@@ -158,9 +158,19 @@ export const nameTokens = onchainTable(
     /**
      * The account that owns the token.
      *
-     * Never zeroAddress.
+     * Value is zeroAddress if and only if mintStatus is `burned`.
      */
     owner: t.hex().notNull(),
+
+    /**
+     * The mint status of the token. Either `minted` or `burned`.
+     *
+     * After we index a NFT we never delete it from our index. Instead, when an
+     * indexed NFT is burned onchain we retain its record and update its mint
+     * status as `burned`. If a NFT is minted again after it is burned its mint
+     * status is updated to `minted`.
+     */
+    mintStatus: t.text().notNull(),
   }),
   (t) => ({
     idx_domainId: index().on(t.domainId),

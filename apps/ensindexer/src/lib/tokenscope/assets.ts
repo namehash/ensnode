@@ -17,7 +17,7 @@ export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespac
 export type TokenId = bigint;
 
 /**
- * A struct representing a NFT that is minted by a SupportedNFTIssuer.
+ * A struct representing a NFT that has been minted by a SupportedNFTIssuer.
  *
  * Any ERC1155 SupportedNFT we create is guaranteed to never have a balance > 1.
  */
@@ -70,3 +70,18 @@ export const buildAssetId = (
 export const buildSupportedNFTAssetId = (nft: SupportedNFT): AssetId => {
   return buildAssetId(nft.contract, nft.tokenId, nft.assetNamespace);
 };
+
+/**
+ * An enum representing the mint status of a SupportedNFT.
+ *
+ * After we index a NFT we never delete it from our index. Instead, when an
+ * indexed NFT is burned onchain we retain its record and update its mint
+ * status as `burned`. If a NFT is minted again after it is burned its mint
+ * status is updated to `minted`.
+ */
+export const NFTMintStatuses = {
+  Minted: "minted",
+  Burned: "burned",
+} as const;
+
+export type NFTMintStatus = (typeof NFTMintStatuses)[keyof typeof NFTMintStatuses];
