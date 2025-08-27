@@ -6,7 +6,7 @@ import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
 import { makeEventId } from "@/lib/ids";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { buildNftAssetId } from "@/lib/tokenscope/assets";
+import { buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
 import { getSupportedSaleFromOrderFulfilledEvent } from "@/lib/tokenscope/seaport";
 
 /**
@@ -45,7 +45,7 @@ export default function () {
       contractAddress: sale.nft.contract.address,
       tokenId: sale.nft.tokenId,
       assetNamespace: sale.nft.assetNamespace,
-      assetId: buildNftAssetId(sale.nft),
+      assetId: buildSupportedNFTAssetId(sale.nft),
       domainId: sale.nft.domainId,
       buyer: sale.buyer,
       seller: sale.seller,

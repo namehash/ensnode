@@ -57,11 +57,11 @@ export const buildAssetId = (
 };
 
 /**
- * Builds a CAIP-19 AssetId for the provided NFT.
+ * Builds a CAIP-19 AssetId for the SupportedNFT.
  *
- * @param nft - The NFT to build an AssetId for
- * @returns The CAIP-19 AssetId for the NFT
+ * @param nft - The SupportedNFT to build an AssetId for
+ * @returns The CAIP-19 AssetId for the SupportedNFT
  */
-export const buildNftAssetId = (nft: SupportedNFT): AssetId => {
+export const buildSupportedNFTAssetId = (nft: SupportedNFT): AssetId => {
   return buildAssetId(nft.contract, nft.tokenId, nft.assetNamespace);
 };

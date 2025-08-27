@@ -7,7 +7,7 @@ import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { AssetNamespaces, SupportedNFT, TokenId, buildNftAssetId } from "@/lib/tokenscope/assets";
+import { AssetNamespaces, SupportedNFT, TokenId, buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
 import { labelHashGeneratedTokenIdToNode } from "@/lib/tokenscope/token-issuers";
 import { DatasourceNames } from "@ensnode/datasources";
 import { Address, isAddressEqual, zeroAddress } from "viem";
@@ -108,7 +108,7 @@ const handleERC721Transfer = async ({
     throw new Error(`Token ID mismatch in handleERC721Transfer: ${tokenId} !== ${nft.tokenId}`);
   }
 
-  const assetId = buildNftAssetId(nft);
+  const assetId = buildSupportedNFTAssetId(nft);
 
   if (isAddressEqual(from, zeroAddress)) {
     // a transfer from the zero address means `nft` was minted
