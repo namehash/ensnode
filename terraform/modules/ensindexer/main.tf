@@ -12,6 +12,7 @@ locals {
     "NAMESPACE"                         = { value = var.namespace },
     "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },
     "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
+    "REPLACE_UNNORMALIZED"              = { value = var.replace_unnormalized },
 
     # Mainnet networks
     "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },

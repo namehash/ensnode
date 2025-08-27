@@ -14,6 +14,7 @@ locals {
       namespace                         = "holesky"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
+      replace_unnormalized              = "false"
       instance_type                     = "starter"
     }
     sepolia = {
@@ -24,6 +25,7 @@ locals {
       namespace                         = "sepolia"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
+      replace_unnormalized              = "false"
       instance_type                     = "starter"
     }
     mainnet = {
@@ -34,6 +36,7 @@ locals {
       namespace                         = "mainnet"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
+      replace_unnormalized              = "false"
       instance_type                     = "standard"
     }
     alpha = {
@@ -44,6 +47,7 @@ locals {
       namespace                         = "mainnet"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
+      replace_unnormalized              = "true"
       instance_type                     = "standard"
     }
 
@@ -55,6 +59,7 @@ locals {
       namespace                         = "sepolia"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
+      replace_unnormalized              = "true"
       instance_type                     = "starter"
     }
   }
@@ -105,6 +110,7 @@ module "ensindexer" {
   namespace                         = each.value.namespace
   heal_reverse_addresses            = each.value.heal_reverse_addresses
   index_additional_resolver_records = each.value.index_additional_resolver_records
+  replace_unnormalized              = each.value.replace_unnormalized
 
   # Common configuration (spread operator merges the map)
   base_domain_name = local.base_domain_name
