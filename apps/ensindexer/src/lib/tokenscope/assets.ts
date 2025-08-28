@@ -1,6 +1,6 @@
-import { AccountId, Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import { AccountId, ChainId, Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { AssetId as CaipAssetId } from "caip";
-import { Address, isAddressEqual, zeroAddress } from "viem";
+import { Address, Hex, isAddressEqual, zeroAddress } from "viem";
 
 /**
  * An enum representing the possible CAIP-19 Asset Namespace values.
@@ -88,6 +88,24 @@ export const NFTMintStatuses = {
 export type NFTMintStatus = (typeof NFTMintStatuses)[keyof typeof NFTMintStatuses];
 
 /**
+ * Metadata about a NFT transfer event.
+ *
+ * This metadata can be used for building more helpful messages when processing
+ * NFT transfer events.
+ */
+export interface NFTTransferEventMetadata {
+  chainId: ChainId;
+  blockNumber: bigint;
+  transactionHash: Hex;
+  eventHandlerName: string;
+  nft: SupportedNFT;
+}
+
+export const formatNFTTransferEventMetadata = (metadata: NFTTransferEventMetadata): string => {
+  return `Transfer of NFT ${buildSupportedNFTAssetId(metadata.nft)} on chain ${metadata.chainId} at block ${metadata.blockNumber} with transaction ${metadata.transactionHash} from event handler ${metadata.eventHandlerName}.`;
+};
+
+/**
  * An enum representing the type of transfer that has occurred to a SupportedNFT.
  */
 export const NFTTransferTypes = {
@@ -173,7 +191,7 @@ export type NFTTransferType = (typeof NFTTransferTypes)[keyof typeof NFTTransfer
 export const getNFTTransferType = (
   from: Address,
   to: Address,
-  nft: SupportedNFT,
+  metadata: NFTTransferEventMetadata,
   currentlyIndexedOwner?: Address,
 ): NFTTransferType => {
   const isIndexed = currentlyIndexedOwner !== undefined;
@@ -181,7 +199,7 @@ export const getNFTTransferType = (
 
   if (isIndexed && !isAddressEqual(currentlyIndexedOwner, from)) {
     throw new Error(
-      `Transfer of NFT ${buildSupportedNFTAssetId(nft)} from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.`,
+      `${formatNFTTransferEventMetadata(metadata)} Error: Sending from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.`,
     );
   }
 
@@ -198,7 +216,7 @@ export const getNFTTransferType = (
         // mint-burn with isIndexed && isMinted
         // invalid state transition to be minted and then mint again
         throw new Error(
-          `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from minted -> mint-burn`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from minted -> mint-burn`,
         );
       }
     } else {
@@ -210,12 +228,12 @@ export const getNFTTransferType = (
         // - !isMinted requires that from === zeroAddress
         // throw an error to validate above assertions
         throw new Error(
-          `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from unindexed -> self-transfer`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from unindexed -> self-transfer`,
         );
       } else if (!isMinted) {
         // self-transfer with isIndexed && !isMinted
         throw new Error(
-          `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from burned -> self-transfer`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: invalid state transition from burned -> self-transfer`,
         );
       } else {
         // self-transfer with isIndexed && isMinted
@@ -233,7 +251,7 @@ export const getNFTTransferType = (
     } else {
       // mint with isIndexed && isMinted
       throw new Error(
-        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from minted -> mint`,
+        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from minted -> mint`,
       );
     }
   } else if (isAddressEqual(to, zeroAddress)) {
@@ -241,12 +259,12 @@ export const getNFTTransferType = (
     if (!isIndexed) {
       // burn with !isIndexed && !isMinted
       throw new Error(
-        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from unindexed -> burn`,
+        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from unindexed -> burn`,
       );
     } else if (!isMinted) {
       // burn with isIndexed && !isMinted
       throw new Error(
-        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from burned -> burn`,
+        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from burned -> burn`,
       );
     } else {
       // burn with isIndexed && isMinted
@@ -257,12 +275,12 @@ export const getNFTTransferType = (
     if (!isIndexed) {
       // transfer with !isIndexed && !isMinted
       throw new Error(
-        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from unindexed -> transfer`,
+        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from unindexed -> transfer`,
       );
     } else if (!isMinted) {
       // transfer with isIndexed && !isMinted
       throw new Error(
-        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from burned -> transfer`,
+        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from burned -> transfer`,
       );
     } else {
       // transfer with isIndexed && isMinted

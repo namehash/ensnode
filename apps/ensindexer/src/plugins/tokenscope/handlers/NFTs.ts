@@ -7,10 +7,12 @@ import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   NFTMintStatuses,
+  NFTTransferEventMetadata,
   NFTTransferTypes,
   SupportedNFT,
   TokenId,
   buildSupportedNFTAssetId,
+  formatNFTTransferEventMetadata,
   getNFTTransferType,
 } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
@@ -34,7 +36,15 @@ export default function () {
         event.args.tokenId,
       );
 
-      handleTransfer(context, event.args.from, event.args.to, nft);
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "EthBaseRegistrar:Transfer",
+        nft,
+      };
+
+      handleTransfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -48,7 +58,15 @@ export default function () {
         event.args.id,
       );
 
-      handleTransfer(context, event.args.from, event.args.to, nft);
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "BaseBaseRegistrar:Transfer",
+        nft,
+      };
+
+      handleTransfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -62,7 +80,15 @@ export default function () {
         event.args.tokenId,
       );
 
-      handleTransfer(context, event.args.from, event.args.to, nft);
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "LineaBaseRegistrar:Transfer",
+        nft,
+      };
+
+      handleTransfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -76,8 +102,23 @@ export default function () {
         event.args.id,
       );
 
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "NameWrapper:TransferSingle",
+        nft,
+      };
+
       // NOTE: we don't make any use of event.args.operator in this handler
-      handleERC1155Transfer(context, event.args.from, event.args.to, nft, event.args.value);
+      handleERC1155Transfer(
+        context,
+        event.args.from,
+        event.args.to,
+        nft,
+        event.args.value,
+        metadata,
+      );
     },
   );
 
@@ -85,8 +126,24 @@ export default function () {
     namespaceContract(pluginName, "NameWrapper:TransferBatch"),
     async ({ context, event }) => {
       if (event.args.ids.length !== event.args.values.length) {
+        // construct a dummy nft just for the purpose building our error message
+        const nft = buildSupportedNFT(
+          config.namespace,
+          DatasourceNames.ENSRoot,
+          "NameWrapper",
+          0n, // dummy tokenId
+        );
+
+        const metadata: NFTTransferEventMetadata = {
+          chainId: context.chain.id,
+          blockNumber: event.block.number,
+          transactionHash: event.transaction.hash,
+          eventHandlerName: "NameWrapper:TransferBatch",
+          nft,
+        };
+
         throw new Error(
-          `ERC1155 transfer batch ids and values must have the same length, got ${event.args.ids.length} and ${event.args.values.length}`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: ERC1155 transfer batch ids and values must have the same length, got ${event.args.ids.length} and ${event.args.values.length}.`,
         );
       }
 
@@ -104,8 +161,17 @@ export default function () {
           "NameWrapper",
           tokenId,
         );
+
+        const metadata: NFTTransferEventMetadata = {
+          chainId: context.chain.id,
+          blockNumber: event.block.number,
+          transactionHash: event.transaction.hash,
+          eventHandlerName: "NameWrapper:TransferBatch",
+          nft,
+        };
+
         // NOTE: we don't make any use of event.args.operator in this handler
-        handleERC1155Transfer(context, event.args.from, event.args.to, nft, value);
+        handleERC1155Transfer(context, event.args.from, event.args.to, nft, value, metadata);
       }
     },
   );
@@ -121,7 +187,15 @@ export default function () {
 
       const nft = buildSupportedNFT(config.namespace, datasourceName, "ThreeDNSToken", tokenId);
 
-      handleTransfer(context, zeroAddress, registrant, nft);
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "ThreeDNSToken:RegistrationCreated",
+        nft,
+      };
+
+      handleTransfer(context, zeroAddress, registrant, nft, metadata);
     },
   );
 
@@ -142,13 +216,21 @@ export default function () {
       const assetId = buildSupportedNFTAssetId(nft);
       const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
 
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "ThreeDNSToken:RegistrationTransferred",
+        nft,
+      };
+
       if (!indexedNft) {
         throw new Error(
-          `ThreeDNSToken:RegistrationTransferred event for assetId ${assetId} on chain ${context.chain.id} but no indexed record found.`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: No previously indexed record found for asset.`,
         );
       }
 
-      handleTransfer(context, indexedNft.owner, newOwner, nft);
+      handleTransfer(context, indexedNft.owner, newOwner, nft, metadata);
     },
   );
 
@@ -169,13 +251,21 @@ export default function () {
       const assetId = buildSupportedNFTAssetId(nft);
       const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
 
+      const metadata: NFTTransferEventMetadata = {
+        chainId: context.chain.id,
+        blockNumber: event.block.number,
+        transactionHash: event.transaction.hash,
+        eventHandlerName: "ThreeDNSToken:RegistrationBurned",
+        nft,
+      };
+
       if (!indexedNft) {
         throw new Error(
-          `ThreeDNSToken:RegistrationBurned event for assetId ${assetId} on chain ${context.chain.id} but no indexed record found.`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: No previously indexed record found for asset.`,
         );
       }
 
-      handleTransfer(context, indexedNft.owner, zeroAddress, nft);
+      handleTransfer(context, indexedNft.owner, zeroAddress, nft, metadata);
     },
   );
 }
@@ -201,17 +291,18 @@ const handleERC1155Transfer = async (
   to: Address,
   nft: SupportedNFT,
   value: bigint,
+  metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
   // sanity check for ERC1155 transfer single value
   if (value !== 1n) {
     // to be a TokenScope supported ERC1155 NFT issuer, the contract must never
     // have a balance or amount > 1 for any tokenId
     throw new Error(
-      `ERC1155 transfer single value must be 1, got ${value} for nft ${buildSupportedNFTAssetId(nft)}`,
+      `${formatNFTTransferEventMetadata(metadata)} Error: ERC1155 transfer single value must be 1, got ${value}`,
     );
   }
 
-  handleTransfer(context, from, to, nft);
+  handleTransfer(context, from, to, nft, metadata);
 };
 
 const handleTransfer = async (
@@ -219,12 +310,13 @@ const handleTransfer = async (
   from: Address,
   to: Address,
   nft: SupportedNFT,
+  metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
   const assetId = buildSupportedNFTAssetId(nft);
 
   // get the currently indexed record for the assetId (if it exists)
   const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
-  const transferType = getNFTTransferType(from, to, nft, indexedNft?.owner);
+  const transferType = getNFTTransferType(from, to, metadata, indexedNft?.owner);
 
   switch (transferType) {
     case NFTTransferTypes.Mint:
