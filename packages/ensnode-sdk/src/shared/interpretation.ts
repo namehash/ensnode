@@ -24,11 +24,11 @@ export function interpretLiteralLabel(label: string | null): Label | EncodedLabe
   // pattern at this method's callsites, minimizing hard-to-read ternary statements.
   if (label === null) return null;
 
-  // if the label is not normalized, represent as encoded LabelHash
-  if (!isNormalizedLabel(label)) return encodeLabelHash(labelhash(label));
+  // if the label normalized, we're all good
+  if (isNormalizedLabel(label)) return label as Label;
 
-  // otherwise, the label is normalized
-  return label as Label;
+  // otherwise, represent as encoded LabelHash
+  return encodeLabelHash(labelhash(label));
 }
 
 /**

@@ -194,24 +194,30 @@ export const handleNewOwner =
         healedLabel = await labelByLabelHash(labelHash);
       }
 
-      // Interpret the `healedLabel` Literal Label into an Interpreted Label
-      // see https://ensnode.io/docs/reference/terminology#literal-label
-      // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
-
-      // to construct `Domain.name` use the parent's Name and the Interpreted Label
-      // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-      const name = parent?.name ? `${label}.${parent.name}` : label;
-
       if (config.replaceUnnormalized) {
-        // NOTE(replace-unnormalized): always update labelName to the Interpreted Label
+        // Interpret the `healedLabel` Literal Label into an Interpreted Label
+        // see https://ensnode.io/docs/reference/terminology#literal-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
+
+        // to construct `Domain.name` use the parent's Name and the Interpreted Label
+        // NOTE: for a TLD, the parent is null, so we just use the Label value as is
+        const name = parent?.name ? `${label}.${parent.name}` : label;
+
         await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
       } else {
+        const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+
+        // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
+        // NOTE: for TLDs, the parent is null, so we just use the label value as is
+        const label = validLabel || encodeLabelHash(labelHash);
+        const name = parent?.name ? `${label}.${parent.name}` : label;
+
         // NOTE(replace-unnormalized, subgraph-compat): only update Domain.labelName iff label is healed and indexable
         // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
         await context.db.update(schema.domain, { id: node }).set({
           name,
-          labelName: isLabelIndexable(healedLabel) ? healedLabel : undefined,
+          labelName: validLabel,
         });
       }
     }
