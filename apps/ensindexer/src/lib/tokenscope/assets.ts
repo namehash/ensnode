@@ -35,7 +35,7 @@ export interface SupportedNFT {
  * Formatted as a fully lowercase CAIP-19 AssetId.
  *
  * @see https://chainagnostic.org/CAIPs/caip-19
- * @example "eip155:1/erc721:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/79233663829379634837589865448569342784712482819484549289560981379859480642508"
+ * @example "eip155:1/erc721:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
  *          for vitalik.eth in the eth base registrar on mainnet.
  */
 export type AssetId = string;
