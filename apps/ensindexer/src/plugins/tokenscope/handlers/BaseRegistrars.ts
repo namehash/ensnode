@@ -3,13 +3,11 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata, formatNFTTransferEventMetadata } from "@/lib/tokenscope/assets";
+import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
-import {
-  handleERC1155Transfer,
-  handleNFTTransfer,
-} from "@/plugins/tokenscope/lib/handle-nft-transfer";
 import { DatasourceNames } from "@ensnode/datasources";
+
+import { handleNFTTransfer } from "../lib/handle-nft-transfer";
 
 /**
  * Registers event handlers with Ponder.

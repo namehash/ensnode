@@ -1,7 +1,9 @@
 import { ponder } from "ponder:registry";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
-
 import schema from "ponder:schema";
+import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { zeroAddress } from "viem";
+import { base, optimism } from "viem/chains";
+
 import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { getThreeDNSTokenId } from "@/lib/threedns-helpers";
@@ -11,10 +13,9 @@ import {
   formatNFTTransferEventMetadata,
 } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
-import { handleNFTTransfer } from "@/plugins/tokenscope/lib/handle-nft-transfer";
 import { DatasourceName, DatasourceNames } from "@ensnode/datasources";
-import { zeroAddress } from "viem";
-import { base, optimism } from "viem/chains";
+
+import { handleNFTTransfer } from "../lib/handle-nft-transfer";
 
 const getThreeDNSDatasourceName = (chainId: ChainId): DatasourceName => {
   switch (chainId) {
