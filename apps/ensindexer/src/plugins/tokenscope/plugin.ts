@@ -71,13 +71,12 @@ export default createPlugin({
 
     return ponder.createConfig({
       chains: {
-        // not passing seaport.chain.id or threeDNSBase.chain.id here because we've
-        // validated above that it's the same as ensroot.chain.id and basenames.chain.id
-        // we don't want to pass the same chainId here twice
+        ...chainsConnectionConfig(config.rpcConfigs, seaport.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, ensroot.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, basenames.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, lineanames.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
       },
       contracts: {
         [namespaceContract(pluginName, "Seaport")]: {
