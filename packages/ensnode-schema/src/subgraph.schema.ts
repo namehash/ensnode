@@ -13,27 +13,38 @@ export const domain = onchainTable("domains", (t) => ({
   /**
    * The human readable name that this Domain represents.
    *
-   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be a Name consisting entirely of
-   * Labels that are either normalized or represented as Encoded LabelHashes. Note that the type of
-   * the column will remain string | null, for legacy subgraph compatibility.
+   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
+   * a) a normalized Name, or
+   * b) a Name entirely consisting of Interpreted Labels.
+   *
+   * Note that the type of the column will remain string | null, for legacy subgraph compatibility,
+   * but in practice will never be null. The Root node's name will be '' (empty string).
+   *
+   * @see https://ensnode.io/docs/reference/terminology#interpreted-name
    *
    * If REPLACE_UNNORMALIZED is false, this value may contain:
    * a) null (in the case of the root node), or
-   * b) a name that may or may not be normalized and may or may not contain Encoded LabelHashes.
+   * b) a Literal Name that may or may not be normalized and may or may not contain Encoded LabelHashes.
+   *
+   * @see https://ensnode.io/docs/reference/terminology#literal-name
    */
   name: t.text(),
 
   /**
-   * The human-readable Label associated with the Domain.
+   * The Label associated with the Domain.
    *
-   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
-   * a) null, representing an invalid label (i.e. empty string)
-   * b) a non-empty-string, normalized label, or
-   * c) an Encoded LabelHash
+   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
+   * a) null, exclusively in the case of the root Node,
+   * b) a normalized Label, or
+   * c) an Encoded LabelHash.
    *
-   * If REPLACE_UNNORMALIZED is false, this value could contain an unnormalized Label.
+   * @see https://ensnode.io/docs/reference/terminology#interpreted-label
    *
-   * TODO: can labelName ever be invalid? likely not, so in practice labelName would never be null.
+   * If REPLACE_UNNORMALIZED is false, this value my contain:
+   * a) null (in the case of the root node), or
+   * b) a Literal Lbael that may or may not be normalized and may or may not be an Encoded LabelHash.
+   *
+   * @see https://ensnode.io/docs/reference/terminology#literal-label
    */
   labelName: t.text(),
 
@@ -206,17 +217,23 @@ export const registration = onchainTable(
     // The account that registered the domain
     registrantId: t.hex().notNull(),
     /**
-     * The human-readable Label associated with the domain registration.
+     * The Label associated with the domain registration.
      *
-     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
-     * a) null, representing an invalid label (i.e. empty string)
-     * b) a non-empty-string, normalized label, or
-     * c) an Encoded LabelHash
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
+     * a) a normalized Label, or
+     * b) an Encoded LabelHash.
      *
-     * If REPLACE_UNNORMALIZED is false, this value could contain an unnormalized Label.
+     * Note that the type of the column will remain string | null, for legacy subgraph compatibility.
+     * In practice however, when REPLACE_UNNORMALIZED is true, because there is no Registration entity
+     * for the root Node—the only Node with a null labelName—this field will never be null.
      *
-     * TODO: can Registration.labelName ever be invalid? likely not, so in practice labelName would
-     * never be null.
+     * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+     *
+     * If REPLACE_UNNORMALIZED is false, this value may contain:
+     * a) null, or
+     * b) a Literal Label that may or may not be normalized and may or may not be an Encoded LabelHash.
+     *
+     * @see https://ensnode.io/docs/reference/terminology#literal-label
      */
     labelName: t.text(),
   }),
@@ -259,18 +276,22 @@ export const wrappedDomain = onchainTable(
     // The account that owns this WrappedDomain
     ownerId: t.hex().notNull(),
     /**
-     * The name of the wrapped domain.
+     * The Name that this WrappedDomain represents.
      *
-     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
-     * a) null, representing an invalid Name emitted by the NameWrapper
-     * b) a Name consisting entirely of Labels that are either normalized or represented as
-     *    Encoded LabelHashes.
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
+     * a) a normalized Name, or
+     * b) a Name entirely consisting of Interpreted Labels.
      *
-     * If REPLACE_UNNORMALIZED is false, this value could contain an unnormalized Name.
+     * Note that the type of the column will remain string | null, for legacy subgraph compatibility,
+     * but in practice will never be null.
      *
-     * TODO: can NameWrapper even emit invalid dns-encoded names? if so, the type of this must be null
-     * because the name is set in a later transaction than the creation BUT in practice it would
-     * never be null.
+     * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+     *
+     * If REPLACE_UNNORMALIZED is false, this value may contain:
+     * a) null (in the case of the root node or invalid Name), or
+     * b) a Literal Name that may or may not be normalized and may or may not contain Encoded LabelHashes.
+     *
+     * @see https://ensnode.io/docs/reference/terminology#literal-name
      */
     name: t.text(),
   }),

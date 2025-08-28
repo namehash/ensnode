@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interpretLiteralLabel } from "./interpretation";
+import { interpretLiteralLabel, interpretLiteralName } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -16,12 +16,10 @@ const VALID_LABELS = [
   "a".repeat(512), // Long normalized
 ];
 
-const INVALID_LABELS = [
-  null,
-  "", // Empty string
-];
+const INVALID_LABELS = [null];
 
 const INVALID_ENCODABLE_LABELS = [
+  "", // Empty string
   "Vitalik", // Uppercase
   "Example", // Uppercase
   "TEST", // Uppercase
@@ -43,7 +41,7 @@ const INVALID_ENCODABLE_LABELS = [
 ];
 
 describe("interpretation", () => {
-  describe("interpretLabel", () => {
+  describe("interpretLiteralLabel", () => {
     it("should return normalized labels unchanged", () => {
       VALID_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBe(label));
     });
@@ -56,6 +54,12 @@ describe("interpretation", () => {
       INVALID_ENCODABLE_LABELS.forEach((label) =>
         expect(interpretLiteralLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
       );
+    });
+  });
+
+  describe("interpretLiteralName", () => {
+    it("should return empty string for empty string", () => {
+      expect(interpretLiteralName("")).toBe("");
     });
   });
 });

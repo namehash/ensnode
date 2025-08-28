@@ -24,9 +24,6 @@ export function interpretLiteralLabel(label: string | null): Label | EncodedLabe
   // pattern at this method's callsites, minimizing hard-to-read ternary statements.
   if (label === null) return null;
 
-  // empty string is an invalid Label
-  if (label === "") return null;
-
   // if the label is not normalized, represent as encoded LabelHash
   if (!isNormalizedLabel(label)) return encodeLabelHash(labelhash(label));
 
@@ -48,6 +45,9 @@ export function interpretLiteralName(name: string | null): Name | null {
   // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
   // pattern at this method's callsites, minimizing hard-to-read ternary statements.
   if (name === null) return null;
+
+  // if the name is already normalized (includes empty string), good to go
+  if (isNormalizedName(name)) return name as Name;
 
   const labels = name.split(".").map(interpretLiteralLabel);
 

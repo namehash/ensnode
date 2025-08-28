@@ -129,7 +129,7 @@ export const makeNameWrapperHandlers = ({
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-name
       if (config.replaceUnnormalized) {
-        name = interpretLiteralLabel(label);
+        label = interpretLiteralLabel(label);
         name = interpretLiteralName(name);
       }
 
