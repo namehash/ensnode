@@ -1,5 +1,6 @@
 import { AccountId, Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { AssetId as CaipAssetId } from "caip";
+import { Address, isAddressEqual, zeroAddress } from "viem";
 
 /**
  * An enum representing the possible CAIP-19 Asset Namespace values.
@@ -85,3 +86,187 @@ export const NFTMintStatuses = {
 } as const;
 
 export type NFTMintStatus = (typeof NFTMintStatuses)[keyof typeof NFTMintStatuses];
+
+/**
+ * An enum representing the type of transfer that has occurred to a SupportedNFT.
+ */
+export const NFTTransferTypes = {
+  /**
+   * Initial transfer from zeroAddress to a non-zeroAddress
+   * Can happen at most once to a NFT AssetId
+   *
+   * Invariants:
+   * - NFT is not indexed and therefore has no previous mint status or owner
+   * - new NFT mint status is `minted`
+   * - new NFT owner is a non-zeroAddress
+   */
+  Mint: "mint",
+
+  /**
+   * Subsequent transfer from zeroAddress to a non-zeroAddress
+   * Can happen any number of times to a NFT AssetId as it passes in a cycle from
+   * mint -> burn -> remint -> burn -> remint -> ...
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous NFT mint status was `burned`
+   * - previous NFT owner is the zeroAddress
+   * - new NFT mint status is `minted`
+   * - new NFT owner is a non-zeroAddress
+   */
+  Remint: "remint",
+
+  /**
+   * Transfer from a non-zeroAddress to zeroAddress
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous NFT mint status was `minted`
+   * - previous NFT owner is a non-zeroAddress
+   * - new NFT mint status is `burned`
+   * - new NFT owner is the zeroAddress
+   */
+  Burn: "burn",
+
+  /**
+   * Transfer from a non-zeroAddress to a distinct non-zeroAddress
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous and new NFT mint status is `minted`
+   * - previous and new NFT owner are distinct non-zeroAddress
+   */
+  Transfer: "transfer",
+
+  /**
+   * Transfer from a non-zeroAddress to the same non-zeroAddress
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous and new NFT mint status is `minted`
+   * - previous and new NFT owner are equivalent non-zeroAddress
+   */
+  SelfTransfer: "self-transfer",
+
+  /**
+   * Transfer from zeroAddress to zeroAddress for an indexed NFT
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous and new NFT mint status is `burned`
+   * - previous and new NFT owner are zeroAddress
+   */
+  MintBurn: "mint-burn",
+
+  /**
+   * Transfer from zeroAddress to zeroAddress for an unindexed NFT
+   *
+   * Invariants:
+   * - NFT is not indexed and therefore has no previous mint status or owner
+   * - NFT should remain unindexed and without any mint status or owner
+   */
+  NoOp: "no-op",
+} as const;
+
+export type NFTTransferType = (typeof NFTTransferTypes)[keyof typeof NFTTransferTypes];
+
+export const getNFTTransferType = (
+  from: Address,
+  to: Address,
+  nft: SupportedNFT,
+  currentlyIndexedOwner?: Address,
+): NFTTransferType => {
+  const isIndexed = currentlyIndexedOwner !== undefined;
+  const isMinted = isIndexed && !isAddressEqual(currentlyIndexedOwner, zeroAddress);
+
+  if (isIndexed && !isAddressEqual(currentlyIndexedOwner, from)) {
+    throw new Error(
+      `Transfer of NFT ${buildSupportedNFTAssetId(nft)} from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.`,
+    );
+  }
+
+  if (isAddressEqual(from, to)) {
+    if (isAddressEqual(from, zeroAddress)) {
+      // a transfer to and from the zeroAddress represents a mint-burn
+      if (!isIndexed) {
+        // mint-burn with !isIndexed && !isMinted
+        return NFTTransferTypes.NoOp;
+      } else if (!isMinted) {
+        // mint-burn with isIndexed && !isMinted
+        return NFTTransferTypes.MintBurn;
+      } else {
+        // mint-burn with isIndexed && isMinted
+        // invalid state transition to be minted and then mint again
+        throw new Error(
+          `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from minted -> mint-burn`,
+        );
+      }
+    } else {
+      // a transfer to and from a non-zero address represents a self-transfer
+      if (!isIndexed) {
+        // self-transfer with !isIndexed && !isMinted
+        // this branch is unreachable because:
+        // - from !== zeroAddress; and
+        // - !isMinted requires that from === zeroAddress
+        // throw an error to validate above assertions
+        throw new Error(
+          `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from unindexed -> self-transfer`,
+        );
+      } else if (!isMinted) {
+        // self-transfer with isIndexed && !isMinted
+        throw new Error(
+          `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from burned -> self-transfer`,
+        );
+      } else {
+        // self-transfer with isIndexed && isMinted
+        return NFTTransferTypes.SelfTransfer;
+      }
+    }
+  } else if (isAddressEqual(from, zeroAddress)) {
+    // a transfer from the zeroAddress to a non-zeroAddress represents minting
+    if (!isIndexed) {
+      // mint with !isIndexed && !isMinted
+      return NFTTransferTypes.Mint;
+    } else if (!isMinted) {
+      // mint with isIndexed && !isMinted
+      return NFTTransferTypes.Remint;
+    } else {
+      // mint with isIndexed && isMinted
+      throw new Error(
+        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from minted -> mint`,
+      );
+    }
+  } else if (isAddressEqual(to, zeroAddress)) {
+    // a transfer from a non-zeroAddress to the zeroAddress represents burning
+    if (!isIndexed) {
+      // burn with !isIndexed && !isMinted
+      throw new Error(
+        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from unindexed -> burn`,
+      );
+    } else if (!isMinted) {
+      // burn with isIndexed && !isMinted
+      throw new Error(
+        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from burned -> burn`,
+      );
+    } else {
+      // burn with isIndexed && isMinted
+      return NFTTransferTypes.Burn;
+    }
+  } else {
+    // a transfer from a non-zeroAddress to a non-zeroAddress represents a transfer
+    if (!isIndexed) {
+      // transfer with !isIndexed && !isMinted
+      throw new Error(
+        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from unindexed -> transfer`,
+      );
+    } else if (!isMinted) {
+      // transfer with isIndexed && !isMinted
+      throw new Error(
+        `Transfer of NFT ${buildSupportedNFTAssetId(nft)} with invalid state transition from burned -> transfer`,
+      );
+    } else {
+      // transfer with isIndexed && isMinted
+      return NFTTransferTypes.Transfer;
+    }
+  }
+};

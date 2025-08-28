@@ -1,5 +1,5 @@
 import { Context, ponder } from "ponder:registry";
-import { BASENAMES_NODE, ETH_NODE, LINEANAMES_NODE, PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import schema from "ponder:schema";
 import config from "@/config";
@@ -7,14 +7,16 @@ import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
-  AssetNamespaces,
   NFTMintStatuses,
+  NFTTransferTypes,
   SupportedNFT,
+  TokenId,
   buildSupportedNFTAssetId,
+  getNFTTransferType,
 } from "@/lib/tokenscope/assets";
-import { labelHashGeneratedTokenIdToNode } from "@/lib/tokenscope/nft-issuers";
-import { DatasourceNames } from "@ensnode/datasources";
-import { Address, isAddressEqual, zeroAddress } from "viem";
+import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
+import { DatasourceName, DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
+import { Address, zeroAddress } from "viem";
 
 /**
  * Registers event handlers with Ponder.
@@ -25,66 +27,134 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "EthBaseRegistrar:Transfer"),
     async ({ context, event }) => {
-      const contract = getDatasourceContract(
+      const nft = buildSupportedNFT(
         config.namespace,
         DatasourceNames.ENSRoot,
         "BaseRegistrar",
+        event.args.tokenId,
       );
-      const domainId = labelHashGeneratedTokenIdToNode(event.args.tokenId, ETH_NODE);
 
-      const nft: SupportedNFT = {
-        contract,
-        tokenId: event.args.tokenId,
-        assetNamespace: AssetNamespaces.ERC721,
-        domainId,
-      };
-
-      handleERC721Transfer(context, event.args.from, event.args.to, nft);
+      handleTransfer(context, event.args.from, event.args.to, nft);
     },
   );
 
   ponder.on(
     namespaceContract(pluginName, "BaseBaseRegistrar:Transfer"),
     async ({ context, event }) => {
-      const contract = getDatasourceContract(
+      const nft = buildSupportedNFT(
         config.namespace,
         DatasourceNames.Basenames,
         "BaseRegistrar",
+        event.args.id,
       );
-      const domainId = labelHashGeneratedTokenIdToNode(event.args.id, BASENAMES_NODE);
-      const nft: SupportedNFT = {
-        contract,
-        tokenId: event.args.id,
-        assetNamespace: AssetNamespaces.ERC721,
-        domainId,
-      };
 
-      handleERC721Transfer(context, event.args.from, event.args.to, nft);
+      handleTransfer(context, event.args.from, event.args.to, nft);
     },
   );
 
   ponder.on(
     namespaceContract(pluginName, "LineaBaseRegistrar:Transfer"),
     async ({ context, event }) => {
-      const contract = getDatasourceContract(
+      const nft = buildSupportedNFT(
         config.namespace,
         DatasourceNames.Lineanames,
         "BaseRegistrar",
+        event.args.tokenId,
       );
-      const domainId = labelHashGeneratedTokenIdToNode(event.args.tokenId, LINEANAMES_NODE);
-      const nft: SupportedNFT = {
-        contract,
-        tokenId: event.args.tokenId,
-        assetNamespace: AssetNamespaces.ERC721,
-        domainId,
-      };
 
-      handleERC721Transfer(context, event.args.from, event.args.to, nft);
+      handleTransfer(context, event.args.from, event.args.to, nft);
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "NameWrapper:TransferSingle"),
+    async ({ context, event }) => {
+      const nft = buildSupportedNFT(
+        config.namespace,
+        DatasourceNames.ENSRoot,
+        "NameWrapper",
+        event.args.id,
+      );
+
+      // NOTE: we don't make any use of event.args.operator in this handler
+      handleERC1155Transfer(context, event.args.from, event.args.to, nft, event.args.value);
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "NameWrapper:TransferBatch"),
+    async ({ context, event }) => {
+      if (event.args.ids.length !== event.args.values.length) {
+        throw new Error(
+          `ERC1155 transfer batch ids and values must have the same length, got ${event.args.ids.length} and ${event.args.values.length}`,
+        );
+      }
+
+      // we know that ids and values have equal length
+      const batchSize = event.args.ids.length;
+
+      for (let i = 0; i < batchSize; i++) {
+        // using ! as we know that ids and values have length > i
+        const tokenId = event.args.ids[i]!;
+        const value = event.args.values[i]!;
+
+        const nft = buildSupportedNFT(
+          config.namespace,
+          DatasourceNames.ENSRoot,
+          "NameWrapper",
+          tokenId,
+        );
+        // NOTE: we don't make any use of event.args.operator in this handler
+        handleERC1155Transfer(context, event.args.from, event.args.to, nft, value);
+      }
     },
   );
 }
 
-const handleERC721Transfer = async (
+const buildSupportedNFT = (
+  namespaceId: ENSNamespaceId,
+  datasourceName: DatasourceName,
+  contractName: string,
+  tokenId: TokenId,
+): SupportedNFT => {
+  const contract = getDatasourceContract(namespaceId, datasourceName, contractName);
+
+  const nftIssuer = getSupportedNFTIssuer(namespaceId, contract);
+  if (!nftIssuer) {
+    throw new Error(
+      `Error getting nftIssuer for contract name ${contractName} at address ${contract.address} on chainId ${contract.chainId} in datasource ${datasourceName} in namespace ${config.namespace}.`,
+    );
+  }
+  const domainId = nftIssuer.getDomainId(tokenId);
+
+  return {
+    contract,
+    tokenId,
+    assetNamespace: nftIssuer.assetNamespace,
+    domainId,
+  };
+};
+
+const handleERC1155Transfer = async (
+  context: Context,
+  from: Address,
+  to: Address,
+  nft: SupportedNFT,
+  value: bigint,
+): Promise<void> => {
+  // sanity check for ERC1155 transfer single value
+  if (value !== 1n) {
+    // to be a TokenScope supported ERC1155 NFT issuer, the contract must never
+    // have a balance or amount > 1 for any tokenId
+    throw new Error(
+      `ERC1155 transfer single value must be 1, got ${value} for nft ${buildSupportedNFTAssetId(nft)}`,
+    );
+  }
+
+  handleTransfer(context, from, to, nft);
+};
+
+const handleTransfer = async (
   context: Context,
   from: Address,
   to: Address,
@@ -92,33 +162,14 @@ const handleERC721Transfer = async (
 ): Promise<void> => {
   const assetId = buildSupportedNFTAssetId(nft);
 
-  // a transfer from the zero address means `nft` was minted
-  const isMint = isAddressEqual(from, zeroAddress);
-
-  // a transfer to the zero address means `nft` was burned
-  const isBurn = isAddressEqual(to, zeroAddress);
-
   // get the currently indexed record for the assetId (if it exists)
   const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
+  const transferType = getNFTTransferType(from, to, nft, indexedNft?.owner);
 
-  if (!indexedNft) {
-    // this NFT has never been minted (or indexed) before
-
-    if (isMint && isBurn) {
-      // sanity check for theoretical mint to zero address
-      // state transition from never minted -> minted -> burned is no-op (retain never minted state)
-      return;
-    } else if (isBurn) {
-      // sanity check for burning a NFT we have never indexed before
-      throw new Error(`NFT ${assetId} has invalid state transition from never minted -> burned`);
-    } else if (!isMint) {
-      // sanity check for transferring a NFT we have never indexed before
-      throw new Error(
-        `NFT ${assetId} has invalid state transition from never minted -> transferred`,
-      );
-    } else {
-      // state transition from never minted -> minted
-      // insert a record of the `nft` that has been minted for the first time
+  switch (transferType) {
+    case NFTTransferTypes.Mint:
+      // mint status transition from unindexed -> minted
+      // insert the record of the nft that has been minted for the first time
       await upsertAccount(context, to);
       await context.db.insert(schema.ext_nameTokens).values({
         id: assetId,
@@ -130,54 +181,42 @@ const handleERC721Transfer = async (
         owner: to,
         mintStatus: NFTMintStatuses.Minted,
       });
-    }
-    return;
-  }
+      break;
 
-  // we've previously indexed this NFT
+    case NFTTransferTypes.Remint:
+      // mint status transition from burned -> minted
+      // update the mint status and owner of the nft
+      await upsertAccount(context, to);
+      await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
+        owner: to,
+        mintStatus: NFTMintStatuses.Minted,
+      });
+      break;
 
-  if (isMint && isBurn) {
-    // sanity check for theoretical mint to zero address
-    if (indexedNft.mintStatus === NFTMintStatuses.Minted)
-      throw new Error(
-        `NFT ${assetId} has invalid state transition from minted -> minted -> burned`,
-      );
+    case NFTTransferTypes.Burn:
+      // mint status transition from minted -> burned
+      // update the mint status and owner of the nft
+      // TODO: should we remove this upsertAccount call with the zeroAddress?
+      await upsertAccount(context, zeroAddress);
+      await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
+        owner: zeroAddress,
+        mintStatus: NFTMintStatuses.Burned,
+      });
+      break;
 
-    // state transition from burned -> minted -> burned is no-op
-  } else if (isMint) {
-    if (indexedNft.mintStatus === NFTMintStatuses.Minted)
-      throw new Error(`NFT ${assetId} has invalid state transition from minted -> minted`);
+    case NFTTransferTypes.Transfer:
+      // mint status remains minted (no change)
+      // update owner of the nft
+      await upsertAccount(context, to);
+      await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
+        owner: to,
+      });
+      break;
 
-    // state transition from burned -> minted
-    // update the mint status and owner of the `nft`
-    await upsertAccount(context, to);
-    await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
-      owner: to,
-      mintStatus: NFTMintStatuses.Minted,
-    });
-  } else if (isBurn) {
-    if (indexedNft.mintStatus === NFTMintStatuses.Burned)
-      throw new Error(`NFT ${assetId} has invalid state transition from burned -> burned`);
-
-    // state transition from minted -> burned
-    // update the mint status and owner of the `nft`
-    // TODO: should we remove this upsertAccount call?
-    await upsertAccount(context, zeroAddress);
-    await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
-      owner: zeroAddress,
-      mintStatus: NFTMintStatuses.Burned,
-    });
-  } else {
-    if (indexedNft.mintStatus === NFTMintStatuses.Burned)
-      throw new Error(`NFT ${assetId} has invalid state transition from burned -> transferred`);
-
-    // a transfer from a non-zero address to a non-zero address means `nft` was transferred
-
-    // state transition from minted -> transferred (still minted)
-    // update owner of the `nft`
-    await upsertAccount(context, to);
-    await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
-      owner: to,
-    });
+    case NFTTransferTypes.SelfTransfer:
+    case NFTTransferTypes.MintBurn:
+    case NFTTransferTypes.NoOp:
+      // no indexed state changes needed for SelfTransfer, MintBurn, or NoOp
+      break;
   }
 };

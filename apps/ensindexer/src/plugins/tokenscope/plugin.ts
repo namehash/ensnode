@@ -112,6 +112,16 @@ export default createPlugin({
           },
           abi: lineanames.contracts.BaseRegistrar.abi,
         },
+        [namespaceContract(pluginName, "NameWrapper")]: {
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.NameWrapper,
+            ),
+          },
+          abi: ensroot.contracts.NameWrapper.abi,
+        },
       },
     });
   },

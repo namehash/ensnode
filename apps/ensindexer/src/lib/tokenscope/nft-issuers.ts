@@ -46,7 +46,7 @@ export interface SupportedNFTIssuer {
  * @param tokenId - The tokenId to convert
  * @returns The Node of the tokenId
  */
-export const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
+const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
   return uint256ToHex32(tokenId);
 };
 
@@ -59,7 +59,7 @@ export const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
  * @param parentNode - the parent Node that the token issuing contract issues subnames under
  * @returns The Node of the tokenId issued under the parentNode
  */
-export const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): Node => {
+const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): Node => {
   const labelHash: LabelHash = uint256ToHex32(tokenId);
   return makeSubdomainNode(labelHash, parentNode);
 };
