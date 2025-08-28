@@ -3,7 +3,7 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata, formatNFTTransferEventMetadata } from "@/lib/tokenscope/assets";
+import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 import { DatasourceNames } from "@ensnode/datasources";
 
@@ -49,24 +49,8 @@ export default function () {
     namespaceContract(pluginName, "NameWrapper:TransferBatch"),
     async ({ context, event }) => {
       if (event.args.ids.length !== event.args.values.length) {
-        // construct a dummy nft just for the purpose building our error message
-        const nft = buildSupportedNFT(
-          config.namespace,
-          DatasourceNames.ENSRoot,
-          "NameWrapper",
-          0n, // dummy tokenId
-        );
-
-        const metadata: NFTTransferEventMetadata = {
-          chainId: context.chain.id,
-          blockNumber: event.block.number,
-          transactionHash: event.transaction.hash,
-          eventHandlerName: "NameWrapper:TransferBatch",
-          nft,
-        };
-
         throw new Error(
-          `${formatNFTTransferEventMetadata(metadata)} Error: ERC1155 transfer batch ids and values must have the same length, got ${event.args.ids.length} and ${event.args.values.length}.`,
+          `Error: ERC1155 transfer batch ids and values must have the same length, got ${event.args.ids.length} and ${event.args.values.length}.`,
         );
       }
 
