@@ -45,7 +45,7 @@ export default function () {
         nft,
       };
 
-      await handleERC721Transfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleNFTTransfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -67,7 +67,7 @@ export default function () {
         nft,
       };
 
-      await handleERC721Transfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleNFTTransfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -89,7 +89,7 @@ export default function () {
         nft,
       };
 
-      await handleERC721Transfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleNFTTransfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -196,7 +196,7 @@ export default function () {
         nft,
       };
 
-      await handleERC721Transfer(context, zeroAddress, registrant, nft, metadata);
+      await handleNFTTransfer(context, zeroAddress, registrant, nft, metadata);
     },
   );
 
@@ -231,7 +231,7 @@ export default function () {
         );
       }
 
-      await handleERC721Transfer(context, indexedNft.owner, newOwner, nft, metadata);
+      await handleNFTTransfer(context, indexedNft.owner, newOwner, nft, metadata);
     },
   );
 
@@ -266,7 +266,7 @@ export default function () {
         );
       }
 
-      await handleERC721Transfer(context, indexedNft.owner, zeroAddress, nft, metadata);
+      await handleNFTTransfer(context, indexedNft.owner, zeroAddress, nft, metadata);
     },
   );
 }
@@ -287,22 +287,21 @@ const handleERC1155Transfer = async (
   from: Address,
   to: Address,
   nft: SupportedNFT,
-  value: bigint,
+  amount: bigint,
   metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
-  // sanity check for ERC1155 transfer single value
-  if (value !== 1n) {
-    // to be a TokenScope supported ERC1155 NFT issuer, the contract must never
-    // have a balance or amount > 1 for any tokenId
+  // Sanity Check: ERC1155 contract must transfer exactly 1 item
+  if (amount !== 1n) {
     throw new Error(
-      `${formatNFTTransferEventMetadata(metadata)} Error: ERC1155 transfer single value must be 1, got ${value}`,
+      `${formatNFTTransferEventMetadata(metadata)} Error: ERC1155 transfer single value must be 1, got ${amount}`,
     );
   }
 
-  await handleERC721Transfer(context, from, to, nft, metadata);
+  // if that's the case
+  await handleNFTTransfer(context, from, to, nft, metadata);
 };
 
-const handleERC721Transfer = async (
+const handleNFTTransfer = async (
   context: Context,
   from: Address,
   to: Address,
