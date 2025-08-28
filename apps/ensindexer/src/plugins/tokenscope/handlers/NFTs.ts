@@ -366,9 +366,9 @@ const handleTransfer = async (
       break;
 
     case NFTTransferTypes.SelfTransfer:
+    case NFTTransferTypes.RemintBurn:
     case NFTTransferTypes.MintBurn:
-    case NFTTransferTypes.NoOp:
-      // no indexed state changes needed for SelfTransfer, MintBurn, or NoOp
+      // no indexed state changes needed for SelfTransfer, RemintBurn, or MintBurn
       break;
   }
 };

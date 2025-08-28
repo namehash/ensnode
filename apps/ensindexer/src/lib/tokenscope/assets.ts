@@ -174,7 +174,7 @@ export const NFTTransferTypes = {
    * - previous and new NFT mint status is `burned`
    * - previous and new NFT owner are zeroAddress
    */
-  MintBurn: "mint-burn",
+  RemintBurn: "remint-burn",
 
   /**
    * Transfer from zeroAddress to zeroAddress for an unindexed NFT
@@ -183,7 +183,7 @@ export const NFTTransferTypes = {
    * - NFT is not indexed and therefore has no previous mint status or owner
    * - NFT should remain unindexed and without any mint status or owner
    */
-  NoOp: "no-op",
+  MintBurn: "mint-burn",
 } as const;
 
 export type NFTTransferType = (typeof NFTTransferTypes)[keyof typeof NFTTransferTypes];
@@ -205,18 +205,18 @@ export const getNFTTransferType = (
 
   if (isAddressEqual(from, to)) {
     if (isAddressEqual(from, zeroAddress)) {
-      // a transfer to and from the zeroAddress represents a mint-burn
+      // a transfer to and from the zeroAddress represents either mint-burn or remint-burn
       if (!isIndexed) {
         // mint-burn with !isIndexed && !isMinted
-        return NFTTransferTypes.NoOp;
-      } else if (!isMinted) {
-        // mint-burn with isIndexed && !isMinted
         return NFTTransferTypes.MintBurn;
+      } else if (!isMinted) {
+        // remint-burn with isIndexed && !isMinted
+        return NFTTransferTypes.RemintBurn;
       } else {
-        // mint-burn with isIndexed && isMinted
-        // invalid state transition to be minted and then mint again
+        // remint-burn with isIndexed && isMinted
+        // invalid state transition to be minted and then remint again
         throw new Error(
-          `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from minted -> mint-burn`,
+          `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from minted -> remint-burn`,
         );
       }
     } else {
