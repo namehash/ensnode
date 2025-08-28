@@ -35,7 +35,7 @@ export default function () {
     await upsertAccount(context, sale.buyer);
 
     // insert NameSale entity
-    await context.db.insert(schema.nameSales).values({
+    await context.db.insert(schema.ext_nameSales).values({
       id: makeEventId(context.chain.id, event.block.number, event.log.logIndex),
       chainId: sale.nft.contract.chainId,
       blockNumber: event.block.number,
