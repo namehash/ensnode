@@ -1,7 +1,7 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, Hex, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
   type LabelHash,
@@ -24,6 +24,7 @@ import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
+import { getThreeDNSTokenId } from "@/lib/threedns-helpers";
 
 /**
  * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
@@ -124,7 +125,7 @@ export async function handleNewOwner({
 
     // 1. attempt metadata retrieval
     if (!healedLabel) {
-      const tokenId = hexToBigInt(node, { size: 32 });
+      const tokenId = getThreeDNSTokenId(node);
       const uri = await getUriForTokenId(context, tokenId);
       [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
     }

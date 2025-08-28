@@ -1,23 +1,24 @@
 import { Context, ponder } from "ponder:registry";
-import { ChainId, Node, PluginName } from "@ensnode/ensnode-sdk";
+import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 
 import schema from "ponder:schema";
 import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { getThreeDNSTokenId } from "@/lib/threedns-helpers";
 import {
   NFTMintStatuses,
   NFTTransferEventMetadata,
   NFTTransferTypes,
   SupportedNFT,
-  TokenId,
   buildSupportedNFTAssetId,
   formatNFTTransferEventMetadata,
   getNFTTransferType,
 } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 import { DatasourceName, DatasourceNames } from "@ensnode/datasources";
-import { Address, hexToBigInt, zeroAddress } from "viem";
+import { replaceBigInts } from "ponder";
+import { Address, zeroAddress } from "viem";
 import { base, optimism } from "viem/chains";
 
 /**
@@ -44,7 +45,7 @@ export default function () {
         nft,
       };
 
-      handleTransfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleERC721Transfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -66,7 +67,7 @@ export default function () {
         nft,
       };
 
-      handleTransfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleERC721Transfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -88,7 +89,7 @@ export default function () {
         nft,
       };
 
-      handleTransfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleERC721Transfer(context, event.args.from, event.args.to, nft, metadata);
     },
   );
 
@@ -111,7 +112,7 @@ export default function () {
       };
 
       // NOTE: we don't make any use of event.args.operator in this handler
-      handleERC1155Transfer(
+      await handleERC1155Transfer(
         context,
         event.args.from,
         event.args.to,
@@ -171,7 +172,7 @@ export default function () {
         };
 
         // NOTE: we don't make any use of event.args.operator in this handler
-        handleERC1155Transfer(context, event.args.from, event.args.to, nft, value, metadata);
+        await handleERC1155Transfer(context, event.args.from, event.args.to, nft, value, metadata);
       }
     },
   );
@@ -195,7 +196,7 @@ export default function () {
         nft,
       };
 
-      handleTransfer(context, zeroAddress, registrant, nft, metadata);
+      await handleERC721Transfer(context, zeroAddress, registrant, nft, metadata);
     },
   );
 
@@ -230,7 +231,7 @@ export default function () {
         );
       }
 
-      handleTransfer(context, indexedNft.owner, newOwner, nft, metadata);
+      await handleERC721Transfer(context, indexedNft.owner, newOwner, nft, metadata);
     },
   );
 
@@ -265,14 +266,10 @@ export default function () {
         );
       }
 
-      handleTransfer(context, indexedNft.owner, zeroAddress, nft, metadata);
+      await handleERC721Transfer(context, indexedNft.owner, zeroAddress, nft, metadata);
     },
   );
 }
-
-const getThreeDNSTokenId = (node: Node): TokenId => {
-  return hexToBigInt(node, { size: 32 });
-};
 
 const getThreeDNSDatasourceName = (chainId: ChainId): DatasourceName => {
   switch (chainId) {
@@ -302,10 +299,10 @@ const handleERC1155Transfer = async (
     );
   }
 
-  handleTransfer(context, from, to, nft, metadata);
+  await handleERC721Transfer(context, from, to, nft, metadata);
 };
 
-const handleTransfer = async (
+const handleERC721Transfer = async (
   context: Context,
   from: Address,
   to: Address,
@@ -315,8 +312,8 @@ const handleTransfer = async (
   const assetId = buildSupportedNFTAssetId(nft);
 
   // get the currently indexed record for the assetId (if it exists)
-  const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
-  const transferType = getNFTTransferType(from, to, metadata, indexedNft?.owner);
+  const previous = await context.db.find(schema.ext_nameTokens, { id: assetId });
+  const transferType = getNFTTransferType(from, to, metadata, previous?.owner);
 
   switch (transferType) {
     case NFTTransferTypes.Mint:

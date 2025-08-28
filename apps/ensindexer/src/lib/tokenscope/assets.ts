@@ -102,7 +102,15 @@ export interface NFTTransferEventMetadata {
 }
 
 export const formatNFTTransferEventMetadata = (metadata: NFTTransferEventMetadata): string => {
-  return `Transfer of NFT ${buildSupportedNFTAssetId(metadata.nft)} on chain ${metadata.chainId} at block ${metadata.blockNumber} with transaction ${metadata.transactionHash} from event handler ${metadata.eventHandlerName}.`;
+  return [
+    `Event: ${metadata.eventHandlerName}`,
+    `Chain ID: ${metadata.chainId}`,
+    `Block Number: ${metadata.blockNumber}`,
+    `Transaction Hash: ${metadata.transactionHash}`,
+    `NFT: ${buildSupportedNFTAssetId(metadata.nft)}`,
+  ]
+    .map((line) => ` - ${line}`)
+    .join("\n");
 };
 
 /**
@@ -199,7 +207,7 @@ export const getNFTTransferType = (
 
   if (isIndexed && !isAddressEqual(currentlyIndexedOwner, from)) {
     throw new Error(
-      `${formatNFTTransferEventMetadata(metadata)} Error: Sending from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.`,
+      `Error: Sending from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.\n${formatNFTTransferEventMetadata(metadata)}`,
     );
   }
 
@@ -216,7 +224,7 @@ export const getNFTTransferType = (
         // remint-burn with isIndexed && isMinted
         // invalid state transition to be minted and then remint again
         throw new Error(
-          `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from minted -> remint-burn`,
+          `Error: Invalid state transition from minted -> remint-burn\n${formatNFTTransferEventMetadata(metadata)}`,
         );
       }
     } else {
@@ -228,12 +236,12 @@ export const getNFTTransferType = (
         // - !isMinted requires that from === zeroAddress
         // throw an error to validate above assertions
         throw new Error(
-          `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from unindexed -> self-transfer`,
+          `Error: Invalid state transition from unindexed -> self-transfer\n${formatNFTTransferEventMetadata(metadata)}`,
         );
       } else if (!isMinted) {
         // self-transfer with isIndexed && !isMinted
         throw new Error(
-          `${formatNFTTransferEventMetadata(metadata)} Error: invalid state transition from burned -> self-transfer`,
+          `Error: invalid state transition from burned -> self-transfer\n${formatNFTTransferEventMetadata(metadata)}`,
         );
       } else {
         // self-transfer with isIndexed && isMinted
@@ -251,7 +259,7 @@ export const getNFTTransferType = (
     } else {
       // mint with isIndexed && isMinted
       throw new Error(
-        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from minted -> mint`,
+        `Error: Invalid state transition from minted -> mint\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     }
   } else if (isAddressEqual(to, zeroAddress)) {
@@ -259,12 +267,12 @@ export const getNFTTransferType = (
     if (!isIndexed) {
       // burn with !isIndexed && !isMinted
       throw new Error(
-        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from unindexed -> burn`,
+        `Error: Invalid state transition from unindexed -> burn\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     } else if (!isMinted) {
       // burn with isIndexed && !isMinted
       throw new Error(
-        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from burned -> burn`,
+        `Error: Invalid state transition from burned -> burn\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     } else {
       // burn with isIndexed && isMinted
@@ -275,12 +283,12 @@ export const getNFTTransferType = (
     if (!isIndexed) {
       // transfer with !isIndexed && !isMinted
       throw new Error(
-        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from unindexed -> transfer`,
+        `Error: Invalid state transition from unindexed -> transfer\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     } else if (!isMinted) {
       // transfer with isIndexed && !isMinted
       throw new Error(
-        `${formatNFTTransferEventMetadata(metadata)} Error: Invalid state transition from burned -> transfer`,
+        `Error: Invalid state transition from burned -> transfer\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     } else {
       // transfer with isIndexed && isMinted

@@ -51,16 +51,18 @@ export default createPlugin({
       config.namespace,
       DatasourceNames.ThreeDNSOptimism,
     );
+
     const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
       config.namespace,
       DatasourceNames.ThreeDNSBase,
     );
 
-    // invariant sanity check: seaport and ensroot are on the same chain
+    // Sanity Check: Seaport and ENSRoot are on the same chain
     if (seaport.chain.id !== ensroot.chain.id) {
       throw new Error("Seaport and ENSRoot datasources are expected to be on the same chain");
     }
 
+    // Sanity Check: ThreeDNSBase and Basenames are on the same chain
     if (threeDNSBase.chain.id !== basenames.chain.id) {
       throw new Error(
         "ThreeDNSBase and Basenames datasources are expected to be on the same chain",
