@@ -28,7 +28,7 @@ export const handleERC1155Transfer = async (
     );
   }
 
-  // if that's the case
+  // handle it as a normal nft transfer
   await handleNFTTransfer(context, from, to, nft, metadata);
 };
 
