@@ -1,6 +1,6 @@
 ---
-"@ensnode/ensnode-schema": patch
-"ensindexer": patch
+"@ensnode/ensnode-schema": minor
+"ensindexer": minor
 ---
 
-Index mapping from ENS names to their ownership controlling tokens.
+Index mappings between ENS names and their ownership controlling tokens.
