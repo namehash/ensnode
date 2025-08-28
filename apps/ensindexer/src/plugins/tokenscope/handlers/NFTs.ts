@@ -3,7 +3,6 @@ import { ChainId, Node, PluginName } from "@ensnode/ensnode-sdk";
 
 import schema from "ponder:schema";
 import config from "@/config";
-import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { upsertAccount } from "@/lib/db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
@@ -14,8 +13,8 @@ import {
   buildSupportedNFTAssetId,
   getNFTTransferType,
 } from "@/lib/tokenscope/assets";
-import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
-import { DatasourceName, DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
+import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
+import { DatasourceName, DatasourceNames } from "@ensnode/datasources";
 import { Address, hexToBigInt, zeroAddress } from "viem";
 import { base, optimism } from "viem/chains";
 
@@ -194,30 +193,6 @@ const getThreeDNSDatasourceName = (chainId: ChainId): DatasourceName => {
     default:
       throw new Error(`No ThreeDNS DatasourceName for chain id ${chainId}.`);
   }
-};
-
-const buildSupportedNFT = (
-  namespaceId: ENSNamespaceId,
-  datasourceName: DatasourceName,
-  contractName: string,
-  tokenId: TokenId,
-): SupportedNFT => {
-  const contract = getDatasourceContract(namespaceId, datasourceName, contractName);
-
-  const nftIssuer = getSupportedNFTIssuer(namespaceId, contract);
-  if (!nftIssuer) {
-    throw new Error(
-      `Error getting nftIssuer for contract name ${contractName} at address ${contract.address} on chainId ${contract.chainId} in datasource ${datasourceName} in namespace ${config.namespace}.`,
-    );
-  }
-  const domainId = nftIssuer.getDomainId(tokenId);
-
-  return {
-    contract,
-    tokenId,
-    assetNamespace: nftIssuer.assetNamespace,
-    domainId,
-  };
 };
 
 const handleERC1155Transfer = async (

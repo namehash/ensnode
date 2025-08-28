@@ -1,6 +1,6 @@
-import { maybeGetDatasourceContract } from "@/lib/datasource-helpers";
-import { AssetNamespace, AssetNamespaces, TokenId } from "@/lib/tokenscope/assets";
-import { DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
+import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
+import { AssetNamespace, AssetNamespaces, SupportedNFT, TokenId } from "@/lib/tokenscope/assets";
+import { DatasourceName, DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
 import {
   AccountId,
   BASENAMES_NODE,
@@ -182,4 +182,28 @@ export const getSupportedNFTIssuer = (
 ): SupportedNFTIssuer | null => {
   const nftIssuers = getSupportedNFTIssuers(namespaceId);
   return nftIssuers.find((nftIssuer) => accountIdEqual(nftIssuer.contract, contract)) ?? null;
+};
+
+export const buildSupportedNFT = (
+  namespaceId: ENSNamespaceId,
+  datasourceName: DatasourceName,
+  contractName: string,
+  tokenId: TokenId,
+): SupportedNFT => {
+  const contract = getDatasourceContract(namespaceId, datasourceName, contractName);
+
+  const nftIssuer = getSupportedNFTIssuer(namespaceId, contract);
+  if (!nftIssuer) {
+    throw new Error(
+      `Error getting nftIssuer for contract name ${contractName} at address ${contract.address} on chainId ${contract.chainId} in datasource ${datasourceName} in namespace ${namespaceId}.`,
+    );
+  }
+  const domainId = nftIssuer.getDomainId(tokenId);
+
+  return {
+    contract,
+    tokenId,
+    assetNamespace: nftIssuer.assetNamespace,
+    domainId,
+  };
 };
