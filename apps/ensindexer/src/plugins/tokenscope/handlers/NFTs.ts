@@ -1,5 +1,5 @@
 import { Context, ponder } from "ponder:registry";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { ChainId, Node, PluginName } from "@ensnode/ensnode-sdk";
 
 import schema from "ponder:schema";
 import config from "@/config";
@@ -16,7 +16,8 @@ import {
 } from "@/lib/tokenscope/assets";
 import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
 import { DatasourceName, DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
-import { Address, zeroAddress } from "viem";
+import { Address, hexToBigInt, zeroAddress } from "viem";
+import { base, optimism } from "viem/chains";
 
 /**
  * Registers event handlers with Ponder.
@@ -109,7 +110,91 @@ export default function () {
       }
     },
   );
+
+  ponder.on(
+    namespaceContract(pluginName, "ThreeDNSToken:RegistrationCreated"),
+    async ({ context, event }) => {
+      // currently no use for tld, fqdn, controlBitmap, or expiry fields in event.args
+      const { node, registrant } = event.args;
+
+      const datasourceName = getThreeDNSDatasourceName(context.chain.id);
+      const tokenId = getThreeDNSTokenId(node);
+
+      const nft = buildSupportedNFT(config.namespace, datasourceName, "ThreeDNSToken", tokenId);
+
+      handleTransfer(context, zeroAddress, registrant, nft);
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "ThreeDNSToken:RegistrationTransferred"),
+    async ({ context, event }) => {
+      // currently no use for operator field in event.args
+      const { node, newOwner } = event.args;
+
+      const datasourceName = getThreeDNSDatasourceName(context.chain.id);
+      const tokenId = getThreeDNSTokenId(node);
+
+      const nft = buildSupportedNFT(config.namespace, datasourceName, "ThreeDNSToken", tokenId);
+
+      // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
+      // to look it up in the database. this query is then repeated in handleTransfer which
+      // is a bit of a bummer but better to keep our logic simple.
+      const assetId = buildSupportedNFTAssetId(nft);
+      const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
+
+      if (!indexedNft) {
+        throw new Error(
+          `ThreeDNSToken:RegistrationTransferred event for assetId ${assetId} on chain ${context.chain.id} but no indexed record found.`,
+        );
+      }
+
+      handleTransfer(context, indexedNft.owner, newOwner, nft);
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "ThreeDNSToken:RegistrationBurned"),
+    async ({ context, event }) => {
+      // currently no use for burner field in event.args
+      const { node } = event.args;
+
+      const datasourceName = getThreeDNSDatasourceName(context.chain.id);
+      const tokenId = getThreeDNSTokenId(node);
+
+      const nft = buildSupportedNFT(config.namespace, datasourceName, "ThreeDNSToken", tokenId);
+
+      // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
+      // to look it up in the database. this query is then repeated in handleTransfer which
+      // is a bit of a bummer but better to keep our logic simple.
+      const assetId = buildSupportedNFTAssetId(nft);
+      const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
+
+      if (!indexedNft) {
+        throw new Error(
+          `ThreeDNSToken:RegistrationBurned event for assetId ${assetId} on chain ${context.chain.id} but no indexed record found.`,
+        );
+      }
+
+      handleTransfer(context, indexedNft.owner, zeroAddress, nft);
+    },
+  );
 }
+
+const getThreeDNSTokenId = (node: Node): TokenId => {
+  return hexToBigInt(node, { size: 32 });
+};
+
+const getThreeDNSDatasourceName = (chainId: ChainId): DatasourceName => {
+  switch (chainId) {
+    case base.id:
+      return DatasourceNames.ThreeDNSBase;
+    case optimism.id:
+      return DatasourceNames.ThreeDNSOptimism;
+    default:
+      throw new Error(`No ThreeDNS DatasourceName for chain id ${chainId}.`);
+  }
+};
 
 const buildSupportedNFT = (
   namespaceId: ENSNamespaceId,

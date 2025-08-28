@@ -23,6 +23,8 @@ export default createPlugin({
     DatasourceNames.ENSRoot,
     DatasourceNames.Basenames,
     DatasourceNames.Lineanames,
+    DatasourceNames.ThreeDNSOptimism,
+    DatasourceNames.ThreeDNSBase,
   ],
   createPonderConfig(config) {
     const seaport = getDatasourceAsFullyDefinedAtCompileTime(
@@ -45,19 +47,35 @@ export default createPlugin({
       DatasourceNames.Lineanames,
     );
 
+    const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSOptimism,
+    );
+    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSBase,
+    );
+
     // invariant sanity check: seaport and ensroot are on the same chain
     if (seaport.chain.id !== ensroot.chain.id) {
       throw new Error("Seaport and ENSRoot datasources are expected to be on the same chain");
     }
 
+    if (threeDNSBase.chain.id !== basenames.chain.id) {
+      throw new Error(
+        "ThreeDNSBase and Basenames datasources are expected to be on the same chain",
+      );
+    }
+
     return ponder.createConfig({
       chains: {
-        // not passing seaport.chain.id here because we've validated above that
-        // it's the same as ensroot.chain.id and we don't want to pass the same
-        // chainId here twice
+        // not passing seaport.chain.id or threeDNSBase.chain.id here because we've
+        // validated above that it's the same as ensroot.chain.id and basenames.chain.id
+        // we don't want to pass the same chainId here twice
         ...chainsConnectionConfig(config.rpcConfigs, ensroot.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, basenames.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, lineanames.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
       },
       contracts: {
         [namespaceContract(pluginName, "Seaport")]: {
@@ -121,6 +139,23 @@ export default createPlugin({
             ),
           },
           abi: ensroot.contracts.NameWrapper.abi,
+        },
+        // multi-chain ThreeDNSToken indexing config
+        [namespaceContract(pluginName, "ThreeDNSToken")]: {
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSOptimism.chain.id,
+              threeDNSOptimism.contracts.ThreeDNSToken,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSBase.chain.id,
+              threeDNSBase.contracts.ThreeDNSToken,
+            ),
+          },
+          // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
+          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
         },
       },
     });
