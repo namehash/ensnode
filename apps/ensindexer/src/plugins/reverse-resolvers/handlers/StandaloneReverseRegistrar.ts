@@ -2,9 +2,9 @@ import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import config from "@/config";
 import { makePrimaryNameId } from "@/lib/ids";
+import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
-import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts. These contracts manage

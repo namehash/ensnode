@@ -4,7 +4,7 @@ import { getAddress, isAddress, zeroAddress } from "viem";
 
 import { makeKeyedResolverRecordId } from "@/lib/ids";
 import { stripNullBytes } from "@/lib/lib-helpers";
-import { isNormalizedName, Name } from "@ensnode/ensnode-sdk";
+import { Name, isNormalizedName } from "@ensnode/ensnode-sdk";
 
 /**
  * Interprets the provided name() record value, ensuring that it is either:
