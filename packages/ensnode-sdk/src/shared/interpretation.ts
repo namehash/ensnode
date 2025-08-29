@@ -15,7 +15,7 @@ import {
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  *
- * @param label - The Literal Label string to validate
+ * @param label - The Literal Label string to interpret
  * @returns The provided label if it is normalized, else the EncodedLabelHash of the label
  */
 export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
