@@ -55,5 +55,19 @@ describe("interpretation", () => {
     it("should return empty string for empty string", () => {
       expect(interpretLiteralName("")).toBe("");
     });
+
+    it("should work for unnormalizable single label", () => {
+      expect(interpretLiteralName("unnormalizable|label")).toMatch(ENCODED_LABELHASH_LABEL);
+    });
+
+    it("should handle empty labels", () => {
+      // 2 empty labels, looks like [00...00].[00...00]
+      expect(interpretLiteralName(".")).toMatch(/^\[[\da-f]{64}\]\.\[[\da-f]{64}\]$/);
+
+      // 3 empty labels, looks like [00...00].[00...00].[00...00]
+      expect(interpretLiteralName("..")).toMatch(
+        /^\[[\da-f]{64}\]\.\[[\da-f]{64}\]\.\[[\da-f]{64}\]$/,
+      );
+    });
   });
 });
