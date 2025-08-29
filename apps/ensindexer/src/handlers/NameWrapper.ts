@@ -4,9 +4,11 @@ import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
 import {
+  Label,
+  Name,
   type Node,
   interpretLiteralLabel,
-  interpretLiteralName,
+  requireInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
@@ -123,14 +125,25 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       // decode the name emitted by NameWrapper
-      let [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+      const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(event.args.name));
 
       // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-name
+      let label: Label | null;
+      let name: Name | null;
       if (config.replaceUnnormalized) {
-        label = label ? interpretLiteralLabel(label) : label;
-        name = name ? interpretLiteralName(name) : name;
+        if (literalLabel === null || literalName === null) {
+          throw new Error(
+            `Invariant: When REPLACE_UNNORMALIZED=true, it is an invariant that the NameWrapper emits decodable DNSPacketBytes, but the following bytes were not decodable: ${event.args.name}.`,
+          );
+        }
+
+        label = interpretLiteralLabel(literalLabel);
+        name = requireInterpretedName(literalName);
+      } else {
+        label = literalLabel;
+        name = literalName;
       }
 
       const domain = await context.db.find(schema.domain, { id: node });

@@ -22,24 +22,25 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
   // if the label is normalized, good to go
   if (isNormalizedLabel(label)) return label;
 
-  // otherwise, interpret as EncodedLabelHash
+  // otherwise (includes empty string label), interpret as EncodedLabelHash
   return encodeLabelHash(labelhash(label));
 }
 
 /**
- * Transforms a Literal Name into an Interpreted Name.
+ * Requires that the provided Literal Name is an Interpreted Name.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-name
  * @see https://ensnode.io/docs/reference/terminology#interpreted-name
  *
- * @param name - The Literal Name string to interpret
- * @returns The provided name if it is normalized, else converts each label in name that is not a
- * normalized label into an Interpreted Label
+ * @param name - The Literal Name to interpret
+ * @returns An Interpreted Name
+ * @throws If the Literal Name is not normalized
  */
-export function interpretLiteralName(name: Name): Name {
+export function requireInterpretedName(name: Name) {
   // if the name is already normalized (includes empty string), good to go
   if (isNormalizedName(name)) return name;
 
-  // otherwise ensure the name is composed of Interpreted Labels
-  return name.split(".").map(interpretLiteralLabel).join(".");
+  throw new Error(
+    `Invariant(requireInterpretedName): The provided name '${name}' is not normalized and cannot be an Interpreted Name.`,
+  );
 }

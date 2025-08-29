@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { interpretLiteralLabel, interpretLiteralName } from "./interpretation";
+import { interpretLiteralLabel } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -47,26 +47,6 @@ describe("interpretation", () => {
     it("should encode non-normalized encodable labels as labelhashes", () => {
       UNNORMALIZED_LABELS.forEach((label) =>
         expect(interpretLiteralLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
-      );
-    });
-  });
-
-  describe("interpretLiteralName", () => {
-    it("should return empty string for empty string", () => {
-      expect(interpretLiteralName("")).toBe("");
-    });
-
-    it("should work for unnormalizable single label", () => {
-      expect(interpretLiteralName("unnormalizable|label")).toMatch(ENCODED_LABELHASH_LABEL);
-    });
-
-    it("should handle empty labels", () => {
-      // 2 empty labels, looks like [00...00].[00...00]
-      expect(interpretLiteralName(".")).toMatch(/^\[[\da-f]{64}\]\.\[[\da-f]{64}\]$/);
-
-      // 3 empty labels, looks like [00...00].[00...00].[00...00]
-      expect(interpretLiteralName("..")).toMatch(
-        /^\[[\da-f]{64}\]\.\[[\da-f]{64}\]\.\[[\da-f]{64}\]$/,
       );
     });
   });

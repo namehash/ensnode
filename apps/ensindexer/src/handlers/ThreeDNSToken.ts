@@ -7,8 +7,8 @@ import {
   type Node,
   encodeLabelHash,
   interpretLiteralLabel,
-  interpretLiteralName,
   makeSubdomainNode,
+  requireInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -205,24 +205,24 @@ export async function handleRegistrationCreated({
 
   const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
 
-  // ThreeDNS always emits a DNS Packet but/and we explicitly enforce this invariant here
+  // Invariant: ThreeDNS always emits a decodable DNS Packet
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
   if (!literalLabel || !literalName) {
     console.table({ ...event.args, tx: event.transaction.hash });
     throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
   }
 
+  // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
+  if (literalName.split(".").length >= 3) {
+    console.table({ ...event.args, tx: event.transaction.hash });
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${literalName}`);
+  }
+
   // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
   // see https://ensnode.io/docs/reference/terminology#interpreted-label
   // see https://ensnode.io/docs/reference/terminology#interpreted-name
   const interpretedLabel = interpretLiteralLabel(literalLabel);
-  const interpretedName = interpretLiteralName(literalName);
-
-  // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
-  if (interpretedName.split(".").length >= 3) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${interpretedName}`);
-  }
+  const interpretedName = requireInterpretedName(literalName);
 
   const labelHash = labelhash(literalLabel);
 

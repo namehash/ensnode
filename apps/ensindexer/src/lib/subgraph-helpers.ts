@@ -2,7 +2,7 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
-import { Node, ROOT_NODE, interpretLiteralName } from "@ensnode/ensnode-sdk";
+import { Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
 import { zeroAddress } from "viem";
 
 /**
@@ -39,7 +39,7 @@ export async function setupRootNode({ context }: { context: Context }) {
       // NOTE(replace-unnormalized, subgraph-compat): the subgraph datamodel expects that the
       // value for the root node's `name` is `null`. with config.replaceUnnormalized, however, we
       // enforce that the root node's name is empty string, the technically correct value
-      name: config.replaceUnnormalized ? interpretLiteralName("") : null,
+      name: config.replaceUnnormalized ? "" : null,
     })
     .onConflictDoNothing();
 }
