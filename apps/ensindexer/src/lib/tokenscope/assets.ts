@@ -238,8 +238,17 @@ export const getNFTTransferType = (
   const isIndexed = currentlyIndexedOwner !== undefined;
   const isIndexedAsMinted = isIndexed && !isAddressEqual(currentlyIndexedOwner, zeroAddress);
 
+  // a transfer from the zeroAddress to a non-zeroAddress represents minting
+  const isMint = isAddressEqual(from, zeroAddress);
+
+  // a transfer from a non-zeroAddress to the zeroAddress represents burning
+  const isBurn = isAddressEqual(to, zeroAddress);
+
+  // it's possible to transfer to and from the same address
+  const isSelfTransfer = isAddressEqual(from, to);
+
   if (isIndexed && !isAddressEqual(currentlyIndexedOwner, from)) {
-    if (allowMintedRemint && isAddressEqual(from, zeroAddress)) {
+    if (isMint && allowMintedRemint) {
       // special case to allow minted remint from improperly implemented NFT contracts
     } else {
       throw new Error(
@@ -248,9 +257,10 @@ export const getNFTTransferType = (
     }
   }
 
-  if (isAddressEqual(from, to)) {
-    if (isAddressEqual(from, zeroAddress)) {
-      // a transfer to and from the zeroAddress represents either mint-burn or remint-burn
+  if (isSelfTransfer) {
+    if (isMint) {
+      // a self-transfer to and from the zeroAddress represents either mint-burn, remint-burn,
+      // or minted-remint-burn
       if (!isIndexed) {
         // mint-burn with !isIndexed && !isIndexedAsMinted
         return NFTTransferTypes.MintBurn;
@@ -264,7 +274,7 @@ export const getNFTTransferType = (
         // that allow a NFT that is currently minted to be reminted again before an
         // intermediate burn.
         //
-        // this is a transfer from zeroAddress to zeroAddress for an indexed NFT
+        // this is a self-transfer from zeroAddress to zeroAddress for an indexed NFT
         // where the previously indexed nft had status `minted` with a non-zeroAddress owner.
         return NFTTransferTypes.MintedRemintBurn;
       } else {
@@ -275,7 +285,7 @@ export const getNFTTransferType = (
         );
       }
     } else {
-      // a transfer to and from a non-zero address represents a self-transfer
+      // a self-transfer to and from the same non-zero address
       if (!isIndexed) {
         // self-transfer with !isIndexed && !isIndexedAsMinted
         // this branch is unreachable because:
@@ -295,8 +305,7 @@ export const getNFTTransferType = (
         return NFTTransferTypes.SelfTransfer;
       }
     }
-  } else if (isAddressEqual(from, zeroAddress)) {
-    // a transfer from the zeroAddress to a non-zeroAddress represents minting
+  } else if (isMint) {
     if (!isIndexed) {
       // mint with !isIndexed && !isIndexedAsMinted
       return NFTTransferTypes.Mint;
@@ -319,8 +328,7 @@ export const getNFTTransferType = (
         `Error: Invalid state transition from minted -> mint\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     }
-  } else if (isAddressEqual(to, zeroAddress)) {
-    // a transfer from a non-zeroAddress to the zeroAddress represents burning
+  } else if (isBurn) {
     if (!isIndexed) {
       // burn with !isIndexed && !isIndexedAsMinted
       throw new Error(
