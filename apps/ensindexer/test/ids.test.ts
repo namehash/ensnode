@@ -5,10 +5,12 @@ setupConfigMock(); // setup config mock before importing dependent modules
 import {
   makeDomainResolverRelationId,
   makeEventId,
+  makePrimaryNameId,
   makeRegistrationId,
   makeResolverId,
   parseResolverId,
 } from "@/lib/ids";
+import { DEFAULT_EVM_COIN_TYPE } from "@ensnode/ensnode-sdk";
 import { labelhash, namehash, zeroAddress } from "viem";
 
 const CHAIN_ID = 1337;
@@ -116,6 +118,14 @@ describe("ids", () => {
       it("should use the node of the registered name", () => {
         expect(makeRegistrationId(labelhash("vitalik"), namehash("vitalik.linea.eth"))).toEqual(
           namehash("vitalik.linea.eth"),
+        );
+      });
+    });
+
+    describe("makePrimaryNameId", () => {
+      it("should construct primary name id", () => {
+        expect(makePrimaryNameId(zeroAddress, DEFAULT_EVM_COIN_TYPE)).toEqual(
+          `${zeroAddress}-80000000`,
         );
       });
     });

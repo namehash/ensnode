@@ -8,21 +8,8 @@ on:
   pull_request:
 
 jobs:
-  changed-packages:
-    runs-on: blacksmith-4vcpu-ubuntu-2204
-    outputs:
-      packages: ${{ steps.changes.outputs.packages }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check for package changes
-        id: changes
-        uses: dorny/paths-filter@v2
-        with:
-          filters: |
-            packages:
-              - 'packages/**'
-
   static-analysis:
+    name: "Static Analysis"
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:
@@ -49,8 +36,10 @@ jobs:
       - name: Run TypeScript type checks
         run: pnpm -r typecheck
 
-      - name: Build packages
-        if: needs.changed-packages.outputs.packages == 'true'
+      - name: Check Terraform format
+        run: terraform fmt -recursive -check -diff
+
+      - name: Build NPM Packages
         run: pnpm packages:prepublish
 
       # This will run the dev command in background, and wait up to
@@ -70,19 +59,26 @@ jobs:
           # We use private RPC URLs from GitHub Secrets to avoid rate limits.
           # Public RPC URLs are used as fallbacks for repository forks
           # that don't have the relevant secrets configured.
-          PLUGINS: subgraph,basenames,lineanames,threedns
+          PLUGINS: subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope
           RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
           RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
           RPC_URL_8453: ${{ secrets.BASE_RPC_URL || 'https://base.drpc.org' }}
           RPC_URL_59144: ${{ secrets.LINEA_RPC_URL || 'https://linea.drpc.org' }}
+          RPC_URL_42161: ${{ secrets.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org' }}
+          RPC_URL_534352: ${{ secrets.SCROLL_RPC_URL || 'https://scroll.drpc.org' }}
           HEALTH_CHECK_TIMEOUT: 60
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
+          ENSINDEXER_URL: http://localhost:42069
+          # Label Set Configuration (REQUIRED)
+          LABEL_SET_ID: ens-test-env
+          LABEL_SET_VERSION: 0
         run: |
           chmod +x ./.github/scripts/run_ensindexer_healthcheck.sh
           ./.github/scripts/run_ensindexer_healthcheck.sh
 
   unit-tests:
+    name: "Unit Tests"
     runs-on: blacksmith-4vcpu-ubuntu-2204
 
     steps:

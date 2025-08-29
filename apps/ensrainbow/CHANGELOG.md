@@ -1,5 +1,48 @@
 # ensrainbow
 
+## 0.34.0
+
+### Minor Changes
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Introduced ENSRainbow v2 data format.
+
+  This change addresses large Docker image sizes and data management challenges.
+
+  Key changes:
+
+  - A new .ensrainbow data format replaces SQL dumps, supporting label set IDs and versioned label sets for incremental data updates.
+  - ENSRainbow is now distributed as a lightweight, data-less Docker image.
+  - On first startup, the application downloads a pre-ingested database from R2, significantly reducing setup time.
+  - This new architecture allows for deterministic data healing and easier data evolution.
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Reduce size of the ENSRainbow docker image
+
+### Patch Changes
+
+- Updated dependencies [[`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa)]:
+  - @ensnode/ensnode-sdk@0.34.0
+  - @ensnode/ensrainbow-sdk@0.34.0
+
+## 0.33.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@0.33.0
+  - @ensnode/ensrainbow-sdk@0.33.0
+
+## 0.32.0
+
+### Minor Changes
+
+- [#901](https://github.com/namehash/ensnode/pull/901) [`3b42583`](https://github.com/namehash/ensnode/commit/3b425832dd93e247d3c7544c86856972f1831061) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Terraform Render environment
+
+### Patch Changes
+
+- Updated dependencies [[`2b60fad`](https://github.com/namehash/ensnode/commit/2b60fad313e31735c77372c514d22523f9d2cbc3), [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294), [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`ad7fc8b`](https://github.com/namehash/ensnode/commit/ad7fc8bb4d12fe0ef1bb133eef9670d4eb84911b), [`f3eff8a`](https://github.com/namehash/ensnode/commit/f3eff8aef94cf6162ae4bab39059abd1e852352b)]:
+  - @ensnode/ensnode-sdk@0.32.0
+  - @ensnode/ensrainbow-sdk@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

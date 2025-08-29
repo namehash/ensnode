@@ -2,32 +2,34 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { makeKeyedResolverRecordId } from "@/lib/ids";
 import { stripNullBytes } from "@/lib/lib-helpers";
-import { Address, isAddress, zeroAddress } from "viem";
+import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
+import { getAddress, isAddress, zeroAddress } from "viem";
 
 export async function handleResolverNameUpdate(
   context: Context,
   resolverId: string,
   name: string | null,
 ) {
-  // TODO(null-bytes): represent null bytes correctly
-  // NOTE: additionally coalesce falsy values (empty string) into null
-  const sanitizedName = name === null ? null : stripNullBytes(name) || null;
-
-  await context.db.update(schema.resolver, { id: resolverId }).set({ name: sanitizedName });
+  await context.db
+    .update(schema.resolver, { id: resolverId })
+    .set({ name: sanitizeNameRecordValue(name) });
 }
 
 export async function handleResolverAddressRecordUpdate(
   context: Context,
   resolverId: string,
   coinType: bigint,
-  address: Address,
+  address: string,
 ) {
   const recordId = makeKeyedResolverRecordId(resolverId, coinType.toString());
-  const isDeletion = !isAddress(address) || address === zeroAddress;
+  const isDeletion = address === "" || address === zeroAddress;
   if (isDeletion) {
     // delete
     await context.db.delete(schema.ext_resolverAddressRecords, { id: recordId });
   } else {
+    // checksum the stored value if it is an EVM address
+    const addressRecordValue = isAddress(address) ? getAddress(address) : address;
+
     // upsert
     await context.db
       .insert(schema.ext_resolverAddressRecords)
@@ -36,10 +38,10 @@ export async function handleResolverAddressRecordUpdate(
         id: recordId,
         resolverId,
         coinType,
-        address,
+        address: addressRecordValue,
       })
       // or update the existing one
-      .onConflictDoUpdate({ address });
+      .onConflictDoUpdate({ address: addressRecordValue });
   }
 }
 
@@ -49,7 +51,7 @@ export async function handleResolverTextRecordUpdate(
   key: string,
   value: string | undefined | null,
 ) {
-  // if value is undefined, this is a LegacyPublicResolver event, nothing to do
+  // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event, nothing to do
   if (value === undefined) return;
 
   // TODO(null-bytes): store null bytes correctly

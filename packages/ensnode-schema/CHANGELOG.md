@@ -1,5 +1,19 @@
 # @ensnode/ensnode-schema
 
+## 0.34.0
+
+### Minor Changes
+
+- [#970](https://github.com/namehash/ensnode/pull/970) [`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Initial launch of ENS TokenScope with support for indexing Seaport sales.
+
+## 0.33.0
+
+## 0.32.0
+
+### Minor Changes
+
+- [#902](https://github.com/namehash/ensnode/pull/902) [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485) Thanks [@shrugs](https://github.com/shrugs)! - include schema to index an account's primary name records as emitted by StandaloneReverseRegistrars
+
 ## 0.31.0
 
 ## 0.30.0

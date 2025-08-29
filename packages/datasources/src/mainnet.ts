@@ -25,8 +25,10 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 
-// Shared Resolver Config
-import { ResolverConfig } from "./lib/resolver";
+import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
+// Shared ABIs
+import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { ResolverABI, ResolverFilter } from "./lib/resolver";
 
 /**
  * The Mainnet ENSNamespace
@@ -52,7 +54,8 @@ export default {
         startBlock: 9380380,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
       },
       BaseRegistrar: {
@@ -85,24 +88,13 @@ export default {
         address: "0xaBd80E8a13596fEeA40Fd26fD6a24c3fe76F05fB",
         startBlock: 22671701,
       },
-      //
-      LegacyPublicResolver: {
-        abi: ResolverConfig.abi,
-        address: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
-        startBlock: 9412610,
-      },
-      PublicResolver: {
-        abi: ResolverConfig.abi,
-        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
-        startBlock: 16925619,
-      },
       BasenamesL1Resolver: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         address: "0xde9049636F4a1dfE0a64d1bFe3155C0A14C54F31",
         startBlock: 20420641,
       },
       LineanamesL1Resolver: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         address: "0xde16ee87B0C019499cEBDde29c9F7686560f679a",
         startBlock: 20410692,
       },
@@ -139,7 +131,8 @@ export default {
         startBlock: 17571480,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -158,7 +151,7 @@ export default {
         startBlock: 18619035,
       },
       L2Resolver: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         address: "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD",
         startBlock: 17575714,
       },
@@ -195,7 +188,8 @@ export default {
         startBlock: 6682888,
       },
       Resolver: {
-        ...ResolverConfig,
+        abi: ResolverABI,
+        filter: ResolverFilter,
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {
@@ -229,7 +223,7 @@ export default {
         startBlock: 110393959,
       },
       Resolver: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         // NOTE: 3DNSToken on Optimism has a hardcoded protocol-wide Resolver at this address
         address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 110393959,
@@ -250,7 +244,7 @@ export default {
         startBlock: 17522624,
       },
       Resolver: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         // NOTE: 3DNSToken on Base has a hardcoded protocol-wide Resolver at this address
         address: "0xF97aAc6C8dbaEBCB54ff166d79706E3AF7a813c8",
         startBlock: 17522624,
@@ -259,101 +253,188 @@ export default {
   },
 
   /**
-   * The Reverse Resolver(s) on the ENS Root chain.
+   * Contracts that power Reverse Resolution on the ENS Root chain.
    */
   [DatasourceNames.ReverseResolverRoot]: {
     chain: mainnet,
     contracts: {
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x283F227c4Bd38ecE252C4Ae7ECE650B0e913f1f9",
+        startBlock: 22764819,
+      },
+
       // NOTE: the DefaultReverseResolver1 (aka LegacyDefaultReverseResolver) does NOT emit events
       // and is effectively unindexable for the purposes of Reverse Resolution. We document it here
       // for completeness, but/and explicity do not index it.
-      // DefaultReverseResolver1: {
-      //   abi: ResolverConfig.abi,
-      //   address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
-      //   startBlock: 9380501,
-      // },
+      DefaultReverseResolver1: {
+        abi: ResolverABI,
+        address: "0xA2C122BE93b0074270ebeE7f6b7292C7deB45047",
+        startBlock: 9380501,
+      },
+
+      // this DefaultReverseResolver was enabled in the following proposal:
+      // https://discuss.ens.domains/t/ep3-5-executable-activate-new-eth-controller-and-reverse-registrar/16776
+      // https://www.tally.xyz/gov/ens/proposal/42973781582803845389836855775840822719678533376883030929209752909248937768242
+      // DefaultReverseResolver2 is the pre-ENSIP-19 DefaultReverseResolver and it emits
+      // Resolver#NameChanged events. We index these events to power aspects of Protocol Acceleration.
       DefaultReverseResolver2: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
         startBlock: 16925619,
       },
+
       // this DefaultReverseResolver was enabled in the following proposal:
       // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      // https://www.tally.xyz/gov/ens/proposal/42524979896803285837776370636134389407867034021879791462477783237030656381157
+      // NOTE: DefaultReverseResolver3 is not directly indexed: it simply reads data from
+      // DefaultReverseRegistrar, which IS indexed. We document it here for completeness.
       DefaultReverseResolver3: {
-        abi: ResolverConfig.abi,
+        abi: ResolverABI,
         address: "0xA7d635c8de9a58a228AA69353a1699C7Cc240DCF",
         startBlock: 22764871,
+      },
+
+      // the original default public resolver aka LegacyPublicResolver
+      // it uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver1: {
+        abi: ResolverABI,
+        address: "0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41",
+        startBlock: 9412610,
+      },
+
+      // this PublicResolver was enabled in the following proposal:
+      // https://discuss.ens.domains/t/ep3-5-executable-activate-new-eth-controller-and-reverse-registrar/16776
+      // https://www.tally.xyz/gov/ens/proposal/42973781582803845389836855775840822719678533376883030929209752909248937768242
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63",
+        startBlock: 16925619,
+      },
+
+      // this PublicResolver was enabled in the following proposal
+      // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
+      // https://www.tally.xyz/gov/ens/proposal/42524979896803285837776370636134389407867034021879791462477783237030656381157
+      DefaultPublicResolver3: {
+        abi: ResolverABI,
+        address: "0xF29100983E058B709F3D539b0c765937B804AC15",
+        startBlock: 22764828,
+      },
+
+      BaseReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#80002105.reverse
+        address: "0xc800DBc8ff9796E58EfBa2d7b35028DdD1997E5e",
+        startBlock: 22764838,
+      },
+
+      LineaReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#8000e708.reverse
+        address: "0x0Ce08a41bdb10420FB5Cac7Da8CA508EA313aeF8",
+        startBlock: 22764840,
+      },
+
+      OptimismReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#8000000a.reverse
+        address: "0xF9Edb1A21867aC11b023CE34Abad916D29aBF107",
+        startBlock: 22764854,
+      },
+
+      ArbitrumReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#8000a4b1.reverse
+        address: "0x4b9572C03AAa8b0Efa4B4b0F0cc0f0992bEDB898",
+        startBlock: 22764837,
+      },
+
+      ScrollReverseResolver: {
+        abi: ResolverABI,
+        // https://adraffy.github.io/ens-normalize.js/test/resolver.html#80082750.reverse
+        address: "0xC4842814cA523E481Ca5aa85F719FEd1E9CaC614",
+        startBlock: 22921284,
       },
     },
   },
 
   /**
-   * The Reverse Resolver on Base.
+   * Contracts that power Reverse Resolution on Base.
    */
   [DatasourceNames.ReverseResolverBase]: {
     chain: base,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        // NOTE: this is basenames L2Resolver, NOT ENSIP-19 Compliant
-        address: "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD", // TODO: update this address
-        startBlock: 17575714,
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 31808582,
       },
     },
   },
 
   /**
-   * The Reverse Resolver on Optimism.
-   */
-  [DatasourceNames.ReverseResolverOptimism]: {
-    chain: optimism,
-    contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
-      },
-    },
-  },
-
-  /**
-   * The Reverse Resolver on Arbitrum.
-   */
-  [DatasourceNames.ReverseResolverArbitrum]: {
-    chain: arbitrum,
-    contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
-      },
-    },
-  },
-
-  /**
-   * The Reverse Resolver on Scroll.
-   */
-  [DatasourceNames.ReverseResolverScroll]: {
-    chain: scroll,
-    contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
-      },
-    },
-  },
-
-  /**
-   * The Reverse Resolver on Linea.
+   * Contracts that power Reverse Resolution on Linea.
    */
   [DatasourceNames.ReverseResolverLinea]: {
     chain: linea,
     contracts: {
-      ReverseResolver: {
-        abi: ResolverConfig.abi,
-        address: zeroAddress, // TODO: update this address
-        startBlock: 0, // TODO: set this correctly
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 20173340,
+      },
+    },
+  },
+
+  /**
+   * Contracts that power Reverse Resolution on Optimism.
+   */
+  [DatasourceNames.ReverseResolverOptimism]: {
+    chain: optimism,
+    contracts: {
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 137403854,
+      },
+    },
+  },
+
+  /**
+   * Contracts that power Reverse Resolution on Arbitrum.
+   */
+  [DatasourceNames.ReverseResolverArbitrum]: {
+    chain: arbitrum,
+    contracts: {
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 349263357,
+      },
+    },
+  },
+
+  /**
+   * Contracts that power Reverse Resolution on Scroll.
+   */
+  [DatasourceNames.ReverseResolverScroll]: {
+    chain: scroll,
+    contracts: {
+      L2ReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
+        startBlock: 16604272,
+      },
+    },
+  },
+
+  [DatasourceNames.Seaport]: {
+    chain: mainnet,
+    contracts: {
+      Seaport1_5: {
+        abi: Seaport1_5, // Seaport 1.5
+        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        startBlock: 17129405,
       },
     },
   },

@@ -1,5 +1,51 @@
 # @ensnode/ensnode-sdk
 
+## 0.34.0
+
+### Minor Changes
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Includes `latestSyncedBlock` field in `ChainIndexingBackfillStatus` data model.
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Extends `ENSNodeClient` with new methods: `.config()` and `.indexingStatus()`.
+
+### Patch Changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration support to ENSNode SDK
+
+  - Add label set configuration types to ENSIndexerConfig
+  - Update configuration serialization and deserialization
+  - Add Zod schema validation for label set configuration
+  - Update configuration conversion utilities and tests
+
+- Updated dependencies [[`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2)]:
+  - @ensnode/datasources@0.34.0
+
+## 0.33.0
+
+### Patch Changes
+
+- Updated dependencies [[`748a16e`](https://github.com/namehash/ensnode/commit/748a16e3a74798b21ccf1881dcf36d411ee6a27c)]:
+  - @ensnode/datasources@0.33.0
+
+## 0.32.0
+
+### Minor Changes
+
+- [#896](https://github.com/namehash/ensnode/pull/896) [`2b60fad`](https://github.com/namehash/ensnode/commit/2b60fad313e31735c77372c514d22523f9d2cbc3) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `ensindexer/indexing-status` module.
+
+- [#865](https://github.com/namehash/ensnode/pull/865) [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294) Thanks [@shrugs](https://github.com/shrugs)! - adds protocol-tracing-related types to the sdk
+
+- [#902](https://github.com/namehash/ensnode/pull/902) [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485) Thanks [@shrugs](https://github.com/shrugs)! - include support for resolveRecords, resolvePrimaryName, and resolvePrimaryNames
+
+- [#886](https://github.com/namehash/ensnode/pull/886) [`ad7fc8b`](https://github.com/namehash/ensnode/commit/ad7fc8bb4d12fe0ef1bb133eef9670d4eb84911b) Thanks [@notrab](https://github.com/notrab)! - Adds `resolveRecords` and `resolvePrimaryName` methods to ENSNode-SDK.
+
+- [#894](https://github.com/namehash/ensnode/pull/894) [`f3eff8a`](https://github.com/namehash/ensnode/commit/f3eff8aef94cf6162ae4bab39059abd1e852352b) Thanks [@tk-o](https://github.com/tk-o)! - Split `utils` module into two modules: `ens` and `shared`. Create a new `@ensnode/ensnode-sdk/internal` import path allowing other monorepo packages to re-use validation methods from ENSNode SDK.
+
+### Patch Changes
+
+- Updated dependencies [[`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01), [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0), [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8)]:
+  - @ensnode/datasources@0.32.0
+
 ## 0.31.0
 
 ## 0.30.0

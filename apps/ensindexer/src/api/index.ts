@@ -2,9 +2,8 @@ import packageJson from "@/../package.json";
 
 import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
-import { Hono, MiddlewareHandler } from "hono";
+import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { graphql as ponderGraphQL } from "ponder";
 
 import { sdk } from "@/api/lib/instrumentation";
 import config from "@/config";
@@ -23,44 +22,34 @@ import {
   buildGraphQLSchema as buildSubgraphGraphQLSchema,
   graphql as subgraphGraphQL,
 } from "@ensnode/ponder-subgraph";
-import ensNodeApi from "./handlers/ensnode-api";
+
+import ensNodeApi from "@/api/handlers/ensnode-api";
 
 const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
 const app = new Hono();
 
-const ensNodeVersionResponseHeader: MiddlewareHandler = async (ctx, next) => {
+// set the X-ENSNode-Version header to the current version
+app.use(async (ctx, next) => {
   ctx.header("x-ensnode-version", packageJson.version);
   return next();
-};
+});
 
-app.use(
-  // set the X-ENSNode-Version header to the current version
-  ensNodeVersionResponseHeader,
+// use CORS middleware
+app.use(cors({ origin: "*" }));
 
-  // use CORS middleware
-  cors({ origin: "*" }),
-);
-
+// log hono errors to console
 app.onError((error, ctx) => {
-  // log the error for operators
   console.error(error);
-
   return ctx.text("Internal server error", 500);
 });
 
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
-  try {
-    const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
-    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl);
+  const ensAdminRedirectUrl = new URL("connect", config.ensAdminUrl);
+  ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
 
-    return ctx.redirect(ensAdminRedirectUrl);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
-  }
+  return ctx.redirect(ensAdminRedirectUrl);
 });
 
 // use ENSNode middleware at /metadata
@@ -73,7 +62,7 @@ app.get(
     },
     env: {
       PLUGINS: config.plugins.join(","),
-      DATABASE_SCHEMA: config.ponderDatabaseSchema,
+      DATABASE_SCHEMA: config.databaseSchemaName,
       NAMESPACE: config.namespace,
     },
     db,
@@ -89,11 +78,6 @@ app.get(
 
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
-
-// use ponder middleware at `/ponder` with description injection
-app.use("/ponder", fixContentLengthMiddleware);
-app.use("/ponder", makeApiDocumentationMiddleware("/ponder"));
-app.use("/ponder", ponderGraphQL({ db, schema: schemaWithoutExtensions }));
 
 // use our custom graphql middleware at /subgraph with description injection
 app.use("/subgraph", fixContentLengthMiddleware);
@@ -144,7 +128,7 @@ app.use(
   }),
 );
 
-// Start/Terminate ENSNode API OpenTelemetry SDK
+// start ENSNode API OpenTelemetry SDK
 sdk.start();
 
 // gracefully shut down the SDK on process interrupt/exit

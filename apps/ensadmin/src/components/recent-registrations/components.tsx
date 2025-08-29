@@ -1,10 +1,17 @@
 "use client";
 
-import { Duration, FormattedDate, RelativeTime } from "@/components/datetime-utils";
-import { EnsNode, useIndexingStatusQuery } from "@/components/ensnode";
+import type { ENSNamespaceId } from "@ensnode/datasources";
+import {
+  type ENSIndexerOverallIndexingCompletedStatus,
+  type ENSIndexerOverallIndexingFollowingStatus,
+  type ENSIndexerPublicConfig,
+  OverallIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
+import { fromUnixTime } from "date-fns";
+import { useEffect, useState } from "react";
+
+import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { NameDisplay } from "@/components/identity/utils";
-import { globalIndexingStatusViewModel } from "@/components/indexing-status/view-models";
-import { Registration } from "@/components/recent-registrations/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -14,85 +21,60 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { selectedEnsNodeUrl } from "@/lib/env";
-import { ENSNamespaceId } from "@ensnode/datasources";
-import { Clock } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
+import type { Registration } from "./types";
 
 /**
- * Maximal number of latest registrations to be displayed in the panel
+ * Max number of latest registrations to display
  */
 const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
-/**
- * Displays a list of the most recently indexed registrations and the date of the most recently indexed block
- */
-export function RecentRegistrations() {
-  const searchParams = useSearchParams();
-  const ensNodeUrl = selectedEnsNodeUrl(searchParams);
-  const indexingStatusQuery = useIndexingStatusQuery(ensNodeUrl);
+interface RecentRegistrationsProps {
+  ensIndexerConfig: ENSIndexerPublicConfig;
 
+  indexingStatus:
+    | ENSIndexerOverallIndexingCompletedStatus
+    | ENSIndexerOverallIndexingFollowingStatus;
+}
+
+/**
+ * Displays a panel containing the list of the most recently indexed
+ * registrations and the date of the most recently indexed block.
+ *
+ * Note: The Recent Registrations Panel is only visible when the
+ * overall indexing status is either "completed", or "following".
+ */
+export function RecentRegistrations({
+  ensIndexerConfig,
+  indexingStatus,
+}: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
+
   // Get the current indexing date from the indexing status
-  const currentIndexingDate = indexingStatusQuery.data
-    ? globalIndexingStatusViewModel(
-        indexingStatusQuery.data.runtime.chainIndexingStatuses,
-        indexingStatusQuery.data.env.NAMESPACE,
-      ).currentIndexingDate
-    : null;
-
-  if (indexingStatusQuery.isLoading) {
-    return <RegistrationsListLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
-  }
-
-  if (indexingStatusQuery.isError) {
-    return (
-      <Card className="w-full">
-        <CardHeader className="text-2xl font-bold">An error occurred</CardHeader>
-        <CardContent>
-          Could not fetch indexing status from selected ENSNode due to an error:{" "}
-          {indexingStatusQuery.error.message}
-        </CardContent>
-      </Card>
-    );
-  }
+  const currentIndexingDate =
+    indexingStatus.overallStatus === OverallIndexingStatusIds.Following
+      ? fromUnixTime(indexingStatus.omnichainIndexingCursor)
+      : null;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span>Latest indexed registrations</span>
-          {currentIndexingDate && (
-            <div className="flex items-center gap-1.5">
-              <Clock size={16} className="text-blue-600" />
-              <span className="text-sm font-medium">
-                Last indexed block on{" "}
-                <FormattedDate
-                  date={currentIndexingDate}
-                  options={{
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }}
-                />
-              </span>
-            </div>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isClient && indexingStatusQuery.data && (
+        {isClient && (
           <RegistrationsList
-            ensNodeMetadata={indexingStatusQuery.data}
             ensNodeUrl={ensNodeUrl}
+            namespaceId={namespaceId}
             maxRecords={MAX_NUMBER_OF_LATEST_REGISTRATIONS}
           />
         )}
@@ -103,7 +85,7 @@ export function RecentRegistrations() {
 
 interface RegistrationsListProps {
   ensNodeUrl: URL;
-  ensNodeMetadata: EnsNode.Metadata;
+  namespaceId: ENSNamespaceId;
   maxRecords: number;
 }
 
@@ -113,10 +95,12 @@ interface RegistrationsListProps {
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({ ensNodeMetadata, ensNodeUrl, maxRecords }: RegistrationsListProps) {
-  const namespaceId = ensNodeMetadata.env.NAMESPACE;
-
-  const recentRegistrationsQuery = useRecentRegistrations(ensNodeUrl, maxRecords, namespaceId);
+function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: RegistrationsListProps) {
+  const recentRegistrationsQuery = useRecentRegistrations({
+    ensNodeUrl,
+    namespaceId,
+    maxRecords,
+  });
 
   if (recentRegistrationsQuery.isLoading) {
     return <RegistrationsListLoading rowCount={maxRecords} />;

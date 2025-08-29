@@ -1,6 +1,6 @@
 import { BreadcrumbItem, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
-export default function BreadcrumbsSubgraphCompatPage() {
+export default function Page() {
   return (
     <>
       <BreadcrumbItem>

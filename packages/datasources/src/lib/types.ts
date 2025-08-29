@@ -1,4 +1,4 @@
-import type { Abi, Address, Chain } from "viem";
+import { type Abi, type Address, type Chain, isAddressEqual } from "viem";
 
 /**
  * ENSNamespaceIds encodes the set of identifiers for well-known ENS namespaces.
@@ -55,6 +55,7 @@ export const DatasourceNames = {
   ENSRoot: "ensroot",
   Basenames: "basenames",
   Lineanames: "lineanames",
+  Seaport: "seaport",
   ThreeDNSOptimism: "threedns-optimism",
   ThreeDNSBase: "threedns-base",
   ReverseResolverRoot: "reverse-resolver-root",

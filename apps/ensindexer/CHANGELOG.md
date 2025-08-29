@@ -1,5 +1,102 @@
 # ensindexer
 
+## 0.34.0
+
+### Minor Changes
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Integrates `latestSyncedBlock` field in `ChainIndexingBackfillStatus` data model.
+
+- [#964](https://github.com/namehash/ensnode/pull/964) [`bc05198`](https://github.com/namehash/ensnode/commit/bc051988f47d45a2d1bf4bc0fe13d14eae678d41) Thanks [@shrugs](https://github.com/shrugs)! - Protocol Acceleration is now disabled if ENSIndexer is too far behind realtime (60s)
+
+- [#612](https://github.com/namehash/ensnode/pull/612) [`20322cd`](https://github.com/namehash/ensnode/commit/20322cdd0cccd2b14eb8789acd1f0bd42da5bc3b) Thanks [@djstrong](https://github.com/djstrong)! - Updated ENSIndexer for compatibility with ENSRainbow v2 data format. ENSIndexer can now leverage versioned label sets with label set IDs, enabling deterministic indexing results over time as the set of healable labels evolves.
+
+- [#970](https://github.com/namehash/ensnode/pull/970) [`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Initial launch of ENS TokenScope with support for indexing Seaport sales.
+
+- [#919](https://github.com/namehash/ensnode/pull/919) [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa) Thanks [@tk-o](https://github.com/tk-o)! - Uses custom response codes for building Indexing Status API response.
+
+### Patch Changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add LABEL_SET_ID and LABEL_SET_VERSION environment variables to ENSIndexer
+
+  - Add label set configuration to ENSIndexerConfig, SerializedENSIndexerConfig, and ENSIndexerPublicConfig
+  - Update indexing behavior dependencies to prevent starting with different label set configurations
+  - Add configuration schema validation and serialization support
+  - Enforce Ponder build id changes if configured label set changes
+
+- [#962](https://github.com/namehash/ensnode/pull/962) [`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663) Thanks [@djstrong](https://github.com/djstrong)! - Add label set configuration to Terraform infrastructure
+
+  - Add label_set_id and label_set_version variables to ENSIndexer Terraform module
+  - Update main Terraform configuration to support label set configuration
+  - Enhance deterministic label healing capabilities through infrastructure configuration
+
+- Updated dependencies [[`845a037`](https://github.com/namehash/ensnode/commit/845a03761dc830303a56cd70fe0d57c36d78a663), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa), [`6f20c5d`](https://github.com/namehash/ensnode/commit/6f20c5dd1bdc8517679155efff6e6c461b15defa), [`373e934`](https://github.com/namehash/ensnode/commit/373e9343f7ac14010ae9a995cb812c42210c92e2)]:
+  - @ensnode/ensnode-sdk@0.34.0
+  - @ensnode/ensnode-schema@0.34.0
+  - @ensnode/datasources@0.34.0
+  - @ensnode/ensrainbow-sdk@0.34.0
+  - @ensnode/ponder-metadata@0.34.0
+  - @ensnode/ponder-subgraph@0.34.0
+
+## 0.33.0
+
+### Minor Changes
+
+- [#931](https://github.com/namehash/ensnode/pull/931) [`d4f401c`](https://github.com/namehash/ensnode/commit/d4f401c131b57047e293a757e915249d8a8de81e) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer now requires an RPC*URL*\* for the ENS Root Chain (i.e. mainnet, sepolia, holesky, or anvil) in order to power the Resolution API
+
+- [#931](https://github.com/namehash/ensnode/pull/931) [`d4f401c`](https://github.com/namehash/ensnode/commit/d4f401c131b57047e293a757e915249d8a8de81e) Thanks [@shrugs](https://github.com/shrugs)! - Enables Resolution API by default, with acceleration defaulting to false
+
+### Patch Changes
+
+- Updated dependencies [[`748a16e`](https://github.com/namehash/ensnode/commit/748a16e3a74798b21ccf1881dcf36d411ee6a27c)]:
+  - @ensnode/datasources@0.33.0
+  - @ensnode/ensnode-sdk@0.33.0
+  - @ensnode/ensrainbow-sdk@0.33.0
+  - @ensnode/ponder-metadata@0.33.0
+  - @ensnode/ensnode-schema@0.33.0
+  - @ensnode/ponder-subgraph@0.33.0
+
+## 0.32.0
+
+### Minor Changes
+
+- [#901](https://github.com/namehash/ensnode/pull/901) [`3b42583`](https://github.com/namehash/ensnode/commit/3b425832dd93e247d3c7544c86856972f1831061) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Terraform Render environment
+
+- [#870](https://github.com/namehash/ensnode/pull/870) [`29176f9`](https://github.com/namehash/ensnode/commit/29176f94e477a96a3dd9f98141cf8235bc135be2) Thanks [@notrab](https://github.com/notrab)! - remove ponder client sql endpoint
+
+- [#867](https://github.com/namehash/ensnode/pull/867) [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01) Thanks [@shrugs](https://github.com/shrugs)! - Index referrals from the new UnwrappedEthRegistrarController.
+
+- [#902](https://github.com/namehash/ensnode/pull/902) [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485) Thanks [@shrugs](https://github.com/shrugs)! - adds support for ReverseResolvers plugin (enable with 'reverse-resolvers') and implements ENSIP-19 Multichain Primary Names in resolution api
+
+- [#865](https://github.com/namehash/ensnode/pull/865) [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294) Thanks [@shrugs](https://github.com/shrugs)! - implements protocol tracing outputs for the resolution apis via ?trace query param
+
+- [#896](https://github.com/namehash/ensnode/pull/896) [`2b60fad`](https://github.com/namehash/ensnode/commit/2b60fad313e31735c77372c514d22523f9d2cbc3) Thanks [@tk-o](https://github.com/tk-o)! - Added a new required environment variable `ENSINDEXER_URL`.
+
+- [#747](https://github.com/namehash/ensnode/pull/747) [`27c0ea0`](https://github.com/namehash/ensnode/commit/27c0ea0c834fcce6c45a04510ba56e4e86a82738) Thanks [@shrugs](https://github.com/shrugs)! - add forward/reverse resolution apis gated behind an EXPERIMENTAL_RESOLUTION config flag
+
+- [#867](https://github.com/namehash/ensnode/pull/867) [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01) Thanks [@shrugs](https://github.com/shrugs)! - integrate new UnwrappedEthRegistrarController indexing behavior
+
+- [#895](https://github.com/namehash/ensnode/pull/895) [`afb994c`](https://github.com/namehash/ensnode/commit/afb994cac1f2bf3aa18ec9ecc1b33e5a58b6525a) Thanks [@tk-o](https://github.com/tk-o)! - Introduce `GET /api/config` endpoint returning serialized ENSIndexerPublicConfig object.
+
+- [#913](https://github.com/namehash/ensnode/pull/913) [`d447251`](https://github.com/namehash/ensnode/commit/d4472512a82e64a26c5c9ec1fc0010efc866bcda) Thanks [@shrugs](https://github.com/shrugs)! - fix bug where formerly-preminted name renewals would crash ENSIndexer
+
+- [#896](https://github.com/namehash/ensnode/pull/896) [`2b60fad`](https://github.com/namehash/ensnode/commit/2b60fad313e31735c77372c514d22523f9d2cbc3) Thanks [@tk-o](https://github.com/tk-o)! - Introduce `GET /api/indexing-status` endpoint.
+
+### Patch Changes
+
+- [#878](https://github.com/namehash/ensnode/pull/878) [`99bf615`](https://github.com/namehash/ensnode/commit/99bf6155772a298476ff380a99660191ac8728a4) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Deployed hosted instances of the latest Graph Node server running the latest ENS Subgraph across mainnet / sepolia / holesky.
+
+- [#890](https://github.com/namehash/ensnode/pull/890) [`95c9140`](https://github.com/namehash/ensnode/commit/95c91404bd699705602d5ec19e76242b05057a44) Thanks [@djstrong](https://github.com/djstrong)! - Enhance RPC configuration guidance.
+
+- [#912](https://github.com/namehash/ensnode/pull/912) [`886f8ca`](https://github.com/namehash/ensnode/commit/886f8ca27dfab5302fae4e04a89d1b3fce21cf04) Thanks [@djstrong](https://github.com/djstrong)! - remove deprecated `/ponder` endpoint and update documentation
+
+- Updated dependencies [[`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`2b60fad`](https://github.com/namehash/ensnode/commit/2b60fad313e31735c77372c514d22523f9d2cbc3), [`7c27fb8`](https://github.com/namehash/ensnode/commit/7c27fb80d93bc053534cef1223e81efdf88e636a), [`32ad3d8`](https://github.com/namehash/ensnode/commit/32ad3d8d129c5ce872615819de2fcc0be433a294), [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`38711f8`](https://github.com/namehash/ensnode/commit/38711f88b327284ce51a9b4a21c39af2192f2e01), [`a769e90`](https://github.com/namehash/ensnode/commit/a769e9028a0dd55b88e62fe90669c5dc54e51485), [`3c6378b`](https://github.com/namehash/ensnode/commit/3c6378bd8f1504ed4da724f537dc6869371a40e0), [`cad61ef`](https://github.com/namehash/ensnode/commit/cad61efc9984aa1b8b0738e90e29b28a879886a8), [`ad7fc8b`](https://github.com/namehash/ensnode/commit/ad7fc8bb4d12fe0ef1bb133eef9670d4eb84911b), [`f3eff8a`](https://github.com/namehash/ensnode/commit/f3eff8aef94cf6162ae4bab39059abd1e852352b)]:
+  - @ensnode/ensnode-schema@0.32.0
+  - @ensnode/ensnode-sdk@0.32.0
+  - @ensnode/ponder-subgraph@0.32.0
+  - @ensnode/datasources@0.32.0
+  - @ensnode/ensrainbow-sdk@0.32.0
+  - @ensnode/ponder-metadata@0.32.0
+
 ## 0.31.0
 
 ### Patch Changes

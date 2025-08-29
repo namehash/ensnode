@@ -1,11 +1,12 @@
 {
   "name": "@ensnode/shared-configs",
   "private": true,
-  "version": "0.31.0",
+  "version": "0.34.0",
   "type": "module",
   "description": "Shared configs for the ENSNode project.",
   "license": "MIT",
   "scripts": {
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "files": [

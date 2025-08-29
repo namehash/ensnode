@@ -1,4 +1,4 @@
-import { Datasource, type ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+import { type Datasource, type ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
 import { type Chain } from "viem";
 import { anvil } from "viem/chains";
 

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-subgraph",
-  "version": "0.31.0",
+  "version": "0.34.0",
   "type": "module",
   "description": "A Hono middleware for generating Subgraph-compatible GraphQL schema.",
   "license": "MIT",
@@ -35,13 +35,13 @@
   "scripts": {
     "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "dependencies": {
-    "@escape.tech/graphql-armor-max-aliases": "^2.6.0",
-    "@escape.tech/graphql-armor-max-depth": "^2.4.0",
-    "@escape.tech/graphql-armor-max-tokens": "^2.5.0",
+    "@escape.tech/graphql-armor-max-aliases": "^2.6.2",
+    "@escape.tech/graphql-armor-max-depth": "^2.4.2",
+    "@escape.tech/graphql-armor-max-tokens": "^2.5.1",
     "dataloader": "^2.2.3",
     "drizzle-orm": "catalog:",
     "graphql": "^16.10.0",

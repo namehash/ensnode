@@ -59,14 +59,26 @@ export function RelativeTime({
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
-}: { date: Date; enforcePast?: boolean; includeSeconds?: boolean; conciseFormatting?: boolean }) {
+  prefix,
+}: {
+  date: Date;
+  enforcePast?: boolean;
+  includeSeconds?: boolean;
+  conciseFormatting?: boolean;
+  prefix?: string;
+}) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
     setRelativeTime(formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting));
   }, [date]);
 
-  return <>{relativeTime}</>;
+  return (
+    <>
+      {prefix}
+      {relativeTime}
+    </>
+  );
 }
 
 /**

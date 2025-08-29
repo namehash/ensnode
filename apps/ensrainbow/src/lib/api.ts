@@ -1,12 +1,20 @@
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
-import { StatusCode } from "@ensnode/ensrainbow-sdk";
+import {
+  type EnsRainbowClientLabelSet,
+  type LabelSetId,
+  type LabelSetVersion,
+  buildEnsRainbowClientLabelSet,
+  buildLabelSetId,
+  buildLabelSetVersion,
+} from "@ensnode/ensnode-sdk";
+import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 import { Hono } from "hono";
 import type { Context as HonoContext } from "hono";
 import { cors } from "hono/cors";
 
 import packageJson from "@/../package.json";
-import { ENSRainbowDB, SCHEMA_VERSION } from "@/lib/database";
+import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
+import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
 /**
@@ -27,10 +35,53 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     }),
   );
 
-  api.get("/v1/heal/:labelHash", async (c: HonoContext) => {
-    const labelHash = c.req.param("labelHash") as `0x${string}`;
-    logger.debug(`Healing request for labelHash: ${labelHash}`);
-    const result = await server.heal(labelHash);
+  api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
+    const labelhash = c.req.param("labelhash") as `0x${string}`;
+
+    const labelSetVersionParam = c.req.query("label_set_version");
+    const labelSetIdParam = c.req.query("label_set_id");
+
+    let labelSetVersion: LabelSetVersion | undefined;
+    try {
+      if (labelSetVersionParam) {
+        labelSetVersion = buildLabelSetVersion(labelSetVersionParam);
+      }
+    } catch (error) {
+      logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
+      return c.json(
+        {
+          status: StatusCode.Error,
+          error: "Invalid label_set_version parameter: must be a non-negative integer",
+          errorCode: ErrorCode.BadRequest,
+        },
+        400,
+      );
+    }
+
+    let clientLabelSet: EnsRainbowClientLabelSet;
+    try {
+      const labelSetId: LabelSetId | undefined = labelSetIdParam
+        ? buildLabelSetId(labelSetIdParam)
+        : undefined;
+      clientLabelSet = buildEnsRainbowClientLabelSet(labelSetId, labelSetVersion);
+    } catch (error) {
+      logger.warn(error);
+      return c.json(
+        {
+          status: StatusCode.Error,
+          error: getErrorMessage(error),
+          errorCode: ErrorCode.BadRequest,
+        },
+        400,
+      );
+    }
+
+    logger.debug(
+      `Healing request for labelhash: ${labelhash}, with labelSet: ${JSON.stringify(
+        clientLabelSet,
+      )}`,
+    );
+    const result = await server.heal(labelhash, clientLabelSet);
     logger.debug(`Heal result:`, result);
     return c.json(result, result.errorCode);
   });
@@ -54,7 +105,8 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       status: StatusCode.Success,
       versionInfo: {
         version: packageJson.version,
-        schema_version: SCHEMA_VERSION,
+        dbSchemaVersion: DB_SCHEMA_VERSION,
+        labelSet: server.getServerLabelSet(),
       },
     };
     logger.debug(`Version result:`, result);

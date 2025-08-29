@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "0.31.0",
+  "version": "0.34.0",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
@@ -31,6 +31,7 @@
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
     "@hono/otel": "^0.2.2",
+    "@hono/zod-validator": "^0.7.2",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/core": "^2.0.1",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.202.0",
@@ -42,6 +43,8 @@
     "@opentelemetry/sdk-trace-node": "^2.0.1",
     "@opentelemetry/semantic-conventions": "^1.34.0",
     "@types/dns-packet": "^5.6.5",
+    "caip": "^1.1.1",
+    "date-fns": "catalog:",
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",
     "hono": "catalog:",
@@ -49,7 +52,7 @@
     "ponder": "catalog:",
     "ponder-enrich-gql-docs-middleware": "^0.1.3",
     "viem": "catalog:",
-    "zod": "3.25.7"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@biomejs/biome": "catalog:",

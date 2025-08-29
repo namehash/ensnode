@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/datasources",
-  "version": "0.31.0",
+  "version": "0.34.0",
   "type": "module",
   "description": "Catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.",
   "license": "MIT",
@@ -32,6 +32,7 @@
   },
   "scripts": {
     "prepublish": "tsup",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-schema",
-  "version": "0.31.0",
+  "version": "0.34.0",
   "type": "module",
   "description": "The ponder schema for ENSNode",
   "license": "MIT",
@@ -33,7 +33,7 @@
   },
   "scripts": {
     "prepublish": "tsup",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "dependencies": {

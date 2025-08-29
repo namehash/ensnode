@@ -1,4 +1,4 @@
-name: "Deploy: ENSNode to Railway Environment"
+name: "Deploy: ENSNode to Railway and Render Environments"
 
 on:
   workflow_dispatch:
@@ -37,14 +37,33 @@ jobs:
       # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
       # AWS_REGION should be the same as Terraform S3 bucket state region.
       AWS_REGION: us-east-1
-      TF_VAR_railway_token: ${{ secrets.RAILWAY_TOKEN }}
-      TF_VAR_mainnet_rpc_url: ${{ secrets.MAINNET_RPC_URL }}
-      TF_VAR_sepolia_rpc_url: ${{ secrets.SEPOLIA_RPC_URL }}
-      TF_VAR_holesky_rpc_url: ${{ secrets.HOLESKY_RPC_URL }}
-      TF_VAR_base_rpc_url: ${{ secrets.BASE_RPC_URL }}
-      TF_VAR_linea_rpc_url: ${{ secrets.LINEA_RPC_URL }}
-      TF_VAR_optimism_rpc_url: ${{ secrets.OPTIMISM_RPC_URL }}
       TF_VAR_ensnode_version: ${{ inputs.tag }}
+      TF_VAR_ensindexer_label_set_id:  ${{ vars.LABEL_SET_ID }}
+      TF_VAR_ensindexer_label_set_version: ${{ vars.LABEL_SET_VERSION }}
+      TF_VAR_ensrainbow_label_set_id: ${{ vars.LABEL_SET_ID }}
+      TF_VAR_ensrainbow_label_set_version: ${{ vars.LABEL_SET_VERSION }}
+      TF_VAR_db_schema_version: ${{ vars.DB_SCHEMA_VERSION }}
+      # For now only one Terraform environment is active. In future this will be calculated based on workflow input.
+      TF_VAR_render_environment: "yellow"
+      TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
+      TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID }}
+      # RPC URLs
+      # Mainnet
+      TF_VAR_ethereum_mainnet_rpc_url:   ${{ secrets.ETH_MAINNET_RPC_URL }}
+      TF_VAR_base_mainnet_rpc_url:      ${{ secrets.BASE_MAINNET_RPC_URL }}
+      TF_VAR_linea_mainnet_rpc_url:     ${{ secrets.LINEA_MAINNET_RPC_URL }}
+      TF_VAR_optimism_mainnet_rpc_url:  ${{ secrets.OPTIMISM_MAINNET_RPC_URL }}
+      TF_VAR_arbitrum_mainnet_rpc_url:  ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+      TF_VAR_scroll_mainnet_rpc_url:    ${{ secrets.SCROLL_MAINNET_RPC_URL }}
+      # Sepolia
+      TF_VAR_ethereum_sepolia_rpc_url:   ${{ secrets.ETH_SEPOLIA_RPC_URL }}
+      TF_VAR_base_sepolia_rpc_url:      ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+      TF_VAR_linea_sepolia_rpc_url:     ${{ secrets.LINEA_SEPOLIA_RPC_URL }}
+      TF_VAR_optimism_sepolia_rpc_url:  ${{ secrets.OPTIMISM_SEPOLIA_RPC_URL }}
+      TF_VAR_arbitrum_sepolia_rpc_url:  ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+      TF_VAR_scroll_sepolia_rpc_url:    ${{ secrets.SCROLL_SEPOLIA_RPC_URL }}
+      # Holesky
+      TF_VAR_ethereum_holesky_rpc_url:   ${{ secrets.ETH_HOLESKY_RPC_URL }}
 
     steps:
       - name: Checkout repository
@@ -213,12 +232,6 @@ jobs:
           #ENSRAINBOW
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
 
-      # Terraform deploy - apply Terraform template everytime new deployment is introduced to either green or blue environment
-      - name: Set full permissions to execute scripts (read / write / execute)
-        working-directory: terraform
-        run: |
-          chmod 777 ./healthcheck.sh
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -232,6 +245,10 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: terraform
+
+      - name: Terraform workspace
+        run: terraform workspace select ${{env.TF_VAR_render_environment}}
         working-directory: terraform
 
       - name: Terraform Validate

@@ -5,8 +5,6 @@ export default defineConfig({
     client: "src/client.ts",
     consts: "src/consts.ts",
     index: "src/index.ts",
-    labelUtils: "src/label-utils.ts",
-    "label-utils": "src/label-utils.ts",
   },
   platform: "browser",
   format: ["esm"],

@@ -1,12 +1,11 @@
-import { DatasourceName } from "@ensnode/datasources";
+import { DatasourceName, getENSRootChainId } from "@ensnode/datasources";
 import { Address, isAddress } from "viem";
 import { z } from "zod/v4";
 
-import type { ENSIndexerConfig } from "@/config/types";
-import { uniq } from "@/lib/lib-helpers";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
 type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
@@ -43,6 +42,23 @@ export function invariant_requiredDatasources(
   }
 }
 
+// Invariant: rpcConfig is specified for the ENS Root Chain of the configured namespace
+export function invariant_rpcConfigsSpecifiedForRootChain(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "rpcConfigs">>,
+) {
+  const { value: config } = ctx;
+
+  const ensRootChainId = getENSRootChainId(config.namespace);
+
+  if (!config.rpcConfigs.has(ensRootChainId)) {
+    ctx.issues.push({
+      code: "custom",
+      input: config,
+      message: `An RPC_URL_${ensRootChainId} (for the ENS Root Chain) is required, but none was specified.`,
+    });
+  }
+}
+
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins" | "rpcConfigs">>,
@@ -57,7 +73,7 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
     for (const datasourceName of datasourceNames) {
       const { chain } = datasources[datasourceName];
 
-      if (!config.rpcConfigs[chain.id]) {
+      if (!config.rpcConfigs.has(chain.id)) {
         ctx.issues.push({
           code: "custom",
           input: config,
@@ -147,23 +163,6 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
       code: "custom",
       input: config,
       message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
-    });
-  }
-}
-
-// Invariant: experimentalResolution requires ReverseResolvers plugin
-export function invariant_experimentalResolutionNeedsReverseResolversPlugin(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "experimentalResolution">>,
-) {
-  const { value: config } = ctx;
-
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
-
-  if (config.experimentalResolution && !reverseResolversPluginActive) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `EXPERIMENTAL_RESOLUTION requires the reverse-resolvers plugin to be active.`,
     });
   }
 }

@@ -1,21 +1,10 @@
+"use client";
+
 import { CopyButton } from "@/components/ui/copy-button";
-import { defaultEnsNodeUrl } from "@/lib/env";
+import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
 
-type ActionProps = {
-  searchParams: Promise<{
-    [key: string]: string | string[] | undefined;
-  }>;
-};
-
-export default async function ActionsSubgraphCompatPage({ searchParams }: ActionProps) {
-  const { ensnode = defaultEnsNodeUrl() } = await searchParams;
-
-  const baseUrl = Array.isArray(ensnode)
-    ? ensnode[0]
-    : typeof ensnode === "string"
-      ? ensnode
-      : defaultEnsNodeUrl();
-
+export default function ActionsSubgraphCompatPage() {
+  const baseUrl = useActiveENSNodeUrl();
   const url = new URL(`/subgraph`, baseUrl).toString();
 
   return (

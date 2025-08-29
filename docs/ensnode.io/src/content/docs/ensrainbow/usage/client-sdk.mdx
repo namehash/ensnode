@@ -1,5 +1,6 @@
 ---
 title: ENSRainbow Typescript Client SDK
+description: Official TypeScript SDK for easy integration with type safety and caching.
 sidebar:
   label: Client SDK
   order: 3
@@ -17,5 +18,28 @@ The SDK provides a simple, type-safe interface for all API endpoints and handles
   description="View the ENSRainbow SDK source code on GitHub"
   href="https://github.com/namehash/ensnode/tree/main/packages/ensrainbow-sdk"
 />
+
+The easiest way to use the SDK:
+
+```bash title="Install SDK"
+pnpm add @ensnode/ensrainbow-sdk
+```
+
+```ts title="heal.ts"
+import { EnsRainbowApiClient } from '@ensnode/ensrainbow-sdk';
+
+const client = new EnsRainbowApiClient({
+  baseUrl: 'https://api.ensrainbow.io',
+  labelSet: { labelSetId: 'subgraph', labelSetVersion: 0 }
+});
+
+const res = await client.healLabel('0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc');
+
+if (res.status === 'success') {
+  console.log(res.label);
+} else {
+  console.error(res.error);
+}
+```
 
 <Readme />
