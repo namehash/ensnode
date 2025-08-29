@@ -1,6 +1,6 @@
 import { index, onchainTable } from "ponder";
 
-export const nameSales = onchainTable(
+export const ext_nameSales = onchainTable(
   "ext_name_sales",
   (t) => ({
     /**
@@ -43,9 +43,9 @@ export const nameSales = onchainTable(
     /**
      * The tokenId managed by contractAddress that was sold.
      *
-     * Interpretation depends on 'assetNamespace':
-     * - erc721: Unique token within contract
-     * - erc1155: Token type identifier (multiple copies may exist)
+     * In a general context (outside of TokenScope) ERC1155 NFTs may have
+     * multiple copies, however TokenScope guarantees that all indexed NFTs
+     * never have an amount / balance > 1.
      */
     tokenId: t.bigint().notNull(),
 
@@ -65,7 +65,7 @@ export const nameSales = onchainTable(
     assetId: t.text().notNull(),
 
     /**
-     * The namehash of the ENS domain that was sold.
+     * The namehash (Node) of the ENS domain that was sold.
      */
     domainId: t.hex().notNull(),
 
@@ -109,5 +109,97 @@ export const nameSales = onchainTable(
     idx_buyer: index().on(t.buyer),
     idx_seller: index().on(t.seller),
     idx_timestamp: index().on(t.timestamp),
+  }),
+);
+
+export const ext_nameTokens = onchainTable(
+  "ext_name_tokens",
+  (t) => ({
+    /**
+     * The CAIP-19 Asset ID of the token.
+     *
+     * This is a globally unique reference to the token.
+     *
+     * @see https://chainagnostic.org/CAIPs/caip-19
+     */
+    id: t.text().primaryKey(),
+
+    /**
+     * The namehash (Node) of the ENS name associated with the token.
+     *
+     * Note: An ENS name may have more than one distinct token across time. It is
+     * also possible for multiple distinct tokens for an ENS name to have
+     * a mintStatus of `minted` at the same time. For example:
+     * - When a direct subname of .eth is wrapped by the NameWrapper. This state
+     *   has one minted token for the name managed by the BaseRegistrar (this
+     *   token will be owned by the NameWrapper) and another minted token for
+     *   the name managed by the NameWrapper (owned by the effective owner of
+     *   the name).
+     * - When a direct subname of .eth is wrapped by the NameWrapper and then
+     *   unwrapped. This state has one minted token (managed by the BaseRegistrar)
+     *   and another burned token (managed by the NameWrapper).
+     */
+    domainId: t.hex().notNull(),
+
+    /**
+     * The chain that manages the token.
+     */
+    chainId: t.integer().notNull(),
+
+    /**
+     * The address of the contract on chainId that manages the token.
+     */
+    contractAddress: t.hex().notNull(),
+
+    /**
+     * The tokenId of the token managed by contractAddress.
+     *
+     * In a general context (outside of TokenScope) ERC1155 NFTs may have
+     * multiple copies, however TokenScope guarantees that all indexed NFTs
+     * never have an amount / balance > 1.
+     */
+    tokenId: t.bigint().notNull(),
+
+    /**
+     * The CAIP-19 Asset Namespace of the token. Either `erc721` or `erc1155`.
+     *
+     * @see https://chainagnostic.org/CAIPs/caip-19
+     */
+    assetNamespace: t.text().notNull(),
+
+    /**
+     * The account that owns the token.
+     *
+     * Value is zeroAddress if and only if mintStatus is `burned`.
+     *
+     * Note: The owner of the token for a given domainId may differ from the
+     * owner of the associated node in the registry. For example:
+     * - Consider the case where address X owns the ENS name `foo.eth` in
+     *   both the BaseRegistrar and the Registry. If X sends a request directly
+     *   to the Registry to transfer ownership to Y, ownership of `foo.eth` will
+     *   be transferred to Y in the Registry but not in the BaseRegistrar.
+     * - ... for the case above, the BaseRegistrar implements a `reclaim`
+     *   allowing the owner of the name in the BaseRegistrar to reclaim ownership
+     *   of the name in the Registry.
+     *
+     * Note: When a name is wrapped by the NameWrapper, the owner of the token
+     * in the BaseRegistrar is the NameWrapper, while a new token for the name is
+     * minted by the NameWrapper and owned by the effective owner of the name.
+     */
+    owner: t.hex().notNull(),
+
+    /**
+     * The mint status of the token. Either `minted` or `burned`.
+     *
+     * After we index a NFT we never delete it from our index. Instead, when an
+     * indexed NFT is burned onchain we retain its record and update its mint
+     * status as `burned`. If a NFT is minted again after it is burned its mint
+     * status is updated to `minted`.
+     */
+    mintStatus: t.text().notNull(),
+  }),
+  (t) => ({
+    idx_domainId: index().on(t.domainId),
+    idx_owner: index().on(t.owner),
   }),
 );

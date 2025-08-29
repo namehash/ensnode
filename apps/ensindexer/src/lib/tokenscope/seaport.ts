@@ -1,15 +1,16 @@
 import { CurrencyIds, getCurrencyIdForContract } from "@/lib/currencies";
 import { AssetNamespace, AssetNamespaces } from "@/lib/tokenscope/assets";
-import { SupportedNFT, SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
+import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
+import { SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
 import {
   ConsiderationItem,
   ItemType,
   OfferItem,
   OrderFulfilledEvent,
 } from "@/lib/tokenscope/seaport-types";
-import { getKnownTokenIssuer } from "@/lib/tokenscope/token-issuers";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { ChainId, uniq } from "@ensnode/ensnode-sdk";
+import { SupportedNFT } from "./assets";
 
 /**
  * Gets the supported TokenScope Asset Namespace for a given Seaport ItemType.
@@ -44,23 +45,27 @@ const getSupportedNFT = (
   chainId: ChainId,
   item: OfferItem | ConsiderationItem,
 ): SupportedNFT | null => {
-  // validate as exactly 1 item
+  // validate amount as exactly 1 item.
+  // All SupportedNFTs (including ERC1155) must never have a balance or amount > 1.
   if (item.amount !== 1n) return null;
 
   // validate item as an ERC721/ERC1155 NFT
   const assetNamespace = getAssetNamespace(item.itemType);
   if (!assetNamespace) return null;
 
-  // validate that the token is a known token issuing contract
-  const tokenIssuer = getKnownTokenIssuer(namespaceId, {
+  // validate that the token is from a SupportedNFTIssuer contract
+  const nftIssuer = getSupportedNFTIssuer(namespaceId, {
     chainId,
     address: item.token,
   });
-  if (!tokenIssuer) return null;
+  if (!nftIssuer) return null;
 
-  const contract = tokenIssuer.contract;
+  // validate that the token is from the correct asset namespace
+  if (nftIssuer.assetNamespace !== assetNamespace) return null;
+
+  const contract = nftIssuer.contract;
   const tokenId = item.identifier;
-  const domainId = tokenIssuer.getDomainId(tokenId);
+  const domainId = nftIssuer.getDomainId(tokenId);
 
   return {
     assetNamespace,

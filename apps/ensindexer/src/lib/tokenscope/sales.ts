@@ -1,15 +1,7 @@
-import { AccountId, Node } from "@ensnode/ensnode-sdk";
 import { Address, Hex } from "viem";
 
 import { Price } from "@/lib/currencies";
-import { AssetNamespace, TokenId } from "@/lib/tokenscope/assets";
-
-export interface SupportedNFT {
-  assetNamespace: AssetNamespace;
-  contract: AccountId;
-  tokenId: TokenId;
-  domainId: Node;
-}
+import { SupportedNFT } from "@/lib/tokenscope/assets";
 
 export interface SupportedPayment {
   price: Price;

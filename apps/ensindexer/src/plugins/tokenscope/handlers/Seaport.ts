@@ -1,12 +1,12 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
-import { AssetId } from "caip";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
 import { makeEventId } from "@/lib/ids";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
 import { getSupportedSaleFromOrderFulfilledEvent } from "@/lib/tokenscope/seaport";
 
 /**
@@ -35,7 +35,7 @@ export default function () {
     await upsertAccount(context, sale.buyer);
 
     // insert NameSale entity
-    await context.db.insert(schema.nameSales).values({
+    await context.db.insert(schema.ext_nameSales).values({
       id: makeEventId(context.chain.id, event.block.number, event.log.logIndex),
       chainId: sale.nft.contract.chainId,
       blockNumber: event.block.number,
@@ -45,11 +45,7 @@ export default function () {
       contractAddress: sale.nft.contract.address,
       tokenId: sale.nft.tokenId,
       assetNamespace: sale.nft.assetNamespace,
-      assetId: AssetId.format({
-        chainId: { namespace: "eip155", reference: sale.nft.contract.chainId.toString() },
-        assetName: { namespace: sale.nft.assetNamespace, reference: sale.nft.contract.address },
-        tokenId: uint256ToHex32(sale.nft.tokenId),
-      }),
+      assetId: buildSupportedNFTAssetId(sale.nft),
       domainId: sale.nft.domainId,
       buyer: sale.buyer,
       seller: sale.seller,

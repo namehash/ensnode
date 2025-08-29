@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
-import { getKnownTokenIssuer } from "../src/lib/tokenscope/token-issuers";
+import { getSupportedNFTIssuer } from "../src/lib/tokenscope/nft-issuers";
 
 const {
   contracts: { NameWrapper },
 } = getDatasource(ENSNamespaceIds.Mainnet, DatasourceNames.ENSRoot);
 
-describe("token-issuers", () => {
+describe("supported-nft-issuers", () => {
   it("works for expected mainnet contract", () => {
-    const issuer = getKnownTokenIssuer(ENSNamespaceIds.Mainnet, {
+    const issuer = getSupportedNFTIssuer(ENSNamespaceIds.Mainnet, {
       chainId: 1,
       address: NameWrapper.address,
     });
