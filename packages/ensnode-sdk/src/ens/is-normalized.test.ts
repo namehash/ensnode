@@ -3,8 +3,10 @@ import { isNormalizedLabel } from "./is-normalized";
 
 const NORMALIZED_LABELS = ["eth", "test"];
 
+// https://www.soscisurvey.de/tools/view-chars.php
 const UNNORMALIZED_LABELS = [
   "еthchina", // \u0435thchina
+  "еthgold", // same situation
 ];
 
 describe("is-normalized", () => {
