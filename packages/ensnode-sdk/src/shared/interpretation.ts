@@ -33,7 +33,8 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
  * @see https://ensnode.io/docs/reference/terminology#interpreted-name
  *
  * @param name - The Literal Name string to interpret
- * @returns An Interpreted Name
+ * @returns The provided name if it is normalized, else converts each label in name that is not a
+ * normalized label into an Interpreted Label
  */
 export function interpretLiteralName(name: Name): Name {
   // if the name is already normalized (includes empty string), good to go
