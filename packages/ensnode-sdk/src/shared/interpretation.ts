@@ -10,22 +10,17 @@ import {
 } from "../ens";
 
 /**
- * Interprets a Literal Label into an Interpreted Label or null if the Literal Label is null, empty
- * string, or not normalized.
+ * Interprets a Literal Label into an Interpreted Label.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  *
  * @param label - The Literal Label string to validate
- * @returns An Interpreted Label or null if the Literal Label is null, empty string, or not normalized.
+ * @returns An Interpreted Label
  */
-export function interpretLiteralLabel(label: string | null): Label | EncodedLabelHash | null {
-  // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
-  // pattern at this method's callsites, minimizing hard-to-read ternary statements.
-  if (label === null) return null;
-
+export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
   // if the label normalized, we're all good
-  if (isNormalizedLabel(label)) return label as Label;
+  if (isNormalizedLabel(label)) return label;
 
   // otherwise, represent as encoded LabelHash
   return encodeLabelHash(labelhash(label));
@@ -41,21 +36,12 @@ export function interpretLiteralLabel(label: string | null): Label | EncodedLabe
  * @param name - The ENS name string to validate
  * @returns An Interpreted Name that is either normalized or consists entirely of Interpreted Labels
  */
-export function interpretLiteralName(name: string | null): Name | null {
-  // obviously null is invalid — it's helpful to embed this logic here to streamline the coalescing
-  // pattern at this method's callsites, minimizing hard-to-read ternary statements.
-  if (name === null) return null;
-
+export function interpretLiteralName(name: Name): Name {
   // if the name is already normalized (includes empty string), good to go
-  if (isNormalizedName(name)) return name as Name;
+  if (isNormalizedName(name)) return name;
 
-  const labels = name.split(".").map(interpretLiteralLabel);
-
-  // if any of the labels resulted in null (were not valid, for whatever reason, this name is not valid)
-  if (labels.some((label) => label === null)) return null;
-
-  // otherwise the name is composed of Interpreted Labels and is an Interpreted Name
-  return labels.join(".") as Name;
+  // otherwise ensure the name is composed of Interpreted Labels
+  return name.split(".").map(interpretLiteralLabel).join(".");
 }
 
 /**
@@ -69,7 +55,9 @@ export function interpretLiteralName(name: string | null): Name | null {
 export function interpretNameRecordValue(value: string): Name | null {
   // empty string is technically a normalized name, representing the ens root node, but in the
   // context of a name record value, we want to coerce empty string to null, to represent the
-  // non-existence of a record value.
+  // non-existence of a record value. this is because the abi of this event is only capable of
+  // expressing string values, so empty string canonically represents the non-existence of the
+  // record value.
   if (value === "") return null;
 
   // if not normalized, is not valid `name` record value

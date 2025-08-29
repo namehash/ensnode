@@ -129,8 +129,8 @@ export const makeNameWrapperHandlers = ({
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-name
       if (config.replaceUnnormalized) {
-        label = interpretLiteralLabel(label);
-        name = interpretLiteralName(name);
+        label = label ? interpretLiteralLabel(label) : label;
+        name = name ? interpretLiteralName(name) : name;
       }
 
       const domain = await context.db.find(schema.domain, { id: node });

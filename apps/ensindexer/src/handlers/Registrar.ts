@@ -49,7 +49,7 @@ export const makeRegistrarHandlers = ({
       // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
       // see https://ensnode.io/docs/reference/terminology#literal-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      label = interpretLiteralLabel(label) ?? encodeLabelHash(labelHash);
+      label = label ? interpretLiteralLabel(label) : encodeLabelHash(labelHash);
     }
 
     // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
@@ -154,7 +154,7 @@ export const makeRegistrarHandlers = ({
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
+        label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
         name = `${label}.${registrarManagedName}`;
       } else {
         // only update the name if the label is healed & indexable

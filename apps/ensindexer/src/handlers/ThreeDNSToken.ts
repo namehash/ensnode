@@ -137,7 +137,7 @@ export async function handleNewOwner({
 
     // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
     // that was emitted otherwise
-    const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
+    const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
@@ -203,29 +203,29 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const [_label, _name] = decodeDNSPacketBytes(hexToBytes(fqdn));
-
-  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
-  // see https://ensnode.io/docs/reference/terminology#interpreted-label
-  // see https://ensnode.io/docs/reference/terminology#interpreted-name
-  const label = interpretLiteralLabel(_label);
-  const name = interpretLiteralName(_name);
+  const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
 
   // ThreeDNS always emits a valid DNS Packet and an Interpreted Name/Label but/and we explicitly
   // enforce this invariant here.
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  if (!label || !name) {
+  if (!literalLabel || !literalName) {
     console.table({ ...event.args, tx: event.transaction.hash });
     throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
   }
 
+  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
+  // see https://ensnode.io/docs/reference/terminology#interpreted-label
+  // see https://ensnode.io/docs/reference/terminology#interpreted-name
+  const interpretedLabel = interpretLiteralLabel(literalLabel);
+  const interpretedName = interpretLiteralName(literalName);
+
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
-  if (name.split(".").length > 2) {
+  if (interpretedName.split(".").length >= 3) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${interpretedName}`);
   }
 
-  const labelHash = labelhash(label);
+  const labelHash = labelhash(literalLabel);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
   // expiry and re-registration (example: delv.box)
@@ -241,8 +241,8 @@ export async function handleRegistrationCreated({
     expiryDate: expiry,
 
     // include its decoded label/name
-    labelName: label,
-    name,
+    labelName: interpretedLabel,
+    name: interpretedName,
   });
 
   // upsert a Registration entity
@@ -253,7 +253,7 @@ export async function handleRegistrationCreated({
     registrationDate: event.block.timestamp,
     expiryDate: expiry,
     registrantId: registrant,
-    labelName: label,
+    labelName: interpretedLabel,
   });
 
   // log RegistrationEvent
