@@ -239,9 +239,13 @@ export const getNFTTransferType = (
   const isMinted = isIndexed && !isAddressEqual(currentlyIndexedOwner, zeroAddress);
 
   if (isIndexed && !isAddressEqual(currentlyIndexedOwner, from)) {
-    throw new Error(
-      `Error: Sending from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.\n${formatNFTTransferEventMetadata(metadata)}`,
-    );
+    if (allowMintedRemint && isAddressEqual(from, zeroAddress)) {
+      // special case to allow minted remint from improperly implemented NFT contracts
+    } else {
+      throw new Error(
+        `Error: Sending from ${from} conflicts with currently indexed owner ${currentlyIndexedOwner}.\n${formatNFTTransferEventMetadata(metadata)}`,
+      );
+    }
   }
 
   if (isAddressEqual(from, to)) {
