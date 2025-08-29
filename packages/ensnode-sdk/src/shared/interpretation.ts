@@ -32,7 +32,7 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
  * @see https://ensnode.io/docs/reference/terminology#literal-name
  * @see https://ensnode.io/docs/reference/terminology#interpreted-name
  *
- * @param name - The Literal Name string to validate
+ * @param name - The Literal Name string to interpret
  * @returns An Interpreted Name
  */
 export function interpretLiteralName(name: Name): Name {
