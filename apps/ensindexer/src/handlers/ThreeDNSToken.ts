@@ -135,8 +135,9 @@ export async function handleNewOwner({
       healedLabel = await labelByLabelHash(labelHash);
     }
 
-    // NOTE(replace-unnormalized): ensure we have a valid label, falling back to the known labelHash
-    // that was emitted otherwise
+    // Interpret the `healedLabel` Literal Label into an Interpreted Label
+    // see https://ensnode.io/docs/reference/terminology#literal-label
+    // see https://ensnode.io/docs/reference/terminology#interpreted-label
     const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label
