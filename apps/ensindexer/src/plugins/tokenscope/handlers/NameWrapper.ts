@@ -38,6 +38,7 @@ export default function () {
         context,
         event.args.from,
         event.args.to,
+        false,
         nft,
         event.args.value,
         metadata,
@@ -75,7 +76,15 @@ export default function () {
         };
 
         // NOTE: we don't make any use of event.args.operator in this handler
-        await handleERC1155Transfer(context, event.args.from, event.args.to, nft, value, metadata);
+        await handleERC1155Transfer(
+          context,
+          event.args.from,
+          event.args.to,
+          false,
+          nft,
+          value,
+          metadata,
+        );
       }
     },
   );

@@ -45,11 +45,17 @@ export default function () {
         nft,
       };
 
+      // 3DNS appears to have improperly implemented NFT contracts that allow
+      // a NFT that is currently minted to be reminted again before an
+      // intermediate burn.
+      const allowMintedRemint = true;
+
       // NOTE: we don't make any use of event.args.operator in this handler
       await handleERC1155Transfer(
         context,
         event.args.from,
         event.args.to,
+        allowMintedRemint,
         nft,
         event.args.value,
         metadata,
@@ -86,8 +92,21 @@ export default function () {
           nft,
         };
 
+        // 3DNS appears to have improperly implemented NFT contracts that allow
+        // a NFT that is currently minted to be reminted again before an
+        // intermediate burn.
+        const allowMintedRemint = true;
+
         // NOTE: we don't make any use of event.args.operator in this handler
-        await handleERC1155Transfer(context, event.args.from, event.args.to, nft, value, metadata);
+        await handleERC1155Transfer(
+          context,
+          event.args.from,
+          event.args.to,
+          allowMintedRemint,
+          nft,
+          value,
+          metadata,
+        );
       }
     },
   );

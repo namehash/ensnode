@@ -143,6 +143,22 @@ export const NFTTransferTypes = {
   Remint: "remint",
 
   /**
+   * Special transfer type for improperly implemented NFT contracts that allow a NFT
+   * that is currently minted to be reminted before an intermediate burn.
+   *
+   * Transfer from zeroAddress to non-zeroAddress for an indexed NFT where the
+   * previously indexed nft had status `minted` with a non-zeroAddress owner.
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous NFT mint status was `minted`
+   * - previous NFT owner was a non-zeroAddress
+   * - new NFT mint status is `minted`
+   * - new NFT owner is a non-zeroAddress
+   */
+  MintedRemint: "minted-remint",
+
+  /**
    * Transfer from a non-zeroAddress to zeroAddress
    *
    * Invariants:
@@ -185,6 +201,22 @@ export const NFTTransferTypes = {
   RemintBurn: "remint-burn",
 
   /**
+   * Special transfer type for improperly implemented NFT contracts that allow a NFT
+   * that is currently minted to be reminted again before an intermediate burn.
+   *
+   * Transfer from zeroAddress to zeroAddress for an indexed NFT where the
+   * previously indexed nft had status `minted` with a non-zeroAddress owner.
+   *
+   * Invariants:
+   * - NFT is indexed
+   * - previous NFT mint status was `minted`
+   * - previous NFT owner was a non-zeroAddress
+   * - new NFT mint status is `burned`
+   * - new NFT owner is the zeroAddress
+   */
+  MintedRemintBurn: "minted-remint-burn",
+
+  /**
    * Transfer from zeroAddress to zeroAddress for an unindexed NFT
    *
    * Invariants:
@@ -199,6 +231,7 @@ export type NFTTransferType = (typeof NFTTransferTypes)[keyof typeof NFTTransfer
 export const getNFTTransferType = (
   from: Address,
   to: Address,
+  allowMintedRemint: boolean,
   metadata: NFTTransferEventMetadata,
   currentlyIndexedOwner?: Address,
 ): NFTTransferType => {
@@ -220,8 +253,18 @@ export const getNFTTransferType = (
       } else if (!isMinted) {
         // remint-burn with isIndexed && !isMinted
         return NFTTransferTypes.RemintBurn;
+      } else if (allowMintedRemint) {
+        // minted-remint-burn with isIndexed && isMinted && allowDoubleMint
+        //
+        // this is a non-standard special case for improperly implemented NFT contracts
+        // that allow a NFT that is currently minted to be reminted again before an
+        // intermediate burn.
+        //
+        // this is a transfer from zeroAddress to zeroAddress for an indexed NFT
+        // where the previously indexed nft had status `minted` with a non-zeroAddress owner.
+        return NFTTransferTypes.MintedRemintBurn;
       } else {
-        // remint-burn with isIndexed && isMinted
+        // remint-burn with isIndexed && isMinted && !allowDoubleMint
         // invalid state transition to be minted and then remint again
         throw new Error(
           `Error: Invalid state transition from minted -> remint-burn\n${formatNFTTransferEventMetadata(metadata)}`,
@@ -256,8 +299,18 @@ export const getNFTTransferType = (
     } else if (!isMinted) {
       // mint with isIndexed && !isMinted
       return NFTTransferTypes.Remint;
+    } else if (allowMintedRemint) {
+      // mint with isIndexed && isMinted && allowDoubleMint
+      //
+      // this is a non-standard special case for improperly implemented NFT contracts
+      // that allow a NFT that is currently minted to be reminted again before an
+      // intermediate burn.
+      //
+      // this is a transfer from zeroAddress to non-zeroAddress for an indexed NFT
+      // where the previously indexed nft had status `minted` with a non-zeroAddress owner.
+      return NFTTransferTypes.MintedRemint;
     } else {
-      // mint with isIndexed && isMinted
+      // mint with isIndexed && isMinted && !allowDoubleMint
       throw new Error(
         `Error: Invalid state transition from minted -> mint\n${formatNFTTransferEventMetadata(metadata)}`,
       );

@@ -33,7 +33,7 @@ export default function () {
         nft,
       };
 
-      await handleNFTTransfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleNFTTransfer(context, event.args.from, event.args.to, false, nft, metadata);
     },
   );
 
@@ -55,7 +55,7 @@ export default function () {
         nft,
       };
 
-      await handleNFTTransfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleNFTTransfer(context, event.args.from, event.args.to, false, nft, metadata);
     },
   );
 
@@ -77,7 +77,7 @@ export default function () {
         nft,
       };
 
-      await handleNFTTransfer(context, event.args.from, event.args.to, nft, metadata);
+      await handleNFTTransfer(context, event.args.from, event.args.to, false, nft, metadata);
     },
   );
 }

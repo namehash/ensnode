@@ -17,6 +17,7 @@ export const handleERC1155Transfer = async (
   context: Context,
   from: Address,
   to: Address,
+  allowMintedRemint: boolean,
   nft: SupportedNFT,
   amount: bigint,
   metadata: NFTTransferEventMetadata,
@@ -29,21 +30,22 @@ export const handleERC1155Transfer = async (
   }
 
   // handle it as a normal nft transfer
-  await handleNFTTransfer(context, from, to, nft, metadata);
+  await handleNFTTransfer(context, from, to, allowMintedRemint, nft, metadata);
 };
 
 export const handleNFTTransfer = async (
   context: Context,
   from: Address,
   to: Address,
+  allowMintedRemint: boolean,
   nft: SupportedNFT,
   metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
   const assetId = buildSupportedNFTAssetId(nft);
 
-  // get the currently indexed record for the assetId (if it exists)
+  // get the previously indexed record for the assetId (if it exists)
   const previous = await context.db.find(schema.ext_nameTokens, { id: assetId });
-  const transferType = getNFTTransferType(from, to, metadata, previous?.owner);
+  const transferType = getNFTTransferType(from, to, allowMintedRemint, metadata, previous?.owner);
 
   switch (transferType) {
     case NFTTransferTypes.Mint:
@@ -62,9 +64,28 @@ export const handleNFTTransfer = async (
       });
       break;
 
+    case NFTTransferTypes.MintBurn:
+      // mint status transition from unindexed -> burned
+      // insert the record of the nft that has been minted for the first time
+      // ... but minted to the zeroAddress and therefore we should initialize
+      // it's state as burned
+      // TODO: should we remove this upsertAccount call with the zeroAddress?
+      await upsertAccount(context, zeroAddress);
+      await context.db.insert(schema.ext_nameTokens).values({
+        id: assetId,
+        chainId: nft.contract.chainId,
+        contractAddress: nft.contract.address,
+        tokenId: nft.tokenId,
+        assetNamespace: nft.assetNamespace,
+        domainId: nft.domainId,
+        owner: zeroAddress,
+        mintStatus: NFTMintStatuses.Burned,
+      });
+      break;
+
     case NFTTransferTypes.Remint:
       // mint status transition from burned -> minted
-      // update the mint status and owner of the nft
+      // update the mint status and owner of the previously indexed nft
       await upsertAccount(context, to);
       await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
         owner: to,
@@ -73,8 +94,10 @@ export const handleNFTTransfer = async (
       break;
 
     case NFTTransferTypes.Burn:
+      // the indexed state transition for a minted-remint-burn is the same as a burn
+    case NFTTransferTypes.MintedRemintBurn:
       // mint status transition from minted -> burned
-      // update the mint status and owner of the nft
+      // update the mint status and owner of the previously indexed nft
       // TODO: should we remove this upsertAccount call with the zeroAddress?
       await upsertAccount(context, zeroAddress);
       await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
@@ -84,8 +107,10 @@ export const handleNFTTransfer = async (
       break;
 
     case NFTTransferTypes.Transfer:
+      // the indexed state transition for a minted-remint is the same as a transfer
+    case NFTTransferTypes.MintedRemint:
       // mint status remains minted (no change)
-      // update owner of the nft
+      // update owner of the previously indexed nft
       await upsertAccount(context, to);
       await context.db.update(schema.ext_nameTokens, { id: assetId }).set({
         owner: to,
@@ -94,8 +119,7 @@ export const handleNFTTransfer = async (
 
     case NFTTransferTypes.SelfTransfer:
     case NFTTransferTypes.RemintBurn:
-    case NFTTransferTypes.MintBurn:
-      // no indexed state changes needed for SelfTransfer, RemintBurn, or MintBurn
+      // no indexed state changes needed for previously indexed NFTs upon SelfTransfer or RemintBurn
       break;
   }
 };
