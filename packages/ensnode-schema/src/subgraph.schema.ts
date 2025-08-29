@@ -36,7 +36,7 @@ export const domain = onchainTable("domains", (t) => ({
    * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
    * a) null, exclusively in the case of the root Node,
    * b) a normalized Label, or
-   * c) an Encoded LabelHash.
+   * c) an Encoded LabelHash of the Literal Label value found onchain.
    *
    * @see https://ensnode.io/docs/reference/terminology#interpreted-label
    *
@@ -227,7 +227,7 @@ export const registration = onchainTable(
      *
      * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
      * a) a normalized Label, or
-     * b) an Encoded LabelHash.
+     * b) an Encoded LabelHash of the Literal Label value found onchain.
      *
      * Note that the type of the column will remain string | null, for legacy subgraph compatibility.
      * In practice however, when REPLACE_UNNORMALIZED is true, because there is no Registration entity

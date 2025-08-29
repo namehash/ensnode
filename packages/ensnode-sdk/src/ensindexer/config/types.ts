@@ -134,7 +134,7 @@ export interface ENSIndexerPublicConfig {
    * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
    *    LabelHash, and
    * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
-   *    may be represented as an Encoded LabelHash.
+   *    may be represented as an Encoded LabelHash of the Literal Label value found onchain.
    *
    * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
    * interpretation.

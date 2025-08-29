@@ -140,15 +140,27 @@ export interface ENSIndexerConfig {
   indexAdditionalResolverRecords: boolean;
 
   /**
-   * Prevents unnormalized ENS name values from being indexed or returned in API requests,
-   * defaulting to true (DEFAULT_REPLACE_UNNORMALIZED).
+   * Controls ENSIndexer's handling of Literal Labels and Literal Names
+   * This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.
    *
-   * If this is set to false, ENSIndexer may store and return names with unnormalized labels.
-   * If this is set to true, ENSIndexer will encoded unnormalized labels as encoded labelhashes,
-   * avoiding edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters.
+   * Optional. If this is not set, the default value is set to `DEFAULT_REPLACE_UNNORMALIZED` (true).
    *
-   * Note that this does not prevent unnormalized names entirely — unnormalized names can still exist
-   * if labels are encoded labelhashes.
+   * When set to true, all Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
+   * - https://ensnode.io/docs/reference/terminology#interpreted-label
+   * - https://ensnode.io/docs/reference/terminology#interpreted-name
+   *
+   * That is,
+   * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
+   *    LabelHash, and
+   * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
+   *    may be represented as an Encoded LabelHash of the Literal Label value found onchain.
+   *
+   * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
+   * interpretation.
+   * - https://ensnode.io/docs/reference/terminology#literal-label
+   * - https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * NOTE: {@link replaceUnnormalized} must be `false` for subgraph compatible indexing behavior.
    */
   replaceUnnormalized: boolean;
 
