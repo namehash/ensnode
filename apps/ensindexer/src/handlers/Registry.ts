@@ -204,7 +204,10 @@ export const handleNewOwner =
         // NOTE: for a TLD, the parent is null, so we just use the Label value as is
         const name = parent?.name ? `${label}.${parent.name}` : label;
 
-        await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
+        await context.db.update(schema.domain, { id: node }).set({
+          name,
+          labelName: label,
+        });
       } else {
         const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 

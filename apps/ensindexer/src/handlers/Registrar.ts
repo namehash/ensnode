@@ -5,6 +5,7 @@ import { type Address, namehash } from "viem";
 import {
   type Label,
   type LabelHash,
+  Name,
   PluginName,
   encodeLabelHash,
   interpretLiteralLabel,
@@ -147,25 +148,30 @@ export const makeRegistrarHandlers = ({
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByLabelHash(labelHash);
 
-      // Interpret the `healedLabel` Literal Label into an Interpreted Label
-      // see https://ensnode.io/docs/reference/terminology#literal-label
-      // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      const label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
+      let name: Name | undefined = undefined;
+      let label: Label | undefined = undefined;
+      if (config.replaceUnnormalized) {
+        // Interpret the `healedLabel` Literal Label into an Interpreted Label
+        // see https://ensnode.io/docs/reference/terminology#literal-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        label = interpretLiteralLabel(healedLabel) ?? encodeLabelHash(labelHash);
+        name = `${label}.${registrarManagedName}`;
+      } else {
+        // only update the name if the label is healed & indexable
+        // undefined value means no change to the name
+        label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
-      // only update the name if the label is healed & indexable
-      // undefined value means no change to the name
-      const name = `${label}.${registrarManagedName}`;
-
-      // NOTE(subgraph-compat): if config.replaceUnnormalized is false, only update the name and label
-      // if the label is healed & indexable
-      const updateNameAndLabelValues = config.replaceUnnormalized || isLabelIndexable(healedLabel);
+        // only update the name if the label is healed & indexable
+        // undefined value means no change to the name
+        name = label ? `${label}.${registrarManagedName}` : undefined;
+      }
 
       // update Domain
       await context.db.update(schema.domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: updateNameAndLabelValues ? label : undefined,
-        name: updateNameAndLabelValues ? name : undefined,
+        labelName: label,
+        name,
       });
 
       // upsert registration
@@ -178,7 +184,7 @@ export const makeRegistrarHandlers = ({
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        labelName: updateNameAndLabelValues ? label : undefined,
+        labelName: label,
       });
 
       // log RegistrationEvent
