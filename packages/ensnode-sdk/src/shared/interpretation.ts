@@ -22,7 +22,7 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
   // if the label is normalized, good to go
   if (isNormalizedLabel(label)) return label;
 
-  // otherwise, represent as Encoded LabelHash
+  // otherwise, interpret as EncodedLabelHash
   return encodeLabelHash(labelhash(label));
 }
 
