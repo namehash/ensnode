@@ -205,8 +205,7 @@ export async function handleRegistrationCreated({
 
   const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
 
-  // ThreeDNS always emits a valid DNS Packet and an Interpreted Name/Label but/and we explicitly
-  // enforce this invariant here.
+  // ThreeDNS always emits a DNS Packet but/and we explicitly enforce this invariant here
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
   if (!literalLabel || !literalName) {
     console.table({ ...event.args, tx: event.transaction.hash });

@@ -5,12 +5,12 @@ import type { Label, Name } from "./types";
 /**
  * Determines whether the input Name is normalized.
  *
- * @param input - The Name to check for normalization
+ * @param name - The Name to check for normalization
  * @returns True if the input is a normalized Name according to ENS normalization rules, false otherwise
  */
-export function isNormalizedName(input: Name): boolean {
+export function isNormalizedName(name: Name): boolean {
   try {
-    return input === normalize(input);
+    return name === normalize(name);
   } catch {
     return false;
   }
@@ -19,18 +19,18 @@ export function isNormalizedName(input: Name): boolean {
 /**
  * Determines whether the input Label is normalized.
  *
- * @param input - The Label to check for normalization
+ * @param label - The Label to check for normalization
  * @returns True if the input is a normalized Label according to ENS normalization rules, false otherwise
  */
-export function isNormalizedLabel(input: Label): boolean {
+export function isNormalizedLabel(label: Label): boolean {
   // empty string is not a normalized label
-  if (input === "") return false;
+  if (label === "") return false;
 
   // normalized labels do not contain periods
-  if (input.includes(".")) return false;
+  if (label.includes(".")) return false;
 
   try {
-    return input === normalize(input);
+    return label === normalize(label);
   } catch {
     return false;
   }
