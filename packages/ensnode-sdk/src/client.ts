@@ -87,6 +87,9 @@ export class ENSNodeClient {
   /**
    * Resolves records for an ENS name (Forward Resolution).
    *
+   * The returned `name` field, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+   * If the name record returned by the resolver is not normalized, `null` is returned as if no name record was set.
+   *
    * @param name The ENS Name whose records to resolve
    * @param selection selection of Resolver records
    * @param options additional options
@@ -156,6 +159,7 @@ export class ENSNodeClient {
    * determine the `address`'s Default Name directly.
    *
    * The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+   * If the primary name set for the address is not normalized, `null` is returned as if no primary name was set.
    *
    * @param address The Address whose Primary Name to resolve
    * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
@@ -210,6 +214,7 @@ export class ENSNodeClient {
    * should rely on the aforementioned per-chain defaulting behavior.
    *
    * Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+   * If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
    *
    * @param address The Address whose Primary Names to resolve
    * @param options additional options

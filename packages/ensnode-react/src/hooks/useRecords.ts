@@ -10,6 +10,9 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
 /**
  * Resolves records for an ENS name (Forward Resolution).
  *
+ * The returned `name` field, if set, is guaranteed to be a normalized name.
+ * If the name record returned by the resolver is not normalized, `null` is returned as if no name record was set.
+ *
  * @param parameters - Configuration for the ENS name resolution
  * @returns Query result with resolved records
  *

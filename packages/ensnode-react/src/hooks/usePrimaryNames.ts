@@ -8,6 +8,9 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
 /**
  * Resolves the primary names of a specified address across multiple chains.
  *
+ * Each returned Primary Name, if set, is guaranteed to be a normalized name.
+ * If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
+ *
  * @param parameters - Configuration for the address resolution
  * @returns Query result with resolved primary names
  *

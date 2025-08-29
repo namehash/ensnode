@@ -48,6 +48,8 @@ const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF
 
 Resolves records for an ENS name (Forward Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
 
+The returned `name` field, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the name record returned by the resolver is not normalized, `null` is returned as if no name record was set.
+
 - `name`: The ENS Name whose records to resolve
 - `selection`: Optional selection of Resolver records:
   - `addresses`: Array of coin types to resolve addresses for
@@ -85,7 +87,7 @@ console.log(records);
 
 Resolves the primary name of the provided `address` on the specified `chainId`, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to determine the `address`'s Default Name directly.
 
-The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the primary name set for the address is not normalized, `null` is returned as if no primary name was set.
 
 - `address`: The Address whose Primary Name to resolve
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
@@ -114,7 +116,7 @@ const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e
 
 Resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and should rely on the aforementioned per-chain defaulting behavior.
 
-Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
 
 - `address`: The Address whose Primary Names to resolve
 - `options`: (optional) additional options

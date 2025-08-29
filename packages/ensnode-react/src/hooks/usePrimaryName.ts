@@ -8,6 +8,9 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
 /**
  * Resolves the primary name of a specified address (Reverse Resolution).
  *
+ * The returned Primary Name, if set, is guaranteed to be a normalized name.
+ * If the primary name set for the address is not normalized, `null` is returned as if no primary name was set.
+ *
  * @param parameters - Configuration for the address resolution
  * @returns Query result with resolved primary name
  *
