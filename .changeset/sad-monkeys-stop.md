@@ -1,0 +1,5 @@
+---
+"ensindexer": minor
+---
+
+asdf
