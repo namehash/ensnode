@@ -1,10 +1,5 @@
 import { ResolverABI } from "@ensnode/datasources";
-import {
-  type Name,
-  type Node,
-  type ResolverRecordsSelection,
-  interpretNameRecordValue,
-} from "@ensnode/ensnode-sdk";
+import { type Name, type Node, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
   type Address,
@@ -23,6 +18,7 @@ import {
 import { packetToBytes } from "viem/ens";
 
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
+import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 

@@ -3,11 +3,8 @@ import schema from "ponder:schema";
 import config from "@/config";
 import { makePrimaryNameId } from "@/lib/ids";
 import { getENSRootChainId } from "@ensnode/datasources";
-import {
-  DEFAULT_EVM_COIN_TYPE,
-  evmChainIdToCoinType,
-  interpretNameRecordValue,
-} from "@ensnode/ensnode-sdk";
+import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
+import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts. These contracts manage
