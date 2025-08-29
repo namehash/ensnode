@@ -26,6 +26,10 @@ const footerProducts = [
     href: "https://namehashlabs.org/ens-v2-referral-programs",
   },
   {
+    name: "ENSAwards",
+    href: "https://ensawards.org/",
+  },
+  {
     name: "NameGraph",
     href: "https://namegraph.dev",
   },

@@ -68,7 +68,7 @@ resource "render_web_service" "ensindexer" {
         value = "https://${local.full_ensindexer_hostname}"
       },
       ENSINDEXER_URL = {
-        value = "http://localhost:1000"
+        value = "http://localhost:10000"
       }
     }
   )
@@ -99,7 +99,7 @@ resource "render_web_service" "ensindexer_api" {
         value = "https://${local.full_ensindexer_api_hostname}"
       },
       ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.instance_name}:1000"
+        value = "http://ensindexer-${var.instance_name}:10000"
       },
       PONDER_COMMAND = {
         value = "serve"
