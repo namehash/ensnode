@@ -94,7 +94,7 @@ export const handleNFTTransfer = async (
       break;
 
     case NFTTransferTypes.Burn:
-      // the indexed state transition for a minted-remint-burn is the same as a burn
+    // the indexed state transition for a minted-remint-burn is the same as a burn
     case NFTTransferTypes.MintedRemintBurn:
       // mint status transition from minted -> burned
       // update the mint status and owner of the previously indexed nft
@@ -107,7 +107,7 @@ export const handleNFTTransfer = async (
       break;
 
     case NFTTransferTypes.Transfer:
-      // the indexed state transition for a minted-remint is the same as a transfer
+    // the indexed state transition for a minted-remint is the same as a transfer
     case NFTTransferTypes.MintedRemint:
       // mint status remains minted (no change)
       // update owner of the previously indexed nft
