@@ -19,7 +19,7 @@ import {
  * @returns The provided label if it is normalized, else the EncodedLabelHash of the label
  */
 export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
-  // if the label normalized, good to go
+  // if the label is normalized, good to go
   if (isNormalizedLabel(label)) return label;
 
   // otherwise, represent as Encoded LabelHash
