@@ -8,7 +8,7 @@ import {
   Name,
   type Node,
   interpretLiteralLabel,
-  requireInterpretedName,
+  interpretLiteralName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
@@ -140,7 +140,7 @@ export const makeNameWrapperHandlers = ({
         }
 
         label = interpretLiteralLabel(literalLabel);
-        name = requireInterpretedName(literalName);
+        name = interpretLiteralName(literalName);
       } else {
         label = literalLabel;
         name = literalName;

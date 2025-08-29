@@ -7,8 +7,8 @@ import {
   type Node,
   encodeLabelHash,
   interpretLiteralLabel,
+  interpretLiteralName,
   makeSubdomainNode,
-  requireInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -222,7 +222,7 @@ export async function handleRegistrationCreated({
   // see https://ensnode.io/docs/reference/terminology#interpreted-label
   // see https://ensnode.io/docs/reference/terminology#interpreted-name
   const interpretedLabel = interpretLiteralLabel(literalLabel);
-  const interpretedName = requireInterpretedName(literalName);
+  const interpretedName = interpretLiteralName(literalName);
 
   const labelHash = labelhash(literalLabel);
 

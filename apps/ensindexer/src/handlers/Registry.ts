@@ -209,18 +209,20 @@ export const handleNewOwner =
           labelName: label,
         });
       } else {
-        const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
-
         // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
         // NOTE: for TLDs, the parent is null, so we just use the label value as is
-        const label = validLabel || encodeLabelHash(labelHash);
-        const name = parent?.name ? `${label}.${parent.name}` : label;
+        const labelForUseInName = isLabelIndexable(healedLabel)
+          ? healedLabel
+          : encodeLabelHash(labelHash);
+        const name = parent?.name ? `${labelForUseInName}.${parent.name}` : labelForUseInName;
 
-        // NOTE(replace-unnormalized, subgraph-compat): only update Domain.labelName iff label is healed and indexable
-        // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
         await context.db.update(schema.domain, { id: node }).set({
           name,
-          labelName: validLabel,
+          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and indexable
+          //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
+          // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
+          //   is updated to, if it is indexable, _not_ the `label` value used to construct the name
+          labelName: isLabelIndexable(healedLabel) ? healedLabel : undefined,
         });
       }
     }

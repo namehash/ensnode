@@ -1,5 +1,7 @@
+import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
-import { interpretLiteralLabel } from "./interpretation";
+import { encodeLabelHash } from "../ens";
+import { interpretLiteralLabel, interpretLiteralName } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -47,6 +49,24 @@ describe("interpretation", () => {
     it("should encode non-normalized encodable labels as labelhashes", () => {
       UNNORMALIZED_LABELS.forEach((label) =>
         expect(interpretLiteralLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
+      );
+    });
+  });
+
+  describe("interpretLiteralName", () => {
+    it("should return normalized names unchanged", () => {
+      expect(interpretLiteralName("vitalik.eth")).toBe("vitalik.eth");
+    });
+
+    it("should encode non-normalized encodable labels as labelhashes", () => {
+      expect(interpretLiteralName("vitalik.UNNORMALIZED.eth")).toBe(
+        `vitalik.${encodeLabelHash(labelhash("UNNORMALIZED"))}.eth`,
+      );
+    });
+
+    it("should handle empty labels appropriately", () => {
+      expect(interpretLiteralName("this..name")).toBe(
+        `this.${encodeLabelHash(labelhash(""))}.name`,
       );
     });
   });

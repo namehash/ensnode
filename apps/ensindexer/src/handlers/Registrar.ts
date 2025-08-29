@@ -49,11 +49,11 @@ export const makeRegistrarHandlers = ({
       // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
       // see https://ensnode.io/docs/reference/terminology#literal-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      label = label ? interpretLiteralLabel(label) : encodeLabelHash(labelHash);
+      label = interpretLiteralLabel(label);
+    } else {
+      // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
+      if (!isLabelIndexable(label)) return;
     }
-
-    // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
-    if (!isLabelIndexable(label)) return;
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
