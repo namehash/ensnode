@@ -4,12 +4,12 @@ import { getAddress, isAddress, zeroAddress } from "viem";
 
 import { makeKeyedResolverRecordId } from "@/lib/ids";
 import { stripNullBytes } from "@/lib/lib-helpers";
-import { interpretNameRecord } from "@ensnode/ensnode-sdk";
+import { interpretNameRecordValue } from "@ensnode/ensnode-sdk";
 
 export async function handleResolverNameUpdate(context: Context, resolverId: string, name: string) {
   await context.db
     .update(schema.resolver, { id: resolverId })
-    .set({ name: interpretNameRecord(name) });
+    .set({ name: interpretNameRecordValue(name) });
 }
 
 export async function handleResolverAddressRecordUpdate(

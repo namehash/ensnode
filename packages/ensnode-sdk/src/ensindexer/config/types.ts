@@ -116,22 +116,32 @@ export interface ENSIndexerPublicConfig {
    * provide safe use of indexed resolver record values (in appropriate
    * contexts).
    *
-   * Note that enabling {@link indexAdditionalResolverRecords} results in
-   * indexed data becoming a _superset_ of the Subgraph. For exact data-level
-   * backwards compatibility with the ENS Subgraph,
+   * Note that enabling {@link indexAdditionalResolverRecords} results in indexed data becoming a
+   * _superset_ of the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
    * {@link indexAdditionalResolverRecords} should be `false`.
    */
   indexAdditionalResolverRecords: boolean;
 
   /**
-   * Prevention of unnormalized ENS name values from being returned in API requests.
+   * Controls ENSIndexer's handling of Literal Labels and Literal Names
+   * This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.
    *
-   * When set to `false`, ensures full subgraph backwards compatibility by allowing unnormalized names to be returned.
-   * When set to `true`, guarantees certain nasty edge cases are impossible, including labels containing null bytes,
-   * full-stop characters (periods), or exotic unicode characters.
+   * When set to true, all Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
+   * - https://ensnode.io/docs/reference/terminology#interpreted-label
+   * - https://ensnode.io/docs/reference/terminology#interpreted-name
    *
-   * Note that this does not prevent unnormalized names entirely - unnormalized names can still exist if labels are
-   * encoded labelhashes.
+   * That is,
+   * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
+   *    LabelHash, and
+   * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
+   *    may be represented as an Encoded LabelHash.
+   *
+   * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
+   * interpretation.
+   * - https://ensnode.io/docs/reference/terminology#literal-label
+   * - https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * NOTE: {@link replaceUnnormalized} must be `false` for subgraph compatible indexing behavior.
    */
   replaceUnnormalized: boolean;
 

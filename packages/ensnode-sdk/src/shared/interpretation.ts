@@ -66,7 +66,7 @@ export function interpretLiteralName(name: string | null): Name | null {
  * @param value - The name record value string to validate
  * @returns A valid normalized Name for use as a name record, or null if invalid (empty string or not normalized)
  */
-export function interpretNameRecord(value: string): Name | null {
+export function interpretNameRecordValue(value: string): Name | null {
   // empty string is technically a normalized name, representing the ens root node, but in the
   // context of a name record value, we want to coerce empty string to null, to represent the
   // non-existence of a record value.

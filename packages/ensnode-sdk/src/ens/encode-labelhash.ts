@@ -1,7 +1,7 @@
 import type { EncodedLabelHash, LabelHash } from "./types";
 
 /**
- * Represents a LabelHash as an Encoded LabelHash.
+ * Formats a LabelHash as an Encoded LabelHash.
  *
  * @see https://ensnode.io/docs/reference/terminology#encoded-labelhash
  *

@@ -3,7 +3,7 @@ import { interpretLiteralLabel, interpretLiteralName } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
-const VALID_LABELS = [
+const NORMALIZED_LABELS = [
   "vitalik",
   "example",
   "test",
@@ -16,9 +16,7 @@ const VALID_LABELS = [
   "a".repeat(512), // Long normalized
 ];
 
-const INVALID_LABELS = [null];
-
-const INVALID_ENCODABLE_LABELS = [
+const UNNORMALIZED_LABELS = [
   "", // Empty string
   "Vitalik", // Uppercase
   "Example", // Uppercase
@@ -43,15 +41,11 @@ const INVALID_ENCODABLE_LABELS = [
 describe("interpretation", () => {
   describe("interpretLiteralLabel", () => {
     it("should return normalized labels unchanged", () => {
-      VALID_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBe(label));
-    });
-
-    it("should return null for invalid labels", () => {
-      INVALID_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBeNull());
+      NORMALIZED_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBe(label));
     });
 
     it("should encode non-normalized encodable labels as labelhashes", () => {
-      INVALID_ENCODABLE_LABELS.forEach((label) =>
+      UNNORMALIZED_LABELS.forEach((label) =>
         expect(interpretLiteralLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
       );
     });

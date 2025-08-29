@@ -41,8 +41,8 @@ export const domain = onchainTable("domains", (t) => ({
    * @see https://ensnode.io/docs/reference/terminology#interpreted-label
    *
    * If REPLACE_UNNORMALIZED is false, this value my contain:
-   * a) null (in the case of the root node), or
-   * b) a Literal Lbael that may or may not be normalized and may or may not be an Encoded LabelHash.
+   * a) null, exclusively in the case of the root Node, or
+   * b) a Literal Label that may or may not be normalized and may or may not be an Encoded LabelHash.
    *
    * @see https://ensnode.io/docs/reference/terminology#literal-label
    */
@@ -169,9 +169,15 @@ export const resolver = onchainTable(
     /**
      * Represents the value of the reverse-resolution (ENSIP-3) name() record.
      *
-     * The value of this field is guaranteed to be either:
-     * a) null, representing an empty or invalid on-chain name record value, or
-     * b) a non-empty-string normalized ENS name.
+     * The emitted record values are interpreted according to `interpretNameRecordValue` — unnormalized
+     * names and empty string values are interpreted as a deletion of the associated record (represented
+     * here as `null`).
+     *
+     * If set, the value of this field is guaranteed to be a non-empty-string normalized ENS name
+     * (see `interpretNameRecordValue` for guarantees).
+     *
+     * Note that this is an extension to the original subgraph schema and legacy subgraph compatibility
+     * is not relevant.
      */
     name: t.text(),
   }),
