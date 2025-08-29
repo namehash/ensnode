@@ -236,7 +236,7 @@ export const getNFTTransferType = (
   currentlyIndexedOwner?: Address,
 ): NFTTransferType => {
   const isIndexed = currentlyIndexedOwner !== undefined;
-  const isMinted = isIndexed && !isAddressEqual(currentlyIndexedOwner, zeroAddress);
+  const isIndexedAsMinted = isIndexed && !isAddressEqual(currentlyIndexedOwner, zeroAddress);
 
   if (isIndexed && !isAddressEqual(currentlyIndexedOwner, from)) {
     if (allowMintedRemint && isAddressEqual(from, zeroAddress)) {
@@ -252,13 +252,13 @@ export const getNFTTransferType = (
     if (isAddressEqual(from, zeroAddress)) {
       // a transfer to and from the zeroAddress represents either mint-burn or remint-burn
       if (!isIndexed) {
-        // mint-burn with !isIndexed && !isMinted
+        // mint-burn with !isIndexed && !isIndexedAsMinted
         return NFTTransferTypes.MintBurn;
-      } else if (!isMinted) {
-        // remint-burn with isIndexed && !isMinted
+      } else if (!isIndexedAsMinted) {
+        // remint-burn with isIndexed && !isIndexedAsMinted
         return NFTTransferTypes.RemintBurn;
       } else if (allowMintedRemint) {
-        // minted-remint-burn with isIndexed && isMinted && allowDoubleMint
+        // minted-remint-burn with isIndexed && isIndexedAsMinted && allowMintedRemint
         //
         // this is a non-standard special case for improperly implemented NFT contracts
         // that allow a NFT that is currently minted to be reminted again before an
@@ -268,7 +268,7 @@ export const getNFTTransferType = (
         // where the previously indexed nft had status `minted` with a non-zeroAddress owner.
         return NFTTransferTypes.MintedRemintBurn;
       } else {
-        // remint-burn with isIndexed && isMinted && !allowDoubleMint
+        // remint-burn with isIndexed && isIndexedAsMinted && !allowMintedRemint
         // invalid state transition to be minted and then remint again
         throw new Error(
           `Error: Invalid state transition from minted -> remint-burn\n${formatNFTTransferEventMetadata(metadata)}`,
@@ -277,34 +277,34 @@ export const getNFTTransferType = (
     } else {
       // a transfer to and from a non-zero address represents a self-transfer
       if (!isIndexed) {
-        // self-transfer with !isIndexed && !isMinted
+        // self-transfer with !isIndexed && !isIndexedAsMinted
         // this branch is unreachable because:
         // - from !== zeroAddress; and
-        // - !isMinted requires that from === zeroAddress
+        // - !isIndexedAsMinted requires that from === zeroAddress
         // throw an error to validate above assertions
         throw new Error(
           `Error: Invalid state transition from unindexed -> self-transfer\n${formatNFTTransferEventMetadata(metadata)}`,
         );
-      } else if (!isMinted) {
-        // self-transfer with isIndexed && !isMinted
+      } else if (!isIndexedAsMinted) {
+        // self-transfer with isIndexed && !isIndexedAsMinted
         throw new Error(
           `Error: invalid state transition from burned -> self-transfer\n${formatNFTTransferEventMetadata(metadata)}`,
         );
       } else {
-        // self-transfer with isIndexed && isMinted
+        // self-transfer with isIndexed && isIndexedAsMinted
         return NFTTransferTypes.SelfTransfer;
       }
     }
   } else if (isAddressEqual(from, zeroAddress)) {
     // a transfer from the zeroAddress to a non-zeroAddress represents minting
     if (!isIndexed) {
-      // mint with !isIndexed && !isMinted
+      // mint with !isIndexed && !isIndexedAsMinted
       return NFTTransferTypes.Mint;
-    } else if (!isMinted) {
-      // mint with isIndexed && !isMinted
+    } else if (!isIndexedAsMinted) {
+      // mint with isIndexed && !isIndexedAsMinted
       return NFTTransferTypes.Remint;
     } else if (allowMintedRemint) {
-      // mint with isIndexed && isMinted && allowDoubleMint
+      // mint with isIndexed && isIndexedAsMinted && allowMintedRemint
       //
       // this is a non-standard special case for improperly implemented NFT contracts
       // that allow a NFT that is currently minted to be reminted again before an
@@ -314,7 +314,7 @@ export const getNFTTransferType = (
       // where the previously indexed nft had status `minted` with a non-zeroAddress owner.
       return NFTTransferTypes.MintedRemint;
     } else {
-      // mint with isIndexed && isMinted && !allowDoubleMint
+      // mint with isIndexed && isIndexedAsMinted && !allowMintedRemint
       throw new Error(
         `Error: Invalid state transition from minted -> mint\n${formatNFTTransferEventMetadata(metadata)}`,
       );
@@ -322,33 +322,33 @@ export const getNFTTransferType = (
   } else if (isAddressEqual(to, zeroAddress)) {
     // a transfer from a non-zeroAddress to the zeroAddress represents burning
     if (!isIndexed) {
-      // burn with !isIndexed && !isMinted
+      // burn with !isIndexed && !isIndexedAsMinted
       throw new Error(
         `Error: Invalid state transition from unindexed -> burn\n${formatNFTTransferEventMetadata(metadata)}`,
       );
-    } else if (!isMinted) {
-      // burn with isIndexed && !isMinted
+    } else if (!isIndexedAsMinted) {
+      // burn with isIndexed && !isIndexedAsMinted
       throw new Error(
         `Error: Invalid state transition from burned -> burn\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     } else {
-      // burn with isIndexed && isMinted
+      // burn with isIndexed && isIndexedAsMinted
       return NFTTransferTypes.Burn;
     }
   } else {
     // a transfer from a non-zeroAddress to a non-zeroAddress represents a transfer
     if (!isIndexed) {
-      // transfer with !isIndexed && !isMinted
+      // transfer with !isIndexed && !isIndexedAsMinted
       throw new Error(
         `Error: Invalid state transition from unindexed -> transfer\n${formatNFTTransferEventMetadata(metadata)}`,
       );
-    } else if (!isMinted) {
-      // transfer with isIndexed && !isMinted
+    } else if (!isIndexedAsMinted) {
+      // transfer with isIndexed && !isIndexedAsMinted
       throw new Error(
         `Error: Invalid state transition from burned -> transfer\n${formatNFTTransferEventMetadata(metadata)}`,
       );
     } else {
-      // transfer with isIndexed && isMinted
+      // transfer with isIndexed && isIndexedAsMinted
       return NFTTransferTypes.Transfer;
     }
   }
