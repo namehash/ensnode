@@ -154,7 +154,8 @@ export const makeRegistrarHandlers = ({
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+        label =
+          healedLabel !== null ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
         name = `${label}.${registrarManagedName}`;
       } else {
         // only update the name if the label is healed & indexable

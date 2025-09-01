@@ -133,14 +133,10 @@ export const makeNameWrapperHandlers = ({
       let label: Label | null;
       let name: Name | null;
       if (config.replaceUnnormalized) {
-        if (literalLabel === null || literalName === null) {
-          throw new Error(
-            `Invariant: When REPLACE_UNNORMALIZED=true, it is an invariant that the NameWrapper emits decodable DNSPacketBytes, but the following bytes were not decodable: ${event.args.name}.`,
-          );
-        }
-
-        label = interpretLiteralLabel(literalLabel);
-        name = interpretLiteralName(literalName);
+        // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable
+        // according to `decodeDNSPacketBytes` — if that occurs, we continue with existing behavior
+        label = literalLabel !== null ? interpretLiteralLabel(literalLabel) : null;
+        name = literalName !== null ? interpretLiteralName(literalName) : null;
       } else {
         label = literalLabel;
         name = literalName;

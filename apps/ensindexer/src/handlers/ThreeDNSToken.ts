@@ -139,7 +139,8 @@ export async function handleNewOwner({
     // Interpret the `healedLabel` Literal Label into an Interpreted Label
     // see https://ensnode.io/docs/reference/terminology#literal-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
-    const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+    const label =
+      healedLabel !== null ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is

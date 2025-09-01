@@ -282,20 +282,18 @@ export const wrappedDomain = onchainTable(
     // The account that owns this WrappedDomain
     ownerId: t.hex().notNull(),
     /**
-     * The Name that this WrappedDomain represents.
+     * The Name that this WrappedDomain represents, as emitted by the NameWrapper contract. The
+     * names emitted by the NameWrapper may be malformed, which will result in this field being `null`.
      *
-     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
-     * a) a normalized Name, or
-     * b) a Name entirely consisting of Interpreted Labels.
-     *
-     * Note that the type of the column will remain string | null, for legacy subgraph compatibility,
-     * but in practice will never be null.
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
+     * a) null (in the case of a malformed name),
+     * b) an Interpreted Name, which is either normalized entirely consisting of Interpreted Labels.
      *
      * @see https://ensnode.io/docs/reference/terminology#interpreted-name
      *
      * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null (in the case of the root node or invalid Name), or
-     * b) a Literal Name that may or may not be normalized and may or may not contain Encoded LabelHashes.
+     * a) null (in the case of a malformed or unindexable name), or
+     * b) a Literal Name that may or may not be normalized.
      *
      * @see https://ensnode.io/docs/reference/terminology#literal-name
      */
