@@ -1,5 +1,27 @@
 # ensindexer
 
+## 0.35.0
+
+### Minor Changes
+
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all stored Label and Name values are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology/#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology/#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels) of the Literal Label value found onchain.
+
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - The ENSNode Resolution API (`/resolve/*`) is now guaranteed to only return normalized names. This includes both primary name resolution (reverse resolution) and `name` record resolution (forward resolution).
+
+- [#997](https://github.com/namehash/ensnode/pull/997) [`319e4b0`](https://github.com/namehash/ensnode/commit/319e4b0e8bf2d1d51c2c5affa999453b99cb8580) Thanks [@shrugs](https://github.com/shrugs)! - Added REPLACE_UNNORMALIZED configuration option (defaults to `true`). When enabled, all Label and Name values returned from the Subgraph-Compatible GraphQL API (`/subgraph`) are guaranteed to be [Interpreted Labels](https://ensnode.io/docs/reference/terminology/#interpreted-label) and [Interpreted Names](https://ensnode.io/docs/reference/terminology/#interpreted-name), avoiding edge cases with unnormalized characters by representing unnormalized values as [Encoded LabelHashes](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels) of the Literal Label value found onchain.
+
+- [#1001](https://github.com/namehash/ensnode/pull/1001) [`7ccaa65`](https://github.com/namehash/ensnode/commit/7ccaa65c5142f0491d7f1882cd84eed7e0d3c8ea) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Index mappings between ENS names and their ownership controlling tokens.
+
+### Patch Changes
+
+- Updated dependencies [[`7ccaa65`](https://github.com/namehash/ensnode/commit/7ccaa65c5142f0491d7f1882cd84eed7e0d3c8ea)]:
+  - @ensnode/ensnode-schema@0.35.0
+  - @ensnode/datasources@0.35.0
+  - @ensnode/ensrainbow-sdk@0.35.0
+  - @ensnode/ponder-metadata@0.35.0
+  - @ensnode/ponder-subgraph@0.35.0
+  - @ensnode/ensnode-sdk@0.35.0
+
 ## 0.34.0
 
 ### Minor Changes

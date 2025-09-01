@@ -47,7 +47,7 @@ locals {
       namespace                         = "mainnet"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
-      replace_unnormalized              = "true"
+      replace_unnormalized              = "false"
       instance_type                     = "standard"
     }
 
@@ -55,11 +55,11 @@ locals {
       instance_name                     = "alpha-sepolia"
       subdomain_prefix                  = "alpha-sepolia.${var.render_environment}"
       database_schema                   = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames,reverse-resolvers,referrals,tokenscope"
+      plugins                           = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
       namespace                         = "sepolia"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
-      replace_unnormalized              = "true"
+      replace_unnormalized              = "false"
       instance_type                     = "starter"
     }
   }

@@ -1,5 +1,20 @@
 # ensadmin
 
+## 0.35.0
+
+### Minor Changes
+
+- [#994](https://github.com/namehash/ensnode/pull/994) [`ff9c7a8`](https://github.com/namehash/ensnode/commit/ff9c7a8fd27ec8131330d8e3d1337077510e3d95) Thanks [@shrugs](https://github.com/shrugs)! - Fixes issue where ENSIndexer's configured ENSRainbow Label Set Version Number was rendering as 'unknown' when it was 0.
+
+### Patch Changes
+
+- Updated dependencies [[`7ccaa65`](https://github.com/namehash/ensnode/commit/7ccaa65c5142f0491d7f1882cd84eed7e0d3c8ea)]:
+  - @ensnode/ensnode-schema@0.35.0
+  - @ensnode/datasources@0.35.0
+  - @ensnode/ponder-metadata@0.35.0
+  - @ensnode/ensnode-react@0.35.0
+  - @ensnode/ensnode-sdk@0.35.0
+
 ## 0.34.0
 
 ### Minor Changes
