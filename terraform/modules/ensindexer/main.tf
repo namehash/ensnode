@@ -68,7 +68,7 @@ resource "render_web_service" "ensindexer" {
         value = "https://${local.full_ensindexer_hostname}"
       },
       ENSINDEXER_URL = {
-        value = "http://localhost:10000"
+        value = "http://ensindexer-${var.instance_name}:10000"
       }
     }
   )

@@ -17,7 +17,7 @@ variable "render_owner_id" {
 
 variable "ensdb_disk_size_gb" {
   type    = number
-  default = 120
+  default = 250
 }
 
 # Mainnet Variables
