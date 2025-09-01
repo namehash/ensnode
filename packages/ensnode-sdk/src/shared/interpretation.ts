@@ -6,7 +6,6 @@ import {
   type Name,
   encodeLabelHash,
   isNormalizedLabel,
-  isNormalizedName,
 } from "../ens";
 
 /**
@@ -27,23 +26,17 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
 }
 
 /**
- * Transforms a Literal Name into an Interpreted Name.
+ * Interprets a set of Literal Labels into an Interpreted Name.
  *
- * @see https://ensnode.io/docs/reference/terminology#literal-name
- * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+ * Note that it's important that the Literal Labels are provided as an array, otherwise it's
+ * impossible to differentiate between 'a.label.eth' being ['a.label', 'eth'] or ['a', 'label', 'eth'].
  *
- * If the name provided to this function contains empty-string labels (i.e 'this..name'),
- * then the empty string labels will be Interpreted. Empty-string is not a normalizable name, so the
- * label will be replaced with its Encoded LabelHash representation (i.e. )
+ * Note that the input is a set of _Literal_ Labels: in this context, any label that looks like an
+ * Encoded LabelHash will NOT be interpreted as such, and _its_ labelhash will be used.
  *
- * @param name - The Literal Name string to interpret
- * @returns The provided name if it is normalized, else converts each label in name that is not a
- * normalized label into an Interpreted Label
+ * @param labels A set of Literal Labels
+ * @returns An Interpreted Name
  */
-export function interpretLiteralName(name: Name): Name {
-  // if the name is already normalized (includes empty string), good to go
-  if (isNormalizedName(name)) return name;
-
-  // otherwise ensure the name is composed of Interpreted Labels
-  return name.split(".").map(interpretLiteralLabel).join(".");
+export function interpretLiteralLabelsIntoInterpretedName(labels: Label[]): Name {
+  return labels.map(interpretLiteralLabel).join(".");
 }

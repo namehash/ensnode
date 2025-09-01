@@ -1,7 +1,8 @@
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
+
 import { encodeLabelHash } from "../ens";
-import { interpretLiteralLabel, interpretLiteralName } from "./interpretation";
+import { interpretLiteralLabel, interpretLiteralLabelsIntoInterpretedName } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -53,21 +54,25 @@ describe("interpretation", () => {
     });
   });
 
-  describe("interpretLiteralName", () => {
-    it("should return normalized names unchanged", () => {
-      expect(interpretLiteralName("vitalik.eth")).toBe("vitalik.eth");
-    });
-
-    it("should encode non-normalized encodable labels as labelhashes", () => {
-      expect(interpretLiteralName("vitalik.UNNORMALIZED.eth")).toBe(
-        `vitalik.${encodeLabelHash(labelhash("UNNORMALIZED"))}.eth`,
+  describe("interpretLiteralLabelsIntoInterpretedName", () => {
+    it("correctly interprets labels with period", () => {
+      expect(interpretLiteralLabelsIntoInterpretedName(["a.b", "c"])).toEqual(
+        `${encodeLabelHash(labelhash("a.b"))}.c`,
       );
     });
 
-    it("should handle empty labels appropriately", () => {
-      expect(interpretLiteralName("this..name")).toBe(
-        `this.${encodeLabelHash(labelhash(""))}.name`,
+    it("correctly interprets labels will NULL", () => {
+      expect(interpretLiteralLabelsIntoInterpretedName(["\0", "c"])).toEqual(
+        `${encodeLabelHash(labelhash("\0"))}.c`,
       );
+    });
+
+    it("correctly interprets encoded-labelhash-looking-strings", () => {
+      const literalLabelThatLooksLikeALabelHash = encodeLabelHash(labelhash("test"));
+
+      expect(
+        interpretLiteralLabelsIntoInterpretedName([literalLabelThatLooksLikeALabelHash, "c"]),
+      ).toEqual(`${encodeLabelHash(labelhash(literalLabelThatLooksLikeALabelHash))}.c`);
     });
   });
 });

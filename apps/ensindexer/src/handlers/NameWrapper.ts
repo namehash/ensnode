@@ -7,14 +7,14 @@ import {
   Label,
   Name,
   type Node,
-  interpretLiteralLabel,
-  interpretLiteralName,
+  getFirstLabel,
+  interpretLiteralLabelsIntoInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
-import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
+import { legacy_decodeDNSPacketBytes, v1_decodePacketIntoLiteralLabels } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
@@ -124,22 +124,24 @@ export const makeNameWrapperHandlers = ({
 
       await upsertAccount(context, owner);
 
-      // decode the name emitted by NameWrapper
-      const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(event.args.name));
-
-      // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
-      // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      // see https://ensnode.io/docs/reference/terminology#interpreted-name
-      let label: Label | null;
-      let name: Name | null;
+      let label: Label | null = null;
+      let name: Name | null = null;
       if (config.replaceUnnormalized) {
-        // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable
-        // according to `decodeDNSPacketBytes` — if that occurs, we continue with existing behavior
-        label = literalLabel !== null ? interpretLiteralLabel(literalLabel) : null;
-        name = literalName !== null ? interpretLiteralName(literalName) : null;
+        // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-name
+        try {
+          const labels = v1_decodePacketIntoLiteralLabels(event.args.name);
+          name = interpretLiteralLabelsIntoInterpretedName(labels);
+          label = getFirstLabel(name);
+        } catch {
+          // malformed packet? no-op and continue with existing behavior (this will result in
+          // WrappedDomain.name === null)
+        }
       } else {
-        label = literalLabel;
-        name = literalName;
+        // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable
+        // according to `legacy_decodeDNSPacketBytes`, and `label` and `name` will be null
+        [label, name] = legacy_decodeDNSPacketBytes(hexToBytes(event.args.name));
       }
 
       const domain = await context.db.find(schema.domain, { id: node });

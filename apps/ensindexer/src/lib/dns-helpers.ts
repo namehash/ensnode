@@ -56,7 +56,7 @@ import { type Label, type Name, isLabelIndexable } from "@ensnode/ensnode-sdk";
  *
  * @returns [(first) Label, Name] if decoding succeeded, otherwise [null, null]
  */
-export function decodeDNSPacketBytes(buf: Uint8Array): [Label, Name] | [null, null] {
+export function legacy_decodeDNSPacketBytes(buf: Uint8Array): [Label, Name] | [null, null] {
   // buffer is empty, bail
   if (buf.length === 0) return [null, null];
 
@@ -107,6 +107,56 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
   concatenatedArray.set(a);
   concatenatedArray.set(b, a.length);
   return concatenatedArray;
+}
+
+/**
+ * Decodes a DNS-Encoded name into a set of Literal Labels.
+ *
+ * NOTE: In ENSv1 (NameWrapper, ThreeDNS), emitted DNS-Encoded Names do NOT carve out special cases
+ * for Encoded LabelHashes and strings that look like Encoded LabelHashes are understood to be Literal Labels.
+ * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
+ * @see https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/libraries/BytesUtils.sol
+ *
+ * NOTE: in the future, for ENSv2, an Encoded-LabelHash-aware version of this function must be used
+ * to decode names emitted by contracts using the new NameCoder.sol.
+ *
+ * @param packet
+ * @returns A set of Literal Labels
+ * @throws If the packet is malformed
+ */
+export function v1_decodePacketIntoLiteralLabels(packet: Hex): Label[] {
+  const labels: Label[] = [];
+
+  const bytes = hexToBytes(packet);
+  if (bytes.length === 0) throw new Error(`Packet is empty.`);
+
+  let offset = 0;
+  while (offset < bytes.length) {
+    const len = bytes[offset];
+
+    // Invariant: the while conditional enforces that there's always _something_ in bytes at len
+    if (len === undefined) {
+      throw new Error(`Invariant: bytes[offset] is undefined after offset < bytes.length check.`);
+    }
+
+    // stop condition
+    if (len === 0) break;
+
+    // decode literal label string
+    const literalLabel = bytesToString(bytes.subarray(offset + 1, offset + len + 1));
+
+    // continue
+    labels.push(literalLabel);
+    offset += len + 1;
+  }
+
+  // check for overflow
+  if (offset >= bytes.length) throw new Error(`Overflow, offset >= bytes.length`);
+
+  // check for junk
+  if (offset !== bytes.length - 1) throw new Error(`Junk at end of name`);
+
+  return labels;
 }
 
 /**
@@ -188,7 +238,7 @@ export function parseDnsTxtRecordArgs({
   if (resource !== 16) return { key: null, value: null };
 
   // parse the record's name, which is the key of the DNS record
-  const [, recordName] = decodeDNSPacketBytes(hexToBytes(name));
+  const [, recordName] = legacy_decodeDNSPacketBytes(hexToBytes(name));
 
   // invariant: recordName is always available and parsed correctly
   if (!recordName) {

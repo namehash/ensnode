@@ -1,14 +1,25 @@
+import { packetToBytes } from "@ensdomains/ensjs/utils";
 import type { TxtAnswer } from "dns-packet";
-import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
+import {
+  bytesToHex,
+  decodeEventLog,
+  hexToBytes,
+  labelhash,
+  stringToHex,
+  toBytes,
+  zeroHash,
+} from "viem";
 import { describe, expect, it } from "vitest";
 
 import {
-  decodeDNSPacketBytes,
   decodeTXTData,
+  legacy_decodeDNSPacketBytes,
   parseDnsTxtRecordArgs,
   parseRRSet,
+  v1_decodePacketIntoLiteralLabels,
 } from "@/lib/dns-helpers";
 import { getDatasource } from "@ensnode/datasources";
+import { encodeLabelHash } from "@ensnode/ensnode-sdk";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
@@ -59,24 +70,24 @@ describe("dns-helpers", () => {
 
   describe("decodeDNSPacketBytes", () => {
     it("should return [null, null] for empty buffer", () => {
-      expect(decodeDNSPacketBytes(new Uint8Array())).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(new Uint8Array())).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
     });
 
     it("should return [null, null] for malformed dns packet", () => {
-      expect(decodeDNSPacketBytes(new Uint8Array([0x00]))).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(new Uint8Array([0x00]))).toEqual([null, null]);
     });
 
     it("should return [null, null] for labels with unindexable characters", () => {
-      expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
+      expect(legacy_decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
     });
 
     it("should handle previously bugged name", () => {
       // this `name` from tx 0x2138cdf5fbaeabc9cc2cd65b0a30e4aea47b3961f176d4775869350c702bd401
-      expect(decodeDNSPacketBytes(hexToBytes("0x0831323333333232310365746800"))).toEqual([
+      expect(legacy_decodeDNSPacketBytes(hexToBytes("0x0831323333333232310365746800"))).toEqual([
         "12333221",
         "12333221.eth",
       ]);
@@ -107,6 +118,62 @@ describe("dns-helpers", () => {
 
     it("should parse args correctly", () => {
       expect(parseDnsTxtRecordArgs(args)).toEqual({ key: PARSED_KEY, value: PARSED_VALUE });
+    });
+  });
+
+  describe("v1_decodePacketIntoLiteralLabels", () => {
+    it("handles root node", () => {
+      expect(v1_decodePacketIntoLiteralLabels(bytesToHex(packetToBytes("")))).toEqual([]);
+    });
+
+    it("handles obvious case", () => {
+      expect(v1_decodePacketIntoLiteralLabels(bytesToHex(packetToBytes("vitalik.eth")))).toEqual([
+        "vitalik",
+        "eth",
+      ]);
+    });
+
+    it("throws for malformed input", () => {
+      expect(() => v1_decodePacketIntoLiteralLabels("0x")).toThrow(/empty/i);
+    });
+
+    it("parses example input", () => {
+      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03aaa\x02bb\x01c\x00"))).toEqual([
+        "aaa",
+        "bb",
+        "c",
+      ]);
+    });
+
+    it("handles junk", () => {
+      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03aaa\x00"))).toEqual(["aaa"]);
+      expect(() => v1_decodePacketIntoLiteralLabels(stringToHex("\x03aaa\x00junk"))).toThrow(
+        /junk/i,
+      );
+    });
+
+    it("handles overflow", () => {
+      expect(() => v1_decodePacketIntoLiteralLabels(stringToHex("\x06aaa\x00"))).toThrow(
+        /overflow/i,
+      );
+    });
+
+    it("correctly decodes labels with period", () => {
+      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03a.a\x00"))).toEqual(["a.a"]);
+    });
+
+    it("correctly decodes labels will NULL", () => {
+      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03\0\0\0\x00"))).toEqual(["\0\0\0"]);
+    });
+
+    it("correctly decodes encoded-labelhash-looking-strings", () => {
+      const literalLabelThatLooksLikeALabelHash = encodeLabelHash(labelhash("test"));
+
+      expect(
+        v1_decodePacketIntoLiteralLabels(
+          stringToHex(`\x42${literalLabelThatLooksLikeALabelHash}\x00`),
+        ),
+      ).toEqual([literalLabelThatLooksLikeALabelHash]);
     });
   });
 });

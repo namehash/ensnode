@@ -1,13 +1,16 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, Hex, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, Hex, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
+  Label,
   type LabelHash,
+  Name,
   type Node,
   encodeLabelHash,
+  getFirstLabel,
   interpretLiteralLabel,
-  interpretLiteralName,
+  interpretLiteralLabelsIntoInterpretedName,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -19,7 +22,7 @@ import {
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
-import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
+import { v1_decodePacketIntoLiteralLabels } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
@@ -206,28 +209,35 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
+  let label: Label;
+  let name: Name;
+  try {
+    const labels = v1_decodePacketIntoLiteralLabels(fqdn);
 
-  // Invariant: ThreeDNS always emits a decodable DNS Packet
-  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  if (!literalLabel || !literalName) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
+    // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
+    // see https://ensnode.io/docs/reference/terminology#interpreted-label
+    // see https://ensnode.io/docs/reference/terminology#interpreted-name
+    name = interpretLiteralLabelsIntoInterpretedName(labels);
+    const maybeLabel = getFirstLabel(name);
+    if (maybeLabel === null) {
+      throw new Error(
+        `Invariant: ThreeDNSToken emitted ${fqdn} that decoded to root node (empty string).`,
+      );
+    }
+    label = maybeLabel;
+  } catch (error) {
+    // Invariant: ThreeDNS always emits a decodable DNS Packet
+    // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
+    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}": ${error}`);
   }
 
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
-  if (literalName.split(".").length >= 3) {
+  if (name.split(".").length >= 3) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${literalName}`);
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
   }
 
-  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
-  // see https://ensnode.io/docs/reference/terminology#interpreted-label
-  // see https://ensnode.io/docs/reference/terminology#interpreted-name
-  const interpretedLabel = interpretLiteralLabel(literalLabel);
-  const interpretedName = interpretLiteralName(literalName);
-
-  const labelHash = labelhash(literalLabel);
+  const labelHash = labelhash(label);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
   // expiry and re-registration (example: delv.box)
@@ -243,8 +253,8 @@ export async function handleRegistrationCreated({
     expiryDate: expiry,
 
     // include its decoded label/name
-    labelName: interpretedLabel,
-    name: interpretedName,
+    labelName: label,
+    name,
   });
 
   // upsert a Registration entity
@@ -255,7 +265,7 @@ export async function handleRegistrationCreated({
     registrationDate: event.block.timestamp,
     expiryDate: expiry,
     registrantId: registrant,
-    labelName: interpretedLabel,
+    labelName: label,
   });
 
   // log RegistrationEvent
