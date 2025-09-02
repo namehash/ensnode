@@ -1,5 +1,12 @@
 # @ensnode/ensnode-react
 
+## 0.36.0
+
+### Patch Changes
+
+- Updated dependencies [[`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8)]:
+  - @ensnode/ensnode-sdk@0.36.0
+
 ## 0.35.0
 
 ### Patch Changes
