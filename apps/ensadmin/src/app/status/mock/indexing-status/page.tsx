@@ -15,7 +15,7 @@ const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOveral
 
 type StatusVariant = keyof typeof mockStatusData;
 
-export default function StatusMockPage() {
+export default function StatusMockIndexingStatusPage() {
   const [selectedVariant, setSelectedVariant] = useState<StatusVariant>("unstarted");
 
   const { deserializedStatus, validationError } = useMemo(() => {

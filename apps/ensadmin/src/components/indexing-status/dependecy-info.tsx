@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InlineSummary } from "@/components/ui/inline-summary";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
-interface ENSIndexerDependencyInfoProps {
+export interface ENSIndexerDependencyInfoProps {
   ensIndexerConfig: ENSIndexerPublicConfig;
 }
 
