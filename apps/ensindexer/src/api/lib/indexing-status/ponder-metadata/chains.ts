@@ -181,7 +181,6 @@ export function getChainIndexingStatus(
   return {
     status: ChainIndexingStatusIds.Backfill,
     latestIndexedBlock: chainStatusBlock,
-    latestSyncedBlock: chainSyncBlock,
     backfillEndBlock: chainBackfillEndBlock,
     config,
   } satisfies ChainIndexingBackfillStatus;

@@ -139,12 +139,6 @@ export function IndexingStatsForBackfillStatus({
 
                 <BlockStats
                   chainId={chainId}
-                  label="Latest synced block"
-                  block={blockViewModel(chain.latestSyncedBlock)}
-                />
-
-                <BlockStats
-                  chainId={chainId}
                   label="Backfill end block"
                   block={blockViewModel(chain.backfillEndBlock)}
                 />
@@ -257,12 +251,6 @@ export function IndexingStatsForFollowingStatus({
                   chainId={chainId}
                   label="Latest indexed block"
                   block={blockViewModel(chain.latestIndexedBlock)}
-                />
-
-                <BlockStats
-                  chainId={chainId}
-                  label="Latest synced block"
-                  block={blockViewModel(chain.latestSyncedBlock)}
                 />
 
                 <BlockStats

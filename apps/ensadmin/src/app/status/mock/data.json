@@ -65,10 +65,6 @@
           "timestamp": 1580899661,
           "number": 9422161
         },
-        "latestSyncedBlock": {
-          "timestamp": 1755622079,
-          "number": 23176411
-        },
         "backfillEndBlock": {
           "timestamp": 1755622079,
           "number": 23176411

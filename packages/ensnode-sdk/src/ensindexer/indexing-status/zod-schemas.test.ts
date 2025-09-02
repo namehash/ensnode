@@ -73,7 +73,6 @@ describe("ENSIndexer: Indexing Status", () => {
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
-          latestSyncedBlock: laterBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus;
 
@@ -89,7 +88,6 @@ describe("ENSIndexer: Indexing Status", () => {
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
-          latestSyncedBlock: laterBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus);
       });
@@ -104,7 +102,6 @@ describe("ENSIndexer: Indexing Status", () => {
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: earliestBlockRef,
-          latestSyncedBlock: laterBlockRef,
           backfillEndBlock: laterBlockRef,
         } satisfies ChainIndexingBackfillStatus;
 
@@ -115,7 +112,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
       });
 
-      it("won't parse if the latestIndexedBlock is after the latestSyncedBlock", () => {
+      it("won't parse if the latestIndexedBlock is after the backfillEndBlock", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
@@ -125,7 +122,6 @@ describe("ENSIndexer: Indexing Status", () => {
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
-          latestSyncedBlock: laterBlockRef,
           backfillEndBlock: laterBlockRef,
         } satisfies ChainIndexingBackfillStatus;
 
@@ -133,28 +129,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as latestSyncedBlock.`);
-      });
-
-      it("won't parse if the latestSyncedBlock is after the backfillEndBlock", () => {
-        // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Backfill,
-          config: {
-            strategy: ChainIndexingStrategyIds.Definite,
-            startBlock: earlierBlockRef,
-            endBlock: laterBlockRef,
-          },
-          latestIndexedBlock: laterBlockRef,
-          latestSyncedBlock: latestBlockRef,
-          backfillEndBlock: laterBlockRef,
-        } satisfies ChainIndexingBackfillStatus;
-
-        // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
-
-        // assert
-        expect(notParsed).toBe(`✖ latestSyncedBlock must be before or same as backfillEndBlock.`);
+        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as backfillEndBlock.`);
       });
 
       it("won't parse if the backfillEndBlock different than the config.endBlock", () => {
@@ -167,7 +142,6 @@ describe("ENSIndexer: Indexing Status", () => {
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
-          latestSyncedBlock: latestBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus;
 
