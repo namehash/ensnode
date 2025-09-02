@@ -317,6 +317,19 @@ export interface ENSIndexerOverallIndexingCompletedStatus {
   overallStatus: typeof OverallIndexingStatusIds.Completed;
 
   /**
+   * Omnichain Indexing Cursor
+   *
+   * Identifies the timestamp of the progress of omnichain indexing across
+   * all chains in {@link ChainIndexingCompletedStatus} status.
+   *
+   * Invariants:
+   * - the cursor value is guaranteed to be equal to
+   *   the timestamp of the highest `latestIndexedBlock` across all chains
+   *   in {@link ChainIndexingCompletedStatus} status.
+   */
+  omnichainIndexingCursor: UnixTimestamp;
+
+  /**
    * Indexing Status for each chain.
    *
    * Each chain is guaranteed to have the "completed" status.

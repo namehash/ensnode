@@ -8,12 +8,11 @@ import {
   ENSIndexerOverallIndexingBackfillStatus,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
-  sortAscChainStatusesByStartBlock,
+  sortEarliestOmnichainStartBlock,
 } from "@ensnode/ensnode-sdk";
-import { fromUnixTime } from "date-fns";
+import { fromUnixTime, intlFormat } from "date-fns";
 import { Clock } from "lucide-react";
 
-import { FormattedDate } from "@/components/datetime-utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getChainName } from "@/lib/namespace-utils";
@@ -39,7 +38,7 @@ interface BackfillStatusProps {
  * Presents indexing status when overall status is "backfill".
  */
 export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+  const chainEntries = sortEarliestOmnichainStartBlock([...indexingStatus.chains.entries()]);
   const chains = chainEntries.map(([, chain]) => chain);
 
   const timelineStartUnixTimestamp = getTimestampForLowestOmnichainStartBlock(chains);
@@ -72,18 +71,11 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
                 Indexed through{" "}
-                <FormattedDate
-                  date={omnichainIndexingCursorDate}
-                  options={{
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "numeric",
-                    second: "numeric",
-                    hour12: true,
-                  }}
-                />
+                {intlFormat(omnichainIndexingCursorDate, {
+                  dateStyle: "medium",
+                  timeStyle: "medium",
+                  hour12: true,
+                })}
               </span>
             </div>
           </CardTitle>

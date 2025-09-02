@@ -1,24 +1,51 @@
-import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
+import {
+  IntlFormatFormatOptions,
+  formatDistance,
+  formatDistanceStrict,
+  intlFormat,
+} from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
 
 /**
- * Client-only date formatter component
+ * Format date as a datetime string.
  */
-export function FormattedDate({
-  date,
-  options,
-}: {
-  date: Date;
-  options: Intl.DateTimeFormatOptions;
-}) {
-  const [formattedDate, setFormattedDate] = useState<string>("");
+export function datetimeFormat(date: Date, args: Partial<IntlFormatFormatOptions> = {}): string {
+  const {
+    year = "numeric",
+    month = "short",
+    day = "numeric",
+    hour = "numeric",
+    minute = "numeric",
+    second = "numeric",
+    hour12 = true,
+  } = args;
 
-  useEffect(() => {
-    setFormattedDate(intlFormat(date, options));
-  }, [date, options]);
+  return intlFormat(date, {
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
+    hour12,
+  });
+}
 
-  return <>{formattedDate}</>;
+/**
+ * Format date as a date string.
+ */
+export function dateFormat(
+  date: Date,
+  args: Partial<Pick<IntlFormatFormatOptions, "dateStyle" | "year" | "month" | "day">> = {},
+): string {
+  const { year = "numeric", month = "short", day = "numeric" } = args;
+
+  return intlFormat(date, {
+    year,
+    month,
+    day,
+  });
 }
 
 /**

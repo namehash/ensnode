@@ -28,6 +28,7 @@ import {
   checkChainIndexingStatusesForUnstartedOverallStatus,
   getActiveChains,
   getOmnichainIndexingCursor,
+  getOmnichainIndexingCursorForCompletedOverallStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "@ensnode/ensnode-sdk";
@@ -131,12 +132,19 @@ export const makePonderChainMetadataSchema = (
         }
 
         case OverallIndexingStatusIds.Completed: {
+          // invariant: all chains are in the completed status
+          if (!checkChainIndexingStatusesForCompletedOverallStatus(chainStatuses)) {
+            throw new Error("All chains must be in the 'completed' status.");
+          }
+
           return {
             overallStatus: OverallIndexingStatusIds.Completed,
             chains: serializedChainIndexingStatuses as Record<
               ChainIdString,
               ChainIndexingCompletedStatus
             >, // forcing the type here, will be validated in the following 'check' step
+            omnichainIndexingCursor:
+              getOmnichainIndexingCursorForCompletedOverallStatus(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
 
