@@ -13,8 +13,8 @@ import {
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingFollowingStatus,
+  ENSIndexerOverallIndexingQueuedStatus,
   ENSIndexerOverallIndexingStatus,
-  ENSIndexerOverallIndexingUnstartedStatus,
   OverallIndexingStatusId,
   OverallIndexingStatusIds,
   sortAscChainStatusesByStartBlock,
@@ -42,11 +42,11 @@ export function IndexingStatsForIndexerErrorStatus() {
 }
 
 /**
- * Indexing stats for {@link OverallIndexingStatusIds.Unstarted}.
+ * Indexing stats for {@link OverallIndexingStatusIds.Queued}.
  */
-export function IndexingStatsForUnstartedStatus({
+export function IndexingStatsForQueuedStatus({
   indexingStatus,
-}: IndexingStatusProps<ENSIndexerOverallIndexingUnstartedStatus>) {
+}: IndexingStatusProps<ENSIndexerOverallIndexingQueuedStatus>) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {

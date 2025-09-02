@@ -12,10 +12,10 @@ import {
   ChainIndexingDefiniteConfig,
   ChainIndexingFollowingStatus,
   ChainIndexingIndefiniteConfig,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   OverallIndexingStatusIds,
 } from "./types";
 
@@ -53,17 +53,17 @@ describe("ENSIndexer: Indexing Status helpers", () => {
       expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Completed);
     });
 
-    it("can correctly derive 'unstarted' status if all chains are either 'unstarted' or 'completed'", () => {
+    it("can correctly derive 'queued' status if all chains are either 'queued' or 'completed'", () => {
       // arrange
       const chainStatuses: ChainIndexingStatus[] = [
         {
-          status: ChainIndexingStatusIds.Unstarted,
+          status: ChainIndexingStatusIds.Queued,
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
-        } satisfies ChainIndexingUnstartedStatus,
+        } satisfies ChainIndexingQueuedStatus,
 
         {
           status: ChainIndexingStatusIds.Completed,
@@ -80,20 +80,20 @@ describe("ENSIndexer: Indexing Status helpers", () => {
       const overallIndexingStatus = getOverallIndexingStatus(chainStatuses);
 
       // assert
-      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Unstarted);
+      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Queued);
     });
 
-    it("can correctly derive 'backfill' status if all chains are either 'unstarted', 'backfill' or 'completed'", () => {
+    it("can correctly derive 'backfill' status if all chains are either 'queued', 'backfill' or 'completed'", () => {
       // arrange
       const chainStatuses: ChainIndexingStatus[] = [
         {
-          status: ChainIndexingStatusIds.Unstarted,
+          status: ChainIndexingStatusIds.Queued,
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
-        } satisfies ChainIndexingUnstartedStatus,
+        } satisfies ChainIndexingQueuedStatus,
 
         {
           status: ChainIndexingStatusIds.Backfill,

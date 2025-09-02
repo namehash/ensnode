@@ -6,9 +6,9 @@ import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingFollowingStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingStatus,
 } from "./types";
 
@@ -35,13 +35,13 @@ describe("ENSIndexer: Indexing Status", () => {
           [
             8453,
             {
-              status: ChainIndexingStatusIds.Unstarted,
+              status: ChainIndexingStatusIds.Queued,
               config: {
                 strategy: ChainIndexingStrategyIds.Indefinite,
                 startBlock: latestBlockRef,
                 endBlock: null,
               },
-            } satisfies ChainIndexingUnstartedStatus,
+            } satisfies ChainIndexingQueuedStatus,
           ],
           [
             10,
@@ -80,13 +80,13 @@ describe("ENSIndexer: Indexing Status", () => {
             approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
           } satisfies ChainIndexingFollowingStatus,
           "8453": {
-            status: ChainIndexingStatusIds.Unstarted,
+            status: ChainIndexingStatusIds.Queued,
             config: {
               strategy: ChainIndexingStrategyIds.Indefinite,
               startBlock: latestBlockRef,
               endBlock: null,
             },
-          } satisfies ChainIndexingUnstartedStatus,
+          } satisfies ChainIndexingQueuedStatus,
           "10": {
             status: ChainIndexingStatusIds.Backfill,
             config: {

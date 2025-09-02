@@ -1,7 +1,7 @@
 import type { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 
 export const ChainIndexingStatusIds = {
-  Unstarted: "unstarted",
+  Queued: "queued",
   Backfill: "backfill",
   Following: "following",
   Completed: "completed",
@@ -14,7 +14,7 @@ export type ChainIndexingStatusId =
   (typeof ChainIndexingStatusIds)[keyof typeof ChainIndexingStatusIds];
 
 export const OverallIndexingStatusIds = {
-  Unstarted: "unstarted",
+  Queued: "queued",
   Backfill: "backfill",
   Following: "following",
   Completed: "completed",
@@ -99,14 +99,14 @@ export interface ChainIndexingDefiniteConfig {
 export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingDefiniteConfig;
 
 /**
- * Chain Indexing Status: Unstarted
+ * Chain Indexing Status: Queued
  *
  * Notes:
- * - The "unstarted" status applies when using omnichain ordering and
+ * - The "queued" status applies when using omnichain ordering and
  *   the omnichainIndexingCursor from the overall indexing status <= config.startBlock.timestamp.
  */
-export interface ChainIndexingUnstartedStatus {
-  status: typeof ChainIndexingStatusIds.Unstarted;
+export interface ChainIndexingQueuedStatus {
+  status: typeof ChainIndexingStatusIds.Queued;
   config: ChainIndexingConfig;
 }
 
@@ -222,7 +222,7 @@ export interface ChainIndexingCompletedStatus {
  * Use the `status` field to determine the correct type interpretation at runtime.
  */
 export type ChainIndexingStatus =
-  | ChainIndexingUnstartedStatus
+  | ChainIndexingQueuedStatus
   | ChainIndexingBackfillStatus
   | ChainIndexingFollowingStatus
   | ChainIndexingCompletedStatus;
@@ -241,36 +241,34 @@ export type ChainIndexingActiveStatus = ChainIndexingBackfillStatus | ChainIndex
  * Represents a chain where indexing is currently on standby (not happening).
  * The `latestIndexedBlock` field will not be available.
  */
-export type ChainIndexingStandbyStatus =
-  | ChainIndexingUnstartedStatus
-  | ChainIndexingCompletedStatus;
+export type ChainIndexingStandbyStatus = ChainIndexingQueuedStatus | ChainIndexingCompletedStatus;
 
 /**
- * ENSIndexer Overall Indexing Status: Unstarted
+ * ENSIndexer Overall Indexing Status: Queued
  *
  * Describes the current state of indexing operations across all indexed chains
- * when the overall indexing status is {@link OverallIndexingStatusIds.Unstarted}.
+ * when the overall indexing status is {@link OverallIndexingStatusIds.Queued}.
  */
-export interface ENSIndexerOverallIndexingUnstartedStatus {
+export interface ENSIndexerOverallIndexingQueuedStatus {
   /**
    * Overall Indexing Status
    */
-  overallStatus: typeof OverallIndexingStatusIds.Unstarted;
+  overallStatus: typeof OverallIndexingStatusIds.Queued;
 
   /**
    * Indexing Status for each chain.
    *
-   * Each chain is guaranteed to have the "unstarted" status.
-   * It's impossible for any chain to have status other than "unstarted".
+   * Each chain is guaranteed to have the "queued" status.
+   * It's impossible for any chain to have status other than "queued".
    */
-  chains: Map<ChainId, ChainIndexingUnstartedStatus>;
+  chains: Map<ChainId, ChainIndexingQueuedStatus>;
 }
 
 /**
  * Chain Indexing Status allowed when overall status is 'backfill'.
  */
 export type ChainIndexingStatusForBackfillOverallStatus =
-  | ChainIndexingUnstartedStatus
+  | ChainIndexingQueuedStatus
   | ChainIndexingBackfillStatus
   | ChainIndexingCompletedStatus;
 
@@ -303,7 +301,7 @@ export interface ENSIndexerOverallIndexingBackfillStatus {
    * Indexing Status for each chain.
    *
    * At least one chain is guaranteed to be in the "backfill" status.
-   * Each chain is guaranteed to have a status of either "unstarted",
+   * Each chain is guaranteed to have a status of either "queued",
    * "backfill" or "completed". It's impossible for any chain to be
    * in the "following" status.
    */
@@ -361,7 +359,7 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
    * Indexing Status for each chain.
    *
    * At least one chain is guaranteed to be in the "following" status.
-   * Each chain is guaranteed to have a status of either "unstarted",
+   * Each chain is guaranteed to have a status of either "queued",
    * "backfill", "following" or "completed".
    */
   chains: Map<ChainId, ChainIndexingStatus>;
@@ -395,7 +393,7 @@ export interface ENSIndexerOverallIndexingErrorStatus {
  * Describes the overall state of indexing operations.
  */
 export type ENSIndexerOverallIndexingStatus =
-  | ENSIndexerOverallIndexingUnstartedStatus
+  | ENSIndexerOverallIndexingQueuedStatus
   | ENSIndexerOverallIndexingBackfillStatus
   | ENSIndexerOverallIndexingCompletedStatus
   | ENSIndexerOverallIndexingFollowingStatus

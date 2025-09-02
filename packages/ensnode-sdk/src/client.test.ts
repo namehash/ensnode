@@ -113,7 +113,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
       },
     },
     "8453": {
-      status: ChainIndexingStatusIds.Unstarted,
+      status: ChainIndexingStatusIds.Queued,
       config: {
         strategy: ChainIndexingStrategyIds.Indefinite,
         startBlock: {

@@ -10,7 +10,7 @@ import {
   IndexingStatsForCompletedStatus,
   IndexingStatsForFollowingStatus,
   IndexingStatsForIndexerErrorStatus,
-  IndexingStatsForUnstartedStatus,
+  IndexingStatsForQueuedStatus,
   IndexingStatsShell,
 } from "@/components/indexing-status/indexing-stats";
 import { IndexingStatusPlaceholder } from "@/components/indexing-status/indexing-status-placeholder";
@@ -28,8 +28,8 @@ export function MockIndexingStatusDisplay({ indexingStatus }: MockIndexingStatus
       indexingStats = <IndexingStatsForIndexerErrorStatus />;
       break;
 
-    case OverallIndexingStatusIds.Unstarted:
-      indexingStats = <IndexingStatsForUnstartedStatus indexingStatus={indexingStatus} />;
+    case OverallIndexingStatusIds.Queued:
+      indexingStats = <IndexingStatsForQueuedStatus indexingStatus={indexingStatus} />;
       break;
 
     case OverallIndexingStatusIds.Backfill:

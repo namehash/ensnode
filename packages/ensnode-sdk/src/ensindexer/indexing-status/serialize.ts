@@ -4,8 +4,8 @@ import {
   SerializedENSIndexerOverallIndexingCompletedStatus,
   SerializedENSIndexerOverallIndexingErrorStatus,
   SerializedENSIndexerOverallIndexingFollowingStatus,
+  SerializedENSIndexerOverallIndexingQueuedStatus,
   SerializedENSIndexerOverallIndexingStatus,
-  SerializedENSIndexerOverallIndexingUnstartedStatus,
 } from "./serialized-types";
 import {
   ChainIndexingStatus,
@@ -40,11 +40,11 @@ export function serializeENSIndexerIndexingStatus(
         overallStatus: OverallIndexingStatusIds.IndexerError,
       } satisfies SerializedENSIndexerOverallIndexingErrorStatus;
 
-    case OverallIndexingStatusIds.Unstarted:
+    case OverallIndexingStatusIds.Queued:
       return {
-        overallStatus: OverallIndexingStatusIds.Unstarted,
+        overallStatus: OverallIndexingStatusIds.Queued,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
-      } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
+      } satisfies SerializedENSIndexerOverallIndexingQueuedStatus;
 
     case OverallIndexingStatusIds.Backfill:
       return {

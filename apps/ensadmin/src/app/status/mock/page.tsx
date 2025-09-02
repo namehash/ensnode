@@ -3,7 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  SerializedENSIndexerOverallIndexingStatus,
+  OverallIndexingStatusId,
+  OverallIndexingStatusIds,
+  SerializedENSIndexerOverallIndexingBackfillStatus,
+  SerializedENSIndexerOverallIndexingCompletedStatus,
+  SerializedENSIndexerOverallIndexingErrorStatus,
+  SerializedENSIndexerOverallIndexingFollowingStatus,
+  SerializedENSIndexerOverallIndexingQueuedStatus,
   deserializeENSIndexerIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
@@ -11,12 +17,18 @@ import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
 
 import mockDataJson from "./data.json";
 
-const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOverallIndexingStatus>;
-
-type StatusVariant = keyof typeof mockStatusData;
+const mockStatusData = mockDataJson as {
+  [OverallIndexingStatusIds.Queued]: SerializedENSIndexerOverallIndexingQueuedStatus;
+  [OverallIndexingStatusIds.Backfill]: SerializedENSIndexerOverallIndexingBackfillStatus;
+  [OverallIndexingStatusIds.Completed]: SerializedENSIndexerOverallIndexingCompletedStatus;
+  [OverallIndexingStatusIds.Following]: SerializedENSIndexerOverallIndexingFollowingStatus;
+  [OverallIndexingStatusIds.IndexerError]: SerializedENSIndexerOverallIndexingErrorStatus;
+};
 
 export default function StatusMockPage() {
-  const [selectedVariant, setSelectedVariant] = useState<StatusVariant>("unstarted");
+  const [selectedVariant, setSelectedVariant] = useState<OverallIndexingStatusId>(
+    OverallIndexingStatusIds.Queued,
+  );
 
   const { deserializedStatus, validationError } = useMemo(() => {
     try {
@@ -43,7 +55,7 @@ export default function StatusMockPage() {
                 key={variant}
                 variant={selectedVariant === variant ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedVariant(variant as StatusVariant)}
+                onClick={() => setSelectedVariant(variant as OverallIndexingStatusId)}
               >
                 {variant}
               </Button>

@@ -5,10 +5,10 @@ import {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingFollowingStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
 } from "./types";
 import { makeChainIndexingStatusSchema } from "./zod-schemas";
 
@@ -17,42 +17,42 @@ describe("ENSIndexer: Indexing Status", () => {
     const formatParseError = <T>(zodParseError: ZodSafeParseResult<T>) =>
       prettifyError(zodParseError.error!);
 
-    describe("ChainIndexingUnstartedStatus", () => {
+    describe("ChainIndexingQueuedStatus", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Unstarted,
+          status: ChainIndexingStatusIds.Queued,
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingUnstartedStatus;
+        } satisfies ChainIndexingQueuedStatus;
 
         // act
         const parsed = makeChainIndexingStatusSchema().parse(serialized);
 
         // assert
         expect(parsed).toStrictEqual({
-          status: ChainIndexingStatusIds.Unstarted,
+          status: ChainIndexingStatusIds.Queued,
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingUnstartedStatus);
+        } satisfies ChainIndexingQueuedStatus);
       });
 
       it("won't parse if the config.startBlock is after the config.endBlock", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Unstarted,
+          status: ChainIndexingStatusIds.Queued,
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: laterBlockRef,
             endBlock: earlierBlockRef,
           },
-        } satisfies ChainIndexingUnstartedStatus;
+        } satisfies ChainIndexingQueuedStatus;
 
         // act
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));

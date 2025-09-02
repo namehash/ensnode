@@ -17,7 +17,7 @@ import {
   IndexingStatsForCompletedStatus,
   IndexingStatsForFollowingStatus,
   IndexingStatsForIndexerErrorStatus,
-  IndexingStatsForUnstartedStatus,
+  IndexingStatsForQueuedStatus,
   IndexingStatsShell,
 } from "./indexing-stats";
 import { IndexingStatusPlaceholder } from "./indexing-status-placeholder";
@@ -49,8 +49,8 @@ export function IndexingStatus() {
       indexingStats = <IndexingStatsForIndexerErrorStatus />;
       break;
 
-    case OverallIndexingStatusIds.Unstarted:
-      indexingStats = <IndexingStatsForUnstartedStatus indexingStatus={indexingStatus} />;
+    case OverallIndexingStatusIds.Queued:
+      indexingStats = <IndexingStatsForQueuedStatus indexingStatus={indexingStatus} />;
       break;
 
     case OverallIndexingStatusIds.Backfill:

@@ -19,7 +19,7 @@ import {
   checkChainIndexingStatusesForBackfillOverallStatus,
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
-  checkChainIndexingStatusesForUnstartedOverallStatus,
+  checkChainIndexingStatusesForQueuedOverallStatus,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
   getStandbyChains,
@@ -29,16 +29,16 @@ import {
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingFollowingStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingFollowingStatus,
-  ENSIndexerOverallIndexingUnstartedStatus,
+  ENSIndexerOverallIndexingQueuedStatus,
   OverallIndexingStatusIds,
 } from "./types";
 
@@ -60,12 +60,12 @@ const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
   ]);
 
 /**
- * Makes Zod schema for {@link ChainIndexingUnstartedStatus} type.
+ * Makes Zod schema for {@link ChainIndexingQueuedStatus} type.
  */
-export const makeChainIndexingUnstartedStatusSchema = (valueLabel: string = "Value") =>
+export const makeChainIndexingQueuedStatusSchema = (valueLabel: string = "Value") =>
   z
     .strictObject({
-      status: z.literal(ChainIndexingStatusIds.Unstarted),
+      status: z.literal(ChainIndexingStatusIds.Queued),
       config: makeChainIndexingConfigSchema(valueLabel),
     })
     .refine(
@@ -181,7 +181,7 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
  */
 export const makeChainIndexingStatusSchema = (valueLabel: string = "Value") =>
   z.discriminatedUnion("status", [
-    makeChainIndexingUnstartedStatusSchema(valueLabel),
+    makeChainIndexingQueuedStatusSchema(valueLabel),
     makeChainIndexingBackfillStatusSchema(valueLabel),
     makeChainIndexingFollowingStatusSchema(valueLabel),
     makeChainIndexingCompletedStatusSchema(valueLabel),
@@ -206,22 +206,21 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
     });
 
 /**
- * Makes Zod schema for {@link ENSIndexerOverallIndexingUnstartedStatus}
+ * Makes Zod schema for {@link ENSIndexerOverallIndexingQueuedStatus}
  */
-const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
+const makeQueuedOverallStatusSchema = (valueLabel?: string) =>
   z
     .strictObject({
-      overallStatus: z.literal(OverallIndexingStatusIds.Unstarted),
+      overallStatus: z.literal(OverallIndexingStatusIds.Queued),
       chains: makeChainIndexingStatusesSchema(valueLabel)
         .refine(
-          (chains) =>
-            checkChainIndexingStatusesForUnstartedOverallStatus(Array.from(chains.values())),
+          (chains) => checkChainIndexingStatusesForQueuedOverallStatus(Array.from(chains.values())),
           {
-            error: `${valueLabel} at least one chain must be in "unstarted" status and
-each chain has to have a status of either "unstarted", or "completed"`,
+            error: `${valueLabel} at least one chain must be in "queued" status and
+each chain has to have a status of either "queued", or "completed"`,
           },
         )
-        .transform((chains) => chains as Map<ChainId, ChainIndexingUnstartedStatus>),
+        .transform((chains) => chains as Map<ChainId, ChainIndexingQueuedStatus>),
     })
     .refine(
       (indexingStatus) => {
@@ -245,7 +244,7 @@ const makeBackfillOverallStatusSchema = (valueLabel?: string) =>
             checkChainIndexingStatusesForBackfillOverallStatus(Array.from(chains.values())),
           {
             error: `${valueLabel} at least one chain must be in "backfill" status and
-each chain has to have a status of either "unstarted", "backfill" or "completed"`,
+each chain has to have a status of either "queued", "backfill" or "completed"`,
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>),
@@ -377,7 +376,7 @@ export const makeENSIndexerIndexingStatusSchema = (
   valueLabel: string = "ENSIndexerIndexingStatus",
 ) =>
   z.discriminatedUnion("overallStatus", [
-    makeUnstartedOverallStatusSchema(valueLabel),
+    makeQueuedOverallStatusSchema(valueLabel),
     makeBackfillOverallStatusSchema(valueLabel),
     makeCompletedOverallStatusSchema(valueLabel),
     makeFollowingOverallStatusSchema(valueLabel),

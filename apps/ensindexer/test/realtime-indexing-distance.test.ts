@@ -4,9 +4,9 @@ import { hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingFollowingStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   Duration,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
@@ -105,7 +105,7 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
           },
         } satisfies ChainIndexingBackfillStatus,
         "8453": {
-          status: ChainIndexingStatusIds.Unstarted,
+          status: ChainIndexingStatusIds.Queued,
           config: {
             strategy: ChainIndexingStrategyIds.Indefinite,
             startBlock: {
@@ -114,7 +114,7 @@ describe("ENSIndexer: assertRealtimeIndexingDistance", () => {
             },
             endBlock: null,
           },
-        } satisfies ChainIndexingUnstartedStatus,
+        } satisfies ChainIndexingQueuedStatus,
       },
       omnichainIndexingCursor: 123123124,
     } satisfies SerializedENSIndexerOverallIndexingBackfillStatus);

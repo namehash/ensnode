@@ -13,19 +13,19 @@
 import {
   type ChainIdString,
   ChainIndexingCompletedStatus,
+  ChainIndexingQueuedStatus,
   type ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingUnstartedStatus,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,
   SerializedENSIndexerOverallIndexingFollowingStatus,
-  SerializedENSIndexerOverallIndexingUnstartedStatus,
+  SerializedENSIndexerOverallIndexingQueuedStatus,
   UnixTimestamp,
   checkChainIndexingStatusesForBackfillOverallStatus,
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
-  checkChainIndexingStatusesForUnstartedOverallStatus,
+  checkChainIndexingStatusesForQueuedOverallStatus,
   getActiveChains,
   getOmnichainIndexingCursor,
   getOverallApproxRealtimeDistance,
@@ -104,17 +104,17 @@ export const makePonderChainMetadataSchema = (
       const overallStatus = getOverallIndexingStatus(chainStatuses);
 
       switch (overallStatus) {
-        case OverallIndexingStatusIds.Unstarted: {
+        case OverallIndexingStatusIds.Queued: {
           // forcing the type here, will be validated in the following 'check' step
           const chains = serializedChainIndexingStatuses as Record<
             ChainIdString,
-            ChainIndexingUnstartedStatus
+            ChainIndexingQueuedStatus
           >;
 
           return {
-            overallStatus: OverallIndexingStatusIds.Unstarted,
+            overallStatus: OverallIndexingStatusIds.Queued,
             chains,
-          } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
+          } satisfies SerializedENSIndexerOverallIndexingQueuedStatus;
         }
 
         case OverallIndexingStatusIds.Backfill: {
@@ -155,8 +155,8 @@ export const makePonderChainMetadataSchema = (
       let hasValidChains = false;
 
       switch (overallStatus) {
-        case OverallIndexingStatusIds.Unstarted:
-          hasValidChains = checkChainIndexingStatusesForUnstartedOverallStatus(chainStatuses);
+        case OverallIndexingStatusIds.Queued:
+          hasValidChains = checkChainIndexingStatusesForQueuedOverallStatus(chainStatuses);
           break;
 
         case OverallIndexingStatusIds.Backfill:
