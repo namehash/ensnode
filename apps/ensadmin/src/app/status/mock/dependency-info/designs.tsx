@@ -4,12 +4,13 @@ import {ENSNodeIcon} from "@/components/ensnode-icon";
 import {ENSIndexerIcon} from "@/components/ensindexer-icon";
 import {cn} from "@/lib/utils";
 import {ENSRainbowIcon} from "@/components/ensrainbow-icon";
-import {ReactElement} from "react";
-import {ExternalLink} from "lucide-react";
+import {ReactElement, SVGProps} from "react";
+import {ExternalLink, Replace, CheckIcon, X} from "lucide-react";
 import {ENSDbIcon} from "@/components/ensdb-icon";
 import {ChainIcon} from "@/components/chains/ChainIcon";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {CopyButton} from "@/components/ui/copy-button";
+import {IconENS} from "@/components/icons/ens";
 
 export function FigmaBasedDependencyInfo({ ensIndexerConfig }: ENSIndexerDependencyInfoProps) {
     const baseCardTitleStyles = "flex items-center gap-2";
@@ -126,6 +127,149 @@ export function FigmaBasedDependencyInfo({ ensIndexerConfig }: ENSIndexerDepende
     </Card>
 }
 
+export function FigmaEvolutionDependencyInfo({ensIndexerConfig}: ENSIndexerDependencyInfoProps) {
+    const baseCardTitleStyles = "flex items-center gap-2";
+    const cardContentStyles = "flex flex-col gap-4"
+    const copyIcon = <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <g clipPath="url(#clip0_899_10241)">
+            <path
+                d="M2.66536 10.6666C1.93203 10.6666 1.33203 10.0666 1.33203 9.33325V2.66659C1.33203 1.93325 1.93203 1.33325 2.66536 1.33325H9.33203C10.0654 1.33325 10.6654 1.93325 10.6654 2.66659M6.66536 5.33325H13.332C14.0684 5.33325 14.6654 5.93021 14.6654 6.66659V13.3333C14.6654 14.0696 14.0684 14.6666 13.332 14.6666H6.66536C5.92899 14.6666 5.33203 14.0696 5.33203 13.3333V6.66659C5.33203 5.93021 5.92899 5.33325 6.66536 5.33325Z"
+                stroke="#737373" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
+        </g>
+        <defs>
+            <clipPath id="clip0_899_10241">
+                <rect width="16" height="16" fill="white"/>
+            </clipPath>
+        </defs>
+    </svg>
+
+    return <Card className="w-full">
+        <CardHeader className="pb-2 max-sm:p-3">
+            <CardTitle className={cn(baseCardTitleStyles, "text-2xl")}>
+                <ENSNodeIcon width={28} height={28}/>
+                <span>ENSNode</span>
+            </CardTitle>
+        </CardHeader>
+        <CardContent className={cardContentStyles}>
+            <div className="flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3">
+                <div className="h-fit min-w-[255px] flex flex-col justify-start items-start">
+                    <p className="text-sm leading-6 font-semibold text-gray-500">Connection</p>
+                    <p className="flex flex-row flex-nowrap justify-start items-center gap-[2px] text-sm leading-6 font-normal text-black">{ensIndexerConfig.ensNodePublicUrl.href}<CopyButton
+                        value={ensIndexerConfig.ensNodePublicUrl.href} icon={copyIcon}/></p>
+                </div>
+                <div className="h-fit min-w-[255px] flex flex-col justify-start items-start">
+                    <p className="text-sm leading-6 font-semibold text-gray-500">Public URL</p>
+                    <p className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.ensAdminUrl.href}</p>
+                </div>
+            </div>
+            <div className={cn(cardContentStyles, "max-sm:gap-3")}>
+                {/*ENSIndexer*/}
+                <FigmaEvolutionAppCard
+                    name="ENSIndexer"
+                    icon={<ENSIndexerIcon width={24} height={24}/>}
+                    items={[
+                        {
+                            label: "Ponder",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.dependencyInfo.ponder}</p>
+                        },
+                        {
+                            label: "Node.js",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.dependencyInfo.nodejs}</p>
+                        },
+                        {
+                            label: "Namespace",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.namespace}</p>,
+                            additionalInfo: "The ENS namespace that ENSNode operates in the context of."
+                        },
+                        {
+                            label: "Indexed chains",
+                            value: <div
+                                className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">{Array.from(ensIndexerConfig.indexedChainIds).map((chainId) =>
+                                <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId}/>)}</div>
+                        },
+                        {
+                            label: "Active Plugins",
+                            value: <div
+                                className="w-full flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-1 pt-1">{ensIndexerConfig.plugins.map((plugin) =>
+                                <PluginBadge key={`${plugin}-plugin-badge`} text={plugin}/>)}</div>,
+                            additionalInfo: "A set of PluginNames indicating which plugins to activate."
+                        }
+                    ]}
+                    checks={[
+                        {
+                            label: "Heal Reverse Addresses",
+                            description: "Enable or disable healing of addr.reverse subnames. If this is set to true, ENSIndexer will attempt to heal subnames of addr.reverse.",
+                            value: ensIndexerConfig.healReverseAddresses,
+                            icon: <HealIcon/>
+                        },
+                        {
+                            label: "Index Additional Resolver Records",
+                            description: "Enable or disable the indexing of Resolver record values. If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records. If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.",
+                            value: ensIndexerConfig.indexAdditionalResolverRecords,
+                            icon: <IndexAdditionalRecordsIcon />
+                        },
+                        {
+                            label: "Replace Unnormalized Labels",
+                            description: "Controls ENSIndexer's handling of Literal Labels and Literal Names This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.",
+                            value: ensIndexerConfig.replaceUnnormalized,
+                            icon: <Replace width={20} height={20} stroke="#3F3F46" />
+                        },
+                        {
+                            label: "Subgraph Compatible",
+                            description: "A flag derived from the built config indicating whether ENSIndexer is operating in a subgraph-compatible way. This flag is true if:a) only the subgraph plugin is activated,\nb) healReverseAddresess is false, and\nc) indexRecordValues is false",
+                            value: ensIndexerConfig.isSubgraphCompatible,
+                            icon: <IconENS width={18} height={18} className="text-[#3F3F46]" />
+                        }
+                    ]}
+                    version={ensIndexerConfig.dependencyInfo.ensRainbow}
+                    docsLink={new URL("https://ensnode.io/ensindexer/")}/>
+                {/*The version of ensindexer is a stretch, idk if we can be sure that the versions are aligned, probably not */}
+                {/*ENSRainbow*/}
+                <FigmaEvolutionAppCard
+                    name="ENSRainbow"
+                    icon={<ENSRainbowIcon width={24} height={24}/>}
+                    items={[
+                        {
+                            label: "Schema Version",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.dependencyInfo.ensRainbowSchema}</p>
+                        },
+                        {
+                            label: "LabelSetId",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.labelSet.labelSetId}</p>,
+                            additionalInfo: "Optional label set ID that the ENSRainbow server is expected to use. If provided, heal operations will validate the ENSRainbow server is using this labelSetId."
+                        },
+                        {
+                            label: "Highest label set version",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.labelSet.labelSetVersion}</p>,
+                            additionalInfo: "Optional highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned. If not provided, the server will use the latest available version."
+                        }
+                    ]}
+                    version={ensIndexerConfig.dependencyInfo.ensRainbow}
+                    docsLink={new URL("https://ensnode.io/ensrainbow/")}/>
+                {/*ENSDb*/}
+                <FigmaEvolutionAppCard
+                    name="ENSDb"
+                    icon={<ENSDbIcon width={24} height={24}/>}
+                    items={[
+                        {
+                            label: "Database Schema",
+                            value: <p
+                                className="text-sm leading-6 font-normal text-black">{ensIndexerConfig.databaseSchemaName}</p>,
+                            additionalInfo: "A Postgres database schema name. This instance of ENSIndexer will write indexed data to the tables in this schema."
+                        }
+                    ]}
+                    version="ClosedAlpha"/>
+            </div>
+        </CardContent>
+    </Card>
+}
+
 interface AppCardContent {
     label: string;
     value: ReactElement;
@@ -192,7 +336,7 @@ const AdditionalInformationTooltip = ({text}: TextContentProps) => {
             </defs>
         </svg>
     );
-
+    //TODO: consider changing "text" prop from string to ReactElement (for example to include links)
     return (
         <Tooltip>
             <TooltipTrigger asChild >
@@ -208,27 +352,28 @@ const AdditionalInformationTooltip = ({text}: TextContentProps) => {
 }
 
 interface EvolutionAppCardProps extends AppCardProps {
-    checks: {
+    checks?: {
         label: string;
         description: string;
         value: boolean;
-    }
+        icon: ReactElement;
+    }[]
 }
 
 //TODO: make planned changes to this version of design:
-// 1. Bigger app icons and names
 // 2. Inclusion of the booleans from config (with icons prepared in Figma)
-// 3. Anything else?
-const FigmaEvolutionAppCard = ({name, icon, items, version, docsLink}: EvolutionAppCardProps) => {
+// 3. Anything else? (so far only minor spacing changes)
+// 4. Icons for plugins (new dedicated PluginIcon component, working similarily to ChainIcon) -- questionable --> too much noise
+const FigmaEvolutionAppCard = ({name, icon, items, version, docsLink, checks}: EvolutionAppCardProps) => {
     const cardHeaderLayoutStyles = "flex flex-row flex-nowrap justify-between items-center max-sm:flex-col max-sm:justify-start max-sm:items-start max-sm:gap-2";
     const baseCardTitleStyles = "flex items-center gap-2";
     const cardContentStyles = "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3"
 
     return (
         <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-5">
                 <div className={cardHeaderLayoutStyles}>
-                    <CardTitle className={cn(baseCardTitleStyles, "text-sm leading-6 font-bold")}>
+                    <CardTitle className={cn(baseCardTitleStyles, "text-lg leading-normal font-semibold")}>
                         {icon}
                         <span>{name}</span>
                     </CardTitle>
@@ -246,5 +391,33 @@ const FigmaEvolutionAppCard = ({name, icon, items, version, docsLink}: Evolution
                     {item.value}
                 </div>)}
             </CardContent>
+            <CardContent className={cardContentStyles}>
+                <span className="w-full self-stretch h-[1px] bg-gray-300"/>
+                {checks && (<div className="flex flex-col justify-start items-start gap-2">
+                    <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-md leading-normal font-semibold text-black">Settings</p>
+                    {checks.map((check) => (<div key={`${name}-${check.label}-check`}
+                                                 className="flex flex-row flex-nowrap justify-start items-center gap-2">
+                        {check.icon}
+                        <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">{check.label}<AdditionalInformationTooltip
+                            text={check.description}/></p>
+                        {check.value ? <CheckIcon className="text-emerald-600" /> : <X className="text-red-600" />}
+                    </div>))}
+                </div>)}
+            </CardContent>
         </Card>);
 }
+
+const HealIcon = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20"
+                                                          viewBox="0 0 21 20" fill="none" {...props}>
+    <path
+        d="M7.4364 7.08341L13.5614 12.9167M9.18641 17.0834L17.9364 8.75008C18.3453 8.36848 18.6706 7.91346 18.8937 7.41135C19.1168 6.90924 19.2331 6.36999 19.236 5.82479C19.2389 5.27959 19.1283 4.73925 18.9106 4.23501C18.6928 3.73078 18.3723 3.27266 17.9675 2.88714C17.5627 2.50162 17.0817 2.19635 16.5522 1.98898C16.0228 1.78161 15.4554 1.67625 14.883 1.67901C14.3105 1.68176 13.7443 1.79257 13.2171 2.00502C12.6899 2.21747 12.2121 2.52736 11.8114 2.91675L3.0614 11.2501C2.65254 11.6317 2.32716 12.0867 2.10409 12.5888C1.88101 13.0909 1.76467 13.6302 1.76177 14.1754C1.75888 14.7206 1.8695 15.2609 2.08724 15.7652C2.30498 16.2694 2.62552 16.7275 3.03031 17.113C3.43511 17.4986 3.91614 17.8038 4.44558 18.0112C4.97503 18.2186 5.54238 18.3239 6.11484 18.3212C6.68731 18.3184 7.25352 18.2076 7.78073 17.9951C8.30795 17.7827 8.78572 17.4728 9.18641 17.0834Z"
+        stroke="#3F3F46" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>
+
+const IndexAdditionalRecordsIcon = (props: SVGProps<SVGSVGElement>) => <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="20" height="20"
+                                                                            viewBox="0 0 20 20" fill="none" {...props}>
+    <path
+        d="M17.5 4.16675C17.5 5.54746 14.1421 6.66675 10 6.66675C5.85786 6.66675 2.5 5.54746 2.5 4.16675M17.5 4.16675C17.5 2.78604 14.1421 1.66675 10 1.66675C5.85786 1.66675 2.5 2.78604 2.5 4.16675M17.5 4.16675L17.5 9.00012M2.5 4.16675L2.50006 15.8334C2.49541 16.2342 2.77989 16.6294 3.3295 16.9859C3.87911 17.3423 4.67774 17.6495 5.65809 17.8815C6.63843 18.1135 7.77174 18.2636 8.96248 18.319C10.1532 18.3745 11.3665 18.3337 12.5001 18.2001M16.5 13.0001V17.0335M2.5 10.0001C2.5012 10.3897 2.77557 10.7738 3.30121 11.1218C3.82685 11.4698 4.58921 11.772 5.52747 12.0043C6.46573 12.2367 7.5539 12.3927 8.70518 12.46C9.85645 12.5272 11.039 12.5039 12.1583 12.3917M14.5 15.0001H18.5"
+        stroke="#3F3F46" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>

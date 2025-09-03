@@ -3,7 +3,7 @@
 import {cn} from "@/lib/utils";
 import {ENSIndexerDependencyInfo} from "@/components/indexing-status/dependecy-info";
 import {MockENSIndexerPublicConfig} from "@/app/status/mock/dependency-info/data";
-import {FigmaBasedDependencyInfo} from "@/app/status/mock/dependency-info/designs";
+import {FigmaBasedDependencyInfo, FigmaEvolutionDependencyInfo} from "@/app/status/mock/dependency-info/designs";
 
 export default function StatusMockDependencyInfoPage() {
     const headerStyles = "font-semibold leading-normal text-black"
@@ -21,7 +21,7 @@ export default function StatusMockDependencyInfoPage() {
         {contentSeparator}
 
         <h1 className={cn(headerStyles, "text-lg")}>Evolution of Figma-based design</h1>
-        <p>TODO</p>
+        <FigmaEvolutionDependencyInfo ensIndexerConfig={MockENSIndexerPublicConfig} />
         {contentSeparator}
     </section>;
 }
