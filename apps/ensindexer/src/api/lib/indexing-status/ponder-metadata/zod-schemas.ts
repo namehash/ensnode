@@ -13,9 +13,9 @@
 import {
   type ChainIdString,
   ChainIndexingCompletedStatus,
+  ChainIndexingQueuedStatus,
   type ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingUnstartedStatus,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,
@@ -108,7 +108,7 @@ export const makePonderChainMetadataSchema = (
           // forcing the type here, will be validated in the following 'check' step
           const chains = serializedChainIndexingStatuses as Record<
             ChainIdString,
-            ChainIndexingUnstartedStatus
+            ChainIndexingQueuedStatus
           >;
 
           return {

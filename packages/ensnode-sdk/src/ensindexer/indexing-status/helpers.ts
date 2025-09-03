@@ -5,12 +5,12 @@ import {
   ChainIndexingConfig,
   ChainIndexingDefiniteConfig,
   ChainIndexingIndefiniteConfig,
+  ChainIndexingQueuedStatus,
   ChainIndexingStandbyStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   OverallIndexingStatusId,
   OverallIndexingStatusIds,
 } from "./types";
@@ -23,27 +23,30 @@ import {
  * statuses were provided to this function guarantees there was no indexer
  * error, and that the overall indexing status is never
  * an {@link OverallIndexingStatusIds.IndexerError}
+ *
+ * @throws an error if unable to determine overall indexing status
  */
 export function getOverallIndexingStatus(
   chains: ChainIndexingStatus[],
 ): Exclude<OverallIndexingStatusId, typeof OverallIndexingStatusIds.IndexerError> {
-  const chainStatuses = chains.map((chain) => chain.status);
-
-  let overallStatus: OverallIndexingStatusId;
-
-  if (chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Following)) {
-    overallStatus = OverallIndexingStatusIds.Following;
-  } else if (chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Backfill)) {
-    overallStatus = OverallIndexingStatusIds.Backfill;
-  } else if (
-    chainStatuses.some((chainStatus) => chainStatus === ChainIndexingStatusIds.Unstarted)
-  ) {
-    overallStatus = OverallIndexingStatusIds.Unstarted;
-  } else {
-    overallStatus = OverallIndexingStatusIds.Completed;
+  if (checkChainIndexingStatusesForFollowingOverallStatus(chains)) {
+    return OverallIndexingStatusIds.Following;
   }
 
-  return overallStatus;
+  if (checkChainIndexingStatusesForBackfillOverallStatus(chains)) {
+    return OverallIndexingStatusIds.Backfill;
+  }
+
+  if (checkChainIndexingStatusesForUnstartedOverallStatus(chains)) {
+    return OverallIndexingStatusIds.Unstarted;
+  }
+
+  if (checkChainIndexingStatusesForCompletedOverallStatus(chains)) {
+    return OverallIndexingStatusIds.Completed;
+  }
+
+  // if none of the chain statuses matched, throw an error
+  throw new Error(`Unable to determine overall indexing status for provided chains.`);
 }
 
 /**
@@ -92,7 +95,7 @@ export function getTimestampForHighestOmnichainKnownBlock(
 
   for (const chain of chains) {
     switch (chain.status) {
-      case ChainIndexingStatusIds.Unstarted:
+      case ChainIndexingStatusIds.Queued:
         if (chain.config.endBlock) {
           latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
         }
@@ -141,7 +144,7 @@ export function getActiveChains(chains: ChainIndexingStatus[]): ChainIndexingAct
 export function getStandbyChains(chains: ChainIndexingStatus[]): ChainIndexingStandbyStatus[] {
   return chains.filter(
     (chain) =>
-      chain.status === ChainIndexingStatusIds.Unstarted ||
+      chain.status === ChainIndexingStatusIds.Queued ||
       chain.status === ChainIndexingStatusIds.Completed,
   );
 }
@@ -174,22 +177,22 @@ export function createIndexingConfig(
 /**
  * Check if Chain Indexing Statuses fit the 'unstarted' overall status
  * requirements:
- * - All chains are guaranteed to have a status of "unstarted".
+ * - All chains are guaranteed to have a status of "queued".
  *
  * Note: This function narrows the {@link ChainIndexingStatus} type to
- * {@link ChainIndexingUnstartedStatus}.
+ * {@link ChainIndexingQueuedStatus}.
  */
 export function checkChainIndexingStatusesForUnstartedOverallStatus(
   chains: ChainIndexingStatus[],
-): chains is ChainIndexingUnstartedStatus[] {
-  return chains.every((chain) => chain.status === ChainIndexingStatusIds.Unstarted);
+): chains is ChainIndexingQueuedStatus[] {
+  return chains.every((chain) => chain.status === ChainIndexingStatusIds.Queued);
 }
 
 /**
  * Check if Chain Indexing Statuses fit the 'backfill' overall status
  * requirements:
  * - At least one chain is guaranteed to be in the "backfill" status.
- * - Each chain is guaranteed to have a status of either "unstarted",
+ * - Each chain is guaranteed to have a status of either "queued",
  *   "backfill" or "completed".
  *
  * Note: This function narrows the {@linkChainIndexingStatus} type to
@@ -203,7 +206,7 @@ export function checkChainIndexingStatusesForBackfillOverallStatus(
   );
   const otherChainsHaveValidStatuses = chains.every(
     (chain) =>
-      chain.status === ChainIndexingStatusIds.Unstarted ||
+      chain.status === ChainIndexingStatusIds.Queued ||
       chain.status === ChainIndexingStatusIds.Backfill ||
       chain.status === ChainIndexingStatusIds.Completed,
   );

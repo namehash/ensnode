@@ -3,7 +3,7 @@
     "overallStatus": "unstarted",
     "chains": {
       "1": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -14,7 +14,7 @@
         }
       },
       "10": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -25,7 +25,7 @@
         }
       },
       "8453": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -36,7 +36,7 @@
         }
       },
       "59144": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -71,7 +71,7 @@
         }
       },
       "10": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -82,7 +82,7 @@
         }
       },
       "8453": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -93,7 +93,7 @@
         }
       },
       "59144": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {

@@ -29,11 +29,11 @@ import {
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingFollowingStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
@@ -60,12 +60,12 @@ const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
   ]);
 
 /**
- * Makes Zod schema for {@link ChainIndexingUnstartedStatus} type.
+ * Makes Zod schema for {@link ChainIndexingQueuedStatus} type.
  */
-export const makeChainIndexingUnstartedStatusSchema = (valueLabel: string = "Value") =>
+export const makeChainIndexingQueuedStatusSchema = (valueLabel: string = "Value") =>
   z
     .strictObject({
-      status: z.literal(ChainIndexingStatusIds.Unstarted),
+      status: z.literal(ChainIndexingStatusIds.Queued),
       config: makeChainIndexingConfigSchema(valueLabel),
     })
     .refine(
@@ -173,7 +173,7 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
  */
 export const makeChainIndexingStatusSchema = (valueLabel: string = "Value") =>
   z.discriminatedUnion("status", [
-    makeChainIndexingUnstartedStatusSchema(valueLabel),
+    makeChainIndexingQueuedStatusSchema(valueLabel),
     makeChainIndexingBackfillStatusSchema(valueLabel),
     makeChainIndexingFollowingStatusSchema(valueLabel),
     makeChainIndexingCompletedStatusSchema(valueLabel),
@@ -209,11 +209,10 @@ const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
           (chains) =>
             checkChainIndexingStatusesForUnstartedOverallStatus(Array.from(chains.values())),
           {
-            error: `${valueLabel} at least one chain must be in "unstarted" status and
-each chain has to have a status of either "unstarted", or "completed"`,
+            error: `${valueLabel} all chains must have "queued" status`,
           },
         )
-        .transform((chains) => chains as Map<ChainId, ChainIndexingUnstartedStatus>),
+        .transform((chains) => chains as Map<ChainId, ChainIndexingQueuedStatus>),
     })
     .refine(
       (indexingStatus) => {
@@ -237,7 +236,7 @@ const makeBackfillOverallStatusSchema = (valueLabel?: string) =>
             checkChainIndexingStatusesForBackfillOverallStatus(Array.from(chains.values())),
           {
             error: `${valueLabel} at least one chain must be in "backfill" status and
-each chain has to have a status of either "unstarted", "backfill" or "completed"`,
+each chain has to have a status of either "queued", "backfill" or "completed"`,
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>),
