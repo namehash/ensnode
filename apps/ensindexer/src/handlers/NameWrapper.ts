@@ -12,6 +12,7 @@ import {
   LiteralName,
   type Node,
   getFirstLabel,
+  interpretLiteralLabel,
   literalLabelsToInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
@@ -33,23 +34,30 @@ import type { RegistrarManagedName } from "@/lib/types";
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
- * Parses the NameWrapper's emitted DNS-Encoded `name` packet and interprets it into an Interpreted
+ * Parses the NameWrapper's emitted DNS-Encoded Name `packet` and interprets it into an Interpreted
  * Name.
+ *
+ * NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
+ * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+ * @see https://ensnode.io/docs/reference/terminology#interpreted-name
  */
 function parseAndInterpretNameWrapperName(packet: LiteralDNSEncodedName): {
-  label: null | InterpretedLabel;
-  name: null | InterpretedName;
+  label: InterpretedLabel;
+  name: InterpretedName;
 } {
-  // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
-  // see https://ensnode.io/docs/reference/terminology#interpreted-label
-  // see https://ensnode.io/docs/reference/terminology#interpreted-name
   try {
     const literalLabels = decodeLiteralDNSEncodedName(packet);
 
-    const interpretedName = literalLabelsToInterpretedName(literalLabels);
-    const interpretedLabel = getFirstLabel(interpretedName);
+    if (literalLabels.length === 0) {
+      throw new Error(
+        `Invariant: NameWrapper emitted ${packet} that decoded to root node (empty string).`,
+      );
+    }
 
-    return { label: interpretedLabel, name: interpretedName };
+    return {
+      label: interpretLiteralLabel(literalLabels[0]!), // ! ok due to length invariant above
+      name: literalLabelsToInterpretedName(literalLabels),
+    };
   } catch (error) {
     // malformed packet? no-op and continue with existing behavior (this will result in
     // WrappedDomain.name === null)
@@ -66,7 +74,7 @@ function parseLiteralNameWrapperName(packet: LiteralDNSEncodedName): {
   name: null | LiteralName;
 } {
   // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable
-  // according to `legacy_decodeDNSPacketBytes`, and `label` and `name` will be null
+  // according to `legacy_decodeDNSPacketBytes`: if so, the returned `label` and `name` will be null
   const [label, name] = legacy_decodeDNSPacketBytes(hexToBytes(packet));
   return { label, name };
 }
