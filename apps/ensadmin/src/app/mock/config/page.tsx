@@ -3,13 +3,15 @@
 import {
   FigmaBasedDependencyInfo,
   FigmaEvolutionDependencyInfo,
-} from "@/app/status/mock/dependency-info/designs";
+} from "@/app/mock/config/designs";
 import { ENSIndexerDependencyInfo } from "@/components/indexing-status/dependecy-info";
 import { cn } from "@/lib/utils";
 import mockDataJson from "./data.json";
 import {deserializeENSIndexerPublicConfig, SerializedENSIndexerPublicConfig} from "@ensnode/ensnode-sdk";
 import {useMemo} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import Link from "next/link";
 
 const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
 
@@ -67,6 +69,9 @@ export default function StatusMockDependencyInfoPage() {
                 {contentSeparator}
             </>
         }
+        <Button asChild variant="default" >
+            <Link href="/mock">Back to mock list</Link>
+        </Button>
     </section>
   );
 }
