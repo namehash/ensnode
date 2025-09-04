@@ -214,7 +214,7 @@ export async function handleRegistrationCreated({
   try {
     const labels = v1_decodePacketIntoLiteralLabels(fqdn);
 
-    // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
+    // Interpret the decoded Literal Labels into an Interpreted Name
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-name
     name = interpretLiteralLabelsIntoInterpretedName(labels);
