@@ -121,7 +121,7 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
  * to decode names emitted by contracts using the new NameCoder.sol.
  *
  * @param packet
- * @returns A set of Literal Labels
+ * @returns A list of the Literal Labels contained in packet. Each Literal Label returned is guaranteed to be a max of 255 UTF-8 encoded bytes in length due to the constrains of DNS Encoded Names.
  * @throws If the packet is a malformed DNS-Encoded name
  */
 export function v1_decodePacketIntoLiteralLabels(packet: Hex): Label[] {
