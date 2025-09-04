@@ -26,7 +26,7 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
 }
 
 /**
- * Interprets a set of Literal Labels into an Interpreted Name.
+ * Interprets an ordered list of Literal Labels into an Interpreted Name.
  *
  * Note that it's important that the Literal Labels are provided as an array, otherwise it's
  * impossible to differentiate between 'a.label.eth' being ['a.label', 'eth'] or ['a', 'label', 'eth'].
