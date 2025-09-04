@@ -11,6 +11,7 @@ import { RecentRegistrations } from "@/components/recent-registrations";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { BackfillStatus } from "./backfill-status";
+import { ENSNodeConfigInfo } from "./config-info";
 import {
   IndexingStatsForBackfillStatus,
   IndexingStatsForCompletedStatus,
@@ -20,7 +21,6 @@ import {
   IndexingStatsShell,
 } from "./indexing-stats";
 import { IndexingStatusPlaceholder } from "./indexing-status-placeholder";
-import {ENSNodeConfigInfo} from "./config-info";
 
 export function IndexingStatus() {
   const ensIndexerConfigQuery = useENSIndexerConfig();

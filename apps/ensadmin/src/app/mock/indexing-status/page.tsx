@@ -9,8 +9,8 @@ import {
 import { useMemo, useState } from "react";
 import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
 
-import mockDataJson from "./data.json";
 import Link from "next/link";
+import mockDataJson from "./data.json";
 
 const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOverallIndexingStatus>;
 
@@ -67,7 +67,7 @@ export default function MockIndexingStatusPage() {
       {deserializedStatus && (
         <MockIndexingStatusDisplayWithProps indexingStatus={deserializedStatus} />
       )}
-      <Button asChild variant="default" >
+      <Button asChild variant="default">
         <Link href="/mock">Back to mock list</Link>
       </Button>
     </section>

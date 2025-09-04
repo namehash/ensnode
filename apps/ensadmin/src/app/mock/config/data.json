@@ -6,14 +6,7 @@
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "indexedChainIds": [
-      1,
-      8453,
-      59144,
-      10,
-      42161,
-      534352
-    ],
+    "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352],
     "databaseSchemaName": "alphaSchema0.34.0",
     "healReverseAddresses": true,
     "indexAdditionalResolverRecords": true,
@@ -49,14 +42,7 @@
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
-    "indexedChainIds": [
-      11155111,
-      84532,
-      59141,
-      11155420,
-      421614,
-      534351
-    ],
+    "indexedChainIds": [11155111, 84532, 59141, 11155420, 421614, 534351],
     "namespace": "sepolia",
     "plugins": [
       "subgraph",
@@ -85,13 +71,9 @@
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
-    "indexedChainIds": [
-      1
-    ],
+    "indexedChainIds": [1],
     "namespace": "mainnet",
-    "plugins": [
-      "subgraph"
-    ],
+    "plugins": ["subgraph"],
     "databaseSchemaName": "mainnetSchema0.34.0",
     "healReverseAddresses": false,
     "indexAdditionalResolverRecords": false,
@@ -111,13 +93,9 @@
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
-    "indexedChainIds": [
-      11155111
-    ],
+    "indexedChainIds": [11155111],
     "namespace": "sepolia",
-    "plugins": [
-      "subgraph"
-    ],
+    "plugins": ["subgraph"],
     "databaseSchemaName": "sepoliaSchema0.34.0",
     "healReverseAddresses": false,
     "indexAdditionalResolverRecords": false,
@@ -137,13 +115,9 @@
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
-    "indexedChainIds": [
-      17000
-    ],
+    "indexedChainIds": [17000],
     "namespace": "holesky",
-    "plugins": [
-      "subgraph"
-    ],
+    "plugins": ["subgraph"],
     "databaseSchemaName": "holeskySchema0.34.0",
     "healReverseAddresses": false,
     "indexAdditionalResolverRecords": false,

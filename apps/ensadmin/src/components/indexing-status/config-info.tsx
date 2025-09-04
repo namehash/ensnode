@@ -4,6 +4,7 @@
  */
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
+import { ENSAdminIcon } from "@/components/ensadmin-icon";
 import { ENSDbIcon } from "@/components/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
@@ -12,12 +13,11 @@ import { IconENS } from "@/components/icons/ens";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
+import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import { CheckIcon, ExternalLink, Replace, X } from "lucide-react";
 import { ReactElement, SVGProps } from "react";
-import {ENSIndexerPublicConfig} from "@ensnode/ensnode-sdk";
-import {ENSAdminIcon} from "@/components/ensadmin-icon";
-import {getChainName} from "@/lib/namespace-utils";
 
 export interface ENSNodeConfigProps {
   ensIndexerConfig: ENSIndexerPublicConfig;
@@ -66,40 +66,55 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
         </div>
         <div className={cn(cardContentStyles, "max-sm:gap-3")}>
           {/*ENSAdmin*/}
-          <ConfigInfoAppCard name="ENSAdmin" icon={<ENSAdminIcon width={24} height={24} />} items={[{
-            label: "URL", value:
-            <a
-                href={ensIndexerConfig.ensAdminUrl.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:underline text-sm leading-6 font-normal"
-            >
-              {ensIndexerConfig.ensAdminUrl.href}<ExternalLink size={14} className="inline-block" />
-            </a>
-          }]} version={ensIndexerConfig.dependencyInfo.ensRainbow} docsLink={new URL("https://ensnode.io/ensadmin/")}/>
+          <ConfigInfoAppCard
+            name="ENSAdmin"
+            icon={<ENSAdminIcon width={24} height={24} />}
+            items={[
+              {
+                label: "URL",
+                value: (
+                  <a
+                    href={ensIndexerConfig.ensAdminUrl.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-blue-600 hover:underline text-sm leading-6 font-normal"
+                  >
+                    {ensIndexerConfig.ensAdminUrl.href}
+                    <ExternalLink size={14} className="inline-block" />
+                  </a>
+                ),
+              },
+            ]}
+            version={ensIndexerConfig.dependencyInfo.ensRainbow}
+            docsLink={new URL("https://ensnode.io/ensadmin/")}
+          />
           {/*TODO: The version of ensindexer/ensadmin is a stretch, idk if we can be sure that the versions are aligned, PROBABLY NOT */}
           {/*ENSDb*/}
           <ConfigInfoAppCard
-              name="ENSDb"
-              icon={<ENSDbIcon width={24} height={24} />}
-              items={[
-                {
-                  label: "Database Schema",
-                  value: (
-                      <p className="text-sm leading-6 font-normal text-black">
-                        {ensIndexerConfig.databaseSchemaName}
-                      </p>
-                  ),
-                  additionalInfo:
-                      <p>A Postgres database schema name. This instance of ENSIndexer will write indexed data to the tables in this schema.</p>,
-                },
-              ]}
-              version="ClosedAlpha"
+            name="ENSDb"
+            icon={<ENSDbIcon width={24} height={24} />}
+            items={[
+              {
+                label: "Database Schema",
+                value: (
+                  <p className="text-sm leading-6 font-normal text-black">
+                    {ensIndexerConfig.databaseSchemaName}
+                  </p>
+                ),
+                additionalInfo: (
+                  <p>
+                    A Postgres database schema name. This instance of ENSIndexer will write indexed
+                    data to the tables in this schema.
+                  </p>
+                ),
+              },
+            ]}
+            version="ClosedAlpha"
           />
           {/*ENSIndexer*/}
           <ConfigInfoAppCard
-              name="ENSIndexer"
-              icon={<ENSIndexerIcon width={24} height={24} />}
+            name="ENSIndexer"
+            icon={<ENSIndexerIcon width={24} height={24} />}
             items={[
               {
                 label: "Ponder",
@@ -129,11 +144,21 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Indexed Chains",
                 value: (
-                    <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
-                      {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
-                          <Tooltip><TooltipTrigger><ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} /></TooltipTrigger><TooltipContent side="top" className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit">{getChainName(chainId)}</TooltipContent></Tooltip>
-                      ))}
-                    </div>
+                  <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
+                    {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                        >
+                          {getChainName(chainId)}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
                 ),
               },
               {
@@ -183,7 +208,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                   checkNotSelected: "Check is FALSE",
                 },
                 value: ensIndexerConfig.isSubgraphCompatible,
-                icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0"  />,
+                icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0" />,
               },
             ]}
             version={ensIndexerConfig.dependencyInfo.ensRainbow}
@@ -210,8 +235,13 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                     {ensIndexerConfig.labelSet.labelSetId}
                   </p>
                 ),
-                additionalInfo:
-                    <p>Optional label set ID that the ENSRainbow server is expected to use. If provided, heal operations will validate the ENSRainbow server is using this labelSetId.</p>,
+                additionalInfo: (
+                  <p>
+                    Optional label set ID that the ENSRainbow server is expected to use. If
+                    provided, heal operations will validate the ENSRainbow server is using this
+                    labelSetId.
+                  </p>
+                ),
               },
               {
                 label: "Highest label set version",
@@ -220,8 +250,15 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                     {ensIndexerConfig.labelSet.labelSetVersion}
                   </p>
                 ),
-                additionalInfo:
-                    <p>Optional highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned. If not provided, the server will use the latest available version.</p>,
+                additionalInfo: (
+                  <p>
+                    Optional highest label set version of label set id to query. Enables
+                    deterministic heal results across time even if the ENSRainbow server ingests
+                    label sets with greater versions than this value. If provided, only labels from
+                    label sets with versions less than or equal to this value will be returned. If
+                    not provided, the server will use the latest available version.
+                  </p>
+                ),
               },
             ]}
             version={ensIndexerConfig.dependencyInfo.ensRainbow}
@@ -247,7 +284,8 @@ interface ConfigInfoAppCardProps {
   docsLink?: URL;
   checks?: {
     label: string;
-    description: { //TODO: improve field names here
+    description: {
+      //TODO: improve field names here
       checkSelected: string;
       checkNotSelected: string;
     };
@@ -356,13 +394,16 @@ const ConfigInfoAppCard = ({
           >
             <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
               {item.label}
-              {item.additionalInfo && <AdditionalInformationTooltip content={item.additionalInfo} />}
+              {item.additionalInfo && (
+                <AdditionalInformationTooltip content={item.additionalInfo} />
+              )}
             </p>
             {item.value}
           </div>
         ))}
       </CardContent>
-      {checks && (<CardContent className={cardContentStyles}>
+      {checks && (
+        <CardContent className={cardContentStyles}>
           <span className="w-full self-stretch h-[1px] bg-gray-300" />
           <div className="flex flex-col justify-start items-start gap-2">
             <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-md leading-normal font-semibold text-black">
@@ -376,16 +417,25 @@ const ConfigInfoAppCard = ({
                 {check.icon}
                 <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
                   {check.label}
-                  <AdditionalInformationTooltip content={<p>{check.value ? check.description.checkSelected : check.description.checkNotSelected}</p>} />
+                  <AdditionalInformationTooltip
+                    content={
+                      <p>
+                        {check.value
+                          ? check.description.checkSelected
+                          : check.description.checkNotSelected}
+                      </p>
+                    }
+                  />
                 </p>
                 {check.value ? (
                   <CheckIcon className="text-emerald-600 flex-shrink-0" />
                 ) : (
                   <X className="text-red-600 flex-shrink-0" />
                 )}
-              </div>))}
+              </div>
+            ))}
           </div>
-      </CardContent>
+        </CardContent>
       )}
     </Card>
   );
