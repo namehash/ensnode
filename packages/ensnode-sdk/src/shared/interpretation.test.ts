@@ -1,8 +1,8 @@
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { encodeLabelHash } from "../ens";
-import { interpretLiteralLabel, interpretLiteralLabelsIntoInterpretedName } from "./interpretation";
+import { LiteralLabel, encodeLabelHash } from "../ens";
+import { interpretLiteralLabel, literalLabelsToInterpretedName } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -17,7 +17,7 @@ const NORMALIZED_LABELS = [
   "café",
   "sub",
   "a".repeat(512), // Long normalized
-];
+] as LiteralLabel[];
 
 const UNNORMALIZED_LABELS = [
   "", // Empty string
@@ -39,7 +39,7 @@ const UNNORMALIZED_LABELS = [
   "test\u200B", // Zero-width space
   "test\u202E", // RTL override
   "A".repeat(300), // Long non-normalized
-];
+] as LiteralLabel[];
 
 describe("interpretation", () => {
   describe("interpretLiteralLabel", () => {
@@ -56,13 +56,13 @@ describe("interpretation", () => {
 
   describe("interpretLiteralLabelsIntoInterpretedName", () => {
     it("correctly interprets labels with period", () => {
-      expect(interpretLiteralLabelsIntoInterpretedName(["a.b", "c"])).toEqual(
+      expect(literalLabelsToInterpretedName(["a.b", "c"] as LiteralLabel[])).toEqual(
         `${encodeLabelHash(labelhash("a.b"))}.c`,
       );
     });
 
     it("correctly interprets labels with NULL", () => {
-      expect(interpretLiteralLabelsIntoInterpretedName(["\0", "c"])).toEqual(
+      expect(literalLabelsToInterpretedName(["\0", "c"] as LiteralLabel[])).toEqual(
         `${encodeLabelHash(labelhash("\0"))}.c`,
       );
     });
@@ -71,7 +71,10 @@ describe("interpretation", () => {
       const literalLabelThatLooksLikeALabelHash = encodeLabelHash(labelhash("test"));
 
       expect(
-        interpretLiteralLabelsIntoInterpretedName([literalLabelThatLooksLikeALabelHash, "c"]),
+        literalLabelsToInterpretedName([
+          literalLabelThatLooksLikeALabelHash,
+          "c",
+        ] as LiteralLabel[]),
       ).toEqual(`${encodeLabelHash(labelhash(literalLabelThatLooksLikeALabelHash))}.c`);
     });
   });

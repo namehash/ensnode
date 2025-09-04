@@ -5,6 +5,7 @@ import { type Address, zeroAddress } from "viem";
 import config from "@/config";
 import {
   type LabelHash,
+  LiteralLabel,
   type Node,
   REVERSE_ROOT_NODES,
   encodeLabelHash,
@@ -199,7 +200,9 @@ export const handleNewOwner =
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         const label =
-          healedLabel !== null ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+          healedLabel !== null
+            ? interpretLiteralLabel(healedLabel as LiteralLabel)
+            : encodeLabelHash(labelHash);
 
         // to construct `Domain.name` use the parent's Name and the Interpreted Label
         // NOTE: for a TLD, the parent is null, so we just use the Label value as is

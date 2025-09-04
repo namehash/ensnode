@@ -8,6 +8,7 @@ import {
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
+  asNormalizedName,
   isNormalizedName,
   isSelectionEmpty,
   parseReverseName,
@@ -93,7 +94,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * NOTE: uses `chainId` parameter for internal Protocol Acceleration behavior (see recursive call below).
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  name: ForwardResolutionArgs<SELECTION>["name"],
+  _name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { chainId: number; accelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
@@ -104,14 +105,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   return withProtocolStepAsync(
     TraceableENSProtocol.ForwardResolution,
     ForwardResolutionProtocolStep.Operation,
-    { name, selection: selectionString, chainId, accelerate },
+    { name: _name, selection: selectionString, chainId, accelerate },
     (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
         `resolveForward(${name}, chainId: ${chainId})`,
         {
-          name,
+          name: _name,
           selection: selectionString,
           chainId,
           accelerate,
@@ -122,10 +123,11 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // Invariant: Name must be normalized
-          if (!isNormalizedName(name)) {
-            throw new Error(`Invariant: Name "${name}" must be normalized.`);
+          if (!isNormalizedName(_name)) {
+            throw new Error(`Invariant: Name "${_name}" must be normalized.`);
           }
 
+          const name = asNormalizedName(_name);
           const node: Node = namehash(name);
           span.setAttribute("node", node);
 

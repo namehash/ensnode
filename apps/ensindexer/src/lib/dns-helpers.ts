@@ -2,7 +2,14 @@ import dnsPacket, { Answer } from "dns-packet";
 import { Hex, bytesToHex, bytesToString, hexToBytes, stringToBytes } from "viem";
 
 import { stripNullBytes } from "@/lib/lib-helpers";
-import { type Label, type Name, isLabelIndexable } from "@ensnode/ensnode-sdk";
+import {
+  type Label,
+  LiteralDNSEncodedName,
+  LiteralLabel,
+  LiteralName,
+  type Name,
+  isLabelIndexable,
+} from "@ensnode/ensnode-sdk";
 
 /**
  * Given a Buffer representing a DNS Packet that encodes a domain name, decodes the domain name into
@@ -56,7 +63,9 @@ import { type Label, type Name, isLabelIndexable } from "@ensnode/ensnode-sdk";
  *
  * @returns [(first) Label, Name] if decoding succeeded, otherwise [null, null]
  */
-export function legacy_decodeDNSPacketBytes(buf: Uint8Array): [Label, Name] | [null, null] {
+export function legacy_decodeDNSPacketBytes(
+  buf: Uint8Array,
+): [LiteralLabel, LiteralName] | [null, null] {
   // buffer is empty, bail
   if (buf.length === 0) return [null, null];
 
@@ -65,7 +74,7 @@ export function legacy_decodeDNSPacketBytes(buf: Uint8Array): [Label, Name] | [n
   let dot = stringToBytes(".");
   let len = buf[offset++];
   let hex = bytesToHex(buf);
-  let firstLabel = "";
+  let firstLabel = "" as LiteralLabel;
 
   // if the length of the first label is 0, this packet doesn't represent anything, so bail
   if (len === 0) return [null, null]; // NOTE: we return [null, null] instead of ["", "."]
@@ -84,7 +93,7 @@ export function legacy_decodeDNSPacketBytes(buf: Uint8Array): [Label, Name] | [n
       list = concatUint8Arrays(list, dot);
     } else {
       // this is the first decoded label, set firstLabel
-      firstLabel = labelBytes.toString();
+      firstLabel = labelBytes.toString() as LiteralLabel;
     }
 
     // add the decoded label to the list of decoded labels
@@ -99,7 +108,7 @@ export function legacy_decodeDNSPacketBytes(buf: Uint8Array): [Label, Name] | [n
   }
 
   // finally, return the firstLabel and the set of labels and dots as a string
-  return [firstLabel, bytesToString(list)];
+  return [firstLabel, bytesToString(list) as LiteralName];
 }
 
 function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
@@ -110,24 +119,19 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
 }
 
 /**
- * Decodes a DNS-Encoded name into a list of Literal Labels.
+ * Decodes a DNS-Encoded name consisting of Literal Labels into an ordred list of Literal Labels.
  *
- * @see https://docs.ens.domains/resolution/names/#dns-encoding
+ * For discussion on DNS-Encoding, see the {@link DNSEncodedName} and {@link LiteralDNSEncodedName} types.
  *
- * NOTE: In ENSv1 (NameWrapper, ThreeDNS), emitted DNS-Encoded Names do NOT carve out special cases
- * for Encoded LabelHashes and strings that look like Encoded LabelHashes are understood to be Literal Labels.
- * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
- * @see https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/libraries/BytesUtils.sol
+ * Due to the constraints of DNS-Encoding, there is an additional guarantee that each Literal Label
+ * in the resulting list is guaranteed to have a maximum byte length of 255.
  *
- * NOTE: in the future, for ENSv2, an Encoded-LabelHash-aware version of this function must be used
- * to decode names emitted by contracts using the new NameCoder.sol.
- *
- * @param packet
- * @returns A list of the Literal Labels contained in packet. Each Literal Label returned is guaranteed to be a max of 255 UTF-8 encoded bytes in length due to the constrains of DNS Encoded Names.
- * @throws If the packet is a malformed DNS-Encoded name
+ * @param packet a hex string that encodes a LiteralDNSEncodedName
+ * @returns A list of the LiteralLabels contained in packet.
+ * @throws If the packet is malformed
  */
-export function v1_decodePacketIntoLiteralLabels(packet: Hex): Label[] {
-  const labels: Label[] = [];
+export function decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): LiteralLabel[] {
+  const labels: LiteralLabel[] = [];
 
   const bytes = hexToBytes(packet);
   if (bytes.length === 0) throw new Error(`Packet is empty.`);
@@ -155,10 +159,14 @@ export function v1_decodePacketIntoLiteralLabels(packet: Hex): Label[] {
     if (len === 0) break;
 
     // decode literal label string
-    const literalLabel = bytesToString(bytes.subarray(offset + 1, offset + len + 1));
+    const literalLabel = bytesToString(
+      bytes.subarray(offset + 1, offset + len + 1),
+    ) as LiteralLabel;
+
+    // add to list of literal labels
+    labels.push(literalLabel);
 
     // continue
-    labels.push(literalLabel);
     offset += len + 1;
   }
 

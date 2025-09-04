@@ -5,6 +5,7 @@ import { type Address, namehash } from "viem";
 import {
   type Label,
   type LabelHash,
+  LiteralLabel,
   Name,
   PluginName,
   encodeLabelHash,
@@ -49,7 +50,7 @@ export const makeRegistrarHandlers = ({
       // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
       // see https://ensnode.io/docs/reference/terminology#literal-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      label = interpretLiteralLabel(label);
+      label = interpretLiteralLabel(label as LiteralLabel);
     } else {
       // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
       if (!isLabelIndexable(label)) return;
@@ -155,7 +156,9 @@ export const makeRegistrarHandlers = ({
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         label =
-          healedLabel !== null ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+          healedLabel !== null
+            ? interpretLiteralLabel(healedLabel as LiteralLabel)
+            : encodeLabelHash(labelHash);
         name = `${label}.${registrarManagedName}`;
       } else {
         // only update the name if the label is healed & indexable

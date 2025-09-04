@@ -12,14 +12,14 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
+  decodeLiteralDNSEncodedName,
   decodeTXTData,
   legacy_decodeDNSPacketBytes,
   parseDnsTxtRecordArgs,
   parseRRSet,
-  v1_decodePacketIntoLiteralLabels,
 } from "@/lib/dns-helpers";
 import { getDatasource } from "@ensnode/datasources";
-import { encodeLabelHash } from "@ensnode/ensnode-sdk";
+import { LiteralDNSEncodedName, encodeLabelHash } from "@ensnode/ensnode-sdk";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
@@ -121,57 +121,64 @@ describe("dns-helpers", () => {
     });
   });
 
-  describe("v1_decodePacketIntoLiteralLabels", () => {
+  describe("decodeLiteralDNSEncodedName", () => {
     it("handles root node", () => {
-      expect(v1_decodePacketIntoLiteralLabels(bytesToHex(packetToBytes("")))).toEqual([]);
+      expect(
+        decodeLiteralDNSEncodedName(bytesToHex(packetToBytes("")) as LiteralDNSEncodedName),
+      ).toEqual([]);
     });
 
     it("handles obvious case", () => {
-      expect(v1_decodePacketIntoLiteralLabels(bytesToHex(packetToBytes("vitalik.eth")))).toEqual([
-        "vitalik",
-        "eth",
-      ]);
+      expect(
+        decodeLiteralDNSEncodedName(
+          bytesToHex(packetToBytes("vitalik.eth")) as LiteralDNSEncodedName,
+        ),
+      ).toEqual(["vitalik", "eth"]);
     });
 
     it("throws for malformed input", () => {
-      expect(() => v1_decodePacketIntoLiteralLabels("0x")).toThrow(/empty/i);
+      expect(() => decodeLiteralDNSEncodedName("0x" as LiteralDNSEncodedName)).toThrow(/empty/i);
     });
 
     it("parses example input", () => {
-      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03aaa\x02bb\x01c\x00"))).toEqual([
-        "aaa",
-        "bb",
-        "c",
-      ]);
+      expect(
+        decodeLiteralDNSEncodedName(stringToHex("\x03aaa\x02bb\x01c\x00") as LiteralDNSEncodedName),
+      ).toEqual(["aaa", "bb", "c"]);
     });
 
     it("handles junk", () => {
-      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03aaa\x00"))).toEqual(["aaa"]);
-      expect(() => v1_decodePacketIntoLiteralLabels(stringToHex("\x03aaa\x00junk"))).toThrow(
-        /junk/i,
-      );
+      expect(
+        decodeLiteralDNSEncodedName(stringToHex("\x03aaa\x00") as LiteralDNSEncodedName),
+      ).toEqual(["aaa"]);
+      expect(() =>
+        decodeLiteralDNSEncodedName(stringToHex("\x03aaa\x00junk") as LiteralDNSEncodedName),
+      ).toThrow(/junk/i);
     });
 
     it("handles overflow", () => {
-      expect(() => v1_decodePacketIntoLiteralLabels(stringToHex("\x06aaa\x00"))).toThrow(
-        /overflow/i,
-      );
+      expect(() =>
+        decodeLiteralDNSEncodedName(stringToHex("\x06aaa\x00") as LiteralDNSEncodedName),
+      ).toThrow(/overflow/i);
     });
 
     it("correctly decodes labels with period", () => {
-      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03a.a\x00"))).toEqual(["a.a"]);
+      expect(
+        decodeLiteralDNSEncodedName(stringToHex("\x03a.a\x00") as LiteralDNSEncodedName),
+      ).toEqual(["a.a"]);
     });
 
     it("correctly decodes labels with NULL", () => {
-      expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03\0\0\0\x00"))).toEqual(["\0\0\0"]);
+      expect(
+        decodeLiteralDNSEncodedName(stringToHex("\x03\0\0\0\x00") as LiteralDNSEncodedName),
+      ).toEqual(["\0\0\0"]);
     });
 
     it("correctly decodes encoded-labelhash-looking-strings", () => {
       const literalLabelThatLooksLikeALabelHash = encodeLabelHash(labelhash("test"));
 
       expect(
-        v1_decodePacketIntoLiteralLabels(
-          stringToHex(`\x42${literalLabelThatLooksLikeALabelHash}\x00`),
+        decodeLiteralDNSEncodedName(
+          stringToHex(`\x42${literalLabelThatLooksLikeALabelHash}\x00`) as LiteralDNSEncodedName,
         ),
       ).toEqual([literalLabelThatLooksLikeALabelHash]);
     });
