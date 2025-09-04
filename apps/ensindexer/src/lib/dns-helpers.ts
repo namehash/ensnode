@@ -122,7 +122,7 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
  *
  * @param packet
  * @returns A set of Literal Labels
- * @throws If the packet is malformed
+ * @throws If the packet is a malformed DNS-Encoded name
  */
 export function v1_decodePacketIntoLiteralLabels(packet: Hex): Label[] {
   const labels: Label[] = [];
