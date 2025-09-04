@@ -433,11 +433,12 @@ interface TextContentProps {
 }
 
 const PluginBadge = ({ text }: TextContentProps) => (
-  <span className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black">
+  <span className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default">
     {text}
   </span>
 );
 
+//TODO: style it better + change "text" prop from string to ReactElement (for example to include links)
 const AdditionalInformationTooltip = ({ text }: TextContentProps) => {
   const InfoIcon = (
     <svg
@@ -464,7 +465,6 @@ const AdditionalInformationTooltip = ({ text }: TextContentProps) => {
       </defs>
     </svg>
   );
-  //TODO: consider changing "text" prop from string to ReactElement (for example to include links)
   return (
     <Tooltip>
       <TooltipTrigger asChild>{InfoIcon}</TooltipTrigger>
@@ -542,7 +542,7 @@ const FigmaEvolutionAppCard = ({
         ))}
       </CardContent>
       <CardContent className={cardContentStyles}>
-        <span className="w-full self-stretch h-[1px] bg-gray-300" />
+          {checks && <span className="w-full self-stretch h-[1px] bg-gray-300" />}
         {checks && (
           <div className="flex flex-col justify-start items-start gap-2">
             <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-md leading-normal font-semibold text-black">

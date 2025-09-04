@@ -1,0 +1,38 @@
+{
+  "Alpha Mainnet": {
+    "ensAdminUrl": "https://admin.ensnode.io/",
+    "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
+    "labelSet": {
+      "labelSetId": "subgraph",
+      "labelSetVersion": 0
+    },
+    "indexedChainIds": [
+      1,
+      8453,
+      59144,
+      10,
+      42161,
+      534352
+    ],
+    "databaseSchemaName": "alphaSchema0.34.0",
+    "healReverseAddresses": true,
+    "indexAdditionalResolverRecords": true,
+    "replaceUnnormalized": false,
+    "isSubgraphCompatible": false,
+    "namespace": "mainnet",
+    "plugins": [
+      "subgraph",
+      "basenames",
+      "lineanames",
+      "threedns",
+      "reverse-resolvers",
+      "referrals"
+    ],
+    "dependencyInfo": {
+      "nodejs": "22.18.0",
+      "ponder": "0.11.43",
+      "ensRainbow": "0.34.0",
+      "ensRainbowSchema": 3
+    }
+  }
+}
