@@ -11,7 +11,6 @@ import {
   LiteralLabel,
   LiteralName,
   type Node,
-  getFirstLabel,
   interpretLiteralLabel,
   literalLabelsToInterpretedName,
   uint256ToHex32,
