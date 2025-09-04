@@ -45,6 +45,10 @@ variable "ensrainbow_url" {
   type = string
 }
 
+variable "ensadmin_url" {
+  type = string
+}
+
 variable "ensindexer_label_set_id" {
   type        = string
   description = "The label set ID that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"

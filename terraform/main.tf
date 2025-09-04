@@ -97,6 +97,17 @@ module "ensrainbow" {
   ensrainbow_label_set_version = var.ensrainbow_label_set_version
 }
 
+module "ensadmin" {
+  source                = "./modules/ensadmin"
+  render_region         = local.render_region
+  render_environment_id = render_project.ensnode.environments["default"].id
+  instance_type         = "starter"
+
+  base_domain_name = local.base_domain_name
+  ensnode_version  = var.ensnode_version
+  subdomain_prefix = var.render_environment
+}
+
 module "ensindexer" {
   source   = "./modules/ensindexer"
   for_each = local.ensindexer_instances
@@ -121,6 +132,7 @@ module "ensindexer" {
   render_region         = local.render_region
   render_environment_id = render_project.ensnode.environments["default"].id
   database_url          = module.ensdb.internal_connection_string
+  ensadmin_url          = module.ensadmin.ensadmin_url
 
   # Mainnet RPC URLs
   ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url
