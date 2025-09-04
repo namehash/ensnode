@@ -120,11 +120,13 @@ export function getTimestampForHighestOmnichainKnownBlock(
 }
 
 /**
- * Get Omnichain Indexing Cursor across all chains which status is
- * {@link ChainIndexingActiveStatus}.
+ * Get Omnichain Indexing Cursor
+ *
+ * The cursor tracks the "highest" latest indexed block across all chains in
+ * {@link ChainIndexingActiveStatus} indexing status.
  */
 export function getOmnichainIndexingCursor(chains: ChainIndexingActiveStatus[]): UnixTimestamp {
-  return Math.min(...chains.map((chain) => chain.latestIndexedBlock.timestamp));
+  return Math.max(...chains.map((chain) => chain.latestIndexedBlock.timestamp));
 }
 
 /**
@@ -134,6 +136,7 @@ export function getActiveChains(chains: ChainIndexingStatus[]): ChainIndexingAct
   return chains.filter(
     (chain) =>
       chain.status === ChainIndexingStatusIds.Backfill ||
+      chain.status === ChainIndexingStatusIds.Completed ||
       chain.status === ChainIndexingStatusIds.Following,
   );
 }
@@ -142,11 +145,7 @@ export function getActiveChains(chains: ChainIndexingStatus[]): ChainIndexingAct
  * Get all chains which status is {@link ChainIndexingStandbyStatus}.
  */
 export function getStandbyChains(chains: ChainIndexingStatus[]): ChainIndexingStandbyStatus[] {
-  return chains.filter(
-    (chain) =>
-      chain.status === ChainIndexingStatusIds.Queued ||
-      chain.status === ChainIndexingStatusIds.Completed,
-  );
+  return chains.filter((chain) => chain.status === ChainIndexingStatusIds.Queued);
 }
 
 /**
