@@ -162,7 +162,7 @@ describe("dns-helpers", () => {
       expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03a.a\x00"))).toEqual(["a.a"]);
     });
 
-    it("correctly decodes labels will NULL", () => {
+    it("correctly decodes labels with NULL", () => {
       expect(v1_decodePacketIntoLiteralLabels(stringToHex("\x03\0\0\0\x00"))).toEqual(["\0\0\0"]);
     });
 
