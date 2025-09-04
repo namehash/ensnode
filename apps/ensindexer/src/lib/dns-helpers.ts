@@ -110,7 +110,7 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
 }
 
 /**
- * Decodes a DNS-Encoded name into a set of Literal Labels.
+ * Decodes a DNS-Encoded name into a list of Literal Labels.
  *
  * NOTE: In ENSv1 (NameWrapper, ThreeDNS), emitted DNS-Encoded Names do NOT carve out special cases
  * for Encoded LabelHashes and strings that look like Encoded LabelHashes are understood to be Literal Labels.
