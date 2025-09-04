@@ -23,6 +23,9 @@ RUN pnpm --filter ensadmin build
 # runner
 FROM base AS runner
 
+# Set the environment variable for the default ENSNode URLs
+ARG NEXT_PUBLIC_DEFAULT_ENSNODE_URLS
+ENV NEXT_PUBLIC_DEFAULT_ENSNODE_URLS=${NEXT_PUBLIC_DEFAULT_ENSNODE_URLS}
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs
