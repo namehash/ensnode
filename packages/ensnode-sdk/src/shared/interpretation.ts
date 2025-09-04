@@ -34,7 +34,7 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
  * Note that the input is a set of _Literal_ Labels: in this context, any label that looks like an
  * Encoded LabelHash will NOT be interpreted as such, and _its_ labelhash will be used.
  *
- * @param labels A set of Literal Labels
+ * @param labels An ordered list of Literal Labels
  * @returns An Interpreted Name
  */
 export function interpretLiteralLabelsIntoInterpretedName(labels: Label[]): Name {
