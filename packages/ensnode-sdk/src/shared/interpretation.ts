@@ -31,8 +31,8 @@ export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
  * Note that it's important that the Literal Labels are provided as an array, otherwise it's
  * impossible to differentiate between 'a.label.eth' being ['a.label', 'eth'] or ['a', 'label', 'eth'].
  *
- * Note that the input is a set of _Literal_ Labels: in this context, any label that looks like an
- * Encoded LabelHash will NOT be interpreted as such, and _its_ labelhash will be used.
+ * Note that the input is an ordered list of _Literal_ Labels: in this context, any literal label that is formatted as an
+ * Encoded LabelHash will NOT be interpreted as such. Instead it will be converted into an Encoded LabelHash that encodes the literal labelhash of the literal label.
  *
  * @param labels An ordered list of Literal Labels
  * @returns An Interpreted Name
