@@ -61,7 +61,7 @@ describe("interpretation", () => {
       );
     });
 
-    it("correctly interprets labels will NULL", () => {
+    it("correctly interprets labels with NULL", () => {
       expect(interpretLiteralLabelsIntoInterpretedName(["\0", "c"])).toEqual(
         `${encodeLabelHash(labelhash("\0"))}.c`,
       );
