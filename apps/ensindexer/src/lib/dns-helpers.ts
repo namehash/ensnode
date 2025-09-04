@@ -112,6 +112,8 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
 /**
  * Decodes a DNS-Encoded name into a list of Literal Labels.
  *
+ * @see https://docs.ens.domains/resolution/names/#dns-encoding
+ *
  * NOTE: In ENSv1 (NameWrapper, ThreeDNS), emitted DNS-Encoded Names do NOT carve out special cases
  * for Encoded LabelHashes and strings that look like Encoded LabelHashes are understood to be Literal Labels.
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
@@ -132,11 +134,21 @@ export function v1_decodePacketIntoLiteralLabels(packet: Hex): Label[] {
 
   let offset = 0;
   while (offset < bytes.length) {
+    // NOTE: `len` is always [0, 255] because ByteArray is array of unsigned 8-bit integers. Because
+    // the length of the next label is limited to one unsigned byte, this is why labels with bytelength
+    // greater than 255 cannot be DNS Encoded.
     const len = bytes[offset];
 
-    // Invariant: the while conditional enforces that there's always _something_ in bytes at len
+    // Invariant: the while conditional enforces that there's always _something_ in bytes at offset
     if (len === undefined) {
       throw new Error(`Invariant: bytes[offset] is undefined after offset < bytes.length check.`);
+    }
+
+    // Invariant: `len` is always [0, 255]. technically not necessary but good for clarity
+    if (len < 0 || len > 255) {
+      throw new Error(
+        `Invariant: this should be literally impossible, but an unsigned byte was less than zero or greater than 255. The value in question is ${len}`,
+      );
     }
 
     // stop condition
