@@ -18,7 +18,10 @@ import {
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
-import { decodeLiteralDNSEncodedName, legacy_decodeDNSPacketBytes } from "@/lib/dns-helpers";
+import {
+  decodeLiteralDNSEncodedName,
+  subgraph_decodeLiteralDNSEncodedName,
+} from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
@@ -72,10 +75,14 @@ function parseLiteralNameWrapperName(packet: LiteralDNSEncodedName): {
   label: null | LiteralLabel;
   name: null | LiteralName;
 } {
-  // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable
-  // according to `legacy_decodeDNSPacketBytes`: if so, the returned `label` and `name` will be null
-  const [label, name] = legacy_decodeDNSPacketBytes(hexToBytes(packet));
-  return { label, name };
+  try {
+    return subgraph_decodeLiteralDNSEncodedName(packet);
+  } catch {
+    // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable according
+    // to `subgraph_decodeLiteralDNSEncodedName`: when this occurs, the subgraph expects `null` to
+    // be returned
+    return { label: null, name: null };
+  }
 }
 
 // if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two

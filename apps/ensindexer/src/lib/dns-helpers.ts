@@ -1,121 +1,52 @@
 import dnsPacket, { Answer } from "dns-packet";
-import { Hex, bytesToHex, bytesToString, hexToBytes, stringToBytes } from "viem";
+import { Hex, bytesToString, hexToBytes } from "viem";
 
 import { stripNullBytes } from "@/lib/lib-helpers";
 import {
-  type Label,
+  DNSEncodedName,
   LiteralDNSEncodedName,
   LiteralLabel,
   LiteralName,
-  type Name,
   isLabelIndexable,
+  literalLabelsToLiteralName,
 } from "@ensnode/ensnode-sdk";
 
 /**
- * Given a Buffer representing a DNS Packet that encodes a domain name, decodes the domain name into
- * [Label, Name] where the first return parameter is the first Label in the Name, and the second is
- * the full domain name. If decoding fails, [null, null] is returned.
+ * Implements the original ENS Subgraph DNS-Encoded Name decoding logic, in particular the additional
+ * check that each label in the decoded name is indexable (see `isLabelIndexable` for context).
  *
- * ex: if the input DNS Packet represents `example.eth`, the output will be ['example', 'example.eth']
- *
- * ---
- *
- * DNS Packet Format for Domain Names:
- * - Domain names are encoded as a sequence of labels
- * - Each label begins with a length byte (1 byte) indicating how many bytes follow for that label
- * - The bytes after the length byte represent the characters in the label
- * - Labels are concatenated with no separators
- * - The sequence ends with a zero-length byte (0x00)
- *
- * Example: "example.eth" is encoded as:
- * [0x07, 'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x03, 'e', 't', 'h', 0x00]
- * Where 0x07 is the length of "example", 0x03 is the length of "eth", and 0x00 marks the end
- *
- * The decoding process:
- * 1. Read the length byte
- * 2. Extract the label using that length
- * 3. Append a dot if not the first label
- * 4. Repeat until a zero-length byte is encountered
- *
- * ---
- *
- * NOTE: there seems to be a bug in ensjs#bytesToPacket, which we were originally using for this
- * implementation, regarding malformed names.
- *
- * For example, in this tx `0x4ece50ae828f2a0f27f45d086e85a55e6284bff31a0a89daca9df4b1b1f5cb75` the
- * `name` input is `8436.eth` (it should have been just `8436`, as the `.eth` is inferred).
- *
- * This operates against a name that actually looks like `[fb1d24d5dc41613d5b4874e6cccb06ecf442f6f1773c3771c4fcce1161985a18].eth`
- * which results in a namehash of `0xfb1d24d5dc41613d5b4874e6cccb06ecf442f6f1773c3771c4fcce1161985a18`
- * and the NameWrapper emits an event with the packet bytes of `08383433362E6574680365746800`.
- * when ensjs#bytesToPacket sees these bytes, it returns a name of `8436.eth.eth`, which is incorrect.
- *
- * The original subgraph logic handled this case correctly, it seems, and so we re-implement it here.
- * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L30
- *
- * More information about this discussion can be found in this thread:
- * https://github.com/namehash/ensnode/issues/36
- *
- * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
- *
- * TODO: replace this function with ensjs#bytesToPacket when it correctly handles these cases. See
- * ensnode commit hash bace0ab55077d9f5cd37bd9d6638c4acb16334a8 for an example implementation.
- *
- * @returns [(first) Label, Name] if decoding succeeded, otherwise [null, null]
+ * @param packet a hex string that encodes a LiteralDNSEncodedName
+ * @returns The Literal Label and Literal Name that the LiteralDNSEncodeName decodes to
+ * @throws If the packet is malformed, the packet encodes the root node, or if any of the labels are not indexable.
  */
-export function legacy_decodeDNSPacketBytes(
-  buf: Uint8Array,
-): [LiteralLabel, LiteralName] | [null, null] {
-  // buffer is empty, bail
-  if (buf.length === 0) return [null, null];
+export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): {
+  label: LiteralLabel;
+  name: LiteralName;
+} {
+  // decode the literal labels as normal
+  const literalLabels = decodeLiteralDNSEncodedName(packet);
 
-  let offset = 0;
-  let list = new Uint8Array(0);
-  let dot = stringToBytes(".");
-  let len = buf[offset++];
-  let hex = bytesToHex(buf);
-  let firstLabel = "" as LiteralLabel;
-
-  // if the length of the first label is 0, this packet doesn't represent anything, so bail
-  if (len === 0) return [null, null]; // NOTE: we return [null, null] instead of ["", "."]
-
-  // while there are more labels to decode...
-  while (len) {
-    // grab the characters that represent that label
-    const label = hex.slice((offset + 1) * 2, (offset + 1 + len) * 2);
-    const labelBytes = Buffer.from(label, "hex");
-
-    // if the decoded label is not indexable, bail
-    if (!isLabelIndexable(labelBytes.toString())) return [null, null];
-
-    if (offset > 1) {
-      // if this is not the first label, append a dot to the current list of labels
-      list = concatUint8Arrays(list, dot);
-    } else {
-      // this is the first decoded label, set firstLabel
-      firstLabel = labelBytes.toString() as LiteralLabel;
-    }
-
-    // add the decoded label to the list of decoded labels
-    list = concatUint8Arrays(list, labelBytes);
-
-    // forward offset to the character that represents the length of the next label
-    offset += len;
-    // decode that length and iterate
-    len = buf[offset++];
-
-    // NOTE: if this is the last label, the final 0x00 sets `len` to 0 and therefore breaks the loop
+  // NOTE: in the original implementation, the returned `label`, in the case of the root node, would
+  // be '' (empty string). In practice, however, the root node is never wrapped by the NameWrapper,
+  // and this condition never occurs. To enhance the clarity of this function, we encode that
+  // implicit invariant here.
+  if (literalLabels.length === 0) {
+    throw new Error(
+      `Implicit Invariant(subgraph_decodeLiteralDNSEncodedName): NameWrapper emitted ${packet} that decoded to root node (empty string).`,
+    );
   }
 
-  // finally, return the firstLabel and the set of labels and dots as a string
-  return [firstLabel, bytesToString(list) as LiteralName];
-}
+  // additionally require that every literal label is indexable
+  if (!literalLabels.every(isLabelIndexable)) {
+    throw new Error(
+      `Some decoded literal labels were not indexable: [${literalLabels.join(", ")}].`,
+    );
+  }
 
-function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
-  const concatenatedArray = new Uint8Array(a.length + b.length);
-  concatenatedArray.set(a);
-  concatenatedArray.set(b, a.length);
-  return concatenatedArray;
+  return {
+    label: literalLabels[0]!, // ! ok due to length invariant above,
+    name: literalLabelsToLiteralName(literalLabels),
+  };
 }
 
 /**
@@ -129,9 +60,26 @@ function concatUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
  * @param packet a hex string that encodes a LiteralDNSEncodedName
  * @returns A list of the LiteralLabels contained in packet.
  * @throws If the packet is malformed
+ * @dev This is just `decodeDNSEncodedPacket` with semantic input/output
  */
 export function decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): LiteralLabel[] {
-  const labels: LiteralLabel[] = [];
+  return decodeDNSEncodedName(packet) as LiteralLabel[];
+}
+
+/**
+ * Decodes a DNS-Encoded Name into an ordred list of string segments.
+ *
+ * For discussion on DNS-Encoding, see the {@link DNSEncodedName} type.
+ *
+ * Due to the constraints of DNS-Encoding, there is an additional guarantee that each segment
+ * in the resulting list is guaranteed to have a maximum byte length of 255.
+ *
+ * @param packet a hex string that encodes a DNSEncodedName
+ * @returns A list of the segments contained in packet.
+ * @throws If the packet is malformed
+ */
+export function decodeDNSEncodedName(packet: DNSEncodedName): string[] {
+  const segments: string[] = [];
 
   const bytes = hexToBytes(packet);
   if (bytes.length === 0) throw new Error(`Packet is empty.`);
@@ -158,13 +106,8 @@ export function decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): Lite
     // stop condition
     if (len === 0) break;
 
-    // decode literal label string
-    const literalLabel = bytesToString(
-      bytes.subarray(offset + 1, offset + len + 1),
-    ) as LiteralLabel;
-
-    // add to list of literal labels
-    labels.push(literalLabel);
+    // add to list of segments
+    segments.push(bytesToString(bytes.subarray(offset + 1, offset + len + 1)));
 
     // continue
     offset += len + 1;
@@ -176,7 +119,7 @@ export function decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): Lite
   // check for junk
   if (offset !== bytes.length - 1) throw new Error(`Junk at end of name`);
 
-  return labels;
+  return segments;
 }
 
 /**
@@ -250,7 +193,7 @@ export function parseDnsTxtRecordArgs({
   resource,
   record,
 }: {
-  name: Hex;
+  name: DNSEncodedName;
   resource: number;
   record?: Hex;
 }): { key: string | null; value: string | null } {
@@ -258,12 +201,8 @@ export function parseDnsTxtRecordArgs({
   if (resource !== 16) return { key: null, value: null };
 
   // parse the record's name, which is the key of the DNS record
-  const [, recordName] = legacy_decodeDNSPacketBytes(hexToBytes(name));
-
-  // invariant: recordName is always available and parsed correctly
-  if (!recordName) {
-    throw new Error(`parseDNSRecordArgs: Invalid DNSPacket, cannot parse name '${name}'.`);
-  }
+  // Invariant: recordName is always available and parsed correctly (`decodeDNSEncodedName` throws)
+  const recordName = decodeDNSEncodedName(name).join(".");
 
   // relevant keys end with .ens
   if (!recordName.endsWith(".ens")) return { key: null, value: null };

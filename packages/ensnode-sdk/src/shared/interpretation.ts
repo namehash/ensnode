@@ -4,6 +4,7 @@ import {
   type InterpretedLabel,
   InterpretedName,
   type LiteralLabel,
+  LiteralName,
   encodeLabelHash,
   isNormalizedLabel,
 } from "../ens";
@@ -50,4 +51,14 @@ export function literalLabelsToInterpretedName(labels: LiteralLabel[]): Interpre
  */
 export function interpretedLabelsToInterpretedName(labels: InterpretedLabel[]): InterpretedName {
   return labels.join(".") as InterpretedName;
+}
+
+/**
+ * Joins the list of Literal Labels with '.' to form a Literal Name.
+ *
+ * @param labels An ordered list of Literal Labels
+ * @returns An LiteralName
+ */
+export function literalLabelsToLiteralName(labels: LiteralLabel[]): LiteralName {
+  return labels.join(".") as LiteralName;
 }
