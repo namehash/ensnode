@@ -4,7 +4,7 @@ import {
   FigmaBasedDependencyInfo,
   FigmaEvolutionDependencyInfo,
 } from "@/app/mock/config/designs";
-import { ENSIndexerDependencyInfo } from "@/components/indexing-status/dependecy-info";
+import { ENSNodeConfig } from "@/components/indexing-status/dependecy-info";
 import { cn } from "@/lib/utils";
 import mockDataJson from "./data.json";
 import {deserializeENSIndexerPublicConfig, SerializedENSIndexerPublicConfig} from "@ensnode/ensnode-sdk";
@@ -17,7 +17,7 @@ const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublic
 
 type ConfigVariant = keyof typeof mockConfigData;
 
-export default function StatusMockDependencyInfoPage() {
+export default function MockConfigPage() {
   const {deserializedConfig, validationError} = useMemo(() => {
       try {
           const config = deserializeENSIndexerPublicConfig(mockConfigData["Alpha Mainnet"]);
@@ -49,7 +49,7 @@ export default function StatusMockDependencyInfoPage() {
         {deserializedConfig &&
             <>
                 <h1 className={cn(headerStyles, "text-lg")}>Current production version</h1>
-                <ENSIndexerDependencyInfo ensIndexerConfig={deserializedConfig} />
+                <ENSNodeConfig ensIndexerConfig={deserializedConfig} />
                 {contentSeparator}
             </>
         }

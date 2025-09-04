@@ -10,11 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InlineSummary } from "@/components/ui/inline-summary";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
-export interface ENSIndexerDependencyInfoProps {
+export interface ENSNodeConfigProps {
   ensIndexerConfig: ENSIndexerPublicConfig;
 }
 
-export function ENSIndexerDependencyInfo({ ensIndexerConfig }: ENSIndexerDependencyInfoProps) {
+export function ENSNodeConfig({ ensIndexerConfig }: ENSNodeConfigProps) {
   const { dependencyInfo, plugins, namespace, databaseSchemaName, labelSet, isSubgraphCompatible } =
     ensIndexerConfig;
 

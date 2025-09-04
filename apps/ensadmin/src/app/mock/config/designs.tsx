@@ -4,7 +4,7 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { IconENS } from "@/components/icons/ens";
-import { ENSIndexerDependencyInfoProps } from "@/components/indexing-status/dependecy-info";
+import { ENSNodeConfigProps } from "@/components/indexing-status/dependecy-info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { CheckIcon, ExternalLink, Replace, X } from "lucide-react";
 import { ReactElement, SVGProps } from "react";
 
-export function FigmaBasedDependencyInfo({ ensIndexerConfig }: ENSIndexerDependencyInfoProps) {
+export function FigmaBasedDependencyInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
   const baseCardTitleStyles = "flex items-center gap-2";
   const cardContentStyles = "flex flex-col gap-4";
   const copyIcon = (
@@ -173,7 +173,7 @@ export function FigmaBasedDependencyInfo({ ensIndexerConfig }: ENSIndexerDepende
   );
 }
 
-export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSIndexerDependencyInfoProps) {
+export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
   const baseCardTitleStyles = "flex items-center gap-2";
   const cardContentStyles = "flex flex-col gap-4";
   const copyIcon = (
