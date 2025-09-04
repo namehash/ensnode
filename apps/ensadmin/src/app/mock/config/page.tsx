@@ -1,11 +1,8 @@
 "use client";
 
 import {
-  FigmaBasedDependencyInfo,
-  FigmaEvolutionDependencyInfo,
-} from "@/app/mock/config/designs";
-import { ENSNodeConfig } from "@/components/indexing-status/dependecy-info";
-import { cn } from "@/lib/utils";
+  ENSNodeConfigInfo,
+} from "@/components/indexing-status/config-info";
 import mockDataJson from "./data.json";
 import {deserializeENSIndexerPublicConfig, SerializedENSIndexerPublicConfig} from "@ensnode/ensnode-sdk";
 import {useMemo} from "react";
@@ -32,9 +29,6 @@ export default function MockConfigPage() {
 
   return (
     <section className="flex flex-col gap-6 p-6">
-      <h1 className={cn(headerStyles, "text-xl")}>New "Dependency Info" design proposals</h1>
-      {contentSeparator}
-
         {validationError && (
             <Card className="border-red-200 bg-red-50">
                 <CardHeader>
@@ -48,24 +42,7 @@ export default function MockConfigPage() {
 
         {deserializedConfig &&
             <>
-                <h1 className={cn(headerStyles, "text-lg")}>Current production version</h1>
-                <ENSNodeConfig ensIndexerConfig={deserializedConfig} />
-                {contentSeparator}
-            </>
-        }
-
-        {deserializedConfig &&
-            <>
-                <h1 className={cn(headerStyles, "text-lg")}>Version strictly based on Figma</h1>
-                <FigmaBasedDependencyInfo ensIndexerConfig={deserializedConfig} />
-                {contentSeparator}
-            </>
-        }
-
-        {deserializedConfig &&
-            <>
-                <h1 className={cn(headerStyles, "text-lg")}>Evolution of Figma-based design</h1>
-                <FigmaEvolutionDependencyInfo ensIndexerConfig={deserializedConfig} />
+                <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} />
                 {contentSeparator}
             </>
         }

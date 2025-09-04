@@ -4,176 +4,19 @@ import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
 import { IconENS } from "@/components/icons/ens";
-import { ENSNodeConfigProps } from "@/components/indexing-status/dependecy-info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ExternalLink, Replace, X } from "lucide-react";
 import { ReactElement, SVGProps } from "react";
+import {ENSIndexerPublicConfig} from "@ensnode/ensnode-sdk";
 
-export function FigmaBasedDependencyInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
-  const baseCardTitleStyles = "flex items-center gap-2";
-  const cardContentStyles = "flex flex-col gap-4";
-  const copyIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <g clipPath="url(#clip0_899_10241)">
-        <path
-          d="M2.66536 10.6666C1.93203 10.6666 1.33203 10.0666 1.33203 9.33325V2.66659C1.33203 1.93325 1.93203 1.33325 2.66536 1.33325H9.33203C10.0654 1.33325 10.6654 1.93325 10.6654 2.66659M6.66536 5.33325H13.332C14.0684 5.33325 14.6654 5.93021 14.6654 6.66659V13.3333C14.6654 14.0696 14.0684 14.6666 13.332 14.6666H6.66536C5.92899 14.6666 5.33203 14.0696 5.33203 13.3333V6.66659C5.33203 5.93021 5.92899 5.33325 6.66536 5.33325Z"
-          stroke="#737373"
-          strokeWidth="1.33"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-      <defs>
-        <clipPath id="clip0_899_10241">
-          <rect width="16" height="16" fill="white" />
-        </clipPath>
-      </defs>
-    </svg>
-  );
-
-  return (
-    <Card className="w-full">
-      <CardHeader className="pb-2 max-sm:p-3">
-        <CardTitle className={cn(baseCardTitleStyles, "text-lg")}>
-          <ENSNodeIcon width={28} height={28} />
-          <span>ENSNode</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className={cardContentStyles}>
-        <div className="flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3">
-          <div className="h-fit min-w-[255px] flex flex-col justify-start items-start">
-            <p className="text-sm leading-6 font-semibold text-gray-500">Connection</p>
-            <p className="flex flex-row flex-nowrap justify-start items-center gap-[2px] text-sm leading-6 font-normal text-black">
-              {ensIndexerConfig.ensNodePublicUrl.href}
-              <CopyButton value={ensIndexerConfig.ensNodePublicUrl.href} icon={copyIcon} />
-            </p>
-          </div>
-          <div className="h-fit min-w-[255px] flex flex-col justify-start items-start">
-            <p className="text-sm leading-6 font-semibold text-gray-500">Public URL</p>
-            <p className="text-sm leading-6 font-normal text-black">
-              {ensIndexerConfig.ensAdminUrl.href}
-            </p>
-          </div>
-        </div>
-        <div className={cn(cardContentStyles, "max-sm:gap-3")}>
-          {/*ENSIndexer*/}
-          <FigmaAppCard
-            name="ENSIndexer"
-            icon={<ENSIndexerIcon width={20} height={20} />}
-            items={[
-              {
-                label: "Ponder",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.dependencyInfo.ponder}
-                  </p>
-                ),
-              },
-              {
-                label: "Node.js",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.dependencyInfo.nodejs}
-                  </p>
-                ),
-              },
-              {
-                label: "Namespace",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.namespace}
-                  </p>
-                ),
-                additionalInfo: "The ENS namespace that ENSNode operates in the context of.",
-              },
-              {
-                label: "Indexed chains",
-                value: (
-                  <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
-                    {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
-                      <ChainIcon chainId={chainId} />
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                label: "Active Plugins",
-                value: (
-                  <div className="w-full flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-1 pt-1">
-                    {ensIndexerConfig.plugins.map((plugin) => (
-                      <PluginBadge text={plugin} />
-                    ))}
-                  </div>
-                ),
-              },
-            ]}
-            version={ensIndexerConfig.dependencyInfo.ensRainbow}
-            docsLink={new URL("https://ensnode.io/ensindexer/")}
-          />
-          {/*The version of ensindexer is a stretch, idk if we can be sure that the versions are aligned, probably not */}
-          {/*ENSRainbow*/}
-          <FigmaAppCard
-            name="ENSRainbow"
-            icon={<ENSRainbowIcon width={20} height={20} />}
-            items={[
-              {
-                label: "Schema Version",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.dependencyInfo.ensRainbowSchema}
-                  </p>
-                ),
-              },
-              {
-                label: "LabelSetId",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.labelSet.labelSetId}
-                  </p>
-                ),
-                additionalInfo:
-                  "Optional label set ID that the ENSRainbow server is expected to use. If provided, heal operations will validate the ENSRainbow server is using this labelSetId.",
-              },
-              {
-                label: "Highest label set version",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.labelSet.labelSetVersion}
-                  </p>
-                ),
-                additionalInfo:
-                  "Optional highest label set version of label set id to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, only labels from label sets with versions less than or equal to this value will be returned. If not provided, the server will use the latest available version.",
-              },
-            ]}
-            version={ensIndexerConfig.dependencyInfo.ensRainbow}
-            docsLink={new URL("https://ensnode.io/ensrainbow/")}
-          />
-          {/*ENSDb*/}
-          <FigmaAppCard
-            name="ENSDb"
-            icon={<ENSDbIcon width={20} height={20} />}
-            items={[
-              {
-                label: "Database Schema",
-                value: (
-                  <p className="text-sm leading-6 font-normal text-black">
-                    {ensIndexerConfig.databaseSchemaName}
-                  </p>
-                ),
-              },
-            ]}
-            version="ClosedAlpha"
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
+export interface ENSNodeConfigProps {
+  ensIndexerConfig: ENSIndexerPublicConfig;
 }
 
-export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
+export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
   const baseCardTitleStyles = "flex items-center gap-2";
   const cardContentStyles = "flex flex-col gap-4";
   const copyIcon = (
@@ -221,7 +64,7 @@ export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSNodeConfig
         </div>
         <div className={cn(cardContentStyles, "max-sm:gap-3")}>
           {/*ENSIndexer*/}
-          <FigmaEvolutionAppCard
+          <ConfigInfoAppCard
             name="ENSIndexer"
             icon={<ENSIndexerIcon width={24} height={24} />}
             items={[
@@ -307,7 +150,7 @@ export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSNodeConfig
           />
           {/*The version of ensindexer is a stretch, idk if we can be sure that the versions are aligned, probably not */}
           {/*ENSRainbow*/}
-          <FigmaEvolutionAppCard
+          <ConfigInfoAppCard
             name="ENSRainbow"
             icon={<ENSRainbowIcon width={24} height={24} />}
             items={[
@@ -344,7 +187,7 @@ export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSNodeConfig
             docsLink={new URL("https://ensnode.io/ensrainbow/")}
           />
           {/*ENSDb*/}
-          <FigmaEvolutionAppCard
+          <ConfigInfoAppCard
             name="ENSDb"
             icon={<ENSDbIcon width={24} height={24} />}
             items={[
@@ -367,66 +210,25 @@ export function FigmaEvolutionDependencyInfo({ ensIndexerConfig }: ENSNodeConfig
   );
 }
 
-interface AppCardContent {
+interface ConfigInfoAppCardContent {
   label: string;
   value: ReactElement;
   additionalInfo?: string;
 }
 
-interface AppCardProps {
+interface ConfigInfoAppCardProps {
   name: string;
   icon: ReactElement;
-  items: AppCardContent[];
+  items: ConfigInfoAppCardContent[];
   version: string;
   docsLink?: URL;
+  checks?: {
+    label: string;
+    description: string;
+    value: boolean;
+    icon: ReactElement;
+  }[];
 }
-
-const FigmaAppCard = ({ name, icon, items, version, docsLink }: AppCardProps) => {
-  const cardHeaderLayoutStyles =
-    "flex flex-row flex-nowrap justify-between items-center max-sm:flex-col max-sm:justify-start max-sm:items-start max-sm:gap-2";
-  const baseCardTitleStyles = "flex items-center gap-2";
-  const cardContentStyles = "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3";
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className={cardHeaderLayoutStyles}>
-          <CardTitle className={cn(baseCardTitleStyles, "text-sm leading-6 font-bold")}>
-            {icon}
-            <span>{name}</span>
-          </CardTitle>
-          <div className={baseCardTitleStyles}>
-            <p className="text-sm leading-normal font-normal text-muted-foreground">v{version}</p>
-            {docsLink && (
-              <a
-                href={docsLink.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="flex items-center gap-1 text-sm leading-normal text-blue-600 hover:underline font-normal"
-              >
-                View Docs <ExternalLink size={14} className="inline-block" />
-              </a>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className={cardContentStyles}>
-        {items.map((item) => (
-          <div
-            key={`${name}-${item.label}-item`}
-            className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start"
-          >
-            <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
-              {item.label}
-              {item.additionalInfo && <AdditionalInformationTooltip text={item.additionalInfo} />}
-            </p>
-            {item.value}
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-};
 
 interface TextContentProps {
   text: string;
@@ -478,27 +280,18 @@ const AdditionalInformationTooltip = ({ text }: TextContentProps) => {
   );
 };
 
-interface EvolutionAppCardProps extends AppCardProps {
-  checks?: {
-    label: string;
-    description: string;
-    value: boolean;
-    icon: ReactElement;
-  }[];
-}
-
 //TODO: make planned changes to this version of design:
 // 2. Inclusion of the booleans from config (with icons prepared in Figma)
 // 3. Anything else? (so far only minor spacing changes)
 // 4. Icons for plugins (new dedicated PluginIcon component, working similarily to ChainIcon) -- questionable --> too much noise
-const FigmaEvolutionAppCard = ({
+const ConfigInfoAppCard = ({
   name,
   icon,
   items,
   version,
   docsLink,
   checks,
-}: EvolutionAppCardProps) => {
+}: ConfigInfoAppCardProps) => {
   const cardHeaderLayoutStyles =
     "flex flex-row flex-nowrap justify-between items-center max-sm:flex-col max-sm:justify-start max-sm:items-start max-sm:gap-2";
   const baseCardTitleStyles = "flex items-center gap-2";
