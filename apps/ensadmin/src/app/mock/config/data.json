@@ -17,7 +17,7 @@
     "databaseSchemaName": "alphaSchema0.34.0",
     "healReverseAddresses": true,
     "indexAdditionalResolverRecords": true,
-    "replaceUnnormalized": false,
+    "replaceUnnormalized": true,
     "isSubgraphCompatible": false,
     "namespace": "mainnet",
     "plugins": [
@@ -26,7 +26,8 @@
       "lineanames",
       "threedns",
       "reverse-resolvers",
-      "referrals"
+      "referrals",
+      "tokenscope"
     ],
     "dependencyInfo": {
       "nodejs": "22.18.0",
@@ -34,5 +35,119 @@
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     }
+  },
+  "Alpha Sepolia": {
+    "ensAdminUrl": "https://admin.ensnode.io/",
+    "ensNodePublicUrl": "https://api.alpha-sepolia.green.ensnode.io/",
+    "labelSet": {
+      "labelSetId": "subgraph",
+      "labelSetVersion": 0
+    },
+    "dependencyInfo": {
+      "nodejs": "22.18.0",
+      "ponder": "0.11.43",
+      "ensRainbow": "0.34.0",
+      "ensRainbowSchema": 3
+    },
+    "indexedChainIds": [
+      11155111,
+      84532,
+      59141,
+      11155420,
+      421614,
+      534351
+    ],
+    "namespace": "sepolia",
+    "plugins": [
+      "subgraph",
+      "basenames",
+      "lineanames",
+      "threedns",
+      "reverse-resolvers",
+      "referrals"
+    ],
+    "databaseSchemaName": "alphaSepoliaSchema0.34.0",
+    "healReverseAddresses": true,
+    "indexAdditionalResolverRecords": true,
+    "replaceUnnormalized": true,
+    "isSubgraphCompatible": false
+  },
+  "Subgraph Mainnet": {
+    "ensAdminUrl": "https://admin.ensnode.io/",
+    "ensNodePublicUrl": "https://api.mainnet.green.ensnode.io/",
+    "labelSet": {
+      "labelSetId": "subgraph",
+      "labelSetVersion": 0
+    },
+    "dependencyInfo": {
+      "nodejs": "22.18.0",
+      "ponder": "0.11.43",
+      "ensRainbow": "0.34.0",
+      "ensRainbowSchema": 3
+    },
+    "indexedChainIds": [
+      1
+    ],
+    "namespace": "mainnet",
+    "plugins": [
+      "subgraph"
+    ],
+    "databaseSchemaName": "mainnetSchema0.34.0",
+    "healReverseAddresses": false,
+    "indexAdditionalResolverRecords": false,
+    "replaceUnnormalized": false,
+    "isSubgraphCompatible": true
+  },
+  "Subgraph Sepolia": {
+    "ensAdminUrl": "https://admin.ensnode.io/",
+    "ensNodePublicUrl": "https://api.sepolia.green.ensnode.io/",
+    "labelSet": {
+      "labelSetId": "subgraph",
+      "labelSetVersion": 0
+    },
+    "dependencyInfo": {
+      "nodejs": "22.18.0",
+      "ponder": "0.11.43",
+      "ensRainbow": "0.34.0",
+      "ensRainbowSchema": 3
+    },
+    "indexedChainIds": [
+      11155111
+    ],
+    "namespace": "sepolia",
+    "plugins": [
+      "subgraph"
+    ],
+    "databaseSchemaName": "sepoliaSchema0.34.0",
+    "healReverseAddresses": false,
+    "indexAdditionalResolverRecords": false,
+    "replaceUnnormalized": false,
+    "isSubgraphCompatible": true
+  },
+  "Subgraph Holesky": {
+    "ensAdminUrl": "https://admin.ensnode.io/",
+    "ensNodePublicUrl": "https://api.holesky.green.ensnode.io/",
+    "labelSet": {
+      "labelSetId": "subgraph",
+      "labelSetVersion": 0
+    },
+    "dependencyInfo": {
+      "nodejs": "22.18.0",
+      "ponder": "0.11.43",
+      "ensRainbow": "0.34.0",
+      "ensRainbowSchema": 3
+    },
+    "indexedChainIds": [
+      17000
+    ],
+    "namespace": "holesky",
+    "plugins": [
+      "subgraph"
+    ],
+    "databaseSchemaName": "holeskySchema0.34.0",
+    "healReverseAddresses": false,
+    "indexAdditionalResolverRecords": false,
+    "replaceUnnormalized": false,
+    "isSubgraphCompatible": true
   }
 }

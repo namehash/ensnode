@@ -151,29 +151,37 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
             checks={[
               {
                 label: "Heal Reverse Addresses",
-                description:
-                  "Enable or disable healing of addr.reverse subnames. If this is set to true, ENSIndexer will attempt to heal subnames of addr.reverse.",
+                description: {
+                  checkSelected: "Check is TRUE",
+                  checkNotSelected: "Check is FALSE",
+                },
                 value: ensIndexerConfig.healReverseAddresses,
                 icon: <HealIcon className="flex-shrink-0" />,
               },
               {
                 label: "Index Additional Resolver Records",
-                description:
-                  "Enable or disable the indexing of Resolver record values. If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records. If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.",
+                description: {
+                  checkSelected: "Check is TRUE",
+                  checkNotSelected: "Check is FALSE",
+                },
                 value: ensIndexerConfig.indexAdditionalResolverRecords,
                 icon: <IndexAdditionalRecordsIcon className="flex-shrink-0" />,
               },
               {
                 label: "Replace Unnormalized Labels",
-                description:
-                  "Controls ENSIndexer's handling of Literal Labels and Literal Names This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.",
+                description: {
+                  checkSelected: "Check is TRUE",
+                  checkNotSelected: "Check is FALSE",
+                },
                 value: ensIndexerConfig.replaceUnnormalized,
                 icon: <Replace width={20} height={20} stroke="#3F3F46" className="flex-shrink-0" />,
               },
               {
                 label: "Subgraph Compatible",
-                description:
-                  "A flag derived from the built config indicating whether ENSIndexer is operating in a subgraph-compatible way. This flag is true if:a) only the subgraph plugin is activated,\nb) healReverseAddresess is false, and\nc) indexRecordValues is false",
+                description: {
+                  checkSelected: "Check is TRUE",
+                  checkNotSelected: "Check is FALSE",
+                },
                 value: ensIndexerConfig.isSubgraphCompatible,
                 icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0"  />,
               },
@@ -239,7 +247,10 @@ interface ConfigInfoAppCardProps {
   docsLink?: URL;
   checks?: {
     label: string;
-    description: string;
+    description: { //TODO: improve field names here
+      checkSelected: string;
+      checkNotSelected: string;
+    };
     value: boolean;
     icon: ReactElement;
   }[];
@@ -365,7 +376,7 @@ const ConfigInfoAppCard = ({
                 {check.icon}
                 <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
                   {check.label}
-                  <AdditionalInformationTooltip content={<p>{check.description}</p>} />
+                  <AdditionalInformationTooltip content={<p>{check.value ? check.description.checkSelected : check.description.checkNotSelected}</p>} />
                 </p>
                 {check.value ? (
                   <CheckIcon className="text-emerald-600 flex-shrink-0" />
