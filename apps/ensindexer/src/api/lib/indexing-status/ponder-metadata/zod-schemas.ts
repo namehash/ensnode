@@ -26,7 +26,6 @@ import {
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
   checkChainIndexingStatusesForUnstartedOverallStatus,
-  getActiveChains,
   getOmnichainIndexingCursor,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
@@ -118,24 +117,17 @@ export const makePonderChainMetadataSchema = (
         }
 
         case OverallIndexingStatusIds.Backfill: {
-          // forcing the type here, will be validated in the following 'check' step
-          const chains = serializedChainIndexingStatuses as Record<
-            ChainIdString,
-            ChainIndexingStatusForBackfillOverallStatus
-          >;
           return {
             overallStatus: OverallIndexingStatusIds.Backfill,
-            chains,
-            omnichainIndexingCursor: getOmnichainIndexingCursor(getActiveChains(chainStatuses)),
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingStatusForBackfillOverallStatus
+            >, // forcing the type here, will be validated in the following 'check' step
+            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
         }
 
         case OverallIndexingStatusIds.Completed: {
-          // invariant: all chains are in the completed status
-          if (!checkChainIndexingStatusesForCompletedOverallStatus(chainStatuses)) {
-            throw new Error("All chains must be in the 'completed' status.");
-          }
-
           return {
             overallStatus: OverallIndexingStatusIds.Completed,
             chains: serializedChainIndexingStatuses as Record<
@@ -151,7 +143,7 @@ export const makePonderChainMetadataSchema = (
             overallStatus: OverallIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
             overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
-            omnichainIndexingCursor: getOmnichainIndexingCursor(getActiveChains(chainStatuses)),
+            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
       }
     })

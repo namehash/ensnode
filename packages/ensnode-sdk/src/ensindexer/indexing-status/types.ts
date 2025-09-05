@@ -221,25 +221,6 @@ export type ChainIndexingStatus =
   | ChainIndexingCompletedStatus;
 
 /**
- * Chain Indexing Status: Active
- *
- * Represents a chain where indexing was active, or is currently active.
- * The `latestIndexedBlock` field will be available.
- */
-export type ChainIndexingActiveStatus =
-  | ChainIndexingBackfillStatus
-  | ChainIndexingCompletedStatus
-  | ChainIndexingFollowingStatus;
-
-/**
- * Chain Indexing Status: Standby
- *
- * Represents a chain where indexing is currently on standby (not happening).
- * The `latestIndexedBlock` field will not be available.
- */
-export type ChainIndexingStandbyStatus = ChainIndexingQueuedStatus;
-
-/**
  * ENSIndexer Overall Indexing Status: Unstarted
  *
  * Describes the current state of indexing operations across all indexed chains
@@ -284,15 +265,14 @@ export interface ENSIndexerOverallIndexingBackfillStatus {
    * Omnichain Indexing Cursor
    *
    * Identifies the timestamp of the progress of omnichain indexing across
-   * all chains in {@link ChainIndexingBackfillStatus} status.
+   * all indexed chains.
    *
    * Invariants:
    * - guaranteed to be equal to
-   *   a timestamp of the highest `latestIndexedBlock` across all
-   *   chains in {@link ChainIndexingBackfillStatus} status.
-   * - guaranteed to be lower than or equal to
-   *   a timestamp of the earliest `config.startBlock` across all chains
-   *   in {@link ChainIndexingStandbyStatus} status.
+   *   a timestamp of the highest `latestIndexedBlock` across all chains that
+   *   have started indexing (are not queued).
+   * - guaranteed to be lower than
+   *   a timestamp of the lowest `config.startBlock` across all queued chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
 
@@ -328,8 +308,10 @@ export interface ENSIndexerOverallIndexingCompletedStatus {
    *
    * Invariants:
    * - guaranteed to be equal to
-   *   a timestamp of the highest `latestIndexedBlock` across all indexed
-   *   chains.
+   *   a timestamp of the highest `latestIndexedBlock` across all chains that
+   *   have started indexing (are not queued).
+   * - guaranteed to be lower than
+   *   a timestamp of the lowest `config.startBlock` across all queued chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
 
@@ -358,15 +340,14 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
    * Omnichain Indexing Cursor
    *
    * Identifies the timestamp of the progress of omnichain indexing across
-   * all chains in {@link ChainIndexingActiveStatus} status.
+   * all indexed chains.
    *
    * Invariants:
    * - guaranteed to be equal to
-   *   a timestamp of the highest `latestIndexedBlock` across all
-   *   chains in {@link ChainIndexingActiveStatus} status.
-   * - guaranteed to be lower than or equal to
-   *   a timestamp of the earliest `config.startBlock` across all chains
-   *   in {@link ChainIndexingStandbyStatus} status.
+   *   a timestamp of the highest `latestIndexedBlock` across all chains that
+   *   have started indexing (are not queued).
+   * - guaranteed to be lower than
+   *   a timestamp of the lowest `config.startBlock` across all queued chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
 

@@ -1,12 +1,10 @@
 import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 import {
-  ChainIndexingActiveStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingDefiniteConfig,
   ChainIndexingIndefiniteConfig,
   ChainIndexingQueuedStatus,
-  ChainIndexingStandbyStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
@@ -122,30 +120,23 @@ export function getTimestampForHighestOmnichainKnownBlock(
 /**
  * Get Omnichain Indexing Cursor
  *
- * The cursor tracks the "highest" latest indexed block across all chains in
- * {@link ChainIndexingActiveStatus} indexing status.
+ * The cursor tracks the "highest" latest indexed block timestamp across all chains
+ * that have started indexing (are not queued).
  */
-export function getOmnichainIndexingCursor(chains: ChainIndexingActiveStatus[]): UnixTimestamp {
-  return Math.max(...chains.map((chain) => chain.latestIndexedBlock.timestamp));
-}
+export function getOmnichainIndexingCursor(chains: ChainIndexingStatus[]): UnixTimestamp {
+  const latestIndexedBlockTimestamps = [] as UnixTimestamp[];
 
-/**
- * Get all chains which status is {@link ChainIndexingActiveStatus}.
- */
-export function getActiveChains(chains: ChainIndexingStatus[]): ChainIndexingActiveStatus[] {
-  return chains.filter(
-    (chain) =>
-      chain.status === ChainIndexingStatusIds.Backfill ||
-      chain.status === ChainIndexingStatusIds.Completed ||
-      chain.status === ChainIndexingStatusIds.Following,
-  );
-}
+  for (const chain of chains) {
+    switch (chain.status) {
+      case ChainIndexingStatusIds.Backfill:
+      case ChainIndexingStatusIds.Completed:
+      case ChainIndexingStatusIds.Following:
+        latestIndexedBlockTimestamps.push(chain.latestIndexedBlock.timestamp);
+        break;
+    }
+  }
 
-/**
- * Get all chains which status is {@link ChainIndexingStandbyStatus}.
- */
-export function getStandbyChains(chains: ChainIndexingStatus[]): ChainIndexingStandbyStatus[] {
-  return chains.filter((chain) => chain.status === ChainIndexingStatusIds.Queued);
+  return Math.max(...latestIndexedBlockTimestamps);
 }
 
 /**
