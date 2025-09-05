@@ -8,10 +8,10 @@ import {
   decodeTXTData,
   parseDnsTxtRecordArgs,
   parseRRSet,
-  subgraph_decodeLiteralDNSEncodedName,
+  subgraph_decodeDNSEncodedLiteralName,
 } from "@/lib/dns-helpers";
 import { getDatasource } from "@ensnode/datasources";
-import { DNSEncodedName, LiteralDNSEncodedName, encodeLabelHash } from "@ensnode/ensnode-sdk";
+import { DNSEncodedLiteralName, DNSEncodedName, encodeLabelHash } from "@ensnode/ensnode-sdk";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
@@ -33,7 +33,7 @@ const NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES = [
   stringToHex("\x05test.\x00"),
   stringToHex("\x05test[\x00"),
   stringToHex("\x05test]\x00"),
-] as LiteralDNSEncodedName[];
+] as DNSEncodedLiteralName[];
 
 describe("dns-helpers", () => {
   describe("parseRRSet", () => {
@@ -70,41 +70,41 @@ describe("dns-helpers", () => {
   describe("decodeDNSPacketBytes", () => {
     it("throws for root node", () => {
       expect(() =>
-        subgraph_decodeLiteralDNSEncodedName(
-          bytesToHex(packetToBytes("")) as LiteralDNSEncodedName,
+        subgraph_decodeDNSEncodedLiteralName(
+          bytesToHex(packetToBytes("")) as DNSEncodedLiteralName,
         ),
       ).toThrow(/root node/i);
     });
 
     it("throws for empty input", () => {
-      expect(() => subgraph_decodeLiteralDNSEncodedName("" as LiteralDNSEncodedName)).toThrow(
+      expect(() => subgraph_decodeDNSEncodedLiteralName("" as DNSEncodedLiteralName)).toThrow(
         /empty/i,
       );
     });
 
     it("throws for empty packet", () => {
-      expect(() => subgraph_decodeLiteralDNSEncodedName("0x" as LiteralDNSEncodedName)).toThrow(
+      expect(() => subgraph_decodeDNSEncodedLiteralName("0x" as DNSEncodedLiteralName)).toThrow(
         /empty/i,
       );
     });
 
     it("throws for malformed packet", () => {
       expect(() =>
-        subgraph_decodeLiteralDNSEncodedName(stringToHex("\x06aaa\x00") as LiteralDNSEncodedName),
+        subgraph_decodeDNSEncodedLiteralName(stringToHex("\x06aaa\x00") as DNSEncodedLiteralName),
       ).toThrow(/overflow/i);
     });
 
     it("should throw for labels with subgraph-invalid characters", () => {
       NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES.forEach((name) => {
-        expect(() => subgraph_decodeLiteralDNSEncodedName(name)).toThrow(/not subgraph-valid/i);
+        expect(() => subgraph_decodeDNSEncodedLiteralName(name)).toThrow(/not subgraph-valid/i);
       });
     });
 
     it("should handle previously bugged name", () => {
       // this `name` from tx 0x2138cdf5fbaeabc9cc2cd65b0a30e4aea47b3961f176d4775869350c702bd401
       expect(
-        subgraph_decodeLiteralDNSEncodedName(
-          "0x0831323333333232310365746800" as LiteralDNSEncodedName,
+        subgraph_decodeDNSEncodedLiteralName(
+          "0x0831323333333232310365746800" as DNSEncodedLiteralName,
         ),
       ).toEqual({
         label: "12333221",

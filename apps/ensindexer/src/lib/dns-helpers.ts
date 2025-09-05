@@ -3,8 +3,8 @@ import { Hex, bytesToString, hexToBytes } from "viem";
 
 import { stripNullBytes } from "@/lib/lib-helpers";
 import {
+  DNSEncodedLiteralName,
   DNSEncodedName,
-  LiteralDNSEncodedName,
   LiteralLabel,
   LiteralName,
   isLabelSubgraphValid,
@@ -18,16 +18,16 @@ import {
  * NOTE(subgraph-compat): This behavior is required when config.replaceUnnormalized = false in order
  * to match the output of the legacy ENS Subgraph.
  *
- * @param packet a hex string that encodes a LiteralDNSEncodedName
+ * @param packet a hex string that encodes a DNSEncodedLiteralName
  * @returns The Literal Label and Literal Name that the LiteralDNSEncodeName decodes to
  * @throws If the packet is malformed, the packet encodes the root node, or if any of the labels are not subgraph-valid.
  */
-export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): {
+export function subgraph_decodeDNSEncodedLiteralName(packet: DNSEncodedLiteralName): {
   label: LiteralLabel;
   name: LiteralName;
 } {
   // decode the literal labels as normal, throwing if malformed
-  const literalLabels = decodeLiteralDNSEncodedName(packet);
+  const literalLabels = decodeDNSEncodedLiteralName(packet);
 
   // NOTE: in the original implementation, the returned `label`, in the case of the root node, would
   // be '' (empty string). In practice, however, the root node is never wrapped by the NameWrapper,
@@ -35,7 +35,7 @@ export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedNa
   // implicit invariant here.
   if (literalLabels.length === 0) {
     throw new Error(
-      `Implicit Invariant(subgraph_decodeLiteralDNSEncodedName): NameWrapper emitted ${packet} that decoded to root node (empty string).`,
+      `Implicit Invariant(subgraph_decodeDNSEncodedLiteralName): NameWrapper emitted ${packet} that decoded to root node (empty string).`,
     );
   }
 
@@ -53,24 +53,24 @@ export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedNa
 }
 
 /**
- * Decodes a DNS-Encoded name consisting of Literal Labels into an ordred list of Literal Labels.
+ * Decodes a DNS-Encoded name consisting of Literal Labels into an ordered list of Literal Labels.
  *
- * For discussion on DNS-Encoding, see the {@link DNSEncodedName} and {@link LiteralDNSEncodedName} types.
+ * For discussion on DNS-Encoding, see the {@link DNSEncodedName} and {@link DNSEncodedLiteralName} types.
  *
  * Due to the constraints of DNS-Encoding, there is an additional guarantee that each Literal Label
  * in the resulting list is guaranteed to have a maximum byte length of 255.
  *
- * @param packet a hex string that encodes a LiteralDNSEncodedName
+ * @param packet a hex string that encodes a DNSEncodedLiteralName
  * @returns A list of the LiteralLabels contained in packet
  * @throws If the packet is malformed
- * @dev This is just `decodeDNSEncodedPacket` with semantic input/output
+ * @dev This is just `decodeDNSEncodedName` with semantic input/output
  */
-export function decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): LiteralLabel[] {
+export function decodeDNSEncodedLiteralName(packet: DNSEncodedLiteralName): LiteralLabel[] {
   return decodeDNSEncodedName(packet) as LiteralLabel[];
 }
 
 /**
- * Decodes a DNS-Encoded Name into an ordred list of string segments.
+ * Decodes a DNS-Encoded Name into an ordered list of string segments.
  *
  * For discussion on DNS-Encoding, see the {@link DNSEncodedName} type.
  *

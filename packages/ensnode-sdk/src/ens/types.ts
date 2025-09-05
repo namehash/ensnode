@@ -58,7 +58,7 @@ export type LabelHash = Hex;
 export type Label = string;
 
 /**
- * An EncodedLabelHash is a specially formatted unnormalized Label that should be interpreted as a
+ * An EncodedLabelHash is a specially formatted (unnormalized) Label that should be interpreted as a
  * LabelHash literal. The original string may not be known, may not be normalizable, or may be too
  * long for DNS-Encoding.
  *
@@ -130,46 +130,46 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * Where 0x07 is the length of "example", 0x03 is the length of "eth", and 0x00 marks the end
  *
  * @dev This type is _structurally_ typed to aid Event Argument Typing — consumers should further
- * cast the type of the event argument to a _nominally_ typed DNSEncodedName (see below) depending
- * on what type of DNSEncodedName the event argument represents.
+ * cast the type of the event argument to a _nominally_ typed DNSEncodedName like {@link DNSEncodedLiteralName}
+ * or {@link DNSEncodedPartiallyInterpretedName} depending on the context.
  */
 export type DNSEncodedName = Hex;
 
 /**
- * A DNSEncodedName that contains literal label data as it appears onchain,
- * without any interpretation processing. The encoded labels may contain
- * unnormalized characters or other values unsuitable for display.
+ * A DNSEncodedName that encodes a name containing {@link LiteralLabel}s.
  *
- * In a LiteralDNSEncodedName, strings that look like Encoded LabelHashes are understood to be
- * Literal Labels: when interpreted, the Interpeted Label will be the `labelhash` of the
- * "[abcd...xyz]" string.
+ * In a DNSEncodedLiteralName, all labels are understood to be Literal Labels, including labels
+ * that may look like Encoded LabelHashes: when interpreted, the Interpeted Label will be the
+ * `labelhash` of the "[abcd...xyz]" string.
  *
- * The NameWrapper contract emits LiteralDNSEncodedNames:
+ * The NameWrapper contract emits DNSEncodedLiteralNames:
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
  *
- * The ThreeDNSToken contract emits LiteralDNSEncodedNames:
+ * The ThreeDNSToken contract emits DNSEncodedLiteralNames:
  * @see https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/libraries/BytesUtils.sol
  *
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
-export type LiteralDNSEncodedName = DNSEncodedName & { __brand: "LiteralDNSEncodedName" };
+export type DNSEncodedLiteralName = DNSEncodedName & { __brand: "DNSEncodedLiteralName" };
 
 /**
  * A DNSEncodedName that represents a name consisting of labels that are either:
  * a) Literal Labels, or
  * b) Encoded LabelHashes.
  *
- * In a PartiallyInterpretedDNSEncodedName, strings that look like Encoded LabelHashes are understood
+ * In a DNSEncodedPartiallyInterpretedName, strings that look like Encoded LabelHashes are understood
  * to be Encoded LabelHashes: when interpreted, the Interpeted Label will be the exact value of the
  * decoded "[abcd...xyz]" string.
  *
  * TODO: This type is unused in ENSv1, but its usage is anticipated in ENSv2 due to Encoded
  * LabelHash support in the NameCoder contract.
  *
+ * TODO: determine "is this label an encoded labelhash" logic after NameCoder is updated
+ *
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
  *
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
-export type PartiallyInterpretedDNSEncodedName = DNSEncodedName & {
-  __brand: "PartiallyInterpretedDNSEncodedName";
+export type DNSEncodedPartiallyInterpretedName = DNSEncodedName & {
+  __brand: "DNSEncodedPartiallyInterpretedName";
 };

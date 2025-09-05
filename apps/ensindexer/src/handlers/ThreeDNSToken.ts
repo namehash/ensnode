@@ -3,11 +3,11 @@ import schema from "ponder:schema";
 import { Address, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
+  DNSEncodedLiteralName,
   DNSEncodedName,
   InterpretedLabel,
   InterpretedName,
   type LabelHash,
-  LiteralDNSEncodedName,
   LiteralLabel,
   type Node,
   encodeLabelHash,
@@ -25,7 +25,7 @@ import {
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
-import { decodeLiteralDNSEncodedName } from "@/lib/dns-helpers";
+import { decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
@@ -48,12 +48,17 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
   });
 };
 
-const parseFQDN = (
-  fqdn: LiteralDNSEncodedName,
-): { label: InterpretedLabel; name: InterpretedName } => {
-  // Invariant: ThreeDNS always emits a decodable DNS Packet
+/**
+ * Decodes ThreeDNSToken's emitted DNS-Encoded Name `fqdn` into an Interpreted Name and its first
+ * Interpreted Label.
+ */
+function decodeFQDN(fqdn: DNSEncodedLiteralName): {
+  label: InterpretedLabel;
+  name: InterpretedName;
+} {
+  // Invariant: ThreeDNS always emits a decodable DNS Packet (`decodeDNSEncodedLiteralName` throws)
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  const literalLabels = decodeLiteralDNSEncodedName(fqdn); // throws if malformed
+  const literalLabels = decodeDNSEncodedLiteralName(fqdn);
 
   // Invariant: ThreeDNSToken doesn't try to register the root node
   if (literalLabels.length === 0) {
@@ -70,14 +75,14 @@ const parseFQDN = (
     );
   }
 
-  // thanks to the invariant above, we know that all of the labels are normalized (and therefore interpreted)
+  // due the invariant above, we know that all of the labels are normalized (and therefore Interpreted Labels)
   const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
 
-  const label = interpretedLabels[0]!; // ! ok due to length invariant above
-  const name = interpretedLabelsToInterpretedName(interpretedLabels);
-
-  return { label, name };
-};
+  return {
+    label: interpretedLabels[0]!, // ! ok due to length invariant above
+    name: interpretedLabelsToInterpretedName(interpretedLabels),
+  };
+}
 
 /**
  * In ThreeDNS, NewOwner is emitted when a (sub)domain is created. This includes TLDs, 2LDs, and
@@ -245,7 +250,8 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const { label, name } = parseFQDN(fqdn as LiteralDNSEncodedName);
+  // NOTE: ThreeDNSToken emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
+  const { label, name } = decodeFQDN(fqdn as DNSEncodedLiteralName);
 
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
   if (name.split(".").length >= 3) {
@@ -253,6 +259,8 @@ export async function handleRegistrationCreated({
     throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
   }
 
+  // NOTE: this labelhash(label) is safe because `label` is guaranteed to be normalized and guaranteed
+  // _not_ to be an Encoded LabelHash (see invariants in `decodeFQDN`)
   const labelHash = labelhash(label);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
