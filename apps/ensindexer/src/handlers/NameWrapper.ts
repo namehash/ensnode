@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { type Address, type Hex, hexToBytes, namehash } from "viem";
+import { type Address, namehash } from "viem";
 
 import {
   DNSEncodedName,

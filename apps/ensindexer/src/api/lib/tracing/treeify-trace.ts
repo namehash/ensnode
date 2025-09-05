@@ -1,9 +1,4 @@
-import {
-  PROTOCOL_ATTRIBUTE_PREFIX,
-  ProtocolSpan,
-  ProtocolSpanTreeNode,
-  ProtocolTrace,
-} from "@ensnode/ensnode-sdk";
+import { ProtocolSpan, ProtocolSpanTreeNode, ProtocolTrace } from "@ensnode/ensnode-sdk";
 import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
 
 /**
