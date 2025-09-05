@@ -4,6 +4,7 @@ import {
   ForwardResolutionProtocolStep,
   ForwardResolutionResult,
   Node,
+  NormalizedName,
   PluginName,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
@@ -110,7 +111,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
-        `resolveForward(${name}, chainId: ${chainId})`,
+        `resolveForward(${_name}, chainId: ${chainId})`,
         {
           name: _name,
           selection: selectionString,
@@ -127,7 +128,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             throw new Error(`Invariant: Name "${_name}" must be normalized.`);
           }
 
-          const name = nameToNormalizedName(_name);
+          const name = nameToNormalizedName(_name); // name is already normalized so won't throw
           const node: Node = namehash(name);
           span.setAttribute("node", node);
 
