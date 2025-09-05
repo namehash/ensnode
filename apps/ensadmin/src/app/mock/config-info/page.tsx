@@ -1,16 +1,15 @@
 "use client";
 
-import {ENSNodeConfigError, ENSNodeConfigInfo} from "@/components/indexing-status/config-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   SerializedENSIndexerPublicConfig,
   deserializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import mockDataJson from "./data.json";
 import {IndexingStatusPlaceholder} from "@/components/indexing-status/indexing-status-placeholder";
+import {ENSNodeConfigInfoError, ENSNodeConfigInfo} from "@/components/indexing-status/config-info";
 
 const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
 
@@ -34,14 +33,12 @@ export default function MockConfigPage() {
     }
   }, [selectedConfig]);
 
-  const headerStyles = "font-semibold leading-normal text-black";
-
   return (
     <section className="flex flex-col gap-6 p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: ENSNode Public Config</CardTitle>
-          <CardDescription>Select a mock config info variant</CardDescription>
+          <CardTitle>Mock: ENSNodeConfigInfo</CardTitle>
+          <CardDescription>Select a mock ENSNodeConfigInfo variant</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -75,7 +72,7 @@ export default function MockConfigPage() {
 
       {selectedConfig === "Loading" && <IndexingStatusPlaceholder />}
 
-      {selectedConfig === "Loading Error" && <ENSNodeConfigError />}
+      {selectedConfig === "Loading Error" && <ENSNodeConfigInfoError />}
     </section>
   );
 }

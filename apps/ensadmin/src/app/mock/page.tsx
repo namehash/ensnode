@@ -8,15 +8,15 @@ export default function Mock() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl leading-normal">Status Mocks</CardTitle>
-          <CardDescription>Select a mock component to preview</CardDescription>
+          <CardDescription>Select a component mock to preview</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">
-              <Link href="/mock/config">Config</Link>
+              <Link href="/mock/config-info">ENSNodeConfigInfo</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/mock/indexing-status">Indexing status</Link>
+              <Link href="/mock/indexing-stats">IndexingStats</Link>
             </Button>
           </div>
         </CardContent>

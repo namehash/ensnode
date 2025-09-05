@@ -33,8 +33,8 @@ export default function MockIndexingStatusPage() {
     <section className="flex flex-col gap-6 p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: Indexing Status</CardTitle>
-          <CardDescription>Select a mock indexing status scenario</CardDescription>
+          <CardTitle>Mock: IndexingStats</CardTitle>
+          <CardDescription>Select a mock IndexingStats scenario</CardDescription>
         </CardHeader>
 
         <CardContent>

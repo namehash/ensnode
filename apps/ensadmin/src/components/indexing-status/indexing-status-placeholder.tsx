@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
  */
 export function IndexingStatusPlaceholder() {
   return (
-    <section className="flex flex-col gap-6">
+    <section className="flex flex-col gap-6 p-6">
       <Card className="animate-pulse">
         <CardHeader>
           <div className="h-6 bg-muted rounded w-1/3" />

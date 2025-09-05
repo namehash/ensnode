@@ -11,7 +11,7 @@ import { RecentRegistrations } from "@/components/recent-registrations";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { BackfillStatus } from "./backfill-status";
-import { ENSNodeConfigInfo } from "./config-info";
+import {ENSNodeConfigInfoError, ENSNodeConfigInfo} from "./config-info";
 import {
   IndexingStatsForBackfillStatus,
   IndexingStatsForCompletedStatus,
@@ -27,7 +27,7 @@ export function IndexingStatus() {
   const indexingStatusQuery = useIndexingStatus();
 
   if (ensIndexerConfigQuery.isError) {
-    return <p className="p-6">Failed to fetch ENSIndexer Config.</p>;
+    return <ENSNodeConfigInfoError />;
   }
   if (indexingStatusQuery.isError) {
     return <p className="p-6">Failed to fetch Indexing Status.</p>;
