@@ -9,17 +9,17 @@ describe("isLabelSubgraphValid", () => {
     expect(isLabelSubgraphValid("test]")).toBe(false);
   });
 
+  it("should return false for unknown label", () => {
+    expect(isLabelSubgraphValid(null)).toBe(false);
+  });
+
   it("should return true for labels without subgraph-invalid characters", () => {
     expect(isLabelSubgraphValid("test")).toBe(true);
     expect(isLabelSubgraphValid("example")).toBe(true);
     expect(isLabelSubgraphValid("21🚀bingo")).toBe(true);
   });
 
-  it("should return false for empty labels", () => {
-    expect(isLabelSubgraphValid("")).toBe(false);
-  });
-
-  it("should return false for unhealable lablelhash", () => {
-    expect(isLabelSubgraphValid(null)).toBe(false);
+  it("should return true for empty label", () => {
+    expect(isLabelSubgraphValid("")).toBe(true);
   });
 });
