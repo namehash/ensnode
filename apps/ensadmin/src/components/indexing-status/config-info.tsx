@@ -133,7 +133,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                 ),
               },
               {
-                label: "Namespace",
+                label: "ENS Namespace",
                 value: (
                   <p className="text-sm leading-6 font-normal text-black">
                     {ensIndexerConfig.namespace}
@@ -147,7 +147,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                   <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
                     {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
                       <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger className="cursor-default">
                           <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
                         </TooltipTrigger>
                         <TooltipContent
@@ -162,15 +162,14 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                 ),
               },
               {
-                label: "Active Plugins",
+                label: "Plugins",
                 value: (
                   <div className="w-full flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-1 pt-1">
                     {ensIndexerConfig.plugins.map((plugin) => (
                       <PluginBadge key={`${plugin}-plugin-badge`} text={plugin} />
                     ))}
                   </div>
-                ),
-                additionalInfo: <p>A set of PluginNames indicating which plugins to activate.</p>,
+                )
               },
             ]}
             checks={[
@@ -346,10 +345,6 @@ const AdditionalInformationTooltip = ({ content }: TooltipContentProps) => {
   );
 };
 
-//TODO: make planned changes to this version of design:
-// 2. Inclusion of the booleans from config (with icons prepared in Figma)
-// 3. Anything else? (so far only minor spacing changes)
-// 4. Icons for plugins (new dedicated PluginIcon component, working similarily to ChainIcon) -- questionable --> too much noise
 const ConfigInfoAppCard = ({
   name,
   icon,

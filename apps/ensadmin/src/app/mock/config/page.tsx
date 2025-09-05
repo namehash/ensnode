@@ -66,9 +66,6 @@ export default function MockConfigPage() {
       )}
 
       {deserializedConfig && <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} />}
-      <Button asChild variant="default">
-        <Link href="/mock">Back to mock list</Link>
-      </Button>
     </section>
   );
 }

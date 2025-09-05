@@ -67,9 +67,6 @@ export default function MockIndexingStatusPage() {
       {deserializedStatus && (
         <MockIndexingStatusDisplayWithProps indexingStatus={deserializedStatus} />
       )}
-      <Button asChild variant="default">
-        <Link href="/mock">Back to mock list</Link>
-      </Button>
     </section>
   );
 }
