@@ -1,6 +1,7 @@
 import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { Address } from "viem";
 
 interface NameDisplayProps {
@@ -17,22 +18,16 @@ interface NameDisplayProps {
  * Optionally shows an external link icon.
  */
 export function NameDisplay({ name, namespaceId, showExternalLinkIcon }: NameDisplayProps) {
-  const ensAppNameDetailsUrl = getNameDetailsUrl(name, namespaceId);
-
-  if (!ensAppNameDetailsUrl) {
-    return <span className="font-medium">{name}</span>;
-  }
+  const nameDetailsUrl = getNameDetailsUrl(name, namespaceId);
 
   return (
-    <a
-      href={ensAppNameDetailsUrl.toString()}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      href={nameDetailsUrl}
       className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
     >
       {name}
       {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
-    </a>
+    </Link>
   );
 }
 
