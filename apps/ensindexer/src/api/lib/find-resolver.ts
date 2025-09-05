@@ -1,6 +1,13 @@
 import { db } from "ponder:api";
 import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
-import { ChainId, type Name, type Node, PluginName, getNameHierarchy } from "@ensnode/ensnode-sdk";
+import {
+  ChainId,
+  type Name,
+  type Node,
+  NormalizedName,
+  PluginName,
+  getNameHierarchy,
+} from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,
@@ -46,7 +53,7 @@ export async function findResolver({
   name,
   accelerate,
   publicClient,
-}: { chainId: ChainId; name: Name; accelerate: boolean; publicClient: PublicClient }) {
+}: { chainId: ChainId; name: NormalizedName; accelerate: boolean; publicClient: PublicClient }) {
   if (chainId === ensRootChainId) {
     // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
     // Subgraph plugin is active
@@ -154,7 +161,10 @@ async function findResolverWithUniversalResolver(
  * // Returns: "0x123..." or null if no resolver found
  * ```
  */
-async function findResolverWithIndex(chainId: ChainId, name: Name): Promise<FindResolverResult> {
+async function findResolverWithIndex(
+  chainId: ChainId,
+  name: NormalizedName,
+): Promise<FindResolverResult> {
   return withActiveSpanAsync(tracer, "findResolverWithIndex", { chainId, name }, async () => {
     // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
     const names = getNameHierarchy(name);

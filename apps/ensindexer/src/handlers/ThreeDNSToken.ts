@@ -1,13 +1,19 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, Hex, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
+  DNSEncodedLiteralName,
+  DNSEncodedName,
+  InterpretedLabel,
+  InterpretedName,
   type LabelHash,
+  LiteralLabel,
   type Node,
   encodeLabelHash,
-  interpretLiteralLabel,
-  interpretLiteralName,
+  interpretedLabelsToInterpretedName,
+  isNormalizedLabel,
+  literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -19,7 +25,7 @@ import {
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
-import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
+import { decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
@@ -41,6 +47,42 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
     args: [tokenId],
   });
 };
+
+/**
+ * Decodes ThreeDNSToken's emitted DNS-Encoded Name `fqdn` into an Interpreted Name and its first
+ * Interpreted Label.
+ */
+function decodeFQDN(fqdn: DNSEncodedLiteralName): {
+  label: InterpretedLabel;
+  name: InterpretedName;
+} {
+  // Invariant: ThreeDNS always emits a decodable DNS Packet (`decodeDNSEncodedLiteralName` throws)
+  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
+  const literalLabels = decodeDNSEncodedLiteralName(fqdn);
+
+  // Invariant: ThreeDNSToken doesn't try to register the root node
+  if (literalLabels.length === 0) {
+    throw new Error(
+      `Invariant: ThreeDNSToken emitted ${fqdn} that decoded to root node (empty string).`,
+    );
+  }
+
+  // Invariant: ThreeDNSToken only emits normalized labels
+  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
+  if (!literalLabels.every(isNormalizedLabel)) {
+    throw new Error(
+      `Invariant: ThreeDNSToken emitted ${fqdn} that included some unnormalized labels: [${literalLabels.join(", ")}].`,
+    );
+  }
+
+  // due the invariant above, we know that all of the labels are normalized (and therefore Interpreted Labels)
+  const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
+
+  return {
+    label: interpretedLabels[0]!, // ! ok due to length invariant above
+    name: interpretedLabelsToInterpretedName(interpretedLabels),
+  };
+}
 
 /**
  * In ThreeDNS, NewOwner is emitted when a (sub)domain is created. This includes TLDs, 2LDs, and
@@ -139,7 +181,10 @@ export async function handleNewOwner({
     // Interpret the `healedLabel` Literal Label into an Interpreted Label
     // see https://ensnode.io/docs/reference/terminology#literal-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
-    const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+    const label =
+      healedLabel !== null
+        ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
+        : encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
@@ -195,7 +240,7 @@ export async function handleRegistrationCreated({
     // NOTE: `tld` event arg represents a `Node` that is the parent of `node`
     tld: Node;
     // NOTE: `fqdn` event arg represents a Hex-encoded DNS Packet
-    fqdn: Hex;
+    fqdn: DNSEncodedName;
     registrant: Address;
     controlBitmap: number;
     expiry: bigint;
@@ -205,28 +250,18 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
-
-  // Invariant: ThreeDNS always emits a decodable DNS Packet
-  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  if (!literalLabel || !literalName) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
-  }
+  // NOTE: ThreeDNSToken emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
+  const { label, name } = decodeFQDN(fqdn as DNSEncodedLiteralName);
 
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
-  if (literalName.split(".").length >= 3) {
+  if (name.split(".").length >= 3) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${literalName}`);
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
   }
 
-  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
-  // see https://ensnode.io/docs/reference/terminology#interpreted-label
-  // see https://ensnode.io/docs/reference/terminology#interpreted-name
-  const interpretedLabel = interpretLiteralLabel(literalLabel);
-  const interpretedName = interpretLiteralName(literalName);
-
-  const labelHash = labelhash(literalLabel);
+  // NOTE: this labelhash(label) is safe because `label` is guaranteed to be normalized and guaranteed
+  // _not_ to be an Encoded LabelHash (see invariants in `decodeFQDN`)
+  const labelHash = labelhash(label);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
   // expiry and re-registration (example: delv.box)
@@ -242,8 +277,8 @@ export async function handleRegistrationCreated({
     expiryDate: expiry,
 
     // include its decoded label/name
-    labelName: interpretedLabel,
-    name: interpretedName,
+    labelName: label,
+    name,
   });
 
   // upsert a Registration entity
@@ -254,7 +289,7 @@ export async function handleRegistrationCreated({
     registrationDate: event.block.timestamp,
     expiryDate: expiry,
     registrantId: registrant,
-    labelName: interpretedLabel,
+    labelName: label,
   });
 
   // log RegistrationEvent

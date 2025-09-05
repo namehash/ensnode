@@ -1,4 +1,4 @@
-import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
+import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 

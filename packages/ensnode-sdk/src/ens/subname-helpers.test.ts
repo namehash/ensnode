@@ -2,34 +2,10 @@ import { Address, IntegerOutOfRangeError, labelhash, namehash, zeroHash } from "
 import { describe, expect, it } from "vitest";
 
 import {
-  isLabelIndexable,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
   uint256ToHex32,
 } from "./subname-helpers";
-
-describe("isLabelIndexable", () => {
-  it("should return false for labels containing unindexable characters", () => {
-    expect(isLabelIndexable("test\0")).toBe(false);
-    expect(isLabelIndexable("test.")).toBe(false);
-    expect(isLabelIndexable("test[")).toBe(false);
-    expect(isLabelIndexable("test]")).toBe(false);
-  });
-
-  it("should return true for labels without unindexable characters", () => {
-    expect(isLabelIndexable("test")).toBe(true);
-    expect(isLabelIndexable("example")).toBe(true);
-    expect(isLabelIndexable("21🚀bingo")).toBe(true);
-  });
-
-  it("should return false for empty labels", () => {
-    expect(isLabelIndexable("")).toBe(false);
-  });
-
-  it("should return false for unhealable lablelhash", () => {
-    expect(isLabelIndexable(null)).toBe(false);
-  });
-});
 
 describe("uint256ToHex32", () => {
   it("should convert bigint to hex string", () => {

@@ -28,8 +28,8 @@ const UNNORMALIZED_LABELS = [
   "vitalik\0", // Null character
   "\0", // Only null character
   "example.\0", // Null character in middle
-  "test[", // Unindexable character
-  "test]", // Unindexable character
+  "test[", // Not normalizable bracket
+  "test]", // Not normalizable bracket
   "test.", // Contains dot
   ".eth", // Starts with dot
   "sub.example", // Contains dot
