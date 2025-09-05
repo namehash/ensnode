@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ENSNodeConfigInfo,
+  ENSNodeConfigInfoError,
+} from "@/components/indexing-status/config-info";
+import { IndexingStatusPlaceholder } from "@/components/indexing-status/indexing-status-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,8 +13,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
 import mockDataJson from "./data.json";
-import {IndexingStatusPlaceholder} from "@/components/indexing-status/indexing-status-placeholder";
-import {ENSNodeConfigInfoError, ENSNodeConfigInfo} from "@/components/indexing-status/config-info";
 
 const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
 
@@ -19,8 +22,8 @@ type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 export default function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>("Alpha Mainnet");
   const { deserializedConfig, validationError } = useMemo(() => {
-    if (selectedConfig === "Loading" || selectedConfig === "Loading Error" ){
-      return {deserializedConfig: null, validationError: null}
+    if (selectedConfig === "Loading" || selectedConfig === "Loading Error") {
+      return { deserializedConfig: null, validationError: null };
     }
 
     try {

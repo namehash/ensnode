@@ -9,7 +9,12 @@ import { ENSDbIcon } from "@/components/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { ConnectionFailedIcon } from "@/components/icons/ConnectionFailedIcon";
+import { CopyIcon } from "@/components/icons/CopyIcon";
+import { HealIcon } from "@/components/icons/HealIcon";
+import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { IconENS } from "@/components/icons/ens";
+import { ConfigInfoAppCard } from "@/components/indexing-status/config-info/app-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -17,11 +22,6 @@ import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import { ExternalLink, Replace } from "lucide-react";
-import {HealIcon} from "@/components/icons/HealIcon";
-import {IndexAdditionalRecordsIcon} from "@/components/icons/IndexAdditionalRecordsIcon";
-import {ConnectionFailedIcon} from "@/components/icons/ConnectionFailedIcon";
-import {CopyIcon} from "@/components/icons/CopyIcon";
-import {ConfigInfoAppCard} from "@/components/indexing-status/config-info/app-card";
 
 export interface ENSNodeConfigProps {
   ensIndexerConfig: ENSIndexerPublicConfig;
@@ -73,7 +73,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
             version={ensIndexerConfig.dependencyInfo.ensRainbow}
             docsLink={new URL("https://ensnode.io/ensadmin/")}
           />
-            {/*TODO: The current approach to displaying the version of ENSAdmin is a stretch.
+          {/*TODO: The current approach to displaying the version of ENSAdmin is a stretch.
            We need to make another update that improves the data model of ENSIndexerPublicConfig and related */}
           {/*ENSDb*/}
           <ConfigInfoAppCard
@@ -89,7 +89,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                 ),
                 additionalInfo: (
                   <p>
-                    A Postgres database schema name. ENSIndexer writes indexed data to tables within this schema.
+                    A Postgres database schema name. ENSIndexer writes indexed data to tables within
+                    this schema.
                   </p>
                 ),
               },
@@ -151,10 +152,15 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                 value: (
                   <div className="w-full flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-1 pt-1">
                     {ensIndexerConfig.plugins.map((plugin) => (
-                        <span key={`${plugin}-plugin-badge`} className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default">{plugin}</span>
+                      <span
+                        key={`${plugin}-plugin-badge`}
+                        className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default"
+                      >
+                        {plugin}
+                      </span>
                     ))}
                   </div>
-                )
+                ),
               },
             ]}
             checks={[
@@ -170,8 +176,10 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Index Additional Resolver Records",
                 description: {
-                  descWhenTrue: "ENSIndexer will track both the keys and the values of Resolver records.",
-                  descWhenFalse: "ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.",
+                  descWhenTrue:
+                    "ENSIndexer will track both the keys and the values of Resolver records.",
+                  descWhenFalse:
+                    "ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.",
                 },
                 value: ensIndexerConfig.indexAdditionalResolverRecords,
                 icon: <IndexAdditionalRecordsIcon className="flex-shrink-0" />,
@@ -179,8 +187,10 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Replace Unnormalized Labels",
                 description: {
-                  descWhenTrue: "All Literal Labels and Literal Names encountered by ENSIndexer will be interpreted.",
-                  descWhenFalse: "ENSIndexer will store and return Literal Labels and Literal Names without further interpretation",
+                  descWhenTrue:
+                    "All Literal Labels and Literal Names encountered by ENSIndexer will be interpreted.",
+                  descWhenFalse:
+                    "ENSIndexer will store and return Literal Labels and Literal Names without further interpretation",
                 },
                 value: ensIndexerConfig.replaceUnnormalized,
                 icon: <Replace width={20} height={20} stroke="#3F3F46" className="flex-shrink-0" />,
@@ -188,7 +198,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Subgraph Compatible",
                 description: {
-                  descWhenTrue: "ENSIndexer is operating in a subgraph-compatible way. It will use subgraph-compatible IDs for entities and events and limit indexing behavior to subgraph indexing semantics",
+                  descWhenTrue:
+                    "ENSIndexer is operating in a subgraph-compatible way. It will use subgraph-compatible IDs for entities and events and limit indexing behavior to subgraph indexing semantics",
                   descWhenFalse: "ENSIndexer is not operating in a subgraph-compatible way.",
                 },
                 value: ensIndexerConfig.isSubgraphCompatible,
@@ -256,14 +267,17 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
 }
 
 export function ENSNodeConfigInfoError() {
-    return (
-        <section className="flex flex-col gap-6 p-6">
-        <Card className="w-full">
-            <CardHeader className="pb-2 max-sm:p-3">
-                <CardTitle className="flex flex-row justify-start items-center gap-2 text-2xl"><ConnectionFailedIcon width={22} height={22} className="flex-shrink-0"/>Connection error</CardTitle>
-            </CardHeader>
-            <CardContent>Failed to fetch ENSIndexer Config.</CardContent>
-        </Card>
-        </section>
-    );
+  return (
+    <section className="flex flex-col gap-6 p-6">
+      <Card className="w-full">
+        <CardHeader className="pb-2 max-sm:p-3">
+          <CardTitle className="flex flex-row justify-start items-center gap-2 text-2xl">
+            <ConnectionFailedIcon width={22} height={22} className="flex-shrink-0" />
+            Connection error
+          </CardTitle>
+        </CardHeader>
+        <CardContent>Failed to fetch ENSIndexer Config.</CardContent>
+      </Card>
+    </section>
+  );
 }

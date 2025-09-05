@@ -11,7 +11,7 @@ import { RecentRegistrations } from "@/components/recent-registrations";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { BackfillStatus } from "./backfill-status";
-import {ENSNodeConfigInfoError, ENSNodeConfigInfo} from "./config-info";
+import { ENSNodeConfigInfo, ENSNodeConfigInfoError } from "./config-info";
 import {
   IndexingStatsForBackfillStatus,
   IndexingStatsForCompletedStatus,
