@@ -103,10 +103,6 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
         timestamp: 1496124933,
         number: 3791243,
       },
-      latestSyncedBlock: {
-        timestamp: 1496125933,
-        number: 3791777,
-      },
       backfillEndBlock: {
         timestamp: 1755182591,
         number: 23139951,
@@ -162,10 +158,6 @@ const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
       latestIndexedBlock: {
         timestamp: 1_496_124_536,
         number: 17_599_999,
-      },
-      latestSyncedBlock: {
-        timestamp: 1_496_125_933,
-        number: 17_600_777,
       },
       backfillEndBlock: {
         timestamp: 1_499_456_537,
