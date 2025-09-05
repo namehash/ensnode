@@ -67,7 +67,7 @@ describe("dns-helpers", () => {
     });
   });
 
-  describe("decodeDNSPacketBytes", () => {
+  describe("subgraph_decodeDNSEncodedLiteralName", () => {
     it("throws for root node", () => {
       expect(() =>
         subgraph_decodeDNSEncodedLiteralName(
