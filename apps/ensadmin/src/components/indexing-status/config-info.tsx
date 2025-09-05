@@ -176,8 +176,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Heal Reverse Addresses",
                 description: {
-                  checkSelected: "Check is TRUE",
-                  checkNotSelected: "Check is FALSE",
+                  checkSelected: "ENSIndexer will attempt to heal subnames of addr.reverse.",
+                  checkNotSelected: "ENSIndexer won't attempt to heal subnames of addr.reverse.",
                 },
                 value: ensIndexerConfig.healReverseAddresses,
                 icon: <HealIcon className="flex-shrink-0" />,
@@ -185,8 +185,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Index Additional Resolver Records",
                 description: {
-                  checkSelected: "Check is TRUE",
-                  checkNotSelected: "Check is FALSE",
+                  checkSelected: "ENSIndexer will track both the keys and the values of Resolver records.",
+                  checkNotSelected: "ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.",
                 },
                 value: ensIndexerConfig.indexAdditionalResolverRecords,
                 icon: <IndexAdditionalRecordsIcon className="flex-shrink-0" />,
@@ -194,8 +194,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Replace Unnormalized Labels",
                 description: {
-                  checkSelected: "Check is TRUE",
-                  checkNotSelected: "Check is FALSE",
+                  checkSelected: "All Literal Labels and Literal Names encountered by ENSIndexer will be interpreted.",
+                  checkNotSelected: "ENSIndexer will store and return Literal Labels and Literal Names without further interpretation",
                 },
                 value: ensIndexerConfig.replaceUnnormalized,
                 icon: <Replace width={20} height={20} stroke="#3F3F46" className="flex-shrink-0" />,
@@ -203,8 +203,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Subgraph Compatible",
                 description: {
-                  checkSelected: "Check is TRUE",
-                  checkNotSelected: "Check is FALSE",
+                  checkSelected: "ENSIndexer is operating in a subgraph-compatible way. It will use subgraph-compatible IDs for entities and events and limit indexing behavior to subgraph indexing semantics",
+                  checkNotSelected: "ENSIndexer is not operating in a subgraph-compatible way.",
                 },
                 value: ensIndexerConfig.isSubgraphCompatible,
                 icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0" />,
