@@ -11,7 +11,7 @@ import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
 import { getTimelinePosition } from "./indexing-timeline-utils";
 
 interface ChainIndexingTimelinePhaseViewModel {
-  status: typeof ChainIndexingStatusIds.Unstarted | typeof ChainIndexingStatusIds.Backfill;
+  status: typeof ChainIndexingStatusIds.Queued | typeof ChainIndexingStatusIds.Backfill;
   startDate: Date;
   endDate: Date;
 }
@@ -25,7 +25,7 @@ interface ChainIndexingTimelinePhaseProps {
 
 /**
  * Component to display a single indexing phase,
- * such as {@link ChainIndexingStatusIds.Unstarted}
+ * such as {@link ChainIndexingStatusIds.Queued}
  * or {@link ChainIndexingStatusIds.Backfill}, on the chain indexing timeline.
  */
 function ChainIndexingTimelinePhase({
@@ -47,7 +47,7 @@ function ChainIndexingTimelinePhase({
   return (
     <div
       className={cn("absolute h-5 rounded-sm z-10", {
-        "bg-gray-400": phase.status === ChainIndexingStatusIds.Unstarted,
+        "bg-gray-400": phase.status === ChainIndexingStatusIds.Queued,
         "bg-blue-500": phase.status === ChainIndexingStatusIds.Backfill,
       })}
       style={{
