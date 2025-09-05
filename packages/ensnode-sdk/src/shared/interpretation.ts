@@ -10,7 +10,7 @@ import {
 } from "../ens";
 
 /**
- * Transforms a Literal Label into an Interpreted Label.
+ * Interprets a Literal Label, producing an Interpreted Label.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
@@ -18,11 +18,11 @@ import {
  * @param label - The Literal Label string to interpret
  * @returns The provided label if it is normalized, else the EncodedLabelHash of the label
  */
-export function interpretLiteralLabel(label: LiteralLabel): InterpretedLabel {
+export function literalLabelToInterpretedLabel(label: LiteralLabel): InterpretedLabel {
   // if the label is normalized, good to go
   if (isNormalizedLabel(label)) return label as string as InterpretedLabel;
 
-  // otherwise (includes empty string label), interpret as EncodedLabelHash
+  // otherwise (includes empty string label), encode the labelhash of the Label
   return encodeLabelHash(labelhash(label)) as InterpretedLabel;
 }
 
@@ -40,7 +40,7 @@ export function interpretLiteralLabel(label: LiteralLabel): InterpretedLabel {
  * @returns An InterpretedName
  */
 export function literalLabelsToInterpretedName(labels: LiteralLabel[]): InterpretedName {
-  return labels.map(interpretLiteralLabel).join(".") as InterpretedName;
+  return labels.map(literalLabelToInterpretedLabel).join(".") as InterpretedName;
 }
 
 /**

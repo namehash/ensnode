@@ -7,23 +7,26 @@ import {
   LiteralDNSEncodedName,
   LiteralLabel,
   LiteralName,
-  isLabelIndexable,
+  isLabelSubgraphValid,
   literalLabelsToLiteralName,
 } from "@ensnode/ensnode-sdk";
 
 /**
  * Implements the original ENS Subgraph DNS-Encoded Name decoding logic, in particular the additional
- * check that each label in the decoded name is indexable (see `isLabelIndexable` for context).
+ * check that each label in the decoded name is subgraph-valid (see {@link isLabelSubgraphValid}).
+ *
+ * NOTE(subgraph-compat): This behavior is required when config.replaceUnnormalized = false in order
+ * to match the output of the legacy ENS Subgraph.
  *
  * @param packet a hex string that encodes a LiteralDNSEncodedName
  * @returns The Literal Label and Literal Name that the LiteralDNSEncodeName decodes to
- * @throws If the packet is malformed, the packet encodes the root node, or if any of the labels are not indexable.
+ * @throws If the packet is malformed, the packet encodes the root node, or if any of the labels are not subgraph-valid.
  */
 export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): {
   label: LiteralLabel;
   name: LiteralName;
 } {
-  // decode the literal labels as normal
+  // decode the literal labels as normal, throwing if malformed
   const literalLabels = decodeLiteralDNSEncodedName(packet);
 
   // NOTE: in the original implementation, the returned `label`, in the case of the root node, would
@@ -36,10 +39,10 @@ export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedNa
     );
   }
 
-  // additionally require that every literal label is indexable
-  if (!literalLabels.every(isLabelIndexable)) {
+  // additionally require that every literal label is subgraph-valid
+  if (!literalLabels.every(isLabelSubgraphValid)) {
     throw new Error(
-      `Some decoded literal labels were not indexable: [${literalLabels.join(", ")}].`,
+      `Some decoded literal labels were not subgraph-valid: [${literalLabels.join(", ")}].`,
     );
   }
 
@@ -58,7 +61,7 @@ export function subgraph_decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedNa
  * in the resulting list is guaranteed to have a maximum byte length of 255.
  *
  * @param packet a hex string that encodes a LiteralDNSEncodedName
- * @returns A list of the LiteralLabels contained in packet.
+ * @returns A list of the LiteralLabels contained in packet
  * @throws If the packet is malformed
  * @dev This is just `decodeDNSEncodedPacket` with semantic input/output
  */
@@ -75,8 +78,9 @@ export function decodeLiteralDNSEncodedName(packet: LiteralDNSEncodedName): Lite
  * in the resulting list is guaranteed to have a maximum byte length of 255.
  *
  * @param packet a hex string that encodes a DNSEncodedName
- * @returns A list of the segments contained in packet.
+ * @returns A UTF-8 string array of the segments contained in packet
  * @throws If the packet is malformed
+ * @dev This is the generic implementation of DNS-Encoded Name Decoding
  */
 export function decodeDNSEncodedName(packet: DNSEncodedName): string[] {
   const segments: string[] = [];

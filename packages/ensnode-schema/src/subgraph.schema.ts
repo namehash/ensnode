@@ -11,7 +11,7 @@ export const domain = onchainTable("domains", (t) => ({
   id: t.hex().primaryKey(),
 
   /**
-   * The human readable name that this Domain represents.
+   * The ENS Name that this Domain represents.
    *
    * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
    * a) a normalized Name, or
@@ -236,9 +236,10 @@ export const registration = onchainTable(
      * @see https://ensnode.io/docs/reference/terminology#interpreted-label
      *
      * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null, or
+     * a) null, if the emitted Label is not subgraph-valid, or
      * b) a Literal Label that may or may not be normalized and may or may not be an Encoded LabelHash.
      *
+     * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-valid-and-invalid-labels
      * @see https://ensnode.io/docs/reference/terminology#literal-label
      */
     labelName: t.text(),
@@ -287,14 +288,15 @@ export const wrappedDomain = onchainTable(
      *
      * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be either:
      * a) null (in the case of a malformed name),
-     * b) an Interpreted Name, which is either normalized entirely consisting of Interpreted Labels.
+     * b) an Interpreted Name, which is either normalized or entirely consisting of Interpreted Labels.
      *
      * @see https://ensnode.io/docs/reference/terminology#interpreted-name
      *
      * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null (in the case of a malformed or unindexable name), or
+     * a) null (in the case of a malformed or name that contains subgraph-invalid labels), or
      * b) a Literal Name that may or may not be normalized.
      *
+     * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-valid-and-invalid-labels
      * @see https://ensnode.io/docs/reference/terminology#literal-name
      */
     name: t.text(),

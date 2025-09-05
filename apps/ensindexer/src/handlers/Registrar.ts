@@ -9,8 +9,8 @@ import {
   Name,
   PluginName,
   encodeLabelHash,
-  interpretLiteralLabel,
-  isLabelIndexable,
+  isLabelSubgraphValid,
+  literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -50,10 +50,10 @@ export const makeRegistrarHandlers = ({
       // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
       // see https://ensnode.io/docs/reference/terminology#literal-label
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      label = interpretLiteralLabel(label as LiteralLabel);
+      label = literalLabelToInterpretedLabel(label as LiteralLabel);
     } else {
-      // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
-      if (!isLabelIndexable(label)) return;
+      // NOTE(subgraph-compat): if the label is not subgraph-valid, ignore it entirely
+      if (!isLabelSubgraphValid(label)) return;
     }
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
@@ -157,15 +157,15 @@ export const makeRegistrarHandlers = ({
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         label =
           healedLabel !== null
-            ? interpretLiteralLabel(healedLabel as LiteralLabel)
+            ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
             : encodeLabelHash(labelHash);
         name = `${label}.${registrarManagedName}`;
       } else {
-        // only update the name if the label is healed & indexable
+        // only update the name if the label is healed & subgraph-valid
         // undefined value means no change to the name
-        label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+        label = isLabelSubgraphValid(healedLabel) ? healedLabel : undefined;
 
-        // only update the name if the label is healed & indexable
+        // only update the name if the label is healed & subgraph-valid
         // undefined value means no change to the name
         name = label ? `${label}.${registrarManagedName}` : undefined;
       }

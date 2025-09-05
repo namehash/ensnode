@@ -9,8 +9,8 @@ import {
   type Node,
   REVERSE_ROOT_NODES,
   encodeLabelHash,
-  interpretLiteralLabel,
-  isLabelIndexable,
+  isLabelSubgraphValid,
+  literalLabelToInterpretedLabel,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
 } from "@ensnode/ensnode-sdk";
@@ -201,7 +201,7 @@ export const handleNewOwner =
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         const label =
           healedLabel !== null
-            ? interpretLiteralLabel(healedLabel as LiteralLabel)
+            ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
             : encodeLabelHash(labelHash);
 
         // to construct `Domain.name` use the parent's Name and the Interpreted Label
@@ -213,20 +213,21 @@ export const handleNewOwner =
           labelName: label,
         });
       } else {
-        // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
+        // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-valid)
         // NOTE: for TLDs, the parent is null, so we just use the label value as is
-        const labelForUseInName = isLabelIndexable(healedLabel)
+        const labelForUseInName = isLabelSubgraphValid(healedLabel)
           ? healedLabel
           : encodeLabelHash(labelHash);
         const name = parent?.name ? `${labelForUseInName}.${parent.name}` : labelForUseInName;
 
         await context.db.update(schema.domain, { id: node }).set({
           name,
-          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and indexable
+          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and subgraph-valid
           //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
           // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
-          //   is updated to, if it is indexable, _not_ the `label` value used to construct the name
-          labelName: isLabelIndexable(healedLabel) ? healedLabel : undefined,
+          //   is updated to, if it is subgraph-valid, _not_ the `label` value used to construct the
+          //   name (which the subgraph specifies as the encoded labelHash if `label` is not subgraph-valid)
+          labelName: isLabelSubgraphValid(healedLabel) ? healedLabel : undefined,
         });
       }
     }

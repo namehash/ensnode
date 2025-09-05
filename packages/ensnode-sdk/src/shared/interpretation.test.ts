@@ -2,7 +2,7 @@ import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { LiteralLabel, encodeLabelHash } from "../ens";
-import { interpretLiteralLabel, literalLabelsToInterpretedName } from "./interpretation";
+import { literalLabelToInterpretedLabel, literalLabelsToInterpretedName } from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -29,8 +29,8 @@ const UNNORMALIZED_LABELS = [
   "vitalik\0", // Null character
   "\0", // Only null character
   "example.\0", // Null character in middle
-  "test[", // Unindexable character
-  "test]", // Unindexable character
+  "test[", // Not normalizable bracket
+  "test]", // Not normalizable bracket
   "test.", // Contains dot
   ".eth", // Starts with dot
   "sub.example", // Contains dot
@@ -44,12 +44,14 @@ const UNNORMALIZED_LABELS = [
 describe("interpretation", () => {
   describe("interpretLiteralLabel", () => {
     it("should return normalized labels unchanged", () => {
-      NORMALIZED_LABELS.forEach((label) => expect(interpretLiteralLabel(label)).toBe(label));
+      NORMALIZED_LABELS.forEach((label) =>
+        expect(literalLabelToInterpretedLabel(label)).toBe(label),
+      );
     });
 
     it("should encode non-normalized encodable labels as labelhashes", () => {
       UNNORMALIZED_LABELS.forEach((label) =>
-        expect(interpretLiteralLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
+        expect(literalLabelToInterpretedLabel(label)).toMatch(ENCODED_LABELHASH_LABEL),
       );
     });
   });

@@ -11,7 +11,7 @@ import {
   LiteralLabel,
   LiteralName,
   type Node,
-  interpretLiteralLabel,
+  literalLabelToInterpretedLabel,
   literalLabelsToInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
@@ -36,17 +36,12 @@ import type { RegistrarManagedName } from "@/lib/types";
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
- * Parses the NameWrapper's emitted DNS-Encoded Name `packet` and interprets it into an Interpreted
- * Name.
- *
- * NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
- * @see https://ensnode.io/docs/reference/terminology#interpreted-label
- * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+ * Decodes the NameWrapper's emitted DNS-Encoded Name `packet` into an Interpreted Name and its first
+ * Interpreted Label.
  */
-function parseAndInterpretNameWrapperName(packet: LiteralDNSEncodedName): {
-  label: InterpretedLabel;
-  name: InterpretedName;
-} {
+function decodeAndInterpretNameWrapperName(
+  packet: LiteralDNSEncodedName,
+): { label: InterpretedLabel; name: InterpretedName } | { label: null; name: null } {
   try {
     const literalLabels = decodeLiteralDNSEncodedName(packet);
 
@@ -57,30 +52,30 @@ function parseAndInterpretNameWrapperName(packet: LiteralDNSEncodedName): {
     }
 
     return {
-      label: interpretLiteralLabel(literalLabels[0]!), // ! ok due to length invariant above
+      label: literalLabelToInterpretedLabel(literalLabels[0]!), // ! ok due to length invariant above
       name: literalLabelsToInterpretedName(literalLabels),
     };
-  } catch (error) {
-    // malformed packet? no-op and continue with existing behavior (this will result in
-    // WrappedDomain.name === null)
-    // TODO: if interpreted correctly will there ever by malformed packets? if not can remove possible null type
-    throw new Error(`Malformed packet? '${packet}' ${error}`);
+  } catch {
+    // In the event that the NameWrapper emits a malformed packet, `decodeLiteralDNSEncodedName`
+    // will throw. The Subgraph indexing logic is prepared for this eventuality, and expects
+    // `null` to be returned from the decoding process
+    return { label: null, name: null };
   }
 }
 
 /**
- * Parses the NameWrapper's emitted DNS-Encoded `name` packet and returns it as a Literal Name.
+ * Decodes the NameWrapper's emitted DNS-Encoded `name` packet into a Literal Name and its first
+ * Literal Label.
  */
-function parseLiteralNameWrapperName(packet: LiteralDNSEncodedName): {
-  label: null | LiteralLabel;
-  name: null | LiteralName;
-} {
+function decodeLiteralNameWrapperName(
+  packet: LiteralDNSEncodedName,
+): { label: LiteralLabel; name: LiteralName } | { label: null; name: null } {
   try {
     return subgraph_decodeLiteralDNSEncodedName(packet);
   } catch {
-    // NOTE: the NameWrapper may emit malformed dns packets or labels that are not indexable according
-    // to `subgraph_decodeLiteralDNSEncodedName`: when this occurs, the subgraph expects `null` to
-    // be returned
+    // NOTE: the NameWrapper may emit names that are malformed or contain labels that are not
+    // subgraph-valid: when this occurs, the subgraph expects `null` to be returned from the decoding
+    // process
     return { label: null, name: null };
   }
 }
@@ -183,8 +178,8 @@ export const makeNameWrapperHandlers = ({
 
       // NameWrapper emits a LiteralDNSEncodedName, so cast it as such
       const { label, name } = config.replaceUnnormalized
-        ? parseAndInterpretNameWrapperName(event.args.name as LiteralDNSEncodedName)
-        : parseLiteralNameWrapperName(event.args.name as LiteralDNSEncodedName);
+        ? decodeAndInterpretNameWrapperName(event.args.name as LiteralDNSEncodedName)
+        : decodeLiteralNameWrapperName(event.args.name as LiteralDNSEncodedName);
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");

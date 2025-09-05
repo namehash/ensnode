@@ -11,9 +11,9 @@ import {
   LiteralLabel,
   type Node,
   encodeLabelHash,
-  interpretLiteralLabel,
   interpretedLabelsToInterpretedName,
   isNormalizedLabel,
+  literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -178,7 +178,7 @@ export async function handleNewOwner({
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
     const label =
       healedLabel !== null
-        ? interpretLiteralLabel(healedLabel as LiteralLabel)
+        ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
         : encodeLabelHash(labelHash);
 
     // to construct `Domain.name` use the parent's Name and the valid Label

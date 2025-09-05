@@ -22,7 +22,7 @@ When querying the ENSNode API for specific names or sets of names, it's crucial 
 
 The [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15) may change across time such that the set of normalizable names grows (thankfully it should never shrink). For example, consider a new Unicode release that standardizes new emoji. The ENS Normalize standard may subsequently change to expand support for those new emoji.
 
-Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying the ENSNode API. The node of a name is immutable across time and works for all names, even if they are unknown, unnormalized, or unindexable.
+Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying the ENSNode API. The node of a name is immutable across time and works for all names, even if they are unknown, unnormalized, or subgraph-invalid.
 
 ### Recommended Query Patterns
 
@@ -164,11 +164,11 @@ According to [ENSIP-1](https://docs.ens.domains/ensip/1#namehash-algorithm), the
 An example of such an implementation can be found in the viem library's namehash implementation:
 The [viem namehash implementation](https://github.com/wevm/viem/blob/fe558fdef7e2e9cd5f3f57d8bdeae0c7ff67a1b0/src/utils/ens/namehash.ts#L36-L51) correctly calculates the node of names containing unknown labels.
 
-## Unindexable Labels
+## ENS Subgraph 'Valid' and 'Invalid' Labels
 
-ENSNode may sometimes represent a label as an unknown label if that label is "unindexable". This is an important consideration when working with the ENSNode API.
+When `REPLACE_UNNORMALIZED=false`, ENSNode may sometimes represent a label as an unknown label if that label is not "valid" according to the legacy ENS Subgraph logic. This is an important consideration when working with the ENSNode API when `REPLACE_UNNORMALIZED=false`.
 
-While many characters are not supported by ENSIP-15, only the following four characters are specifically classified as "unindexable" due to indexing concerns:
+While many characters are not supported by ENSIP-15, only the following four characters are specifically classified as subgraph-invalid due to indexing concerns:
 
 1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
 2. `.` (period) - Conflicts with ENS label separator logic
@@ -179,13 +179,13 @@ It's important to note that while onchain ENS contracts do not enforce ENSIP-15 
 
 ### Unknown Label Representation
 
-When an unindexable label is encountered, ENSNode represents it as an "unknown label" in the format `[{labelhash}]`, where `{labelhash}` is the labelhash of the unknown label. This representation creates an interesting edge case that must be handled carefully:
+When a subgraph-invalid label is encountered, ENSNode represents it as an "unknown label" in the format `[{labelhash}]`, where `{labelhash}` is the labelhash of the unknown label. This representation creates an interesting edge case that must be handled carefully:
 
-Consider an unnormalized label that literally looks like `[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]`. Because this label contains square brackets (unindexable characters), it will be represented as the unknown label:
+Consider an unnormalized label that literally looks like `[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]`. Because this label contains square brackets (subgraph-invalid characters), it will be represented as the unknown label:
 `[80968d00b78a91f47b233eaa213576293d16dadcbbdceb257bca94b08451ba7f]`
 
-Therefore, this represents the unindexable label as an "unknown label", encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered unindexable - they create ambiguity between literal labels and the representation of unknown labels.
+Therefore, this represents the subgraph-invalid label as an "unknown label", encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered subgraph-invalid - they create ambiguity between literal labels and the representation of unknown labels.
 
-When ENSNode encounters an unindexable label, it will represent it as an unknown label even if the actual label data is available. This is a safety mechanism to ensure data integrity and consistent behavior across the system.
+When ENSNode encounters an subgraph-invalid label, it will represent it as an unknown label even if the actual label data is available. This is a safety mechanism to ensure data integrity and consistent behavior across the system.
 
-For more detailed information about unindexable labels and their handling, please refer to the [ENSNode SDK implementation](https://github.com/namehash/ensnode/blob/main/packages/@ensnode/ensnode-sdk/src/subname-helpers.ts#L14-L70).
+For more detailed information about subgraph-invalid labels and their handling, please refer to the [ENSNode SDK implementation](https://github.com/namehash/ensnode/blob/main/packages/@ensnode/ensnode-sdk/src/ens/subgraph-label-valid.ts).

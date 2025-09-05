@@ -28,7 +28,7 @@ const { args } = decodeEventLog({
 const PARSED_KEY = "com.twitter";
 const PARSED_VALUE = "0xTko";
 
-const UNINDEXABLE_DNS_ENCODED_NAMES = [
+const NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES = [
   stringToHex("\x05test\0\x00"),
   stringToHex("\x05test.\x00"),
   stringToHex("\x05test[\x00"),
@@ -94,9 +94,9 @@ describe("dns-helpers", () => {
       ).toThrow(/overflow/i);
     });
 
-    it("should throw for labels with unindexable characters", () => {
-      UNINDEXABLE_DNS_ENCODED_NAMES.forEach((name) => {
-        expect(() => subgraph_decodeLiteralDNSEncodedName(name)).toThrow(/not indexable/i);
+    it("should throw for labels with subgraph-invalid characters", () => {
+      NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES.forEach((name) => {
+        expect(() => subgraph_decodeLiteralDNSEncodedName(name)).toThrow(/not subgraph-valid/i);
       });
     });
 
