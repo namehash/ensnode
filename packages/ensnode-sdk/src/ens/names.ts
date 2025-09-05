@@ -1,24 +1,28 @@
-import { isNormalizedName } from "./is-normalized";
-import type { InterpretedLabel, InterpretedName, Name, NormalizedName } from "./types";
+import { normalize } from "viem/ens";
+
+import type { Name, NormalizedName } from "./types";
 
 /**
- * Constructs a name hierarchy from a given Name.
- * i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
+ * Constructs a name hierarchy from a given NormalizedName.
+ *
+ * @example
+ * ```
+ * getNameHierarchy("sub.example.eth") -> ["sub.example.eth", "example.eth", "eth"]
+ * ```
+ *
+ * @dev by restricting the input type to NormalizedName we guarantee that we can split and join
+ * on '.' and receive NormalizedNames as a result
  */
 export const getNameHierarchy = (name: NormalizedName): NormalizedName[] =>
   name.split(".").map((_, i, labels) => labels.slice(i).join(".")) as NormalizedName[];
 
 /**
- * Casts a Name input as a NormalizedName, if possible.
+ * Transforms Name input to a NormalizedName, throwing if not possible.
  *
- * @param name
+ * @param name An ENS Name, of unknown normalization status.
  * @returns NormalizedName
- * @throws if `name` is not normalized.
+ * @throws if `name` is not normalized or normalizable
  */
-export const asNormalizedName = (name: Name): NormalizedName => {
-  if (!isNormalizedName) {
-    throw new Error(`Name '${name}' is not normalized and cannot be cast as NormalizedName.`);
-  }
-
-  return name as NormalizedName;
+export const nameToNormalizedName = (name: Name): NormalizedName => {
+  return normalize(name) as NormalizedName;
 };

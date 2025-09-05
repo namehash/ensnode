@@ -8,9 +8,9 @@ import {
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
-  asNormalizedName,
   isNormalizedName,
   isSelectionEmpty,
+  nameToNormalizedName,
   parseReverseName,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
@@ -127,7 +127,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             throw new Error(`Invariant: Name "${_name}" must be normalized.`);
           }
 
-          const name = asNormalizedName(_name);
+          const name = nameToNormalizedName(_name);
           const node: Node = namehash(name);
           span.setAttribute("node", node);
 
