@@ -1,6 +1,6 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
+import {ENSNodeConfigError, ENSNodeConfigInfo} from "@/components/indexing-status/config-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,14 +10,20 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import mockDataJson from "./data.json";
+import {IndexingStatusPlaceholder} from "@/components/indexing-status/indexing-status-placeholder";
 
 const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
 
-type ConfigVariant = keyof typeof mockConfigData;
+type LoadingVariant = "Loading" | "Loading Error";
+type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 
 export default function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>("Alpha Mainnet");
   const { deserializedConfig, validationError } = useMemo(() => {
+    if (selectedConfig === "Loading" || selectedConfig === "Loading Error" ){
+      return {deserializedConfig: null, validationError: null}
+    }
+
     try {
       const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
       return { deserializedConfig: config, validationError: null };
@@ -40,7 +46,7 @@ export default function MockConfigPage() {
 
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {Object.keys(mockConfigData).map((variant) => (
+            {[...Object.keys(mockConfigData), "Loading", "Loading Error"].map((variant) => (
               <Button
                 key={variant}
                 variant={selectedConfig === variant ? "default" : "outline"}
@@ -66,6 +72,10 @@ export default function MockConfigPage() {
       )}
 
       {deserializedConfig && <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} />}
+
+      {selectedConfig === "Loading" && <IndexingStatusPlaceholder />}
+
+      {selectedConfig === "Loading Error" && <ENSNodeConfigError />}
     </section>
   );
 }
