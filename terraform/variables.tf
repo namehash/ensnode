@@ -19,6 +19,9 @@ variable "ensdb_disk_size_gb" {
   type    = number
   default = 250
 }
+variable "anthropic_api_key" {
+  type    = string
+}
 
 # Mainnet Variables
 variable "ethereum_mainnet_rpc_url" {

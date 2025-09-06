@@ -1,6 +1,6 @@
 locals {
-  full_ensindexer_hostname     = "indexer.${var.subdomain_prefix}.${var.base_domain_name}"
-  full_ensindexer_api_hostname = "api.${var.subdomain_prefix}.${var.base_domain_name}"
+  ensindexer_fqdn     = "indexer.${var.subdomain_prefix}.${var.base_domain_name}"
+  ensindexer_api_fqdn = "api.${var.subdomain_prefix}.${var.base_domain_name}"
 }
 
 data "aws_route53_zone" "ensnode" {
@@ -10,7 +10,7 @@ data "aws_route53_zone" "ensnode" {
 
 resource "aws_route53_record" "ensindexer_validation" {
   zone_id = data.aws_route53_zone.ensnode.zone_id
-  name    = local.full_ensindexer_hostname
+  name    = local.ensindexer_fqdn
   type    = "CNAME"
   ttl     = 300
   records = [replace(render_web_service.ensindexer.url, "https://", "")]
@@ -18,7 +18,7 @@ resource "aws_route53_record" "ensindexer_validation" {
 
 resource "aws_route53_record" "ensapi_validation" {
   zone_id = data.aws_route53_zone.ensnode.zone_id
-  name    = local.full_ensindexer_api_hostname
+  name    = local.ensindexer_api_fqdn
   type    = "CNAME"
   ttl     = 300
   records = [replace(render_web_service.ensindexer_api.url, "https://", "")]

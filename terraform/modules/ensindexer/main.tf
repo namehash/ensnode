@@ -13,7 +13,7 @@ locals {
     "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },
     "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
     "REPLACE_UNNORMALIZED"              = { value = var.replace_unnormalized },
-    "ENSADMIN_URL"                      = { value = var.ensadmin_url }
+    "ENSADMIN_URL"                      = { value = var.ensadmin_public_url }
 
     # Mainnet networks
     "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },
@@ -66,15 +66,16 @@ resource "render_web_service" "ensindexer" {
     local.common_variables,
     {
       ENSNODE_PUBLIC_URL = {
-        value = "https://${local.full_ensindexer_hostname}"
+        value = "https://${local.ensindexer_fqdn}"
       },
       ENSINDEXER_URL = {
         value = "http://ensindexer-${var.instance_name}:10000"
       }
     }
   )
+  # Domains assigned by user
   custom_domains = [
-    { name : local.full_ensindexer_hostname },
+    { name : local.ensindexer_fqdn },
   ]
 
 }
@@ -97,7 +98,7 @@ resource "render_web_service" "ensindexer_api" {
     local.common_variables,
     {
       ENSNODE_PUBLIC_URL = {
-        value = "https://${local.full_ensindexer_api_hostname}"
+        value = "https://${local.ensindexer_api_fqdn}"
       },
       ENSINDEXER_URL = {
         value = "http://ensindexer-${var.instance_name}:10000"
@@ -108,7 +109,7 @@ resource "render_web_service" "ensindexer_api" {
     }
   )
   custom_domains = [
-    { name : local.full_ensindexer_api_hostname },
+    { name : local.ensindexer_api_fqdn },
   ]
 
 }

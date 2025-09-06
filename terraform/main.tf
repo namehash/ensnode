@@ -103,9 +103,10 @@ module "ensadmin" {
   render_environment_id = render_project.ensnode.environments["default"].id
   instance_type         = "starter"
 
-  base_domain_name = local.base_domain_name
-  ensnode_version  = var.ensnode_version
-  subdomain_prefix = var.render_environment
+  base_domain_name  = local.base_domain_name
+  ensnode_version   = var.ensnode_version
+  subdomain_prefix  = var.render_environment
+  anthropic_api_key = var.anthropic_api_key
 }
 
 module "ensindexer" {
@@ -132,7 +133,7 @@ module "ensindexer" {
   render_region         = local.render_region
   render_environment_id = render_project.ensnode.environments["default"].id
   database_url          = module.ensdb.internal_connection_string
-  ensadmin_url          = module.ensadmin.ensadmin_url
+  ensadmin_public_url   = module.ensadmin.ensadmin_public_url
 
   # Mainnet RPC URLs
   ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url

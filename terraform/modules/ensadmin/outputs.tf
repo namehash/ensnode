@@ -1,3 +1,3 @@
-output "ensadmin_url" {
-  value = "https://${local.full_ensadmin_hostname}"
+output "ensadmin_public_url" {
+  value = "https://${local.ensadmin_fqdn}"
 }

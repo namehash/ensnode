@@ -45,7 +45,7 @@ variable "ensrainbow_url" {
   type = string
 }
 
-variable "ensadmin_url" {
+variable "ensadmin_public_url" {
   type = string
 }
 
