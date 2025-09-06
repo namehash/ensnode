@@ -20,7 +20,7 @@ variable "ensdb_disk_size_gb" {
   default = 250
 }
 variable "anthropic_api_key" {
-  type    = string
+  type = string
 }
 
 # Mainnet Variables

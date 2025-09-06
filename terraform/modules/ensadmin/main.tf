@@ -14,12 +14,12 @@ resource "render_web_service" "ensadmin" {
   env_vars = {
     ENSADMIN_PUBLIC_URL = {
       value = "https://${local.ensadmin_fqdn}"
-    }    
+    }
     ANTHROPIC_API_KEY = {
       value = var.anthropic_api_key
     }
   }
-# Domains assigned by user
+  # Domains assigned by user
   custom_domains = [
     { name : local.ensadmin_fqdn },
   ]
