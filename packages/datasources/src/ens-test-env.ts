@@ -1,4 +1,4 @@
-import { anvil } from "viem/chains";
+import { localhost } from "viem/chains";
 
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -17,22 +17,10 @@ import { ResolverABI, ResolverFilter } from "./lib/resolver";
 /**
  * The ens-test-env ENSNamespace
  *
- * 'ens-test-env' represents an ENS namespace running on a local Anvil chain for development of
- * ENS apps and running test suites against a deterministic deployment of the ENS protocol.
- * https://github.com/ensdomains/ens-test-env
+ * 'ens-test-env' represents a deterministic deployment of the ENS protocol to a local Anvil chain
+ * for development and testing.
  *
- * These 'ens-test-env' Datasources are only relevant in the context of apps that use the ens-test-env
- * tool (i.e. ensjs and ens-app-v3) and it depends on the addresses of the contracts deployed by
- * that app (each app deploys the ENS protocol to slightly different addresses).
- *
- * In both ensjs and ens-app-v3, an env variable is available to the ens-test-env tool that
- * lists the addresses of each contract after deployment. These addresses are different in each
- * app and may change over time.
- *
- * If the addresses are not available in the environment, we use empty string as a mock to ensure
- * type-correctness: consumers of these ens-test-env Datasources, if using outside of the context
- * of the ens-test-env tool, should validate that an Address is provided, or they may experience
- * undefined runtime behavior.
+ * @see https://github.com/ensdomains/ens-test-env
  *
  * NOTE: The ens-test-env ENS namespace does not support Basenames, Lineanames, or 3DNS.
  * NOTE: The ens-test-env ENS namespace does not support ENSIP-19 Reverse Resolvers.
@@ -45,8 +33,7 @@ export default {
    * https://github.com/ensdomains/ens-test-env/
    */
   [DatasourceNames.ENSRoot]: {
-    // ens-test-env runs on a local Anvil chain with id 1337
-    chain: { ...anvil, id: 1337 },
+    chain: localhost,
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
