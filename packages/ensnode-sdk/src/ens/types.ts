@@ -85,11 +85,11 @@ export type EncodedLabelHash = `[${string}]`;
  * or normalization processing. It may be an unnormalized label for reasons including:
  * - being an empty label,
  * - containing '.' characters,
- * - containing unnormalized characters such as null bytes or other characters not
- *   suitable for display,
- * - being formatted as an EncodedLabelHash. Note that when LiteralLabel are formatted as
- *   an EncodedLabelHash they do NOT symbolically represent the encoding of a LabelHash
- *   literal.
+ * - being formatted as an EncodedLabelHash (which are not normalizable). Note that
+ *   when LiteralLabel are formatted as an EncodedLabelHash they do NOT symbolically
+ *   represent the encoding of a LabelHash literal, or
+ * - containing other unnormalized characters such as null bytes or other characters
+ *   not suitable for display.
  *
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
@@ -114,11 +114,12 @@ export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
  * A Literal Name is a Name as it literally appears onchain, composed of Literal Labels
  * joined by dots. It may be an unnormalized name for reasons including:
  * - containing empty labels,
- * - containing unnormalized characters such as null bytes or other characters not
- *   suitable for display,
- * - containing LiteralLabel values formatted as an EncodedLabelHash. Note that when
- *   LiteralLabel values are formatted as an EncodedLabelHash they do NOT symbolically
- *   represent the encoding of a LabelHash literal.
+ * - containing LiteralLabel values formatted as an EncodedLabelHash (which are
+ *   not normalizable)). Note that when LiteralLabel values are formatted as an
+ *   EncodedLabelHash they do NOT symbolically represent the encoding of a
+ *   LabelHash literal, or
+ * - containing other unnormalized characters such as null bytes or other characters
+ *   not suitable for display.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -128,7 +129,7 @@ export type LiteralName = Name & { __brand: "LiteralName" };
 /**
  * An Interpreted Name is a Name that is entirely composed of 0 or more
  * Interpreted Labels.
- * 
+ *
  * That is, it is either:
  * a) a Normalized Name, or
  * b) an Unnormalizable Name exclusively for the reason that it contains 1 or
