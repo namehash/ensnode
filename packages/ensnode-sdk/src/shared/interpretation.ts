@@ -16,13 +16,13 @@ import {
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  *
  * @param label - The Literal Label string to interpret
- * @returns The provided label if it is normalized, else the EncodedLabelHash of the label
+ * @returns The provided label if it is a normalized label, else the EncodedLabelHash of the label
  */
 export function literalLabelToInterpretedLabel(label: LiteralLabel): InterpretedLabel {
   // if the label is normalized, good to go
   if (isNormalizedLabel(label)) return label as string as InterpretedLabel;
 
-  // otherwise (includes empty string label), encode the labelhash of the Label
+  // otherwise, encode the labelhash of the literal Label
   return encodeLabelHash(labelhash(label)) as InterpretedLabel;
 }
 
@@ -36,7 +36,7 @@ export function literalLabelToInterpretedLabel(label: LiteralLabel): Interpreted
  * that is formatted as an Encoded LabelHash will NOT be interpreted as such. Instead it will be
  * interpreted into an Encoded LabelHash that encodes the literal labelhash of the Literal Label.
  *
- * @param labels An ordered list of Literal Labels
+ * @param labels An ordered list of 0 or moreLiteral Labels
  * @returns An InterpretedName
  */
 export function literalLabelsToInterpretedName(labels: LiteralLabel[]): InterpretedName {
@@ -46,7 +46,7 @@ export function literalLabelsToInterpretedName(labels: LiteralLabel[]): Interpre
 /**
  * Joins the list of Interpreted Labels with '.' to form an Interpreted Name.
  *
- * @param labels An ordered list of Interpreted Labels
+ * @param labels An ordered list of 0 or more Interpreted Labels
  * @returns An InterpretedName
  */
 export function interpretedLabelsToInterpretedName(labels: InterpretedLabel[]): InterpretedName {
@@ -56,7 +56,11 @@ export function interpretedLabelsToInterpretedName(labels: InterpretedLabel[]): 
 /**
  * Joins the list of Literal Labels with '.' to form a Literal Name.
  *
- * @param labels An ordered list of Literal Labels
+ * Note: LiteralLabel values may contain '.' characters, which will be preserved
+ * in the resulting LiteralName. Therefore, the number of labels in the returned
+ * LiteralName may be greater than the number of LiteralLabels in the input array.
+ *
+ * @param labels An ordered list of 0 or more Literal Labels
  * @returns An LiteralName
  */
 export function literalLabelsToLiteralName(labels: LiteralLabel[]): LiteralName {

@@ -31,6 +31,7 @@ export type Name = string;
  *
  * @example vitalik.eth
  * @see https://ensnode.io/docs/reference/terminology#name-node-namehash
+ * @dev nominally typed to enforce usage & enhance codebase clarity
  */
 export type NormalizedName = Name & { __brand: "NormalizedName" };
 
@@ -58,9 +59,21 @@ export type LabelHash = Hex;
 export type Label = string;
 
 /**
- * An EncodedLabelHash is a specially formatted (unnormalized) Label that should be interpreted as a
- * LabelHash literal. The original string may not be known, may not be normalizable, or may be too
- * long for DNS-Encoding.
+ * An EncodedLabelHash is a specially formatted (unnormalized) Label formatted
+ * as a non-0x prefixed 32-byte hex string enclosed in square brackets.
+ *
+ * Care should be taken to distinguish Label values formatted as an
+ * EncodedLabelHash as either a LiteralLabel or an InterpretedLabel:
+ * - If a LiteralLabel is formatted as an EncodedLabelHash it does NOT
+ *   symbolically represent the encoding of a LabelHash literal.
+ * - If an InterpretedLabel is formatted as an EncodedLabelHash it should be
+ *   interpreted as encoding a LabelHash literal.
+ *
+ * An InterpretedLabel may be formatted as an EncodedLabelHash if the related
+ * LiteralLabel is:
+ * - not a normalized label
+ * - is an unknown value that could not be healed.
+ * - is too long for DNS-Encoding in contexts where DNS-Encoding was required.
  *
  * @example [af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc]
  *
@@ -70,8 +83,15 @@ export type EncodedLabelHash = `[${string}]`;
 
 /**
  * A Literal Label is a Label as it literally appears onchain, without any interpretation
- * or normalization processing. It may contain unnormalized characters, null bytes, or
- * other values that are not suitable for display.
+ * or normalization processing. It may be an unnormalized label for reasons including:
+ * - being an empty label,
+ * - containing '.' characters,
+ * - being formatted as an EncodedLabelHash (which are not normalizable). Note that
+ *   when LiteralLabel are formatted as an EncodedLabelHash they do NOT symbolically
+ *   represent the encoding of a LabelHash literal, or
+ * - containing other unnormalized characters such as null bytes or other characters
+ *   not suitable for display.
+ *
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -81,7 +101,10 @@ export type LiteralLabel = Label & { __brand: "LiteralLabel" };
 /**
  * An Interpreted Label is a Label that is either:
  * a) a Normalized Label, or
- * b) an Unnormalizable Label formatted as an Encoded LabelHash.
+ * b) an Unnormalizable Label exclusively for the reason that it is formatted
+ *    as an Encoded LabelHash that should be interpreted as encoding a
+ *    LabelHash literal, where the encoded LabelHash literal is the `labelhash`
+ *    of the related LiteralLabel.
  *
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -90,8 +113,14 @@ export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 
 /**
  * A Literal Name is a Name as it literally appears onchain, composed of Literal Labels
- * joined by dots. It may contain unnormalized characters, null bytes, or other values
- * that are not suitable for display.
+ * joined by dots. It may be an unnormalized name for reasons including:
+ * - containing empty labels,
+ * - containing LiteralLabel values formatted as an EncodedLabelHash (which are
+ *   not normalizable)). Note that when LiteralLabel values are formatted as an
+ *   EncodedLabelHash they do NOT symbolically represent the encoding of a
+ *   LabelHash literal, or
+ * - containing other unnormalized characters such as null bytes or other characters
+ *   not suitable for display.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -99,9 +128,15 @@ export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 export type LiteralName = Name & { __brand: "LiteralName" };
 
 /**
- * An Interpreted Name is a Name that is entirely composed of Interpreted Labels. That is, it is either:
+ * An Interpreted Name is a Name that is entirely composed of 0 or more
+ * Interpreted Labels.
+ *
+ * That is, it is either:
  * a) a Normalized Name, or
- * b) contains Unnormalizable Labels formatted as Encoded LabelHashes.
+ * b) an Unnormalizable Name exclusively for the reason that it contains 1 or
+ *    more labels formatted as Encoded LabelHashes that should be interpreted
+ *    as encoding a LabelHash literal, where the encoded LabelHash literal is
+ *    the `labelhash` of the related LiteralLabel.
  *
  * @see https://ensnode.io/docs/reference/terminology#interpreted-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -119,8 +154,9 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
  *
  * DNS Packet Format for Domain Names:
- * - Domain names are encoded as a sequence of labels
+ * - Domain names are encoded as a sequence of 0 or more labels
  * - Each label begins with a length byte (1 byte) indicating how many bytes follow for that label
+ *   Note how this constrains each label in DNS encoded names to a max length of 255 bytes.
  * - The bytes after the length byte represent the characters in the label
  * - Labels are concatenated with no separators
  * - The sequence ends with a zero-length byte (0x00)
@@ -136,11 +172,12 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
 export type DNSEncodedName = Hex;
 
 /**
- * A DNSEncodedName that encodes a name containing {@link LiteralLabel}s.
+ * A DNSEncodedName that encodes a name containing 0 or more {@link LiteralLabel}s.
  *
- * In a DNSEncodedLiteralName, all labels are understood to be Literal Labels, including labels
- * that may look like Encoded LabelHashes: when interpreted, the Interpeted Label will be the
- * `labelhash` of the "[abcd...xyz]" string.
+ * In a DNSEncodedLiteralName, all labels are Literal Labels, including labels
+ * that may be formatted as Encoded LabelHashes. If Literal Label values are
+ * formatted as Encoded LabelHashes, when they are interpreted, the Interpeted
+ * Label will be the `labelhash` of the Literal Label value.
  *
  * The NameWrapper contract emits DNSEncodedLiteralNames:
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
@@ -153,16 +190,14 @@ export type DNSEncodedName = Hex;
 export type DNSEncodedLiteralName = DNSEncodedName & { __brand: "DNSEncodedLiteralName" };
 
 /**
- * A DNSEncodedName that represents a name consisting of labels that are either:
- * a) Literal Labels, or
- * b) Encoded LabelHashes.
- *
- * In a DNSEncodedPartiallyInterpretedName, strings that look like Encoded LabelHashes are understood
- * to be Encoded LabelHashes: when interpreted, the Interpeted Label will be the exact value of the
- * decoded "[abcd...xyz]" string.
+ * A DNSEncodedName that encodes a name consisting of 0 or more labels that are either:
+ * a) Literal Labels that are guaranteed not to include '.' characters or to be
+ *    formatted as Encoded LabelHashes.
+ * b) Interpreted Labels formatted as Encoded LabelHashes that should be interpreted
+ *    as encoding a LabelHash literal.
  *
  * TODO: This type is unused in ENSv1, but its usage is anticipated in ENSv2 due to Encoded
- * LabelHash support in the NameCoder contract.
+ * LabelHash support in the ENSv2 implementation of the NameCoder contract.
  *
  * TODO: determine "is this label an encoded labelhash" logic after NameCoder is updated
  *

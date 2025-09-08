@@ -1,8 +1,12 @@
 import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { LiteralLabel, encodeLabelHash } from "../ens";
-import { literalLabelToInterpretedLabel, literalLabelsToInterpretedName } from "./interpretation";
+import { InterpretedLabel, LiteralLabel, encodeLabelHash } from "../ens";
+import {
+  interpretedLabelsToInterpretedName,
+  literalLabelToInterpretedLabel,
+  literalLabelsToInterpretedName,
+} from "./interpretation";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -78,6 +82,34 @@ describe("interpretation", () => {
           "c",
         ] as LiteralLabel[]),
       ).toEqual(`${encodeLabelHash(labelhash(literalLabelThatLooksLikeALabelHash))}.c`);
+    });
+
+    it("correctly interprets an empty array of labels", () => {
+      expect(literalLabelsToInterpretedName([] as LiteralLabel[])).toEqual("");
+    });
+  });
+
+  describe("interpretedLabelsToInterpretedName", () => {
+    it("correctly interprets an empty array of labels", () => {
+      expect(interpretedLabelsToInterpretedName([] as InterpretedLabel[])).toEqual("");
+    });
+
+    it("correctly interprets a single label", () => {
+      expect(interpretedLabelsToInterpretedName(["a"] as InterpretedLabel[])).toEqual("a");
+    });
+
+    it("correctly interprets a multiple labels, including encoded labelhashes", () => {
+      const literalLabel = "unnormalized.label" as LiteralLabel;
+      const interpretedLabelThatLooksLikeALabelHash = literalLabelToInterpretedLabel(literalLabel);
+
+      expect(
+        interpretedLabelsToInterpretedName([
+          "a",
+          "b",
+          "c",
+          interpretedLabelThatLooksLikeALabelHash,
+        ] as InterpretedLabel[]),
+      ).toEqual(`a.b.c.${interpretedLabelThatLooksLikeALabelHash}`);
     });
   });
 });
