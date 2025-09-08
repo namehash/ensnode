@@ -39,7 +39,8 @@ export function ConfigInfoAppCard({
   const cardHeaderLayoutStyles =
     "flex flex-row flex-nowrap justify-between items-center max-sm:flex-col max-sm:justify-start max-sm:items-start max-sm:gap-2";
   const baseCardTitleStyles = "flex items-center gap-2";
-  const cardContentStyles = "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3 max-sm:px-3 max-sm:pb-3";
+  const cardContentStyles =
+    "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3 max-sm:px-3 max-sm:pb-3";
   const checksWrapperStyles = "flex flex-row flex-nowrap justify-start items-center gap-2";
 
   return (
@@ -51,7 +52,9 @@ export function ConfigInfoAppCard({
             <span>{name}</span>
           </CardTitle>
           <div className={baseCardTitleStyles}>
-            {version && <p className="text-sm leading-normal font-normal text-muted-foreground">v{version}</p>}
+            {version && (
+              <p className="text-sm leading-normal font-normal text-muted-foreground">v{version}</p>
+            )}
             {docsLink && (
               <a
                 href={docsLink.href}
@@ -123,11 +126,11 @@ export function ConfigInfoAppCard({
                       }
                     </TooltipContent>
                   </Tooltip>
-                {check.value ? (
-                  <CheckIcon className="text-emerald-600 flex-shrink-0" />
-                ) : (
-                  <X className="text-red-600 flex-shrink-0" />
-                )}
+                  {check.value ? (
+                    <CheckIcon className="text-emerald-600 flex-shrink-0" />
+                  ) : (
+                    <X className="text-red-600 flex-shrink-0" />
+                  )}
                 </div>
               </div>
             ))}

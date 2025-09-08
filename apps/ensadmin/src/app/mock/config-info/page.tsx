@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  ENSNodeConfigInfo
-} from "@/components/indexing-status/config-info";
+import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -33,8 +31,12 @@ export default function MockConfigPage() {
           return { deserializedConfig: config, validationError: null, configError: undefined };
         } catch (error) {
           const errorMessage =
-              error instanceof Error ? error.message : "Unknown config validation error";
-          return { deserializedConfig: null, validationError: errorMessage, configError: undefined };
+            error instanceof Error ? error.message : "Unknown config validation error";
+          return {
+            deserializedConfig: null,
+            validationError: errorMessage,
+            configError: undefined,
+          };
         }
     }
   }, [selectedConfig]);
@@ -72,7 +74,9 @@ export default function MockConfigPage() {
             <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
           </CardContent>
         </Card>
-      ) : <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} error={configError} />}
+      ) : (
+        <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} error={configError} />
+      )}
     </section>
   );
 }

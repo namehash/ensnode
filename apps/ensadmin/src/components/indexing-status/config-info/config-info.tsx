@@ -43,16 +43,16 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
-  if (error && ensIndexerConfig !== null){
-      throw new Error("Invariant: Error occurred but the ensIndexerConfig is not null.");
+  if (error && ensIndexerConfig !== null) {
+    throw new Error("Invariant: Error occurred but the ensIndexerConfig is not null.");
   }
 
-  if (error){
-      return <ENSNodeConfigInfoError />;
+  if (error) {
+    return <ENSNodeConfigInfoError />;
   }
 
-  if (ensIndexerConfig === null){
-      return <ENSNodeConfigInfoLoading />;
+  if (ensIndexerConfig === null) {
+    return <ENSNodeConfigInfoLoading />;
   }
 
   return (
@@ -69,7 +69,11 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
             <p className="text-sm leading-6 font-semibold text-gray-500">Connection</p>
             <p className="flex flex-row flex-nowrap justify-start items-center gap-[2px] text-sm leading-6 font-normal text-black">
               {ensIndexerConfig.ensNodePublicUrl.href}
-              <CopyButton value={ensIndexerConfig.ensNodePublicUrl.href} icon={<CopyIcon />} className="max-sm:hidden"/>
+              <CopyButton
+                value={ensIndexerConfig.ensNodePublicUrl.href}
+                icon={<CopyIcon />}
+                className="max-sm:hidden"
+              />
             </p>
           </div>
         </div>
@@ -103,11 +107,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
             items={[
               {
                 label: "Database Schema",
-                value: (
-                  <p className={cardItemValueStyles}>
-                    {ensIndexerConfig.databaseSchemaName}
-                  </p>
-                ),
+                value: <p className={cardItemValueStyles}>{ensIndexerConfig.databaseSchemaName}</p>,
                 additionalInfo: (
                   <p>
                     A Postgres database schema name. ENSIndexer writes indexed data to tables within
@@ -115,18 +115,14 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
                   </p>
                 ),
               },
-                {
-                    label: "Database",
-                    value: (
-                        <p className={cardItemValueStyles}>
-                            Postgres
-                        </p>
-                    )
-                }
+              {
+                label: "Database",
+                value: <p className={cardItemValueStyles}>Postgres</p>,
+              },
             ]}
             version={ensIndexerConfig.dependencyInfo.ensRainbow}
           />
-            {/*It's safe to assume that the version number of ENSDb is always equal to the version number of ENSIndexer.
+          {/*It's safe to assume that the version number of ENSDb is always equal to the version number of ENSIndexer.
              Until changes to ENSIndexerPublicConfig are made this logic is correct (see a comment about ENSIndexer version)*/}
           {/*ENSIndexer*/}
           <ConfigInfoAppCard
@@ -136,26 +132,18 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
               {
                 label: "Ponder",
                 value: (
-                  <p className={cardItemValueStyles}>
-                    {ensIndexerConfig.dependencyInfo.ponder}
-                  </p>
+                  <p className={cardItemValueStyles}>{ensIndexerConfig.dependencyInfo.ponder}</p>
                 ),
               },
               {
                 label: "Node.js",
                 value: (
-                  <p className={cardItemValueStyles}>
-                    {ensIndexerConfig.dependencyInfo.nodejs}
-                  </p>
+                  <p className={cardItemValueStyles}>{ensIndexerConfig.dependencyInfo.nodejs}</p>
                 ),
               },
               {
                 label: "ENS Namespace",
-                value: (
-                  <p className={cardItemValueStyles}>
-                    {ensIndexerConfig.namespace}
-                  </p>
-                ),
+                value: <p className={cardItemValueStyles}>{ensIndexerConfig.namespace}</p>,
                 additionalInfo: <p>The ENS namespace that ENSNode operates in the context of.</p>,
               },
               {
@@ -258,9 +246,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
               {
                 label: "LabelSetId",
                 value: (
-                  <p className={cardItemValueStyles}>
-                    {ensIndexerConfig.labelSet.labelSetId}
-                  </p>
+                  <p className={cardItemValueStyles}>{ensIndexerConfig.labelSet.labelSetId}</p>
                 ),
                 additionalInfo: (
                   <p>
@@ -273,9 +259,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
               {
                 label: "Highest label set version",
                 value: (
-                  <p className={cardItemValueStyles}>
-                    {ensIndexerConfig.labelSet.labelSetVersion}
-                  </p>
+                  <p className={cardItemValueStyles}>{ensIndexerConfig.labelSet.labelSetVersion}</p>
                 ),
                 additionalInfo: (
                   <p>
@@ -314,29 +298,31 @@ function ENSNodeConfigInfoError() {
 }
 
 function ENSNodeConfigInfoLoading() {
-    const loadingCardContentStyles = "space-y-2 max-sm:p-3 max-sm:pt-0";
+  const loadingCardContentStyles = "space-y-2 max-sm:p-3 max-sm:pt-0";
 
-    return (
-            <Card className="animate-pulse">
-                <CardHeader className="max-sm:p-3">
-                    <div className="h-6 bg-muted rounded w-1/3"/>
-                </CardHeader>
-                <CardContent className="max-sm:p-3 max-sm:pt-0">
-                    <div className="space-y-2 pb-6 max-sm:pb-3">
-                        <div className="h-4 bg-muted rounded w-1/2"/>
-                    </div>
-                    <div className="flex flex-col gap-4 max-sm:p-0 max-sm:gap-3">
-                        {["ENSAdmin", "ENSDb", "ENSIndexer", "ENSRainbow"].map(() => (<Card>
-                            <CardHeader className="max-sm:p-3">
-                                <div className="h-6 bg-muted rounded w-1/4"/>
-                            </CardHeader>
-                            <CardContent className={loadingCardContentStyles}>
-                                <div className="h-4 bg-muted rounded w-2/3"/>
-                                <div className="h-4 bg-muted rounded w-2/3"/>
-                            </CardContent>
-                        </Card>))}
-                    </div>
-                </CardContent>
+  return (
+    <Card className="animate-pulse">
+      <CardHeader className="max-sm:p-3">
+        <div className="h-6 bg-muted rounded w-1/3" />
+      </CardHeader>
+      <CardContent className="max-sm:p-3 max-sm:pt-0">
+        <div className="space-y-2 pb-6 max-sm:pb-3">
+          <div className="h-4 bg-muted rounded w-1/2" />
+        </div>
+        <div className="flex flex-col gap-4 max-sm:p-0 max-sm:gap-3">
+          {["ENSAdmin", "ENSDb", "ENSIndexer", "ENSRainbow"].map(() => (
+            <Card>
+              <CardHeader className="max-sm:p-3">
+                <div className="h-6 bg-muted rounded w-1/4" />
+              </CardHeader>
+              <CardContent className={loadingCardContentStyles}>
+                <div className="h-4 bg-muted rounded w-2/3" />
+                <div className="h-4 bg-muted rounded w-2/3" />
+              </CardContent>
             </Card>
-    );
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

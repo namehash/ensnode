@@ -27,17 +27,19 @@ export function IndexingStatus() {
   const indexingStatusQuery = useIndexingStatus();
 
   if (ensIndexerConfigQuery.isError) {
-    return <ENSNodeConfigInfo ensIndexerConfig={null} error={true}/>;
+    return <ENSNodeConfigInfo ensIndexerConfig={null} error={true} />;
   }
   if (indexingStatusQuery.isError) {
     return <p className="p-6">Failed to fetch Indexing Status.</p>;
   }
 
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
-    return (<section className="flex flex-col gap-6 p-6">
-      <ENSNodeConfigInfo ensIndexerConfig={null} />
-      <IndexingStatusPlaceholder />
-    </section>);
+    return (
+      <section className="flex flex-col gap-6 p-6">
+        <ENSNodeConfigInfo ensIndexerConfig={null} />
+        <IndexingStatusPlaceholder />
+      </section>
+    );
   }
 
   const ensIndexerConfig = ensIndexerConfigQuery.data;
