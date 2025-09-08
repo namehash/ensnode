@@ -30,6 +30,7 @@ export interface ENSNodeConfigProps {
 export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
   const baseCardTitleStyles = "flex items-center gap-2";
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
+  const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
   return (
     <Card className="w-full">
@@ -70,11 +71,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                 ),
               },
             ]}
-            version={ensIndexerConfig.dependencyInfo.ensRainbow}
             docsLink={new URL("https://ensnode.io/ensadmin/")}
           />
-          {/*TODO: The current approach to displaying the version of ENSAdmin is a stretch.
-           We need to make another update that improves the data model of ENSIndexerPublicConfig and related */}
           {/*ENSDb*/}
           <ConfigInfoAppCard
             name="ENSDb"
@@ -83,7 +81,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Database Schema",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.databaseSchemaName}
                   </p>
                 ),
@@ -94,9 +92,19 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
                   </p>
                 ),
               },
+                {
+                    label: "Database",
+                    value: (
+                        <p className={cardItemValueStyles}>
+                            Postgres
+                        </p>
+                    )
+                }
             ]}
-            version="ClosedAlpha"
+            version={ensIndexerConfig.dependencyInfo.ensRainbow}
           />
+            {/*It's safe to assume that the version number of ENSDb is always equal to the version number of ENSIndexer.
+             Until changes to ENSIndexerPublicConfig are made this logic is correct (see a comment about ENSIndexer version)*/}
           {/*ENSIndexer*/}
           <ConfigInfoAppCard
             name="ENSIndexer"
@@ -105,7 +113,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Ponder",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.dependencyInfo.ponder}
                   </p>
                 ),
@@ -113,7 +121,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Node.js",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.dependencyInfo.nodejs}
                   </p>
                 ),
@@ -121,7 +129,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "ENS Namespace",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.namespace}
                   </p>
                 ),
@@ -219,7 +227,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Schema Version",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.dependencyInfo.ensRainbowSchema}
                   </p>
                 ),
@@ -227,7 +235,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "LabelSetId",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.labelSet.labelSetId}
                   </p>
                 ),
@@ -242,7 +250,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Highest label set version",
                 value: (
-                  <p className="text-sm leading-6 font-normal text-black">
+                  <p className={cardItemValueStyles}>
                     {ensIndexerConfig.labelSet.labelSetVersion}
                   </p>
                 ),
