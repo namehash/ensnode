@@ -189,16 +189,14 @@ export type DNSEncodedName = Hex;
 export type DNSEncodedLiteralName = DNSEncodedName & { __brand: "DNSEncodedLiteralName" };
 
 /**
- * A DNSEncodedName that represents a name consisting of labels that are either:
- * a) Literal Labels, or
- * b) Encoded LabelHashes.
- *
- * In a DNSEncodedPartiallyInterpretedName, strings that look like Encoded LabelHashes are understood
- * to be Encoded LabelHashes: when interpreted, the Interpeted Label will be the exact value of the
- * decoded "[abcd...xyz]" string.
+ * A DNSEncodedName that encodes a name consisting of 0 or more labels that are either:
+ * a) Literal Labels that are guaranteed not to include '.' characters or to be
+ *    formatted as Encoded LabelHashes.
+ * b) Interpreted Labels formatted as Encoded LabelHashes that should be interpreted
+ *    as encoding a LabelHash literal.
  *
  * TODO: This type is unused in ENSv1, but its usage is anticipated in ENSv2 due to Encoded
- * LabelHash support in the NameCoder contract.
+ * LabelHash support in the ENSv2 implementation of the NameCoder contract.
  *
  * TODO: determine "is this label an encoded labelhash" logic after NameCoder is updated
  *
