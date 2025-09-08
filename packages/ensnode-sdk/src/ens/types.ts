@@ -85,7 +85,8 @@ export type EncodedLabelHash = `[${string}]`;
  * or normalization processing. It may be an unnormalized label for reasons including:
  * - being an empty label,
  * - containing '.' characters,
- * - containing unnormalized characters such as null bytes,
+ * - containing unnormalized characters such as null bytes or other characters not
+ *   suitable for display,
  * - being formatted as an EncodedLabelHash. Note that when LiteralLabel are formatted as
  *   an EncodedLabelHash they do NOT symbolically represent the encoding of a LabelHash
  *   literal.
@@ -99,9 +100,10 @@ export type LiteralLabel = Label & { __brand: "LiteralLabel" };
 /**
  * An Interpreted Label is a Label that is either:
  * a) a Normalized Label, or
- * b) an Unnormalizable Label formatted as an Encoded LabelHash that should be
- *    interpreted as encoding a LabelHash literal, where the encoded LabelHash
- *    literal is the `labelhash` of the related LiteralLabel.
+ * b) an Unnormalizable Label exclusively for the reason that it is formatted
+ *    as an Encoded LabelHash that should be interpreted as encoding a
+ *    LabelHash literal, where the encoded LabelHash literal is the `labelhash`
+ *    of the related LiteralLabel.
  *
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -110,8 +112,13 @@ export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 
 /**
  * A Literal Name is a Name as it literally appears onchain, composed of Literal Labels
- * joined by dots. It may contain unnormalized characters, null bytes, or other values
- * that are not suitable for display.
+ * joined by dots. It may be an unnormalized name for reasons including:
+ * - containing empty labels,
+ * - containing unnormalized characters such as null bytes or other characters not
+ *   suitable for display,
+ * - containing LiteralLabel values formatted as an EncodedLabelHash. Note that when
+ *   LiteralLabel values are formatted as an EncodedLabelHash they do NOT symbolically
+ *   represent the encoding of a LabelHash literal.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -119,9 +126,15 @@ export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 export type LiteralName = Name & { __brand: "LiteralName" };
 
 /**
- * An Interpreted Name is a Name that is entirely composed of Interpreted Labels. That is, it is either:
+ * An Interpreted Name is a Name that is entirely composed of 0 or more
+ * Interpreted Labels.
+ * 
+ * That is, it is either:
  * a) a Normalized Name, or
- * b) contains Unnormalizable Labels formatted as Encoded LabelHashes.
+ * b) an Unnormalizable Name exclusively for the reason that it contains 1 or
+ *    more labels formatted as Encoded LabelHashes that should be interpreted
+ *    as encoding a LabelHash literal, where the encoded LabelHash literal is
+ *    the `labelhash` of the related LiteralLabel.
  *
  * @see https://ensnode.io/docs/reference/terminology#interpreted-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
