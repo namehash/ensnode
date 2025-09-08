@@ -1,5 +1,4 @@
-import { localhost } from "viem/chains";
-
+import { ensTestEnvL1Chain } from "./lib/chains";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -33,7 +32,7 @@ export default {
    * https://github.com/ensdomains/ens-test-env/
    */
   [DatasourceNames.ENSRoot]: {
-    chain: localhost,
+    chain: ensTestEnvL1Chain,
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
