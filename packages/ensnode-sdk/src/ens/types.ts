@@ -58,9 +58,21 @@ export type LabelHash = Hex;
 export type Label = string;
 
 /**
- * An EncodedLabelHash is a specially formatted (unnormalized) Label that should be interpreted as a
- * LabelHash literal. The original string may not be known, may not be normalizable, or may be too
- * long for DNS-Encoding.
+ * An EncodedLabelHash is a specially formatted (unnormalized) Label formatted
+ * as a non-0x prefixed 32-byte hex string enclosed in square brackets.
+ *
+ * Care should be taken to distinguish Label values formatted as an
+ * EncodedLabelHash as either a LiteralLabel or an InterpretedLabel:
+ * - If a LiteralLabel is formatted as an EncodedLabelHash it does not
+ *   symbolically represent the encoding of a LabelHash literal.
+ * - If an InterpretedLabel is formatted as an EncodedLabelHash it should be
+ *   interpreted as encoding a LabelHash literal.
+ *
+ * An InterpretedLabel may be formatted as an EncodedLabelHash if the related
+ * LiteralLabel is:
+ * - not a normalized label
+ * - is an unknown value that could not be healed.
+ * - is too long for DNS-Encoding in contexts where DNS-Encoding was required.
  *
  * @example [af2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc]
  *
