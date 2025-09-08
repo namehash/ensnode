@@ -31,6 +31,7 @@ export type Name = string;
  *
  * @example vitalik.eth
  * @see https://ensnode.io/docs/reference/terminology#name-node-namehash
+ * @dev nominally typed to enforce usage & enhance codebase clarity
  */
 export type NormalizedName = Name & { __brand: "NormalizedName" };
 
