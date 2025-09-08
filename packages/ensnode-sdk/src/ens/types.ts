@@ -99,7 +99,9 @@ export type LiteralLabel = Label & { __brand: "LiteralLabel" };
 /**
  * An Interpreted Label is a Label that is either:
  * a) a Normalized Label, or
- * b) an Unnormalizable Label formatted as an Encoded LabelHash.
+ * b) an Unnormalizable Label formatted as an Encoded LabelHash that should be
+ *    interpreted as encoding a LabelHash literal, where the encoded LabelHash
+ *    literal is the `labelhash` of the related LiteralLabel.
  *
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
