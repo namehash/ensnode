@@ -8,8 +8,8 @@ import { Label } from "./types";
  * @see https://ens.mirror.xyz/9GN77d-MqGvRypm72FcwgxlUnPSuKWhG3rWxddHhRwM
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L76
  *
- * For context on the ENS Separator,
- * @see https://docs.ens.domains/ensip/15
+ * For context on the full stop (.) character,
+ * @see https://docs.ens.domains/ensip/1/#name-syntax
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L80
  *
  * For context on Encoded LabelHashes,

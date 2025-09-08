@@ -110,10 +110,11 @@ export function decodeDNSEncodedName(packet: DNSEncodedName): string[] {
     // stop condition
     if (len === 0) break;
 
-    // add to list of segments
-    segments.push(bytesToString(bytes.subarray(offset + 1, offset + len + 1)));
+    // decode to UTF-8 string
+    const segment = bytesToString(bytes.subarray(offset + 1, offset + len + 1));
 
-    // continue
+    // add to list of segments and continue decoding
+    segments.push(segment);
     offset += len + 1;
   }
 
