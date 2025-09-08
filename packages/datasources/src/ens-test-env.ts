@@ -1,7 +1,5 @@
-import { Address, zeroAddress } from "viem";
 import { anvil } from "viem/chains";
 
-import { getENSTestEnvDeploymentAddresses } from "./lib/ens-test-env-deployment-addresses";
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 // ABIs for ENSRoot Datasource
@@ -15,10 +13,6 @@ import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } f
 
 // Shared ABIs
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
-
-const deploymentAddresses = getENSTestEnvDeploymentAddresses();
-
-const EMPTY_ADDRESS = "" as Address;
 
 /**
  * The ens-test-env ENSNamespace
@@ -56,12 +50,12 @@ export default {
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: deploymentAddresses?.LegacyENSRegistry ?? EMPTY_ADDRESS,
+        address: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
         startBlock: 0,
       },
       Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: deploymentAddresses?.ENSRegistry ?? EMPTY_ADDRESS,
+        address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
         startBlock: 0,
       },
       Resolver: {
@@ -71,46 +65,32 @@ export default {
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: deploymentAddresses?.BaseRegistrarImplementation ?? EMPTY_ADDRESS,
+        address: "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
         startBlock: 0,
       },
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address:
-          // NOTE: prefer the post-UnwrappedEthRegistrarController naming
-          deploymentAddresses?.LegacyETHRegistrarController ??
-          // TODO: remove deploymentAddresses?.ETHRegistrarControllerOld after ens-test-env is updated
-          deploymentAddresses?.ETHRegistrarControllerOld ??
-          EMPTY_ADDRESS,
+        address: "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
         startBlock: 0,
       },
       WrappedEthRegistrarController: {
         abi: root_WrappedEthRegistrarController,
-        address:
-          // NOTE: prefer the post-UnwrappedEthRegistrarController naming
-          deploymentAddresses?.WrappedETHRegistrarController ??
-          // TODO: remove deploymentAddresses?.ETHRegistrarController after ens-test-env is updated
-          deploymentAddresses?.ETHRegistrarController ??
-          EMPTY_ADDRESS,
+        address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
         startBlock: 0,
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        // TODO: once ens-test-env is updated with the new UnwrappedEthRegistrarController, update
-        // this reference here
-        // NOTE: using zeroAddress so indexing proceeds as expected in ens-test-env pre-UnwrappedEthRegistrarController
-        // TODO: change zeroAddress to EMPTY_ADDRESS after ens-test-env is updated
-        address: deploymentAddresses?.UnwrappedETHRegistrarController ?? zeroAddress,
+        address: "0x36b58F5C1969B7b6591D752ea6F5486D069010AB",
         startBlock: 0,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: deploymentAddresses?.NameWrapper ?? EMPTY_ADDRESS,
+        address: "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
         startBlock: 0,
       },
       UniversalResolver: {
         abi: root_UniversalResolver,
-        address: deploymentAddresses?.UniversalResolver ?? EMPTY_ADDRESS,
+        address: "0xD84379CEae14AA33C123Af12424A37803F885889",
         startBlock: 0,
       },
     },

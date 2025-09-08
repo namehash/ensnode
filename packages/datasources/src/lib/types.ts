@@ -1,4 +1,4 @@
-import { type Abi, type Address, type Chain, isAddressEqual } from "viem";
+import { type Abi, type Address, type Chain } from "viem";
 
 /**
  * ENSNamespaceIds encodes the set of identifiers for well-known ENS namespaces.
