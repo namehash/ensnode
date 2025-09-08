@@ -1,1 +1,1 @@
-export { ENSNodeConfigInfo, ENSNodeConfigInfoError } from "./config-info";
+export { ENSNodeConfigInfo } from "./config-info";

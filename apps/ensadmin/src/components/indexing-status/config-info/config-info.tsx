@@ -310,8 +310,8 @@ function ENSNodeConfigInfoLoading() {
           <div className="h-4 bg-muted rounded w-1/2" />
         </div>
         <div className="flex flex-col gap-4 max-sm:p-0 max-sm:gap-3">
-          {["ENSAdmin", "ENSDb", "ENSIndexer", "ENSRainbow"].map(() => (
-            <Card>
+          {["ENSAdmin", "ENSDb", "ENSIndexer", "ENSRainbow"].map((app) => (
+            <Card key={`${app}-app-placeholder`}>
               <CardHeader className="max-sm:p-3">
                 <div className="h-6 bg-muted rounded w-1/4" />
               </CardHeader>
