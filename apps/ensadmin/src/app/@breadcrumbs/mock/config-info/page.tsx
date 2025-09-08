@@ -5,7 +5,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-//TODO: is there any better way to do this?
 export default function Page() {
   return (
     <>
