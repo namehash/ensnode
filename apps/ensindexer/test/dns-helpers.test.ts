@@ -1,17 +1,16 @@
-import { bytesToPacket, packetToBytes } from "@ensdomains/ensjs/utils";
 import type { TxtAnswer } from "dns-packet";
-import { bytesToHex, decodeEventLog, labelhash, stringToBytes, stringToHex, zeroHash } from "viem";
+import { bytesToHex, decodeEventLog, stringToHex, zeroHash } from "viem";
+import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
 import {
-  decodeDNSEncodedName,
   decodeTXTData,
   parseDnsTxtRecordArgs,
   parseRRSet,
   subgraph_decodeDNSEncodedLiteralName,
 } from "@/lib/dns-helpers";
 import { getDatasource } from "@ensnode/datasources";
-import { DNSEncodedLiteralName, DNSEncodedName, encodeLabelHash } from "@ensnode/ensnode-sdk";
+import { DNSEncodedLiteralName } from "@ensnode/ensnode-sdk";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
@@ -96,9 +95,9 @@ describe("dns-helpers", () => {
       ).toThrow(/overflow/i);
     });
 
-    it("should throw for labels with subgraph-invalid characters", () => {
+    it("should throw for labels with subgraph-unindexable characters", () => {
       NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES.forEach((name) => {
-        expect(() => subgraph_decodeDNSEncodedLiteralName(name)).toThrow(/not subgraph-valid/i);
+        expect(() => subgraph_decodeDNSEncodedLiteralName(name)).toThrow(/not subgraph-indexable/i);
       });
     });
 
@@ -139,67 +138,6 @@ describe("dns-helpers", () => {
 
     it("should parse args correctly", () => {
       expect(parseDnsTxtRecordArgs(args)).toEqual({ key: PARSED_KEY, value: PARSED_VALUE });
-    });
-  });
-
-  describe("decodeDNSEncodedName", () => {
-    it("handles root node", () => {
-      expect(decodeDNSEncodedName(bytesToHex(packetToBytes("")))).toEqual([]);
-    });
-
-    it("handles obvious case", () => {
-      expect(decodeDNSEncodedName(bytesToHex(packetToBytes("vitalik.eth")))).toEqual([
-        "vitalik",
-        "eth",
-      ]);
-    });
-
-    it("throws for empty input", () => {
-      expect(() => decodeDNSEncodedName("" as DNSEncodedName)).toThrow(/empty/i);
-    });
-
-    it("throws for empty packet", () => {
-      expect(() => decodeDNSEncodedName("0x")).toThrow(/empty/i);
-    });
-
-    it("parses example input", () => {
-      expect(decodeDNSEncodedName(stringToHex("\x03aaa\x02bb\x01c\x00"))).toEqual([
-        "aaa",
-        "bb",
-        "c",
-      ]);
-    });
-
-    it("handles junk", () => {
-      expect(decodeDNSEncodedName(stringToHex("\x03aaa\x00"))).toEqual(["aaa"]);
-      expect(() => decodeDNSEncodedName(stringToHex("\x03aaa\x00junk"))).toThrow(/junk/i);
-    });
-
-    it("handles overflow", () => {
-      expect(() => decodeDNSEncodedName(stringToHex("\x06aaa\x00"))).toThrow(/overflow/i);
-    });
-
-    it("correctly decodes labels with period", () => {
-      expect(decodeDNSEncodedName(stringToHex("\x03a.a\x00"))).toEqual(["a.a"]);
-    });
-
-    it("correctly decodes labels with NULL", () => {
-      expect(decodeDNSEncodedName(stringToHex("\x03\0\0\0\x00"))).toEqual(["\0\0\0"]);
-    });
-
-    it("correctly decodes encoded-labelhash-looking-strings", () => {
-      const literalLabelThatLooksLikeALabelHash = encodeLabelHash(labelhash("test"));
-
-      expect(
-        decodeDNSEncodedName(stringToHex(`\x42${literalLabelThatLooksLikeALabelHash}\x00`)),
-      ).toEqual([literalLabelThatLooksLikeALabelHash]);
-    });
-
-    it("correctly decodes multi-byte unicode", () => {
-      console.log(bytesToHex(packetToBytes("example.eth")));
-      MULTI_BYTE_UNICODE_NAMES.forEach((name) =>
-        expect(decodeDNSEncodedName(bytesToHex(packetToBytes(name)))).toEqual(name.split(".")),
-      );
     });
   });
 });

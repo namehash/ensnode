@@ -213,7 +213,7 @@ export const handleNewOwner =
           labelName: label,
         });
       } else {
-        // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-valid)
+        // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-indexable)
         // NOTE: for TLDs, the parent is null, so we just use the label value as is
         const labelForUseInName = isLabelSubgraphValid(healedLabel)
           ? healedLabel
@@ -222,11 +222,11 @@ export const handleNewOwner =
 
         await context.db.update(schema.domain, { id: node }).set({
           name,
-          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and subgraph-valid
+          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and subgraph-indexable
           //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
           // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
-          //   is updated to, if it is subgraph-valid, _not_ the `label` value used to construct the
-          //   name (which the subgraph specifies as the encoded labelHash if `label` is not subgraph-valid)
+          //   is updated to, if it is subgraph-indexable, _not_ the `label` value used to construct the
+          //   name (which the subgraph specifies as the encoded labelHash if `label` is not subgraph-indexable)
           labelName: isLabelSubgraphValid(healedLabel) ? healedLabel : undefined,
         });
       }

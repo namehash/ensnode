@@ -1,10 +1,9 @@
-import { Label } from "./types";
+import type { Label } from "@ensnode/ensnode-sdk";
 
 /**
- * The following 4 characters are classified as "invalid" in emitted labels by the ENS Subgraph due
- * to indexing concerns.
+ * The following 4 characters are classified as "unindexable" in emitted labels by the ENS Subgraph.
  *
- * For null byte context,
+ * For context on null bytes,
  * @see https://ens.mirror.xyz/9GN77d-MqGvRypm72FcwgxlUnPSuKWhG3rWxddHhRwM
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L76
  *
@@ -18,38 +17,39 @@ import { Label } from "./types";
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L91
  *
  * For additional context,
- * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-valid-and-invalid-labels
+ * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-indexable-and-invalid-labels
  */
-const INVALID_LABEL_CHARACTERS = [
+const UNINDEXABLE_LABEL_CHARACTERS = [
   "\0", // null byte: PostgreSQL does not allow storing this character in text fields.
   ".", // conflicts with ENS label separator logic
   "[", // conflicts with Encoded LabelHash format
   "]", // conflicts with Encoded LabelHash format
 ];
 
-const INVALID_LABEL_CHARACTER_CODES = new Set(
-  INVALID_LABEL_CHARACTERS.map((char) => char.charCodeAt(0)),
+const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
+  UNINDEXABLE_LABEL_CHARACTERS.map((char) => char.charCodeAt(0)),
 );
 
 /**
- * Check if any characters in `label` are "valid" according to legacy Subgraph logic.
+ * Determine whether the provided `label` contains only "indexable" characters according to legacy
+ * Subgraph logic.
  *
  * Implements the following ENS Subgraph `checkValidLabel` function:
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L68
  *
  * @param label - The label to check. Note: A `null` value for `label` represents an unknown label.
- * @returns whether the provided Label is subgraph-valid
+ * @returns whether the provided Label is subgraph-indexable
  */
-export const isLabelSubgraphValid = (label: Label | null): label is Label => {
-  // an unknown label is not subgraph-valid
+export const isLabelSubgraphIndexable = (label: Label | null): label is Label => {
+  // an unknown label is not subgraph-indexable
   // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L69
   if (label === null) return false;
 
   // the label string cannot include any of the documented character codes
   for (let i = 0; i < label.length; i++) {
-    if (INVALID_LABEL_CHARACTER_CODES.has(label.charCodeAt(i))) return false;
+    if (UNINDEXABLE_LABEL_CHARACTER_CODES.has(label.charCodeAt(i))) return false;
   }
 
-  // otherwise, the label is subgraph-valid
+  // otherwise, the label is subgraph-indexable
   return true;
 };

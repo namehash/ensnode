@@ -236,10 +236,10 @@ export const registration = onchainTable(
      * @see https://ensnode.io/docs/reference/terminology#interpreted-label
      *
      * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null, if the emitted Label is not subgraph-valid, or
+     * a) null, if the emitted Label is not subgraph-indexable, or
      * b) a Literal Label that may or may not be normalized and may or may not be an Encoded LabelHash.
      *
-     * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-valid-and-invalid-labels
+     * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-indexable-and-invalid-labels
      * @see https://ensnode.io/docs/reference/terminology#literal-label
      */
     labelName: t.text(),
@@ -293,10 +293,10 @@ export const wrappedDomain = onchainTable(
      * @see https://ensnode.io/docs/reference/terminology#interpreted-name
      *
      * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null (in the case of a malformed or a name that contains subgraph-invalid labels), or
+     * a) null (in the case of a malformed or a name that contains subgraph-unindexable labels), or
      * b) a Literal Name that may or may not be normalized.
      *
-     * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-valid-and-invalid-labels
+     * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-indexable-and-invalid-labels
      * @see https://ensnode.io/docs/reference/terminology#literal-name
      */
     name: t.text(),

@@ -52,7 +52,7 @@ export const makeRegistrarHandlers = ({
       // see https://ensnode.io/docs/reference/terminology#interpreted-label
       label = literalLabelToInterpretedLabel(label as LiteralLabel);
     } else {
-      // NOTE(subgraph-compat): if the label is not subgraph-valid, ignore it entirely
+      // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
       if (!isLabelSubgraphValid(label)) return;
     }
 
@@ -161,11 +161,11 @@ export const makeRegistrarHandlers = ({
             : encodeLabelHash(labelHash);
         name = `${label}.${registrarManagedName}`;
       } else {
-        // only update the name if the label is healed & subgraph-valid
+        // only update the name if the label is healed & subgraph-indexable
         // undefined value means no change to the name
         label = isLabelSubgraphValid(healedLabel) ? healedLabel : undefined;
 
-        // only update the name if the label is healed & subgraph-valid
+        // only update the name if the label is healed & subgraph-indexable
         // undefined value means no change to the name
         name = label ? `${label}.${registrarManagedName}` : undefined;
       }

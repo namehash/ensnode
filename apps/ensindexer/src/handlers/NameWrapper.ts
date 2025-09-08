@@ -74,7 +74,7 @@ function decodeLiteralNameWrapperName(
     return subgraph_decodeDNSEncodedLiteralName(packet);
   } catch {
     // NOTE: the NameWrapper may emit names that are malformed or contain labels that are not
-    // subgraph-valid: when this occurs, the subgraph expects `null` to be returned from the decoding
+    // subgraph-indexable: when this occurs, the subgraph expects `null` to be returned from the decoding
     // process
     return { label: null, name: null };
   }

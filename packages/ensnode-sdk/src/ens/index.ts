@@ -7,4 +7,4 @@ export * from "./types";
 export * from "./parse-reverse-name";
 export * from "./is-normalized";
 export * from "./encode-labelhash";
-export * from "./subgraph-label-valid";
+export * from "./dns-encoded-name";
