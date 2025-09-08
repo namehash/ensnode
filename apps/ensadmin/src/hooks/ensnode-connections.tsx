@@ -7,6 +7,7 @@ import { useLocalstorageState } from "rooks";
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { defaultEnsNodeUrls } from "@/lib/env";
+import { getTabId } from "@/lib/tab-utils";
 
 // TODO: move to lib
 const standardizeURL = (url: string) => new URL(url).toString();
@@ -17,10 +18,12 @@ const DEFAULT_CONNECTION_URLS = defaultEnsNodeUrls()
 
 function _useENSNodeConnections() {
   const hydrated = useHydrated();
-  const [urls, setUrls] = useLocalstorageState<string[]>("ensadmin:connections:urls", []);
+  const tabId = useMemo(() => (hydrated ? getTabId() : "server"), [hydrated]);
+
+  const [urls, setUrls] = useLocalstorageState<string[]>(`ensadmin:${tabId}:connections:urls`, []);
 
   const [selected, setSelected, clearSelected] = useLocalstorageState<string | null>(
-    "ensadmin:connections:selected",
+    `ensadmin:${tabId}:connections:selected`,
     null,
   );
 
@@ -39,31 +42,37 @@ function _useENSNodeConnections() {
     [connections],
   );
 
-  const addConnection = useCallback(async (_url: string) => {
-    // validate the URL
-    const { isValid, error } = await validateENSNodeUrl(_url);
-    if (!isValid) {
-      throw new Error(error || "Invalid URL");
-    }
+  const addConnection = useCallback(
+    async (_url: string) => {
+      // validate the URL
+      const { isValid, error } = await validateENSNodeUrl(_url);
+      if (!isValid) {
+        throw new Error(error || "Invalid URL");
+      }
 
-    const url = standardizeURL(_url);
+      const url = standardizeURL(_url);
 
-    // check if URL already exists
-    if (connections.some((c) => c.url === url)) return url;
+      // check if URL already exists
+      if (connections.some((c) => c.url === url)) return url;
 
-    // add to set of urls
-    setUrls((urls) => [...urls, url]);
+      // add to set of urls
+      setUrls((urls) => [...urls, url]);
 
-    // return standardized value
-    return url;
-  }, []);
+      // return standardized value
+      return url;
+    },
+    [connections, setUrls],
+  );
 
-  const removeConnection = useCallback((url: string) => {
-    // remove from set of urls
-    setUrls((urls) => urls.filter((_url) => _url !== url));
+  const removeConnection = useCallback(
+    (url: string) => {
+      // remove from set of urls
+      setUrls((urls) => urls.filter((_url) => _url !== url));
 
-    return url;
-  }, []);
+      return url;
+    },
+    [setUrls],
+  );
 
   const selectConnection = useCallback(
     (url: string) => {
@@ -74,7 +83,7 @@ function _useENSNodeConnections() {
 
       return setSelected(url);
     },
-    [isInConnections],
+    [isInConnections, setSelected],
   );
 
   const addAndSelectConnection = useCallback(
@@ -83,7 +92,7 @@ function _useENSNodeConnections() {
       setSelected(added);
       return added;
     },
-    [addConnection, selectConnection],
+    [addConnection, setSelected],
   );
 
   // the active connection is the selected (if valid) or the first
@@ -105,7 +114,7 @@ function _useENSNodeConnections() {
     if (selected && !isInConnections(selected)) {
       clearSelected();
     }
-  }, [selected, isInConnections]);
+  }, [selected, isInConnections, clearSelected]);
 
   return {
     connections,
