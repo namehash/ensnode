@@ -19,18 +19,20 @@ export type { ENSNamespaceId } from "@ensnode/datasources";
 export type Node = Hex;
 
 /**
- * A Name represents a human-readable ENS name.
+ * An ENS Name that may or may not be normalized.
  *
  * @example vitalik.eth
  * @see https://ensnode.io/docs/reference/terminology#name-node-namehash
+ * @see https://docs.ens.domains/ensip/15
  */
 export type Name = string;
 
 /**
- * A Normalized Name represents a normalized ENS name.
+ * A Normalized Name is an ENS Name that is guaranteed to be normalized.
  *
  * @example vitalik.eth
  * @see https://ensnode.io/docs/reference/terminology#name-node-namehash
+ * @see https://docs.ens.domains/ensip/15
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
 export type NormalizedName = Name & { __brand: "NormalizedName" };
@@ -148,7 +150,7 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * of a domain name. Used in ENS contracts for efficient name storage and transmission.
  * Each label is prefixed with a length byte, and the entire sequence is null-terminated.
  *
- * @example "0x07766974616c696b03657468000" represents "vitalik.eth"
+ * @example "0x076578616d706c650365746800" represents "example.eth"
  *
  * @see https://docs.ens.domains/resolution/names/#dns-encoding
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
@@ -156,14 +158,34 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * DNS Packet Format for Domain Names:
  * - Domain names are encoded as a sequence of 0 or more labels
  * - Each label begins with a length byte (1 byte) indicating how many bytes follow for that label
- *   Note how this constrains each label in DNS encoded names to a max length of 255 bytes.
- * - The bytes after the length byte represent the characters in the label
+ *   Note how this constrains each label in DNS encoded names to a max byte length of 255 bytes.
+ * - The bytes after the length byte represent the label, as a UTF-8 byte array
  * - Labels are concatenated with no separators
- * - The sequence ends with a zero-length byte (0x00)
+ * - The sequence ends with a null byte (0x00)
  *
  * Example: "example.eth" is encoded as:
  * [0x07, 'e', 'x', 'a', 'm', 'p', 'l', 'e', 0x03, 'e', 't', 'h', 0x00]
  * Where 0x07 is the length of "example", 0x03 is the length of "eth", and 0x00 marks the end
+ *
+ * Example: "" (empty string, i.e. root node) is encoded as:
+ * [0x00]
+ *
+ * Example: "👩🏼‍❤‍💋‍👨🏼.eth" (multi-byte unicode character) is encoded as:
+ * [0x20, 240, 159, 145, 169, 240, 159, 143, 188, 226, 128, 141, 226, 157, 164, 226,
+ * 128, 141, 240, 159, 146, 139, 226, 128, 141, 240, 159, 145, 168, 240, 159, 143,
+ * 188, 3, 'e', 't', 'h', 0x00]
+ *
+ * A DNS-Encoded Name Packet may be malformed if it does not exactly follow that specification.
+ * Possible reasons a DNS-Encoded Name may be malfomed include:
+ * - 'empty' packet
+ *   - e.g. []
+ *           ^-- that's empty!
+ * - 'length' byte overflowing packet byte length
+ *   - e.g. [0x06, 'e', 't', 'h', 0x00]
+ *            ^-- length overflows available bytes!
+ * - 'junk' at the end of the dns-encoded
+ *   - e.g. [0x03, 'e', 't', 'h', 0x00, 0x01]
+ *                                       ^-- junk!
  *
  * @dev This type is _structurally_ typed to aid Event Argument Typing — consumers should further
  * cast the type of the event argument to a _nominally_ typed DNSEncodedName like {@link DNSEncodedLiteralName}
@@ -174,10 +196,9 @@ export type DNSEncodedName = Hex;
 /**
  * A DNSEncodedName that encodes a name containing 0 or more {@link LiteralLabel}s.
  *
- * In a DNSEncodedLiteralName, all labels are Literal Labels, including labels
- * that may be formatted as Encoded LabelHashes. If Literal Label values are
- * formatted as Encoded LabelHashes, when they are interpreted, the Interpeted
- * Label will be the `labelhash` of the Literal Label value.
+ * In a DNSEncodedLiteralName, all labels are Literal Labels, including any Encoded-LabelHash-looking
+ * labels. Any Encoded-LabelHash-looking Literal Label values, when interpreted, will be formatted as
+ * the `labelhash` of the Literal Label value.
  *
  * The NameWrapper contract emits DNSEncodedLiteralNames:
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
@@ -191,15 +212,15 @@ export type DNSEncodedLiteralName = DNSEncodedName & { __brand: "DNSEncodedLiter
 
 /**
  * A DNSEncodedName that encodes a name consisting of 0 or more labels that are either:
- * a) Literal Labels that are guaranteed not to include '.' characters or to be
- *    formatted as Encoded LabelHashes.
- * b) Interpreted Labels formatted as Encoded LabelHashes that should be interpreted
- *    as encoding a LabelHash literal.
+ * a) Literal Labels, or
+ * b) Encoded LabelHashes, which are already an Interpreted Label.
  *
- * TODO: This type is unused in ENSv1, but its usage is anticipated in ENSv2 due to Encoded
+ * In a DNSEncodedPartiallyInterpretedName, any Encoded-LabelHash-looking decoded Labels (i.e. ones
+ * that match the regex /^\[[\da-f]{64}\]$/) represent an Encoded LabelHash. When decoding a
+ * DNSEncodedPartiallyInterpretedName, these labels are already considered Interpreted.
+ *
+ * NOTE: This type is unused in ENSv1, but its usage is anticipated in ENSv2 due to Encoded
  * LabelHash support in the ENSv2 implementation of the NameCoder contract.
- *
- * TODO: determine "is this label an encoded labelhash" logic after NameCoder is updated
  *
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
  *

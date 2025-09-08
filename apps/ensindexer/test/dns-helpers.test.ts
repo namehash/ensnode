@@ -1,6 +1,6 @@
-import { packetToBytes } from "@ensdomains/ensjs/utils";
+import { bytesToPacket, packetToBytes } from "@ensdomains/ensjs/utils";
 import type { TxtAnswer } from "dns-packet";
-import { bytesToHex, decodeEventLog, labelhash, stringToHex, zeroHash } from "viem";
+import { bytesToHex, decodeEventLog, labelhash, stringToBytes, stringToHex, zeroHash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -34,6 +34,8 @@ const NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES = [
   stringToHex("\x05test[\x00"),
   stringToHex("\x05test]\x00"),
 ] as DNSEncodedLiteralName[];
+
+const MULTI_BYTE_UNICODE_NAMES = ["👩🏼‍❤‍💋‍👨🏼.eth"];
 
 describe("dns-helpers", () => {
   describe("parseRRSet", () => {
@@ -191,6 +193,13 @@ describe("dns-helpers", () => {
       expect(
         decodeDNSEncodedName(stringToHex(`\x42${literalLabelThatLooksLikeALabelHash}\x00`)),
       ).toEqual([literalLabelThatLooksLikeALabelHash]);
+    });
+
+    it("correctly decodes multi-byte unicode", () => {
+      console.log(bytesToHex(packetToBytes("example.eth")));
+      MULTI_BYTE_UNICODE_NAMES.forEach((name) =>
+        expect(decodeDNSEncodedName(bytesToHex(packetToBytes(name)))).toEqual(name.split(".")),
+      );
     });
   });
 });
