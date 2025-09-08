@@ -153,8 +153,9 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/NameCoder.sol
  *
  * DNS Packet Format for Domain Names:
- * - Domain names are encoded as a sequence of labels
+ * - Domain names are encoded as a sequence of 0 or more labels
  * - Each label begins with a length byte (1 byte) indicating how many bytes follow for that label
+ *   Note how this constrains each label in DNS encoded names to a max length of 255 bytes.
  * - The bytes after the length byte represent the characters in the label
  * - Labels are concatenated with no separators
  * - The sequence ends with a zero-length byte (0x00)
