@@ -63,7 +63,7 @@ export type Label = string;
  *
  * Care should be taken to distinguish Label values formatted as an
  * EncodedLabelHash as either a LiteralLabel or an InterpretedLabel:
- * - If a LiteralLabel is formatted as an EncodedLabelHash it does not
+ * - If a LiteralLabel is formatted as an EncodedLabelHash it does NOT
  *   symbolically represent the encoding of a LabelHash literal.
  * - If an InterpretedLabel is formatted as an EncodedLabelHash it should be
  *   interpreted as encoding a LabelHash literal.
@@ -82,8 +82,14 @@ export type EncodedLabelHash = `[${string}]`;
 
 /**
  * A Literal Label is a Label as it literally appears onchain, without any interpretation
- * or normalization processing. It may contain unnormalized characters, null bytes, or
- * other values that are not suitable for display.
+ * or normalization processing. It may be an unnormalized label for reasons including:
+ * - being an empty label,
+ * - containing '.' characters,
+ * - containing unnormalized characters such as null bytes,
+ * - being formatted as an EncodedLabelHash. Note that when LiteralLabel are formatted as
+ *   an EncodedLabelHash they do NOT symbolically represent the encoding of a LabelHash
+ *   literal.
+ *
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
