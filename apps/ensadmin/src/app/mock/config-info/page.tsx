@@ -37,7 +37,7 @@ export default function MockConfigPage() {
   }, [selectedConfig]);
 
   return (
-    <section className="flex flex-col gap-6 p-6">
+    <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
           <CardTitle>Mock: ENSNodeConfigInfo</CardTitle>

@@ -29,27 +29,27 @@ export interface ENSNodeConfigProps {
 
 export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
   const baseCardTitleStyles = "flex items-center gap-2";
-  const cardContentStyles = "flex flex-col gap-4";
+  const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-2 max-sm:p-3">
+      <CardHeader className="sm:pb-4 max-sm:p-3">
         <CardTitle className={cn(baseCardTitleStyles, "text-2xl")}>
           <ENSNodeIcon width={28} height={28} />
           <span>ENSNode</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className={cardContentStyles}>
+      <CardContent className={cn(cardContentStyles, "max-sm:pt-0")}>
         <div className="flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3">
-          <div className="h-fit min-w-[255px] flex flex-col justify-start items-start">
+          <div className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start">
             <p className="text-sm leading-6 font-semibold text-gray-500">Connection</p>
             <p className="flex flex-row flex-nowrap justify-start items-center gap-[2px] text-sm leading-6 font-normal text-black">
               {ensIndexerConfig.ensNodePublicUrl.href}
-              <CopyButton value={ensIndexerConfig.ensNodePublicUrl.href} icon={<CopyIcon />} />
+              <CopyButton value={ensIndexerConfig.ensNodePublicUrl.href} icon={<CopyIcon />} className="max-sm:hidden"/>
             </p>
           </div>
         </div>
-        <div className={cn(cardContentStyles, "max-sm:gap-3")}>
+        <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
           {/*ENSAdmin*/}
           <ConfigInfoAppCard
             name="ENSAdmin"
@@ -150,11 +150,11 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
               {
                 label: "Plugins",
                 value: (
-                  <div className="w-full flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-1 pt-1">
+                  <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
                     {ensIndexerConfig.plugins.map((plugin) => (
                       <span
                         key={`${plugin}-plugin-badge`}
-                        className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default"
+                        className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
                       >
                         {plugin}
                       </span>

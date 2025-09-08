@@ -39,11 +39,12 @@ export function ConfigInfoAppCard({
   const cardHeaderLayoutStyles =
     "flex flex-row flex-nowrap justify-between items-center max-sm:flex-col max-sm:justify-start max-sm:items-start max-sm:gap-2";
   const baseCardTitleStyles = "flex items-center gap-2";
-  const cardContentStyles = "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3";
+  const cardContentStyles = "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3 max-sm:px-3 max-sm:pb-3";
+  const checksWrapperStyles = "flex flex-row flex-nowrap justify-start items-center gap-2";
 
   return (
     <Card>
-      <CardHeader className="pb-5">
+      <CardHeader className="pb-5 max-sm:p-3 max-sm:pb-4">
         <div className={cardHeaderLayoutStyles}>
           <CardTitle className={cn(baseCardTitleStyles, "text-lg leading-normal font-semibold")}>
             {icon}
@@ -98,11 +99,13 @@ export function ConfigInfoAppCard({
             {checks.map((check) => (
               <div
                 key={`${name}-${check.label}-check`}
-                className="flex flex-row flex-nowrap justify-start items-center gap-2"
+                className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
               >
-                {check.icon}
-                <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
-                  {check.label}
+                <div className={checksWrapperStyles}>
+                  {check.icon}
+                  <p className="text-sm leading-6 font-semibold text-gray-500">{check.label}</p>
+                </div>
+                <div className={checksWrapperStyles}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       {<InfoIcon className="flex-shrink-0" />}
@@ -120,12 +123,12 @@ export function ConfigInfoAppCard({
                       }
                     </TooltipContent>
                   </Tooltip>
-                </p>
                 {check.value ? (
                   <CheckIcon className="text-emerald-600 flex-shrink-0" />
                 ) : (
                   <X className="text-red-600 flex-shrink-0" />
                 )}
+                </div>
               </div>
             ))}
           </div>
