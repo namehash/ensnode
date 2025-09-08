@@ -1,10 +1,8 @@
 "use client";
 
 import {
-  ENSNodeConfigInfo,
-  ENSNodeConfigInfoError,
+  ENSNodeConfigInfo
 } from "@/components/indexing-status/config-info";
-import { IndexingStatusPlaceholder } from "@/components/indexing-status/indexing-status-placeholder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,18 +19,23 @@ type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 
 export default function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>("Alpha Mainnet");
-  const { deserializedConfig, validationError } = useMemo(() => {
-    if (selectedConfig === "Loading" || selectedConfig === "Loading Error") {
-      return { deserializedConfig: null, validationError: null };
-    }
+  const { deserializedConfig, validationError, configError } = useMemo(() => {
+    switch (selectedConfig) {
+      case "Loading":
+        return { deserializedConfig: null, validationError: null, configError: undefined };
 
-    try {
-      const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-      return { deserializedConfig: config, validationError: null };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown config validation error";
-      return { deserializedConfig: null, validationError: errorMessage };
+      case "Loading Error":
+        return { deserializedConfig: null, validationError: null, configError: true };
+
+      default:
+        try {
+          const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
+          return { deserializedConfig: config, validationError: null, configError: undefined };
+        } catch (error) {
+          const errorMessage =
+              error instanceof Error ? error.message : "Unknown config validation error";
+          return { deserializedConfig: null, validationError: errorMessage, configError: undefined };
+        }
     }
   }, [selectedConfig]);
 
@@ -60,7 +63,7 @@ export default function MockConfigPage() {
         </CardContent>
       </Card>
 
-      {validationError && (
+      {validationError ? (
         <Card className="border-red-200 bg-red-50">
           <CardHeader>
             <CardTitle className="text-red-800">Mock JSON Data Validation Error</CardTitle>
@@ -69,13 +72,7 @@ export default function MockConfigPage() {
             <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
           </CardContent>
         </Card>
-      )}
-
-      {deserializedConfig && <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} />}
-
-      {selectedConfig === "Loading" && <IndexingStatusPlaceholder />}
-
-      {selectedConfig === "Loading Error" && <ENSNodeConfigInfoError />}
+      ) : <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} error={configError} />}
     </section>
   );
 }

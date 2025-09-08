@@ -23,14 +23,37 @@ import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import { ExternalLink, Replace } from "lucide-react";
 
+/**
+ * ENSNodeConfigInfo props reflecting possible display scenarios:
+ *
+ * Standard - ensIndexerConfig: ENSIndexerPublicConfig, error: undefined
+ * Loading - ensIndexerConfig: null, error: undefined
+ * Error - ensIndexerConfig: null, error: true
+ *
+ * Invariant:
+ * If the error parameter is defined then the ensIndexerConfig parameter must be null
+ */
 export interface ENSNodeConfigProps {
-  ensIndexerConfig: ENSIndexerPublicConfig;
+  ensIndexerConfig: ENSIndexerPublicConfig | null;
+  error?: boolean;
 }
 
-export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
+export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProps) {
   const baseCardTitleStyles = "flex items-center gap-2";
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
+
+  if (error && ensIndexerConfig !== null){
+      throw new Error("Invariant: Error occurred but the ensIndexerConfig is not null.");
+  }
+
+  if (error){
+      return <ENSNodeConfigInfoError />;
+  }
+
+  if (ensIndexerConfig === null){
+      return <ENSNodeConfigInfoLoading />;
+  }
 
   return (
     <Card className="w-full">
@@ -274,7 +297,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig }: ENSNodeConfigProps) {
   );
 }
 
-export function ENSNodeConfigInfoError() {
+function ENSNodeConfigInfoError() {
   return (
     <section className="flex flex-col gap-6 p-6">
       <Card className="w-full">
@@ -288,4 +311,32 @@ export function ENSNodeConfigInfoError() {
       </Card>
     </section>
   );
+}
+
+function ENSNodeConfigInfoLoading() {
+    const loadingCardContentStyles = "space-y-2 max-sm:p-3 max-sm:pt-0";
+
+    return (
+            <Card className="animate-pulse">
+                <CardHeader className="max-sm:p-3">
+                    <div className="h-6 bg-muted rounded w-1/3"/>
+                </CardHeader>
+                <CardContent className="max-sm:p-3 max-sm:pt-0">
+                    <div className="space-y-2 pb-6 max-sm:pb-3">
+                        <div className="h-4 bg-muted rounded w-1/2"/>
+                    </div>
+                    <div className="flex flex-col gap-4 max-sm:p-0 max-sm:gap-3">
+                        {["ENSAdmin", "ENSDb", "ENSIndexer", "ENSRainbow"].map(() => (<Card>
+                            <CardHeader className="max-sm:p-3">
+                                <div className="h-6 bg-muted rounded w-1/4"/>
+                            </CardHeader>
+                            <CardContent className={loadingCardContentStyles}>
+                                <div className="h-4 bg-muted rounded w-2/3"/>
+                                <div className="h-4 bg-muted rounded w-2/3"/>
+                            </CardContent>
+                        </Card>))}
+                    </div>
+                </CardContent>
+            </Card>
+    );
 }
