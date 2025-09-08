@@ -171,11 +171,12 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
 export type DNSEncodedName = Hex;
 
 /**
- * A DNSEncodedName that encodes a name containing {@link LiteralLabel}s.
+ * A DNSEncodedName that encodes a name containing 0 or more {@link LiteralLabel}s.
  *
- * In a DNSEncodedLiteralName, all labels are understood to be Literal Labels, including labels
- * that may look like Encoded LabelHashes: when interpreted, the Interpeted Label will be the
- * `labelhash` of the "[abcd...xyz]" string.
+ * In a DNSEncodedLiteralName, all labels are Literal Labels, including labels
+ * that may be formatted as Encoded LabelHashes. If Literal Label values are
+ * formatted as Encoded LabelHashes, when they are interpreted, the Interpeted
+ * Label will be the `labelhash` of the Literal Label value.
  *
  * The NameWrapper contract emits DNSEncodedLiteralNames:
  * @see https://github.com/ensdomains/ens-contracts/blob/staging/contracts/utils/BytesUtils_LEGACY.sol
