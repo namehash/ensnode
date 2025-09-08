@@ -16,13 +16,13 @@ import {
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  *
  * @param label - The Literal Label string to interpret
- * @returns The provided label if it is normalized, else the EncodedLabelHash of the label
+ * @returns The provided label if it is a normalized label, else the EncodedLabelHash of the label
  */
 export function literalLabelToInterpretedLabel(label: LiteralLabel): InterpretedLabel {
   // if the label is normalized, good to go
   if (isNormalizedLabel(label)) return label as string as InterpretedLabel;
 
-  // otherwise (includes empty string label), encode the labelhash of the Label
+  // otherwise, encode the labelhash of the literal Label
   return encodeLabelHash(labelhash(label)) as InterpretedLabel;
 }
 
