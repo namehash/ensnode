@@ -8,8 +8,6 @@ import {
   DNSEncodedName,
   InterpretedLabel,
   InterpretedName,
-  LiteralLabel,
-  LiteralName,
   type Node,
   SubgraphInterpretedLabel,
   SubgraphInterpretedName,
@@ -192,7 +190,8 @@ export const makeNameWrapperHandlers = ({
       //   continue to have an un-healed EncodedLabelHash in its name field
       // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
       // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
-      if (!domain.labelName && label) {
+      // NOTE: truthy/falsy boolean check is _intended_ here, to match legacy subgraph logic
+      if (domain.labelName && label) {
         await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 

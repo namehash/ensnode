@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, isAddressEqual, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
   DNSEncodedLiteralName,
@@ -161,20 +161,16 @@ export async function handleNewOwner({
   // NOTE: for threedns this occurs on non-2LD `NewOwner` events, as a 2LD registration will
   // always emit `RegistrationCreated`, including Domain's `name`, before this `NewOwner` event
   // is indexed.
-  if (!domain.name) {
+  if (domain.name === null) {
     const parent = await context.db.find(schema.domain, { id: parentNode });
 
-    let healedLabel: string | null = null;
-
     // 1. attempt metadata retrieval
-    if (!healedLabel) {
-      const tokenId = getThreeDNSTokenId(node);
-      const uri = await getUriForTokenId(context, tokenId);
-      [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
-    }
+    const tokenId = getThreeDNSTokenId(node);
+    const uri = await getUriForTokenId(context, tokenId);
+    let [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
 
     // 2. attempt to heal the label associated with labelHash via ENSRainbow
-    if (!healedLabel) {
+    if (healedLabel === null) {
       healedLabel = await labelByLabelHash(labelHash);
     }
 
@@ -222,7 +218,7 @@ export async function handleTransfer({
   await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
 
   // garbage collect newly 'empty' domain iff necessary
-  if (owner === zeroAddress) {
+  if (isAddressEqual(owner, zeroAddress)) {
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   }
 
@@ -244,7 +240,6 @@ export async function handleRegistrationCreated({
     node: Node;
     // NOTE: `tld` event arg represents a `Node` that is the parent of `node`
     tld: Node;
-    // NOTE: `fqdn` event arg represents a Hex-encoded DNS Packet
     fqdn: DNSEncodedName;
     registrant: Address;
     controlBitmap: number;

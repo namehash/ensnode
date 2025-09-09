@@ -1,4 +1,4 @@
-import type { Label, Name } from "@ensnode/ensnode-sdk";
+import type { LiteralLabel, Name } from "@ensnode/ensnode-sdk";
 
 const POSSIBLE_PREFIXES = [
   "data:application/json;base64,",
@@ -23,7 +23,9 @@ function parseOnChainMetadata(uri: string) {
  * @param uri - The base64-encoded JSON metadata URI string
  * @returns A tuple containing [label, name] if parsing succeeds, or [null, null] if it fails
  */
-export function parseLabelAndNameFromOnChainMetadata(uri: string): [Label, Name] | [null, null] {
+export function parseLabelAndNameFromOnChainMetadata(
+  uri: string,
+): [LiteralLabel, Name] | [null, null] {
   const metadata = parseOnChainMetadata(uri);
   if (!metadata) return [null, null];
 

@@ -8,7 +8,6 @@ import {
   type Label,
   type LabelHash,
   LiteralLabel,
-  Name,
   PluginName,
   SubgraphInterpretedLabel,
   SubgraphInterpretedName,
@@ -69,9 +68,14 @@ export const makeRegistrarHandlers = ({
 
     // materialize the domain's name and labelName using the emitted values
     if (domain.labelName !== interpretedLabel) {
+      // in either case a Name composed of (Subgraph) Interpreted Labels is (Subgraph) Interpreted
+      const interpretedName = `${interpretedLabel}.${registrarManagedName}` as
+        | InterpretedName
+        | SubgraphInterpretedName;
+
       await context.db
         .update(schema.domain, { id: node })
-        .set({ labelName: interpretedLabel, name: `${interpretedLabel}.${registrarManagedName}` });
+        .set({ labelName: interpretedLabel, name: interpretedName });
     }
 
     // update the registration's labelName

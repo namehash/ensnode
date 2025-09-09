@@ -1,6 +1,6 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, zeroAddress } from "viem";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import config from "@/config";
 import {
@@ -87,7 +87,7 @@ export const handleNewOwner =
     }
 
     // if the domain doesn't yet have a name, attempt to construct it here
-    if (!domain.name) {
+    if (domain.name === null) {
       const parent = await context.db.find(schema.domain, { id: parentNode });
 
       const ensRootChainId = getENSRootChainId(config.namespace);
@@ -174,19 +174,17 @@ export const handleNewOwner =
               labelHash,
             });
 
-            if (healedLabel) {
-              // break the loop after the first successful healing
-              break;
-            }
+            // break the loop after the first successful healing
+            if (healedLabel !== null) break;
           }
 
-          if (!healedLabel) {
+          if (healedLabel === null) {
             // by this point, we have exhausted all our strategies for healing
             // the reverse address and we still don't have a healed label,
             // so we throw an error to bring visibility to not achieving
             // the expected 100% success rate
             throw new Error(
-              `A NewOwner event for a Reverse Node in the Root ENS Datasource on Chain ID "${ensRootChainId}" was emitted by the Registry in tx "${event.transaction.hash}", and we failed to heal reverse address for labelHash "${labelHash}".`,
+              `Invariant: A NewOwner event for a Reverse Node in the Root ENS Datasource on Chain ID "${ensRootChainId}" was emitted by the Registry in tx "${event.transaction.hash}", and we failed to heal reverse address for labelHash "${labelHash}".`,
             );
           }
         }
@@ -245,7 +243,7 @@ export const handleNewOwner =
 
     // garbage collect newly 'empty' domain iff necessary
     // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L85
-    if (owner === zeroAddress) {
+    if (isAddressEqual(owner, zeroAddress)) {
       await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
     }
 
@@ -276,7 +274,7 @@ export async function handleTransfer({
     .onConflictDoUpdate({ ownerId: owner });
 
   // garbage collect newly 'empty' domain iff necessary
-  if (owner === zeroAddress) {
+  if (isAddressEqual(owner, zeroAddress)) {
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   }
 
@@ -322,7 +320,7 @@ export async function handleNewResolver({
 
   const resolverId = makeResolverId(context.chain.id, resolverAddress, node);
 
-  const isZeroResolver = resolverAddress === zeroAddress;
+  const isZeroResolver = isAddressEqual(resolverAddress, zeroAddress);
   const ensRootChainId = getENSRootChainId(config.namespace);
   // if zeroing out a domain's resolver, remove the reference instead of tracking a zeroAddress Resolver
   // NOTE: Resolver records are not deleted
