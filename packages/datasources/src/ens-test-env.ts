@@ -20,16 +20,17 @@ import { ResolverABI, ResolverFilter } from "./lib/resolver";
  * for development and testing.
  *
  * @see https://github.com/ensdomains/ens-test-env
+ * @see https://github.com/ensdomains/namechain
  *
  * NOTE: The ens-test-env ENS namespace does not support Basenames, Lineanames, or 3DNS.
- * NOTE: The ens-test-env ENS namespace does not support ENSIP-19 Reverse Resolvers.
+ * NOTE: The ens-test-env ENS namespace does not (yet) support ENSIP-19 Reverse Resolvers.
  */
 export default {
   /**
    * ENSRoot Datasource
    *
-   * Addresses and Start Blocks from ens-test-env
-   * https://github.com/ensdomains/ens-test-env/
+   * Addresses and Start Blocks from Namechain devnet
+   * https://github.com/ensdomains/namechain
    */
   [DatasourceNames.ENSRoot]: {
     chain: ensTestEnvL1Chain,
