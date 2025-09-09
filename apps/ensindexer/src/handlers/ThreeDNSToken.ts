@@ -186,7 +186,7 @@ export async function handleNewOwner({
         ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
         : encodeLabelHash(labelHash);
 
-    // to construct `Domain.name` use the parent's Name and the valid Label
+    // to construct `Domain.name` use the parent's Name and the Interpreted Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
     const name = parent?.name ? `${label}.${parent.name}` : label;
 

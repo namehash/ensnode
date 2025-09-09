@@ -165,3 +165,21 @@ A **Literal Name** is composed of **Literal Labels** as they appear in raw oncha
 
 ### Interpreted Name
 An **Interpreted Name** is composed of **Interpreted Labels** after processing, where each label has been classified and potentially converted to its appropriate display format (using **Encoded LabelHash** for unknown labels).
+
+## Subgraph Indexability & Label/Name Interpretation
+
+### Subgraph-Indexable Labels / Subgraph-Unindexable Labels
+The legacy ENS Subgraph specifies that labels containing certain UTF-8 characters are 'unindexable'.
+
+The prohibited UTF-8 characters are: `\0` (NULL), `[`, `]`, and `.` (period).
+
+- `subgraph-indexable`: the Literal Label in question does NOT contain any of the prohibited UTF-8 characters
+- `subgraph-unindexable`: the Literal Label in question contains some of the prohibited UTF-8 characters
+
+### Subgraph Interpreted Label
+A **Subgraph Interpreted Label** is a **Literal Label** that is either:
+- (if `subgraph-indexable`): a Literal Label, of unknown normalization status, guaranteed to not contain any of the `subgraph-unindexable` UTF-8 characters
+- (if `subgraph-unindexable`): an Encoded LabelHash
+
+### Subgraph Interpreted Name
+A **Subgraph Interpreted Name** is a name exclusively composed of **Subgraph Interpreted Labels**.
