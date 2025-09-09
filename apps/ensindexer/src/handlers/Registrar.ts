@@ -168,7 +168,7 @@ export const makeRegistrarHandlers = ({
 
         name = `${label}.${registrarManagedName}` as InterpretedName;
       } else {
-        // only update the label/name if label is healed & subgraph-indexable
+        // only update the label/name if label is subgraph-indexable
         if (isLabelSubgraphIndexable(healedLabel)) {
           label = healedLabel as SubgraphInterpretedLabel;
           name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;

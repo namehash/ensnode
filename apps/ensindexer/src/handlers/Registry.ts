@@ -230,7 +230,7 @@ export const handleNewOwner =
 
         await context.db.update(schema.domain, { id: node }).set({
           name: subgraphInterpretedName,
-          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and subgraph-indexable
+          // NOTE(subgraph-compat): update Domain.labelName iff label is subgraph-indexable
           //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
           // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
           //   is updated to, if it is subgraph-indexable, _not_ the Subgraph Interpreted Label
