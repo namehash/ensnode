@@ -4,14 +4,12 @@ import {
   ForwardResolutionProtocolStep,
   ForwardResolutionResult,
   Node,
-  NormalizedName,
   PluginName,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
   isNormalizedName,
   isSelectionEmpty,
-  nameToNormalizedName,
   parseReverseName,
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
@@ -95,7 +93,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
  * NOTE: uses `chainId` parameter for internal Protocol Acceleration behavior (see recursive call below).
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
-  _name: ForwardResolutionArgs<SELECTION>["name"],
+  name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
   options: { chainId: number; accelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
@@ -106,14 +104,14 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   return withProtocolStepAsync(
     TraceableENSProtocol.ForwardResolution,
     ForwardResolutionProtocolStep.Operation,
-    { name: _name, selection: selectionString, chainId, accelerate },
+    { name, selection: selectionString, chainId, accelerate },
     (protocolTracingSpan) =>
       // trace for internal metrics
       withActiveSpanAsync(
         tracer,
-        `resolveForward(${_name}, chainId: ${chainId})`,
+        `resolveForward(${name}, chainId: ${chainId})`,
         {
-          name: _name,
+          name,
           selection: selectionString,
           chainId,
           accelerate,
@@ -124,11 +122,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // Invariant: Name must be normalized
-          if (!isNormalizedName(_name)) {
-            throw new Error(`Invariant: Name "${_name}" must be normalized.`);
+          if (!isNormalizedName(name)) {
+            throw new Error(`Invariant: Name "${name}" must be normalized.`);
           }
 
-          const name = nameToNormalizedName(_name); // name is already normalized so won't throw
           const node: Node = namehash(name);
           span.setAttribute("node", node);
 

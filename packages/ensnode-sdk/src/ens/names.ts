@@ -1,6 +1,4 @@
-import { normalize } from "viem/ens";
-
-import type { Name, NormalizedName } from "./types";
+import type { NormalizedName } from "./types";
 
 /**
  * Constructs a name hierarchy from a given NormalizedName.
@@ -15,14 +13,3 @@ import type { Name, NormalizedName } from "./types";
  */
 export const getNameHierarchy = (name: NormalizedName): NormalizedName[] =>
   name.split(".").map((_, i, labels) => labels.slice(i).join(".")) as NormalizedName[];
-
-/**
- * Transforms Name input to a NormalizedName, throwing if not possible.
- *
- * @param name An ENS Name, of unknown normalization status.
- * @returns NormalizedName
- * @throws if `name` is not normalized or normalizable
- */
-export const nameToNormalizedName = (name: Name): NormalizedName => {
-  return normalize(name) as NormalizedName;
-};
