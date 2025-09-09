@@ -17,7 +17,7 @@ import type { Label } from "@ensnode/ensnode-sdk";
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L91
  *
  * For additional context,
- * @see https://ensnode.io/docs/usage/querying-best-practices/#ens-subgraph-indexable-and-unindexable-labels
+ * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
  */
 const UNINDEXABLE_LABEL_CHARACTERS = [
   "\0", // null byte: PostgreSQL does not allow storing this character in text fields.

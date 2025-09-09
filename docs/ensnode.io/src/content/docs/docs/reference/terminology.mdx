@@ -169,17 +169,24 @@ An **Interpreted Name** is composed of **Interpreted Labels** after processing, 
 ## Subgraph Indexability & Label/Name Interpretation
 
 ### Subgraph-Indexable Labels / Subgraph-Unindexable Labels
-The legacy ENS Subgraph specifies that labels containing certain UTF-8 characters are 'unindexable'.
+The legacy ENS Subgraph specifies that unknown labels and labels containing certain UTF-8 characters are "invalid". We refer to this concept as `subgraph-indexable` and `subgraph-unindexable`.
 
-The `subgraph-unindexable` UTF-8 characters are: `\0` (NULL), `[`, `]`, and `.` (period).
+A `subgraph-unindexable` Label is either:
+  - an **Unknown Label**, or
+  - a **Literal Label** that contains any of the prohibited UTF-8 characters.
 
-- `subgraph-indexable`: the Literal Label in question does NOT contain any of the prohibited UTF-8 characters
-- `subgraph-unindexable`: the Literal Label in question contains some of the prohibited UTF-8 characters
+A `subgraph-indexable` Label is a **Known Literal Label** that does NOT contain any of the prohibited UTF-8 characters.
+
+The `subgraph-unindexable` UTF-8 characters are:
+1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
+2. `.` (period) - Conflicts with ENS label separator logic
+3. `[` (left square bracket) - Conflicts with "unknown label" representations
+4. `]` (right square bracket) - Conflicts with "unknown label" representations
 
 ### Subgraph Interpreted Label
-A **Subgraph Interpreted Label** is a **Literal Label** that is either:
-- (if `subgraph-indexable`): a Literal Label, of unknown normalization status, guaranteed to not contain any of the `subgraph-unindexable` UTF-8 characters
-- (if `subgraph-unindexable`): an Encoded LabelHash
+A **Subgraph Interpreted Label** is a **Label** that is either:
+- (if `subgraph-indexable`): a **Literal Label** guaranteed to not contain any of the `subgraph-unindexable` UTF-8 characters, or
+- (if `subgraph-unindexable`): an Encoded LabelHash.
 
 ### Subgraph Interpreted Name
 A **Subgraph Interpreted Name** is a name exclusively composed of **Subgraph Interpreted Labels**.

@@ -164,19 +164,6 @@ According to [ENSIP-1](https://docs.ens.domains/ensip/1#namehash-algorithm), the
 An example of such an implementation can be found in the viem library's namehash implementation:
 The [viem namehash implementation](https://github.com/wevm/viem/blob/fe558fdef7e2e9cd5f3f57d8bdeae0c7ff67a1b0/src/utils/ens/namehash.ts#L36-L51) correctly calculates the node of names containing unknown labels.
 
-## ENS Subgraph 'Indexable' and 'Unindexable' Labels
-
-When `REPLACE_UNNORMALIZED=false`, ENSNode may sometimes represent a label as an unknown label if that label is not "valid" according to the legacy ENS Subgraph logic. This is an important consideration when working with the ENSNode API when `REPLACE_UNNORMALIZED=false`.
-
-While many characters are not supported by ENSIP-15, only the following four characters are specifically classified as subgraph-unindexable due to indexing concerns:
-
-1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
-2. `.` (period) - Conflicts with ENS label separator logic
-3. `[` (left square bracket) - Conflicts with "unknown label" representations
-4. `]` (right square bracket) - Conflicts with "unknown label" representations
-
-It's important to note that while onchain ENS contracts do not enforce ENSIP-15 normalization (due to factors like gas costs), these specific characters require special handling by indexers to avoid conflicts.
-
 ### Unknown Label Representation
 
 When a subgraph-unindexable label is encountered, ENSNode represents it as an "unknown label" in the format `[{labelhash}]`, where `{labelhash}` is the labelhash of the unknown label. This representation creates an interesting edge case that must be handled carefully:
