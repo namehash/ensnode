@@ -6,8 +6,10 @@ import { stripNullBytes } from "@/lib/lib-helpers";
 import {
   DNSEncodedLiteralName,
   DNSEncodedName,
-  LiteralLabel,
-  LiteralName,
+  Label,
+  Name,
+  SubgraphInterpretedLabel,
+  SubgraphInterpretedName,
   decodeDNSEncodedLiteralName,
   decodeDNSEncodedName,
   literalLabelsToLiteralName,
@@ -25,8 +27,8 @@ import {
  * @throws If the packet is malformed, the packet encodes the root node, or if any of the labels are not subgraph-indexable.
  */
 export function subgraph_decodeDNSEncodedLiteralName(packet: DNSEncodedLiteralName): {
-  label: LiteralLabel;
-  name: LiteralName;
+  label: SubgraphInterpretedLabel;
+  name: SubgraphInterpretedName;
 } {
   // decode the literal labels as normal, throwing if malformed
   const literalLabels = decodeDNSEncodedLiteralName(packet);
@@ -48,9 +50,10 @@ export function subgraph_decodeDNSEncodedLiteralName(packet: DNSEncodedLiteralNa
     );
   }
 
+  // the label and name are Subgraph Interpreted by virtue of being a subgraph-indexable Literal Label/Name
   return {
-    label: literalLabels[0]!, // ! ok due to length invariant above,
-    name: literalLabelsToLiteralName(literalLabels),
+    label: literalLabels[0]! as Label as SubgraphInterpretedLabel, // ! ok due to length invariant above,
+    name: literalLabelsToLiteralName(literalLabels) as Name as SubgraphInterpretedName,
   };
 }
 

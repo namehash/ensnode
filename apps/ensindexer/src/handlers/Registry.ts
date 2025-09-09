@@ -4,6 +4,8 @@ import { type Address, zeroAddress } from "viem";
 
 import config from "@/config";
 import {
+  InterpretedLabel,
+  InterpretedName,
   type LabelHash,
   LiteralLabel,
   type Node,
@@ -199,16 +201,17 @@ export const handleNewOwner =
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        const interpretedLabel =
+        const interpretedLabel = (
           healedLabel !== null
             ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
-            : encodeLabelHash(labelHash);
+            : encodeLabelHash(labelHash)
+        ) as InterpretedLabel;
 
         // to construct `Domain.name` use the parent's Name and the Interpreted Label
         // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-        const interpretedName = parent?.name
-          ? `${interpretedLabel}.${parent.name}`
-          : interpretedLabel;
+        const interpretedName = (
+          parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
+        ) as InterpretedName;
 
         await context.db.update(schema.domain, { id: node }).set({
           name: interpretedName,

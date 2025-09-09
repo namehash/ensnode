@@ -293,7 +293,7 @@ export const wrappedDomain = onchainTable(
      * @see https://ensnode.io/docs/reference/terminology#interpreted-name
      *
      * If REPLACE_UNNORMALIZED is false, this value is guaranteed to be either:
-     * a) null (in the case of a malformed or a name that contains subgraph-unindexable labels), or
+     * a) null (in the case of a DNS-Encoded Name that is malformed or contains subgraph-unindexable labels), or
      * b) a subgraph-indexable Subgraph Interpreted Label (i.e. a Literal Label of unknown normalization).
      *
      * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation

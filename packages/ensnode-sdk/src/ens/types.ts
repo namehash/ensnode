@@ -146,6 +146,24 @@ export type LiteralName = Name & { __brand: "LiteralName" };
 export type InterpretedName = Name & { __brand: "InterpretedName" };
 
 /**
+ * A Subgraph Interpreted Label is a Literal Label that is either:
+ * a) (if subgraph-indexable): a Literal Label, of unknown normalization status, guaranteed to not contain any of the subgraph-unindexable UTF-8 characters
+ * b) (if subgraph-unindexable): an Encoded LabelHash
+ *
+ * @see https://ensnode.io/docs/reference/terminology#subgraph-interpreted-label
+ * @dev nominally typed to enforce usage & enhance codebase clarity
+ */
+export type SubgraphInterpretedLabel = Label & { __brand: "SubgraphInterpretedLabel" };
+
+/**
+ * A Subgraph Interpreted Name is a name exclusively composed of Subgraph Interpreted Labels.
+ *
+ * @see https://ensnode.io/docs/reference/terminology#subgraph-interpreted-name
+ * @dev nominally typed to enforce usage & enhance codebase clarity
+ */
+export type SubgraphInterpretedName = Name & { __brand: "SubgraphInterpretedName" };
+
+/**
  * A DNS-Encoded Name as a hex string, representing the binary DNS wire format encoding
  * of a domain name. Used in ENS contracts for efficient name storage and transmission.
  * Each label is prefixed with a length byte, and the entire sequence is null-terminated.

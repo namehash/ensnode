@@ -11,6 +11,8 @@ import {
   LiteralLabel,
   LiteralName,
   type Node,
+  SubgraphInterpretedLabel,
+  SubgraphInterpretedName,
   decodeDNSEncodedLiteralName,
   literalLabelToInterpretedLabel,
   literalLabelsToInterpretedName,
@@ -62,12 +64,14 @@ function decodeInterpretedNameWrapperName(
 }
 
 /**
- * Decodes the NameWrapper's emitted DNS-Encoded `name` packet into a Literal Name and its first
- * Literal Label.
+ * Decodes the NameWrapper's emitted DNS-Encoded `name` packet into a Subgraph Interpreted Name and
+ * its first Subgraph Interpreted Label.
  */
-function decodeLiteralNameWrapperName(
+function decodeSubgraphInterpretedNameWrapperName(
   packet: DNSEncodedLiteralName,
-): { label: LiteralLabel; name: LiteralName } | { label: null; name: null } {
+):
+  | { label: SubgraphInterpretedLabel; name: SubgraphInterpretedName }
+  | { label: null; name: null } {
   try {
     return subgraph_decodeDNSEncodedLiteralName(packet);
   } catch {
@@ -177,7 +181,7 @@ export const makeNameWrapperHandlers = ({
       // NOTE: NameWrapper emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
       const { label, name } = config.replaceUnnormalized
         ? decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
-        : decodeLiteralNameWrapperName(event.args.name as DNSEncodedLiteralName);
+        : decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");

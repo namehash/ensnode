@@ -31,8 +31,9 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
 );
 
 /**
- * Determine whether the provided `label` contains only "indexable" characters according to legacy
- * Subgraph logic.
+ * Determine whether the provided `label` is "indexable" according to legacy Subgraph logic.
+ *
+ * A label is 'subgraph-unindexable' if it is unknown or contains one of the prohibited UTF-8 characters.
  *
  * Implements the following ENS Subgraph `checkValidLabel` function:
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L68
