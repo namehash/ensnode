@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 /**
  * Component to display a placeholder for the indexing status.
  */
-export function IndexingStatusPlaceholder() {
+export function IndexingStatusLoading() {
   return (
     <Card className="animate-pulse">
       <CardHeader>

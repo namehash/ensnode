@@ -20,14 +20,14 @@ import {
   IndexingStatsForUnstartedStatus,
   IndexingStatsShell,
 } from "./indexing-stats";
-import { IndexingStatusPlaceholder } from "./indexing-status-placeholder";
+import { IndexingStatusLoading } from "./indexing-status-loading";
 
 export function IndexingStatus() {
   const ensIndexerConfigQuery = useENSIndexerConfig();
   const indexingStatusQuery = useIndexingStatus();
 
   if (ensIndexerConfigQuery.isError) {
-    return <ENSNodeConfigInfo ensIndexerConfig={null} error={true} />;
+    return <ENSNodeConfigInfo ensIndexerConfig={null} error={ensIndexerConfigQuery.error.message} />;
   }
   if (indexingStatusQuery.isError) {
     return <p className="p-6">Failed to fetch Indexing Status.</p>;
@@ -37,7 +37,7 @@ export function IndexingStatus() {
     return (
       <section className="flex flex-col gap-6 p-6">
         <ENSNodeConfigInfo ensIndexerConfig={null} />
-        <IndexingStatusPlaceholder />
+        <IndexingStatusLoading />
       </section>
     );
   }

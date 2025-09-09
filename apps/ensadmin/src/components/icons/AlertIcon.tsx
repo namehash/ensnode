@@ -1,6 +1,6 @@
 import { SVGProps } from "react";
 
-export const ConnectionFailedIcon = (props: SVGProps<SVGSVGElement>) => (
+export const AlertIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"

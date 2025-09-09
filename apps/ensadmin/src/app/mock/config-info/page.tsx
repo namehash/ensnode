@@ -9,6 +9,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
 import mockDataJson from "./data.json";
+import {ErrorInfo} from "@/components/ui/error-info";
+import {ENSNodeConfigProps} from "@/components/indexing-status/config-info/config-info";
 
 const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
 
@@ -17,25 +19,24 @@ type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 
 export default function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>("Alpha Mainnet");
-  const { deserializedConfig, validationError, configError } = useMemo(() => {
+  const { props, deserializationError,  } = useMemo(() => {
     switch (selectedConfig) {
       case "Loading":
-        return { deserializedConfig: null, validationError: null, configError: undefined };
+        return {props: {ensIndexerConfig: null}, deserializationError: null };
 
       case "Loading Error":
-        return { deserializedConfig: null, validationError: null, configError: true };
+        return { props: {ensIndexerConfig: null, error: "Failed to fetch ENSIndexer Config."}, deserializationError: null};
 
       default:
         try {
           const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { deserializedConfig: config, validationError: null, configError: undefined };
+          return {  props: {ensIndexerConfig: config} , deserializationError: null};
         } catch (error) {
           const errorMessage =
-            error instanceof Error ? error.message : "Unknown config validation error";
+            error instanceof Error ? error.message : "Unknown ENSIndexerPublicConfig deserialization error";
           return {
-            deserializedConfig: null,
-            validationError: errorMessage,
-            configError: undefined,
+            props: {ensIndexerConfig: null },
+            deserializationError: errorMessage,
           };
         }
     }
@@ -65,17 +66,10 @@ export default function MockConfigPage() {
         </CardContent>
       </Card>
 
-      {validationError ? (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader>
-            <CardTitle className="text-red-800">Mock JSON Data Validation Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
-          </CardContent>
-        </Card>
+      {deserializationError ? (
+        <ErrorInfo title="JSON Deserialization Error" description={deserializationError}/>
       ) : (
-        <ENSNodeConfigInfo ensIndexerConfig={deserializedConfig} error={configError} />
+        <ENSNodeConfigInfo {...props as ENSNodeConfigProps} />
       )}
     </section>
   );

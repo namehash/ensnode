@@ -9,7 +9,6 @@ import { ENSDbIcon } from "@/components/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
-import { ConnectionFailedIcon } from "@/components/icons/ConnectionFailedIcon";
 import { CopyIcon } from "@/components/icons/CopyIcon";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
@@ -22,20 +21,20 @@ import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import { ExternalLink, Replace } from "lucide-react";
+import {ErrorInfo} from "@/components/ui/error-info";
 
 /**
- * ENSNodeConfigInfo props reflecting possible display scenarios:
+ * ENSNodeConfigInfo display variations:
  *
  * Standard - ensIndexerConfig: ENSIndexerPublicConfig, error: undefined
  * Loading - ensIndexerConfig: null, error: undefined
- * Error - ensIndexerConfig: null, error: true
+ * Error - ensIndexerConfig: null, error: string
  *
- * Invariant:
- * If the error parameter is defined then the ensIndexerConfig parameter must be null
+ * @throws If the error parameter is defined and the ensIndexerConfig is not null
  */
 export interface ENSNodeConfigProps {
   ensIndexerConfig: ENSIndexerPublicConfig | null;
-  error?: boolean;
+  error?: string;
 }
 
 export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProps) {
@@ -43,12 +42,12 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
-  if (error && ensIndexerConfig !== null) {
-    throw new Error("Invariant: Error occurred but the ensIndexerConfig is not null.");
+  if (error !== undefined && ensIndexerConfig !== null) {
+    throw new Error("Invariant: ENSNodeConfigInfo with error and non-null ensIndexerConfig.");
   }
 
   if (error) {
-    return <ENSNodeConfigInfoError />;
+    return <ErrorInfo title="ENSNodeConfigInfo Error" description={error} />;
   }
 
   if (ensIndexerConfig === null) {
@@ -278,22 +277,6 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function ENSNodeConfigInfoError() {
-  return (
-    <section className="flex flex-col gap-6 p-6">
-      <Card className="w-full">
-        <CardHeader className="pb-2 max-sm:p-3">
-          <CardTitle className="flex flex-row justify-start items-center gap-2 text-2xl">
-            <ConnectionFailedIcon width={22} height={22} className="flex-shrink-0" />
-            Connection error
-          </CardTitle>
-        </CardHeader>
-        <CardContent>Failed to fetch ENSIndexer Config.</CardContent>
-      </Card>
-    </section>
   );
 }
 
