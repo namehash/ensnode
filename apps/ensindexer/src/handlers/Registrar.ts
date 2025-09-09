@@ -171,15 +171,11 @@ export const makeRegistrarHandlers = ({
 
         name = `${label}.${registrarManagedName}` as InterpretedName;
       } else {
-        // only update the label if it is healed & subgraph-indexable
-        label = isLabelSubgraphIndexable(healedLabel)
-          ? (healedLabel as SubgraphInterpretedLabel)
-          : undefined; // undefined value means no change to the label
-
-        // only update the name if the label is healed & subgraph-indexable
-        name = label //
-          ? (`${label}.${registrarManagedName}` as SubgraphInterpretedName)
-          : undefined; // undefined value means no change to the name
+        // only update the label/name if label is healed & subgraph-indexable
+        if (isLabelSubgraphIndexable(healedLabel)) {
+          label = healedLabel as SubgraphInterpretedLabel;
+          name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;
+        }
       }
 
       // update Domain
