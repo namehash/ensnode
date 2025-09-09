@@ -27,7 +27,9 @@ export function IndexingStatus() {
   const indexingStatusQuery = useIndexingStatus();
 
   if (ensIndexerConfigQuery.isError) {
-    return <ENSNodeConfigInfo ensIndexerConfig={null} error={ensIndexerConfigQuery.error.message} />;
+    return (
+      <ENSNodeConfigInfo ensIndexerConfig={null} error={ensIndexerConfigQuery.error.message} />
+    );
   }
   if (indexingStatusQuery.isError) {
     return <p className="p-6">Failed to fetch Indexing Status.</p>;
