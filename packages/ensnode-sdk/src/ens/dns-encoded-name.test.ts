@@ -58,7 +58,6 @@ describe("decodeDNSEncodedName", () => {
   });
 
   it("correctly decodes multi-byte unicode", () => {
-    console.log(bytesToHex(packetToBytes("example.eth")));
     MULTI_BYTE_UNICODE_NAMES.forEach((name) =>
       expect(decodeDNSEncodedName(bytesToHex(packetToBytes(name)))).toEqual(name.split(".")),
     );

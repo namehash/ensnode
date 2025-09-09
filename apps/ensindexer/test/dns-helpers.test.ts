@@ -34,8 +34,6 @@ const NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES = [
   stringToHex("\x05test]\x00"),
 ] as DNSEncodedLiteralName[];
 
-const MULTI_BYTE_UNICODE_NAMES = ["👩🏼‍❤‍💋‍👨🏼.eth"];
-
 describe("dns-helpers", () => {
   describe("parseRRSet", () => {
     it("correctly parses Hex RRSet to single TXT answer", () => {
