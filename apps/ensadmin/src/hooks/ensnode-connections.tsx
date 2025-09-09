@@ -20,7 +20,7 @@ function _useENSNodeConnections() {
   const hydrated = useHydrated();
   const tabId = useMemo(() => (hydrated ? getTabId() : "server"), [hydrated]);
 
-  const [urls, setUrls] = useLocalstorageState<string[]>(`ensadmin:${tabId}:connections:urls`, []);
+  const [urls, setUrls] = useLocalstorageState<string[]>(`ensadmin:connections:urls`, []);
 
   const [selected, setSelected, clearSelected] = useLocalstorageState<string | null>(
     `ensadmin:${tabId}:connections:selected`,
