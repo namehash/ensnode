@@ -10,6 +10,7 @@ import {
   type LabelHash,
   LiteralLabel,
   type Node,
+  decodeDNSEncodedLiteralName,
   encodeLabelHash,
   interpretedLabelsToInterpretedName,
   isNormalizedLabel,
@@ -25,7 +26,6 @@ import {
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
-import { decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";

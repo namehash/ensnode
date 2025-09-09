@@ -11,6 +11,7 @@ import {
   LiteralLabel,
   LiteralName,
   type Node,
+  decodeDNSEncodedLiteralName,
   literalLabelToInterpretedLabel,
   literalLabelsToInterpretedName,
   uint256ToHex32,
@@ -18,10 +19,7 @@ import {
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
-import {
-  decodeDNSEncodedLiteralName,
-  subgraph_decodeDNSEncodedLiteralName,
-} from "@/lib/dns-helpers";
+import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";

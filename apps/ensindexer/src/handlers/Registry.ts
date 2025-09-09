@@ -9,7 +9,6 @@ import {
   type Node,
   REVERSE_ROOT_NODES,
   encodeLabelHash,
-  isLabelSubgraphValid,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
@@ -30,6 +29,7 @@ import {
   getAddressesFromTrace,
 } from "@/lib/trace-transaction-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
+import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
 
 /**
  * shared handlers for a Registry contract
@@ -215,7 +215,7 @@ export const handleNewOwner =
       } else {
         // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-indexable)
         // NOTE: for TLDs, the parent is null, so we just use the label value as is
-        const labelForUseInName = isLabelSubgraphValid(healedLabel)
+        const labelForUseInName = isLabelSubgraphIndexable(healedLabel)
           ? healedLabel
           : encodeLabelHash(labelHash);
         const name = parent?.name ? `${labelForUseInName}.${parent.name}` : labelForUseInName;
@@ -227,7 +227,7 @@ export const handleNewOwner =
           // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
           //   is updated to, if it is subgraph-indexable, _not_ the `label` value used to construct the
           //   name (which the subgraph specifies as the encoded labelHash if `label` is not subgraph-indexable)
-          labelName: isLabelSubgraphValid(healedLabel) ? healedLabel : undefined,
+          labelName: isLabelSubgraphIndexable(healedLabel) ? healedLabel : undefined,
         });
       }
     }

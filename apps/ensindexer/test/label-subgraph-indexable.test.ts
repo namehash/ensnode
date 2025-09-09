@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
 
-describe("isLabelSubgraphValid", () => {
+describe("isLabelSubgraphIndexable", () => {
   it("should return false for labels containing subgraph-unindexable characters", () => {
     expect(isLabelSubgraphIndexable("test\0")).toBe(false);
     expect(isLabelSubgraphIndexable("test.")).toBe(false);

@@ -9,7 +9,6 @@ import {
   Name,
   PluginName,
   encodeLabelHash,
-  isLabelSubgraphValid,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
@@ -22,6 +21,7 @@ import { makeRegistrationId } from "@/lib/ids";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { RegistrarManagedName } from "@/lib/types";
+import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
@@ -53,7 +53,7 @@ export const makeRegistrarHandlers = ({
       label = literalLabelToInterpretedLabel(label as LiteralLabel);
     } else {
       // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
-      if (!isLabelSubgraphValid(label)) return;
+      if (!isLabelSubgraphIndexable(label)) return;
     }
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
@@ -163,7 +163,7 @@ export const makeRegistrarHandlers = ({
       } else {
         // only update the name if the label is healed & subgraph-indexable
         // undefined value means no change to the name
-        label = isLabelSubgraphValid(healedLabel) ? healedLabel : undefined;
+        label = isLabelSubgraphIndexable(healedLabel) ? healedLabel : undefined;
 
         // only update the name if the label is healed & subgraph-indexable
         // undefined value means no change to the name
