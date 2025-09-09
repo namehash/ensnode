@@ -144,6 +144,7 @@ export function parseDnsTxtRecordArgs({
 
   // trim the .ens off the end to match ENS record naming
   const key = recordName.slice(0, -4);
+  if (key === "") return { key: null, value: null };
 
   if (!record) return { key, value: null };
 
