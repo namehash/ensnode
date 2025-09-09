@@ -181,16 +181,21 @@ export async function handleNewOwner({
     // Interpret the `healedLabel` Literal Label into an Interpreted Label
     // see https://ensnode.io/docs/reference/terminology#literal-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
-    const label =
+    const interpretedLabel = (
       healedLabel !== null
         ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
-        : encodeLabelHash(labelHash);
+        : encodeLabelHash(labelHash)
+    ) as InterpretedLabel;
 
     // to construct `Domain.name` use the parent's Name and the Interpreted Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-    const name = parent?.name ? `${label}.${parent.name}` : label;
+    const interpretedName = (
+      parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
+    ) as InterpretedName;
 
-    await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
+    await context.db
+      .update(schema.domain, { id: node })
+      .set({ name: interpretedName, labelName: interpretedLabel });
   }
 
   // log DomainEvent
