@@ -22,6 +22,7 @@ import {
 } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeResolverId } from "@/lib/ids";
+import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import {
@@ -29,7 +30,6 @@ import {
   getAddressesFromTrace,
 } from "@/lib/trace-transaction-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
-import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
 
 /**
  * shared handlers for a Registry contract
@@ -199,34 +199,38 @@ export const handleNewOwner =
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        const label =
+        const interpretedLabel =
           healedLabel !== null
             ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
             : encodeLabelHash(labelHash);
 
         // to construct `Domain.name` use the parent's Name and the Interpreted Label
         // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-        const name = parent?.name ? `${label}.${parent.name}` : label;
+        const interpretedName = parent?.name
+          ? `${interpretedLabel}.${parent.name}`
+          : interpretedLabel;
 
         await context.db.update(schema.domain, { id: node }).set({
-          name,
-          labelName: label,
+          name: interpretedName,
+          labelName: interpretedLabel,
         });
       } else {
         // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-indexable)
         // NOTE: for TLDs, the parent is null, so we just use the label value as is
-        const labelForUseInName = isLabelSubgraphIndexable(healedLabel)
+        const subgraphInterpretedLabel = isLabelSubgraphIndexable(healedLabel)
           ? healedLabel
           : encodeLabelHash(labelHash);
-        const name = parent?.name ? `${labelForUseInName}.${parent.name}` : labelForUseInName;
+
+        const subgraphInterpretedName = parent?.name
+          ? `${subgraphInterpretedLabel}.${parent.name}`
+          : subgraphInterpretedLabel;
 
         await context.db.update(schema.domain, { id: node }).set({
-          name,
+          name: subgraphInterpretedName,
           // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and subgraph-indexable
           //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
           // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
-          //   is updated to, if it is subgraph-indexable, _not_ the `label` value used to construct the
-          //   name (which the subgraph specifies as the encoded labelHash if `label` is not subgraph-indexable)
+          //   is updated to, if it is subgraph-indexable, _not_ the Subgraph Interpreted Label
           labelName: isLabelSubgraphIndexable(healedLabel) ? healedLabel : undefined,
         });
       }

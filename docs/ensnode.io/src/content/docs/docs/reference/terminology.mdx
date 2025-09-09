@@ -171,7 +171,7 @@ An **Interpreted Name** is composed of **Interpreted Labels** after processing, 
 ### Subgraph-Indexable Labels / Subgraph-Unindexable Labels
 The legacy ENS Subgraph specifies that labels containing certain UTF-8 characters are 'unindexable'.
 
-The prohibited UTF-8 characters are: `\0` (NULL), `[`, `]`, and `.` (period).
+The `subgraph-unindexable` UTF-8 characters are: `\0` (NULL), `[`, `]`, and `.` (period).
 
 - `subgraph-indexable`: the Literal Label in question does NOT contain any of the prohibited UTF-8 characters
 - `subgraph-unindexable`: the Literal Label in question contains some of the prohibited UTF-8 characters

@@ -3,6 +3,7 @@ import { labelhash } from "viem";
 import {
   type InterpretedLabel,
   InterpretedName,
+  Label,
   type LiteralLabel,
   LiteralName,
   encodeLabelHash,
@@ -20,7 +21,7 @@ import {
  */
 export function literalLabelToInterpretedLabel(label: LiteralLabel): InterpretedLabel {
   // if the label is normalized, good to go
-  if (isNormalizedLabel(label)) return label as string as InterpretedLabel;
+  if (isNormalizedLabel(label)) return label as Label as InterpretedLabel;
 
   // otherwise, encode the labelhash of the literal Label
   return encodeLabelHash(labelhash(label)) as InterpretedLabel;
