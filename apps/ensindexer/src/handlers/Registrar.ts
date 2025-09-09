@@ -50,19 +50,16 @@ export const makeRegistrarHandlers = ({
     labelHash: LabelHash,
     cost: bigint,
   ) {
-    let interpretedLabel: InterpretedLabel | SubgraphInterpretedLabel;
-    if (config.replaceUnnormalized) {
-      // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
-      // see https://ensnode.io/docs/reference/terminology#literal-label
-      // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      interpretedLabel = literalLabelToInterpretedLabel(label);
-    } else {
-      // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
-      if (!isLabelSubgraphIndexable(label)) return;
+    // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
+    if (!config.replaceUnnormalized && !isLabelSubgraphIndexable(label)) return;
 
-      // Implicit: because it is subgraph-indexable, the Literal Label is a Subgraph Interpreted Label
-      interpretedLabel = label as Label as SubgraphInterpretedLabel;
-    }
+    const interpretedLabel = config.replaceUnnormalized
+      ? // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
+        // see https://ensnode.io/docs/reference/terminology#literal-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        literalLabelToInterpretedLabel(label)
+      : // A subgraph-indexable Literal Label is a Subgraph Interpreted Label
+        (label as Label as SubgraphInterpretedLabel);
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
