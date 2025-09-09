@@ -2,7 +2,7 @@ import { Address, Hex, concat, isAddress, isHash, keccak256, toHex } from "viem"
 
 import { labelhash } from "viem/ens";
 import { addrReverseLabel } from "./reverse-name";
-import type { LabelHash, Node } from "./types";
+import type { LabelHash, LiteralLabel, Node } from "./types";
 
 /**
  * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
@@ -29,7 +29,7 @@ export const maybeHealLabelByReverseAddress = ({
 
   /** The labelhash of the addr.reverse subname */
   labelHash: LabelHash;
-}): string | null => {
+}): LiteralLabel | null => {
   // check if required arguments are valid
   if (!isAddress(maybeReverseAddress)) {
     throw new Error(
@@ -47,10 +47,9 @@ export const maybeHealLabelByReverseAddress = ({
   const assumedLabel = addrReverseLabel(maybeReverseAddress);
 
   // if labelHash of the assumed label matches the provided labelHash, heal
-  if (labelhash(assumedLabel) === labelHash) return assumedLabel;
+  if (labelhash(assumedLabel) === labelHash) return assumedLabel as LiteralLabel;
 
   // otherwise, healing did not succeed
-  // TODO: log the event args for analysis and debugging
   return null;
 };
 

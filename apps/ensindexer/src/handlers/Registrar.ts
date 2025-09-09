@@ -22,7 +22,7 @@ import { handleNewOwner } from "@/handlers/Registry";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
-import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
+import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { RegistrarManagedName } from "@/lib/types";
@@ -162,15 +162,18 @@ export const makeRegistrarHandlers = ({
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         label = (
           healedLabel !== null
-            ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
+            ? literalLabelToInterpretedLabel(healedLabel)
             : encodeLabelHash(labelHash)
         ) as InterpretedLabel;
 
+        // a name constructed of Interpreted Labels is Interpreted
         name = `${label}.${registrarManagedName}` as InterpretedName;
       } else {
         // only update the label/name if label is subgraph-indexable
         if (isLabelSubgraphIndexable(healedLabel)) {
-          label = healedLabel as SubgraphInterpretedLabel;
+          // if subgraph-indexable, the label is Subgraph Interpreted
+          label = healedLabel as Label as SubgraphInterpretedLabel;
+          // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
           name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;
         }
       }

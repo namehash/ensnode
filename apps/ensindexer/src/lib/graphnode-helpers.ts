@@ -1,5 +1,5 @@
 import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-import type { Label, LabelHash } from "@ensnode/ensnode-sdk";
+import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 import { ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
 
 const ensRainbowApiClient = getENSRainbowApiClient();
@@ -12,20 +12,18 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  * @returns the original label if found, or null if not found for the labelHash.
  * @throws if the labelHash is not correctly formatted, or server error occurs, or connection error occurs.
  **/
-export async function labelByLabelHash(labelHash: LabelHash): Promise<Label | null> {
-  const healResponse = await ensRainbowApiClient.heal(labelHash);
+export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLabel | null> {
+  const response = await ensRainbowApiClient.heal(labelHash);
 
-  if (!isHealError(healResponse)) {
-    // original label found for the labelHash
-    return healResponse.label;
+  if (isHealError(response)) {
+    throw new Error(
+      `Error healing labelHash: "${labelHash}". Error (${response.errorCode}): ${response.error}.`,
+    );
   }
 
-  if (healResponse.errorCode === ErrorCode.NotFound) {
-    // no original label found for the labelHash
-    return null;
-  }
+  // no original label found for the labelHash
+  if (response.errorCode === ErrorCode.NotFound) return null;
 
-  throw new Error(
-    `Error healing labelHash: "${labelHash}". Error (${healResponse.errorCode}): ${healResponse.error}.`,
-  );
+  // original label found for the labelHash
+  return response.label as LiteralLabel;
 }

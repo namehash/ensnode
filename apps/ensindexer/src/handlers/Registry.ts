@@ -10,6 +10,8 @@ import {
   LiteralLabel,
   type Node,
   REVERSE_ROOT_NODES,
+  SubgraphInterpretedLabel,
+  SubgraphInterpretedName,
   encodeLabelHash,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
@@ -24,7 +26,7 @@ import {
 } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeResolverId } from "@/lib/ids";
-import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
+import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
 import {
@@ -89,7 +91,7 @@ export const handleNewOwner =
       const parent = await context.db.find(schema.domain, { id: parentNode });
 
       const ensRootChainId = getENSRootChainId(config.namespace);
-      let healedLabel = null;
+      let healedLabel: LiteralLabel | null = null;
 
       // If healing labels from reverse addresses is enabled, the parent is a known reverse node
       // (i.e. addr.reverse), and the event comes from the chain that hosts the ENS Root, then attempt
@@ -133,7 +135,7 @@ export const handleNewOwner =
         //
         // Example transaction:
         // https://etherscan.io/tx/0xf0109fcbba1cea0d42e744c1b5b69cc4ab99d1f7b3171aee4413d0426329a6bb
-        if (!healedLabel) {
+        if (healedLabel === null) {
           healedLabel = maybeHealLabelByReverseAddress({
             maybeReverseAddress: event.args.owner,
             labelHash,
@@ -152,7 +154,7 @@ export const handleNewOwner =
         //
         // Example transaction:
         // https://etherscan.io/tx/0x9a6a5156f9f1fc6b1d5551483b97930df32e802f2f9229b35572170f1111134d
-        if (!healedLabel) {
+        if (healedLabel === null) {
           // The `debug_traceTransaction` RPC call is cached by Ponder.
           // It will only be made once per transaction hash and
           // the response will be stored in Ponder's RPC cache.
@@ -191,7 +193,7 @@ export const handleNewOwner =
       }
 
       // 2. if reverse address healing didn't work, try ENSRainbow
-      if (!healedLabel) {
+      if (healedLabel === null) {
         // attempt to heal the label associated with labelHash via ENSRainbow
         // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
         healedLabel = await labelByLabelHash(labelHash);
@@ -203,12 +205,13 @@ export const handleNewOwner =
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         const interpretedLabel = (
           healedLabel !== null
-            ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
+            ? literalLabelToInterpretedLabel(healedLabel)
             : encodeLabelHash(labelHash)
         ) as InterpretedLabel;
 
         // to construct `Domain.name` use the parent's Name and the Interpreted Label
         // NOTE: for a TLD, the parent is null, so we just use the Label value as is
+        // a name constructed of Interpreted Labels is Interpreted
         const interpretedName = (
           parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
         ) as InterpretedName;
@@ -220,13 +223,14 @@ export const handleNewOwner =
       } else {
         // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-indexable)
         // NOTE: for TLDs, the parent is null, so we just use the label value as is
-        const subgraphInterpretedLabel = isLabelSubgraphIndexable(healedLabel)
-          ? healedLabel
-          : encodeLabelHash(labelHash);
+        const subgraphInterpretedLabel = (
+          isLabelSubgraphIndexable(healedLabel) ? healedLabel : encodeLabelHash(labelHash)
+        ) as SubgraphInterpretedLabel;
 
-        const subgraphInterpretedName = parent?.name
-          ? `${subgraphInterpretedLabel}.${parent.name}`
-          : subgraphInterpretedLabel;
+        // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
+        const subgraphInterpretedName = (
+          parent?.name ? `${subgraphInterpretedLabel}.${parent.name}` : subgraphInterpretedLabel
+        ) as SubgraphInterpretedName;
 
         await context.db.update(schema.domain, { id: node }).set({
           name: subgraphInterpretedName,

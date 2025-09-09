@@ -1,4 +1,4 @@
-import type { Label } from "@ensnode/ensnode-sdk";
+import type { LiteralLabel } from "@ensnode/ensnode-sdk";
 
 /**
  * The following 4 characters are classified as "unindexable" in emitted labels by the ENS Subgraph.
@@ -33,15 +33,16 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
 /**
  * Determine whether the provided `label` is "indexable" according to legacy Subgraph logic.
  *
- * A label is 'subgraph-unindexable' if it is unknown or contains one of the prohibited UTF-8 characters.
+ * For additional context,
+ * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
  *
  * Implements the following ENS Subgraph `checkValidLabel` function:
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L68
  *
  * @param label - The label to check. Note: A `null` value for `label` represents an unknown label.
- * @returns whether the provided Label is subgraph-indexable
+ * @returns Whether the provided Label is subgraph-indexable
  */
-export const isLabelSubgraphIndexable = (label: Label | null): label is Label => {
+export const isLabelSubgraphIndexable = (label: LiteralLabel | null) => {
   // an unknown label is not subgraph-indexable
   // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L69
   if (label === null) return false;

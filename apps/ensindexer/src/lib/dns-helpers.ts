@@ -1,7 +1,7 @@
 import dnsPacket, { Answer } from "dns-packet";
 import { Hex } from "viem";
 
-import { isLabelSubgraphIndexable } from "@/lib/label-subgraph-indexable";
+import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { stripNullBytes } from "@/lib/lib-helpers";
 import {
   DNSEncodedLiteralName,
