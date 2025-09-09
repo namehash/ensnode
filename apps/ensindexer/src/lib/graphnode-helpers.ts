@@ -16,13 +16,13 @@ export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLab
   const response = await ensRainbowApiClient.heal(labelHash);
 
   if (isHealError(response)) {
+    // no original label found for the labelHash
+    if (response.errorCode === ErrorCode.NotFound) return null;
+
     throw new Error(
       `Error healing labelHash: "${labelHash}". Error (${response.errorCode}): ${response.error}.`,
     );
   }
-
-  // no original label found for the labelHash
-  if (response.errorCode === ErrorCode.NotFound) return null;
 
   // original label found for the labelHash
   return response.label as LiteralLabel;
