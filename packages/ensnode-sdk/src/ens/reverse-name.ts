@@ -1,14 +1,15 @@
 import { Address } from "viem";
 
 import { CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
-import type { Label, Name } from "./types";
+import type { Label, LiteralLabel, Name } from "./types";
 
 /**
  * Gets the Label used for the reverse names of subnames as per ENSIP-11 & ENSIP-19.
  *
  * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
-export const addrReverseLabel = (address: Address): Label => address.slice(2).toLowerCase();
+export const addrReverseLabel = (address: Address): LiteralLabel =>
+  address.slice(2).toLowerCase() as LiteralLabel;
 
 /**
  * Converts `coinType` to prefix-free hex string.

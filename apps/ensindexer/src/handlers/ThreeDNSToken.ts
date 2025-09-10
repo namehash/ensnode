@@ -7,6 +7,7 @@ import {
   DNSEncodedName,
   InterpretedLabel,
   InterpretedName,
+  Label,
   type LabelHash,
   LiteralLabel,
   type Node,
@@ -14,6 +15,7 @@ import {
   encodeLabelHash,
   interpretedLabelsToInterpretedName,
   isNormalizedLabel,
+  labelhashLiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
@@ -53,6 +55,7 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
  * Interpreted Label.
  */
 function decodeFQDN(fqdn: DNSEncodedLiteralName): {
+  labelHash: LabelHash;
   label: InterpretedLabel;
   name: InterpretedName;
 } {
@@ -79,6 +82,7 @@ function decodeFQDN(fqdn: DNSEncodedLiteralName): {
   const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
 
   return {
+    labelHash: labelhashLiteralLabel(literalLabels[0]!), // ! ok due to length invariant above
     label: interpretedLabels[0]!, // ! ok due to length invariant above
     name: interpretedLabelsToInterpretedName(interpretedLabels),
   };
@@ -251,17 +255,13 @@ export async function handleRegistrationCreated({
   await upsertAccount(context, registrant);
 
   // NOTE: ThreeDNSToken emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
-  const { label, name } = decodeFQDN(fqdn as DNSEncodedLiteralName);
+  const { labelHash, label, name } = decodeFQDN(fqdn as DNSEncodedLiteralName);
 
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
   if (name.split(".").length >= 3) {
     console.table({ ...event.args, tx: event.transaction.hash });
     throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
   }
-
-  // NOTE: this labelhash(label) is safe because `label` is guaranteed to be normalized and guaranteed
-  // _not_ to be an Encoded LabelHash (see invariants in `decodeFQDN`)
-  const labelHash = labelhash(label);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
   // expiry and re-registration (example: delv.box)

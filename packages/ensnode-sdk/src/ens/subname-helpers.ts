@@ -1,6 +1,7 @@
 import { Address, Hex, concat, isAddress, isHash, keccak256, toHex } from "viem";
 
 import { labelhash } from "viem/ens";
+import { labelhashLiteralLabel } from "../shared";
 import { addrReverseLabel } from "./reverse-name";
 import type { LabelHash, LiteralLabel, Node } from "./types";
 
@@ -47,7 +48,7 @@ export const maybeHealLabelByReverseAddress = ({
   const assumedLabel = addrReverseLabel(maybeReverseAddress);
 
   // if labelHash of the assumed label matches the provided labelHash, heal
-  if (labelhash(assumedLabel) === labelHash) return assumedLabel as LiteralLabel;
+  if (labelhashLiteralLabel(assumedLabel) === labelHash) return assumedLabel;
 
   // otherwise, healing did not succeed
   return null;

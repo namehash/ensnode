@@ -1,5 +1,3 @@
-import { labelhash } from "viem";
-
 import {
   type InterpretedLabel,
   InterpretedName,
@@ -9,6 +7,7 @@ import {
   encodeLabelHash,
   isNormalizedLabel,
 } from "../ens";
+import { labelhashLiteralLabel } from "./labelhash";
 
 /**
  * Interprets a Literal Label, producing an Interpreted Label.
@@ -24,7 +23,7 @@ export function literalLabelToInterpretedLabel(label: LiteralLabel): Interpreted
   if (isNormalizedLabel(label)) return label as Label as InterpretedLabel;
 
   // otherwise, encode the labelhash of the literal Label
-  return encodeLabelHash(labelhash(label)) as InterpretedLabel;
+  return encodeLabelHash(labelhashLiteralLabel(label)) as InterpretedLabel;
 }
 
 /**

@@ -114,7 +114,7 @@ export type LiteralLabel = Label & { __brand: "LiteralLabel" };
 export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 
 /**
- * A Literal Name is a Name as it literally appears onchain, composed of Literal Labels
+ * A Literal Name is a Name as it literally appears onchain, composed of 0 or more Literal Labels
  * joined by dots. It may be an unnormalized name for reasons including:
  * - containing empty labels,
  * - containing LiteralLabel values formatted as an EncodedLabelHash (which are
@@ -130,8 +130,7 @@ export type InterpretedLabel = Label & { __brand: "InterpretedLabel" };
 export type LiteralName = Name & { __brand: "LiteralName" };
 
 /**
- * An Interpreted Name is a Name that is entirely composed of 0 or more
- * Interpreted Labels.
+ * An Interpreted Name is a Name that is entirely composed of 0 or more Interpreted Labels.
  *
  * That is, it is either:
  * a) a Normalized Name, or
@@ -147,8 +146,10 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
 
 /**
  * A Subgraph Interpreted Label is a Literal Label that is either:
- * a) (if subgraph-indexable): a Literal Label, of unknown normalization status, guaranteed to not contain any of the subgraph-unindexable UTF-8 characters
- * b) (if subgraph-unindexable): an Encoded LabelHash
+ * a) (if subgraph-indexable): a Literal Label, of unknown normalization status, guaranteed to not
+ *   contain any of the subgraph-unindexable UTF-8 characters (and therefore guaranteed not to be
+ *   an Encoded LabelHash), or
+ * b) (if subgraph-unindexable): an Encoded LabelHash.
  *
  * @see https://ensnode.io/docs/reference/terminology#subgraph-interpreted-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
@@ -156,7 +157,7 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
 export type SubgraphInterpretedLabel = Label & { __brand: "SubgraphInterpretedLabel" };
 
 /**
- * A Subgraph Interpreted Name is a name exclusively composed of Subgraph Interpreted Labels.
+ * A Subgraph Interpreted Name is a name exclusively composed of 0 or more Subgraph Interpreted Labels.
  *
  * @see https://ensnode.io/docs/reference/terminology#subgraph-interpreted-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
