@@ -1,4 +1,3 @@
-import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 
 import { InterpretedLabel, LiteralLabel, encodeLabelHash } from "../ens";
@@ -7,6 +6,7 @@ import {
   literalLabelToInterpretedLabel,
   literalLabelsToInterpretedName,
 } from "./interpretation";
+import { labelhashLiteralLabel } from "./labelhash";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
@@ -63,25 +63,27 @@ describe("interpretation", () => {
   describe("interpretLiteralLabelsIntoInterpretedName", () => {
     it("correctly interprets labels with period", () => {
       expect(literalLabelsToInterpretedName(["a.b", "c"] as LiteralLabel[])).toEqual(
-        `${encodeLabelHash(labelhash("a.b"))}.c`,
+        `${encodeLabelHash(labelhashLiteralLabel("a.b" as LiteralLabel))}.c`,
       );
     });
 
     it("correctly interprets labels with NULL", () => {
       expect(literalLabelsToInterpretedName(["\0", "c"] as LiteralLabel[])).toEqual(
-        `${encodeLabelHash(labelhash("\0"))}.c`,
+        `${encodeLabelHash(labelhashLiteralLabel("\0" as LiteralLabel))}.c`,
       );
     });
 
     it("correctly interprets encoded-labelhash-looking-strings", () => {
-      const literalLabelThatLooksLikeALabelHash = encodeLabelHash(labelhash("test"));
+      const literalLabelThatLooksLikeALabelHash = encodeLabelHash(
+        labelhashLiteralLabel("test" as LiteralLabel),
+      ) as LiteralLabel;
 
       expect(
         literalLabelsToInterpretedName([
           literalLabelThatLooksLikeALabelHash,
           "c",
         ] as LiteralLabel[]),
-      ).toEqual(`${encodeLabelHash(labelhash(literalLabelThatLooksLikeALabelHash))}.c`);
+      ).toEqual(`${encodeLabelHash(labelhashLiteralLabel(literalLabelThatLooksLikeALabelHash))}.c`);
     });
 
     it("correctly interprets an empty array of labels", () => {

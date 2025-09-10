@@ -126,10 +126,6 @@ A **Normalized Name** is a **name** composed entirely of **Normalized Labels**. 
 
 An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the ENS normalization algorithm.
 
-### Unknown Name
-
-An **Unknown Name** is a **name** that contains one or more **Unknown Labels**, meaning the human-readable form of at least one label is not available and must be displayed using **Encoded LabelHash** format.
-
 ## Display Encoding Formats
 
 When human-readable names or labels are unavailable, ENSNode uses specific encoding formats for consistent display. These formats ensure users can distinguish between actual hex content and placeholder representations.
@@ -156,26 +152,24 @@ When processing ENS data, it's important to distinguish between the literal data
 A **Literal Label** is the raw label data as it exists in onchain storage or event data, before any processing or interpretation. This represents the exact bytes or string as emitted by contracts.
 
 ### Interpreted Label
-An **Interpreted Label** is a **Literal Label** that has been processed and classified as either:
-- A **Normalized Label** (if it passes normalization)
-- An **Unknown Label** (if it cannot be normalized or the human-readable form is unavailable)
+An **Interpreted Label** is a **Label** that is either:
+- (if normalized): a noramlized **Literal Label**
+- (if not normalized or **Unknown**): an **Encoded LabelHash**
 
 ### Literal Name
-A **Literal Name** is composed of **Literal Labels** as they appear in raw onchain data.
+A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels**.
 
 ### Interpreted Name
-An **Interpreted Name** is composed of **Interpreted Labels** after processing, where each label has been classified and potentially converted to its appropriate display format (using **Encoded LabelHash** for unknown labels).
+An **Interpreted Name** is a Name exclusively composed of 0 or more **Interpreted Labels**.
 
 ## Subgraph Indexability & Label/Name Interpretation
 
 ### Subgraph-Indexable Labels / Subgraph-Unindexable Labels
-The legacy ENS Subgraph specifies that unknown labels and labels containing certain UTF-8 characters are "invalid". We refer to this concept as `subgraph-indexable` and `subgraph-unindexable`.
+The legacy ENS Subgraph specifies that **Unknown Labels** and labels containing certain UTF-8 characters are "invalid". We refer to this concept as `subgraph-indexable` and `subgraph-unindexable`.
 
-A `subgraph-unindexable` Label is either:
-  - an **Unknown Label**, or
-  - a **Literal Label** that contains any of the prohibited UTF-8 characters.
-
-A `subgraph-indexable` Label is a **Known Literal Label** that does NOT contain any of the prohibited UTF-8 characters.
+A **Literal Label** is `subgraph-unindexable` if it:
+  - is an **Unknown Label**, or
+  - contains any of the following prohibited UTF-8 characters.
 
 The `subgraph-unindexable` UTF-8 characters are:
 1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
@@ -183,10 +177,12 @@ The `subgraph-unindexable` UTF-8 characters are:
 3. `[` (left square bracket) - Conflicts with "unknown label" representations
 4. `]` (right square bracket) - Conflicts with "unknown label" representations
 
+A `subgraph-indexable` **Literal Label** is a **Known Literal Label** that does NOT contain any of the prohibited UTF-8 characters.
+
 ### Subgraph Interpreted Label
 A **Subgraph Interpreted Label** is a **Label** that is either:
 - (if `subgraph-indexable`): a **Literal Label** guaranteed to not contain any of the `subgraph-unindexable` UTF-8 characters, or
 - (if `subgraph-unindexable`): an Encoded LabelHash.
 
 ### Subgraph Interpreted Name
-A **Subgraph Interpreted Name** is a name exclusively composed of **Subgraph Interpreted Labels**.
+A **Subgraph Interpreted Name** is a name exclusively composed of 0 or more **Subgraph Interpreted Labels**.

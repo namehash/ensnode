@@ -36,7 +36,7 @@ export function literalLabelToInterpretedLabel(label: LiteralLabel): Interpreted
  * that is formatted as an Encoded LabelHash will NOT be interpreted as such. Instead it will be
  * interpreted into an Encoded LabelHash that encodes the literal labelhash of the Literal Label.
  *
- * @param labels An ordered list of 0 or moreLiteral Labels
+ * @param labels An ordered list of 0 or more Literal Labels
  * @returns An InterpretedName
  */
 export function literalLabelsToInterpretedName(labels: LiteralLabel[]): InterpretedName {

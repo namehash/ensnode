@@ -39,11 +39,11 @@ const UNINDEXABLE_LABEL_CHARACTER_CODES = new Set(
  * Implements the following ENS Subgraph `checkValidLabel` function:
  * @see https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L68
  *
- * @param label - The label to check. Note: A `null` value for `label` represents an unknown label.
+ * @param label - The label to check. Note: A `null` value for `label` represents an Unknown Label.
  * @returns Whether the provided Label is subgraph-indexable
  */
 export const isLabelSubgraphIndexable = (label: LiteralLabel | null) => {
-  // an unknown label is not subgraph-indexable
+  // an Unknown Label is not subgraph-indexable
   // https://github.com/ensdomains/ens-subgraph/blob/c8447914e8743671fb4b20cffe5a0a97020b3cee/src/utils.ts#L69
   if (label === null) return false;
 

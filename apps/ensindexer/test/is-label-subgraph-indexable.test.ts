@@ -19,6 +19,10 @@ describe("isLabelSubgraphIndexable", () => {
     expect(isLabelSubgraphIndexable("test" as LiteralLabel)).toBe(true);
     expect(isLabelSubgraphIndexable("example" as LiteralLabel)).toBe(true);
     expect(isLabelSubgraphIndexable("21🚀bingo" as LiteralLabel)).toBe(true);
+
+    // unnormalized
+    expect(isLabelSubgraphIndexable("ABC" as LiteralLabel)).toBe(true);
+    expect(isLabelSubgraphIndexable("abc|xyz" as LiteralLabel)).toBe(true);
   });
 
   it("should return true for empty label", () => {

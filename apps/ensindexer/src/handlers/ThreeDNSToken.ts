@@ -183,7 +183,7 @@ export async function handleNewOwner({
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
     const interpretedLabel = (
       healedLabel !== null
-        ? literalLabelToInterpretedLabel(healedLabel as LiteralLabel)
+        ? literalLabelToInterpretedLabel(healedLabel)
         : encodeLabelHash(labelHash)
     ) as InterpretedLabel;
 
