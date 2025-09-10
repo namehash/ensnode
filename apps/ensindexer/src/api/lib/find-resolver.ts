@@ -90,7 +90,7 @@ async function findResolverWithUniversalResolver(
       } = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 
       // 2. Call UniversalResolver#findResolver via RPC
-      const dnsEncodedName = packetToBytes(name);
+      const dnsEncodedNameBytes = packetToBytes(name);
       const [activeResolver, , _offset] = await withSpanAsync(
         tracer,
         "UniversalResolver#findResolver",
@@ -100,7 +100,7 @@ async function findResolverWithUniversalResolver(
             address,
             abi,
             functionName: "findResolver",
-            args: [toHex(dnsEncodedName)],
+            args: [toHex(dnsEncodedNameBytes)],
           }),
       );
 
@@ -121,14 +121,14 @@ async function findResolverWithUniversalResolver(
       // offset is byte offset into DNS Encoded Name used for resolution
       const offset = Number(_offset);
 
-      if (offset > dnsEncodedName.length) {
+      if (offset > dnsEncodedNameBytes.length) {
         throw new Error(
-          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of bytes in '${name}' ({dnsEncodedName.length}).`,
+          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of bytes in the dns-encoding of '${name}' ({dnsEncodedName.length}).`,
         );
       }
 
       // UniversalResolver returns the offset in bytes within the DNS Encoded Name where the activeName begins
-      const activeName: Name = bytesToPacket(dnsEncodedName.slice(offset));
+      const activeName: Name = bytesToPacket(dnsEncodedNameBytes.slice(offset));
 
       return {
         activeName,

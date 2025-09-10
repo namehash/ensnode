@@ -114,7 +114,7 @@ const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e
 
 ##### `resolvePrimaryNames(address, options)`
 
-Resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and should rely on the aforementioned per-chain defaulting behavior.
+Resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. You may _not_ query the Default EVM Chain Id (`0`) directly (see `resolvePrimaryName` if you need to explicitly determine the `address`'s Default Primary Name).
 
 Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
 
@@ -132,12 +132,12 @@ const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF
 
 console.log(names);
 // {
-//   "1": "gregskril.eth",
-//   "10": "gregskril.eth",
-//   "8453": "greg.base.eth", // base-specific Primary Name!
-//   "42161": "gregskril.eth",
-//   "59144": "gregskril.eth",
-//   "534352": "gregskril.eth"
+//   "1": "gregskril.eth", // Default Primary Name
+//   "10": "gregskril.eth", // Default Primary Name
+//   "8453": "greg.base.eth", // Base-specific Primary Name!
+//   "42161": "gregskril.eth", // Default Primary Name
+//   "59144": "gregskril.eth", // Default Primary Name
+//   "534352": "gregskril.eth" // Default Primary Name
 // }
 
 // Resolve an address' Primary Names on specific chain Ids
