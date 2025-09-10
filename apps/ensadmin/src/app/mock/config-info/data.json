@@ -126,7 +126,7 @@
   },
   "Serialization Error": {
     "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": null,
+    "ensNodePublicUrl": "invalid",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
