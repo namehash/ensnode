@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "pnpm -r --parallel --aggregate-output lint",
     "lint:ci": "pnpm -r --parallel --aggregate-output lint:ci",
-    "test": "pnpm -r --parallel --aggregate-output test run",
+    "test": "vitest --silent passed-only",
     "typecheck": "pnpm -r --parallel --aggregate-output typecheck",
     "changeset": "changeset",
     "changeset-publish": "changeset publish",
@@ -22,7 +22,8 @@
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.6",
     "tsup": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=22.14.0"
