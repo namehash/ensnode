@@ -28,7 +28,7 @@ export function IndexingStatus() {
 
   if (ensIndexerConfigQuery.isError) {
     return (
-      <ENSNodeConfigInfo ensIndexerConfig={null} error={ensIndexerConfigQuery.error.message} />
+      <ENSNodeConfigInfo error={{ title: "ENSNodeConfigInfo Error", description: ensIndexerConfigQuery.error.message}} />
     );
   }
   if (indexingStatusQuery.isError) {
@@ -38,7 +38,7 @@ export function IndexingStatus() {
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
     return (
       <section className="flex flex-col gap-6 p-6">
-        <ENSNodeConfigInfo ensIndexerConfig={null} />
+        <ENSNodeConfigInfo />
         <IndexingStatusLoading />
       </section>
     );

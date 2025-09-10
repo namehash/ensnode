@@ -123,5 +123,27 @@
     "indexAdditionalResolverRecords": false,
     "replaceUnnormalized": false,
     "isSubgraphCompatible": true
+  },
+  "Serialization Error": {
+    "ensAdminUrl": "https://admin.ensnode.io/",
+    "ensNodePublicUrl": null,
+    "labelSet": {
+      "labelSetId": "subgraph",
+      "labelSetVersion": 0
+    },
+    "dependencyInfo": {
+      "nodejs": "22.18.0",
+      "ponder": "0.11.43",
+      "ensRainbow": "0.34.0",
+      "ensRainbowSchema": 3
+    },
+    "indexedChainIds": [17000],
+    "namespace": "holesky",
+    "plugins": ["subgraph"],
+    "databaseSchemaName": "DeserializationSchema0.34.0",
+    "healReverseAddresses": false,
+    "indexAdditionalResolverRecords": false,
+    "replaceUnnormalized": false,
+    "isSubgraphCompatible": true
   }
 }

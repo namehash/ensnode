@@ -17,31 +17,30 @@ const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublic
 type LoadingVariant = "Loading" | "Loading Error";
 type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 
+const DEFAULT_VARIANT = "Alpha Mainnet";
 export default function MockConfigPage() {
-  const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>("Alpha Mainnet");
-  const { props, deserializationError } = useMemo(() => {
+  const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>(DEFAULT_VARIANT);
+  const props: ENSNodeConfigProps = useMemo(() => {
     switch (selectedConfig) {
       case "Loading":
-        return { props: { ensIndexerConfig: null }, deserializationError: null };
+        return { };
 
       case "Loading Error":
         return {
-          props: { ensIndexerConfig: null, error: "Failed to fetch ENSIndexer Config." },
-          deserializationError: null,
+         error: {title: "ENSNodeConfigInfo Error", description: "Failed to fetch ENSIndexer Config." }
         };
 
       default:
         try {
           const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { props: { ensIndexerConfig: config }, deserializationError: null };
+          return { ensIndexerConfig: config};
         } catch (error) {
           const errorMessage =
             error instanceof Error
               ? error.message
               : "Unknown ENSIndexerPublicConfig deserialization error";
           return {
-            props: { ensIndexerConfig: null },
-            deserializationError: errorMessage,
+            error: {title: "Deserialization Error", description: errorMessage,}
           };
         }
     }
@@ -71,11 +70,7 @@ export default function MockConfigPage() {
         </CardContent>
       </Card>
 
-      {deserializationError ? (
-        <ErrorInfo title="JSON Deserialization Error" description={deserializationError} />
-      ) : (
-        <ENSNodeConfigInfo {...(props as ENSNodeConfigProps)} />
-      )}
+      <ENSNodeConfigInfo {...props} />
     </section>
   );
 }

@@ -16,7 +16,7 @@ import { IconENS } from "@/components/icons/ens";
 import { ConfigInfoAppCard } from "@/components/indexing-status/config-info/app-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
-import { ErrorInfo } from "@/components/ui/error-info";
+import {ErrorInfo, ErrorInfoProps} from "@/components/ui/error-info";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
@@ -27,14 +27,14 @@ import { ExternalLink, Replace } from "lucide-react";
  * ENSNodeConfigInfo display variations:
  *
  * Standard - ensIndexerConfig: ENSIndexerPublicConfig, error: undefined
- * Loading - ensIndexerConfig: null, error: undefined
- * Error - ensIndexerConfig: null, error: string
+ * Loading - ensIndexerConfig: undefined, error: undefined
+ * Error - ensIndexerConfig: undefined, error: string
  *
- * @throws If the error parameter is defined and the ensIndexerConfig is not null
+ * @throws If the ensIndexerConfig and error parameters are defined at the same time
  */
 export interface ENSNodeConfigProps {
-  ensIndexerConfig: ENSIndexerPublicConfig | null;
-  error?: string;
+  ensIndexerConfig?: ENSIndexerPublicConfig;
+  error?: ErrorInfoProps;
 }
 
 export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProps) {
@@ -42,18 +42,17 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
-  if (error !== undefined && ensIndexerConfig !== null) {
-    throw new Error("Invariant: ENSNodeConfigInfo with error and non-null ensIndexerConfig.");
+  if (error !== undefined && ensIndexerConfig !== undefined) {
+    throw new Error("Invariant: ENSNodeConfigInfo with error and a defined ensIndexerConfig.");
   }
 
-  if (error) {
-    return <ErrorInfo title="ENSNodeConfigInfo Error" description={error} />;
+  if (error !== undefined) {
+    return <ErrorInfo {...error} />;
   }
 
-  if (ensIndexerConfig === null) {
+  if (ensIndexerConfig === undefined) {
     return <ENSNodeConfigInfoLoading />;
   }
-
   return (
     <Card className="w-full">
       <CardHeader className="sm:pb-4 max-sm:p-3">
@@ -150,7 +149,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
                 value: (
                   <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
                     {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
-                      <Tooltip>
+                      <Tooltip key={`indexed-chain-#${chainId}`}>
                         <TooltipTrigger className="cursor-default">
                           <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
                         </TooltipTrigger>
