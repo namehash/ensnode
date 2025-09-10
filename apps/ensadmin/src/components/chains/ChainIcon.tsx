@@ -12,7 +12,7 @@ import { OptimismTestnetIcon } from "@/components/icons/chains/OptimismTestnetIc
 import { ScrollIcon } from "@/components/icons/chains/ScrollIcon";
 import { ScrollTestnetIcon } from "@/components/icons/chains/ScrollTestnetIcon";
 import { UnrecognizedChainIcon } from "@/components/icons/chains/UnrecognizedChainIcon";
-import { ensTestEnv } from "@/lib/chains";
+import { ensTestEnvL1Chain } from "@ensnode/datasources";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -58,7 +58,7 @@ const chainIcons = new Map<number, React.ReactNode>([
   [holesky.id, <EthereumTestnetIcon width={20} height={20} />],
 
   // ens-test-env
-  [ensTestEnv.id, <EthereumLocalIcon width={20} height={20} />],
+  [ensTestEnvL1Chain.id, <EthereumLocalIcon width={20} height={20} />],
 ]);
 
 /**

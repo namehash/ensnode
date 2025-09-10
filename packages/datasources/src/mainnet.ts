@@ -1,4 +1,3 @@
-import { zeroAddress } from "viem";
 import { arbitrum, base, linea, mainnet, optimism, scroll } from "viem/chains";
 
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
