@@ -16,7 +16,7 @@ import { IconENS } from "@/components/icons/ens";
 import { ConfigInfoAppCard } from "@/components/indexing-status/config-info/app-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CopyButton } from "@/components/ui/copy-button";
-import {ErrorInfo, ErrorInfoProps} from "@/components/ui/error-info";
+import { ErrorInfo, ErrorInfoProps } from "@/components/ui/error-info";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";

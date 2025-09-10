@@ -28,7 +28,12 @@ export function IndexingStatus() {
 
   if (ensIndexerConfigQuery.isError) {
     return (
-      <ENSNodeConfigInfo error={{ title: "ENSNodeConfigInfo Error", description: ensIndexerConfigQuery.error.message}} />
+      <ENSNodeConfigInfo
+        error={{
+          title: "ENSNodeConfigInfo Error",
+          description: ensIndexerConfigQuery.error.message,
+        }}
+      />
     );
   }
   if (indexingStatusQuery.isError) {

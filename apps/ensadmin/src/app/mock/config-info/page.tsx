@@ -23,24 +23,27 @@ export default function MockConfigPage() {
   const props: ENSNodeConfigProps = useMemo(() => {
     switch (selectedConfig) {
       case "Loading":
-        return { };
+        return {};
 
       case "Loading Error":
         return {
-         error: {title: "ENSNodeConfigInfo Error", description: "Failed to fetch ENSIndexer Config." }
+          error: {
+            title: "ENSNodeConfigInfo Error",
+            description: "Failed to fetch ENSIndexer Config.",
+          },
         };
 
       default:
         try {
           const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { ensIndexerConfig: config};
+          return { ensIndexerConfig: config };
         } catch (error) {
           const errorMessage =
             error instanceof Error
               ? error.message
               : "Unknown ENSIndexerPublicConfig deserialization error";
           return {
-            error: {title: "Deserialization Error", description: errorMessage,}
+            error: { title: "Deserialization Error", description: errorMessage },
           };
         }
     }
