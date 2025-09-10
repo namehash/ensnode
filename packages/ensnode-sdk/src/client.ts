@@ -232,12 +232,12 @@ export class ENSNodeClient {
    *
    * console.log(names);
    * // {
-   * //   "1": "gregskril.eth",
-   * //   "10": "gregskril.eth",
-   * //   "8453": "greg.base.eth", // base-specific Primary Name!
-   * //   "42161": "gregskril.eth",
-   * //   "59144": "gregskril.eth",
-   * //   "534352": "gregskril.eth"
+   * //   "1": "gregskril.eth", // Default Primary Name
+   * //   "10": "gregskril.eth", // Default Primary Name
+   * //   "8453": "greg.base.eth", // Base-specific Primary Name!
+   * //   "42161": "gregskril.eth", // Default Primary Name
+   * //   "59144": "gregskril.eth", // Default Primary Name
+   * //   "534352": "gregskril.eth" // Default Primary Name
    * // }
    *
    * // Resolve the address' Primary Names on specific chain Ids
