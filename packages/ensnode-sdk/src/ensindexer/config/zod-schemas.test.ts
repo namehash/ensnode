@@ -4,6 +4,8 @@ import { DependencyInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
   makeDependencyInfoSchema,
+  makeENSIndexerPublicConfigSchema,
+  makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
   makePluginsListSchema,
 } from "./zod-schemas";
@@ -44,7 +46,7 @@ describe("ENSIndexer: Config", () => {
         ).toContain("Plugins cannot contain duplicate values");
 
         expect(formatParseError(makePluginsListSchema().safeParse([]))).toContain(
-          "Plugins must be a list with at least one valid plugin name. Valid plugins are: subgraph, basenames, lineanames, threedns, reverse-resolvers, referrals",
+          "Plugins must be a list with at least one valid plugin name. Valid plugins are: subgraph, basenames, lineanames, threedns, reverse-resolvers, referrals, tokenscope",
         );
       });
 
@@ -60,6 +62,36 @@ describe("ENSIndexer: Config", () => {
         expect(formatParseError(makeIndexedChainIdsSchema().safeParse([]))).toContain(
           "Indexed Chain IDs list must include at least one element",
         );
+      });
+
+      it("can parse label set configuration values", () => {
+        expect(
+          makeFullyPinnedLabelSetSchema().parse({
+            labelSetId: "subgraph",
+            labelSetVersion: 0,
+          }),
+        ).toStrictEqual({
+          labelSetId: "subgraph",
+          labelSetVersion: 0,
+        });
+
+        expect(
+          formatParseError(
+            makeFullyPinnedLabelSetSchema().safeParse({
+              labelSetId: "",
+              labelSetVersion: 0,
+            }),
+          ),
+        ).toContain("labelSetId must be 1-50 characters long");
+
+        expect(
+          formatParseError(
+            makeFullyPinnedLabelSetSchema().safeParse({
+              labelSetId: "subgraph",
+              labelSetVersion: -1,
+            }),
+          ),
+        ).toContain("labelSetVersion must be a non-negative integer");
       });
 
       it("can parse version info values", () => {
@@ -94,6 +126,71 @@ describe("ENSIndexer: Config", () => {
   → at ensRainbow
 ✖ Value must be a positive integer (>0).
   → at ensRainbowSchema`);
+      });
+
+      it("can parse full ENSIndexerPublicConfig with label set", () => {
+        const validConfig = {
+          ensAdminUrl: "https://admin.ensnode.io",
+          ensNodePublicUrl: "http://localhost:42069",
+          labelSet: {
+            labelSetId: "subgraph",
+            labelSetVersion: 0,
+          },
+          healReverseAddresses: false,
+          indexAdditionalResolverRecords: false,
+          replaceUnnormalized: false,
+          indexedChainIds: [1],
+          isSubgraphCompatible: true,
+          namespace: "mainnet" as const,
+          plugins: [PluginName.Subgraph],
+          databaseSchemaName: "test_schema",
+          dependencyInfo: {
+            nodejs: "v22.22.22",
+            ponder: "0.11.25",
+            ensRainbow: "0.32.0",
+            ensRainbowSchema: 2,
+          } satisfies DependencyInfo,
+        };
+
+        const parsedConfig = makeENSIndexerPublicConfigSchema().parse(validConfig);
+
+        // The schema transforms URLs and arrays, so we need to check the transformed values
+        expect(parsedConfig.ensAdminUrl).toBeInstanceOf(URL);
+        expect(parsedConfig.ensAdminUrl.toString()).toBe("https://admin.ensnode.io/");
+        expect(parsedConfig.ensNodePublicUrl).toBeInstanceOf(URL);
+        expect(parsedConfig.ensNodePublicUrl.toString()).toBe("http://localhost:42069/");
+        expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
+        expect(Array.from(parsedConfig.indexedChainIds)).toEqual([1]);
+        expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);
+        expect(parsedConfig.healReverseAddresses).toBe(validConfig.healReverseAddresses);
+        expect(parsedConfig.indexAdditionalResolverRecords).toBe(
+          validConfig.indexAdditionalResolverRecords,
+        );
+        expect(parsedConfig.isSubgraphCompatible).toBe(validConfig.isSubgraphCompatible);
+        expect(parsedConfig.namespace).toBe(validConfig.namespace);
+        expect(parsedConfig.plugins).toEqual(validConfig.plugins);
+        expect(parsedConfig.databaseSchemaName).toBe(validConfig.databaseSchemaName);
+        expect(parsedConfig.dependencyInfo).toEqual(validConfig.dependencyInfo);
+
+        // Test invalid labelSetId
+        expect(
+          formatParseError(
+            makeENSIndexerPublicConfigSchema().safeParse({
+              ...validConfig,
+              labelSet: { ...validConfig.labelSet, labelSetId: "" },
+            }),
+          ),
+        ).toContain("labelSet.labelSetId must be 1-50 characters long");
+
+        // Test invalid labelSetVersion
+        expect(
+          formatParseError(
+            makeENSIndexerPublicConfigSchema().safeParse({
+              ...validConfig,
+              labelSet: { ...validConfig.labelSet, labelSetVersion: "not-a-number" },
+            }),
+          ),
+        ).toContain("labelSet.labelSetVersion must be an integer");
       });
     });
 

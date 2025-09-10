@@ -7,6 +7,7 @@ import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 export function getENSRainbowApiClient() {
   const ensRainbowApiClient = new EnsRainbowApiClient({
     endpointUrl: config.ensRainbowUrl,
+    labelSet: config.labelSet,
   });
 
   if (

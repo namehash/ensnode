@@ -3,14 +3,15 @@ import { prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
-  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
+  DEFAULT_REPLACE_UNNORMALIZED,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 
@@ -54,13 +55,11 @@ const RpcConfigSchema = z.object({
     .default(DEFAULT_RPC_RATE_LIMIT),
 });
 
-const ENSNamespaceSchema = z
-  .enum(ENSNamespaceIds, {
-    error: (issue) => {
-      return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
-    },
-  })
-  .default(DEFAULT_NAMESPACE);
+const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
+  error: (issue) => {
+    return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
+  },
+});
 
 const BlockrangeSchema = z
   .object({
@@ -115,6 +114,9 @@ const IndexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
   "INDEX_ADDITIONAL_RESOLVER_RECORDS",
 ).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
 
+const ReplaceUnnormalizedSchema = makeEnvStringBoolSchema("REPLACE_UNNORMALIZED") //
+  .default(DEFAULT_REPLACE_UNNORMALIZED);
+
 const PortSchema = z.coerce
   .number({ error: "PORT must be an integer." })
   .int({ error: "PORT must be an integer." })
@@ -123,6 +125,8 @@ const PortSchema = z.coerce
   .default(DEFAULT_PORT);
 
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
+
+const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 
 const RpcConfigsSchema = z
   .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
@@ -170,8 +174,10 @@ const ENSIndexerConfigSchema = z
     plugins: PluginsSchema,
     healReverseAddresses: HealReverseAddressesSchema,
     indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
+    replaceUnnormalized: ReplaceUnnormalizedSchema,
     port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
+    labelSet: LabelSetSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
   })

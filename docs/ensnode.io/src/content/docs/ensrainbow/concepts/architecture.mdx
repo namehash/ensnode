@@ -1,0 +1,37 @@
+---
+title: ENSRainbow Architecture Overview
+description: High-level overview and data-flow of ENSRainbow.
+sidebar:
+  label: Architecture
+  order: 2
+---
+
+import { LinkCard } from '@astrojs/starlight/components';
+
+ENSRainbow consists of four primary layers working together to "heal" unknown labels:
+
+1. **Data Generation & Conversion** – legacy `.sql.gz` rainbow tables are converted to the modern `.ensrainbow` format.
+2. **Data Ingestion** – the `.ensrainbow` files are ingested into a LevelDB database using the `ingest-ensrainbow` CLI.
+3. **HTTP API Service** – state in the database is exposed through a lightweight HTTP API.
+4. **Client Integration** – applications call the API directly or via the TypeScript SDK.
+
+```mermaid
+flowchart TD
+    subgraph Data_Generation
+        SQL[".sql.gz files"]
+        ENSRB[".ensrainbow files"]
+        SQL --> Convert["convert" command]
+        Convert --> ENSRB
+    end
+
+    ENSRB --> Ingest["ingest-ensrainbow"]
+    Ingest --> DB[(LevelDB)]
+
+    DB --> API[["HTTP API /v1/*"]]
+    API --> SDK["@ensnode/ensrainbow-sdk"]
+    SDK --> App["Your app"]
+```
+
+:::tip[Why this matters]
+Understanding the flow helps you pick the right starting point—whether you only need the hosted API, want to ingest your own data, or plan to contribute to the core.
+::: 

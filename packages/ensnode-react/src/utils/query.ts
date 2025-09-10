@@ -2,6 +2,7 @@
 
 import {
   ENSNodeClient,
+  IndexingStatusRequest,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNamesRequest,
   ResolveRecordsRequest,
@@ -25,6 +26,11 @@ export const queryKeys = {
 
   primaryNames: (url: string, args: ResolvePrimaryNamesRequest) =>
     [...queryKeys.resolve(url), "primary-names", args] as const,
+
+  config: (url: string) => [...queryKeys.base(url), "config"] as const,
+
+  indexingStatus: (url: string, args: IndexingStatusRequest) =>
+    [...queryKeys.base(url), "config", args] as const,
 };
 
 /**
@@ -74,6 +80,37 @@ export function createPrimaryNamesQueryOptions(
     queryFn: async () => {
       const client = new ENSNodeClient(config.client);
       return client.resolvePrimaryNames(args.address, args);
+    },
+  };
+}
+
+/**
+ * Creates query options for ENSIndexer Config API
+ */
+export function createENSIndexerConfigQueryOptions(config: ENSNodeConfig) {
+  return {
+    enabled: true,
+    queryKey: queryKeys.config(config.client.url.href),
+    queryFn: async () => {
+      const client = new ENSNodeClient(config.client);
+      return client.config();
+    },
+  };
+}
+
+/**
+ * Creates query options for ENSIndexer Indexing Status API
+ */
+export function createIndexingStatusQueryOptions(
+  config: ENSNodeConfig,
+  args: IndexingStatusRequest,
+) {
+  return {
+    enabled: true,
+    queryKey: queryKeys.indexingStatus(config.client.url.href, args),
+    queryFn: async () => {
+      const client = new ENSNodeClient(config.client);
+      return client.indexingStatus(args);
     },
   };
 }

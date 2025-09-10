@@ -33,3 +33,6 @@ terraform.tfstate*
 
 # CLAUDE.md
 CLAUDE.md
+
+# ENSRainbow data
+apps/ensrainbow/data

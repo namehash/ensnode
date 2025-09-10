@@ -1,5 +1,3 @@
-import type { ChainId } from "./types";
-
 /**
  * A string representation of {@link ChainId}.
  **/

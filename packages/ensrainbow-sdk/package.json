@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensrainbow-sdk",
-  "version": "0.33.0",
+  "version": "0.35.0",
   "type": "module",
   "description": "ENSRainbow SDK for interacting with the ENSRainbow API.",
   "license": "MIT",
@@ -21,8 +21,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
-    "./consts": "./src/consts.ts",
-    "./label-utils": "./src/label-utils.ts"
+    "./consts": "./src/consts.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -38,10 +37,6 @@
       "./consts": {
         "types": "./dist/consts.d.ts",
         "default": "./dist/consts.js"
-      },
-      "./label-utils": {
-        "types": "./dist/label-utils.d.ts",
-        "default": "./dist/label-utils.js"
       }
     },
     "main": "./dist/index.js",
@@ -52,7 +47,7 @@
     "prepublish": "tsup",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check --write",
+    "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
   "peerDependencies": {

@@ -3,8 +3,16 @@ import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, type Hex, hexToBytes, namehash } from "viem";
 
-import { type Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import {
+  Label,
+  Name,
+  type Node,
+  interpretLiteralLabel,
+  interpretLiteralName,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
@@ -117,7 +125,26 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       // decode the name emitted by NameWrapper
-      const [label, name] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+      const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(event.args.name));
+
+      // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
+      // see https://ensnode.io/docs/reference/terminology#interpreted-label
+      // see https://ensnode.io/docs/reference/terminology#interpreted-name
+      let label: Label | null;
+      let name: Name | null;
+      if (config.replaceUnnormalized) {
+        if (literalLabel === null || literalName === null) {
+          throw new Error(
+            `Invariant: When REPLACE_UNNORMALIZED=true, it is an invariant that the NameWrapper emits decodable DNSPacketBytes, but the following bytes were not decodable: ${event.args.name}.`,
+          );
+        }
+
+        label = interpretLiteralLabel(literalLabel);
+        name = interpretLiteralName(literalName);
+      } else {
+        label = literalLabel;
+        name = literalName;
+      }
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");

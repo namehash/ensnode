@@ -2,7 +2,7 @@ import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import config from "@/config";
 import { makePrimaryNameId } from "@/lib/ids";
-import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
+import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
 
@@ -22,9 +22,11 @@ export default function () {
         : evmChainIdToCoinType(context.chain.id);
 
     const id = makePrimaryNameId(address, coinType);
-    const name = sanitizeNameRecordValue(_name);
 
-    // empty string is deletion
+    // interpret the emitted name record values (see `interpretNameRecordValue` for guarantees)
+    const name = interpretNameRecordValue(_name);
+
+    // if the coerced value is null, consider it a deletion
     const isDeletion = name === null;
     if (isDeletion) {
       // delete

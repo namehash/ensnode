@@ -14,6 +14,7 @@ locals {
       namespace                         = "holesky"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
+      replace_unnormalized              = "false"
       instance_type                     = "starter"
     }
     sepolia = {
@@ -24,6 +25,7 @@ locals {
       namespace                         = "sepolia"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
+      replace_unnormalized              = "false"
       instance_type                     = "starter"
     }
     mainnet = {
@@ -34,16 +36,18 @@ locals {
       namespace                         = "mainnet"
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
+      replace_unnormalized              = "false"
       instance_type                     = "standard"
     }
     alpha = {
       instance_name                     = "alpha"
       subdomain_prefix                  = "alpha.${var.render_environment}"
       database_schema                   = "alphaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames,threedns"
+      plugins                           = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
       namespace                         = "mainnet"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
+      replace_unnormalized              = "false"
       instance_type                     = "standard"
     }
 
@@ -51,10 +55,11 @@ locals {
       instance_name                     = "alpha-sepolia"
       subdomain_prefix                  = "alpha-sepolia.${var.render_environment}"
       database_schema                   = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames"
+      plugins                           = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
       namespace                         = "sepolia"
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
+      replace_unnormalized              = "false"
       instance_type                     = "starter"
     }
   }
@@ -86,6 +91,10 @@ module "ensrainbow" {
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
   ensnode_version       = var.ensnode_version
+
+  # Label set that ENSRainbow will offer to its clients
+  ensrainbow_label_set_id      = var.ensrainbow_label_set_id
+  ensrainbow_label_set_version = var.ensrainbow_label_set_version
 }
 
 module "ensindexer" {
@@ -101,6 +110,7 @@ module "ensindexer" {
   namespace                         = each.value.namespace
   heal_reverse_addresses            = each.value.heal_reverse_addresses
   index_additional_resolver_records = each.value.index_additional_resolver_records
+  replace_unnormalized              = each.value.replace_unnormalized
 
   # Common configuration (spread operator merges the map)
   base_domain_name = local.base_domain_name
@@ -113,7 +123,7 @@ module "ensindexer" {
   database_url          = module.ensdb.internal_connection_string
 
   # Mainnet RPC URLs
-  etherum_mainnet_rpc_url  = var.etherum_mainnet_rpc_url
+  ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url
   base_mainnet_rpc_url     = var.base_mainnet_rpc_url
   linea_mainnet_rpc_url    = var.linea_mainnet_rpc_url
   optimism_mainnet_rpc_url = var.optimism_mainnet_rpc_url
@@ -121,7 +131,7 @@ module "ensindexer" {
   scroll_mainnet_rpc_url   = var.scroll_mainnet_rpc_url
 
   # Sepolia RPC URLs
-  etherum_sepolia_rpc_url  = var.etherum_sepolia_rpc_url
+  ethereum_sepolia_rpc_url = var.ethereum_sepolia_rpc_url
   base_sepolia_rpc_url     = var.base_sepolia_rpc_url
   linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
   optimism_sepolia_rpc_url = var.optimism_sepolia_rpc_url
@@ -129,5 +139,9 @@ module "ensindexer" {
   scroll_sepolia_rpc_url   = var.scroll_sepolia_rpc_url
 
   # Holesky RPC URLs
-  etherum_holesky_rpc_url = var.etherum_holesky_rpc_url
+  ethereum_holesky_rpc_url = var.ethereum_holesky_rpc_url
+
+  # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
+  ensindexer_label_set_id      = var.ensindexer_label_set_id
+  ensindexer_label_set_version = var.ensindexer_label_set_version
 }

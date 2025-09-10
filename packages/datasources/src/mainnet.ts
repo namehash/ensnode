@@ -1,4 +1,3 @@
-import { zeroAddress } from "viem";
 import { arbitrum, base, linea, mainnet, optimism, scroll } from "viem/chains";
 
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
@@ -25,6 +24,7 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 
+import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
@@ -423,6 +423,17 @@ export default {
         abi: StandaloneReverseRegistrar,
         address: "0x0000000000D8e504002cC26E3Ec46D81971C1664",
         startBlock: 16604272,
+      },
+    },
+  },
+
+  [DatasourceNames.Seaport]: {
+    chain: mainnet,
+    contracts: {
+      Seaport1_5: {
+        abi: Seaport1_5, // Seaport 1.5
+        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        startBlock: 17129405,
       },
     },
   },

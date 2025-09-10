@@ -14,8 +14,8 @@ npm install @ensnode/ensnode-sdk
 
 The `ENSNodeClient` provides a unified interface for the supported ENSNode APIs:
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
-- 🚧 Configuration API
-- 🚧 Indexing Status API
+- Indexing Status API
+- Configuration API
 
 ### Basic Usage
 
@@ -47,6 +47,8 @@ const { names } = await client.resolvePrimaryNames("0x179A862703a4adfb29896552DF
 ##### `resolveRecords(name, selection, options)`
 
 Resolves records for an ENS name (Forward Resolution), via ENSNode, which implements Protocol Acceleration for indexed names.
+
+The returned `name` field, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the name record returned by the resolver is not normalized, `null` is returned as if no name record was set.
 
 - `name`: The ENS Name whose records to resolve
 - `selection`: Optional selection of Resolver records:
@@ -85,6 +87,8 @@ console.log(records);
 
 Resolves the primary name of the provided `address` on the specified `chainId`, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to determine the `address`'s Default Name directly.
 
+The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the primary name set for the address is not normalized, `null` is returned as if no primary name was set.
+
 - `address`: The Address whose Primary Name to resolve
 - `chainId`: The chain id within which to query the address' ENSIP-19 Multichain Primary Name
 - `options`: (optional) additional options
@@ -111,6 +115,8 @@ const { name } = await client.resolvePrimaryName("0x179A862703a4adfb29896552DF9e
 ##### `resolvePrimaryNames(address, options)`
 
 Resolves the primary names of the provided `address` on the specified chainIds, via ENSNode, which implements Protocol Acceleration for indexed names. If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default Name will be returned for all chainIds for which there is not a chain-specific Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and should rely on the aforementioned per-chain defaulting behavior.
+
+Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name). If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
 
 - `address`: The Address whose Primary Names to resolve
 - `options`: (optional) additional options
@@ -146,6 +152,45 @@ console.log(names);
 // }
 ```
 
+#### Configuration API
+
+##### `config()`
+
+Fetches the ENSNode's configuration.
+
+- Returns: `ConfigResponse` - The ENSNode configuration data
+- Throws: Error if the request fails or the ENSNode API returns an error response
+
+```ts
+const config = await client.config();
+console.log(config);
+// Returns the ENSNode configuration including indexed chains, etc.
+```
+
+#### Indexing Status API
+
+##### `indexingStatus(options)`
+
+Fetches the ENSNode's multichain indexing status.
+
+- `options`: (optional) additional options
+  - `maxRealtimeDistance`: (optional) The max allowed distance in seconds between the latest indexed block of the slowest indexed chain and the current time. Setting this parameter influences the HTTP response code:
+    - Success (200 OK): The latest indexed block of each chain is within the requested distance from realtime
+    - Service Unavailable (503): The latest indexed block of each chain is NOT within the requested distance from realtime
+- Returns: `IndexingStatusResponse` - The indexing status data for all indexed chains
+- Throws: Error if the request fails or the ENSNode API returns an error response
+
+```ts
+// Get current indexing status
+const status = await client.indexingStatus();
+console.log(status);
+// Returns indexing status for all indexed chains
+
+// Check if omnichain indexing is within 60 seconds of realtime
+const status = await client.indexingStatus({ maxRealtimeDistance: 60 });
+console.log(status);
+// Returns indexing status, throws if not within 60 seconds of realtime
+```
 
 ### Configuration
 

@@ -70,10 +70,10 @@ describe("ENSIndexer: Indexing Status", () => {
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
-            endBlock: laterBlockRef,
+            endBlock: latestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
-          backfillEndBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus;
 
         // act
@@ -85,10 +85,10 @@ describe("ENSIndexer: Indexing Status", () => {
           config: {
             strategy: ChainIndexingStrategyIds.Definite,
             startBlock: earlierBlockRef,
-            endBlock: laterBlockRef,
+            endBlock: latestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
-          backfillEndBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus);
       });
 
@@ -112,7 +112,7 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
       });
 
-      it("won't parse if the latestIndexedBlock is after the latestKnownBlock", () => {
+      it("won't parse if the latestIndexedBlock is after the backfillEndBlock", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
           status: ChainIndexingStatusIds.Backfill,
@@ -223,25 +223,6 @@ describe("ENSIndexer: Indexing Status", () => {
         expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as latestKnownBlock.`);
       });
 
-      it("won't parse if the latestIndexedBlock is after the config.endBlock", () => {
-        // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Completed,
-          config: {
-            strategy: ChainIndexingStrategyIds.Definite,
-            startBlock: earlierBlockRef,
-            endBlock: laterBlockRef,
-          },
-          latestIndexedBlock: latestBlockRef,
-        } satisfies ChainIndexingCompletedStatus;
-
-        // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
-
-        // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be the same as config.endBlock.`);
-      });
-
       it("won't parse if the approxRealtimeDistance was a negative integer", () => {
         // arrange
         const serialized: ChainIndexingStatus = {
@@ -327,7 +308,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be the same as config.endBlock.`);
+        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as config.endBlock.`);
       });
     });
   });

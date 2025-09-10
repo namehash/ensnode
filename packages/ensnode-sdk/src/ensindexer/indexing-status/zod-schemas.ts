@@ -161,9 +161,10 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
       },
     )
     .refine(
-      ({ config, latestIndexedBlock }) => blockRef.isEqualTo(latestIndexedBlock, config.endBlock),
+      ({ config, latestIndexedBlock }) =>
+        blockRef.isBeforeOrEqualTo(latestIndexedBlock, config.endBlock),
       {
-        error: `latestIndexedBlock must be the same as config.endBlock.`,
+        error: `latestIndexedBlock must be before or same as config.endBlock.`,
       },
     );
 

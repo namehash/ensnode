@@ -46,16 +46,10 @@ app.onError((error, ctx) => {
 
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
-  try {
-    const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
-    ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
+  const ensAdminRedirectUrl = new URL("connect", config.ensAdminUrl);
+  ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
 
-    return ctx.redirect(ensAdminRedirectUrl);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    throw new Error(`Cannot redirect to ENSAdmin: ${errorMessage}`);
-  }
+  return ctx.redirect(ensAdminRedirectUrl);
 });
 
 // use ENSNode middleware at /metadata

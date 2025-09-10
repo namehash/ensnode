@@ -23,6 +23,12 @@ export const ext_primaryNames_domain_relations = relations(account, ({ one, many
  * So these records CANNOT be queried directly and used as a source of truth — you MUST perform
  * Forward Resolution to resolve a consistent set of an Account's ENSIP-19 Primary Names. These records
  * are used to power Protocol Acceleration for those ReverseResolvers backed by a StandloneReverseRegistrar.
+ *
+ * The emitted record values are interpreted according to `interpretNameRecordValue` — unnormalized
+ * names and empty string values are interpreted as a deletion of the associated Primary Name entity.
+ *
+ * Note that this is an extension to the original subgraph schema and legacy subgraph compatibility
+ * is not relevant.
  */
 export const ext_primaryName = onchainTable(
   "ext_primary_names",
@@ -32,7 +38,11 @@ export const ext_primaryName = onchainTable(
     address: t.hex().notNull(),
     coinType: t.bigint().notNull(),
 
-    // NOTE: this is the sanitized name record value (see @/lib/sanitize-name-record)
+    /**
+     * Represents the ENSIP-19 Primary Name value for a given (address, coinType).
+     *
+     * The value of this field is guaranteed to be a non-empty-string normalized ENS name.
+     */
     name: t.text().notNull(),
   }),
   (t) => ({

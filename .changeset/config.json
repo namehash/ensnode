@@ -13,9 +13,12 @@
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ponder-metadata",
       "@ensnode/ensnode-schema",
+      "@ensnode/ensnode-react",
       "@ensnode/ponder-subgraph",
       "@ensnode/ensnode-sdk",
-      "@ensnode/shared-configs"
+      "@ensnode/shared-configs",
+      "@docs/ensnode",
+      "@docs/ensrainbow"
     ]
   ],
   "updateInternalDependencies": "patch",
@@ -23,6 +26,5 @@
   "privatePackages": {
     "version": true,
     "tag": true
-  },
-  "ignore": []
+  }
 }

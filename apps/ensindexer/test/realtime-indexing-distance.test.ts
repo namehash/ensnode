@@ -1,6 +1,6 @@
 import { setupConfigMock } from "./utils/mockConfig";
 setupConfigMock(); // setup config mock before importing dependent modules
-import { hasAchievedRequestedDistance } from "@/indexing-status";
+import { hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingFollowingStatus,

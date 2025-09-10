@@ -8,7 +8,7 @@ import {
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
-  isNormalized,
+  isNormalizedName,
   isSelectionEmpty,
   parseReverseName,
 } from "@ensnode/ensnode-sdk";
@@ -122,7 +122,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // Invariant: Name must be normalized
-          if (!isNormalized(name)) {
+          if (!isNormalizedName(name)) {
             throw new Error(`Invariant: Name "${name}" must be normalized.`);
           }
 
@@ -204,35 +204,45 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
 
             if (_isKnownENSIP19ReverseResolver && isIndexingReverseRegistrars) {
-              // Invariant: consumer must be selecting the `name` record at this point
-              if (selection.name !== true) {
-                throw new Error(
-                  `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
-                );
-              }
+              return withProtocolStepAsync(
+                TraceableENSProtocol.ForwardResolution,
+                ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
+                {},
+                async () => {
+                  // Invariant: consumer must be selecting the `name` record at this point
+                  if (selection.name !== true) {
+                    throw new Error(
+                      `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
+                    );
+                  }
 
-              // Sanity Check: This should only happen in the context of Reverse Resolution, and
-              // the selection should just be `{ name: true }`, but technically not prohibited to
-              // select more records than just 'name', so just warn if that happens.
-              if (selection.addresses !== undefined || selection.texts !== undefined) {
-                console.warn(
-                  `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
-                );
-              }
+                  // Sanity Check: This should only happen in the context of Reverse Resolution, and
+                  // the selection should just be `{ name: true }`, but technically not prohibited to
+                  // select more records than just 'name', so just warn if that happens.
+                  if (selection.addresses !== undefined || selection.texts !== undefined) {
+                    console.warn(
+                      `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
+                    );
+                  }
 
-              // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
-              const parsed = parseReverseName(name);
-              if (!parsed) {
-                throw new Error(
-                  `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
-                );
-              }
+                  // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
+                  const parsed = parseReverseName(name);
+                  if (!parsed) {
+                    throw new Error(
+                      `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
+                    );
+                  }
 
-              // retrieve the name record from the index
-              const nameRecord = await getPrimaryNameFromIndex(parsed.address, parsed.coinType);
+                  // retrieve the name record from the index
+                  const nameRecordValue = await getPrimaryNameFromIndex(
+                    parsed.address,
+                    parsed.coinType,
+                  );
 
-              // NOTE: typecast is ok because of sanity checks above
-              return { name: nameRecord } as ResolverRecordsResponse<SELECTION>;
+                  // NOTE: typecast is ok because of sanity checks above
+                  return { name: nameRecordValue } as ResolverRecordsResponse<SELECTION>;
+                },
+              );
             }
 
             addProtocolStepEvent(

@@ -1,12 +1,24 @@
+import { deserializeErrorResponse } from "./api";
 import {
-  ErrorResponse,
-  ResolvePrimaryNameRequest,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesRequest,
-  ResolvePrimaryNamesResponse,
-  ResolveRecordsRequest,
-  ResolveRecordsResponse,
+  type ConfigResponse,
+  type ErrorResponse,
+  type IndexingStatusRequest,
+  type IndexingStatusResponse,
+  IndexingStatusResponseCodes,
+  type ResolvePrimaryNameRequest,
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesRequest,
+  type ResolvePrimaryNamesResponse,
+  type ResolveRecordsRequest,
+  type ResolveRecordsResponse,
 } from "./api/types";
+import { ClientError } from "./client-error";
+import {
+  type SerializedENSIndexerOverallIndexingStatus,
+  type SerializedENSIndexerPublicConfig,
+  deserializeENSIndexerIndexingStatus,
+  deserializeENSIndexerPublicConfig,
+} from "./ensindexer";
 import { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -75,6 +87,9 @@ export class ENSNodeClient {
   /**
    * Resolves records for an ENS name (Forward Resolution).
    *
+   * The returned `name` field, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+   * If the name record returned by the resolver is not normalized, `null` is returned as if no name record was set.
+   *
    * @param name The ENS Name whose records to resolve
    * @param selection selection of Resolver records
    * @param options additional options
@@ -129,7 +144,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Records Resolution Failed: ${error.message}`);
+      throw ClientError.fromErrorResponse(error);
     }
 
     const data = await response.json();
@@ -142,6 +157,9 @@ export class ENSNodeClient {
    * If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name),
    * the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to
    * determine the `address`'s Default Name directly.
+   *
+   * The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+   * If the primary name set for the address is not normalized, `null` is returned as if no primary name was set.
    *
    * @param address The Address whose Primary Name to resolve
    * @param chainId The chain id within which to query the address' ENSIP-19 Multichain Primary Name
@@ -180,7 +198,7 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Primary Name Resolution Failed: ${error.message}`);
+      throw ClientError.fromErrorResponse(error);
     }
 
     const data = await response.json();
@@ -194,6 +212,9 @@ export class ENSNodeClient {
    * the Default Name will be returned for all chainIds for which there is not a chain-specific
    * Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and
    * should rely on the aforementioned per-chain defaulting behavior.
+   *
+   * Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
+   * If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
    *
    * @param address The Address whose Primary Names to resolve
    * @param options additional options
@@ -243,10 +264,114 @@ export class ENSNodeClient {
 
     if (!response.ok) {
       const error = (await response.json()) as ErrorResponse;
-      throw new Error(`Primary Names Resolution Failed: ${error.message}`);
+      throw ClientError.fromErrorResponse(error);
     }
 
     const data = await response.json();
     return data as ResolvePrimaryNamesResponse;
+  }
+
+  /**
+   * Fetch ENSNode Config
+   *
+   * Fetch the ENSNode's configuration.
+   *
+   * @returns {ConfigResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   */
+  async config(): Promise<ConfigResponse> {
+    const url = new URL(`/api/config`, this.options.url);
+
+    const response = await fetch(url);
+
+    let responseData: unknown;
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    if (!response.ok) {
+      const errorResponse = deserializeErrorResponse(responseData);
+      throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
+    }
+
+    return deserializeENSIndexerPublicConfig(responseData as SerializedENSIndexerPublicConfig);
+  }
+
+  /**
+   * Fetch ENSNode Indexing Status
+   *
+   * Fetch the ENSNode's multichain indexing status.
+   *
+   * @param options additional options
+   * @param options.maxRealtimeDistance the max allowed distance between the
+   *  latest indexed block of each chain and the "tip" of all indexed chains.
+   *  Setting this parameter influences the HTTP response code as follows:
+   *  - Success (200 OK): The latest indexed block of each chain is within the
+   *    requested distance from realtime.
+   *  - Service Unavailable (503): The latest indexed block of each chain is NOT
+   *    within the requested distance from realtime.
+   *
+   * @returns {IndexingStatusResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   */
+  async indexingStatus(options?: IndexingStatusRequest): Promise<IndexingStatusResponse> {
+    const url = new URL(`/api/indexing-status`, this.options.url);
+
+    if (typeof options?.maxRealtimeDistance !== "undefined") {
+      url.searchParams.set("maxRealtimeDistance", `${options.maxRealtimeDistance}`);
+    }
+
+    const response = await fetch(url);
+
+    let responseData: unknown;
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // handle application errors accordingly
+    if (!response.ok) {
+      switch (response.status) {
+        case IndexingStatusResponseCodes.IndexerError: {
+          console.error("Indexing Status API: indexer error");
+          return deserializeENSIndexerIndexingStatus(
+            responseData as SerializedENSIndexerOverallIndexingStatus,
+          );
+        }
+
+        case IndexingStatusResponseCodes.RequestedDistanceNotAchievedError: {
+          console.error(
+            "Indexing Status API: Requested realtime indexing distance not achieved error",
+          );
+          return deserializeENSIndexerIndexingStatus(
+            responseData as SerializedENSIndexerOverallIndexingStatus,
+          );
+        }
+
+        default: {
+          const errorResponse = deserializeErrorResponse(responseData);
+          throw new Error(`Fetching ENSNode Indexing Status Failed: ${errorResponse.message}`);
+        }
+      }
+    }
+
+    return deserializeENSIndexerIndexingStatus(
+      responseData as SerializedENSIndexerOverallIndexingStatus,
+    );
   }
 }

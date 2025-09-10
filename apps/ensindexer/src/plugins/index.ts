@@ -7,12 +7,14 @@ import referralsPlugin from "./referrals/plugin";
 import reverseResolversPlugin from "./reverse-resolvers/plugin";
 import subgraphPlugin from "./subgraph/plugin";
 import threednsPlugin from "./threedns/plugin";
+import tokenScopePlugin from "./tokenscope/plugin";
 
 export const ALL_PLUGINS = [
   subgraphPlugin,
   basenamesPlugin,
   lineaNamesPlugin,
   threednsPlugin,
+  tokenScopePlugin,
   reverseResolversPlugin,
   referralsPlugin,
 ] as const;

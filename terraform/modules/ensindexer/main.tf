@@ -6,13 +6,16 @@ locals {
     "DATABASE_URL"                      = { value = var.database_url },
     "DATABASE_SCHEMA"                   = { value = var.database_schema },
     "ENSRAINBOW_URL"                    = { value = var.ensrainbow_url },
+    "LABEL_SET_ID"                      = { value = var.ensindexer_label_set_id },
+    "LABEL_SET_VERSION"                 = { value = var.ensindexer_label_set_version },
     "PLUGINS"                           = { value = var.plugins },
     "NAMESPACE"                         = { value = var.namespace },
     "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },
     "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
+    "REPLACE_UNNORMALIZED"              = { value = var.replace_unnormalized },
 
     # Mainnet networks
-    "RPC_URL_1"                     = { value = var.etherum_mainnet_rpc_url },
+    "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_1"      = { value = local.rpc_request_rate_limit },
     "RPC_URL_8453"                  = { value = var.base_mainnet_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_8453"   = { value = local.rpc_request_rate_limit },
@@ -26,7 +29,7 @@ locals {
     "RPC_REQUEST_RATE_LIMIT_534352" = { value = local.rpc_request_rate_limit },
 
     # Sepolia networks
-    "RPC_URL_11155111"                = { value = var.etherum_sepolia_rpc_url },
+    "RPC_URL_11155111"                = { value = var.ethereum_sepolia_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_11155111" = { value = local.rpc_request_rate_limit },
     "RPC_URL_84532"                   = { value = var.base_sepolia_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_84532"    = { value = local.rpc_request_rate_limit },
@@ -40,13 +43,13 @@ locals {
     "RPC_REQUEST_RATE_LIMIT_534351"   = { value = local.rpc_request_rate_limit },
 
     # Holesky networks
-    "RPC_URL_17000"                = { value = var.etherum_holesky_rpc_url },
+    "RPC_URL_17000"                = { value = var.ethereum_holesky_rpc_url },
     "RPC_REQUEST_RATE_LIMIT_17000" = { value = local.rpc_request_rate_limit },
   }
 }
 
 resource "render_web_service" "ensindexer" {
-  name           = "ensindexer_${var.instance_name}"
+  name           = "ensindexer-${var.instance_name}"
   plan           = var.instance_type
   region         = var.render_region
   environment_id = var.render_environment_id
@@ -63,6 +66,9 @@ resource "render_web_service" "ensindexer" {
     {
       ENSNODE_PUBLIC_URL = {
         value = "https://${local.full_ensindexer_hostname}"
+      },
+      ENSINDEXER_URL = {
+        value = "http://ensindexer-${var.instance_name}:10000"
       }
     }
   )
@@ -91,7 +97,9 @@ resource "render_web_service" "ensindexer_api" {
     {
       ENSNODE_PUBLIC_URL = {
         value = "https://${local.full_ensindexer_api_hostname}"
-
+      },
+      ENSINDEXER_URL = {
+        value = "http://ensindexer-${var.instance_name}:10000"
       },
       PONDER_COMMAND = {
         value = "serve"

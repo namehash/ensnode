@@ -1,6 +1,5 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { encodeLabelhash } from "@ensdomains/ensjs/utils";
 import { type Address, zeroAddress } from "viem";
 
 import config from "@/config";
@@ -8,6 +7,8 @@ import {
   type LabelHash,
   type Node,
   REVERSE_ROOT_NODES,
+  encodeLabelHash,
+  interpretLiteralLabel,
   isLabelIndexable,
   makeSubdomainNode,
   maybeHealLabelByReverseAddress,
@@ -176,7 +177,7 @@ export const handleNewOwner =
 
           if (!healedLabel) {
             // by this point, we have exhausted all our strategies for healing
-            // the reverse address and we still don't have a valid label,
+            // the reverse address and we still don't have a healed label,
             // so we throw an error to bring visibility to not achieving
             // the expected 100% success rate
             throw new Error(
@@ -193,21 +194,37 @@ export const handleNewOwner =
         healedLabel = await labelByLabelHash(labelHash);
       }
 
-      const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+      if (config.replaceUnnormalized) {
+        // Interpret the `healedLabel` Literal Label into an Interpreted Label
+        // see https://ensnode.io/docs/reference/terminology#literal-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
 
-      // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
-      // NOTE: for TLDs, the parent is null, so we just use the label value as is
-      const label = validLabel || encodeLabelhash(labelHash);
-      const name = parent?.name ? `${label}.${parent.name}` : label;
+        // to construct `Domain.name` use the parent's Name and the Interpreted Label
+        // NOTE: for a TLD, the parent is null, so we just use the Label value as is
+        const name = parent?.name ? `${label}.${parent.name}` : label;
 
-      // akin to domain.save()
-      // via https://github.com/ensdomains/ens-subgraph/blob/c68a889e0bcdc6d45033778faef19b3efe3d15fe/src/ensRegistry.ts#L86
-      await context.db.update(schema.domain, { id: node }).set({
-        name,
-        // NOTE: only update Domain.labelName iff label is healed and valid
-        // via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
-        labelName: validLabel,
-      });
+        await context.db.update(schema.domain, { id: node }).set({
+          name,
+          labelName: label,
+        });
+      } else {
+        // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
+        // NOTE: for TLDs, the parent is null, so we just use the label value as is
+        const labelForUseInName = isLabelIndexable(healedLabel)
+          ? healedLabel
+          : encodeLabelHash(labelHash);
+        const name = parent?.name ? `${labelForUseInName}.${parent.name}` : labelForUseInName;
+
+        await context.db.update(schema.domain, { id: node }).set({
+          name,
+          // NOTE(subgraph-compat): only update Domain.labelName iff label is healed and indexable
+          //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
+          // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
+          //   is updated to, if it is indexable, _not_ the `label` value used to construct the name
+          labelName: isLabelIndexable(healedLabel) ? healedLabel : undefined,
+        });
+      }
     }
 
     // garbage collect newly 'empty' domain iff necessary

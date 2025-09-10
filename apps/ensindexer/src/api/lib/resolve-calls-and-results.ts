@@ -1,5 +1,5 @@
 import { ResolverABI } from "@ensnode/datasources";
-import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { type Name, type Node, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
   type Address,
@@ -18,7 +18,7 @@ import {
 import { packetToBytes } from "viem/ens";
 
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
-import { sanitizeNameRecordValue } from "@/lib/sanitize-name-record";
+import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 
@@ -240,9 +240,9 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
         // and otherwise return it as-is
         return { call, result };
       }
-      // for name records, we need to sanitize the result
       case "name": {
-        return { call, result: sanitizeNameRecordValue(result) };
+        // interpret name records (see `interpretNameRecordValue` for specific guarantees)
+        return { call, result: interpretNameRecordValue(result) };
       }
       case "text": {
         // coalesce falsy string values (i.e. empty string) to null

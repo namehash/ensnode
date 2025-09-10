@@ -11,7 +11,6 @@ import { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
 import { ContractConfig } from "@ensnode/datasources";
-import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import { ENSIndexerConfig } from "@/config/types";
@@ -128,7 +127,7 @@ interface PonderContractBlockConfig {
   contracts: Record<
     string,
     {
-      chain: Record<string, { id: ChainConfig["id"] } & Blockrange>;
+      chain: Record<string, Blockrange>;
     }
   >;
 }
@@ -239,9 +238,9 @@ export async function createStartBlockByChainIdMap(
   // go through each contract configuration
   for (const contractConfig of contractsConfig) {
     // and then through each chain configuration for the contract
-    for (const contractChainConfig of Object.values(contractConfig.chain)) {
+    for (const [_chainId, contractChainConfig] of Object.entries(contractConfig.chain)) {
       // map string to number
-      const chainId = contractChainConfig.id;
+      const chainId = Number(_chainId);
       const startBlock = contractChainConfig.startBlock || 0;
 
       // update the start block number for the chain ID if it's lower than the current one
@@ -306,7 +305,6 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
   return {
     [chainId.toString()]: {
       address: contractConfig.address, // provide per-network address if available
-      id: chainId,
       startBlock,
       endBlock,
     },

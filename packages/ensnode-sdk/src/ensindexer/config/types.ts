@@ -1,5 +1,7 @@
-import type { ENSNamespaceId } from "../../ens";
-import type { ChainId } from "../../shared";
+import { ENSNamespaceId } from "@ensnode/datasources";
+
+import type { EnsRainbowClientLabelSet } from "../../ensrainbow";
+import { ChainId } from "../../shared";
 
 /**
  * A PluginName is a unique id for a 'plugin': we use the notion of
@@ -12,6 +14,7 @@ export enum PluginName {
   ThreeDNS = "threedns",
   ReverseResolvers = "reverse-resolvers",
   Referrals = "referrals",
+  TokenScope = "tokenscope",
 }
 
 /**
@@ -66,6 +69,11 @@ export interface ENSIndexerPublicConfig {
   ensNodePublicUrl: URL;
 
   /**
+   * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
+   */
+  labelSet: Required<EnsRainbowClientLabelSet>;
+
+  /**
    * A Postgres database schema name. This instance of ENSIndexer will write
    * indexed data to the tables in this schema.
    *
@@ -108,12 +116,34 @@ export interface ENSIndexerPublicConfig {
    * provide safe use of indexed resolver record values (in appropriate
    * contexts).
    *
-   * Note that enabling {@link indexAdditionalResolverRecords} results in
-   * indexed data becoming a _superset_ of the Subgraph. For exact data-level
-   * backwards compatibility with the ENS Subgraph,
+   * Note that enabling {@link indexAdditionalResolverRecords} results in indexed data becoming a
+   * _superset_ of the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
    * {@link indexAdditionalResolverRecords} should be `false`.
    */
   indexAdditionalResolverRecords: boolean;
+
+  /**
+   * Controls ENSIndexer's handling of Literal Labels and Literal Names
+   * This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.
+   *
+   * When set to true, all Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
+   * - https://ensnode.io/docs/reference/terminology#interpreted-label
+   * - https://ensnode.io/docs/reference/terminology#interpreted-name
+   *
+   * That is,
+   * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
+   *    LabelHash, and
+   * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
+   *    may be represented as an Encoded LabelHash of the Literal Label value found onchain.
+   *
+   * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
+   * interpretation.
+   * - https://ensnode.io/docs/reference/terminology#literal-label
+   * - https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * NOTE: {@link replaceUnnormalized} must be `false` for subgraph compatible indexing behavior.
+   */
+  replaceUnnormalized: boolean;
 
   /**
    * Indexed Chain IDs

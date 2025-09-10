@@ -1,28 +1,44 @@
 ---
 title: ENSRainbow API
+description: Complete HTTP API reference for ENSRainbow label healing service.
 sidebar:
   label: API
   order: 2
 ---
 
+## Endpoint Summary
+
+| Endpoint | Purpose | Key Response Types |
+|----------|---------|--------------------|
+| `GET /health` | Liveness probe for orchestration | `{ status: "ok" }` |
+| `GET /v1/heal/{labelhash}` | Heal a single labelhash | `HealSuccess`, `HealError` |
+| `GET /v1/labels/count` | Current healable label count | `CountSuccess`, `CountServerError` |
+| `GET /v1/version` | Server & database schema info plus label set details | `VersionInfo` |
+
+:::tip[Deterministic Results]
+Pin `labelSetVersion` in your client if you need **deterministic results** across time. See the [Label Sets & Versioning guide](/ensrainbow/concepts/label-sets-and-versioning/) for details.
+:::
+
 ## Health Check
 
 ```bash
-curl http://localhost:3223/health
+curl https://api.ensrainbow.io/health
 ```
 
 Response: `{"status":"ok"}`
 
 ## Heal Label
 
+### Basic Usage
+
 ```bash
-curl http://localhost:3223/v1/heal/0x[labelHash]
+curl https://api.ensrainbow.io/v1/heal/0x[labelhash]
 ```
 
 Example:
 
 ```bash
-curl http://localhost:3223/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+curl https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ```
 
 Response:
@@ -34,6 +50,19 @@ Response:
 }
 ```
 
+### Advanced Usage with Query Parameters
+
+You can optionally specify `label_set_id` and `label_set_version` query parameters:
+
+```bash
+curl "https://api.ensrainbow.io/v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc?label_set_id=subgraph&label_set_version=0"
+```
+
+#### Query Parameters
+
+- **`label_set_id`** (optional): Validates that the request matches the database label set ID.
+- **`label_set_version`** (optional): Specifies the highest label set version of label set ID to query. Enables deterministic heal results across time even if the ENSRainbow server ingests label sets with greater versions than this value. If provided, label_set_id is required and only labels from label sets with versions less than or equal to this value will be returned.
+
 Note on returned labels: The service returns labels exactly as they appear in the source data. This means:
 
 - Labels may or may not be ENS-normalized
@@ -42,17 +71,35 @@ Note on returned labels: The service returns labels exactly as they appear in th
 
 #### Error Responses
 
-- `400 Bad Request`: When the labelHash parameter is missing or invalid
+- `400 Bad Request`: When the labelhash parameter is missing or invalid, or when query parameters are incorrectly specified
 
   ```json
   {
     "status": "error",
-    "error": "Invalid labelHash - must be a valid hex string",
+    "error": "Invalid labelhash - must be a valid hex string",
     "errorCode": 400
   }
   ```
 
-- `404 Not Found`: When no label is found for the given labelHash
+
+
+  ```json
+  {
+    "status": "error",
+    "error": "Requested label set version is higher than available label set version",
+    "errorCode": 400
+  }
+  ```
+
+  ```json
+  {
+    "status": "error",
+    "error": "Server label set ID \"subgraph\" does not match client's requested label set ID \"ens-test-env\".",
+    "errorCode": 400
+  }
+  ```
+
+- `404 Not Found`: When no label is found for the given labelhash
 
   ```json
   {
@@ -71,10 +118,14 @@ Note on returned labels: The service returns labels exactly as they appear in th
   }
   ```
 
+:::tip[Having trouble with API errors?]
+Check the [Troubleshooting guide](/ensrainbow/usage/troubleshooting/) for solutions to common issues.
+:::
+
 ## Get Count of Healable Labels
 
 ```bash
-curl http://localhost:3223/v1/labels/count
+curl https://api.ensrainbow.io/v1/labels/count
 ```
 
 Success Response:
@@ -100,7 +151,7 @@ Success Response:
 ## Get Version Information
 
 ```bash
-curl http://localhost:3223/v1/version
+curl https://api.ensrainbow.io/v1/version
 ```
 
 Success Response:
@@ -109,10 +160,17 @@ Success Response:
 {
   "status": "success",
   "version": "0.1.0",
-  "schema_version": 2
+  "dbSchemaVersion": 3,
+  "labelSet": {
+    "labelSetId": "subgraph",
+    "highestLabelSetVersion": 0
+  }
 }
 ```
 
 The response contains:
 - `version`: The current version of ENSRainbow
-- `schema_version`: The current schema version of the database
+- `dbSchemaVersion`: The current schema version of the database
+- `labelSet`: The label set of the loaded database
+  - `labelSetId`: The label set ID of the loaded database
+  - `highestLabelSetVersion`: The highest label set version available in the database

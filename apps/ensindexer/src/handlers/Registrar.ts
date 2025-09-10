@@ -5,11 +5,15 @@ import { type Address, namehash } from "viem";
 import {
   type Label,
   type LabelHash,
+  Name,
   PluginName,
+  encodeLabelHash,
+  interpretLiteralLabel,
   isLabelIndexable,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
+import config from "@/config";
 import { handleNewOwner } from "@/handlers/Registry";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
@@ -41,8 +45,15 @@ export const makeRegistrarHandlers = ({
     labelHash: LabelHash,
     cost: bigint,
   ) {
-    // if the label is otherwise un-indexable, ignore it (see isLabelIndexable for context)
-    if (!isLabelIndexable(label)) return;
+    if (config.replaceUnnormalized) {
+      // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
+      // see https://ensnode.io/docs/reference/terminology#literal-label
+      // see https://ensnode.io/docs/reference/terminology#interpreted-label
+      label = interpretLiteralLabel(label);
+    } else {
+      // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
+      if (!isLabelIndexable(label)) return;
+    }
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
@@ -50,18 +61,16 @@ export const makeRegistrarHandlers = ({
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
-    // update the domain's labelName with label
+    // materialize the domain's name and labelName using the emitted values
     if (domain.labelName !== label) {
       await context.db
         .update(schema.domain, { id: node })
         .set({ labelName: label, name: `${label}.${registrarManagedName}` });
     }
 
-    // materialize the registration's labelName as well
+    // update the registration's labelName
     await context.db
-      .update(schema.registration, {
-        id: makeRegistrationId(labelHash, node),
-      })
+      .update(schema.registration, { id: makeRegistrationId(labelHash, node) })
       .set({ labelName: label, cost });
   }
 
@@ -139,19 +148,29 @@ export const makeRegistrarHandlers = ({
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByLabelHash(labelHash);
 
-      // only update the label if it is healed & indexable
-      // undefined value means no change to the label
-      const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+      let name: Name | undefined = undefined;
+      let label: Label | undefined = undefined;
+      if (config.replaceUnnormalized) {
+        // Interpret the `healedLabel` Literal Label into an Interpreted Label
+        // see https://ensnode.io/docs/reference/terminology#literal-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+        name = `${label}.${registrarManagedName}`;
+      } else {
+        // only update the name if the label is healed & indexable
+        // undefined value means no change to the name
+        label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
 
-      // only update the name if the label is healed & indexable
-      // undefined value means no change to the name
-      const name = validLabel ? `${validLabel}.${registrarManagedName}` : undefined;
+        // only update the name if the label is healed & indexable
+        // undefined value means no change to the name
+        name = label ? `${label}.${registrarManagedName}` : undefined;
+      }
 
       // update Domain
       await context.db.update(schema.domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
-        labelName: validLabel,
+        labelName: label,
         name,
       });
 
@@ -165,7 +184,7 @@ export const makeRegistrarHandlers = ({
         registrationDate: event.block.timestamp,
         expiryDate: expires,
         registrantId: owner,
-        labelName: validLabel,
+        labelName: label,
       });
 
       // log RegistrationEvent

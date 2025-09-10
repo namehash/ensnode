@@ -1,5 +1,6 @@
 import { publicClients } from "ponder:api";
 import {
+  IndexingStatusResponseCodes,
   OverallIndexingStatusIds,
   serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
@@ -8,11 +9,12 @@ import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
+import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
 import { validate } from "@/api/lib/validate";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/indexing-status";
 import { getUnixTime } from "date-fns";
+import type { UnofficialStatusCode } from "hono/utils/http-status";
 import resolutionApi from "./resolution-api";
 
 const app = new Hono();
@@ -38,9 +40,12 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
   const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
   const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
 
-  // respond with 503 error if ENSIndexer is not available
+  // respond with custom server error if ENSIndexer is not available
   if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
-    return c.json(serializedIndexingStatus, 503);
+    return c.json(
+      serializedIndexingStatus,
+      IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
+    );
   }
 
   const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
@@ -48,9 +53,12 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
     maxRealtimeDistance,
   );
 
-  // respond with 503 error if requested distance hasn't been achieved yet
+  // respond with custom server error if requested distance hasn't been achieved yet
   if (!hasAchievedRequestedRealtimeIndexingDistance) {
-    return c.json(serializedIndexingStatus, 503);
+    return c.json(
+      serializedIndexingStatus,
+      IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
+    );
   }
 
   // respond with the serialized indexing status object

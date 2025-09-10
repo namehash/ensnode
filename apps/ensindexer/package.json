@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "0.33.0",
+  "version": "0.35.0",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
@@ -43,6 +43,7 @@
     "@opentelemetry/sdk-trace-node": "^2.0.1",
     "@opentelemetry/semantic-conventions": "^1.34.0",
     "@types/dns-packet": "^5.6.5",
+    "caip": "^1.1.1",
     "date-fns": "catalog:",
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",

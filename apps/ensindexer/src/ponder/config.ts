@@ -28,7 +28,12 @@ const ponderConfig = activePlugins.reduce(
 (ponderConfig as any).indexingBehaviorDependencies = {
   healReverseAddresses: config.healReverseAddresses,
   indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
-} satisfies Pick<ENSIndexerConfig, "healReverseAddresses" | "indexAdditionalResolverRecords">;
+  replaceUnnormalized: config.replaceUnnormalized,
+  labelSet: config.labelSet,
+} satisfies Pick<
+  ENSIndexerConfig,
+  "healReverseAddresses" | "indexAdditionalResolverRecords" | "replaceUnnormalized" | "labelSet"
+>;
 
 ////////
 // Set indexing order strategy

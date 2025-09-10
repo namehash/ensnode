@@ -1,5 +1,6 @@
 import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
@@ -29,7 +30,7 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
+   * The ENS namespace that ENSNode operates in the context of.
    *
    * See {@link ENSNamespaceIds} for available namespace identifiers.
    */
@@ -69,6 +70,11 @@ export interface ENSIndexerConfig {
    * - localhost urls are allowed (and expected).
    */
   ensRainbowUrl: URL;
+
+  /**
+   * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
+   */
+  labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
    * A Postgres database schema name. This instance of ENSIndexer will write indexed data to the
@@ -132,6 +138,31 @@ export interface ENSIndexerConfig {
    * {@link indexAdditionalResolverRecords} should be `false`.
    */
   indexAdditionalResolverRecords: boolean;
+
+  /**
+   * Controls ENSIndexer's handling of Literal Labels and Literal Names
+   * This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.
+   *
+   * Optional. If this is not set, the default value is set to `DEFAULT_REPLACE_UNNORMALIZED` (true).
+   *
+   * When set to true, all Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
+   * - https://ensnode.io/docs/reference/terminology#interpreted-label
+   * - https://ensnode.io/docs/reference/terminology#interpreted-name
+   *
+   * That is,
+   * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
+   *    LabelHash, and
+   * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
+   *    may be represented as an Encoded LabelHash of the Literal Label value found onchain.
+   *
+   * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
+   * interpretation.
+   * - https://ensnode.io/docs/reference/terminology#literal-label
+   * - https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * NOTE: {@link replaceUnnormalized} must be `false` for subgraph compatible indexing behavior.
+   */
+  replaceUnnormalized: boolean;
 
   /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
@@ -241,11 +272,16 @@ export interface ENSIndexerEnvironment {
   namespace: string | undefined;
   plugins: string | undefined;
   ensRainbowUrl: string | undefined;
+  labelSet: {
+    labelSetId: string | undefined;
+    labelSetVersion: string | undefined;
+  };
   ensNodePublicUrl: string | undefined;
   ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;
   healReverseAddresses: string | undefined;
   indexAdditionalResolverRecords: string | undefined;
+  replaceUnnormalized: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;

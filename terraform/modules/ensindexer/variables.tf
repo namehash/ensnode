@@ -45,6 +45,16 @@ variable "ensrainbow_url" {
   type = string
 }
 
+variable "ensindexer_label_set_id" {
+  type        = string
+  description = "The label set ID that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
+}
+
+variable "ensindexer_label_set_version" {
+  type        = string
+  description = "The label set version that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., '0', '1')"
+}
+
 variable "plugins" {
   type = string
 }
@@ -61,8 +71,12 @@ variable "index_additional_resolver_records" {
   type = string
 }
 
+variable "replace_unnormalized" {
+  type = string
+}
+
 # Mainnet RPC URLs
-variable "etherum_mainnet_rpc_url" {
+variable "ethereum_mainnet_rpc_url" {
   type = string
 }
 
@@ -87,7 +101,7 @@ variable "scroll_mainnet_rpc_url" {
 }
 
 # Sepolia RPC URLs
-variable "etherum_sepolia_rpc_url" {
+variable "ethereum_sepolia_rpc_url" {
   type = string
 }
 
@@ -112,6 +126,6 @@ variable "scroll_sepolia_rpc_url" {
 }
 
 # Holesky RPC URLs
-variable "etherum_holesky_rpc_url" {
+variable "ethereum_holesky_rpc_url" {
   type = string
 }

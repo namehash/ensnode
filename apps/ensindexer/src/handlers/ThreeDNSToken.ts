@@ -1,12 +1,13 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { encodeLabelhash } from "@ensdomains/ensjs/utils";
-import { Address, Hex, hexToBigInt, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, Hex, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
   type LabelHash,
   type Node,
-  isLabelIndexable,
+  encodeLabelHash,
+  interpretLiteralLabel,
+  interpretLiteralName,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -24,6 +25,7 @@ import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
+import { getThreeDNSTokenId } from "@/lib/threedns-helpers";
 
 /**
  * Gets the `uri` for a given tokenId using the relevant ThreeDNSToken from `context`
@@ -120,11 +122,11 @@ export async function handleNewOwner({
   if (!domain.name) {
     const parent = await context.db.find(schema.domain, { id: parentNode });
 
-    let healedLabel = null;
+    let healedLabel: string | null = null;
 
     // 1. attempt metadata retrieval
     if (!healedLabel) {
-      const tokenId = hexToBigInt(node, { size: 32 });
+      const tokenId = getThreeDNSTokenId(node);
       const uri = await getUriForTokenId(context, tokenId);
       [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
     }
@@ -134,13 +136,16 @@ export async function handleNewOwner({
       healedLabel = await labelByLabelHash(labelHash);
     }
 
-    const validLabel = isLabelIndexable(healedLabel) ? healedLabel : undefined;
-    // to construct `Domain.name` use the parent's name and the label value (encoded if not indexable)
-    // NOTE: for a TLD, the parent is null, so we just use the label value as is
-    const label = validLabel || encodeLabelhash(labelHash);
+    // Interpret the `healedLabel` Literal Label into an Interpreted Label
+    // see https://ensnode.io/docs/reference/terminology#literal-label
+    // see https://ensnode.io/docs/reference/terminology#interpreted-label
+    const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+
+    // to construct `Domain.name` use the parent's Name and the valid Label
+    // NOTE: for a TLD, the parent is null, so we just use the Label value as is
     const name = parent?.name ? `${label}.${parent.name}` : label;
 
-    await context.db.update(schema.domain, { id: node }).set({ name, labelName: validLabel });
+    await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
   }
 
   // log DomainEvent
@@ -200,29 +205,28 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const [label, name] = decodeDNSPacketBytes(hexToBytes(fqdn));
+  const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
 
-  // Invariant: ThreeDNS always emits a valid DNS Packet
-  if (!label || !name) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Expected valid DNSPacketBytes: "${fqdn}"`);
-  }
-
-  // Invariant: ThreeDNS validates that labels only use alphanumeric characters and hypens
+  // Invariant: ThreeDNS always emits a decodable DNS Packet
   // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  if (!isLabelIndexable(label)) {
+  if (!literalLabel || !literalName) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Expected indexable label, got "${label}"`);
+    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
   }
 
-  // Invariant: >2LDs never emit RegistrationCreated
-  // TODO: is this invariant exactly correct? it seems to be, but unclear
-  if (name.split(".").length > 2) {
+  // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
+  if (literalName.split(".").length >= 3) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`>2LD emitted RegistrationCreated: ${name}`);
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${literalName}`);
   }
 
-  const labelHash = labelhash(label);
+  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
+  // see https://ensnode.io/docs/reference/terminology#interpreted-label
+  // see https://ensnode.io/docs/reference/terminology#interpreted-name
+  const interpretedLabel = interpretLiteralLabel(literalLabel);
+  const interpretedName = interpretLiteralName(literalName);
+
+  const labelHash = labelhash(literalLabel);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
   // expiry and re-registration (example: delv.box)
@@ -238,8 +242,8 @@ export async function handleRegistrationCreated({
     expiryDate: expiry,
 
     // include its decoded label/name
-    labelName: label,
-    name,
+    labelName: interpretedLabel,
+    name: interpretedName,
   });
 
   // upsert a Registration entity
@@ -250,7 +254,7 @@ export async function handleRegistrationCreated({
     registrationDate: event.block.timestamp,
     expiryDate: expiry,
     registrantId: registrant,
-    labelName: label,
+    labelName: interpretedLabel,
   });
 
   // log RegistrationEvent

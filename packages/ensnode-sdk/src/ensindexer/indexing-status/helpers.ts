@@ -1,4 +1,4 @@
-import { BlockRef, Duration, UnixTimestamp } from "../../shared";
+import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 import {
   ChainIndexingActiveStatus,
   ChainIndexingCompletedStatus,
@@ -65,6 +65,55 @@ export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]):
   const approxRealtimeDistance = Math.max(...chainApproxRealtimeDistances);
 
   return approxRealtimeDistance;
+}
+
+/**
+ * Get lowest of the highest end block across all chains which status is
+ * {@link ChainIndexingStatus}.
+ */
+export function getTimestampForLowestOmnichainStartBlock(
+  chains: ChainIndexingStatus[],
+): UnixTimestamp {
+  const earliestKnownBlockTimestamps: UnixTimestamp[] = chains.map(
+    (chain) => chain.config.startBlock.timestamp,
+  );
+
+  return Math.min(...earliestKnownBlockTimestamps);
+}
+
+/**
+ * Get timestamp of the highest known block across all chains which status is
+ * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ */
+export function getTimestampForHighestOmnichainKnownBlock(
+  chains: ChainIndexingStatus[],
+): UnixTimestamp {
+  const latestKnownBlockTimestamps: UnixTimestamp[] = [];
+
+  for (const chain of chains) {
+    switch (chain.status) {
+      case ChainIndexingStatusIds.Unstarted:
+        if (chain.config.endBlock) {
+          latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
+        }
+        break;
+
+      case ChainIndexingStatusIds.Backfill:
+        latestKnownBlockTimestamps.push(chain.backfillEndBlock.timestamp);
+
+        break;
+
+      case ChainIndexingStatusIds.Completed:
+        latestKnownBlockTimestamps.push(chain.latestIndexedBlock.timestamp);
+        break;
+
+      case ChainIndexingStatusIds.Following:
+        latestKnownBlockTimestamps.push(chain.latestKnownBlock.timestamp);
+        break;
+    }
+  }
+
+  return Math.max(...latestKnownBlockTimestamps);
 }
 
 /**
@@ -194,4 +243,20 @@ export function checkChainIndexingStatusesForFollowingOverallStatus(
   );
 
   return allChainsHaveValidStatuses;
+}
+
+/**
+ * Sort a list of [{@link ChainId}, {@link ChainIndexingStatus}] tuples
+ * by the omnichain start block timestamp in ascending order.
+ */
+export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingStatus>(
+  chains: [ChainId, ChainStatusType][],
+): [ChainId, ChainStatusType][] {
+  // Sort the chain statuses by the omnichain first block to index timestamp
+  chains.sort(
+    ([, chainA], [, chainB]) =>
+      chainA.config.startBlock.timestamp - chainB.config.startBlock.timestamp,
+  );
+
+  return chains;
 }

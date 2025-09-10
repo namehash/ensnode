@@ -189,7 +189,7 @@ describe("ENSIndexer: Indexing Status helpers", () => {
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
-          latestIndexedBlock: laterBlockRef,
+          latestIndexedBlock: earlierBlockRef,
           backfillEndBlock: latestBlockRef,
         } satisfies ChainIndexingBackfillStatus,
 

@@ -6,15 +6,22 @@ import {
 import { Hono } from "hono";
 
 import { errorResponse } from "@/api/lib/error-response";
+import { canAccelerateResolution } from "@/api/lib/indexing-status/can-accelerate-resolution";
 import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import { validate } from "@/api/lib/validate";
-import config from "@/config";
+import { simpleMemoized } from "@/lib/simple-memoized";
 import { routes } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
+
+// memoizes the result of canAccelerateResolution within a 30s window
+// this means that the effective maxRealtimeDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
+// and the initial request(s) in between ENSApi startup and the first resolution of
+// canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
+const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
 
 /**
  * Example queries for /records:
@@ -34,7 +41,8 @@ app.get(
   validate("query", routes.records.query),
   async (c) => {
     const { name } = c.req.valid("param");
-    const { selection, trace: showTrace, accelerate } = c.req.valid("query");
+    const { selection, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
+    const accelerate = _accelerate && getCanAccelerateResolution();
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -43,6 +51,7 @@ app.get(
 
       const response = {
         records: result,
+        accelerationAttempted: accelerate,
         ...(showTrace && { trace }),
       } satisfies ResolveRecordsResponse<typeof selection>;
 
@@ -72,7 +81,8 @@ app.get(
   validate("query", routes.primaryName.query),
   async (c) => {
     const { address, chainId } = c.req.valid("param");
-    const { trace: showTrace, accelerate } = c.req.valid("query");
+    const { trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
+    const accelerate = _accelerate && getCanAccelerateResolution();
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -81,6 +91,7 @@ app.get(
 
       const response = {
         name: result,
+        accelerationAttempted: accelerate,
         ...(showTrace && { trace }),
       } satisfies ResolvePrimaryNameResponse;
 
@@ -107,7 +118,8 @@ app.get(
   validate("query", routes.primaryNames.query),
   async (c) => {
     const { address } = c.req.valid("param");
-    const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
+    const { chainIds, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
+    const accelerate = _accelerate && getCanAccelerateResolution();
 
     try {
       const { result, trace } = await captureTrace(() =>
@@ -116,6 +128,7 @@ app.get(
 
       const response = {
         names: result,
+        accelerationAttempted: accelerate,
         ...(showTrace && { trace }),
       } satisfies ResolvePrimaryNamesResponse;
 

@@ -2,7 +2,6 @@ import type { RpcConfig } from "@/config/types";
 import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -19,6 +18,8 @@ const BASE_ENV = {
   HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
   ENSRAINBOW_URL: "https://api.ensrainbow.io",
+  LABEL_SET_ID: "ens-test-env",
+  LABEL_SET_VERSION: "0",
   NAMESPACE: "mainnet",
   RPC_URL_1: VALID_RPC_URL,
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
@@ -325,10 +326,9 @@ describe("config", () => {
       expect(config.namespace).toBe("sepolia");
     });
 
-    it("returns the default NAMESPACE if it is not set", async () => {
+    it("throws if NAMESPACE is not set", async () => {
       vi.stubEnv("NAMESPACE", undefined);
-      const config = await getConfig();
-      expect(config.namespace).toBe(DEFAULT_NAMESPACE);
+      await expect(getConfig()).rejects.toThrow(/NAMESPACE/);
     });
 
     it("throws if NAMESPACE is an invalid string value", async () => {
@@ -491,6 +491,9 @@ describe("config", () => {
       vi.stubEnv("PLUGINS", "subgraph");
       vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
       vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+      vi.stubEnv("REPLACE_UNNORMALIZED", "false");
+      vi.stubEnv("LABEL_SET_ID", "subgraph");
+      vi.stubEnv("LABEL_SET_VERSION", "0");
     });
 
     it("is true when compatible", async () => {
@@ -517,6 +520,12 @@ describe("config", () => {
       const config = await getConfig();
       expect(config.isSubgraphCompatible).toBe(false);
     });
+
+    it("is false when REPLACE_UNNORMALIZED is true", async () => {
+      vi.stubEnv("REPLACE_UNNORMALIZED", "true");
+      const config = await getConfig();
+      expect(config.isSubgraphCompatible).toBe(false);
+    });
   });
 
   describe("additional checks", () => {
@@ -536,6 +545,80 @@ describe("config", () => {
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
       vi.stubEnv("END_BLOCK", "1");
       await expect(getConfig()).rejects.toThrow(/multiple chains/i);
+    });
+  });
+
+  describe(".labelSet", () => {
+    it("returns the labelSet configuration if both LABEL_SET_ID and LABEL_SET_VERSION are valid", async () => {
+      vi.stubEnv("LABEL_SET_ID", "subgraph");
+      vi.stubEnv("LABEL_SET_VERSION", "5");
+      const config = await getConfig();
+      expect(config.labelSet).toEqual({
+        labelSetId: "subgraph",
+        labelSetVersion: 5,
+      });
+    });
+
+    it("throws an error when LABEL_SET_ID is not set", async () => {
+      vi.stubEnv("LABEL_SET_ID", undefined);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID must be a string/);
+    });
+
+    it("throws an error when LABEL_SET_ID is empty", async () => {
+      vi.stubEnv("LABEL_SET_ID", "");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID must be 1-50 characters long/);
+    });
+
+    it("throws an error when LABEL_SET_ID is only whitespace", async () => {
+      vi.stubEnv("LABEL_SET_ID", "   ");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID can only contain lowercase letters/);
+    });
+
+    it("throws an error when LABEL_SET_ID is too long", async () => {
+      vi.stubEnv("LABEL_SET_ID", "a".repeat(51));
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID must be 1-50 characters long/);
+    });
+
+    it("throws an error when LABEL_SET_ID contains invalid characters", async () => {
+      vi.stubEnv("LABEL_SET_ID", "invalid-id_with_underscores");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID can only contain lowercase letters/);
+    });
+
+    it("throws an error when LABEL_SET_ID contains uppercase letters", async () => {
+      vi.stubEnv("LABEL_SET_ID", "InvalidId");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID can only contain lowercase letters/);
+    });
+
+    it("accepts valid LABEL_SET_ID with hyphens", async () => {
+      vi.stubEnv("LABEL_SET_ID", "ens-test-env");
+      const config = await getConfig();
+      expect(config.labelSet.labelSetId).toBe("ens-test-env");
+    });
+
+    it("throws an error when LABEL_SET_VERSION is not set", async () => {
+      vi.stubEnv("LABEL_SET_VERSION", undefined);
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
+    });
+
+    it("throws an error when LABEL_SET_VERSION is negative", async () => {
+      vi.stubEnv("LABEL_SET_VERSION", "-1");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
+    });
+
+    it("throws an error when LABEL_SET_VERSION is not an integer", async () => {
+      vi.stubEnv("LABEL_SET_VERSION", "5.5");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
+    });
+
+    it("throws an error when LABEL_SET_VERSION is not a number", async () => {
+      vi.stubEnv("LABEL_SET_VERSION", "not-a-number");
+      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
+    });
+
+    it("accepts zero as a valid LABEL_SET_VERSION", async () => {
+      vi.stubEnv("LABEL_SET_VERSION", "0");
+      const config = await getConfig();
+      expect(config.labelSet.labelSetVersion).toBe(0);
     });
   });
 

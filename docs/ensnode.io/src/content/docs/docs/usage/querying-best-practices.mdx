@@ -134,6 +134,16 @@ The query structure in Pattern 2 remains the same as Pattern 1, except the norma
 
 ## Unnormalized Labels
 
+:::note[Configuration Note]
+ENSNode's handling of unnormalized labels is controlled by the `REPLACE_UNNORMALIZED` configuration option:
+- `REPLACE_UNNORMALIZED=false` allows unnormalized labels to be returned (required for full ENS Subgraph compatibility)
+- `REPLACE_UNNORMALIZED=true` (default) encodes unnormalized labels as labelhashes, improving security
+
+For more details, see [Subgraph Compatibility](/docs/reference/subgraph-compatibility/#replace_unnormalized).
+:::
+
+### When `REPLACE_UNNORMALIZED=false`
+
 ENSNode may return unnormalized labels associated with indexed names. It is important to note that **ENSNode clients should never attempt to normalize labels returned by ENSNode**. This is because when ENSNode returns an unnormalized label, that label is associated with a specific node that has been indexed. Normalizing an unnormalized label in this context would represent a different node.
 
 There are effectively two distinct query patterns to consider:
@@ -142,6 +152,10 @@ There are effectively two distinct query patterns to consider:
 2. Onchain data → ENSNode data: Normalization should NOT be performed
 
 An ENSNode client is permitted to validate that all labels returned by ENSNode are in normalized form, and to reject any names with unnormalized labels from further processing. However, the key principle is that an ENSNode client should never normalize returned labels, as normalization transforms the label and therefore also the node associated with the name the label is contained within.
+
+### When `REPLACE_UNNORMALIZED=true`
+
+When ENSNode is configured to replace unnormalized labels with encoded labelHashes, it helps you avoid edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters. When names are returned from any of the ENSNode APIs, including the Subgraph-compatible GraphQL API, the only names will either be a) [normalized](https://ensnode.io/docs/reference/terminology/#name-node-namehash) or b) unnormalized in [encoded labelHash form](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels).
 
 ## Calculating the Node for Unknown Names
 

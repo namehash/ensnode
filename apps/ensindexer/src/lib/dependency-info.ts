@@ -67,12 +67,18 @@ export async function getDependencyInfo(): Promise<DependencyInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();
   const { versionInfo: ensRainbowDependencyInfo } = await ensRainbowApiClient.version();
 
+  // use a fallback for backwards compatibility
+  const ensRainbowSchema =
+    ensRainbowDependencyInfo.dbSchemaVersion ||
+    // @ts-ignore
+    ensRainbowDependencyInfo.schema_version;
+
   const schema = makeDependencyInfoSchema();
   const data = {
     ensRainbow: ensRainbowDependencyInfo.version,
-    ensRainbowSchema: ensRainbowDependencyInfo.schema_version,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
+    ensRainbowSchema,
   } satisfies DependencyInfo;
 
   const parsed = schema.safeParse(data);
