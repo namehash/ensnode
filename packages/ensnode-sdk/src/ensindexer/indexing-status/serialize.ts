@@ -57,6 +57,7 @@ export function serializeENSIndexerIndexingStatus(
       return {
         overallStatus: OverallIndexingStatusIds.Completed,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
       } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
     }
 

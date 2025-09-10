@@ -285,6 +285,7 @@ const makeCompletedOverallStatusSchema = (valueLabel?: string) =>
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingCompletedStatus>),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
     })
     .refine(
       (indexingStatus) => {
@@ -293,6 +294,21 @@ const makeCompletedOverallStatusSchema = (valueLabel?: string) =>
         return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
+    )
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        const latestIndexedBlocks = chains.map((chain) => chain.latestIndexedBlock.timestamp);
+
+        const chainHighestLastIndexedBlock = Math.max(...latestIndexedBlocks);
+
+        return indexingStatus.omnichainIndexingCursor === chainHighestLastIndexedBlock;
+      },
+      {
+        error:
+          "omnichainIndexingCursor must be equal to the highest latestIndexedBlock across all chains",
+      },
     );
 
 /**

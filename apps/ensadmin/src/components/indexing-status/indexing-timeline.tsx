@@ -5,8 +5,8 @@
 import { ChainName } from "@/components/chains/ChainName";
 import { cn } from "@/lib/utils";
 import { ChainId, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
-import { intlFormat } from "date-fns";
 
+import { dateFormat } from "@/components/datetime-utils";
 import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
 import { getTimelinePosition } from "./indexing-timeline-utils";
 
@@ -141,7 +141,7 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
         >
           <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
             <span className="text-xs text-gray-600">
-              {intlFormat(chainStatus.firstBlockToIndex.date)}
+              {dateFormat(chainStatus.firstBlockToIndex.date)}
             </span>
           </div>
         </div>

@@ -17,7 +17,7 @@ import {
   ENSIndexerOverallIndexingUnstartedStatus,
   OverallIndexingStatusId,
   OverallIndexingStatusIds,
-  sortAscChainStatusesByStartBlock,
+  sortEarliestOmnichainStartBlock,
 } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
 
@@ -47,7 +47,7 @@ export function IndexingStatsForIndexerErrorStatus() {
 export function IndexingStatsForUnstartedStatus({
   indexingStatus,
 }: IndexingStatusProps<ENSIndexerOverallIndexingUnstartedStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+  const chainEntries = sortEarliestOmnichainStartBlock([...indexingStatus.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -94,7 +94,7 @@ export function IndexingStatsForUnstartedStatus({
 export function IndexingStatsForBackfillStatus({
   indexingStatus,
 }: IndexingStatusProps<ENSIndexerOverallIndexingBackfillStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+  const chainEntries = sortEarliestOmnichainStartBlock([...indexingStatus.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -157,7 +157,7 @@ export function IndexingStatsForBackfillStatus({
 export function IndexingStatsForCompletedStatus({
   indexingStatus,
 }: IndexingStatusProps<ENSIndexerOverallIndexingCompletedStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+  const chainEntries = sortEarliestOmnichainStartBlock([...indexingStatus.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -210,7 +210,7 @@ export function IndexingStatsForCompletedStatus({
 export function IndexingStatsForFollowingStatus({
   indexingStatus,
 }: IndexingStatusProps<ENSIndexerOverallIndexingFollowingStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+  const chainEntries = sortEarliestOmnichainStartBlock([...indexingStatus.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;

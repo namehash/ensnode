@@ -125,6 +125,18 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingActiveStatus[]):
 }
 
 /**
+ * Get Omnichain Indexing Cursor across all chains which status is
+ * {@link ChainIndexingCompletedStatus}.
+ *
+ * Note how this function as a different goal to {@link getOmnichainIndexingCursor} one.
+ */
+export function getOmnichainIndexingCursorForCompletedOverallStatus(
+  chains: ChainIndexingCompletedStatus[],
+): UnixTimestamp {
+  return Math.max(...chains.map((chain) => chain.latestIndexedBlock.timestamp));
+}
+
+/**
  * Get all chains which status is {@link ChainIndexingActiveStatus}.
  */
 export function getActiveChains(chains: ChainIndexingStatus[]): ChainIndexingActiveStatus[] {
@@ -249,9 +261,9 @@ export function checkChainIndexingStatusesForFollowingOverallStatus(
  * Sort a list of [{@link ChainId}, {@link ChainIndexingStatus}] tuples
  * by the omnichain start block timestamp in ascending order.
  */
-export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingStatus>(
-  chains: [ChainId, ChainStatusType][],
-): [ChainId, ChainStatusType][] {
+export function sortEarliestOmnichainStartBlock<
+  ChainIndexingStatusType extends ChainIndexingStatus,
+>(chains: [ChainId, ChainIndexingStatusType][]): [ChainId, ChainIndexingStatusType][] {
   // Sort the chain statuses by the omnichain first block to index timestamp
   chains.sort(
     ([, chainA], [, chainB]) =>
