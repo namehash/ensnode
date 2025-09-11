@@ -1,4 +1,4 @@
-import { getTabId } from "@/lib/tab-utils";
+import { getActiveConnectionFromParams } from "@/lib/url-params";
 import { QueryClient, defaultShouldDehydrateQuery, isServer } from "@tanstack/react-query";
 
 /**
@@ -13,8 +13,11 @@ function makeQueryClient() {
         staleTime: 5 * 1000, // 5 seconds
         refetchInterval: 10 * 1000, // 10 seconds
         queryKeyHashFn: (queryKey) => {
-          const tabId = getTabId();
-          return JSON.stringify([tabId, ...queryKey]);
+          const activeConnection =
+            typeof window !== "undefined"
+              ? getActiveConnectionFromParams(new URLSearchParams(window.location.search))
+              : "server";
+          return JSON.stringify([activeConnection, ...queryKey]);
         },
       },
       dehydrate: {
@@ -32,7 +35,7 @@ const browserQueryClients = new Map<string, QueryClient>();
  * Get a query client.
  *
  * On the server, we create a new query client for each request.
- * On the browser, we create a unique query client per tab to isolate state.
+ * On the browser, we create a unique query client per active connection to isolate state.
  *
  * Note: Next.js uses implicit suspense boundaries so we need to be careful to
  * avoid creating too many query clients and loose the benefits of query persistence.
@@ -44,12 +47,13 @@ export function getQueryClient() {
     // Server: always make a new query client
     return makeQueryClient();
   } else {
-    const tabId = getTabId();
+    const activeConnection =
+      getActiveConnectionFromParams(new URLSearchParams(window.location.search)) || "default";
 
-    if (!browserQueryClients.has(tabId)) {
-      browserQueryClients.set(tabId, makeQueryClient());
+    if (!browserQueryClients.has(activeConnection)) {
+      browserQueryClients.set(activeConnection, makeQueryClient());
     }
 
-    return browserQueryClients.get(tabId)!;
+    return browserQueryClients.get(activeConnection)!;
   }
 }

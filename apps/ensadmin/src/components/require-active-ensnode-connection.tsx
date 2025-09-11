@@ -1,14 +1,10 @@
 "use client";
 
-import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { PropsWithChildren } from "react";
 
 /**
- * Allows consumers to use `useActiveENSNodeConection` by blocking rendering until it is available.
+ * No longer needed with simplified connection approach - just renders children directly.
  */
 export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{}>) {
-  const { active } = useENSNodeConnections();
-
-  if (!active) return null;
   return <>{children}</>;
 }

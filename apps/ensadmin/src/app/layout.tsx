@@ -9,7 +9,7 @@ import { RequireActiveENSNodeConnection } from "@/components/require-active-ensn
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { ENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
+
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";
 
@@ -64,24 +64,24 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <ENSNodeConnectionsProvider>
-            <RequireActiveENSNodeConnection>
-              <SidebarProvider>
+          <RequireActiveENSNodeConnection>
+            <SidebarProvider>
+              <Suspense>
+                <AppSidebar />
+              </Suspense>
+              <SidebarInset className="min-w-0">
+                <Header>
+                  <HeaderNav>
+                    <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                  </HeaderNav>
+                  <HeaderActions>{actions}</HeaderActions>
+                </Header>
                 <Suspense>
-                  <AppSidebar />
-                </Suspense>
-                <SidebarInset className="min-w-0">
-                  <Header>
-                    <HeaderNav>
-                      <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                    </HeaderNav>
-                    <HeaderActions>{actions}</HeaderActions>
-                  </Header>
                   <ENSNodeProvider>{children}</ENSNodeProvider>
-                </SidebarInset>
-              </SidebarProvider>
-            </RequireActiveENSNodeConnection>
-          </ENSNodeConnectionsProvider>
+                </Suspense>
+              </SidebarInset>
+            </SidebarProvider>
+          </RequireActiveENSNodeConnection>
         </QueryClientProvider>
         <Toaster />
       </body>
