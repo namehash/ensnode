@@ -6,81 +6,94 @@ import { monkeypatchCollate } from "./collate";
  * Domain
  */
 
-export const domain = onchainTable("domains", (t) => ({
-  // The namehash of the name
-  id: t.hex().primaryKey(),
+export const domain = onchainTable(
+  "domains",
+  (t) => ({
+    // The namehash of the name
+    id: t.hex().primaryKey(),
 
-  /**
-   * The ENS Name that this Domain represents.
-   *
-   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
-   * a) a normalized Name, or
-   * b) a Name entirely consisting of Interpreted Labels.
-   *
-   * Note that when REPLACE_UNNORMALIZED is true, the type of the column will remain string | null,
-   * for legacy subgraph compatibility, but in practice will never be null. The Root node's name
-   * will be '' (empty string).
-   *
-   * @see https://ensnode.io/docs/reference/terminology#interpreted-name
-   *
-   * If REPLACE_UNNORMALIZED is false, this is guaranteed to be either:
-   * a) null (in the case of the root node), or
-   * b) a Subgraph Interpreted Name.
-   *
-   * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
-   */
-  name: t.text(),
+    /**
+     * The ENS Name that this Domain represents.
+     *
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
+     * a) a normalized Name, or
+     * b) a Name entirely consisting of Interpreted Labels.
+     *
+     * Note that when REPLACE_UNNORMALIZED is true, the type of the column will remain string | null,
+     * for legacy subgraph compatibility, but in practice will never be null. The Root node's name
+     * will be '' (empty string).
+     *
+     * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+     *
+     * If REPLACE_UNNORMALIZED is false, this is guaranteed to be either:
+     * a) null (in the case of the root node), or
+     * b) a Subgraph Interpreted Name.
+     *
+     * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
+     */
+    name: t.text(),
 
-  /**
-   * The Label associated with the Domain.
-   *
-   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
-   * a) null, exclusively in the case of the root Node,
-   * b) a normalized Label, or
-   * c) an Encoded LabelHash of the Literal Label value found onchain.
-   *
-   * @see https://ensnode.io/docs/reference/terminology#interpreted-label
-   *
-   * If REPLACE_UNNORMALIZED is false, this value is guaranteed to be either:
-   * a) null, in the case of the root Node or a Domain whose label is subgraph-unindexable, or
-   * b) a subgraph-indexable Subgraph Interpreted Label (i.e. a Literal Label of unknown normalization).
-   *
-   * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
-   */
-  labelName: t.text(),
+    /**
+     * The Label associated with the Domain.
+     *
+     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
+     * a) null, exclusively in the case of the root Node,
+     * b) a normalized Label, or
+     * c) an Encoded LabelHash of the Literal Label value found onchain.
+     *
+     * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+     *
+     * If REPLACE_UNNORMALIZED is false, this value is guaranteed to be either:
+     * a) null, in the case of the root Node or a Domain whose label is subgraph-unindexable, or
+     * b) a subgraph-indexable Subgraph Interpreted Label (i.e. a Literal Label of unknown normalization).
+     *
+     * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
+     */
+    labelName: t.text(),
 
-  // keccak256(labelName)
-  labelhash: t.hex(),
-  // The namehash (id) of the parent name
-  parentId: t.hex(),
+    // keccak256(labelName)
+    labelhash: t.hex(),
+    // The namehash (id) of the parent name
+    parentId: t.hex(),
 
-  // The number of subdomains
-  subdomainCount: t.integer().notNull().default(0),
+    // The number of subdomains
+    subdomainCount: t.integer().notNull().default(0),
 
-  // Address logged from current resolver, if any
-  resolvedAddressId: t.hex(),
+    // Address logged from current resolver, if any
+    resolvedAddressId: t.hex(),
 
-  // The resolver that controls the domain's settings
-  resolverId: t.text(),
+    // The resolver that controls the domain's settings
+    resolverId: t.text(),
 
-  // The time-to-live (TTL) value of the domain's records
-  ttl: t.bigint(),
+    // The time-to-live (TTL) value of the domain's records
+    ttl: t.bigint(),
 
-  // Indicates whether the domain has been migrated to a new registrar
-  isMigrated: t.boolean().notNull().default(false),
-  // The time when the domain was created
-  createdAt: t.bigint().notNull(),
+    // Indicates whether the domain has been migrated to a new registrar
+    isMigrated: t.boolean().notNull().default(false),
+    // The time when the domain was created
+    createdAt: t.bigint().notNull(),
 
-  // The account that owns the domain
-  ownerId: t.hex().notNull(),
-  // The account that owns the ERC721 NFT for the domain
-  registrantId: t.hex(),
-  // The account that owns the wrapped domain
-  wrappedOwnerId: t.hex(),
+    // The account that owns the domain
+    ownerId: t.hex().notNull(),
+    // The account that owns the ERC721 NFT for the domain
+    registrantId: t.hex(),
+    // The account that owns the wrapped domain
+    wrappedOwnerId: t.hex(),
 
-  // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
-  expiryDate: t.bigint(),
-}));
+    // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
+    expiryDate: t.bigint(),
+  }),
+  (t) => ({
+    byName: index().on(t.name),
+    byLabelName: index().on(t.labelName),
+    byLabelhash: index().on(t.labelhash),
+    byParentId: index().on(t.parentId),
+    bySubdomainCount: index().on(t.subdomainCount),
+    byOwnerId: index().on(t.ownerId),
+    byRegistrantId: index().on(t.registrantId),
+    byWrappedOwnerId: index().on(t.wrappedOwnerId),
+  }),
+);
 
 // monkeypatch drizzle's column (necessary to match graph-node default collation "C")
 // https://github.com/drizzle-team/drizzle-orm/issues/638
