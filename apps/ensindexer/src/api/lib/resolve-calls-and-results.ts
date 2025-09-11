@@ -222,7 +222,7 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
     switch (call.functionName) {
       // make sure address is valid (i.e. specifically not empty bytes)
       case "addr": {
-        // coerce '0x' empty result to null
+        // coerce '0x' (empty result) to null
         if (result === "0x") return { call, result: null };
 
         // if it is a valid EVM address...
@@ -234,8 +234,8 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
           return { call, result: getAddress(result) };
         }
 
-        // not an EVM address, just coerce falsy string values (i.e. empty string) to null
-        if (!result) return { call, result: null };
+        // not an EVM address, just coerce empty string to null
+        if (result === "") return { call, result: null };
 
         // and otherwise return it as-is
         return { call, result };
@@ -245,8 +245,8 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
         return { call, result: interpretNameRecordValue(result) };
       }
       case "text": {
-        // coalesce falsy string values (i.e. empty string) to null
-        if (!result) return { call, result: null };
+        // coerce empty string to null
+        if (result === "") return { call, result: null };
 
         // and otherwise return it as-is
         return { call, result };
