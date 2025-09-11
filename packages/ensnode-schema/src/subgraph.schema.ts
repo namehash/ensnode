@@ -246,6 +246,7 @@ export const registration = onchainTable(
   }),
   (t) => ({
     idx: index().on(t.domainId),
+    byRegistrationDate: index().on(t.registrationDate),
   }),
 );
 
