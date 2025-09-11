@@ -1,26 +1,13 @@
-import { defineConfig } from "vitest/config";
+import { resolve } from "path";
+import { defineProject } from "vitest/config";
 
-export default defineConfig({
-  test: {
-    environment: "jsdom",
-    globals: true,
-    setupFiles: ["./src/__tests__/setup.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-      exclude: [
-        "node_modules/",
-        "dist/",
-        "**/__tests__/**",
-        "**/examples/**",
-        "**/*.config.*",
-        "**/*.d.ts",
-      ],
-    },
-  },
+export default defineProject({
   resolve: {
     alias: {
-      "@": new URL("./src", import.meta.url).pathname,
+      "@": resolve(__dirname, "./src"),
     },
+  },
+  test: {
+    environment: "jsdom",
   },
 });
