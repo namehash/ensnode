@@ -2,7 +2,6 @@ import type { RpcConfig } from "@/config/types";
 import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_NAMESPACE,
   DEFAULT_PORT,
   DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
@@ -327,10 +326,9 @@ describe("config", () => {
       expect(config.namespace).toBe("sepolia");
     });
 
-    it("returns the default NAMESPACE if it is not set", async () => {
+    it("throws if NAMESPACE is not set", async () => {
       vi.stubEnv("NAMESPACE", undefined);
-      const config = await getConfig();
-      expect(config.namespace).toBe(DEFAULT_NAMESPACE);
+      await expect(getConfig()).rejects.toThrow(/NAMESPACE/);
     });
 
     it("throws if NAMESPACE is an invalid string value", async () => {
