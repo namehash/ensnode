@@ -6,9 +6,8 @@ import { getNameAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
-import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { AddressDisplay, NameDisplay } from "./utils";
+import { AddressDisplay, NameDisplay, NamePageLink } from "./utils";
 
 interface IdentityProps {
   address: Address;
@@ -30,21 +29,14 @@ export function Identity({
   showAvatar = false,
   className = "",
 }: IdentityProps) {
-  const [mounted, setMounted] = useState(false);
-
-  // Handle client-side rendering
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Lookup the primary name for address using ENSNode
-  const { data, status } = usePrimaryName({
+  const { data, status, isLoading } = usePrimaryName({
     address,
     chainId: 1,
   });
 
   // If not mounted yet (server-side), or still loading, show a skeleton
-  if (!mounted || status === "pending") {
+  if (isLoading || status === "pending") {
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
@@ -67,7 +59,7 @@ export function Identity({
         </Avatar>
       )}
       {ensName ? (
-        <NameDisplay name={ensName} namespaceId={namespaceId} />
+        <NamePageLink name={ensName} />
       ) : (
         <AddressDisplay address={address} namespaceId={namespaceId} />
       )}

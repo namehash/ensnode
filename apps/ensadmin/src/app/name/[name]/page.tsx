@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { ExternalLinkWithIcon } from "@/components/identity/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -69,19 +70,16 @@ export default function NameDetailPage() {
                 <h1 className="text-3xl font-bold">{name}</h1>
                 <div className="flex items-center gap-3 mt-1">
                   {records?.records?.texts?.url && (
-                    <a
+                    <ExternalLinkWithIcon
                       href={
                         records.records.texts.url.startsWith("http")
                           ? records.records.texts.url
                           : `https://${records.records.texts.url}`
                       }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-sm"
                     >
                       {records.records.texts.url.replace(/^https?:\/\//, "")}
-                      <ExternalLink size={12} />
-                    </a>
+                    </ExternalLinkWithIcon>
                   )}
                 </div>
               </div>
@@ -142,28 +140,24 @@ export default function NameDetailPage() {
                   {records.records.texts?.["com.twitter"] && (
                     <div className="flex items-center gap-2">
                       <SiX size={16} className="text-gray-500" />
-                      <a
+                      <ExternalLinkWithIcon
                         href={`https://twitter.com/${records.records.texts["com.twitter"]}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm"
+                        className="text-sm"
                       >
                         @{records.records.texts["com.twitter"]}
-                      </a>
+                      </ExternalLinkWithIcon>
                     </div>
                   )}
 
                   {records.records.texts?.["com.github"] && (
                     <div className="flex items-center gap-2">
                       <SiGithub size={16} className="text-gray-500" />
-                      <a
+                      <ExternalLinkWithIcon
                         href={`https://github.com/${records.records.texts["com.github"]}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm"
+                        className="text-sm"
                       >
                         {records.records.texts["com.github"]}
-                      </a>
+                      </ExternalLinkWithIcon>
                     </div>
                   )}
                 </CardContent>
