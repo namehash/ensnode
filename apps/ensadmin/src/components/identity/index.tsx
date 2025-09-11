@@ -7,7 +7,7 @@ import { ENSNamespaceId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
 import type { Address } from "viem";
-import { AddressDisplay, NameDisplay, NamePageLink } from "./utils";
+import { AddressDisplay, NamePageLink } from "./utils";
 
 interface IdentityProps {
   address: Address;

@@ -11,7 +11,7 @@ import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { Duration, RelativeTime } from "@/components/datetime-utils";
-import { NameDisplay, NamePageLink } from "@/components/identity/utils";
+import { NamePageLink } from "@/components/identity/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
