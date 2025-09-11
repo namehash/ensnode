@@ -31,10 +31,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Biome CI
-        run: pnpm -r lint:ci
+        run: pnpm lint:ci
 
       - name: Run TypeScript type checks
-        run: pnpm -r typecheck
+        run: pnpm typecheck
 
       - name: Check Terraform format
         run: terraform fmt -recursive -check -diff
@@ -59,6 +59,7 @@ jobs:
           # We use private RPC URLs from GitHub Secrets to avoid rate limits.
           # Public RPC URLs are used as fallbacks for repository forks
           # that don't have the relevant secrets configured.
+          NAMESPACE: mainnet
           PLUGINS: subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope
           RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
           RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
@@ -97,4 +98,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
-        run: pnpm -r test
+        run: pnpm test

@@ -14,8 +14,8 @@ npm install @ensnode/ensnode-sdk
 
 The `ENSNodeClient` provides a unified interface for the supported ENSNode APIs:
 - Resolution API (Protocol Accelerated Forward/Reverse Resolution)
-- 🚧 Configuration API
-- 🚧 Indexing Status API
+- Indexing Status API
+- Configuration API
 
 ### Basic Usage
 
@@ -152,6 +152,45 @@ console.log(names);
 // }
 ```
 
+#### Configuration API
+
+##### `config()`
+
+Fetches the ENSNode's configuration.
+
+- Returns: `ConfigResponse` - The ENSNode configuration data
+- Throws: Error if the request fails or the ENSNode API returns an error response
+
+```ts
+const config = await client.config();
+console.log(config);
+// Returns the ENSNode configuration including indexed chains, etc.
+```
+
+#### Indexing Status API
+
+##### `indexingStatus(options)`
+
+Fetches the ENSNode's multichain indexing status.
+
+- `options`: (optional) additional options
+  - `maxRealtimeDistance`: (optional) The max allowed distance in seconds between the latest indexed block of the slowest indexed chain and the current time. Setting this parameter influences the HTTP response code:
+    - Success (200 OK): The latest indexed block of each chain is within the requested distance from realtime
+    - Service Unavailable (503): The latest indexed block of each chain is NOT within the requested distance from realtime
+- Returns: `IndexingStatusResponse` - The indexing status data for all indexed chains
+- Throws: Error if the request fails or the ENSNode API returns an error response
+
+```ts
+// Get current indexing status
+const status = await client.indexingStatus();
+console.log(status);
+// Returns indexing status for all indexed chains
+
+// Check if omnichain indexing is within 60 seconds of realtime
+const status = await client.indexingStatus({ maxRealtimeDistance: 60 });
+console.log(status);
+// Returns indexing status, throws if not within 60 seconds of realtime
+```
 
 ### Configuration
 
