@@ -9,8 +9,5 @@ export default defineProject({
   },
   test: {
     environment: "node",
-    env: {
-      LOG_LEVEL: "silent",
-    },
   },
 });
