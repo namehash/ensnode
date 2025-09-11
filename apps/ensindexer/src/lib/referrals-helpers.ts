@@ -10,7 +10,7 @@ import schema from "ponder:schema";
 import { Node } from "@ensnode/ensnode-sdk";
 
 /**
- * Upserts a Referrer and increments their valueWei by `valueWei`.
+ * Upserts a Referrer and aggregates their `valueWei`.
  */
 async function updateReferrerWithValue(context: Context, referrer: Hex, valueWei: bigint) {
   await context.db
