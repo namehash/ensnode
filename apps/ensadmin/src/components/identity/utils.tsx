@@ -1,6 +1,5 @@
 import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
-import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Address } from "viem";
 
@@ -26,7 +25,6 @@ export function NameDisplay({ name, namespaceId, showExternalLinkIcon }: NameDis
       className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
     >
       {name}
-      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
     </Link>
   );
 }
@@ -34,7 +32,6 @@ export function NameDisplay({ name, namespaceId, showExternalLinkIcon }: NameDis
 interface AddressDisplayProps {
   address: Address;
   namespaceId: ENSNamespaceId;
-  showExternalLinkIcon?: boolean;
 }
 
 /**
@@ -44,11 +41,7 @@ interface AddressDisplayProps {
  *
  * Optionally shows an external link icon.
  */
-export function AddressDisplay({
-  address,
-  namespaceId,
-  showExternalLinkIcon,
-}: AddressDisplayProps) {
+export function AddressDisplay({ address, namespaceId }: AddressDisplayProps) {
   // Truncate address for display
   const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
 
@@ -66,7 +59,6 @@ export function AddressDisplay({
       className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
     >
       {truncatedAddress}
-      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
     </a>
   );
 }

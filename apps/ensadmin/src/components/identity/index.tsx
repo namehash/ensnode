@@ -14,7 +14,6 @@ interface IdentityProps {
   address: Address;
   namespaceId: ENSNamespaceId;
   showAvatar?: boolean;
-  showExternalLinkIcon?: boolean;
   className?: string;
 }
 
@@ -29,7 +28,6 @@ export function Identity({
   address,
   namespaceId,
   showAvatar = false,
-  showExternalLinkIcon = true,
   className = "",
 }: IdentityProps) {
   const [mounted, setMounted] = useState(false);
@@ -52,13 +50,7 @@ export function Identity({
 
   // If there is an error looking up the primary name, fallback to showing the address
   if (status === "error") {
-    return (
-      <AddressDisplay
-        address={address}
-        namespaceId={namespaceId}
-        showExternalLinkIcon={showExternalLinkIcon}
-      />
-    );
+    return <AddressDisplay address={address} namespaceId={namespaceId} />;
   }
 
   const ensName = data.name;
@@ -75,17 +67,9 @@ export function Identity({
         </Avatar>
       )}
       {ensName ? (
-        <NameDisplay
-          name={ensName}
-          namespaceId={namespaceId}
-          showExternalLinkIcon={showExternalLinkIcon}
-        />
+        <NameDisplay name={ensName} namespaceId={namespaceId} />
       ) : (
-        <AddressDisplay
-          address={address}
-          namespaceId={namespaceId}
-          showExternalLinkIcon={showExternalLinkIcon}
-        />
+        <AddressDisplay address={address} namespaceId={namespaceId} />
       )}
     </div>
   );
