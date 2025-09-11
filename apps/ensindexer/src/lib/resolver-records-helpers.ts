@@ -1,6 +1,6 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { getAddress, isAddress, zeroAddress } from "viem";
+import { getAddress, isAddress, isAddressEqual, zeroAddress } from "viem";
 
 import { makeKeyedResolverRecordId } from "@/lib/ids";
 import { stripNullBytes } from "@/lib/lib-helpers";
@@ -42,7 +42,7 @@ export async function handleResolverAddressRecordUpdate(
   address: string,
 ) {
   const recordId = makeKeyedResolverRecordId(resolverId, coinType.toString());
-  const isDeletion = address === "" || address === zeroAddress;
+  const isDeletion = address === "" || (isAddress(address) && isAddressEqual(address, zeroAddress));
   if (isDeletion) {
     // delete
     await context.db.delete(schema.ext_resolverAddressRecords, { id: recordId });

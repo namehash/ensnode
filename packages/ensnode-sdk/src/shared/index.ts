@@ -15,3 +15,4 @@ export {
 export * from "../ens/is-normalized";
 export * from "./account-id";
 export * from "./interpretation";
+export * from "./labelhash";

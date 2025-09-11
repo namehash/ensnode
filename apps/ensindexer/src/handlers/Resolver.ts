@@ -376,7 +376,7 @@ export async function handleDNSRecordChanged({
   const { key, value } = parseDnsTxtRecordArgs(event.args);
 
   // no key to operate over? no-op
-  if (!key) return;
+  if (key === null) return;
 
   // upsert Resolver entity
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -422,7 +422,7 @@ export async function handleDNSRecordDeleted({
   const { key } = parseDnsTxtRecordArgs(event.args);
 
   // no key to operate over? no-op
-  if (!key) return;
+  if (key === null) return;
 
   // upsert Resolver entity
   const id = makeResolverId(context.chain.id, event.log.address, node);
