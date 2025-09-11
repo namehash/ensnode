@@ -123,7 +123,7 @@ async function findResolverWithUniversalResolver(
 
       if (offset > dnsEncodedNameBytes.length) {
         throw new Error(
-          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of bytes in the dns-encoding of '${name}' ({dnsEncodedName.length}).`,
+          `Invariant: findResolverWithUniversalResolver returned an offset (${offset}) larger than the number of bytes in the dns-encoding of '${name}' (${dnsEncodedNameBytes.length}).`,
         );
       }
 
