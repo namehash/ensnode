@@ -5,5 +5,5 @@ export default function BreadcrumbsNameLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <BreadcrumbsGroup name="Latest indexed registrations">{children}</BreadcrumbsGroup>;
+  return <BreadcrumbsGroup name="Name">{children}</BreadcrumbsGroup>;
 }
