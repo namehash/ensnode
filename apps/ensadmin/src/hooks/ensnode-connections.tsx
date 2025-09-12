@@ -2,9 +2,13 @@
 
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { defaultEnsNodeUrls } from "@/lib/env";
-import { buildUrlWithParams, setActiveConnectionInParams } from "@/lib/url-params";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import {
+  buildUrlWithParams,
+  getActiveConnectionFromParams,
+  setActiveConnectionInParams,
+} from "@/lib/url-params";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo } from "react";
 import { useLocalstorageState } from "rooks";
 
 const standardizeURL = (url: string) => new URL(url).toString();
@@ -16,6 +20,7 @@ const DEFAULT_CONNECTION_URLS = defaultEnsNodeUrls()
 export function useENSNodeConnections() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [urls, setUrls] = useLocalstorageState<string[]>(`ensadmin:connections:urls`, []);
 
@@ -67,6 +72,21 @@ export function useENSNodeConnections() {
     },
     [addConnection, selectConnection],
   );
+
+  useEffect(() => {
+    const activeConnectionUrl = getActiveConnectionFromParams(searchParams);
+
+    if (activeConnectionUrl) {
+      try {
+        const standardizedUrl = standardizeURL(activeConnectionUrl);
+        const isAlreadyInConnections = connections.some((c) => c.url === standardizedUrl);
+
+        if (!isAlreadyInConnections) {
+          setUrls((urls) => [...urls, standardizedUrl]);
+        }
+      } catch {}
+    }
+  }, [searchParams, connections, setUrls]);
 
   return {
     connections,
