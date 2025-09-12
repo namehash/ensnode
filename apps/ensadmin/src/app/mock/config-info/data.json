@@ -6,7 +6,7 @@
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352],
+    "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352, 567],
     "databaseSchemaName": "alphaSchema0.34.0",
     "healReverseAddresses": true,
     "indexAdditionalResolverRecords": true,
