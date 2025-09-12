@@ -43,7 +43,7 @@ export function IndexingStatus() {
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
     return (
       <section className="flex flex-col gap-6 p-6">
-        <ENSNodeConfigInfo />
+        <ENSNodeConfigInfo /> {/*display loading state*/}
         <IndexingStatusLoading />
       </section>
     );

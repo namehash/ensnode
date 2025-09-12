@@ -28,9 +28,9 @@ import { ExternalLink, Replace } from "lucide-react";
  *
  * Standard - ensIndexerConfig: ENSIndexerPublicConfig, error: undefined
  * Loading - ensIndexerConfig: undefined, error: undefined
- * Error - ensIndexerConfig: undefined, error: string
+ * Error - ensIndexerConfig: undefined, error: ErrorInfoProps
  *
- * @throws If the ensIndexerConfig and error parameters are defined at the same time
+ * @throws If both ensIndexerConfig and error are defined
  */
 export interface ENSNodeConfigProps {
   ensIndexerConfig?: ENSIndexerPublicConfig;
@@ -43,7 +43,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
   if (error !== undefined && ensIndexerConfig !== undefined) {
-    throw new Error("Invariant: ENSNodeConfigInfo with error and a defined ensIndexerConfig.");
+    throw new Error("Invariant: ENSNodeConfigInfo with both ensIndexerConfig and error defined.");
   }
 
   if (error !== undefined) {
