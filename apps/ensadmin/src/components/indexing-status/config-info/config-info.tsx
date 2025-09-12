@@ -119,6 +119,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
               },
             ]}
             version={ensIndexerConfig.dependencyInfo.ensRainbow}
+            docsLink={new URL("https://ensnode.io/ensdb/")}
           />
           {/*It's safe to assume that the version number of ENSDb is always equal to the version number of ENSIndexer.
              Until changes to ENSIndexerPublicConfig are made this logic is correct (see a comment about ENSIndexer version)*/}

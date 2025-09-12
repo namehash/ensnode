@@ -174,6 +174,26 @@ export function starlight(): AstroIntegration {
             },
           ],
         },
+        {
+          label: "ENSDb",
+          link: "/ensdb",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "Coming soon",
+                  link: "/ensdb"
+                },
+                {
+                  label: "What is ENSDb?",
+                  link: "/ensdb/overview/what-is-ensdb"
+                }
+              ]
+            }
+          ]
+        }
       ]),
     ],
     title: "ENSNode",
