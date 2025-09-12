@@ -1,5 +1,16 @@
 # @ensnode/ensnode-sdk
 
+## 0.36.0
+
+### Minor Changes
+
+- [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
+
+### Patch Changes
+
+- Updated dependencies [[`7fc0465`](https://github.com/namehash/ensnode/commit/7fc0465d3b816affe2930c7f36577d0214d145b9)]:
+  - @ensnode/datasources@0.36.0
+
 ## 0.35.0
 
 ### Patch Changes

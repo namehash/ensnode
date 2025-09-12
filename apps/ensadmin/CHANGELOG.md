@@ -1,5 +1,24 @@
 # ensadmin
 
+## 0.36.0
+
+### Minor Changes
+
+- [#1039](https://github.com/namehash/ensnode/pull/1039) [`6142f8c`](https://github.com/namehash/ensnode/commit/6142f8c9b8dbc90f37cf5f8dec3bcd18d6d029ae) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Extend default ENSAdmin ENSNode urls
+
+- [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
+
+- [#1012](https://github.com/namehash/ensnode/pull/1012) [`b1c7973`](https://github.com/namehash/ensnode/commit/b1c7973991e3d57b3071e804e429b9189f36d653) Thanks [@Y3drk](https://github.com/Y3drk)! - Enhance ENSNodeConfig UI
+
+### Patch Changes
+
+- Updated dependencies [[`7fc0465`](https://github.com/namehash/ensnode/commit/7fc0465d3b816affe2930c7f36577d0214d145b9), [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8)]:
+  - @ensnode/datasources@0.36.0
+  - @ensnode/ensnode-sdk@0.36.0
+  - @ensnode/ensnode-react@0.36.0
+  - @ensnode/ponder-metadata@0.36.0
+  - @ensnode/ensnode-schema@0.36.0
+
 ## 0.35.0
 
 ### Minor Changes
