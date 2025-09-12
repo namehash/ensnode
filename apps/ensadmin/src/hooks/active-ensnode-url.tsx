@@ -1,13 +1,19 @@
 "use client";
 
-import { useENSNodeConnections } from "@/hooks/ensnode-connections";
+import { defaultEnsNodeUrls } from "@/lib/env";
+import { getActiveConnectionFromParams } from "@/lib/url-params";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
-export function useActiveENSNodeUrl() {
-  const { active } = useENSNodeConnections();
+const DEFAULT_URL = defaultEnsNodeUrls()[0].toString();
 
-  if (!active) {
-    throw new Error(`Invariant(useActiveENSNodeUrl): Expected an active ENSNode Connection.`);
-  }
+export function useActiveENSNodeUrl(): URL {
+  const searchParams = useSearchParams();
 
-  return active;
+  const urlString = useMemo(() => {
+    const activeConnection = getActiveConnectionFromParams(searchParams);
+    return activeConnection || DEFAULT_URL;
+  }, [searchParams]);
+
+  return useMemo(() => new URL(urlString), [urlString]);
 }

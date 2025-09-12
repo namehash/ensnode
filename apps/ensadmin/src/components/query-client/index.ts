@@ -1,3 +1,4 @@
+import { getActiveConnectionFromParams } from "@/lib/url-params";
 import { QueryClient, defaultShouldDehydrateQuery, isServer } from "@tanstack/react-query";
 
 /**
@@ -11,6 +12,13 @@ function makeQueryClient() {
       queries: {
         staleTime: 5 * 1000, // 5 seconds
         refetchInterval: 10 * 1000, // 10 seconds
+        queryKeyHashFn: (queryKey) => {
+          const activeConnection =
+            typeof window !== "undefined"
+              ? getActiveConnectionFromParams(new URLSearchParams(window.location.search))
+              : "server";
+          return JSON.stringify([activeConnection, ...queryKey]);
+        },
       },
       dehydrate: {
         // include pending queries in dehydration
@@ -21,13 +29,13 @@ function makeQueryClient() {
   });
 }
 
-let browserQueryClient: QueryClient | undefined = undefined;
+const browserQueryClients = new Map<string, QueryClient>();
 
 /**
  * Get a query client.
  *
  * On the server, we create a new query client for each request.
- * On the browser, we reuse the same query client across suspense boundaries.
+ * On the browser, we create a unique query client per active connection to isolate state.
  *
  * Note: Next.js uses implicit suspense boundaries so we need to be careful to
  * avoid creating too many query clients and loose the benefits of query persistence.
@@ -39,11 +47,13 @@ export function getQueryClient() {
     // Server: always make a new query client
     return makeQueryClient();
   } else {
-    // Browser: make a new query client if we don't already have one
-    // This is very important, so we don't re-make a new client if React
-    // suspends during the initial render. This may not be needed if we
-    // have a suspense boundary BELOW the creation of the query client
-    if (!browserQueryClient) browserQueryClient = makeQueryClient();
-    return browserQueryClient;
+    const activeConnection =
+      getActiveConnectionFromParams(new URLSearchParams(window.location.search)) || "default";
+
+    if (!browserQueryClients.has(activeConnection)) {
+      browserQueryClients.set(activeConnection, makeQueryClient());
+    }
+
+    return browserQueryClients.get(activeConnection)!;
   }
 }

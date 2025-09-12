@@ -47,7 +47,9 @@ export function ConnectionSelector() {
     selectConnection,
   } = useENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
-  const addAndSelectConnection = useMutation({ mutationFn: _addAndSelectConnection });
+  const addAndSelectConnection = useMutation({
+    mutationFn: _addAndSelectConnection,
+  });
 
   const [newUrl, setNewUrl] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);

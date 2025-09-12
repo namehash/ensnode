@@ -13,7 +13,9 @@ export default function ConnectPage() {
   const searchParams = useSearchParams();
 
   const { addAndSelectConnection: _addAndSelectConnection } = useENSNodeConnections();
-  const addAndSelectConnection = useMutation({ mutationFn: _addAndSelectConnection });
+  const addAndSelectConnection = useMutation({
+    mutationFn: _addAndSelectConnection,
+  });
 
   const ensNodeUrl = searchParams.get(ENSNODE_PUBLIC_URL_QUERY_PARAM);
   useEffect(() => {
