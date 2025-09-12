@@ -3,7 +3,7 @@ import { NormalizedName, isNormalizedName } from "@ensnode/ensnode-sdk";
 import { getAddress, isAddress, isAddressEqual, zeroAddress } from "viem";
 
 /**
- * Interprets a name record value string and returns null if the value represents a deletion.
+ * Interprets a name record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
  * a) null, representing a non-existant or deletion of the record, or
@@ -27,7 +27,7 @@ export function interpretNameRecordValue(value: string): NormalizedName | null {
 }
 
 /**
- * Interprets an address record value string and returns null if the value represents a deletion.
+ * Interprets an address record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
  * a) null, representing a non-existant or deletion of the record, or
@@ -87,7 +87,7 @@ export function interpretTextRecordKey(key: string): string | null {
 }
 
 /**
- * Interprets a text record value string and returns null if the value represents a deletion.
+ * Interprets a text record value string and returns null if the value is interpreted as a deletion.
  *
  * The interpreted record value is either:
  * a) null, representing a non-existant or deletion of the record, or

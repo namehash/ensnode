@@ -23,7 +23,7 @@ export default function () {
 
     const id = makePrimaryNameId(address, coinType);
 
-    // interpret the emitted name record values (see `interpretNameRecordValue` for guarantees)
+    // interpret the emitted name record value (see `interpretNameRecordValue` for guarantees)
     const interpretedValue = interpretNameRecordValue(name);
 
     // if the interpreted value is null, consider it a deletion
