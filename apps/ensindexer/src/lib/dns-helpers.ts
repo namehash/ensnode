@@ -1,8 +1,9 @@
 import dnsPacket, { Answer } from "dns-packet";
 import { Hex } from "viem";
 
+import { interpretTextRecordKey, interpretTextRecordValue } from "@/lib/interpret-record-values";
 import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
-import { stripNullBytes } from "@/lib/lib-helpers";
+import { hasNullByte } from "@/lib/lib-helpers";
 import {
   DNSEncodedLiteralName,
   DNSEncodedName,
@@ -132,20 +133,23 @@ export function parseDnsTxtRecordArgs({
   resource: number;
   record?: Hex;
 }): { key: string | null; value: string | null } {
-  // we only index TXT records (resource id 16)
+  // ignore records that are not TXT records (resource id 16)
   if (resource !== 16) return { key: null, value: null };
 
   // parse the record's name, which is the key of the DNS record
   // Invariant: recordName is always available and parsed correctly (`decodeDNSEncodedName` throws)
   const recordName = decodeDNSEncodedName(name).join(".");
 
-  // relevant keys end with .ens
+  // ignore keys that don't end with .ens
   if (!recordName.endsWith(".ens")) return { key: null, value: null };
 
   // trim the .ens off the end to match ENS record naming
-  const key = recordName.slice(0, -4);
-  if (key === "") return { key: null, value: null };
+  const key = interpretTextRecordKey(recordName.slice(0, -4));
 
+  // if the interpreted key should be ignored, ignore it
+  if (key === null) return { key: null, value: null };
+
+  // no record? interpret as deletion
   if (!record) return { key, value: null };
 
   // parse the `record` parameter, which is an RRSet describing the value of the DNS record
@@ -160,9 +164,9 @@ export function parseDnsTxtRecordArgs({
     });
 
   if (txtDatas.length === 0) {
-    // no txt answers??
     console.warn(`parseDNSRecordArgs: No TXT answers found in DNS record for key '${key}'`);
-    // TODO: should be invariant?
+
+    // no text answers? interpret as deletion
     return { key, value: null };
   }
 
@@ -174,10 +178,6 @@ export function parseDnsTxtRecordArgs({
 
   const value = txtDatas[0]!;
 
-  // TODO(null-bytes): correctly represent null bytes here
-  const sanitizedKey = stripNullBytes(key) || null;
-  const sanitizedValue = stripNullBytes(value) || null;
-
-  // return sanitized key, value to consumers
-  return { key: sanitizedKey, value: sanitizedValue };
+  // after decoding, interpret the text record value and return to consumer
+  return { key, value: interpretTextRecordValue(value) };
 }

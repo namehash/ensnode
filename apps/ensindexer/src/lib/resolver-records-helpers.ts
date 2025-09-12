@@ -5,9 +5,9 @@ import { makeKeyedResolverRecordId } from "@/lib/ids";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
+  interpretTextRecordKey,
   interpretTextRecordValue,
 } from "@/lib/interpret-record-values";
-import { stripNullBytes } from "@/lib/lib-helpers";
 
 export async function handleResolverNameUpdate(context: Context, resolverId: string, name: string) {
   await context.db
@@ -50,9 +50,12 @@ export async function handleResolverTextRecordUpdate(
   key: string,
   value: string | null,
 ) {
-  // TODO(null-bytes): store null bytes correctly
-  const sanitizedKey = stripNullBytes(key);
-  const recordId = makeKeyedResolverRecordId(resolverId, sanitizedKey);
+  const interpretedKey = interpretTextRecordKey(key);
+
+  // ignore updates involving keys that should be ignored as per `interpretTextRecordKey`
+  if (interpretedKey === null) return;
+
+  const recordId = makeKeyedResolverRecordId(resolverId, interpretedKey);
 
   // interpret the incoming text record value
   const interpretedValue = value == null ? null : interpretTextRecordValue(value);
@@ -70,7 +73,7 @@ export async function handleResolverTextRecordUpdate(
       .values({
         id: recordId,
         resolverId,
-        key: sanitizedKey,
+        key: interpretedKey,
         value: interpretedValue,
       })
       // or update the existing one

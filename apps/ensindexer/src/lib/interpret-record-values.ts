@@ -1,5 +1,5 @@
-import { stripNullBytes } from "@/lib/lib-helpers";
-import { Name, isNormalizedName } from "@ensnode/ensnode-sdk";
+import { hasNullByte } from "@/lib/lib-helpers";
+import { NormalizedName, isNormalizedName } from "@ensnode/ensnode-sdk";
 import { getAddress, isAddress, isAddressEqual, zeroAddress } from "viem";
 
 /**
@@ -12,7 +12,7 @@ import { getAddress, isAddress, isAddressEqual, zeroAddress } from "viem";
  * @param value - The name record value string to interpret.
  * @returns The interpreted name string, or null if deleted.
  */
-export function interpretNameRecordValue(value: string): Name | null {
+export function interpretNameRecordValue(value: string): NormalizedName | null {
   // empty string is technically a normalized name, representing the ens root node, but in the
   // context of a name record value, empty string is emitted when the user un-sets the record (this
   // is because the abi of this event is only capable of expressing string values, so empty string
@@ -23,7 +23,7 @@ export function interpretNameRecordValue(value: string): Name | null {
   if (!isNormalizedName(value)) return null;
 
   // otherwise, this is a non-empty-string normalized Name that can be used as a name() record value
-  return value as Name;
+  return value;
 }
 
 /**
@@ -31,9 +31,10 @@ export function interpretNameRecordValue(value: string): Name | null {
  *
  * The interpreted record value is either:
  * a) null, representing a non-existant or deletion of the record, or
- *   i. empty string
- *   ii. empty hex (0x)
- *   iii. zeroAddress
+ *   i. contains null bytes
+ *   ii. empty string
+ *   iii. empty hex (0x)
+ *   iv. zeroAddress
  * b) an address record value that
  *   i. does not contain null bytes
  *   ii. (if is an EVM address) is checksummed
@@ -42,23 +43,47 @@ export function interpretNameRecordValue(value: string): Name | null {
  * @returns The interpreted address string or null if deleted.
  */
 export function interpretAddressRecordValue(value: string): string | null {
-  // TODO(null-bytes): store null bytes correctly
-  const sanitized = stripNullBytes(value);
+  // TODO(null-bytes): store null bytes correctly — for now, interpret as deletion
+  if (hasNullByte(value)) return null;
 
   // interpret empty string as deletion of address record
-  if (sanitized === "") return null;
+  if (value === "") return null;
 
   // interpret empty bytes as deletion of address record
-  if (sanitized === "0x") return null;
+  if (value === "0x") return null;
 
   // if it's not an EVM address, return as-is
-  if (!isAddress(sanitized)) return sanitized;
+  if (!isAddress(value)) return value;
 
   // interpret zeroAddress as deletion
-  if (isAddressEqual(sanitized, zeroAddress)) return null;
+  if (isAddressEqual(value, zeroAddress)) return null;
 
   // otherwise ensure checksummed
-  return getAddress(sanitized);
+  return getAddress(value);
+}
+
+/**
+ * Interprets a text record key string and returns null if the key should be ignored.
+ *
+ * The interpreted text record key is either:
+ * a) null, representing a text record key that should be ignored, or
+ *   i. contains null bytes
+ *   ii. empty string
+ * b) a text record key that
+ *   i. does not contain null bytes
+ *
+ * @param value - The text record key to interpret.
+ * @returns The interpreted text string or null if ignored.
+ */
+export function interpretTextRecordKey(key: string): string | null {
+  // TODO(null-bytes): store null bytes correctly — for now, ignore
+  if (hasNullByte(key)) return null;
+
+  // ignore empty-string keys
+  if (key === "") return null;
+
+  // otherwise return the key as-is
+  return key;
 }
 
 /**
@@ -66,7 +91,8 @@ export function interpretAddressRecordValue(value: string): string | null {
  *
  * The interpreted record value is either:
  * a) null, representing a non-existant or deletion of the record, or
- *   i. empty string
+ *   i. contains null bytes
+ *   ii. empty string
  * b) a text record value that
  *   i. does not contain null bytes
  *
@@ -74,12 +100,12 @@ export function interpretAddressRecordValue(value: string): string | null {
  * @returns The interpreted text string or null if deleted.
  */
 export function interpretTextRecordValue(value: string): string | null {
-  // TODO(null-bytes): store null bytes correctly
-  const sanitized = stripNullBytes(value);
+  // TODO(null-bytes): store null bytes correctly — for now, interpret as deletion
+  if (hasNullByte(value)) return null;
 
   // interpret empty string as deletion of a text record
-  if (sanitized === "") return null;
+  if (value === "") return null;
 
   // otherwise return the string as-is
-  return sanitized;
+  return value;
 }
