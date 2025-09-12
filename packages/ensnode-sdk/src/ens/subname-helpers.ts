@@ -1,6 +1,5 @@
-import { Address, Hex, concat, isAddress, isHash, keccak256, toHex } from "viem";
+import { Address, Hex, concat, isAddress, isHash, keccak256, size, toHex } from "viem";
 
-import { labelhash } from "viem/ens";
 import { labelhashLiteralLabel } from "../shared";
 import { addrReverseLabel } from "./reverse-name";
 import type { LabelHash, LiteralLabel, Node } from "./types";
@@ -21,34 +20,18 @@ export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
  *
  * @returns the original label if healed, otherwise null
  */
-export const maybeHealLabelByReverseAddress = ({
-  maybeReverseAddress,
-  labelHash,
-}: {
-  /** The address that is possibly associated with the addr.reverse subname */
-  maybeReverseAddress: Address;
+export const maybeHealLabelByReverseAddress = (
+  labelHash: LabelHash,
+  address: Address,
+): LiteralLabel | null => {
+  if (!isHash(labelHash) || size(labelHash) !== 32) throw new Error("Invalid labelHash");
+  if (!isAddress(address)) throw new Error("Invalid address");
 
-  /** The labelhash of the addr.reverse subname */
-  labelHash: LabelHash;
-}): LiteralLabel | null => {
-  // check if required arguments are valid
-  if (!isAddress(maybeReverseAddress)) {
-    throw new Error(
-      `Invalid reverse address: '${maybeReverseAddress}'. Must be a valid EVM Address.`,
-    );
-  }
+  // construct a Reverse Name's label from the provided address
+  const maybeLabel = addrReverseLabel(address);
 
-  if (!isHash(labelHash)) {
-    throw new Error(
-      `Invalid labelHash: '${labelHash}'. Must start with '0x' and represent 32 bytes.`,
-    );
-  }
-
-  // derive the assumed label from the normalized address
-  const assumedLabel = addrReverseLabel(maybeReverseAddress);
-
-  // if labelHash of the assumed label matches the provided labelHash, heal
-  if (labelhashLiteralLabel(assumedLabel) === labelHash) return assumedLabel;
+  // if its labelhash matches what we're looking for, then that was the label!
+  if (labelhashLiteralLabel(maybeLabel) === labelHash) return maybeLabel;
 
   // otherwise, healing did not succeed
   return null;
