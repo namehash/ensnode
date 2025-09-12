@@ -1,6 +1,7 @@
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
+  interpretTextRecordKey,
   interpretTextRecordValue,
 } from "@/lib/interpret-record-values";
 import { describe, expect, it } from "vitest";
@@ -45,8 +46,22 @@ describe("interpretAddressRecordValue", () => {
     );
   });
 
-  it("strips null bytes before interpreting", () => {
-    expect(interpretAddressRecordValue("example\u0000")).toBe("example");
+  it("interprets null-byte-containing string as deletion", () => {
+    expect(interpretAddressRecordValue("example\u0000")).toBeNull();
+  });
+});
+
+describe("interpretTextRecordKey", () => {
+  it("ignores empty string", () => {
+    expect(interpretTextRecordKey("")).toBeNull();
+  });
+
+  it("ignores null bytes", () => {
+    expect(interpretTextRecordKey("hello\u0000world")).toBeNull();
+  });
+
+  it("otherwise works", () => {
+    expect(interpretTextRecordKey("hello")).toBe("hello");
   });
 });
 
@@ -55,8 +70,11 @@ describe("interpretTextRecordValue", () => {
     expect(interpretTextRecordValue("")).toBeNull();
   });
 
-  it("strips null bytes for non-empty value", () => {
+  it("interprets null-byte-containing string as deletion", () => {
+    expect(interpretTextRecordValue("example\u0000")).toBeNull();
+  });
+
+  it("otherwise works", () => {
     expect(interpretTextRecordValue("hello")).toBe("hello");
-    expect(interpretTextRecordValue("hello\u0000world")).toBe("helloworld");
   });
 });
