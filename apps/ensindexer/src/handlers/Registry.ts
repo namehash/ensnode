@@ -4,12 +4,12 @@ import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import config from "@/config";
 import {
+  ADDR_REVERSE_NODE,
   InterpretedLabel,
   InterpretedName,
   type LabelHash,
   LiteralLabel,
   type Node,
-  REVERSE_ROOT_NODES,
   SubgraphInterpretedLabel,
   SubgraphInterpretedName,
   encodeLabelHash,
@@ -93,18 +93,21 @@ export const handleNewOwner =
       const ensRootChainId = getENSRootChainId(config.namespace);
       let healedLabel: LiteralLabel | null = null;
 
-      // If healing labels from reverse addresses is enabled, the parent is a known reverse node
-      // (i.e. addr.reverse), and the event comes from the chain that hosts the ENS Root, then attempt
-      // to heal the unknown label.
+      // If:
+      //  1. healing labels from reverse addresses is enabled,
+      //  2. the new domain is a child of addr.reverse, and
+      //  3. the event is emitted on the ENS Root chain,
+      // then: attempt to heal the unknown label via transaction context.
       //
       // Note: Per ENSIP-19, only the ENS Root chain may record primary names under the `addr.reverse`
-      // subname.
-      //
-      // Currently, we only heal primary names on the ENS Root chain. Support for healing primary
-      // names on other chains will be added in the future.
+      // subname. Also per ENSIP-19 no Reverse Names need exist in (shadow)Registries on non-root
+      // chains, so we explicitly only support Root chain addr.reverse-based Reverse Names: ENSIP-19
+      // CoinType-specific Reverse Names (ex: [address].[coinType].reverse) don't actually exist in
+      // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
+      // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
       if (
         config.healReverseAddresses &&
-        REVERSE_ROOT_NODES.has(parentNode) &&
+        parentNode === ADDR_REVERSE_NODE &&
         context.chain.id === ensRootChainId
       ) {
         // First, try healing with the transaction sender address.
