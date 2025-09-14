@@ -118,13 +118,11 @@ export function AddressDisplay({ address, namespaceId }: AddressDisplayProps) {
   }
 
   return (
-    <a
+    <ExternalLinkWithIcon
       href={ensAppAddressDetailsUrl.toString()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+      className="font-mono text-xs font-medium"
     >
       {truncatedAddress}
-    </a>
+    </ExternalLinkWithIcon>
   );
 }
