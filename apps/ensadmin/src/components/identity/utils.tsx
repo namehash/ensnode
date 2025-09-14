@@ -1,12 +1,13 @@
 import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
+import { Name } from "@ensnode/ensnode-sdk";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Address } from "viem";
 
 interface NameDisplayProps {
-  name: string;
+  name: Name;
   className?: string;
 }
 
@@ -43,7 +44,7 @@ export function ExternalLinkWithIcon({ href, children, className }: ExternalLink
 }
 
 interface NamePageLinkProps {
-  name: string;
+  name: Name;
   className?: string;
 }
 
@@ -63,15 +64,16 @@ export function NamePageLink({ name, className }: NamePageLinkProps) {
 }
 
 interface NameLinkProps {
-  name: string;
+  name: Name;
   namespaceId: ENSNamespaceId;
   className?: string;
 }
 
 /**
- * Displays an ENS name with a link. Automatically detects if the link is external
- * and shows an external link icon accordingly.
- * Links to external ENS Manager App if available, otherwise to internal name page.
+ * Displays an ENS name with a link. Determines if the link is external by checking
+ * if the URL from getNameDetailsUrl() starts with "http" protocol.
+ * External links render with an external link icon and open in a new tab.
+ * Internal links render as standard Next.js Link components.
  */
 export function NameLink({ name, namespaceId, className }: NameLinkProps) {
   const nameDetailsUrl = getNameDetailsUrl(name, namespaceId);
