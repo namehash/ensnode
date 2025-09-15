@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkWithIcon } from "@/components/identity/utils";
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiFarcaster, SiGithub, SiX } from "@icons-pack/react-simple-icons";
 

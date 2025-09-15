@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkWithIcon } from "@/components/identity/utils";
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -12,12 +12,32 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: ProfileHeaderProps) {
+  // Parse header image URI and only use it if it's HTTP/HTTPS
+  // TODO: Add support for more URI types as defined in ENSIP-12
+  // See: https://docs.ens.domains/ensip/12#uri-types
+  const getValidHeaderImageUrl = (headerImage: string | null | undefined): string | null => {
+    if (!headerImage) return null;
+
+    try {
+      const url = new URL(headerImage);
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        return headerImage;
+      }
+      // For any other URI types (ipfs, data, NFT URIs, etc.), fallback to default
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const validHeaderImageUrl = getValidHeaderImageUrl(headerImage);
+
   return (
     <Card className="overflow-hidden mb-8">
       <div
         className="h-48 bg-blue-500"
         style={{
-          backgroundImage: `url(${headerImage})`,
+          backgroundImage: validHeaderImageUrl ? `url(${validHeaderImageUrl})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
