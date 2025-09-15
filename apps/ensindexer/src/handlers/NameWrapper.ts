@@ -1,20 +1,25 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
-import { type Address, type Hex, hexToBytes, namehash } from "viem";
+import { type Address, namehash } from "viem";
 
 import {
-  Label,
-  Name,
+  DNSEncodedLiteralName,
+  DNSEncodedName,
+  InterpretedLabel,
+  InterpretedName,
   type Node,
-  interpretLiteralLabel,
-  interpretLiteralName,
+  SubgraphInterpretedLabel,
+  SubgraphInterpretedName,
+  decodeDNSEncodedLiteralName,
+  literalLabelToInterpretedLabel,
+  literalLabelsToInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
-import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
+import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
@@ -27,6 +32,53 @@ import type { RegistrarManagedName } from "@/lib/types";
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/wrapper/ERC1155Fuse.sol#L262
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
+
+/**
+ * Decodes the NameWrapper's emitted DNS-Encoded Name `packet` into an Interpreted Name and its first
+ * Interpreted Label.
+ */
+function decodeInterpretedNameWrapperName(
+  packet: DNSEncodedLiteralName,
+): { label: InterpretedLabel; name: InterpretedName } | { label: null; name: null } {
+  try {
+    const literalLabels = decodeDNSEncodedLiteralName(packet);
+
+    if (literalLabels.length === 0) {
+      throw new Error(
+        `Invariant: NameWrapper emitted ${packet} that decoded to root node (empty string).`,
+      );
+    }
+
+    return {
+      label: literalLabelToInterpretedLabel(literalLabels[0]!), // ! ok due to length invariant above
+      name: literalLabelsToInterpretedName(literalLabels),
+    };
+  } catch {
+    // In the event that the NameWrapper emits a malformed packet, `decodeDNSEncodedLiteralName`
+    // will throw. The Subgraph indexing logic is prepared for this eventuality, and expects
+    // `null` to be returned from the decoding process
+    return { label: null, name: null };
+  }
+}
+
+/**
+ * Decodes the NameWrapper's emitted DNS-Encoded `name` packet into a Subgraph Interpreted Name and
+ * its first Subgraph Interpreted Label.
+ */
+function decodeSubgraphInterpretedNameWrapperName(
+  packet: DNSEncodedLiteralName,
+):
+  | { label: SubgraphInterpretedLabel; name: SubgraphInterpretedName }
+  | { label: null; name: null } {
+  try {
+    return subgraph_decodeDNSEncodedLiteralName(packet);
+  } catch {
+    // NOTE: the NameWrapper may emit names that are malformed or contain labels that are not
+    // subgraph-indexable: when this occurs, the subgraph expects `null` to be returned from the decoding
+    // process
+    return { label: null, name: null };
+  }
+}
 
 // if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
@@ -117,34 +169,17 @@ export const makeNameWrapperHandlers = ({
         owner: Address;
         fuses: number;
         expiry: bigint;
-        name: Hex;
+        name: DNSEncodedName;
       }>;
     }) {
       const { node, owner, fuses, expiry } = event.args;
 
       await upsertAccount(context, owner);
 
-      // decode the name emitted by NameWrapper
-      const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(event.args.name));
-
-      // NOTE(replace-unnormalized): ensures that the decoded label/name values are Interpreted
-      // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      // see https://ensnode.io/docs/reference/terminology#interpreted-name
-      let label: Label | null;
-      let name: Name | null;
-      if (config.replaceUnnormalized) {
-        if (literalLabel === null || literalName === null) {
-          throw new Error(
-            `Invariant: When REPLACE_UNNORMALIZED=true, it is an invariant that the NameWrapper emits decodable DNSPacketBytes, but the following bytes were not decodable: ${event.args.name}.`,
-          );
-        }
-
-        label = interpretLiteralLabel(literalLabel);
-        name = interpretLiteralName(literalName);
-      } else {
-        label = literalLabel;
-        name = literalName;
-      }
+      // NOTE: NameWrapper emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
+      const { label, name } = config.replaceUnnormalized
+        ? decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
+        : decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");
@@ -155,7 +190,8 @@ export const makeNameWrapperHandlers = ({
       //   continue to have an un-healed EncodedLabelHash in its name field
       // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
       // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
-      if (!domain.labelName && label) {
+      // NOTE: truthy/falsy boolean check is _intended_ here, to match legacy subgraph logic
+      if (domain.labelName && label) {
         await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 

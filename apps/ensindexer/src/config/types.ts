@@ -1,4 +1,4 @@
-import type { ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
+import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
@@ -30,7 +30,7 @@ export interface RpcConfig {
  */
 export interface ENSIndexerConfig {
   /**
-   * The ENS namespace that ENSNode operates in the context of, defaulting to 'mainnet' (DEFAULT_NAMESPACE).
+   * The ENS namespace that ENSNode operates in the context of.
    *
    * See {@link ENSNamespaceIds} for available namespace identifiers.
    */

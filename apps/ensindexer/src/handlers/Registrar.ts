@@ -3,13 +3,16 @@ import schema from "ponder:schema";
 import { type Address, namehash } from "viem";
 
 import {
+  InterpretedLabel,
+  InterpretedName,
   type Label,
   type LabelHash,
-  Name,
+  LiteralLabel,
   PluginName,
+  SubgraphInterpretedLabel,
+  SubgraphInterpretedName,
   encodeLabelHash,
-  interpretLiteralLabel,
-  isLabelIndexable,
+  literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -18,6 +21,7 @@ import { handleNewOwner } from "@/handlers/Registry";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
+import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { RegistrarManagedName } from "@/lib/types";
@@ -41,19 +45,20 @@ export const makeRegistrarHandlers = ({
 
   async function setNamePreimage(
     context: Context,
-    label: Label,
+    label: LiteralLabel,
     labelHash: LabelHash,
     cost: bigint,
   ) {
-    if (config.replaceUnnormalized) {
-      // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
-      // see https://ensnode.io/docs/reference/terminology#literal-label
-      // see https://ensnode.io/docs/reference/terminology#interpreted-label
-      label = interpretLiteralLabel(label);
-    } else {
-      // NOTE(subgraph-compat): if the label is not indexable, ignore it entirely
-      if (!isLabelIndexable(label)) return;
-    }
+    // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
+    if (!config.replaceUnnormalized && !isLabelSubgraphIndexable(label)) return;
+
+    const interpretedLabel = config.replaceUnnormalized
+      ? // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
+        // see https://ensnode.io/docs/reference/terminology#literal-label
+        // see https://ensnode.io/docs/reference/terminology#interpreted-label
+        literalLabelToInterpretedLabel(label)
+      : // A subgraph-indexable Literal Label is a Subgraph Interpreted Label
+        (label as Label as SubgraphInterpretedLabel);
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
@@ -62,16 +67,21 @@ export const makeRegistrarHandlers = ({
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
 
     // materialize the domain's name and labelName using the emitted values
-    if (domain.labelName !== label) {
+    if (domain.labelName !== interpretedLabel) {
+      // in either case a Name composed of (Subgraph) Interpreted Labels is (Subgraph) Interpreted
+      const interpretedName = `${interpretedLabel}.${registrarManagedName}` as
+        | InterpretedName
+        | SubgraphInterpretedName;
+
       await context.db
         .update(schema.domain, { id: node })
-        .set({ labelName: label, name: `${label}.${registrarManagedName}` });
+        .set({ labelName: interpretedLabel, name: interpretedName });
     }
 
     // update the registration's labelName
     await context.db
       .update(schema.registration, { id: makeRegistrationId(labelHash, node) })
-      .set({ labelName: label, cost });
+      .set({ labelName: interpretedLabel, cost });
   }
 
   return {
@@ -148,22 +158,28 @@ export const makeRegistrarHandlers = ({
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByLabelHash(labelHash);
 
-      let name: Name | undefined = undefined;
-      let label: Label | undefined = undefined;
+      let label: InterpretedLabel | SubgraphInterpretedLabel | undefined = undefined;
+      let name: InterpretedName | SubgraphInterpretedName | undefined = undefined;
       if (config.replaceUnnormalized) {
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
-        name = `${label}.${registrarManagedName}`;
-      } else {
-        // only update the name if the label is healed & indexable
-        // undefined value means no change to the name
-        label = isLabelIndexable(healedLabel) ? healedLabel : undefined;
+        label = (
+          healedLabel !== null
+            ? literalLabelToInterpretedLabel(healedLabel)
+            : encodeLabelHash(labelHash)
+        ) as InterpretedLabel;
 
-        // only update the name if the label is healed & indexable
-        // undefined value means no change to the name
-        name = label ? `${label}.${registrarManagedName}` : undefined;
+        // a name constructed of Interpreted Labels is Interpreted
+        name = `${label}.${registrarManagedName}` as InterpretedName;
+      } else {
+        // only update the label/name if label is subgraph-indexable
+        if (isLabelSubgraphIndexable(healedLabel)) {
+          // if subgraph-indexable, the label is Subgraph Interpreted
+          label = healedLabel as Label as SubgraphInterpretedLabel;
+          // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
+          name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;
+        }
       }
 
       // update Domain
@@ -208,7 +224,13 @@ export const makeRegistrarHandlers = ({
       }>;
     }) {
       const { label, labelHash, cost } = event.args;
-      await setNamePreimage(context, label, labelHash, cost);
+
+      await setNamePreimage(
+        context,
+        label as LiteralLabel, // NameRegistered emits Literal Labels
+        labelHash,
+        cost,
+      );
     },
 
     async handleNameRenewedByController({
@@ -223,7 +245,13 @@ export const makeRegistrarHandlers = ({
       }>;
     }) {
       const { label, labelHash, cost } = event.args;
-      await setNamePreimage(context, label, labelHash, cost);
+
+      await setNamePreimage(
+        context,
+        label as LiteralLabel, // NameRenewed emits Literal Labels
+        labelHash,
+        cost,
+      );
     },
 
     async handleNameRenewed({

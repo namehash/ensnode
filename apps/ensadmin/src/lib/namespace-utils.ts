@@ -2,12 +2,12 @@ import {
   DatasourceNames,
   ENSNamespaceId,
   ENSNamespaceIds,
+  ensTestEnvL1Chain,
   getDatasource,
 } from "@ensnode/datasources";
 import { ChainId, Name } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 import {
-  anvil,
   arbitrum,
   arbitrumSepolia,
   base,
@@ -23,10 +23,8 @@ import {
   sepolia,
 } from "viem/chains";
 
-const ensTestEnv = { ...anvil, id: 1337, name: "ens-test-env" };
-
 const SUPPORTED_CHAINS = [
-  ensTestEnv,
+  ensTestEnvL1Chain,
   mainnet,
   sepolia,
   holesky,
@@ -48,7 +46,7 @@ const SUPPORTED_CHAINS = [
  * NOTE: We prefer our custom names here, rather than those provided by default in `Chain#name`.
  */
 const CUSTOM_CHAIN_NAMES = new Map<number, string>([
-  [ensTestEnv.id, "Ethereum Local (ens-test-env)"],
+  [ensTestEnvL1Chain.id, "Ethereum Local (ens-test-env)"],
   [mainnet.id, "Ethereum"],
   [sepolia.id, "Ethereum Sepolia"],
   [holesky.id, "Ethereum Holesky"],

@@ -102,6 +102,17 @@
           },
           "endBlock": null
         }
+      },
+      "567": {
+        "status": "unstarted",
+        "config": {
+          "strategy": "indefinite",
+          "startBlock": {
+            "timestamp": 1720768999,
+            "number": 6682889
+          },
+          "endBlock": null
+        }
       }
     },
     "omnichainIndexingCursor": 1580899661

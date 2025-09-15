@@ -22,7 +22,7 @@ When querying the ENSNode API for specific names or sets of names, it's crucial 
 
 The [ENSIP-15: ENS Name Normalization Standard](https://docs.ens.domains/ensip/15) may change across time such that the set of normalizable names grows (thankfully it should never shrink). For example, consider a new Unicode release that standardizes new emoji. The ENS Normalize standard may subsequently change to expand support for those new emoji.
 
-Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying the ENSNode API. The node of a name is immutable across time and works for all names, even if they are unknown, unnormalized, or unindexable.
+Therefore, always use the node of a name (calculated by the namehash of the name) as the stable identifier when querying the ENSNode API. The node of a name is immutable across time and works for all names, even if they are unknown, unnormalized, or subgraph-unindexable.
 
 ### Recommended Query Patterns
 
@@ -157,35 +157,23 @@ An ENSNode client is permitted to validate that all labels returned by ENSNode a
 
 When ENSNode is configured to replace unnormalized labels with encoded labelHashes, it helps you avoid edge cases related to null bytes, full-stop characters (periods), or exotic unicode characters. When names are returned from any of the ENSNode APIs, including the Subgraph-compatible GraphQL API, the only names will either be a) [normalized](https://ensnode.io/docs/reference/terminology/#name-node-namehash) or b) unnormalized in [encoded labelHash form](https://ensnode.io/docs/reference/terminology/#rendering-unknown-labels).
 
-## Calculating the Node for Unknown Names
+## Calculating the Node for Names that contain Encoded LabelHashes
 
-According to [ENSIP-1](https://docs.ens.domains/ensip/1#namehash-algorithm), the namehash algorithm makes no special consideration of unknown labels, and therefore interprets unknown labels literally. Due to this behavior, we recommend using an "unknown label aware" namehash algorithm implementation.
-
-An example of such an implementation can be found in the viem library's namehash implementation:
-The [viem namehash implementation](https://github.com/wevm/viem/blob/fe558fdef7e2e9cd5f3f57d8bdeae0c7ff67a1b0/src/utils/ens/namehash.ts#L36-L51) correctly calculates the node of names containing unknown labels.
-
-## Unindexable Labels
-
-ENSNode may sometimes represent a label as an unknown label if that label is "unindexable". This is an important consideration when working with the ENSNode API.
-
-While many characters are not supported by ENSIP-15, only the following four characters are specifically classified as "unindexable" due to indexing concerns:
-
-1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
-2. `.` (period) - Conflicts with ENS label separator logic
-3. `[` (left square bracket) - Conflicts with "unknown label" representations
-4. `]` (right square bracket) - Conflicts with "unknown label" representations
-
-It's important to note that while onchain ENS contracts do not enforce ENSIP-15 normalization (due to factors like gas costs), these specific characters require special handling by indexers to avoid conflicts.
+According to [ENSIP-1](https://docs.ens.domains/ensip/1#namehash-algorithm), the namehash algorithm makes no special consideration for Encoded LabelHashes, and therefore interprets Encoded-LabelHash-looking strings as Literal Label values. Due to this behavior, we recommend using an "Encoded-LabelHash-aware" namehash algorithm implementation such as the [viem namehash implementation](https://github.com/wevm/viem/blob/fe558fdef7e2e9cd5f3f57d8bdeae0c7ff67a1b0/src/utils/ens/namehash.ts#L36-L51).
 
 ### Unknown Label Representation
 
-When an unindexable label is encountered, ENSNode represents it as an "unknown label" in the format `[{labelhash}]`, where `{labelhash}` is the labelhash of the unknown label. This representation creates an interesting edge case that must be handled carefully:
+:::note[REPLACE_UNNORMALIZED]
+The following is relevant when `REPLACE_UNNORMALIZED=true` and ENSNode is following legacy ENS Subgraph logic for handling unknown labels.
+:::
 
-Consider an unnormalized label that literally looks like `[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]`. Because this label contains square brackets (unindexable characters), it will be represented as the unknown label:
+When an **Unknown** or `subgraph-unindexable` label is encountered, ENSNode represents it as an **Encoded LabelHash** in the format `[{labelhash}]`, where `{labelhash}` is the labelhash of the label in question. This representation creates an interesting edge case that must be handled carefully:
+
+Consider an unnormalized label that literally looks like `[24695ee963d29f0f52edfdea1e830d2fcfc9052d5ba70b194bddd0afbbc89765]`. Because this label contains square brackets (`subgraph-unindexable` characters), it will be represented as the unknown label:
 `[80968d00b78a91f47b233eaa213576293d16dadcbbdceb257bca94b08451ba7f]`
 
-Therefore, this represents the unindexable label as an "unknown label", encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered unindexable - they create ambiguity between literal labels and the representation of unknown labels.
+Therefore, this represents the `subgraph-unindexable` label as an **Encoded LabelHash**, encoding the labelhash of the original unnormalized label (including its square brackets) in square brackets. This demonstrates why square brackets are considered `subgraph-unindexable` - they create ambiguity between literal labels and the representation of **Encoded LabelHashes**.
 
-When ENSNode encounters an unindexable label, it will represent it as an unknown label even if the actual label data is available. This is a safety mechanism to ensure data integrity and consistent behavior across the system.
+When ENSNode encounters an `subgraph-unindexable` label, it will represent it as an **Encoded LabelHash** even if the actual label data is available.
 
-For more detailed information about unindexable labels and their handling, please refer to the [ENSNode SDK implementation](https://github.com/namehash/ensnode/blob/main/packages/@ensnode/ensnode-sdk/src/subname-helpers.ts#L14-L70).
+For more detailed information about `subgraph-unindexable` labels and their handling, please refer to the [ENSNode SDK implementation](https://github.com/namehash/ensnode/blob/main/apps/ensindexer/src/lib/is-label-subgraph-indexable.ts).

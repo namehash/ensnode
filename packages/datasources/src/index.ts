@@ -1,4 +1,5 @@
 export * from "./lib/types";
+export * from "./lib/chains";
 export * from "./namespaces";
 
 // export shared ABIs for consumer convenience
