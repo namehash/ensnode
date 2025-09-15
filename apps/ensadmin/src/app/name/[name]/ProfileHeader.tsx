@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
+import { NameDisplay } from "@/components/identity/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -52,7 +53,9 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
               <AvatarFallback randomAvatarGenerationSeed={name} />
             </Avatar>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold">{name}</h1>
+              <h1>
+                <NameDisplay className="text-3xl font-bold" name={name} />
+              </h1>
               <div className="flex items-center gap-3 mt-1">
                 {websiteUrl && (
                   <ExternalLinkWithIcon

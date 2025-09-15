@@ -42,7 +42,7 @@ export function NameLink({ name, className }: NameLinkProps) {
   return (
     <Link
       href={nameDetailsRelativePath}
-      className={`flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
+      className={`inline-flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
     >
       <NameDisplay name={name} />
     </Link>

@@ -1,9 +1,9 @@
 "use client";
 
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Button } from "@/components/ui/button";
 import { getExternalEnsAppNameUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
 
 export default function ActionsNamePage() {
@@ -18,16 +18,8 @@ export default function ActionsNamePage() {
   if (!ensAppUrl) return null;
 
   return (
-    <Button variant="outline" size="sm" asChild>
-      <a
-        href={ensAppUrl.toString()}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-1"
-      >
-        View in ENS App
-        <ExternalLink size={14} />
-      </a>
+    <Button variant="link" size="sm" asChild>
+      <ExternalLinkWithIcon href={ensAppUrl.toString()}>View in ENS App</ExternalLinkWithIcon>
     </Button>
   );
 }
