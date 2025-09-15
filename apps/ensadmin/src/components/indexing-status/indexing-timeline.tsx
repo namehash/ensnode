@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 import { ChainId, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { intlFormat } from "date-fns";
 
+import { ChainIcon } from "@/components/chains/ChainIcon";
 import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getChainName } from "@/lib/namespace-utils";
 import { getTimelinePosition } from "./indexing-timeline-utils";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {ChainIcon} from "@/components/chains/ChainIcon";
-import {getChainName} from "@/lib/namespace-utils";
 
 interface ChainIndexingTimelinePhaseViewModel {
   status: typeof ChainIndexingStatusIds.Unstarted | typeof ChainIndexingStatusIds.Backfill;
@@ -120,8 +120,8 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
             <ChainIcon chainId={chainStatus.chainId} />
           </TooltipTrigger>
           <TooltipContent
-              side="left"
-              className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+            side="left"
+            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
           >
             {getChainName(chainStatus.chainId)}
           </TooltipContent>
