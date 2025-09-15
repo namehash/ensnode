@@ -201,11 +201,8 @@ export async function handleTextChanged({
   const sanitizedKey = stripNullBytes(key);
 
   // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver (DefaultPublicResolver1)
-  // event, and the subgraph indexes that as `null`.
-  //
-  // NOTE(subgraph-compat): ponder's (viem's) event parsing produces empty string for some TextChanged events
-  // (which is strictly correct) but the subgraph represents these instances as null, so we coalesce
-  // falsy strings to null for compatibility.
+  // event, and the subgraph indexes that as `null`. value can also be decoded to empty string, which
+  // the subgraph also indexes as `null`.
   // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog
   //
   // NOTE(subgraph-compat): we also must strip null bytes in strings, which are unindexable by Postgres
@@ -228,7 +225,20 @@ export async function handleTextChanged({
   });
 
   if (config.indexAdditionalResolverRecords) {
-    await handleResolverTextRecordUpdate(context, id, key, value);
+    // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event and
+    // if we are indexing additional resolver records, we need the actual record value in order
+    // to accelerate at resolution-time. so fetch it here if necessary
+    const recordValue =
+      value !== undefined
+        ? value
+        : await context.client.readContract({
+            abi: context.contracts.Resolver.abi,
+            address: event.log.address,
+            functionName: "text",
+            args: [node, key],
+          });
+
+    await handleResolverTextRecordUpdate(context, id, key, recordValue);
   }
 }
 

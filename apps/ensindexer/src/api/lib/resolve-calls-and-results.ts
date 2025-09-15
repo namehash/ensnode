@@ -8,17 +8,17 @@ import {
   decodeAbiParameters,
   encodeFunctionData,
   getAbiItem,
-  getAddress,
-  isAddress,
-  isAddressEqual,
   size,
   toHex,
-  zeroAddress,
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
-import { interpretNameRecordValue } from "@/lib/resolver-records-helpers";
+import {
+  interpretAddressRecordValue,
+  interpretNameRecordValue,
+  interpretTextRecordValue,
+} from "@/lib/interpret-record-values";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 
@@ -220,36 +220,17 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
     if (result === null) return { call, result };
 
     switch (call.functionName) {
-      // make sure address is valid (i.e. specifically not empty bytes)
       case "addr": {
-        // coerce '0x' (empty result) to null
-        if (result === "0x") return { call, result: null };
-
-        // if it is a valid EVM address...
-        if (isAddress(result)) {
-          // coerce zeroAddress to null
-          if (isAddressEqual(result, zeroAddress)) return { call, result: null };
-
-          // otherwise, ensure checksummed
-          return { call, result: getAddress(result) };
-        }
-
-        // not an EVM address, just coerce empty string to null
-        if (result === "") return { call, result: null };
-
-        // and otherwise return it as-is
-        return { call, result };
+        // interpret address records (see `interpretAddressRecordValue` for specific guarantees)
+        return { call, result: interpretAddressRecordValue(result) };
       }
       case "name": {
         // interpret name records (see `interpretNameRecordValue` for specific guarantees)
         return { call, result: interpretNameRecordValue(result) };
       }
       case "text": {
-        // coerce empty string to null
-        if (result === "") return { call, result: null };
-
-        // and otherwise return it as-is
-        return { call, result };
+        // interpret text records (see `interpretTextRecordValue` for specific guarantees)
+        return { call, result: interpretTextRecordValue(result) };
       }
     }
   });
