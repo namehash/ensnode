@@ -7,7 +7,7 @@ import { ENSNamespaceId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
 import type { Address } from "viem";
-import { AddressDisplay, NamePageLink } from "./utils";
+import { AddressDisplay, NameLink } from "./utils";
 
 interface IdentityProps {
   address: Address;
@@ -59,7 +59,7 @@ export function Identity({
         </Avatar>
       )}
       {ensName ? (
-        <NamePageLink name={ensName} />
+        <NameLink name={ensName} />
       ) : (
         <AddressDisplay address={address} namespaceId={namespaceId} />
       )}

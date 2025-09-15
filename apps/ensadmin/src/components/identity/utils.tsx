@@ -1,4 +1,4 @@
-import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
+import { getAddressDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
@@ -43,7 +43,16 @@ export function ExternalLinkWithIcon({ href, children, className }: ExternalLink
   );
 }
 
-interface NamePageLinkProps {
+/**
+ * Gets the relative path of the internal name details page for a given name.
+ *
+ * @returns relative path to the internal name details page for the given name.
+ */
+export function getNameDetailsRelativePath(name: Name): string {
+  return `/name/${encodeURIComponent(name)}`;
+}
+
+interface NameLinkProps {
   name: Name;
   className?: string;
 }
@@ -52,32 +61,12 @@ interface NamePageLinkProps {
  * Displays an ENS name with a link to the internal name detail page.
  * Wraps NameDisplay component with navigation to /name/[name].
  */
-export function NamePageLink({ name, className }: NamePageLinkProps) {
-  return (
-    <Link
-      href={`/name/${encodeURIComponent(name)}`}
-      className={`flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
-    >
-      <NameDisplay name={name} />
-    </Link>
-  );
-}
-
-interface NameLinkProps {
-  name: Name;
-  namespaceId: ENSNamespaceId;
-  className?: string;
-}
-
-/**
- * Displays an ENS name with a link to the name detail page.
- */
-export function NameLink({ name, namespaceId, className }: NameLinkProps) {
-  const nameDetailsUrl = getNameDetailsUrl(name, namespaceId);
+export function NameLink({ name, className }: NameLinkProps) {
+  const nameDetailsRelativePath = getNameDetailsRelativePath(name);
 
   return (
     <Link
-      href={nameDetailsUrl}
+      href={nameDetailsRelativePath}
       className={`flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
     >
       <NameDisplay name={name} />

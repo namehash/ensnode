@@ -130,15 +130,6 @@ export function getExternalEnsAppNameUrl(name: Name, namespaceId: ENSNamespaceId
 }
 
 /**
- * Get the URL of the internal name details page for a given name.
- *
- * @returns URL path to the internal name details page
- */
-export function getNameDetailsUrl(name: Name, namespaceId: ENSNamespaceId): string {
-  return `/name/${encodeURIComponent(name)}`;
-}
-
-/**
  * Get the URL of the address details page in ENS Manager App for a given address and ENS Namespace.
  *
  * @returns URL to the address details page in the ENS Manager App for a given address and ENS
