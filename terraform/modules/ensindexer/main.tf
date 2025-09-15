@@ -3,7 +3,7 @@ locals {
 
   common_variables = {
     # Common configuration
-    "DATABASE_URL"                      = { value = var.database_url },
+    "DATABASE_URL"                      = { value = var.ensdb_url },
     "DATABASE_SCHEMA"                   = { value = var.database_schema },
     "ENSRAINBOW_URL"                    = { value = var.ensrainbow_url },
     "LABEL_SET_ID"                      = { value = var.ensindexer_label_set_id },
@@ -50,8 +50,8 @@ locals {
 }
 
 resource "render_web_service" "ensindexer" {
-  name           = "ensindexer-${var.instance_name}"
-  plan           = var.instance_type
+  name           = "ensindexer-${var.ensnode_indexer_type}"
+  plan           = var.render_instance_type
   region         = var.render_region
   environment_id = var.render_environment_id
 
@@ -69,11 +69,11 @@ resource "render_web_service" "ensindexer" {
         value = "https://${local.ensindexer_fqdn}"
       },
       ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.instance_name}:10000"
+        value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       }
     }
   )
-  # Domains assigned by user
+  # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensindexer_fqdn },
   ]
@@ -82,7 +82,7 @@ resource "render_web_service" "ensindexer" {
 
 
 resource "render_web_service" "ensindexer_api" {
-  name           = "ensindexer_api_${var.instance_name}"
+  name           = "ensindexer_api_${var.ensnode_indexer_type}"
   plan           = "starter"
   region         = var.render_region
   environment_id = var.render_environment_id
@@ -101,13 +101,14 @@ resource "render_web_service" "ensindexer_api" {
         value = "https://${local.ensindexer_api_fqdn}"
       },
       ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.instance_name}:10000"
+        value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       },
       PONDER_COMMAND = {
         value = "serve"
       }
     }
   )
+  # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensindexer_api_fqdn },
   ]

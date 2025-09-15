@@ -1,10 +1,10 @@
 locals {
-  ensindexer_fqdn     = "indexer.${var.subdomain_prefix}.${var.base_domain_name}"
-  ensindexer_api_fqdn = "api.${var.subdomain_prefix}.${var.base_domain_name}"
+  ensindexer_fqdn     = "indexer.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}"
+  ensindexer_api_fqdn = "api.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}"
 }
 
 data "aws_route53_zone" "ensnode" {
-  name         = "${var.base_domain_name}."
+  name         = "${var.hosted_zone_name}."
   private_zone = false
 }
 

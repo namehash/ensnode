@@ -1,6 +1,6 @@
 resource "render_web_service" "ensadmin" {
   name           = "ensadmin"
-  plan           = var.instance_type
+  plan           = var.render_instance_type
   region         = var.render_region
   environment_id = var.render_environment_id
 
@@ -19,7 +19,7 @@ resource "render_web_service" "ensadmin" {
       value = var.anthropic_api_key
     }
   }
-  # Domains assigned by user
+  # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensadmin_fqdn },
   ]
