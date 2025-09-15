@@ -1,9 +1,8 @@
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { getAddressDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
-import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
-import { ReactNode } from "react";
 import { Address } from "viem";
 
 interface NameDisplayProps {
@@ -17,30 +16,6 @@ interface NameDisplayProps {
  */
 export function NameDisplay({ name, className = "font-medium" }: NameDisplayProps) {
   return <span className={className}>{name}</span>;
-}
-
-interface ExternalLinkWithIconProps {
-  href: string;
-  children: ReactNode;
-  className?: string;
-}
-
-/**
- * Renders an external link with an external link icon.
- * General-purpose component for any external URL.
- */
-export function ExternalLinkWithIcon({ href, children, className }: ExternalLinkWithIconProps) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
-    >
-      {children}
-      <ExternalLinkIcon size={12} />
-    </a>
-  );
 }
 
 /**
