@@ -76,27 +76,42 @@ export function NameLink({ name, className }: NameLinkProps) {
 
 interface AddressDisplayProps {
   address: Address;
-  namespaceId: ENSNamespaceId;
+  className?: string;
 }
 
 /**
- * Displays a truncated address.
+ * Displays a truncated address without any navigation.
+ * Pure display component for showing addresses.
+ */
+export function AddressDisplay({ address, className = "font-medium" }: AddressDisplayProps) {
+  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return <span className={className}>{truncatedAddress}</span>;
+}
+
+interface AddressLinkProps {
+  address: Address;
+  namespaceId: ENSNamespaceId;
+  className?: string;
+}
+
+/**
+ * Displays a truncated address with a link to the address details URL.
  * If the ENS namespace has a known ENS Manager App,
  * includes a link to the view details of the address within that ENS namespace.
  */
-export function AddressDisplay({ address, namespaceId }: AddressDisplayProps) {
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-
+export function AddressLink({ address, namespaceId, className }: AddressLinkProps) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <span className="font-medium">{truncatedAddress}</span>;
+    return <AddressDisplay address={address} className={className} />;
   }
 
   return (
-    <ExternalLinkWithIcon href={ensAppAddressDetailsUrl.toString()} className="font-medium">
-      {truncatedAddress}
+    <ExternalLinkWithIcon
+      href={ensAppAddressDetailsUrl.toString()}
+      className={`font-medium ${className || ""}`}
+    >
+      <AddressDisplay address={address} />
     </ExternalLinkWithIcon>
   );
 }

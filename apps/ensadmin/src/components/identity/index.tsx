@@ -7,7 +7,7 @@ import { ENSNamespaceId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
 import type { Address } from "viem";
-import { AddressDisplay, NameLink } from "./utils";
+import { AddressLink, NameLink } from "./utils";
 
 interface IdentityProps {
   address: Address;
@@ -42,7 +42,7 @@ export function Identity({
 
   // If there is an error looking up the primary name, fallback to showing the address
   if (status === "error") {
-    return <AddressDisplay address={address} namespaceId={namespaceId} />;
+    return <AddressLink address={address} namespaceId={namespaceId} />;
   }
 
   const ensName = data.name;
@@ -61,7 +61,7 @@ export function Identity({
       {ensName ? (
         <NameLink name={ensName} />
       ) : (
-        <AddressDisplay address={address} namespaceId={namespaceId} />
+        <AddressLink address={address} namespaceId={namespaceId} />
       )}
     </div>
   );
