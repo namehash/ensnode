@@ -66,6 +66,9 @@ export default function NameDetailPage() {
               twitter={records.records.texts?.["com.twitter"]}
               github={records.records.texts?.["com.github"]}
               farcaster={records.records.texts?.["com.farcaster"]}
+              telegram={records.records.texts?.["org.telegram"]}
+              linkedin={records.records.texts?.["com.linkedin"]}
+              reddit={records.records.texts?.["com.reddit"]}
             />
 
             <Addresses addresses={records.records.addresses} />

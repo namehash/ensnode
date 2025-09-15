@@ -62,7 +62,7 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
                     href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
                     className="text-sm"
                   >
-                    {websiteUrl.replace(/^https?:\/\//, "")}
+                    {new URL(websiteUrl).hostname}
                   </ExternalLinkWithIcon>
                 )}
               </div>

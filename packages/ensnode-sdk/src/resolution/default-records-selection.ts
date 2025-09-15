@@ -18,7 +18,7 @@ const getENSIP19SupportedCoinTypes = (namespace: ENSNamespaceId) =>
       maybeGetDatasource(namespace, DatasourceNames.ReverseResolverScroll),
     ]
       .filter((ds) => ds !== undefined)
-      .map((ds) => ds.chain.id),
+      .map((ds) => ds.chain.id)
   ).map(evmChainIdToCoinType);
 
 const TEXTS = [
@@ -30,23 +30,38 @@ const TEXTS = [
   "com.twitter",
   "com.farcaster",
   "com.github",
+  "org.telegram",
+  "com.linkedin",
+  "com.reddit",
 ] as const satisfies string[];
 
 export const DefaultRecordsSelection = {
   [ENSNamespaceIds.Mainnet]: {
-    addresses: [ETH_COIN_TYPE, ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.Mainnet)],
+    addresses: [
+      ETH_COIN_TYPE,
+      ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.Mainnet),
+    ],
     texts: TEXTS,
   },
   [ENSNamespaceIds.Sepolia]: {
-    addresses: [ETH_COIN_TYPE, ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.Sepolia)],
+    addresses: [
+      ETH_COIN_TYPE,
+      ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.Sepolia),
+    ],
     texts: TEXTS,
   },
   [ENSNamespaceIds.Holesky]: {
-    addresses: [ETH_COIN_TYPE, ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.Holesky)],
+    addresses: [
+      ETH_COIN_TYPE,
+      ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.Holesky),
+    ],
     texts: TEXTS,
   },
   [ENSNamespaceIds.EnsTestEnv]: {
-    addresses: [ETH_COIN_TYPE, ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.EnsTestEnv)],
+    addresses: [
+      ETH_COIN_TYPE,
+      ...getENSIP19SupportedCoinTypes(ENSNamespaceIds.EnsTestEnv),
+    ],
     texts: TEXTS,
   },
 } as const satisfies Record<ENSNamespaceId, ResolverRecordsSelection>;
