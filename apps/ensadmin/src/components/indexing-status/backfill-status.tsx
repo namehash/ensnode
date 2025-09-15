@@ -159,7 +159,6 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
                   currentIndexingDate={omnichainIndexingCursorDate}
                   chainStatus={{
                     chainId,
-                    chainName: getChainName(chainId),
                     firstBlockToIndex: blockViewModel(chain.config.startBlock),
                     lastIndexedBlock,
                     phases,

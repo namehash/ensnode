@@ -6,7 +6,7 @@ import { RelativeTime } from "@/components/datetime-utils";
 import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 import { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
 export interface BlockRefViewModel extends BlockRef {
   get date(): Date;
@@ -43,13 +43,13 @@ function BlockNumber({ chainId, block }: BlockNumberProps) {
         rel="noreferrer noopener"
         className="w-fit text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
       >
-        #{block.number}
-        <ExternalLink size={16} className="inline-block flex-shrink-0" />
+        {block.number}
+        <ExternalLinkIcon size={16} className="inline-block flex-shrink-0" />
       </a>
     );
   }
 
-  return <div className="text-lg font-semibold">#${block.number}</div>;
+  return <div className="text-lg font-semibold">{block.number}</div>;
 }
 
 interface BlockStatsProps {

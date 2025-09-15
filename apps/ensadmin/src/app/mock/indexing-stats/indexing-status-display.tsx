@@ -13,7 +13,7 @@ import {
   IndexingStatsForUnstartedStatus,
   IndexingStatsShell,
 } from "@/components/indexing-status/indexing-stats";
-import { IndexingStatusPlaceholder } from "@/components/indexing-status/indexing-status-placeholder";
+import { IndexingStatusLoading } from "@/components/indexing-status/indexing-status-loading";
 
 interface MockIndexingStatusDisplayPropsProps {
   indexingStatus: ENSIndexerOverallIndexingStatus;
@@ -76,7 +76,7 @@ export function MockIndexingStatusDisplayWithProps({
   }
 
   if (loading || !indexingStatus) {
-    return <IndexingStatusPlaceholder />;
+    return <IndexingStatusLoading />;
   }
 
   return <MockIndexingStatusDisplay indexingStatus={indexingStatus} />;

@@ -1,7 +1,7 @@
 import { resolve } from "path";
-import { defineConfig } from "vitest/config";
+import { defineProject } from "vitest/config";
 
-export default defineConfig({
+export default defineProject({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
@@ -9,10 +9,5 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json", "html"],
-    },
   },
 });

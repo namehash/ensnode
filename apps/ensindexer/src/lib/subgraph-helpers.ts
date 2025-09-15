@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
 import { Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
-import { zeroAddress } from "viem";
+import { isAddressEqual, zeroAddress } from "viem";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.
@@ -48,7 +48,9 @@ export async function setupRootNode({ context }: { context: Context }) {
 // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L65
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
   return (
-    domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
+    domain.resolverId === null &&
+    isAddressEqual(domain.ownerId, zeroAddress) &&
+    domain.subdomainCount === 0
   );
 }
 
