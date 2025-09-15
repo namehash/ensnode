@@ -11,7 +11,7 @@ import { RecentRegistrations } from "@/components/recent-registrations";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { BackfillStatus } from "./backfill-status";
-import { ENSIndexerDependencyInfo } from "./dependecy-info";
+import { ENSNodeConfigInfo } from "./config-info";
 import {
   IndexingStatsForBackfillStatus,
   IndexingStatsForCompletedStatus,
@@ -20,21 +20,33 @@ import {
   IndexingStatsForUnstartedStatus,
   IndexingStatsShell,
 } from "./indexing-stats";
-import { IndexingStatusPlaceholder } from "./indexing-status-placeholder";
+import { IndexingStatusLoading } from "./indexing-status-loading";
 
 export function IndexingStatus() {
   const ensIndexerConfigQuery = useENSIndexerConfig();
   const indexingStatusQuery = useIndexingStatus();
 
   if (ensIndexerConfigQuery.isError) {
-    return <p className="p-6">Failed to fetch ENSIndexer Config.</p>;
+    return (
+      <ENSNodeConfigInfo
+        error={{
+          title: "ENSNodeConfigInfo Error",
+          description: ensIndexerConfigQuery.error.message,
+        }}
+      />
+    );
   }
   if (indexingStatusQuery.isError) {
     return <p className="p-6">Failed to fetch Indexing Status.</p>;
   }
 
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
-    return <IndexingStatusPlaceholder />;
+    return (
+      <section className="flex flex-col gap-6 p-6">
+        <ENSNodeConfigInfo /> {/*display loading state*/}
+        <IndexingStatusLoading />
+      </section>
+    );
   }
 
   const ensIndexerConfig = ensIndexerConfigQuery.data;
@@ -91,7 +103,7 @@ export function IndexingStatus() {
 
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ENSIndexerDependencyInfo ensIndexerConfig={ensIndexerConfig} />
+      <ENSNodeConfigInfo ensIndexerConfig={ensIndexerConfig} />
 
       {maybeIndexingTimeline}
 

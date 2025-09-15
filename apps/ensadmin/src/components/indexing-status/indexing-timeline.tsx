@@ -7,7 +7,10 @@ import { cn } from "@/lib/utils";
 import { ChainId, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { intlFormat } from "date-fns";
 
+import { ChainIcon } from "@/components/chains/ChainIcon";
 import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getChainName } from "@/lib/namespace-utils";
 import { getTimelinePosition } from "./indexing-timeline-utils";
 
 interface ChainIndexingTimelinePhaseViewModel {
@@ -94,7 +97,6 @@ interface ChainIndexingTimelineProps {
   timelineEnd: Date;
   chainStatus: {
     chainId: ChainId;
-    chainName: string;
     firstBlockToIndex: BlockRefViewModel;
     lastIndexedBlock: BlockRefViewModel | null;
     phases: ChainIndexingTimelinePhaseViewModel[];
@@ -112,8 +114,18 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
   return (
     <div key={chainStatus.chainId} className="flex items-center">
       {/* ChainName label */}
-      <div className="w-24 pr-3 flex flex-col">
-        <ChainName chainId={chainStatus.chainId} className="text-sm font-medium" />
+      <div className="pr-6 flex flex-col">
+        <Tooltip>
+          <TooltipTrigger className="cursor-default">
+            <ChainIcon chainId={chainStatus.chainId} />
+          </TooltipTrigger>
+          <TooltipContent
+            side="left"
+            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+          >
+            {getChainName(chainStatus.chainId)}
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Chain timeline bar */}

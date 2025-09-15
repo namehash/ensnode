@@ -9,7 +9,6 @@ export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
 export const DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS = true;
 export const DEFAULT_REPLACE_UNNORMALIZED = true;
-export const DEFAULT_NAMESPACE = ENSNamespaceIds.Mainnet;
 
 /**
  * Extracts dynamic chain configuration from environment variables.

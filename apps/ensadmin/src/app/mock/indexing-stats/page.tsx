@@ -9,13 +9,14 @@ import {
 import { useMemo, useState } from "react";
 import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
 
+import Link from "next/link";
 import mockDataJson from "./data.json";
 
 const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOverallIndexingStatus>;
 
 type StatusVariant = keyof typeof mockStatusData;
 
-export default function StatusMockPage() {
+export default function MockIndexingStatusPage() {
   const [selectedVariant, setSelectedVariant] = useState<StatusVariant>("unstarted");
 
   const { deserializedStatus, validationError } = useMemo(() => {
@@ -32,8 +33,8 @@ export default function StatusMockPage() {
     <section className="flex flex-col gap-6 p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: Indexing Status</CardTitle>
-          <CardDescription>Select a mock indexing status scenario</CardDescription>
+          <CardTitle>Mock: IndexingStats</CardTitle>
+          <CardDescription>Select a mock IndexingStats scenario</CardDescription>
         </CardHeader>
 
         <CardContent>

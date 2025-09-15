@@ -1,18 +1,18 @@
-import { ArbitrumIcon } from "@/components/icons/ArbitrumIcon";
-import { ArbitrumTestnetIcon } from "@/components/icons/ArbitrumTestnetIcon";
-import { BaseIcon } from "@/components/icons/BaseIcon";
-import { BaseTestnetIcon } from "@/components/icons/BaseTestnetIcon";
-import { EthereumIcon } from "@/components/icons/EthereumIcon";
-import { EthereumLocalIcon } from "@/components/icons/EthereumLocalIcon";
-import { EthereumTestnetIcon } from "@/components/icons/EthereumTestnetIcon";
-import { LineaIcon } from "@/components/icons/LineaIcon";
-import { LineaTestnetIcon } from "@/components/icons/LineaTestnetIcon";
-import { OptimismIcon } from "@/components/icons/OptimismIcon";
-import { OptimismTestnetIcon } from "@/components/icons/OptimismTestnetIcon";
-import { ScrollIcon } from "@/components/icons/ScrollIcon";
-import { ScrollTestnetIcon } from "@/components/icons/ScrollTestnetIcon";
-import { UnrecognizedChainIcon } from "@/components/icons/UnrecognizedChainIcon";
-import { ensTestEnv } from "@/lib/chains";
+import { ArbitrumIcon } from "@/components/icons/chains/ArbitrumIcon";
+import { ArbitrumTestnetIcon } from "@/components/icons/chains/ArbitrumTestnetIcon";
+import { BaseIcon } from "@/components/icons/chains/BaseIcon";
+import { BaseTestnetIcon } from "@/components/icons/chains/BaseTestnetIcon";
+import { EthereumIcon } from "@/components/icons/chains/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/chains/EthereumLocalIcon";
+import { EthereumTestnetIcon } from "@/components/icons/chains/EthereumTestnetIcon";
+import { LineaIcon } from "@/components/icons/chains/LineaIcon";
+import { LineaTestnetIcon } from "@/components/icons/chains/LineaTestnetIcon";
+import { OptimismIcon } from "@/components/icons/chains/OptimismIcon";
+import { OptimismTestnetIcon } from "@/components/icons/chains/OptimismTestnetIcon";
+import { ScrollIcon } from "@/components/icons/chains/ScrollIcon";
+import { ScrollTestnetIcon } from "@/components/icons/chains/ScrollTestnetIcon";
+import { UnrecognizedChainIcon } from "@/components/icons/chains/UnrecognizedChainIcon";
+import { ensTestEnvL1Chain } from "@ensnode/datasources";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -58,7 +58,7 @@ const chainIcons = new Map<number, React.ReactNode>([
   [holesky.id, <EthereumTestnetIcon width={20} height={20} />],
 
   // ens-test-env
-  [ensTestEnv.id, <EthereumLocalIcon width={20} height={20} />],
+  [ensTestEnvL1Chain.id, <EthereumLocalIcon width={20} height={20} />],
 ]);
 
 /**
