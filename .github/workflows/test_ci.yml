@@ -8,39 +8,71 @@ on:
   pull_request:
 
 jobs:
+  audit:
+    name: "Audit Dependencies"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm audit --audit-level=moderate
+
+  prepublish:
+    name: "Build NPM Packages"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm packages:prepublish
+
   static-analysis:
     name: "Static Analysis"
     runs-on: blacksmith-4vcpu-ubuntu-2204
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: useblacksmith/setup-node@v5
         with:
           node-version-file: .nvmrc
-
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=moderate
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       - name: Run Biome CI
         run: pnpm lint:ci
 
-      - name: Run TypeScript type checks
+      - name: Run TypeScript Typecheck
         run: pnpm typecheck
 
-      - name: Check Terraform format
+      - name: Check Terraform Format
         run: terraform fmt -recursive -check -diff
 
-      - name: Build NPM Packages
-        run: pnpm packages:prepublish
+  unit-tests:
+    name: "Unit Tests"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  integrity-check:
+    name: "Integrity Check"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
 
       # This will run the dev command in background, and wait up to
       # HEALTH_CHECK_TIMEOUT seconds. It will monitor the log output to
@@ -74,28 +106,6 @@ jobs:
           # Label Set Configuration (REQUIRED)
           LABEL_SET_ID: ens-test-env
           LABEL_SET_VERSION: 0
-        run: |
-          chmod +x ./.github/scripts/run_ensindexer_healthcheck.sh
-          ./.github/scripts/run_ensindexer_healthcheck.sh
+        run: ./.github/scripts/run_ensindexer_healthcheck.sh
 
-  unit-tests:
-    name: "Unit Tests"
-    runs-on: blacksmith-4vcpu-ubuntu-2204
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
-        with:
-          node-version-file: .nvmrc
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run unit tests
-        run: pnpm test

@@ -1,77 +1,92 @@
-import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
+import { getAddressDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
-import { ExternalLink } from "lucide-react";
+import { Name } from "@ensnode/ensnode-sdk";
+import Link from "next/link";
 import { Address } from "viem";
 
 interface NameDisplayProps {
-  name: string;
-  namespaceId: ENSNamespaceId;
-  showExternalLinkIcon?: boolean;
+  name: Name;
+  className?: string;
 }
 
 /**
- * Displays an ENS name.
- * If the ENS namespace has a known ENS Manager App,
- * includes a link to the view the profile associated with the name within that ENS namespace.
- *
- * Optionally shows an external link icon.
+ * Displays an ENS name without any navigation.
+ * Pure display component for showing names.
  */
-export function NameDisplay({ name, namespaceId, showExternalLinkIcon }: NameDisplayProps) {
-  const ensAppNameDetailsUrl = getNameDetailsUrl(name, namespaceId);
+export function NameDisplay({ name, className = "font-medium" }: NameDisplayProps) {
+  return <span className={className}>{name}</span>;
+}
 
-  if (!ensAppNameDetailsUrl) {
-    return <span className="font-medium">{name}</span>;
-  }
+/**
+ * Gets the relative path of the internal name details page for a given name.
+ *
+ * @returns relative path to the internal name details page for the given name.
+ */
+export function getNameDetailsRelativePath(name: Name): string {
+  return `/name/${encodeURIComponent(name)}`;
+}
+
+interface NameLinkProps {
+  name: Name;
+  className?: string;
+}
+
+/**
+ * Displays an ENS name with a link to the internal name detail page.
+ * Wraps NameDisplay component with navigation to /name/[name].
+ */
+export function NameLink({ name, className }: NameLinkProps) {
+  const nameDetailsRelativePath = getNameDetailsRelativePath(name);
 
   return (
-    <a
-      href={ensAppNameDetailsUrl.toString()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+    <Link
+      href={nameDetailsRelativePath}
+      className={`inline-flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
     >
-      {name}
-      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
-    </a>
+      <NameDisplay name={name} />
+    </Link>
   );
 }
 
 interface AddressDisplayProps {
   address: Address;
-  namespaceId: ENSNamespaceId;
-  showExternalLinkIcon?: boolean;
+  className?: string;
 }
 
 /**
- * Displays a truncated address.
+ * Displays a truncated address without any navigation.
+ * Pure display component for showing addresses.
+ */
+export function AddressDisplay({ address, className = "font-medium" }: AddressDisplayProps) {
+  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  return <span className={className}>{truncatedAddress}</span>;
+}
+
+interface AddressLinkProps {
+  address: Address;
+  namespaceId: ENSNamespaceId;
+  className?: string;
+}
+
+/**
+ * Displays a truncated address with a link to the address details URL.
  * If the ENS namespace has a known ENS Manager App,
  * includes a link to the view details of the address within that ENS namespace.
- *
- * Optionally shows an external link icon.
  */
-export function AddressDisplay({
-  address,
-  namespaceId,
-  showExternalLinkIcon,
-}: AddressDisplayProps) {
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-
+export function AddressLink({ address, namespaceId, className }: AddressLinkProps) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+    return <AddressDisplay address={address} className={className} />;
   }
 
   return (
-    <a
+    <ExternalLinkWithIcon
       href={ensAppAddressDetailsUrl.toString()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+      className={`font-medium ${className || ""}`}
     >
-      {truncatedAddress}
-      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
-    </a>
+      <AddressDisplay address={address} />
+    </ExternalLinkWithIcon>
   );
 }
