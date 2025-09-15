@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { BlockRef } from "../../shared";
 import {
   createIndexingConfig,
+  getOmnichainIndexingCursor,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
 } from "./helpers";
@@ -243,5 +243,55 @@ describe("ENSIndexer: Indexing Status helpers", () => {
         endBlock: null,
       } satisfies ChainIndexingIndefiniteConfig);
     });
+  });
+});
+
+describe("getOmnichainIndexingCursor", () => {
+  it("returns the correct cursor for the given chain statuses", () => {
+    // arrange
+    const chainStatuses = [
+      {
+        status: ChainIndexingStatusIds.Backfill,
+        config: {
+          strategy: ChainIndexingStrategyIds.Definite,
+          startBlock: earliestBlockRef,
+          endBlock: latestBlockRef,
+        },
+        latestIndexedBlock: earlierBlockRef,
+        backfillEndBlock: laterBlockRef,
+      } satisfies ChainIndexingBackfillStatus,
+
+      {
+        status: ChainIndexingStatusIds.Following,
+        config: {
+          strategy: ChainIndexingStrategyIds.Indefinite,
+          startBlock: earliestBlockRef,
+        },
+        latestIndexedBlock: earlierBlockRef,
+        latestKnownBlock: laterBlockRef,
+        approxRealtimeDistance: 432,
+      } satisfies ChainIndexingFollowingStatus,
+      {
+        status: ChainIndexingStatusIds.Completed,
+        config: {
+          strategy: ChainIndexingStrategyIds.Definite,
+          startBlock: earlierBlockRef,
+          endBlock: latestBlockRef,
+        },
+        latestIndexedBlock: latestBlockRef,
+      } satisfies ChainIndexingCompletedStatus,
+    ];
+
+    // act
+    const omnichainIndexingCursor = getOmnichainIndexingCursor(chainStatuses);
+
+    // assert
+    expect(omnichainIndexingCursor).toEqual(latestBlockRef.timestamp);
+  });
+
+  it("throws error when no chains were provided", () => {
+    expect(() => getOmnichainIndexingCursor([])).toThrowError(
+      "Unable to determine omnichain indexing cursor. No chains provided.",
+    );
   });
 });

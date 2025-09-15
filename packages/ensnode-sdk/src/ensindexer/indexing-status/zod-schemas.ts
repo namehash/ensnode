@@ -223,18 +223,34 @@ const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
       { error: `${valueLabel} is an invalid overallStatus.` },
     );
 
+/**
+ * Checks that the omnichain indexing cursor is lower than the earliest start block
+ * across all queued chains.
+ *
+ * Note: if there are no queued chains, the invariant holds.
+ *
+ * @param indexingStatus The current indexing status.
+ * @returns true if the invariant holds, false otherwise.
+ */
 function invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains(indexingStatus: {
   omnichainIndexingCursor: UnixTimestamp;
   chains: Map<ChainId, ChainIndexingStatus>;
 }) {
   const chains = Array.from(indexingStatus.chains.values());
+  const queuedChains = chains.filter((chain) => chain.status === ChainIndexingStatusIds.Queued);
 
-  const queuedChainStartBlocks = chains
-    .filter((chain) => chain.status === ChainIndexingStatusIds.Queued)
-    .map((chain) => chain.config.startBlock.timestamp);
+  // there are no queued chains
+  if (queuedChains.length === 0) {
+    // the invariant holds
+    return true;
+  }
 
+  const queuedChainStartBlocks = queuedChains.map((chain) => chain.config.startBlock.timestamp);
   const queuedChainEarliestStartBlock = Math.min(...queuedChainStartBlocks);
 
+  // there are queued chains
+  // the invariant holds if the omnichain indexing cursor is lower than
+  // the earliest start block across all queued chains
   return indexingStatus.omnichainIndexingCursor < queuedChainEarliestStartBlock;
 }
 

@@ -269,10 +269,10 @@ export interface ENSIndexerOverallIndexingBackfillStatus {
    *
    * Invariants:
    * - guaranteed to be equal to
-   *   a timestamp of the highest `latestIndexedBlock` across all chains that
+   *   the timestamp of the highest `latestIndexedBlock` across all chains that
    *   have started indexing (are not queued).
    * - guaranteed to be lower than
-   *   a timestamp of the lowest `config.startBlock` across all queued chains.
+   *   the `config.startBlock` timestamp for all queued chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
 
@@ -308,10 +308,10 @@ export interface ENSIndexerOverallIndexingCompletedStatus {
    *
    * Invariants:
    * - guaranteed to be equal to
-   *   a timestamp of the highest `latestIndexedBlock` across all chains that
+   *   the timestamp of the highest `latestIndexedBlock` across all chains that
    *   have started indexing (are not queued).
    * - guaranteed to be lower than
-   *   a timestamp of the lowest `config.startBlock` across all queued chains.
+   *   the `config.startBlock` timestamp for all queued chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
 
@@ -344,10 +344,10 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
    *
    * Invariants:
    * - guaranteed to be equal to
-   *   a timestamp of the highest `latestIndexedBlock` across all chains that
+   *   the timestamp of the highest `latestIndexedBlock` across all chains that
    *   have started indexing (are not queued).
    * - guaranteed to be lower than
-   *   a timestamp of the lowest `config.startBlock` across all queued chains.
+   *   the `config.startBlock` timestamp for all queued chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
 

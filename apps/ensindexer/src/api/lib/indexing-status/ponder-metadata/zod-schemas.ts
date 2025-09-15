@@ -16,6 +16,7 @@ import {
   ChainIndexingQueuedStatus,
   type ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
+  ChainIndexingStatusIds,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,
@@ -123,7 +124,9 @@ export const makePonderChainMetadataSchema = (
               ChainIdString,
               ChainIndexingStatusForBackfillOverallStatus
             >, // forcing the type here, will be validated in the following 'check' step
-            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            omnichainIndexingCursor: getOmnichainIndexingCursor(
+              chainStatuses.filter((c) => c.status !== ChainIndexingStatusIds.Queued),
+            ),
           } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
         }
 
@@ -134,7 +137,9 @@ export const makePonderChainMetadataSchema = (
               ChainIdString,
               ChainIndexingCompletedStatus
             >, // forcing the type here, will be validated in the following 'check' step
-            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            omnichainIndexingCursor: getOmnichainIndexingCursor(
+              chainStatuses.filter((c) => c.status !== ChainIndexingStatusIds.Queued),
+            ),
           } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
 
@@ -143,7 +148,9 @@ export const makePonderChainMetadataSchema = (
             overallStatus: OverallIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
             overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
-            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            omnichainIndexingCursor: getOmnichainIndexingCursor(
+              chainStatuses.filter((c) => c.status !== ChainIndexingStatusIds.Queued),
+            ),
           } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
       }
     })

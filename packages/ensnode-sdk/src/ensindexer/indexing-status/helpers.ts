@@ -1,8 +1,10 @@
 import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 import {
+  ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingDefiniteConfig,
+  ChainIndexingFollowingStatus,
   ChainIndexingIndefiniteConfig,
   ChainIndexingQueuedStatus,
   ChainIndexingStatus,
@@ -122,19 +124,21 @@ export function getTimestampForHighestOmnichainKnownBlock(
  *
  * The cursor tracks the "highest" latest indexed block timestamp across all chains
  * that have started indexing (are not queued).
+ *
+ * @throws an error if no chains are provided.
  */
-export function getOmnichainIndexingCursor(chains: ChainIndexingStatus[]): UnixTimestamp {
-  const latestIndexedBlockTimestamps = [] as UnixTimestamp[];
-
-  for (const chain of chains) {
-    switch (chain.status) {
-      case ChainIndexingStatusIds.Backfill:
-      case ChainIndexingStatusIds.Completed:
-      case ChainIndexingStatusIds.Following:
-        latestIndexedBlockTimestamps.push(chain.latestIndexedBlock.timestamp);
-        break;
-    }
+export function getOmnichainIndexingCursor(
+  chains: Array<
+    ChainIndexingBackfillStatus | ChainIndexingCompletedStatus | ChainIndexingFollowingStatus
+  >,
+): UnixTimestamp {
+  if (chains.length === 0) {
+    throw new Error(`Unable to determine omnichain indexing cursor. No chains provided.`);
   }
+
+  const latestIndexedBlockTimestamps: UnixTimestamp[] = chains.map(
+    (chain) => chain.latestIndexedBlock.timestamp,
+  );
 
   return Math.max(...latestIndexedBlockTimestamps);
 }
