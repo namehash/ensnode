@@ -1,7 +1,7 @@
 import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Address } from "viem";
@@ -38,7 +38,7 @@ export function ExternalLinkWithIcon({ href, children, className }: ExternalLink
       className={`flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
     >
       {children}
-      <ExternalLink size={12} />
+      <ExternalLinkIcon size={12} />
     </a>
   );
 }
@@ -70,22 +70,10 @@ interface NameLinkProps {
 }
 
 /**
- * Displays an ENS name with a link. Determines if the link is external by checking
- * if the URL from getNameDetailsUrl() starts with "http" protocol.
- * External links render with an external link icon and open in a new tab.
- * Internal links render as standard Next.js Link components.
+ * Displays an ENS name with a link to the name detail page.
  */
 export function NameLink({ name, namespaceId, className }: NameLinkProps) {
   const nameDetailsUrl = getNameDetailsUrl(name, namespaceId);
-  const isExternal = nameDetailsUrl.startsWith("http");
-
-  if (isExternal) {
-    return (
-      <ExternalLinkWithIcon href={nameDetailsUrl} className={className}>
-        <NameDisplay name={name} />
-      </ExternalLinkWithIcon>
-    );
-  }
 
   return (
     <Link
@@ -114,14 +102,11 @@ export function AddressDisplay({ address, namespaceId }: AddressDisplayProps) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+    return <span className="text-xs">{truncatedAddress}</span>;
   }
 
   return (
-    <ExternalLinkWithIcon
-      href={ensAppAddressDetailsUrl.toString()}
-      className="font-mono text-xs font-medium"
-    >
+    <ExternalLinkWithIcon href={ensAppAddressDetailsUrl.toString()} className="text-xs">
       {truncatedAddress}
     </ExternalLinkWithIcon>
   );
