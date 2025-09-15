@@ -4,13 +4,13 @@ import { Address } from "viem";
 import { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
+import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   DebugTraceTransactionSchema,
   getAddressesFromTrace,
 } from "@/lib/trace-transaction-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
-import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
 
 /**
  * Heals the first label of an addr.reverse Reverse Name given a Registry#NewOwner event.
