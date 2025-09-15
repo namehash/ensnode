@@ -102,11 +102,11 @@ export function AddressDisplay({ address, namespaceId }: AddressDisplayProps) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <span className="text-xs">{truncatedAddress}</span>;
+    return <span className="font-medium">{truncatedAddress}</span>;
   }
 
   return (
-    <ExternalLinkWithIcon href={ensAppAddressDetailsUrl.toString()} className="text-xs">
+    <ExternalLinkWithIcon href={ensAppAddressDetailsUrl.toString()} className="font-medium">
       {truncatedAddress}
     </ExternalLinkWithIcon>
   );
