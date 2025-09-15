@@ -115,12 +115,12 @@ export function getNameAvatarUrl(name: Name, namespaceId: ENSNamespaceId): URL |
 }
 
 /**
- * Get the URL of the name details page in ENS Manager App for a given name and ENS Namespace.
+ * Get the URL of the external ENS Manager App name details page for a given name and ENS Namespace.
  *
- * @returns URL to the name details page in the ENS Manager App for a given name and ENS Namespace,
+ * @returns URL to the name details page in the external ENS Manager App for a given name and ENS Namespace,
  * or null if this URL is not known
  */
-export function getNameDetailsUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
+export function getExternalEnsAppNameUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
   if (!baseUrl) return null;
 
