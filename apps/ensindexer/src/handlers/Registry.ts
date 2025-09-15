@@ -3,6 +3,7 @@ import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import config from "@/config";
+import { getENSRootChainId } from "@ensnode/datasources";
 import {
   ADDR_REVERSE_NODE,
   InterpretedLabel,
@@ -15,7 +16,6 @@ import {
   encodeLabelHash,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
-  maybeHealLabelByReverseAddress,
 } from "@ensnode/ensnode-sdk";
 
 import {
@@ -25,16 +25,11 @@ import {
   upsertResolver,
 } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import { healReverseNameLabel } from "@/lib/heal-reverse-name-label";
+import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import { makeDomainResolverRelationId, makeResolverId } from "@/lib/ids";
 import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
-import {
-  type DebugTraceTransactionSchema,
-  getAddressesFromTrace,
-} from "@/lib/trace-transaction-helpers";
-import { getENSRootChainId } from "@ensnode/datasources";
 
 /**
  * shared handlers for a Registry contract
@@ -111,7 +106,7 @@ export const handleNewOwner =
         parentNode === ADDR_REVERSE_NODE &&
         context.chain.id === getENSRootChainId(config.namespace)
       ) {
-        healedLabel = await healReverseNameLabel(context, event, labelHash);
+        healedLabel = await healAddrReverseSubnameLabel(context, event, labelHash);
       }
 
       // if reverse address healing didn't work, try ENSRainbow

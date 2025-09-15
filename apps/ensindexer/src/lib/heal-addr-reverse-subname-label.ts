@@ -1,7 +1,7 @@
 import { Context } from "ponder:registry";
 import { Address } from "viem";
 
-import { LabelHash, LiteralLabel, maybeHealLabelByReverseAddress } from "@ensnode/ensnode-sdk";
+import { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import { EventWithArgs } from "@/lib/ponder-helpers";
@@ -10,20 +10,22 @@ import {
   getAddressesFromTrace,
 } from "@/lib/trace-transaction-helpers";
 import { getENSRootChainId } from "@ensnode/datasources";
+import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
 
 /**
- * Heals the first label of a Reverse Name given the transaction that emitted Registry#NewOwner.
+ * Heals the first label of an addr.reverse Reverse Name given a Registry#NewOwner event.
+ *
  * @returns a healed LiteralLabel
- * @throws if unable to heal the Reverse Name's label
+ * @throws if unable to heal the addr.reverse subname's label
  */
-export async function healReverseNameLabel(
+export async function healAddrReverseSubnameLabel(
   context: Context,
   event: EventWithArgs<{ owner: Address }>,
   labelHash: LabelHash,
 ): Promise<LiteralLabel> {
   if (context.chain.id !== getENSRootChainId(config.namespace)) {
     throw new Error(
-      `Invariant(healReverseNameLabel): Only valid in the context of the ENS Root Chain, instead got ${context.chain.id}.`,
+      `Invariant(healAddrReverseSubnameLabel): Only valid in the context of the ENS Root Chain, instead got ${context.chain.id}.`,
     );
   }
 
@@ -40,7 +42,7 @@ export async function healReverseNameLabel(
   //
   // Example transaction:
   // https://etherscan.io/tx/0x17697f8a43a9fc2d79ea8686366f2df3814a4dd6802272c06ce92cb4b9e5dc1b
-  const healedFromSender = maybeHealLabelByReverseAddress(labelHash, event.transaction.from);
+  const healedFromSender = maybeHealLabelByAddrReverseSubname(labelHash, event.transaction.from);
   if (healedFromSender !== null) return healedFromSender;
 
   // If healing with sender address didn't work, try healing with the event's `owner` address.
@@ -52,7 +54,7 @@ export async function healReverseNameLabel(
   //
   // Example transaction:
   // https://etherscan.io/tx/0xf0109fcbba1cea0d42e744c1b5b69cc4ab99d1f7b3171aee4413d0426329a6bb
-  const healedFromOwner = maybeHealLabelByReverseAddress(labelHash, event.args.owner);
+  const healedFromOwner = maybeHealLabelByAddrReverseSubname(labelHash, event.args.owner);
   if (healedFromOwner !== null) return healedFromOwner;
 
   // If previous healing methods failed, try addresses from transaction traces. In rare cases,
@@ -80,12 +82,12 @@ export async function healReverseNameLabel(
   // iterate over all addresses in the transaction traces
   // and try to heal the label with each address
   for (const address of allAddressesInTransaction) {
-    const healedFromTrace = maybeHealLabelByReverseAddress(labelHash, address);
+    const healedFromTrace = maybeHealLabelByAddrReverseSubname(labelHash, address);
     if (healedFromTrace !== null) return healedFromTrace;
   }
 
-  // Invariant: by this point, we should have healed all Reverse Names
+  // Invariant: by this point, we should have healed all subnames of addr.reverse
   throw new Error(
-    `Invariant(healReverseName): Unable to heal the label for labelHash '${labelHash}'.`,
+    `Invariant(healAddrReverseSubnameLabel): Unable to heal the label for subname of addr.reverse with labelHash '${labelHash}'.`,
   );
 }
