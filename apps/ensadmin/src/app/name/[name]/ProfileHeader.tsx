@@ -29,9 +29,7 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
           <div className="flex items-center gap-4">
             <Avatar className="-mt-16 h-20 w-20 ring-4 ring-white">
               {avatarUrl && <AvatarImage src={avatarUrl.toString()} alt={name} />}
-              <AvatarFallback className="text-2xl" randomAvatarGenerationSeed={name}>
-                {name.charAt(0).toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback randomAvatarGenerationSeed={name} />
             </Avatar>
             <div className="flex-1">
               <h1 className="text-3xl font-bold">{name}</h1>
