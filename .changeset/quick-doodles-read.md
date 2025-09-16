@@ -3,4 +3,4 @@
 "ensadmin": minor
 ---
 
-get social coin types for telegram, linkedin and reddit
+Add support for telegram, linkedin and reddit profiles on name detail page
