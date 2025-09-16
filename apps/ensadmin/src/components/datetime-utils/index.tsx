@@ -1,6 +1,8 @@
 import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import * as React from "react";
 
 /**
  * Client-only date formatter component
@@ -24,7 +26,7 @@ export function FormattedDate({
 /**
  * Formats a Date as its relative distance with now
  *
- * @param enforcePast - iif true, enforces that the return value won't relate to the future.
+ * @param enforcePast - if true, enforces that the return value won't relate to the future.
  * Helpful for UI contexts where its nonsensical for a value to relate to the future. Ex: how long ago an event happened.
  * @param includeSeconds - if true includes seconds in the result
  * @param conciseFormatting - if true removes special prefixes
@@ -74,10 +76,29 @@ export function RelativeTime({
   }, [date]);
 
   return (
-    <>
-      {prefix}
-      {relativeTime}
-    </>
+      <Tooltip>
+        <TooltipTrigger className="cursor-default">
+            {prefix}
+            {relativeTime}
+        </TooltipTrigger>
+        <TooltipContent
+            side="right"
+            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+        >
+          <FormattedDate
+              date={date}
+              options={{
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+                second: "numeric",
+                hour12: true,
+              }}
+          />
+        </TooltipContent>
+      </Tooltip>
   );
 }
 
