@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { getNameAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { useRecords } from "@ensnode/ensnode-react";
+import { ResolverRecordsSelection, useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
 import { AdditionalRecords } from "./AdditionalRecords";
@@ -20,13 +20,23 @@ export default function NameDetailPage() {
   // TODO: Get the namespace from the active ENSNode connection
   const namespaceId = ENSNamespaceIds.Mainnet;
 
+  const selection = {
+    ...DefaultRecordsSelection[namespaceId],
+    texts: [
+      ...DefaultRecordsSelection[namespaceId].texts,
+      "org.telegram",
+      "com.linkedin",
+      "com.reddit",
+    ],
+  } as const satisfies ResolverRecordsSelection;
+
   const {
     data: records,
     status: recordsStatus,
     isLoading,
   } = useRecords({
     name,
-    selection: DefaultRecordsSelection.mainnet,
+    selection,
   });
 
   const avatarUrl = getNameAvatarUrl(name, namespaceId);
@@ -58,17 +68,17 @@ export default function NameDetailPage() {
         {recordsStatus === "success" && records && (
           <>
             <ProfileInformation
-              description={records.records.texts?.description}
-              email={records.records.texts?.email}
+              description={records.records.texts.description}
+              email={records.records.texts.email}
             />
 
             <SocialLinks
-              twitter={records.records.texts?.["com.twitter"]}
-              github={records.records.texts?.["com.github"]}
-              farcaster={records.records.texts?.["com.farcaster"]}
-              telegram={records.records.texts?.["org.telegram"]}
-              linkedin={records.records.texts?.["com.linkedin"]}
-              reddit={records.records.texts?.["com.reddit"]}
+              twitter={records.records.texts["com.twitter"]}
+              github={records.records.texts["com.github"]}
+              farcaster={records.records.texts["com.farcaster"]}
+              telegram={records.records.texts["org.telegram"]}
+              linkedin={records.records.texts["com.linkedin"]}
+              reddit={records.records.texts["com.reddit"]}
             />
 
             <Addresses addresses={records.records.addresses} />
