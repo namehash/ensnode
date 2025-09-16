@@ -1,11 +1,11 @@
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
-import {getAddressDetailsUrl, getChainName} from "@/lib/namespace-utils";
-import {ENSNamespaceId, getENSRootChainId} from "@ensnode/datasources";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
+import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
 import Link from "next/link";
+import { PropsWithChildren } from "react";
 import { Address } from "viem";
-import {PropsWithChildren} from "react";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface NameDisplayProps {
   name: Name;
@@ -80,23 +80,24 @@ export function AddressLink({ address, namespaceId, className }: AddressLinkProp
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <AddressInfoTooltip namespaceId={namespaceId} address={address}>
-      <AddressDisplay address={address} className={className} />
-    </AddressInfoTooltip>;
+    return (
+      <AddressInfoTooltip namespaceId={namespaceId} address={address}>
+        <AddressDisplay address={address} className={className} />
+      </AddressInfoTooltip>
+    );
   }
 
   return (
-      <AddressInfoTooltip namespaceId={namespaceId} address={address}>
-    <ExternalLinkWithIcon
-      href={ensAppAddressDetailsUrl.toString()}
-      className={`font-medium ${className || ""}`}
-    >
-      <AddressDisplay address={address} />
-    </ExternalLinkWithIcon>
-      </AddressInfoTooltip>
+    <AddressInfoTooltip namespaceId={namespaceId} address={address}>
+      <ExternalLinkWithIcon
+        href={ensAppAddressDetailsUrl.toString()}
+        className={`font-medium ${className || ""}`}
+      >
+        <AddressDisplay address={address} />
+      </ExternalLinkWithIcon>
+    </AddressInfoTooltip>
   );
 }
-
 
 interface AddressInfoTooltipProps {
   namespaceId: ENSNamespaceId;
@@ -106,15 +107,20 @@ interface AddressInfoTooltipProps {
 /**
  * On hover displays a full address and a chain it belongs to.
  */
-const AddressInfoTooltip = ({children, namespaceId, address}: PropsWithChildren<AddressInfoTooltipProps>) =>
-      <Tooltip>
-        <TooltipTrigger>
-          {children}
-        </TooltipTrigger>
-        <TooltipContent
-            side="top"
-            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
-        >
-          Unnamed {getChainName(getENSRootChainId(namespaceId))} address:<br />{address}
-        </TooltipContent>
-      </Tooltip>;
+const AddressInfoTooltip = ({
+  children,
+  namespaceId,
+  address,
+}: PropsWithChildren<AddressInfoTooltipProps>) => (
+  <Tooltip>
+    <TooltipTrigger>{children}</TooltipTrigger>
+    <TooltipContent
+      side="top"
+      className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+    >
+      Unnamed {getChainName(getENSRootChainId(namespaceId))} address:
+      <br />
+      {address}
+    </TooltipContent>
+  </Tooltip>
+);

@@ -5,7 +5,7 @@ import {
   AvatarFallback,
   AvatarImage,
   NamedAddressFallback,
-  UnnamedAddressFallback
+  UnnamedAddressFallback,
 } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getNameAvatarUrl } from "@/lib/namespace-utils";
@@ -59,14 +59,16 @@ export function Identity({
       {showAvatar && (
         <Avatar className="h-6 w-6">
           {ensName && ensAvatarUrl ? (
-              <>
-                <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />
-                <AvatarFallback >
-                  <NamedAddressFallback name={ensName} />
-                </AvatarFallback>
-              </>
+            <>
+              <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />
+              <AvatarFallback>
+                <NamedAddressFallback name={ensName} />
+              </AvatarFallback>
+            </>
           ) : (
-              <AvatarFallback><UnnamedAddressFallback namespaceId={namespaceId} /></AvatarFallback>
+            <AvatarFallback>
+              <UnnamedAddressFallback namespaceId={namespaceId} />
+            </AvatarFallback>
           )}
         </Avatar>
       )}

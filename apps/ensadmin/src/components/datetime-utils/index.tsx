@@ -1,7 +1,7 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import * as React from "react";
 
 /**
@@ -76,29 +76,29 @@ export function RelativeTime({
   }, [date]);
 
   return (
-      <Tooltip>
-        <TooltipTrigger className="cursor-default">
-            {prefix}
-            {relativeTime}
-        </TooltipTrigger>
-        <TooltipContent
-            side="right"
-            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
-        >
-          <FormattedDate
-              date={date}
-              options={{
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "numeric",
-                second: "numeric",
-                hour12: true,
-              }}
-          />
-        </TooltipContent>
-      </Tooltip>
+    <Tooltip>
+      <TooltipTrigger className="cursor-default">
+        {prefix}
+        {relativeTime}
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+      >
+        <FormattedDate
+          date={date}
+          options={{
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            hour12: true,
+          }}
+        />
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

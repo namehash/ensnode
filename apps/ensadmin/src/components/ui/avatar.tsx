@@ -4,11 +4,11 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
+import { ChainIcon } from "@/components/chains/ChainIcon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
-import {ENSNamespaceId, getENSRootChainId} from "@ensnode/datasources";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {ChainIcon} from "@/components/chains/ChainIcon";
-import {getChainName} from "@/lib/namespace-utils";
+import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -56,32 +56,33 @@ interface NamedAddressFallbackProps {
   name: string;
 }
 
-const NamedAddressFallback = ({name}: NamedAddressFallbackProps) =>
-    <BoringAvatar
-        name={name}
-        colors={["#000000", "#ffffff", "#5191c1", "#1e6495", "#0a4b75"]}
-        variant="beam"
-    />;
+const NamedAddressFallback = ({ name }: NamedAddressFallbackProps) => (
+  <BoringAvatar
+    name={name}
+    colors={["#000000", "#ffffff", "#5191c1", "#1e6495", "#0a4b75"]}
+    variant="beam"
+  />
+);
 
 interface UnnamedAddressFallbackProps {
   namespaceId: ENSNamespaceId;
 }
 
-const UnnamedAddressFallback = ({namespaceId}: UnnamedAddressFallbackProps) => {
+const UnnamedAddressFallback = ({ namespaceId }: UnnamedAddressFallbackProps) => {
   const chainId = getENSRootChainId(namespaceId);
   return (
-      <Tooltip>
-        <TooltipTrigger className="cursor-default">
-          <ChainIcon chainId={chainId} />
-        </TooltipTrigger>
-        <TooltipContent
-            side="top"
-            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
-        >
-          {getChainName(chainId)}
-        </TooltipContent>
-      </Tooltip>
+    <Tooltip>
+      <TooltipTrigger className="cursor-default">
+        <ChainIcon chainId={chainId} />
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+      >
+        {getChainName(chainId)}
+      </TooltipContent>
+    </Tooltip>
   );
-}
+};
 
 export { Avatar, AvatarImage, AvatarFallback, NamedAddressFallback, UnnamedAddressFallback };
