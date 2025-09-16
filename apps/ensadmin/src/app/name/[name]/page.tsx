@@ -1,8 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { getNameAvatarUrl } from "@/lib/namespace-utils";
-import { ENSNamespaceIds } from "@ensnode/datasources";
+import { useNamespaceId } from "@/hooks/use-namespace-id";
 import { useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
@@ -17,8 +16,7 @@ export default function NameDetailPage() {
   const params = useParams();
   const name = decodeURIComponent(params.name as string);
 
-  // TODO: Get the namespace from the active ENSNode connection
-  const namespaceId = ENSNamespaceIds.Mainnet;
+  const { data: namespaceId, isLoading: namespaceLoading } = useNamespaceId();
 
   const {
     data: records,
@@ -26,12 +24,10 @@ export default function NameDetailPage() {
     isLoading,
   } = useRecords({
     name,
-    selection: DefaultRecordsSelection.mainnet,
+    selection: DefaultRecordsSelection[namespaceId],
   });
 
-  const avatarUrl = getNameAvatarUrl(name, namespaceId);
-
-  if (isLoading) {
+  if (namespaceLoading || isLoading) {
     return <NameDetailPageSkeleton />;
   }
 
@@ -39,7 +35,6 @@ export default function NameDetailPage() {
     <div className="container mx-auto p-6 max-w-4xl">
       <ProfileHeader
         name={name}
-        avatarUrl={avatarUrl}
         headerImage={records?.records?.texts?.header}
         websiteUrl={records?.records?.texts?.url}
       />

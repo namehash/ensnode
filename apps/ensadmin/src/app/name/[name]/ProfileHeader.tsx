@@ -4,15 +4,16 @@ import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAvatarUrl } from "@/hooks/use-avatar-url";
 
 interface ProfileHeaderProps {
   name: string;
-  avatarUrl: URL | null;
   headerImage?: string | null;
   websiteUrl?: string | null;
 }
 
-export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: ProfileHeaderProps) {
+export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderProps) {
+  const { data: avatarUrl } = useAvatarUrl({ name });
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12
   // See: https://docs.ens.domains/ensip/12#uri-types
