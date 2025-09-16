@@ -2,7 +2,7 @@
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {Avatar, AvatarFallback, AvatarImage, NamedAddressFallback} from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface ProfileHeaderProps {
@@ -50,7 +50,7 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
           <div className="flex items-center gap-4">
             <Avatar className="-mt-16 h-20 w-20 ring-4 ring-white">
               {avatarUrl && <AvatarImage src={avatarUrl.toString()} alt={name} />}
-              <AvatarFallback randomAvatarGenerationSeed={name} />
+              <AvatarFallback><NamedAddressFallback name={name} /></AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <h1>

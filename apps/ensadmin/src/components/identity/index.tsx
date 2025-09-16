@@ -1,6 +1,12 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  NamedAddressFallback,
+  UnnamedAddressFallback
+} from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getNameAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
@@ -53,9 +59,15 @@ export function Identity({
       {showAvatar && (
         <Avatar className="h-6 w-6">
           {ensName && ensAvatarUrl ? (
-            <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />
-          ) : null}
-          <AvatarFallback randomAvatarGenerationSeed={address} />
+              <>
+                <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />
+                <AvatarFallback >
+                  <NamedAddressFallback name={ensName} />
+                </AvatarFallback>
+              </>
+          ) : (
+              <AvatarFallback><UnnamedAddressFallback namespaceId={namespaceId} /></AvatarFallback>
+          )}
         </Avatar>
       )}
       {ensName ? (
