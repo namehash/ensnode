@@ -50,7 +50,7 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  * ```
  */
 export function useRecords<SELECTION extends ResolverRecordsSelection>(
-  parameters: UseRecordsParameters<SELECTION> & ConfigParameter
+  parameters: UseRecordsParameters<SELECTION> & ConfigParameter,
 ) {
   const { config, query = {}, name, ...args } = parameters;
   const _config = useENSNodeConfig(config);
