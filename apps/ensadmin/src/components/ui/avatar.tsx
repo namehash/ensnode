@@ -49,8 +49,8 @@ const AvatarFallback = React.forwardRef<
   >
     <BoringAvatar
       name={randomAvatarGenerationSeed}
-      colors={["#093c52", "#006699", "#0080bc", "#6ba5b8", "#9dc3d0"]}
-      variant="marble"
+      colors={["#000000", "#ffffff", "#5191c1", "#1e6495", "#0a4b75"]}
+      variant="beam"
     />
   </AvatarPrimitive.Fallback>
 ));
