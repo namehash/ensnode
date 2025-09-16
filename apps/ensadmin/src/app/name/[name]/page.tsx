@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { getNameAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { ResolverRecordsSelection, useRecords } from "@ensnode/ensnode-react";
+import { useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
 import { AdditionalRecords } from "./AdditionalRecords";
@@ -20,23 +20,13 @@ export default function NameDetailPage() {
   // TODO: Get the namespace from the active ENSNode connection
   const namespaceId = ENSNamespaceIds.Mainnet;
 
-  const selection = {
-    ...DefaultRecordsSelection[namespaceId],
-    texts: [
-      ...DefaultRecordsSelection[namespaceId].texts,
-      "org.telegram",
-      "com.linkedin",
-      "com.reddit",
-    ],
-  } as const satisfies ResolverRecordsSelection;
-
   const {
     data,
     status: recordsStatus,
     isLoading,
   } = useRecords({
     name,
-    selection,
+    selection: DefaultRecordsSelection[namespaceId],
   });
 
   const avatarUrl = getNameAvatarUrl(name, namespaceId);

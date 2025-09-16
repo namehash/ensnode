@@ -30,6 +30,9 @@ const TEXTS = [
   "com.twitter",
   "com.farcaster",
   "com.github",
+  "org.telegram",
+  "com.linkedin",
+  "com.reddit",
 ] as const satisfies string[];
 
 export const DefaultRecordsSelection = {
