@@ -31,7 +31,33 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
     }
   };
 
+  const normalizeWebsiteUrl = (url: string | null | undefined): string | undefined => {
+    if (!url) return undefined;
+
+    try {
+      let normalizedUrl: URL;
+
+      try {
+        normalizedUrl = new URL(url);
+      } catch {
+        normalizedUrl = new URL(`https://${url}`);
+      }
+
+      const urlString = normalizedUrl.toString();
+
+      // If URL is only a domain (no path, search, or hash), remove trailing slash
+      if (normalizedUrl.pathname === "/" && !normalizedUrl.search && !normalizedUrl.hash) {
+        return urlString.replace(/\/$/, "");
+      }
+
+      return urlString;
+    } catch {
+      return undefined;
+    }
+  };
+
   const validHeaderImageUrl = getValidHeaderImageUrl(headerImage);
+  const normalizedWebsiteUrl = normalizeWebsiteUrl(websiteUrl);
 
   return (
     <Card className="overflow-hidden mb-8">
@@ -57,12 +83,9 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
                 <NameDisplay className="text-3xl font-bold" name={name} />
               </h1>
               <div className="flex items-center gap-3 mt-1">
-                {websiteUrl && (
-                  <ExternalLinkWithIcon
-                    href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
-                    className="text-sm"
-                  >
-                    {new URL(websiteUrl).hostname}
+                {normalizedWebsiteUrl && (
+                  <ExternalLinkWithIcon href={normalizedWebsiteUrl} className="text-sm">
+                    {new URL(normalizedWebsiteUrl).hostname}
                   </ExternalLinkWithIcon>
                 )}
               </div>
