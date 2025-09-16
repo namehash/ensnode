@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
-import { LinkedInIcon } from "@/components/icons/LinkedinIcon";
+import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 
