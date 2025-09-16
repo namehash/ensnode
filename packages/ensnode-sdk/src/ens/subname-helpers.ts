@@ -1,9 +1,6 @@
-import { Address, Hex, concat, isAddress, isHash, keccak256, toHex } from "viem";
+import { Hex, concat, keccak256, toHex } from "viem";
 
-import { labelhash } from "viem/ens";
-import { labelhashLiteralLabel } from "../shared";
-import { addrReverseLabel } from "./reverse-name";
-import type { LabelHash, LiteralLabel, Node } from "./types";
+import type { LabelHash, Node } from "./types";
 
 /**
  * Implements one step of the namehash algorithm, combining `labelHash` with `node` to produce
@@ -12,47 +9,6 @@ import type { LabelHash, LiteralLabel, Node } from "./types";
  */
 export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
   keccak256(concat([node, labelHash]));
-
-/**
- * Attempt to heal the labelHash of an addr.reverse subname using an address that might be related to the subname.
- *
- * @throws if maybeReverseAddress is not a valid Address
- * @throws if labelHash is not a valid Labelhash
- *
- * @returns the original label if healed, otherwise null
- */
-export const maybeHealLabelByReverseAddress = ({
-  maybeReverseAddress,
-  labelHash,
-}: {
-  /** The address that is possibly associated with the addr.reverse subname */
-  maybeReverseAddress: Address;
-
-  /** The labelhash of the addr.reverse subname */
-  labelHash: LabelHash;
-}): LiteralLabel | null => {
-  // check if required arguments are valid
-  if (!isAddress(maybeReverseAddress)) {
-    throw new Error(
-      `Invalid reverse address: '${maybeReverseAddress}'. Must be a valid EVM Address.`,
-    );
-  }
-
-  if (!isHash(labelHash)) {
-    throw new Error(
-      `Invalid labelHash: '${labelHash}'. Must start with '0x' and represent 32 bytes.`,
-    );
-  }
-
-  // derive the assumed label from the normalized address
-  const assumedLabel = addrReverseLabel(maybeReverseAddress);
-
-  // if labelHash of the assumed label matches the provided labelHash, heal
-  if (labelhashLiteralLabel(assumedLabel) === labelHash) return assumedLabel;
-
-  // otherwise, healing did not succeed
-  return null;
-};
 
 /**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.
