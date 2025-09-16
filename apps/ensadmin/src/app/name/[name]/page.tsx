@@ -31,7 +31,7 @@ export default function NameDetailPage() {
   } as const satisfies ResolverRecordsSelection;
 
   const {
-    data: records,
+    data,
     status: recordsStatus,
     isLoading,
   } = useRecords({
@@ -50,8 +50,8 @@ export default function NameDetailPage() {
       <ProfileHeader
         name={name}
         avatarUrl={avatarUrl}
-        headerImage={records?.records?.texts?.header}
-        websiteUrl={records?.records?.texts?.url}
+        headerImage={data?.records?.texts?.header}
+        websiteUrl={data?.records?.texts?.url}
       />
 
       <div className="grid gap-6">
@@ -65,25 +65,18 @@ export default function NameDetailPage() {
           </Card>
         )}
 
-        {recordsStatus === "success" && records && (
+        {recordsStatus === "success" && data && (
           <>
             <ProfileInformation
-              description={records.records.texts.description}
-              email={records.records.texts.email}
+              description={data.records.texts.description}
+              email={data.records.texts.email}
             />
 
-            <SocialLinks
-              twitter={records.records.texts["com.twitter"]}
-              github={records.records.texts["com.github"]}
-              farcaster={records.records.texts["com.farcaster"]}
-              telegram={records.records.texts["org.telegram"]}
-              linkedin={records.records.texts["com.linkedin"]}
-              reddit={records.records.texts["com.reddit"]}
-            />
+            <SocialLinks.Texts texts={data.records.texts} />
 
-            <Addresses addresses={records.records.addresses} />
+            <Addresses addresses={data.records.addresses} />
 
-            <AdditionalRecords texts={records.records.texts} />
+            <AdditionalRecords texts={data.records.texts} />
           </>
         )}
       </div>
