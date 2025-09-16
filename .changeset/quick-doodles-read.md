@@ -1,5 +1,4 @@
 ---
-"@ensnode/ensnode-sdk": minor
 "ensadmin": minor
 ---
 
