@@ -1,3 +1,4 @@
+export * from "./address";
 export * from "./cache";
 export * from "./collections";
 export * from "./types";

@@ -1,14 +1,14 @@
-import { Address, getAddress } from "viem";
+import { Address, isAddress } from "viem";
 import { z } from "zod/v4";
 
 import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
-import { ChainId, isNormalizedName } from "../../shared";
+import { ChainId, asLowerCaseAddress, isNormalizedName } from "../../shared";
 import { makeDurationSchema } from "../../shared/zod-schemas";
 
 const toName = (val: string) => val as Name;
-const toAddress = (val: string) => val as Address;
+const toAddress = (val: string) => asLowerCaseAddress(val);
 const toChainId = (val: number) => val as ChainId;
 const toCoinType = (val: number) => val as CoinType;
 
@@ -39,16 +39,15 @@ const name = z
 
 const address = z
   .string()
-  .refine(
-    (val) => {
-      try {
-        return getAddress(val) === val;
-      } catch {
-        return false;
-      }
-    },
-    { error: "Must be a valid checksummed EVM Address" },
-  )
+  .check((ctx) => {
+    if (!isAddress(ctx.value)) {
+      ctx.issues.push({
+        code: "custom",
+        message: "Invalid EVM address",
+        input: ctx.value,
+      });
+    }
+  })
   .transform(toAddress);
 
 const trace = boolstring;

@@ -1,6 +1,6 @@
 import { hasNullByte } from "@/lib/lib-helpers";
-import { NormalizedName, isNormalizedName } from "@ensnode/ensnode-sdk";
-import { getAddress, isAddress, isAddressEqual, zeroAddress } from "viem";
+import { NormalizedName, asLowerCaseAddress, isNormalizedName } from "@ensnode/ensnode-sdk";
+import { isAddress, isAddressEqual, zeroAddress } from "viem";
 
 /**
  * Interprets a name record value string and returns null if the value is interpreted as a deletion.
@@ -37,7 +37,7 @@ export function interpretNameRecordValue(value: string): NormalizedName | null {
  *   iv. zeroAddress
  * b) an address record value that
  *   i. does not contain null bytes
- *   ii. (if is an EVM address) is checksummed
+ *   ii. (if is an EVM address) is lowercase
  *
  * @param value - The address record value to interpret.
  * @returns The interpreted address string or null if deleted.
@@ -58,8 +58,8 @@ export function interpretAddressRecordValue(value: string): string | null {
   // interpret zeroAddress as deletion
   if (isAddressEqual(value, zeroAddress)) return null;
 
-  // otherwise ensure checksummed
-  return getAddress(value);
+  // otherwise ensure lowercase
+  return asLowerCaseAddress(value);
 }
 
 /**
