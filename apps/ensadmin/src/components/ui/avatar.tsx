@@ -31,8 +31,8 @@ export const Avatar = React.forwardRef<
         <AvatarImage
           src={ensAvatarUrl.href}
           alt={ensName}
-          onLoadingStatusChange={(newStatus: ImageLoadingStatus) => {
-            setLoadingStatus(newStatus);
+          onLoadingStatusChangeCallback={(status: ImageLoadingStatus) => {
+            setLoadingStatus(status);
           }}
         />
       )}
@@ -46,15 +46,21 @@ export const Avatar = React.forwardRef<
 });
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
-const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
-  ({ className, onError, ...props }, ref) => (
-    <AvatarPrimitive.Image
-      ref={ref}
-      className={cn("aspect-square h-full w-full", className)}
-      {...props}
-    />
-  ),
-);
+interface AvatarImageProps {
+  onLoadingStatusChangeCallback: (status: ImageLoadingStatus) => void;
+}
+
+const AvatarImage = React.forwardRef<
+  HTMLImageElement,
+  React.ImgHTMLAttributes<HTMLImageElement> & AvatarImageProps
+>(({ className, onLoadingStatusChangeCallback, onError, ...props }, ref) => (
+  <AvatarPrimitive.Image
+    ref={ref}
+    className={cn("aspect-square h-full w-full", className)}
+    onLoadingStatusChange={onLoadingStatusChangeCallback}
+    {...props}
+  />
+));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 interface AvatarFallbackProps {

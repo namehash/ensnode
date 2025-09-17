@@ -52,7 +52,8 @@ export default function MockRelativeTimePage() {
     prefix?: string;
   }[] = useMemo(() => {
     const date = unixTimestampToDate(mockRelativeTimestampData[selectedTime].date);
-    const relativeToForPast = unixTimestampToDate(mockRelativeTimestampData["Past"].relativeTo);
+    // since the value is hardcoded we are sure it exists
+    const relativeToForPast = unixTimestampToDate(mockRelativeTimestampData["Past"].relativeTo!);
 
     return selectedTime === "Past"
       ? [

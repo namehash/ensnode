@@ -68,7 +68,7 @@ export function RelativeTime({
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
-  tooltipPosition = "top",
+  tooltipPosition = TooltipPosition.TOP,
   relativeTo,
   prefix,
 }: {
