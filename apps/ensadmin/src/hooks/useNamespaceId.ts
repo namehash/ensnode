@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
  * Hook to get the namespace ID from the active ENSNode connection.
  *
  * Returns the ENS namespace identifier for the currently configured ENSNode client.
- * This determines which ENS network (Mainnet, Sepolia, Holesky, etc.) the application
+ * This determines which ENS namespace (Mainnet, Sepolia, Holesky, etc.) the connected ENSNode
  * is connected to. Falls back to Mainnet if no configuration is available.
  *
  * @returns Query result with namespace ID, loading state, and error handling
