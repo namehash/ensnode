@@ -2,7 +2,7 @@
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Button } from "@/components/ui/button";
-import { useNamespaceId } from "@/hooks/use-namespace-id";
+import { useNamespaceId } from "@/hooks/useNamespaceId";
 import { getExternalEnsAppNameUrl } from "@/lib/namespace-utils";
 import { useParams } from "next/navigation";
 

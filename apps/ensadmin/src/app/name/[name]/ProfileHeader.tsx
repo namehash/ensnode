@@ -4,7 +4,7 @@ import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAvatarUrl } from "@/hooks/use-avatar-url";
+import { useAvatarUrl } from "@/hooks/useAvatarUrl";
 
 interface ProfileHeaderProps {
   name: string;

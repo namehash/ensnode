@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useNamespaceId } from "@/hooks/use-namespace-id";
+import { useNamespaceId } from "@/hooks/useNamespaceId";
 import { useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
