@@ -1,8 +1,20 @@
 
 locals {
-  # Base domain name used for ENSIndexer and ENSRainbow DNS records
-  # DNS records for ENSIndexer are assigned using the following naming pattern indexer.${default_environment}.${domain_name}
-  # Example indexer.holesky.terraform-test.ensnode.io
+  # The `hosted_zone_name` represents the "base" domain name of the zone in AWS Route53
+  # where "hosted" ENSNode app instances (such as ENSIndexer and ENSRainbow) are nested beneath.
+  # 
+  # For example, if:
+  # - `hosted_zone_name` is "ensnode.io"
+  # - `ensnode_environment_name` is "blue"
+  # - `ensnode_indexer_type` is "alpha-sepolia"
+  #
+  # The fqdn for "API"-style ENSIndexer instances is generated as follows:
+  # - api.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
+  # - example: api.alpha-sepolia.blue.ensnode.io
+  # 
+  # The fqdn for "Indexer"-style ENSIndexer instances is generated as follows:
+  # - indexer.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
+  # - example: indexer.alpha-sepolia.blue.ensnode.io
   hosted_zone_name = "ensnode.io"
   render_region    = "ohio"
   ensindexer_instances = {
