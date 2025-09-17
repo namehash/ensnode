@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 
 const SOCIAL_LINK_KEYS = [
-  "twitter",
-  "github",
-  "farcaster",
-  "telegram",
-  "linkedin",
-  "reddit",
+  "com.twitter",
+  "com.farcaster",
+  "com.github",
+  "org.telegram",
+  "com.linkedin",
+  "com.reddit",
 ] as const;
 
 type SocialLinkKey = (typeof SOCIAL_LINK_KEYS)[number];
@@ -31,7 +31,7 @@ export function SocialLinks({
       <CardContent className="gap-3 flex flex-col md:flex-row flex-wrap">
         {linksWithValue.map(({ key, value }) => {
           switch (key) {
-            case "twitter": {
+            case "com.twitter": {
               return (
                 <div className="inline-flex items-center gap-2">
                   <SiX size={16} className="text-gray-500" />
@@ -41,7 +41,7 @@ export function SocialLinks({
                 </div>
               );
             }
-            case "github": {
+            case "com.github": {
               return (
                 <div className="inline-flex items-center gap-2">
                   <SiGithub size={16} className="text-gray-500" />
@@ -51,7 +51,7 @@ export function SocialLinks({
                 </div>
               );
             }
-            case "farcaster": {
+            case "com.farcaster": {
               return (
                 <div className="inline-flex items-center gap-2">
                   <SiFarcaster size={16} className="text-gray-500" />
@@ -61,7 +61,7 @@ export function SocialLinks({
                 </div>
               );
             }
-            case "telegram": {
+            case "org.telegram": {
               return (
                 <div className="inline-flex items-center gap-2">
                   <SiTelegram size={16} className="text-gray-500" />
@@ -71,7 +71,7 @@ export function SocialLinks({
                 </div>
               );
             }
-            case "linkedin": {
+            case "com.linkedin": {
               return (
                 <div className="inline-flex items-center gap-2">
                   <LinkedInIcon className="text-gray-500 size-4 fill-current" />
@@ -84,7 +84,7 @@ export function SocialLinks({
                 </div>
               );
             }
-            case "reddit": {
+            case "com.reddit": {
               return (
                 <div className="inline-flex items-center gap-2">
                   <SiReddit size={16} className="text-gray-500" />
