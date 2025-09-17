@@ -1,39 +1,47 @@
-# ENSNode configuration
-variable "ensnode_version" {
-  type = string
-}
-
 # Render configuration
+
+# See https://render.com/docs/projects
 variable "render_environment_id" {
   type = string
 }
 
+# See https://render.com/docs/blueprint-spec#region
 variable "render_region" {
   type = string
 }
 
-variable "instance_type" {
+# See https://render.com/docs/web-services
+variable "render_instance_plan" {
   type = string
 }
 
 # DNS configuration
-variable "base_domain_name" {
-  type        = string
-  description = "Base DNS domain (e.g. 'example.com' or 'namehash.io'). Combine with subdomain_prefix to build full domain name."
+
+# Example: "ensnode.io"
+# See main.tf for more details
+variable "hosted_zone_name" {
+  type = string
 }
 
-variable "subdomain_prefix" {
-  type        = string
-  description = "Subdomain prefix (e.g. 'mainnet.green' or 'staging'). Combine with base_domain_name to build full domain name."
+# Example: "blue"
+# See main.tf for more details on how this is used, including for building fqdn values.
+variable "ensnode_environment_name" {
+  type = string
+}
+
+# Example: "alpha-sepolia"
+# See main.tf for more details on how this is used, including for building fqdn values.
+variable "ensnode_indexer_type" {
+  type = string
 }
 
 # ENSIndexer configuration
-variable "instance_name" {
-  type        = string
-  description = "Unique name for ensindexer instance to guarantee unique names for all Render instances"
+
+variable "ensnode_version" {
+  type = string
 }
 
-variable "database_url" {
+variable "ensdb_url" {
   type = string
 }
 
@@ -42,6 +50,10 @@ variable "database_schema" {
 }
 
 variable "ensrainbow_url" {
+  type = string
+}
+
+variable "ensadmin_public_url" {
   type = string
 }
 
