@@ -19,7 +19,7 @@ describe("asLowerCaseAddress", () => {
 
     // act & assert
     expect(() => asLowerCaseAddress(input)).toThrowError(
-      `Cannot make an invalid EVM address "${input}" a lowercase address.`,
+      `Invalid EVM address "${input}" cannot be converted to a lowercase address.`,
     );
   });
 });

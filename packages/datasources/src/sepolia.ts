@@ -196,7 +196,7 @@ export default {
       },
       NameWrapper: {
         abi: linea_NameWrapper,
-        address: "0xf127de9e039a789806fed4c6b1c0f3affeea9425e",
+        address: "0xf127de9e039a789806fed4c6b1c0f3affea9425e",
         startBlock: 2395202,
       },
     },

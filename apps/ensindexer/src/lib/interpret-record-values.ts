@@ -58,7 +58,7 @@ export function interpretAddressRecordValue(value: string): string | null {
   // interpret zeroAddress as deletion
   if (isAddressEqual(value, zeroAddress)) return null;
 
-  // otherwise ensure lowercase
+  // otherwise convert to lowercase
   return asLowerCaseAddress(value);
 }
 
