@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,13 +17,12 @@ const SOCIAL_LINK_KEYS = [
 ] as const;
 
 type SocialLinkKey = (typeof SOCIAL_LINK_KEYS)[number];
-type SocialLinkValue = string | null;
+type SocialLinkValue = string;
 
 export function SocialLinks({
   links,
 }: { links: { key: SocialLinkKey; value: SocialLinkValue }[] }) {
-  const linksWithValue = links.filter(({ value }) => !!value);
-  if (linksWithValue.length === 0) return null;
+  if (links.length === 0) return null;
 
   return (
     <Card>
@@ -29,7 +30,7 @@ export function SocialLinks({
         <CardTitle>Social Links</CardTitle>
       </CardHeader>
       <CardContent className="gap-3 flex flex-col md:flex-row flex-wrap">
-        {linksWithValue.map(({ key, value }) => {
+        {links.map(({ key, value }) => {
           switch (key) {
             case "com.twitter": {
               return (
@@ -106,6 +107,19 @@ export function SocialLinks({
 
 SocialLinks.Texts = function SocialLinksTexts({
   texts,
-}: { texts: Record<string, SocialLinkValue> }) {
-  return <SocialLinks links={SOCIAL_LINK_KEYS.map((key) => ({ key, value: texts[key] }))} />;
+}: { texts: Record<string, string | null | undefined> }) {
+  const links = useMemo(
+    () =>
+      SOCIAL_LINK_KEYS
+        // map social keys to a set of links
+        .map((key) => ({ key, value: texts[key] }))
+        // filter those links by those that exist
+        .filter(
+          (link): link is { key: SocialLinkKey; value: SocialLinkValue } =>
+            typeof link.value === "string",
+        ),
+    [texts],
+  );
+
+  return <SocialLinks links={links} />;
 };
