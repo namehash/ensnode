@@ -1,4 +1,4 @@
-import { Address, hexToBigInt } from "viem";
+import { Address, hexToBigInt, isAddress } from "viem";
 import { asLowerCaseAddress } from "../shared";
 import { CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE, bigintToCoinType } from "./coin-type";
 import { Label, Name } from "./types";
@@ -17,7 +17,15 @@ const REVERSE_NAME_REGEX = /^([0-9a-fA-F]+)\.([0-9a-f]{1,64}|addr|default)\.reve
  * @throws if address is invalid
  * @see https://docs.ens.domains/ensip/19#reverse-resolution
  */
-const parseAddressLabel = (addressLabel: Label): Address => asLowerCaseAddress(`0x${addressLabel}`);
+const parseAddressLabel = (addressLabel: Label): Address => {
+  const maybeAddress = `0x${addressLabel}`;
+
+  if (!isAddress(maybeAddress)) {
+    throw new Error(`Invalid EVM address "${maybeAddress}"`);
+  }
+
+  return asLowerCaseAddress(maybeAddress);
+};
 
 /**
  * Parses a coinType label (hex sans prefix) into an EVMCoinType.

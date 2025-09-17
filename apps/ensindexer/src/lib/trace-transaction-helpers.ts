@@ -1,5 +1,5 @@
 import { asLowerCaseAddress } from "@ensnode/ensnode-sdk";
-import { type Address, type Hash, type Hex } from "viem";
+import { type Address, type Hash, type Hex, isAddress } from "viem";
 
 /**
  * Options for the `callTracer` tracer. This tracer is used to enlist
@@ -84,12 +84,12 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
     // if matches are found, normalize them and return unique addresses
     if (matches) {
       for (const maybeAddress of matches) {
-        try {
+        if (isAddress(maybeAddress)) {
           // Normalize the address
           const normalizedAddr = asLowerCaseAddress(maybeAddress);
           // Add the normalized address to the set
           uniqueAddresses.add(normalizedAddr);
-        } catch {
+        } else {
           // Ignore invalid addresses
         }
       }
@@ -113,12 +113,14 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
         continue;
       }
 
-      try {
+      const maybeAddress = `0x${maybePartialAddress}`;
+
+      if (isAddress(maybeAddress)) {
         // Add 0x prefix and normalize the address
-        const normalizedAddr = asLowerCaseAddress(`0x${maybePartialAddress}`);
+        const normalizedAddr = asLowerCaseAddress(maybeAddress);
         // Add the normalized address to the set
         uniqueAddresses.add(normalizedAddr);
-      } catch {
+      } else {
         // Ignore invalid addresses
       }
     }

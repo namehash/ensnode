@@ -1,5 +1,5 @@
 import { CoinType, coinNameToTypeMap } from "@ensdomains/address-encoder";
-import { isAddress } from "viem";
+import { Address, isAddress } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -153,7 +153,7 @@ export const makeEvmAddressSchema = (valueLabel: string = "EVM address") =>
         });
       }
     })
-    .transform((val) => asLowerCaseAddress(val));
+    .transform((val) => asLowerCaseAddress(val as Address));
 
 /**
  * Parses an ISO 8601 string representations of {@link Datetime}

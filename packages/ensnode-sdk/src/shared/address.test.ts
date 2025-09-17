@@ -12,14 +12,4 @@ describe("asLowerCaseAddress", () => {
     // assert
     expect(result).toBe("0x6bd421b6e762d6ad89780eb54b9255f9ab5840bf");
   });
-
-  it("should throw an error for an invalid EVM address", () => {
-    // arrange
-    const input = "0xinvalid";
-
-    // act & assert
-    expect(() => asLowerCaseAddress(input)).toThrowError(
-      `Invalid EVM address "${input}" cannot be converted to a lowercase address.`,
-    );
-  });
 });
