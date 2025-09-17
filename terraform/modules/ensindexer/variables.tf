@@ -20,19 +20,19 @@ variable "render_instance_plan" {
 # Example: "ensnode.io"
 # See main.tf for more details
 variable "hosted_zone_name" {
-  type        = string
+  type = string
 }
 
 # Example: "blue"
 # See main.tf for more details on how this is used, including for building fqdn values.
 variable "ensnode_environment_name" {
-  type        = string
+  type = string
 }
 
 # Example: "alpha-sepolia"
 # See main.tf for more details on how this is used, including for building fqdn values.
 variable "ensnode_indexer_type" {
-  type        = string
+  type = string
 }
 
 # ENSIndexer configuration

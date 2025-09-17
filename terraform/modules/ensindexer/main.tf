@@ -112,7 +112,7 @@ resource "render_web_service" "ensindexer_api" {
       }
     }
   )
-  
+
   # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensindexer_api_fqdn },
