@@ -1,4 +1,4 @@
-import {Tooltip, TooltipContent, TooltipPosition, TooltipTrigger} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipPosition, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
@@ -40,7 +40,7 @@ export function formatRelativeTime(
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
-  relativeTo?: Date
+  relativeTo?: Date,
 ): string {
   const compareWith = relativeTo ? relativeTo.getTime() : Date.now();
 
@@ -83,7 +83,9 @@ export function RelativeTime({
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
-    setRelativeTime(formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting, relativeTo));
+    setRelativeTime(
+      formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting, relativeTo),
+    );
   }, [date]);
 
   return (

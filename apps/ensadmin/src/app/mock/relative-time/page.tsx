@@ -1,16 +1,23 @@
 "use client";
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
-import {RelativeTime, UnixTimestampInSeconds, unixTimestampToDate,} from "@/components/datetime-utils";
-import {InfoIcon} from "@/components/icons/InfoIcon";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {Tooltip, TooltipContent, TooltipPosition, TooltipTrigger} from "@/components/ui/tooltip";
-import {CheckIcon, X as XIcon} from "lucide-react";
-import {useMemo, useState} from "react";
-import {intlFormat} from "date-fns";
+import {
+  RelativeTime,
+  UnixTimestampInSeconds,
+  unixTimestampToDate,
+} from "@/components/datetime-utils";
+import { InfoIcon } from "@/components/icons/InfoIcon";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipPosition, TooltipTrigger } from "@/components/ui/tooltip";
+import { intlFormat } from "date-fns";
+import { CheckIcon, X as XIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 
-const mockRelativeTimestampData = mockDataJson as Record<string, {date: UnixTimestampInSeconds, relativeTo?: UnixTimestampInSeconds}>;
+const mockRelativeTimestampData = mockDataJson as Record<
+  string,
+  { date: UnixTimestampInSeconds; relativeTo?: UnixTimestampInSeconds }
+>;
 type TimeVariant = keyof typeof mockRelativeTimestampData;
 
 const DEFAULT_VARIANT = "Past";
@@ -137,48 +144,48 @@ export default function MockRelativeTimePage() {
                 Display Settings
               </p>
               {/*The checkValue logic is aligned with the RelativeTime optional props logic*/}
-              <RelativeTimePropCheck
-                checkName="enforcePast"
-                checkValue={props.enforcePast}
-              />
-              <RelativeTimePropCheck
-                checkName="includeSeconds"
-                checkValue={props.includeSeconds}
-              />
+              <RelativeTimePropCheck checkName="enforcePast" checkValue={props.enforcePast} />
+              <RelativeTimePropCheck checkName="includeSeconds" checkValue={props.includeSeconds} />
               <RelativeTimePropCheck
                 checkName="conciseFormatting"
                 checkValue={props.conciseFormatting}
               />
-              <div className="h-[1px] self-stretch bg-gray-200"/>
+              <div className="h-[1px] self-stretch bg-gray-200" />
               <div
-                  key={`RelativeTime-relativeTo-display-setting-check`}
-                  className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
+                key={`RelativeTime-relativeTo-display-setting-check`}
+                className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
               >
                 <p className="text-sm leading-6 font-semibold text-gray-500">date:</p>
-                <p className="text-sm leading-6 font-semibold">{intlFormat(props.date, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                  hour12: true,
-                })}</p>
+                <p className="text-sm leading-6 font-semibold">
+                  {intlFormat(props.date, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    second: "numeric",
+                    hour12: true,
+                  })}
+                </p>
               </div>
               <div
-                  key={`RelativeTime-relativeTo-display-setting-check`}
-                  className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
+                key={`RelativeTime-relativeTo-display-setting-check`}
+                className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
               >
                 <p className="text-sm leading-6 font-semibold text-gray-500">relativeTo:</p>
-                <p className="text-sm leading-6 font-semibold">{props.relativeTo ? intlFormat(props.relativeTo, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "numeric",
-                  second: "numeric",
-                  hour12: true,
-                }): "Now"}</p>
+                <p className="text-sm leading-6 font-semibold">
+                  {props.relativeTo
+                    ? intlFormat(props.relativeTo, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                        second: "numeric",
+                        hour12: true,
+                      })
+                    : "Now"}
+                </p>
               </div>
             </div>
             <div className="self-stretch w-[1px] bg-gray-300" />

@@ -2,7 +2,7 @@ import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
-import {ChainId, Name} from "@ensnode/ensnode-sdk";
+import { ChainId, Name } from "@ensnode/ensnode-sdk";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 import { Address } from "viem";
@@ -86,7 +86,13 @@ interface AddressLinkProps {
  * Can take other components (ex.ChainIcon) as children
  * and display them alongside the link as one common interaction area.
  */
-export function AddressLink({ address, namespaceId, chainId, className, children }: PropsWithChildren<AddressLinkProps>) {
+export function AddressLink({
+  address,
+  namespaceId,
+  chainId,
+  className,
+  children,
+}: PropsWithChildren<AddressLinkProps>) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {

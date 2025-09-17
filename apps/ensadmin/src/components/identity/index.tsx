@@ -1,17 +1,15 @@
 "use client";
 
-import {
-  Avatar
-} from "@/components/ui/avatar";
+import { ChainIcon } from "@/components/chains/ChainIcon";
+import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import {ENSNamespaceId, getENSRootChainId} from "@ensnode/datasources";
+import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
+import { ChainId } from "@ensnode/ensnode-sdk";
 import { cx } from "class-variance-authority";
+import * as React from "react";
 import type { Address } from "viem";
 import { AddressLink, NameLink } from "./utils";
-import {ChainId} from "@ensnode/ensnode-sdk";
-import {ChainIcon} from "@/components/chains/ChainIcon";
-import * as React from "react";
 
 interface IdentityProps {
   address: Address;
@@ -56,19 +54,23 @@ export function Identity({
 
   // If there is an error looking up the primary name, fallback to showing the address
   if (status === "error") {
-    return <AddressLink address={address} namespaceId={namespaceId} chainId={resolvedChainId} >
-      {showAvatar && <ChainIcon chainId={resolvedChainId}/>}
-    </AddressLink>;
+    return (
+      <AddressLink address={address} namespaceId={namespaceId} chainId={resolvedChainId}>
+        {showAvatar && <ChainIcon chainId={resolvedChainId} />}
+      </AddressLink>
+    );
   }
 
   const ensName = data.name;
 
-  return (
-      ensName ? (
-          <NameLink name={ensName}>{showAvatar && <Avatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6"/>}</NameLink>
-      ) : (
-          <AddressLink address={address} namespaceId={namespaceId} chainId={resolvedChainId}>{showAvatar && <ChainIcon chainId={resolvedChainId}/>}</AddressLink>
-      )
+  return ensName ? (
+    <NameLink name={ensName}>
+      {showAvatar && <Avatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
+    </NameLink>
+  ) : (
+    <AddressLink address={address} namespaceId={namespaceId} chainId={resolvedChainId}>
+      {showAvatar && <ChainIcon chainId={resolvedChainId} />}
+    </AddressLink>
   );
 }
 Identity.Placeholder = IdentityPlaceholder;

@@ -1,25 +1,25 @@
 "use client";
 
+import { getNameAvatarUrl } from "@/lib/namespace-utils";
+import { cn } from "@/lib/utils";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { Name } from "@ensnode/ensnode-sdk";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
-import {getNameAvatarUrl} from "@/lib/namespace-utils";
-import { cn } from "@/lib/utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
-import {Name} from "@ensnode/ensnode-sdk";
 
 interface AvatarProps {
-    ensName: Name;
-    namespaceId: ENSNamespaceId;
+  ensName: Name;
+  namespaceId: ENSNamespaceId;
 }
 
-type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
+type ImageLoadingStatus = "idle" | "loading" | "loaded" | "error";
 
 export const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ className, ensName, namespaceId, ...props }, ref) => {
-  const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>('idle');
+  const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
   const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
   return (
     <AvatarPrimitive.Root
@@ -27,8 +27,20 @@ export const Avatar = React.forwardRef<
       className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
       {...props}
     >
-        {ensAvatarUrl && <AvatarImage src={ensAvatarUrl.href} alt={ensName} onLoadingStatusChange={(newStatus: ImageLoadingStatus) => {setLoadingStatus(newStatus)}}/>}
-        {ensAvatarUrl === null || loadingStatus === "error" ? <AvatarFallback name={ensName} /> : ((loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />)}
+      {ensAvatarUrl && (
+        <AvatarImage
+          src={ensAvatarUrl.href}
+          alt={ensName}
+          onLoadingStatusChange={(newStatus: ImageLoadingStatus) => {
+            setLoadingStatus(newStatus);
+          }}
+        />
+      )}
+      {ensAvatarUrl === null || loadingStatus === "error" ? (
+        <AvatarFallback name={ensName} />
+      ) : (
+        (loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />
+      )}
     </AvatarPrimitive.Root>
   );
 });
@@ -46,7 +58,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<H
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 interface AvatarFallbackProps {
-    name: Name;
+  name: Name;
 }
 
 const AvatarFallback = React.forwardRef<
@@ -61,13 +73,13 @@ const AvatarFallback = React.forwardRef<
     )}
     {...props}
   >
-      <BoringAvatar
-          name={name}
-          colors={["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"]}
-          variant="beam"
-      />
+    <BoringAvatar
+      name={name}
+      colors={["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"]}
+      variant="beam"
+    />
   </AvatarPrimitive.Fallback>
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />
+const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />;

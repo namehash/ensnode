@@ -1,23 +1,30 @@
 "use client";
 
-import type {ENSNamespaceId} from "@ensnode/datasources";
+import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
-    type ENSIndexerOverallIndexingCompletedStatus,
-    type ENSIndexerOverallIndexingFollowingStatus,
-    type ENSIndexerPublicConfig,
-    OverallIndexingStatusIds,
+  type ENSIndexerOverallIndexingCompletedStatus,
+  type ENSIndexerOverallIndexingFollowingStatus,
+  type ENSIndexerPublicConfig,
+  OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
-import {fromUnixTime} from "date-fns";
-import {useEffect, useState} from "react";
+import { fromUnixTime } from "date-fns";
+import { useEffect, useState } from "react";
 
-import {Duration, RelativeTime} from "@/components/datetime-utils";
-import {NameLink} from "@/components/identity/utils";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-import {Identity} from "../identity";
-import {useRecentRegistrations} from "./hooks";
-import type {Registration} from "./types";
-import {TooltipPosition} from "@/components/ui/tooltip";
+import { Duration, RelativeTime } from "@/components/datetime-utils";
+import { NameLink } from "@/components/identity/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { TooltipPosition } from "@/components/ui/tooltip";
+import { Identity } from "../identity";
+import { useRecentRegistrations } from "./hooks";
+import type { Registration } from "./types";
 
 /**
  * Max number of latest registrations to display
