@@ -29,8 +29,6 @@ export default function NameDetailPage() {
 
   if (status === "pending") return <NameDetailPageSkeleton />;
 
-  // return <NameDetailPageSkeleton />;
-
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <ProfileHeader
