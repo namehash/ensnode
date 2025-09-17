@@ -86,7 +86,7 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
       for (const maybeAddress of matches) {
         try {
           // Normalize the address
-          const normalizedAddr = asLowerCaseAddress(maybeAddress as Hex);
+          const normalizedAddr = asLowerCaseAddress(maybeAddress);
           // Add the normalized address to the set
           uniqueAddresses.add(normalizedAddr);
         } catch {
