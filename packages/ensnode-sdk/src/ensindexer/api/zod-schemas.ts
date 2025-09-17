@@ -1,16 +1,15 @@
-import { Address, isAddress } from "viem";
 import { z } from "zod/v4";
 
-import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
+import { DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
-import { ChainId, asLowerCaseAddress, isNormalizedName } from "../../shared";
-import { makeDurationSchema } from "../../shared/zod-schemas";
-
-const toName = (val: string) => val as Name;
-const toAddress = (val: string) => asLowerCaseAddress(val);
-const toChainId = (val: number) => val as ChainId;
-const toCoinType = (val: number) => val as CoinType;
+import { isNormalizedName } from "../../shared";
+import {
+  makeChainIdStringSchema,
+  makeCoinTypeStringSchema,
+  makeDurationSchema,
+  makeEvmAddressSchema,
+} from "../../shared/zod-schemas";
 
 const excludingDefaultChainId = z
   .number()
@@ -35,25 +34,13 @@ const stringarray = z
 const name = z
   .string()
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
-  .transform(toName);
-
-const address = z
-  .string()
-  .check((ctx) => {
-    if (!isAddress(ctx.value)) {
-      ctx.issues.push({
-        code: "custom",
-        message: "Invalid EVM address",
-        input: ctx.value,
-      });
-    }
-  })
-  .transform(toAddress);
+  .transform((val) => val as Name);
 
 const trace = boolstring;
 const accelerate = boolstring;
-const chainId = z.coerce.number<string>().int().nonnegative().transform(toChainId);
-const coinType = z.coerce.number<string>().int().nonnegative().transform(toCoinType);
+const address = makeEvmAddressSchema();
+const chainId = makeChainIdStringSchema();
+const coinType = makeCoinTypeStringSchema();
 
 const selection = {
   name: z.optional(boolstring),

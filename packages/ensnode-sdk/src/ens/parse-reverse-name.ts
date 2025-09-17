@@ -13,9 +13,11 @@ const REVERSE_NAME_REGEX = /^([0-9a-fA-F]+)\.([0-9a-f]{1,64}|addr|default)\.reve
 /**
  * Parses an address label (hex sans prefix) into an Address.
  *
+ * @param addressLabel - Hex string derived from a reverse address.
  * @throws if address is invalid
+ * @see https://docs.ens.domains/ensip/19#reverse-resolution
  */
-const parseAddressLabel = (addressLabel: Label): Address => asLowerCaseAddress(`0x${addressLabel}`);
+const parseAddressLabel = (addressLabel: Label): Address => `0x${addressLabel}`; // addressLabel is guaranteed to be lowercase
 
 /**
  * Parses a coinType label (hex sans prefix) into an EVMCoinType.

@@ -3,8 +3,8 @@ import {
   type CoinType,
   type LabelHash,
   type Node,
-  asLowerCaseAddress,
   coinTypeReverseLabel,
+  deserializeChainId,
 } from "@ensnode/ensnode-sdk";
 import { type Address } from "viem";
 
@@ -47,15 +47,15 @@ export const parseResolverId = (
   if (parts.length === 2) {
     return {
       chainId: null,
-      address: parts[0] as Address,
+      address: parts[0] as Address, // guaranteed to be fully lowercase
       node: parts[1] as Node,
     };
   }
 
   if (parts.length === 3) {
     return {
-      chainId: parseInt(parts[0]!),
-      address: parts[1] as Address,
+      chainId: deserializeChainId(parts[0] as string),
+      address: parts[1] as Address, // guaranteed to be fully lowercase
       node: parts[2] as Node,
     };
   }

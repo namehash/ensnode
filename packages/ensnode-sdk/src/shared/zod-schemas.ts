@@ -1,3 +1,5 @@
+import { CoinType, coinNameToTypeMap } from "@ensdomains/address-encoder";
+import { isAddress } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -8,7 +10,8 @@
  */
 import z from "zod/v4";
 import { ENSNamespaceIds } from "../ens";
-import type { BlockRef, Datetime, Duration, UnixTimestamp } from "./types";
+import { asLowerCaseAddress } from "./address";
+import type { BlockRef, ChainId, Datetime, Duration, UnixTimestamp } from "./types";
 
 /**
  * Zod `.check()` function input.
@@ -68,7 +71,7 @@ export const makeDurationSchema = (valueLabel: string = "Value") =>
  * {@link ChainId}
  */
 export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
-  makePositiveIntegerSchema(valueLabel);
+  makePositiveIntegerSchema(valueLabel).transform((val) => val as ChainId);
 
 /**
  * Parses a string representation of {@link ChainId}.
@@ -78,6 +81,53 @@ export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") 
     .string({ error: `${valueLabel} must be a string representing a chain ID.` })
     .pipe(z.coerce.number({ error: `${valueLabel} must represent a positive integer (>0).` }))
     .pipe(makeChainIdSchema(`The numeric value represented by ${valueLabel}`));
+
+const knownCoinTypes = new Set<number>(Object.values(coinNameToTypeMap));
+
+/**
+ * Parses {@link CoinType}.
+ */
+export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
+  z
+    .number({ error: `${valueLabel} must be a number.` })
+    .int({ error: `${valueLabel} must be an integer.` })
+    .nonnegative({ error: `${valueLabel} must be a non-negative integer (>=0).` })
+    .check((ctx) => {
+      if (!knownCoinTypes.has(ctx.value)) {
+        ctx.issues.push({
+          code: "custom",
+          message: "Must be a known SLIP-0044 coin type.",
+          input: ctx.value,
+        });
+      }
+    })
+    .transform((val) => val as CoinType);
+
+/**
+ * Parses a string representation of {@link CoinType}.
+ */
+export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String") =>
+  z
+    .string({ error: `${valueLabel} must be a string representing a coin type.` })
+    .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
+    .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
+
+/**
+ * Parses a string representation of an EVM address.
+ */
+export const makeEvmAddressSchema = (valueLabel: string = "EVM address") =>
+  z
+    .string()
+    .check((ctx) => {
+      if (!isAddress(ctx.value)) {
+        ctx.issues.push({
+          code: "custom",
+          message: `${valueLabel} must be a valid EVM address`,
+          input: ctx.value,
+        });
+      }
+    })
+    .transform((val) => asLowerCaseAddress(val));
 
 /**
  * Parses an ISO 8601 string representations of {@link Datetime}
