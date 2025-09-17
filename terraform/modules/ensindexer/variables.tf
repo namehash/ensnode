@@ -1,9 +1,5 @@
-# ENSNode configuration
-variable "ensnode_version" {
-  type = string
-}
-
 # Render configuration
+
 variable "render_environment_id" {
   type = string
 }
@@ -16,22 +12,30 @@ variable "render_instance_plan" {
   type = string
 }
 
-# Example: ensnode.io
+# DNS configuration
+
+# Example: "ensnode.io"
 # See main.tf for more details
 variable "hosted_zone_name" {
   type        = string
 }
 
-# Example: blue
+# Example: "blue"
 # See main.tf for more details on how this is used, including for building fqdn values.
 variable "ensnode_environment_name" {
   type        = string
 }
 
-# ENSIndexer configuration
+# Example: "alpha-sepolia"
+# See main.tf for more details on how this is used, including for building fqdn values.
 variable "ensnode_indexer_type" {
   type        = string
-  description = "Uqniue name across single environment for api/indexer pair instances e.g. mainnet/sepolia/holesky. Used for creating Render api/indexer instances name."
+}
+
+# ENSIndexer configuration
+
+variable "ensnode_version" {
+  type = string
 }
 
 variable "ensdb_url" {
