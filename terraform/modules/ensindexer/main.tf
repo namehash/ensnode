@@ -51,7 +51,7 @@ locals {
 
 resource "render_web_service" "ensindexer" {
   name           = "ensindexer-${var.ensnode_indexer_type}"
-  plan           = var.render_instance_type
+  plan           = var.render_instance_plan
   region         = var.render_region
   environment_id = var.render_environment_id
 

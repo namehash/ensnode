@@ -27,7 +27,7 @@ locals {
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
       replace_unnormalized              = "false"
-      render_instance_type              = "starter"
+      render_instance_plan              = "starter"
     }
     sepolia = {
       ensnode_indexer_type              = "sepolia"
@@ -38,7 +38,7 @@ locals {
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
       replace_unnormalized              = "false"
-      render_instance_type              = "starter"
+      render_instance_plan              = "starter"
     }
     mainnet = {
       ensnode_indexer_type              = "mainnet"
@@ -49,7 +49,7 @@ locals {
       heal_reverse_addresses            = "false"
       index_additional_resolver_records = "false"
       replace_unnormalized              = "false"
-      render_instance_type              = "standard"
+      render_instance_plan              = "standard"
     }
     alpha = {
       ensnode_indexer_type              = "alpha"
@@ -60,7 +60,7 @@ locals {
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
       replace_unnormalized              = "false"
-      render_instance_type              = "standard"
+      render_instance_plan              = "standard"
     }
 
     alpha-sepolia = {
@@ -72,7 +72,7 @@ locals {
       heal_reverse_addresses            = "true"
       index_additional_resolver_records = "true"
       replace_unnormalized              = "false"
-      render_instance_type              = "starter"
+      render_instance_plan              = "starter"
     }
   }
 }
@@ -113,7 +113,7 @@ module "ensadmin" {
   source                = "./modules/ensadmin"
   render_region         = local.render_region
   render_environment_id = render_project.ensnode.environments["default"].id
-  render_instance_type  = "starter"
+  render_instance_plan  = "starter"
 
   hosted_zone_name         = local.hosted_zone_name
   ensnode_version          = var.ensnode_version
@@ -130,7 +130,7 @@ module "ensindexer" {
 
   # Instance-specific configuration
   ensnode_indexer_type              = each.value.ensnode_indexer_type
-  render_instance_type              = each.value.render_instance_type
+  render_instance_plan              = each.value.render_instance_plan
   ensnode_environment_name          = each.value.ensnode_environment_name
   database_schema                   = each.value.database_schema
   plugins                           = each.value.plugins

@@ -12,7 +12,7 @@ variable "render_region" {
   type = string
 }
 
-variable "render_instance_type" {
+variable "render_instance_plan" {
   type = string
 }
 

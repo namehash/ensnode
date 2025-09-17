@@ -1,6 +1,6 @@
 resource "render_web_service" "ensadmin" {
   name           = "ensadmin"
-  plan           = var.render_instance_type
+  plan           = var.render_instance_plan
   region         = var.render_region
   environment_id = var.render_environment_id
 
