@@ -30,7 +30,7 @@ import { useQuery } from "@tanstack/react-query";
  * ```
  */
 export function useNamespaceId() {
-  const { data: config, isLoading: configLoading, error: configError } = useENSIndexerConfig();
+  const { data: config, isLoading: configLoading } = useENSIndexerConfig();
 
   return useQuery({
     queryKey: ["namespaceId", config?.namespace],

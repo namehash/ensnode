@@ -28,9 +28,8 @@ export interface UseAvatarUrlParameters {
  *     name: "vitalik.eth"
  *   });
  *
- *   if (isLoading) return <div>Loading avatar...</div>;
- *   if (error) return <div>Failed to load avatar</div>;
- *   if (!avatarUrl) return <div>No avatar URL available</div>;
+ *   if (isLoading) return <div>Constructing avatar URL...</div>;
+ *   if (error) return <div>Failed to fetch avatar URL</div>;
  *
  *   return <img src={avatarUrl.toString()} alt="ENS Avatar" />;
  * }
@@ -45,6 +44,6 @@ export function useAvatarUrl({ name }: UseAvatarUrlParameters) {
       if (!namespaceId) return null;
       return getNameAvatarUrl(name, namespaceId);
     },
-    enabled: !!namespaceId,
+    enabled: namespaceId !== undefined,
   });
 }
