@@ -1,13 +1,16 @@
 # Render configuration
 
+# See https://render.com/docs/projects
 variable "render_environment_id" {
   type = string
 }
 
+# See https://render.com/docs/blueprint-spec#region
 variable "render_region" {
   type = string
 }
 
+# See https://render.com/docs/web-services
 variable "render_instance_plan" {
   type = string
 }

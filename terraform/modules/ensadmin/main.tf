@@ -1,3 +1,5 @@
+# For details on "render_web_service", see:
+# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensadmin" {
   name           = "ensadmin"
   plan           = var.render_instance_plan
@@ -19,6 +21,7 @@ resource "render_web_service" "ensadmin" {
       value = var.anthropic_api_key
     }
   }
+  
   # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensadmin_fqdn },

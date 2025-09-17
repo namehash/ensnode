@@ -2,6 +2,8 @@ locals {
   mount_path = "/app/apps/ensrainbow/data"
 }
 
+# For details on "render_web_service", see:
+# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensrainbow" {
   name           = "ensrainbow"
   plan           = "starter"

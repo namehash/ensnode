@@ -49,6 +49,8 @@ locals {
   }
 }
 
+# For details on "render_web_service", see:
+# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensindexer" {
   name           = "ensindexer-${var.ensnode_indexer_type}"
   plan           = var.render_instance_plan
@@ -73,6 +75,7 @@ resource "render_web_service" "ensindexer" {
       }
     }
   )
+
   # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensindexer_fqdn },
@@ -80,7 +83,8 @@ resource "render_web_service" "ensindexer" {
 
 }
 
-
+# For details on "render_web_service", see:
+# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensindexer_api" {
   name           = "ensindexer_api_${var.ensnode_indexer_type}"
   plan           = "starter"
@@ -108,6 +112,7 @@ resource "render_web_service" "ensindexer_api" {
       }
     }
   )
+  
   # See https://render.com/docs/custom-domains
   custom_domains = [
     { name : local.ensindexer_api_fqdn },

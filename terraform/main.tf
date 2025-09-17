@@ -16,6 +16,7 @@ locals {
   # - indexer.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
   # - example: indexer.alpha-sepolia.blue.ensnode.io
   hosted_zone_name = "ensnode.io"
+  # See https://render.com/docs/blueprint-spec#region
   render_region    = "ohio"
   ensindexer_instances = {
     holesky = {
