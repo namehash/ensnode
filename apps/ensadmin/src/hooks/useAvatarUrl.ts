@@ -10,7 +10,7 @@ export interface UseAvatarUrlParameters {
 }
 
 /**
- * Hook to get the avatar image URL for an ENS name using the ENS Metadata Service.
+ * Hook to get the URL for loading the avatar image for an ENS name through the ENS Metadata Service.
  *
  * Makes use of the ENS Metadata Service (https://metadata.ens.domains/docs) to fetch
  * the avatar image for the given name in the given namespace. The ENS Metadata Service
