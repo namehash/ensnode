@@ -37,7 +37,7 @@ export interface UseAvatarUrlParameters {
  * ```
  */
 export function useAvatarUrl({ name }: UseAvatarUrlParameters) {
-  const { data: namespaceId, isLoading: namespaceLoading } = useNamespaceId();
+  const { data: namespaceId } = useNamespaceId();
 
   return useQuery({
     queryKey: ["avatarUrl", name, namespaceId],
@@ -45,6 +45,6 @@ export function useAvatarUrl({ name }: UseAvatarUrlParameters) {
       if (!namespaceId) return null;
       return getNameAvatarUrl(name, namespaceId);
     },
-    enabled: !namespaceLoading && !!namespaceId,
+    enabled: !!namespaceId,
   });
 }
