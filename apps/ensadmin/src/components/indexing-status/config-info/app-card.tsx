@@ -2,7 +2,7 @@ import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { CheckIcon, ExternalLink, X } from "lucide-react";
+import { CheckIcon, ExternalLink, X as XIcon } from "lucide-react";
 import { ReactElement } from "react";
 
 interface ConfigInfoAppCardContent {
@@ -129,7 +129,7 @@ export function ConfigInfoAppCard({
                   {check.value ? (
                     <CheckIcon className="text-emerald-600 flex-shrink-0" />
                   ) : (
-                    <X className="text-red-600 flex-shrink-0" />
+                    <XIcon className="text-red-600 flex-shrink-0" />
                   )}
                 </div>
               </div>

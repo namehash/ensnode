@@ -3,23 +3,33 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
-
-import { ChainIcon } from "@/components/chains/ChainIcon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getChainName } from "@/lib/namespace-utils";
+import {getNameAvatarUrl} from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
-import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import {Name} from "@ensnode/ensnode-sdk";
 
-const Avatar = React.forwardRef<
+interface AvatarProps {
+    ensName: Name;
+    namespaceId: ENSNamespaceId;
+}
+
+type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
+
+export const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
+>(({ className, ensName, namespaceId, ...props }, ref) => {
+  const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>('idle');
+  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
   return (
     <AvatarPrimitive.Root
       ref={ref}
       className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
       {...props}
-    />
+    >
+        {ensAvatarUrl && <AvatarImage src={ensAvatarUrl.href} alt={ensName} onLoadingStatusChange={(newStatus: ImageLoadingStatus) => {setLoadingStatus(newStatus)}}/>}
+        {ensAvatarUrl === null || loadingStatus === "error" ? <AvatarFallback name={ensName} /> : ((loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />)}
+    </AvatarPrimitive.Root>
   );
 });
 Avatar.displayName = AvatarPrimitive.Root.displayName;
@@ -35,10 +45,14 @@ const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<H
 );
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
+interface AvatarFallbackProps {
+    name: Name;
+}
+
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & AvatarFallbackProps
+>(({ className, name, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
@@ -47,42 +61,13 @@ const AvatarFallback = React.forwardRef<
     )}
     {...props}
   >
-    {children}
+      <BoringAvatar
+          name={name}
+          colors={["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"]}
+          variant="beam"
+      />
   </AvatarPrimitive.Fallback>
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-interface NamedAddressFallbackProps {
-  name: string;
-}
-
-const NamedAddressFallback = ({ name }: NamedAddressFallbackProps) => (
-  <BoringAvatar
-    name={name}
-    colors={["#000000", "#ffffff", "#5191c1", "#1e6495", "#0a4b75"]}
-    variant="beam"
-  />
-);
-
-interface UnnamedAddressFallbackProps {
-  namespaceId: ENSNamespaceId;
-}
-
-const UnnamedAddressFallback = ({ namespaceId }: UnnamedAddressFallbackProps) => {
-  const chainId = getENSRootChainId(namespaceId);
-  return (
-    <Tooltip>
-      <TooltipTrigger className="cursor-default">
-        <ChainIcon chainId={chainId} />
-      </TooltipTrigger>
-      <TooltipContent
-        side="top"
-        className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
-      >
-        {getChainName(chainId)}
-      </TooltipContent>
-    </Tooltip>
-  );
-};
-
-export { Avatar, AvatarImage, AvatarFallback, NamedAddressFallback, UnnamedAddressFallback };
+const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />

@@ -1,8 +1,8 @@
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
-import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
-import { Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import {ChainId, Name} from "@ensnode/ensnode-sdk";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 import { Address } from "viem";
@@ -37,15 +37,21 @@ interface NameLinkProps {
 /**
  * Displays an ENS name with a link to the internal name detail page.
  * Wraps NameDisplay component with navigation to /name/[name].
+ *
+ * Can take other components (ex.Avatar) as children
+ * and display them alongside the link as one common interaction area.
  */
-export function NameLink({ name, className }: NameLinkProps) {
+
+// TODO: What about the naming? See related comment: https://github.com/namehash/ensnode/pull/1072#discussion_r2355343758
+export function NameLink({ name, className, children }: PropsWithChildren<NameLinkProps>) {
   const nameDetailsRelativePath = getNameDetailsRelativePath(name);
 
   return (
     <Link
       href={nameDetailsRelativePath}
-      className={`inline-flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
+      className={`inline-flex items-center gap-2 text-blue-600 hover:underline ${className || ""}`}
     >
+      {children}
       <NameDisplay name={name} />
     </Link>
   );
@@ -68,6 +74,7 @@ export function AddressDisplay({ address, className = "font-medium" }: AddressDi
 interface AddressLinkProps {
   address: Address;
   namespaceId: ENSNamespaceId;
+  chainId: ChainId;
   className?: string;
 }
 
@@ -75,50 +82,55 @@ interface AddressLinkProps {
  * Displays a truncated address with a link to the address details URL.
  * If the ENS namespace has a known ENS Manager App,
  * includes a link to the view details of the address within that ENS namespace.
+ *
+ * Can take other components (ex.ChainIcon) as children
+ * and display them alongside the link as one common interaction area.
  */
-export function AddressLink({ address, namespaceId, className }: AddressLinkProps) {
+export function AddressLink({ address, namespaceId, chainId, className, children }: PropsWithChildren<AddressLinkProps>) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
     return (
-      <AddressInfoTooltip namespaceId={namespaceId} address={address}>
+      <UnnamedAddressInfoTooltip chainId={chainId} address={address}>
+        {children}
         <AddressDisplay address={address} className={className} />
-      </AddressInfoTooltip>
+      </UnnamedAddressInfoTooltip>
     );
   }
 
   return (
-    <AddressInfoTooltip namespaceId={namespaceId} address={address}>
+    <UnnamedAddressInfoTooltip chainId={chainId} address={address}>
       <ExternalLinkWithIcon
         href={ensAppAddressDetailsUrl.toString()}
         className={`font-medium ${className || ""}`}
       >
+        {children}
         <AddressDisplay address={address} />
       </ExternalLinkWithIcon>
-    </AddressInfoTooltip>
+    </UnnamedAddressInfoTooltip>
   );
 }
 
-interface AddressInfoTooltipProps {
-  namespaceId: ENSNamespaceId;
+interface UnnamedAddressInfoTooltipProps {
+  chainId: ChainId;
   address: Address;
 }
 
 /**
  * On hover displays a full address and a chain it belongs to.
  */
-const AddressInfoTooltip = ({
+const UnnamedAddressInfoTooltip = ({
   children,
-  namespaceId,
+  chainId,
   address,
-}: PropsWithChildren<AddressInfoTooltipProps>) => (
-  <Tooltip>
+}: PropsWithChildren<UnnamedAddressInfoTooltipProps>) => (
+  <Tooltip delayDuration={2000}>
     <TooltipTrigger>{children}</TooltipTrigger>
     <TooltipContent
       side="top"
-      className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+      className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
     >
-      Unnamed {getChainName(getENSRootChainId(namespaceId))} address:
+      Unnamed {getChainName(chainId)} address:
       <br />
       {address}
     </TooltipContent>

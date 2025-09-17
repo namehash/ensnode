@@ -2,11 +2,12 @@
  * This file defines UI components for presenting {@link BlockRef}.
  */
 
-import { RelativeTime } from "@/components/datetime-utils";
-import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
-import { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
-import { fromUnixTime } from "date-fns";
-import { ExternalLink as ExternalLinkIcon } from "lucide-react";
+import {RelativeTime} from "@/components/datetime-utils";
+import {getBlockExplorerUrlForBlock} from "@/lib/namespace-utils";
+import {BlockRef, ChainId} from "@ensnode/ensnode-sdk";
+import {fromUnixTime} from "date-fns";
+import {ExternalLink as ExternalLinkIcon} from "lucide-react";
+import {TooltipPosition} from "@/components/ui/tooltip";
 
 export interface BlockRefViewModel extends BlockRef {
   get date(): Date;
@@ -83,6 +84,7 @@ export function BlockStats({ chainId, label, block }: BlockStatsProps) {
           enforcePast={true}
           conciseFormatting={true}
           includeSeconds={true}
+          tooltipPosition={TooltipPosition.RIGHT}
           prefix="from "
         />
       </div>

@@ -1,25 +1,24 @@
 "use client";
 
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  NamedAddressFallback,
-  UnnamedAddressFallback,
+  Avatar
 } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getNameAvatarUrl } from "@/lib/namespace-utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
+import {ENSNamespaceId, getENSRootChainId} from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
 import type { Address } from "viem";
 import { AddressLink, NameLink } from "./utils";
+import {ChainId} from "@ensnode/ensnode-sdk";
+import {ChainIcon} from "@/components/chains/ChainIcon";
+import * as React from "react";
 
 interface IdentityProps {
   address: Address;
   namespaceId: ENSNamespaceId;
   showAvatar?: boolean;
   className?: string;
+  chainId?: ChainId;
 }
 
 /**
@@ -32,13 +31,22 @@ interface IdentityProps {
 export function Identity({
   address,
   namespaceId,
+  chainId,
   showAvatar = false,
   className = "",
 }: IdentityProps) {
+  const rootDatasourceChainId = getENSRootChainId(namespaceId);
+
+  // Establish chainId
+  const definedChainId = chainId !== undefined ? chainId : rootDatasourceChainId;
+
+  // Resolve chainId for the primary name lookup (better alignment with ENSIP-19)
+  const resolvedChainId = definedChainId === rootDatasourceChainId ? 1 : definedChainId;
+
   // Lookup the primary name for address using ENSNode
   const { data, status, isLoading } = usePrimaryName({
     address,
-    chainId: 1,
+    chainId: resolvedChainId,
   });
 
   // If not mounted yet (server-side), or still loading, show a skeleton
@@ -48,36 +56,19 @@ export function Identity({
 
   // If there is an error looking up the primary name, fallback to showing the address
   if (status === "error") {
-    return <AddressLink address={address} namespaceId={namespaceId} />;
+    return <AddressLink address={address} namespaceId={namespaceId} chainId={resolvedChainId} >
+      {showAvatar && <ChainIcon chainId={resolvedChainId}/>}
+    </AddressLink>;
   }
 
   const ensName = data.name;
-  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
 
   return (
-    <div className={cx("flex items-center gap-2", className)}>
-      {showAvatar && (
-        <Avatar className="h-6 w-6">
-          {ensName && ensAvatarUrl ? (
-            <>
-              <AvatarImage src={ensAvatarUrl.toString()} alt={ensName} />
-              <AvatarFallback>
-                <NamedAddressFallback name={ensName} />
-              </AvatarFallback>
-            </>
-          ) : (
-            <AvatarFallback>
-              <UnnamedAddressFallback namespaceId={namespaceId} />
-            </AvatarFallback>
-          )}
-        </Avatar>
-      )}
-      {ensName ? (
-        <NameLink name={ensName} />
+      ensName ? (
+          <NameLink name={ensName}>{showAvatar && <Avatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6"/>}</NameLink>
       ) : (
-        <AddressLink address={address} namespaceId={namespaceId} />
-      )}
-    </div>
+          <AddressLink address={address} namespaceId={namespaceId} chainId={resolvedChainId}>{showAvatar && <ChainIcon chainId={resolvedChainId}/>}</AddressLink>
+      )
   );
 }
 Identity.Placeholder = IdentityPlaceholder;

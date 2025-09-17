@@ -13,10 +13,9 @@ import {
 import { fromUnixTime } from "date-fns";
 import { Clock } from "lucide-react";
 
-import { FormattedDate } from "@/components/datetime-utils";
+import { AbsoluteTime } from "@/components/datetime-utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getChainName } from "@/lib/namespace-utils";
 
 import {
   generateYearMarkers,
@@ -72,7 +71,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
                 Indexed through{" "}
-                <FormattedDate
+                <AbsoluteTime
                   date={omnichainIndexingCursorDate}
                   options={{
                     year: "numeric",

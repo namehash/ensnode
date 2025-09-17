@@ -2,17 +2,18 @@
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
-import { Avatar, AvatarFallback, AvatarImage, NamedAddressFallback } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import {ENSNamespaceId} from "@ensnode/datasources";
 
 interface ProfileHeaderProps {
   name: string;
-  avatarUrl: URL | null;
+  namespaceId: ENSNamespaceId;
   headerImage?: string | null;
   websiteUrl?: string | null;
 }
 
-export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: ProfileHeaderProps) {
+export function ProfileHeader({ name, namespaceId, headerImage, websiteUrl }: ProfileHeaderProps) {
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12
   // See: https://docs.ens.domains/ensip/12#uri-types
@@ -48,12 +49,7 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Avatar className="-mt-16 h-20 w-20 ring-4 ring-white">
-              {avatarUrl && <AvatarImage src={avatarUrl.toString()} alt={name} />}
-              <AvatarFallback>
-                <NamedAddressFallback name={name} />
-              </AvatarFallback>
-            </Avatar>
+             <Avatar className="-mt-16 h-20 w-20 ring-4 ring-white" ensName={name} namespaceId={namespaceId} />
             <div className="flex-1">
               <h1>
                 <NameDisplay className="text-3xl font-bold" name={name} />

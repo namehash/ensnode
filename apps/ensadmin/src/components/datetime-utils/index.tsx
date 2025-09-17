@@ -1,26 +1,26 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {Tooltip, TooltipContent, TooltipPosition, TooltipTrigger} from "@/components/ui/tooltip";
 import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
 import * as React from "react";
 
 /**
- * Client-only date formatter component
+ * Client-only absolute time component
  */
-export function FormattedDate({
+export function AbsoluteTime({
   date,
   options,
 }: {
   date: Date;
   options: Intl.DateTimeFormatOptions;
 }) {
-  const [formattedDate, setFormattedDate] = useState<string>("");
+  const [absoluteTime, setAbsoluteTime] = useState<string>("");
 
   useEffect(() => {
-    setFormattedDate(intlFormat(date, options));
+    setAbsoluteTime(intlFormat(date, options));
   }, [date, options]);
 
-  return <>{formattedDate}</>;
+  return <>{absoluteTime}</>;
 }
 
 /**
@@ -28,29 +28,36 @@ export function FormattedDate({
  *
  * @param enforcePast - if true, enforces that the return value won't relate to the future.
  * Helpful for UI contexts where its nonsensical for a value to relate to the future. Ex: how long ago an event happened.
+ * Note how different systems may have misaligned clocks. `enforcePast` aims to protect from UI confusion when
+ * the client's clock is set incorrectly in the past, such that events happening "now" might otherwise appear to
+ * be coming from the future.
  * @param includeSeconds - if true includes seconds in the result
- * @param conciseFormatting - if true removes special prefixes
+ * @param conciseFormatting - if true removes special prefixes / suffixes such as "about ..." or "in almost ..."
+ * @param relativeTo - if defined represents the date to compare with. Otherwise, the date param is compared with the present.
  */
 export function formatRelativeTime(
   date: Date,
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
+  relativeTo?: Date
 ): string {
-  const now = Date.now();
+  const compareWith = relativeTo ? relativeTo.getTime() : Date.now();
 
-  if (enforcePast && date.getTime() >= now) {
+  if (enforcePast && date.getTime() >= compareWith) {
     return "just now";
   }
 
   if (conciseFormatting) {
-    return formatDistanceStrict(date, now, { addSuffix: true });
+    return formatDistanceStrict(date, compareWith, { addSuffix: true });
   }
 
-  return formatDistance(date, now, {
+  const formattedDistance = formatDistance(date, compareWith, {
     addSuffix: true,
     includeSeconds,
   });
+
+  return formattedDistance !== "less than a minute ago" ? formattedDistance : "just now";
 }
 
 /**
@@ -61,31 +68,35 @@ export function RelativeTime({
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
+  tooltipPosition = "top",
+  relativeTo,
   prefix,
 }: {
   date: Date;
   enforcePast?: boolean;
   includeSeconds?: boolean;
   conciseFormatting?: boolean;
+  tooltipPosition?: TooltipPosition;
+  relativeTo?: Date;
   prefix?: string;
 }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
-    setRelativeTime(formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting));
+    setRelativeTime(formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting, relativeTo));
   }, [date]);
 
   return (
-    <Tooltip>
-      <TooltipTrigger className="cursor-default">
+    <Tooltip delayDuration={2000}>
+      <TooltipTrigger className="cursor-text">
         {prefix}
         {relativeTime}
       </TooltipTrigger>
       <TooltipContent
-        side="right"
+        side={tooltipPosition}
         className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
       >
-        <FormattedDate
+        <AbsoluteTime
           date={date}
           options={{
             year: "numeric",
