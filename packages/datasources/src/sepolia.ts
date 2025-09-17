@@ -52,12 +52,12 @@ export default {
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x94f523b8261B815b87EFfCf4d18E6aBeF18d6e4b",
+        address: "0x94f523b8261b815b87effcf4d18e6abef18d6e4b",
         startBlock: 3702721,
       },
       Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+        address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 3702728,
       },
       Resolver: {
@@ -67,32 +67,32 @@ export default {
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85",
+        address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
         startBlock: 3702731,
       },
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: "0x7e02892cfc2Bfd53a75275451d73cF620e793fc0",
+        address: "0x7e02892cfc2bfd53a75275451d73cf620e793fc0",
         startBlock: 3790197,
       },
       WrappedEthRegistrarController: {
         abi: root_WrappedEthRegistrarController,
-        address: "0xFED6a969AaA60E4961FCD3EBF1A2e8913ac65B72",
+        address: "0xfed6a969aaa60e4961fcd3ebf1a2e8913ac65b72",
         startBlock: 3790244,
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0xfb3cE5D01e0f33f41DbB39035dB9745962F1f968",
+        address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
         startBlock: 8579988,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x0635513f179D50A207757E05759CbD106d7dFcE8",
+        address: "0x0635513f179d50a207757e05759cbd106d7dfce8",
         startBlock: 3790153,
       },
       UniversalResolver: {
         abi: root_UniversalResolver,
-        address: "0xb7B7DAdF4D42a08B3eC1d3A1079959Dfbc8CFfCC",
+        address: "0xb7b7dadf4d42a08b3ec1d3a1079959dfbc8cffcc",
         startBlock: 8515717,
       },
     },
@@ -124,7 +124,7 @@ export default {
     contracts: {
       Registry: {
         abi: base_Registry,
-        address: "0x1493b2567056c2181630115660963E13A8E32735",
+        address: "0x1493b2567056c2181630115660963e13a8e32735",
         startBlock: 13012458,
       },
       Resolver: {
@@ -134,7 +134,7 @@ export default {
       },
       BaseRegistrar: {
         abi: base_BaseRegistrar,
-        address: "0xA0c70ec36c010B55E3C434D6c6EbEEC50c705794",
+        address: "0xa0c70ec36c010b55e3c434d6c6ebeec50c705794",
         startBlock: 13012465,
       },
       EARegistrarController: {
@@ -144,7 +144,7 @@ export default {
       },
       RegistrarController: {
         abi: base_RegistrarController,
-        address: "0x49aE3cC2e3AA768B1e5654f5D3C6002144A59581",
+        address: "0x49ae3cc2e3aa768b1e5654f5d3c6002144a59581",
         startBlock: 13298580,
       },
     },
@@ -176,7 +176,7 @@ export default {
     contracts: {
       Registry: {
         abi: linea_Registry,
-        address: "0x5B2636F0f2137B4aE722C01dd5122D7d3e9541f7",
+        address: "0x5b2636f0f2137b4ae722c01dd5122d7d3e9541f7",
         startBlock: 2395094,
       },
       Resolver: {
@@ -186,17 +186,17 @@ export default {
       },
       BaseRegistrar: {
         abi: linea_BaseRegistrar,
-        address: "0x83475a84C0ea834F06c8e636A62631e7d2e07A44",
+        address: "0x83475a84c0ea834f06c8e636a62631e7d2e07a44",
         startBlock: 2395099,
       },
       EthRegistrarController: {
         abi: linea_EthRegistrarController,
-        address: "0x0f81E3B3A32DFE1b8A08d3C0061d852337a09338",
+        address: "0x0f81e3b3a32dfe1b8a08d3c0061d852337a09338",
         startBlock: 2395231,
       },
       NameWrapper: {
         abi: linea_NameWrapper,
-        address: "0xF127De9E039a789806fEd4C6b1C0f3aFfeA9425e",
+        address: "0xf127de9e039a789806fed4c6b1c0f3affeea9425e",
         startBlock: 2395202,
       },
     },
@@ -210,74 +210,74 @@ export default {
     contracts: {
       DefaultReverseRegistrar: {
         abi: StandaloneReverseRegistrar,
-        address: "0x4F382928805ba0e23B30cFB75fC9E848e82DFD47",
+        address: "0x4f382928805ba0e23b30cfb75fc9e848e82dfd47",
         startBlock: 8579966,
       },
 
       DefaultReverseResolver1: {
         abi: ResolverABI,
-        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        address: "0x8fade66b79cc9f707ab26799354482eb93a5b7dd",
         startBlock: 3790251,
       },
       DefaultReverseResolver2: {
         abi: ResolverABI,
-        address: "0x8948458626811dd0c23EB25Cc74291247077cC51",
+        address: "0x8948458626811dd0c23eb25cc74291247077cc51",
         startBlock: 7035086,
       },
       DefaultReverseResolver3: {
         abi: ResolverABI,
-        address: "0x9DC60e7BD81cCc96774C55214fF389D42Ae5E9Ac",
+        address: "0x9dc60e7bd81ccc96774c55214ff389d42ae5e9ac",
         startBlock: 8580041,
       },
 
       DefaultPublicResolver1: {
         abi: ResolverABI,
-        address: "0x8FADE66B79cC9f707aB26799354482EB93a5B7dD",
+        address: "0x8fade66b79cc9f707ab26799354482eb93a5b7dd",
         startBlock: 3790251,
       },
       DefaultPublicResolver2: {
         abi: ResolverABI,
-        address: "0x8948458626811dd0c23EB25Cc74291247077cC51",
+        address: "0x8948458626811dd0c23eb25cc74291247077cc51",
         startBlock: 7035086,
       },
       DefaultPublicResolver3: {
         abi: ResolverABI,
-        address: "0xE99638b40E4Fff0129D56f03b55b6bbC4BBE49b5",
+        address: "0xe99638b40e4fff0129d56f03b55b6bbc4bbe49b5",
         startBlock: 8580001,
       },
 
       BaseReverseResolver: {
         abi: ResolverABI,
         // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80014a34.reverse
-        address: "0xaF3b3f636bE80b6709F5Bd3A374d6ac0D0a7c7aA",
+        address: "0xaf3b3f636be80b6709f5bd3a374d6ac0d0a7c7aa",
         startBlock: 8580004,
       },
 
       LineaReverseResolver: {
         abi: ResolverABI,
         // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8000e705.reverse
-        address: "0x083dA1Dbc0F379ccda6AC81A934207c3D8a8a205",
+        address: "0x083da1dbc0f379ccda6ac81a934207c3d8a8a205",
         startBlock: 8580005,
       },
 
       OptimismReverseResolver: {
         abi: ResolverABI,
         // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80aa37dc.reverse
-        address: "0xc9Ae189772BD48e01410AB3Be933637ee9D3AA5f",
+        address: "0xc9ae189772bd48e01410ab3be933637ee9d3aa5f",
         startBlock: 8580026,
       },
 
       ArbitrumReverseResolver: {
         abi: ResolverABI,
         // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#80066eee.reverse
-        address: "0x926f94D2aDC77C86Cb0050892097D49AADd02e8B",
+        address: "0x926f94d2adc77c86cb0050892097d49aadd02e8b",
         startBlock: 8580003,
       },
 
       ScrollReverseResolver: {
         abi: ResolverABI,
         // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8008274f.reverse
-        address: "0x9Fa59673e43F15bDB8722Fdaf5C2107574B99062",
+        address: "0x9fa59673e43f15bdb8722fdaf5c2107574b99062",
         startBlock: 8580040,
       },
     },
@@ -291,7 +291,7 @@ export default {
     contracts: {
       L2ReverseRegistrar: {
         abi: ResolverABI,
-        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 21788010,
       },
     },
@@ -305,7 +305,7 @@ export default {
     contracts: {
       L2ReverseRegistrar: {
         abi: ResolverABI,
-        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 23770766,
       },
     },
@@ -319,7 +319,7 @@ export default {
     contracts: {
       L2ReverseRegistrar: {
         abi: ResolverABI,
-        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 123142726,
       },
     },
@@ -333,7 +333,7 @@ export default {
     contracts: {
       L2ReverseRegistrar: {
         abi: ResolverABI,
-        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 8175276,
       },
     },
@@ -347,7 +347,7 @@ export default {
     contracts: {
       L2ReverseRegistrar: {
         abi: ResolverABI,
-        address: "0x00000BeEF055f7934784D6d81b6BC86665630dbA",
+        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
         startBlock: 9267966,
       },
     },
@@ -358,7 +358,7 @@ export default {
     contracts: {
       Seaport1_5: {
         abi: Seaport1_5, // Seaport 1.5
-        address: "0x00000000000000ADc04C56Bf30aC9d3c0aAF14dC",
+        address: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
         startBlock: 3365529,
       },
     },
