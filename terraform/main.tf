@@ -107,6 +107,9 @@ module "ensadmin" {
   ensnode_version          = var.ensnode_version
   ensnode_environment_name = var.render_environment
   anthropic_api_key        = var.anthropic_api_key
+
+  # NEXT_PUBLIC_DEFAULT_ENSNODE_URLS is not currently configurable through
+  # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
 }
 
 module "ensindexer" {
