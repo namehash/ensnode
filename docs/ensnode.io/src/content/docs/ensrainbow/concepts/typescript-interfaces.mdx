@@ -7,7 +7,7 @@ sidebar:
 keywords: [ensrainbow, typescript, interfaces, types]
 ---
 
-ENSRainbow's TypeScript APIs expose two companion interfaces that describe **which label sets are available (server-side) or requested (client-side)**.
+ENSRainbow's TypeScript APIs expose two companion interfaces that describe **which label sets** (see [Glossary](/ensrainbow/concepts/glossary/) for definition) **are available (server-side) or requested (client-side)**.
 
 ## Server Label Set
 
@@ -24,7 +24,7 @@ interface EnsRainbowServerLabelSet {
 
 #### Fields
 
-- **`labelSetId`** identifies **which label set** the server is currently serving.
+- **`labelSetId`** identifies **which label set** (see [Glossary](/ensrainbow/concepts/glossary/) for definition) the server is currently serving.
 - **`highestLabelSetVersion`** is the **highest version** available through the server for the label set id. The server will not return labels from a version _greater_ than this value (unless it ingests another incremental label set).
 
 ## Client Label Set
