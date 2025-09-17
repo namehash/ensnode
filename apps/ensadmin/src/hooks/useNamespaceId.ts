@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
  * function NetworkIndicator() {
  *   const { data: namespaceId, isLoading, error } = useNamespaceId();
  *
- *   if (isLoading) return <div>Loading network...</div>;
+ *   if (isLoading) return <div>Connecting to ENSNode...</div>;
  *   if (error) return <div>Failed to detect network</div>;
  *
  *   const networkName = namespaceId === ENSNamespaceIds.Mainnet ? "Mainnet" :
