@@ -6,12 +6,12 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 import { useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
-import { AdditionalRecords } from "./AdditionalRecords";
-import { Addresses } from "./Addresses";
-import { ProfileHeader } from "./ProfileHeader";
-import { ProfileInformation } from "./ProfileInformation";
-import { NameDetailPageSkeleton, ProfileSkeleton } from "./ProfileSkeleton";
-import { SocialLinks } from "./SocialLinks";
+import { AdditionalRecords } from "./_components/AdditionalRecords";
+import { Addresses } from "./_components/Addresses";
+import { ProfileHeader } from "./_components/ProfileHeader";
+import { ProfileInformation } from "./_components/ProfileInformation";
+import { NameDetailPageSkeleton, ProfileSkeleton } from "./_components/ProfileSkeleton";
+import { SocialLinks } from "./_components/SocialLinks";
 
 export default function NameDetailPage() {
   const params = useParams();
