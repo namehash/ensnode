@@ -1,8 +1,5 @@
 /**
- * A label set ID identifies a set of labels that can be used for deterministic healing.
- * A label set allows clients to deterministically heal their state against a server,
- * ensuring that both are operating on the same version of data.
- *
+ * A label set ID identifies a label set (see https://ensnode.io/ensrainbow/concepts/glossary/ for definition).
  * It is guaranteed to be 1 to 50 characters long and contain only lowercase letters (a-z)
  * and hyphens (-).
  */
