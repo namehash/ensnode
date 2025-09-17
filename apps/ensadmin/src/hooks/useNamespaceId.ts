@@ -16,16 +16,16 @@ import { useQuery } from "@tanstack/react-query";
  * import { useNamespaceId } from "@/hooks/useNamespaceId";
  * import { ENSNamespaceIds } from "@ensnode/datasources";
  *
- * function NetworkIndicator() {
+ * function NamespaceIndicator() {
  *   const { data: namespaceId, isLoading, error } = useNamespaceId();
  *
  *   if (isLoading) return <div>Connecting to ENSNode...</div>;
- *   if (error) return <div>Failed to detect network</div>;
+ *   if (error) return <div>Error connecting to ENSNode</div>;
  *
- *   const networkName = namespaceId === ENSNamespaceIds.Mainnet ? "Mainnet" :
- *                      namespaceId === ENSNamespaceIds.Sepolia ? "Sepolia" : "Unknown";
+ *   const namespaceName = namespaceId === ENSNamespaceIds.Mainnet ? "Mainnet" :
+ *                         namespaceId === ENSNamespaceIds.Sepolia ? "Sepolia" : "Unknown";
  *
- *   return <div>Connected to: {networkName}</div>;
+ *   return <div>Connected to: {namespaceName}</div>;
  * }
  * ```
  */
