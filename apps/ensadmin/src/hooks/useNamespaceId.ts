@@ -1,13 +1,11 @@
-import { ENSNamespaceIds } from "@ensnode/datasources";
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
-import { useQuery } from "@tanstack/react-query";
 
 /**
  * Hook to get the namespace ID from the active ENSNode connection.
  *
  * Returns the ENS namespace identifier for the currently configured ENSNode client.
  * This determines which ENS namespace (Mainnet, Sepolia, Holesky, etc.) the connected ENSNode
- * is associated with. Falls back to Mainnet if no ENSNode is actively connected.
+ * is associated with. Returns null if no ENSNode is actively connected.
  *
  * @returns Query result with namespace ID, loading state, and error handling
  *
@@ -30,12 +28,10 @@ import { useQuery } from "@tanstack/react-query";
  * ```
  */
 export function useNamespaceId() {
-  const { data: config, isLoading: configLoading } = useENSIndexerConfig();
+  const configQuery = useENSIndexerConfig();
 
-  return useQuery({
-    queryKey: ["namespaceId", config?.namespace],
-    queryFn: () => config?.namespace ?? ENSNamespaceIds.Mainnet,
-    enabled: !configLoading,
-    initialData: ENSNamespaceIds.Mainnet,
-  });
+  return {
+    ...configQuery,
+    data: configQuery.data?.namespace ?? null,
+  };
 }

@@ -44,6 +44,6 @@ export function useAvatarUrl({ name }: UseAvatarUrlParameters) {
       if (!namespaceId) return null;
       return getNameAvatarUrl(name, namespaceId);
     },
-    enabled: namespaceId !== undefined,
+    enabled: !!namespaceId,
   });
 }
