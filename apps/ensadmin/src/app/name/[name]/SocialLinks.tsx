@@ -34,7 +34,7 @@ export function SocialLinks({
           switch (key) {
             case "com.twitter": {
               return (
-                <div className="inline-flex items-center gap-2">
+                <div key={key} className="inline-flex items-center gap-2">
                   <SiX size={16} className="text-gray-500" />
                   <ExternalLinkWithIcon href={`https://twitter.com/${value}`} className="text-sm">
                     @{value}
@@ -44,7 +44,7 @@ export function SocialLinks({
             }
             case "com.github": {
               return (
-                <div className="inline-flex items-center gap-2">
+                <div key={key} className="inline-flex items-center gap-2">
                   <SiGithub size={16} className="text-gray-500" />
                   <ExternalLinkWithIcon href={`https://github.com/${value}`} className="text-sm">
                     {value}
@@ -54,7 +54,7 @@ export function SocialLinks({
             }
             case "com.farcaster": {
               return (
-                <div className="inline-flex items-center gap-2">
+                <div key={key} className="inline-flex items-center gap-2">
                   <SiFarcaster size={16} className="text-gray-500" />
                   <ExternalLinkWithIcon href={`https://warpcast.com/${value}`} className="text-sm">
                     @{value}
@@ -64,7 +64,7 @@ export function SocialLinks({
             }
             case "org.telegram": {
               return (
-                <div className="inline-flex items-center gap-2">
+                <div key={key} className="inline-flex items-center gap-2">
                   <SiTelegram size={16} className="text-gray-500" />
                   <ExternalLinkWithIcon href={`https://t.me/${value}`} className="text-sm">
                     @{value}
@@ -74,7 +74,7 @@ export function SocialLinks({
             }
             case "com.linkedin": {
               return (
-                <div className="inline-flex items-center gap-2">
+                <div key={key} className="inline-flex items-center gap-2">
                   <LinkedInIcon className="text-gray-500 size-4 fill-current" />
                   <ExternalLinkWithIcon
                     href={`https://linkedin.com/in/${value}`}
@@ -87,7 +87,7 @@ export function SocialLinks({
             }
             case "com.reddit": {
               return (
-                <div className="inline-flex items-center gap-2">
+                <div key={key} className="inline-flex items-center gap-2">
                   <SiReddit size={16} className="text-gray-500" />
                   <ExternalLinkWithIcon href={`https://reddit.com/u/${value}`} className="text-sm">
                     u/{value}

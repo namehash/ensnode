@@ -4,6 +4,7 @@ import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { beautifyUrl } from "@/lib/beautify-url";
 
 interface ProfileHeaderProps {
   name: string;
@@ -19,40 +20,30 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
   const getValidHeaderImageUrl = (headerImage: string | null | undefined): string | null => {
     if (!headerImage) return null;
 
+    let url: URL;
     try {
-      const url = new URL(headerImage);
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        return headerImage;
-      }
-      // For any other URI types (ipfs, data, NFT URIs, etc.), fallback to default
-      return null;
+      url = new URL(headerImage);
     } catch {
       return null;
     }
+
+    if (url.protocol === "http:" || url.protocol === "https:") return headerImage;
+
+    // For any other URI types (ipfs, data, NFT URIs, etc.), fallback to default
+    return null;
   };
 
-  const normalizeWebsiteUrl = (url: string | null | undefined): string | undefined => {
-    if (!url) return undefined;
+  const normalizeWebsiteUrl = (url: string | null | undefined): URL | null => {
+    if (!url) return null;
 
     try {
-      let normalizedUrl: URL;
-
       try {
-        normalizedUrl = new URL(url);
+        return new URL(url);
       } catch {
-        normalizedUrl = new URL(`https://${url}`);
+        return new URL(`https://${url}`);
       }
-
-      const urlString = normalizedUrl.toString();
-
-      // If URL is only a domain (no path, search, or hash), remove trailing slash
-      if (normalizedUrl.pathname === "/" && !normalizedUrl.search && !normalizedUrl.hash) {
-        return urlString.replace(/\/$/, "");
-      }
-
-      return urlString;
     } catch {
-      return undefined;
+      return null;
     }
   };
 
@@ -84,8 +75,8 @@ export function ProfileHeader({ name, avatarUrl, headerImage, websiteUrl }: Prof
               </h1>
               <div className="flex items-center gap-3 mt-1">
                 {normalizedWebsiteUrl && (
-                  <ExternalLinkWithIcon href={normalizedWebsiteUrl} className="text-sm">
-                    {new URL(normalizedWebsiteUrl).hostname}
+                  <ExternalLinkWithIcon href={normalizedWebsiteUrl.toString()} className="text-sm">
+                    {beautifyUrl(normalizedWebsiteUrl)}
                   </ExternalLinkWithIcon>
                 )}
               </div>
