@@ -11,7 +11,14 @@ import { isAddress } from "viem";
 import z from "zod/v4";
 import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
-import type { BlockRef, ChainId, Datetime, Duration, UnixTimestamp } from "./types";
+import type {
+  BlockRef,
+  ChainId,
+  Datetime,
+  DefaultableChainId,
+  Duration,
+  UnixTimestamp,
+} from "./types";
 
 /**
  * Zod `.check()` function input.
@@ -81,6 +88,25 @@ export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") 
     .string({ error: `${valueLabel} must be a string representing a chain ID.` })
     .pipe(z.coerce.number({ error: `${valueLabel} must represent a positive integer (>0).` }))
     .pipe(makeChainIdSchema(`The numeric value represented by ${valueLabel}`));
+
+/**
+ * Parses Defaultable Chain ID
+ *
+ * {@link DefaultableChainId}
+ */
+export const makeDefaultableChainIdSchema = (valueLabel: string = "Defaultable Chain ID") =>
+  makeNonNegativeIntegerSchema(valueLabel).transform((val) => val as DefaultableChainId);
+
+/**
+ * Parses a string representation of {@link DefaultableChainId}.
+ */
+export const makeDefaultableChainIdStringSchema = (
+  valueLabel: string = "Defaultable Chain ID String",
+) =>
+  z
+    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
+    .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
+    .pipe(makeDefaultableChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 const knownCoinTypes = new Set<number>(Object.values(coinNameToTypeMap));
 

@@ -1,4 +1,5 @@
 import { Address } from "viem";
+import { type DEFAULT_EVM_CHAIN_ID } from "../ens";
 
 /**
  * Chain ID
@@ -7,6 +8,18 @@ import { Address } from "viem";
  * Guaranteed to be a positive integer.
  **/
 export type ChainId = number;
+
+/**
+ * Defaultable Chain ID
+ *
+ * Represents a unique identifier for a chain, including
+ * the default chain as defined by ENSIP-19.
+ *
+ * @see https://docs.ens.domains/ensip/19/#annex-supported-chains
+ *
+ * Guaranteed to be a non-negative integer.
+ **/
+export type DefaultableChainId = typeof DEFAULT_EVM_CHAIN_ID | ChainId;
 
 /**
  * Represents an account (contract or EOA) at `address` on chain `chainId`.

@@ -5,8 +5,8 @@ import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
 import { isNormalizedName } from "../../shared";
 import {
-  makeChainIdStringSchema,
   makeCoinTypeStringSchema,
+  makeDefaultableChainIdStringSchema,
   makeDurationSchema,
   makeEvmAddressSchema,
 } from "../../shared/zod-schemas";
@@ -39,7 +39,7 @@ const name = z
 const trace = boolstring;
 const accelerate = boolstring;
 const address = makeEvmAddressSchema();
-const chainId = makeChainIdStringSchema();
+const defaultableChainId = makeDefaultableChainIdStringSchema();
 const coinType = makeCoinTypeStringSchema();
 
 const selection = {
@@ -104,7 +104,7 @@ export const routes = {
       }),
   },
   primaryName: {
-    params: z.object({ address, chainId }),
+    params: z.object({ address, chainId: defaultableChainId }),
     query: z.object({
       trace: z.optional(trace).default(false),
       accelerate: z.optional(accelerate).default(false),
@@ -113,7 +113,9 @@ export const routes = {
   primaryNames: {
     params: z.object({ address: address }),
     query: z.object({
-      chainIds: z.optional(stringarray.pipe(z.array(chainId.pipe(excludingDefaultChainId)))),
+      chainIds: z.optional(
+        stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
+      ),
       trace: z.optional(trace).default(false),
       accelerate: z.optional(accelerate).default(false),
     }),
