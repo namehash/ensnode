@@ -71,13 +71,15 @@ export default function Layout({
                   <AppSidebar />
                 </Suspense>
                 <SidebarInset className="min-w-0">
-                  <Header>
-                    <HeaderNav>
-                      <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                    </HeaderNav>
-                    <HeaderActions>{actions}</HeaderActions>
-                  </Header>
-                  <ENSNodeProvider>{children}</ENSNodeProvider>
+                  <ENSNodeProvider>
+                    <Header>
+                      <HeaderNav>
+                        <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                      </HeaderNav>
+                      <HeaderActions>{actions}</HeaderActions>
+                    </Header>
+                    {children}
+                  </ENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
             </RequireActiveENSNodeConnection>

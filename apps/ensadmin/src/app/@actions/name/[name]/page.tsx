@@ -6,22 +6,18 @@ import { useNamespaceId } from "@/hooks/useNamespaceId";
 import { getExternalEnsAppNameUrl } from "@/lib/namespace-utils";
 import { useParams } from "next/navigation";
 
-// TODO BEFORE MERGE, NEED TO REFACTOR LAYOUT PROVIDERS
 export default function ActionsNamePage() {
-  return null;
-  // const params = useParams();
-  // const name = decodeURIComponent(params.name as string);
+  const params = useParams();
+  const name = decodeURIComponent(params.name as string);
+  const { data: namespaceId, isLoading } = useNamespaceId();
 
-  // const { data: namespaceId, isLoading: namespaceLoading } = useNamespaceId();
-  // const ensAppUrl = getExternalEnsAppNameUrl(name, namespaceId);
+  const ensAppUrl = namespaceId ? getExternalEnsAppNameUrl(name, namespaceId) : null;
 
-  // if (namespaceLoading || !ensAppUrl) return null;
+  if (isLoading || !ensAppUrl) return null;
 
-  // return (
-  //   <Button variant="link" size="sm" asChild>
-  //     <ExternalLinkWithIcon href={ensAppUrl.toString()}>
-  //       View in ENS App
-  //     </ExternalLinkWithIcon>
-  //   </Button>
-  // );
+  return (
+    <Button variant="link" size="sm" asChild>
+      <ExternalLinkWithIcon href={ensAppUrl.toString()}>View in ENS App</ExternalLinkWithIcon>
+    </Button>
+  );
 }
