@@ -8,9 +8,9 @@ import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
 import { AdditionalRecords } from "./_components/AdditionalRecords";
 import { Addresses } from "./_components/Addresses";
+import { NameDetailPageSkeleton } from "./_components/NameDetailPageSkeleton";
 import { ProfileHeader } from "./_components/ProfileHeader";
 import { ProfileInformation } from "./_components/ProfileInformation";
-import { NameDetailPageSkeleton, ProfileSkeleton } from "./_components/ProfileSkeleton";
 import { SocialLinks } from "./_components/SocialLinks";
 
 export default function NameDetailPage() {
@@ -20,20 +20,16 @@ export default function NameDetailPage() {
   // TODO: Get the namespace from the active ENSNode connection
   const namespaceId = ENSNamespaceIds.Mainnet;
 
-  const {
-    data,
-    status: recordsStatus,
-    isLoading,
-  } = useRecords({
+  const { data, status } = useRecords({
     name,
     selection: DefaultRecordsSelection[namespaceId],
   });
 
   const avatarUrl = getNameAvatarUrl(name, namespaceId);
 
-  if (isLoading) {
-    return <NameDetailPageSkeleton />;
-  }
+  if (status === "pending") return <NameDetailPageSkeleton />;
+
+  // return <NameDetailPageSkeleton />;
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -45,30 +41,36 @@ export default function NameDetailPage() {
       />
 
       <div className="grid gap-6">
-        {recordsStatus === "pending" && <ProfileSkeleton />}
+        {(() => {
+          switch (status) {
+            case "error": {
+              return (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-red-600">Failed to load profile information</p>
+                  </CardContent>
+                </Card>
+              );
+            }
 
-        {recordsStatus === "error" && (
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-red-600">Failed to load profile information</p>
-            </CardContent>
-          </Card>
-        )}
+            case "success": {
+              return (
+                <>
+                  <ProfileInformation
+                    description={data.records.texts.description}
+                    email={data.records.texts.email}
+                  />
 
-        {recordsStatus === "success" && data && (
-          <>
-            <ProfileInformation
-              description={data.records.texts.description}
-              email={data.records.texts.email}
-            />
+                  <SocialLinks.Texts texts={data.records.texts} />
 
-            <SocialLinks.Texts texts={data.records.texts} />
+                  <Addresses addresses={data.records.addresses} />
 
-            <Addresses addresses={data.records.addresses} />
-
-            <AdditionalRecords texts={data.records.texts} />
-          </>
-        )}
+                  <AdditionalRecords texts={data.records.texts} />
+                </>
+              );
+            }
+          }
+        })()}
       </div>
     </div>
   );
