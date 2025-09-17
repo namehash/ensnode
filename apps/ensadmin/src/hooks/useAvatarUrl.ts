@@ -10,16 +10,14 @@ export interface UseAvatarUrlParameters {
 }
 
 /**
- * Hook to get the URL for loading the avatar image for an ENS name through the ENS Metadata Service.
+ * Hook to build the URL for an ENS name's avatar image via the ENS Metadata Service.
  *
- * Makes use of the ENS Metadata Service (https://metadata.ens.domains/docs) to fetch
- * the avatar image for the given name in the given namespace. The ENS Metadata Service
- * acts as proxy that offers deterministic routes for these fetch requests, and then
- * works internally to lookup the true avatar record of the provided name and namespace
- * and then to load the image associated with that true avatar record.
+ * Constructs a URL pointing to the ENS Metadata Service (https://metadata.ens.domains/docs)
+ * for the given name in the given namespace. This URL can then be used in fetch operations
+ * or as an image src to load the avatar associated with the ENS name.
  *
  * @param parameters - Configuration containing the ENS name
- * @returns Query result with avatar URL, loading state, and error handling
+ * @returns Query result with avatar URL (or null), loading state, and error handling
  *
  * @example
  * ```typescript
@@ -32,7 +30,7 @@ export interface UseAvatarUrlParameters {
  *
  *   if (isLoading) return <div>Loading avatar...</div>;
  *   if (error) return <div>Failed to load avatar</div>;
- *   if (!avatarUrl) return <div>No avatar set</div>;
+ *   if (!avatarUrl) return <div>No avatar URL available</div>;
  *
  *   return <img src={avatarUrl.toString()} alt="ENS Avatar" />;
  * }
