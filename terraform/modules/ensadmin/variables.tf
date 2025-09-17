@@ -21,14 +21,14 @@ variable "render_instance_plan" {
   type = string
 }
 
-# DNS configuration
-# hosted_zone_name is used to retrieve Route53 hosted zone
+# Example: ensnode.io
+# See main.tf for more details
 variable "hosted_zone_name" {
   type        = string
-  description = "Base DNS domain (e.g. 'example.com' or 'namehash.io'). Combine with ensnode_environment_name to build full domain name. Must have corresponding domain zone in AWS Route53."
 }
-# ensnode_environment_name is added as hosted_zone_name prefix to create fqdn. It can be for instance environment - blue/green
+
+# Example: blue
+# See main.tf for more details on how this is used, including for building fqdn values.
 variable "ensnode_environment_name" {
   type        = string
-  description = "Environment name on which ENSAdmin will be deployed. Combined with hosted_zone_name to build full domain name."
 }
