@@ -14,12 +14,10 @@ export interface UseEnsMetadataServiceAvatarUrlParameters {
  * avatar image for the given name from the ENS Metadata Service
  * (https://metadata.ens.domains/docs).
  *
- * The returned URL is dynamically built based on the ENS namespace of the actively
- * connected ENSNode. Not all ENS namespaces are supported by the ENS Metadata Service.
- * Therefore, the returned avatarUrl may be null.
- *
- * @param parameters - The ENS name to get the avatar URL for
- * @returns Query result with avatar URL (or null), loading state, and error handling
+ * @param parameters.name - The ENS name to get the ENS Metadata Service avatar URL for
+ * @returns Query result with avatarUrl, loading state, and error handling. avatarUrl will be
+ *          null if there is no active ENSNode connection or if the connected ENS namespace
+ *          is not supported by the ENS Metadata Service.
  *
  * @example
  * ```typescript
@@ -30,9 +28,9 @@ export interface UseEnsMetadataServiceAvatarUrlParameters {
  *     name: "vitalik.eth"
  *   });
  *
- *   if (isLoading) return <div>Constructing avatar URL...</div>;
- *   if (error) return <div>Failed to construct avatar URL</div>;
- *   if (!avatarUrl) return <div>No avatar URL available for the current namespace</div>;
+ *   if (isLoading) return <div>Connecting to ENSNode...</div>;
+ *   if (error) return <div>Error connecting to ENSNode</div>;
+ *   if (!avatarUrl) return <div>No active ENSNode connection or no avatar URL available for the current namespace</div>;
  *
  *   return <img src={avatarUrl.toString()} alt="ENS Avatar" />;
  * }

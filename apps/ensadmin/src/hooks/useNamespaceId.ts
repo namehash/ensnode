@@ -3,11 +3,8 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 /**
  * Hook to get the namespace ID from the active ENSNode connection.
  *
- * Returns the ENS namespace identifier for the currently connected ENSNode client.
- * This determines which ENS namespace (Mainnet, Sepolia, Holesky, etc.) the connected ENSNode
- * is associated with. Returns null if no ENSNode is actively connected.
- *
- * @returns Query result with namespace ID, loading state, and error handling
+ * @returns Query result with namespaceId, loading state, and error handling. namespaceId will
+ *          be null if there is no active ENSNode connection.
  *
  * @example
  * ```typescript
