@@ -40,6 +40,7 @@ const TEXTS = [
 // Additionally, we should update `useRecords` so that it can return not only all the
 // (texts / addresses) records that are explicitly requested, but also any other (texts / addresses)
 // records that ENSNode has found onchain.
+// see: https://github.com/namehash/ensnode/issues/1084
 export const DefaultRecordsSelection = {
   [ENSNamespaceIds.Mainnet]: {
     addresses: getCommonCoinTypes(ENSNamespaceIds.Mainnet),

@@ -35,6 +35,7 @@ export default function NameDetailPage() {
   // explicitly requested, but also any other records that were found onchain,
   // no matter what their text record keys are. Below are two examples of
   // additional text records set for lightwalker.eth on mainnet as an example.
+  // see: https://github.com/namehash/ensnode/issues/1083
   const AdditionalTextRecords = ["status", "eth.ens.delegate"];
   const AllRequestedTextRecords = [
     ...HeaderPanelTextRecords,
@@ -58,6 +59,7 @@ export default function NameDetailPage() {
   // should then be updated so that it takes as input only the nice and clean `ENSProfile` data model.
   // These UI components should not need to consider the nuances or complexities of the raw `useRecords`
   // data model. All those nuances and complexities should be mananaged in a single place (ex: `useENSProfile`).
+  // see: https://github.com/namehash/ensnode/issues/1082
   const { data, status } = useRecords({
     name,
     selection,
