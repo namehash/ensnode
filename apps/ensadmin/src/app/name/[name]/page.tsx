@@ -1,35 +1,27 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useNamespaceId } from "@/hooks/useNamespaceId";
+import { useActiveENSNodeConfig } from "@/hooks/use-active-ensnode-config";
 import { useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
 import { AdditionalRecords } from "./AdditionalRecords";
 import { Addresses } from "./Addresses";
+import { NameDetailPageSkeleton } from "./NameDetailPageSkeleton";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileInformation } from "./ProfileInformation";
-import { NameDetailPageSkeleton, ProfileSkeleton } from "./ProfileSkeleton";
 import { SocialLinks } from "./SocialLinks";
 
 export default function NameDetailPage() {
-  const params = useParams();
-  const name = decodeURIComponent(params.name as string);
+  const { name } = useParams<{ name: string }>();
+  const { namespace } = useActiveENSNodeConfig();
 
-  const { data: namespaceId, isLoading: namespaceLoading } = useNamespaceId();
-
-  const {
-    data: records,
-    status: recordsStatus,
-    isLoading: recordsLoading,
-  } = useRecords({
+  const { data: records, status } = useRecords({
     name,
-    selection: DefaultRecordsSelection[namespaceId],
+    selection: DefaultRecordsSelection[namespace],
   });
 
-  if (namespaceLoading || recordsLoading) {
-    return <NameDetailPageSkeleton />;
-  }
+  if (status === "pending") return <NameDetailPageSkeleton />;
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -40,9 +32,7 @@ export default function NameDetailPage() {
       />
 
       <div className="grid gap-6">
-        {recordsStatus === "pending" && <ProfileSkeleton />}
-
-        {recordsStatus === "error" && (
+        {status === "error" && (
           <Card>
             <CardContent className="pt-6">
               <p className="text-red-600">Failed to load profile information</p>
@@ -50,7 +40,7 @@ export default function NameDetailPage() {
           </Card>
         )}
 
-        {recordsStatus === "success" && records && (
+        {status === "success" && (
           <>
             <ProfileInformation
               description={records.records.texts?.description}

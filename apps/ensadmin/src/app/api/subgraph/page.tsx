@@ -1,7 +1,7 @@
 "use client";
 
 import { SubgraphGraphiQLEditor } from "@/components/graphiql-editor";
-import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
+import { useActiveENSNodeUrl } from "@/hooks/use-active-ensnode-url";
 
 export default function SubgraphGraphQLPage() {
   const baseUrl = useActiveENSNodeUrl();

@@ -2,18 +2,15 @@
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Button } from "@/components/ui/button";
-import { useNamespaceId } from "@/hooks/useNamespaceId";
-import { getExternalEnsAppNameUrl } from "@/lib/namespace-utils";
+import { useENSAppNameUrl } from "@/hooks/use-ens-app-name-url";
 import { useParams } from "next/navigation";
 
 export default function ActionsNamePage() {
-  const params = useParams();
-  const name = decodeURIComponent(params.name as string);
-  const { data: namespaceId, isLoading } = useNamespaceId();
+  const { name } = useParams<{ name: string }>();
 
-  const ensAppUrl = namespaceId ? getExternalEnsAppNameUrl(name, namespaceId) : null;
+  const { data: ensAppUrl } = useENSAppNameUrl(name);
 
-  if (isLoading || !ensAppUrl) return null;
+  if (!ensAppUrl) return null;
 
   return (
     <Button variant="link" size="sm" asChild>

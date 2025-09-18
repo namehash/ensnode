@@ -5,6 +5,7 @@ import "./globals.css";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
+import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
 import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -78,7 +79,7 @@ export default function Layout({
                       </HeaderNav>
                       <HeaderActions>{actions}</HeaderActions>
                     </Header>
-                    {children}
+                    <RequireActiveENSNodeConfig>{children}</RequireActiveENSNodeConfig>
                   </ENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>

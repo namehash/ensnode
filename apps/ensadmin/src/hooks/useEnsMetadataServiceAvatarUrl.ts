@@ -42,9 +42,9 @@ export function useEnsMetadataServiceAvatarUrl({ name }: UseEnsMetadataServiceAv
   return useQuery({
     queryKey: ["avatarUrl", name, namespaceId],
     queryFn: () => {
-      if (!namespaceId) return null;
+      if (namespaceId === null) throw new Error('namespaceId required to execute this query');
       return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
     },
-    enabled: !!namespaceId,
+    enabled: namespaceId !== null,
   });
 }
