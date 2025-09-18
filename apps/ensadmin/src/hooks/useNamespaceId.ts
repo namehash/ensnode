@@ -3,7 +3,7 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 /**
  * Hook to get the namespace ID from the active ENSNode connection.
  *
- * Returns the ENS namespace identifier for the currently configured ENSNode client.
+ * Returns the ENS namespace identifier for the currently connected ENSNode client.
  * This determines which ENS namespace (Mainnet, Sepolia, Holesky, etc.) the connected ENSNode
  * is associated with. Returns null if no ENSNode is actively connected.
  *
@@ -12,18 +12,15 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
  * @example
  * ```typescript
  * import { useNamespaceId } from "@/hooks/useNamespaceId";
- * import { ENSNamespaceIds } from "@ensnode/datasources";
  *
  * function NamespaceIndicator() {
  *   const { data: namespaceId, isLoading, error } = useNamespaceId();
  *
  *   if (isLoading) return <div>Connecting to ENSNode...</div>;
  *   if (error) return <div>Error connecting to ENSNode</div>;
+ *   if (!namespaceId) return <div>No active ENSNode connection</div>;
  *
- *   const namespaceName = namespaceId === ENSNamespaceIds.Mainnet ? "Mainnet" :
- *                         namespaceId === ENSNamespaceIds.Sepolia ? "Sepolia" : "Unknown";
- *
- *   return <div>Connected to: {namespaceName}</div>;
+ *   return <div>Connected to ENS namespace: {namespaceId}</div>;
  * }
  * ```
  */
