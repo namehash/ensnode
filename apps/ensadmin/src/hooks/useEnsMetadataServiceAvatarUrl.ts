@@ -1,11 +1,11 @@
 "use client";
 
 import { useNamespaceId } from "@/hooks/useNamespaceId";
-import { getNameAvatarUrl } from "@/lib/namespace-utils";
+import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { Name } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 
-export interface UseAvatarUrlParameters {
+export interface UseEnsMetadataServiceAvatarUrlParameters {
   name: Name;
 }
 
@@ -23,10 +23,10 @@ export interface UseAvatarUrlParameters {
  *
  * @example
  * ```typescript
- * import { useAvatarUrl } from "@/hooks/useAvatarUrl";
+ * import { useEnsMetadataServiceAvatarUrl } from "@/hooks/useEnsMetadataServiceAvatarUrl";
  *
  * function ProfileAvatar() {
- *   const { data: avatarUrl, isLoading, error } = useAvatarUrl({
+ *   const { data: avatarUrl, isLoading, error } = useEnsMetadataServiceAvatarUrl({
  *     name: "vitalik.eth"
  *   });
  *
@@ -38,14 +38,14 @@ export interface UseAvatarUrlParameters {
  * }
  * ```
  */
-export function useAvatarUrl({ name }: UseAvatarUrlParameters) {
+export function useEnsMetadataServiceAvatarUrl({ name }: UseEnsMetadataServiceAvatarUrlParameters) {
   const { data: namespaceId } = useNamespaceId();
 
   return useQuery({
     queryKey: ["avatarUrl", name, namespaceId],
     queryFn: () => {
       if (!namespaceId) return null;
-      return getNameAvatarUrl(name, namespaceId);
+      return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
     },
     enabled: !!namespaceId,
   });

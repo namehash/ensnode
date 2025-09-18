@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getNameAvatarUrl } from "@/lib/namespace-utils";
+import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { cx } from "class-variance-authority";
@@ -46,7 +46,7 @@ export function Identity({
   }
 
   const ensName = data.name;
-  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
+  const ensAvatarUrl = ensName ? buildEnsMetadataServiceAvatarUrl(ensName, namespaceId) : null;
 
   return (
     <div className={cx("flex items-center gap-2", className)}>
