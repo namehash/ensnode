@@ -125,18 +125,21 @@ export function getTimestampForHighestOmnichainKnownBlock(
  * The cursor tracks the "highest" latest indexed block timestamp across all chains
  * that have started indexing (are not queued).
  *
- * @throws an error if no chains are provided.
+ * @throws an error if no chains are provided, or if all chains provided are in the
+ *         "queued" status.
  */
-export function getOmnichainIndexingCursor(
-  chains: Array<
-    ChainIndexingBackfillStatus | ChainIndexingCompletedStatus | ChainIndexingFollowingStatus
-  >,
-): UnixTimestamp {
-  if (chains.length === 0) {
-    throw new Error(`Unable to determine omnichain indexing cursor. No chains provided.`);
+export function getOmnichainIndexingCursor(chains: ChainIndexingStatus[]): UnixTimestamp {
+  const chainsThatStartedIndexing = chains.filter(
+    (chain) => chain.status !== ChainIndexingStatusIds.Queued,
+  );
+
+  if (chainsThatStartedIndexing.length === 0) {
+    throw new Error(
+      `Unable to determine omnichain indexing cursor. No chains that started indexing provided.`,
+    );
   }
 
-  const latestIndexedBlockTimestamps: UnixTimestamp[] = chains.map(
+  const latestIndexedBlockTimestamps: UnixTimestamp[] = chainsThatStartedIndexing.map(
     (chain) => chain.latestIndexedBlock.timestamp,
   );
 

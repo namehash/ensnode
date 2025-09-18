@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { BlockRef } from "../../shared";
 import {
   createIndexingConfig,
   getOmnichainIndexingCursor,
@@ -249,7 +250,21 @@ describe("ENSIndexer: Indexing Status helpers", () => {
 describe("getOmnichainIndexingCursor", () => {
   it("returns the correct cursor for the given chain statuses", () => {
     // arrange
+
+    const evenLaterBlockRef: BlockRef = {
+      timestamp: latestBlockRef.timestamp + 1000,
+      number: latestBlockRef.number + 1000,
+    };
+
     const chainStatuses = [
+      {
+        status: ChainIndexingStatusIds.Queued,
+        config: {
+          strategy: ChainIndexingStrategyIds.Indefinite,
+          startBlock: evenLaterBlockRef,
+        },
+      } satisfies ChainIndexingQueuedStatus,
+
       {
         status: ChainIndexingStatusIds.Backfill,
         config: {
@@ -291,7 +306,21 @@ describe("getOmnichainIndexingCursor", () => {
 
   it("throws error when no chains were provided", () => {
     expect(() => getOmnichainIndexingCursor([])).toThrowError(
-      "Unable to determine omnichain indexing cursor. No chains provided.",
+      /Unable to determine omnichain indexing cursor/,
     );
+  });
+
+  it("throws error when all chains are in 'queued' status", () => {
+    expect(() =>
+      getOmnichainIndexingCursor([
+        {
+          status: ChainIndexingStatusIds.Queued,
+          config: {
+            strategy: ChainIndexingStrategyIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingQueuedStatus,
+      ]),
+    ).toThrowError(/Unable to determine omnichain indexing cursor/);
   });
 });
