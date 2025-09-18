@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getNameAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { useRecords } from "@ensnode/ensnode-react";
-import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
+import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
 import { AdditionalRecords } from "./_components/AdditionalRecords";
 import { Addresses } from "./_components/Addresses";
@@ -20,9 +20,47 @@ export default function NameDetailPage() {
   // TODO: Get the namespace from the active ENSNode connection
   const namespaceId = ENSNamespaceIds.Mainnet;
 
+  const HeaderPanelTextRecords = ["url", "avatar", "header"];
+  const ProfilePanelTextRecords = ["description", "email"];
+  const SocialLinksTextRecords = [
+    "com.twitter",
+    "com.github",
+    "com.farcaster",
+    "org.telegram",
+    "com.linkedin",
+    "com.reddit",
+  ];
+  // TODO: Instead of explicitly listing AdditionalTextRecords, we should update
+  // `useRecords` so that we can ask it to return not only all the records we
+  // explicitly requested, but also any other records that were found onchain,
+  // no matter what their text record keys are. Below are two examples of
+  // additional text records set for lightwalker.eth on mainnet as an example.
+  const AdditionalTextRecords = ["status", "eth.ens.delegate"];
+  const AllRequestedTextRecords = [
+    ...HeaderPanelTextRecords,
+    ...ProfilePanelTextRecords,
+    ...SocialLinksTextRecords,
+    ...AdditionalTextRecords,
+  ];
+
+  const selection = {
+    addresses: getCommonCoinTypes(namespaceId),
+    texts: AllRequestedTextRecords,
+  } as const satisfies ResolverRecordsSelection;
+
+  // TODO: Each app (including ENSAdmin) should define their own "wrapper" data model around
+  // their `useRecords` queries that is specific to their use case. For example, ENSAdmin should
+  // define a nicely designed data model such as `ENSProfile` (based on the subjective definition
+  // of what an ENS profile is within the context of ENSAdmin). Then, a hook such as `useENSProfile`
+  // should be defined that internally calls `useRecords` and then performs the data transformations
+  // that might be required to return the nice, clean, and specialized `ENSProfile` data model.
+  // The code in `ProfileHeader`, `ProfileInformation`, `SocialLinks`, `Addresses`, and `AdditionalRecords`
+  // should then be updated so that it takes as input only the nice and clean `ENSProfile` data model.
+  // These UI components should not need to consider the nuances or complexities of the raw `useRecords`
+  // data model. All those nuances and complexities should be mananaged in a single place (ex: `useENSProfile`).
   const { data, status } = useRecords({
     name,
-    selection: DefaultRecordsSelection[namespaceId],
+    selection,
   });
 
   const avatarUrl = getNameAvatarUrl(name, namespaceId);
