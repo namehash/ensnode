@@ -2,4 +2,4 @@
 "@docs/ensnode": minor
 ---
 
-Add a documentation page for ENSDb
+Add a placeholder docs section for ENSDb
