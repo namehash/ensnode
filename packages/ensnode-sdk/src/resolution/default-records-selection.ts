@@ -23,7 +23,7 @@ const getENSIP19SupportedCoinTypes = (namespace: ENSNamespaceId) =>
 
 export const getCommonCoinTypes = (namespace: ENSNamespaceId): CoinType[] => {
   return [ETH_COIN_TYPE, ...getENSIP19SupportedCoinTypes(namespace)];
-}
+};
 
 const TEXTS = [
   "url",
