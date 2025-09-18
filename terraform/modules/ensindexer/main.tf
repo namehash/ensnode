@@ -3,7 +3,7 @@ locals {
 
   common_variables = {
     # Common configuration
-    "DATABASE_URL"                      = { value = var.database_url },
+    "DATABASE_URL"                      = { value = var.ensdb_url },
     "DATABASE_SCHEMA"                   = { value = var.database_schema },
     "ENSRAINBOW_URL"                    = { value = var.ensrainbow_url },
     "LABEL_SET_ID"                      = { value = var.ensindexer_label_set_id },
@@ -13,6 +13,7 @@ locals {
     "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },
     "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
     "REPLACE_UNNORMALIZED"              = { value = var.replace_unnormalized },
+    "ENSADMIN_URL"                      = { value = var.ensadmin_public_url }
 
     # Mainnet networks
     "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },
@@ -48,9 +49,11 @@ locals {
   }
 }
 
+# For details on "render_web_service", see:
+# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensindexer" {
-  name           = "ensindexer-${var.instance_name}"
-  plan           = var.instance_type
+  name           = "ensindexer-${var.ensnode_indexer_type}"
+  plan           = var.render_instance_plan
   region         = var.render_region
   environment_id = var.render_environment_id
 
@@ -65,22 +68,25 @@ resource "render_web_service" "ensindexer" {
     local.common_variables,
     {
       ENSNODE_PUBLIC_URL = {
-        value = "https://${local.full_ensindexer_hostname}"
+        value = "https://${local.ensindexer_fqdn}"
       },
       ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.instance_name}:10000"
+        value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       }
     }
   )
+
+  # See https://render.com/docs/custom-domains
   custom_domains = [
-    { name : local.full_ensindexer_hostname },
+    { name : local.ensindexer_fqdn },
   ]
 
 }
 
-
+# For details on "render_web_service", see:
+# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensindexer_api" {
-  name           = "ensindexer_api_${var.instance_name}"
+  name           = "ensindexer_api_${var.ensnode_indexer_type}"
   plan           = "starter"
   region         = var.render_region
   environment_id = var.render_environment_id
@@ -96,18 +102,20 @@ resource "render_web_service" "ensindexer_api" {
     local.common_variables,
     {
       ENSNODE_PUBLIC_URL = {
-        value = "https://${local.full_ensindexer_api_hostname}"
+        value = "https://${local.ensindexer_api_fqdn}"
       },
       ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.instance_name}:10000"
+        value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       },
       PONDER_COMMAND = {
         value = "serve"
       }
     }
   )
+
+  # See https://render.com/docs/custom-domains
   custom_domains = [
-    { name : local.full_ensindexer_api_hostname },
+    { name : local.ensindexer_api_fqdn },
   ]
 
 }

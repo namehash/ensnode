@@ -5,6 +5,7 @@ import { NameDisplay } from "@/components/identity/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEnsMetadataServiceAvatarUrl } from "@/hooks/useEnsMetadataServiceAvatarUrl";
+import { beautifyUrl } from "@/lib/beautify-url";
 
 interface ProfileHeaderProps {
   name: string;
@@ -20,19 +21,35 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
   const getValidHeaderImageUrl = (headerImage: string | null | undefined): string | null => {
     if (!headerImage) return null;
 
+    let url: URL;
     try {
-      const url = new URL(headerImage);
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        return headerImage;
-      }
-      // For any other URI types (ipfs, data, NFT URIs, etc.), fallback to default
+      url = new URL(headerImage);
+    } catch {
       return null;
+    }
+
+    if (url.protocol === "http:" || url.protocol === "https:") return headerImage;
+
+    // For any other URI types (ipfs, data, NFT URIs, etc.), fallback to default
+    return null;
+  };
+
+  const normalizeWebsiteUrl = (url: string | null | undefined): URL | null => {
+    if (!url) return null;
+
+    try {
+      try {
+        return new URL(url);
+      } catch {
+        return new URL(`https://${url}`);
+      }
     } catch {
       return null;
     }
   };
 
   const validHeaderImageUrl = getValidHeaderImageUrl(headerImage);
+  const normalizedWebsiteUrl = normalizeWebsiteUrl(websiteUrl);
 
   return (
     <Card className="overflow-hidden mb-8">
@@ -58,12 +75,9 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
                 <NameDisplay className="text-3xl font-bold" name={name} />
               </h1>
               <div className="flex items-center gap-3 mt-1">
-                {websiteUrl && (
-                  <ExternalLinkWithIcon
-                    href={websiteUrl.startsWith("http") ? websiteUrl : `https://${websiteUrl}`}
-                    className="text-sm"
-                  >
-                    {websiteUrl.replace(/^https?:\/\//, "")}
+                {normalizedWebsiteUrl && (
+                  <ExternalLinkWithIcon href={normalizedWebsiteUrl.toString()} className="text-sm">
+                    {beautifyUrl(normalizedWebsiteUrl)}
                   </ExternalLinkWithIcon>
                 )}
               </div>

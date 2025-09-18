@@ -286,6 +286,10 @@ a[href*="ensadmin"] .starlight-sidebar-topics-icon {
   background-image: url("../assets/ensadmin.svg");
 }
 
+a[href*="ensdb"] .starlight-sidebar-topics-icon {
+  background-image: url("../assets/ensdb.svg");
+}
+
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
   transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
