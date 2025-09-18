@@ -27,6 +27,7 @@ jobs:
       TAG: ${{ inputs.tag }}
       ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
       ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag }}"
+      ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag }}"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
       RAILWAY_ENVIRONMENT_ID: ${{ secrets.RAILWAY_ENVIRONMENT_ID}}
@@ -43,6 +44,7 @@ jobs:
       TF_VAR_ensrainbow_label_set_id: ${{ vars.LABEL_SET_ID }}
       TF_VAR_ensrainbow_label_set_version: ${{ vars.LABEL_SET_VERSION }}
       TF_VAR_db_schema_version: ${{ vars.DB_SCHEMA_VERSION }}
+      TF_VAR_anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
       # For now only one Terraform environment is active. In future this will be calculated based on workflow input.
       TF_VAR_render_environment: "yellow"
       TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
@@ -75,6 +77,7 @@ jobs:
         run: |
           docker manifest inspect ${{ env.ENSINDEXER_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSINDEXER_DOCKER_IMAGE }}"; exit 1; }
           docker manifest inspect ${{ env.ENSRAINBOW_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}"; exit 1; }
+          docker manifest inspect ${{ env.ENSADMIN_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSADMIN_DOCKER_IMAGE }}"; exit 1; }
 
       - name: Print switch target
         run: |
@@ -103,6 +106,8 @@ jobs:
               echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.GREEN_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
               #ENSRAINBOW
               echo "ENSRAINBOW_SVC_ID="${{ secrets.GREEN_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
+              #ENSADMIN
+              echo "ENSADMIN_SVC_ID="${{ secrets.GREEN_ENSADMIN_SVC_ID }} >> "$GITHUB_ENV"
               echo "SLACK_TITLE=':large_green_circle: GREEN environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
               ;;
             "blue")
@@ -125,6 +130,8 @@ jobs:
               echo "HOLESKY_INDEXER_SVC_ID="${{ secrets.BLUE_HOLESKY_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
               #ENSRAINBOW
               echo "ENSRAINBOW_SVC_ID="${{ secrets.BLUE_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
+              #ENSADMIN
+              echo "ENSADMIN_SVC_ID="${{ secrets.BLUE_ENSADMIN_SVC_ID }} >> "$GITHUB_ENV"
               echo "SLACK_TITLE=':large_blue_circle: BLUE environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
               ;;
             *)
@@ -174,6 +181,8 @@ jobs:
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #ENSRAINBOW
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}      ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          #ENSADMIN
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}        ${{ env.ENSADMIN_DOCKER_IMAGE }}
 
       # Update DATABASE_SCHEMA for each indexer based on input tag
       - name: Update shared environment variable
@@ -231,6 +240,8 @@ jobs:
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID}
           #ENSRAINBOW
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
+          #ENSADMIN
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
