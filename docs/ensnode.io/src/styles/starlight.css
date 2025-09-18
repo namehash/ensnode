@@ -287,8 +287,7 @@ a[href*="ensadmin"] .starlight-sidebar-topics-icon {
 }
 
 a[href*="ensdb"] .starlight-sidebar-topics-icon {
-  /*TODO: replace with ENSDb 2D icon once it's provided*/
-  background-image: url("../assets/ensrainbow.svg");
+  background-image: url("../assets/ensdb.svg");
 }
 
 /* Enhance hover and selected states for sidebar items */
