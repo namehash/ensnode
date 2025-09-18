@@ -29,7 +29,8 @@ export interface UseAvatarUrlParameters {
  *   });
  *
  *   if (isLoading) return <div>Constructing avatar URL...</div>;
- *   if (error) return <div>Failed to fetch avatar URL</div>;
+ *   if (error) return <div>Failed to construct avatar URL</div>;
+ *   if (!avatarUrl) return <div>No avatar URL available for the current namespace</div>;
  *
  *   return <img src={avatarUrl.toString()} alt="ENS Avatar" />;
  * }
