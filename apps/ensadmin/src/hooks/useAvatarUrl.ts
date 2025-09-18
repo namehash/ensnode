@@ -10,13 +10,15 @@ export interface UseAvatarUrlParameters {
 }
 
 /**
- * Hook to build the URL for an ENS name's avatar image via the ENS Metadata Service.
+ * Hook to build the URL for an ENS name's avatar image that (once fetched) would load the
+ * avatar image for the given name from the ENS Metadata Service
+ * (https://metadata.ens.domains/docs).
  *
- * Constructs a URL pointing to the ENS Metadata Service (https://metadata.ens.domains/docs)
- * for the given name in the given namespace. This URL can then be used in fetch operations
- * or as an image src to load the avatar associated with the ENS name.
+ * The returned URL is dynamically built based on the ENS namespace of the actively
+ * connected ENSNode. Not all ENS namespaces are supported by the ENS Metadata Service.
+ * Therefore, the returned avatarUrl may be null.
  *
- * @param parameters - Configuration containing the ENS name
+ * @param parameters - The ENS name to get the avatar URL for
  * @returns Query result with avatar URL (or null), loading state, and error handling
  *
  * @example
