@@ -44,7 +44,12 @@ export function formatRelativeTime(
 ): string {
   const compareWith = relativeTo ? relativeTo.getTime() : Date.now();
 
-  if (enforcePast && date.getTime() >= compareWith) {
+  if (
+    (enforcePast && date.getTime() >= compareWith) ||
+    (!includeSeconds &&
+      !conciseFormatting &&
+      Math.abs(date.getTime() - compareWith) < 60 * millisecondsInSecond)
+  ) {
     return "just now";
   }
 
@@ -52,12 +57,10 @@ export function formatRelativeTime(
     return formatDistanceStrict(date, compareWith, { addSuffix: true });
   }
 
-  const formattedDistance = formatDistance(date, compareWith, {
+  return formatDistance(date, compareWith, {
     addSuffix: true,
     includeSeconds,
   });
-
-  return formattedDistance !== "less than a minute ago" ? formattedDistance : "just now";
 }
 
 /**
@@ -68,7 +71,7 @@ export function RelativeTime({
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
-  tooltipPosition = TooltipPosition.TOP,
+  tooltipPosition = TooltipPosition.Top,
   relativeTo,
   prefix,
 }: {
@@ -89,7 +92,7 @@ export function RelativeTime({
   }, [date]);
 
   return (
-    <Tooltip delayDuration={2000}>
+    <Tooltip delayDuration={1000}>
       <TooltipTrigger className="cursor-text">
         {prefix}
         {relativeTime}

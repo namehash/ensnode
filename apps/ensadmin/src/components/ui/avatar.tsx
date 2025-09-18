@@ -18,7 +18,7 @@ type ImageLoadingStatus = "idle" | "loading" | "loaded" | "error";
 export const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
->(({ className, ensName, namespaceId, ...props }, ref) => {
+>(({ ensName, namespaceId, className, ...props }, ref) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
   const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
   return (

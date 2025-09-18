@@ -5,9 +5,10 @@ import { NameDisplay } from "@/components/identity/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ENSNamespaceId } from "@ensnode/datasources";
+import { Name } from "@ensnode/ensnode-sdk";
 
 interface ProfileHeaderProps {
-  name: string;
+  name: Name;
   namespaceId: ENSNamespaceId;
   headerImage?: string | null;
   websiteUrl?: string | null;

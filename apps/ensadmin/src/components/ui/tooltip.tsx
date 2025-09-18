@@ -6,10 +6,10 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export enum TooltipPosition {
-  TOP = "top",
-  RIGHT = "right",
-  BOTTOM = "bottom",
-  LEFT = "left",
+  Top = "top",
+  Right = "right",
+  Bottom = "bottom",
+  Left = "left",
 }
 
 const TooltipProvider = TooltipPrimitive.Provider;

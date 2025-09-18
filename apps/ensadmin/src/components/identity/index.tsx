@@ -52,7 +52,7 @@ export function Identity({
 
   const renderAddress = () => (
     <AddressLink address={address} namespaceId={namespaceId} chainId={definedChainId}>
-      {showAvatar && <ChainIcon chainId={definedChainId} />}
+      {showAvatar && <ChainIcon chainId={definedChainId} height={24} width={24} />}
     </AddressLink>
   );
 

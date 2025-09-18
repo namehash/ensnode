@@ -2,6 +2,7 @@
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
 import {
+  AbsoluteTime,
   RelativeTime,
   UnixTimestampInSeconds,
   unixTimestampToDate,
@@ -10,7 +11,6 @@ import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipPosition, TooltipTrigger } from "@/components/ui/tooltip";
-import { intlFormat } from "date-fns";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -158,15 +158,18 @@ export default function MockRelativeTimePage() {
               >
                 <p className="text-sm leading-6 font-semibold text-gray-500">date:</p>
                 <p className="text-sm leading-6 font-semibold">
-                  {intlFormat(props.date, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "numeric",
-                    second: "numeric",
-                    hour12: true,
-                  })}
+                  <AbsoluteTime
+                    date={props.date}
+                    options={{
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "numeric",
+                      second: "numeric",
+                      hour12: true,
+                    }}
+                  />
                 </p>
               </div>
               <div
@@ -175,8 +178,10 @@ export default function MockRelativeTimePage() {
               >
                 <p className="text-sm leading-6 font-semibold text-gray-500">relativeTo:</p>
                 <p className="text-sm leading-6 font-semibold">
-                  {props.relativeTo
-                    ? intlFormat(props.relativeTo, {
+                  {props.relativeTo ? (
+                    <AbsoluteTime
+                      date={props.relativeTo}
+                      options={{
                         year: "numeric",
                         month: "short",
                         day: "numeric",
@@ -184,8 +189,11 @@ export default function MockRelativeTimePage() {
                         minute: "numeric",
                         second: "numeric",
                         hour12: true,
-                      })
-                    : "Now"}
+                      }}
+                    />
+                  ) : (
+                    "Now"
+                  )}
                 </p>
               </div>
             </div>
@@ -194,7 +202,7 @@ export default function MockRelativeTimePage() {
               <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-md leading-normal font-semibold text-black">
                 RelativeTimestamp
               </p>
-              <RelativeTime {...props} tooltipPosition={TooltipPosition.RIGHT} />
+              <RelativeTime {...props} tooltipPosition={TooltipPosition.Right} />
             </div>
           </CardContent>
         </Card>

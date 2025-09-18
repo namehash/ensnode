@@ -5,7 +5,7 @@ import { ENSNamespaceId } from "@ensnode/datasources";
 import { ChainId, Name } from "@ensnode/ensnode-sdk";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
-import { Address } from "viem";
+import { Address, getAddress } from "viem";
 
 interface NameDisplayProps {
   name: Name;
@@ -42,7 +42,6 @@ interface NameLinkProps {
  * and display them alongside the link as one common interaction area.
  */
 
-// TODO: What about the naming? See related comment: https://github.com/namehash/ensnode/pull/1072#discussion_r2355343758
 export function NameLink({ name, className, children }: PropsWithChildren<NameLinkProps>) {
   const nameDetailsRelativePath = getNameDetailsRelativePath(name);
 
@@ -108,7 +107,7 @@ export function AddressLink({
     <UnnamedAddressInfoTooltip chainId={chainId} address={address}>
       <ExternalLinkWithIcon
         href={ensAppAddressDetailsUrl.toString()}
-        className={`font-medium ${className || ""}`}
+        className={`font-medium gap-2 ${className || ""}`}
       >
         {children}
         <AddressDisplay address={address} />
@@ -130,7 +129,7 @@ const UnnamedAddressInfoTooltip = ({
   chainId,
   address,
 }: PropsWithChildren<UnnamedAddressInfoTooltipProps>) => (
-  <Tooltip delayDuration={2000}>
+  <Tooltip delayDuration={1000}>
     <TooltipTrigger>{children}</TooltipTrigger>
     <TooltipContent
       side="top"
@@ -138,7 +137,7 @@ const UnnamedAddressInfoTooltip = ({
     >
       Unnamed {getChainName(chainId)} address:
       <br />
-      {address}
+      {getAddress(address)}
     </TooltipContent>
   </Tooltip>
 );
