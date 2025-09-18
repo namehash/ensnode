@@ -21,13 +21,13 @@ export default function NameDetailPage() {
   const {
     data: records,
     status: recordsStatus,
-    isLoading,
+    isLoading: recordsLoading,
   } = useRecords({
     name,
     selection: DefaultRecordsSelection[namespaceId],
   });
 
-  if (namespaceLoading || isLoading) {
+  if (namespaceLoading || recordsLoading) {
     return <NameDetailPageSkeleton />;
   }
 
