@@ -125,12 +125,12 @@ export function buildEnsMetadataServiceAvatarUrl(
 }
 
 /**
- * Get the URL of the external ENS Manager App name details page for a given name and ENS Namespace.
+ * Builds the URL of the external ENS Manager App Profile page for a given name and ENS Namespace.
  *
- * @returns URL to the name details page in the external ENS Manager App for a given name and ENS Namespace,
+ * @returns URL to the Profile page in the external ENS Manager App for a given name and ENS Namespace,
  * or null if this URL is not known
  */
-export function getExternalEnsAppNameUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
+export function buildExternalEnsAppProfileUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
   const baseUrl = getEnsManagerAppUrl(namespaceId);
   if (!baseUrl) return null;
 
