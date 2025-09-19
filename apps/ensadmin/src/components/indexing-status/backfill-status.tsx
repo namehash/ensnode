@@ -13,10 +13,9 @@ import {
 import { fromUnixTime } from "date-fns";
 import { Clock } from "lucide-react";
 
-import { FormattedDate } from "@/components/datetime-utils";
+import { AbsoluteTime } from "@/components/datetime-utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getChainName } from "@/lib/namespace-utils";
 
 import {
   generateYearMarkers,
@@ -26,7 +25,7 @@ import { blockViewModel } from "./block-refs";
 import { ChainIndexingTimeline } from "./indexing-timeline";
 
 interface ChainIndexingPhaseViewModel {
-  status: typeof ChainIndexingStatusIds.Unstarted | typeof ChainIndexingStatusIds.Backfill;
+  status: typeof ChainIndexingStatusIds.Queued | typeof ChainIndexingStatusIds.Backfill;
   startDate: Date;
   endDate: Date;
 }
@@ -72,7 +71,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               <Clock size={16} className="text-blue-600" />
               <span className="text-sm font-medium">
                 Indexed through{" "}
-                <FormattedDate
+                <AbsoluteTime
                   date={omnichainIndexingCursorDate}
                   options={{
                     year: "numeric",
@@ -138,7 +137,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
                 phases.push({
                   startDate: timelineStart,
                   endDate: fromUnixTime(chain.config.startBlock.timestamp - 1),
-                  status: ChainIndexingStatusIds.Unstarted,
+                  status: ChainIndexingStatusIds.Queued,
                 });
               }
 
@@ -174,7 +173,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
           <div className="flex items-center justify-end mt-8 text-xs gap-4">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-gray-400" />
-              <span>Unstarted</span>
+              <span>Queued</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-blue-500" />

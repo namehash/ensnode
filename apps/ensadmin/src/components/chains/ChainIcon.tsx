@@ -31,39 +31,42 @@ import {
 
 export interface ChainIconProps {
   chainId: number;
+  width?: number;
+  height?: number;
 }
 
 /**
  * Mapping of chain id to chain icon.
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  */
-const chainIcons = new Map<number, React.ReactNode>([
+const chainIcons = new Map<number, React.ComponentType<React.SVGProps<SVGSVGElement>>>([
   // mainnet
-  [mainnet.id, <EthereumIcon width={20} height={20} />],
-  [base.id, <BaseIcon width={20} height={20} />],
-  [linea.id, <LineaIcon width={20} height={20} />],
-  [optimism.id, <OptimismIcon width={20} height={20} />],
-  [arbitrum.id, <ArbitrumIcon width={20} height={20} />],
-  [scroll.id, <ScrollIcon width={20} height={20} />],
+  [mainnet.id, EthereumIcon],
+  [base.id, BaseIcon],
+  [linea.id, LineaIcon],
+  [optimism.id, OptimismIcon],
+  [arbitrum.id, ArbitrumIcon],
+  [scroll.id, ScrollIcon],
 
   // sepolia
-  [sepolia.id, <EthereumTestnetIcon width={20} height={20} />],
-  [baseSepolia.id, <BaseTestnetIcon width={20} height={20} />],
-  [lineaSepolia.id, <LineaTestnetIcon width={20} height={20} />],
-  [optimismSepolia.id, <OptimismTestnetIcon width={20} height={20} />],
-  [arbitrumSepolia.id, <ArbitrumTestnetIcon width={20} height={20} />],
-  [scrollSepolia.id, <ScrollTestnetIcon width={20} height={20} />],
+  [sepolia.id, EthereumTestnetIcon],
+  [baseSepolia.id, BaseTestnetIcon],
+  [lineaSepolia.id, LineaTestnetIcon],
+  [optimismSepolia.id, OptimismTestnetIcon],
+  [arbitrumSepolia.id, ArbitrumTestnetIcon],
+  [scrollSepolia.id, ScrollTestnetIcon],
 
   // holesky
-  [holesky.id, <EthereumTestnetIcon width={20} height={20} />],
+  [holesky.id, EthereumTestnetIcon],
 
   // ens-test-env
-  [ensTestEnvL1Chain.id, <EthereumLocalIcon width={20} height={20} />],
+  [ensTestEnvL1Chain.id, EthereumLocalIcon],
 ]);
 
 /**
  * Renders an icon for the provided chain ID.
  */
-export function ChainIcon({ chainId }: ChainIconProps) {
-  return chainIcons.get(chainId) || <UnrecognizedChainIcon width={20} height={20} />;
+export function ChainIcon({ chainId, width = 20, height = 20 }: ChainIconProps) {
+  const Icon = chainIcons.get(chainId) || UnrecognizedChainIcon;
+  return <Icon width={width} height={height} />;
 }

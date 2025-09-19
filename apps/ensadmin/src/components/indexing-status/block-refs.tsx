@@ -83,6 +83,7 @@ export function BlockStats({ chainId, label, block }: BlockStatsProps) {
           enforcePast={true}
           conciseFormatting={true}
           includeSeconds={true}
+          tooltipPosition="bottom"
           prefix="from "
         />
       </div>

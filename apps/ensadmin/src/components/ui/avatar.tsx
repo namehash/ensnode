@@ -1,44 +1,84 @@
 "use client";
 
+import { getNameAvatarUrl } from "@/lib/namespace-utils";
+import { cn } from "@/lib/utils";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { Name } from "@ensnode/ensnode-sdk";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+interface AvatarProps {
+  ensName: Name;
+  namespaceId: ENSNamespaceId;
+}
 
-const Avatar = React.forwardRef<
+type ImageLoadingStatus = "idle" | "loading" | "loaded" | "error";
+
+export const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
+>(({ ensName, namespaceId, className, ...props }, ref) => {
+  const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
+  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
+
+  if (ensAvatarUrl === null) {
+    return (
+      <AvatarPrimitive.Root
+        ref={ref}
+        className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
+        {...props}
+      >
+        <AvatarFallback name={ensName} />
+      </AvatarPrimitive.Root>
+    );
+  }
+
   return (
     <AvatarPrimitive.Root
       ref={ref}
       className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
       {...props}
-    />
+    >
+      <AvatarImage
+        src={ensAvatarUrl.href}
+        alt={ensName}
+        onLoadingStatusChangeCallback={(status: ImageLoadingStatus) => {
+          setLoadingStatus(status);
+        }}
+      />
+      {loadingStatus === "error" && <AvatarFallback name={ensName} />}
+      {(loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />}
+    </AvatarPrimitive.Root>
   );
 });
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
-const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
-  ({ className, onError, ...props }, ref) => (
-    <AvatarPrimitive.Image
-      ref={ref}
-      className={cn("aspect-square h-full w-full", className)}
-      {...props}
-    />
-  ),
-);
+interface AvatarImageProps {
+  onLoadingStatusChangeCallback: (status: ImageLoadingStatus) => void;
+}
+
+const AvatarImage = React.forwardRef<
+  HTMLImageElement,
+  React.ImgHTMLAttributes<HTMLImageElement> & AvatarImageProps
+>(({ className, onLoadingStatusChangeCallback, onError, ...props }, ref) => (
+  <AvatarPrimitive.Image
+    ref={ref}
+    className={cn("aspect-square h-full w-full", className)}
+    onLoadingStatusChange={onLoadingStatusChangeCallback}
+    {...props}
+  />
+));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
 
 interface AvatarFallbackProps {
-  randomAvatarGenerationSeed: string;
+  name: Name;
 }
 
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & AvatarFallbackProps
->(({ className, randomAvatarGenerationSeed, ...props }, ref) => (
+>(({ className, name, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
@@ -48,12 +88,12 @@ const AvatarFallback = React.forwardRef<
     {...props}
   >
     <BoringAvatar
-      name={randomAvatarGenerationSeed}
-      colors={["#093c52", "#006699", "#0080bc", "#6ba5b8", "#9dc3d0"]}
-      variant="marble"
+      name={name}
+      colors={["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"]}
+      variant="beam"
     />
   </AvatarPrimitive.Fallback>
 ));
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-export { Avatar, AvatarImage, AvatarFallback };
+const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />;

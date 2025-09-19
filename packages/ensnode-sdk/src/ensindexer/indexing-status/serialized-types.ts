@@ -1,9 +1,9 @@
 import type { ChainIdString } from "../../shared";
 import type {
   ChainIndexingCompletedStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
@@ -17,7 +17,7 @@ import type {
  */
 export interface SerializedENSIndexerOverallIndexingUnstartedStatus
   extends Omit<ENSIndexerOverallIndexingUnstartedStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingUnstartedStatus>;
+  chains: Record<ChainIdString, ChainIndexingQueuedStatus>;
 }
 
 /**
