@@ -4,7 +4,7 @@ import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveENSNodeConfig } from "@/hooks/use-active-ensnode-config";
+import { useActiveNamespace } from "@/hooks/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
 import { Name } from "@ensnode/ensnode-sdk";
 
@@ -15,7 +15,7 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderProps) {
-  const { namespace } = useActiveENSNodeConfig();
+  const namespace = useActiveNamespace();
 
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12

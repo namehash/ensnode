@@ -1,11 +1,10 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveENSNodeConfig } from "@/hooks/use-active-ensnode-config";
+import { useActiveNamespace } from "@/hooks/use-active-namespace";
 import { useRecords } from "@ensnode/ensnode-react";
-import { useParams } from "next/navigation";
-
 import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
+import { useParams } from "next/navigation";
 
 import { AdditionalRecords } from "./_components/AdditionalRecords";
 import { Addresses } from "./_components/Addresses";
@@ -40,7 +39,7 @@ const AllRequestedTextRecords = [
 
 export default function NameDetailPage() {
   const { name } = useParams<{ name: string }>();
-  const { namespace } = useActiveENSNodeConfig();
+  const namespace = useActiveNamespace();
 
   const selection = {
     addresses: getCommonCoinTypes(namespace),
