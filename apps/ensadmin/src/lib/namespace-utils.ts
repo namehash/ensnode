@@ -100,8 +100,8 @@ export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
  * namespaces are supported by the ENS Metadata Service. Therefore, the returned URL may
  * be null.
  *
- * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
  * @param {Name} name - ENS name to build the avatar image URL for
+ * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
  * @returns avatar image URL for the name on the given ENS Namespace, or null if the given
  *          ENS namespace is not supported by the ENS Metadata Service
  */
