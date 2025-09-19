@@ -87,7 +87,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
 
         <CardContent>
           {/* Timeline header with years */}
-          <div className="relative h-6 mb-1 mt-4 ml-24">
+          <div className="relative h-6 mb-1 mt-4 ml-6">
             {yearMarkers.map((marker) => (
               <div
                 key={`year-${marker.label}`}
@@ -101,7 +101,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
           </div>
 
           {/* Main timeline */}
-          <div className="relative mb-4 ml-24">
+          <div className="relative mb-4 ml-10">
             {/* Timeline track */}
             <div className="absolute top-0 left-0 w-full h-0.5 bg-gray-200"></div>
 
