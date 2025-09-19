@@ -11,7 +11,7 @@ import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { Duration, RelativeTime } from "@/components/datetime-utils";
-import {NameDisplay, NameLink} from "@/components/identity/utils";
+import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -150,9 +150,9 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-          <NameLink name={registration.name}>
-              <NameDisplay name={registration.name} />
-          </NameLink>
+        <NameLink name={registration.name}>
+          <NameDisplay name={registration.name} />
+        </NameLink>
       </TableCell>
       <TableCell>
         <RelativeTime date={registration.registeredAt} tooltipPosition="top" />

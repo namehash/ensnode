@@ -22,15 +22,15 @@ export const Avatar = React.forwardRef<
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
   const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
 
-  if (ensAvatarUrl === null){
+  if (ensAvatarUrl === null) {
     return (
-        <AvatarPrimitive.Root
-            ref={ref}
-            className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
-            {...props}
-        >
-          <AvatarFallback name={ensName} />
-        </AvatarPrimitive.Root>
+      <AvatarPrimitive.Root
+        ref={ref}
+        className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
+        {...props}
+      >
+        <AvatarFallback name={ensName} />
+      </AvatarPrimitive.Root>
     );
   }
 
@@ -40,13 +40,13 @@ export const Avatar = React.forwardRef<
       className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
       {...props}
     >
-        <AvatarImage
-          src={ensAvatarUrl.href}
-          alt={ensName}
-          onLoadingStatusChangeCallback={(status: ImageLoadingStatus) => {
-            setLoadingStatus(status);
-          }}
-        />
+      <AvatarImage
+        src={ensAvatarUrl.href}
+        alt={ensName}
+        onLoadingStatusChangeCallback={(status: ImageLoadingStatus) => {
+          setLoadingStatus(status);
+        }}
+      />
       {loadingStatus === "error" && <AvatarFallback name={ensName} />}
       {(loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />}
     </AvatarPrimitive.Root>

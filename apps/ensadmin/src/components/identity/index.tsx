@@ -3,13 +3,13 @@
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { Avatar } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { ChainId } from "@ensnode/ensnode-sdk";
 import * as React from "react";
 import type { Address } from "viem";
-import {AddressDisplay, AddressLink, NameDisplay, NameLink} from "./utils";
-import {cn} from "@/lib/utils";
+import { AddressDisplay, AddressLink, NameDisplay, NameLink } from "./utils";
 
 interface IdentityProps {
   address: Address;
