@@ -1,5 +1,5 @@
-import { CoinType, coinNameToTypeMap } from "@ensdomains/address-encoder";
-import { Address, isAddress } from "viem";
+import { type CoinType } from "@ensdomains/address-encoder";
+import { type Address, isAddress } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -108,8 +108,6 @@ export const makeDefaultableChainIdStringSchema = (
     .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
     .pipe(makeDefaultableChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
-const knownCoinTypes = new Set<number>(Object.values(coinNameToTypeMap));
-
 /**
  * Parses {@link CoinType}.
  */
@@ -118,15 +116,6 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
     .number({ error: `${valueLabel} must be a number.` })
     .int({ error: `${valueLabel} must be an integer.` })
     .nonnegative({ error: `${valueLabel} must be a non-negative integer (>=0).` })
-    .check((ctx) => {
-      if (!knownCoinTypes.has(ctx.value)) {
-        ctx.issues.push({
-          code: "custom",
-          message: "Must be a known SLIP-0044 coin type.",
-          input: ctx.value,
-        });
-      }
-    })
     .transform((val) => val as CoinType);
 
 /**
@@ -139,9 +128,9 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
- * Parses a string representation of an EVM address.
+ * Parses a string representation of an EVM address into a lowercase Address.
  */
-export const makeEvmAddressSchema = (valueLabel: string = "EVM address") =>
+export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
   z
     .string()
     .check((ctx) => {

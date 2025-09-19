@@ -8,7 +8,7 @@ import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,
   makeDurationSchema,
-  makeEvmAddressSchema,
+  makeLowercaseAddressSchema,
 } from "../../shared/zod-schemas";
 
 const excludingDefaultChainId = z
@@ -38,7 +38,7 @@ const name = z
 
 const trace = boolstring;
 const accelerate = boolstring;
-const address = makeEvmAddressSchema();
+const address = makeLowercaseAddressSchema();
 const defaultableChainId = makeDefaultableChainIdStringSchema();
 const coinType = makeCoinTypeStringSchema();
 

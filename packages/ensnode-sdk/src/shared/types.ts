@@ -12,7 +12,7 @@ export type ChainId = number;
 /**
  * Defaultable Chain ID
  *
- * Represents a unique identifier for a chain, including
+ * Represents a unique identifier for a chain, or
  * the default chain as defined by ENSIP-19.
  *
  * @see https://docs.ens.domains/ensip/19/#annex-supported-chains
