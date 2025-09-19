@@ -28,6 +28,7 @@ export function AbsoluteTime({
 /**
  * Formats a Unix timestamp as its relative distance with now
  *
+ * @param timestamp - the timestamp to format as a relative time
  * @param enforcePast - if true, enforces that the return value won't relate to the future.
  * Helpful for UI contexts where its nonsensical for a value to relate to the future. Ex: how long ago an event happened.
  * Note how different systems may have misaligned clocks. `enforcePast` aims to protect from UI confusion when
