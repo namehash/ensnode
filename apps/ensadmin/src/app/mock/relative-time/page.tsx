@@ -10,7 +10,7 @@ import {
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipPosition, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -202,7 +202,7 @@ export default function MockRelativeTimePage() {
               <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-md leading-normal font-semibold text-black">
                 RelativeTimestamp
               </p>
-              <RelativeTime {...props} tooltipPosition={TooltipPosition.Right} />
+              <RelativeTime {...props} tooltipPosition="right" />
             </div>
           </CardContent>
         </Card>

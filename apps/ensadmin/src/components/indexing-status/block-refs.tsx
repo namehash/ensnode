@@ -3,7 +3,6 @@
  */
 
 import { RelativeTime } from "@/components/datetime-utils";
-import { TooltipPosition } from "@/components/ui/tooltip";
 import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 import { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
@@ -84,7 +83,7 @@ export function BlockStats({ chainId, label, block }: BlockStatsProps) {
           enforcePast={true}
           conciseFormatting={true}
           includeSeconds={true}
-          tooltipPosition={TooltipPosition.Bottom}
+          tooltipPosition="bottom"
           prefix="from "
         />
       </div>

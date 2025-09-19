@@ -6,10 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 import { ChainId } from "@ensnode/ensnode-sdk";
-import { cx } from "class-variance-authority";
 import * as React from "react";
 import type { Address } from "viem";
-import { AddressLink, NameLink } from "./utils";
+import {AddressDisplay, AddressLink, NameDisplay, NameLink} from "./utils";
+import {cn} from "@/lib/utils";
 
 interface IdentityProps {
   address: Address;
@@ -53,6 +53,7 @@ export function Identity({
   const renderAddress = () => (
     <AddressLink address={address} namespaceId={namespaceId} chainId={definedChainId}>
       {showAvatar && <ChainIcon chainId={definedChainId} height={24} width={24} />}
+      <AddressDisplay address={address} />
     </AddressLink>
   );
 
@@ -68,6 +69,7 @@ export function Identity({
   return (
     <NameLink name={ensName}>
       {showAvatar && <Avatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
+      <NameDisplay name={ensName} />
     </NameLink>
   );
 }
@@ -77,7 +79,7 @@ interface IdentityPlaceholderProps extends Pick<IdentityProps, "showAvatar" | "c
 
 function IdentityPlaceholder({ showAvatar = false, className }: IdentityPlaceholderProps) {
   return (
-    <div className={cx("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       {showAvatar && <Skeleton className="h-6 w-6 rounded-full" />}
       <Skeleton className="h-4 w-24" />
     </div>

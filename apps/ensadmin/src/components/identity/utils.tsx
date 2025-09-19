@@ -51,7 +51,6 @@ export function NameLink({ name, className, children }: PropsWithChildren<NameLi
       className={`inline-flex items-center gap-2 text-blue-600 hover:underline ${className || ""}`}
     >
       {children}
-      <NameDisplay name={name} />
     </Link>
   );
 }
@@ -98,7 +97,6 @@ export function AddressLink({
     return (
       <UnnamedAddressInfoTooltip chainId={chainId} address={address}>
         {children}
-        <AddressDisplay address={address} className={className} />
       </UnnamedAddressInfoTooltip>
     );
   }
@@ -110,7 +108,6 @@ export function AddressLink({
         className={`font-medium gap-2 ${className || ""}`}
       >
         {children}
-        <AddressDisplay address={address} />
       </ExternalLinkWithIcon>
     </UnnamedAddressInfoTooltip>
   );

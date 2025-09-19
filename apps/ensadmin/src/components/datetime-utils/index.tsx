@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipPosition, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
@@ -71,7 +71,7 @@ export function RelativeTime({
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
-  tooltipPosition = TooltipPosition.Top,
+  tooltipPosition = "top",
   relativeTo,
   prefix,
 }: {
@@ -79,7 +79,7 @@ export function RelativeTime({
   enforcePast?: boolean;
   includeSeconds?: boolean;
   conciseFormatting?: boolean;
-  tooltipPosition?: TooltipPosition;
+  tooltipPosition?: React.ComponentProps<typeof TooltipContent>["side"];
   relativeTo?: Date;
   prefix?: string;
 }) {
