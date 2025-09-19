@@ -151,8 +151,8 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
             )}%`,
           }}
         >
-          <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
-            <span className="text-xs text-gray-600">
+          <div className="absolute top-4 whitespace-nowrap">
+            <span className="text-xs text-gray-900">
               <AbsoluteTime
                 timestamp={chainStatus.firstBlockToIndex.timestamp}
                 options={{
