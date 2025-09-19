@@ -6,6 +6,7 @@
 import {
   ChainIndexingStatusIds,
   ENSIndexerOverallIndexingBackfillStatus,
+  UnixTimestamp,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
   sortAscChainStatusesByStartBlock,
@@ -26,8 +27,8 @@ import { ChainIndexingTimeline } from "./indexing-timeline";
 
 interface ChainIndexingPhaseViewModel {
   status: typeof ChainIndexingStatusIds.Queued | typeof ChainIndexingStatusIds.Backfill;
-  startDate: Date;
-  endDate: Date;
+  startsAt: UnixTimestamp;
+  endsAt: UnixTimestamp;
 }
 
 interface BackfillStatusProps {
@@ -41,18 +42,14 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
   const chains = chainEntries.map(([, chain]) => chain);
 
-  const timelineStartUnixTimestamp = getTimestampForLowestOmnichainStartBlock(chains);
-  const timelineEndUnixTimestamp = getTimestampForHighestOmnichainKnownBlock(chains);
+  const timelineStartsAt = getTimestampForLowestOmnichainStartBlock(chains);
+  const timelineEndsAt = getTimestampForHighestOmnichainKnownBlock(chains);
 
-  const timelineStart = fromUnixTime(timelineStartUnixTimestamp);
-  const timelineEnd = fromUnixTime(timelineEndUnixTimestamp);
-  const omnichainIndexingCursorDate = fromUnixTime(indexingStatus.omnichainIndexingCursor);
-
-  const yearMarkers = generateYearMarkers(timelineStart, timelineEnd);
+  const yearMarkers = generateYearMarkers(timelineStartsAt, timelineEndsAt);
   const timelinePositionValue = getTimelinePosition(
-    omnichainIndexingCursorDate,
-    timelineStart,
-    timelineEnd,
+    indexingStatus.omnichainIndexingCursor,
+    timelineStartsAt,
+    timelineEndsAt,
   );
 
   const timelinePosition =
@@ -72,7 +69,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               <span className="text-sm font-medium">
                 Indexed through{" "}
                 <AbsoluteTime
-                  date={omnichainIndexingCursorDate}
+                  timestamp={indexingStatus.omnichainIndexingCursor}
                   options={{
                     year: "numeric",
                     month: "short",
@@ -133,17 +130,17 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
             {chainEntries.map(([chainId, chain]) => {
               const phases: ChainIndexingPhaseViewModel[] = [];
 
-              if (timelineStartUnixTimestamp < chain.config.startBlock.timestamp) {
+              if (timelineStartsAt < chain.config.startBlock.timestamp) {
                 phases.push({
-                  startDate: timelineStart,
-                  endDate: fromUnixTime(chain.config.startBlock.timestamp - 1),
+                  startsAt: timelineStartsAt,
+                  endsAt: chain.config.startBlock.timestamp - 1,
                   status: ChainIndexingStatusIds.Queued,
                 });
               }
 
               phases.push({
-                startDate: fromUnixTime(chain.config.startBlock.timestamp),
-                endDate: timelineEnd,
+                startsAt: chain.config.startBlock.timestamp,
+                endsAt: timelineEndsAt,
                 status: ChainIndexingStatusIds.Backfill,
               });
 
@@ -155,15 +152,15 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               return (
                 <ChainIndexingTimeline
                   key={chainId}
-                  currentIndexingDate={omnichainIndexingCursorDate}
+                  omnichainIndexingCursor={indexingStatus.omnichainIndexingCursor}
                   chainStatus={{
                     chainId,
                     firstBlockToIndex: blockViewModel(chain.config.startBlock),
                     lastIndexedBlock,
                     phases,
                   }}
-                  timelineStart={timelineStart}
-                  timelineEnd={timelineEnd}
+                  timelineStartsAt={timelineStartsAt}
+                  timelineEndsAt={timelineEndsAt}
                 />
               );
             })}

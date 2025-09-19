@@ -155,7 +155,7 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
         </NameLink>
       </TableCell>
       <TableCell>
-        <RelativeTime date={registration.registeredAt} tooltipPosition="top" />
+        <RelativeTime timestamp={registration.registeredAt} tooltipPosition="top" />
       </TableCell>
       <TableCell>
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />

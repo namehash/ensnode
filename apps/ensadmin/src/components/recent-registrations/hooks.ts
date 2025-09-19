@@ -57,8 +57,8 @@ function toRegistration(
   namespaceId: ENSNamespaceId,
 ): Registration {
   return {
-    registeredAt: unixTimestampToDate(registrationResult.registrationDate),
-    expiresAt: unixTimestampToDate(registrationResult.expiryDate),
+    registeredAt: Number(registrationResult.registrationDate),
+    expiresAt: Number(registrationResult.expiryDate),
     name: registrationResult.domain.name,
     ownerInRegistry: getAddress(registrationResult.domain.owner.id),
     ownerInNameWrapper: registrationResult.domain.wrappedOwner

@@ -3,10 +3,11 @@
  */
 
 import { cn } from "@/lib/utils";
-import { ChainId, ChainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { ChainId, ChainIndexingStatusIds, UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { intlFormat } from "date-fns";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
+import { AbsoluteTime } from "@/components/datetime-utils";
 import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
@@ -14,15 +15,15 @@ import { getTimelinePosition } from "./indexing-timeline-utils";
 
 interface ChainIndexingTimelinePhaseViewModel {
   status: typeof ChainIndexingStatusIds.Queued | typeof ChainIndexingStatusIds.Backfill;
-  startDate: Date;
-  endDate: Date;
+  startsAt: UnixTimestamp;
+  endsAt: UnixTimestamp;
 }
 
 interface ChainIndexingTimelinePhaseProps {
   phase: ChainIndexingTimelinePhaseViewModel;
   isActive: boolean;
-  timelineStart: Date;
-  timelineEnd: Date;
+  timelineStartsAt: UnixTimestamp;
+  timelineEndsAt: UnixTimestamp;
 }
 
 /**
@@ -33,12 +34,12 @@ interface ChainIndexingTimelinePhaseProps {
 function ChainIndexingTimelinePhase({
   phase,
   isActive,
-  timelineStart,
-  timelineEnd,
+  timelineStartsAt,
+  timelineEndsAt,
 }: ChainIndexingTimelinePhaseProps) {
-  const startPos = getTimelinePosition(phase.startDate, timelineStart, timelineEnd);
-  const endPos = phase.endDate
-    ? getTimelinePosition(phase.endDate, timelineStart, timelineEnd)
+  const startPos = getTimelinePosition(phase.startsAt, timelineStartsAt, timelineEndsAt);
+  const endPos = phase.endsAt
+    ? getTimelinePosition(phase.endsAt, timelineStartsAt, timelineEndsAt)
     : 100;
 
   const width = endPos - startPos;
@@ -72,17 +73,17 @@ function ChainIndexingTimelinePhase({
 /**
  * Get the current phase of the chain indexing timeline.
  *
- * @param date current indexing date
+ * @param omnichainIndexingCursor unix timestamp
  * @param chainStatus view model
  */
 function currentPhase(
-  date: Date,
+  omnichainIndexingCursor: UnixTimestamp,
   chainStatus: {
     phases: ChainIndexingTimelinePhaseViewModel[];
   },
 ): ChainIndexingTimelinePhaseViewModel {
   for (let i = chainStatus.phases.length - 1; i >= 0; i--) {
-    if (date >= chainStatus.phases[i].startDate) {
+    if (omnichainIndexingCursor >= chainStatus.phases[i].startsAt) {
       return chainStatus.phases[i];
     }
   }
@@ -91,9 +92,9 @@ function currentPhase(
 }
 
 interface ChainIndexingTimelineProps {
-  currentIndexingDate: Date;
-  timelineStart: Date;
-  timelineEnd: Date;
+  omnichainIndexingCursor: UnixTimestamp;
+  timelineStartsAt: UnixTimestamp;
+  timelineEndsAt: UnixTimestamp;
   chainStatus: {
     chainId: ChainId;
     firstBlockToIndex: BlockRefViewModel;
@@ -107,8 +108,8 @@ interface ChainIndexingTimelineProps {
  * Includes a timeline bar for each indexing phase.
  */
 export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
-  const { currentIndexingDate, chainStatus, timelineStart, timelineEnd } = props;
-  const currentIndexingPhase = currentPhase(currentIndexingDate, chainStatus);
+  const { omnichainIndexingCursor, chainStatus, timelineStartsAt, timelineEndsAt } = props;
+  const currentIndexingPhase = currentPhase(omnichainIndexingCursor, chainStatus);
 
   return (
     <div key={chainStatus.chainId} className="flex items-center">
@@ -134,8 +135,8 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
             key={`${chainStatus.chainId}-${phase.status}`}
             phase={phase}
             isActive={phase === currentIndexingPhase}
-            timelineStart={timelineStart}
-            timelineEnd={timelineEnd}
+            timelineStartsAt={timelineStartsAt}
+            timelineEndsAt={timelineEndsAt}
           />
         ))}
 
@@ -144,15 +145,20 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
           className="absolute w-0.5 h-5 bg-gray-800 z-10"
           style={{
             left: `${getTimelinePosition(
-              chainStatus.firstBlockToIndex.date,
-              timelineStart,
-              timelineEnd,
+              chainStatus.firstBlockToIndex.timestamp,
+              timelineStartsAt,
+              timelineEndsAt,
             )}%`,
           }}
         >
           <div className="absolute top-4 -translate-x-1/2 whitespace-nowrap">
             <span className="text-xs text-gray-600">
-              {intlFormat(chainStatus.firstBlockToIndex.date)}
+              <AbsoluteTime
+                timestamp={chainStatus.firstBlockToIndex.timestamp}
+                options={{
+                  dateStyle: "medium",
+                }}
+              />
             </span>
           </div>
         </div>
