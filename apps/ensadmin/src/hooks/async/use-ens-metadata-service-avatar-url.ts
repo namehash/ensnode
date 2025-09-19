@@ -1,9 +1,11 @@
 "use client";
 
-import { useNamespaceId } from "@/hooks/useNamespaceId";
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { Name } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
+
+import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
+
+import { useNamespace } from "./use-namespace";
 
 export interface UseEnsMetadataServiceAvatarUrlParameters {
   name: Name;
@@ -37,7 +39,7 @@ export interface UseEnsMetadataServiceAvatarUrlParameters {
  * ```
  */
 export function useEnsMetadataServiceAvatarUrl({ name }: UseEnsMetadataServiceAvatarUrlParameters) {
-  const { data: namespaceId } = useNamespaceId();
+  const { data: namespaceId } = useNamespace();
 
   return useQuery({
     queryKey: ["avatarUrl", name, namespaceId],

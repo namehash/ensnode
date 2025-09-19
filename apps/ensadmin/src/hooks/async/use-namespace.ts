@@ -8,10 +8,10 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
  *
  * @example
  * ```typescript
- * import { useNamespaceId } from "@/hooks/useNamespaceId";
+ * import { useNamespace } from "@/hooks/useNamespace";
  *
  * function NamespaceIndicator() {
- *   const { data: namespaceId, isLoading, error } = useNamespaceId();
+ *   const { data: namespaceId, isLoading, error } = useNamespace();
  *
  *   if (isLoading) return <div>Connecting to ENSNode...</div>;
  *   if (error) return <div>Error connecting to ENSNode</div>;
@@ -21,11 +21,11 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
  * }
  * ```
  */
-export function useNamespaceId() {
-  const configQuery = useENSIndexerConfig();
+export function useNamespace() {
+  const { data, ...query } = useENSIndexerConfig();
 
   return {
-    ...configQuery,
-    data: configQuery.data?.namespace ?? null,
+    ...query,
+    data: data?.namespace ?? null,
   };
 }

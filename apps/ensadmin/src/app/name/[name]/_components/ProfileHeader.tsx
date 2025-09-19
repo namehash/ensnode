@@ -4,7 +4,7 @@ import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/use-active-namespace";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
 import { Name } from "@ensnode/ensnode-sdk";
 

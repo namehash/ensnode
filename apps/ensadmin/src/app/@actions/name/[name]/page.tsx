@@ -2,7 +2,7 @@
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Button } from "@/components/ui/button";
-import { useENSAppNameUrl } from "@/hooks/use-ens-app-name-url";
+import { useENSAppNameUrl } from "@/hooks/async/use-ens-app-name-url";
 import { useParams } from "next/navigation";
 
 export default function ActionsNamePage() {

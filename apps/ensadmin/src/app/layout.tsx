@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
+import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
 import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
@@ -72,7 +72,7 @@ export default function Layout({
                   <AppSidebar />
                 </Suspense>
                 <SidebarInset className="min-w-0">
-                  <ENSNodeProvider>
+                  <ActiveENSNodeProvider>
                     <Header>
                       <HeaderNav>
                         <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
@@ -80,7 +80,7 @@ export default function Layout({
                       <HeaderActions>{actions}</HeaderActions>
                     </Header>
                     <RequireActiveENSNodeConfig>{children}</RequireActiveENSNodeConfig>
-                  </ENSNodeProvider>
+                  </ActiveENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
             </RequireActiveENSNodeConnection>

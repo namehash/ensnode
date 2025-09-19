@@ -32,8 +32,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
 import { useENSNodeConnections } from "@/hooks/ensnode-connections";
-import { useActiveENSNodeUrl } from "@/hooks/use-active-ensnode-url";
 import { useMutation } from "@tanstack/react-query";
 import { CopyButton } from "../ui/copy-button";
 
