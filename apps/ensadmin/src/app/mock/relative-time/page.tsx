@@ -1,12 +1,7 @@
 "use client";
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
-import {
-  AbsoluteTime,
-  RelativeTime,
-  UnixTimestampInSeconds,
-  unixTimestampToDate,
-} from "@/components/datetime-utils";
+import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +12,7 @@ import { useMemo, useState } from "react";
 
 const mockRelativeTimestampData = mockDataJson as Record<
   string,
-  { date: UnixTimestampInSeconds; relativeTo?: UnixTimestampInSeconds }
+  { date: UnixTimestamp; relativeTo?: UnixTimestamp }
 >;
 type TimeVariant = keyof typeof mockRelativeTimestampData;
 
@@ -52,9 +47,9 @@ export default function MockRelativeTimePage() {
     relativeTo?: UnixTimestamp;
     prefix?: string;
   }[] = useMemo(() => {
-    const timestamp = Number(mockRelativeTimestampData[selectedTime].date);
+    const timestamp = mockRelativeTimestampData[selectedTime].date;
     // since the value is hardcoded we are sure it exists
-    const relativeToForPast = Number(mockRelativeTimestampData["Past"].relativeTo!);
+    const relativeToForPast = mockRelativeTimestampData["Past"].relativeTo!;
 
     return selectedTime === "Past"
       ? [

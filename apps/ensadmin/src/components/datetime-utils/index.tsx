@@ -141,21 +141,3 @@ export function Duration({
 
   return <>{duration}</>;
 }
-
-/**
- * An integer value (representing a Unix timestamp in seconds) formatted as a string.
- */
-export type UnixTimestampInSeconds = string;
-
-/**
- * Transforms a UnixTimestampInSeconds to a Date object.
- */
-export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
-  const date = new Date(parseInt(timestamp) * millisecondsInSecond);
-
-  if (isNaN(date.getTime())) {
-    throw new Error(`Error parsing timestamp (${timestamp}) to date`);
-  }
-
-  return date;
-}

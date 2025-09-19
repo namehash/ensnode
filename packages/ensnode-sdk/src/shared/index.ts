@@ -10,6 +10,7 @@ export {
   deserializeChainId,
   deserializeDatetime,
   deserializeDuration,
+  deserializeUnixTimestamp,
   deserializeUrl,
 } from "./deserialize";
 export * from "../ens/is-normalized";
