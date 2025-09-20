@@ -32,7 +32,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
+import { useENSNodeConnection } from "@/hooks/active-ensnode-url";
 import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { useMutation } from "@tanstack/react-query";
 import { CopyButton } from "../ui/copy-button";
@@ -46,7 +46,7 @@ export function ConnectionSelector() {
     removeConnection,
     selectConnection,
   } = useENSNodeConnections();
-  const activeENSNodeUrl = useActiveENSNodeUrl().toString();
+  const activeENSNodeUrl = useENSNodeConnection().toString();
   const addAndSelectConnection = useMutation({
     mutationFn: _addAndSelectConnection,
   });

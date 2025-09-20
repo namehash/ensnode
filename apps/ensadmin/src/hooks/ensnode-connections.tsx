@@ -3,7 +3,7 @@
 import { validateConnection } from "@/components/connections/ensnode-url-validator";
 import { defaultEnsNodeUrls } from "@/lib/env";
 import {
-  buildUrlWithParams,
+  buildPathnameWithParams,
   getConnectionFromParams,
   setActiveConnectionInParams,
 } from "@/lib/url-params";
@@ -58,7 +58,7 @@ export function useENSNodeConnections() {
   const selectConnection = useCallback(
     (url: string) => {
       const params = setActiveConnectionInParams(new URLSearchParams(window.location.search), url);
-      const newUrl = buildUrlWithParams(pathname, params);
+      const newUrl = buildPathnameWithParams(pathname, params);
       router.push(newUrl);
     },
     [pathname, router],

@@ -7,13 +7,13 @@ import { useMemo } from "react";
 
 const DEFAULT_URL = defaultEnsNodeUrls()[0].toString();
 
-export function useActiveENSNodeUrl(): URL {
+export function useENSNodeConnection(): URL {
   const searchParams = useSearchParams();
 
-  const urlString = useMemo(() => {
+  const connectionString = useMemo(() => {
     const activeConnection = getConnectionFromParams(searchParams);
     return activeConnection || DEFAULT_URL;
   }, [searchParams]);
 
-  return useMemo(() => new URL(urlString), [urlString]);
+  return useMemo(() => new URL(connectionString), [connectionString]);
 }
