@@ -12,6 +12,7 @@
 
 import {
   type BlockRef,
+  Duration,
   ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingStatus,
   OverallIndexingStatusIds,
@@ -165,6 +166,7 @@ async function getChainsBlockRefs(
 export async function buildIndexingStatus(
   publicClients: Record<ChainName, PublicClient>,
   systemTimestamp: UnixTimestamp,
+  maxRealtimeDistance: Duration | undefined,
 ): Promise<ENSIndexerOverallIndexingStatus> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
@@ -183,6 +185,12 @@ export async function buildIndexingStatus(
 
     return deserializeENSIndexerIndexingStatus({
       overallStatus: OverallIndexingStatusIds.IndexerError,
+      maxRealtimeDistance: maxRealtimeDistance
+        ? {
+            requestedDistance: maxRealtimeDistance,
+            satisfiesRequestedDistance: false,
+          }
+        : undefined,
     } satisfies ENSIndexerOverallIndexingErrorStatus);
   }
 
@@ -234,6 +242,7 @@ export async function buildIndexingStatus(
   const parsed = schema.safeParse({
     appSettings: parsedAppSettings.data,
     chains,
+    maxRealtimeDistance,
   });
 
   if (!parsed.success) {

@@ -1,7 +1,7 @@
 import { publicClients } from "ponder:api";
-import { buildIndexingStatus } from "@/api/lib/indexing-status/build-index-status";
-import { hasAchievedRequestedDistance } from "@/api/lib/indexing-status/realtime-indexing-distance";
 import { getUnixTime } from "date-fns";
+
+import { buildIndexingStatus } from "./build-index-status";
 
 const MAX_REALTIME_DISTANCE_TO_ACCELERATE = 60; // seconds
 
@@ -15,9 +15,13 @@ const MAX_REALTIME_DISTANCE_TO_ACCELERATE = 60; // seconds
 export async function canAccelerateResolution(): Promise<boolean> {
   try {
     const systemTimestamp = getUnixTime(new Date());
-    const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
+    const indexingStatus = await buildIndexingStatus(
+      publicClients,
+      systemTimestamp,
+      MAX_REALTIME_DISTANCE_TO_ACCELERATE,
+    );
 
-    return hasAchievedRequestedDistance(indexingStatus, MAX_REALTIME_DISTANCE_TO_ACCELERATE);
+    return indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance === true;
   } catch {
     return false;
   }

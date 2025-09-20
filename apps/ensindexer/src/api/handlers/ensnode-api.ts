@@ -9,7 +9,7 @@ import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
-import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
+import { buildIndexingStatus } from "@/api/lib/indexing-status";
 import { validate } from "@/api/lib/validate";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
@@ -37,7 +37,12 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
   // get system timestamp for the current request
   const systemTimestamp = getUnixTime(new Date());
 
-  const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
+  const indexingStatus = await buildIndexingStatus(
+    publicClients,
+    systemTimestamp,
+    maxRealtimeDistance,
+  );
+
   const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
 
   // respond with custom server error if ENSIndexer is not available
@@ -48,13 +53,8 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
     );
   }
 
-  const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
-    indexingStatus,
-    maxRealtimeDistance,
-  );
-
   // respond with custom server error if requested distance hasn't been achieved yet
-  if (!hasAchievedRequestedRealtimeIndexingDistance) {
+  if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
     return c.json(
       serializedIndexingStatus,
       IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
