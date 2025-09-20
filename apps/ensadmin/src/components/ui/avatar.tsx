@@ -1,6 +1,6 @@
 "use client";
 
-import { getNameAvatarUrl } from "@/lib/namespace-utils";
+import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
@@ -20,7 +20,7 @@ export const Avatar = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ ensName, namespaceId, className, ...props }, ref) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
-  const ensAvatarUrl = ensName ? getNameAvatarUrl(ensName, namespaceId) : null;
+  const ensAvatarUrl = ensName ? buildEnsMetadataServiceAvatarUrl(ensName, namespaceId) : null;
 
   if (ensAvatarUrl === null) {
     return (

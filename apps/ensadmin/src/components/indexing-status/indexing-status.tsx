@@ -36,6 +36,7 @@ export function IndexingStatus() {
       />
     );
   }
+
   if (indexingStatusQuery.isError) {
     return <p className="p-6">Failed to fetch Indexing Status.</p>;
   }

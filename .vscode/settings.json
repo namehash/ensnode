@@ -16,5 +16,8 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }

@@ -32,7 +32,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
+import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
 import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { useMutation } from "@tanstack/react-query";
 import { CopyButton } from "../ui/copy-button";
