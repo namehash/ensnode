@@ -14,6 +14,7 @@ import {
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
+  OverallIndexingStatusIds,
   type SerializedENSIndexerOverallIndexingStatus,
   type SerializedENSIndexerPublicConfig,
   deserializeENSIndexerIndexingStatus,
@@ -346,34 +347,43 @@ export class ENSNodeClient {
       throw new Error("Malformed response data: invalid JSON");
     }
 
-    // handle application errors accordingly
+    // handle response errors accordingly
     if (!response.ok) {
-      switch (response.status) {
-        case IndexingStatusResponseCodes.IndexerError: {
-          console.error("Indexing Status API: indexer error");
-          return deserializeENSIndexerIndexingStatus(
-            responseData as SerializedENSIndexerOverallIndexingStatus,
-          );
-        }
+      let errorResponse: ErrorResponse | undefined;
 
-        case IndexingStatusResponseCodes.RequestedDistanceNotAchievedError: {
-          console.error(
-            "Indexing Status API: Requested realtime indexing distance not achieved error",
-          );
-          return deserializeENSIndexerIndexingStatus(
-            responseData as SerializedENSIndexerOverallIndexingStatus,
-          );
-        }
+      // check for a generic errorResponse
+      try {
+        errorResponse = deserializeErrorResponse(responseData);
+      } catch {
+        // if errorResponse is could not be determined,
+        // it means the response includes indexing status data
+        console.log("Indexing Status API: handling a known indexing status server error.");
+      }
 
-        default: {
-          const errorResponse = deserializeErrorResponse(responseData);
-          throw new Error(`Fetching ENSNode Indexing Status Failed: ${errorResponse.message}`);
-        }
+      // however, if errorResponse was defined,
+      // throw an error with the generic server error message
+      if (typeof errorResponse !== "undefined") {
+        throw new Error(`Fetching ENSNode Indexing Status Failed: ${errorResponse.message}`);
       }
     }
 
-    return deserializeENSIndexerIndexingStatus(
+    // deserialize indexing status data
+    const indexingStatus = deserializeENSIndexerIndexingStatus(
       responseData as SerializedENSIndexerOverallIndexingStatus,
     );
+
+    // log indexer error if overall status is 'indexer-error'
+    if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
+      console.error("Indexing Status API: indexer error");
+    }
+
+    // log indexer error if maxRealtimeDistance was requested,
+    // but not satisfied
+    if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
+      console.error("Indexing Status API: Requested realtime indexing distance was not satisfied");
+    }
+
+    // returned deserialized indexing status data
+    return indexingStatus;
   }
 }
