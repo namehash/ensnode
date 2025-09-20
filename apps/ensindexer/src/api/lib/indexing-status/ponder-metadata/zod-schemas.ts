@@ -34,9 +34,11 @@ import {
 import {
   makeBlockRefSchema,
   makeChainIdSchema,
+  makeDurationSchema,
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
+
 import { getChainIndexingStatus } from "./chains";
 import type { ChainName } from "./config";
 
@@ -87,6 +89,8 @@ export const makePonderChainMetadataSchema = (
         .refine(invariant_definedEntryForEachIndexedChain, {
           error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
         }),
+
+      maxRealtimeDistance: makeDurationSchema().optional(),
     })
     .transform((ponderIndexingStatus) => {
       let serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
@@ -102,18 +106,22 @@ export const makePonderChainMetadataSchema = (
 
       const chainStatuses = Object.values(serializedChainIndexingStatuses);
       const overallStatus = getOverallIndexingStatus(chainStatuses);
+      const requestedMaxRealtimeDistance = ponderIndexingStatus.maxRealtimeDistance;
 
       switch (overallStatus) {
         case OverallIndexingStatusIds.Unstarted: {
-          // forcing the type here, will be validated in the following 'check' step
-          const chains = serializedChainIndexingStatuses as Record<
-            ChainIdString,
-            ChainIndexingQueuedStatus
-          >;
-
           return {
             overallStatus: OverallIndexingStatusIds.Unstarted,
-            chains,
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingQueuedStatus
+            >, // forcing the type here, will be validated in the following 'check' step
+            maxRealtimeDistance: requestedMaxRealtimeDistance
+              ? {
+                  requestedDistance: requestedMaxRealtimeDistance,
+                  satisfiesRequestedDistance: false,
+                }
+              : undefined,
           } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
         }
 
@@ -125,6 +133,12 @@ export const makePonderChainMetadataSchema = (
               ChainIndexingStatusForBackfillOverallStatus
             >, // forcing the type here, will be validated in the following 'check' step
             omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            maxRealtimeDistance: requestedMaxRealtimeDistance
+              ? {
+                  requestedDistance: requestedMaxRealtimeDistance,
+                  satisfiesRequestedDistance: false,
+                }
+              : undefined,
           } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
         }
 
@@ -136,15 +150,30 @@ export const makePonderChainMetadataSchema = (
               ChainIndexingCompletedStatus
             >, // forcing the type here, will be validated in the following 'check' step
             omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            maxRealtimeDistance: requestedMaxRealtimeDistance
+              ? {
+                  requestedDistance: requestedMaxRealtimeDistance,
+                  satisfiesRequestedDistance: false,
+                }
+              : undefined,
           } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
 
         case OverallIndexingStatusIds.Following:
+          const overallApproxRealtimeDistance = getOverallApproxRealtimeDistance(chainStatuses);
+
           return {
             overallStatus: OverallIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
-            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
             omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            overallApproxRealtimeDistance,
+            maxRealtimeDistance: requestedMaxRealtimeDistance
+              ? {
+                  requestedDistance: requestedMaxRealtimeDistance,
+                  satisfiesRequestedDistance:
+                    overallApproxRealtimeDistance <= requestedMaxRealtimeDistance,
+                }
+              : undefined,
           } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
       }
     })
