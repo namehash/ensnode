@@ -4,8 +4,8 @@ import { validateConnection } from "@/components/connections/ensnode-url-validat
 import { defaultEnsNodeUrls } from "@/lib/env";
 import {
   buildPathnameWithParams,
-  getConectionInUrlParams,
   getConnectionFromParams,
+  setSelectedConnectionInParams,
 } from "@/lib/url-params";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
@@ -57,7 +57,10 @@ export function useENSNodeConnections() {
 
   const selectConnection = useCallback(
     (url: string) => {
-      const params = getConectionInUrlParams(new URLSearchParams(window.location.search), url);
+      const params = setSelectedConnectionInParams(
+        new URLSearchParams(window.location.search),
+        url,
+      );
       const newUrl = buildPathnameWithParams(pathname, params);
       router.push(newUrl);
     },
