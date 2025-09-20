@@ -1,10 +1,10 @@
 "use client";
 
 import { CopyButton } from "@/components/ui/copy-button";
-import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
+import { useENSNodeConnection } from "@/hooks/active-ensnode-url";
 
 export default function ActionsSubgraphCompatPage() {
-  const baseUrl = useActiveENSNodeUrl();
+  const baseUrl = useENSNodeConnection();
   const url = new URL(`/subgraph`, baseUrl).toString();
 
   return (

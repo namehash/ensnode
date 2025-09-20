@@ -32,7 +32,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useActiveENSNodeUrl } from "@/hooks/active-ensnode-url";
+import { useENSNodeConnection } from "@/hooks/active-ensnode-url";
 import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { useMutation } from "@tanstack/react-query";
 import { CopyButton } from "../ui/copy-button";
@@ -46,8 +46,10 @@ export function ConnectionSelector() {
     removeConnection,
     selectConnection,
   } = useENSNodeConnections();
-  const activeENSNodeUrl = useActiveENSNodeUrl().toString();
-  const addAndSelectConnection = useMutation({ mutationFn: _addAndSelectConnection });
+  const connection = useENSNodeConnection().toString();
+  const addAndSelectConnection = useMutation({
+    mutationFn: _addAndSelectConnection,
+  });
 
   const [newUrl, setNewUrl] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -88,7 +90,7 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{activeENSNodeUrl}</span>
+                  <span className="truncate text-xs font-mono">{connection}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
@@ -106,7 +108,7 @@ export function ConnectionSelector() {
               {connections
                 .filter(({ isDefault }) => isDefault)
                 .map(({ url }) => {
-                  const isActiveUrl = url === activeENSNodeUrl;
+                  const isActiveUrl = url === connection;
                   return (
                     <div key={url} className="flex items-center justify-between gap-1">
                       <DropdownMenuItem
@@ -133,7 +135,7 @@ export function ConnectionSelector() {
                   {connections
                     .filter(({ isDefault }) => !isDefault)
                     .map(({ url }) => {
-                      const isActiveUrl = url === activeENSNodeUrl;
+                      const isActiveUrl = url === connection;
                       return (
                         <div key={url} className="flex items-center justify-between gap-1">
                           <DropdownMenuItem
