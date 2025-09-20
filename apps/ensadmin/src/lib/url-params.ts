@@ -1,9 +1,9 @@
 import { ReadonlyURLSearchParams } from "next/navigation";
 
-const ACTIVE_CONNECTION_PARAM = "connection";
+const SELECTED_CONNECTION_PARAM = "connection";
 
 /**
- * Retrieves the active connection URL from URL search parameters.
+ * Retrieves the selected connection URL from URL search parameters.
  *
  * @param searchParams - The URL search parameters to read from
  * @returns The connection URL string if present, otherwise null
@@ -11,23 +11,23 @@ const ACTIVE_CONNECTION_PARAM = "connection";
 export const getConnectionFromParams = (
   searchParams: ReadonlyURLSearchParams | URLSearchParams,
 ): string | null => {
-  return searchParams.get(ACTIVE_CONNECTION_PARAM);
+  return searchParams.get(SELECTED_CONNECTION_PARAM);
 };
 
 /**
- * Sets the active connection URL in URL search parameters.
+ * Sets the selected connection URL in URL search parameters.
  *
  * @param searchParams - The existing URL search parameters
  * @param connection - The connection URL string to set
  * @returns A new URLSearchParams instance with the connection parameter set
  */
-export const getConectionInUrlParams = (
+export const setSelectedConnectionInParams = (
   searchParams: URLSearchParams,
   connection: string,
 ): URLSearchParams => {
   const params = new URLSearchParams(searchParams);
 
-  params.set(ACTIVE_CONNECTION_PARAM, connection);
+  params.set(SELECTED_CONNECTION_PARAM, connection);
 
   return params;
 };
