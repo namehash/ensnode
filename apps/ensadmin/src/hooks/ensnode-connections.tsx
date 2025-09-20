@@ -1,10 +1,10 @@
 "use client";
 
-import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
+import { validateConnection } from "@/components/connections/ensnode-url-validator";
 import { defaultEnsNodeUrls } from "@/lib/env";
 import {
   buildUrlWithParams,
-  getActiveConnectionFromParams,
+  getConnectionFromParams,
   setActiveConnectionInParams,
 } from "@/lib/url-params";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -34,7 +34,7 @@ export function useENSNodeConnections() {
 
   const addConnection = useCallback(
     async (_url: string) => {
-      const { isValid, error } = await validateENSNodeUrl(_url);
+      const { isValid, error } = await validateConnection(_url);
       if (!isValid) {
         throw new Error(error || "Invalid URL");
       }
@@ -74,7 +74,7 @@ export function useENSNodeConnections() {
   );
 
   useEffect(() => {
-    const activeConnectionUrl = getActiveConnectionFromParams(searchParams);
+    const activeConnectionUrl = getConnectionFromParams(searchParams);
 
     if (activeConnectionUrl) {
       try {

@@ -1,7 +1,7 @@
 type ValidationResult = { isValid: true; error?: never } | { isValid: false; error: string };
 
 // TODO: more advanced validation (i.e. confirm ENSNode status response, version numbers...)
-export async function validateENSNodeUrl(url: string): Promise<ValidationResult> {
+export async function validateConnection(url: string): Promise<ValidationResult> {
   try {
     const parsedUrl = new URL(url);
 

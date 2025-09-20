@@ -1,7 +1,7 @@
 "use client";
 
 import { defaultEnsNodeUrls } from "@/lib/env";
-import { getActiveConnectionFromParams } from "@/lib/url-params";
+import { getConnectionFromParams } from "@/lib/url-params";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -11,7 +11,7 @@ export function useActiveENSNodeUrl(): URL {
   const searchParams = useSearchParams();
 
   const urlString = useMemo(() => {
-    const activeConnection = getActiveConnectionFromParams(searchParams);
+    const activeConnection = getConnectionFromParams(searchParams);
     return activeConnection || DEFAULT_URL;
   }, [searchParams]);
 
