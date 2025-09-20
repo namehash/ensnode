@@ -79,7 +79,7 @@ export function BlockStats({ chainId, label, block }: BlockStatsProps) {
       <BlockNumber block={block} chainId={chainId} />
       <div className="text-xs text-muted-foreground">
         <RelativeTime
-          date={block.date}
+          timestamp={block.timestamp}
           enforcePast={true}
           conciseFormatting={true}
           includeSeconds={true}

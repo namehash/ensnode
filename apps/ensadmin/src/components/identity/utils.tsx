@@ -61,11 +61,12 @@ interface AddressDisplayProps {
 }
 
 /**
- * Displays a truncated address without any navigation.
+ * Displays a truncated checksummed address without any navigation.
  * Pure display component for showing addresses.
  */
 export function AddressDisplay({ address, className = "font-medium" }: AddressDisplayProps) {
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const checksummedAddress = getAddress(address);
+  const truncatedAddress = `${checksummedAddress.slice(0, 6)}...${checksummedAddress.slice(-4)}`;
   return <span className={className}>{truncatedAddress}</span>;
 }
 

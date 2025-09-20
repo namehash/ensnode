@@ -9,7 +9,7 @@ import type { Label, LiteralLabel, Name } from "./types";
  * @see https://docs.ens.domains/ensip/19/#reverse-resolution
  */
 export const addrReverseLabel = (address: Address): LiteralLabel =>
-  address.slice(2).toLowerCase() as LiteralLabel;
+  address.slice(2) as LiteralLabel; // address is guaranteed to be fully lowercase
 
 /**
  * Converts `coinType` to prefix-free hex string.

@@ -1,5 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatDistance, formatDistanceStrict, intlFormat } from "date-fns";
+import { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { formatDistance, formatDistanceStrict, fromUnixTime, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import { useEffect, useState } from "react";
 import * as React from "react";
@@ -8,12 +9,13 @@ import * as React from "react";
  * Client-only absolute time component
  */
 export function AbsoluteTime({
-  date,
+  timestamp,
   options,
 }: {
-  date: Date;
+  timestamp: UnixTimestamp;
   options: Intl.DateTimeFormatOptions;
 }) {
+  const date = fromUnixTime(timestamp);
   const [absoluteTime, setAbsoluteTime] = useState<string>("");
 
   useEffect(() => {
@@ -24,8 +26,9 @@ export function AbsoluteTime({
 }
 
 /**
- * Formats a Date as its relative distance with now
+ * Formats a Unix timestamp as its relative distance with now
  *
+ * @param timestamp - the timestamp to format as a relative time
  * @param enforcePast - if true, enforces that the return value won't relate to the future.
  * Helpful for UI contexts where its nonsensical for a value to relate to the future. Ex: how long ago an event happened.
  * Note how different systems may have misaligned clocks. `enforcePast` aims to protect from UI confusion when
@@ -33,22 +36,23 @@ export function AbsoluteTime({
  * be coming from the future.
  * @param includeSeconds - if true includes seconds in the result
  * @param conciseFormatting - if true removes special prefixes / suffixes such as "about ..." or "in almost ..."
- * @param relativeTo - if defined represents the date to compare with. Otherwise, the date param is compared with the present.
+ * @param relativeTo - if defined represents the timestamp to compare with. Otherwise, the timestamp param is compared with the present.
  */
 export function formatRelativeTime(
-  date: Date,
+  timestamp: UnixTimestamp,
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
-  relativeTo?: Date,
+  relativeTo?: UnixTimestamp,
 ): string {
-  const compareWith = relativeTo ? relativeTo.getTime() : Date.now();
+  const date = fromUnixTime(timestamp);
+  const compareWith = typeof relativeTo !== "undefined" ? fromUnixTime(relativeTo) : new Date();
 
   if (
-    (enforcePast && date.getTime() >= compareWith) ||
+    (enforcePast && date >= compareWith) ||
     (!includeSeconds &&
       !conciseFormatting &&
-      Math.abs(date.getTime() - compareWith) < 60 * millisecondsInSecond)
+      Math.abs(date.getTime() - compareWith.getTime()) < 60 * millisecondsInSecond)
   ) {
     return "just now";
   }
@@ -67,7 +71,7 @@ export function formatRelativeTime(
  * Client-only relative time component
  */
 export function RelativeTime({
-  date,
+  timestamp,
   enforcePast = false,
   includeSeconds = false,
   conciseFormatting = false,
@@ -75,21 +79,21 @@ export function RelativeTime({
   relativeTo,
   prefix,
 }: {
-  date: Date;
+  timestamp: UnixTimestamp;
   enforcePast?: boolean;
   includeSeconds?: boolean;
   conciseFormatting?: boolean;
   tooltipPosition?: React.ComponentProps<typeof TooltipContent>["side"];
-  relativeTo?: Date;
+  relativeTo?: UnixTimestamp;
   prefix?: string;
 }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
     setRelativeTime(
-      formatRelativeTime(date, enforcePast, includeSeconds, conciseFormatting, relativeTo),
+      formatRelativeTime(timestamp, enforcePast, includeSeconds, conciseFormatting, relativeTo),
     );
-  }, [date]);
+  }, [timestamp]);
 
   return (
     <Tooltip delayDuration={1000}>
@@ -102,7 +106,7 @@ export function RelativeTime({
         className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
       >
         <AbsoluteTime
-          date={date}
+          timestamp={timestamp}
           options={{
             year: "numeric",
             month: "short",
@@ -125,32 +129,16 @@ export function Duration({
   beginsAt,
   endsAt,
 }: {
-  beginsAt: Date;
-  endsAt: Date;
+  beginsAt: UnixTimestamp;
+  endsAt: UnixTimestamp;
 }) {
   const [duration, setDuration] = useState<string>("");
+  const beginsAtDate = fromUnixTime(beginsAt);
+  const endsAtDate = fromUnixTime(endsAt);
 
   useEffect(() => {
-    setDuration(formatDistanceStrict(endsAt, beginsAt));
-  }, [beginsAt, endsAt]);
+    setDuration(formatDistanceStrict(endsAtDate, beginsAtDate));
+  }, [beginsAtDate, endsAtDate]);
 
   return <>{duration}</>;
-}
-
-/**
- * An integer value (representing a Unix timestamp in seconds) formatted as a string.
- */
-export type UnixTimestampInSeconds = string;
-
-/**
- * Transforms a UnixTimestampInSeconds to a Date object.
- */
-export function unixTimestampToDate(timestamp: UnixTimestampInSeconds): Date {
-  const date = new Date(parseInt(timestamp) * millisecondsInSecond);
-
-  if (isNaN(date.getTime())) {
-    throw new Error(`Error parsing timestamp (${timestamp}) to date`);
-  }
-
-  return date;
 }

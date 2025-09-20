@@ -23,8 +23,14 @@ describe("ids", () => {
   describe("in any compatibility mode", () => {
     describe("makeResolverId", () => {
       it("should lowercase address", () => {
-        expect(makeResolverId(CHAIN_ID, "0xCAFE", namehash("vitalik.eth"))).toMatch(
-          /0xcafe-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835$/,
+        expect(
+          makeResolverId(
+            CHAIN_ID,
+            "0x2aaecbf301b736859333be66942cb6dbd3e9cafe",
+            namehash("vitalik.eth"),
+          ),
+        ).toEqual(
+          "1337-0x2aaecbf301b736859333be66942cb6dbd3e9cafe-0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835",
         );
       });
     });
