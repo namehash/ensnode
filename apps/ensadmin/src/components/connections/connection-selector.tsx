@@ -46,7 +46,7 @@ export function ConnectionSelector() {
     removeConnection,
     selectConnection,
   } = useENSNodeConnections();
-  const activeENSNodeUrl = useENSNodeConnection().toString();
+  const connection = useENSNodeConnection().toString();
   const addAndSelectConnection = useMutation({
     mutationFn: _addAndSelectConnection,
   });
@@ -90,7 +90,7 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{activeENSNodeUrl}</span>
+                  <span className="truncate text-xs font-mono">{connection}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
@@ -108,7 +108,7 @@ export function ConnectionSelector() {
               {connections
                 .filter(({ isDefault }) => isDefault)
                 .map(({ url }) => {
-                  const isActiveUrl = url === activeENSNodeUrl;
+                  const isActiveUrl = url === connection;
                   return (
                     <div key={url} className="flex items-center justify-between gap-1">
                       <DropdownMenuItem
@@ -135,7 +135,7 @@ export function ConnectionSelector() {
                   {connections
                     .filter(({ isDefault }) => !isDefault)
                     .map(({ url }) => {
-                      const isActiveUrl = url === activeENSNodeUrl;
+                      const isActiveUrl = url === connection;
                       return (
                         <div key={url} className="flex items-center justify-between gap-1">
                           <DropdownMenuItem
