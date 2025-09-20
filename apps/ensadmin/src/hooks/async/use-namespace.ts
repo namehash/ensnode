@@ -8,7 +8,7 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
  *
  * @example
  * ```typescript
- * import { useNamespace } from "@/hooks/useNamespace";
+ * import { useNamespace } from "@/hooks/async/use-namespace";
  *
  * function NamespaceIndicator() {
  *   const { data: namespaceId, isLoading, error } = useNamespace();
@@ -22,10 +22,10 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
  * ```
  */
 export function useNamespace() {
-  const { data, ...query } = useENSIndexerConfig();
+  const query = useENSIndexerConfig();
 
   return {
     ...query,
-    data: data?.namespace ?? null,
+    data: query.data?.namespace ?? null,
   };
 }

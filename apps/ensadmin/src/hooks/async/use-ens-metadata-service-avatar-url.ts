@@ -23,7 +23,7 @@ export interface UseEnsMetadataServiceAvatarUrlParameters {
  *
  * @example
  * ```typescript
- * import { useEnsMetadataServiceAvatarUrl } from "@/hooks/useEnsMetadataServiceAvatarUrl";
+ * import { useEnsMetadataServiceAvatarUrl } from "@/hooks/async/use-ens-metadata-service-avatar-url";
  *
  * function ProfileAvatar() {
  *   const { data: avatarUrl, isLoading, error } = useEnsMetadataServiceAvatarUrl({
