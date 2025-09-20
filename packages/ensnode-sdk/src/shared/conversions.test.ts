@@ -15,9 +15,9 @@ describe("ENSIndexer: Shared", () => {
     });
 
     it("can serialize URL into its string representation", () => {
-      const url = new URL("https://admin.ensnode.io/connect");
+      const url = new URL("https://admin.ensnode.io");
 
-      url.searchParams.set("ensnode", "https://indexer.alpha.ensnode.io");
+      url.searchParams.set("connection", "https://indexer.alpha.ensnode.io");
 
       expect(serializeUrl(url)).toBe(
         "https://admin.ensnode.io/?connection=https%3A%2F%2Findexer.alpha.ensnode.io",
@@ -63,9 +63,9 @@ describe("ENSIndexer: Shared", () => {
       const serializedUrl =
         "https://admin.ensnode.io/?connection=https%3A%2F%2Findexer.alpha.ensnode.io";
 
-      const resultUrl = new URL("https://admin.ensnode.io/connect");
+      const resultUrl = new URL("https://admin.ensnode.io");
 
-      resultUrl.searchParams.set("ensnode", "https://indexer.alpha.ensnode.io");
+      resultUrl.searchParams.set("connection", "https://indexer.alpha.ensnode.io");
 
       expect(deserializeUrl(serializedUrl)).toStrictEqual(resultUrl);
     });
