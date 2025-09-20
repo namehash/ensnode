@@ -25,7 +25,7 @@ import { usePrimaryName } from "@ensnode/ensnode-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 
 const EXAMPLE_INPUT = [
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet
@@ -56,8 +56,7 @@ export default function ResolvePrimaryNameInspector() {
 
   const additionalChainIds = getENSIP19SupportedChainIds(ENSNamespaceIds.Mainnet);
 
-  const canQuery =
-    !!debouncedAddress && debouncedAddress.length > 0 && debouncedAddress.startsWith("0x");
+  const canQuery = !!debouncedAddress && isAddress(debouncedAddress);
 
   const accelerated = usePrimaryName({
     address: debouncedAddress as Address,

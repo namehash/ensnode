@@ -69,47 +69,47 @@ const SUPPORTED_CURRENCY_CONTRACTS: Record<ChainId, Record<Address, CurrencyId>>
   /** mainnet namespace */
   [mainnet.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0xA0b86a33E6417c5Dd4Baf8C54e5de49E293E9169"]: CurrencyIds.USDC,
-    ["0x6B175474E89094C44Da98b954EedeAC495271d0F"]: CurrencyIds.DAI,
+    ["0xa0b86a33e6417c5dd4baf8c54e5de49e293e9169"]: CurrencyIds.USDC,
+    ["0x6b175474e89094c44da98b954eedeac495271d0f"]: CurrencyIds.DAI,
   },
   [base.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"]: CurrencyIds.USDC,
-    ["0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"]: CurrencyIds.DAI,
+    ["0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"]: CurrencyIds.USDC,
+    ["0x50c5725949a6f0c72e6c4a641f24049a917db0cb"]: CurrencyIds.DAI,
   },
   [optimism.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85"]: CurrencyIds.USDC,
-    ["0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"]: CurrencyIds.DAI,
+    ["0x0b2c639c533813f4aa9d7837caf62653d097ff85"]: CurrencyIds.USDC,
+    ["0xda10009cbd5d07dd0cecc66161fc93d7c9000da1"]: CurrencyIds.DAI,
   },
   [linea.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x176211869cA2b568f2A7D4EE941E073a821EE1ff"]: CurrencyIds.USDC,
-    ["0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5"]: CurrencyIds.DAI,
+    ["0x176211869ca2b568f2a7d4ee941e073a821ee1ff"]: CurrencyIds.USDC,
+    ["0x4af15ec2a0bd43db75dd04e62faa3b8ef36b00d5"]: CurrencyIds.DAI,
   },
 
   /** sepolia namespace */
   [sepolia.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"]: CurrencyIds.USDC,
-    ["0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6"]: CurrencyIds.DAI,
+    ["0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"]: CurrencyIds.USDC,
+    ["0x3e622317f8c93f7328350cf0b56d9eD4c620c5d6"]: CurrencyIds.DAI,
   },
   [baseSepolia.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x036CbD53842c5426634e7929541eC2318f3dCF7e"]: CurrencyIds.USDC,
-    ["0x7368C6C68a4b2b68F90DB2e8F5E3b8E1E5e4F5c7"]: CurrencyIds.DAI,
+    ["0x036cbd53842c5426634e7929541ec2318f3dcf7e"]: CurrencyIds.USDC,
+    ["0x7368c6c68a4b2b68f90db2e8f5e3b8e1e5e4f5c7"]: CurrencyIds.DAI,
   },
   [lineaSepolia.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x176211869cA2b568f2A7D4EE941E073a821EE1ff"]: CurrencyIds.USDC,
-    ["0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5"]: CurrencyIds.DAI,
+    ["0x176211869ca2b568f2a7d4ee941e073a821ee1ff"]: CurrencyIds.USDC,
+    ["0x4af15ec2a0bd43db75dd04e62faa3b8ef36b00d5"]: CurrencyIds.DAI,
   },
 
   /** holesky namespace */
   [holesky.id]: {
     [zeroAddress]: CurrencyIds.ETH,
-    ["0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"]: CurrencyIds.USDC,
-    ["0x3e622317f8C93f7328350cF0B56d9eD4C620C5d6"]: CurrencyIds.DAI,
+    ["0x1c7d4b196cb0c7b01d743fbc6116a902379c7238"]: CurrencyIds.USDC,
+    ["0x3e622317f8c93f7328350cf0b56d9ed4c620c5d6"]: CurrencyIds.DAI,
   },
 };
 

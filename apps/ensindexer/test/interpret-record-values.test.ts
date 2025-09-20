@@ -37,12 +37,12 @@ describe("interpretAddressRecordValue", () => {
     expect(interpretAddressRecordValue("0x0000000000000000000000000000000000000000")).toBeNull();
   });
 
-  it("returns checksummed address for valid EVM address", () => {
+  it("returns lowercase address for valid EVM address", () => {
     expect(interpretAddressRecordValue("0x52908400098527886E0F7030069857D2E4169EE7")).toBe(
-      "0x52908400098527886E0F7030069857D2E4169EE7",
+      "0x52908400098527886e0f7030069857d2e4169ee7",
     );
     expect(interpretAddressRecordValue("0x52908400098527886e0f7030069857d2e4169ee7")).toBe(
-      "0x52908400098527886E0F7030069857D2E4169EE7",
+      "0x52908400098527886e0f7030069857d2e4169ee7",
     );
   });
 

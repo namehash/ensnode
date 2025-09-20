@@ -1,22 +1,18 @@
 "use client";
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
-import {
-  AbsoluteTime,
-  RelativeTime,
-  UnixTimestampInSeconds,
-  unixTimestampToDate,
-} from "@/components/datetime-utils";
+import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { type UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const mockRelativeTimestampData = mockDataJson as Record<
   string,
-  { date: UnixTimestampInSeconds; relativeTo?: UnixTimestampInSeconds }
+  { date: UnixTimestamp; relativeTo?: UnixTimestamp }
 >;
 type TimeVariant = keyof typeof mockRelativeTimestampData;
 
@@ -44,49 +40,49 @@ const relativeTimePropsDescriptions = new Map<boolean, Map<string, string>>([
 export default function MockRelativeTimePage() {
   const [selectedTime, setSelectedTime] = useState<TimeVariant>(DEFAULT_VARIANT);
   const variantProps: {
-    date: Date;
+    timestamp: UnixTimestamp;
     enforcePast: boolean;
     includeSeconds: boolean;
     conciseFormatting: boolean;
-    relativeTo?: Date;
+    relativeTo?: UnixTimestamp;
     prefix?: string;
   }[] = useMemo(() => {
-    const date = unixTimestampToDate(mockRelativeTimestampData[selectedTime].date);
+    const timestamp = mockRelativeTimestampData[selectedTime].date;
     // since the value is hardcoded we are sure it exists
-    const relativeToForPast = unixTimestampToDate(mockRelativeTimestampData["Past"].relativeTo!);
+    const relativeToForPast = mockRelativeTimestampData["Past"].relativeTo!;
 
     return selectedTime === "Past"
       ? [
           {
-            date: date,
+            timestamp,
             includeSeconds: true,
             conciseFormatting: true,
             enforcePast: false,
             relativeTo: relativeToForPast,
           },
           {
-            date: date,
+            timestamp,
             includeSeconds: true,
             conciseFormatting: false,
             enforcePast: false,
             relativeTo: relativeToForPast,
           },
           {
-            date: date,
+            timestamp,
             includeSeconds: false,
             conciseFormatting: true,
             enforcePast: false,
             relativeTo: relativeToForPast,
           },
           {
-            date: date,
+            timestamp,
             includeSeconds: false,
             conciseFormatting: false,
             enforcePast: false,
             relativeTo: relativeToForPast,
           },
           {
-            date: date,
+            timestamp,
             includeSeconds: false,
             conciseFormatting: false,
             enforcePast: false,
@@ -94,19 +90,19 @@ export default function MockRelativeTimePage() {
         ]
       : [
           {
-            date: date,
+            timestamp,
             includeSeconds: false,
             conciseFormatting: false,
             enforcePast: true,
           },
           {
-            date: date,
+            timestamp,
             includeSeconds: false,
             conciseFormatting: false,
             enforcePast: false,
           },
           {
-            date: date,
+            timestamp,
             includeSeconds: false,
             conciseFormatting: true,
             enforcePast: false,
@@ -159,7 +155,7 @@ export default function MockRelativeTimePage() {
                 <p className="text-sm leading-6 font-semibold text-gray-500">date:</p>
                 <p className="text-sm leading-6 font-semibold">
                   <AbsoluteTime
-                    date={props.date}
+                    timestamp={props.timestamp}
                     options={{
                       year: "numeric",
                       month: "short",
@@ -180,7 +176,7 @@ export default function MockRelativeTimePage() {
                 <p className="text-sm leading-6 font-semibold">
                   {props.relativeTo ? (
                     <AbsoluteTime
-                      date={props.relativeTo}
+                      timestamp={props.relativeTo}
                       options={{
                         year: "numeric",
                         month: "short",

@@ -1,16 +1,15 @@
-import { Address, getAddress } from "viem";
 import { z } from "zod/v4";
 
-import { CoinType, DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
+import { DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
 import { Name } from "../../ens/types";
 import { ResolverRecordsSelection, isSelectionEmpty } from "../../resolution";
-import { ChainId, isNormalizedName } from "../../shared";
-import { makeDurationSchema } from "../../shared/zod-schemas";
-
-const toName = (val: string) => val as Name;
-const toAddress = (val: string) => val as Address;
-const toChainId = (val: number) => val as ChainId;
-const toCoinType = (val: number) => val as CoinType;
+import { isNormalizedName } from "../../shared";
+import {
+  makeCoinTypeStringSchema,
+  makeDefaultableChainIdStringSchema,
+  makeDurationSchema,
+  makeLowercaseAddressSchema,
+} from "../../shared/zod-schemas";
 
 const excludingDefaultChainId = z
   .number()
@@ -35,26 +34,13 @@ const stringarray = z
 const name = z
   .string()
   .refine(isNormalizedName, "Must be normalized, see https://docs.ens.domains/resolution/names/")
-  .transform(toName);
-
-const address = z
-  .string()
-  .refine(
-    (val) => {
-      try {
-        return getAddress(val) === val;
-      } catch {
-        return false;
-      }
-    },
-    { error: "Must be a valid checksummed EVM Address" },
-  )
-  .transform(toAddress);
+  .transform((val) => val as Name);
 
 const trace = boolstring;
 const accelerate = boolstring;
-const chainId = z.coerce.number<string>().int().nonnegative().transform(toChainId);
-const coinType = z.coerce.number<string>().int().nonnegative().transform(toCoinType);
+const address = makeLowercaseAddressSchema();
+const defaultableChainId = makeDefaultableChainIdStringSchema();
+const coinType = makeCoinTypeStringSchema();
 
 const selection = {
   name: z.optional(boolstring),
@@ -118,7 +104,7 @@ export const routes = {
       }),
   },
   primaryName: {
-    params: z.object({ address, chainId }),
+    params: z.object({ address, chainId: defaultableChainId }),
     query: z.object({
       trace: z.optional(trace).default(false),
       accelerate: z.optional(accelerate).default(false),
@@ -127,7 +113,9 @@ export const routes = {
   primaryNames: {
     params: z.object({ address: address }),
     query: z.object({
-      chainIds: z.optional(stringarray.pipe(z.array(chainId.pipe(excludingDefaultChainId)))),
+      chainIds: z.optional(
+        stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
+      ),
       trace: z.optional(trace).default(false),
       accelerate: z.optional(accelerate).default(false),
     }),

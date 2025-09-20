@@ -104,7 +104,7 @@
         }
       },
       "567": {
-        "status": "unstarted",
+        "status": "queued",
         "config": {
           "strategy": "indefinite",
           "startBlock": {
@@ -221,7 +221,8 @@
           "number": 3890240
         }
       }
-    }
+    },
+    "omnichainIndexingCursor": 1689337584
   },
   "indexer-error": {
     "overallStatus": "indexer-error"

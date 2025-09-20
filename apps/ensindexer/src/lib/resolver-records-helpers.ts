@@ -8,6 +8,7 @@ import {
   interpretTextRecordKey,
   interpretTextRecordValue,
 } from "@/lib/interpret-record-values";
+import { type Address } from "viem";
 
 export async function handleResolverNameUpdate(context: Context, resolverId: string, name: string) {
   await context.db
@@ -19,7 +20,7 @@ export async function handleResolverAddressRecordUpdate(
   context: Context,
   resolverId: string,
   coinType: bigint,
-  address: string,
+  address: Address,
 ) {
   const recordId = makeKeyedResolverRecordId(resolverId, coinType.toString());
   const interpretedValue = interpretAddressRecordValue(address);
