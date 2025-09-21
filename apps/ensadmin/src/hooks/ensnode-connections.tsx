@@ -1,6 +1,7 @@
 "use client";
 
 import constate from "constate";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLocalstorageState } from "rooks";
 
@@ -31,8 +32,12 @@ const DEFAULT_CONNECTION_URLS = defaultEnsNodeUrls()
   .map((url) => url.toString())
   .map(normalizeUrl);
 
+const CONNECTION_PARAM_KEY = "connection";
+
 function _useENSNodeConnections() {
   const hydrated = useHydrated();
+  const searchParams = useSearchParams();
+  const currentConnection = searchParams.get(CONNECTION_PARAM_KEY);
   const [rawCustomConnectionUrls, storeCustomConnections] = useLocalstorageState<UrlString[]>(
     "ensadmin:connections:urls",
     [],
@@ -49,11 +54,6 @@ function _useENSNodeConnections() {
 
     return validatedUrls;
   }, [rawCustomConnectionUrls, storeCustomConnections]);
-
-  const [selected, setSelected, clearSelected] = useLocalstorageState<UrlString | null>(
-    "ensadmin:connections:selected",
-    null,
-  );
 
   const connections = useMemo(
     () => [
@@ -99,28 +99,16 @@ function _useENSNodeConnections() {
     [storeCustomConnections],
   );
 
-  const selectConnection = useCallback(
-    (url: UrlString) => {
-      // must be in existing set of connections
-      if (!isInConnections(url)) {
-        throw new Error(`Cannot select URL not in list of connections: '${url}'.`);
-      }
-
-      return setSelected(url);
-    },
-    [isInConnections, setSelected],
-  );
-
   const addAndSelectConnection = useCallback(
     async (url: UrlString) => {
       const added = await addConnection(url);
-      setSelected(added);
+
       return added;
     },
-    [addConnection, setSelected],
+    [addConnection],
   );
 
-  // the active connection is the selected (if valid) or the first
+  // the active connection is the current connection (from URL param) or the first default
   const active = useMemo<URL | null>(() => {
     // no active ensnode connection in server environments
     if (!hydrated) return null;
@@ -129,17 +117,10 @@ function _useENSNodeConnections() {
     // NOTE: guaranteed to have at least 1 connection because defaults must have length > 0
     const first = connections[0].url;
 
-    if (!selected) return new URL(first);
-    if (!isInConnections(selected)) return new URL(first);
-    return new URL(selected);
-  }, [hydrated, connections, selected, isInConnections]);
-
-  // clear selected if it is invalid
-  useEffect(() => {
-    if (selected && !isInConnections(selected)) {
-      clearSelected();
-    }
-  }, [selected, isInConnections, clearSelected]);
+    if (!currentConnection) return new URL(first);
+    if (!isInConnections(currentConnection)) return new URL(first);
+    return new URL(currentConnection);
+  }, [hydrated, connections, currentConnection, isInConnections]);
 
   return {
     connections,
@@ -147,7 +128,6 @@ function _useENSNodeConnections() {
     addConnection,
     addAndSelectConnection,
     removeConnection,
-    selectConnection,
   };
 }
 

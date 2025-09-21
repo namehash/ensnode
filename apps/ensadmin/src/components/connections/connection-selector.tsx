@@ -49,7 +49,6 @@ export function ConnectionSelector() {
     connections,
     addAndSelectConnection: _addAndSelectConnection,
     removeConnection,
-    selectConnection,
   } = useENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
   const addAndSelectConnection = useMutation({
@@ -103,9 +102,6 @@ export function ConnectionSelector() {
 
     const existingConnection = connections.find((conn) => conn.url === connectionParam);
     if (existingConnection) {
-      if (activeENSNodeUrl !== connectionParam) {
-        selectConnection(connectionParam);
-      }
       return;
     }
 
@@ -131,7 +127,6 @@ export function ConnectionSelector() {
     searchParams,
     connections,
     activeENSNodeUrl,
-    selectConnection,
     addConnectionFromUrl,
     router,
     updateUrlParam,
@@ -139,7 +134,6 @@ export function ConnectionSelector() {
   ]);
 
   const handleSelect = (url: string) => {
-    selectConnection(url);
     updateUrlParam(url);
     setDialogOpen(false);
   };
