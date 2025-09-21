@@ -90,6 +90,13 @@ export function ConnectionSelector() {
 
   useEffect(() => {
     const connectionParam = searchParams.get(CONNECTION_PARAM_KEY);
+
+    // If no connection parameter exists and we have an active connection, update URL
+    if (!connectionParam && activeENSNodeUrl && connections.length > 0) {
+      updateUrlParam(activeENSNodeUrl);
+      return;
+    }
+
     if (!connectionParam) return;
 
     if (failedConnections.has(connectionParam)) return;
