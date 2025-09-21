@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown, Loader2, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ENSAdminIcon } from "@/components/ensadmin-icon";
@@ -37,8 +38,12 @@ import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { useMutation } from "@tanstack/react-query";
 import { CopyButton } from "../ui/copy-button";
 
+const CONNECTION_PARAM_KEY = "connection";
+
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     connections,
@@ -47,13 +52,88 @@ export function ConnectionSelector() {
     selectConnection,
   } = useENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
-  const addAndSelectConnection = useMutation({ mutationFn: _addAndSelectConnection });
+  const addAndSelectConnection = useMutation({
+    mutationFn: _addAndSelectConnection,
+  });
+
+  const addConnectionFromUrl = useMutation({
+    mutationFn: _addAndSelectConnection,
+  });
 
   const [newUrl, setNewUrl] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [previousConnection, setPreviousConnection] = useState<string | null>(null);
+  const [failedConnections, setFailedConnections] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const currentConnection = searchParams.get(CONNECTION_PARAM_KEY);
+
+    if (
+      previousConnection !== null &&
+      previousConnection !== currentConnection &&
+      currentConnection
+    ) {
+      toast.success(`Connected to ${currentConnection}`);
+    }
+
+    setPreviousConnection(currentConnection);
+  }, [searchParams, previousConnection]);
+
+  const updateUrlParam = useCallback(
+    (url: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(CONNECTION_PARAM_KEY, url);
+      router.replace(`?${params.toString()}`);
+    },
+    [router, searchParams],
+  );
+
+  useEffect(() => {
+    const connectionParam = searchParams.get(CONNECTION_PARAM_KEY);
+    if (!connectionParam) return;
+
+    if (failedConnections.has(connectionParam)) return;
+
+    const existingConnection = connections.find((conn) => conn.url === connectionParam);
+    if (existingConnection) {
+      if (activeENSNodeUrl !== connectionParam) {
+        selectConnection(connectionParam);
+      }
+      return;
+    }
+
+    addConnectionFromUrl.mutate(connectionParam, {
+      onSuccess: (addedUrl) => {
+        updateUrlParam(addedUrl);
+        toast.success(`Connection saved to custom connections`);
+        toast.success(`Connected to ${addedUrl}`);
+      },
+      onError: (error) => {
+        toast.error(`Failed to connect: ${error.message}`);
+
+        // Track this as a failed connection to prevent retry loop
+        setFailedConnections((prev) => new Set(prev).add(connectionParam));
+
+        // Remove invalid connection param from URL
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete(CONNECTION_PARAM_KEY);
+        router.replace(params.toString() ? `?${params.toString()}` : window.location.pathname);
+      },
+    });
+  }, [
+    searchParams,
+    connections,
+    activeENSNodeUrl,
+    selectConnection,
+    addConnectionFromUrl,
+    router,
+    updateUrlParam,
+    failedConnections,
+  ]);
 
   const handleSelect = (url: string) => {
     selectConnection(url);
+    updateUrlParam(url);
     setDialogOpen(false);
   };
 
@@ -62,8 +142,7 @@ export function ConnectionSelector() {
       onSuccess: (url) => {
         setNewUrl("");
         setDialogOpen(false);
-        toast.success(`You are now connected to ${url}`);
-
+        updateUrlParam(url);
         addAndSelectConnection.reset();
       },
     });

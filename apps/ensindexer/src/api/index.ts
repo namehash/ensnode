@@ -46,8 +46,8 @@ app.onError((error, ctx) => {
 
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
-  const ensAdminRedirectUrl = new URL("connect", config.ensAdminUrl);
-  ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
+  const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
+  ensAdminRedirectUrl.searchParams.set("connecton", config.ensNodePublicUrl.href);
 
   return ctx.redirect(ensAdminRedirectUrl);
 });
