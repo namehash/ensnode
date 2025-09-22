@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/radix-ui/dialog";
+} from "@/components/shadcn/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,9 +23,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/radix-ui/dropdown-menu";
+} from "@/components/shadcn/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/radix-ui/label";
+import { Label } from "@/components/shadcn/label";
 import {
   SidebarMenu,
   SidebarMenuButton,

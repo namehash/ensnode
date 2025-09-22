@@ -2,7 +2,7 @@ import { CodeBlock } from "@/components/code-block";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { TraceRenderer } from "@/components/tracing/renderer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/radix-ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { renderMicroseconds } from "@/lib/time";
 import { getTraceDuration } from "@/lib/tracing";
 import { cn } from "@/lib/utils";

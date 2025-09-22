@@ -1,7 +1,7 @@
 "use client";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
-import { Avatar } from "@/components/radix-ui/avatar";
+import { EnsAvatar } from "@/components/ui/ens-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
@@ -68,7 +68,7 @@ export function Identity({
   // Otherwise, render the primary name
   return (
     <NameLink name={ensName}>
-      {showAvatar && <Avatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
+      {showAvatar && <EnsAvatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
       <NameDisplay name={ensName} />
     </NameLink>
   );

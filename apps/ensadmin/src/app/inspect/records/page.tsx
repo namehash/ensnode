@@ -5,7 +5,7 @@ import { Pill } from "@/components/pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/radix-ui/label";
+import { Label } from "@/components/shadcn/label";
 import { useRecords } from "@ensnode/ensnode-react";
 import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
 

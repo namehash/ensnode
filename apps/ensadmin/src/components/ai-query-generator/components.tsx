@@ -4,14 +4,14 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/radix-ui/label";
+import { Label } from "@/components/shadcn/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/radix-ui/select";
+} from "@/components/shadcn/select";
 import type { AiQueryGeneratorResult } from "./types";
 
 interface QueryPromptExample {

@@ -15,7 +15,7 @@ interface AvatarProps {
 
 type ImageLoadingStatus = "idle" | "loading" | "loaded" | "error";
 
-export const Avatar = React.forwardRef<
+export const EnsAvatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
 >(({ ensName, namespaceId, className, ...props }, ref) => {
@@ -52,7 +52,7 @@ export const Avatar = React.forwardRef<
     </AvatarPrimitive.Root>
   );
 });
-Avatar.displayName = AvatarPrimitive.Root.displayName;
+EnsAvatar.displayName = AvatarPrimitive.Root.displayName;
 
 interface AvatarImageProps {
   onLoadingStatusChangeCallback: (status: ImageLoadingStatus) => void;
