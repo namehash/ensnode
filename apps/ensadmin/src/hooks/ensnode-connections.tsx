@@ -56,7 +56,7 @@ const DEFAULT_CONNECTION_URLS = (() => {
 
 const CONNECTION_PARAM_KEY = "connection";
 
-function _useENSNodeConnections() {
+function _useAvailableENSNodeConnections() {
   const hydrated = useHydrated();
   const searchParams = useSearchParams();
   const currentConnection = searchParams.get(CONNECTION_PARAM_KEY);
@@ -153,21 +153,35 @@ function _useENSNodeConnections() {
   };
 }
 
-function ENSNodeConnectionsProviderWithSuspense({
+/**
+ * Provider for available ENSNode connections (both default and custom).
+ *
+ * Wraps the inner provider with Suspense boundary to handle the async nature
+ * of useSearchParams() which can suspend during SSR/hydration.
+ *
+ * Provides access to:
+ * - availableConnections: All connections (default + custom)
+ * - active: Currently active connection URL
+ * - addCustomConnection: Add a new custom connection
+ * - addAndSelectCustomConnection: Add and immediately select a custom connection
+ * - removeCustomConnection: Remove a custom connection
+ */
+function AvailableENSNodeConnectionsProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <Suspense fallback={null}>
-      <ENSNodeConnectionsProviderInner>{children}</ENSNodeConnectionsProviderInner>
+      <AvailableENSNodeConnectionsProviderInner>
+        {children}
+      </AvailableENSNodeConnectionsProviderInner>
     </Suspense>
   );
 }
 
-const [ENSNodeConnectionsProviderInner, useENSNodeConnections] = constate(_useENSNodeConnections);
+const [AvailableENSNodeConnectionsProviderInner, useAvailableENSNodeConnections] = constate(
+  _useAvailableENSNodeConnections,
+);
 
-export {
-  ENSNodeConnectionsProviderWithSuspense as ENSNodeConnectionsProvider,
-  useENSNodeConnections,
-};
+export { AvailableENSNodeConnectionsProvider, useAvailableENSNodeConnections };

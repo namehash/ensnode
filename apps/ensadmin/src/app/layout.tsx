@@ -10,7 +10,7 @@ import { RequireActiveENSNodeConnection } from "@/components/require-active-ensn
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { ENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
+import { AvailableENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";
 
@@ -65,7 +65,7 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <ENSNodeConnectionsProvider>
+          <AvailableENSNodeConnectionsProvider>
             <RequireActiveENSNodeConnection>
               <SidebarProvider>
                 <Suspense>
@@ -84,7 +84,7 @@ export default function Layout({
                 </SidebarInset>
               </SidebarProvider>
             </RequireActiveENSNodeConnection>
-          </ENSNodeConnectionsProvider>
+          </AvailableENSNodeConnectionsProvider>
         </QueryClientProvider>
         <Toaster />
       </body>

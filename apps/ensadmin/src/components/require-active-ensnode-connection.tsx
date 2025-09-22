@@ -1,6 +1,6 @@
 "use client";
 
-import { useENSNodeConnections } from "@/hooks/ensnode-connections";
+import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { CONNECTION_PARAM_KEY } from "@/lib/constants";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,7 +18,7 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
     availableConnections,
     active,
     addAndSelectCustomConnection: _addAndSelectConnection,
-  } = useENSNodeConnections();
+  } = useAvailableENSNodeConnections();
 
   const addConnectionFromUrl = useMutation({
     mutationFn: _addAndSelectConnection,

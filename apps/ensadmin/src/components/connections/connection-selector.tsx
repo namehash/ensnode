@@ -22,7 +22,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
-import { useENSNodeConnections } from "@/hooks/ensnode-connections";
+import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { CONNECTION_PARAM_KEY } from "@/lib/constants";
 import { useMutation } from "@tanstack/react-query";
 
@@ -35,7 +35,7 @@ export function ConnectionSelector() {
     availableConnections,
     addAndSelectCustomConnection: _addAndSelectCustomConnection,
     removeCustomConnection,
-  } = useENSNodeConnections();
+  } = useAvailableENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
   const addAndSelectConnection = useMutation({
     mutationFn: _addAndSelectCustomConnection,

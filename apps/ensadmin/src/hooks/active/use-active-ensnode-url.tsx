@@ -1,6 +1,6 @@
 "use client";
 
-import { useENSNodeConnections } from "@/hooks/ensnode-connections";
+import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 
 /**
  * Hook to get the currently active ENSNode connection URL synchronously.
@@ -16,7 +16,7 @@ import { useENSNodeConnections } from "@/hooks/ensnode-connections";
  * @throws Error if no active ENSNode Connection is available
  */
 export function useActiveENSNodeUrl() {
-  const { active } = useENSNodeConnections();
+  const { active } = useAvailableENSNodeConnections();
 
   if (!active) {
     throw new Error(`Invariant(useActiveENSNodeUrl): Expected an active ENSNode Connection.`);
