@@ -119,7 +119,16 @@ export function defaultEnsNodeUrls(): Array<URL> {
   }
 
   try {
-    const urlList = envVarValue.split(",").map((maybeUrl) => parseUrl(maybeUrl));
+    const urlList = envVarValue
+      .split(",")
+      .map((maybeUrl) => maybeUrl.trim()) // Remove whitespace
+      .filter((maybeUrl) => maybeUrl.length > 0) // Remove empty strings
+      .map((maybeUrl) => parseUrl(maybeUrl))
+      .filter(
+        (url, index, array) =>
+          // Remove duplicates by comparing normalized string representations
+          array.findIndex((u) => u.toString() === url.toString()) === index,
+      );
 
     if (urlList.length === 0) {
       throw new Error(

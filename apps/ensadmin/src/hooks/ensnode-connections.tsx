@@ -2,11 +2,12 @@
 
 import constate from "constate";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { useLocalstorageState } from "rooks";
 
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { useHydrated } from "@/hooks/use-hydrated";
+import { CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
 import { defaultEnsNodeUrls } from "@/lib/env";
 import type { UrlString } from "@ensnode/ensnode-sdk";
 
@@ -28,9 +29,30 @@ const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
     .filter((url, index, array) => array.indexOf(url) === index); // remove duplicates
 };
 
-const DEFAULT_CONNECTION_URLS = defaultEnsNodeUrls()
-  .map((url) => url.toString())
-  .map(normalizeUrl);
+/**
+ * Default ENSNode connection URLs with guaranteed invariants:
+ * - Each URL passes isValidUrl validation
+ * - Each URL is in normalizeUrl form
+ * - All URLs are unique (no duplicates)
+ * - Contains at least 1 URL
+ *
+ * These invariants are maintained by:
+ * 1. defaultEnsNodeUrls() already validates and ensures at least 1 URL
+ * 2. Converting to string then normalizing ensures consistent format
+ * 3. validateAndNormalizeUrls removes any potential duplicates and invalid URLs
+ */
+const DEFAULT_CONNECTION_URLS = (() => {
+  const rawUrls = defaultEnsNodeUrls().map((url) => url.toString());
+  const validatedUrls = validateAndNormalizeUrls(rawUrls);
+
+  // Guarantee at least 1 URL - this should never happen due to defaultEnsNodeUrls validation
+  // but adding as a safety net to maintain the invariant
+  if (validatedUrls.length === 0) {
+    throw new Error("DEFAULT_CONNECTION_URLS must contain at least one valid URL");
+  }
+
+  return validatedUrls;
+})();
 
 const CONNECTION_PARAM_KEY = "connection";
 
@@ -39,7 +61,7 @@ function _useENSNodeConnections() {
   const searchParams = useSearchParams();
   const currentConnection = searchParams.get(CONNECTION_PARAM_KEY);
   const [rawCustomConnectionUrls, storeCustomConnections] = useLocalstorageState<UrlString[]>(
-    "ensadmin:connections:urls",
+    CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY,
     [],
   );
 
@@ -55,7 +77,7 @@ function _useENSNodeConnections() {
     return validatedUrls;
   }, [rawCustomConnectionUrls, storeCustomConnections]);
 
-  const connections = useMemo(
+  const availableConnections = useMemo(
     () => [
       // include the default connections
       ...DEFAULT_CONNECTION_URLS.map((url) => ({ url, isDefault: true })),
@@ -66,11 +88,11 @@ function _useENSNodeConnections() {
   );
 
   const isInConnections = useMemo(
-    () => (url: UrlString) => connections.some((conn) => conn.url === url),
-    [connections],
+    () => (url: UrlString) => availableConnections.some((conn) => conn.url === url),
+    [availableConnections],
   );
 
-  const addConnection = useCallback(
+  const addCustomConnection = useCallback(
     async (_url: UrlString) => {
       const { isValid, error } = await validateENSNodeUrl(_url);
       if (!isValid) {
@@ -79,16 +101,16 @@ function _useENSNodeConnections() {
 
       const url = normalizeUrl(_url);
 
-      if (connections.some((c) => c.url === url)) return url;
+      if (availableConnections.some((c) => c.url === url)) return url;
 
       storeCustomConnections((customConnections) => [...customConnections, url]);
 
       return url;
     },
-    [connections, storeCustomConnections],
+    [availableConnections, storeCustomConnections],
   );
 
-  const removeConnection = useCallback(
+  const removeCustomConnection = useCallback(
     (url: UrlString) => {
       storeCustomConnections((customConnections) =>
         customConnections.filter((_url) => _url !== url),
@@ -99,13 +121,13 @@ function _useENSNodeConnections() {
     [storeCustomConnections],
   );
 
-  const addAndSelectConnection = useCallback(
+  const addAndSelectCustomConnection = useCallback(
     async (url: UrlString) => {
-      const added = await addConnection(url);
+      const added = await addCustomConnection(url);
 
       return added;
     },
-    [addConnection],
+    [addCustomConnection],
   );
 
   // the active connection is the current connection (from URL param) or the first default
@@ -113,21 +135,21 @@ function _useENSNodeConnections() {
     // no active ensnode connection in server environments
     if (!hydrated) return null;
 
-    // NOTE: guaranteed to have a valid set of `connections` here, on the client
+    // NOTE: guaranteed to have a valid set of `availableConnections` here, on the client
     // NOTE: guaranteed to have at least 1 connection because defaults must have length > 0
-    const first = connections[0].url;
+    const first = availableConnections[0].url;
 
     if (!currentConnection) return new URL(first);
     if (!isInConnections(currentConnection)) return new URL(first);
     return new URL(currentConnection);
-  }, [hydrated, connections, currentConnection, isInConnections]);
+  }, [hydrated, availableConnections, currentConnection, isInConnections]);
 
   return {
-    connections,
+    availableConnections,
     active,
-    addConnection,
-    addAndSelectConnection,
-    removeConnection,
+    addCustomConnection,
+    addAndSelectCustomConnection,
+    removeCustomConnection,
   };
 }
 
