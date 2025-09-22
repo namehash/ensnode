@@ -2,7 +2,7 @@
 
 import constate from "constate";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { Suspense, useCallback, useEffect, useMemo } from "react";
 import { useLocalstorageState } from "rooks";
 
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
@@ -131,4 +131,21 @@ function _useENSNodeConnections() {
   };
 }
 
-export const [ENSNodeConnectionsProvider, useENSNodeConnections] = constate(_useENSNodeConnections);
+function ENSNodeConnectionsProviderWithSuspense({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <ENSNodeConnectionsProviderInner>{children}</ENSNodeConnectionsProviderInner>
+    </Suspense>
+  );
+}
+
+const [ENSNodeConnectionsProviderInner, useENSNodeConnections] = constate(_useENSNodeConnections);
+
+export {
+  ENSNodeConnectionsProviderWithSuspense as ENSNodeConnectionsProvider,
+  useENSNodeConnections,
+};
