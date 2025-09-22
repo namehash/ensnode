@@ -12,9 +12,11 @@ set -euo pipefail
 # saving the end-user from a slow and resource-intensive data ingestion process.
 #
 # The database is versioned using a three-part system:
-#   - DB_SCHEMA_VERSION: The physical layout/structure of the database.
-#   - LABEL_SET_ID: The identifier for a label set (see https://ensnode.io/ensrainbow/concepts/glossary/ for definition).
-#   - LABEL_SET_VERSION: A non-negative integer representing the version of a label set (see https://ensnode.io/ensrainbow/concepts/glossary/ for definition).
+#   - DB_SCHEMA_VERSION
+#   - LABEL_SET_ID
+#   - LABEL_SET_VERSION
+#
+# See https://ensnode.io/ensrainbow/concepts/glossary/ for details.
 #
 # This script requires these three identifiers as command-line arguments to
 # download the correct pre-built database archive (.tgz), its checksum, and a
