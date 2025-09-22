@@ -4,6 +4,7 @@ interface InlineSummaryProps {
   items: ReadonlyArray<InlineSummaryItemProps>;
 }
 
+//TODO: currently unused, can we delete it?
 export function InlineSummary(props: InlineSummaryProps) {
   return (
     <ul className="text-sm text-muted-foreground mt-1 flex flex-row flex-wrap gap-4">

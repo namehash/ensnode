@@ -1,5 +1,5 @@
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/radix-ui/tooltip";
 import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { ChainId, Name } from "@ensnode/ensnode-sdk";

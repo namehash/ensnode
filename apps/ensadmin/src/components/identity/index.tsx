@@ -1,7 +1,7 @@
 "use client";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar } from "@/components/radix-ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";

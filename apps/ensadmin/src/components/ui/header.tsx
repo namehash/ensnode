@@ -1,6 +1,6 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/radix-ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import * as React from "react";

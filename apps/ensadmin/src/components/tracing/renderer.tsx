@@ -1,5 +1,5 @@
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/radix-ui/hover-card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/radix-ui/tooltip";
 import { renderMicroseconds } from "@/lib/time";
 import { getProtocolStepInfo } from "@/lib/tracing";
 import { cn } from "@/lib/utils";

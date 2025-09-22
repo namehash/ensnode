@@ -1,6 +1,6 @@
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/radix-ui/tooltip";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ExternalLink, X as XIcon } from "lucide-react";
 import { ReactElement } from "react";

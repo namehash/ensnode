@@ -4,7 +4,7 @@ import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/radix-ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,

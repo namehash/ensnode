@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/radix-ui/tooltip";
 import { UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { formatDistance, formatDistanceStrict, fromUnixTime, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
