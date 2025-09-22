@@ -9,7 +9,7 @@ keywords: [ensrainbow, versioning, label sets, deterministic]
 
 ## Why Label Sets & Versions?
 
-A **label set** (see [Glossary](/ensrainbow/concepts/glossary/) for definition) is analogous to a _dataset snapshot_. Every time the upstream data (e.g. an on-chain subgraph export) changes, we mint a new **label set version** so that:
+A **[label set](/ensrainbow/concepts/glossary#label-set)** is analogous to a _dataset snapshot_. Every time the upstream data (e.g. an on-chain subgraph export) changes, we mint a new **[label set version](/ensrainbow/concepts/glossary#label-set-version)** so that:
 
 ### 1. Deterministic Results
 Clients that pin _version `N`_ are guaranteed to get the _exact same_ heal response today, tomorrow, and two years from now.
@@ -51,6 +51,6 @@ This flexibility ensures applications can choose between **staying current** wit
 
 ## Related Documentation
 
-- **[Glossary](/ensrainbow/concepts/glossary)** - Key terminology including version-related terms
+- **[Glossary](/ensrainbow/concepts/glossary)** - Key terminology including [label set](/ensrainbow/concepts/glossary#label-set) and [label set version](/ensrainbow/concepts/glossary#label-set-version) terms
 - **[TypeScript Interfaces](/ensrainbow/concepts/typescript-interfaces)** - Type definitions for ENSRainbow's server and client
 - **[Data Model](/ensrainbow/concepts/data-model)** - How versions are stored in the database 

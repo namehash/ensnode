@@ -1,5 +1,5 @@
 /**
- * A label set ID identifies a label set (see https://ensnode.io/ensrainbow/concepts/glossary/ for definition).
+ * A label set ID identifies a label set (see https://ensnode.io/ensrainbow/concepts/glossary#label-set for definition).
  * It is guaranteed to be 1 to 50 characters long and contain only lowercase letters (a-z)
  * and hyphens (-).
  */
