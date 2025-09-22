@@ -402,6 +402,18 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
    * "backfill", "following" or "completed".
    */
   chains: Map<ChainId, ChainIndexingStatus>;
+
+  // TODO: This comment applies to ALL omnichain snapshots, not just "following":
+  // Suggest to add another field here named `snapshotTime` of type `UnixTimestamp`.
+  // This field should have an invariant that `snapshotTime` is >= `omnichainIndexingCursor`,
+  // and is >= `latestKnownBlock` for any "following" chains.
+  // The value in this field represents the timestamp when the snapshot was generated.
+  // Due to possible clock skew between systems, when generating the value that you put in this field,
+  // it should be set as the max between the system timestamp in ENSIndexer and `omnichainIndexingCursor`
+  // and `latestKnownBlock`.
+  // Goals of this field include helping us identify the distinction between the "current" distance vs
+  // the "snapshot" distance. This is highly relevant for cases where "snapshots" are planned to be cached
+  // in memory or stored in ENSDb.
 }
 
 /**
@@ -488,6 +500,9 @@ export type CurrentIndexingSnapshotOmnichain = {
   strategy: typeof IndexingStrategyIds.Omnichain;
 
   // the timestamp approximating "realtime" that relative distances are calculated from
+  // must always be >= `snapshotTime`
+  // due to possible clock skew between systems, when generating the value that you put in this field,
+  // it should be set as the max between the system timestamp in ENSIndexer and `snapshotTime`.
   realtime: UnixTimestamp;
 
   /**
