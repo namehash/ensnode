@@ -489,14 +489,14 @@ export type IndexingStrategyIds =
 // - This is "Current..." because it isthe only place in the indexing status data model that should have a relationship with "now".
 // - This adds an explicit "realtime" timestamp
 // - The above is important as we want to be able to cache `OmnichainIndexingSnapshot` and then generate
-//   - `CurrentIndexingSnapshotOmnichain` as a function of:
+//   - `CurrentIndexingProjectionOmnichain` as a function of:
 //      - An omnichain indexing snapshot (from cache)
 //      - "now" (aka "realtime")
 //      - `maxRealtimeDistance` (as might be associated the request being processed)
 // - This also includes an explicit field for `strategy` which provides more "future-proofing" and explicitly
 //   identifies how this data model is specific to omnichain indexing -- the data model and invariants would be
 //   different for other indexing strategies.
-export type CurrentIndexingSnapshotOmnichain = {
+export type CurrentIndexingProjectionOmnichain = {
   strategy: typeof IndexingStrategyIds.Omnichain;
 
   // the timestamp approximating "realtime" that relative distances are calculated from
@@ -529,7 +529,7 @@ export type CurrentIndexingSnapshotOmnichain = {
   snapshot: ENSIndexerOverallIndexingStatus;
 }
 
-export type CurrentIndexingSnapshotError = {
+export type CurrentIndexingProjectionError = {
   // strategy is unknown because indexer is unavailable
   strategy: null;
 
@@ -556,4 +556,4 @@ export type CurrentIndexingSnapshotError = {
   snapshot: null;
 }
 
-export type CurrentIndexingSnapshot = CurrentIndexingSnapshotOmnichain | CurrentIndexingSnapshotError;
+export type CurrentIndexingProjection = CurrentIndexingProjectionOmnichain | CurrentIndexingProjectionError;
