@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
 import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 
 const SOCIAL_LINK_KEYS = [

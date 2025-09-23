@@ -2,8 +2,8 @@
 
 import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
 import { ENSNodeConfigProps } from "@/components/indexing-status/config-info/config-info";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/shadcn/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
 import { ErrorInfo } from "@/components/ui/error-info";
 import {
   SerializedENSIndexerPublicConfig,

@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/shadcn/button";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 

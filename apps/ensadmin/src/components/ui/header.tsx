@@ -1,7 +1,7 @@
 "use client";
 
 import { Separator } from "@/components/shadcn/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/shadcn/sidebar";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 

@@ -6,8 +6,8 @@
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ChainName } from "@/components/chains/ChainName";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/shadcn/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
 import {
   ChainIndexingStatusIds,
   ENSIndexerOverallIndexingBackfillStatus,

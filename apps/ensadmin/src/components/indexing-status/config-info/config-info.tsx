@@ -14,7 +14,7 @@ import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { IconENS } from "@/components/icons/ens";
 import { ConfigInfoAppCard } from "@/components/indexing-status/config-info/app-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
 import { CopyButton } from "@/components/ui/copy-button";
 import { ErrorInfo, ErrorInfoProps } from "@/components/ui/error-info";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/shadcn/tooltip";

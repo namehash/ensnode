@@ -1,5 +1,5 @@
 import { AlertIcon } from "@/components/icons/AlertIcon";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
 
 export interface ErrorInfoProps {
   title?: string;
