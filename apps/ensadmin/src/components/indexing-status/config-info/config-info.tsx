@@ -15,9 +15,9 @@ import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRe
 import { IconENS } from "@/components/icons/ens";
 import { ConfigInfoAppCard } from "@/components/indexing-status/config-info/app-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/shadcn/tooltip";
 import { CopyButton } from "@/components/ui/copy-button";
 import { ErrorInfo, ErrorInfoProps } from "@/components/ui/error-info";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/shadcn/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";

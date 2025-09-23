@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/shadcn/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
 import {
   SerializedENSIndexerOverallIndexingStatus,
   deserializeENSIndexerIndexingStatus,

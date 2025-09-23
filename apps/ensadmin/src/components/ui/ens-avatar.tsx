@@ -1,11 +1,11 @@
 "use client";
 
+import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
-import {Avatar, AvatarImage} from "@/components/shadcn/avatar";
 
 interface EnsAvatarProps {
   ensName: Name;
@@ -13,7 +13,9 @@ interface EnsAvatarProps {
   className?: string;
 }
 
-type ImageLoadingStatus = Parameters<React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]>[0];
+type ImageLoadingStatus = Parameters<
+  React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]
+>[0];
 
 const avatarFallbackColors = ["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"];
 
@@ -23,18 +25,14 @@ export const EnsAvatar = ({ ensName, namespaceId, className }: EnsAvatarProps) =
 
   if (ensAvatarUrl === null) {
     return (
-      <Avatar
-        className={className}
-      >
+      <Avatar className={className}>
         <EnsAvatarFallback name={ensName} />
       </Avatar>
     );
   }
 
   return (
-    <Avatar
-      className={className}
-    >
+    <Avatar className={className}>
       <AvatarImage
         src={ensAvatarUrl.href}
         alt={ensName}
@@ -48,16 +46,12 @@ export const EnsAvatar = ({ ensName, namespaceId, className }: EnsAvatarProps) =
   );
 };
 
-
 interface EnsAvatarFallbackProps {
   name: Name;
 }
 
-const EnsAvatarFallback = ({name}: EnsAvatarFallbackProps) =>
-    <BoringAvatar
-      name={name}
-      colors={avatarFallbackColors}
-      variant="beam"
-    />;
+const EnsAvatarFallback = ({ name }: EnsAvatarFallbackProps) => (
+  <BoringAvatar name={name} colors={avatarFallbackColors} variant="beam" />
+);
 
 const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />;

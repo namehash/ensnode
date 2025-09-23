@@ -3,7 +3,13 @@
 import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
 import { ENSNodeConfigProps } from "@/components/indexing-status/config-info/config-info";
 import { Button } from "@/components/shadcn/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn/card";
 import { ErrorInfo } from "@/components/ui/error-info";
 import {
   SerializedENSIndexerPublicConfig,

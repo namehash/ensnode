@@ -2,8 +2,8 @@
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
-import { EnsAvatar } from "@/components/ui/ens-avatar";
 import { Card, CardContent } from "@/components/shadcn/card";
+import { EnsAvatar } from "@/components/ui/ens-avatar";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
 import { Name } from "@ensnode/ensnode-sdk";
