@@ -14,7 +14,7 @@ interface EnsAvatarProps {
 }
 
 type ImageLoadingStatus = Parameters<
-  React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]
+  NonNullable<React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]>
 >[0];
 
 const avatarFallbackColors = ["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"];
