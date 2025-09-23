@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn/card";
-import { ErrorInfo } from "@/components/ui/error-info";
 import {
   SerializedENSIndexerPublicConfig,
   deserializeENSIndexerPublicConfig,
