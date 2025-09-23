@@ -1,99 +1,63 @@
 "use client";
 
 import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
-import { cn } from "@/lib/utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
+import {Avatar, AvatarImage} from "@/components/shadcn/avatar";
 
-interface AvatarProps {
+interface EnsAvatarProps {
   ensName: Name;
   namespaceId: ENSNamespaceId;
+  className?: string;
 }
 
-type ImageLoadingStatus = "idle" | "loading" | "loaded" | "error";
+type ImageLoadingStatus = Parameters<React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]>[0];
 
-export const EnsAvatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & AvatarProps
->(({ ensName, namespaceId, className, ...props }, ref) => {
+const avatarFallbackColors = ["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"];
+
+export const EnsAvatar = ({ ensName, namespaceId, className }: EnsAvatarProps) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
   const ensAvatarUrl = ensName ? buildEnsMetadataServiceAvatarUrl(ensName, namespaceId) : null;
 
   if (ensAvatarUrl === null) {
     return (
-      <AvatarPrimitive.Root
-        ref={ref}
-        className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
-        {...props}
+      <Avatar
+        className={className}
       >
-        <AvatarFallback name={ensName} />
-      </AvatarPrimitive.Root>
+        <EnsAvatarFallback name={ensName} />
+      </Avatar>
     );
   }
 
   return (
-    <AvatarPrimitive.Root
-      ref={ref}
-      className={cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className)}
-      {...props}
+    <Avatar
+      className={className}
     >
       <AvatarImage
         src={ensAvatarUrl.href}
         alt={ensName}
-        onLoadingStatusChangeCallback={(status: ImageLoadingStatus) => {
+        onLoadingStatusChange={(status: ImageLoadingStatus) => {
           setLoadingStatus(status);
         }}
       />
-      {loadingStatus === "error" && <AvatarFallback name={ensName} />}
+      {loadingStatus === "error" && <EnsAvatarFallback name={ensName} />}
       {(loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />}
-    </AvatarPrimitive.Root>
+    </Avatar>
   );
-});
-EnsAvatar.displayName = AvatarPrimitive.Root.displayName;
+};
 
-interface AvatarImageProps {
-  onLoadingStatusChangeCallback: (status: ImageLoadingStatus) => void;
-}
 
-const AvatarImage = React.forwardRef<
-  HTMLImageElement,
-  React.ImgHTMLAttributes<HTMLImageElement> & AvatarImageProps
->(({ className, onLoadingStatusChangeCallback, onError, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    onLoadingStatusChange={onLoadingStatusChangeCallback}
-    {...props}
-  />
-));
-AvatarImage.displayName = AvatarPrimitive.Image.displayName;
-
-interface AvatarFallbackProps {
+interface EnsAvatarFallbackProps {
   name: Name;
 }
 
-const AvatarFallback = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Fallback>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> & AvatarFallbackProps
->(({ className, name, ...props }, ref) => (
-  <AvatarPrimitive.Fallback
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className,
-    )}
-    {...props}
-  >
+const EnsAvatarFallback = ({name}: EnsAvatarFallbackProps) =>
     <BoringAvatar
       name={name}
-      colors={["#000000", "#bedbff", "#5191c1", "#1e6495", "#0a4b75"]}
+      colors={avatarFallbackColors}
       variant="beam"
-    />
-  </AvatarPrimitive.Fallback>
-));
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
+    />;
 
 const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />;
