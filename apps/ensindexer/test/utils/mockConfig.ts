@@ -18,9 +18,6 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     labelSetId: "ens-test-env",
     labelSetVersion: "0",
   },
-  healReverseAddresses: "true",
-  indexAdditionalResolverRecords: "true",
-  replaceUnnormalized: "true",
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: {

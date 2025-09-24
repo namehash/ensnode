@@ -1,10 +1,5 @@
 import type { RpcConfig } from "@/config/types";
-import {
-  DEFAULT_ENSADMIN_URL,
-  DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_PORT,
-  DEFAULT_RPC_RATE_LIMIT,
-} from "@/lib/lib-config";
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -15,7 +10,6 @@ const BASE_ENV = {
   ENSADMIN_URL: "https://admin.ensnode.io",
   DATABASE_SCHEMA: "ensnode",
   PLUGINS: "subgraph",
-  HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
   ENSRAINBOW_URL: "https://api.ensrainbow.io",
   LABEL_SET_ID: "ens-test-env",
@@ -49,7 +43,6 @@ describe("config", () => {
       expect(config.ensAdminUrl).toStrictEqual(new URL("https://admin.ensnode.io"));
       expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
-      expect(config.healReverseAddresses).toBe(true);
       expect(config.port).toBe(3000);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
     });
@@ -291,33 +284,6 @@ describe("config", () => {
     });
   });
 
-  describe(".healReverseAddresses", () => {
-    it("returns false if HEAL_REVERSE_ADDRESSES is 'false'", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
-      const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(false);
-    });
-
-    it("returns true if HEAL_REVERSE_ADDRESSES is 'true'", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
-      const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(true);
-    });
-
-    it("returns the default if HEAL_REVERSE_ADDRESSES is not set", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", undefined);
-      const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
-    });
-
-    it("throws if HEAL_REVERSE_ADDRESSES is an invalid string value", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "not-a-boolean");
-      await expect(getConfig()).rejects.toThrow(
-        /HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i,
-      );
-    });
-  });
-
   describe(".namespace", () => {
     it("returns the NAMESPACE if set", async () => {
       vi.stubEnv("NAMESPACE", "sepolia");
@@ -489,9 +455,6 @@ describe("config", () => {
     // start in subgraph-compatible state
     beforeEach(() => {
       vi.stubEnv("PLUGINS", "subgraph");
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
-      vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
-      vi.stubEnv("REPLACE_UNNORMALIZED", "false");
       vi.stubEnv("LABEL_SET_ID", "subgraph");
       vi.stubEnv("LABEL_SET_VERSION", "0");
     });
@@ -511,18 +474,6 @@ describe("config", () => {
     it("is false when PLUGINS includes subgraph along with other plugins", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
-    });
-
-    it("is false when HEAL_REVERSE_ADDRESSES is true", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
-    });
-
-    it("is false when REPLACE_UNNORMALIZED is true", async () => {
-      vi.stubEnv("REPLACE_UNNORMALIZED", "true");
       const config = await getConfig();
       expect(config.isSubgraphCompatible).toBe(false);
     });
@@ -620,18 +571,5 @@ describe("config", () => {
       const config = await getConfig();
       expect(config.labelSet.labelSetVersion).toBe(0);
     });
-  });
-
-  it("reverse-resolvers plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be true", async () => {
-    vi.stubEnv("PLUGINS", "reverse-resolvers");
-    vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_42161", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_534352", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
-    vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
-
-    await expect(getConfig()).rejects.toThrow(/requires INDEX_ADDITIONAL_RESOLVER_RECORDS/i);
   });
 });

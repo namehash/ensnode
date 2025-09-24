@@ -183,42 +183,12 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
             ]}
             checks={[
               {
-                label: "Heal Reverse Addresses",
-                description: {
-                  descWhenTrue: "ENSIndexer will attempt to heal subnames of addr.reverse.",
-                  descWhenFalse: "ENSIndexer won't attempt to heal subnames of addr.reverse.",
-                },
-                value: ensIndexerConfig.healReverseAddresses,
-                icon: <HealIcon className="flex-shrink-0" />,
-              },
-              {
-                label: "Index Additional Resolver Records",
-                description: {
-                  descWhenTrue:
-                    "ENSIndexer will track both the keys and the values of Resolver records.",
-                  descWhenFalse:
-                    "ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.",
-                },
-                value: ensIndexerConfig.indexAdditionalResolverRecords,
-                icon: <IndexAdditionalRecordsIcon className="flex-shrink-0" />,
-              },
-              {
-                label: "Replace Unnormalized Labels",
-                description: {
-                  descWhenTrue:
-                    "All Literal Labels and Literal Names encountered by ENSIndexer will be interpreted.",
-                  descWhenFalse:
-                    "ENSIndexer will store and return Literal Labels and Literal Names without further interpretation",
-                },
-                value: ensIndexerConfig.replaceUnnormalized,
-                icon: <Replace width={20} height={20} stroke="#3F3F46" className="flex-shrink-0" />,
-              },
-              {
                 label: "Subgraph Compatible",
                 description: {
                   descWhenTrue:
                     "ENSIndexer is operating in a subgraph-compatible way. It will use subgraph-compatible IDs for entities and events and limit indexing behavior to subgraph indexing semantics",
-                  descWhenFalse: "ENSIndexer is not operating in a subgraph-compatible way.",
+                  descWhenFalse:
+                    "ENSIndexer is not indexing in a subgraph-compatible way and includes a variety of indexing behavior enhancements.",
                 },
                 value: ensIndexerConfig.isSubgraphCompatible,
                 icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0" />,

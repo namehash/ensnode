@@ -27,8 +27,8 @@ const threeDNSBase = maybeGetDatasource(config.namespace, DatasourceNames.ThreeD
  * @returns
  */
 export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
-  // config.indexAdditionalResolverRecords must be true, or we aren't indexing resolver records at all
-  if (!config.indexAdditionalResolverRecords) return false;
+  // if config.isSubgraphCompatible, we aren't indexing resolver records at all
+  if (config.isSubgraphCompatible) return false;
 
   const isENSRootChain = chainId === ensRoot.chain.id;
   const isBasenamesChain = chainId === basenames?.chain.id;

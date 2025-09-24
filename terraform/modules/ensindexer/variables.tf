@@ -75,18 +75,6 @@ variable "namespace" {
   type = string
 }
 
-variable "heal_reverse_addresses" {
-  type = string
-}
-
-variable "index_additional_resolver_records" {
-  type = string
-}
-
-variable "replace_unnormalized" {
-  type = string
-}
-
 # Mainnet RPC URLs
 variable "ethereum_mainnet_rpc_url" {
   type = string

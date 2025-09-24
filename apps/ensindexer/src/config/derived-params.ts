@@ -39,14 +39,7 @@ export const derive_indexedChainIds = <
  * Derived `isSubgraphCompatible` config param based on validated ENSIndexerConfig object.
  */
 export const derive_isSubgraphCompatible = <
-  CONFIG extends Pick<
-    ENSIndexerConfig,
-    | "plugins"
-    | "healReverseAddresses"
-    | "indexAdditionalResolverRecords"
-    | "replaceUnnormalized"
-    | "labelSet"
-  >,
+  CONFIG extends Pick<ENSIndexerConfig, "plugins" | "labelSet">,
 >(
   config: CONFIG,
 ): CONFIG & { isSubgraphCompatible: boolean } => {

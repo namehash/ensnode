@@ -3,17 +3,14 @@ locals {
 
   common_variables = {
     # Common configuration
-    "DATABASE_URL"                      = { value = var.ensdb_url },
-    "DATABASE_SCHEMA"                   = { value = var.database_schema },
-    "ENSRAINBOW_URL"                    = { value = var.ensrainbow_url },
-    "LABEL_SET_ID"                      = { value = var.ensindexer_label_set_id },
-    "LABEL_SET_VERSION"                 = { value = var.ensindexer_label_set_version },
-    "PLUGINS"                           = { value = var.plugins },
-    "NAMESPACE"                         = { value = var.namespace },
-    "INDEX_ADDITIONAL_RESOLVER_RECORDS" = { value = var.index_additional_resolver_records },
-    "HEAL_REVERSE_ADDRESSES"            = { value = var.heal_reverse_addresses },
-    "REPLACE_UNNORMALIZED"              = { value = var.replace_unnormalized },
-    "ENSADMIN_URL"                      = { value = var.ensadmin_public_url }
+    "DATABASE_URL"      = { value = var.ensdb_url },
+    "DATABASE_SCHEMA"   = { value = var.database_schema },
+    "ENSRAINBOW_URL"    = { value = var.ensrainbow_url },
+    "LABEL_SET_ID"      = { value = var.ensindexer_label_set_id },
+    "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
+    "PLUGINS"           = { value = var.plugins },
+    "NAMESPACE"         = { value = var.namespace },
+    "ENSADMIN_URL"      = { value = var.ensadmin_public_url }
 
     # Mainnet networks
     "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },

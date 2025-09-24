@@ -136,48 +136,19 @@ export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
     },
   );
 
-// Invariant: ReverseResolvers plugin requires indexAdditionalResolverRecords
-export function invariant_reverseResolversPluginNeedsResolverRecords(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerPublicConfig, "plugins" | "indexAdditionalResolverRecords">>,
-) {
-  const { value: config } = ctx;
-
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
-
-  if (reverseResolversPluginActive && !config.indexAdditionalResolverRecords) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `The '${PluginName.ReverseResolvers}' plugin requires 'indexAdditionalResolverRecords' to be 'true'.`,
-    });
-  }
-}
-
 // Invariant: isSubgraphCompatible requires Subgraph plugin only, no extra indexing features, and subgraph label set
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<
-      ENSIndexerPublicConfig,
-      | "plugins"
-      | "isSubgraphCompatible"
-      | "healReverseAddresses"
-      | "indexAdditionalResolverRecords"
-      | "replaceUnnormalized"
-      | "labelSet"
-    >
+    Pick<ENSIndexerPublicConfig, "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
 
-  if (config.isSubgraphCompatible !== isSubgraphCompatible(config)) {
-    const message = config.isSubgraphCompatible
-      ? `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active, 'indexAdditionalResolverRecords', 'healReverseAddresses', and 'replaceUnnormalized' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`
-      : `'indexAdditionalResolverRecords', 'healReverseAddresses', and 'replaceUnnormalized' were set to 'false', the only active plugin was the '${PluginName.Subgraph}' plugin, and labelSet was {labelSetId: "subgraph", labelSetVersion: 0}. The 'isSubgraphCompatible' must be set to 'true'`;
-
+  if (config.isSubgraphCompatible && !isSubgraphCompatible(config)) {
     ctx.issues.push({
       code: "custom",
       input: config,
-      message,
+      message: `'isSubgraphCompatible' requires only the '${PluginName.Subgraph}' plugin to be active and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`,
     });
   }
 }
@@ -194,11 +165,6 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
       ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
-      healReverseAddresses: z.boolean({ error: `${valueLabel}.healReverseAddresses` }),
-      indexAdditionalResolverRecords: z.boolean({
-        error: `${valueLabel}.indexAdditionalResolverRecords`,
-      }),
-      replaceUnnormalized: z.boolean({ error: `${valueLabel}.replaceUnnormalized` }),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
@@ -211,5 +177,4 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
      *
      * All required data validations must be performed below.
      */
-    .check(invariant_reverseResolversPluginNeedsResolverRecords)
     .check(invariant_isSubgraphCompatibleRequirements);

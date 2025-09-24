@@ -56,7 +56,7 @@ export async function handleAddrChanged({
     addrId: address,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     // AddrChanged is just AddressChanged with implicit coinType of ETH
     await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), address);
   }
@@ -91,7 +91,7 @@ export async function handleAddressChanged({
     addr: newAddress,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
   }
 }
@@ -120,7 +120,7 @@ export async function handleNameChanged({
     name,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverNameUpdate(context, id, name);
   }
 }
@@ -224,7 +224,7 @@ export async function handleTextChanged({
     value: sanitizedValue,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event and
     // if we are indexing additional resolver records, we need the actual record value in order
     // to accelerate at resolution-time. so fetch it here if necessary
@@ -409,7 +409,7 @@ export async function handleDNSRecordChanged({
     value,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverTextRecordUpdate(context, id, key, value);
   }
 }
@@ -455,7 +455,7 @@ export async function handleDNSRecordDeleted({
     value: null,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverTextRecordUpdate(context, id, key, null);
   }
 }

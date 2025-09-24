@@ -6,21 +6,13 @@ import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ens
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
-import {
-  DEFAULT_ENSADMIN_URL,
-  DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
-  DEFAULT_PORT,
-  DEFAULT_REPLACE_UNNORMALIZED,
-  DEFAULT_RPC_RATE_LIMIT,
-} from "@/lib/lib-config";
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
 
 import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
-  invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_rpcConfigsSpecifiedForRootChain,
   invariant_validContractConfigs,
@@ -107,16 +99,6 @@ const PluginsSchema = z.coerce
     error: "PLUGINS cannot contain duplicate values",
   });
 
-const HealReverseAddressesSchema = makeEnvStringBoolSchema("HEAL_REVERSE_ADDRESSES") //
-  .default(DEFAULT_HEAL_REVERSE_ADDRESSES);
-
-const IndexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
-  "INDEX_ADDITIONAL_RESOLVER_RECORDS",
-).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
-
-const ReplaceUnnormalizedSchema = makeEnvStringBoolSchema("REPLACE_UNNORMALIZED") //
-  .default(DEFAULT_REPLACE_UNNORMALIZED);
-
 const PortSchema = z.coerce
   .number({ error: "PORT must be an integer." })
   .int({ error: "PORT must be an integer." })
@@ -172,9 +154,6 @@ const ENSIndexerConfigSchema = z
     ensAdminUrl: EnsAdminUrlSchema,
     databaseSchemaName: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
-    healReverseAddresses: HealReverseAddressesSchema,
-    indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
-    replaceUnnormalized: ReplaceUnnormalizedSchema,
     port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
@@ -202,7 +181,6 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_validContractConfigs)
-  .check(invariant_reverseResolversPluginNeedsResolverRecords)
   /**
    * Derived configuration
    *
@@ -212,19 +190,7 @@ const ENSIndexerConfigSchema = z
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
    *
-   * ```ts
-   * function derive_isSubgraphCompatible<
-   *   CONFIG extends Pick<
-   *     ENSIndexerConfig,
-   *     "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
-   *   >,
-   *  >(config: CONFIG): CONFIG & { isSubgraphCompatible: boolean } {
-   *   return {
-   *     ...config,
-   *     isSubgraphCompatible: true // can use some complex logic to calculate the final outcome
-   *   }
-   * }
-   * ```
+   * See {@link derive_isSubgraphCompatible} and {@link derive_indexedChainIds} for examples.
    */
   .transform(derive_isSubgraphCompatible)
   .transform(derive_indexedChainIds)

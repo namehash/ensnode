@@ -37,9 +37,9 @@ export async function setupRootNode({ context }: { context: Context }) {
       isMigrated: true,
 
       // NOTE(replace-unnormalized, subgraph-compat): the subgraph datamodel expects that the
-      // value for the root node's `name` is `null`. with config.replaceUnnormalized, however, we
-      // enforce that the root node's name is empty string, the technically correct value
-      name: config.replaceUnnormalized ? "" : null,
+      // value for the root node's `name` is `null`. otherwise enforce that the root node's name is
+      // the correct Interpeted Name (empty string)
+      name: config.isSubgraphCompatible ? null : "",
     })
     .onConflictDoNothing();
 }

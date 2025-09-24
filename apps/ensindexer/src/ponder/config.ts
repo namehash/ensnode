@@ -26,14 +26,9 @@ const ponderConfig = activePlugins.reduce(
 //
 // https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
 (ponderConfig as any).indexingBehaviorDependencies = {
-  healReverseAddresses: config.healReverseAddresses,
-  indexAdditionalResolverRecords: config.indexAdditionalResolverRecords,
-  replaceUnnormalized: config.replaceUnnormalized,
+  isSubgraphCompatible: config.isSubgraphCompatible,
   labelSet: config.labelSet,
-} satisfies Pick<
-  ENSIndexerConfig,
-  "healReverseAddresses" | "indexAdditionalResolverRecords" | "replaceUnnormalized" | "labelSet"
->;
+} satisfies Pick<ENSIndexerConfig, "isSubgraphCompatible" | "labelSet">;
 
 ////////
 // Set indexing order strategy
