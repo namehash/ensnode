@@ -68,7 +68,7 @@ export function Identity({
   // Otherwise, render the primary name
   return (
     <NameLink name={ensName}>
-      {showAvatar && <EnsAvatar ensName={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
+      {showAvatar && <EnsAvatar name={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
       <NameDisplay name={ensName} />
     </NameLink>
   );

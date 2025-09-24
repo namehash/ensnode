@@ -70,7 +70,7 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
           <div className="flex items-center gap-4">
             <EnsAvatar
               className="-mt-16 h-20 w-20 ring-4 ring-white"
-              ensName={name}
+              name={name}
               namespaceId={namespace}
             />
             <div className="flex-1">
