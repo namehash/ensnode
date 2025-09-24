@@ -3,13 +3,7 @@
 import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
 import { ENSNodeConfigProps } from "@/components/indexing-status/config-info/config-info";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   SerializedENSIndexerPublicConfig,
   deserializeENSIndexerPublicConfig,

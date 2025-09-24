@@ -4,13 +4,7 @@ import mockDataJson from "@/app/mock/relative-time/data.json";
 import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { CheckIcon, X as XIcon } from "lucide-react";

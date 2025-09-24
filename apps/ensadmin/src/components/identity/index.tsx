@@ -1,8 +1,8 @@
 "use client";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EnsAvatar } from "@/components/ens-avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
