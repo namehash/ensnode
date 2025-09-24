@@ -7,9 +7,9 @@ import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-pro
 import { QueryClientProvider } from "@/components/query-client/components";
 import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
 import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
-import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
-import { Toaster } from "@/components/shadcn/sonner";
-import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
+import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
 import { ENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";

@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 
 import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/shadcn/table";
+} from "@/components/ui/table";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
 import type { Registration } from "./types";

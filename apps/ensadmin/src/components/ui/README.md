@@ -1,6 +1,6 @@
 # Shadcn components usage instruction
 
-All components from `@/components/shadcn` are direct imports from the [shadcn/ui library](https://ui.shadcn.com/) that leverage primitives from the [Radix UI component library](https://www.radix-ui.com/primitives/docs/overview/introduction) and shouldn't be directly modified
+All components from `@/components/ui` are direct imports from the [shadcn/ui library](https://ui.shadcn.com/) that leverage primitives from the [Radix UI component library](https://www.radix-ui.com/primitives/docs/overview/introduction) and shouldn't be directly modified
 unless there is a very special reason for it. 
 
 If we want to apply any changes to the behavior of such component across our app, a `"higher order" component` should be created. It would adapt the UI to our new needs through composition and addition of necessary logic, without touching the base component.

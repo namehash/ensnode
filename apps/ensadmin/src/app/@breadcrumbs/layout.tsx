@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbList } from "@/components/shadcn/breadcrumb";
+import { Breadcrumb, BreadcrumbList } from "@/components/ui/breadcrumb";
 
 export default function BreadcrumbsLayout({
   children,

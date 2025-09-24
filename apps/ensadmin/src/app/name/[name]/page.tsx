@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/components/shadcn/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useRecords } from "@ensnode/ensnode-react";
 import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";

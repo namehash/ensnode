@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AddressesProps {
   addresses: Record<string, unknown> | null | undefined;

@@ -1,7 +1,7 @@
 import { CodeBlock } from "@/components/code-block";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TraceRenderer } from "@/components/tracing/renderer";
 import { renderMicroseconds } from "@/lib/time";
 import { getTraceDuration } from "@/lib/tracing";

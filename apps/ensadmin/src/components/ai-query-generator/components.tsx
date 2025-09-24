@@ -2,16 +2,16 @@ import { useMutation } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/shadcn/button";
-import { Input } from "@/components/shadcn/input";
-import { Label } from "@/components/shadcn/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/shadcn/select";
+} from "@/components/ui/select";
 import type { AiQueryGeneratorResult } from "./types";
 
 interface QueryPromptExample {

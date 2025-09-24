@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";

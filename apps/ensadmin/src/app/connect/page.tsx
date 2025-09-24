@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/ui/button";
 import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";

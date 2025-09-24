@@ -1,6 +1,6 @@
 import * as React from "react";
 
-declare module "@/components/shadcn/table" {
+declare module "@/components/ui/table" {
   export const Table: React.ForwardRefExoticComponent<
     React.HTMLAttributes<HTMLTableElement> & React.RefAttributes<HTMLTableElement>
   >;

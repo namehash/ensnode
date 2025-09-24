@@ -3,7 +3,7 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/shadcn/breadcrumb";
+} from "@/components/ui/breadcrumb";
 
 export default function Page() {
   return (

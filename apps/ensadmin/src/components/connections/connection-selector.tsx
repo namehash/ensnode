@@ -5,8 +5,8 @@ import { ChevronsUpDown, Loader2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ENSAdminIcon } from "@/components/ensadmin-icon";
-import { Button } from "@/components/shadcn/button";
+import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/shadcn/dialog";
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,19 +23,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
-import { Input } from "@/components/shadcn/input";
-import { Label } from "@/components/shadcn/label";
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/shadcn/sidebar";
+} from "@/components/ui/sidebar";
 import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
 import { useENSNodeConnections } from "@/hooks/ensnode-connections";
 import { useMutation } from "@tanstack/react-query";
-import { CopyButton } from "../ui/copy-button";
+import { CopyButton } from "../copy-button";
 
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();

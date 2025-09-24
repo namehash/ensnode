@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/ui/button";
 import { useENSAppProfileUrl } from "@/hooks/async/use-ens-app-profile-url";
 import { useParams } from "next/navigation";
 

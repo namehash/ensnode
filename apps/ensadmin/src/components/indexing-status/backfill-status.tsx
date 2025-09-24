@@ -15,8 +15,8 @@ import { fromUnixTime } from "date-fns";
 import { Clock } from "lucide-react";
 
 import { AbsoluteTime } from "@/components/datetime-utils";
-import { Badge } from "@/components/shadcn/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn/card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
   generateYearMarkers,

@@ -3,15 +3,15 @@
 import mockDataJson from "@/app/mock/relative-time/data.json";
 import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/shadcn/card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/shadcn/tooltip";
+} from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";

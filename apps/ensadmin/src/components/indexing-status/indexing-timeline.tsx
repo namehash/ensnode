@@ -9,7 +9,7 @@ import { intlFormat } from "date-fns";
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { AbsoluteTime } from "@/components/datetime-utils";
 import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/shadcn/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
 import { getTimelinePosition } from "./indexing-timeline-utils";
 

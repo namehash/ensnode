@@ -3,7 +3,7 @@ import {
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/components/shadcn/breadcrumb";
+} from "@/components/ui/breadcrumb";
 
 export default function Layout({
   children,
