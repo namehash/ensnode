@@ -1,3 +1,4 @@
+import { EnvironmentDefaults } from "@/config/environment-defaults";
 import type { RpcConfig } from "@/config/types";
 import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -304,6 +305,40 @@ describe("config", () => {
   });
 
   describe(".plugins", () => {
+    describe("SUBGRAPH_COMPAT=true", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "true");
+        vi.stubEnv("LABEL_SET_ID", "subgraph");
+        vi.stubEnv("LABEL_SET_VERSION", "0");
+      });
+
+      it("has default plugins", async () => {
+        vi.stubEnv("PLUGINS", undefined);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          plugins: EnvironmentDefaults.subgraphCompatible.plugins.split(","),
+        });
+      });
+    });
+
+    describe("SUBGRAPH_COMPAT=false", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "false");
+      });
+
+      it("has default plugins", async () => {
+        vi.stubEnv("PLUGINS", undefined);
+        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+        vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
+        vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
+        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          plugins: EnvironmentDefaults.alpha.plugins.split(","),
+        });
+      });
+    });
+
     it("returns the PLUGINS if it is a valid array", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
@@ -334,13 +369,6 @@ describe("config", () => {
 
     it("throws if PLUGINS consists of non-existent plugins", async () => {
       vi.stubEnv("PLUGINS", "some,nonexistent,plugins");
-      await expect(getConfig()).rejects.toThrow(
-        /PLUGINS must be a comma separated list with at least one valid plugin name/i,
-      );
-    });
-
-    it("throws if PLUGINS is not set (undefined)", async () => {
-      vi.stubEnv("PLUGINS", undefined);
       await expect(getConfig()).rejects.toThrow(
         /PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
@@ -451,31 +479,30 @@ describe("config", () => {
     });
   });
 
-  describe("isSubgraphCompatible", () => {
+  describe("SUBGRAPH_COMPAT", () => {
     // start in subgraph-compatible state
     beforeEach(() => {
-      vi.stubEnv("PLUGINS", "subgraph");
-      vi.stubEnv("LABEL_SET_ID", "subgraph");
-      vi.stubEnv("LABEL_SET_VERSION", "0");
+      vi.stubEnv("SUBGRAPH_COMPAT", "true");
+      vi.stubEnv("LABEL_SET_ID", undefined);
+      vi.stubEnv("LABEL_SET_VERSION", undefined);
     });
 
     it("is true when compatible", async () => {
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(true);
+      await expect(getConfig()).resolves.toMatchObject({ isSubgraphCompatible: true });
     });
 
-    it("is false when PLUGINS does not include subgraph", async () => {
+    it("throws when PLUGINS does not include subgraph", async () => {
       vi.stubEnv("PLUGINS", "basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
+
+      await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
 
-    it("is false when PLUGINS includes subgraph along with other plugins", async () => {
+    it("throws when PLUGINS includes subgraph along with other plugins", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
+
+      await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
   });
 
@@ -510,9 +537,34 @@ describe("config", () => {
       });
     });
 
-    it("throws an error when LABEL_SET_ID is not set", async () => {
-      vi.stubEnv("LABEL_SET_ID", undefined);
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID must be a string/);
+    describe("SUBGRAPH_COMPAT=true", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "true");
+      });
+
+      it("has default label set", async () => {
+        vi.stubEnv("LABEL_SET_ID", undefined);
+        vi.stubEnv("LABEL_SET_VERSION", undefined);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+        });
+      });
+    });
+
+    describe("SUBGRAPH_COMPAT=false", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "false");
+      });
+
+      it("has default label set", async () => {
+        vi.stubEnv("LABEL_SET_ID", undefined);
+        vi.stubEnv("LABEL_SET_VERSION", undefined);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+        });
+      });
     });
 
     it("throws an error when LABEL_SET_ID is empty", async () => {
@@ -544,11 +596,6 @@ describe("config", () => {
       vi.stubEnv("LABEL_SET_ID", "ens-test-env");
       const config = await getConfig();
       expect(config.labelSet.labelSetId).toBe("ens-test-env");
-    });
-
-    it("throws an error when LABEL_SET_VERSION is not set", async () => {
-      vi.stubEnv("LABEL_SET_VERSION", undefined);
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
     });
 
     it("throws an error when LABEL_SET_VERSION is negative", async () => {

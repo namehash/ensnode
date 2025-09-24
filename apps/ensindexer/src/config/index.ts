@@ -1,9 +1,8 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
-import { ENSIndexerEnvironment } from "@/config/types";
 import { getRpcConfigsFromEnv } from "@/lib/lib-config";
 
-// format the relevant environment variables into the shape of an ENSIndexerEnvironment
-const environment = {
+// build, validate, and export the ENSIndexerConfig given the env
+export default buildConfigFromEnvironment({
   port: process.env.PORT,
   databaseSchemaName: process.env.DATABASE_SCHEMA,
   databaseUrl: process.env.DATABASE_URL,
@@ -22,7 +21,5 @@ const environment = {
     endBlock: process.env.END_BLOCK,
   },
   rpcConfigs: getRpcConfigsFromEnv(),
-} satisfies ENSIndexerEnvironment;
-
-// build, validate, and export the ENSIndexerConfig
-export default buildConfigFromEnvironment(environment);
+  isSubgraphCompatible: process.env.SUBGRAPH_COMPAT,
+});

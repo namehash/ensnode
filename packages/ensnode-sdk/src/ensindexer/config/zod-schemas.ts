@@ -136,7 +136,7 @@ export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
     },
   );
 
-// Invariant: isSubgraphCompatible requires Subgraph plugin only, no extra indexing features, and subgraph label set
+// Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
     Pick<ENSIndexerPublicConfig, "plugins" | "isSubgraphCompatible" | "labelSet">
