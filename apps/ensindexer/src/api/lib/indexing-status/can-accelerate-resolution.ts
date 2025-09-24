@@ -21,7 +21,12 @@ export async function canAccelerateResolution(): Promise<boolean> {
       MAX_REALTIME_DISTANCE_TO_ACCELERATE,
     );
 
-    return indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance === true;
+    // handle case where the indexing projection is unavailable
+    if (indexingStatus.type === null) {
+      return false;
+    }
+
+    return indexingStatus.maxRealtimeDistance <= MAX_REALTIME_DISTANCE_TO_ACCELERATE;
   } catch {
     return false;
   }

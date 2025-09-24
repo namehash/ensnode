@@ -1,28 +1,21 @@
 import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  ErrorResponse,
-  IndexingStatusResponseCodes,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesResponse,
-} from "./api";
+import { ErrorResponse, ResolvePrimaryNameResponse, ResolvePrimaryNamesResponse } from "./api";
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
 import { Name } from "./ens";
 import {
+  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
-  OverallIndexingStatusIds,
+  OmnichainIndexingStatusIds,
   PluginName,
-  type SerializedENSIndexerOverallIndexingBackfillStatus,
-  SerializedENSIndexerOverallIndexingErrorStatus,
-  type SerializedENSIndexerOverallIndexingFollowingStatus,
   type SerializedENSIndexerPublicConfig,
-  deserializeENSIndexerIndexingStatus,
+  type SerializedOmnichainIndexingSnapshotBackfill,
+  type SerializedOmnichainIndexingSnapshotFollowing,
   deserializeENSIndexerPublicConfig,
+  deserializeOmnichainIndexingSnapshot,
 } from "./ensindexer";
 import { ResolverRecordsSelection } from "./resolution";
-import { Duration } from "./shared";
 
 const EXAMPLE_NAME: Name = "example.eth";
 const EXAMPLE_ADDRESS: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
@@ -82,17 +75,13 @@ const EXAMPLE_CONFIG_RESPONSE = {
   },
 } satisfies SerializedENSIndexerPublicConfig;
 
-const EXAMPLE_INDEXING_STATUS_INDEXER_ERROR_RESPONSE = {
-  overallStatus: OverallIndexingStatusIds.IndexerError,
-} satisfies SerializedENSIndexerOverallIndexingErrorStatus;
-
 const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
-  overallStatus: OverallIndexingStatusIds.Backfill,
+  omnichainStatus: OmnichainIndexingStatusIds.Backfill,
   chains: {
     "1": {
       status: ChainIndexingStatusIds.Backfill,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        type: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: {
           timestamp: 1489165544,
           number: 3327417,
@@ -111,7 +100,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
     "8453": {
       status: ChainIndexingStatusIds.Queued,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        type: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: {
           timestamp: 1721932307,
           number: 17571480,
@@ -121,15 +110,16 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
     },
   },
   omnichainIndexingCursor: 1496124933,
-} satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
+  snapshotTime: 1496124934,
+} satisfies SerializedOmnichainIndexingSnapshotBackfill;
 
 const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
-  overallStatus: OverallIndexingStatusIds.Following,
+  omnichainStatus: OmnichainIndexingStatusIds.Following,
   chains: {
     "1": {
       status: ChainIndexingStatusIds.Following,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        type: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: {
           timestamp: 1_484_015_544,
           number: 23_327_417,
@@ -143,12 +133,11 @@ const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
         timestamp: 1_496_124_564,
         number: 23_791_247,
       },
-      approxRealtimeDistance: 21,
     },
     "8453": {
       status: ChainIndexingStatusIds.Backfill,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        type: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: {
           timestamp: 1_496_123_537,
           number: 17_571_480,
@@ -165,9 +154,9 @@ const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
       },
     },
   },
-  overallApproxRealtimeDistance: 21,
   omnichainIndexingCursor: 1_496_124_533,
-} satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
+  snapshotTime: 1_496_124_534,
+} satisfies SerializedOmnichainIndexingSnapshotFollowing;
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -421,7 +410,7 @@ describe("ENSNodeClient", () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
       const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-      const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
+      const mockedResponse = deserializeOmnichainIndexingSnapshot(serializedMockedResponse);
       const client = new ENSNodeClient();
 
       mockFetch.mockResolvedValueOnce({
@@ -444,106 +433,6 @@ describe("ENSNodeClient", () => {
       await expect(client.indexingStatus()).rejects.toThrow(
         /Fetching ENSNode Indexing Status Failed/i,
       );
-    });
-
-    describe("requested 'maxRealtimeDistance'", () => {
-      it("should fetch overall indexing status object with 200 response code when status is 'following' and requested distance is achieved", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        // set the requested duration to the actual approx realtime distance
-        const maxRealtimeDistance: Duration =
-          serializedMockedResponse.overallApproxRealtimeDistance;
-
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-        requestUrl.searchParams.set("maxRealtimeDistance", `${maxRealtimeDistance}`);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(
-          client.indexingStatus({ maxRealtimeDistance: maxRealtimeDistance }),
-        ).resolves.toStrictEqual(mockedResponse);
-
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
-
-      it("should fetch overall indexing status object with custom response code when status is 'following' and requested distance is not achieved", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        // set the requested duration to just exceed the actual approx realtime distance
-        const maxRealtimeDistance: Duration =
-          serializedMockedResponse.overallApproxRealtimeDistance + 1;
-
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-        requestUrl.searchParams.set("maxRealtimeDistance", `${maxRealtimeDistance}`);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: IndexingStatusResponseCodes.RequestedDistanceNotAchievedError,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(client.indexingStatus({ maxRealtimeDistance })).resolves.toStrictEqual(
-          mockedResponse,
-        );
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
-
-      it("should fetch overall indexing status object with custom response code when status is not 'following' ", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        const maxRealtimeDistance: Duration = 0;
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-        requestUrl.searchParams.set("maxRealtimeDistance", `${maxRealtimeDistance}`);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: IndexingStatusResponseCodes.RequestedDistanceNotAchievedError,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(client.indexingStatus({ maxRealtimeDistance })).resolves.toStrictEqual(
-          mockedResponse,
-        );
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
-
-      it("should fetch overall indexing status object with custom response code when indexer error happens", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_INDEXER_ERROR_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: IndexingStatusResponseCodes.IndexerError,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(client.indexingStatus()).resolves.toStrictEqual(mockedResponse);
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
     });
   });
 
@@ -579,7 +468,7 @@ describe("ENSNodeClient", () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
       const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-      const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
+      const mockedResponse = deserializeOmnichainIndexingSnapshot(serializedMockedResponse);
       const client = new ENSNodeClient();
 
       mockFetch.mockResolvedValueOnce({
@@ -602,106 +491,6 @@ describe("ENSNodeClient", () => {
       await expect(client.indexingStatus()).rejects.toThrow(
         /Fetching ENSNode Indexing Status Failed/i,
       );
-    });
-
-    describe("requested 'maxRealtimeDistance'", () => {
-      it("should fetch overall indexing status object with 200 response code when status is 'following' and requested distance is achieved", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        // set the requested duration to the actual approx realtime distance
-        const maxRealtimeDistance: Duration =
-          serializedMockedResponse.overallApproxRealtimeDistance;
-
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-        requestUrl.searchParams.set("maxRealtimeDistance", `${maxRealtimeDistance}`);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(
-          client.indexingStatus({ maxRealtimeDistance: maxRealtimeDistance }),
-        ).resolves.toStrictEqual(mockedResponse);
-
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
-
-      it("should fetch overall indexing status object with custom response code when status is 'following' and requested distance is not achieved", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        // set the requested duration to just exceed the actual approx realtime distance
-        const maxRealtimeDistance: Duration =
-          serializedMockedResponse.overallApproxRealtimeDistance + 1;
-
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-        requestUrl.searchParams.set("maxRealtimeDistance", `${maxRealtimeDistance}`);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: IndexingStatusResponseCodes.RequestedDistanceNotAchievedError,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(client.indexingStatus({ maxRealtimeDistance })).resolves.toStrictEqual(
-          mockedResponse,
-        );
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
-
-      it("should fetch overall indexing status object with custom response code when status is not 'following' ", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        const maxRealtimeDistance: Duration = 0;
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-        requestUrl.searchParams.set("maxRealtimeDistance", `${maxRealtimeDistance}`);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: IndexingStatusResponseCodes.RequestedDistanceNotAchievedError,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(client.indexingStatus({ maxRealtimeDistance })).resolves.toStrictEqual(
-          mockedResponse,
-        );
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
-
-      it("should fetch overall indexing status object with custom response code when indexer error happens", async () => {
-        // arrange
-        const client = new ENSNodeClient();
-
-        const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_INDEXER_ERROR_RESPONSE;
-        const mockedResponse = deserializeENSIndexerIndexingStatus(serializedMockedResponse);
-
-        const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: IndexingStatusResponseCodes.IndexerError,
-          json: async () => serializedMockedResponse,
-        });
-
-        // act & assert
-        await expect(client.indexingStatus()).resolves.toStrictEqual(mockedResponse);
-        expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-      });
     });
   });
 });

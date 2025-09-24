@@ -1,77 +1,96 @@
 import { ChainId, ChainIdString, serializeChainId } from "../../shared";
 import {
-  SerializedENSIndexerOverallIndexingBackfillStatus,
-  SerializedENSIndexerOverallIndexingCompletedStatus,
-  SerializedENSIndexerOverallIndexingErrorStatus,
-  SerializedENSIndexerOverallIndexingFollowingStatus,
-  SerializedENSIndexerOverallIndexingStatus,
-  SerializedENSIndexerOverallIndexingUnstartedStatus,
+  SerializedCurrentIndexingProjection,
+  SerializedCurrentIndexingProjectionOmnichain,
+  SerializedCurrentIndexingProjectionUnavailable,
+  SerializedOmnichainIndexingSnapshot,
+  SerializedOmnichainIndexingSnapshotBackfill,
+  SerializedOmnichainIndexingSnapshotCompleted,
+  SerializedOmnichainIndexingSnapshotFollowing,
+  SerializedOmnichainIndexingSnapshotUnstarted,
 } from "./serialized-types";
 import {
-  ChainIndexingStatus,
-  ENSIndexerOverallIndexingStatus,
-  OverallIndexingStatusIds,
+  ChainIndexingSnapshot,
+  CurrentIndexingProjection,
+  OmnichainIndexingSnapshot,
+  OmnichainIndexingStatusIds,
 } from "./types";
 
-/**
- * Serialize chain indexing statuses.
- */
-export function serializeChainIndexingStatuses<ChainIndexingStatusType extends ChainIndexingStatus>(
-  chainIndexingStatuses: Map<ChainId, ChainIndexingStatusType>,
-): Record<ChainIdString, ChainIndexingStatusType> {
-  const serializedChainsIndexingStatuses: Record<ChainIdString, ChainIndexingStatusType> = {};
-
-  for (const [chainId, chainIndexingStatus] of chainIndexingStatuses.entries()) {
-    serializedChainsIndexingStatuses[serializeChainId(chainId)] = chainIndexingStatus;
+export function serializedCurrentIndexingProjection(
+  indexingProjection: CurrentIndexingProjection,
+): SerializedCurrentIndexingProjection {
+  if (indexingProjection.type === null) {
+    return {
+      type: null,
+      realtime: indexingProjection.realtime,
+      snapshot: null,
+      maxRealtimeDistance: null,
+    } satisfies SerializedCurrentIndexingProjectionUnavailable;
   }
 
-  return serializedChainsIndexingStatuses;
+  return {
+    type: indexingProjection.type,
+    realtime: indexingProjection.realtime,
+    snapshot: serializeOmnichainIndexingSnapshot(indexingProjection.snapshot),
+    maxRealtimeDistance: indexingProjection.maxRealtimeDistance,
+  } satisfies SerializedCurrentIndexingProjectionOmnichain;
+}
+
+/**
+ * Serialize chain indexing snapshots.
+ */
+export function serializeChainIndexingSnapshots<
+  ChainIndexingSnapshotType extends ChainIndexingSnapshot,
+>(
+  chains: Map<ChainId, ChainIndexingSnapshotType>,
+): Record<ChainIdString, ChainIndexingSnapshotType> {
+  const serializedSnapshots: Record<ChainIdString, ChainIndexingSnapshotType> = {};
+
+  for (const [chainId, snapshot] of chains.entries()) {
+    serializedSnapshots[serializeChainId(chainId)] = snapshot;
+  }
+
+  return serializedSnapshots;
 }
 
 /**
  * Serialize a {@link ENSIndexerIndexingStatus} object.
  */
-export function serializeENSIndexerIndexingStatus(
-  indexingStatus: ENSIndexerOverallIndexingStatus,
-): SerializedENSIndexerOverallIndexingStatus {
-  switch (indexingStatus.overallStatus) {
-    case OverallIndexingStatusIds.IndexerError:
+export function serializeOmnichainIndexingSnapshot(
+  indexingStatus: OmnichainIndexingSnapshot,
+): SerializedOmnichainIndexingSnapshot {
+  switch (indexingStatus.omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted:
       return {
-        overallStatus: OverallIndexingStatusIds.IndexerError,
-        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
-      } satisfies SerializedENSIndexerOverallIndexingErrorStatus;
-
-    case OverallIndexingStatusIds.Unstarted:
-      return {
-        overallStatus: OverallIndexingStatusIds.Unstarted,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
-        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
-      } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
-
-    case OverallIndexingStatusIds.Backfill:
-      return {
-        overallStatus: OverallIndexingStatusIds.Backfill,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
-      } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
+        snapshotTime: indexingStatus.snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotUnstarted;
 
-    case OverallIndexingStatusIds.Completed: {
+    case OmnichainIndexingStatusIds.Backfill:
       return {
-        overallStatus: OverallIndexingStatusIds.Completed,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
-      } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
+        snapshotTime: indexingStatus.snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotBackfill;
+
+    case OmnichainIndexingStatusIds.Completed: {
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Completed,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+        snapshotTime: indexingStatus.snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotCompleted;
     }
 
-    case OverallIndexingStatusIds.Following:
+    case OmnichainIndexingStatusIds.Following:
       return {
-        overallStatus: OverallIndexingStatusIds.Following,
-        chains: serializeChainIndexingStatuses(indexingStatus.chains),
-        overallApproxRealtimeDistance: indexingStatus.overallApproxRealtimeDistance,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
-      } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
+        snapshotTime: indexingStatus.snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotFollowing;
   }
 }

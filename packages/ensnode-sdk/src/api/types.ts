@@ -1,4 +1,4 @@
-import type { ENSIndexerOverallIndexingStatus, ENSIndexerPublicConfig } from "../ensindexer";
+import type { CurrentIndexingProjection, ENSIndexerPublicConfig } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -103,7 +103,7 @@ export interface IndexingStatusRequest {
 /**
  * ENSIndexer Overall Indexing Status Response
  */
-export type IndexingStatusResponse = ENSIndexerOverallIndexingStatus;
+export type IndexingStatusResponse = CurrentIndexingProjection;
 
 /**
  * ENSIndexer Overall Indexing Status Response Codes

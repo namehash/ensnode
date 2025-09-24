@@ -12,12 +12,13 @@
 
 import {
   type BlockRef,
+  CurrentIndexingProjection,
   Duration,
-  ENSIndexerOverallIndexingErrorStatus,
-  ENSIndexerOverallIndexingStatus,
-  OverallIndexingStatusIds,
+  IndexingStatusResponse,
+  IndexingStrategyIds,
+  OmnichainIndexingSnapshot,
   UnixTimestamp,
-  deserializeENSIndexerIndexingStatus,
+  deserializeOmnichainIndexingSnapshot,
 } from "@ensnode/ensnode-sdk";
 import { prettifyError } from "zod/v4";
 
@@ -167,7 +168,7 @@ export async function buildIndexingStatus(
   publicClients: Record<ChainName, PublicClient>,
   systemTimestamp: UnixTimestamp,
   maxRealtimeDistance: Duration | undefined,
-): Promise<ENSIndexerOverallIndexingStatus> {
+): Promise<IndexingStatusResponse> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
 
@@ -183,15 +184,18 @@ export async function buildIndexingStatus(
   } catch (error) {
     console.error(`Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}`);
 
-    return deserializeENSIndexerIndexingStatus({
-      overallStatus: OverallIndexingStatusIds.IndexerError,
-      maxRealtimeDistance: maxRealtimeDistance
-        ? {
-            requestedDistance: maxRealtimeDistance,
-            satisfiesRequestedDistance: false,
-          }
-        : undefined,
-    } satisfies ENSIndexerOverallIndexingErrorStatus);
+    // TODO: implement CurrentIndexingProjectionUnavailable type response
+    throw new Error("CurrentIndexingProjectionUnavailable not implemented yet");
+
+    // return deserializeOmnichainIndexingSnapshot({
+    //   omnichainStatus: OmnichainIndexingStatusIds.IndexerError,
+    //   maxRealtimeDistance: maxRealtimeDistance
+    //     ? {
+    //         requestedDistance: maxRealtimeDistance,
+    //         satisfiesRequestedDistance: false,
+    //       }
+    //     : undefined,
+    // } satisfies ENSIndexerOverallIndexingErrorStatus);
   }
 
   // Invariant: Ponder command & ordering are as expected
@@ -238,7 +242,7 @@ export async function buildIndexingStatus(
   }
 
   // parse chain metadata for each indexed chain
-  const schema = makePonderChainMetadataSchema(chainNames, systemTimestamp);
+  const schema = makePonderChainMetadataSchema(chainNames);
   const parsed = schema.safeParse({
     appSettings: parsedAppSettings.data,
     chains,
@@ -251,6 +255,14 @@ export async function buildIndexingStatus(
     );
   }
 
-  // construct the final ENSIndexerIndexingStatus object from validated chain metadata
-  return deserializeENSIndexerIndexingStatus(parsed.data);
+  // deserialize to ensure the final object is fully validated
+  const snapshot = deserializeOmnichainIndexingSnapshot(parsed.data);
+
+  // construct the final OmnichainIndexingSnapshot object from validated chain metadata
+  return {
+    type: IndexingStrategyIds.Omnichain,
+    realtime: Math.max(systemTimestamp, snapshot.snapshotTime),
+    snapshot,
+    maxRealtimeDistance: systemTimestamp,
+  } as CurrentIndexingProjection;
 }

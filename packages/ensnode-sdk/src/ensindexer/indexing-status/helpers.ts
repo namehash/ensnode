@@ -1,81 +1,60 @@
 import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 import {
-  ChainIndexingBackfillStatus,
-  ChainIndexingCompletedStatus,
   ChainIndexingConfig,
-  ChainIndexingDefiniteConfig,
-  ChainIndexingFollowingStatus,
-  ChainIndexingIndefiniteConfig,
-  ChainIndexingQueuedStatus,
-  ChainIndexingStatus,
-  ChainIndexingStatusForBackfillOverallStatus,
+  ChainIndexingConfigDefinite,
+  ChainIndexingConfigIndefinite,
+  ChainIndexingConfigTypeIds,
+  ChainIndexingSnapshot,
+  ChainIndexingSnapshotBackfill,
+  ChainIndexingSnapshotCompleted,
+  ChainIndexingSnapshotFollowing,
+  ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
+  ChainIndexingSnapshotQueued,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
-  OverallIndexingStatusId,
-  OverallIndexingStatusIds,
+  OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
 } from "./types";
 
 /**
- * Get {@link OverallIndexingStatusId} based on indexed chains' statuses.
+ * Get {@link OmnichainIndexingStatusId} based on indexed chains' statuses.
  *
  * This function decides what is the current overall indexing status,
  * based on provided chain indexing statuses. The fact that chain indexing
  * statuses were provided to this function guarantees there was no indexer
  * error, and that the overall indexing status is never
- * an {@link OverallIndexingStatusIds.IndexerError}
+ * an {@link OmnichainIndexingStatusIds.IndexerError}
  *
  * @throws an error if unable to determine overall indexing status
  */
-export function getOverallIndexingStatus(
-  chains: ChainIndexingStatus[],
-): Exclude<OverallIndexingStatusId, typeof OverallIndexingStatusIds.IndexerError> {
-  if (checkChainIndexingStatusesForFollowingOverallStatus(chains)) {
-    return OverallIndexingStatusIds.Following;
+export function getOmnichainIndexingStatus(
+  chains: ChainIndexingSnapshot[],
+): OmnichainIndexingStatusId {
+  if (checkChainIndexingStatusesForOmnichainStatusFollowing(chains)) {
+    return OmnichainIndexingStatusIds.Following;
   }
 
-  if (checkChainIndexingStatusesForBackfillOverallStatus(chains)) {
-    return OverallIndexingStatusIds.Backfill;
+  if (checkChainIndexingStatusesForOmnichainStatusBackfill(chains)) {
+    return OmnichainIndexingStatusIds.Backfill;
   }
 
-  if (checkChainIndexingStatusesForUnstartedOverallStatus(chains)) {
-    return OverallIndexingStatusIds.Unstarted;
+  if (checkChainIndexingStatusesForOmnichainStatusUnstarted(chains)) {
+    return OmnichainIndexingStatusIds.Unstarted;
   }
 
-  if (checkChainIndexingStatusesForCompletedOverallStatus(chains)) {
-    return OverallIndexingStatusIds.Completed;
+  if (checkChainIndexingStatusesForOmnichainStatusCompleted(chains)) {
+    return OmnichainIndexingStatusIds.Completed;
   }
 
   // if none of the chain statuses matched, throw an error
-  throw new Error(`Unable to determine overall indexing status for provided chains.`);
-}
-
-/**
- * Get overall approximate realtime distance across all indexed chains.
- *
- * @throws an error if none of the indexed chains was in the 'following' status.
- */
-export function getOverallApproxRealtimeDistance(chains: ChainIndexingStatus[]): Duration {
-  const chainApproxRealtimeDistances = chains
-    .filter((chain) => chain.status === ChainIndexingStatusIds.Following)
-    .map((chain) => chain.approxRealtimeDistance);
-
-  if (chainApproxRealtimeDistances.length === 0) {
-    throw new Error(
-      `The overall approximate realtime distance value is undefined if no indexed chain is in the '${OverallIndexingStatusIds.Following}' status`,
-    );
-  }
-
-  const approxRealtimeDistance = Math.max(...chainApproxRealtimeDistances);
-
-  return approxRealtimeDistance;
+  throw new Error(`Unable to determine omnichain indexing status for provided chains.`);
 }
 
 /**
  * Get lowest of the highest end block across all chains which status is
- * {@link ChainIndexingStatus}.
+ * {@link ChainIndexingSnapshot}.
  */
 export function getTimestampForLowestOmnichainStartBlock(
-  chains: ChainIndexingStatus[],
+  chains: ChainIndexingSnapshot[],
 ): UnixTimestamp {
   const earliestKnownBlockTimestamps: UnixTimestamp[] = chains.map(
     (chain) => chain.config.startBlock.timestamp,
@@ -86,10 +65,10 @@ export function getTimestampForLowestOmnichainStartBlock(
 
 /**
  * Get timestamp of the highest known block across all chains which status is
- * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ * {@link ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill}.
  */
 export function getTimestampForHighestOmnichainKnownBlock(
-  chains: ChainIndexingStatus[],
+  chains: ChainIndexingSnapshot[],
 ): UnixTimestamp {
   const latestKnownBlockTimestamps: UnixTimestamp[] = [];
 
@@ -128,7 +107,7 @@ export function getTimestampForHighestOmnichainKnownBlock(
  * @throws an error if no chains are provided, or if all chains provided are in the
  *         "queued" status.
  */
-export function getOmnichainIndexingCursor(chains: ChainIndexingStatus[]): UnixTimestamp {
+export function getOmnichainIndexingCursor(chains: ChainIndexingSnapshot[]): UnixTimestamp {
   const chainsThatStartedIndexing = chains.filter(
     (chain) => chain.status !== ChainIndexingStatusIds.Queued,
   );
@@ -158,17 +137,17 @@ export function createIndexingConfig(
 ): ChainIndexingConfig {
   if (endBlock) {
     return {
-      strategy: ChainIndexingStrategyIds.Definite,
+      type: ChainIndexingConfigTypeIds.Definite,
       startBlock,
       endBlock,
-    } satisfies ChainIndexingDefiniteConfig;
+    } satisfies ChainIndexingConfigDefinite;
   }
 
   return {
-    strategy: ChainIndexingStrategyIds.Indefinite,
+    type: ChainIndexingConfigTypeIds.Indefinite,
     startBlock,
     endBlock: null,
-  } satisfies ChainIndexingIndefiniteConfig;
+  } satisfies ChainIndexingConfigIndefinite;
 }
 
 /**
@@ -176,12 +155,12 @@ export function createIndexingConfig(
  * requirements:
  * - All chains are guaranteed to have a status of "queued".
  *
- * Note: This function narrows the {@link ChainIndexingStatus} type to
- * {@link ChainIndexingQueuedStatus}.
+ * Note: This function narrows the {@link ChainIndexingSnapshot} type to
+ * {@link ChainIndexingSnapshotQueued}.
  */
-export function checkChainIndexingStatusesForUnstartedOverallStatus(
-  chains: ChainIndexingStatus[],
-): chains is ChainIndexingQueuedStatus[] {
+export function checkChainIndexingStatusesForOmnichainStatusUnstarted(
+  chains: ChainIndexingSnapshot[],
+): chains is ChainIndexingSnapshotQueued[] {
   return chains.every((chain) => chain.status === ChainIndexingStatusIds.Queued);
 }
 
@@ -193,11 +172,11 @@ export function checkChainIndexingStatusesForUnstartedOverallStatus(
  *   "backfill" or "completed".
  *
  * Note: This function narrows the {@linkChainIndexingStatus} type to
- * {@link ChainIndexingStatusForBackfillOverallStatus}.
+ * {@link ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill}.
  */
-export function checkChainIndexingStatusesForBackfillOverallStatus(
-  chains: ChainIndexingStatus[],
-): chains is ChainIndexingStatusForBackfillOverallStatus[] {
+export function checkChainIndexingStatusesForOmnichainStatusBackfill(
+  chains: ChainIndexingSnapshot[],
+): chains is ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill[] {
   const atLeastOneChainInTargetStatus = chains.some(
     (chain) => chain.status === ChainIndexingStatusIds.Backfill,
   );
@@ -217,11 +196,11 @@ export function checkChainIndexingStatusesForBackfillOverallStatus(
  * - All chains are guaranteed to have a status of "completed".
  *
  * Note: This function narrows the {@linkChainIndexingStatus} type to
- * {@link ChainIndexingCompletedStatus}.
+ * {@link ChainIndexingSnapshotCompleted}.
  */
-export function checkChainIndexingStatusesForCompletedOverallStatus(
-  chains: ChainIndexingStatus[],
-): chains is ChainIndexingCompletedStatus[] {
+export function checkChainIndexingStatusesForOmnichainStatusCompleted(
+  chains: ChainIndexingSnapshot[],
+): chains is ChainIndexingSnapshotCompleted[] {
   const allChainsHaveValidStatuses = chains.every(
     (chain) => chain.status === ChainIndexingStatusIds.Completed,
   );
@@ -235,9 +214,9 @@ export function checkChainIndexingStatusesForCompletedOverallStatus(
  * - At least one chain is guaranteed to be in the "following" status.
  * - Any other chain can have any status.
  */
-export function checkChainIndexingStatusesForFollowingOverallStatus(
-  chains: ChainIndexingStatus[],
-): chains is ChainIndexingStatus[] {
+export function checkChainIndexingStatusesForOmnichainStatusFollowing(
+  chains: ChainIndexingSnapshot[],
+): chains is ChainIndexingSnapshot[] {
   const allChainsHaveValidStatuses = chains.some(
     (chain) => chain.status === ChainIndexingStatusIds.Following,
   );
@@ -246,10 +225,10 @@ export function checkChainIndexingStatusesForFollowingOverallStatus(
 }
 
 /**
- * Sort a list of [{@link ChainId}, {@link ChainIndexingStatus}] tuples
+ * Sort a list of [{@link ChainId}, {@link ChainIndexingSnapshot}] tuples
  * by the omnichain start block timestamp in ascending order.
  */
-export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingStatus>(
+export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingSnapshot>(
   chains: [ChainId, ChainStatusType][],
 ): [ChainId, ChainStatusType][] {
   // Sort the chain statuses by the omnichain first block to index timestamp

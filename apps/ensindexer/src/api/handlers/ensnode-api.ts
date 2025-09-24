@@ -1,9 +1,9 @@
 import { publicClients } from "ponder:api";
 import {
   IndexingStatusResponseCodes,
-  OverallIndexingStatusIds,
-  serializeENSIndexerIndexingStatus,
   serializeENSIndexerPublicConfig,
+  serializeOmnichainIndexingSnapshot,
+  serializedCurrentIndexingProjection,
 } from "@ensnode/ensnode-sdk";
 import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
@@ -43,23 +43,23 @@ app.get("/indexing-status", validate("query", routes.indexingStatus.query), asyn
     maxRealtimeDistance,
   );
 
-  const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
+  const serializedIndexingStatus = serializedCurrentIndexingProjection(indexingStatus);
 
   // respond with custom server error if ENSIndexer is not available
-  if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
+  if (indexingStatus.type === null) {
     return c.json(
       serializedIndexingStatus,
       IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
     );
   }
 
-  // respond with custom server error if requested distance hasn't been achieved yet
-  if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
-    return c.json(
-      serializedIndexingStatus,
-      IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
-    );
-  }
+  // // respond with custom server error if requested distance hasn't been achieved yet
+  // if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
+  //   return c.json(
+  //     serializedIndexingStatus,
+  //     IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
+  //   );
+  // }
 
   // respond with the serialized indexing status object
   return c.json(serializedIndexingStatus);

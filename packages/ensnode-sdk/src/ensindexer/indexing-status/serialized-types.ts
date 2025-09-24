@@ -1,61 +1,76 @@
 import type { ChainIdString } from "../../shared";
 import type {
-  ChainIndexingCompletedStatus,
-  ChainIndexingQueuedStatus,
-  ChainIndexingStatus,
-  ChainIndexingStatusForBackfillOverallStatus,
-  ENSIndexerOverallIndexingBackfillStatus,
-  ENSIndexerOverallIndexingCompletedStatus,
-  ENSIndexerOverallIndexingErrorStatus,
-  ENSIndexerOverallIndexingFollowingStatus,
-  ENSIndexerOverallIndexingStatus,
-  ENSIndexerOverallIndexingUnstartedStatus,
+  ChainIndexingSnapshot,
+  ChainIndexingSnapshotCompleted,
+  ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
+  ChainIndexingSnapshotQueued,
+  CurrentIndexingProjection,
+  CurrentIndexingProjectionOmnichain,
+  CurrentIndexingProjectionUnavailable,
+  OmnichainIndexingSnapshot,
+  OmnichainIndexingSnapshotBackfill,
+  OmnichainIndexingSnapshotCompleted,
+  OmnichainIndexingSnapshotFollowing,
+  OmnichainIndexingSnapshotUnstarted,
 } from "./types";
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingUnstartedStatus}
+ * Serialized representation of {@link OmnichainIndexingSnapshotUnstarted}
  */
-export interface SerializedENSIndexerOverallIndexingUnstartedStatus
-  extends Omit<ENSIndexerOverallIndexingUnstartedStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingQueuedStatus>;
+export interface SerializedOmnichainIndexingSnapshotUnstarted
+  extends Omit<OmnichainIndexingSnapshotUnstarted, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingSnapshotQueued>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingBackfillStatus}
+ * Serialized representation of {@link OmnichainIndexingSnapshotBackfill}
  */
-export interface SerializedENSIndexerOverallIndexingBackfillStatus
-  extends Omit<ENSIndexerOverallIndexingBackfillStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingStatusForBackfillOverallStatus>;
+export interface SerializedOmnichainIndexingSnapshotBackfill
+  extends Omit<OmnichainIndexingSnapshotBackfill, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingCompletedStatus}
+ * Serialized representation of {@link OmnichainIndexingSnapshotCompleted}
  */
-export interface SerializedENSIndexerOverallIndexingCompletedStatus
-  extends Omit<ENSIndexerOverallIndexingCompletedStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingCompletedStatus>;
+export interface SerializedOmnichainIndexingSnapshotCompleted
+  extends Omit<OmnichainIndexingSnapshotCompleted, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingSnapshotCompleted>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingFollowingStatus}
+ * Serialized representation of {@link OmnichainIndexingSnapshotFollowing}
  */
-export interface SerializedENSIndexerOverallIndexingFollowingStatus
-  extends Omit<ENSIndexerOverallIndexingFollowingStatus, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingStatus>;
+export interface SerializedOmnichainIndexingSnapshotFollowing
+  extends Omit<OmnichainIndexingSnapshotFollowing, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingSnapshot>;
 }
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingErrorStatus}
+ * Serialized representation of {@link OmnichainIndexingSnapshot}
  */
-export interface SerializedENSIndexerOverallIndexingErrorStatus
-  extends ENSIndexerOverallIndexingErrorStatus {}
+export type SerializedOmnichainIndexingSnapshot =
+  | SerializedOmnichainIndexingSnapshotUnstarted
+  | SerializedOmnichainIndexingSnapshotBackfill
+  | SerializedOmnichainIndexingSnapshotCompleted
+  | SerializedOmnichainIndexingSnapshotFollowing;
 
 /**
- * Serialized representation of {@link ENSIndexerOverallIndexingStatus}
+ * Serialized representation of {@link CurrentIndexingProjectionOmnichain}
  */
-export type SerializedENSIndexerOverallIndexingStatus =
-  | SerializedENSIndexerOverallIndexingUnstartedStatus
-  | SerializedENSIndexerOverallIndexingBackfillStatus
-  | SerializedENSIndexerOverallIndexingCompletedStatus
-  | SerializedENSIndexerOverallIndexingFollowingStatus
-  | SerializedENSIndexerOverallIndexingErrorStatus;
+export interface SerializedCurrentIndexingProjectionOmnichain
+  extends Omit<CurrentIndexingProjectionOmnichain, "snapshot"> {
+  snapshot: SerializedOmnichainIndexingSnapshot;
+}
+
+/**
+ * Serialized representation of {@link CurrentIndexingProjectionUnavailable}
+ */
+export type SerializedCurrentIndexingProjectionUnavailable = CurrentIndexingProjectionUnavailable;
+
+/**
+ * Serialized representation of {@link CurrentIndexingProjection}
+ */
+export type SerializedCurrentIndexingProjection =
+  | SerializedCurrentIndexingProjectionOmnichain
+  | SerializedCurrentIndexingProjectionUnavailable;

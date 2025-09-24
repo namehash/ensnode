@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { deserializeENSIndexerIndexingStatus } from "./deserialize";
-import { serializeENSIndexerIndexingStatus } from "./serialize";
-import { SerializedENSIndexerOverallIndexingStatus } from "./serialized-types";
+import { deserializeOmnichainIndexingSnapshot } from "./deserialize";
+import { serializeOmnichainIndexingSnapshot } from "./serialize";
+import { SerializedOmnichainIndexingSnapshot } from "./serialized-types";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
-  ChainIndexingBackfillStatus,
-  ChainIndexingFollowingStatus,
-  ChainIndexingQueuedStatus,
+  ChainIndexingConfigTypeIds,
+  ChainIndexingSnapshotBackfill,
+  ChainIndexingSnapshotFollowing,
+  ChainIndexingSnapshotQueued,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
-  ENSIndexerOverallIndexingStatus,
+  OmnichainIndexingSnapshot,
+  OmnichainIndexingStatusIds,
 } from "./types";
 
 describe("ENSIndexer: Indexing Status", () => {
@@ -17,101 +18,91 @@ describe("ENSIndexer: Indexing Status", () => {
     it("can serialize and deserialize indexing status object maxRealtimeDistance was requested and satisfied", () => {
       // arrange
       const indexingStatus = {
-        overallStatus: ChainIndexingStatusIds.Following,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: new Map([
           [
             1,
             {
               status: ChainIndexingStatusIds.Following,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earliestBlockRef,
               },
               latestIndexedBlock: earlierBlockRef,
               latestKnownBlock: latestBlockRef,
-              approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-            } satisfies ChainIndexingFollowingStatus,
+            } satisfies ChainIndexingSnapshotFollowing,
           ],
           [
             10,
             {
               status: ChainIndexingStatusIds.Backfill,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earlierBlockRef,
                 endBlock: null,
               },
               latestIndexedBlock: laterBlockRef,
               backfillEndBlock: latestBlockRef,
-            } satisfies ChainIndexingBackfillStatus,
+            } satisfies ChainIndexingSnapshotBackfill,
           ],
           [
             8453,
             {
               status: ChainIndexingStatusIds.Queued,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: latestBlockRef,
                 endBlock: null,
               },
-            } satisfies ChainIndexingQueuedStatus,
+            } satisfies ChainIndexingSnapshotQueued,
           ],
         ]),
-        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
         omnichainIndexingCursor: earlierBlockRef.timestamp,
-        maxRealtimeDistance: {
-          requestedDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-          satisfiesRequestedDistance: true,
-        },
-      } satisfies ENSIndexerOverallIndexingStatus;
+        snapshotTime: earlierBlockRef.timestamp + 1,
+      } satisfies OmnichainIndexingSnapshot;
 
       // act
-      const result = serializeENSIndexerIndexingStatus(indexingStatus);
+      const result = serializeOmnichainIndexingSnapshot(indexingStatus);
 
       // assert
       expect(result).toMatchObject({
-        overallStatus: ChainIndexingStatusIds.Following,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: {
           "1": {
             status: ChainIndexingStatusIds.Following,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: earlierBlockRef,
             latestKnownBlock: latestBlockRef,
-            approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-          } satisfies ChainIndexingFollowingStatus,
+          } satisfies ChainIndexingSnapshotFollowing,
           "8453": {
             status: ChainIndexingStatusIds.Queued,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: latestBlockRef,
               endBlock: null,
             },
-          } satisfies ChainIndexingQueuedStatus,
+          } satisfies ChainIndexingSnapshotQueued,
           "10": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earlierBlockRef,
               endBlock: null,
             },
             latestIndexedBlock: laterBlockRef,
             backfillEndBlock: latestBlockRef,
-          } satisfies ChainIndexingBackfillStatus,
+          } satisfies ChainIndexingSnapshotBackfill,
         },
-        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
         omnichainIndexingCursor: earlierBlockRef.timestamp,
-        maxRealtimeDistance: {
-          requestedDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-          satisfiesRequestedDistance: true,
-        },
-      } satisfies SerializedENSIndexerOverallIndexingStatus);
+        snapshotTime: earlierBlockRef.timestamp + 1,
+      } satisfies SerializedOmnichainIndexingSnapshot);
 
       // bonus step: deserialize serialized
       // act
-      const deserializedResult = deserializeENSIndexerIndexingStatus(result);
+      const deserializedResult = deserializeOmnichainIndexingSnapshot(result);
 
       // assert
       expect(deserializedResult).toMatchObject(indexingStatus);
@@ -119,101 +110,92 @@ describe("ENSIndexer: Indexing Status", () => {
     it("can serialize and deserialize indexing status object maxRealtimeDistance was requested, but not satisfied", () => {
       // arrange
       const indexingStatus = {
-        overallStatus: ChainIndexingStatusIds.Following,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: new Map([
           [
             1,
             {
               status: ChainIndexingStatusIds.Following,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earliestBlockRef,
               },
               latestIndexedBlock: earlierBlockRef,
               latestKnownBlock: latestBlockRef,
-              approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-            } satisfies ChainIndexingFollowingStatus,
+            } satisfies ChainIndexingSnapshotFollowing,
           ],
           [
             10,
             {
               status: ChainIndexingStatusIds.Backfill,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earlierBlockRef,
                 endBlock: null,
               },
               latestIndexedBlock: laterBlockRef,
               backfillEndBlock: latestBlockRef,
-            } satisfies ChainIndexingBackfillStatus,
+            } satisfies ChainIndexingSnapshotBackfill,
           ],
           [
             8453,
             {
               status: ChainIndexingStatusIds.Queued,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: latestBlockRef,
                 endBlock: null,
               },
-            } satisfies ChainIndexingQueuedStatus,
+            } satisfies ChainIndexingSnapshotQueued,
           ],
         ]),
-        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
         omnichainIndexingCursor: earlierBlockRef.timestamp,
-        maxRealtimeDistance: {
-          requestedDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp - 1,
-          satisfiesRequestedDistance: false,
-        },
-      } satisfies ENSIndexerOverallIndexingStatus;
+
+        snapshotTime: earlierBlockRef.timestamp + 1,
+      } satisfies OmnichainIndexingSnapshot;
 
       // act
-      const result = serializeENSIndexerIndexingStatus(indexingStatus);
+      const result = serializeOmnichainIndexingSnapshot(indexingStatus);
 
       // assert
       expect(result).toMatchObject({
-        overallStatus: ChainIndexingStatusIds.Following,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: {
           "1": {
             status: ChainIndexingStatusIds.Following,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: earlierBlockRef,
             latestKnownBlock: latestBlockRef,
-            approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-          } satisfies ChainIndexingFollowingStatus,
+          } satisfies ChainIndexingSnapshotFollowing,
           "8453": {
             status: ChainIndexingStatusIds.Queued,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: latestBlockRef,
               endBlock: null,
             },
-          } satisfies ChainIndexingQueuedStatus,
+          } satisfies ChainIndexingSnapshotQueued,
           "10": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earlierBlockRef,
               endBlock: null,
             },
             latestIndexedBlock: laterBlockRef,
             backfillEndBlock: latestBlockRef,
-          } satisfies ChainIndexingBackfillStatus,
+          } satisfies ChainIndexingSnapshotBackfill,
         },
-        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
         omnichainIndexingCursor: earlierBlockRef.timestamp,
-        maxRealtimeDistance: {
-          requestedDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp - 1,
-          satisfiesRequestedDistance: false,
-        },
-      } satisfies SerializedENSIndexerOverallIndexingStatus);
+        snapshotTime: earlierBlockRef.timestamp + 1,
+      } satisfies SerializedOmnichainIndexingSnapshot);
 
       // bonus step: deserialize serialized
       // act
-      const deserializedResult = deserializeENSIndexerIndexingStatus(result);
+      const deserializedResult = deserializeOmnichainIndexingSnapshot(result);
 
       // assert
       expect(deserializedResult).toMatchObject(indexingStatus);
@@ -222,96 +204,93 @@ describe("ENSIndexer: Indexing Status", () => {
     it("can serialize and deserialize indexing status object when no maxRealtimeDistance was requested", () => {
       // arrange
       const indexingStatus = {
-        overallStatus: ChainIndexingStatusIds.Following,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: new Map([
           [
             1,
             {
               status: ChainIndexingStatusIds.Following,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earliestBlockRef,
               },
               latestIndexedBlock: earlierBlockRef,
               latestKnownBlock: latestBlockRef,
-              approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-            } satisfies ChainIndexingFollowingStatus,
+            } satisfies ChainIndexingSnapshotFollowing,
           ],
           [
             10,
             {
               status: ChainIndexingStatusIds.Backfill,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earlierBlockRef,
                 endBlock: null,
               },
               latestIndexedBlock: laterBlockRef,
               backfillEndBlock: latestBlockRef,
-            } satisfies ChainIndexingBackfillStatus,
+            } satisfies ChainIndexingSnapshotBackfill,
           ],
           [
             8453,
             {
               status: ChainIndexingStatusIds.Queued,
               config: {
-                strategy: ChainIndexingStrategyIds.Indefinite,
+                type: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: latestBlockRef,
                 endBlock: null,
               },
-            } satisfies ChainIndexingQueuedStatus,
+            } satisfies ChainIndexingSnapshotQueued,
           ],
         ]),
-        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
         omnichainIndexingCursor: earlierBlockRef.timestamp,
-      } satisfies ENSIndexerOverallIndexingStatus;
+        snapshotTime: earlierBlockRef.timestamp + 1,
+      } satisfies OmnichainIndexingSnapshot;
 
       // act
-      const result = serializeENSIndexerIndexingStatus(indexingStatus);
+      const result = serializeOmnichainIndexingSnapshot(indexingStatus);
 
       console.log(result);
 
       // assert
       expect(result).toMatchObject({
-        overallStatus: ChainIndexingStatusIds.Following,
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: {
           "1": {
             status: ChainIndexingStatusIds.Following,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earliestBlockRef,
             },
             latestIndexedBlock: earlierBlockRef,
             latestKnownBlock: latestBlockRef,
-            approxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
-          } satisfies ChainIndexingFollowingStatus,
+          } satisfies ChainIndexingSnapshotFollowing,
           "8453": {
             status: ChainIndexingStatusIds.Queued,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: latestBlockRef,
               endBlock: null,
             },
-          } satisfies ChainIndexingQueuedStatus,
+          } satisfies ChainIndexingSnapshotQueued,
           "10": {
             status: ChainIndexingStatusIds.Backfill,
             config: {
-              strategy: ChainIndexingStrategyIds.Indefinite,
+              type: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earlierBlockRef,
               endBlock: null,
             },
             latestIndexedBlock: laterBlockRef,
             backfillEndBlock: latestBlockRef,
-          } satisfies ChainIndexingBackfillStatus,
+          } satisfies ChainIndexingSnapshotBackfill,
         },
-        overallApproxRealtimeDistance: latestBlockRef.timestamp - earlierBlockRef.timestamp,
         omnichainIndexingCursor: earlierBlockRef.timestamp,
-        maxRealtimeDistance: undefined,
-      } satisfies SerializedENSIndexerOverallIndexingStatus);
+        snapshotTime: earlierBlockRef.timestamp + 1,
+      } satisfies SerializedOmnichainIndexingSnapshot);
 
       // bonus step: deserialize serialized
       // act
-      const deserializedResult = deserializeENSIndexerIndexingStatus(result);
+      const deserializedResult = deserializeOmnichainIndexingSnapshot(result);
 
       // assert
       expect(deserializedResult).toMatchObject(indexingStatus);

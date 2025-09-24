@@ -14,13 +14,13 @@
 import {
   type BlockRef,
   type ChainId,
-  type ChainIndexingBackfillStatus,
-  type ChainIndexingCompletedStatus,
-  type ChainIndexingFollowingStatus,
-  type ChainIndexingQueuedStatus,
-  type ChainIndexingStatus,
+  ChainIndexingConfigTypeIds,
+  type ChainIndexingSnapshot,
+  type ChainIndexingSnapshotBackfill,
+  type ChainIndexingSnapshotCompleted,
+  type ChainIndexingSnapshotFollowing,
+  type ChainIndexingSnapshotQueued,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
   type DeepPartial,
   type Duration,
   type UnixTimestamp,
@@ -30,7 +30,7 @@ import {
 /**
  * Chain Metadata
  *
- * Chain metadata, required to determine {@link ChainIndexingStatus}.
+ * Chain metadata, required to determine {@link ChainIndexingSnapshot}.
  */
 export interface ChainMetadata {
   chainId: ChainId;
@@ -102,15 +102,12 @@ export interface UnvalidatedChainMetadata
 }
 
 /**
- * Get {@link ChainIndexingStatus} for the indexed chain metadata.
+ * Get {@link ChainIndexingSnapshot} for the indexed chain metadata.
  *
  * This function uses the current system timestamp to calculate
  * `approxRealtimeDistance` for chains in "following" status.
  */
-export function getChainIndexingStatus(
-  chainMetadata: ChainMetadata,
-  systemTimestamp: UnixTimestamp,
-): ChainIndexingStatus {
+export function getChainIndexingStatus(chainMetadata: ChainMetadata): ChainIndexingSnapshot {
   const {
     config: chainBlocksConfig,
     backfillEndBlock: chainBackfillEndBlock,
@@ -129,13 +126,13 @@ export function getChainIndexingStatus(
     return {
       status: ChainIndexingStatusIds.Queued,
       config,
-    } satisfies ChainIndexingQueuedStatus;
+    } satisfies ChainIndexingSnapshotQueued;
   }
 
   if (isSyncComplete) {
-    if (config.strategy !== ChainIndexingStrategyIds.Definite) {
+    if (config.type !== ChainIndexingConfigTypeIds.Definite) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingStrategyIds.Definite}' indexing strategy.`,
+        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingConfigTypeIds.Definite}' indexing config type.`,
       );
     }
 
@@ -143,39 +140,25 @@ export function getChainIndexingStatus(
       status: ChainIndexingStatusIds.Completed,
       latestIndexedBlock: chainStatusBlock,
       config,
-    } satisfies ChainIndexingCompletedStatus;
+    } satisfies ChainIndexingSnapshotCompleted;
   }
 
   if (isSyncRealtime) {
-    if (config.strategy !== ChainIndexingStrategyIds.Indefinite) {
+    if (config.type !== ChainIndexingConfigTypeIds.Indefinite) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingStrategyIds.Indefinite}' indexing strategy.`,
+        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingConfigTypeIds.Indefinite}' indexing config type.`,
       );
     }
-
-    /**
-     * It's possible that the current system time of the ENSIndexer instance
-     * is set to be ahead of the time agreed to by the blockchain and held in
-     * chainStatusBlock.timestamp.
-     *
-     * Here we enforce that the Duration value can never be negative,
-     * even if system clocks are misconfigured.
-     */
-    const approxRealtimeDistance: Duration = Math.max(
-      0,
-      systemTimestamp - chainStatusBlock.timestamp,
-    );
 
     return {
       status: ChainIndexingStatusIds.Following,
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
-      approxRealtimeDistance,
       config: {
-        strategy: config.strategy,
+        type: config.type,
         startBlock: config.startBlock,
       },
-    } satisfies ChainIndexingFollowingStatus;
+    } satisfies ChainIndexingSnapshotFollowing;
   }
 
   return {
@@ -183,5 +166,5 @@ export function getChainIndexingStatus(
     latestIndexedBlock: chainStatusBlock,
     backfillEndBlock: chainBackfillEndBlock,
     config,
-  } satisfies ChainIndexingBackfillStatus;
+  } satisfies ChainIndexingSnapshotBackfill;
 }

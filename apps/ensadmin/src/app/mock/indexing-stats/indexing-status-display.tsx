@@ -1,61 +1,59 @@
 // Temporary mock page until indexing-status is detached from data loading
 "use client";
 
-import { ENSIndexerOverallIndexingStatus, OverallIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { OmnichainIndexingSnapshot, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { type ReactElement } from "react";
 
 import { BackfillStatus } from "@/components/indexing-status/backfill-status";
 import {
-  IndexingStatsForBackfillStatus,
-  IndexingStatsForCompletedStatus,
-  IndexingStatsForFollowingStatus,
-  IndexingStatsForIndexerErrorStatus,
-  IndexingStatsForUnstartedStatus,
+  IndexingStatsForSnapshotBackfill,
+  IndexingStatsForSnapshotCompleted,
+  IndexingStatsForSnapshotFollowing,
+  IndexingStatsForSnapshotUnstarted,
+  IndexingStatsForUnavailableSnapshot,
   IndexingStatsShell,
 } from "@/components/indexing-status/indexing-stats";
 import { IndexingStatusLoading } from "@/components/indexing-status/indexing-status-loading";
 
 interface MockIndexingStatusDisplayPropsProps {
-  indexingStatus: ENSIndexerOverallIndexingStatus;
+  indexingSnapshot: OmnichainIndexingSnapshot | null;
 }
 
-export function MockIndexingStatusDisplay({ indexingStatus }: MockIndexingStatusDisplayPropsProps) {
+export function MockIndexingStatusDisplay({
+  indexingSnapshot,
+}: MockIndexingStatusDisplayPropsProps) {
   let indexingStats: ReactElement;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  switch (indexingStatus.overallStatus) {
-    case OverallIndexingStatusIds.IndexerError:
-      indexingStats = <IndexingStatsForIndexerErrorStatus />;
+  if (!indexingSnapshot) {
+    return <IndexingStatsForUnavailableSnapshot />;
+  }
+
+  switch (indexingSnapshot.omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted:
+      indexingStats = <IndexingStatsForSnapshotUnstarted indexingSnapshot={indexingSnapshot} />;
       break;
 
-    case OverallIndexingStatusIds.Unstarted:
-      indexingStats = <IndexingStatsForUnstartedStatus indexingStatus={indexingStatus} />;
+    case OmnichainIndexingStatusIds.Backfill:
+      indexingStats = <IndexingStatsForSnapshotBackfill indexingSnapshot={indexingSnapshot} />;
+
+      maybeIndexingTimeline = <BackfillStatus indexingSnapshot={indexingSnapshot} />;
       break;
 
-    case OverallIndexingStatusIds.Backfill:
-      indexingStats = <IndexingStatsForBackfillStatus indexingStatus={indexingStatus} />;
-
-      maybeIndexingTimeline = <BackfillStatus indexingStatus={indexingStatus} />;
+    case OmnichainIndexingStatusIds.Completed:
+      indexingStats = <IndexingStatsForSnapshotCompleted indexingSnapshot={indexingSnapshot} />;
       break;
 
-    case OverallIndexingStatusIds.Completed:
-      indexingStats = <IndexingStatsForCompletedStatus indexingStatus={indexingStatus} />;
+    case OmnichainIndexingStatusIds.Following:
+      indexingStats = <IndexingStatsForSnapshotFollowing indexingSnapshot={indexingSnapshot} />;
       break;
-
-    case OverallIndexingStatusIds.Following:
-      indexingStats = <IndexingStatsForFollowingStatus indexingStatus={indexingStatus} />;
-      break;
-
-    default:
-      // This should never happen, but provide fallback
-      indexingStats = <IndexingStatsForIndexerErrorStatus />;
   }
 
   return (
     <>
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell overallStatus={indexingStatus.overallStatus}>
+      <IndexingStatsShell omnichainStatus={indexingSnapshot.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
     </>
@@ -63,11 +61,11 @@ export function MockIndexingStatusDisplay({ indexingStatus }: MockIndexingStatus
 }
 
 export function MockIndexingStatusDisplayWithProps({
-  indexingStatus,
+  indexingSnapshot,
   loading = false,
   error = null,
 }: {
-  indexingStatus?: ENSIndexerOverallIndexingStatus;
+  indexingSnapshot?: OmnichainIndexingSnapshot;
   loading?: boolean;
   error?: string | null;
 }) {
@@ -75,9 +73,9 @@ export function MockIndexingStatusDisplayWithProps({
     return <p className="p-6">Failed to fetch data: {error}</p>;
   }
 
-  if (loading || !indexingStatus) {
+  if (loading || !indexingSnapshot) {
     return <IndexingStatusLoading />;
   }
 
-  return <MockIndexingStatusDisplay indexingStatus={indexingStatus} />;
+  return <MockIndexingStatusDisplay indexingSnapshot={indexingSnapshot} />;
 }

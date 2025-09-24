@@ -12,30 +12,27 @@
  */
 import {
   type ChainIdString,
-  ChainIndexingCompletedStatus,
-  ChainIndexingQueuedStatus,
-  type ChainIndexingStatus,
-  ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingStatusIds,
-  OverallIndexingStatusIds,
-  SerializedENSIndexerOverallIndexingBackfillStatus,
-  SerializedENSIndexerOverallIndexingCompletedStatus,
-  SerializedENSIndexerOverallIndexingFollowingStatus,
-  SerializedENSIndexerOverallIndexingUnstartedStatus,
-  UnixTimestamp,
-  checkChainIndexingStatusesForBackfillOverallStatus,
-  checkChainIndexingStatusesForCompletedOverallStatus,
-  checkChainIndexingStatusesForFollowingOverallStatus,
-  checkChainIndexingStatusesForUnstartedOverallStatus,
+  type ChainIndexingSnapshot,
+  ChainIndexingSnapshotCompleted,
+  ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
+  ChainIndexingSnapshotQueued,
+  OmnichainIndexingStatusIds,
+  SerializedOmnichainIndexingSnapshotBackfill,
+  SerializedOmnichainIndexingSnapshotCompleted,
+  SerializedOmnichainIndexingSnapshotFollowing,
+  SerializedOmnichainIndexingSnapshotUnstarted,
+  checkChainIndexingStatusesForOmnichainStatusBackfill,
+  checkChainIndexingStatusesForOmnichainStatusCompleted,
+  checkChainIndexingStatusesForOmnichainStatusFollowing,
+  checkChainIndexingStatusesForOmnichainStatusUnstarted,
   getOmnichainIndexingCursor,
-  getOverallApproxRealtimeDistance,
-  getOverallIndexingStatus,
+  getOmnichainIndexingStatus,
 } from "@ensnode/ensnode-sdk";
 import {
   makeBlockRefSchema,
   makeChainIdSchema,
-  makeDurationSchema,
   makeNonNegativeIntegerSchema,
+  makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
 
@@ -71,10 +68,7 @@ const PonderChainMetadataSchema = z.strictObject({
   statusBlock: PonderBlockRefSchema,
 });
 
-export const makePonderChainMetadataSchema = (
-  indexedChainNames: string[],
-  systemTimestamp: UnixTimestamp,
-) => {
+export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
   const ChainNameSchema = makeChainNameSchema(indexedChainNames);
 
   const invariant_definedEntryForEachIndexedChain = (v: Map<ChainName, unknown>) =>
@@ -90,122 +84,97 @@ export const makePonderChainMetadataSchema = (
           error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
         }),
 
-      maxRealtimeDistance: makeDurationSchema().optional(),
+      systemTime: makeUnixTimestampSchema(),
     })
-    .transform((ponderIndexingStatus) => {
-      let serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
+    .transform(({ chains, systemTime }) => {
+      let serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingSnapshot>;
 
       for (const chainName of indexedChainNames) {
-        const indexedChain = ponderIndexingStatus.chains.get(chainName)!;
+        const indexedChain = chains.get(chainName)!;
 
-        serializedChainIndexingStatuses[indexedChain.chainId] = getChainIndexingStatus(
-          indexedChain,
-          systemTimestamp,
-        );
+        serializedChainIndexingStatuses[indexedChain.chainId] =
+          getChainIndexingStatus(indexedChain);
       }
 
       const chainStatuses = Object.values(serializedChainIndexingStatuses);
-      const overallStatus = getOverallIndexingStatus(chainStatuses);
-      const requestedMaxRealtimeDistance = ponderIndexingStatus.maxRealtimeDistance;
+      const omnichainStatus = getOmnichainIndexingStatus(chainStatuses);
+      const snapshotTime = systemTime;
 
-      switch (overallStatus) {
-        case OverallIndexingStatusIds.Unstarted: {
+      switch (omnichainStatus) {
+        case OmnichainIndexingStatusIds.Unstarted: {
           return {
-            overallStatus: OverallIndexingStatusIds.Unstarted,
+            omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
             chains: serializedChainIndexingStatuses as Record<
               ChainIdString,
-              ChainIndexingQueuedStatus
-            >, // forcing the type here, will be validated in the following 'check' step
-            maxRealtimeDistance: requestedMaxRealtimeDistance
-              ? {
-                  requestedDistance: requestedMaxRealtimeDistance,
-                  satisfiesRequestedDistance: false,
-                }
-              : undefined,
-          } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
-        }
-
-        case OverallIndexingStatusIds.Backfill: {
-          return {
-            overallStatus: OverallIndexingStatusIds.Backfill,
-            chains: serializedChainIndexingStatuses as Record<
-              ChainIdString,
-              ChainIndexingStatusForBackfillOverallStatus
+              ChainIndexingSnapshotQueued
             >, // forcing the type here, will be validated in the following 'check' step
             omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
-            maxRealtimeDistance: requestedMaxRealtimeDistance
-              ? {
-                  requestedDistance: requestedMaxRealtimeDistance,
-                  satisfiesRequestedDistance: false,
-                }
-              : undefined,
-          } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
+            snapshotTime,
+          } satisfies SerializedOmnichainIndexingSnapshotUnstarted;
         }
 
-        case OverallIndexingStatusIds.Completed: {
+        case OmnichainIndexingStatusIds.Backfill: {
           return {
-            overallStatus: OverallIndexingStatusIds.Completed,
+            omnichainStatus: OmnichainIndexingStatusIds.Backfill,
             chains: serializedChainIndexingStatuses as Record<
               ChainIdString,
-              ChainIndexingCompletedStatus
+              ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill
             >, // forcing the type here, will be validated in the following 'check' step
             omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
-            maxRealtimeDistance: requestedMaxRealtimeDistance
-              ? {
-                  requestedDistance: requestedMaxRealtimeDistance,
-                  satisfiesRequestedDistance: false,
-                }
-              : undefined,
-          } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
+            snapshotTime,
+          } satisfies SerializedOmnichainIndexingSnapshotBackfill;
         }
 
-        case OverallIndexingStatusIds.Following:
-          const overallApproxRealtimeDistance = getOverallApproxRealtimeDistance(chainStatuses);
-
+        case OmnichainIndexingStatusIds.Completed: {
           return {
-            overallStatus: OverallIndexingStatusIds.Following,
+            omnichainStatus: OmnichainIndexingStatusIds.Completed,
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingSnapshotCompleted
+            >, // forcing the type here, will be validated in the following 'check' step
+            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
+            snapshotTime,
+          } satisfies SerializedOmnichainIndexingSnapshotCompleted;
+        }
+
+        case OmnichainIndexingStatusIds.Following:
+          return {
+            omnichainStatus: OmnichainIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
             omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
-            overallApproxRealtimeDistance,
-            maxRealtimeDistance: requestedMaxRealtimeDistance
-              ? {
-                  requestedDistance: requestedMaxRealtimeDistance,
-                  satisfiesRequestedDistance:
-                    overallApproxRealtimeDistance <= requestedMaxRealtimeDistance,
-                }
-              : undefined,
-          } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
+            snapshotTime,
+          } satisfies SerializedOmnichainIndexingSnapshotFollowing;
       }
     })
     .check((ctx) => {
-      const { chains, overallStatus } = ctx.value;
+      const { chains, omnichainStatus } = ctx.value;
       const chainStatuses = Object.values(chains);
       let hasValidChains = false;
 
-      switch (overallStatus) {
-        case OverallIndexingStatusIds.Unstarted:
-          hasValidChains = checkChainIndexingStatusesForUnstartedOverallStatus(chainStatuses);
+      switch (omnichainStatus) {
+        case OmnichainIndexingStatusIds.Unstarted:
+          hasValidChains = checkChainIndexingStatusesForOmnichainStatusUnstarted(chainStatuses);
           break;
 
-        case OverallIndexingStatusIds.Backfill:
-          hasValidChains = checkChainIndexingStatusesForBackfillOverallStatus(chainStatuses);
+        case OmnichainIndexingStatusIds.Backfill:
+          hasValidChains = checkChainIndexingStatusesForOmnichainStatusBackfill(chainStatuses);
           break;
 
-        case OverallIndexingStatusIds.Completed:
-          hasValidChains = checkChainIndexingStatusesForCompletedOverallStatus(chainStatuses);
+        case OmnichainIndexingStatusIds.Completed:
+          hasValidChains = checkChainIndexingStatusesForOmnichainStatusCompleted(chainStatuses);
           break;
 
-        case OverallIndexingStatusIds.Following:
-          hasValidChains = checkChainIndexingStatusesForFollowingOverallStatus(chainStatuses);
+        case OmnichainIndexingStatusIds.Following:
+          hasValidChains = checkChainIndexingStatusesForOmnichainStatusFollowing(chainStatuses);
           break;
       }
 
       if (!hasValidChains) {
         ctx.issues.push({
           code: "custom",
-          input: { chains, overallStatus },
+          input: { chains, omnichainStatus },
           message:
-            "Ponder Metadata includes 'chains' object misconfigured for selected 'overallStatus'",
+            "Ponder Metadata includes 'chains' object misconfigured for selected 'omnichainStatus'",
         });
       }
     });

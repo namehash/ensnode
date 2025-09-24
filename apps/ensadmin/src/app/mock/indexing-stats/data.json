@@ -1,11 +1,11 @@
 {
   "unstarted": {
-    "overallStatus": "unstarted",
+    "omnichainStatus": "unstarted",
     "chains": {
       "1": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1489165544,
             "number": 3327417
@@ -16,7 +16,7 @@
       "10": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1696386695,
             "number": 110393959
@@ -27,7 +27,7 @@
       "8453": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1721834595,
             "number": 17522624
@@ -38,7 +38,7 @@
       "59144": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1720768992,
             "number": 6682888
@@ -46,15 +46,17 @@
           "endBlock": null
         }
       }
-    }
+    },
+    "omnichainIndexingCursor": 1580899661,
+    "snapshotTime": 1580899662
   },
   "backfill": {
-    "overallStatus": "backfill",
+    "omnichainStatus": "backfill",
     "chains": {
       "1": {
         "status": "backfill",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1489165544,
             "number": 3327417
@@ -73,7 +75,7 @@
       "10": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1696386695,
             "number": 110393959
@@ -84,7 +86,7 @@
       "8453": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1721834595,
             "number": 17522624
@@ -95,7 +97,7 @@
       "59144": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1720768992,
             "number": 6682888
@@ -106,7 +108,7 @@
       "567": {
         "status": "queued",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1720768999,
             "number": 6682889
@@ -115,15 +117,16 @@
         }
       }
     },
-    "omnichainIndexingCursor": 1580899661
+    "omnichainIndexingCursor": 1580899661,
+    "snapshotTime": 1580899662
   },
   "following": {
-    "overallStatus": "following",
+    "omnichainStatus": "following",
     "chains": {
       "1": {
         "status": "following",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1489165544,
             "number": 3327417
@@ -136,13 +139,12 @@
         "latestKnownBlock": {
           "timestamp": 1755667451,
           "number": 23180178
-        },
-        "approxRealtimeDistance": 15
+        }
       },
       "10": {
         "status": "following",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1696386695,
             "number": 110393959
@@ -155,13 +157,12 @@
         "latestKnownBlock": {
           "timestamp": 1755667451,
           "number": 140034337
-        },
-        "approxRealtimeDistance": 17
+        }
       },
       "8453": {
         "status": "following",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1721834595,
             "number": 17522624
@@ -174,13 +175,12 @@
         "latestKnownBlock": {
           "timestamp": 1755667451,
           "number": 34439052
-        },
-        "approxRealtimeDistance": 17
+        }
       },
       "59144": {
         "status": "following",
         "config": {
-          "strategy": "indefinite",
+          "type": "indefinite",
           "startBlock": {
             "timestamp": 1720768992,
             "number": 6682888
@@ -193,20 +193,19 @@
         "latestKnownBlock": {
           "timestamp": 1755667451,
           "number": 22269914
-        },
-        "approxRealtimeDistance": 17
+        }
       }
     },
-    "overallApproxRealtimeDistance": 17,
-    "omnichainIndexingCursor": 1755667449
+    "omnichainIndexingCursor": 1755667449,
+    "snapshotTime": 1755667450
   },
   "completed": {
-    "overallStatus": "completed",
+    "omnichainStatus": "completed",
     "chains": {
       "11155111": {
         "status": "completed",
         "config": {
-          "strategy": "definite",
+          "type": "definite",
           "startBlock": {
             "timestamp": 1686901632,
             "number": 3702721
@@ -222,9 +221,7 @@
         }
       }
     },
-    "omnichainIndexingCursor": 1689337584
-  },
-  "indexer-error": {
-    "overallStatus": "indexer-error"
+    "omnichainIndexingCursor": 1689337584,
+    "snapshotTime": 1689337585
   }
 }

@@ -1,21 +1,46 @@
 import { prettifyError } from "zod/v4";
-import { SerializedENSIndexerOverallIndexingStatus } from "./serialized-types";
-import { ENSIndexerOverallIndexingStatus } from "./types";
-import { makeENSIndexerIndexingStatusSchema } from "./zod-schemas";
+import type {
+  SerializedCurrentIndexingProjection,
+  SerializedOmnichainIndexingSnapshot,
+} from "./serialized-types";
+import type { CurrentIndexingProjection, OmnichainIndexingSnapshot } from "./types";
+import {
+  makeCurrentIndexingProjectionSchema,
+  makeOmnichainIndexingSnapshotSchema,
+} from "./zod-schemas";
 
 /**
- * Serialize a {@link ENSIndexerOverallIndexingStatus} object.
+ * Serialize a {@link OmnichainIndexingSnapshot} object.
  */
-export function deserializeENSIndexerIndexingStatus(
-  maybeStatus: SerializedENSIndexerOverallIndexingStatus,
+export function deserializeOmnichainIndexingSnapshot(
+  maybeStatus: SerializedOmnichainIndexingSnapshot,
   valueLabel?: string,
-): ENSIndexerOverallIndexingStatus {
-  const schema = makeENSIndexerIndexingStatusSchema(valueLabel);
+): OmnichainIndexingSnapshot {
+  const schema = makeOmnichainIndexingSnapshotSchema(valueLabel);
   const parsed = schema.safeParse(maybeStatus);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize ENSIndexerIndexingStatus:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize OmnichainIndexingSnapshot:\n${prettifyError(parsed.error)}\n`,
+    );
+  }
+
+  return parsed.data;
+}
+
+/**
+ * Serialize a {@link CurrentIndexingProjection} object.
+ */
+export function deserializeCurrentIndexingProjection(
+  maybeStatus: SerializedCurrentIndexingProjection,
+  valueLabel?: string,
+): CurrentIndexingProjection {
+  const schema = makeCurrentIndexingProjectionSchema(valueLabel);
+  const parsed = schema.safeParse(maybeStatus);
+
+  if (parsed.error) {
+    throw new Error(
+      `Cannot deserialize CurrentIndexingProjection:\n${prettifyError(parsed.error)}\n`,
     );
   }
 
