@@ -27,7 +27,10 @@ const threeDNSBase = maybeGetDatasource(config.namespace, DatasourceNames.ThreeD
  * @returns
  */
 export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
-  // if config.isSubgraphCompatible, we aren't indexing resolver records at all
+  // TODO: this will soon be as simple as confirming that the `resolution` plugin is active and
+  // that the chainId is in the set of chains indexed by the `resolution` plugin.
+
+  // if config.isSubgraphCompatible, we aren't indexing resolver record values for acceleration
   if (config.isSubgraphCompatible) return false;
 
   const isENSRootChain = chainId === ensRoot.chain.id;
