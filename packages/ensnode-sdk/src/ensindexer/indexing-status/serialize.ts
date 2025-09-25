@@ -38,12 +38,14 @@ export function serializeENSIndexerIndexingStatus(
     case OverallIndexingStatusIds.IndexerError:
       return {
         overallStatus: OverallIndexingStatusIds.IndexerError,
+        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
       } satisfies SerializedENSIndexerOverallIndexingErrorStatus;
 
     case OverallIndexingStatusIds.Unstarted:
       return {
         overallStatus: OverallIndexingStatusIds.Unstarted,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
+        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
       } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
 
     case OverallIndexingStatusIds.Backfill:
@@ -51,6 +53,7 @@ export function serializeENSIndexerIndexingStatus(
         overallStatus: OverallIndexingStatusIds.Backfill,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
       } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
 
     case OverallIndexingStatusIds.Completed: {
@@ -58,6 +61,7 @@ export function serializeENSIndexerIndexingStatus(
         overallStatus: OverallIndexingStatusIds.Completed,
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
       } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
     }
 
@@ -67,6 +71,7 @@ export function serializeENSIndexerIndexingStatus(
         chains: serializeChainIndexingStatuses(indexingStatus.chains),
         overallApproxRealtimeDistance: indexingStatus.overallApproxRealtimeDistance,
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+        maxRealtimeDistance: indexingStatus.maxRealtimeDistance,
       } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
   }
 }

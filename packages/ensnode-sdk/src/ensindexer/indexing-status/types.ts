@@ -99,6 +99,21 @@ export interface ChainIndexingDefiniteConfig {
 export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingDefiniteConfig;
 
 /**
+ * Max Realtime Indexing Distance
+ */
+export type MaxRealtimeIndexingDistance<SatisfiesRequestedDistanceType extends boolean> = {
+  /**
+   * Requested max realtime indexing distance.
+   */
+  requestedDistance: Duration;
+
+  /**
+   * Has the requested max realtime indexing distance been achieved?
+   */
+  satisfiesRequestedDistance: SatisfiesRequestedDistanceType;
+};
+
+/**
  * Chain Indexing Status: Queued
  *
  * Notes:
@@ -239,6 +254,14 @@ export interface ENSIndexerOverallIndexingUnstartedStatus {
    * It's impossible for any chain to have status other than "queued".
    */
   chains: Map<ChainId, ChainIndexingQueuedStatus>;
+
+  /**
+   * Max realtime indexing distance
+   *
+   * Optional, if provided, describes the requested max realtime distance,
+   * and how it was not satisfied for the 'unstarted' overall status.
+   */
+  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
 }
 
 /**
@@ -285,6 +308,14 @@ export interface ENSIndexerOverallIndexingBackfillStatus {
    * in the "following" status.
    */
   chains: Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>;
+
+  /**
+   * Max realtime indexing distance
+   *
+   * Optional, if provided, describes the requested max realtime distance,
+   * and how it was not satisfied for the 'backfill' overall status.
+   */
+  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
 }
 
 /**
@@ -322,6 +353,14 @@ export interface ENSIndexerOverallIndexingCompletedStatus {
    * It's impossible for any chain to have status other than "completed".
    */
   chains: Map<ChainId, ChainIndexingCompletedStatus>;
+
+  /**
+   * Max realtime indexing distance
+   *
+   * Optional, if provided, describes the requested max realtime distance,
+   * and how it was not satisfied for the 'completed' overall status.
+   */
+  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
 }
 
 /**
@@ -366,6 +405,14 @@ export interface ENSIndexerOverallIndexingFollowingStatus {
    * across all chains with status: 'following'.
    */
   overallApproxRealtimeDistance: Duration;
+
+  /**
+   * Max realtime indexing distance
+   *
+   * Optional, if provided, describes the requested max realtime distance,
+   * and if it was satisfied for the 'following' overall status.
+   */
+  maxRealtimeDistance?: MaxRealtimeIndexingDistance<boolean>;
 }
 
 /**
@@ -381,6 +428,14 @@ export interface ENSIndexerOverallIndexingErrorStatus {
    * Overall Indexing Status
    */
   overallStatus: typeof OverallIndexingStatusIds.IndexerError;
+
+  /**
+   * Max realtime indexing distance
+   *
+   * Optional, if provided, describes the requested max realtime distance,
+   * and how it was not satisfied for the 'indexer-error' overall status.
+   */
+  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
 }
 
 /**

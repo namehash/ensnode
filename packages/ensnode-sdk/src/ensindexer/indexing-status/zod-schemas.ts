@@ -39,6 +39,7 @@ import {
   ENSIndexerOverallIndexingErrorStatus,
   ENSIndexerOverallIndexingFollowingStatus,
   ENSIndexerOverallIndexingUnstartedStatus,
+  MaxRealtimeIndexingDistance,
   OverallIndexingStatusIds,
 } from "./types";
 
@@ -198,6 +199,28 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
     });
 
 /**
+ * Makes Zod schema for {@link MaxRealtimeIndexingDistance<boolean>}.
+ *
+ * Note: `satisfiesRequestedDistance` can be any boolean value.
+ */
+const maxRealtimeDistanceAchievableSchema = (valueLabel?: string) =>
+  z.strictObject({
+    requestedDistance: makeDurationSchema(valueLabel),
+    satisfiesRequestedDistance: z.boolean(),
+  });
+
+/**
+ *  Makes Zod schema for {@link MaxRealtimeIndexingDistance<false>}.
+ *
+ * Note: `satisfiesRequestedDistance` is always `false`.
+ */
+const maxRealtimeDistanceSchema = (valueLabel?: string) =>
+  z.strictObject({
+    requestedDistance: makeDurationSchema(valueLabel),
+    satisfiesRequestedDistance: z.literal(false, { error: `${valueLabel} must be set to 'false'` }),
+  });
+
+/**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingUnstartedStatus}
  */
 const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
@@ -213,6 +236,7 @@ const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingQueuedStatus>),
+      maxRealtimeDistance: maxRealtimeDistanceSchema(valueLabel).optional(),
     })
     .refine(
       (indexingStatus) => {
@@ -272,6 +296,7 @@ each chain has to have a status of either "queued", "backfill" or "completed"`,
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>),
       omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+      maxRealtimeDistance: maxRealtimeDistanceSchema(valueLabel).optional(),
     })
     .refine(
       (indexingStatus) => {
@@ -303,6 +328,7 @@ const makeCompletedOverallStatusSchema = (valueLabel?: string) =>
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingCompletedStatus>),
       omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+      maxRealtimeDistance: maxRealtimeDistanceSchema(valueLabel).optional(),
     })
     .refine(
       (indexingStatus) => {
@@ -334,6 +360,7 @@ const makeFollowingOverallStatusSchema = (valueLabel?: string) =>
       chains: makeChainIndexingStatusesSchema(valueLabel),
       overallApproxRealtimeDistance: makeDurationSchema(valueLabel),
       omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+      maxRealtimeDistance: maxRealtimeDistanceAchievableSchema(valueLabel).optional(),
     })
     .refine(
       (indexingStatus) => {
@@ -343,6 +370,18 @@ const makeFollowingOverallStatusSchema = (valueLabel?: string) =>
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
     )
+    .refine(({ overallApproxRealtimeDistance, maxRealtimeDistance }) => {
+      // no invariants to enforce if maxRealtimeDistance was not requested
+      if (typeof maxRealtimeDistance === "undefined") {
+        return true;
+      }
+
+      // otherwise, compare the expected `satisfiesRequestedDistance` with its actual value
+      const expectedResult = maxRealtimeDistance.satisfiesRequestedDistance;
+      const actualResult = overallApproxRealtimeDistance <= maxRealtimeDistance.requestedDistance;
+
+      return expectedResult === actualResult;
+    })
     .refine(
       (indexingStatus) =>
         checkChainIndexingStatusesForFollowingOverallStatus(
