@@ -84,21 +84,7 @@ export type ConfigResponse = ENSIndexerPublicConfig;
 /**
  * ENSIndexer Overall Indexing Status Request
  */
-export interface IndexingStatusRequest {
-  /**
-   * Max Realtime Distance (optional)
-   *
-   * A duration value in seconds, representing the max allowed distance
-   * between the latest indexed block of each chain and the “tip” of
-   * all indexed chains. Setting this parameter influences the HTTP response
-   * code as follows:
-   * - Success (200 OK): The latest indexed block of each chain
-   *   is within the requested distance from realtime.
-   * - Service Unavailable (503): The latest indexed block of each chain
-   *   is NOT within the requested distance from realtime.
-   */
-  maxRealtimeDistance?: Duration;
-}
+export interface IndexingStatusRequest {}
 
 /**
  * ENSIndexer Overall Indexing Status Response

@@ -188,17 +188,13 @@ When monitoring indexing or performing time-sensitive operations, you may wish t
 verify that an ENSNode instance has indexed sufficient blocks to be within
 an acceptable distance from the current "tip" of all indexed chains.
 
-The Indexing Status API supports an optional `maxRealtimeDistance` query
-parameter that enables this verification.
+The Indexing Status API supports a `maxRealtimeDistance` field in response object
+that enables this verification.
 
 #### How it works
 
-The `maxRealtimeDistance` parameter accepts a duration value in seconds,
-representing the max allowed distance between the latest indexed block of each chain and the "tip" of all indexed chains.
-When you include this parameter it influences the HTTP response code as follows:
-
-- **Success (200 OK)**: The latest indexed block of each chain is within the requested distance from realtime.
-- **Service Unavailable (503)**: The latest indexed block of each chain is NOT within the requested distance from realtime.
+The `maxRealtimeDistance` field holds a duration value in seconds,
+representing the max distance between the now and the latest indexed block of each chain and the "tip" of all indexed chains.
 
 This allows your client to programmatically determine whether the ENSNode
 instance is sufficiently synchronized for your use case before proceeding with

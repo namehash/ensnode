@@ -31,35 +31,21 @@ app.get("/config", async (c) => {
   return c.json(serializeENSIndexerPublicConfig(publicConfig));
 });
 
-app.get("/indexing-status", validate("query", routes.indexingStatus.query), async (c) => {
-  const { maxRealtimeDistance } = c.req.valid("query");
-
+app.get("/indexing-status", async (c) => {
   // get system timestamp for the current request
   const systemTimestamp = getUnixTime(new Date());
 
-  const indexingStatus = await buildIndexingStatus(
-    publicClients,
-    systemTimestamp,
-    maxRealtimeDistance,
-  );
+  const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
 
   const serializedIndexingStatus = serializedCurrentIndexingProjection(indexingStatus);
 
-  // respond with custom server error if ENSIndexer is not available
+  // respond with server error if current indexing projection is unavailable
   if (indexingStatus.type === null) {
     return c.json(
       serializedIndexingStatus,
       IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
     );
   }
-
-  // // respond with custom server error if requested distance hasn't been achieved yet
-  // if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
-  //   return c.json(
-  //     serializedIndexingStatus,
-  //     IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
-  //   );
-  // }
 
   // respond with the serialized indexing status object
   return c.json(serializedIndexingStatus);

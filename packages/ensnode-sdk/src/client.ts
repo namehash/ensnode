@@ -328,12 +328,8 @@ export class ENSNodeClient {
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
    */
-  async indexingStatus(options?: IndexingStatusRequest): Promise<IndexingStatusResponse> {
+  async indexingStatus(): Promise<IndexingStatusResponse> {
     const url = new URL(`/api/indexing-status`, this.options.url);
-
-    if (typeof options?.maxRealtimeDistance !== "undefined") {
-      url.searchParams.set("maxRealtimeDistance", `${options.maxRealtimeDistance}`);
-    }
 
     const response = await fetch(url);
 
