@@ -250,8 +250,6 @@ describe("ENSIndexer: Indexing Status", () => {
       // act
       const result = serializeOmnichainIndexingSnapshot(indexingStatus);
 
-      console.log(result);
-
       // assert
       expect(result).toMatchObject({
         omnichainStatus: OmnichainIndexingStatusIds.Following,

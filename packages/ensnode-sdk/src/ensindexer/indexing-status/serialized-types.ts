@@ -1,7 +1,9 @@
 import type { ChainIdString } from "../../shared";
 import type {
   ChainIndexingSnapshot,
+  ChainIndexingSnapshotBackfill,
   ChainIndexingSnapshotCompleted,
+  ChainIndexingSnapshotFollowing,
   ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
   ChainIndexingSnapshotQueued,
   CurrentIndexingProjection,
@@ -13,6 +15,31 @@ import type {
   OmnichainIndexingSnapshotFollowing,
   OmnichainIndexingSnapshotUnstarted,
 } from "./types";
+
+/**
+ * Serialized representation of {@link ChainIndexingSnapshot}
+ */
+export type SerializedChainIndexingSnapshot = ChainIndexingSnapshot;
+
+/**
+ * Serialized representation of {@link ChainIndexingSnapshotQueued}
+ */
+export type SerializedChainIndexingSnapshotQueued = ChainIndexingSnapshotQueued;
+
+/**
+ * Serialized representation of {@link ChainIndexingSnapshotBackfill}
+ */
+export type SerializedChainIndexingSnapshotBackfill = ChainIndexingSnapshotBackfill;
+
+/**
+ * Serialized representation of {@link ChainIndexingSnapshotCompleted}
+ */
+export type SerializedChainIndexingSnapshotCompleted = ChainIndexingSnapshotCompleted;
+
+/**
+ * Serialized representation of {@link ChainIndexingSnapshotFollowing}
+ */
+export type SerializedChainIndexingSnapshotFollowing = ChainIndexingSnapshotFollowing;
 
 /**
  * Serialized representation of {@link OmnichainIndexingSnapshotUnstarted}

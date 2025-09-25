@@ -466,7 +466,6 @@ export type IndexingStrategyIds = (typeof IndexingStrategyIds)[keyof typeof Inde
  *   - `CurrentIndexingProjectionOmnichain` as a function of:
  *      - An omnichain indexing snapshot (from cache)
  *      - "now" (aka "realtime")
- *      - `maxRealtimeDistance` (as might be associated the request being processed)
  * - This also includes an explicit field for `strategy` which provides
  *   more "future-proofing" and explicitly identifies how this data model is
  *   specific to omnichain indexing -- the data model and invariants would be

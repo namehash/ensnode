@@ -46,6 +46,9 @@ export type Datetime = Date;
 /**
  * Unix timestamp value
  *
+ * Represents the number of seconds that have elapsed
+ * since January 1, 1970 (midnight UTC/GMT).
+ *
  * Guaranteed to be an integer.
  */
 export type UnixTimestamp = number;

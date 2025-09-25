@@ -7,22 +7,13 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
-import { type ChainId, type UnixTimestamp, deserializeChainId } from "../../shared";
-import * as blockRef from "../../shared/block-ref";
+import { type ChainId, deserializeChainId } from "../../shared";
 import {
   makeBlockRefSchema,
   makeChainIdStringSchema,
   makeDurationSchema,
   makeUnixTimestampSchema,
 } from "../../shared/zod-schemas";
-import {
-  checkChainIndexingStatusesForOmnichainStatusBackfill,
-  checkChainIndexingStatusesForOmnichainStatusCompleted,
-  checkChainIndexingStatusesForOmnichainStatusFollowing,
-  checkChainIndexingStatusesForOmnichainStatusUnstarted,
-  getOmnichainIndexingCursor,
-  getOmnichainIndexingStatus,
-} from "./helpers";
 import {
   ChainIndexingConfig,
   ChainIndexingConfigTypeIds,
@@ -33,6 +24,7 @@ import {
   ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
   ChainIndexingSnapshotQueued,
   ChainIndexingStatusIds,
+  CurrentIndexingProjectionOmnichain,
   IndexingStrategyIds,
   OmnichainIndexingSnapshotBackfill,
   OmnichainIndexingSnapshotCompleted,
@@ -40,6 +32,22 @@ import {
   OmnichainIndexingSnapshotUnstarted,
   OmnichainIndexingStatusIds,
 } from "./types";
+import {
+  invariant_chainSnapshotBackfillBlocks,
+  invariant_chainSnapshotCompletedBlocks,
+  invariant_chainSnapshotFollowingBlocks,
+  invariant_chainSnapshotQueuedBlocks,
+  invariant_currentIndexingProjectionOmnichainMaxRealtimeDistanceIsCorrect,
+  invariant_currentIndexingProjectionOmnichainRealtimeIsAfterOrEqualToSnapshotTime,
+  invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain,
+  invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains,
+  invariant_omnichainSnapshotBackfillHasValidChains,
+  invariant_omnichainSnapshotCompletedHasValidChains,
+  invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot,
+  invariant_omnichainSnapshotTimeIsAfterLatestKnownBlock,
+  invariant_omnichainSnapshotTimeIsAfterOmnichainIndexingCursor,
+  invariant_omnichainSnapshotUnstartedHasValidChains,
+} from "./validations";
 
 /**
  * Makes Zod schema for {@link ChainIndexingConfig} type.
@@ -67,13 +75,7 @@ export const makeChainIndexingSnapshotQueuedSchema = (valueLabel: string = "Valu
       status: z.literal(ChainIndexingStatusIds.Queued),
       config: makeChainIndexingConfigSchema(valueLabel),
     })
-    .refine(
-      ({ config }) =>
-        config.endBlock === null || blockRef.isBeforeOrEqualTo(config.startBlock, config.endBlock),
-      {
-        error: `config.startBlock must be before or same as config.endBlock.`,
-      },
-    );
+    .check(invariant_chainSnapshotQueuedBlocks);
 
 /**
  * Makes Zod schema for {@link ChainIndexingSnapshotBackfill} type.
@@ -86,56 +88,7 @@ export const makeChainIndexingSnapshotBackfillSchema = (valueLabel: string = "Va
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
       backfillEndBlock: makeBlockRefSchema(valueLabel),
     })
-    .refine(
-      ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock),
-      {
-        error: `config.startBlock must be before or same as latestIndexedBlock.`,
-      },
-    )
-    .refine(
-      ({ latestIndexedBlock, backfillEndBlock }) =>
-        blockRef.isBeforeOrEqualTo(latestIndexedBlock, backfillEndBlock),
-      {
-        error: `latestIndexedBlock must be before or same as backfillEndBlock.`,
-      },
-    )
-    .refine(
-      ({ config, backfillEndBlock }) =>
-        config.endBlock === null || blockRef.isEqualTo(backfillEndBlock, config.endBlock),
-      {
-        error: `backfillEndBlock must be the same as config.endBlock.`,
-      },
-    );
-
-/**
- * Makes Zod schema for {@link ChainIndexingSnapshotFollowing} type.
- */
-export const makeChainIndexingSnapshotFollowingSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject({
-      status: z.literal(ChainIndexingStatusIds.Following),
-      config: z.strictObject({
-        type: z.literal(ChainIndexingConfigTypeIds.Indefinite),
-        startBlock: makeBlockRefSchema(valueLabel),
-      }),
-      latestIndexedBlock: makeBlockRefSchema(valueLabel),
-      latestKnownBlock: makeBlockRefSchema(valueLabel),
-    })
-    .refine(
-      ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock),
-      {
-        error: `config.startBlock must be before or same as latestIndexedBlock.`,
-      },
-    )
-    .refine(
-      ({ latestIndexedBlock, latestKnownBlock }) =>
-        blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock),
-      {
-        error: `latestIndexedBlock must be before or same as latestKnownBlock.`,
-      },
-    );
+    .check(invariant_chainSnapshotBackfillBlocks);
 
 /**
  * Makes Zod schema for {@link ChainIndexingSnapshotCompleted} type.
@@ -151,20 +104,23 @@ export const makeChainIndexingSnapshotCompletedSchema = (valueLabel: string = "V
       }),
       latestIndexedBlock: makeBlockRefSchema(valueLabel),
     })
-    .refine(
-      ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock),
-      {
-        error: `config.startBlock must be before or same as latestIndexedBlock.`,
-      },
-    )
-    .refine(
-      ({ config, latestIndexedBlock }) =>
-        blockRef.isBeforeOrEqualTo(latestIndexedBlock, config.endBlock),
-      {
-        error: `latestIndexedBlock must be before or same as config.endBlock.`,
-      },
-    );
+    .check(invariant_chainSnapshotCompletedBlocks);
+
+/**
+ * Makes Zod schema for {@link ChainIndexingSnapshotFollowing} type.
+ */
+export const makeChainIndexingSnapshotFollowingSchema = (valueLabel: string = "Value") =>
+  z
+    .strictObject({
+      status: z.literal(ChainIndexingStatusIds.Following),
+      config: z.strictObject({
+        type: z.literal(ChainIndexingConfigTypeIds.Indefinite),
+        startBlock: makeBlockRefSchema(valueLabel),
+      }),
+      latestIndexedBlock: makeBlockRefSchema(valueLabel),
+      latestKnownBlock: makeBlockRefSchema(valueLabel),
+    })
+    .check(invariant_chainSnapshotFollowingBlocks);
 
 /**
  * Makes Zod schema for {@link ChainIndexingSnapshot}
@@ -199,168 +155,54 @@ export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
  * Makes Zod schema for {@link OmnichainIndexingSnapshotUnstarted}
  */
 const makeOmnichainIndexingSnapshotUnstartedSchema = (valueLabel?: string) =>
-  z
-    .strictObject({
-      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
-      chains: makeChainIndexingStatusesSchema(valueLabel)
-        .refine(
-          (chains) =>
-            checkChainIndexingStatusesForOmnichainStatusUnstarted(Array.from(chains.values())),
-          {
-            error: `${valueLabel} all chains must have "queued" status`,
-          },
-        )
-        .transform((chains) => chains as Map<ChainId, ChainIndexingSnapshotQueued>),
-      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-      snapshotTime: makeUnixTimestampSchema(valueLabel),
-    })
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        return getOmnichainIndexingStatus(chains) === indexingStatus.omnichainStatus;
-      },
-      { error: `${valueLabel} is an invalid omnichainStatus.` },
-    );
-
-/**
- * Checks that the omnichain indexing cursor is lower than the earliest start block
- * across all queued chains.
- *
- * Note: if there are no queued chains, the invariant holds.
- *
- * @param indexingStatus The current indexing status.
- * @returns true if the invariant holds, false otherwise.
- */
-function invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains(indexingStatus: {
-  omnichainIndexingCursor: UnixTimestamp;
-  chains: Map<ChainId, ChainIndexingSnapshot>;
-}) {
-  const chains = Array.from(indexingStatus.chains.values());
-  const queuedChains = chains.filter((chain) => chain.status === ChainIndexingStatusIds.Queued);
-
-  // there are no queued chains
-  if (queuedChains.length === 0) {
-    // the invariant holds
-    return true;
-  }
-
-  const queuedChainStartBlocks = queuedChains.map((chain) => chain.config.startBlock.timestamp);
-  const queuedChainEarliestStartBlock = Math.min(...queuedChainStartBlocks);
-
-  // there are queued chains
-  // the invariant holds if the omnichain indexing cursor is lower than
-  // the earliest start block across all queued chains
-  return indexingStatus.omnichainIndexingCursor < queuedChainEarliestStartBlock;
-}
+  z.strictObject({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
+    chains: makeChainIndexingStatusesSchema(valueLabel)
+      .check(invariant_omnichainSnapshotUnstartedHasValidChains)
+      .transform((chains) => chains as Map<ChainId, ChainIndexingSnapshotQueued>),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    snapshotTime: makeUnixTimestampSchema(valueLabel),
+  });
 
 /**
  * Makes Zod schema for {@link OmnichainIndexingSnapshotBackfill}
  */
 const makeOmnichainIndexingSnapshotBackfillSchema = (valueLabel?: string) =>
-  z
-    .strictObject({
-      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
-      chains: makeChainIndexingStatusesSchema(valueLabel)
-        .refine(
-          (chains) =>
-            checkChainIndexingStatusesForOmnichainStatusBackfill(Array.from(chains.values())),
-          {
-            error: `${valueLabel} at least one chain must be in "backfill" status and
-each chain has to have a status of either "queued", "backfill" or "completed"`,
-          },
-        )
-        .transform(
-          (chains) =>
-            chains as Map<ChainId, ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill>,
-        ),
-      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-      snapshotTime: makeUnixTimestampSchema(valueLabel),
-    })
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        return getOmnichainIndexingStatus(chains) === indexingStatus.omnichainStatus;
-      },
-      { error: `${valueLabel} is an invalid omnichainStatus.` },
-    )
-    .refine(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains, {
-      error:
-        "omnichainIndexingCursor must be lower than the earliest config.startBlock across all queued chains",
-    });
+  z.strictObject({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
+    chains: makeChainIndexingStatusesSchema(valueLabel)
+      .check(invariant_omnichainSnapshotBackfillHasValidChains)
+      .transform(
+        (chains) =>
+          chains as Map<ChainId, ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill>,
+      ),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    snapshotTime: makeUnixTimestampSchema(valueLabel),
+  });
 
 /**
  * Makes Zod schema for {@link OmnichainIndexingSnapshotCompleted}
  */
 const makeOmnichainIndexingSnapshotCompletedSchema = (valueLabel?: string) =>
-  z
-    .strictObject({
-      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
-      chains: makeChainIndexingStatusesSchema(valueLabel)
-        .refine(
-          (chains) =>
-            checkChainIndexingStatusesForOmnichainStatusCompleted(Array.from(chains.values())),
-          {
-            error: `${valueLabel} all chains must have "completed" status`,
-          },
-        )
-        .transform((chains) => chains as Map<ChainId, ChainIndexingSnapshotCompleted>),
-      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-      snapshotTime: makeUnixTimestampSchema(valueLabel),
-    })
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        return getOmnichainIndexingStatus(chains) === indexingStatus.omnichainStatus;
-      },
-      { error: `${valueLabel} is an invalid omnichainStatus.` },
-    )
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        return indexingStatus.omnichainIndexingCursor === getOmnichainIndexingCursor(chains);
-      },
-      {
-        error:
-          "omnichainIndexingCursor must be equal to the highest latestIndexedBlock across all chains",
-      },
-    );
+  z.strictObject({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
+    chains: makeChainIndexingStatusesSchema(valueLabel)
+      .check(invariant_omnichainSnapshotCompletedHasValidChains)
+      .transform((chains) => chains as Map<ChainId, ChainIndexingSnapshotCompleted>),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    snapshotTime: makeUnixTimestampSchema(valueLabel),
+  });
 
 /**
  * Makes Zod schema for {@link OmnichainIndexingSnapshotFollowing}
  */
 const makeOmnichainIndexingSnapshotFollowingSchema = (valueLabel?: string) =>
-  z
-    .strictObject({
-      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
-      chains: makeChainIndexingStatusesSchema(valueLabel),
-      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-      snapshotTime: makeUnixTimestampSchema(valueLabel),
-    })
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        return getOmnichainIndexingStatus(chains) === indexingStatus.omnichainStatus;
-      },
-      { error: `${valueLabel} is an invalid omnichainStatus.` },
-    )
-    .refine(
-      (indexingStatus) =>
-        checkChainIndexingStatusesForOmnichainStatusFollowing(
-          Array.from(indexingStatus.chains.values()),
-        ),
-      {
-        error: `${valueLabel} at least one chain must be in "following" status`,
-      },
-    )
-    .refine(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains, {
-      error:
-        "omnichainIndexingCursor must be lower than the earliest config.startBlock across all queued chains",
-    });
+  z.strictObject({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
+    chains: makeChainIndexingStatusesSchema(valueLabel),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    snapshotTime: makeUnixTimestampSchema(valueLabel),
+  });
 
 /**
  * Omnichain Indexing Snapshot Schema
@@ -371,22 +213,34 @@ const makeOmnichainIndexingSnapshotFollowingSchema = (valueLabel?: string) =>
 export const makeOmnichainIndexingSnapshotSchema = (
   valueLabel: string = "Omnichain Indexing Snapshot",
 ) =>
-  z.discriminatedUnion("omnichainStatus", [
-    makeOmnichainIndexingSnapshotUnstartedSchema(valueLabel),
-    makeOmnichainIndexingSnapshotBackfillSchema(valueLabel),
-    makeOmnichainIndexingSnapshotCompletedSchema(valueLabel),
-    makeOmnichainIndexingSnapshotFollowingSchema(valueLabel),
-  ]);
+  z
+    .discriminatedUnion("omnichainStatus", [
+      makeOmnichainIndexingSnapshotUnstartedSchema(valueLabel),
+      makeOmnichainIndexingSnapshotBackfillSchema(valueLabel),
+      makeOmnichainIndexingSnapshotCompletedSchema(valueLabel),
+      makeOmnichainIndexingSnapshotFollowingSchema(valueLabel),
+    ])
+    .check(invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot)
+    .check(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains)
+    .check(invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain)
+    .check(invariant_omnichainSnapshotTimeIsAfterOmnichainIndexingCursor)
+    .check(invariant_omnichainSnapshotTimeIsAfterLatestKnownBlock);
 
+/**
+ * Makes Zod schema for {@link CurrentIndexingProjectionOmnichain}
+ */
 const makeCurrentIndexingProjectionOmnichainSchema = (
   valueLabel: string = "Current Indexing Projection",
 ) =>
-  z.strictObject({
-    type: z.literal(IndexingStrategyIds.Omnichain),
-    realtime: makeUnixTimestampSchema(valueLabel),
-    maxRealtimeDistance: makeDurationSchema(valueLabel),
-    snapshot: makeOmnichainIndexingSnapshotSchema(valueLabel),
-  });
+  z
+    .strictObject({
+      type: z.literal(IndexingStrategyIds.Omnichain),
+      realtime: makeUnixTimestampSchema(valueLabel),
+      maxRealtimeDistance: makeDurationSchema(valueLabel),
+      snapshot: makeOmnichainIndexingSnapshotSchema(valueLabel),
+    })
+    .check(invariant_currentIndexingProjectionOmnichainRealtimeIsAfterOrEqualToSnapshotTime)
+    .check(invariant_currentIndexingProjectionOmnichainMaxRealtimeDistanceIsCorrect);
 
 const makeCurrentIndexingProjectionUnavailableSchema = (
   valueLabel: string = "Current Indexing Projection Unavailable",
@@ -398,6 +252,12 @@ const makeCurrentIndexingProjectionUnavailableSchema = (
     snapshot: z.null(),
   });
 
+/**
+ * Current Indexing Projection Schema
+ *
+ * Makes a Zod schema definition for validating current indexing projection
+ * based on the provided indexing snapshot.
+ */
 export const makeCurrentIndexingProjectionSchema = (
   valueLabel: string = "Current Indexing Projection",
 ) =>

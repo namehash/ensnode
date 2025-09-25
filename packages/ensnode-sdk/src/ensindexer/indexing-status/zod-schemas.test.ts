@@ -58,7 +58,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as config.endBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `config.endBlock`.",
+        );
       });
     });
 
@@ -109,7 +111,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        );
       });
 
       it("won't parse if the latestIndexedBlock is after the backfillEndBlock", () => {
@@ -129,7 +133,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as backfillEndBlock.`);
+        expect(notParsed).toBe(
+          "✖ `latestIndexedBlock` must be before or same as `backfillEndBlock`.",
+        );
       });
 
       it("won't parse if the backfillEndBlock different than the config.endBlock", () => {
@@ -149,7 +155,7 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ backfillEndBlock must be the same as config.endBlock.`);
+        expect(notParsed).toBe("✖ `backfillEndBlock` must be the same as `config.endBlock`.");
       });
     });
 
@@ -197,7 +203,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        );
       });
 
       it("won't parse if the latestIndexedBlock is after the latestKnownBlock", () => {
@@ -216,7 +224,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as latestKnownBlock.`);
+        expect(notParsed).toBe(
+          "✖ `latestIndexedBlock` must be before or same as `latestKnownBlock`.",
+        );
       });
     });
 
@@ -264,7 +274,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        );
       });
 
       it("won't parse if the latestIndexedBlock is after the config.endBlock", () => {
@@ -283,7 +295,9 @@ describe("ENSIndexer: Indexing Status", () => {
         const notParsed = formatParseError(makeChainIndexingSnapshotSchema().safeParse(serialized));
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as config.endBlock.`);
+        expect(notParsed).toBe(
+          "✖ `latestIndexedBlock` must be before or same as `config.endBlock`.",
+        );
       });
     });
   });

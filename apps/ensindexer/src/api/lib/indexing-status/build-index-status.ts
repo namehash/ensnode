@@ -13,32 +13,34 @@
 import {
   type BlockRef,
   CurrentIndexingProjection,
+  CurrentIndexingProjectionUnavailable,
   Duration,
   IndexingStatusResponse,
   IndexingStrategyIds,
   OmnichainIndexingSnapshot,
   UnixTimestamp,
+  createProjection,
+  deserializeCurrentIndexingProjection,
   deserializeOmnichainIndexingSnapshot,
 } from "@ensnode/ensnode-sdk";
 import { prettifyError } from "zod/v4";
 
 import config from "@/config";
 import ponderConfig from "@/ponder/config";
+import { getUnixTime } from "date-fns";
 import {
   type ChainName,
   type PonderStatus,
   type PrometheusMetrics,
   type PublicClient,
   type UnvalidatedChainMetadata,
+  createOmnichainIndexingSnapshot,
   fetchBlockRef,
   fetchPonderMetrics,
   fetchPonderStatus,
   getChainsBlockrange,
 } from "./ponder-metadata";
-import {
-  PonderAppSettingsSchema,
-  makePonderChainMetadataSchema,
-} from "./ponder-metadata/zod-schemas";
+import { makePonderChainMetadataSchema } from "./ponder-metadata/zod-schemas";
 
 /**
  * Chain Block Refs
@@ -167,7 +169,6 @@ async function getChainsBlockRefs(
 export async function buildIndexingStatus(
   publicClients: Record<ChainName, PublicClient>,
   systemTimestamp: UnixTimestamp,
-  maxRealtimeDistance: Duration | undefined,
 ): Promise<IndexingStatusResponse> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
@@ -184,30 +185,12 @@ export async function buildIndexingStatus(
   } catch (error) {
     console.error(`Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}`);
 
-    // TODO: implement CurrentIndexingProjectionUnavailable type response
-    throw new Error("CurrentIndexingProjectionUnavailable not implemented yet");
-
-    // return deserializeOmnichainIndexingSnapshot({
-    //   omnichainStatus: OmnichainIndexingStatusIds.IndexerError,
-    //   maxRealtimeDistance: maxRealtimeDistance
-    //     ? {
-    //         requestedDistance: maxRealtimeDistance,
-    //         satisfiesRequestedDistance: false,
-    //       }
-    //     : undefined,
-    // } satisfies ENSIndexerOverallIndexingErrorStatus);
-  }
-
-  // Invariant: Ponder command & ordering are as expected
-  const parsedAppSettings = PonderAppSettingsSchema.safeParse({
-    command: metrics.getLabel("ponder_settings_info", "command"),
-    ordering: metrics.getLabel("ponder_settings_info", "ordering"),
-  });
-
-  if (parsedAppSettings.error) {
-    throw new Error(
-      "Failed to build IndexingStatus object: \n" + prettifyError(parsedAppSettings.error) + "\n",
-    );
+    return deserializeCurrentIndexingProjection({
+      type: null,
+      realtime: systemTimestamp,
+      maxRealtimeDistance: null,
+      snapshot: null,
+    } satisfies CurrentIndexingProjectionUnavailable);
   }
 
   // get BlockRefs for relevant blocks
@@ -243,26 +226,26 @@ export async function buildIndexingStatus(
 
   // parse chain metadata for each indexed chain
   const schema = makePonderChainMetadataSchema(chainNames);
-  const parsed = schema.safeParse({
-    appSettings: parsedAppSettings.data,
-    chains,
-    maxRealtimeDistance,
-  });
+  const parsed = schema.safeParse(chains);
 
   if (!parsed.success) {
     throw new Error(
-      "Failed to build IndexingStatus object: \n" + prettifyError(parsed.error) + "\n",
+      "Failed to build SerializedOmnichainIndexingSnapshot object: \n" +
+        prettifyError(parsed.error) +
+        "\n",
     );
   }
 
-  // deserialize to ensure the final object is fully validated
-  const snapshot = deserializeOmnichainIndexingSnapshot(parsed.data);
+  // TODO: ensure that `systemTimestamp` is the right timestamp to use here.
+  const snapshot = createOmnichainIndexingSnapshot(parsed.data, systemTimestamp);
 
-  // construct the final OmnichainIndexingSnapshot object from validated chain metadata
-  return {
-    type: IndexingStrategyIds.Omnichain,
-    realtime: Math.max(systemTimestamp, snapshot.snapshotTime),
-    snapshot,
-    maxRealtimeDistance: systemTimestamp,
-  } as CurrentIndexingProjection;
+  // Get the current system timestamp for the new time
+  // Note: this timestamp might be significantly later than `systemTimestamp`
+  // passed as `buildIndexingStatus` input param, depending on how long
+  // the above operations took to complete (network requests, validation, etc).
+  // TODO: ensure that a "now" timestamp is the right timestamp to use here.
+  const now = getUnixTime(new Date());
+
+  // create the indexing status response
+  return createProjection(snapshot, now);
 }

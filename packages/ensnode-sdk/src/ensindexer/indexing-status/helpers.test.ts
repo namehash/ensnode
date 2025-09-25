@@ -200,9 +200,8 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
 });
 
 describe("getOmnichainIndexingCursor", () => {
-  it("returns the correct cursor for the given chain statuses", () => {
+  it("returns the correct cursor for the given chains in any status", () => {
     // arrange
-
     const evenLaterBlockRef: BlockRef = {
       timestamp: latestBlockRef.timestamp + 1000,
       number: latestBlockRef.number + 1000,
@@ -255,14 +254,8 @@ describe("getOmnichainIndexingCursor", () => {
     expect(omnichainIndexingCursor).toEqual(latestBlockRef.timestamp);
   });
 
-  it("throws error when no chains were provided", () => {
-    expect(() => getOmnichainIndexingCursor([])).toThrowError(
-      /Unable to determine omnichain indexing cursor/,
-    );
-  });
-
-  it("throws error when all chains are in 'queued' status", () => {
-    expect(() =>
+  it("returns the correct cursor for the given queued chains only", () => {
+    expect(
       getOmnichainIndexingCursor([
         {
           status: ChainIndexingStatusIds.Queued,
@@ -271,7 +264,66 @@ describe("getOmnichainIndexingCursor", () => {
             startBlock: earliestBlockRef,
           },
         } satisfies ChainIndexingSnapshotQueued,
+        {
+          status: ChainIndexingStatusIds.Queued,
+          config: {
+            type: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: laterBlockRef,
+          },
+        } satisfies ChainIndexingSnapshotQueued,
       ]),
-    ).toThrowError(/Unable to determine omnichain indexing cursor/);
+    ).toEqual(earliestBlockRef.timestamp - 1);
+  });
+
+  it("returns the correct cursor for the given indexed chains", () => {
+    // arrange
+    const evenLaterBlockRef: BlockRef = {
+      timestamp: latestBlockRef.timestamp + 1000,
+      number: latestBlockRef.number + 1000,
+    };
+
+    const chainStatuses = [
+      {
+        status: ChainIndexingStatusIds.Backfill,
+        config: {
+          type: ChainIndexingConfigTypeIds.Definite,
+          startBlock: earliestBlockRef,
+          endBlock: latestBlockRef,
+        },
+        latestIndexedBlock: earlierBlockRef,
+        backfillEndBlock: laterBlockRef,
+      } satisfies ChainIndexingSnapshotBackfill,
+
+      {
+        status: ChainIndexingStatusIds.Following,
+        config: {
+          type: ChainIndexingConfigTypeIds.Indefinite,
+          startBlock: earliestBlockRef,
+        },
+        latestIndexedBlock: evenLaterBlockRef,
+        latestKnownBlock: laterBlockRef,
+      } satisfies ChainIndexingSnapshotFollowing,
+      {
+        status: ChainIndexingStatusIds.Completed,
+        config: {
+          type: ChainIndexingConfigTypeIds.Definite,
+          startBlock: earlierBlockRef,
+          endBlock: latestBlockRef,
+        },
+        latestIndexedBlock: latestBlockRef,
+      } satisfies ChainIndexingSnapshotCompleted,
+    ];
+
+    // act
+    const omnichainIndexingCursor = getOmnichainIndexingCursor(chainStatuses);
+
+    // assert
+    expect(omnichainIndexingCursor).toEqual(evenLaterBlockRef.timestamp);
+  });
+
+  it("throws error when no chains were provided", () => {
+    expect(() => getOmnichainIndexingCursor([])).toThrowError(
+      /Unable to determine omnichain indexing cursor/,
+    );
   });
 });

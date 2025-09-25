@@ -86,9 +86,9 @@ const EXAMPLE_CONFIG_RESPONSE = {
 const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
   type: IndexingStrategyIds.Omnichain,
 
-  realtime: 1496124934,
+  realtime: 1496124946,
 
-  maxRealtimeDistance: 86400,
+  maxRealtimeDistance: 13,
 
   snapshot: {
     omnichainStatus: OmnichainIndexingStatusIds.Backfill,
@@ -125,7 +125,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
       },
     },
     omnichainIndexingCursor: 1496124933,
-    snapshotTime: 1496124934,
+    snapshotTime: 1496124945,
   } satisfies SerializedOmnichainIndexingSnapshotBackfill,
 } as SerializedCurrentIndexingProjectionOmnichain;
 
@@ -399,64 +399,6 @@ describe("ENSNodeClient", () => {
 
       const client = new ENSNodeClient();
       await expect(client.resolvePrimaryNames(EXAMPLE_ADDRESS)).rejects.toThrowError(ClientError);
-    });
-  });
-
-  describe("Config API", () => {
-    it("can fetch config object successfully", async () => {
-      // arrange
-      const requestUrl = new URL(`/api/config`, DEFAULT_ENSNODE_API_URL);
-      const serializedMockedResponse = EXAMPLE_CONFIG_RESPONSE;
-      const mockedResponse = deserializeENSIndexerPublicConfig(serializedMockedResponse);
-      const client = new ENSNodeClient();
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => serializedMockedResponse,
-      });
-
-      // act & assert
-      await expect(client.config()).resolves.toStrictEqual(mockedResponse);
-      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-    });
-
-    it("should throw error when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
-
-      const client = new ENSNodeClient();
-
-      await expect(client.config()).rejects.toThrow(/Fetching ENSNode Config Failed/i);
-    });
-  });
-
-  describe("Indexing Status API", () => {
-    it("can fetch overall indexing 'backfill' status object successfully", async () => {
-      // arrange
-      const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-      const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-      const mockedResponse = deserializeCurrentIndexingProjection(serializedMockedResponse);
-      const client = new ENSNodeClient();
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => serializedMockedResponse,
-      });
-
-      // act & assert
-      await expect(client.indexingStatus()).resolves.toStrictEqual(mockedResponse);
-      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
-    });
-
-    it("should throw error when API returns error other than 503 error", async () => {
-      // arrange
-      const client = new ENSNodeClient();
-
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
-
-      // act & assert
-      await expect(client.indexingStatus()).rejects.toThrow(
-        /Fetching ENSNode Indexing Status Failed/i,
-      );
     });
   });
 

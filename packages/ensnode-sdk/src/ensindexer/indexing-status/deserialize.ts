@@ -32,11 +32,11 @@ export function deserializeOmnichainIndexingSnapshot(
  * Serialize a {@link CurrentIndexingProjection} object.
  */
 export function deserializeCurrentIndexingProjection(
-  maybeStatus: SerializedCurrentIndexingProjection,
+  maybeProjection: SerializedCurrentIndexingProjection,
   valueLabel?: string,
 ): CurrentIndexingProjection {
   const schema = makeCurrentIndexingProjectionSchema(valueLabel);
-  const parsed = schema.safeParse(maybeStatus);
+  const parsed = schema.safeParse(maybeProjection);
 
   if (parsed.error) {
     throw new Error(

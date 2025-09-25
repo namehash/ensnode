@@ -101,26 +101,30 @@ export function getTimestampForHighestOmnichainKnownBlock(
 /**
  * Get Omnichain Indexing Cursor
  *
- * The cursor tracks the "highest" latest indexed block timestamp across all chains
- * that have started indexing (are not queued).
+ * The cursor tracks the "highest" latest indexed block timestamp across
+ * all indexed chains. If all chains are queued, the cursor tracks the moment
+ * just before the earliest start block timestamp across those chains.
  *
- * @throws an error if no chains are provided, or if all chains provided are in the
- *         "queued" status.
+ * @throws an error if no chains are provided
  */
 export function getOmnichainIndexingCursor(chains: ChainIndexingSnapshot[]): UnixTimestamp {
-  const chainsThatStartedIndexing = chains.filter(
-    (chain) => chain.status !== ChainIndexingStatusIds.Queued,
-  );
-
-  if (chainsThatStartedIndexing.length === 0) {
-    throw new Error(
-      `Unable to determine omnichain indexing cursor. No chains that started indexing provided.`,
-    );
+  if (chains.length === 0) {
+    throw new Error(`Unable to determine omnichain indexing cursor when no chains were provided.`);
   }
 
-  const latestIndexedBlockTimestamps: UnixTimestamp[] = chainsThatStartedIndexing.map(
-    (chain) => chain.latestIndexedBlock.timestamp,
-  );
+  // if all chains are queued, the cursor tracks the moment just before
+  if (chains.every((chain) => chain.status === ChainIndexingStatusIds.Queued)) {
+    // the earliest start block timestamp across those chains
+    const earliestStartBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
+
+    return Math.min(...earliestStartBlockTimestamps) - 1;
+  }
+
+  // otherwise, the cursor tracks the "highest" latest indexed block timestamp
+  // across all indexed chains
+  const latestIndexedBlockTimestamps = chains
+    .filter((chain) => chain.status !== ChainIndexingStatusIds.Queued)
+    .map((chain) => chain.latestIndexedBlock.timestamp);
 
   return Math.max(...latestIndexedBlockTimestamps);
 }
