@@ -4,19 +4,19 @@
  */
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
-import { ENSAdminIcon } from "@/components/ensadmin-icon";
-import { ENSDbIcon } from "@/components/ensdb-icon";
-import { ENSIndexerIcon } from "@/components/ensindexer-icon";
-import { ENSNodeIcon } from "@/components/ensnode-icon";
-import { ENSRainbowIcon } from "@/components/ensrainbow-icon";
+import { CopyButton } from "@/components/copy-button";
+import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
 import { CopyIcon } from "@/components/icons/CopyIcon";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { IconENS } from "@/components/icons/ens";
+import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
+import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
+import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
+import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
+import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
 import { ConfigInfoAppCard } from "@/components/indexing-status/config-info/app-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CopyButton } from "@/components/ui/copy-button";
-import { ErrorInfo, ErrorInfoProps } from "@/components/ui/error-info";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
