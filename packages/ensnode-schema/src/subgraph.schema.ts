@@ -84,7 +84,6 @@ export const domain = onchainTable(
     expiryDate: t.bigint(),
   }),
   (t) => ({
-    byId: index().on(t.id),
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
     byOwnerId: index().on(t.ownerId),
@@ -143,15 +142,9 @@ export const domainRelations = relations(domain, ({ one, many }) => ({
  * Account
  */
 
-export const account = onchainTable(
-  "accounts",
-  (t) => ({
-    id: t.hex().primaryKey(),
-  }),
-  (t) => ({
-    byId: index().on(t.id),
-  }),
-);
+export const account = onchainTable("accounts", (t) => ({
+  id: t.hex().primaryKey(),
+}));
 
 export const accountRelations = relations(account, ({ many }) => ({
   domains: many(domain),
@@ -200,7 +193,6 @@ export const resolver = onchainTable(
     name: t.text(),
   }),
   (t) => ({
-    byId: index().on(t.id),
     byDomainId: index().on(t.domainId),
   }),
 );
@@ -263,7 +255,6 @@ export const registration = onchainTable(
     labelName: t.text(),
   }),
   (t) => ({
-    byId: index().on(t.id),
     byDomainId: index().on(t.domainId),
     byRegistrationDate: index().on(t.registrationDate),
   }),
@@ -321,7 +312,6 @@ export const wrappedDomain = onchainTable(
     name: t.text(),
   }),
   (t) => ({
-    byId: index().on(t.id),
     byDomainId: index().on(t.domainId),
   }),
 );
