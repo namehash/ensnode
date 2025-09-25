@@ -69,8 +69,8 @@ function _useAvailableENSNodeConnections() {
   const customConnections = useMemo(() => {
     const validatedUrls = validateAndNormalizeUrls(rawCustomConnectionUrls);
 
-    // Clean up localStorage if we found invalid URLs
-    if (validatedUrls.length !== rawCustomConnectionUrls.length) {
+    // Clean up localStorage if validation/normalization changed anything
+    if (JSON.stringify(validatedUrls) !== JSON.stringify(rawCustomConnectionUrls)) {
       storeCustomConnections(validatedUrls);
     }
 
