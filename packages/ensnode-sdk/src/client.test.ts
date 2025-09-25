@@ -1,17 +1,25 @@
 import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ErrorResponse, ResolvePrimaryNameResponse, ResolvePrimaryNamesResponse } from "./api";
+import {
+  ErrorResponse,
+  IndexingStatusResponse,
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesResponse,
+} from "./api";
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
 import { Name } from "./ens";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
+  IndexingStrategyIds,
   OmnichainIndexingStatusIds,
   PluginName,
+  SerializedCurrentIndexingProjectionOmnichain,
   type SerializedENSIndexerPublicConfig,
   type SerializedOmnichainIndexingSnapshotBackfill,
   type SerializedOmnichainIndexingSnapshotFollowing,
+  deserializeCurrentIndexingProjection,
   deserializeENSIndexerPublicConfig,
   deserializeOmnichainIndexingSnapshot,
 } from "./ensindexer";
@@ -76,87 +84,103 @@ const EXAMPLE_CONFIG_RESPONSE = {
 } satisfies SerializedENSIndexerPublicConfig;
 
 const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
-  omnichainStatus: OmnichainIndexingStatusIds.Backfill,
-  chains: {
-    "1": {
-      status: ChainIndexingStatusIds.Backfill,
-      config: {
-        type: ChainIndexingConfigTypeIds.Indefinite,
-        startBlock: {
-          timestamp: 1489165544,
-          number: 3327417,
+  type: IndexingStrategyIds.Omnichain,
+
+  realtime: 1496124934,
+
+  maxRealtimeDistance: 86400,
+
+  snapshot: {
+    omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+    chains: {
+      "1": {
+        status: ChainIndexingStatusIds.Backfill,
+        config: {
+          type: ChainIndexingConfigTypeIds.Indefinite,
+          startBlock: {
+            timestamp: 1489165544,
+            number: 3327417,
+          },
+          endBlock: null,
         },
-        endBlock: null,
+        latestIndexedBlock: {
+          timestamp: 1496124933,
+          number: 3791243,
+        },
+        backfillEndBlock: {
+          timestamp: 1755182591,
+          number: 23139951,
+        },
       },
-      latestIndexedBlock: {
-        timestamp: 1496124933,
-        number: 3791243,
-      },
-      backfillEndBlock: {
-        timestamp: 1755182591,
-        number: 23139951,
+      "8453": {
+        status: ChainIndexingStatusIds.Queued,
+        config: {
+          type: ChainIndexingConfigTypeIds.Indefinite,
+          startBlock: {
+            timestamp: 1721932307,
+            number: 17571480,
+          },
+          endBlock: null,
+        },
       },
     },
-    "8453": {
-      status: ChainIndexingStatusIds.Queued,
-      config: {
-        type: ChainIndexingConfigTypeIds.Indefinite,
-        startBlock: {
-          timestamp: 1721932307,
-          number: 17571480,
-        },
-        endBlock: null,
-      },
-    },
-  },
-  omnichainIndexingCursor: 1496124933,
-  snapshotTime: 1496124934,
-} satisfies SerializedOmnichainIndexingSnapshotBackfill;
+    omnichainIndexingCursor: 1496124933,
+    snapshotTime: 1496124934,
+  } satisfies SerializedOmnichainIndexingSnapshotBackfill,
+} as SerializedCurrentIndexingProjectionOmnichain;
 
 const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
-  omnichainStatus: OmnichainIndexingStatusIds.Following,
-  chains: {
-    "1": {
-      status: ChainIndexingStatusIds.Following,
-      config: {
-        type: ChainIndexingConfigTypeIds.Indefinite,
-        startBlock: {
-          timestamp: 1_484_015_544,
-          number: 23_327_417,
+  type: IndexingStrategyIds.Omnichain,
+
+  realtime: 1496124934,
+
+  maxRealtimeDistance: 86400,
+
+  snapshot: {
+    omnichainStatus: OmnichainIndexingStatusIds.Following,
+    chains: {
+      "1": {
+        status: ChainIndexingStatusIds.Following,
+        config: {
+          type: ChainIndexingConfigTypeIds.Indefinite,
+          startBlock: {
+            timestamp: 1_484_015_544,
+            number: 23_327_417,
+          },
+        },
+        latestIndexedBlock: {
+          timestamp: 1_496_124_533,
+          number: 23_791_243,
+        },
+        latestKnownBlock: {
+          timestamp: 1_496_124_564,
+          number: 23_791_247,
         },
       },
-      latestIndexedBlock: {
-        timestamp: 1_496_124_533,
-        number: 23_791_243,
-      },
-      latestKnownBlock: {
-        timestamp: 1_496_124_564,
-        number: 23_791_247,
-      },
-    },
-    "8453": {
-      status: ChainIndexingStatusIds.Backfill,
-      config: {
-        type: ChainIndexingConfigTypeIds.Indefinite,
-        startBlock: {
-          timestamp: 1_496_123_537,
-          number: 17_571_480,
+      "8453": {
+        status: ChainIndexingStatusIds.Backfill,
+        config: {
+          type: ChainIndexingConfigTypeIds.Indefinite,
+          startBlock: {
+            timestamp: 1_496_123_537,
+            number: 17_571_480,
+          },
+          endBlock: null,
         },
-        endBlock: null,
-      },
-      latestIndexedBlock: {
-        timestamp: 1_496_124_536,
-        number: 17_599_999,
-      },
-      backfillEndBlock: {
-        timestamp: 1_499_456_537,
-        number: 18_000_000,
+        latestIndexedBlock: {
+          timestamp: 1_496_124_536,
+          number: 17_599_999,
+        },
+        backfillEndBlock: {
+          timestamp: 1_499_456_537,
+          number: 18_000_000,
+        },
       },
     },
-  },
-  omnichainIndexingCursor: 1_496_124_533,
-  snapshotTime: 1_496_124_534,
-} satisfies SerializedOmnichainIndexingSnapshotFollowing;
+    omnichainIndexingCursor: 1_496_124_533,
+    snapshotTime: 1_496_124_534,
+  } satisfies SerializedOmnichainIndexingSnapshotFollowing,
+} as SerializedCurrentIndexingProjectionOmnichain;
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -410,7 +434,7 @@ describe("ENSNodeClient", () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
       const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-      const mockedResponse = deserializeOmnichainIndexingSnapshot(serializedMockedResponse);
+      const mockedResponse = deserializeCurrentIndexingProjection(serializedMockedResponse);
       const client = new ENSNodeClient();
 
       mockFetch.mockResolvedValueOnce({
@@ -468,7 +492,7 @@ describe("ENSNodeClient", () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
       const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-      const mockedResponse = deserializeOmnichainIndexingSnapshot(serializedMockedResponse);
+      const mockedResponse = deserializeCurrentIndexingProjection(serializedMockedResponse);
       const client = new ENSNodeClient();
 
       mockFetch.mockResolvedValueOnce({

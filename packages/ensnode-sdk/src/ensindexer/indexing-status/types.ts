@@ -446,58 +446,103 @@ export type OmnichainIndexingSnapshot =
   | OmnichainIndexingSnapshotCompleted
   | OmnichainIndexingSnapshotFollowing;
 
+/**
+ * Indexing Strategy Identifiers
+ */
 export const IndexingStrategyIds = {
   Omnichain: "omnichain",
 } as const;
 
 export type IndexingStrategyIds = (typeof IndexingStrategyIds)[keyof typeof IndexingStrategyIds];
 
-// NOTE:
-// - This is "Current..." because it isthe only place in the indexing status data model that should have a relationship with "now".
-// - This adds an explicit "realtime" timestamp
-// - The above is important as we want to be able to cache `OmnichainIndexingSnapshot` and then generate
-//   - `CurrentIndexingProjectionOmnichain` as a function of:
-//      - An omnichain indexing snapshot (from cache)
-//      - "now" (aka "realtime")
-//      - `maxRealtimeDistance` (as might be associated the request being processed)
-// - This also includes an explicit field for `strategy` which provides more "future-proofing" and explicitly
-//   identifies how this data model is specific to omnichain indexing -- the data model and invariants would be
-//   different for other indexing strategies.
+/**
+ * Current Indexing Projection
+ *
+ * NOTE:
+ * - This is "Current..." because it is the only place in
+ *   the indexing status data model that should have a relationship with "now".
+ * - The above is important as we want to be able to cache
+ *   `OmnichainIndexingSnapshot` and then generate
+ *   - `CurrentIndexingProjectionOmnichain` as a function of:
+ *      - An omnichain indexing snapshot (from cache)
+ *      - "now" (aka "realtime")
+ *      - `maxRealtimeDistance` (as might be associated the request being processed)
+ * - This also includes an explicit field for `strategy` which provides
+ *   more "future-proofing" and explicitly identifies how this data model is
+ *   specific to omnichain indexing -- the data model and invariants would be
+ *   different for other indexing strategies.
+ *
+ * Invariants:
+ * - `realtime` is always >= `snapshot.snapshotTime`
+ */
 export type CurrentIndexingProjectionOmnichain = {
+  /**
+   * Indexing Strategy Type
+   */
   type: typeof IndexingStrategyIds.Omnichain;
 
-  // the timestamp approximating "realtime" that relative distances are calculated from
-  // must always be >= `snapshotTime`
-  // due to possible clock skew between systems, when generating the value that you put in this field,
-  // it should be set as the max between the system timestamp in ENSIndexer and `snapshotTime`.
+  /**
+   * The timestamp for "realtime" that relative distances are calculated from.
+   */
   realtime: UnixTimestamp;
 
   /**
-   * The distance between "now" and the minimum
-   * {@link ChainIndexingSnapshot.omnichainIndexingCursor} value
-   * across all omnichain statuses.
+   * Max realtime distance
+   *
+   * The worst-case distance between "realtime" and the minimum
+   * {@link ChainIndexingSnapshot.omnichainIndexingCursor} value across
+   * all omnichain snapshots.
    */
-  // TODO: Update the docs for this field. Previously this field only existed for the "following" omnichain status. It should exist for all omnichain statuses.
-  // TODO: Rename to `maxRealtimeDistance`.
   maxRealtimeDistance: Duration;
 
+  /**
+   * Omnichain Indexing Snapshot
+   *
+   * The omnichain snapshot that this projection is based on.
+   */
   snapshot: OmnichainIndexingSnapshot;
 };
 
+/**
+ * Current Indexing Projection Unavailable
+ *
+ * Describes the state when the indexing projection is
+ * unavailable due to the indexing snapshot being unavailable,
+ * i.e. the indexer is down or unreachable.
+ */
 export type CurrentIndexingProjectionUnavailable = {
-  // strategy is unknown because indexer is unavailable
+  /**
+   * Indexing Strategy Type
+   *
+   * The type is unknown when snapshot is unavailable.
+   */
   type: null;
 
-  // the timestamp for "realtime" that relative distances are calculated from
+  /**
+   * The timestamp for "realtime" that relative distances are calculated from.
+   */
   realtime: UnixTimestamp;
 
-  // maxRealtimeDistance is unknown because indexer is unavailable
+  /**
+   * Max realtime distance
+   *
+   * The distance is unknown when snapshot is unavailable
+   */
   maxRealtimeDistance: null;
 
-  // snapshot is unknown because indexer is unavailable
+  /**
+   * Omnichain Indexing Snapshot
+   *
+   * The snapshot is unavailable when the indexer is down or unreachable.
+   */
   snapshot: null;
 };
 
+/**
+ * Current Indexing Projection
+ *
+ * Represents a current view of the indexing snapshot as of "now".
+ */
 export type CurrentIndexingProjection =
   | CurrentIndexingProjectionOmnichain
   | CurrentIndexingProjectionUnavailable;
