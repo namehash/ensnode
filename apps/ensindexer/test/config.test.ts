@@ -1,6 +1,7 @@
 import { EnvironmentDefaults } from "@/config/environment-defaults";
 import type { RpcConfig } from "@/config/types";
 import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -20,15 +21,19 @@ const BASE_ENV = {
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
 
-describe("config", () => {
-  async function getConfig() {
-    vi.resetModules(); // Reset module cache
-    const configModule = await import("@/config");
-    return configModule.default;
-  }
+async function getConfig() {
+  vi.resetModules(); // Reset module cache
+  const configModule = await import("@/config");
+  return configModule.default;
+}
 
+async function stubEnv(env: Record<string, string>) {
+  Object.entries(env).forEach(([key, value]) => vi.stubEnv(key, value));
+}
+
+describe("config (with base env)", () => {
   beforeEach(() => {
-    Object.entries(BASE_ENV).forEach(([key, value]) => vi.stubEnv(key, value));
+    stubEnv(BASE_ENV);
   });
 
   afterEach(() => {
@@ -617,6 +622,66 @@ describe("config", () => {
       vi.stubEnv("LABEL_SET_VERSION", "0");
       const config = await getConfig();
       expect(config.labelSet.labelSetVersion).toBe(0);
+    });
+  });
+});
+
+/**
+ * The following test block defines the minimal environment, so each test case is more readable.
+ */
+describe.only("config (minimal base env)", () => {
+  beforeEach(() => {
+    const {
+      NAMESPACE,
+      ENSNODE_PUBLIC_URL,
+      ENSINDEXER_URL,
+      ENSRAINBOW_URL,
+      DATABASE_SCHEMA,
+      RPC_URL_1,
+    } = BASE_ENV;
+    stubEnv({
+      NAMESPACE,
+      ENSNODE_PUBLIC_URL,
+      ENSINDEXER_URL,
+      ENSRAINBOW_URL,
+      DATABASE_SCHEMA,
+      RPC_URL_1,
+    });
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  describe("SUBGAPH_COMPAT=false", () => {
+    beforeEach(() => {
+      stubEnv({ SUBGRAPH_COMPAT: "false" });
+    });
+
+    it("requires default plugins rpc urls", async () => {
+      await expect(getConfig()).rejects.toThrow(/RPC_URL_/);
+    });
+
+    it("provides default plugins", async () => {
+      stubEnv({
+        RPC_URL_8453: VALID_RPC_URL,
+        RPC_URL_59144: VALID_RPC_URL,
+        RPC_URL_10: VALID_RPC_URL,
+      });
+
+      await expect(getConfig()).resolves.toMatchObject({
+        plugins: EnvironmentDefaults.alpha.plugins.split(","),
+      });
+    });
+
+    it("allows override of default plugins", async () => {
+      stubEnv({
+        PLUGINS: "tokenscope",
+        RPC_URL_8453: VALID_RPC_URL,
+        RPC_URL_59144: VALID_RPC_URL,
+        RPC_URL_10: VALID_RPC_URL,
+      });
+
+      await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
     });
   });
 });

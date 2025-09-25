@@ -47,5 +47,24 @@ describe("environment-defaults", () => {
         },
       });
     });
+
+    it("handles partial defaulting of nested values", () => {
+      // the above case tests all of the typescript types, so we use `any` here for convenience to
+      // test runtime behavior for specific cases.
+
+      // partial config provided by user
+      const PROVIDED: any = { labelSet: { labelSetVersion: "1" } };
+
+      // full default set
+      const DEFAULTS: any = { labelSet: { labelSetId: "subgraph", labelSetVersion: "0" } };
+
+      // applyDefaults correctly provides the nested value without clobbering user-provided nested value
+      expect(applyDefaults(PROVIDED, DEFAULTS)).toStrictEqual({
+        labelSet: {
+          labelSetId: "subgraph",
+          labelSetVersion: "1",
+        },
+      });
+    });
   });
 });
