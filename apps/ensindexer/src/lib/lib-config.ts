@@ -5,6 +5,7 @@ import type { RpcConfigEnvironment } from "@/config/types";
 export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
 export const DEFAULT_PORT = 42069;
+export const DEFAULT_SUBGRAPH_COMPAT = false;
 
 /**
  * Extracts dynamic chain configuration from environment variables.

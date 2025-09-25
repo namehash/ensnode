@@ -1,14 +1,24 @@
 import { parse as parseConnectionString } from "pg-connection-string";
-import { prettifyError, z } from "zod/v4";
+import { ZodError, prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
-import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  invariant_isSubgraphCompatibleRequirements,
+  makeUrlSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
+import {
+  DEFAULT_ENSADMIN_URL,
+  DEFAULT_PORT,
+  DEFAULT_RPC_RATE_LIMIT,
+  DEFAULT_SUBGRAPH_COMPAT,
+} from "@/lib/lib-config";
 
-import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
+import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
+
+import { derive_indexedChainIds } from "./derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
 import {
   invariant_globalBlockrange,
@@ -145,6 +155,9 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
+const IsSubgraphCompatibleSchema =
+  makeEnvStringBoolSchema("SUBGRAPH_COMPAT").default(DEFAULT_SUBGRAPH_COMPAT);
+
 const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
@@ -159,6 +172,7 @@ const ENSIndexerConfigSchema = z
     labelSet: LabelSetSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
+    isSubgraphCompatible: IsSubgraphCompatibleSchema,
   })
   /**
    * Invariant enforcement
@@ -181,6 +195,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_validContractConfigs)
+  .check(invariant_isSubgraphCompatibleRequirements)
   /**
    * Derived configuration
    *
@@ -190,27 +205,41 @@ const ENSIndexerConfigSchema = z
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
    *
-   * See {@link derive_isSubgraphCompatible} and {@link derive_indexedChainIds} for examples.
+   * See {@link derive_indexedChainIds} for example.
    */
-  .transform(derive_isSubgraphCompatible)
   .transform(derive_indexedChainIds)
   // `invariant_globalBlockrange` has dependency on `derive_indexedChainIds`
   .check(invariant_globalBlockrange);
 
 /**
- * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
+ * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object, applying
+ * defaults based on {@link ENSIndexerEnvironment#isSubgraphCompatible}.
  *
- * This function then validates the config against the zod schema ensuring that the config
- * meets all type checks and invariants.
+ * This function then parses the {@link ENSIndexerEnvironment} using the ENSIndexerConfigSchema,
+ * producing a validated {@link ENSIndexerConfig}.
  */
 export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
-  const parsed = ENSIndexerConfigSchema.safeParse(environment);
+  try {
+    // first parse the SUBGRAPH_COMPAT env variable
+    const subgraphCompat = IsSubgraphCompatibleSchema.parse(environment.isSubgraphCompatible);
 
-  if (!parsed.success) {
-    throw new Error(
-      "Failed to parse environment configuration: \n" + prettifyError(parsed.error) + "\n",
-    );
+    // based on indicated subgraph compatibility preference, provide sensible defaults for the config
+    const environmentDefaults = subgraphCompat
+      ? EnvironmentDefaults.subgraphCompatible
+      : EnvironmentDefaults.alpha;
+
+    // apply the partial defaults to the ENSIndexerEnvironment
+    const environmentWithDefaults = applyDefaults(environment, environmentDefaults);
+
+    // parse with ENSIndexerConfigSchema
+    return ENSIndexerConfigSchema.parse(environmentWithDefaults);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(
+        "Failed to parse environment configuration: \n" + prettifyError(error) + "\n",
+      );
+    }
+
+    throw error;
   }
-
-  return parsed.data;
 }

@@ -26,6 +26,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     },
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
+  isSubgraphCompatible: undefined,
 });
 
 // the current, mutable ENSIndexerConfig for tests

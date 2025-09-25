@@ -99,10 +99,7 @@ export interface ENSIndexerPublicConfig {
   indexedChainIds: Set<ChainId>;
 
   /**
-   * A flag derived from the built config indicating whether ENSIndexer is operating in a
-   * subgraph-compatible way. This flag is true if:
-   * a) only the subgraph plugin is activated, and
-   * b) the labelSet is { labelSetId: 'subgraph', labelSetVersion: 0 }.
+   * A feature flag to enable/disable ENSIndexer's Subgraph Compatible Indexing Behavior.
    *
    * If {@link isSubgraphCompatible} is true, indexing behavior will match that of the legacy ENS
    * Subgraph.
@@ -110,6 +107,10 @@ export interface ENSIndexerPublicConfig {
    * ENSIndexer will store and return Literal Labels and Literal Names without further interpretation.
    * @see https://ensnode.io/docs/reference/terminology#literal-label
    * @see https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * If {@link isSubgraphCompatible} is true, the following invariants are true for the ENSIndexerConfig:
+   * 1. only the 'subgraph' plugin is enabled, and
+   * 2. the labelSet must be { labelSetId: 'subgraph', labelSetVersion: 0 }
    *
    * If {@link isSubgraphCompatible} is false, ENSIndexer will additionally:
    *
