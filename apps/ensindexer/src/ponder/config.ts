@@ -18,27 +18,39 @@ const ponderConfig = activePlugins.reduce(
   {},
 ) as AllPluginsMergedConfig;
 
-// NOTE: here we inject additional values (ones that change the behavior of the indexing logic) into
-// the Ponder config in order to alter the ponder-generated build id when these additional options change.
+// NOTE: here we inject all values from the ENSIndexerConfig that alter the indexing behavior of the
+// Ponder config in order to alter the ponder-generated build id when these options change.
 //
 // This ensures that running ENSIndexer with different configurations maintains compatibility with
 // Ponder's default crash recovery behavior.
 //
 // https://ponder.sh/docs/api-reference/ponder/database#build-id-and-crash-recovery
 (ponderConfig as any).indexingBehaviorDependencies = {
+  // while technically not necessary, since these configuration properties are reflected in the
+  // generated ponderConfig, we include them here for clarity
+  namespace: config.namespace,
+  plugins: config.plugins,
+  globalBlockrange: config.globalBlockrange,
+
+  // these config properties don't explicitly affect the generated ponderConfig and need to be
+  // injected here to ensure that, if they are configured differently, ponder generates a unique
+  // build id to differentiate between runs with otherwise-identical configs (see above).
   isSubgraphCompatible: config.isSubgraphCompatible,
   labelSet: config.labelSet,
-} satisfies Pick<ENSIndexerConfig, "isSubgraphCompatible" | "labelSet">;
+} satisfies Pick<
+  ENSIndexerConfig,
+  "namespace" | "plugins" | "globalBlockrange" | "isSubgraphCompatible" | "labelSet"
+>;
 
 ////////
 // Set indexing order strategy
 ////////
 
-// NOTE: Ponder uses the `omnichain` strategy by default, but we explicitly enforce `omnichain` ordering here.
-// ENSIndexer may be able to support multichain event ordering in the future, with additional testing,
-// but for simplicity only omnichain is currently supported at the moment.
-// For additional info see:
-// https://ponder.sh/docs/api-reference/ponder/config#guarantees
+// NOTE: We explicitly enforce `omnichain` ordering within ENSIndexer. ENSIndexer may be able to
+// support 'multichain' event ordering in the future, with additional testing, but for simplicity
+// only omnichain is currently supported at the moment.
+//
+// For additional info see: https://ponder.sh/docs/api-reference/ponder/config#guarantees
 ponderConfig.ordering = "omnichain";
 
 export default ponderConfig;
