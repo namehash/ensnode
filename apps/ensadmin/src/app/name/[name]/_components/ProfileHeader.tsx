@@ -1,21 +1,22 @@
 "use client";
 
+import { EnsAvatar } from "@/components/ens-avatar";
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
-import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
-import { ENSNamespaceId } from "@ensnode/datasources";
 import { Name } from "@ensnode/ensnode-sdk";
 
 interface ProfileHeaderProps {
   name: Name;
-  namespaceId: ENSNamespaceId;
   headerImage?: string | null;
   websiteUrl?: string | null;
 }
 
-export function ProfileHeader({ name, namespaceId, headerImage, websiteUrl }: ProfileHeaderProps) {
+export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderProps) {
+  const namespace = useActiveNamespace();
+
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12
   // See: https://docs.ens.domains/ensip/12#uri-types
@@ -67,10 +68,10 @@ export function ProfileHeader({ name, namespaceId, headerImage, websiteUrl }: Pr
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Avatar
+            <EnsAvatar
               className="-mt-16 h-20 w-20 ring-4 ring-white"
-              ensName={name}
-              namespaceId={namespaceId}
+              name={name}
+              namespaceId={namespace}
             />
             <div className="flex-1">
               <h1>
