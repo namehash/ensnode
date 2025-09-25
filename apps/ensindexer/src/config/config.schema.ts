@@ -212,11 +212,15 @@ const ENSIndexerConfigSchema = z
   .check(invariant_globalBlockrange);
 
 /**
- * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object, applying
- * defaults based on {@link ENSIndexerEnvironment#isSubgraphCompatible}.
+ * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object.
  *
- * This function then parses the {@link ENSIndexerEnvironment} using the ENSIndexerConfigSchema,
- * producing a validated {@link ENSIndexerConfig}.
+ * First parses the SUBGRAPH_COMPAT environment variable to determine compatibility mode,
+ * then applies appropriate environment defaults based on that mode (subgraphCompatible or alpha).
+ * Finally validates and parses the complete environment configuration using ENSIndexerConfigSchema.
+ *
+ * @param environment - The environment variables object to build config from
+ * @returns A validated ENSIndexerConfig object
+ * @throws Error with formatted validation messages if environment parsing fails
  */
 export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
   try {

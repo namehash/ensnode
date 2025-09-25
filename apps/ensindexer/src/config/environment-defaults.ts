@@ -2,8 +2,13 @@ import { ENSIndexerEnvironment } from "@/config/types";
 import { DeepPartial, PluginName } from "@ensnode/ensnode-sdk";
 
 /**
- * These are defaults for the ENSIndexerConfig's schema. By applying them at the environment level
- * these inputs still go through the ENSIndexerConfig parsing/validation steps.
+ * Environment defaults applied based on SUBGRAPH_COMPAT mode selection.
+ *
+ * By applying defaults at the environment level, these inputs still undergo full ENSIndexerConfig
+ * parsing and validation steps.
+ *
+ * - `subgraphCompatible`: Provides defaults for legacy ENS Subgraph behavior
+ * - `alpha`: Provides defaults for 'alpha' style instances
  */
 export const EnvironmentDefaults = {
   subgraphCompatible: {
@@ -24,7 +29,11 @@ export const EnvironmentDefaults = {
 } satisfies Record<string, Partial<ENSIndexerEnvironment>>;
 
 /**
- * Applies partial defaults to an object iff the property in question is undefined.
+ * Recursively applies partial defaults to an object, setting default values only for undefined properties.
+ *
+ * @param data - The target object to apply defaults to
+ * @param defaults - A partial object containing default values to apply
+ * @returns The data object with defaults applied to any undefined properties, including nested objects
  */
 export const applyDefaults = <T extends Record<string, any>>(
   data: T,
