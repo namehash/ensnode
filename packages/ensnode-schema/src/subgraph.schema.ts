@@ -84,11 +84,9 @@ export const domain = onchainTable(
     expiryDate: t.bigint(),
   }),
   (t) => ({
-    byName: index().on(t.name),
-    byLabelName: index().on(t.labelName),
+    byId: index().on(t.id),
     byLabelhash: index().on(t.labelhash),
     byParentId: index().on(t.parentId),
-    bySubdomainCount: index().on(t.subdomainCount),
     byOwnerId: index().on(t.ownerId),
     byRegistrantId: index().on(t.registrantId),
     byWrappedOwnerId: index().on(t.wrappedOwnerId),
@@ -145,9 +143,15 @@ export const domainRelations = relations(domain, ({ one, many }) => ({
  * Account
  */
 
-export const account = onchainTable("accounts", (t) => ({
-  id: t.hex().primaryKey(),
-}));
+export const account = onchainTable(
+  "accounts",
+  (t) => ({
+    id: t.hex().primaryKey(),
+  }),
+  (t) => ({
+    byId: index().on(t.id),
+  }),
+);
 
 export const accountRelations = relations(account, ({ many }) => ({
   domains: many(domain),
@@ -196,7 +200,8 @@ export const resolver = onchainTable(
     name: t.text(),
   }),
   (t) => ({
-    idx: index().on(t.domainId),
+    byId: index().on(t.id),
+    byDomainId: index().on(t.domainId),
   }),
 );
 
@@ -258,7 +263,8 @@ export const registration = onchainTable(
     labelName: t.text(),
   }),
   (t) => ({
-    idx: index().on(t.domainId),
+    byId: index().on(t.id),
+    byDomainId: index().on(t.domainId),
     byRegistrationDate: index().on(t.registrationDate),
   }),
 );
@@ -315,7 +321,8 @@ export const wrappedDomain = onchainTable(
     name: t.text(),
   }),
   (t) => ({
-    idx: index().on(t.domainId),
+    byId: index().on(t.id),
+    byDomainId: index().on(t.domainId),
   }),
 );
 
