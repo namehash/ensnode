@@ -1,7 +1,7 @@
 "use client";
 
+import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
-import { CopyButton } from "@/components/ui/copy-button";
 import {
   DropdownMenuItem,
   DropdownMenuLabel,

@@ -7,7 +7,6 @@ import { useCallback, useState } from "react";
 import { AddConnectionDialog } from "@/components/connections/add-connection-dialog";
 import { CustomConnectionsList } from "@/components/connections/custom-connections-list";
 import { DefaultConnectionsList } from "@/components/connections/default-connections-list";
-import { ENSAdminIcon } from "@/components/ensadmin-icon";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import {
   DropdownMenu,
@@ -25,7 +24,7 @@ import {
 import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
 import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { CONNECTION_PARAM_KEY } from "@/lib/constants";
-import { CopyButton } from "@/components/copy-button";
+import { useMutation } from "@tanstack/react-query";
 
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();

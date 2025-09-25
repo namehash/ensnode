@@ -81,8 +81,10 @@ function _useAvailableENSNodeConnections() {
     () => [
       // include the default connections
       ...DEFAULT_CONNECTION_URLS.map((url) => ({ url, isDefault: true })),
-      // include the user's connections if
-      ...customConnections.map((url) => ({ url, isDefault: false })),
+      // include the user's connections that aren't already in defaults
+      ...customConnections
+        .filter((url) => !DEFAULT_CONNECTION_URLS.includes(url))
+        .map((url) => ({ url, isDefault: false })),
     ],
     [customConnections],
   );
