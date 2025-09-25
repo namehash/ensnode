@@ -34,7 +34,7 @@ export const applyDefaults = <T extends Record<string, any>>(
 
   for (const [key, value] of Object.entries(defaults)) {
     // handle nested objects
-    if (typeof value === "object" && !Array.isArray(value)) {
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       result[key] = applyDefaults(result[key], value);
       continue;
     }

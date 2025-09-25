@@ -629,7 +629,7 @@ describe("config (with base env)", () => {
 /**
  * The following test block defines the minimal environment, so each test case is more readable.
  */
-describe.only("config (minimal base env)", () => {
+describe("config (minimal base env)", () => {
   beforeEach(() => {
     const {
       NAMESPACE,
