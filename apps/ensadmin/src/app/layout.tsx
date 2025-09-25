@@ -3,11 +3,11 @@ import { Suspense } from "react";
 import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
 import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
 import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
-import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { AvailableENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";

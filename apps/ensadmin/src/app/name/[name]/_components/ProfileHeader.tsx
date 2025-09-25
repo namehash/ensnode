@@ -1,8 +1,8 @@
 "use client";
 
+import { EnsAvatar } from "@/components/ens-avatar";
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
-import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
@@ -68,9 +68,9 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Avatar
+            <EnsAvatar
               className="-mt-16 h-20 w-20 ring-4 ring-white"
-              ensName={name}
+              name={name}
               namespaceId={namespace}
             />
             <div className="flex-1">
