@@ -26,6 +26,7 @@ locals {
       plugins                  = "subgraph"
       namespace                = "holesky"
       render_instance_plan     = "starter"
+      subgraph_compat          = true
     }
     sepolia = {
       ensnode_indexer_type     = "sepolia"
@@ -34,6 +35,7 @@ locals {
       plugins                  = "subgraph"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
+      subgraph_compat          = true
     }
     mainnet = {
       ensnode_indexer_type     = "mainnet"
@@ -42,6 +44,7 @@ locals {
       plugins                  = "subgraph"
       namespace                = "mainnet"
       render_instance_plan     = "standard"
+      subgraph_compat          = true
     }
     alpha = {
       ensnode_indexer_type     = "alpha"
@@ -50,6 +53,7 @@ locals {
       plugins                  = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
       namespace                = "mainnet"
       render_instance_plan     = "standard"
+      subgraph_compat          = false
     }
 
     alpha-sepolia = {
@@ -59,6 +63,7 @@ locals {
       plugins                  = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
+      subgraph_compat          = false
     }
   }
 }
@@ -121,6 +126,7 @@ module "ensindexer" {
   database_schema          = each.value.database_schema
   plugins                  = each.value.plugins
   namespace                = each.value.namespace
+  subgraph_compat          = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
   hosted_zone_name = local.hosted_zone_name

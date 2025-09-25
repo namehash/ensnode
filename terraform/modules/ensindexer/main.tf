@@ -10,7 +10,8 @@ locals {
     "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
     "PLUGINS"           = { value = var.plugins },
     "NAMESPACE"         = { value = var.namespace },
-    "ENSADMIN_URL"      = { value = var.ensadmin_public_url }
+    "ENSADMIN_URL"      = { value = var.ensadmin_public_url },
+    "SUBGRAPH_COMPAT"   = { value = var.subgraph_compat }
 
     # Mainnet networks
     "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },

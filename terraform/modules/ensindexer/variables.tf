@@ -75,6 +75,10 @@ variable "namespace" {
   type = string
 }
 
+variable "subgraph_compat" {
+  type = bool
+}
+
 # Mainnet RPC URLs
 variable "ethereum_mainnet_rpc_url" {
   type = string
