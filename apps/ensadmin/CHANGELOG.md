@@ -1,5 +1,48 @@
 # ensadmin
 
+## 0.36.0
+
+### Minor Changes
+
+- [#1015](https://github.com/namehash/ensnode/pull/1015) [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9) Thanks [@tk-o](https://github.com/tk-o)! - Rename chain indexing status from `Unstarted` to `Queued`.
+
+- [#1024](https://github.com/namehash/ensnode/pull/1024) [`083cc3c`](https://github.com/namehash/ensnode/commit/083cc3cb1f7178e112d740427a864af54dee5722) Thanks [@notrab](https://github.com/notrab)! - Initial Name Detail Page
+
+- [#1074](https://github.com/namehash/ensnode/pull/1074) [`e4d3ce3`](https://github.com/namehash/ensnode/commit/e4d3ce3d9659430a8f0597a4c719ad1993342eaf) Thanks [@tk-o](https://github.com/tk-o)! - Display all `Address` values as checksummed EVM addresses.
+
+- [#1039](https://github.com/namehash/ensnode/pull/1039) [`6142f8c`](https://github.com/namehash/ensnode/commit/6142f8c9b8dbc90f37cf5f8dec3bcd18d6d029ae) Thanks [@BanaSeba](https://github.com/BanaSeba)! - Extend default ENSAdmin ENSNode urls
+
+- [#1072](https://github.com/namehash/ensnode/pull/1072) [`89da0a3`](https://github.com/namehash/ensnode/commit/89da0a361bc41678abc6bf3eb729600fc9fd4e50) Thanks [@Y3drk](https://github.com/Y3drk)! - Refine `/status` dashboards UI & UX
+
+- [#1062](https://github.com/namehash/ensnode/pull/1062) [`ec79ed8`](https://github.com/namehash/ensnode/commit/ec79ed888aaac1e05626e1a706067b6334969f4a) Thanks [@Y3drk](https://github.com/Y3drk)! - Refine Indexing Status UI
+
+- [#1071](https://github.com/namehash/ensnode/pull/1071) [`58149fa`](https://github.com/namehash/ensnode/commit/58149fa36caa74e1979b142f91b1b3f9825bd0ba) Thanks [@notrab](https://github.com/notrab)! - Add support for telegram, linkedin and reddit profiles on name detail page
+
+- [#1073](https://github.com/namehash/ensnode/pull/1073) [`feaf593`](https://github.com/namehash/ensnode/commit/feaf593dec3024f5b3a945ed2549bfecd9cc32de) Thanks [@notrab](https://github.com/notrab)! - New hooks useNamespace, useEnsMetadataServiceAvatarUrl, and useENSAppProfileUrl
+
+- [#1054](https://github.com/namehash/ensnode/pull/1054) [`4e7422a`](https://github.com/namehash/ensnode/commit/4e7422aed44239548dacf4eba8f2dd9dd1ecd245) Thanks [@Y3drk](https://github.com/Y3drk)! - Update ENSDb icon and link to ENSDb docs
+
+- [#1072](https://github.com/namehash/ensnode/pull/1072) [`89da0a3`](https://github.com/namehash/ensnode/commit/89da0a361bc41678abc6bf3eb729600fc9fd4e50) Thanks [@Y3drk](https://github.com/Y3drk)! - Refine Fallback Avatars
+
+- [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
+
+- [#1012](https://github.com/namehash/ensnode/pull/1012) [`b1c7973`](https://github.com/namehash/ensnode/commit/b1c7973991e3d57b3071e804e429b9189f36d653) Thanks [@Y3drk](https://github.com/Y3drk)! - Enhance ENSNodeConfig UI
+
+- [#1093](https://github.com/namehash/ensnode/pull/1093) [`529e650`](https://github.com/namehash/ensnode/commit/529e6503f4e239aa8b0729644172b20425d63417) Thanks [@tk-o](https://github.com/tk-o)! - Replace `Date` type with `UnixTimestamp` in application logic.
+
+- [#1072](https://github.com/namehash/ensnode/pull/1072) [`89da0a3`](https://github.com/namehash/ensnode/commit/89da0a361bc41678abc6bf3eb729600fc9fd4e50) Thanks [@Y3drk](https://github.com/Y3drk)! - Refine UX for displaying identities without a primary name
+
+- [#1072](https://github.com/namehash/ensnode/pull/1072) [`89da0a3`](https://github.com/namehash/ensnode/commit/89da0a361bc41678abc6bf3eb729600fc9fd4e50) Thanks [@Y3drk](https://github.com/Y3drk)! - Refine UX for Relative Timestamps
+
+### Patch Changes
+
+- Updated dependencies [[`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9), [`e4d3ce3`](https://github.com/namehash/ensnode/commit/e4d3ce3d9659430a8f0597a4c719ad1993342eaf), [`7fc0465`](https://github.com/namehash/ensnode/commit/7fc0465d3b816affe2930c7f36577d0214d145b9), [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9), [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8)]:
+  - @ensnode/ensnode-sdk@0.36.0
+  - @ensnode/datasources@0.36.0
+  - @ensnode/ensnode-react@0.36.0
+  - @ensnode/ponder-metadata@0.36.0
+  - @ensnode/ensnode-schema@0.36.0
+
 ## 0.35.0
 
 ### Minor Changes
