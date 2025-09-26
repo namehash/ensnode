@@ -66,10 +66,7 @@ export function AddConnectionDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="url">URL</Label>
-              <span className="text-xs text-muted-foreground">Include http:// or https://</span>
-            </div>
+            <Label htmlFor="url">URL</Label>
             <Input
               id="url"
               type="text"

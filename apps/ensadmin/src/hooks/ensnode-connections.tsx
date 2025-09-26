@@ -9,30 +9,13 @@ import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validat
 import { useHydrated } from "@/hooks/use-hydrated";
 import { CONNECTION_PARAM_KEY, CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
 import { defaultEnsNodeUrls } from "@/lib/env";
+import { isValidUrl, normalizeUrl } from "@/lib/url-utils";
 import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
 
 export interface ConnectionOption {
   url: UrlString;
   fromServerLibrary: boolean;
 }
-
-const normalizeUrl = (url: UrlString): UrlString => {
-  try {
-    return new URL(url).toString();
-  } catch {
-    // If URL parsing fails, try prefixing with https://
-    return new URL(`https://${url}`).toString();
-  }
-};
-
-const isValidUrl = (url: UrlString): boolean => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
 
 const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
   return uniq(urls.filter(isValidUrl).map(normalizeUrl));

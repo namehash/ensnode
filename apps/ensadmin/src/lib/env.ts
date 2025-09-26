@@ -1,6 +1,7 @@
 // TODO: replace all of this validation with zod
 
 import { uniq } from "@ensnode/ensnode-sdk";
+import { normalizeUrl } from "./url-utils";
 
 /**
  * Get ENSAdmin service public URL.
@@ -26,7 +27,7 @@ export function ensAdminPublicUrl(): URL {
   }
 
   try {
-    return parseUrl(envVarValue);
+    return new URL(normalizeUrl(envVarValue));
   } catch (error) {
     console.error(error);
 
@@ -128,7 +129,7 @@ export function defaultEnsNodeUrls(): Array<URL> {
         .filter((maybeUrl) => maybeUrl.length > 0), // Remove empty strings
     );
 
-    const urlList = urlStrings.map((maybeUrl) => parseUrl(maybeUrl));
+    const urlList = urlStrings.map((maybeUrl) => new URL(normalizeUrl(maybeUrl)));
 
     if (urlList.length === 0) {
       throw new Error(
@@ -143,20 +144,6 @@ export function defaultEnsNodeUrls(): Array<URL> {
     throw new Error(
       `Invalid ${envVarName} value "${envVarValue}" must contain a comma separated list of valid URLs.`,
     );
-  }
-}
-
-/**
- * Parses a URL from a string.
- * @param maybeUrl
- * @returns URL
- * @throws when the URL is invalid
- */
-export function parseUrl(maybeUrl: string): URL {
-  try {
-    return new URL(maybeUrl);
-  } catch (error) {
-    throw new Error(`Invalid URL: ${maybeUrl}`);
   }
 }
 
