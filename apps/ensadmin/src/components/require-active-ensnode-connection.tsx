@@ -14,7 +14,8 @@ import { toast } from "sonner";
 export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{}>) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { availableConnections, active, addCustomConnection } = useAvailableENSNodeConnections();
+  const { availableConnections, selectedConnection, addCustomConnection } =
+    useAvailableENSNodeConnections();
 
   const addConnectionFromUrl = useMutation({
     mutationFn: addCustomConnection,
@@ -51,9 +52,9 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
   useEffect(() => {
     const connectionParam = searchParams.get(CONNECTION_PARAM_KEY);
 
-    // If no connection parameter exists and we have an active connection, update URL
-    if (!connectionParam && active) {
-      updateCurrentConnectionParam(active.toString());
+    // If no connection parameter exists and we have a selected connection, update URL
+    if (!connectionParam && selectedConnection) {
+      updateCurrentConnectionParam(selectedConnection.toString());
       return;
     }
 
@@ -89,14 +90,14 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
   }, [
     searchParams,
     availableConnections,
-    active,
+    selectedConnection,
     addConnectionFromUrl,
     router,
     updateCurrentConnectionParam,
     failedConnectionUrls,
   ]);
 
-  if (!active) return null;
+  if (!selectedConnection) return null;
 
   return children;
 }

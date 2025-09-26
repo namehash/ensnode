@@ -72,6 +72,26 @@ function _useAvailableENSNodeConnections() {
     return validatedUrls;
   }, [rawCustomConnectionUrls, storeCustomConnections]);
 
+  /**
+   * All available ENSNode connections with guaranteed invariants:
+   *
+   * Format:
+   * - Array of objects with { url: UrlString, isDefault: boolean }
+   * - url: Normalized URL string (via normalizeUrl())
+   * - isDefault: true for default connections, false for custom ones
+   *
+   * Content guarantees:
+   * - Always contains at least 1 connection (from DEFAULT_CONNECTION_URLS)
+   * - All URLs are valid (pass isValidUrl validation)
+   * - All URLs are normalized to consistent format
+   * - No duplicate URLs (custom connections filtered against defaults)
+   * - Default connections always come first in array
+   * - Custom connections are filtered to exclude any that match defaults
+   *
+   * Order:
+   * 1. All default connections (isDefault: true)
+   * 2. Custom connections not in defaults (isDefault: false)
+   */
   const availableConnections = useMemo(
     () => [
       // include the default connections
@@ -118,9 +138,9 @@ function _useAvailableENSNodeConnections() {
     [storeCustomConnections],
   );
 
-  // the active connection is the current connection (from URL param) or the first default
-  const active = useMemo<URL | null>(() => {
-    // no active ensnode connection in server environments
+  // the selected connection is the current connection (from URL param) or the first default
+  const selectedConnection = useMemo<URL | null>(() => {
+    // no selected ensnode connection in server environments
     if (!hydrated) return null;
 
     // NOTE: guaranteed to have a valid set of `availableConnections` here, on the client
@@ -134,7 +154,7 @@ function _useAvailableENSNodeConnections() {
 
   return {
     availableConnections,
-    active,
+    selectedConnection,
     addCustomConnection,
     removeCustomConnection,
   };
@@ -154,7 +174,7 @@ export { useAvailableENSNodeConnections };
  *
  * Provides access to:
  * - availableConnections: All connections (default + custom)
- * - active: Currently active connection URL
+ * - selectedConnection: Currently selected connection URL
  * - addCustomConnection: Add a new custom connection
  * - removeCustomConnection: Remove a custom connection
  */

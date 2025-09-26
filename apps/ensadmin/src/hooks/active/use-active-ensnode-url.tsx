@@ -16,11 +16,11 @@ import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
  * @throws Error if no active ENSNode Connection is available
  */
 export function useActiveENSNodeUrl() {
-  const { active } = useAvailableENSNodeConnections();
+  const { selectedConnection } = useAvailableENSNodeConnections();
 
-  if (!active) {
+  if (!selectedConnection) {
     throw new Error(`Invariant(useActiveENSNodeUrl): Expected an active ENSNode Connection.`);
   }
 
-  return active;
+  return selectedConnection;
 }
