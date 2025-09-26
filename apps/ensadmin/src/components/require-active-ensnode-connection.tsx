@@ -56,7 +56,7 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
     const connectionParam = searchParams.get(CONNECTION_PARAM_KEY);
 
     // If no connection parameter exists and we have an active connection, update URL
-    if (!connectionParam && active && availableConnections.length > 0) {
+    if (!connectionParam && active) {
       updateCurrentConnectionParam(active.toString());
       return;
     }
