@@ -118,15 +118,6 @@ function _useAvailableENSNodeConnections() {
     [storeCustomConnections],
   );
 
-  const addAndSelectCustomConnection = useCallback(
-    async (url: UrlString) => {
-      const added = await addCustomConnection(url);
-
-      return added;
-    },
-    [addCustomConnection],
-  );
-
   // the active connection is the current connection (from URL param) or the first default
   const active = useMemo<URL | null>(() => {
     // no active ensnode connection in server environments
@@ -145,7 +136,6 @@ function _useAvailableENSNodeConnections() {
     availableConnections,
     active,
     addCustomConnection,
-    addAndSelectCustomConnection,
     removeCustomConnection,
   };
 }
@@ -166,7 +156,6 @@ export { useAvailableENSNodeConnections };
  * - availableConnections: All connections (default + custom)
  * - active: Currently active connection URL
  * - addCustomConnection: Add a new custom connection
- * - addAndSelectCustomConnection: Add and immediately select a custom connection
  * - removeCustomConnection: Remove a custom connection
  */
 export function AvailableENSNodeConnectionsProvider({

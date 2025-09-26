@@ -14,14 +14,10 @@ import { toast } from "sonner";
 export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{}>) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const {
-    availableConnections,
-    active,
-    addAndSelectCustomConnection: _addAndSelectConnection,
-  } = useAvailableENSNodeConnections();
+  const { availableConnections, active, addCustomConnection } = useAvailableENSNodeConnections();
 
   const addConnectionFromUrl = useMutation({
-    mutationFn: _addAndSelectConnection,
+    mutationFn: addCustomConnection,
   });
 
   const [existingConnectionUrl, setExistingConnectionUrl] = useState<string | null>(null);
