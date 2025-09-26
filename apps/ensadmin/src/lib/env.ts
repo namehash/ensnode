@@ -1,5 +1,7 @@
 // TODO: replace all of this validation with zod
 
+import { uniq } from "@ensnode/ensnode-sdk";
+
 /**
  * Get ENSAdmin service public URL.
  *
@@ -119,16 +121,14 @@ export function defaultEnsNodeUrls(): Array<URL> {
   }
 
   try {
-    const urlList = envVarValue
-      .split(",")
-      .map((maybeUrl) => maybeUrl.trim()) // Remove whitespace
-      .filter((maybeUrl) => maybeUrl.length > 0) // Remove empty strings
-      .map((maybeUrl) => parseUrl(maybeUrl))
-      .filter(
-        (url, index, array) =>
-          // Remove duplicates by comparing normalized string representations
-          array.findIndex((u) => u.toString() === url.toString()) === index,
-      );
+    const urlStrings = uniq(
+      envVarValue
+        .split(",")
+        .map((maybeUrl) => maybeUrl.trim()) // Remove whitespace
+        .filter((maybeUrl) => maybeUrl.length > 0), // Remove empty strings
+    );
+
+    const urlList = urlStrings.map((maybeUrl) => parseUrl(maybeUrl));
 
     if (urlList.length === 0) {
       throw new Error(
