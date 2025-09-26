@@ -16,7 +16,5 @@ import { PropsWithChildren } from "react";
 export function ActiveENSNodeProvider({ children }: PropsWithChildren) {
   const url = useSelectedENSNodeUrl();
 
-  return (
-    <_ENSNodeProvider config={{ client: { url } }}>{children}</_ENSNodeProvider>
-  );
+  return <_ENSNodeProvider config={{ client: { url } }}>{children}</_ENSNodeProvider>;
 }
