@@ -7,7 +7,7 @@ import { useLocalstorageState } from "rooks";
 
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { useHydrated } from "@/hooks/use-hydrated";
-import { CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
+import { CONNECTION_PARAM_KEY, CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
 import { defaultEnsNodeUrls } from "@/lib/env";
 import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
 
@@ -50,8 +50,6 @@ const DEFAULT_CONNECTION_URLS = (() => {
 
   return validatedUrls;
 })();
-
-const CONNECTION_PARAM_KEY = "connection";
 
 function _useAvailableENSNodeConnections() {
   const hydrated = useHydrated();
@@ -152,6 +150,12 @@ function _useAvailableENSNodeConnections() {
   };
 }
 
+const [AvailableENSNodeConnectionsProviderInner, useAvailableENSNodeConnections] = constate(
+  _useAvailableENSNodeConnections,
+);
+
+export { useAvailableENSNodeConnections };
+
 /**
  * Provider for available ENSNode connections (both default and custom).
  *
@@ -165,7 +169,7 @@ function _useAvailableENSNodeConnections() {
  * - addAndSelectCustomConnection: Add and immediately select a custom connection
  * - removeCustomConnection: Remove a custom connection
  */
-function AvailableENSNodeConnectionsProvider({
+export function AvailableENSNodeConnectionsProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -178,9 +182,3 @@ function AvailableENSNodeConnectionsProvider({
     </Suspense>
   );
 }
-
-const [AvailableENSNodeConnectionsProviderInner, useAvailableENSNodeConnections] = constate(
-  _useAvailableENSNodeConnections,
-);
-
-export { AvailableENSNodeConnectionsProvider, useAvailableENSNodeConnections };
