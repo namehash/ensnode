@@ -1,0 +1,175 @@
+/**
+ * Schema Definitions that power Protocol Acceleration in the Resolution API.
+ */
+
+import { onchainTable, relations, uniqueIndex } from "ponder";
+
+/**
+ * Tracks an Account's ENSIP-19 Primary Name by CoinType.
+ *
+ * NOTE: this is NOT a cohesive, materialized index of ALL of an account's names, it is ONLY the
+ * materialized index of its ENSIP-19 Primary Names backed by a StandaloneReverseRegistrar:
+ * - default.reverse
+ * - [coinType].reverse
+ * - NOT *.addr.reverse
+ *
+ * So these records CANNOT be queried directly and used as a source of truth — you MUST perform
+ * Forward Resolution to resolve a consistent set of an Account's ENSIP-19 Primary Names. These records
+ * are used to power Protocol Acceleration for those ReverseResolvers backed by a StandloneReverseRegistrar.
+ */
+export const ext_primaryName = onchainTable(
+  "ext_primary_names",
+  (t) => ({
+    // keyed by (address, coinType)
+    id: t.text().primaryKey(),
+
+    address: t.hex().notNull(),
+    coinType: t.bigint().notNull(),
+
+    /**
+     * Represents the ENSIP-19 Primary Name value for a given (address, coinType).
+     *
+     * The value of this field is guaranteed to be a non-empty-string normalized ENS name. Unnormalized
+     * names and empty string values are interpreted as a deletion of the associated Primary Name
+     * entity (represented as the absence of a relevant Primary Name entity) — see `interpretNameRecordValue`
+     * for additional context.
+     */
+    name: t.text().notNull(),
+  }),
+  (t) => ({
+    byAddressAndCoinType: uniqueIndex().on(t.address, t.coinType),
+  }),
+);
+
+/**
+ * Tracks Domain<->Resolver relationships by chainId to additionally support the chain-specific
+ * Domain<->Resolver relationships within the Basenames and Lineanames Shadow Registries.
+ *
+ * Necessary to accelerate Basenames/Lineanames CCIP-Reads.
+ */
+export const ext_domainResolverRelation = onchainTable(
+  "ext_domain_resolver_relations",
+  (t) => ({
+    // keyed by (chainId, domainId)
+    id: t.text().primaryKey(),
+    chainId: t.integer().notNull(),
+    domainId: t.text().notNull(),
+
+    resolverId: t.text().notNull(),
+  }),
+  (t) => ({
+    byChainIdAndDomain: uniqueIndex().on(t.chainId, t.domainId),
+  }),
+);
+
+/**
+ * Tracks a set of records for a specified `node` within a Resolver contract.
+ *
+ * ResolverRecords is keyed by (chainId, address, node) and:
+ * - has one `name` record (see ENSIP-3)
+ * - has many `addressRecords` (unique by coinType) (see ENSIP-9)
+ * - has many `textRecords` (unique by key) (see ENSIP-5)
+ *
+ * WARNING: These record values do NOT allow the caller to confidently resolve records for names
+ * without following Forward Resolution according to the ENS protocol: a direct query to the database
+ * for a record's value is not ENSIP-10 nor CCIP-Read compliant.
+ */
+export const ext_resolverRecords = onchainTable(
+  "ext_resolver_records",
+  (t) => ({
+    // keyed by (chainId, address, node)
+    id: t.text().primaryKey(),
+
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+    node: t.hex().notNull(),
+
+    /**
+     * Represents the value of the reverse-resolution (ENSIP-3) name() record.
+     *
+     * The emitted record values are interpreted according to `interpretNameRecordValue` — unnormalized
+     * names and empty string values are interpreted as a deletion of the associated record (represented
+     * here as `null`).
+     *
+     * If set, the value of this field is guaranteed to be a non-empty-string normalized ENS name
+     * (see `interpretNameRecordValue` for guarantees).
+     */
+    name: t.text(),
+  }),
+  (t) => ({}),
+);
+
+// add the additional `Resolver.records` relationship to subgraph's Resolver entity
+export const ext_resolverRecords_relations = relations(ext_resolverRecords, ({ one, many }) => ({
+  // resolverRecords has many address records
+  addressRecords: many(ext_resolverAddressRecords),
+
+  // resolverRecords has many text records
+  textRecords: many(ext_resolverTextRecords),
+}));
+
+export const ext_resolverAddressRecords = onchainTable(
+  "ext_resolver_address_records",
+  (t) => ({
+    // keyed by (resolverRecordsId, coinType)
+    id: t.text().primaryKey(),
+
+    resolverRecordsId: t.text().notNull(),
+    coinType: t.bigint().notNull(),
+
+    /**
+     * Represents the value of the Addresss Record specified by (resolverRecordsId, coinType).
+     *
+     * The value of this field is interpreted by `interpretAddressRecordValue` — see its implementation
+     * for additional context and specific guarantees.
+     */
+    address: t.text().notNull(),
+  }),
+  (t) => ({
+    byResolverRecordsIdAndCoinType: uniqueIndex().on(t.resolverRecordsId, t.coinType),
+  }),
+);
+
+export const ext_resolverAddressRecordsRelations = relations(
+  ext_resolverAddressRecords,
+  ({ one, many }) => ({
+    // belongs to resolverRecords
+    resolver: one(ext_resolverRecords, {
+      fields: [ext_resolverAddressRecords.resolverRecordsId],
+      references: [ext_resolverRecords.id],
+    }),
+  }),
+);
+
+export const ext_resolverTextRecords = onchainTable(
+  "ext_resolver_text_records",
+  (t) => ({
+    // keyed by (resolverRecordsId, key)
+    id: t.text().primaryKey(),
+
+    resolverRecordsId: t.text().notNull(),
+    key: t.text().notNull(),
+
+    /**
+     * Represents the value of the Text Record specified by (resolverRecordsId, key).
+     *
+     * The value of this field is interpreted by `interpretTextRecordValue` — see its implementation
+     * for additional context and specific guarantees.
+     */
+    value: t.text().notNull(),
+  }),
+  (t) => ({
+    byResolverRecordsIdAndKey: uniqueIndex().on(t.resolverRecordsId, t.key),
+  }),
+);
+
+export const ext_resolverTextRecordsRelations = relations(
+  ext_resolverTextRecords,
+  ({ one, many }) => ({
+    // belongs to resolverRecords
+    resolver: one(ext_resolverRecords, {
+      fields: [ext_resolverTextRecords.resolverRecordsId],
+      references: [ext_resolverRecords.id],
+    }),
+  }),
+);

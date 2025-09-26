@@ -56,8 +56,8 @@ export async function findResolver({
 }: { chainId: ChainId; name: NormalizedName; accelerate: boolean; publicClient: PublicClient }) {
   if (chainId === ensRootChainId) {
     // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
-    // Subgraph plugin is active
-    if (accelerate && config.plugins.includes(PluginName.Subgraph)) {
+    // ProtocolAcceleration plugin is active
+    if (accelerate && config.plugins.includes(PluginName.ProtocolAcceleration)) {
       return findResolverWithIndex(chainId, name);
     }
 
@@ -165,6 +165,12 @@ async function findResolverWithIndex(
   chainId: ChainId,
   name: NormalizedName,
 ): Promise<FindResolverResult> {
+  if (!config.plugins.includes(PluginName.ProtocolAcceleration)) {
+    throw new Error(
+      "Invariant(findResolverWithIndex): ProtocolAcceleration plugin must be enabled in order to accelerate the identification of a name's active resolver.",
+    );
+  }
+
   return withActiveSpanAsync(tracer, "findResolverWithIndex", { chainId, name }, async () => {
     // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
     const names = getNameHierarchy(name);

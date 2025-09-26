@@ -190,20 +190,20 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
           // ENSIP-19 Reverse Resolvers
           //   If:
-          //    1) the activeResolver is a Known ENSIP-19 Reverse Resolver, and
-          //    2) the ReverseResolvers plugin is active,
+          //    1) the ProtocolAcceleration plugin is active, and
+          //    2) the activeResolver is a Known ENSIP-19 Reverse Resolver,
           //   then we can just read the name record value directly from the index.
           //////////////////////////////////////////////////
           if (accelerate) {
+            const isIndexingReverseRegistrars = config.plugins.includes(
+              PluginName.ProtocolAcceleration,
+            );
             const _isKnownENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
               chainId,
               activeResolver,
             );
-            const isIndexingReverseRegistrars = config.plugins.includes(
-              PluginName.ReverseResolvers,
-            );
 
-            if (_isKnownENSIP19ReverseResolver && isIndexingReverseRegistrars) {
+            if (isIndexingReverseRegistrars && _isKnownENSIP19ReverseResolver) {
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,

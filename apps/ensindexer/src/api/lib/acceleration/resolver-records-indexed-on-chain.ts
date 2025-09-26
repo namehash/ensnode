@@ -10,31 +10,21 @@ const threeDNSOptimism = maybeGetDatasource(config.namespace, DatasourceNames.Th
 const threeDNSBase = maybeGetDatasource(config.namespace, DatasourceNames.ThreeDNSBase);
 
 /**
- * Determines, for a given chain, whether all Resolver Record Values are indexed.
- *
- * Returns false immediately if ENSIndexer is in subgraph-compatible mode since resolver record values
- * are not indexed for acceleration in that mode.
- *
- * Otherwise, determines if ENSIndexer has included either:
- *  a. the shared multi-chain `Resolver` handlers (i.e. Subgraph, Basenames, Lineanames), or
- *  b. implements Resolver Record Value indexing for all possible Resolver contracts on
- *     the specified chain (i.e. ThreeDNS).
- *
- * NOTE(shrugs): i don't love how this encodes knowledge from the ponder.config.ts — perhaps we can either
- * import that directly OR abstract it into a `buildENSIndexerPonderConfig` helper that can be
- * re-used within ENSIndexer without worrying about circular dependencies or ponder runtime behavior.
- * Then we could check for the existence of `ponderConfig.contracts.Resolver.chain[chainId]` or
- * `ponderConfig.contracts["threedns/Resolver"].chain[chainId]`.
+ * Determines, for a given chain, whether all Resolver Records are indexed.
  *
  * @param chainId - The chain ID to check for resolver record indexing
  * @returns true if resolver records are indexed on the given chain, false otherwise
  */
 export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
-  // TODO: this will soon be as simple as confirming that the `resolution` plugin is active and
-  // that the chainId is in the set of chains indexed by the `resolution` plugin.
+  const protocolAccelerationPluginEnabled = config.plugins.includes(
+    PluginName.ProtocolAcceleration,
+  );
 
-  // if config.isSubgraphCompatible, we aren't indexing resolver record values for acceleration
-  if (config.isSubgraphCompatible) return false;
+  // the ProtocolAcceleration plugin describes ResolverRecord indexing behavior: it must be enabled
+  if (!protocolAccelerationPluginEnabled) return false;
+
+  // then, records are available on this chainId iff this chain is indexed by the ProtocolAcceleration
+  // plugin
 
   const isENSRootChain = chainId === ensRoot.chain.id;
   const isBasenamesChain = chainId === basenames?.chain.id;

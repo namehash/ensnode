@@ -2,16 +2,29 @@ import { DatasourceNames, ResolverABI, StandaloneReverseRegistrarABI } from "@en
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { ChainConfig, createConfig } from "ponder";
 
-import { createPlugin, getDatasourceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
+import {
+  createPlugin,
+  getDatasourceAsFullyDefinedAtCompileTime,
+  namespaceContract,
+} from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 
 /**
- * Describes the indexing behavior for known ENSIP-19 L2 Reverse Resolvers & Legacy Reverse Resolvers,
- * in order to power Protocol Accelerated resolution of `name` records on Reverse Names.
+ * Describes the indexing behavior for all entities that power Protocol Acceleration:
+ * - indexing of ResolverRecords
+ * - indexing of LegacyReverseResolvers
+ * - indexing of ENSIP-19 StandaloneReverseRegistrars
  */
-export const pluginName = PluginName.ReverseResolvers;
+export const pluginName = PluginName.ProtocolAcceleration;
 
 const ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES = [
+  // Resolvers
+  DatasourceNames.ENSRoot,
+  DatasourceNames.Basenames,
+  DatasourceNames.Lineanames,
+  DatasourceNames.ThreeDNSOptimism,
+
+  // LegacyReverseResolvers & StandaloneReverseRegistrars
   DatasourceNames.ReverseResolverRoot,
   DatasourceNames.ReverseResolverBase,
   DatasourceNames.ReverseResolverLinea,
@@ -28,6 +41,24 @@ export default createPlugin({
       getDatasourceAsFullyDefinedAtCompileTime(config.namespace, datasourceName),
     );
 
+    // TODO: need to make this generic enough to run in non-mainnet namespaces, filter out empty
+    // datasources
+    const root = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ENSRoot,
+    );
+    const basenames = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.Basenames,
+    );
+    const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.Lineanames,
+    );
+    const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSOptimism,
+    );
     const rrRoot = getDatasourceAsFullyDefinedAtCompileTime(
       config.namespace,
       DatasourceNames.ReverseResolverRoot,
@@ -65,8 +96,39 @@ export default createPlugin({
         ),
 
       contracts: {
+        // a multi-chain Resolver ContractConfig
+        [namespaceContract(pluginName, "Resolver")]: {
+          abi: ResolverABI,
+          chain: {
+            // index all Resolver contracts on ENS Root
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              root.chain.id,
+              root.contracts.Resolver,
+            ),
+            // index all Resolver contracts on Base (includes ThreeDNSToken)
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              basenames.chain.id,
+              basenames.contracts.Resolver,
+            ),
+            // index all Resolver contracts on Linea
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              lineanames.chain.id,
+              lineanames.contracts.Resolver,
+            ),
+            // index ThreeDNSToken as Resolver on Optimism
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSOptimism.chain.id,
+              threeDNSOptimism.contracts.Resolver,
+            ),
+          },
+        },
+
         // a multi-chain LegacyReverseResolver ContractConfig
-        LegacyReverseResolver: {
+        [namespaceContract(pluginName, "LegacyReverseResolver")]: {
           abi: ResolverABI,
           chain: {
             // the Root chain's DefaultReverseResolver2 is a LegacyReverseResolver
@@ -79,7 +141,7 @@ export default createPlugin({
         },
 
         // a multi-chain StandaloneReverseRegistrar ContractConfig
-        StandaloneReverseRegistrar: {
+        [namespaceContract(pluginName, "StandaloneReverseRegistrar")]: {
           abi: StandaloneReverseRegistrarABI,
           chain: {
             // the Root chain's StandaloneReverseRegistrar
