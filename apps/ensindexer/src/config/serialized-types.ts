@@ -7,12 +7,12 @@ import type { ENSIndexerConfig, RpcConfig } from "./types";
  */
 export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "websocketRPC"> {
   /**
-   * String representation of {@link RpcConfig.httpUrls}.
+   * String representation of {@link RpcConfig.httpRPCs}.
    */
   httpRPCs: [UrlString, ...UrlString[]];
 
   /**
-   * String representation of {@link RpcConfig.webSocketUrl}.
+   * String representation of {@link RpcConfig.websocketRPC}.
    */
   websocketRPC?: UrlString;
 }
