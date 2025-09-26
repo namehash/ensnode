@@ -9,7 +9,7 @@ import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validat
 import { useHydrated } from "@/hooks/use-hydrated";
 import { CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
 import { defaultEnsNodeUrls } from "@/lib/env";
-import type { UrlString } from "@ensnode/ensnode-sdk";
+import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
 
 const normalizeUrl = (url: UrlString): UrlString => new URL(url).toString();
 
@@ -23,10 +23,7 @@ const isValidUrl = (url: UrlString): boolean => {
 };
 
 const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
-  return urls
-    .filter(isValidUrl)
-    .map(normalizeUrl)
-    .filter((url, index, array) => array.indexOf(url) === index); // remove duplicates
+  return uniq(urls.filter(isValidUrl).map(normalizeUrl));
 };
 
 /**
