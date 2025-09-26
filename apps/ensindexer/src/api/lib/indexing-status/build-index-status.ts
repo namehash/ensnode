@@ -14,6 +14,7 @@ import {
   type IndexingStatusResponse,
   type UnixTimestamp,
   createProjection,
+  deserializeOmnichainIndexingSnapshot,
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
@@ -25,8 +26,8 @@ import {
   type PonderStatus,
   type PrometheusMetrics,
   type PublicClient,
-  createOmnichainIndexingSnapshot,
   createSerializedChainSnapshots,
+  createSerializedOmnichainIndexingSnapshot,
   fetchPonderMetrics,
   fetchPonderStatus,
   getChainsBlockRefs,
@@ -126,7 +127,11 @@ export async function buildIndexingStatus(
   );
 
   // TODO: ensure that `systemTimestamp` is the right timestamp to use here.
-  const snapshot = createOmnichainIndexingSnapshot(serializedChainSnapshots, systemTimestamp);
+  const serializedOmnichainSnapshot = createSerializedOmnichainIndexingSnapshot(
+    serializedChainSnapshots,
+    systemTimestamp,
+  );
+  const omnichainSnapshot = deserializeOmnichainIndexingSnapshot(serializedOmnichainSnapshot);
 
   // Get the current system timestamp for the new time
   // Note: this timestamp might be significantly later than `systemTimestamp`
@@ -136,5 +141,5 @@ export async function buildIndexingStatus(
   const now = getUnixTime(new Date());
 
   // create the indexing status response
-  return createProjection(snapshot, now);
+  return createProjection(omnichainSnapshot, now);
 }

@@ -186,24 +186,22 @@ export function createChainIndexingSnapshot(chainMetadata: ChainMetadata): Chain
 }
 
 /**
- * Create Omnichain Indexing Snapshot
+ * Create Serialized Omnichain Indexing Snapshot
  *
- * Creates {@link OmnichainIndexingSnapshot} from serialized chain snapshots and "now" timestamp.
+ * Creates {@link SerializedOmnichainIndexingSnapshot} from serialized chain snapshots and "now" timestamp.
  */
-export function createOmnichainIndexingSnapshot(
+export function createSerializedOmnichainIndexingSnapshot(
   serializedChainSnapshots: Record<ChainIdString, SerializedChainIndexingSnapshot>,
   nowTimestamp: UnixTimestamp,
-): OmnichainIndexingSnapshot {
+): SerializedOmnichainIndexingSnapshot {
   const chains = Object.values(serializedChainSnapshots);
   const omnichainStatus = getOmnichainIndexingStatus(chains);
   const omnichainIndexingCursor = getOmnichainIndexingCursor(chains);
   const snapshotTime = nowTimestamp;
 
-  let serializedOmnichainSnapshot: SerializedOmnichainIndexingSnapshot;
-
   switch (omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted: {
-      serializedOmnichainSnapshot = {
+      return {
         omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
         chains: serializedChainSnapshots as Record<
           ChainIdString,
@@ -212,11 +210,10 @@ export function createOmnichainIndexingSnapshot(
         omnichainIndexingCursor,
         snapshotTime,
       } satisfies SerializedOmnichainIndexingSnapshotUnstarted;
-      break;
     }
 
     case OmnichainIndexingStatusIds.Backfill: {
-      serializedOmnichainSnapshot = {
+      return {
         omnichainStatus: OmnichainIndexingStatusIds.Backfill,
         chains: serializedChainSnapshots as Record<
           ChainIdString,
@@ -225,11 +222,10 @@ export function createOmnichainIndexingSnapshot(
         omnichainIndexingCursor,
         snapshotTime,
       } satisfies SerializedOmnichainIndexingSnapshotBackfill;
-      break;
     }
 
     case OmnichainIndexingStatusIds.Completed: {
-      serializedOmnichainSnapshot = {
+      return {
         omnichainStatus: OmnichainIndexingStatusIds.Completed,
         chains: serializedChainSnapshots as Record<
           ChainIdString,
@@ -238,20 +234,16 @@ export function createOmnichainIndexingSnapshot(
         omnichainIndexingCursor,
         snapshotTime,
       } satisfies SerializedOmnichainIndexingSnapshotCompleted;
-      break;
     }
 
     case OmnichainIndexingStatusIds.Following:
-      serializedOmnichainSnapshot = {
+      return {
         omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: serializedChainSnapshots,
         omnichainIndexingCursor,
         snapshotTime,
       } satisfies SerializedOmnichainIndexingSnapshotFollowing;
-      break;
   }
-
-  return deserializeOmnichainIndexingSnapshot(serializedOmnichainSnapshot);
 }
 
 /**
