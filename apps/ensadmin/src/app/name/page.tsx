@@ -42,11 +42,11 @@ export default function NameNavigationPage() {
         <CardHeader className="sm:pb-4 max-sm:p-3">
           <CardTitle className="text-2xl">Explore ENS Names</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-sm:px-3 max-sm:pb-3">
           {/*//TODO: Maybe we could create a short list of example names for users to pick from?
                     Similarly to how it's done in the 'RecordsResolution' ?*/}
           <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-            <fieldset className="flex flex-row gap-2 justify-start items-center">
+            <fieldset className="flex flex-col sm:flex-row gap-2 justify-start items-center">
               <Input
                 autoFocus
                 type="text"
@@ -57,7 +57,7 @@ export default function NameNavigationPage() {
                 value={searchedName}
                 onChange={handleChange}
               />
-              <Button type="submit" disabled={searchedName.length === 0}>
+              <Button type="submit" disabled={searchedName.length === 0} className="max-sm:self-stretch">
                 View Name
               </Button>
             </fieldset>
