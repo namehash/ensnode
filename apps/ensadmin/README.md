@@ -16,11 +16,12 @@ pnpm install
 cp .env.local.example .env.local
 ```
 
-You can update the `NEXT_PUBLIC_DEFAULT_ENSNODE_URLS` environment variable if you wish ENSAdmin to include a given list of comma-separated URLs as initial connection options.
+You can update the `NEXT_PUBLIC_SERVER_ENSNODE_URLS` environment variable if you wish ENSAdmin to include a given list of comma-separated URLs as initial connection options.
 
 ### Run development server
 
 Following [Next.js docs](https://nextjs.org/docs/pages/api-reference/cli/next#next-dev-options):
+
 > Starts the application in development mode with Hot Module Reloading (HMR), error reporting, and more.
 
 ```bash

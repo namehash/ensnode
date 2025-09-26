@@ -12,23 +12,23 @@ import { Trash2 } from "lucide-react";
 
 interface Connection {
   url: string;
-  isDefault: boolean;
+  isFromServer: boolean;
 }
 
 interface CustomConnectionsListProps {
-  availableConnections: Connection[];
+  connectionLibrary: Connection[];
   activeConnectionUrl: string;
   onSelectCustomConnection: (url: string) => void;
   onRemoveCustomConnection: (url: string) => void;
 }
 
 export function CustomConnectionsList({
-  availableConnections,
+  connectionLibrary,
   activeConnectionUrl,
   onSelectCustomConnection,
   onRemoveCustomConnection,
 }: CustomConnectionsListProps) {
-  const customConnections = availableConnections.filter(({ isDefault }) => !isDefault);
+  const customConnections = connectionLibrary.filter(({ isFromServer }) => !isFromServer);
 
   if (customConnections.length === 0) {
     return null;

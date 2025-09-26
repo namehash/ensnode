@@ -14,7 +14,7 @@ import { toast } from "sonner";
 export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{}>) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { availableConnections, selectedConnection, addCustomConnection } =
+  const { connectionLibrary, selectedConnection, addCustomConnection } =
     useAvailableENSNodeConnections();
 
   const addConnectionFromUrl = useMutation({
@@ -62,8 +62,8 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
 
     if (failedConnectionUrls.has(connectionParam)) return;
 
-    // Check if connection URL already exists in available connections (both default and custom)
-    const existingConnection = availableConnections.find((conn) => conn.url === connectionParam);
+    // Check if connection URL already exists in connection library (both server and custom)
+    const existingConnection = connectionLibrary.find((conn) => conn.url === connectionParam);
     if (existingConnection) {
       return;
     }
@@ -89,7 +89,7 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
     });
   }, [
     searchParams,
-    availableConnections,
+    connectionLibrary,
     selectedConnection,
     addConnectionFromUrl,
     router,

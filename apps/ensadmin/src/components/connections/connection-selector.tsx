@@ -31,7 +31,7 @@ export function ConnectionSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { availableConnections, addCustomConnection, removeCustomConnection } =
+  const { connectionLibrary, addCustomConnection, removeCustomConnection } =
     useAvailableENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
   const addCustomConnectionMutation = useMutation({
@@ -91,13 +91,13 @@ export function ConnectionSelector() {
               sideOffset={4}
             >
               <DefaultConnectionsList
-                availableConnections={availableConnections}
+                connectionLibrary={connectionLibrary}
                 activeConnectionUrl={activeENSNodeUrl}
                 onSelectDefaultConnection={handleSelect}
               />
 
               <CustomConnectionsList
-                availableConnections={availableConnections}
+                connectionLibrary={connectionLibrary}
                 activeConnectionUrl={activeENSNodeUrl}
                 onSelectCustomConnection={handleSelect}
                 onRemoveCustomConnection={removeCustomConnection}

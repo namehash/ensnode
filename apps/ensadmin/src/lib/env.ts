@@ -104,17 +104,17 @@ const DEFAULT_ENSNODE_URL =
   "https://api.alpha.ensnode.io,https://api.alpha-sepolia.ensnode.io,https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io,https://api.holesky.ensnode.io";
 
 /**
- * Get list of URLs for default ENSNode instances.
+ * Get list of URLs for server ENSNode instances (ServerConnectionLibrary).
  *
- * @returns a list (with at least one element) of URLs for default ENSNode instances
+ * @returns a list (with at least one element) of URLs for server ENSNode instances
  */
 export function defaultEnsNodeUrls(): Array<URL> {
-  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URLS";
-  let envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
+  const envVarName = "NEXT_PUBLIC_SERVER_ENSNODE_URLS";
+  let envVarValue = process.env.NEXT_PUBLIC_SERVER_ENSNODE_URLS;
 
   if (!envVarValue) {
     console.warn(
-      `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
+      `No server ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
     );
 
     envVarValue = DEFAULT_ENSNODE_URL;

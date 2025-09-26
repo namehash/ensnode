@@ -27,7 +27,7 @@ const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
 };
 
 /**
- * Default ENSNode connection URLs with guaranteed invariants:
+ * Server connection library - ENSNode connection URLs provided by the server with guaranteed invariants:
  * - Each URL passes isValidUrl validation
  * - Each URL is in normalizeUrl form
  * - All URLs are unique (no duplicates)
@@ -38,14 +38,14 @@ const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
  * 2. Converting to string then normalizing ensures consistent format
  * 3. validateAndNormalizeUrls removes any potential duplicates and invalid URLs
  */
-const DEFAULT_CONNECTION_URLS = (() => {
+const serverConnectionLibrary = (() => {
   const rawUrls = defaultEnsNodeUrls().map((url) => url.toString());
   const validatedUrls = validateAndNormalizeUrls(rawUrls);
 
   // Guarantee at least 1 URL - this should never happen due to defaultEnsNodeUrls validation
   // but adding as a safety net to maintain the invariant
   if (validatedUrls.length === 0) {
-    throw new Error("DEFAULT_CONNECTION_URLS must contain at least one valid URL");
+    throw new Error("ServerConnectionLibrary must contain at least one valid URL");
   }
 
   return validatedUrls;
@@ -60,8 +60,8 @@ function _useAvailableENSNodeConnections() {
     [],
   );
 
-  // Validate and normalize URLs from localStorage
-  const customConnections = useMemo(() => {
+  // Validate and normalize URLs from localStorage - Custom Connection Library
+  const customConnectionLibrary = useMemo(() => {
     const validatedUrls = validateAndNormalizeUrls(rawCustomConnectionUrls);
 
     // Clean up localStorage if validation/normalization changed anything
@@ -73,40 +73,40 @@ function _useAvailableENSNodeConnections() {
   }, [rawCustomConnectionUrls, storeCustomConnections]);
 
   /**
-   * All available ENSNode connections with guaranteed invariants:
+   * Connection Library - dynamically generated union of ServerConnectionLibrary and CustomConnectionLibrary with guaranteed invariants:
    *
    * Format:
-   * - Array of objects with { url: UrlString, isDefault: boolean }
+   * - Array of objects with { url: UrlString, isFromServer: boolean }
    * - url: Normalized URL string (via normalizeUrl())
-   * - isDefault: true for default connections, false for custom ones
+   * - isFromServer: true for server connections, false for custom ones
    *
    * Content guarantees:
-   * - Always contains at least 1 connection (from DEFAULT_CONNECTION_URLS)
+   * - Always contains at least 1 connection (from serverConnectionLibrary)
    * - All URLs are valid (pass isValidUrl validation)
    * - All URLs are normalized to consistent format
-   * - No duplicate URLs (custom connections filtered against defaults)
-   * - Default connections always come first in array
-   * - Custom connections are filtered to exclude any that match defaults
+   * - No duplicate URLs (custom connections filtered against server connections)
+   * - Server connections always come first in array
+   * - Custom connections are filtered to exclude any that match server connections
    *
    * Order:
-   * 1. All default connections (isDefault: true)
-   * 2. Custom connections not in defaults (isDefault: false)
+   * 1. All server connections (isFromServer: true)
+   * 2. Custom connections not in server library (isFromServer: false)
    */
-  const availableConnections = useMemo(
+  const connectionLibrary = useMemo(
     () => [
-      // include the default connections
-      ...DEFAULT_CONNECTION_URLS.map((url) => ({ url, isDefault: true })),
-      // include the user's connections that aren't already in defaults
-      ...customConnections
-        .filter((url) => !DEFAULT_CONNECTION_URLS.includes(url))
-        .map((url) => ({ url, isDefault: false })),
+      // include the server connections
+      ...serverConnectionLibrary.map((url) => ({ url, isFromServer: true })),
+      // include the user's connections that aren't already in server library
+      ...customConnectionLibrary
+        .filter((url) => !serverConnectionLibrary.includes(url))
+        .map((url) => ({ url, isFromServer: false })),
     ],
-    [customConnections],
+    [customConnectionLibrary],
   );
 
   const isInConnections = useMemo(
-    () => (url: UrlString) => availableConnections.some((conn) => conn.url === url),
-    [availableConnections],
+    () => (url: UrlString) => connectionLibrary.some((conn) => conn.url === url),
+    [connectionLibrary],
   );
 
   const addCustomConnection = useCallback(
@@ -118,13 +118,13 @@ function _useAvailableENSNodeConnections() {
 
       const url = normalizeUrl(_url);
 
-      if (availableConnections.some((c) => c.url === url)) return url;
+      if (connectionLibrary.some((c) => c.url === url)) return url;
 
       storeCustomConnections((customConnections) => [...customConnections, url]);
 
       return url;
     },
-    [availableConnections, storeCustomConnections],
+    [connectionLibrary, storeCustomConnections],
   );
 
   const removeCustomConnection = useCallback(
@@ -138,22 +138,22 @@ function _useAvailableENSNodeConnections() {
     [storeCustomConnections],
   );
 
-  // the selected connection is the current connection (from URL param) or the first default
+  // the selected connection is the current connection (from URL param) or the first from server library
   const selectedConnection = useMemo<URL | null>(() => {
     // no selected ensnode connection in server environments
     if (!hydrated) return null;
 
-    // NOTE: guaranteed to have a valid set of `availableConnections` here, on the client
-    // NOTE: guaranteed to have at least 1 connection because defaults must have length > 0
-    const first = availableConnections[0].url;
+    // NOTE: guaranteed to have a valid set of `connectionLibrary` here, on the client
+    // NOTE: guaranteed to have at least 1 connection because server library must have length > 0
+    const first = connectionLibrary[0].url;
 
     if (!currentConnection) return new URL(first);
     if (!isInConnections(currentConnection)) return new URL(first);
     return new URL(currentConnection);
-  }, [hydrated, availableConnections, currentConnection, isInConnections]);
+  }, [hydrated, connectionLibrary, currentConnection, isInConnections]);
 
   return {
-    availableConnections,
+    connectionLibrary,
     selectedConnection,
     addCustomConnection,
     removeCustomConnection,
@@ -167,13 +167,13 @@ const [AvailableENSNodeConnectionsProviderInner, useAvailableENSNodeConnections]
 export { useAvailableENSNodeConnections };
 
 /**
- * Provider for available ENSNode connections (both default and custom).
+ * Provider for ENSNode connections (ServerConnectionLibrary + CustomConnectionLibrary).
  *
  * Wraps the inner provider with Suspense boundary to handle the async nature
  * of useSearchParams() which can suspend during SSR/hydration.
  *
  * Provides access to:
- * - availableConnections: All connections (default + custom)
+ * - connectionLibrary: All connections (server + custom)
  * - selectedConnection: Currently selected connection URL
  * - addCustomConnection: Add a new custom connection
  * - removeCustomConnection: Remove a custom connection

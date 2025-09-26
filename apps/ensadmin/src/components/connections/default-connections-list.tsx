@@ -6,23 +6,23 @@ import { cn } from "@/lib/utils";
 
 interface Connection {
   url: string;
-  isDefault: boolean;
+  isFromServer: boolean;
 }
 
 interface DefaultConnectionsListProps {
-  availableConnections: Connection[];
+  connectionLibrary: Connection[];
   activeConnectionUrl: string;
   onSelectDefaultConnection: (url: string) => void;
 }
 
 export function DefaultConnectionsList({
-  availableConnections,
+  connectionLibrary,
   activeConnectionUrl,
   onSelectDefaultConnection,
 }: DefaultConnectionsListProps) {
-  const defaultConnections = availableConnections.filter(({ isDefault }) => isDefault);
+  const serverConnections = connectionLibrary.filter(({ isFromServer }) => isFromServer);
 
-  if (defaultConnections.length === 0) {
+  if (serverConnections.length === 0) {
     return null;
   }
 
@@ -32,21 +32,21 @@ export function DefaultConnectionsList({
         ENSNode Connection Library
       </DropdownMenuLabel>
 
-      {defaultConnections.map(({ url: defaultConnectionUrl }) => {
-        const isActiveConnection = defaultConnectionUrl === activeConnectionUrl;
+      {serverConnections.map(({ url: serverConnectionUrl }) => {
+        const isActiveConnection = serverConnectionUrl === activeConnectionUrl;
 
         return (
-          <div key={defaultConnectionUrl} className="flex items-center justify-between gap-1">
+          <div key={serverConnectionUrl} className="flex items-center justify-between gap-1">
             <DropdownMenuItem
-              onClick={() => onSelectDefaultConnection(defaultConnectionUrl)}
+              onClick={() => onSelectDefaultConnection(serverConnectionUrl)}
               className={cn(
                 "cursor-pointer flex-1 py-2.5 truncate",
                 isActiveConnection ? "bg-primary/10 text-primary" : null,
               )}
             >
-              <span className="font-mono text-xs flex-1">{defaultConnectionUrl}</span>
+              <span className="font-mono text-xs flex-1">{serverConnectionUrl}</span>
             </DropdownMenuItem>
-            <CopyButton value={defaultConnectionUrl} />
+            <CopyButton value={serverConnectionUrl} />
           </div>
         );
       })}

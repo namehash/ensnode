@@ -2,7 +2,7 @@
 locals {
   # The `hosted_zone_name` represents the "base" domain name of the zone in AWS Route53
   # where "hosted" ENSNode app instances (such as ENSIndexer and ENSRainbow) are nested beneath.
-  # 
+  #
   # For example, if:
   # - `hosted_zone_name` is "ensnode.io"
   # - `ensnode_environment_name` is "blue"
@@ -11,7 +11,7 @@ locals {
   # The fqdn for "API"-style ENSIndexer instances is generated as follows:
   # - api.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
   # - example: api.alpha-sepolia.blue.ensnode.io
-  # 
+  #
   # The fqdn for "Indexer"-style ENSIndexer instances is generated as follows:
   # - indexer.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
   # - example: indexer.alpha-sepolia.blue.ensnode.io
@@ -121,7 +121,7 @@ module "ensadmin" {
   ensnode_environment_name = var.render_environment
   anthropic_api_key        = var.anthropic_api_key
 
-  # NEXT_PUBLIC_DEFAULT_ENSNODE_URLS is not currently configurable through
+  # NEXT_PUBLIC_SERVER_ENSNODE_URLS is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
 }
 
