@@ -5,11 +5,16 @@ import type { ENSIndexerConfig, RpcConfig } from "./types";
 /**
  * Serialized representation of {@link RpcConfig}
  */
-export interface SerializedRpcConfig extends Omit<RpcConfig, "url"> {
+export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "websocketRPC"> {
   /**
-   * String representation of {@link RpcConfig.url}.
+   * String representation of {@link RpcConfig.httpRPCs}.
    */
-  url: UrlString;
+  httpRPCs: [UrlString, ...UrlString[]];
+
+  /**
+   * String representation of {@link RpcConfig.websocketRPC}.
+   */
+  websocketRPC?: UrlString;
 }
 
 /**
@@ -56,7 +61,7 @@ export interface SerializedENSIndexerConfig
   indexedChainIds: ChainId[];
 
   /**
-   * String representation of {@link ENSIndexerConfig.rpcConfig}.
+   * String representation of {@link ENSIndexerConfig.rpcConfigs}.
    */
   rpcConfigs: Record<ChainIdString, SerializedRpcConfig>;
 }

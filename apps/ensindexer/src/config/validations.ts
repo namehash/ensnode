@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { uniq } from "@ensnode/ensnode-sdk";
+import { isHttpEndpointURL, isWebSocketEndpointURL, uniq } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -141,5 +141,41 @@ export function invariant_validContractConfigs(
         `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define valid addresses. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
       );
     }
+  }
+}
+
+/**
+ * Invariant: RPC configuration must include at least one HTTP/HTTPS endpoint URL.
+ */
+export function invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL(
+  ctx: ZodCheckFnInput<URL[]>,
+) {
+  const endpoints = ctx.value;
+  const httpEndpoints = endpoints.filter(isHttpEndpointURL);
+
+  if (httpEndpoints.length < 1) {
+    ctx.issues.push({
+      code: "custom",
+      input: endpoints,
+      message: `RPC endpoint configuration must include at least one HTTP/HTTPS URL.`,
+    });
+  }
+}
+
+/**
+ * Invariant: RPC configuration must include at most one WS/WSS endpoint URL.
+ */
+export function invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL(
+  ctx: ZodCheckFnInput<URL[]>,
+) {
+  const endpoints = ctx.value;
+  const wsEndpoints = endpoints.filter(isWebSocketEndpointURL);
+
+  if (wsEndpoints.length > 1) {
+    ctx.issues.push({
+      code: "custom",
+      input: endpoints,
+      message: `RPC endpoint configuration must include at most one WS/WSS URL.`,
+    });
   }
 }

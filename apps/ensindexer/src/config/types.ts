@@ -3,26 +3,37 @@ import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/en
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
- * Configuration for a single RPC used by ENSIndexer.
+ * Indexing RPC configuration for a single chain.
+ *
+ * Ponder automatically manages the use of provided RPC endpoints.
+ *
+ * @see https://ponder.sh/docs/config/chains#rpc-endpoints
+ * @see https://ponder.sh/docs/config/chains#websocket
  */
 export interface RpcConfig {
   /**
-   * The RPC endpoint URL for the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
-   * For nominal indexing behavior, must be an endpoint with high rate limits.
+   * The HTTP endpoint URLs for RPCs to the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
+   * For proper indexing behavior, each RPC must support high request rate limits (ex: 500+ requests a second).
+   *
+   * The order of RPC URLs matters. The first HTTP/HTTPS RPC for a given chain
+   * will be the RPC that is used for Resolution API request processing.
    *
    * Invariants:
-   * - localhost urls are allowed (and expected).
+   * - Includes one or more URLs
+   * - Each URL in the array is guaranteed to be distinct
+   * - Each URL protocol is guaranteed to be "http:" or "https:"
    */
-  url: URL;
+  httpRPCs: [URL, ...URL[]];
 
   /**
-   * The maximum number of RPC requests per second allowed for this chain, defaulting to
-   * 500 (DEFAULT_RPC_RATE_LIMIT). This is used to avoid rate limiting by the RPC provider.
+   * The websocket RPC for the chain.
+   *
+   * If defined, it is used to accelerate discovery of new "realtime" blocks.
    *
    * Invariants:
-   * - The value must be an integer greater than 0
+   * - If defined, URL protocol is guaranteed to be "ws:" or "wss:".
    */
-  maxRequestsPerSecond: number;
+  websocketRPC?: URL;
 }
 
 /**
@@ -221,10 +232,12 @@ export interface ENSIndexerConfig {
   isSubgraphCompatible: boolean;
 }
 
-export interface RpcConfigEnvironment {
-  url: string;
-  maxRequestsPerSecond: string | undefined;
-}
+/**
+ * Represents the raw unvalidated environment variable for the RPCs associated with a chain.
+ *
+ * It might be a single URL string, or a comma separated list of URL strings.
+ */
+export type RpcConfigEnvironment = string;
 
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.

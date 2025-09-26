@@ -1,6 +1,6 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerConfig } from "@/config/types";
-import { DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
+import { DEFAULT_PORT } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
 import { vi } from "vitest";
 
@@ -20,10 +20,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   },
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
-    1: {
-      url: "https://eth-mainnet.g.alchemy.com/v2/1234",
-      maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT.toString(),
-    },
+    1: "https://eth-mainnet.g.alchemy.com/v2/1234",
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
   isSubgraphCompatible: undefined,
@@ -89,31 +86,4 @@ export function updateMockConfig(updates: Partial<ENSIndexerConfig>) {
  */
 export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
   updateMockConfig({ globalBlockrange: { startBlock, endBlock } });
-}
-
-/**
- * Configures a chain in the current mock config
- *
- * @param chainId The chain ID to configure
- * @param url The RPC endpoint URL for the chain
- * @param maxRequestsPerSecond The maximum requests per second (defaults to 50)
- *
- * @example
- * // Add mainnet configuration
- * setChainConfig(1, "https://eth-mainnet.g.alchemy.com/v2/1234", 100);
- *
- * // Add base chain configuration
- * setChainConfig(8453, "https://base-mainnet.g.alchemy.com/v2/5678");
- */
-export function setChainConfig(
-  chainId: number,
-  url: string,
-  maxRequestsPerSecond: number = DEFAULT_RPC_RATE_LIMIT,
-) {
-  updateMockConfig({
-    rpcConfigs: {
-      ...(currentMockConfig.rpcConfigs || {}),
-      [chainId]: { url: new URL(url), maxRequestsPerSecond },
-    },
-  });
 }
