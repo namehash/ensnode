@@ -177,21 +177,6 @@ export const resolver = onchainTable(
     // The set of observed SLIP-44 coin types for this resolver
     // NOTE: we avoid .notNull.default([]) to match subgraph behavior
     coinTypes: t.bigint().array(),
-
-    /**
-     * Represents the value of the reverse-resolution (ENSIP-3) name() record.
-     *
-     * The emitted record values are interpreted according to `interpretNameRecordValue` — unnormalized
-     * names and empty string values are interpreted as a deletion of the associated record (represented
-     * here as `null`).
-     *
-     * If set, the value of this field is guaranteed to be a non-empty-string normalized ENS name
-     * (see `interpretNameRecordValue` for guarantees).
-     *
-     * Note that this is an extension to the original subgraph schema and legacy subgraph compatibility
-     * is not relevant.
-     */
-    name: t.text(),
   }),
   (t) => ({
     byDomainId: index().on(t.domainId),

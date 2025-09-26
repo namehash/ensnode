@@ -50,7 +50,7 @@ locals {
       ensnode_indexer_type     = "alpha"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
+      plugins                  = "subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope"
       namespace                = "mainnet"
       render_instance_plan     = "standard"
       subgraph_compat          = false
@@ -60,7 +60,7 @@ locals {
       ensnode_indexer_type     = "alpha-sepolia"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
+      plugins                  = "subgraph,basenames,lineanames,protocol-acceleration,referrals"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
       subgraph_compat          = false

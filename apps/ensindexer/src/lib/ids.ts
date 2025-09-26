@@ -174,3 +174,17 @@ export const makeDomainResolverRelationId = (chainId: number, domainId: Node) =>
  */
 export const makePrimaryNameId = (address: Address, coinType: CoinType) =>
   [address, coinTypeReverseLabel(coinType)].join("-");
+
+/**
+ * Makes a unique Resolver Records ID.
+ *
+ * @example `${chainId}-${address}-${node}`
+ *
+ * @param chainId the chain ID
+ * @param address the resolver contract address
+ * @param node the ENS Node
+ * @returns a unique Resolver Records ID
+ */
+
+export const makeResolverRecordsId = (chainId: number, address: Address, node: Node) =>
+  [chainId, address, node].join("-");

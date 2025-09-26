@@ -6,7 +6,6 @@ import {
   bigintToCoinType,
 } from "@ensnode/ensnode-sdk";
 
-// TODO: replace with some sort of inferred typing from dizzle
 export interface IndexedResolverRecords {
   name: string | null;
   addressRecords: { coinType: bigint; address: string }[];

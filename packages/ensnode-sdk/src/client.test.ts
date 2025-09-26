@@ -68,7 +68,7 @@ const EXAMPLE_CONFIG_RESPONSE = {
     PluginName.Basenames,
     PluginName.Lineanames,
     PluginName.ThreeDNS,
-    PluginName.ReverseResolvers,
+    PluginName.ProtocolAcceleration,
     PluginName.Referrals,
   ],
   dependencyInfo: {
