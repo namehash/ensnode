@@ -15,13 +15,14 @@ const MAX_REALTIME_DISTANCE_TO_ACCELERATE = 60; // seconds
 export async function canAccelerateResolution(): Promise<boolean> {
   try {
     const systemTimestamp = getUnixTime(new Date());
-    const indexingStatus = await buildIndexingStatus(
-      publicClients,
-      systemTimestamp,
-      MAX_REALTIME_DISTANCE_TO_ACCELERATE,
-    );
+    const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
 
-    return indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance === true;
+    // handle case where the indexing projection is unavailable
+    if (indexingStatus.type === null) {
+      return false;
+    }
+
+    return indexingStatus.maxRealtimeDistance <= MAX_REALTIME_DISTANCE_TO_ACCELERATE;
   } catch {
     return false;
   }

@@ -14,23 +14,42 @@
 import {
   type BlockRef,
   type ChainId,
-  type ChainIndexingBackfillStatus,
-  type ChainIndexingCompletedStatus,
-  type ChainIndexingFollowingStatus,
-  type ChainIndexingQueuedStatus,
-  type ChainIndexingStatus,
+  type ChainIdString,
+  ChainIndexingConfigTypeIds,
+  type ChainIndexingSnapshot,
+  type ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
   type DeepPartial,
-  type Duration,
+  type OmnichainIndexingSnapshot,
+  OmnichainIndexingStatusIds,
+  type SerializedChainIndexingSnapshot,
+  type SerializedChainIndexingSnapshotBackfill,
+  type SerializedChainIndexingSnapshotCompleted,
+  type SerializedChainIndexingSnapshotFollowing,
+  type SerializedChainIndexingSnapshotQueued,
+  type SerializedOmnichainIndexingSnapshot,
+  type SerializedOmnichainIndexingSnapshotBackfill,
+  type SerializedOmnichainIndexingSnapshotCompleted,
+  type SerializedOmnichainIndexingSnapshotFollowing,
+  type SerializedOmnichainIndexingSnapshotUnstarted,
   type UnixTimestamp,
   createIndexingConfig,
+  deserializeChainIndexingSnapshot,
+  deserializeOmnichainIndexingSnapshot,
+  getOmnichainIndexingCursor,
+  getOmnichainIndexingStatus,
 } from "@ensnode/ensnode-sdk";
+import { PrometheusMetrics } from "@ensnode/ponder-metadata";
+import { prettifyError } from "zod/v4/core";
+import type { ChainBlockRefs } from "./block-refs";
+import type { ChainName } from "./config";
+import type { PonderStatus } from "./status";
+import { makePonderChainMetadataSchema } from "./zod-schemas";
 
 /**
  * Chain Metadata
  *
- * Chain metadata, required to determine {@link ChainIndexingStatus}.
+ * Chain metadata, required to determine {@link ChainIndexingSnapshot}.
  */
 export interface ChainMetadata {
   chainId: ChainId;
@@ -102,15 +121,9 @@ export interface UnvalidatedChainMetadata
 }
 
 /**
- * Get {@link ChainIndexingStatus} for the indexed chain metadata.
- *
- * This function uses the current system timestamp to calculate
- * `approxRealtimeDistance` for chains in "following" status.
+ * Create {@link ChainIndexingSnapshot} for the indexed chain metadata.
  */
-export function getChainIndexingStatus(
-  chainMetadata: ChainMetadata,
-  systemTimestamp: UnixTimestamp,
-): ChainIndexingStatus {
+export function createChainIndexingSnapshot(chainMetadata: ChainMetadata): ChainIndexingSnapshot {
   const {
     config: chainBlocksConfig,
     backfillEndBlock: chainBackfillEndBlock,
@@ -126,62 +139,164 @@ export function getChainIndexingStatus(
   // In omnichain ordering, if the startBlock is the same as the
   // status block, the chain has not started yet.
   if (chainBlocksConfig.startBlock.number === chainStatusBlock.number) {
-    return {
+    return deserializeChainIndexingSnapshot({
       status: ChainIndexingStatusIds.Queued,
       config,
-    } satisfies ChainIndexingQueuedStatus;
+    } satisfies SerializedChainIndexingSnapshotQueued);
   }
 
   if (isSyncComplete) {
-    if (config.strategy !== ChainIndexingStrategyIds.Definite) {
+    if (config.type !== ChainIndexingConfigTypeIds.Definite) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingStrategyIds.Definite}' indexing strategy.`,
+        `The '${ChainIndexingStatusIds.Completed}' indexing status can be only created with the '${ChainIndexingConfigTypeIds.Definite}' indexing config type.`,
       );
     }
 
-    return {
+    return deserializeChainIndexingSnapshot({
       status: ChainIndexingStatusIds.Completed,
       latestIndexedBlock: chainStatusBlock,
       config,
-    } satisfies ChainIndexingCompletedStatus;
+    } satisfies SerializedChainIndexingSnapshotCompleted);
   }
 
   if (isSyncRealtime) {
-    if (config.strategy !== ChainIndexingStrategyIds.Indefinite) {
+    if (config.type !== ChainIndexingConfigTypeIds.Indefinite) {
       throw new Error(
-        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingStrategyIds.Indefinite}' indexing strategy.`,
+        `The '${ChainIndexingStatusIds.Following}' indexing status can be only created with the '${ChainIndexingConfigTypeIds.Indefinite}' indexing config type.`,
       );
     }
 
-    /**
-     * It's possible that the current system time of the ENSIndexer instance
-     * is set to be ahead of the time agreed to by the blockchain and held in
-     * chainStatusBlock.timestamp.
-     *
-     * Here we enforce that the Duration value can never be negative,
-     * even if system clocks are misconfigured.
-     */
-    const approxRealtimeDistance: Duration = Math.max(
-      0,
-      systemTimestamp - chainStatusBlock.timestamp,
-    );
-
-    return {
+    return deserializeChainIndexingSnapshot({
       status: ChainIndexingStatusIds.Following,
       latestIndexedBlock: chainStatusBlock,
       latestKnownBlock: chainSyncBlock,
-      approxRealtimeDistance,
       config: {
-        strategy: config.strategy,
+        type: config.type,
         startBlock: config.startBlock,
       },
-    } satisfies ChainIndexingFollowingStatus;
+    } satisfies SerializedChainIndexingSnapshotFollowing);
   }
 
-  return {
+  return deserializeChainIndexingSnapshot({
     status: ChainIndexingStatusIds.Backfill,
     latestIndexedBlock: chainStatusBlock,
     backfillEndBlock: chainBackfillEndBlock,
     config,
-  } satisfies ChainIndexingBackfillStatus;
+  } satisfies SerializedChainIndexingSnapshotBackfill);
+}
+
+/**
+ * Create Serialized Omnichain Indexing Snapshot
+ *
+ * Creates {@link SerializedOmnichainIndexingSnapshot} from serialized chain snapshots and "now" timestamp.
+ */
+export function createSerializedOmnichainIndexingSnapshot(
+  serializedChainSnapshots: Record<ChainIdString, SerializedChainIndexingSnapshot>,
+  nowTimestamp: UnixTimestamp,
+): SerializedOmnichainIndexingSnapshot {
+  const chains = Object.values(serializedChainSnapshots);
+  const omnichainStatus = getOmnichainIndexingStatus(chains);
+  const omnichainIndexingCursor = getOmnichainIndexingCursor(chains);
+  const snapshotTime = nowTimestamp;
+
+  switch (omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted: {
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+        chains: serializedChainSnapshots as Record<
+          ChainIdString,
+          SerializedChainIndexingSnapshotQueued
+        >, // forcing the type here, will be validated in the following 'check' step
+        omnichainIndexingCursor,
+        snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotUnstarted;
+    }
+
+    case OmnichainIndexingStatusIds.Backfill: {
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: serializedChainSnapshots as Record<
+          ChainIdString,
+          ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill
+        >, // forcing the type here, will be validated in the following 'check' step
+        omnichainIndexingCursor,
+        snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotBackfill;
+    }
+
+    case OmnichainIndexingStatusIds.Completed: {
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Completed,
+        chains: serializedChainSnapshots as Record<
+          ChainIdString,
+          SerializedChainIndexingSnapshotCompleted
+        >, // forcing the type here, will be validated in the following 'check' step
+        omnichainIndexingCursor,
+        snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotCompleted;
+    }
+
+    case OmnichainIndexingStatusIds.Following:
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: serializedChainSnapshots,
+        omnichainIndexingCursor,
+        snapshotTime,
+      } satisfies SerializedOmnichainIndexingSnapshotFollowing;
+  }
+}
+
+/**
+ * Create serialized chain indexing snapshots.
+ *
+ * The output of this function is required for
+ * calling {@link createOmnichainIndexingSnapshot}.
+ */
+export function createSerializedChainSnapshots(
+  chainNames: ChainName[],
+  chainsBlockRefs: Map<ChainName, ChainBlockRefs>,
+  metrics: PrometheusMetrics,
+  status: PonderStatus,
+): Record<ChainIdString, SerializedChainIndexingSnapshot> {
+  const chainsMetadata = new Map<ChainName, UnvalidatedChainMetadata>();
+
+  // collect unvalidated chain metadata for each indexed chain
+  for (const chainName of chainNames) {
+    const chainBlockRefs = chainsBlockRefs.get(chainName);
+
+    const chainMetadata = {
+      chainId: status[chainName]?.id,
+      config: chainBlockRefs?.config,
+      backfillEndBlock: chainBlockRefs?.backfillEndBlock,
+      historicalTotalBlocks: metrics.getValue("ponder_historical_total_blocks", {
+        chain: chainName,
+      }),
+      isSyncComplete: metrics.getValue("ponder_sync_is_complete", { chain: chainName }),
+      isSyncRealtime: metrics.getValue("ponder_sync_is_realtime", { chain: chainName }),
+      syncBlock: {
+        number: metrics.getValue("ponder_sync_block", { chain: chainName }),
+        timestamp: metrics.getValue("ponder_sync_block_timestamp", { chain: chainName }),
+      },
+      statusBlock: {
+        number: status[chainName]?.block.number,
+        timestamp: status[chainName]?.block.timestamp,
+      },
+    } satisfies UnvalidatedChainMetadata;
+
+    chainsMetadata.set(chainName, chainMetadata);
+  }
+
+  // parse chain metadata for each indexed chain
+  const schema = makePonderChainMetadataSchema(chainNames);
+  const parsed = schema.safeParse(chainsMetadata);
+
+  if (!parsed.success) {
+    throw new Error(
+      "Failed to build SerializedOmnichainIndexingSnapshot object: \n" +
+        prettifyError(parsed.error) +
+        "\n",
+    );
+  }
+
+  return parsed.data;
 }

@@ -9,10 +9,10 @@ interface UseIndexingStatusParameters
     QueryParameter<IndexingStatusResponse> {}
 
 export function useIndexingStatus(parameters: ConfigParameter & UseIndexingStatusParameters = {}) {
-  const { config, query = {}, ...args } = parameters;
+  const { config, query = {} } = parameters;
   const _config = useENSNodeConfig(config);
 
-  const queryOptions = createIndexingStatusQueryOptions(_config, { ...args });
+  const queryOptions = createIndexingStatusQueryOptions(_config);
 
   const options = {
     ...queryOptions,

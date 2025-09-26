@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { OverallIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 import { type ReactElement, Suspense } from "react";
 
 import { RecentRegistrations } from "@/components/recent-registrations";
@@ -13,11 +13,11 @@ import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { BackfillStatus } from "./backfill-status";
 import { ENSNodeConfigInfo } from "./config-info";
 import {
-  IndexingStatsForBackfillStatus,
-  IndexingStatsForCompletedStatus,
-  IndexingStatsForFollowingStatus,
-  IndexingStatsForIndexerErrorStatus,
-  IndexingStatsForUnstartedStatus,
+  IndexingStatsForSnapshotBackfill,
+  IndexingStatsForSnapshotCompleted,
+  IndexingStatsForSnapshotFollowing,
+  IndexingStatsForSnapshotUnstarted,
+  IndexingStatsForUnavailableSnapshot,
   IndexingStatsShell,
 } from "./indexing-stats";
 import { IndexingStatusLoading } from "./indexing-status-loading";
@@ -57,49 +57,47 @@ export function IndexingStatus() {
   let maybeRecentRegistrations: ReactElement | undefined;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  switch (indexingStatus.overallStatus) {
-    case OverallIndexingStatusIds.IndexerError:
-      indexingStats = <IndexingStatsForIndexerErrorStatus />;
+  switch (indexingStatus.snapshot?.omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted:
+      indexingStats = (
+        <IndexingStatsForSnapshotUnstarted indexingSnapshot={indexingStatus.snapshot} />
+      );
       break;
 
-    case OverallIndexingStatusIds.Unstarted:
-      indexingStats = <IndexingStatsForUnstartedStatus indexingStatus={indexingStatus} />;
+    case OmnichainIndexingStatusIds.Backfill:
+      indexingStats = (
+        <IndexingStatsForSnapshotBackfill indexingSnapshot={indexingStatus.snapshot} />
+      );
+
+      maybeIndexingTimeline = <BackfillStatus indexingSnapshot={indexingStatus.snapshot} />;
       break;
 
-    case OverallIndexingStatusIds.Backfill:
-      indexingStats = <IndexingStatsForBackfillStatus indexingStatus={indexingStatus} />;
-
-      maybeIndexingTimeline = <BackfillStatus indexingStatus={indexingStatus} />;
-      break;
-
-    case OverallIndexingStatusIds.Completed:
-      indexingStats = <IndexingStatsForCompletedStatus indexingStatus={indexingStatus} />;
+    case OmnichainIndexingStatusIds.Completed:
+      indexingStats = (
+        <IndexingStatsForSnapshotCompleted indexingSnapshot={indexingStatus.snapshot} />
+      );
 
       maybeRecentRegistrations = (
         <Suspense>
-          <RecentRegistrations
-            ensIndexerConfig={ensIndexerConfig}
-            indexingStatus={indexingStatus}
-          />
+          <RecentRegistrations ensIndexerConfig={ensIndexerConfig} />
         </Suspense>
       );
       break;
 
-    case OverallIndexingStatusIds.Following:
-      indexingStats = <IndexingStatsForFollowingStatus indexingStatus={indexingStatus} />;
+    case OmnichainIndexingStatusIds.Following:
+      indexingStats = (
+        <IndexingStatsForSnapshotFollowing indexingSnapshot={indexingStatus.snapshot} />
+      );
 
       maybeRecentRegistrations = (
         <Suspense>
-          <RecentRegistrations
-            ensIndexerConfig={ensIndexerConfig}
-            indexingStatus={indexingStatus}
-          />
+          <RecentRegistrations ensIndexerConfig={ensIndexerConfig} />
         </Suspense>
       );
       break;
 
-    case OverallIndexingStatusIds.IndexerError:
-      indexingStats = <IndexingStatsForIndexerErrorStatus />;
+    default:
+      indexingStats = <IndexingStatsForUnavailableSnapshot />;
   }
 
   return (
@@ -108,7 +106,7 @@ export function IndexingStatus() {
 
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell overallStatus={indexingStatus.overallStatus}>
+      <IndexingStatsShell omnichainStatus={indexingStatus.snapshot?.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
 

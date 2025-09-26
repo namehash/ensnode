@@ -14,11 +14,11 @@ import {
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
-  OverallIndexingStatusIds,
-  type SerializedENSIndexerOverallIndexingStatus,
+  SerializedCurrentIndexingProjection,
   type SerializedENSIndexerPublicConfig,
-  deserializeENSIndexerIndexingStatus,
+  deserializeCurrentIndexingProjection,
   deserializeENSIndexerPublicConfig,
+  deserializeOmnichainIndexingSnapshot,
 } from "./ensindexer";
 import { ResolverRecordsSelection } from "./resolution";
 
@@ -328,12 +328,8 @@ export class ENSNodeClient {
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
    */
-  async indexingStatus(options?: IndexingStatusRequest): Promise<IndexingStatusResponse> {
+  async indexingStatus(): Promise<IndexingStatusResponse> {
     const url = new URL(`/api/indexing-status`, this.options.url);
-
-    if (typeof options?.maxRealtimeDistance !== "undefined") {
-      url.searchParams.set("maxRealtimeDistance", `${options.maxRealtimeDistance}`);
-    }
 
     const response = await fetch(url);
 
@@ -368,19 +364,13 @@ export class ENSNodeClient {
     }
 
     // deserialize indexing status data
-    const indexingStatus = deserializeENSIndexerIndexingStatus(
-      responseData as SerializedENSIndexerOverallIndexingStatus,
+    const indexingStatus = deserializeCurrentIndexingProjection(
+      responseData as SerializedCurrentIndexingProjection,
     );
 
     // log indexer error if overall status is 'indexer-error'
-    if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
-      console.error("Indexing Status API: indexer error");
-    }
-
-    // log indexer error if maxRealtimeDistance was requested,
-    // but not satisfied
-    if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
-      console.error("Indexing Status API: Requested realtime indexing distance was not satisfied");
+    if (!indexingStatus.type === null) {
+      console.error("Indexing Status API: indexing status is unavailable");
     }
 
     // returned deserialized indexing status data
