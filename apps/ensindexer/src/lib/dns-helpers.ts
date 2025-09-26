@@ -3,7 +3,6 @@ import { Hex } from "viem";
 
 import { interpretTextRecordKey, interpretTextRecordValue } from "@/lib/interpret-record-values";
 import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
-import { hasNullByte } from "@/lib/lib-helpers";
 import {
   DNSEncodedLiteralName,
   DNSEncodedName,
