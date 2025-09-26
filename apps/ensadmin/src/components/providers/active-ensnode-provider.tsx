@@ -1,6 +1,6 @@
 "use client";
 
-import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
+import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
 import { ENSNodeProvider as _ENSNodeProvider } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
 
@@ -14,7 +14,9 @@ import { PropsWithChildren } from "react";
  * @param children - React children to render within the provider context
  */
 export function ActiveENSNodeProvider({ children }: PropsWithChildren) {
-  const url = useActiveENSNodeUrl();
+  const url = useSelectedENSNodeUrl();
 
-  return <_ENSNodeProvider config={{ client: { url } }}>{children}</_ENSNodeProvider>;
+  return (
+    <_ENSNodeProvider config={{ client: { url } }}>{children}</_ENSNodeProvider>
+  );
 }

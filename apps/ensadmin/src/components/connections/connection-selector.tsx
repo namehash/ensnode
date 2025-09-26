@@ -21,7 +21,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useActiveENSNodeUrl } from "@/hooks/active/use-active-ensnode-url";
+import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
 import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { CONNECTION_PARAM_KEY } from "@/lib/constants";
 import { useMutation } from "@tanstack/react-query";
@@ -33,7 +33,7 @@ export function ConnectionSelector() {
 
   const { connectionLibrary, addCustomConnection, removeCustomConnection } =
     useAvailableENSNodeConnections();
-  const activeENSNodeUrl = useActiveENSNodeUrl().toString();
+  const selectedENSNodeUrl = useSelectedENSNodeUrl().toString();
   const addCustomConnectionMutation = useMutation({
     mutationFn: addCustomConnection,
   });
@@ -46,7 +46,7 @@ export function ConnectionSelector() {
       params.set(CONNECTION_PARAM_KEY, url);
       router.replace(`?${params.toString()}`);
     },
-    [router, searchParams],
+    [router, searchParams]
   );
 
   const handleSelect = (url: string) => {
@@ -79,7 +79,9 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{activeENSNodeUrl}</span>
+                  <span className="truncate text-xs font-mono">
+                    {selectedENSNodeUrl}
+                  </span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
@@ -92,13 +94,13 @@ export function ConnectionSelector() {
             >
               <ServerConnectionsList
                 connectionLibrary={connectionLibrary}
-                activeConnectionUrl={activeENSNodeUrl}
+                selectedConnectionUrl={selectedENSNodeUrl}
                 onSelectServerConnection={handleSelect}
               />
 
               <CustomConnectionsList
                 connectionLibrary={connectionLibrary}
-                activeConnectionUrl={activeENSNodeUrl}
+                selectedConnectionUrl={selectedENSNodeUrl}
                 onSelectCustomConnection={handleSelect}
                 onRemoveCustomConnection={removeCustomConnection}
               />
@@ -112,7 +114,9 @@ export function ConnectionSelector() {
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Plus className="size-4" />
                 </div>
-                <div className="font-medium text-muted-foreground">Add connection</div>
+                <div className="font-medium text-muted-foreground">
+                  Add connection
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
