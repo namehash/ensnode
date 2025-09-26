@@ -2,7 +2,14 @@ import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import {
+  type ChainId,
+  PluginName,
+  deserializeChainId,
+  isHttpEndpointURL,
+  isWebSocketsEndpointURL,
+  uniq,
+} from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -12,7 +19,6 @@ import {
   DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_PORT,
   DEFAULT_REPLACE_UNNORMALIZED,
-  DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 
 import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
@@ -23,6 +29,8 @@ import {
   invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_rpcConfigsSpecifiedForRootChain,
+  invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL,
+  invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL,
   invariant_validContractConfigs,
 } from "./validations";
 
@@ -46,14 +54,14 @@ const makeBlockNumberSchema = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-const RpcConfigSchema = z.object({
-  url: makeUrlSchema("RPC_URL_*"),
-  maxRequestsPerSecond: z.coerce
-    .number({ error: "RPC_REQUEST_RATE_LIMIT_* must be an integer." })
-    .int({ error: "RPC_REQUEST_RATE_LIMIT_* must be an integer." })
-    .min(1, { error: "RPC_REQUEST_RATE_LIMIT_* must be at least 1." })
-    .default(DEFAULT_RPC_RATE_LIMIT),
-});
+const RpcConfigSchema = z
+  .string()
+  .transform((val) => {
+    return val.split(",").filter(Boolean);
+  })
+  .pipe(z.array(makeUrlSchema("RPC_URL_*")))
+  .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL)
+  .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL);
 
 const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
   error: (issue) => {
@@ -136,7 +144,10 @@ const RpcConfigsSchema = z
     const rpcConfigs = new Map<ChainId, RpcConfig>();
 
     for (const [chianIdString, rpcConfig] of Object.entries(records)) {
-      rpcConfigs.set(deserializeChainId(chianIdString), rpcConfig);
+      rpcConfigs.set(deserializeChainId(chianIdString), {
+        httpUrls: new Set(rpcConfig.filter(isHttpEndpointURL)),
+        webSocketUrl: rpcConfig.find(isWebSocketsEndpointURL),
+      });
     }
 
     return rpcConfigs;

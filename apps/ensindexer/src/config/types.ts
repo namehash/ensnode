@@ -4,25 +4,33 @@ import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
  * Configuration for a single RPC used by ENSIndexer.
+ *
+ * Ponder will use those endpoint URLs accordingly to optimize RPC calls during
+ * "backfill" and "following" indexing.
+ *
+ * @see https://ponder.sh/docs/config/chains#rpc-endpoints
+ * @see https://ponder.sh/docs/config/chains#websocket
  */
 export interface RpcConfig {
   /**
-   * The RPC endpoint URL for the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
-   * For nominal indexing behavior, must be an endpoint with high rate limits.
+   * The HTTP endpoint URLs for the chain RPC (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
+   * For nominal indexing behavior, each of them must be an endpoint with high rate limits.
+   *
+   * Invariants:
+   * - includes at least one HTTP/HTTPS endpoint URL
+   * - localhost urls are allowed (and expected).
+   */
+  httpUrls: Set<URL>;
+
+  /**
+   * The Web Socket URL for the chain RPC.
+   *
+   * If provided, it is used for fetching blocks "realtime".
    *
    * Invariants:
    * - localhost urls are allowed (and expected).
    */
-  url: URL;
-
-  /**
-   * The maximum number of RPC requests per second allowed for this chain, defaulting to
-   * 500 (DEFAULT_RPC_RATE_LIMIT). This is used to avoid rate limiting by the RPC provider.
-   *
-   * Invariants:
-   * - The value must be an integer greater than 0
-   */
-  maxRequestsPerSecond: number;
+  webSocketUrl?: URL;
 }
 
 /**
@@ -250,12 +258,11 @@ export interface ENSIndexerConfig {
 }
 
 /**
- * Represents the raw unvalidated environment variables for an rpc endpoint.
+ * Represents the raw unvalidated environment variable for an rpc endpoint.
+ *
+ * It might be a single URL string, or a list of URL strings.
  */
-export interface RpcConfigEnvironment {
-  url: string;
-  maxRequestsPerSecond: string | undefined;
-}
+export type RpcConfigEnvironment = string;
 
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.

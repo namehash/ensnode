@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { PluginName, isHttpEndpointURL, isWebSocketsEndpointURL, uniq } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -157,6 +157,42 @@ export function invariant_reverseResolversPluginNeedsResolverRecords(
       code: "custom",
       input: config,
       message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
+    });
+  }
+}
+
+/**
+ * Invariant: RPC configuration must include at least one HTTP/HTTPS endpoint URL.
+ */
+export function invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL(
+  ctx: ZodCheckFnInput<URL[]>,
+) {
+  const endpoints = ctx.value;
+  const httpEndpoints = endpoints.filter(isHttpEndpointURL);
+
+  if (httpEndpoints.length < 1) {
+    ctx.issues.push({
+      code: "custom",
+      input: endpoints,
+      message: `RPC endpoints configuration must include at least one HTTP/HTTPS URL.`,
+    });
+  }
+}
+
+/**
+ * Invariant: RPC configuration must include at most one WS/WSS endpoint URL.
+ */
+export function invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL(
+  ctx: ZodCheckFnInput<URL[]>,
+) {
+  const endpoints = ctx.value;
+  const wsEndpoints = endpoints.filter(isWebSocketsEndpointURL);
+
+  if (wsEndpoints.length > 1) {
+    ctx.issues.push({
+      code: "custom",
+      input: endpoints,
+      message: `RPC endpoints configuration must include at most one WS/WSS URL.`,
     });
   }
 }

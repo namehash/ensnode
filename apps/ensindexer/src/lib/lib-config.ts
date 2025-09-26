@@ -1,9 +1,7 @@
 import type { RpcConfigEnvironment } from "@/config/types";
-import { ENSNamespaceIds } from "@ensnode/datasources";
 
 // Default rate limit for RPC services
 // Public (rate limited) RPC endpoints will not provide acceptable performance.
-export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
 export const DEFAULT_PORT = 42069;
 export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
@@ -15,9 +13,6 @@ export const DEFAULT_REPLACE_UNNORMALIZED = true;
  *
  * This function scans all environment variables for keys matching the pattern
  * "RPC_URL_{chainId}", where {chainId} must be a string of digits (e.g., "1", "10", "8453").
- *
- * It then looks for matching environment variables for the rate limit of requests per second
- * for the given chain, using the pattern "RPC_REQUEST_RATE_LIMIT_{chainId}".
  *
  * This function returns a raw chain config which is not yet validated against the zod schema.
  */
@@ -38,10 +33,7 @@ export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
 
     if (Number.isNaN(chainId)) throw new Error(`${key} parsed chainId was NaN!`);
 
-    rpcConfigs[chainId] = {
-      url: value,
-      maxRequestsPerSecond: process.env[`RPC_REQUEST_RATE_LIMIT_${chainId}`],
-    };
+    rpcConfigs[chainId] = value;
   });
 
   return rpcConfigs;

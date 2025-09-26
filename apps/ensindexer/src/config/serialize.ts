@@ -12,8 +12,8 @@ function serializeRpcConfigs(
 
   for (const [chainId, rpcConfig] of rpcConfigs.entries()) {
     serializedRpcConfigs[serializeChainId(chainId)] = {
-      maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
-      url: serializeUrl(rpcConfig.url),
+      httpUrls: Array.from(rpcConfig.httpUrls).map((httpUrl) => serializeUrl(httpUrl)),
+      webSocketUrl: rpcConfig.webSocketUrl ? serializeUrl(rpcConfig.webSocketUrl) : undefined,
     };
   }
 
@@ -33,11 +33,11 @@ function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
   const redactedRpcConfigs: ENSIndexerConfig["rpcConfigs"] = new Map();
 
   for (const [chainId, rpcConfig] of config.rpcConfigs.entries()) {
-    const redactedRpcUrl = new URL(`/${REDACTED}`, rpcConfig.url.href);
+    const redactURL = (sourceURL: URL) => new URL(`/${REDACTED}`, sourceURL.href);
 
     redactedRpcConfigs.set(chainId, {
-      ...rpcConfig,
-      url: redactedRpcUrl,
+      httpUrls: new Set(Array.from(rpcConfig.httpUrls).map(redactURL)),
+      webSocketUrl: rpcConfig.webSocketUrl ? redactURL(rpcConfig.webSocketUrl) : undefined,
     });
   }
 

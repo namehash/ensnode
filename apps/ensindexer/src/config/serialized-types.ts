@@ -5,11 +5,16 @@ import type { ENSIndexerConfig, RpcConfig } from "./types";
 /**
  * Serialized representation of {@link RpcConfig}
  */
-export interface SerializedRpcConfig extends Omit<RpcConfig, "url"> {
+export interface SerializedRpcConfig extends Omit<RpcConfig, "httpUrls" | "webSocketUrl"> {
   /**
-   * String representation of {@link RpcConfig.url}.
+   * String representation of {@link RpcConfig.httpUrls}.
    */
-  url: UrlString;
+  httpUrls: UrlString[];
+
+  /**
+   * String representation of {@link RpcConfig.webSocketUrl}.
+   */
+  webSocketUrl?: UrlString;
 }
 
 /**

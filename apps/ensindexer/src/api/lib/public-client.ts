@@ -9,6 +9,8 @@ export function getPublicClient(chainId: ChainId) {
     throw new Error(`Invariant: ENSIndexer does not have an RPC to chain id '${chainId}'.`);
   }
 
+  const rpcHttpEndpointURLs = Array.from(rpcConfig.httpUrls).map((rpcUrl) => rpcUrl.toString());
+
   // create an un-cached publicClient
-  return createPublicClient({ transport: http(rpcConfig.url.href) });
+  return createPublicClient({ transport: http(rpcHttpEndpointURLs[0]) });
 }

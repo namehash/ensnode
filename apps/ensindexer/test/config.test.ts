@@ -3,11 +3,13 @@ import {
   DEFAULT_ENSADMIN_URL,
   DEFAULT_HEAL_REVERSE_ADDRESSES,
   DEFAULT_PORT,
-  DEFAULT_RPC_RATE_LIMIT,
 } from "@/lib/lib-config";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
+const VALID_RPC_URL_ALT = "https://lb.drpc.org/ethereum/987";
+const VALID_RPC_WS_URL = "wss://eth-mainnet.g.alchemy.com/v2/1234";
+const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 
 const BASE_ENV = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
@@ -387,16 +389,51 @@ describe("config", () => {
   });
 
   describe(".chains", () => {
-    it("returns the chains if it is a valid object", async () => {
+    it("returns the chains if it is a valid object (one HTTP endpoint)", async () => {
       vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
       const config = await getConfig();
+
       expect(config.rpcConfigs).toStrictEqual(
         new Map([
           [
             1,
             {
-              url: new URL(VALID_RPC_URL),
-              maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
+              httpUrls: new Set([new URL(VALID_RPC_URL)]),
+              webSocketUrl: undefined,
+            } satisfies RpcConfig,
+          ],
+        ]),
+      );
+    });
+
+    it("returns the chains if it is a valid object (multiple HTTP endpoints)", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_URL_ALT}`);
+      const config = await getConfig();
+
+      expect(config.rpcConfigs).toStrictEqual(
+        new Map([
+          [
+            1,
+            {
+              httpUrls: new Set([new URL(VALID_RPC_URL), new URL(VALID_RPC_URL_ALT)]),
+              webSocketUrl: undefined,
+            } satisfies RpcConfig,
+          ],
+        ]),
+      );
+    });
+
+    it("returns the chains if it is a valid object (multiple HTTP endpoints, and one WebSocket endpoint)", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_WS_URL},${VALID_RPC_URL_ALT}`);
+      const config = await getConfig();
+
+      expect(config.rpcConfigs).toStrictEqual(
+        new Map([
+          [
+            1,
+            {
+              httpUrls: new Set([new URL(VALID_RPC_URL), new URL(VALID_RPC_URL_ALT)]),
+              webSocketUrl: new URL(VALID_RPC_WS_URL),
             } satisfies RpcConfig,
           ],
         ]),
@@ -407,19 +444,19 @@ describe("config", () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
       await expect(getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
     });
-  });
 
-  describe(".rpcMaxRequestsPerSecond", () => {
-    it("returns the RPC_REQUEST_RATE_LIMIT_1 if it is a valid number", async () => {
-      vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", "100");
-      const config = await getConfig();
-      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(100);
+    it("throws an error if RPC_URL_1 includes less than one HTTP endpoint URL", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_WS_URL},${VALID_RPC_WS_URL_ALT}`);
+      await expect(getConfig()).rejects.toThrow(`Failed to parse environment configuration: 
+✖ RPC endpoints configuration must include at least one HTTP/HTTPS URL.
+  → at rpcConfigs.1`);
     });
 
-    it("returns the default if it is not set", async () => {
-      vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", undefined);
-      const config = await getConfig();
-      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
+    it("throws an error if RPC_URL_1 includes more than one WebSockets endpoint URL", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_WS_URL},${VALID_RPC_WS_URL_ALT}`);
+      await expect(getConfig()).rejects.toThrow(`Failed to parse environment configuration: 
+✖ RPC endpoints configuration must include at most one WS/WSS URL.
+  → at rpcConfigs.1`);
     });
   });
 
