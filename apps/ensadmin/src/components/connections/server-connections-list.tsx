@@ -4,17 +4,17 @@ import { CopyButton } from "@/components/copy-button";
 import { DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { ConnectionOption } from "@/hooks/ensnode-connections";
 import { cn } from "@/lib/utils";
-import { UrlString } from "@ensnode/ensnode-sdk";
+import type { UrlString } from "@ensnode/ensnode-sdk";
 
 interface ServerConnectionsListProps {
   connectionLibrary: ConnectionOption[];
-  activeConnectionUrl: UrlString;
+  selectedConnectionUrl: UrlString;
   onSelectServerConnection: (url: UrlString) => void;
 }
 
 export function ServerConnectionsList({
   connectionLibrary,
-  activeConnectionUrl,
+  selectedConnectionUrl,
   onSelectServerConnection,
 }: ServerConnectionsListProps) {
   const serverConnections = connectionLibrary.filter(({ fromServerLibrary }) => fromServerLibrary);
@@ -30,7 +30,7 @@ export function ServerConnectionsList({
       </DropdownMenuLabel>
 
       {serverConnections.map(({ url: serverConnectionUrl }) => {
-        const isActiveConnection = serverConnectionUrl === activeConnectionUrl;
+        const isActiveConnection = serverConnectionUrl === selectedConnectionUrl;
 
         return (
           <div key={serverConnectionUrl} className="flex items-center justify-between gap-1">

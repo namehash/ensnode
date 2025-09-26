@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import type { UrlString } from "@ensnode/ensnode-sdk";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -19,7 +20,7 @@ import { Label } from "@/components/ui/label";
 interface AddConnectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (url: string) => void;
+  onAdd: (url: UrlString) => void;
   isLoading?: boolean;
   error?: string | null;
   onErrorReset?: () => void;
@@ -38,7 +39,7 @@ export function AddConnectionDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (newUrl.trim()) {
-      onAdd(newUrl.trim());
+      onAdd(newUrl.trim() as UrlString);
     }
   };
 

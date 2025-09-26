@@ -9,18 +9,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ConnectionOption } from "@/hooks/ensnode-connections";
 import { cn } from "@/lib/utils";
+import type { UrlString } from "@ensnode/ensnode-sdk";
 import { Trash2 } from "lucide-react";
 
 interface CustomConnectionsListProps {
   connectionLibrary: ConnectionOption[];
-  activeConnectionUrl: string;
-  onSelectCustomConnection: (url: string) => void;
-  onRemoveCustomConnection: (url: string) => void;
+  selectedConnectionUrl: UrlString;
+  onSelectCustomConnection: (url: UrlString) => void;
+  onRemoveCustomConnection: (url: UrlString) => void;
 }
 
 export function CustomConnectionsList({
   connectionLibrary,
-  activeConnectionUrl,
+  selectedConnectionUrl,
   onSelectCustomConnection,
   onRemoveCustomConnection,
 }: CustomConnectionsListProps) {
@@ -38,7 +39,7 @@ export function CustomConnectionsList({
       </DropdownMenuLabel>
 
       {customConnections.map(({ url: customConnectionUrl }) => {
-        const isActiveConnection = customConnectionUrl === activeConnectionUrl;
+        const isActiveConnection = customConnectionUrl === selectedConnectionUrl;
         return (
           <div key={customConnectionUrl} className="flex items-center justify-between gap-1">
             <DropdownMenuItem
