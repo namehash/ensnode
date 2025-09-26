@@ -25,11 +25,7 @@ export function MockIndexingStatusDisplay({
   let indexingStats: ReactElement;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  if (!indexingSnapshot) {
-    return <IndexingStatsForUnavailableSnapshot />;
-  }
-
-  switch (indexingSnapshot.omnichainStatus) {
+  switch (indexingSnapshot?.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
       indexingStats = <IndexingStatsForSnapshotUnstarted indexingSnapshot={indexingSnapshot} />;
       break;
@@ -47,13 +43,16 @@ export function MockIndexingStatusDisplay({
     case OmnichainIndexingStatusIds.Following:
       indexingStats = <IndexingStatsForSnapshotFollowing indexingSnapshot={indexingSnapshot} />;
       break;
+
+    default:
+      indexingStats = <IndexingStatsForUnavailableSnapshot />;
   }
 
   return (
     <>
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={indexingSnapshot.omnichainStatus}>
+      <IndexingStatsShell omnichainStatus={indexingSnapshot?.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
     </>

@@ -53,15 +53,11 @@ export function IndexingStatus() {
   const ensIndexerConfig = ensIndexerConfigQuery.data;
   const indexingStatus = indexingStatusQuery.data;
 
-  if (indexingStatus.snapshot === null) {
-    return <IndexingStatsForUnavailableSnapshot />;
-  }
-
   let indexingStats: ReactElement;
   let maybeRecentRegistrations: ReactElement | undefined;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  switch (indexingStatus.snapshot.omnichainStatus) {
+  switch (indexingStatus.snapshot?.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
       indexingStats = (
         <IndexingStatsForSnapshotUnstarted indexingSnapshot={indexingStatus.snapshot} />
@@ -99,6 +95,9 @@ export function IndexingStatus() {
         </Suspense>
       );
       break;
+
+    default:
+      indexingStats = <IndexingStatsForUnavailableSnapshot />;
   }
 
   return (

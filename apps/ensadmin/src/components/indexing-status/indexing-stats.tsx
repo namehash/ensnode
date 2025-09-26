@@ -291,32 +291,21 @@ export function IndexingStatsForSnapshotFollowing({
 export function IndexingStatsShell({
   omnichainStatus,
   children,
-}: PropsWithChildren<{ omnichainStatus: OmnichainIndexingStatusId }>) {
+}: PropsWithChildren<{ omnichainStatus?: OmnichainIndexingStatusId }>) {
   return (
     <Card className="w-full flex flex-col gap-2">
       <CardHeader>
         <CardTitle className="flex gap-2 items-center">
           <span>Indexing Status</span>
-          {/* 
-          <Badge
-            className={cn(
-              "uppercase text-xs leading-none",
-              omnichainStatus === OmnichainIndexingStatusIds.IndexerError &&
-                "bg-red-600 text-white",
-            )}
-            title={`Overall indexing status: ${omnichainStatus}`}
-          >
-            {omnichainStatus === OmnichainIndexingStatusIds.IndexerError
-              ? "Indexer Error"
-              : omnichainStatus}
-          </Badge> */}
 
-          <Badge
-            className={cn("uppercase text-xs leading-none")}
-            title={`Overall indexing status: ${omnichainStatus}`}
-          >
-            {omnichainStatus}
-          </Badge>
+          {omnichainStatus && (
+            <Badge
+              className={cn("uppercase text-xs leading-none")}
+              title={`Overall indexing status: ${omnichainStatus}`}
+            >
+              {omnichainStatus}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
 
