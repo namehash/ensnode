@@ -31,14 +31,11 @@ export function ConnectionSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const {
-    availableConnections,
-    addAndSelectCustomConnection: _addAndSelectCustomConnection,
-    removeCustomConnection,
-  } = useAvailableENSNodeConnections();
+  const { availableConnections, addAndSelectCustomConnection, removeCustomConnection } =
+    useAvailableENSNodeConnections();
   const activeENSNodeUrl = useActiveENSNodeUrl().toString();
-  const addAndSelectConnection = useMutation({
-    mutationFn: _addAndSelectCustomConnection,
+  const addAndSelectConnectionMutation = useMutation({
+    mutationFn: addAndSelectCustomConnection,
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -58,11 +55,11 @@ export function ConnectionSelector() {
   };
 
   const handleAdd = (url: string) => {
-    addAndSelectConnection.mutate(url, {
+    addAndSelectConnectionMutation.mutate(url, {
       onSuccess: (addedUrl) => {
         setDialogOpen(false);
         updateUrlParam(addedUrl);
-        addAndSelectConnection.reset();
+        addAndSelectConnectionMutation.reset();
       },
     });
   };
@@ -126,9 +123,9 @@ export function ConnectionSelector() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onAdd={handleAdd}
-        isLoading={addAndSelectConnection.isPending}
-        error={addAndSelectConnection.error?.message}
-        onErrorReset={addAndSelectConnection.reset}
+        isLoading={addAndSelectConnectionMutation.isPending}
+        error={addAndSelectConnectionMutation.error?.message}
+        onErrorReset={addAndSelectConnectionMutation.reset}
       />
     </>
   );
