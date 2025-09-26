@@ -1,7 +1,7 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { ETH_COIN_TYPE, Node, uniq } from "@ensnode/ensnode-sdk";
-import { type Address, Hash, type Hex } from "viem";
+import { type Address, Hash, type Hex, decodeAbiParameters, decodeEventLog } from "viem";
 
 import config from "@/config";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
@@ -189,6 +189,57 @@ export async function handleTextChanged({
     value?: string;
   }>;
 }) {
+  if (config.isSubgraphCompatible) {
+    // NOTE(subgraph-compat): Strictly check that topics match expected indexed event arguments.
+    //
+    // In ponder 0.12, abi decoding was made more efficient: previously, ponder would only match an
+    // event if the `indexed` parameters also lined up with the specified abi (stricter, slower) but
+    // now it matches an event by signature, not confirming that the `indexed` topics line up.
+    //
+    // Ordinarily, this would be beneficial — ENSIndexer would like to index _all_ TextChanged events
+    // on a given chain, regardless of whether the parameters are indexed or not.
+    //
+    // This is an issue, however, because the ENS subgraph _does_ perform the (stricter, slower)
+    // confirmation that the topics in an event line up with the `indexed` parameters.
+    //
+    // To match that behavior, we manually confirm that, if config.isSubgraphCompatible, the number
+    // of topics in a TextChanged event matches the specific ResolverABI's TextChanged event.
+    //
+    // For a concrete example, here is a contract emitting a TextChanged event without _any_ indexed
+    // arguments: https://etherscan.io/tx/0x1c852ec21dc816060052a2320e16116aac645b41b5321afd4f9992178947ba5d#eventlog
+    //
+    // Without this additional strict check here, ENSIndexer would happily index this event, but the
+    // legacy ENS Subgraph does not perceive it at all, so we must ignore it here.
+    //
+    // To confirm this behavior, execute this query against the Mainnet ENS Subgraph and notice that
+    // it has _no_ TextChanged events from the contract in question using the un-indexed event args.
+    // ```gql
+    // {
+    //   textChangeds(where:{resolver_:{address:"0x226159d592e2b063810a10ebf6dcbada94ed68b8"}}) {
+    //     id
+    //     key
+    //     value
+    //   }
+    // }
+    // ```
+    //
+    // As a solution, we use viem's event decoding in strict mode, which will throw if the topics
+    // do not align to the specified abi.
+    // https://viem.sh/docs/contract/decodeEventLog#strict-optional
+    try {
+      decodeEventLog({
+        abi: context.contracts.Resolver.abi,
+        eventName: "TextChanged",
+        topics: event.log.topics,
+        data: event.log.data,
+        strict: true,
+      });
+    } catch {
+      // if viem#decodeEventLog threw, we want to ignore this event and no-op
+      return;
+    }
+  }
+
   const { node, key, value } = event.args;
   const id = makeResolverId(context.chain.id, event.log.address, node);
   const resolver = await upsertResolver(context, {
