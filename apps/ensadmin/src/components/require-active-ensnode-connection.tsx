@@ -72,7 +72,7 @@ export function RequireActiveENSNodeConnection({ children }: PropsWithChildren<{
     addConnectionFromUrl.mutate(connectionParam, {
       onSuccess: (addedUrl) => {
         updateCurrentConnectionParam(addedUrl);
-        toast.success(`URL saved to custom connections`);
+        toast.success(`URL saved to connection library`);
         toast.success(`Connected to ${addedUrl}`);
       },
       onError: (error) => {

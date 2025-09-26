@@ -11,7 +11,19 @@ import { CONNECTION_PARAM_KEY, CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/li
 import { defaultEnsNodeUrls } from "@/lib/env";
 import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
 
-const normalizeUrl = (url: UrlString): UrlString => new URL(url).toString();
+export interface ConnectionOption {
+  url: UrlString;
+  fromServerLibrary: boolean;
+}
+
+const normalizeUrl = (url: UrlString): UrlString => {
+  try {
+    return new URL(url).toString();
+  } catch {
+    // If URL parsing fails, try prefixing with https://
+    return new URL(`https://${url}`).toString();
+  }
+};
 
 const isValidUrl = (url: UrlString): boolean => {
   try {
@@ -76,9 +88,9 @@ function _useAvailableENSNodeConnections() {
    * Connection Library - dynamically generated union of ServerConnectionLibrary and CustomConnectionLibrary with guaranteed invariants:
    *
    * Format:
-   * - Array of objects with { url: UrlString, isFromServer: boolean }
+   * - Array of ConnectionOption objects with { url: UrlString, fromServerLibrary: boolean }
    * - url: Normalized URL string (via normalizeUrl())
-   * - isFromServer: true for server connections, false for custom ones
+   * - fromServerLibrary: true for server connections, false for custom ones
    *
    * Content guarantees:
    * - Always contains at least 1 connection (from serverConnectionLibrary)
@@ -89,17 +101,20 @@ function _useAvailableENSNodeConnections() {
    * - Custom connections are filtered to exclude any that match server connections
    *
    * Order:
-   * 1. All server connections (isFromServer: true)
-   * 2. Custom connections not in server library (isFromServer: false)
+   * 1. All server connections (fromServerLibrary: true)
+   * 2. Custom connections not in server library (fromServerLibrary: false)
    */
-  const connectionLibrary = useMemo(
+  const connectionLibrary = useMemo<ConnectionOption[]>(
     () => [
       // include the server connections
-      ...serverConnectionLibrary.map((url) => ({ url, isFromServer: true })),
+      ...serverConnectionLibrary.map((url) => ({
+        url,
+        fromServerLibrary: true,
+      })),
       // include the user's connections that aren't already in server library
       ...customConnectionLibrary
         .filter((url) => !serverConnectionLibrary.includes(url))
-        .map((url) => ({ url, isFromServer: false })),
+        .map((url) => ({ url, fromServerLibrary: false })),
     ],
     [customConnectionLibrary],
   );

@@ -7,16 +7,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { ConnectionOption } from "@/hooks/ensnode-connections";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 
-interface Connection {
-  url: string;
-  isFromServer: boolean;
-}
-
 interface CustomConnectionsListProps {
-  connectionLibrary: Connection[];
+  connectionLibrary: ConnectionOption[];
   activeConnectionUrl: string;
   onSelectCustomConnection: (url: string) => void;
   onRemoveCustomConnection: (url: string) => void;
@@ -28,7 +24,7 @@ export function CustomConnectionsList({
   onSelectCustomConnection,
   onRemoveCustomConnection,
 }: CustomConnectionsListProps) {
-  const customConnections = connectionLibrary.filter(({ isFromServer }) => !isFromServer);
+  const customConnections = connectionLibrary.filter(({ fromServerLibrary }) => !fromServerLibrary);
 
   if (customConnections.length === 0) {
     return null;

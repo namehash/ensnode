@@ -2,15 +2,11 @@
 
 import { CopyButton } from "@/components/copy-button";
 import { DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { ConnectionOption } from "@/hooks/ensnode-connections";
 import { cn } from "@/lib/utils";
 
-interface Connection {
-  url: string;
-  isFromServer: boolean;
-}
-
 interface DefaultConnectionsListProps {
-  connectionLibrary: Connection[];
+  connectionLibrary: ConnectionOption[];
   activeConnectionUrl: string;
   onSelectDefaultConnection: (url: string) => void;
 }
@@ -20,7 +16,7 @@ export function DefaultConnectionsList({
   activeConnectionUrl,
   onSelectDefaultConnection,
 }: DefaultConnectionsListProps) {
-  const serverConnections = connectionLibrary.filter(({ isFromServer }) => isFromServer);
+  const serverConnections = connectionLibrary.filter(({ fromServerLibrary }) => fromServerLibrary);
 
   if (serverConnections.length === 0) {
     return null;
