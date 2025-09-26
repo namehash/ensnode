@@ -89,26 +89,3 @@ export function updateMockConfig(updates: Partial<ENSIndexerConfig>) {
 export function setGlobalBlockrange(startBlock?: number, endBlock?: number) {
   updateMockConfig({ globalBlockrange: { startBlock, endBlock } });
 }
-
-/**
- * Configures a chain in the current mock config
- *
- * @param chainId The chain ID to configure
- * @param url The RPC endpoint URL for the chain
- * @param maxRequestsPerSecond The maximum requests per second (defaults to 50)
- *
- * @example
- * // Add mainnet configuration
- * setChainConfig(1, "https://eth-mainnet.g.alchemy.com/v2/1234", 100);
- *
- * // Add base chain configuration
- * setChainConfig(8453, "https://base-mainnet.g.alchemy.com/v2/5678");
- */
-export function setChainConfig(chainId: number, url: string) {
-  updateMockConfig({
-    rpcConfigs: {
-      ...(currentMockConfig.rpcConfigs || {}),
-      [chainId]: new Set(url.split(",").map((u) => new URL(u))),
-    },
-  });
-}
