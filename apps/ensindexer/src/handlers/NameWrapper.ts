@@ -177,9 +177,9 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       // NOTE: NameWrapper emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
-      const { label, name } = config.replaceUnnormalized
-        ? decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
-        : decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
+      const { label, name } = config.isSubgraphCompatible
+        ? decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
+        : decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");

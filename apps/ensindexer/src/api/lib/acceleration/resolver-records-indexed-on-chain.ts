@@ -12,9 +12,12 @@ const threeDNSBase = maybeGetDatasource(config.namespace, DatasourceNames.ThreeD
 /**
  * Determines, for a given chain, whether all Resolver Record Values are indexed.
  *
- * Basically we need to know, given the `chainId`, if ENSIndexer has included either
+ * Returns false immediately if ENSIndexer is in subgraph-compatible mode since resolver record values
+ * are not indexed for acceleration in that mode.
+ *
+ * Otherwise, determines if ENSIndexer has included either:
  *  a. the shared multi-chain `Resolver` handlers (i.e. Subgraph, Basenames, Lineanames), or
- *  b. otherwise implements Resolver Record Value indexing for all possible Resolver contracts on
+ *  b. implements Resolver Record Value indexing for all possible Resolver contracts on
  *     the specified chain (i.e. ThreeDNS).
  *
  * NOTE(shrugs): i don't love how this encodes knowledge from the ponder.config.ts — perhaps we can either
@@ -23,12 +26,15 @@ const threeDNSBase = maybeGetDatasource(config.namespace, DatasourceNames.ThreeD
  * Then we could check for the existence of `ponderConfig.contracts.Resolver.chain[chainId]` or
  * `ponderConfig.contracts["threedns/Resolver"].chain[chainId]`.
  *
- * @param chainId
- * @returns
+ * @param chainId - The chain ID to check for resolver record indexing
+ * @returns true if resolver records are indexed on the given chain, false otherwise
  */
 export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
-  // config.indexAdditionalResolverRecords must be true, or we aren't indexing resolver records at all
-  if (!config.indexAdditionalResolverRecords) return false;
+  // TODO: this will soon be as simple as confirming that the `resolution` plugin is active and
+  // that the chainId is in the set of chains indexed by the `resolution` plugin.
+
+  // if config.isSubgraphCompatible, we aren't indexing resolver record values for acceleration
+  if (config.isSubgraphCompatible) return false;
 
   const isENSRootChain = chainId === ensRoot.chain.id;
   const isBasenamesChain = chainId === basenames?.chain.id;

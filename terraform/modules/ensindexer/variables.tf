@@ -75,16 +75,8 @@ variable "namespace" {
   type = string
 }
 
-variable "heal_reverse_addresses" {
-  type = string
-}
-
-variable "index_additional_resolver_records" {
-  type = string
-}
-
-variable "replace_unnormalized" {
-  type = string
+variable "subgraph_compat" {
+  type = bool
 }
 
 # Mainnet RPC URLs

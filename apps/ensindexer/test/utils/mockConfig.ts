@@ -18,14 +18,12 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     labelSetId: "ens-test-env",
     labelSetVersion: "0",
   },
-  healReverseAddresses: "true",
-  indexAdditionalResolverRecords: "true",
-  replaceUnnormalized: "true",
   port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: "https://eth-mainnet.g.alchemy.com/v2/1234",
   },
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
+  isSubgraphCompatible: undefined,
 });
 
 // the current, mutable ENSIndexerConfig for tests

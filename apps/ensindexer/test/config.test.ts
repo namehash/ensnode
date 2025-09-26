@@ -1,9 +1,7 @@
+import { EnvironmentDefaults } from "@/config/environment-defaults";
 import type { RpcConfig } from "@/config/types";
-import {
-  DEFAULT_ENSADMIN_URL,
-  DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_PORT,
-} from "@/lib/lib-config";
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/lib/lib-config";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -17,7 +15,6 @@ const BASE_ENV = {
   ENSADMIN_URL: "https://admin.ensnode.io",
   DATABASE_SCHEMA: "ensnode",
   PLUGINS: "subgraph",
-  HEAL_REVERSE_ADDRESSES: "true",
   PORT: "3000",
   ENSRAINBOW_URL: "https://api.ensrainbow.io",
   LABEL_SET_ID: "ens-test-env",
@@ -27,15 +24,19 @@ const BASE_ENV = {
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
 
-describe("config", () => {
-  async function getConfig() {
-    vi.resetModules(); // Reset module cache
-    const configModule = await import("@/config");
-    return configModule.default;
-  }
+async function getConfig() {
+  vi.resetModules(); // Reset module cache
+  const configModule = await import("@/config");
+  return configModule.default;
+}
 
+async function stubEnv(env: Record<string, string>) {
+  Object.entries(env).forEach(([key, value]) => vi.stubEnv(key, value));
+}
+
+describe("config (with base env)", () => {
   beforeEach(() => {
-    Object.entries(BASE_ENV).forEach(([key, value]) => vi.stubEnv(key, value));
+    stubEnv(BASE_ENV);
   });
 
   afterEach(() => {
@@ -51,7 +52,6 @@ describe("config", () => {
       expect(config.ensAdminUrl).toStrictEqual(new URL("https://admin.ensnode.io"));
       expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
-      expect(config.healReverseAddresses).toBe(true);
       expect(config.port).toBe(3000);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
     });
@@ -293,33 +293,6 @@ describe("config", () => {
     });
   });
 
-  describe(".healReverseAddresses", () => {
-    it("returns false if HEAL_REVERSE_ADDRESSES is 'false'", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
-      const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(false);
-    });
-
-    it("returns true if HEAL_REVERSE_ADDRESSES is 'true'", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
-      const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(true);
-    });
-
-    it("returns the default if HEAL_REVERSE_ADDRESSES is not set", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", undefined);
-      const config = await getConfig();
-      expect(config.healReverseAddresses).toBe(DEFAULT_HEAL_REVERSE_ADDRESSES);
-    });
-
-    it("throws if HEAL_REVERSE_ADDRESSES is an invalid string value", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "not-a-boolean");
-      await expect(getConfig()).rejects.toThrow(
-        /HEAL_REVERSE_ADDRESSES must be 'true' or 'false'/i,
-      );
-    });
-  });
-
   describe(".namespace", () => {
     it("returns the NAMESPACE if set", async () => {
       vi.stubEnv("NAMESPACE", "sepolia");
@@ -340,6 +313,40 @@ describe("config", () => {
   });
 
   describe(".plugins", () => {
+    describe("SUBGRAPH_COMPAT=true", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "true");
+        vi.stubEnv("LABEL_SET_ID", "subgraph");
+        vi.stubEnv("LABEL_SET_VERSION", "0");
+      });
+
+      it("has default plugins", async () => {
+        vi.stubEnv("PLUGINS", undefined);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          plugins: EnvironmentDefaults.subgraphCompatible.plugins.split(","),
+        });
+      });
+    });
+
+    describe("SUBGRAPH_COMPAT=false", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "false");
+      });
+
+      it("has default plugins", async () => {
+        vi.stubEnv("PLUGINS", undefined);
+        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+        vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
+        vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
+        vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          plugins: EnvironmentDefaults.alpha.plugins.split(","),
+        });
+      });
+    });
+
     it("returns the PLUGINS if it is a valid array", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
@@ -370,13 +377,6 @@ describe("config", () => {
 
     it("throws if PLUGINS consists of non-existent plugins", async () => {
       vi.stubEnv("PLUGINS", "some,nonexistent,plugins");
-      await expect(getConfig()).rejects.toThrow(
-        /PLUGINS must be a comma separated list with at least one valid plugin name/i,
-      );
-    });
-
-    it("throws if PLUGINS is not set (undefined)", async () => {
-      vi.stubEnv("PLUGINS", undefined);
       await expect(getConfig()).rejects.toThrow(
         /PLUGINS must be a comma separated list with at least one valid plugin name/i,
       );
@@ -522,46 +522,30 @@ describe("config", () => {
     });
   });
 
-  describe("isSubgraphCompatible", () => {
+  describe("SUBGRAPH_COMPAT", () => {
     // start in subgraph-compatible state
     beforeEach(() => {
-      vi.stubEnv("PLUGINS", "subgraph");
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "false");
-      vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
-      vi.stubEnv("REPLACE_UNNORMALIZED", "false");
-      vi.stubEnv("LABEL_SET_ID", "subgraph");
-      vi.stubEnv("LABEL_SET_VERSION", "0");
+      vi.stubEnv("SUBGRAPH_COMPAT", "true");
+      vi.stubEnv("LABEL_SET_ID", undefined);
+      vi.stubEnv("LABEL_SET_VERSION", undefined);
     });
 
     it("is true when compatible", async () => {
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(true);
+      await expect(getConfig()).resolves.toMatchObject({ isSubgraphCompatible: true });
     });
 
-    it("is false when PLUGINS does not include subgraph", async () => {
+    it("throws when PLUGINS does not include subgraph", async () => {
       vi.stubEnv("PLUGINS", "basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
+
+      await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
 
-    it("is false when PLUGINS includes subgraph along with other plugins", async () => {
+    it("throws when PLUGINS includes subgraph along with other plugins", async () => {
       vi.stubEnv("PLUGINS", "subgraph,basenames");
       vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
-    });
 
-    it("is false when HEAL_REVERSE_ADDRESSES is true", async () => {
-      vi.stubEnv("HEAL_REVERSE_ADDRESSES", "true");
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
-    });
-
-    it("is false when REPLACE_UNNORMALIZED is true", async () => {
-      vi.stubEnv("REPLACE_UNNORMALIZED", "true");
-      const config = await getConfig();
-      expect(config.isSubgraphCompatible).toBe(false);
+      await expect(getConfig()).rejects.toThrow(/isSubgraphCompatible/);
     });
   });
 
@@ -596,9 +580,34 @@ describe("config", () => {
       });
     });
 
-    it("throws an error when LABEL_SET_ID is not set", async () => {
-      vi.stubEnv("LABEL_SET_ID", undefined);
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_ID must be a string/);
+    describe("SUBGRAPH_COMPAT=true", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "true");
+      });
+
+      it("has default label set", async () => {
+        vi.stubEnv("LABEL_SET_ID", undefined);
+        vi.stubEnv("LABEL_SET_VERSION", undefined);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+        });
+      });
+    });
+
+    describe("SUBGRAPH_COMPAT=false", () => {
+      beforeEach(() => {
+        vi.stubEnv("SUBGRAPH_COMPAT", "false");
+      });
+
+      it("has default label set", async () => {
+        vi.stubEnv("LABEL_SET_ID", undefined);
+        vi.stubEnv("LABEL_SET_VERSION", undefined);
+
+        await expect(getConfig()).resolves.toMatchObject({
+          labelSet: { labelSetId: "subgraph", labelSetVersion: 0 },
+        });
+      });
     });
 
     it("throws an error when LABEL_SET_ID is empty", async () => {
@@ -632,11 +641,6 @@ describe("config", () => {
       expect(config.labelSet.labelSetId).toBe("ens-test-env");
     });
 
-    it("throws an error when LABEL_SET_VERSION is not set", async () => {
-      vi.stubEnv("LABEL_SET_VERSION", undefined);
-      await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be an integer/);
-    });
-
     it("throws an error when LABEL_SET_VERSION is negative", async () => {
       vi.stubEnv("LABEL_SET_VERSION", "-1");
       await expect(getConfig()).rejects.toThrow(/LABEL_SET_VERSION must be a non-negative integer/);
@@ -658,17 +662,64 @@ describe("config", () => {
       expect(config.labelSet.labelSetVersion).toBe(0);
     });
   });
+});
 
-  it("reverse-resolvers plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be true", async () => {
-    vi.stubEnv("PLUGINS", "reverse-resolvers");
-    vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_10", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_42161", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_534352", VALID_RPC_URL);
-    vi.stubEnv("RPC_URL_59144", VALID_RPC_URL);
-    vi.stubEnv("INDEX_ADDITIONAL_RESOLVER_RECORDS", "false");
+/**
+ * The following test block defines the minimal environment, so each test case is more readable.
+ */
+describe("config (minimal base env)", () => {
+  beforeEach(() => {
+    const {
+      NAMESPACE,
+      ENSNODE_PUBLIC_URL,
+      ENSINDEXER_URL,
+      ENSRAINBOW_URL,
+      DATABASE_SCHEMA,
+      RPC_URL_1,
+    } = BASE_ENV;
+    stubEnv({
+      NAMESPACE,
+      ENSNODE_PUBLIC_URL,
+      ENSINDEXER_URL,
+      ENSRAINBOW_URL,
+      DATABASE_SCHEMA,
+      RPC_URL_1,
+    });
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
 
-    await expect(getConfig()).rejects.toThrow(/requires INDEX_ADDITIONAL_RESOLVER_RECORDS/i);
+  describe("SUBGAPH_COMPAT=false", () => {
+    beforeEach(() => {
+      stubEnv({ SUBGRAPH_COMPAT: "false" });
+    });
+
+    it("requires default plugins rpc urls", async () => {
+      await expect(getConfig()).rejects.toThrow(/RPC_URL_/);
+    });
+
+    it("provides default plugins", async () => {
+      stubEnv({
+        RPC_URL_8453: VALID_RPC_URL,
+        RPC_URL_59144: VALID_RPC_URL,
+        RPC_URL_10: VALID_RPC_URL,
+      });
+
+      await expect(getConfig()).resolves.toMatchObject({
+        plugins: EnvironmentDefaults.alpha.plugins.split(","),
+      });
+    });
+
+    it("allows override of default plugins", async () => {
+      stubEnv({
+        PLUGINS: "tokenscope",
+        RPC_URL_8453: VALID_RPC_URL,
+        RPC_URL_59144: VALID_RPC_URL,
+        RPC_URL_10: VALID_RPC_URL,
+      });
+
+      await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
+    });
   });
 });
