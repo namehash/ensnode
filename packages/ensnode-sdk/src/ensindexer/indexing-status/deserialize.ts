@@ -1,27 +1,33 @@
 import { prettifyError } from "zod/v4";
 import type {
+  SerializedChainIndexingSnapshot,
   SerializedCurrentIndexingProjection,
   SerializedOmnichainIndexingSnapshot,
 } from "./serialized-types";
-import type { CurrentIndexingProjection, OmnichainIndexingSnapshot } from "./types";
+import type {
+  ChainIndexingSnapshot,
+  CurrentIndexingProjection,
+  OmnichainIndexingSnapshot,
+} from "./types";
 import {
+  makeChainIndexingSnapshotSchema,
   makeCurrentIndexingProjectionSchema,
   makeOmnichainIndexingSnapshotSchema,
 } from "./zod-schemas";
 
 /**
- * Serialize a {@link OmnichainIndexingSnapshot} object.
+ * Deserialize into a {@link ChainIndexingSnapshot} object.
  */
-export function deserializeOmnichainIndexingSnapshot(
-  maybeStatus: SerializedOmnichainIndexingSnapshot,
+export function deserializeChainIndexingSnapshot(
+  maybeSnapshot: SerializedChainIndexingSnapshot,
   valueLabel?: string,
-): OmnichainIndexingSnapshot {
-  const schema = makeOmnichainIndexingSnapshotSchema(valueLabel);
-  const parsed = schema.safeParse(maybeStatus);
+): ChainIndexingSnapshot {
+  const schema = makeChainIndexingSnapshotSchema(valueLabel);
+  const parsed = schema.safeParse(maybeSnapshot);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize OmnichainIndexingSnapshot:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize into ChainIndexingSnapshot:\n${prettifyError(parsed.error)}\n`,
     );
   }
 
@@ -29,7 +35,26 @@ export function deserializeOmnichainIndexingSnapshot(
 }
 
 /**
- * Serialize a {@link CurrentIndexingProjection} object.
+ * Deserialize an {@link OmnichainIndexingSnapshot} object.
+ */
+export function deserializeOmnichainIndexingSnapshot(
+  maybeSnapshot: SerializedOmnichainIndexingSnapshot,
+  valueLabel?: string,
+): OmnichainIndexingSnapshot {
+  const schema = makeOmnichainIndexingSnapshotSchema(valueLabel);
+  const parsed = schema.safeParse(maybeSnapshot);
+
+  if (parsed.error) {
+    throw new Error(
+      `Cannot deserialize into OmnichainIndexingSnapshot:\n${prettifyError(parsed.error)}\n`,
+    );
+  }
+
+  return parsed.data;
+}
+
+/**
+ * Deserialize into a {@link CurrentIndexingProjection} object.
  */
 export function deserializeCurrentIndexingProjection(
   maybeProjection: SerializedCurrentIndexingProjection,
@@ -40,7 +65,7 @@ export function deserializeCurrentIndexingProjection(
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize CurrentIndexingProjection:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize into CurrentIndexingProjection:\n${prettifyError(parsed.error)}\n`,
     );
   }
 

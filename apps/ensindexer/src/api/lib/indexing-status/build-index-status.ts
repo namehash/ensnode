@@ -11,57 +11,27 @@
  */
 
 import {
-  type BlockRef,
-  CurrentIndexingProjection,
-  CurrentIndexingProjectionUnavailable,
-  Duration,
-  IndexingStatusResponse,
-  IndexingStrategyIds,
-  OmnichainIndexingSnapshot,
-  UnixTimestamp,
+  type IndexingStatusResponse,
+  type UnixTimestamp,
   createProjection,
-  deserializeCurrentIndexingProjection,
-  deserializeOmnichainIndexingSnapshot,
 } from "@ensnode/ensnode-sdk";
-import { prettifyError } from "zod/v4";
 
 import config from "@/config";
 import ponderConfig from "@/ponder/config";
 import { getUnixTime } from "date-fns";
 import {
+  type ChainBlockRefs,
   type ChainName,
   type PonderStatus,
   type PrometheusMetrics,
   type PublicClient,
-  type UnvalidatedChainMetadata,
   createOmnichainIndexingSnapshot,
-  fetchBlockRef,
+  createSerializedChainSnapshots,
   fetchPonderMetrics,
   fetchPonderStatus,
+  getChainsBlockRefs,
   getChainsBlockrange,
 } from "./ponder-metadata";
-import { makePonderChainMetadataSchema } from "./ponder-metadata/zod-schemas";
-
-/**
- * Chain Block Refs
- *
- * Represents information about indexing scope for an indexed chain.
- */
-interface ChainBlockRefs {
-  /**
-   * Based on Ponder Configuration
-   */
-  config: {
-    startBlock: BlockRef;
-
-    endBlock: BlockRef | null;
-  };
-
-  /**
-   * Based on Ponder runtime metrics
-   */
-  backfillEndBlock: BlockRef;
-}
 
 /**
  * Names for each indexed chain
@@ -85,17 +55,17 @@ const chainsBlockrange = getChainsBlockrange(ponderConfig);
  *
  * Note: works as cache for {@link getChainsBlockRefs}.
  */
-const chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
+let chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
 
 /**
- * Get {@link IndexedChainBlockRefs} for indexed chains.
+ * Get cached {@link IndexedChainBlockRefs} for indexed chains.
  *
  * Guaranteed to include {@link ChainBlockRefs} for each indexed chain.
  *
  * Note: performs a network request only once and caches response to
  * re-use it for further `getChainsBlockRefs` calls.
  */
-async function getChainsBlockRefs(
+async function getChainsBlockRefsCached(
   metrics: PrometheusMetrics,
   publicClients: Record<ChainName, PublicClient>,
 ): Promise<Map<ChainName, ChainBlockRefs>> {
@@ -104,54 +74,7 @@ async function getChainsBlockRefs(
     return chainsBlockRefs;
   }
 
-  // otherwise, build the chain block refs
-
-  for (const chainName of chainNames) {
-    const blockrange = chainsBlockrange[chainName];
-    const startBlock = blockrange?.startBlock;
-    const endBlock = blockrange?.endBlock;
-
-    const publicClient = publicClients[chainName];
-
-    if (typeof startBlock !== "number") {
-      throw new Error(`startBlock not found for chain ${chainName}`);
-    }
-
-    if (typeof publicClient === "undefined") {
-      throw new Error(`publicClient not found for chain ${chainName}`);
-    }
-
-    const historicalTotalBlocks = metrics.getValue("ponder_historical_total_blocks", {
-      chain: chainName,
-    });
-
-    if (typeof historicalTotalBlocks !== "number") {
-      throw new Error(`No historical total blocks metric found for chain ${chainName}`);
-    }
-
-    const backfillEndBlock = startBlock + historicalTotalBlocks - 1;
-
-    try {
-      // fetch relevant block refs using RPC
-      const [startBlockRef, endBlockRef, backfillEndBlockRef] = await Promise.all([
-        fetchBlockRef(publicClient, startBlock),
-        endBlock ? fetchBlockRef(publicClient, endBlock) : null,
-        fetchBlockRef(publicClient, backfillEndBlock),
-      ]);
-
-      const chainBlockRef = {
-        config: {
-          startBlock: startBlockRef,
-          endBlock: endBlockRef,
-        },
-        backfillEndBlock: backfillEndBlockRef,
-      } satisfies ChainBlockRefs;
-
-      chainsBlockRefs.set(chainName, chainBlockRef);
-    } catch {
-      throw new Error(`Could not get BlockRefs for chain ${chainName}`);
-    }
-  }
+  chainsBlockRefs = await getChainsBlockRefs(chainNames, chainsBlockrange, metrics, publicClients);
 
   return chainsBlockRefs;
 }
@@ -185,59 +108,25 @@ export async function buildIndexingStatus(
   } catch (error) {
     console.error(`Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}`);
 
-    return deserializeCurrentIndexingProjection({
-      type: null,
-      realtime: systemTimestamp,
-      maxRealtimeDistance: null,
-      snapshot: null,
-    } satisfies CurrentIndexingProjectionUnavailable);
+    // omnichain indexing snapshot is unavailable
+    const snapshot = null;
+
+    return createProjection(snapshot, systemTimestamp);
   }
 
   // get BlockRefs for relevant blocks
-  const chainsBlockRefs = await getChainsBlockRefs(metrics, publicClients);
+  const chainsBlockRefs = await getChainsBlockRefsCached(metrics, publicClients);
 
-  const chains = new Map<ChainName, UnvalidatedChainMetadata>();
-
-  // collect unvalidated chain metadata for each indexed chain
-  for (const chainName of chainNames) {
-    const chainBlockRefs = chainsBlockRefs.get(chainName);
-
-    const chainMetadata = {
-      chainId: status[chainName]?.id,
-      config: chainBlockRefs?.config,
-      backfillEndBlock: chainBlockRefs?.backfillEndBlock,
-      historicalTotalBlocks: metrics.getValue("ponder_historical_total_blocks", {
-        chain: chainName,
-      }),
-      isSyncComplete: metrics.getValue("ponder_sync_is_complete", { chain: chainName }),
-      isSyncRealtime: metrics.getValue("ponder_sync_is_realtime", { chain: chainName }),
-      syncBlock: {
-        number: metrics.getValue("ponder_sync_block", { chain: chainName }),
-        timestamp: metrics.getValue("ponder_sync_block_timestamp", { chain: chainName }),
-      },
-      statusBlock: {
-        number: status[chainName]?.block.number,
-        timestamp: status[chainName]?.block.timestamp,
-      },
-    } satisfies UnvalidatedChainMetadata;
-
-    chains.set(chainName, chainMetadata);
-  }
-
-  // parse chain metadata for each indexed chain
-  const schema = makePonderChainMetadataSchema(chainNames);
-  const parsed = schema.safeParse(chains);
-
-  if (!parsed.success) {
-    throw new Error(
-      "Failed to build SerializedOmnichainIndexingSnapshot object: \n" +
-        prettifyError(parsed.error) +
-        "\n",
-    );
-  }
+  // create serialized chain indexing snapshot for each indexed chain
+  const serializedChainSnapshots = createSerializedChainSnapshots(
+    chainNames,
+    chainsBlockRefs,
+    metrics,
+    status,
+  );
 
   // TODO: ensure that `systemTimestamp` is the right timestamp to use here.
-  const snapshot = createOmnichainIndexingSnapshot(parsed.data, systemTimestamp);
+  const snapshot = createOmnichainIndexingSnapshot(serializedChainSnapshots, systemTimestamp);
 
   // Get the current system timestamp for the new time
   // Note: this timestamp might be significantly later than `systemTimestamp`
