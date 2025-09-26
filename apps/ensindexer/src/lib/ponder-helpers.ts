@@ -273,14 +273,11 @@ export function chainsConnectionConfig(
     );
   }
 
-  const rpcHttpEndpointURLs = Array.from(rpcConfig.httpUrls).map((rpcUrl) => rpcUrl.toString());
-  const rpcWebSocketsEndpointURL = rpcConfig.webSocketUrl?.toString();
-
   return {
     [chainId.toString()]: {
       id: chainId,
-      rpc: rpcHttpEndpointURLs,
-      ws: rpcWebSocketsEndpointURL,
+      rpc: rpcConfig.httpRPCs.map((httpRPC) => httpRPC.toString()),
+      ws: rpcConfig.websocketRPC?.toString(),
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies ChainConfig,

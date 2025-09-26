@@ -15,11 +15,15 @@ export interface RpcConfig {
    * The HTTP endpoint URLs for RPCs to the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
    * For proper indexing behavior, each RPC must support high request rate limits (ex: 500+ requests a second).
    *
+   * The order of RPC URLs matters. The first HTTP/HTTPS RPC for a given chain
+   * will be the RPC that is used for Resolution API request processing.
+   *
    * Invariants:
-   * - includes one or more URLs
-   * - Each URL protocol is guaranteed to be "http://" or "https://"
+   * - Includes one or more URLs
+   * - Each URL in the array is guaranteed to be distinct
+   * - Each URL protocol is guaranteed to be "http:" or "https:"
    */
-  httpUrls: Set<URL>;
+  httpRPCs: [URL, ...URL[]];
 
   /**
    * The websocket RPC for the chain.
@@ -27,9 +31,9 @@ export interface RpcConfig {
    * If defined, it is used to accelerate discovery of new "realtime" blocks.
    *
    * Invariants:
-   * - If defined, URL protocol is guaranteed to be "ws://" or "wss://".
+   * - If defined, URL protocol is guaranteed to be "ws:" or "wss:".
    */
-  webSocketUrl?: URL;
+  websocketRPC?: URL;
 }
 
 /**

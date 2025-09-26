@@ -7,7 +7,7 @@ import {
   PluginName,
   deserializeChainId,
   isHttpEndpointURL,
-  isWebSocketsEndpointURL,
+  isWebSocketEndpointURL,
   uniq,
 } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
@@ -54,9 +54,7 @@ const makeBlockNumberSchema = (envVarKey: string) =>
 
 const RpcConfigSchema = z
   .string()
-  .transform((val) => {
-    return val.split(",").filter(Boolean);
-  })
+  .transform((val) => val.split(","))
   .pipe(z.array(makeUrlSchema("RPC_URL_*")))
   .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL)
   .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL);
@@ -93,7 +91,7 @@ const PonderDatabaseSchemaSchema = z
 
 const PluginsSchema = z.coerce
   .string()
-  .transform((val) => val.split(",").filter(Boolean))
+  .transform((val) => val.split(","))
   .pipe(
     z
       .array(
@@ -131,10 +129,16 @@ const RpcConfigsSchema = z
   .transform((records) => {
     const rpcConfigs = new Map<ChainId, RpcConfig>();
 
-    for (const [chianIdString, rpcConfig] of Object.entries(records)) {
-      rpcConfigs.set(deserializeChainId(chianIdString), {
-        httpUrls: new Set(rpcConfig.filter(isHttpEndpointURL)),
-        webSocketUrl: rpcConfig.find(isWebSocketsEndpointURL),
+    for (const [chainIdString, rpcConfig] of Object.entries(records)) {
+      // rpcConfig is guaranteed to include at least one HTTP endpoint URL
+      const httpRPCs = rpcConfig.filter(isHttpEndpointURL) as [URL, ...URL[]];
+
+      // rpcConfig is guaranteed to include at most one WebSocket endpoint URL
+      const websocketRPC = rpcConfig.find(isWebSocketEndpointURL);
+
+      rpcConfigs.set(deserializeChainId(chainIdString), {
+        httpRPCs,
+        websocketRPC,
       });
     }
 

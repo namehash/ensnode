@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { isHttpEndpointURL, isWebSocketsEndpointURL, uniq } from "@ensnode/ensnode-sdk";
+import { isHttpEndpointURL, isWebSocketEndpointURL, uniq } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -169,7 +169,7 @@ export function invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointUR
   ctx: ZodCheckFnInput<URL[]>,
 ) {
   const endpoints = ctx.value;
-  const wsEndpoints = endpoints.filter(isWebSocketsEndpointURL);
+  const wsEndpoints = endpoints.filter(isWebSocketEndpointURL);
 
   if (wsEndpoints.length > 1) {
     ctx.issues.push({

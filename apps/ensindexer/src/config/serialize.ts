@@ -1,4 +1,9 @@
-import { serializeChainId, serializeIndexedChainIds, serializeUrl } from "@ensnode/ensnode-sdk";
+import {
+  UrlString,
+  serializeChainId,
+  serializeIndexedChainIds,
+  serializeUrl,
+} from "@ensnode/ensnode-sdk";
 import { SerializedENSIndexerConfig } from "./serialized-types";
 import type { ENSIndexerConfig } from "./types";
 
@@ -11,9 +16,14 @@ function serializeRpcConfigs(
   const serializedRpcConfigs: SerializedENSIndexerConfig["rpcConfigs"] = {};
 
   for (const [chainId, rpcConfig] of rpcConfigs.entries()) {
+    const serializedHttpRPCs = rpcConfig.httpRPCs.map(serializeUrl) as [UrlString, ...UrlString[]];
+    const serializedWebsocketRPC = rpcConfig.websocketRPC
+      ? serializeUrl(rpcConfig.websocketRPC)
+      : undefined;
+
     serializedRpcConfigs[serializeChainId(chainId)] = {
-      httpUrls: Array.from(rpcConfig.httpUrls).map((httpUrl) => serializeUrl(httpUrl)),
-      webSocketUrl: rpcConfig.webSocketUrl ? serializeUrl(rpcConfig.webSocketUrl) : undefined,
+      httpRPCs: serializedHttpRPCs,
+      websocketRPC: serializedWebsocketRPC,
     };
   }
 
@@ -35,9 +45,14 @@ function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
   for (const [chainId, rpcConfig] of config.rpcConfigs.entries()) {
     const redactURL = (sourceURL: URL) => new URL(`/${REDACTED}`, sourceURL.href);
 
+    const redactedHttpRPCs = rpcConfig.httpRPCs.map(redactURL) as [URL, ...URL[]];
+    const redactedWebsocketRPC = rpcConfig.websocketRPC
+      ? redactURL(rpcConfig.websocketRPC)
+      : undefined;
+
     redactedRpcConfigs.set(chainId, {
-      httpUrls: new Set(Array.from(rpcConfig.httpUrls).map(redactURL)),
-      webSocketUrl: rpcConfig.webSocketUrl ? redactURL(rpcConfig.webSocketUrl) : undefined,
+      httpRPCs: redactedHttpRPCs,
+      websocketRPC: redactedWebsocketRPC,
     });
   }
 
