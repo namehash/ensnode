@@ -19,8 +19,8 @@ catalogs:
       specifier: 0.12.0
       version: 0.12.0
     '@ponder/utils':
-      specifier: 0.2.12
-      version: 0.2.12
+      specifier: 0.2.13
+      version: 0.2.13
     '@types/node':
       specifier: ^22.14.0
       version: 22.15.3
@@ -43,8 +43,8 @@ catalogs:
       specifier: ^4.9.7
       version: 4.9.7
     ponder:
-      specifier: 0.12.24
-      version: 0.12.24
+      specifier: 0.13.7
+      version: 0.13.7
     tsup:
       specifier: ^8.3.6
       version: 8.3.6
@@ -137,7 +137,7 @@ importers:
         version: 13.7.0(react@18.3.1)
       '@ponder/utils':
         specifier: 'catalog:'
-        version: 0.2.12(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
+        version: 0.2.13(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
       '@radix-ui/react-avatar':
         specifier: ^1.1.3
         version: 1.1.3(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -348,7 +348,7 @@ importers:
         version: 2.9.0
       ponder:
         specifier: 'catalog:'
-        version: 0.12.24(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7)
+        version: 0.13.7(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7)
       ponder-enrich-gql-docs-middleware:
         specifier: ^0.1.3
         version: 0.1.3(graphql@16.10.0)(hono@4.9.7)
@@ -578,7 +578,7 @@ importers:
     dependencies:
       '@ponder/utils':
         specifier: 'catalog:'
-        version: 0.2.12(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
+        version: 0.2.13(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -649,7 +649,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.12.24(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7)
+        version: 0.13.7(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7)
       viem:
         specifier: 'catalog:'
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7)
@@ -755,7 +755,7 @@ importers:
         version: 4.9.7
       ponder:
         specifier: 'catalog:'
-        version: 0.12.24(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7)
+        version: 0.13.7(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7)
       tsup:
         specifier: 'catalog:'
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.6)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)
@@ -2388,8 +2388,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@ponder/utils@0.2.12':
-    resolution: {integrity: sha512-pIlunpEoXXJlqSucidJl4r4s66DOnPRbqPY3lZ02uhBr6e2GYK7iNRg4IW7v4WnIhVoSugnWIRiEQYWA0yNLiw==}
+  '@ponder/utils@0.2.13':
+    resolution: {integrity: sha512-Yjkr2j9xerqPtsGCrVWTvC/HzjrPsdYPSBnqlj1ZwivIjkB371pTYmj6T1+kNshCyBuClXCp5ZxHReBaG2Fz0A==}
     peerDependencies:
       typescript: '>=5.0.4'
       viem: '>=2'
@@ -7069,8 +7069,8 @@ packages:
       graphql: ^16.10.0
       hono: ^4.6.19
 
-  ponder@0.12.24:
-    resolution: {integrity: sha512-50qlXSCQnygloG5m5qEpIPfWcPJwIjCMp5zSyaa+M+BI91SeRydmGDOWZSIKvSgbA9dETzM64rNlUpzlrPK5eg==}
+  ponder@0.13.7:
+    resolution: {integrity: sha512-IGQJKQYQT2vy+0ipoYcw9yDgxhNredkUaGslJ2Roh+hVrPl2hFgemVGLvus0jFi5VYgQoS7rsq0OzzZB746i+g==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -10745,7 +10745,7 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@ponder/utils@0.2.12(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))':
+  '@ponder/utils@0.2.13(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))':
     dependencies:
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7)
     optionalDependencies:
@@ -14836,7 +14836,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -16069,7 +16069,7 @@ snapshots:
       graphql: 16.10.0
       hono: 4.9.7
 
-  ponder@0.12.24(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7):
+  ponder@0.13.7(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.7)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(yaml@2.7.0)(zod@3.25.7):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -16078,7 +16078,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
       '@hono/node-server': 1.13.3(hono@4.9.7)
-      '@ponder/utils': 0.2.12(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
+      '@ponder/utils': 0.2.13(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))
       abitype: 0.10.3(typescript@5.7.3)(zod@3.25.7)
       ansi-escapes: 7.0.0
       commander: 12.1.0
