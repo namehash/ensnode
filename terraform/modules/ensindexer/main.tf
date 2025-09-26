@@ -14,23 +14,23 @@ locals {
     "ENSADMIN_URL"                      = { value = var.ensadmin_public_url }
 
     # Mainnet networks
-    "RPC_URL_1"                     = { value = var.ethereum_mainnet_rpc_url },
-    "RPC_URL_8453"                  = { value = var.base_mainnet_rpc_url },
-    "RPC_URL_59144"                 = { value = var.linea_mainnet_rpc_url },
-    "RPC_URL_10"                    = { value = var.optimism_mainnet_rpc_url },
-    "RPC_URL_42161"                 = { value = var.arbitrum_mainnet_rpc_url },
-    "RPC_URL_534352"                = { value = var.scroll_mainnet_rpc_url },
+    "RPC_URL_1"      = { value = var.ethereum_mainnet_rpc_url },
+    "RPC_URL_8453"   = { value = var.base_mainnet_rpc_url },
+    "RPC_URL_59144"  = { value = var.linea_mainnet_rpc_url },
+    "RPC_URL_10"     = { value = var.optimism_mainnet_rpc_url },
+    "RPC_URL_42161"  = { value = var.arbitrum_mainnet_rpc_url },
+    "RPC_URL_534352" = { value = var.scroll_mainnet_rpc_url },
 
     # Sepolia networks
-    "RPC_URL_11155111"                = { value = var.ethereum_sepolia_rpc_url },
-    "RPC_URL_84532"                   = { value = var.base_sepolia_rpc_url },
-    "RPC_URL_59141"                   = { value = var.linea_sepolia_rpc_url },
-    "RPC_URL_11155420"                = { value = var.optimism_sepolia_rpc_url },
-    "RPC_URL_421614"                  = { value = var.arbitrum_sepolia_rpc_url },
-    "RPC_URL_534351"                  = { value = var.scroll_sepolia_rpc_url },
+    "RPC_URL_11155111" = { value = var.ethereum_sepolia_rpc_url },
+    "RPC_URL_84532"    = { value = var.base_sepolia_rpc_url },
+    "RPC_URL_59141"    = { value = var.linea_sepolia_rpc_url },
+    "RPC_URL_11155420" = { value = var.optimism_sepolia_rpc_url },
+    "RPC_URL_421614"   = { value = var.arbitrum_sepolia_rpc_url },
+    "RPC_URL_534351"   = { value = var.scroll_sepolia_rpc_url },
 
     # Holesky networks
-    "RPC_URL_17000"                = { value = var.ethereum_holesky_rpc_url },
+    "RPC_URL_17000" = { value = var.ethereum_holesky_rpc_url },
   }
 }
 
