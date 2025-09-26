@@ -29,7 +29,7 @@ export const queryKeys = {
 
   config: (url: string) => [...queryKeys.base(url), "config"] as const,
 
-  indexingStatus: (url: string) => [...queryKeys.base(url), "config"] as const,
+  indexingStatus: (url: string) => [...queryKeys.base(url), "indexing-status"] as const,
 };
 
 /**
