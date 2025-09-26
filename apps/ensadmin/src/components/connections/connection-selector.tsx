@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 
 import { AddConnectionDialog } from "@/components/connections/add-connection-dialog";
 import { CustomConnectionsList } from "@/components/connections/custom-connections-list";
-import { DefaultConnectionsList } from "@/components/connections/default-connections-list";
+import { ServerConnectionsList } from "@/components/connections/server-connections-list";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import {
   DropdownMenu,
@@ -90,10 +90,10 @@ export function ConnectionSelector() {
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
             >
-              <DefaultConnectionsList
+              <ServerConnectionsList
                 connectionLibrary={connectionLibrary}
                 activeConnectionUrl={activeENSNodeUrl}
-                onSelectDefaultConnection={handleSelect}
+                onSelectServerConnection={handleSelect}
               />
 
               <CustomConnectionsList

@@ -1,9 +1,10 @@
 "use client";
 
 import constate from "constate";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
+import { toast } from "sonner";
 
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { useHydrated } from "@/hooks/use-hydrated";
@@ -48,12 +49,16 @@ const serverConnectionLibrary = (() => {
 
 function _useAvailableENSNodeConnections() {
   const hydrated = useHydrated();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const currentConnection = searchParams.get(CONNECTION_PARAM_KEY);
   const [rawCustomConnectionUrls, storeCustomConnections] = useLocalstorageState<UrlString[]>(
     CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY,
     [],
   );
+
+  const [existingConnectionUrl, setExistingConnectionUrl] = useState<UrlString | null>(null);
+  const [failedConnectionUrls, setFailedConnections] = useState<Set<UrlString>>(new Set());
 
   // Validate and normalize URLs from localStorage - Custom Connection Library
   const customConnectionLibrary = useMemo(() => {
@@ -149,6 +154,80 @@ function _useAvailableENSNodeConnections() {
     if (!isInConnections(currentConnection)) return new URL(first);
     return new URL(currentConnection);
   }, [hydrated, connectionLibrary, currentConnection, isInConnections]);
+
+  const updateCurrentConnectionParam = useCallback(
+    (url: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(CONNECTION_PARAM_KEY, url);
+      router.replace(`?${params.toString()}`);
+    },
+    [router, searchParams],
+  );
+
+  // Show connection success toast
+  useEffect(() => {
+    if (
+      existingConnectionUrl !== null &&
+      existingConnectionUrl !== currentConnection &&
+      currentConnection
+    ) {
+      toast.success(`Connected to ${currentConnection}`);
+    }
+
+    setExistingConnectionUrl(currentConnection);
+  }, [currentConnection, existingConnectionUrl]);
+
+  // Handle URL parameter synchronization and connection loading
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!currentConnection) return;
+    if (failedConnectionUrls.has(currentConnection)) return;
+
+    // Check if connection URL already exists in connection library
+    const existingConnection = connectionLibrary.find((conn) => conn.url === currentConnection);
+    if (existingConnection) {
+      return;
+    }
+
+    // Automatically add connection from URL parameter to library (enables shareable connection links)
+    addCustomConnection(currentConnection)
+      .then((addedUrl) => {
+        updateCurrentConnectionParam(addedUrl);
+        toast.success(`URL saved to connection library`);
+        toast.success(`Connected to ${addedUrl}`);
+      })
+      .catch((error) => {
+        toast.error(`Failed to connect: ${error.message}`);
+
+        // Track this as a failed connection to prevent retry loop
+        setFailedConnections((prev) => new Set(prev).add(currentConnection));
+
+        // Remove invalid connection param from URL
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete(CONNECTION_PARAM_KEY);
+        router.replace(params.toString() ? `?${params.toString()}` : window.location.pathname);
+      });
+  }, [
+    hydrated,
+    currentConnection,
+    connectionLibrary,
+    addCustomConnection,
+    updateCurrentConnectionParam,
+    failedConnectionUrls,
+    searchParams,
+    router,
+  ]);
+
+  // Handle URL parameter synchronization when no connection parameter exists
+  useEffect(() => {
+    if (!hydrated) return;
+    if (currentConnection) return;
+
+    // If no connection parameter exists and we have a selected connection, update URL
+    if (selectedConnection) {
+      updateCurrentConnectionParam(selectedConnection.toString());
+    }
+  }, [hydrated, currentConnection, selectedConnection, updateCurrentConnectionParam]);
 
   return {
     connectionLibrary,

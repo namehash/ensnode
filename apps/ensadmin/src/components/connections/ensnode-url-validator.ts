@@ -25,6 +25,7 @@ export async function validateENSNodeUrl(url: string): Promise<ValidationResult>
     }
 
     // Check for reasonable hostname format (basic validation)
+    // Validates a domain/hostname (labels separated by dots, alphanumeric with optional internal hyphens, no leading/trailing hyphens or dots)
     const hostnamePattern =
       /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
     if (!hostnamePattern.test(parsedUrl.hostname) && parsedUrl.hostname !== "localhost") {

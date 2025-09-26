@@ -4,18 +4,19 @@ import { CopyButton } from "@/components/copy-button";
 import { DropdownMenuItem, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { ConnectionOption } from "@/hooks/ensnode-connections";
 import { cn } from "@/lib/utils";
+import { UrlString } from "@ensnode/ensnode-sdk";
 
-interface DefaultConnectionsListProps {
+interface ServerConnectionsListProps {
   connectionLibrary: ConnectionOption[];
-  activeConnectionUrl: string;
-  onSelectDefaultConnection: (url: string) => void;
+  activeConnectionUrl: UrlString;
+  onSelectServerConnection: (url: UrlString) => void;
 }
 
-export function DefaultConnectionsList({
+export function ServerConnectionsList({
   connectionLibrary,
   activeConnectionUrl,
-  onSelectDefaultConnection,
-}: DefaultConnectionsListProps) {
+  onSelectServerConnection,
+}: ServerConnectionsListProps) {
   const serverConnections = connectionLibrary.filter(({ fromServerLibrary }) => fromServerLibrary);
 
   if (serverConnections.length === 0) {
@@ -34,7 +35,7 @@ export function DefaultConnectionsList({
         return (
           <div key={serverConnectionUrl} className="flex items-center justify-between gap-1">
             <DropdownMenuItem
-              onClick={() => onSelectDefaultConnection(serverConnectionUrl)}
+              onClick={() => onSelectServerConnection(serverConnectionUrl)}
               className={cn(
                 "cursor-pointer flex-1 py-2.5 truncate",
                 isActiveConnection ? "bg-primary/10 text-primary" : null,
