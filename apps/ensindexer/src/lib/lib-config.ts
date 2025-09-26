@@ -10,9 +10,9 @@ export const DEFAULT_SUBGRAPH_COMPAT = false;
  * Extracts dynamic chain configuration from environment variables.
  *
  * This function scans all environment variables for keys matching the pattern
- * "RPC_URL_{chainId}", where {chainId} must be a string of digits (e.g., "1", "10", "8453").
+ * "RPC_URL_{chainId}", where {chainId} must be a valid chainId (e.g., "1", "10", "8453").
  *
- * This function returns a raw chain config which is not yet validated against the zod schema.
+ * This function returns raw RpcConfigEnvironment values which are not yet parsed or validated.
  */
 export function getRpcConfigsFromEnv(): Record<number, RpcConfigEnvironment> {
   const rpcConfigs: Record<number, RpcConfigEnvironment> = {};

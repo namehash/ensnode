@@ -157,7 +157,7 @@ export function invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL(
     ctx.issues.push({
       code: "custom",
       input: endpoints,
-      message: `RPC endpoints configuration must include at least one HTTP/HTTPS URL.`,
+      message: `RPC endpoint configuration must include at least one HTTP/HTTPS URL.`,
     });
   }
 }
@@ -175,7 +175,7 @@ export function invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointUR
     ctx.issues.push({
       code: "custom",
       input: endpoints,
-      message: `RPC endpoints configuration must include at most one WS/WSS URL.`,
+      message: `RPC endpoint configuration must include at most one WS/WSS URL.`,
     });
   }
 }
