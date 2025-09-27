@@ -51,16 +51,17 @@ function _useAvailableENSNodeConnections() {
 
   const [existingConnectionUrl, setExistingConnectionUrl] = useState<UrlString | null>(null);
   // Validate and normalize URLs from localStorage - Custom Connection Library
-  const customConnectionLibrary = useMemo(() => {
-    const validatedUrls = validateAndNormalizeUrls(rawCustomConnectionUrls);
+  const customConnectionLibrary = useMemo(
+    () => validateAndNormalizeUrls(rawCustomConnectionUrls),
+    [rawCustomConnectionUrls],
+  );
 
-    // Clean up localStorage if validation/normalization changed anything
-    if (JSON.stringify(validatedUrls) !== JSON.stringify(rawCustomConnectionUrls)) {
-      storeCustomConnections(validatedUrls);
+  // Clean up localStorage if validation/normalization changed anything
+  useEffect(() => {
+    if (JSON.stringify(customConnectionLibrary) !== JSON.stringify(rawCustomConnectionUrls)) {
+      storeCustomConnections(customConnectionLibrary);
     }
-
-    return validatedUrls;
-  }, [rawCustomConnectionUrls, storeCustomConnections]);
+  }, [customConnectionLibrary, rawCustomConnectionUrls, storeCustomConnections]);
 
   /**
    * Connection Library - dynamically generated union of ServerConnectionLibrary and CustomConnectionLibrary with guaranteed invariants:
