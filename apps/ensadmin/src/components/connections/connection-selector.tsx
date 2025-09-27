@@ -1,8 +1,7 @@
 "use client";
 
 import { ChevronsUpDown, Plus } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import { AddConnectionDialog } from "@/components/connections/add-connection-dialog";
 import { ConnectionsList } from "@/components/connections/connections-list";
@@ -22,15 +21,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
 import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
-import { CONNECTION_PARAM_KEY } from "@/lib/constants";
 import { type UrlString } from "@ensnode/ensnode-sdk";
 
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const { connectionLibrary, addCustomConnection, removeCustomConnection } =
+  const { connectionLibrary, addCustomConnection, removeCustomConnection, selectConnection } =
     useAvailableENSNodeConnections();
   const selectedENSNodeUrl = useSelectedENSNodeUrl().toString();
 
@@ -38,17 +34,8 @@ export function ConnectionSelector() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateUrlParam = useCallback(
-    (url: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(CONNECTION_PARAM_KEY, url);
-      router.replace(`?${params.toString()}`);
-    },
-    [router, searchParams],
-  );
-
   const handleSelect = (url: UrlString) => {
-    updateUrlParam(url);
+    selectConnection(url);
     setDialogOpen(false);
   };
 
@@ -59,7 +46,7 @@ export function ConnectionSelector() {
     try {
       const addedUrl = addCustomConnection(url);
       setDialogOpen(false);
-      updateUrlParam(addedUrl);
+      selectConnection(addedUrl);
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add connection");

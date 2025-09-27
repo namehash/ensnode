@@ -181,11 +181,19 @@ function _useAvailableENSNodeConnections() {
     }
   }, [hydrated, rawSelectedConnection, selectedConnection, updateCurrentConnectionParam]);
 
+  const selectConnection = useCallback(
+    (url: UrlString) => {
+      updateCurrentConnectionParam(url);
+    },
+    [updateCurrentConnectionParam],
+  );
+
   return {
     connectionLibrary,
     selectedConnection,
     addCustomConnection,
     removeCustomConnection,
+    selectConnection,
   };
 }
 
