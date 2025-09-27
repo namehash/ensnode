@@ -45,8 +45,6 @@ function _useAvailableENSNodeConnections() {
   );
 
   const [existingConnectionUrl, setExistingConnectionUrl] = useState<UrlString | null>(null);
-  const [failedConnectionUrls, setFailedConnections] = useState<Set<UrlString>>(new Set());
-
   // Validate and normalize URLs from localStorage - Custom Connection Library
   const customConnectionLibrary = useMemo(() => {
     const validatedUrls = validateAndNormalizeUrls(rawCustomConnectionUrls);
@@ -94,11 +92,6 @@ function _useAvailableENSNodeConnections() {
     [customConnectionLibrary],
   );
 
-  const isInConnections = useMemo(
-    () => (url: UrlString) => connectionLibrary.some((conn) => conn.url === url),
-    [connectionLibrary],
-  );
-
   const addCustomConnection = useCallback(
     async (_url: UrlString) => {
       const { isValid, error } = await validateENSNodeUrl(_url);
@@ -138,9 +131,15 @@ function _useAvailableENSNodeConnections() {
     const defaultSelectedConnection = connectionLibrary[0].url;
 
     if (!rawSelectedConnection) return new URL(defaultSelectedConnection);
-    if (!isInConnections(rawSelectedConnection)) return new URL(defaultSelectedConnection);
-    return new URL(rawSelectedConnection);
-  }, [hydrated, connectionLibrary, rawSelectedConnection, isInConnections]);
+
+    // Allow any valid URL as selected connection, even if not in connection library
+    try {
+      return new URL(rawSelectedConnection);
+    } catch {
+      // If rawSelectedConnection is invalid, fall back to default connection
+      return new URL(defaultSelectedConnection);
+    }
+  }, [hydrated, connectionLibrary, rawSelectedConnection]);
 
   const updateCurrentConnectionParam = useCallback(
     (url: string) => {
@@ -163,47 +162,6 @@ function _useAvailableENSNodeConnections() {
 
     setExistingConnectionUrl(rawSelectedConnection);
   }, [rawSelectedConnection, existingConnectionUrl]);
-
-  // Handle URL parameter synchronization and connection loading
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!rawSelectedConnection) return;
-    if (failedConnectionUrls.has(rawSelectedConnection)) return;
-
-    // Check if connection URL already exists in connection library
-    const existingConnection = connectionLibrary.find((conn) => conn.url === rawSelectedConnection);
-    if (existingConnection) {
-      return;
-    }
-
-    // Automatically add connection from URL parameter to library (enables shareable connection links)
-    addCustomConnection(rawSelectedConnection)
-      .then((addedUrl) => {
-        updateCurrentConnectionParam(addedUrl);
-        toast.success(`URL saved to connection library`);
-        toast.success(`Connected to ${addedUrl}`);
-      })
-      .catch((error) => {
-        toast.error(`Failed to connect: ${error.message}`);
-
-        // Track this as a failed connection to prevent retry loop
-        setFailedConnections((prev) => new Set(prev).add(rawSelectedConnection));
-
-        // Remove invalid connection param from URL
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete(CONNECTION_PARAM_KEY);
-        router.replace(params.toString() ? `?${params.toString()}` : window.location.pathname);
-      });
-  }, [
-    hydrated,
-    rawSelectedConnection,
-    connectionLibrary,
-    addCustomConnection,
-    updateCurrentConnectionParam,
-    failedConnectionUrls,
-    searchParams,
-    router,
-  ]);
 
   // Handle URL parameter synchronization when no connection parameter exists
   useEffect(() => {
