@@ -23,6 +23,7 @@ import {
 import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
 import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { CONNECTION_PARAM_KEY } from "@/lib/constants";
+import { type UrlString } from "@ensnode/ensnode-sdk";
 
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();
@@ -46,12 +47,12 @@ export function ConnectionSelector() {
     [router, searchParams],
   );
 
-  const handleSelect = (url: string) => {
+  const handleSelect = (url: UrlString) => {
     updateUrlParam(url);
     setDialogOpen(false);
   };
 
-  const handleAdd = (url: string) => {
+  const handleAdd = (url: UrlString) => {
     setIsLoading(true);
     setError(null);
 

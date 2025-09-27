@@ -149,7 +149,7 @@ function _useAvailableENSNodeConnections() {
   }, [hydrated, connectionLibrary, rawSelectedConnection]);
 
   const updateCurrentConnectionParam = useCallback(
-    (url: string) => {
+    (url: UrlString) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set(CONNECTION_PARAM_KEY, url);
       router.replace(`?${params.toString()}`);
