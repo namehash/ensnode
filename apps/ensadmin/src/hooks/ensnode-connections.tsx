@@ -1,13 +1,12 @@
 "use client";
 
 import constate from "constate";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
+import { useConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useHydrated } from "@/hooks/use-hydrated";
-import { CONNECTION_PARAM_KEY, CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
 import { getServerConnectionLibrary } from "@/lib/env";
 import {
   isValidENSNodeConnectionUrl,
@@ -16,6 +15,8 @@ import {
   validateAndNormalizeENSNodeUrl,
 } from "@/lib/url-utils";
 import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
+
+export const CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY = "ensadmin:custom-connections:urls";
 
 export interface ConnectionOption {
   /** Normalized URL that passes isValidENSNodeConnectionUrl validation */
@@ -42,9 +43,7 @@ const serverConnectionLibrary = getServerConnectionLibrary().map((url) => url.to
 
 function _useAvailableENSNodeConnections() {
   const hydrated = useHydrated();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const rawSelectedConnection = searchParams.get(CONNECTION_PARAM_KEY);
+  const { currentConnectionUrl: rawSelectedConnection, setConnectionUrl } = useConnectionUrlParam();
   const [rawCustomConnectionUrls, storeCustomConnections] = useLocalstorageState<UrlString[]>(
     CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY,
     [],
@@ -147,16 +146,6 @@ function _useAvailableENSNodeConnections() {
       return new URL(defaultSelectedConnection);
     }
   }, [hydrated, connectionLibrary, rawSelectedConnection]);
-
-  const updateCurrentConnectionParam = useCallback(
-    (url: UrlString) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(CONNECTION_PARAM_KEY, url);
-      router.replace(`?${params.toString()}`);
-    },
-    [router, searchParams],
-  );
-
   // Show connection success toast
   useEffect(() => {
     if (
@@ -177,15 +166,15 @@ function _useAvailableENSNodeConnections() {
 
     // If no connection parameter exists and we have a selected connection, update URL
     if (selectedConnection) {
-      updateCurrentConnectionParam(selectedConnection.toString());
+      setConnectionUrl(selectedConnection.toString());
     }
-  }, [hydrated, rawSelectedConnection, selectedConnection, updateCurrentConnectionParam]);
+  }, [hydrated, rawSelectedConnection, selectedConnection, setConnectionUrl]);
 
   const selectConnection = useCallback(
     (url: UrlString) => {
-      updateCurrentConnectionParam(url);
+      setConnectionUrl(url);
     },
-    [updateCurrentConnectionParam],
+    [setConnectionUrl],
   );
 
   return {
