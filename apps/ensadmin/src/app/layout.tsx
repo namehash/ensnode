@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
-import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-provider";
+import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
 import { RequireSelectedENSNodeConnection } from "@/components/require-selected-ensnode-connection";
@@ -72,7 +72,7 @@ export default function Layout({
                   <AppSidebar />
                 </Suspense>
                 <SidebarInset className="min-w-0">
-                  <ActiveENSNodeProvider>
+                  <SelectedENSNodeProvider>
                     <Header>
                       <HeaderNav>
                         <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
@@ -80,7 +80,7 @@ export default function Layout({
                       <HeaderActions>{actions}</HeaderActions>
                     </Header>
                     <RequireActiveENSNodeConfig>{children}</RequireActiveENSNodeConfig>
-                  </ActiveENSNodeProvider>
+                  </SelectedENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
             </RequireSelectedENSNodeConnection>

@@ -1,20 +1,20 @@
 "use client";
 
 import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
-import { ENSNodeProvider as _ENSNodeProvider } from "@ensnode/ensnode-react";
+import { ENSNodeProvider } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
 
 /**
- * Provider component that configures ENSNodeProvider with the currently active ENSNode connection URL.
+ * Provider component that configures ENSNodeProvider with the currently selected ENSNode connection URL.
  *
  * This component wraps the ENSNodeProvider from @ensnode/ensnode-react and automatically
- * configures it with the URL from the currently active ENSNode connection. It serves as
+ * configures it with the URL from the currently selected ENSNode connection URL. It serves as
  * a bridge between the connection management system and the ENSNode React hooks.
  *
  * @param children - React children to render within the provider context
  */
-export function ActiveENSNodeProvider({ children }: PropsWithChildren) {
+export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
   const url = useSelectedENSNodeUrl();
 
-  return <_ENSNodeProvider config={{ client: { url } }}>{children}</_ENSNodeProvider>;
+  return <ENSNodeProvider config={{ client: { url } }}>{children}</ENSNodeProvider>;
 }
