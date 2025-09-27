@@ -7,7 +7,7 @@ import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/component
 import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
-import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
+import { RequireSelectedENSNodeConnection } from "@/components/require-selected-ensnode-connection";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { AvailableENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
@@ -66,7 +66,7 @@ export default function Layout({
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
           <AvailableENSNodeConnectionsProvider>
-            <RequireActiveENSNodeConnection>
+            <RequireSelectedENSNodeConnection>
               <SidebarProvider>
                 <Suspense>
                   <AppSidebar />
@@ -83,7 +83,7 @@ export default function Layout({
                   </ActiveENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
-            </RequireActiveENSNodeConnection>
+            </RequireSelectedENSNodeConnection>
           </AvailableENSNodeConnectionsProvider>
         </QueryClientProvider>
         <Toaster />
