@@ -84,6 +84,8 @@ export function isRainbowRecordKey(key: ByteArray): boolean {
 /**
  * Type representing the ENSRainbow LevelDB database.
  *
+ * For user-facing documentation, see the [Data Model documentation](/docs/ensrainbow/concepts/data-model).
+ *
  * Schema:
  * - Keys are binary encoded and represent:
  *   - For rainbow records: The raw bytes of the ENS labelHash. Always a byte length of 32.
