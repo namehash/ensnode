@@ -115,7 +115,7 @@ export function defaultEnsNodeUrls(): Array<URL> {
 
   if (!envVarValue) {
     console.warn(
-      `No server ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
+      `No server ENSNode URLs provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
     );
 
     envVarValue = DEFAULT_ENSNODE_URL;
