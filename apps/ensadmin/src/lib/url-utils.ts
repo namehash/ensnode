@@ -11,7 +11,7 @@ export const normalizeUrl = (url: UrlString): UrlString => {
 
 export const isValidUrl = (url: UrlString): boolean => {
   try {
-    new URL(url);
+    normalizeUrl(url);
     return true;
   } catch {
     return false;
