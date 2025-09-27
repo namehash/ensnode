@@ -47,6 +47,7 @@ export type NormalizedName = Name & { __brand: "NormalizedName" };
  *
  * @see https://docs.ens.domains/terminology#labelhash
  * @see https://ensnode.io/docs/reference/terminology#labels-labelhashes-labelhash-function
+ * @see https://docs.ensnode.io/docs/ensrainbow/concepts/glossary#labelhash
  */
 export type LabelHash = Hex;
 
