@@ -58,8 +58,8 @@ export function IndexingStatsForUnstartedStatus({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex flex-row justify-start items-center gap-2">
-                <ChainName chainId={chainId} className="font-semibold text-left" />
                 <ChainIcon chainId={chainId} />
+                <ChainName chainId={chainId} className="font-semibold text-left" />
               </div>
             </div>
 
@@ -105,8 +105,8 @@ export function IndexingStatsForBackfillStatus({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex flex-row justify-start items-center gap-2">
-                <ChainName chainId={chainId} className="font-semibold text-left" />
                 <ChainIcon chainId={chainId} />
+                <ChainName chainId={chainId} className="font-semibold text-left" />
               </div>
             </div>
 
@@ -168,8 +168,8 @@ export function IndexingStatsForCompletedStatus({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex flex-row justify-start items-center gap-2">
-                <ChainName chainId={chainId} className="font-semibold text-left" />
                 <ChainIcon chainId={chainId} />
+                <ChainName chainId={chainId} className="font-semibold text-left" />
               </div>
             </div>
 
@@ -221,8 +221,8 @@ export function IndexingStatsForFollowingStatus({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex flex-row justify-start items-center gap-2">
-                <ChainName chainId={chainId} className="font-semibold text-left" />
                 <ChainIcon chainId={chainId} />
+                <ChainName chainId={chainId} className="font-semibold text-left" />
               </div>
             </div>
 

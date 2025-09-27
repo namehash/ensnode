@@ -7,7 +7,7 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
-import { ChainId, deserializeChainId } from "../../shared";
+import { type ChainId, type UnixTimestamp, deserializeChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
 import {
   makeBlockRefSchema,
@@ -20,20 +20,20 @@ import {
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
   checkChainIndexingStatusesForUnstartedOverallStatus,
+  getOmnichainIndexingCursor,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
-  getStandbyChains,
 } from "./helpers";
 import {
   ChainIndexingBackfillStatus,
   ChainIndexingCompletedStatus,
   ChainIndexingConfig,
   ChainIndexingFollowingStatus,
+  ChainIndexingQueuedStatus,
   ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  ChainIndexingUnstartedStatus,
   ENSIndexerOverallIndexingBackfillStatus,
   ENSIndexerOverallIndexingCompletedStatus,
   ENSIndexerOverallIndexingErrorStatus,
@@ -60,12 +60,12 @@ const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
   ]);
 
 /**
- * Makes Zod schema for {@link ChainIndexingUnstartedStatus} type.
+ * Makes Zod schema for {@link ChainIndexingQueuedStatus} type.
  */
-export const makeChainIndexingUnstartedStatusSchema = (valueLabel: string = "Value") =>
+export const makeChainIndexingQueuedStatusSchema = (valueLabel: string = "Value") =>
   z
     .strictObject({
-      status: z.literal(ChainIndexingStatusIds.Unstarted),
+      status: z.literal(ChainIndexingStatusIds.Queued),
       config: makeChainIndexingConfigSchema(valueLabel),
     })
     .refine(
@@ -173,7 +173,7 @@ export const makeChainIndexingCompletedStatusSchema = (valueLabel: string = "Val
  */
 export const makeChainIndexingStatusSchema = (valueLabel: string = "Value") =>
   z.discriminatedUnion("status", [
-    makeChainIndexingUnstartedStatusSchema(valueLabel),
+    makeChainIndexingQueuedStatusSchema(valueLabel),
     makeChainIndexingBackfillStatusSchema(valueLabel),
     makeChainIndexingFollowingStatusSchema(valueLabel),
     makeChainIndexingCompletedStatusSchema(valueLabel),
@@ -209,11 +209,10 @@ const makeUnstartedOverallStatusSchema = (valueLabel?: string) =>
           (chains) =>
             checkChainIndexingStatusesForUnstartedOverallStatus(Array.from(chains.values())),
           {
-            error: `${valueLabel} at least one chain must be in "unstarted" status and
-each chain has to have a status of either "unstarted", or "completed"`,
+            error: `${valueLabel} all chains must have "queued" status`,
           },
         )
-        .transform((chains) => chains as Map<ChainId, ChainIndexingUnstartedStatus>),
+        .transform((chains) => chains as Map<ChainId, ChainIndexingQueuedStatus>),
     })
     .refine(
       (indexingStatus) => {
@@ -223,6 +222,37 @@ each chain has to have a status of either "unstarted", or "completed"`,
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
     );
+
+/**
+ * Checks that the omnichain indexing cursor is lower than the earliest start block
+ * across all queued chains.
+ *
+ * Note: if there are no queued chains, the invariant holds.
+ *
+ * @param indexingStatus The current indexing status.
+ * @returns true if the invariant holds, false otherwise.
+ */
+function invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains(indexingStatus: {
+  omnichainIndexingCursor: UnixTimestamp;
+  chains: Map<ChainId, ChainIndexingStatus>;
+}) {
+  const chains = Array.from(indexingStatus.chains.values());
+  const queuedChains = chains.filter((chain) => chain.status === ChainIndexingStatusIds.Queued);
+
+  // there are no queued chains
+  if (queuedChains.length === 0) {
+    // the invariant holds
+    return true;
+  }
+
+  const queuedChainStartBlocks = queuedChains.map((chain) => chain.config.startBlock.timestamp);
+  const queuedChainEarliestStartBlock = Math.min(...queuedChainStartBlocks);
+
+  // there are queued chains
+  // the invariant holds if the omnichain indexing cursor is lower than
+  // the earliest start block across all queued chains
+  return indexingStatus.omnichainIndexingCursor < queuedChainEarliestStartBlock;
+}
 
 /**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingBackfillStatus}
@@ -237,7 +267,7 @@ const makeBackfillOverallStatusSchema = (valueLabel?: string) =>
             checkChainIndexingStatusesForBackfillOverallStatus(Array.from(chains.values())),
           {
             error: `${valueLabel} at least one chain must be in "backfill" status and
-each chain has to have a status of either "unstarted", "backfill" or "completed"`,
+each chain has to have a status of either "queued", "backfill" or "completed"`,
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>),
@@ -251,23 +281,10 @@ each chain has to have a status of either "unstarted", "backfill" or "completed"
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
     )
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        const standbyChainStartBlocks = getStandbyChains(chains).map(
-          (chain) => chain.config.startBlock.timestamp,
-        );
-
-        const standbyChainEarliestStartBlocks = Math.min(...standbyChainStartBlocks);
-
-        return indexingStatus.omnichainIndexingCursor <= standbyChainEarliestStartBlocks;
-      },
-      {
-        error:
-          "omnichainIndexingCursor must be lower than or equal to the earliest config.startBlock across all standby chains",
-      },
-    );
+    .refine(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains, {
+      error:
+        "omnichainIndexingCursor must be lower than the earliest config.startBlock across all queued chains",
+    });
 
 /**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingCompletedStatus}
@@ -285,6 +302,7 @@ const makeCompletedOverallStatusSchema = (valueLabel?: string) =>
           },
         )
         .transform((chains) => chains as Map<ChainId, ChainIndexingCompletedStatus>),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
     })
     .refine(
       (indexingStatus) => {
@@ -293,6 +311,17 @@ const makeCompletedOverallStatusSchema = (valueLabel?: string) =>
         return getOverallIndexingStatus(chains) === indexingStatus.overallStatus;
       },
       { error: `${valueLabel} is an invalid overallStatus.` },
+    )
+    .refine(
+      (indexingStatus) => {
+        const chains = Array.from(indexingStatus.chains.values());
+
+        return indexingStatus.omnichainIndexingCursor === getOmnichainIndexingCursor(chains);
+      },
+      {
+        error:
+          "omnichainIndexingCursor must be equal to the highest latestIndexedBlock across all chains",
+      },
     );
 
 /**
@@ -333,23 +362,10 @@ const makeFollowingOverallStatusSchema = (valueLabel?: string) =>
       },
       { error: `${valueLabel} is an invalid overallApproxRealtimeDistance.` },
     )
-    .refine(
-      (indexingStatus) => {
-        const chains = Array.from(indexingStatus.chains.values());
-
-        const standbyChainStartBlocks = getStandbyChains(chains).map(
-          (chain) => chain.config.startBlock.timestamp,
-        );
-
-        const standbyChainEarliestStartBlocks = Math.min(...standbyChainStartBlocks);
-
-        return indexingStatus.omnichainIndexingCursor <= standbyChainEarliestStartBlocks;
-      },
-      {
-        error:
-          "omnichainIndexingCursor must be lower than or equal to the earliest config.startBlock across all standby chains",
-      },
-    );
+    .refine(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains, {
+      error:
+        "omnichainIndexingCursor must be lower than the earliest config.startBlock across all queued chains",
+    });
 
 /**
  * Makes Zod schema for {@link ENSIndexerOverallIndexingErrorStatus}

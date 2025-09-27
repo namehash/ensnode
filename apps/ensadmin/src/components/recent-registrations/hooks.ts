@@ -1,21 +1,42 @@
-import { UnixTimestampInSeconds, unixTimestampToDate } from "@/components/datetime-utils";
 import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
-import { ENSNamespace, ENSNamespaceId } from "@ensnode/datasources";
+import { ENSNamespaceId } from "@ensnode/datasources";
+import { Name, UnixTimestamp, deserializeUnixTimestamp } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
 import { Registration } from "./types";
 
 /**
+ * An integer value (representing a Unix timestamp in seconds) formatted as a string.
+ */
+export type UnixTimestampString = string;
+
+/**
+ * Converts a string representing a Unix timestamp in seconds to a Unix timestamp
+ * (a number).
+ *
+ * @param timestamp - A string representing a Unix timestamp in seconds.
+ * @returns A Unix timestamp.
+ * @throws An error if the provided string is not properly formatted.
+ */
+export const toUnixTimestamp = (timestamp: UnixTimestampString): UnixTimestamp => {
+  if (timestamp === "") {
+    throw new Error("Timestamp cannot be an empty string");
+  }
+
+  return deserializeUnixTimestamp(Number(timestamp));
+};
+
+/**
  * The data model returned by a GraphQL query for registrations.
  */
 interface RegistrationResult {
-  registrationDate: UnixTimestampInSeconds;
-  expiryDate: UnixTimestampInSeconds;
+  registrationDate: UnixTimestampString;
+  expiryDate: UnixTimestampString;
   domain: {
-    name: string;
-    createdAt: UnixTimestampInSeconds;
-    expiryDate: UnixTimestampInSeconds;
+    name: Name;
+    createdAt: UnixTimestampString;
+    expiryDate: UnixTimestampString;
     owner: {
       id: Address;
     };
@@ -57,8 +78,8 @@ function toRegistration(
   namespaceId: ENSNamespaceId,
 ): Registration {
   return {
-    registeredAt: unixTimestampToDate(registrationResult.registrationDate),
-    expiresAt: unixTimestampToDate(registrationResult.expiryDate),
+    registeredAt: toUnixTimestamp(registrationResult.registrationDate),
+    expiresAt: toUnixTimestamp(registrationResult.expiryDate),
     name: registrationResult.domain.name,
     ownerInRegistry: getAddress(registrationResult.domain.owner.id),
     ownerInNameWrapper: registrationResult.domain.wrappedOwner

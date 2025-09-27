@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { uniq } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -141,22 +141,5 @@ export function invariant_validContractConfigs(
         `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define valid addresses. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
       );
     }
-  }
-}
-
-// Invariant: ReverseResolvers plugin requires indexAdditionalResolverRecords
-export function invariant_reverseResolversPluginNeedsResolverRecords(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "indexAdditionalResolverRecords">>,
-) {
-  const { value: config } = ctx;
-
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
-
-  if (reverseResolversPluginActive && !config.indexAdditionalResolverRecords) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
-    });
   }
 }

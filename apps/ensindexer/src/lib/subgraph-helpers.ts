@@ -3,7 +3,7 @@ import schema from "ponder:schema";
 import config from "@/config";
 import { upsertAccount } from "@/lib/db-helpers";
 import { Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
-import { zeroAddress } from "viem";
+import { isAddressEqual, zeroAddress } from "viem";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.
@@ -37,9 +37,9 @@ export async function setupRootNode({ context }: { context: Context }) {
       isMigrated: true,
 
       // NOTE(replace-unnormalized, subgraph-compat): the subgraph datamodel expects that the
-      // value for the root node's `name` is `null`. with config.replaceUnnormalized, however, we
-      // enforce that the root node's name is empty string, the technically correct value
-      name: config.replaceUnnormalized ? "" : null,
+      // value for the root node's `name` is `null`. otherwise enforce that the root node's name is
+      // the correct Interpeted Name (empty string)
+      name: config.isSubgraphCompatible ? null : "",
     })
     .onConflictDoNothing();
 }
@@ -48,7 +48,9 @@ export async function setupRootNode({ context }: { context: Context }) {
 // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L65
 function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
   return (
-    domain.resolverId === null && domain.ownerId === zeroAddress && domain.subdomainCount === 0
+    domain.resolverId === null &&
+    isAddressEqual(domain.ownerId, zeroAddress) &&
+    domain.subdomainCount === 0
   );
 }
 

@@ -13,6 +13,7 @@ import {
   ReverseResolutionProtocolStep,
 } from "@ensnode/ensnode-sdk";
 import { useCallback, useState } from "react";
+import { getAddress } from "viem";
 
 const asPercentInDuration = (value: number, duration: number) =>
   `${((value / duration) * 100).toFixed(2)}%`;
@@ -21,7 +22,8 @@ const renderSpanAttributes = (span: ProtocolSpan) => {
   const { [ATTR_PROTOCOL_STEP]: step, [ATTR_PROTOCOL_NAME]: protocol, ...rest } = span.attributes;
   switch (step) {
     case ReverseResolutionProtocolStep.Operation:
-      return `(${rest.address}, ${rest.chainId})`;
+      // render checksummed address
+      return `(${getAddress(rest.address as string)}, ${rest.chainId})`;
     case ForwardResolutionProtocolStep.Operation:
       return `(${rest.name}, ${rest.selection})`;
     default:

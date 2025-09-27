@@ -1,14 +1,16 @@
 import type { TxtAnswer } from "dns-packet";
-import { decodeEventLog, hexToBytes, toBytes, zeroHash } from "viem";
+import { bytesToHex, decodeEventLog, stringToHex, zeroHash } from "viem";
+import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
 import {
-  decodeDNSPacketBytes,
   decodeTXTData,
   parseDnsTxtRecordArgs,
   parseRRSet,
+  subgraph_decodeDNSEncodedLiteralName,
 } from "@/lib/dns-helpers";
 import { getDatasource } from "@ensnode/datasources";
+import { DNSEncodedLiteralName } from "@ensnode/ensnode-sdk";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog
@@ -24,6 +26,13 @@ const { args } = decodeEventLog({
 
 const PARSED_KEY = "com.twitter";
 const PARSED_VALUE = "0xTko";
+
+const NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES = [
+  stringToHex("\x05test\0\x00"),
+  stringToHex("\x05test.\x00"),
+  stringToHex("\x05test[\x00"),
+  stringToHex("\x05test]\x00"),
+] as DNSEncodedLiteralName[];
 
 describe("dns-helpers", () => {
   describe("parseRRSet", () => {
@@ -57,29 +66,49 @@ describe("dns-helpers", () => {
     });
   });
 
-  describe("decodeDNSPacketBytes", () => {
-    it("should return [null, null] for empty buffer", () => {
-      expect(decodeDNSPacketBytes(new Uint8Array())).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes(""))).toEqual([null, null]);
+  describe("subgraph_decodeDNSEncodedLiteralName", () => {
+    it("throws for root node", () => {
+      expect(() =>
+        subgraph_decodeDNSEncodedLiteralName(
+          bytesToHex(packetToBytes("")) as DNSEncodedLiteralName,
+        ),
+      ).toThrow(/root node/i);
     });
 
-    it("should return [null, null] for malformed dns packet", () => {
-      expect(decodeDNSPacketBytes(new Uint8Array([0x00]))).toEqual([null, null]);
+    it("throws for empty input", () => {
+      expect(() => subgraph_decodeDNSEncodedLiteralName("" as DNSEncodedLiteralName)).toThrow(
+        /empty/i,
+      );
     });
 
-    it("should return [null, null] for labels with unindexable characters", () => {
-      expect(decodeDNSPacketBytes(toBytes("test\0"))).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes("test."))).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes("test["))).toEqual([null, null]);
-      expect(decodeDNSPacketBytes(toBytes("test]"))).toEqual([null, null]);
+    it("throws for empty packet", () => {
+      expect(() => subgraph_decodeDNSEncodedLiteralName("0x" as DNSEncodedLiteralName)).toThrow(
+        /empty/i,
+      );
+    });
+
+    it("throws for malformed packet", () => {
+      expect(() =>
+        subgraph_decodeDNSEncodedLiteralName(stringToHex("\x06aaa\x00") as DNSEncodedLiteralName),
+      ).toThrow(/overflow/i);
+    });
+
+    it("should throw for labels with subgraph-unindexable characters", () => {
+      NON_SUBGRAPH_VALID_DNS_ENCODED_NAMES.forEach((name) => {
+        expect(() => subgraph_decodeDNSEncodedLiteralName(name)).toThrow(/not subgraph-indexable/i);
+      });
     });
 
     it("should handle previously bugged name", () => {
       // this `name` from tx 0x2138cdf5fbaeabc9cc2cd65b0a30e4aea47b3961f176d4775869350c702bd401
-      expect(decodeDNSPacketBytes(hexToBytes("0x0831323333333232310365746800"))).toEqual([
-        "12333221",
-        "12333221.eth",
-      ]);
+      expect(
+        subgraph_decodeDNSEncodedLiteralName(
+          "0x0831323333333232310365746800" as DNSEncodedLiteralName,
+        ),
+      ).toEqual({
+        label: "12333221",
+        name: "12333221.eth",
+      });
     });
   });
 

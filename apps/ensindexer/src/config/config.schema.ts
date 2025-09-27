@@ -1,26 +1,28 @@
 import { parse as parseConnectionString } from "pg-connection-string";
-import { prettifyError, z } from "zod/v4";
+import { ZodError, prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
-import { makeUrlSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  invariant_isSubgraphCompatibleRequirements,
+  makeUrlSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import {
   DEFAULT_ENSADMIN_URL,
-  DEFAULT_HEAL_REVERSE_ADDRESSES,
-  DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS,
   DEFAULT_PORT,
-  DEFAULT_REPLACE_UNNORMALIZED,
   DEFAULT_RPC_RATE_LIMIT,
+  DEFAULT_SUBGRAPH_COMPAT,
 } from "@/lib/lib-config";
 
-import { derive_indexedChainIds, derive_isSubgraphCompatible } from "./derived-params";
+import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
+
+import { derive_indexedChainIds } from "./derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
-  invariant_reverseResolversPluginNeedsResolverRecords,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_rpcConfigsSpecifiedForRootChain,
   invariant_validContractConfigs,
@@ -107,16 +109,6 @@ const PluginsSchema = z.coerce
     error: "PLUGINS cannot contain duplicate values",
   });
 
-const HealReverseAddressesSchema = makeEnvStringBoolSchema("HEAL_REVERSE_ADDRESSES") //
-  .default(DEFAULT_HEAL_REVERSE_ADDRESSES);
-
-const IndexAdditionalResolverRecordsSchema = makeEnvStringBoolSchema(
-  "INDEX_ADDITIONAL_RESOLVER_RECORDS",
-).default(DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS);
-
-const ReplaceUnnormalizedSchema = makeEnvStringBoolSchema("REPLACE_UNNORMALIZED") //
-  .default(DEFAULT_REPLACE_UNNORMALIZED);
-
 const PortSchema = z.coerce
   .number({ error: "PORT must be an integer." })
   .int({ error: "PORT must be an integer." })
@@ -163,6 +155,9 @@ const DatabaseUrlSchema = z.union(
   },
 );
 
+const IsSubgraphCompatibleSchema =
+  makeEnvStringBoolSchema("SUBGRAPH_COMPAT").default(DEFAULT_SUBGRAPH_COMPAT);
+
 const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
@@ -172,14 +167,12 @@ const ENSIndexerConfigSchema = z
     ensAdminUrl: EnsAdminUrlSchema,
     databaseSchemaName: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
-    healReverseAddresses: HealReverseAddressesSchema,
-    indexAdditionalResolverRecords: IndexAdditionalResolverRecordsSchema,
-    replaceUnnormalized: ReplaceUnnormalizedSchema,
     port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
     rpcConfigs: RpcConfigsSchema,
     databaseUrl: DatabaseUrlSchema,
+    isSubgraphCompatible: IsSubgraphCompatibleSchema,
   })
   /**
    * Invariant enforcement
@@ -202,7 +195,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_rpcConfigsSpecifiedForIndexedChains)
   .check(invariant_validContractConfigs)
-  .check(invariant_reverseResolversPluginNeedsResolverRecords)
+  .check(invariant_isSubgraphCompatibleRequirements)
   /**
    * Derived configuration
    *
@@ -212,39 +205,45 @@ const ENSIndexerConfigSchema = z
    * ENSIndexerConfig object. For example, we can get a slice of already parsed and validated
    * ENSIndexerConfig values, and return this slice PLUS the derived configuration properties.
    *
-   * ```ts
-   * function derive_isSubgraphCompatible<
-   *   CONFIG extends Pick<
-   *     ENSIndexerConfig,
-   *     "plugins" | "healReverseAddresses" | "indexAdditionalResolverRecords"
-   *   >,
-   *  >(config: CONFIG): CONFIG & { isSubgraphCompatible: boolean } {
-   *   return {
-   *     ...config,
-   *     isSubgraphCompatible: true // can use some complex logic to calculate the final outcome
-   *   }
-   * }
-   * ```
+   * See {@link derive_indexedChainIds} for example.
    */
-  .transform(derive_isSubgraphCompatible)
   .transform(derive_indexedChainIds)
   // `invariant_globalBlockrange` has dependency on `derive_indexedChainIds`
   .check(invariant_globalBlockrange);
 
 /**
- * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object
+ * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object.
  *
- * This function then validates the config against the zod schema ensuring that the config
- * meets all type checks and invariants.
+ * First parses the SUBGRAPH_COMPAT environment variable to determine compatibility mode,
+ * then applies appropriate environment defaults based on that mode (subgraphCompatible or alpha).
+ * Finally validates and parses the complete environment configuration using ENSIndexerConfigSchema.
+ *
+ * @param environment - The environment variables object to build config from
+ * @returns A validated ENSIndexerConfig object
+ * @throws Error with formatted validation messages if environment parsing fails
  */
 export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
-  const parsed = ENSIndexerConfigSchema.safeParse(environment);
+  try {
+    // first parse the SUBGRAPH_COMPAT env variable
+    const subgraphCompat = IsSubgraphCompatibleSchema.parse(environment.isSubgraphCompatible);
 
-  if (!parsed.success) {
-    throw new Error(
-      "Failed to parse environment configuration: \n" + prettifyError(parsed.error) + "\n",
-    );
+    // based on indicated subgraph compatibility preference, provide sensible defaults for the config
+    const environmentDefaults = subgraphCompat
+      ? EnvironmentDefaults.subgraphCompatible
+      : EnvironmentDefaults.alpha;
+
+    // apply the partial defaults to the ENSIndexerEnvironment
+    const environmentWithDefaults = applyDefaults(environment, environmentDefaults);
+
+    // parse with ENSIndexerConfigSchema
+    return ENSIndexerConfigSchema.parse(environmentWithDefaults);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(
+        "Failed to parse environment configuration: \n" + prettifyError(error) + "\n",
+      );
+    }
+
+    throw error;
   }
-
-  return parsed.data;
 }

@@ -1,6 +1,6 @@
 import { normalize } from "viem/ens";
 
-import type { Label, Name } from "./types";
+import type { Label, Name, NormalizedName } from "./types";
 
 /**
  * Determines whether the Name is normalized.
@@ -8,7 +8,7 @@ import type { Label, Name } from "./types";
  * @param name - The Name to check for normalization
  * @returns True if the name is normalized according to ENS normalization rules, false otherwise
  */
-export function isNormalizedName(name: Name): boolean {
+export function isNormalizedName(name: Name): name is NormalizedName {
   try {
     return name === normalize(name);
   } catch {

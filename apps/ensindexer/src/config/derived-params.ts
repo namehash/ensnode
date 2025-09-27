@@ -1,7 +1,7 @@
 import type { ENSIndexerConfig } from "@/config/types";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { ChainId, isSubgraphCompatible } from "@ensnode/ensnode-sdk";
+import { ChainId } from "@ensnode/ensnode-sdk";
 
 /**
  * Derive `indexedChainIds` configuration parameter and include it in
@@ -32,26 +32,5 @@ export const derive_indexedChainIds = <
   return {
     ...config,
     indexedChainIds,
-  };
-};
-
-/**
- * Derived `isSubgraphCompatible` config param based on validated ENSIndexerConfig object.
- */
-export const derive_isSubgraphCompatible = <
-  CONFIG extends Pick<
-    ENSIndexerConfig,
-    | "plugins"
-    | "healReverseAddresses"
-    | "indexAdditionalResolverRecords"
-    | "replaceUnnormalized"
-    | "labelSet"
-  >,
->(
-  config: CONFIG,
-): CONFIG & { isSubgraphCompatible: boolean } => {
-  return {
-    ...config,
-    isSubgraphCompatible: isSubgraphCompatible(config),
   };
 };

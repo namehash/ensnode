@@ -56,7 +56,7 @@ export async function handleAddrChanged({
     addrId: address,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     // AddrChanged is just AddressChanged with implicit coinType of ETH
     await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), address);
   }
@@ -91,7 +91,7 @@ export async function handleAddressChanged({
     addr: newAddress,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
   }
 }
@@ -120,7 +120,7 @@ export async function handleNameChanged({
     name,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverNameUpdate(context, id, name);
   }
 }
@@ -201,11 +201,8 @@ export async function handleTextChanged({
   const sanitizedKey = stripNullBytes(key);
 
   // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver (DefaultPublicResolver1)
-  // event, and the subgraph indexes that as `null`.
-  //
-  // NOTE(subgraph-compat): ponder's (viem's) event parsing produces empty string for some TextChanged events
-  // (which is strictly correct) but the subgraph represents these instances as null, so we coalesce
-  // falsy strings to null for compatibility.
+  // event, and the subgraph indexes that as `null`. value can also be decoded to empty string, which
+  // the subgraph also indexes as `null`.
   // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog
   //
   // NOTE(subgraph-compat): we also must strip null bytes in strings, which are unindexable by Postgres
@@ -227,8 +224,21 @@ export async function handleTextChanged({
     value: sanitizedValue,
   });
 
-  if (config.indexAdditionalResolverRecords) {
-    await handleResolverTextRecordUpdate(context, id, key, value);
+  if (!config.isSubgraphCompatible) {
+    // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event and
+    // if we are indexing additional resolver records, we need the actual record value in order
+    // to accelerate at resolution-time. so fetch it here if necessary
+    const recordValue =
+      value !== undefined
+        ? value
+        : await context.client.readContract({
+            abi: context.contracts.Resolver.abi,
+            address: event.log.address,
+            functionName: "text",
+            args: [node, key],
+          });
+
+    await handleResolverTextRecordUpdate(context, id, key, recordValue);
   }
 }
 
@@ -376,7 +386,7 @@ export async function handleDNSRecordChanged({
   const { key, value } = parseDnsTxtRecordArgs(event.args);
 
   // no key to operate over? no-op
-  if (!key) return;
+  if (key === null) return;
 
   // upsert Resolver entity
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -399,7 +409,7 @@ export async function handleDNSRecordChanged({
     value,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverTextRecordUpdate(context, id, key, value);
   }
 }
@@ -422,7 +432,7 @@ export async function handleDNSRecordDeleted({
   const { key } = parseDnsTxtRecordArgs(event.args);
 
   // no key to operate over? no-op
-  if (!key) return;
+  if (key === null) return;
 
   // upsert Resolver entity
   const id = makeResolverId(context.chain.id, event.log.address, node);
@@ -445,7 +455,7 @@ export async function handleDNSRecordDeleted({
     value: null,
   });
 
-  if (config.indexAdditionalResolverRecords) {
+  if (!config.isSubgraphCompatible) {
     await handleResolverTextRecordUpdate(context, id, key, null);
   }
 }

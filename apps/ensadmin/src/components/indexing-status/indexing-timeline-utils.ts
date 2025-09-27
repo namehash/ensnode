@@ -1,24 +1,28 @@
+import { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { getUnixTime } from "date-fns";
+
 /**
  * Calculate the position of a date in a timeline.
  *
- * @param date
- * @param timelineStart
- * @param timelineEnd
+ * @param requestedTimestamp
+ * @param timelineStartsAt
+ * @param timelineEndsAt
  * @returns
  */
-export function getTimelinePosition(date: Date, timelineStart: Date, timelineEnd: Date): number {
-  const start = timelineStart.getTime();
-  const end = timelineEnd.getTime();
-  const point = date.getTime();
-
-  const percentage = ((point - start) / (end - start)) * 100;
+export function getTimelinePosition(
+  requestedTimestamp: UnixTimestamp,
+  timelineStartsAt: UnixTimestamp,
+  timelineEndsAt: UnixTimestamp,
+): number {
+  const percentage =
+    ((requestedTimestamp - timelineStartsAt) / (timelineEndsAt - timelineStartsAt)) * 100;
 
   return Math.max(0, Math.min(100, percentage));
 }
 
 interface YearMarker {
-  /** date of the marker */
-  date: Date;
+  /** timestamp of the marker */
+  timestamp: UnixTimestamp;
 
   /** position of the marker */
   position: number;
@@ -28,18 +32,22 @@ interface YearMarker {
 }
 
 // Generate year markers for the timeline
-export function generateYearMarkers(timelineStart: Date, timelineEnd: Date): Array<YearMarker> {
+export function generateYearMarkers(
+  timelineStartsAt: UnixTimestamp,
+  timelineEndsAt: UnixTimestamp,
+): Array<YearMarker> {
   const markers: Array<YearMarker> = [];
 
-  const startYear = timelineStart.getFullYear();
-  const endYear = timelineEnd.getFullYear();
+  const startYear = new Date(timelineStartsAt).getFullYear();
+  const endYear = new Date(timelineEndsAt).getFullYear();
 
   for (let year = startYear; year <= endYear; year++) {
-    const date = new Date(year, 0, 1);
-    if (date >= timelineStart && date <= timelineEnd) {
+    const yearStartsAt = getUnixTime(new Date(year, 0, 1));
+
+    if (yearStartsAt >= timelineStartsAt && yearStartsAt <= timelineEndsAt) {
       markers.push({
-        date,
-        position: getTimelinePosition(date, timelineStart, timelineEnd),
+        timestamp: yearStartsAt,
+        position: getTimelinePosition(yearStartsAt, timelineStartsAt, timelineEndsAt),
         label: year.toString(),
       });
     }

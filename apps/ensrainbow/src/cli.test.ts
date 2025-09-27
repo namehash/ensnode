@@ -10,18 +10,16 @@ import { createCLI, validatePortConfiguration } from "./cli";
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
 
 describe("CLI", () => {
-  const originalEnv = process.env.PORT;
-  const originalNodeEnv = process.env.NODE_ENV;
   let tempDir: string;
   let testDataDir: string;
   let cli: ReturnType<typeof createCLI>;
 
   beforeEach(async () => {
-    // Set test environment
-    process.env.NODE_ENV = "test";
+    vi.stubEnv("NODE_ENV", "test");
 
     // Clear PORT before each test
-    delete process.env.PORT;
+    vi.stubEnv("PORT", undefined);
+
     tempDir = await mkdtemp(join(tmpdir(), "ensrainbow-test-cli"));
     testDataDir = join(tempDir, "test-db-directory");
 
@@ -30,19 +28,11 @@ describe("CLI", () => {
   });
 
   afterEach(async () => {
-    // Restore original environment variables
-    if (originalEnv) {
-      process.env.PORT = originalEnv;
-    } else {
-      delete process.env.PORT;
-    }
-    if (originalNodeEnv) {
-      process.env.NODE_ENV = originalNodeEnv;
-    } else {
-      delete process.env.NODE_ENV;
-    }
-    await rm(tempDir, { recursive: true, force: true });
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
+
+    // delete temp files
+    await rm(tempDir, { recursive: true, force: true });
   });
 
   describe("getEnvPort", () => {
@@ -117,22 +107,15 @@ describe("CLI", () => {
         const labelSetId = "test-ens-names"; // Needed for convert
         const labelSetVersion = 0; // Needed for convert
 
-        // Convert requires args - test with a try/catch to properly handle the rejection
-        try {
-          await cli.parse([
+        expect(() =>
+          cli.parse([
             "convert",
             "--input-file",
             sqlInputFile,
             "--output-file",
             ensrainbowOutputFile,
-          ]);
-          // If we get here, the test should fail
-          throw new Error("Expected cli.parse to throw but it didn't");
-        } catch (err: any) {
-          expect(err.message).toMatch(
-            /Missing required arguments: label-set-id, label-set-version/,
-          );
-        }
+          ]),
+        ).toThrow(/Missing required arguments: label-set-id, label-set-version/);
 
         // Successful convert with args
         const ingestCli = createCLI({ exitProcess: false });
@@ -176,22 +159,15 @@ describe("CLI", () => {
         const labelSetId = "ens-test-env"; // Needed for convert
         const labelSetVersion = 0; // Needed for convert
 
-        // Convert requires args - test with a try/catch to properly handle the rejection
-        try {
-          await cli.parse([
+        expect(() =>
+          cli.parse([
             "convert",
             "--input-file",
             sqlInputFile,
             "--output-file",
             ensrainbowOutputFile,
-          ]);
-          // If we get here, the test should fail
-          throw new Error("Expected cli.parse to throw but it didn't");
-        } catch (err: any) {
-          expect(err.message).toMatch(
-            /Missing required arguments: label-set-id, label-set-version/,
-          );
-        }
+          ]),
+        ).toThrow(/Missing required arguments: label-set-id, label-set-version/);
 
         // Successful convert with args
         const ingestCli = createCLI({ exitProcess: false });
@@ -231,22 +207,16 @@ describe("CLI", () => {
         const labelSetId = "test-ens-names"; // Needed for convert
         const labelSetVersion = 1; // Needed for convert
 
-        // Convert requires args - test with a try/catch to properly handle the rejection
-        try {
-          await cli.parse([
+        expect(() =>
+          cli.parse([
             "convert",
             "--input-file",
             sqlInputFile,
             "--output-file",
             ensrainbowOutputFile,
-          ]);
-          // If we get here, the test should fail
-          throw new Error("Expected cli.parse to throw but it didn't");
-        } catch (err: any) {
-          expect(err.message).toMatch(
-            /Missing required arguments: label-set-id, label-set-version/,
-          );
-        }
+          ]),
+        ).toThrow(/Missing required arguments: label-set-id, label-set-version/);
+
         const ingestCli2 = createCLI({ exitProcess: false });
         // Successful convert with args
         await ingestCli2.parse([
@@ -319,22 +289,15 @@ describe("CLI", () => {
         ]);
 
         // Second ingest should fail because label set version > 1
-        let error: Error | undefined;
-        try {
-          await ingestCli.parse([
+        await expect(
+          ingestCli.parse([
             "ingest-ensrainbow",
             "--input-file",
             secondInputFile,
             "--data-dir",
             testDataDir,
-          ]);
-        } catch (err) {
-          error = err as Error;
-        }
-
-        // Check that we got the expected error
-        expect(error).toBeDefined();
-        expect(error?.message).toMatch(
+          ]),
+        ).rejects.toThrow(
           /Label set version must be exactly one higher than the current highest label set version.\nCurrent highest label set version: 0, File label set version: 2/,
         );
       });
@@ -561,21 +524,17 @@ describe("CLI", () => {
 
     describe("general CLI behavior", () => {
       it("should require a command", async () => {
-        await expect(async () => {
-          await cli.parse([]);
-        }).rejects.toThrow("You must specify a command");
+        expect(() => cli.parse([])).toThrow("You must specify a command");
       });
 
       it("should reject unknown commands", async () => {
-        await expect(async () => {
-          await cli.parse(["unknown"]);
-        }).rejects.toThrow("Unknown argument: unknown");
+        expect(() => cli.parse(["unknown"])).toThrow("Unknown argument: unknown");
       });
 
       it("should reject unknown options", async () => {
-        await expect(async () => {
-          await cli.parse(["serve", "--unknown-option"]);
-        }).rejects.toThrow("Unknown arguments: unknown-option, unknownOption");
+        expect(() => cli.parse(["serve", "--unknown-option"])).toThrow(
+          "Unknown arguments: unknown-option, unknownOption",
+        );
       });
     });
   });

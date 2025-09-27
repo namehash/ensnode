@@ -1,3 +1,4 @@
+export * from "./address";
 export * from "./cache";
 export * from "./collections";
 export * from "./types";
@@ -10,8 +11,10 @@ export {
   deserializeChainId,
   deserializeDatetime,
   deserializeDuration,
+  deserializeUnixTimestamp,
   deserializeUrl,
 } from "./deserialize";
 export * from "../ens/is-normalized";
 export * from "./account-id";
 export * from "./interpretation";
+export * from "./labelhash";

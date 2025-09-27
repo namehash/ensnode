@@ -17,10 +17,10 @@ import {
   type ChainIndexingBackfillStatus,
   type ChainIndexingCompletedStatus,
   type ChainIndexingFollowingStatus,
+  type ChainIndexingQueuedStatus,
   type ChainIndexingStatus,
   ChainIndexingStatusIds,
   ChainIndexingStrategyIds,
-  type ChainIndexingUnstartedStatus,
   type DeepPartial,
   type Duration,
   type UnixTimestamp,
@@ -127,9 +127,9 @@ export function getChainIndexingStatus(
   // status block, the chain has not started yet.
   if (chainBlocksConfig.startBlock.number === chainStatusBlock.number) {
     return {
-      status: ChainIndexingStatusIds.Unstarted,
+      status: ChainIndexingStatusIds.Queued,
       config,
-    } satisfies ChainIndexingUnstartedStatus;
+    } satisfies ChainIndexingQueuedStatus;
   }
 
   if (isSyncComplete) {

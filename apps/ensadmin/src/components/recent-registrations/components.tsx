@@ -11,7 +11,7 @@ import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { Duration, RelativeTime } from "@/components/datetime-utils";
-import { NameDisplay } from "@/components/identity/utils";
+import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -118,7 +118,7 @@ function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: Registration
   return (
     <Table>
       <TableHeader>
-        <TableRow>
+        <TableRow className="hover:bg-white">
           <TableHead>Name</TableHead>
           <TableHead>Registered</TableHead>
           <TableHead>Duration</TableHead>
@@ -150,14 +150,12 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <NameDisplay
-          name={registration.name}
-          namespaceId={namespaceId}
-          showExternalLinkIcon={true}
-        />
+        <NameLink name={registration.name}>
+          <NameDisplay name={registration.name} />
+        </NameLink>
       </TableCell>
       <TableCell>
-        <RelativeTime date={registration.registeredAt} />
+        <RelativeTime timestamp={registration.registeredAt} tooltipPosition="top" />
       </TableCell>
       <TableCell>
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />

@@ -12,6 +12,7 @@ import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
+import { logger } from "@/utils/logger";
 import {
   type LabelSetId,
   type LabelSetVersion,
@@ -219,6 +220,20 @@ export function createCLI(options: CLIOptions = {}) {
         },
       )
       .demandCommand(1, "You must specify a command")
+      .fail(function (msg, err, yargs) {
+        if (process.env.VITEST) {
+          // the test functions expect the default behavior of cli.parse to throw
+          if (err) throw err;
+          if (msg) throw new Error(msg);
+        } else {
+          // but we want to override yargs' default printing to stdout/stderr with console printing,
+          // such that it can be silenced with vitest --silent
+          yargs.showHelp();
+
+          if (msg) console.error(msg);
+          if (err) console.error(err);
+        }
+      })
       .strict()
       .help()
   );

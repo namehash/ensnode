@@ -1,77 +1,141 @@
-import { getAddressDetailsUrl, getNameDetailsUrl } from "@/lib/namespace-utils";
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
-import { ExternalLink } from "lucide-react";
-import { Address } from "viem";
+import { ChainId, Name } from "@ensnode/ensnode-sdk";
+import Link from "next/link";
+import { PropsWithChildren } from "react";
+import { Address, getAddress } from "viem";
 
 interface NameDisplayProps {
-  name: string;
-  namespaceId: ENSNamespaceId;
-  showExternalLinkIcon?: boolean;
+  name: Name;
+  className?: string;
 }
 
 /**
- * Displays an ENS name.
- * If the ENS namespace has a known ENS Manager App,
- * includes a link to the view the profile associated with the name within that ENS namespace.
- *
- * Optionally shows an external link icon.
+ * Displays an ENS name without any navigation.
+ * Pure display component for showing names.
  */
-export function NameDisplay({ name, namespaceId, showExternalLinkIcon }: NameDisplayProps) {
-  const ensAppNameDetailsUrl = getNameDetailsUrl(name, namespaceId);
+export function NameDisplay({ name, className = "font-medium" }: NameDisplayProps) {
+  return <span className={className}>{name}</span>;
+}
 
-  if (!ensAppNameDetailsUrl) {
-    return <span className="font-medium">{name}</span>;
-  }
+/**
+ * Gets the relative path of the internal name details page for a given name.
+ *
+ * @returns relative path to the internal name details page for the given name.
+ */
+export function getNameDetailsRelativePath(name: Name): string {
+  return `/name/${encodeURIComponent(name)}`;
+}
+
+interface NameLinkProps {
+  name: Name;
+  className?: string;
+}
+
+/**
+ * Displays an ENS name with a link to the internal name detail page.
+ * Wraps NameDisplay component with navigation to /name/[name].
+ *
+ * Can take other components (ex.Avatar) as children
+ * and display them alongside the link as one common interaction area.
+ */
+
+export function NameLink({ name, className, children }: PropsWithChildren<NameLinkProps>) {
+  const nameDetailsRelativePath = getNameDetailsRelativePath(name);
 
   return (
-    <a
-      href={ensAppNameDetailsUrl.toString()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
+    <Link
+      href={nameDetailsRelativePath}
+      className={`inline-flex items-center gap-2 text-blue-600 hover:underline ${className || ""}`}
     >
-      {name}
-      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
-    </a>
+      {children}
+    </Link>
   );
 }
 
 interface AddressDisplayProps {
   address: Address;
-  namespaceId: ENSNamespaceId;
-  showExternalLinkIcon?: boolean;
+  className?: string;
 }
 
 /**
- * Displays a truncated address.
+ * Displays a truncated checksummed address without any navigation.
+ * Pure display component for showing addresses.
+ */
+export function AddressDisplay({ address, className = "font-medium" }: AddressDisplayProps) {
+  const checksummedAddress = getAddress(address);
+  const truncatedAddress = `${checksummedAddress.slice(0, 6)}...${checksummedAddress.slice(-4)}`;
+  return <span className={className}>{truncatedAddress}</span>;
+}
+
+interface AddressLinkProps {
+  address: Address;
+  namespaceId: ENSNamespaceId;
+  chainId: ChainId;
+  className?: string;
+}
+
+/**
+ * Displays a truncated address with a link to the address details URL.
  * If the ENS namespace has a known ENS Manager App,
  * includes a link to the view details of the address within that ENS namespace.
  *
- * Optionally shows an external link icon.
+ * Can take other components (ex.ChainIcon) as children
+ * and display them alongside the link as one common interaction area.
  */
-export function AddressDisplay({
+export function AddressLink({
   address,
   namespaceId,
-  showExternalLinkIcon,
-}: AddressDisplayProps) {
-  // Truncate address for display
-  const truncatedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-
+  chainId,
+  className,
+  children,
+}: PropsWithChildren<AddressLinkProps>) {
   const ensAppAddressDetailsUrl = getAddressDetailsUrl(address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <span className="font-mono text-xs">{truncatedAddress}</span>;
+    return (
+      <UnnamedAddressInfoTooltip chainId={chainId} address={address}>
+        {children}
+      </UnnamedAddressInfoTooltip>
+    );
   }
 
   return (
-    <a
-      href={ensAppAddressDetailsUrl.toString()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1 text-blue-600 hover:underline font-medium"
-    >
-      {truncatedAddress}
-      {showExternalLinkIcon && <ExternalLink size={14} className="inline-block" />}
-    </a>
+    <UnnamedAddressInfoTooltip chainId={chainId} address={address}>
+      <ExternalLinkWithIcon
+        href={ensAppAddressDetailsUrl.toString()}
+        className={`font-medium gap-2 ${className || ""}`}
+      >
+        {children}
+      </ExternalLinkWithIcon>
+    </UnnamedAddressInfoTooltip>
   );
 }
+
+interface UnnamedAddressInfoTooltipProps {
+  chainId: ChainId;
+  address: Address;
+}
+
+/**
+ * On hover displays a full address and a chain it belongs to.
+ */
+const UnnamedAddressInfoTooltip = ({
+  children,
+  chainId,
+  address,
+}: PropsWithChildren<UnnamedAddressInfoTooltipProps>) => (
+  <Tooltip delayDuration={1000}>
+    <TooltipTrigger>{children}</TooltipTrigger>
+    <TooltipContent
+      side="top"
+      className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
+    >
+      Unnamed {getChainName(chainId)} address:
+      <br />
+      {getAddress(address)}
+    </TooltipContent>
+  </Tooltip>
+);

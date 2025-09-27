@@ -13,9 +13,10 @@
 import {
   type ChainIdString,
   ChainIndexingCompletedStatus,
+  ChainIndexingQueuedStatus,
   type ChainIndexingStatus,
   ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingUnstartedStatus,
+  ChainIndexingStatusIds,
   OverallIndexingStatusIds,
   SerializedENSIndexerOverallIndexingBackfillStatus,
   SerializedENSIndexerOverallIndexingCompletedStatus,
@@ -26,7 +27,6 @@ import {
   checkChainIndexingStatusesForCompletedOverallStatus,
   checkChainIndexingStatusesForFollowingOverallStatus,
   checkChainIndexingStatusesForUnstartedOverallStatus,
-  getActiveChains,
   getOmnichainIndexingCursor,
   getOverallApproxRealtimeDistance,
   getOverallIndexingStatus,
@@ -108,7 +108,7 @@ export const makePonderChainMetadataSchema = (
           // forcing the type here, will be validated in the following 'check' step
           const chains = serializedChainIndexingStatuses as Record<
             ChainIdString,
-            ChainIndexingUnstartedStatus
+            ChainIndexingQueuedStatus
           >;
 
           return {
@@ -118,15 +118,13 @@ export const makePonderChainMetadataSchema = (
         }
 
         case OverallIndexingStatusIds.Backfill: {
-          // forcing the type here, will be validated in the following 'check' step
-          const chains = serializedChainIndexingStatuses as Record<
-            ChainIdString,
-            ChainIndexingStatusForBackfillOverallStatus
-          >;
           return {
             overallStatus: OverallIndexingStatusIds.Backfill,
-            chains,
-            omnichainIndexingCursor: getOmnichainIndexingCursor(getActiveChains(chainStatuses)),
+            chains: serializedChainIndexingStatuses as Record<
+              ChainIdString,
+              ChainIndexingStatusForBackfillOverallStatus
+            >, // forcing the type here, will be validated in the following 'check' step
+            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
         }
 
@@ -137,6 +135,7 @@ export const makePonderChainMetadataSchema = (
               ChainIdString,
               ChainIndexingCompletedStatus
             >, // forcing the type here, will be validated in the following 'check' step
+            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
         }
 
@@ -145,7 +144,7 @@ export const makePonderChainMetadataSchema = (
             overallStatus: OverallIndexingStatusIds.Following,
             chains: serializedChainIndexingStatuses,
             overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
-            omnichainIndexingCursor: getOmnichainIndexingCursor(getActiveChains(chainStatuses)),
+            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
           } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
       }
     })

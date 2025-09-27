@@ -61,9 +61,6 @@ const EXAMPLE_CONFIG_RESPONSE = {
   },
   indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
   databaseSchemaName: "alphaSchema0.31.0",
-  healReverseAddresses: true,
-  indexAdditionalResolverRecords: true,
-  replaceUnnormalized: true,
   isSubgraphCompatible: false,
   namespace: "mainnet",
   plugins: [
@@ -109,7 +106,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
       },
     },
     "8453": {
-      status: ChainIndexingStatusIds.Unstarted,
+      status: ChainIndexingStatusIds.Queued,
       config: {
         strategy: ChainIndexingStrategyIds.Indefinite,
         startBlock: {

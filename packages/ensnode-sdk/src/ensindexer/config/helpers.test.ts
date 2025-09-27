@@ -12,9 +12,6 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'true' when only the '${PluginName.Subgraph}' plugin is active, no extended indexing features are on, and label set is subgraph/0`, () => {
       expect(
         isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -24,9 +21,6 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'false' when active plugins are something else than just '${PluginName.Subgraph}'`, () => {
       expect(
         isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
           plugins: [],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -34,46 +28,7 @@ describe("ENSIndexer: Config helpers", () => {
 
       expect(
         isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph, PluginName.Lineanames],
-          labelSet: subgraphCompatibleLabelSet,
-        }),
-      ).toBe(false);
-    });
-
-    it(`returns 'false' when 'healReverseAddresses' is set to 'true'`, () => {
-      expect(
-        isSubgraphCompatible({
-          healReverseAddresses: true,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
-          plugins: [PluginName.Subgraph],
-          labelSet: subgraphCompatibleLabelSet,
-        }),
-      ).toBe(false);
-    });
-
-    it(`returns 'false' when 'indexAdditionalResolverRecords' is set to 'true'`, () => {
-      expect(
-        isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: true,
-          replaceUnnormalized: false,
-          plugins: [PluginName.Subgraph],
-          labelSet: subgraphCompatibleLabelSet,
-        }),
-      ).toBe(false);
-    });
-
-    it(`returns 'false' when 'replaceUnnormalized' is set to 'true'`, () => {
-      expect(
-        isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: true,
-          plugins: [PluginName.Subgraph],
           labelSet: subgraphCompatibleLabelSet,
         }),
       ).toBe(false);
@@ -82,9 +37,6 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'false' when label set id is not 'subgraph'`, () => {
       expect(
         isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: {
             labelSetId: "other-label-set",
@@ -97,9 +49,6 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'false' when label set version is not 0`, () => {
       expect(
         isSubgraphCompatible({
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
           plugins: [PluginName.Subgraph],
           labelSet: {
             labelSetId: "subgraph",

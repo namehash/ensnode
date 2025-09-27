@@ -4,8 +4,9 @@ import {
   type LabelHash,
   type Node,
   coinTypeReverseLabel,
+  deserializeChainId,
 } from "@ensnode/ensnode-sdk";
-import { type Address, getAddress } from "viem";
+import { type Address } from "viem";
 
 /**
  * Makes a unique, chain-scoped resolver ID.
@@ -24,9 +25,7 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
   [
     // null out chainId prefix iff subgraph-compat, otherwise include for chain-scoping
     config.isSubgraphCompatible ? null : chainId,
-    // NOTE(subgraph-compat): subgraph uses lowercase address here, otherwise keep checksummed
-    address.toLowerCase(),
-    // config.isSubgraphCompatible ? address.toLowerCase() : address,
+    address,
     node,
   ]
     .filter(Boolean)
@@ -48,15 +47,15 @@ export const parseResolverId = (
   if (parts.length === 2) {
     return {
       chainId: null,
-      address: getAddress(parts[0] as Address),
+      address: parts[0] as Address, // guaranteed to be fully lowercase
       node: parts[1] as Node,
     };
   }
 
   if (parts.length === 3) {
     return {
-      chainId: parseInt(parts[0]!),
-      address: getAddress(parts[1] as Address),
+      chainId: deserializeChainId(parts[0] as string),
+      address: parts[1] as Address, // guaranteed to be fully lowercase
       node: parts[2] as Node,
     };
   }

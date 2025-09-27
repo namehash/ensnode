@@ -3,10 +3,11 @@ import { Suspense } from "react";
 import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { ENSNodeProvider } from "@/components/providers/ensnode-provider";
+import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
+import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
+import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
 import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
-import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/ui/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
@@ -71,13 +72,15 @@ export default function Layout({
                   <AppSidebar />
                 </Suspense>
                 <SidebarInset className="min-w-0">
-                  <Header>
-                    <HeaderNav>
-                      <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                    </HeaderNav>
-                    <HeaderActions>{actions}</HeaderActions>
-                  </Header>
-                  <ENSNodeProvider>{children}</ENSNodeProvider>
+                  <ActiveENSNodeProvider>
+                    <Header>
+                      <HeaderNav>
+                        <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                      </HeaderNav>
+                      <HeaderActions>{actions}</HeaderActions>
+                    </Header>
+                    <RequireActiveENSNodeConfig>{children}</RequireActiveENSNodeConfig>
+                  </ActiveENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
             </RequireActiveENSNodeConnection>

@@ -1,13 +1,22 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, Hex, hexToBytes, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, isAddressEqual, labelhash, zeroAddress, zeroHash } from "viem";
 
 import {
+  DNSEncodedLiteralName,
+  DNSEncodedName,
+  InterpretedLabel,
+  InterpretedName,
+  Label,
   type LabelHash,
+  LiteralLabel,
   type Node,
+  decodeDNSEncodedLiteralName,
   encodeLabelHash,
-  interpretLiteralLabel,
-  interpretLiteralName,
+  interpretedLabelsToInterpretedName,
+  isNormalizedLabel,
+  labelhashLiteralLabel,
+  literalLabelToInterpretedLabel,
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
@@ -19,7 +28,6 @@ import {
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
-import { decodeDNSPacketBytes } from "@/lib/dns-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
@@ -41,6 +49,44 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
     args: [tokenId],
   });
 };
+
+/**
+ * Decodes ThreeDNSToken's emitted DNS-Encoded Name `fqdn` into an Interpreted Name and its first
+ * Interpreted Label.
+ */
+function decodeFQDN(fqdn: DNSEncodedLiteralName): {
+  labelHash: LabelHash;
+  label: InterpretedLabel;
+  name: InterpretedName;
+} {
+  // Invariant: ThreeDNS always emits a decodable DNS Packet (`decodeDNSEncodedLiteralName` throws)
+  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
+  const literalLabels = decodeDNSEncodedLiteralName(fqdn);
+
+  // Invariant: ThreeDNSToken doesn't try to register the root node
+  if (literalLabels.length === 0) {
+    throw new Error(
+      `Invariant: ThreeDNSToken emitted ${fqdn} that decoded to root node (empty string).`,
+    );
+  }
+
+  // Invariant: ThreeDNSToken only emits normalized labels
+  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
+  if (!literalLabels.every(isNormalizedLabel)) {
+    throw new Error(
+      `Invariant: ThreeDNSToken emitted ${fqdn} that included some unnormalized labels: [${literalLabels.join(", ")}].`,
+    );
+  }
+
+  // due the invariant above, we know that all of the labels are normalized (and therefore Interpreted Labels)
+  const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
+
+  return {
+    labelHash: labelhashLiteralLabel(literalLabels[0]!), // ! ok due to length invariant above
+    label: interpretedLabels[0]!, // ! ok due to length invariant above
+    name: interpretedLabelsToInterpretedName(interpretedLabels),
+  };
+}
 
 /**
  * In ThreeDNS, NewOwner is emitted when a (sub)domain is created. This includes TLDs, 2LDs, and
@@ -119,33 +165,37 @@ export async function handleNewOwner({
   // NOTE: for threedns this occurs on non-2LD `NewOwner` events, as a 2LD registration will
   // always emit `RegistrationCreated`, including Domain's `name`, before this `NewOwner` event
   // is indexed.
-  if (!domain.name) {
+  if (domain.name === null) {
     const parent = await context.db.find(schema.domain, { id: parentNode });
 
-    let healedLabel: string | null = null;
-
     // 1. attempt metadata retrieval
-    if (!healedLabel) {
-      const tokenId = getThreeDNSTokenId(node);
-      const uri = await getUriForTokenId(context, tokenId);
-      [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
-    }
+    const tokenId = getThreeDNSTokenId(node);
+    const uri = await getUriForTokenId(context, tokenId);
+    let [healedLabel] = parseLabelAndNameFromOnChainMetadata(uri);
 
     // 2. attempt to heal the label associated with labelHash via ENSRainbow
-    if (!healedLabel) {
+    if (healedLabel === null) {
       healedLabel = await labelByLabelHash(labelHash);
     }
 
     // Interpret the `healedLabel` Literal Label into an Interpreted Label
     // see https://ensnode.io/docs/reference/terminology#literal-label
     // see https://ensnode.io/docs/reference/terminology#interpreted-label
-    const label = healedLabel ? interpretLiteralLabel(healedLabel) : encodeLabelHash(labelHash);
+    const interpretedLabel = (
+      healedLabel !== null
+        ? literalLabelToInterpretedLabel(healedLabel)
+        : encodeLabelHash(labelHash)
+    ) as InterpretedLabel;
 
-    // to construct `Domain.name` use the parent's Name and the valid Label
+    // to construct `Domain.name` use the parent's Name and the Interpreted Label
     // NOTE: for a TLD, the parent is null, so we just use the Label value as is
-    const name = parent?.name ? `${label}.${parent.name}` : label;
+    const interpretedName = (
+      parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
+    ) as InterpretedName;
 
-    await context.db.update(schema.domain, { id: node }).set({ name, labelName: label });
+    await context.db
+      .update(schema.domain, { id: node })
+      .set({ name: interpretedName, labelName: interpretedLabel });
   }
 
   // log DomainEvent
@@ -172,7 +222,7 @@ export async function handleTransfer({
   await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
 
   // garbage collect newly 'empty' domain iff necessary
-  if (owner === zeroAddress) {
+  if (isAddressEqual(owner, zeroAddress)) {
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   }
 
@@ -194,8 +244,7 @@ export async function handleRegistrationCreated({
     node: Node;
     // NOTE: `tld` event arg represents a `Node` that is the parent of `node`
     tld: Node;
-    // NOTE: `fqdn` event arg represents a Hex-encoded DNS Packet
-    fqdn: Hex;
+    fqdn: DNSEncodedName;
     registrant: Address;
     controlBitmap: number;
     expiry: bigint;
@@ -205,28 +254,14 @@ export async function handleRegistrationCreated({
 
   await upsertAccount(context, registrant);
 
-  const [literalLabel, literalName] = decodeDNSPacketBytes(hexToBytes(fqdn));
-
-  // Invariant: ThreeDNS always emits a decodable DNS Packet
-  // https://github.com/3dns-xyz/contracts/blob/44937318ae26cc036982e8c6a496cd82ebdc2b12/src/regcontrol/modules/types/Registry.sol#L298
-  if (!literalLabel || !literalName) {
-    console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: expected valid DNSPacketBytes: "${fqdn}"`);
-  }
+  // NOTE: ThreeDNSToken emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
+  const { labelHash, label, name } = decodeFQDN(fqdn as DNSEncodedLiteralName);
 
   // Invariant: ThreeDNSToken only emits RegistrationCreated for TLDs or 2LDs
-  if (literalName.split(".").length >= 3) {
+  if (name.split(".").length >= 3) {
     console.table({ ...event.args, tx: event.transaction.hash });
-    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${literalName}`);
+    throw new Error(`Invariant: >2LD emitted RegistrationCreated: ${name}`);
   }
-
-  // Interpret the decoded Literal Label/Name into an Interpreted Label/Name
-  // see https://ensnode.io/docs/reference/terminology#interpreted-label
-  // see https://ensnode.io/docs/reference/terminology#interpreted-name
-  const interpretedLabel = interpretLiteralLabel(literalLabel);
-  const interpretedName = interpretLiteralName(literalName);
-
-  const labelHash = labelhash(literalLabel);
 
   // NOTE: we use upsert because RegistrationCreated can be emitted for the same domain upon
   // expiry and re-registration (example: delv.box)
@@ -242,8 +277,8 @@ export async function handleRegistrationCreated({
     expiryDate: expiry,
 
     // include its decoded label/name
-    labelName: interpretedLabel,
-    name: interpretedName,
+    labelName: label,
+    name,
   });
 
   // upsert a Registration entity
@@ -254,7 +289,7 @@ export async function handleRegistrationCreated({
     registrationDate: event.block.timestamp,
     expiryDate: expiry,
     registrantId: registrant,
-    labelName: interpretedLabel,
+    labelName: label,
   });
 
   // log RegistrationEvent

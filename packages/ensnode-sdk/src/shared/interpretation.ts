@@ -1,49 +1,68 @@
-import { labelhash } from "viem";
-
 import {
-  type EncodedLabelHash,
-  type Label,
-  type Name,
+  type InterpretedLabel,
+  InterpretedName,
+  Label,
+  type LiteralLabel,
+  LiteralName,
   encodeLabelHash,
   isNormalizedLabel,
-  isNormalizedName,
 } from "../ens";
+import { labelhashLiteralLabel } from "./labelhash";
 
 /**
- * Transforms a Literal Label into an Interpreted Label.
+ * Interprets a Literal Label, producing an Interpreted Label.
  *
  * @see https://ensnode.io/docs/reference/terminology#literal-label
  * @see https://ensnode.io/docs/reference/terminology#interpreted-label
  *
  * @param label - The Literal Label string to interpret
- * @returns The provided label if it is normalized, else the EncodedLabelHash of the label
+ * @returns The provided label if it is a normalized label, else the EncodedLabelHash of the label
  */
-export function interpretLiteralLabel(label: Label): Label | EncodedLabelHash {
+export function literalLabelToInterpretedLabel(label: LiteralLabel): InterpretedLabel {
   // if the label is normalized, good to go
-  if (isNormalizedLabel(label)) return label;
+  if (isNormalizedLabel(label)) return label as Label as InterpretedLabel;
 
-  // otherwise (includes empty string label), interpret as EncodedLabelHash
-  return encodeLabelHash(labelhash(label));
+  // otherwise, encode the labelhash of the literal Label
+  return encodeLabelHash(labelhashLiteralLabel(label)) as InterpretedLabel;
 }
 
 /**
- * Transforms a Literal Name into an Interpreted Name.
+ * Interprets an ordered list of Literal Labels, producing an Interpreted Name.
  *
- * @see https://ensnode.io/docs/reference/terminology#literal-name
- * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+ * Note that it's important that the Literal Labels are provided as an array, otherwise it's
+ * impossible to differentiate between 'a.label.eth' being ['a.label', 'eth'] or ['a', 'label', 'eth'].
  *
- * If the name provided to this function contains empty-string labels (i.e 'this..name'),
- * then the empty string labels will be Interpreted. Empty-string is not a normalizable name, so the
- * label will be replaced with its Encoded LabelHash representation (i.e. )
+ * Note that the input is an ordered list of _Literal_ Labels: in this context, any literal label
+ * that is formatted as an Encoded LabelHash will NOT be interpreted as such. Instead it will be
+ * interpreted into an Encoded LabelHash that encodes the literal labelhash of the Literal Label.
  *
- * @param name - The Literal Name string to interpret
- * @returns The provided name if it is normalized, else converts each label in name that is not a
- * normalized label into an Interpreted Label
+ * @param labels An ordered list of 0 or more Literal Labels
+ * @returns An InterpretedName
  */
-export function interpretLiteralName(name: Name): Name {
-  // if the name is already normalized (includes empty string), good to go
-  if (isNormalizedName(name)) return name;
+export function literalLabelsToInterpretedName(labels: LiteralLabel[]): InterpretedName {
+  return labels.map(literalLabelToInterpretedLabel).join(".") as InterpretedName;
+}
 
-  // otherwise ensure the name is composed of Interpreted Labels
-  return name.split(".").map(interpretLiteralLabel).join(".");
+/**
+ * Joins the list of Interpreted Labels with '.' to form an Interpreted Name.
+ *
+ * @param labels An ordered list of 0 or more Interpreted Labels
+ * @returns An InterpretedName
+ */
+export function interpretedLabelsToInterpretedName(labels: InterpretedLabel[]): InterpretedName {
+  return labels.join(".") as InterpretedName;
+}
+
+/**
+ * Joins the list of Literal Labels with '.' to form a Literal Name.
+ *
+ * Note: LiteralLabel values may contain '.' characters, which will be preserved
+ * in the resulting LiteralName. Therefore, the number of labels in the returned
+ * LiteralName may be greater than the number of LiteralLabels in the input array.
+ *
+ * @param labels An ordered list of 0 or more Literal Labels
+ * @returns An LiteralName
+ */
+export function literalLabelsToLiteralName(labels: LiteralLabel[]): LiteralName {
+  return labels.join(".") as LiteralName;
 }

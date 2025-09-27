@@ -37,12 +37,12 @@ export default {
     contracts: {
       RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+        address: "0x610178da211fef7d417bc0e6fed39f05609ad788",
         startBlock: 0,
       },
       Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+        address: "0xb7f8bc63bbcadd18155201308c8f3540b07f84f5e",
         startBlock: 0,
       },
       Resolver: {
@@ -52,32 +52,32 @@ export default {
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
+        address: "0xa82ff9afd8f496c3d6ac40e2a0f282e47488cfc9",
         startBlock: 0,
       },
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: "0x5081a39b8A5f0E35a8D959395a630b68B74Dd30f",
+        address: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
         startBlock: 0,
       },
       WrappedEthRegistrarController: {
         abi: root_WrappedEthRegistrarController,
-        address: "0x253553366Da8546fC250F225fe3d25d0C782303b",
+        address: "0x253553366da8546fc250f225fe3d25d0c782303b",
         startBlock: 0,
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x36b58F5C1969B7b6591D752ea6F5486D069010AB",
+        address: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
         startBlock: 0,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x2E2Ed0Cfd3AD2f1d34481277b3204d807Ca2F8c2",
+        address: "0x2e2ed0cfd3ad2f1d34481277b3204d807ca2f8c2",
         startBlock: 0,
       },
       UniversalResolver: {
         abi: root_UniversalResolver,
-        address: "0xD84379CEae14AA33C123Af12424A37803F885889",
+        address: "0xd84379ceae14aa33c123af12424a37803f885889",
         startBlock: 0,
       },
     },

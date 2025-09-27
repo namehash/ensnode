@@ -22,7 +22,7 @@ export const ETH_COIN_TYPE: CoinType = 60;
  *
  * @see https://docs.ens.domains/ensip/19
  */
-export const DEFAULT_EVM_CHAIN_ID: ChainId = 0;
+export const DEFAULT_EVM_CHAIN_ID = 0;
 
 /**
  * ENSIP-19 EVM CoinType representing the 'default' coinType for EVM chains in ENS.

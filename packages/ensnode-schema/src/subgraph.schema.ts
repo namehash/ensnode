@@ -6,80 +6,92 @@ import { monkeypatchCollate } from "./collate";
  * Domain
  */
 
-export const domain = onchainTable("domains", (t) => ({
-  // The namehash of the name
-  id: t.hex().primaryKey(),
+export const domain = onchainTable(
+  "domains",
+  (t) => ({
+    // The namehash of the name
+    id: t.hex().primaryKey(),
 
-  /**
-   * The human readable name that this Domain represents.
-   *
-   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
-   * a) a normalized Name, or
-   * b) a Name entirely consisting of Interpreted Labels.
-   *
-   * Note that the type of the column will remain string | null, for legacy subgraph compatibility,
-   * but in practice will never be null. The Root node's name will be '' (empty string).
-   *
-   * @see https://ensnode.io/docs/reference/terminology#interpreted-name
-   *
-   * If REPLACE_UNNORMALIZED is false, this value may contain:
-   * a) null (in the case of the root node), or
-   * b) a Literal Name that may or may not be normalized and may or may not contain Encoded LabelHashes.
-   *
-   * @see https://ensnode.io/docs/reference/terminology#literal-name
-   */
-  name: t.text(),
+    /**
+     * The ENS Name that this Domain represents.
+     *
+     * If {@link ENSIndexerConfig#isSubgraphCompatible}, this value is guaranteed to be either:
+     * a) null (in the case of the root node), or
+     * b) a Subgraph Interpreted Name.
+     *
+     * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
+     *
+     * Otherwise, this value is guaranteed to be an Interpreted Name, which is either:
+     * a) a normalized Name, or
+     * b) a Name entirely consisting of Interpreted Labels.
+     *
+     * Note that the type of the column will remain string | null, for legacy subgraph compatibility,
+     * but in practice will never be null. The Root node's name will be '' (empty string).
+     *
+     * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+     */
+    name: t.text(),
 
-  /**
-   * The Label associated with the Domain.
-   *
-   * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
-   * a) null, exclusively in the case of the root Node,
-   * b) a normalized Label, or
-   * c) an Encoded LabelHash of the Literal Label value found onchain.
-   *
-   * @see https://ensnode.io/docs/reference/terminology#interpreted-label
-   *
-   * If REPLACE_UNNORMALIZED is false, this value my contain:
-   * a) null, exclusively in the case of the root Node, or
-   * b) a Literal Label that may or may not be normalized and may or may not be an Encoded LabelHash.
-   *
-   * @see https://ensnode.io/docs/reference/terminology#literal-label
-   */
-  labelName: t.text(),
+    /**
+     * The Label associated with the Domain.
+     *
+     * If {@link ENSIndexerConfig#isSubgraphCompatible}, this value is guaranteed to be either:
+     * a) null, in the case of the root Node or a name whose childmost label is subgraph-unindexable, or
+     * b) a subgraph-indexable Subgraph Interpreted Label (i.e. a Literal Label of undefined normalization).
+     *
+     * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
+     *
+     * Otherwise, this value is guaranteed to be an Interpreted Label which is either:
+     * a) null, exclusively in the case of the root Node,
+     * b) a normalized Label, or
+     * c) an Encoded LabelHash, which encodes either
+     *   i. in the case of an Unknown Label, the LabelHash emitted onchain, or
+     *   ii. in the case of an Unnormalized Label, the LabelHash of the Literal Label value found onchain.
+     *
+     * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+     */
+    labelName: t.text(),
 
-  // keccak256(labelName)
-  labelhash: t.hex(),
-  // The namehash (id) of the parent name
-  parentId: t.hex(),
+    // keccak256(labelName)
+    labelhash: t.hex(),
+    // The namehash (id) of the parent name
+    parentId: t.hex(),
 
-  // The number of subdomains
-  subdomainCount: t.integer().notNull().default(0),
+    // The number of subdomains
+    subdomainCount: t.integer().notNull().default(0),
 
-  // Address logged from current resolver, if any
-  resolvedAddressId: t.hex(),
+    // Address logged from current resolver, if any
+    resolvedAddressId: t.hex(),
 
-  // The resolver that controls the domain's settings
-  resolverId: t.text(),
+    // The resolver that controls the domain's settings
+    resolverId: t.text(),
 
-  // The time-to-live (TTL) value of the domain's records
-  ttl: t.bigint(),
+    // The time-to-live (TTL) value of the domain's records
+    ttl: t.bigint(),
 
-  // Indicates whether the domain has been migrated to a new registrar
-  isMigrated: t.boolean().notNull().default(false),
-  // The time when the domain was created
-  createdAt: t.bigint().notNull(),
+    // Indicates whether the domain has been migrated to a new registrar
+    isMigrated: t.boolean().notNull().default(false),
+    // The time when the domain was created
+    createdAt: t.bigint().notNull(),
 
-  // The account that owns the domain
-  ownerId: t.hex().notNull(),
-  // The account that owns the ERC721 NFT for the domain
-  registrantId: t.hex(),
-  // The account that owns the wrapped domain
-  wrappedOwnerId: t.hex(),
+    // The account that owns the domain
+    ownerId: t.hex().notNull(),
+    // The account that owns the ERC721 NFT for the domain
+    registrantId: t.hex(),
+    // The account that owns the wrapped domain
+    wrappedOwnerId: t.hex(),
 
-  // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
-  expiryDate: t.bigint(),
-}));
+    // The expiry date for the domain, from either the registration, or the wrapped domain if PCC is burned
+    expiryDate: t.bigint(),
+  }),
+  (t) => ({
+    byLabelhash: index().on(t.labelhash),
+    byParentId: index().on(t.parentId),
+    byOwnerId: index().on(t.ownerId),
+    byRegistrantId: index().on(t.registrantId),
+    byWrappedOwnerId: index().on(t.wrappedOwnerId),
+  }),
+);
 
 // monkeypatch drizzle's column (necessary to match graph-node default collation "C")
 // https://github.com/drizzle-team/drizzle-orm/issues/638
@@ -182,7 +194,7 @@ export const resolver = onchainTable(
     name: t.text(),
   }),
   (t) => ({
-    idx: index().on(t.domainId),
+    byDomainId: index().on(t.domainId),
   }),
 );
 
@@ -225,26 +237,27 @@ export const registration = onchainTable(
     /**
      * The Label associated with the domain registration.
      *
-     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Label which is either:
+     * If {@link ENSIndexerConfig#isSubgraphCompatible}, this value is guaranteed to be either:
+     * a) null, in the case of the root Node or a Domain whose label is subgraph-unindexable, or
+     * b) a subgraph-indexable Subgraph Interpreted Label (i.e. a Literal Label of undefined normalization).
+     *
+     * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
+     *
+     * Otherwise, this value is guaranteed to be an Interpreted Label which is either:
      * a) a normalized Label, or
-     * b) an Encoded LabelHash of the Literal Label value found onchain.
+     * b) in the case of an Unnormalized Label, an Encoded LabelHash of the Literal Label value found onchain.
      *
      * Note that the type of the column will remain string | null, for legacy subgraph compatibility.
-     * In practice however, when REPLACE_UNNORMALIZED is true, because there is no Registration entity
-     * for the root Node—the only Node with a null labelName—this field will never be null.
+     * In practice however, because there is no Registration entity for the root Node (the only Node
+     * with a null labelName) this field will never be null.
      *
      * @see https://ensnode.io/docs/reference/terminology#interpreted-label
-     *
-     * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null, or
-     * b) a Literal Label that may or may not be normalized and may or may not be an Encoded LabelHash.
-     *
-     * @see https://ensnode.io/docs/reference/terminology#literal-label
      */
     labelName: t.text(),
   }),
   (t) => ({
-    idx: index().on(t.domainId),
+    byDomainId: index().on(t.domainId),
+    byRegistrationDate: index().on(t.registrationDate),
   }),
 );
 
@@ -282,27 +295,25 @@ export const wrappedDomain = onchainTable(
     // The account that owns this WrappedDomain
     ownerId: t.hex().notNull(),
     /**
-     * The Name that this WrappedDomain represents.
+     * The Name that this WrappedDomain represents. Names are emitted by the NameWrapper contract as
+     * DNS-Encoded Names which may be malformed, which will result in this field being `null`.
      *
-     * If REPLACE_UNNORMALIZED is true, this value is guaranteed to be an Interpreted Name, which is either:
-     * a) a normalized Name, or
-     * b) a Name entirely consisting of Interpreted Labels.
+     * If {@link ENSIndexerConfig#isSubgraphCompatible}, this value is guaranteed to be either:
+     * a) null (in the case of a DNS-Encoded Name that is malformed or contains subgraph-unindexable labels), or
+     * b) a subgraph-indexable Subgraph Interpreted Label (i.e. a Literal Label of undefined normalization).
      *
-     * Note that the type of the column will remain string | null, for legacy subgraph compatibility,
-     * but in practice will never be null.
+     * @see https://ensnode.io/docs/reference/terminology#subgraph-indexability--labelname-interpretation
+     *
+     * Otherwise, this value is guaranteed to be either:
+     * a) null (in the case of a malformed DNS-Encoded Name),
+     * b) an Interpreted Name.
      *
      * @see https://ensnode.io/docs/reference/terminology#interpreted-name
-     *
-     * If REPLACE_UNNORMALIZED is false, this value may contain:
-     * a) null (in the case of the root node or invalid Name), or
-     * b) a Literal Name that may or may not be normalized and may or may not contain Encoded LabelHashes.
-     *
-     * @see https://ensnode.io/docs/reference/terminology#literal-name
      */
     name: t.text(),
   }),
   (t) => ({
-    idx: index().on(t.domainId),
+    byDomainId: index().on(t.domainId),
   }),
 );
 

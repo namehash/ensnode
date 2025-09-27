@@ -98,7 +98,8 @@ function getVercelAppPublicUrl(): URL {
   return new URL(`https://${vercelAppHostname}`);
 }
 
-const DEFAULT_ENSNODE_URL = "https://api.alpha.ensnode.io";
+const DEFAULT_ENSNODE_URL =
+  "https://api.alpha.ensnode.io,https://api.alpha-sepolia.ensnode.io,https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io,https://api.holesky.ensnode.io";
 
 /**
  * Get list of URLs for default ENSNode instances.
@@ -107,14 +108,14 @@ const DEFAULT_ENSNODE_URL = "https://api.alpha.ensnode.io";
  */
 export function defaultEnsNodeUrls(): Array<URL> {
   const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URLS";
-  const envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
+  let envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
 
   if (!envVarValue) {
     console.warn(
       `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
     );
 
-    return [new URL(DEFAULT_ENSNODE_URL)];
+    envVarValue = DEFAULT_ENSNODE_URL;
   }
 
   try {

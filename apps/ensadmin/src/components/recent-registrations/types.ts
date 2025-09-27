@@ -1,3 +1,4 @@
+import { Name, type UnixTimestamp } from "@ensnode/ensnode-sdk";
 import type { Address } from "viem";
 
 /**
@@ -5,19 +6,19 @@ import type { Address } from "viem";
  */
 export interface Registration {
   /**
-   * Date when the registration occurred.
+   * Timestamp when the registration occurred.
    */
-  registeredAt: Date;
+  registeredAt: UnixTimestamp;
 
   /**
-   * Date when the registration is scheduled to expire.
+   * Timestamp when the registration is scheduled to expire.
    */
-  expiresAt: Date;
+  expiresAt: UnixTimestamp;
 
   /**
    * The registered ENS name
    */
-  name: string;
+  name: Name;
 
   /**
    * The "official" owner of the domain in the ENS Registry.

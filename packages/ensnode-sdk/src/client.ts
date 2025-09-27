@@ -154,9 +154,10 @@ export class ENSNodeClient {
   /**
    * Resolves the primary name of a specified address (Reverse Resolution) on a specific chain.
    *
-   * If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name),
-   * the Default Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to
-   * determine the `address`'s Default Name directly.
+   * If the chainId-specific Primary Name is not defined, but the `address` specifies a valid
+   * [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name), the Default
+   * Name will be returned. You _may_ query the Default EVM Chain Id (`0`) in order to determine the
+   * `address`'s Default Name directly.
    *
    * The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
    * If the primary name set for the address is not normalized, `null` is returned as if no primary name was set.
@@ -208,13 +209,14 @@ export class ENSNodeClient {
   /**
    * Resolves the primary names of a specified address across multiple chains.
    *
-   * If the `address` specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name),
-   * the Default Name will be returned for all chainIds for which there is not a chain-specific
-   * Primary Name. To avoid misuse, you _may not_ query the Default EVM Chain Id (`0`) directly, and
-   * should rely on the aforementioned per-chain defaulting behavior.
+   * For each Primary Name, if the chainId-specific Primary Name is not defined, but the `address`
+   * specifies a valid [ENSIP-19 Default Name](https://docs.ens.domains/ensip/19/#default-primary-name),
+   * the Default Name will be returned. You _may not_ query the Default EVM Chain Id (`0`) directly,
+   * and should rely on the aforementioned per-chain defaulting behavior.
    *
    * Each returned Primary Name, if set, is guaranteed to be a [Normalized Name](https://ensnode.io/docs/reference/terminology#normalized-name).
-   * If the primary name set for the address on any chain is not normalized, `null` is returned for that chain as if no primary name was set.
+   * If the primary name set for the address on any chain is not normalized, `null` is returned for
+   * that chain as if no primary name was set.
    *
    * @param address The Address whose Primary Names to resolve
    * @param options additional options
@@ -232,12 +234,12 @@ export class ENSNodeClient {
    *
    * console.log(names);
    * // {
-   * //   "1": "gregskril.eth",
-   * //   "10": "gregskril.eth",
-   * //   "8453": "greg.base.eth", // base-specific Primary Name!
-   * //   "42161": "gregskril.eth",
-   * //   "59144": "gregskril.eth",
-   * //   "534352": "gregskril.eth"
+   * //   "1": "gregskril.eth", // Default Primary Name
+   * //   "10": "gregskril.eth", // Default Primary Name
+   * //   "8453": "greg.base.eth", // Base-specific Primary Name!
+   * //   "42161": "gregskril.eth", // Default Primary Name
+   * //   "59144": "gregskril.eth", // Default Primary Name
+   * //   "534352": "gregskril.eth" // Default Primary Name
    * // }
    *
    * // Resolve the address' Primary Names on specific chain Ids
