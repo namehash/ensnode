@@ -9,7 +9,7 @@ FROM base AS builder
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Set the environment variable for the server ENSNode URLs
+# Set the environment variable for the server's library of ENSNode URLs
 ARG NEXT_PUBLIC_SERVER_ENSNODE_URLS
 ENV NEXT_PUBLIC_SERVER_ENSNODE_URLS=${NEXT_PUBLIC_SERVER_ENSNODE_URLS}
 
