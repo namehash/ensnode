@@ -25,9 +25,10 @@ export type Node = Hex;
 export type Name = string;
 
 /**
- * A LabelHash is the result of the labelhash function (which is just keccak256) on a Label.
- *
- * @link https://docs.ens.domains/terminology#labelhash
+ * A LabelHash is the result of the labelhash function on a Label.
+ * 
+ * For the complete technical definition, see the ENSRainbow Glossary:
+ * @link https://docs.ensnode.io/docs/ensrainbow/concepts/glossary#labelhash
  */
 export type LabelHash = Hex;
 
