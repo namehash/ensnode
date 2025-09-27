@@ -6,31 +6,37 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
-import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { CONNECTION_PARAM_KEY, CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
 import { getServerConnectionLibrary } from "@/lib/env";
-import { isValidUrl, normalizeUrl } from "@/lib/url-utils";
+import {
+  isValidENSNodeConnectionUrl,
+  isValidUrl,
+  normalizeUrl,
+  validateAndNormalizeENSNodeUrl,
+} from "@/lib/url-utils";
 import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
 
 export interface ConnectionOption {
+  /** Normalized URL that passes isValidENSNodeConnectionUrl validation */
   url: UrlString;
+  /** True if this connection comes from the server library, false if it's a custom connection */
   fromServerLibrary: boolean;
 }
 
 const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
-  return uniq(urls.filter(isValidUrl).map(normalizeUrl));
+  return uniq(urls.filter(isValidUrl).map(normalizeUrl).filter(isValidENSNodeConnectionUrl));
 };
 
 /**
  * Server connection library - ENSNode connection URLs provided by the server with guaranteed invariants:
- * - Each URL passes validation (via getServerConnectionLibrary)
- * - Each URL is normalized (via getServerConnectionLibrary)
+ * - Each URL is normalized (via normalizeUrl in getServerConnectionLibrary)
+ * - Each URL passes isValidENSNodeConnectionUrl validation (via getServerConnectionLibrary)
  * - All URLs are unique (via getServerConnectionLibrary)
  * - Contains at least 1 URL (via getServerConnectionLibrary)
  *
- * These invariants are maintained by getServerConnectionLibrary() which already validates,
- * normalizes, deduplicates, and ensures at least 1 URL exists.
+ * These invariants are maintained by getServerConnectionLibrary() which uses the standard pipeline:
+ * raw input -> normalizeUrl() -> isValidENSNodeConnectionUrl() -> deduplication
  */
 const serverConnectionLibrary = getServerConnectionLibrary().map((url) => url.toString());
 
@@ -62,13 +68,14 @@ function _useAvailableENSNodeConnections() {
    *
    * Format:
    * - Array of ConnectionOption objects with { url: UrlString, fromServerLibrary: boolean }
-   * - url: Normalized URL string (via normalizeUrl())
+   * - url: Normalized URL string that passes isValidENSNodeConnectionUrl validation
    * - fromServerLibrary: true for server connections, false for custom ones
    *
    * Content guarantees:
    * - Always contains at least 1 connection (from serverConnectionLibrary)
-   * - All URLs are valid (pass isValidUrl validation)
-   * - All URLs are normalized to consistent format
+   * - All URLs are normalized (via normalizeUrl)
+   * - All URLs pass isValidENSNodeConnectionUrl validation
+   * - All URLs are unique (no duplicates)
    * - No duplicate URLs (custom connections filtered against server connections)
    * - Server connections always come first in array
    * - Custom connections are filtered to exclude any that match server connections
@@ -93,13 +100,13 @@ function _useAvailableENSNodeConnections() {
   );
 
   const addCustomConnection = useCallback(
-    async (_url: UrlString) => {
-      const { isValid, error } = await validateENSNodeUrl(_url);
-      if (!isValid) {
-        throw new Error(error || "Invalid URL");
+    (_url: UrlString) => {
+      const validation = validateAndNormalizeENSNodeUrl(_url);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
       }
 
-      const url = normalizeUrl(_url);
+      const url = validation.normalizedUrl;
 
       if (connectionLibrary.some((c) => c.url === url)) return url;
 

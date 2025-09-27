@@ -23,7 +23,6 @@ import {
 import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
 import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { CONNECTION_PARAM_KEY } from "@/lib/constants";
-import { useMutation } from "@tanstack/react-query";
 
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();
@@ -33,11 +32,10 @@ export function ConnectionSelector() {
   const { connectionLibrary, addCustomConnection, removeCustomConnection } =
     useAvailableENSNodeConnections();
   const selectedENSNodeUrl = useSelectedENSNodeUrl().toString();
-  const addCustomConnectionMutation = useMutation({
-    mutationFn: addCustomConnection,
-  });
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const updateUrlParam = useCallback(
     (url: string) => {
@@ -54,13 +52,22 @@ export function ConnectionSelector() {
   };
 
   const handleAdd = (url: string) => {
-    addCustomConnectionMutation.mutate(url, {
-      onSuccess: (addedUrl) => {
-        setDialogOpen(false);
-        updateUrlParam(addedUrl);
-        addCustomConnectionMutation.reset();
-      },
-    });
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const addedUrl = addCustomConnection(url);
+      setDialogOpen(false);
+      updateUrlParam(addedUrl);
+      setIsLoading(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add connection");
+      setIsLoading(false);
+    }
+  };
+
+  const handleErrorReset = () => {
+    setError(null);
   };
 
   return (
@@ -124,9 +131,9 @@ export function ConnectionSelector() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onAdd={handleAdd}
-        isLoading={addCustomConnectionMutation.isPending}
-        error={addCustomConnectionMutation.error?.message}
-        onErrorReset={addCustomConnectionMutation.reset}
+        isLoading={isLoading}
+        error={error}
+        onErrorReset={handleErrorReset}
       />
     </>
   );

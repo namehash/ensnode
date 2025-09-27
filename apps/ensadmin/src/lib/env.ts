@@ -1,7 +1,7 @@
 // TODO: replace all of this validation with zod
 
 import { uniq } from "@ensnode/ensnode-sdk";
-import { normalizeUrl } from "./url-utils";
+import { isValidENSNodeConnectionUrl, normalizeUrl } from "./url-utils";
 
 /**
  * Get ENSAdmin service public URL.
@@ -129,11 +129,13 @@ export function getServerConnectionLibrary(): URL[] {
         .filter((maybeUrl) => maybeUrl.length > 0), // Remove empty strings
     );
 
-    const urlList = urlStrings.map((maybeUrl) => new URL(normalizeUrl(maybeUrl)));
+    const normalizedUrls = urlStrings.map((maybeUrl) => normalizeUrl(maybeUrl));
+    const validUrls = normalizedUrls.filter(isValidENSNodeConnectionUrl);
+    const urlList = validUrls.map((url) => new URL(url));
 
     if (urlList.length === 0) {
       throw new Error(
-        `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid URL`,
+        `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`,
       );
     }
 
