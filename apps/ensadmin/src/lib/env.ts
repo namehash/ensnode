@@ -107,7 +107,7 @@ const DEFAULT_ENSNODE_URL =
 /**
  * Get list of URLs for server ENSNode instances (ServerConnectionLibrary).
  *
- * @returns a list (with at least one element) of URLs for server ENSNode instances
+ * @returns a list 1 or more normalized and unique `URL` values representing the server's ENSNode connection library.
  */
 export function defaultEnsNodeUrls(): Array<URL> {
   const envVarName = "NEXT_PUBLIC_SERVER_ENSNODE_URLS";
