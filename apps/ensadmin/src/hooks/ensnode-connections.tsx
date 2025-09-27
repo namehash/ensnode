@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { validateENSNodeUrl } from "@/components/connections/ensnode-url-validator";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { CONNECTION_PARAM_KEY, CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY } from "@/lib/constants";
-import { defaultEnsNodeUrls } from "@/lib/env";
+import { getServerConnectionLibrary } from "@/lib/env";
 import { isValidUrl, normalizeUrl } from "@/lib/url-utils";
 import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
 
@@ -30,15 +30,15 @@ const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
  * - Contains at least 1 URL
  *
  * These invariants are maintained by:
- * 1. defaultEnsNodeUrls() already validates and ensures at least 1 URL
+ * 1. getServerConnectionLibrary() already validates and ensures at least 1 URL
  * 2. Converting to string then normalizing ensures consistent format
  * 3. validateAndNormalizeUrls removes any potential duplicates and invalid URLs
  */
 const serverConnectionLibrary = (() => {
-  const rawUrls = defaultEnsNodeUrls().map((url) => url.toString());
+  const rawUrls = getServerConnectionLibrary().map((url) => url.toString());
   const validatedUrls = validateAndNormalizeUrls(rawUrls);
 
-  // Guarantee at least 1 URL - this should never happen due to defaultEnsNodeUrls validation
+  // Guarantee at least 1 URL - this should never happen due to getServerConnectionLibrary validation
   // but adding as a safety net to maintain the invariant
   if (validatedUrls.length === 0) {
     throw new Error("ServerConnectionLibrary must contain at least one valid URL");

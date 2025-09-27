@@ -109,7 +109,7 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY =
  *
  * @returns a list 1 or more normalized and unique `URL` values representing the server's ENSNode connection library.
  */
-export function defaultEnsNodeUrls(): URL[] {
+export function getServerConnectionLibrary(): URL[] {
   const envVarName = "NEXT_PUBLIC_SERVER_ENSNODE_URLS";
   let envVarValue = process.env.NEXT_PUBLIC_SERVER_ENSNODE_URLS;
 
