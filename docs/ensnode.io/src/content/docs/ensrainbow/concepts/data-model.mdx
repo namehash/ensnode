@@ -19,6 +19,8 @@ ENSRainbow stores its rainbow table in a **LevelDB** database. The schema is int
 
 ## Versioned Rainbow Record
 
+A [rainbow record](/docs/ensrainbow/concepts/glossary#rainbow-record) with versioning information:
+
 ```ts
 interface VersionedRainbowRecord {
   label: string;          // original label
@@ -58,6 +60,7 @@ Protocol Buffers is Google's language-neutral, platform-neutral extensible mecha
 The `.ensrainbow` file format uses two main message types:
 
 ```protobuf
+// Protobuf serialization format for [rainbow records](/docs/ensrainbow/concepts/glossary#rainbow-record)
 message RainbowRecord {
   bytes labelhash = 1;    // 32-byte labelhash
   string label = 2;       // original label string

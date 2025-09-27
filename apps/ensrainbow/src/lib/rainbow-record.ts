@@ -3,7 +3,7 @@ import { Label } from "@ensnode/ensnode-sdk";
 import { type LabelSetVersion, buildLabelSetVersion } from "@ensnode/ensnode-sdk";
 
 /**
- * A versioned rainbow record.
+ * A versioned [rainbow record](/docs/ensrainbow/concepts/glossary#rainbow-record).
  */
 export interface VersionedRainbowRecord {
   /** The original label string */
