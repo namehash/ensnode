@@ -15,7 +15,7 @@ import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
  * @returns The selected ENSNode connection URL
  * @throws Error if no selected ENSNode Connection is available
  */
-export function useSelectedENSNodeUrl() {
+export function useSelectedENSNodeUrl(): URL {
   const { selectedConnection } = useAvailableENSNodeConnections();
 
   if (!selectedConnection) {
