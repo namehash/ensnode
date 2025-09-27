@@ -5,8 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import { AddConnectionDialog } from "@/components/connections/add-connection-dialog";
-import { CustomConnectionsList } from "@/components/connections/custom-connections-list";
-import { ServerConnectionsList } from "@/components/connections/server-connections-list";
+import { ConnectionsList } from "@/components/connections/connections-list";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import {
   DropdownMenu,
@@ -90,17 +89,19 @@ export function ConnectionSelector() {
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
             >
-              <ServerConnectionsList
+              <ConnectionsList
                 connectionLibrary={connectionLibrary}
                 selectedConnectionUrl={selectedENSNodeUrl}
-                onSelectServerConnection={handleSelect}
+                onSelectConnection={handleSelect}
+                type="server"
               />
 
-              <CustomConnectionsList
+              <ConnectionsList
                 connectionLibrary={connectionLibrary}
                 selectedConnectionUrl={selectedENSNodeUrl}
-                onSelectCustomConnection={handleSelect}
+                onSelectConnection={handleSelect}
                 onRemoveCustomConnection={removeCustomConnection}
+                type="custom"
               />
 
               <DropdownMenuSeparator />
