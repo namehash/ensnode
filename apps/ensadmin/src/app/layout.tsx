@@ -4,13 +4,13 @@ import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
-import { ActiveENSNodeProvider } from "@/components/providers/active-ensnode-provider";
+import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
-import { RequireActiveENSNodeConnection } from "@/components/require-active-ensnode-connection";
+import { RequireSelectedENSNodeConnection } from "@/components/require-selected-ensnode-connection";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { ENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
+import { AvailableENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";
 
@@ -65,14 +65,14 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <ENSNodeConnectionsProvider>
-            <RequireActiveENSNodeConnection>
+          <AvailableENSNodeConnectionsProvider>
+            <RequireSelectedENSNodeConnection>
               <SidebarProvider>
                 <Suspense>
                   <AppSidebar />
                 </Suspense>
                 <SidebarInset className="min-w-0">
-                  <ActiveENSNodeProvider>
+                  <SelectedENSNodeProvider>
                     <Header>
                       <HeaderNav>
                         <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
@@ -80,11 +80,11 @@ export default function Layout({
                       <HeaderActions>{actions}</HeaderActions>
                     </Header>
                     <RequireActiveENSNodeConfig>{children}</RequireActiveENSNodeConfig>
-                  </ActiveENSNodeProvider>
+                  </SelectedENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
-            </RequireActiveENSNodeConnection>
-          </ENSNodeConnectionsProvider>
+            </RequireSelectedENSNodeConnection>
+          </AvailableENSNodeConnectionsProvider>
         </QueryClientProvider>
         <Toaster />
       </body>

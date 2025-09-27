@@ -1,5 +1,8 @@
 // TODO: replace all of this validation with zod
 
+import { uniq } from "@ensnode/ensnode-sdk";
+import { isValidENSNodeConnectionUrl, normalizeUrl } from "./url-utils";
+
 /**
  * Get ENSAdmin service public URL.
  *
@@ -24,7 +27,7 @@ export function ensAdminPublicUrl(): URL {
   }
 
   try {
-    return parseUrl(envVarValue);
+    return new URL(normalizeUrl(envVarValue));
   } catch (error) {
     console.error(error);
 
@@ -98,32 +101,41 @@ function getVercelAppPublicUrl(): URL {
   return new URL(`https://${vercelAppHostname}`);
 }
 
-const DEFAULT_ENSNODE_URL =
+const DEFAULT_SERVER_CONNECTION_LIBRARY =
   "https://api.alpha.ensnode.io,https://api.alpha-sepolia.ensnode.io,https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io,https://api.holesky.ensnode.io";
 
 /**
- * Get list of URLs for default ENSNode instances.
+ * Gets the server's ENSNode connection library (ServerConnectionLibrary).
  *
- * @returns a list (with at least one element) of URLs for default ENSNode instances
+ * @returns a list 1 or more normalized and unique `URL` values representing the server's ENSNode connection library.
  */
-export function defaultEnsNodeUrls(): Array<URL> {
-  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URLS";
-  let envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
+export function getServerConnectionLibrary(): URL[] {
+  const envVarName = "NEXT_PUBLIC_SERVER_ENSNODE_URLS";
+  let envVarValue = process.env.NEXT_PUBLIC_SERVER_ENSNODE_URLS;
 
   if (!envVarValue) {
     console.warn(
-      `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
+      `No server ENSNode URLs provided in "${envVarName}". Using fallback: ${DEFAULT_SERVER_CONNECTION_LIBRARY}`,
     );
 
-    envVarValue = DEFAULT_ENSNODE_URL;
+    envVarValue = DEFAULT_SERVER_CONNECTION_LIBRARY;
   }
 
   try {
-    const urlList = envVarValue.split(",").map((maybeUrl) => parseUrl(maybeUrl));
+    const urlStrings = uniq(
+      envVarValue
+        .split(",")
+        .map((maybeUrl) => maybeUrl.trim()) // Remove whitespace
+        .filter((maybeUrl) => maybeUrl.length > 0), // Remove empty strings
+    );
+
+    const normalizedUrls = urlStrings.map((maybeUrl) => normalizeUrl(maybeUrl));
+    const validUrls = normalizedUrls.filter(isValidENSNodeConnectionUrl);
+    const urlList = validUrls.map((url) => new URL(url));
 
     if (urlList.length === 0) {
       throw new Error(
-        `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid URL`,
+        `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`,
       );
     }
 
@@ -134,20 +146,6 @@ export function defaultEnsNodeUrls(): Array<URL> {
     throw new Error(
       `Invalid ${envVarName} value "${envVarValue}" must contain a comma separated list of valid URLs.`,
     );
-  }
-}
-
-/**
- * Parses a URL from a string.
- * @param maybeUrl
- * @returns URL
- * @throws when the URL is invalid
- */
-export function parseUrl(maybeUrl: string): URL {
-  try {
-    return new URL(maybeUrl);
-  } catch (error) {
-    throw new Error(`Invalid URL: ${maybeUrl}`);
   }
 }
 
