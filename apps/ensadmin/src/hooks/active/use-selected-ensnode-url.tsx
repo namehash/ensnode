@@ -13,7 +13,7 @@ import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
  * within the context of a selected ENSNode.
  *
  * @returns The selected ENSNode connection URL
- * @throws Error if no selected ENSNode Connection is available
+ * @throws Error if no ENSNode connection is selected
  */
 export function useSelectedENSNodeUrl(): URL {
   const { selectedConnection } = useAvailableENSNodeConnections();

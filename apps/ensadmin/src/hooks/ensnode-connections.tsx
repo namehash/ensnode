@@ -24,34 +24,21 @@ const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
 
 /**
  * Server connection library - ENSNode connection URLs provided by the server with guaranteed invariants:
- * - Each URL passes isValidUrl validation
- * - Each URL is in normalizeUrl form
- * - All URLs are unique (no duplicates)
- * - Contains at least 1 URL
+ * - Each URL passes validation (via getServerConnectionLibrary)
+ * - Each URL is normalized (via getServerConnectionLibrary)
+ * - All URLs are unique (via getServerConnectionLibrary)
+ * - Contains at least 1 URL (via getServerConnectionLibrary)
  *
- * These invariants are maintained by:
- * 1. getServerConnectionLibrary() already validates and ensures at least 1 URL
- * 2. Converting to string then normalizing ensures consistent format
- * 3. validateAndNormalizeUrls removes any potential duplicates and invalid URLs
+ * These invariants are maintained by getServerConnectionLibrary() which already validates,
+ * normalizes, deduplicates, and ensures at least 1 URL exists.
  */
-const serverConnectionLibrary = (() => {
-  const rawUrls = getServerConnectionLibrary().map((url) => url.toString());
-  const validatedUrls = validateAndNormalizeUrls(rawUrls);
-
-  // Guarantee at least 1 URL - this should never happen due to getServerConnectionLibrary validation
-  // but adding as a safety net to maintain the invariant
-  if (validatedUrls.length === 0) {
-    throw new Error("ServerConnectionLibrary must contain at least one valid URL");
-  }
-
-  return validatedUrls;
-})();
+const serverConnectionLibrary = getServerConnectionLibrary().map((url) => url.toString());
 
 function _useAvailableENSNodeConnections() {
   const hydrated = useHydrated();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentConnection = searchParams.get(CONNECTION_PARAM_KEY);
+  const rawSelectedConnection = searchParams.get(CONNECTION_PARAM_KEY);
   const [rawCustomConnectionUrls, storeCustomConnections] = useLocalstorageState<UrlString[]>(
     CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY,
     [],
@@ -148,12 +135,12 @@ function _useAvailableENSNodeConnections() {
 
     // NOTE: guaranteed to have a valid set of `connectionLibrary` here, on the client
     // NOTE: guaranteed to have at least 1 connection because server library must have length > 0
-    const first = connectionLibrary[0].url;
+    const defaultSelectedConnection = connectionLibrary[0].url;
 
-    if (!currentConnection) return new URL(first);
-    if (!isInConnections(currentConnection)) return new URL(first);
-    return new URL(currentConnection);
-  }, [hydrated, connectionLibrary, currentConnection, isInConnections]);
+    if (!rawSelectedConnection) return new URL(defaultSelectedConnection);
+    if (!isInConnections(rawSelectedConnection)) return new URL(defaultSelectedConnection);
+    return new URL(rawSelectedConnection);
+  }, [hydrated, connectionLibrary, rawSelectedConnection, isInConnections]);
 
   const updateCurrentConnectionParam = useCallback(
     (url: string) => {
@@ -168,29 +155,29 @@ function _useAvailableENSNodeConnections() {
   useEffect(() => {
     if (
       existingConnectionUrl !== null &&
-      existingConnectionUrl !== currentConnection &&
-      currentConnection
+      existingConnectionUrl !== rawSelectedConnection &&
+      rawSelectedConnection
     ) {
-      toast.success(`Connected to ${currentConnection}`);
+      toast.success(`Connected to ${rawSelectedConnection}`);
     }
 
-    setExistingConnectionUrl(currentConnection);
-  }, [currentConnection, existingConnectionUrl]);
+    setExistingConnectionUrl(rawSelectedConnection);
+  }, [rawSelectedConnection, existingConnectionUrl]);
 
   // Handle URL parameter synchronization and connection loading
   useEffect(() => {
     if (!hydrated) return;
-    if (!currentConnection) return;
-    if (failedConnectionUrls.has(currentConnection)) return;
+    if (!rawSelectedConnection) return;
+    if (failedConnectionUrls.has(rawSelectedConnection)) return;
 
     // Check if connection URL already exists in connection library
-    const existingConnection = connectionLibrary.find((conn) => conn.url === currentConnection);
+    const existingConnection = connectionLibrary.find((conn) => conn.url === rawSelectedConnection);
     if (existingConnection) {
       return;
     }
 
     // Automatically add connection from URL parameter to library (enables shareable connection links)
-    addCustomConnection(currentConnection)
+    addCustomConnection(rawSelectedConnection)
       .then((addedUrl) => {
         updateCurrentConnectionParam(addedUrl);
         toast.success(`URL saved to connection library`);
@@ -200,7 +187,7 @@ function _useAvailableENSNodeConnections() {
         toast.error(`Failed to connect: ${error.message}`);
 
         // Track this as a failed connection to prevent retry loop
-        setFailedConnections((prev) => new Set(prev).add(currentConnection));
+        setFailedConnections((prev) => new Set(prev).add(rawSelectedConnection));
 
         // Remove invalid connection param from URL
         const params = new URLSearchParams(searchParams.toString());
@@ -209,7 +196,7 @@ function _useAvailableENSNodeConnections() {
       });
   }, [
     hydrated,
-    currentConnection,
+    rawSelectedConnection,
     connectionLibrary,
     addCustomConnection,
     updateCurrentConnectionParam,
@@ -221,13 +208,13 @@ function _useAvailableENSNodeConnections() {
   // Handle URL parameter synchronization when no connection parameter exists
   useEffect(() => {
     if (!hydrated) return;
-    if (currentConnection) return;
+    if (rawSelectedConnection) return;
 
     // If no connection parameter exists and we have a selected connection, update URL
     if (selectedConnection) {
       updateCurrentConnectionParam(selectedConnection.toString());
     }
-  }, [hydrated, currentConnection, selectedConnection, updateCurrentConnectionParam]);
+  }, [hydrated, rawSelectedConnection, selectedConnection, updateCurrentConnectionParam]);
 
   return {
     connectionLibrary,
