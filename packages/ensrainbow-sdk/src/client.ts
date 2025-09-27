@@ -242,7 +242,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   /**
-   * Attempt to heal a labelHash to its original label.
+   * Attempt to [heal](/docs/ensrainbow/concepts/glossary#heal) a labelHash to its original label.
    *
    * Note on returned labels: ENSRainbow returns labels exactly as they are
    * represented in source rainbow table data. This means:
