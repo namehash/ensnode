@@ -44,7 +44,7 @@ export interface ChainIndexingConfigIndefinite {
    * A {@link BlockRef} to the block where indexing of the chain should end.
    */
   // TODO: this field should be removed.
-  endBlock: null;
+  endBlock?: null;
 }
 
 /**
@@ -678,7 +678,11 @@ export type CurrentIndexingProjectionOmnichain = {
 /**
  * A status code for generating an indexing status response.
  */
-export const IndexingStatusResponseCodes = {
+// TODO: rename to `IndexingStatusResponseCodes` (this was temporarily named as
+// `IndexingStatusResponseCodesTemp`) because there's already an existing
+// `IndexingStatusResponseCodes` type in the `api/types.ts` file. This idea
+// perhaps should move into the `api/types.ts` file.
+export const IndexingStatusResponseCodesTemp = {
   /**
    * Represents that the indexing status is available.
    */
@@ -694,13 +698,13 @@ export const IndexingStatusResponseCodes = {
  * The derived string union of possible {@link IndexingStatusResponseCodes}.
  */
 export type IndexingStatusResponseCode =
-  (typeof IndexingStatusResponseCodes)[keyof typeof IndexingStatusResponseCodes];
+  (typeof IndexingStatusResponseCodesTemp)[keyof typeof IndexingStatusResponseCodesTemp];
 
 /**
  * An indexing status response when the indexing status is available.
  */
 export type IndexingStatusResponseOk = {
-  responseCode: typeof IndexingStatusResponseCodes.Ok;
+  responseCode: typeof IndexingStatusResponseCodesTemp.Ok;
   realtimeProjection: CurrentIndexingProjectionOmnichain;
 };
 
@@ -708,7 +712,7 @@ export type IndexingStatusResponseOk = {
  * An indexing status response when the indexing status is unavailable.
  */
 export type IndexingStatusResponseError = {
-  responseCode: typeof IndexingStatusResponseCodes.Error;
+  responseCode: typeof IndexingStatusResponseCodesTemp.Error;
 };
 
 /**
@@ -718,7 +722,11 @@ export type IndexingStatusResponseError = {
  * at runtime.
  */
 // TODO: change the indexing status API to return this type
-export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusResponseError;
+// TODO: rename to `IndexingStatusResponse` (this was temporarily named as
+// `IndexingStatusResponseTemp`) because there's already an existing
+// `IndexingStatusResponse` type in the `api/types.ts` file. This idea
+// perhaps should move into the `api/types.ts` file.
+export type IndexingStatusResponseTemp = IndexingStatusResponseOk | IndexingStatusResponseError;
 
 /**
  * Current Indexing Projection Unavailable
