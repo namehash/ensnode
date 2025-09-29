@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, RadioTower } from "lucide-react";
+import { Activity, RadioTower, PlugZap } from "lucide-react";
 import * as React from "react";
 
 import { IconENS } from "@/components/icons/ens";
@@ -10,6 +10,11 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/component
 import { ConnectionSelector } from "./connections/connection-selector";
 
 const navItems = [
+  {
+    title: "Connection",
+    url: "/connection",
+    icon: PlugZap,
+  },
   {
     title: "Status",
     url: "/status",

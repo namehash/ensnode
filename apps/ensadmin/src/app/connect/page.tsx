@@ -17,11 +17,11 @@ export default function ConnectPage() {
 
   const ensNodeUrl = searchParams.get(ENSNODE_PUBLIC_URL_QUERY_PARAM);
   useEffect(() => {
-    // no url param provided? just go back to status
-    if (!ensNodeUrl) redirect("/status");
+    // no url param provided? just go back to connection
+    if (!ensNodeUrl) redirect("/connection");
 
     addAndSelectConnection.mutate(ensNodeUrl, {
-      onSuccess: () => setTimeout(() => redirect("/status"), 0),
+      onSuccess: () => setTimeout(() => redirect("/connection"), 0),
     });
   }, []);
 

@@ -11,7 +11,7 @@ import { RecentRegistrations } from "@/components/recent-registrations";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { BackfillStatus } from "./backfill-status";
-import { ENSNodeConfigInfo } from "./config-info";
+import { ENSNodeConfigInfo } from "../connection/config-info";
 import {
   IndexingStatsForBackfillStatus,
   IndexingStatsForCompletedStatus,
@@ -44,7 +44,6 @@ export function IndexingStatus() {
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
     return (
       <section className="flex flex-col gap-6 p-6">
-        <ENSNodeConfigInfo /> {/*display loading state*/}
         <IndexingStatusLoading />
       </section>
     );
@@ -104,8 +103,6 @@ export function IndexingStatus() {
 
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ENSNodeConfigInfo ensIndexerConfig={ensIndexerConfig} />
-
       {maybeIndexingTimeline}
 
       <IndexingStatsShell overallStatus={indexingStatus.overallStatus}>

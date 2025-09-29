@@ -1,8 +1,9 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
+
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
+import {ENSNodeConfigInfo} from "@/components/connection/config-info";
 
 /**
  * Allows consumers to use `useActiveENSNodeConfig` by blocking rendering until it is available.
