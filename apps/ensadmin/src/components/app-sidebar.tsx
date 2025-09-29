@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, RadioTower, PlugZap } from "lucide-react";
+import { Activity, PlugZap, RadioTower } from "lucide-react";
 import * as React from "react";
 
 import { IconENS } from "@/components/icons/ens";

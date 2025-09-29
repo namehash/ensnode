@@ -4,6 +4,7 @@
  */
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
+import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
 import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
 import { CopyIcon } from "@/components/icons/CopyIcon";
@@ -15,7 +16,6 @@ import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
-import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";

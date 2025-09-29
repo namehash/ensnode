@@ -10,8 +10,8 @@ import { type ReactElement, Suspense } from "react";
 import { RecentRegistrations } from "@/components/recent-registrations";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
-import { BackfillStatus } from "./backfill-status";
 import { ENSNodeConfigInfo } from "../connection/config-info";
+import { BackfillStatus } from "./backfill-status";
 import {
   IndexingStatsForBackfillStatus,
   IndexingStatsForCompletedStatus,
