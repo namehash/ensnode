@@ -2,19 +2,21 @@ import { parse as parseConnectionString } from "pg-connection-string";
 import { ZodError, prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
+import {
+  type ChainId,
+  PluginName,
+  deserializeChainId,
+  isHttpProtocol,
+  isWebSocketProtocol,
+  uniq,
+} from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import {
   invariant_isSubgraphCompatibleRequirements,
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import {
-  DEFAULT_ENSADMIN_URL,
-  DEFAULT_PORT,
-  DEFAULT_RPC_RATE_LIMIT,
-  DEFAULT_SUBGRAPH_COMPAT,
-} from "@/lib/lib-config";
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_SUBGRAPH_COMPAT } from "@/lib/lib-config";
 
 import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
 
@@ -25,6 +27,8 @@ import {
   invariant_requiredDatasources,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_rpcConfigsSpecifiedForRootChain,
+  invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
+  invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
   invariant_validContractConfigs,
 } from "./validations";
 
@@ -48,14 +52,12 @@ const makeBlockNumberSchema = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-const RpcConfigSchema = z.object({
-  url: makeUrlSchema("RPC_URL_*"),
-  maxRequestsPerSecond: z.coerce
-    .number({ error: "RPC_REQUEST_RATE_LIMIT_* must be an integer." })
-    .int({ error: "RPC_REQUEST_RATE_LIMIT_* must be an integer." })
-    .min(1, { error: "RPC_REQUEST_RATE_LIMIT_* must be at least 1." })
-    .default(DEFAULT_RPC_RATE_LIMIT),
-});
+const RpcConfigSchema = z
+  .string()
+  .transform((val) => val.split(","))
+  .pipe(z.array(makeUrlSchema("RPC_URL_*")))
+  .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL)
+  .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL);
 
 const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
   error: (issue) => {
@@ -89,7 +91,7 @@ const PonderDatabaseSchemaSchema = z
 
 const PluginsSchema = z.coerce
   .string()
-  .transform((val) => val.split(",").filter(Boolean))
+  .transform((val) => val.split(","))
   .pipe(
     z
       .array(
@@ -127,8 +129,17 @@ const RpcConfigsSchema = z
   .transform((records) => {
     const rpcConfigs = new Map<ChainId, RpcConfig>();
 
-    for (const [chianIdString, rpcConfig] of Object.entries(records)) {
-      rpcConfigs.set(deserializeChainId(chianIdString), rpcConfig);
+    for (const [chainIdString, rpcConfig] of Object.entries(records)) {
+      // rpcConfig is guaranteed to include at least one HTTP protocol URL
+      const httpRPCs = rpcConfig.filter(isHttpProtocol) as [URL, ...URL[]];
+
+      // rpcConfig is guaranteed to include at most one WebSocket protocol URL
+      const websocketRPC = rpcConfig.find(isWebSocketProtocol);
+
+      rpcConfigs.set(deserializeChainId(chainIdString), {
+        httpRPCs,
+        websocketRPC,
+      });
     }
 
     return rpcConfigs;

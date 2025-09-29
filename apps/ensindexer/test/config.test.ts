@@ -1,10 +1,13 @@
 import { EnvironmentDefaults } from "@/config/environment-defaults";
 import type { RpcConfig } from "@/config/types";
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_RPC_RATE_LIMIT } from "@/lib/lib-config";
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/lib/lib-config";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
+const VALID_RPC_URL_ALT = "https://lb.drpc.org/ethereum/987";
+const VALID_RPC_WS_URL = "wss://eth-mainnet.g.alchemy.com/v2/1234";
+const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 
 const BASE_ENV = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
@@ -386,16 +389,51 @@ describe("config (with base env)", () => {
   });
 
   describe(".chains", () => {
-    it("returns the chains if it is a valid object", async () => {
+    it("returns the chains if it is a valid object (one HTTP protocol URL)", async () => {
       vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
       const config = await getConfig();
+
       expect(config.rpcConfigs).toStrictEqual(
         new Map([
           [
             1,
             {
-              url: new URL(VALID_RPC_URL),
-              maxRequestsPerSecond: DEFAULT_RPC_RATE_LIMIT,
+              httpRPCs: [new URL(VALID_RPC_URL)],
+              websocketRPC: undefined,
+            } satisfies RpcConfig,
+          ],
+        ]),
+      );
+    });
+
+    it("returns the chains if it is a valid object (multiple HTTP protocol URLs)", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL_ALT},${VALID_RPC_URL}`);
+      const config = await getConfig();
+
+      expect(config.rpcConfigs).toStrictEqual(
+        new Map([
+          [
+            1,
+            {
+              httpRPCs: [new URL(VALID_RPC_URL_ALT), new URL(VALID_RPC_URL)],
+              websocketRPC: undefined,
+            } satisfies RpcConfig,
+          ],
+        ]),
+      );
+    });
+
+    it("returns the chains if it is a valid object (multiple HTTP protocol URLs, and one WebSocket protocol URL)", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_WS_URL},${VALID_RPC_URL_ALT}`);
+      const config = await getConfig();
+
+      expect(config.rpcConfigs).toStrictEqual(
+        new Map([
+          [
+            1,
+            {
+              httpRPCs: [new URL(VALID_RPC_URL), new URL(VALID_RPC_URL_ALT)],
+              websocketRPC: new URL(VALID_RPC_WS_URL),
             } satisfies RpcConfig,
           ],
         ]),
@@ -406,19 +444,19 @@ describe("config (with base env)", () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
       await expect(getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
     });
-  });
 
-  describe(".rpcMaxRequestsPerSecond", () => {
-    it("returns the RPC_REQUEST_RATE_LIMIT_1 if it is a valid number", async () => {
-      vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", "100");
-      const config = await getConfig();
-      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(100);
+    it("throws an error if RPC_URL_1 includes less than one HTTP protocol URL", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_WS_URL},${VALID_RPC_WS_URL_ALT}`);
+      await expect(getConfig()).rejects.toThrow(
+        /RPC endpoint configuration for a chain must include at least one http\/https protocol URL/i,
+      );
     });
 
-    it("returns the default if it is not set", async () => {
-      vi.stubEnv("RPC_REQUEST_RATE_LIMIT_1", undefined);
-      const config = await getConfig();
-      expect(config.rpcConfigs.get(1)!.maxRequestsPerSecond).toBe(DEFAULT_RPC_RATE_LIMIT);
+    it("throws an error if RPC_URL_1 includes more than one WebSockets protocol URL", async () => {
+      vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_WS_URL},${VALID_RPC_WS_URL_ALT}`);
+      await expect(getConfig()).rejects.toThrow(
+        /RPC endpoint configuration for a chain must include at most one websocket \(ws\/wss\) protocol URL./i,
+      );
     });
   });
 

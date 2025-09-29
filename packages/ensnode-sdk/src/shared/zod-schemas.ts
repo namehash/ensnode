@@ -81,7 +81,7 @@ export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
   makePositiveIntegerSchema(valueLabel).transform((val) => val as ChainId);
 
 /**
- * Parses a string representation of {@link ChainId}.
+ * Parses a serialized representation of {@link ChainId}.
  */
 export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") =>
   z
@@ -98,7 +98,7 @@ export const makeDefaultableChainIdSchema = (valueLabel: string = "Defaultable C
   makeNonNegativeIntegerSchema(valueLabel).transform((val) => val as DefaultableChainId);
 
 /**
- * Parses a string representation of {@link DefaultableChainId}.
+ * Parses a serialized representation of {@link DefaultableChainId}.
  */
 export const makeDefaultableChainIdStringSchema = (
   valueLabel: string = "Defaultable Chain ID String",
@@ -119,7 +119,7 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
     .transform((val) => val as CoinType);
 
 /**
- * Parses a string representation of {@link CoinType}.
+ * Parses a serialized representation of {@link CoinType}.
  */
 export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String") =>
   z
@@ -128,7 +128,7 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
- * Parses a string representation of an EVM address into a lowercase Address.
+ * Parses a serialized representation of an EVM address into a lowercase Address.
  */
 export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
   z
@@ -169,7 +169,7 @@ export const makeUrlSchema = (valueLabel: string = "Value") =>
     .transform((v) => new URL(v));
 
 /**
- * Parses a string representation of a comma separated list.
+ * Parses a serialized representation of a comma separated list.
  */
 export const makeCommaSeparatedList = (valueLabel: string = "Value") =>
   z
