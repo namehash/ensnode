@@ -225,18 +225,23 @@ export async function handleTextChanged({
   });
 
   if (!config.isSubgraphCompatible) {
-    // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event and
+    let recordValue = value ?? null;
+
+    // if recordValue is null, this is a LegacyPublicResolver (DefaultPublicResolver1) event and
     // if we are indexing additional resolver records, we need the actual record value in order
     // to accelerate at resolution-time. so fetch it here if necessary
-    const recordValue =
-      value !== undefined
-        ? value
-        : await context.client.readContract({
-            abi: context.contracts.Resolver.abi,
-            address: event.log.address,
-            functionName: "text",
-            args: [node, key],
-          });
+    if (recordValue === null) {
+      try {
+        recordValue = await context.client.readContract({
+          abi: context.contracts.Resolver.abi,
+          address: event.log.address,
+          functionName: "text",
+          args: [node, key],
+        });
+      } catch {
+        // noop
+      }
+    }
 
     await handleResolverTextRecordUpdate(context, id, key, recordValue);
   }
