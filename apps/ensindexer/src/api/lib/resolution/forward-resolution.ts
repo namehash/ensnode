@@ -17,7 +17,6 @@ import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
-import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
 import { findResolver } from "@/api/lib/protocol-acceleration/find-resolver";
 import { getPrimaryNameFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
 import { getRecordsFromIndex } from "@/api/lib/protocol-acceleration/get-records-from-index";
@@ -25,7 +24,6 @@ import { isKnownENSIP19ReverseResolver } from "@/api/lib/protocol-acceleration/k
 import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/protocol-acceleration/known-offchain-lookup-resolver";
 import { isKnownOnchainStaticResolver } from "@/api/lib/protocol-acceleration/known-onchain-static-resolver";
 import { areResolverRecordsIndexedOnChain } from "@/api/lib/protocol-acceleration/resolver-records-indexed-on-chain";
-import { getPublicClient } from "@/api/lib/public-client";
 import {
   makeEmptyResolverRecordsResponse,
   makeRecordsResponseFromIndexedRecords,
@@ -36,6 +34,8 @@ import {
   interpretRawCallsAndResults,
   makeResolveCalls,
 } from "@/api/lib/resolution/resolve-calls-and-results";
+import { supportsENSIP10Interface } from "@/api/lib/rpc/ensip-10";
+import { getPublicClient } from "@/api/lib/rpc/public-client";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/tracing/protocol-tracing";
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";

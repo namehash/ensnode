@@ -1,4 +1,4 @@
-import { errorResponse } from "@/api/lib/error-response";
+import { errorResponse } from "@/api/lib/handlers/error-response";
 import { zValidator } from "@hono/zod-validator";
 import type { ValidationTargets } from "hono";
 import type { ZodType } from "zod/v4";

@@ -1,5 +1,6 @@
-import { supportsInterface } from "@/api/lib/eip-165";
 import type { Address, PublicClient } from "viem";
+
+import { supportsInterface } from "./eip-165";
 
 /**
  * ENSIP-10 Wildcard Resolution Interface Id
