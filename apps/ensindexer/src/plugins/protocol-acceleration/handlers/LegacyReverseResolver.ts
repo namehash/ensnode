@@ -1,12 +1,12 @@
 import { ponder } from "ponder:registry";
 
-import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   ensureResolverRecords,
   handleResolverNameUpdate,
-} from "../lib/resolver-records-db-helpers";
+} from "@/lib/protocol-acceleration/resolver-records-db-helpers";
 
 /**
  * Handlers for pre-ENSIP-19 ReverseResolver contracts in the Protocol Acceleration Plugin.

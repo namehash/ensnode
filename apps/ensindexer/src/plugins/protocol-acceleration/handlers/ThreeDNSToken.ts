@@ -5,8 +5,7 @@ import { Address } from "viem";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-
-import { upsertDomainResolverRelation } from "../lib/node-resolver-relationship-db-helpers";
+import { upsertDomainResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
 
 /**
  * Handler functions for ThreeDNSToken contracts in the Protocol Acceleration plugin.

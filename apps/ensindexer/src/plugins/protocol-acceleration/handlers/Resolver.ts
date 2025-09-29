@@ -4,13 +4,12 @@ import { ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
-
 import {
   ensureResolverRecords,
   handleResolverAddressRecordUpdate,
   handleResolverNameUpdate,
   handleResolverTextRecordUpdate,
-} from "../lib/resolver-records-db-helpers";
+} from "@/lib/protocol-acceleration/resolver-records-db-helpers";
 
 /**
  * Handlers for Resolver contracts in the Protocol Acceleration plugin.

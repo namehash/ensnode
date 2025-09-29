@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  makeNodeResolverRelationId,
-  makePrimaryNameId,
-} from "@/plugins/protocol-acceleration/lib/ids";
 import { DEFAULT_EVM_COIN_TYPE } from "@ensnode/ensnode-sdk";
 import { namehash, zeroAddress } from "viem";
+
+import { makeNodeResolverRelationId, makePrimaryNameId } from "@/lib/protocol-acceleration/ids";
 
 const CHAIN_ID = 1337;
 

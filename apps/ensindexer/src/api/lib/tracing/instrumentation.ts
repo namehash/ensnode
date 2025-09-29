@@ -1,5 +1,5 @@
 import packageJson from "@/../package.json";
-import { ProtocolTraceExporter } from "@/api/lib/protocol-tracing";
+import { ProtocolTraceExporter } from "@/api/lib/tracing/protocol-tracing";
 
 import { DiagConsoleLogger, DiagLogLevel, diag } from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";

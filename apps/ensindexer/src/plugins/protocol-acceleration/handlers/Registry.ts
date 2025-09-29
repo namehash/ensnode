@@ -8,12 +8,11 @@ import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode
 
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-
 import {
   removeDomainResolverRelation,
   upsertDomainResolverRelation,
-} from "../lib/node-resolver-relationship-db-helpers";
-import { migrateNode, nodeIsMigrated } from "../lib/registry-migration-status";
+} from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 

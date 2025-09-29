@@ -17,26 +17,26 @@ import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
-import { isKnownENSIP19ReverseResolver } from "@/api/lib/acceleration/known-ensip-19-reverse-resolvers";
-import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/acceleration/known-offchain-lookup-resolver";
-import { isKnownOnchainStaticResolver } from "@/api/lib/acceleration/known-onchain-static-resolver";
-import { areResolverRecordsIndexedOnChain } from "@/api/lib/acceleration/resolver-records-indexed-on-chain";
 import { supportsENSIP10Interface } from "@/api/lib/ensip-10";
-import { findResolver } from "@/api/lib/find-resolver";
-import { getPrimaryNameFromIndex } from "@/api/lib/get-primary-name-from-index";
-import { getRecordsFromIndex } from "@/api/lib/get-records-from-index";
+import { findResolver } from "@/api/lib/protocol-acceleration/find-resolver";
+import { getPrimaryNameFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
+import { getRecordsFromIndex } from "@/api/lib/protocol-acceleration/get-records-from-index";
+import { isKnownENSIP19ReverseResolver } from "@/api/lib/protocol-acceleration/known-ensip-19-reverse-resolvers";
+import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/protocol-acceleration/known-offchain-lookup-resolver";
+import { isKnownOnchainStaticResolver } from "@/api/lib/protocol-acceleration/known-onchain-static-resolver";
+import { areResolverRecordsIndexedOnChain } from "@/api/lib/protocol-acceleration/resolver-records-indexed-on-chain";
+import { getPublicClient } from "@/api/lib/public-client";
 import {
   makeEmptyResolverRecordsResponse,
   makeRecordsResponseFromIndexedRecords,
   makeRecordsResponseFromResolveResults,
-} from "@/api/lib/make-records-response";
-import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/protocol-tracing";
-import { getPublicClient } from "@/api/lib/public-client";
+} from "@/api/lib/resolution/make-records-response";
 import {
   executeResolveCalls,
   interpretRawCallsAndResults,
   makeResolveCalls,
-} from "@/api/lib/resolve-calls-and-results";
+} from "@/api/lib/resolution/resolve-calls-and-results";
+import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/tracing/protocol-tracing";
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 

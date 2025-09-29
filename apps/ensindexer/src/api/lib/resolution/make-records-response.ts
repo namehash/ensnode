@@ -1,4 +1,4 @@
-import { ResolveCallsAndResults } from "@/api/lib/resolve-calls-and-results";
+import { ResolveCallsAndResults } from "@/api/lib/resolution/resolve-calls-and-results";
 import {
   ResolverRecordsResponse,
   ResolverRecordsResponseBase,

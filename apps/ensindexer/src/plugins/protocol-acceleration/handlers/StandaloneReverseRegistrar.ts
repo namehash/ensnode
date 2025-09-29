@@ -8,8 +8,7 @@ import { DEFAULT_EVM_COIN_TYPE, PluginName, evmChainIdToCoinType } from "@ensnod
 
 import { interpretNameRecordValue } from "@/lib/interpret-record-values";
 import { namespaceContract } from "@/lib/plugin-helpers";
-
-import { makePrimaryNameId } from "../lib/ids";
+import { makePrimaryNameId } from "@/lib/protocol-acceleration/ids";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts in the Protocol Acceleration
