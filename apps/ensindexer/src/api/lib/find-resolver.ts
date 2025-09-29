@@ -21,7 +21,6 @@ import { packetToBytes } from "viem/ens";
 
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
-import { parseResolverId } from "@/lib/ids";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 
 type FindResolverResult =
@@ -43,10 +42,6 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
  * Identifies the active resolver on `chainId` for `name`.
- *
- * NOTE: If calling `findResolver` for a chain other than the ENS Root Chain, it is the caller's
- * responsibility to ensure that the appropriate Domain-Resolver relations are indexed for the
- * specified chainId, or the `findResolverWithIndex` will return null.
  */
 export async function findResolver({
   chainId,
@@ -61,19 +56,12 @@ export async function findResolver({
       return findResolverWithIndex(chainId, name);
     }
 
-    // query the UniversalResolver on the ENSRoot Chain (via RPC)
+    // otherwise, query the UniversalResolver on the ENSRoot Chain (via RPC)
     return findResolverWithUniversalResolver(publicClient, name);
   }
 
-  // Implicit Invariant: calling `findResolver` in the context of a non-root chain only makes sense
-  // in the context of Protocol-Accelerated logic: besides the ENS Root Chain, `findResolver` should
-  // _ONLY_ be called with chains for which we are guaranteed to have the Domain-Resolver relations
-  // indexed. This is enforced by the requirement that `forwardResolve` with non-ENSRoot chain ids is
-  // only called when a known offchain lookup resolver defers to a plugin that is active.
-
-  // at this point we _must_ have access to the indexed Domain-Resolver relations necessary to look up
-  // the Domain's configured Resolver (see invariant above), so retrieve the name's active resolver
-  // from the index.
+  // If findResolver is called for a non-root-chain, we _must_ have access to the indexed Node-Resolver
+  // relations necessary to look up the Domain's configured Resolver (see invariant in `findResolverWithIndex`)
   return findResolverWithIndex(chainId, name);
 }
 
@@ -167,7 +155,7 @@ async function findResolverWithIndex(
 ): Promise<FindResolverResult> {
   if (!config.plugins.includes(PluginName.ProtocolAcceleration)) {
     throw new Error(
-      "Invariant(findResolverWithIndex): ProtocolAcceleration plugin must be enabled in order to accelerate the identification of a name's active resolver.",
+      `Invariant(findResolverWithIndex): ProtocolAcceleration plugin must be enabled in order to accelerate the identification of a name's active resolver on chain ${chainId}.`,
     );
   }
 
@@ -184,57 +172,57 @@ async function findResolverWithIndex(
     const nodes = names.map((name) => namehash(name) as Node);
 
     // 3. for each domain, find its associated resolver (only on the specified chain)
-    const domainResolverRelations = await withSpanAsync(
+    const nodeResolverRelations = await withSpanAsync(
       tracer,
-      "ext_domainResolverRelation.findMany",
+      "ext_nodeResolverRelation.findMany",
       {},
-      () =>
-        db.query.ext_domainResolverRelation.findMany({
-          where: (drr, { inArray, and, eq }) =>
+      async () => {
+        const records = await db.query.ext_nodeResolverRelation.findMany({
+          where: (nrr, { inArray, and, eq }) =>
             and(
-              inArray(drr.domainId, nodes), // find Relations for the following Domains
-              eq(drr.chainId, chainId), // exclusively on the requested chainId
+              inArray(nrr.node, nodes), // find Relations for the following Nodes
+              eq(nrr.chainId, chainId), // exclusively on the requested chainId
             ),
-          columns: { chainId: true, domainId: true, resolverId: true }, // retrieve resolverId
-        }),
+          columns: { node: true, resolverAddress: true },
+        });
+
+        // cast into our semantic types
+        return records as { node: Node; resolverAddress: Address }[];
+      },
     );
 
     // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
-    domainResolverRelations.sort((a, b) =>
-      nodes.indexOf(a.domainId as Node) > nodes.indexOf(b.domainId as Node) ? 1 : -1,
-    );
+    nodeResolverRelations.sort((a, b) => (nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1));
 
     // 4. iterate up the hierarchy and return the first valid resolver
-    for (const drr of domainResolverRelations) {
-      // find the first one with a resolver
-      if (drr.resolverId !== null) {
-        // parse out its address
-        const { address: resolverAddress } = parseResolverId(drr.resolverId);
-
-        // NOTE: this zeroAddress check is not strictly necessary, as ENSIndexer encodes a zeroAddress
-        // resolver as the _absence_ of a Domain-Resolver relation, so there is no case where a
-        // Domain-Resolver relation exists and the resolverAddress is zeroAddress, but we include this
-        // check here to encode that explicitly.
-        if (isAddressEqual(resolverAddress, zeroAddress)) continue;
-
-        // map the drr's domainId (node) back to its name in `names`
-        const indexInHierarchy = nodes.indexOf(drr.domainId as Node);
-        const activeName = names[indexInHierarchy];
-
-        // will never occur, exlusively for typechecking
-        if (!activeName) {
-          throw new Error(
-            `Invariant(findResolverWithIndex): activeName could not be determined names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's domainId: ${drr.domainId}.`,
-          );
-        }
-
-        return {
-          activeName,
-          activeResolver: resolverAddress,
-          // this resolver must have wildcard support if it was not for the first node in our hierarchy
-          requiresWildcardSupport: indexInHierarchy > 0,
-        };
+    for (const { node, resolverAddress } of nodeResolverRelations) {
+      // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
+      // encodes a zeroAddress resolver as the _absence_ of a Domain-Resolver relation, so there is
+      // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
+      // we include this invariant here to encode that expectation explicitly.
+      if (isAddressEqual(resolverAddress, zeroAddress)) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for node ${node}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
+        );
       }
+
+      // map the relation's `node` back to its name in `names`
+      const indexInHierarchy = nodes.indexOf(node);
+      const activeName = names[indexInHierarchy];
+
+      // will never occur, exlusively for typechecking
+      if (!activeName) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's node: ${node}.`,
+        );
+      }
+
+      return {
+        activeName,
+        activeResolver: resolverAddress,
+        // this resolver must have wildcard support if it was not for the first node in our hierarchy
+        requiresWildcardSupport: indexInHierarchy > 0,
+      };
     }
 
     // 5. unable to find an active resolver

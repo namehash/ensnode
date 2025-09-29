@@ -1,6 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
+import schema from "ponder:schema";
 import {
   handleNewOwner,
   handleNewResolver,
@@ -8,7 +9,6 @@ import {
   handleTransfer,
 } from "@/handlers/Registry";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { subgraph_nodeIsMigrated } from "@/lib/registry-migration-status";
 import { setupRootNode } from "@/lib/subgraph-helpers";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
@@ -20,8 +20,8 @@ import { setupRootNode } from "@/lib/subgraph-helpers";
 // these handlers should ignore 'RegistryOld' events for a given domain if it has been migrated to the
 // (new) Registry, which is tracked in the `Domain.isMigrated` field
 async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
-  const nodeIsMigrated = await subgraph_nodeIsMigrated(context, node);
-  return nodeIsMigrated;
+  const domain = await context.db.find(schema.domain, { id: node });
+  return domain?.isMigrated ?? false;
 }
 
 /**

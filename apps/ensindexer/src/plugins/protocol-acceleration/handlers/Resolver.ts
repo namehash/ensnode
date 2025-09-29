@@ -1,17 +1,20 @@
 import { ponder } from "ponder:registry";
+
+import { ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
+
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
+
 import {
   ensureResolverRecords,
   handleResolverAddressRecordUpdate,
   handleResolverNameUpdate,
   handleResolverTextRecordUpdate,
-} from "@/plugins/protocol-acceleration/lib/protocol-acceleration-db-helpers";
-import { ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
+} from "../lib/resolver-records-db-helpers";
 
 /**
- * Handlers for Resolver contracts in the Protocol Acceleration plugin. These handlers ensure that
- * the relevant Resolver Records are indexed in order to power Protocol Acceleration.
+ * Handlers for Resolver contracts in the Protocol Acceleration plugin.
+ * - indexes Resolver Records
  */
 export default function () {
   ponder.on(

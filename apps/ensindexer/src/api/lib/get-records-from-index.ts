@@ -2,7 +2,7 @@ import { db } from "ponder:api";
 import { onchainStaticResolverImplementsDefaultAddress } from "@/api/lib/acceleration/known-onchain-static-resolver";
 import type { IndexedResolverRecords } from "@/api/lib/make-records-response";
 import { withSpanAsync } from "@/lib/auto-span";
-import { makeResolverRecordsId } from "@/lib/ids";
+import { makeResolverRecordsId } from "@/plugins/protocol-acceleration/lib/ids";
 import {
   ChainId,
   DEFAULT_EVM_COIN_TYPE,

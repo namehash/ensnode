@@ -42,23 +42,23 @@ export const ext_primaryName = onchainTable(
 );
 
 /**
- * Tracks Domain<->Resolver relationships by chainId to additionally support the chain-specific
- * Domain<->Resolver relationships within the Basenames and Lineanames Shadow Registries.
+ * Tracks Node<->Resolver relationships by chainId to additionally support the chain-specific
+ * Node<->Resolver relationships within the Basenames and Lineanames Shadow Registries.
  *
  * Necessary to accelerate Basenames/Lineanames CCIP-Reads.
  */
-export const ext_domainResolverRelation = onchainTable(
-  "ext_domain_resolver_relations",
+export const ext_nodeResolverRelation = onchainTable(
+  "ext_node_resolver_relations",
   (t) => ({
-    // keyed by (chainId, domainId)
+    // keyed by (chainId, node)
     id: t.text().primaryKey(),
     chainId: t.integer().notNull(),
-    domainId: t.text().notNull(),
+    node: t.hex().notNull(),
 
-    resolverId: t.text().notNull(),
+    resolverAddress: t.hex().notNull(),
   }),
   (t) => ({
-    byChainIdAndDomain: uniqueIndex().on(t.chainId, t.domainId),
+    byChainIdAndNode: uniqueIndex().on(t.chainId, t.node),
   }),
 );
 
@@ -173,3 +173,29 @@ export const ext_resolverTextRecordsRelations = relations(
     }),
   }),
 );
+
+/**
+ * Tracks the migration status of a node.
+ *
+ * Due to a security issue, ENS migrated from the RegistryOld contract to a new Registry
+ * contract. When indexing events, the indexer must ignore any events on the RegistryOld for domains
+ * that have since been migrated to the new Registry.
+ *
+ * To store the necessary information required to implement this behavior, we track the set of nodes
+ * that have been registered in the (new) Registry contract on the ENS Root Chain. When an event is
+ * encountered on the RegistryOld contract, if the relevant node exists in this set, the event should
+ * be ignored, as the node is considered migrated.
+ *
+ * Note that this logic is only necessary for the ENS Root Chain, the only chain that includes the
+ * Registry migration: we do not track nodes in the the Basenames and Lineanames deployments of the
+ * Registry on their respective chains, for example.
+ *
+ * Note also that this Registry migration tracking is isolated to the Protocol Acceleration schema/plugin.
+ * That is, the subgraph core plugin implements its own Registry migration logic, and the future
+ * ensv2 core plugin will likely do the same. By isolating this logic to the Protocol Acceleration
+ * plugin, we allow the Protocol acceleration plugin to be run independently of a core plugin
+ * (and could be run _without_ a core plugin, for example).
+ */
+export const ext_migratedNodes = onchainTable("ext_migrated_nodes", (t) => ({
+  node: t.hex().primaryKey(),
+}));

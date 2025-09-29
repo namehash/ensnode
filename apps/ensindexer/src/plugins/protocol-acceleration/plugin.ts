@@ -11,10 +11,10 @@ import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-hel
 
 /**
  * Describes the indexing behavior for all entities that power Protocol Acceleration:
- * - indexing of Resolver Records
- * - indexing of Domain-Resolver Relationships
+ * - indexing of Resolver Records for all Resolver contracts on ENS Root, Base, Linea, and Optimism
+ * - indexing of Node-Resolver Relationships for ENS Root, Basenames, Lineanames, and ThreeDNS
  * - indexing of LegacyReverseResolvers
- * - indexing of ENSIP-19 StandaloneReverseRegistrars
+ * - indexing of ENSIP-19 StandaloneReverseRegistrars for Base, Linea, Optimism, Arbitrum, and Scroll
  */
 export const pluginName = PluginName.ProtocolAcceleration;
 
@@ -113,7 +113,7 @@ export default createPlugin({
               root.chain.id,
               root.contracts.Resolver,
             ),
-            // index all Resolver contracts on Base (includes ThreeDNSToken's Resolver)
+            // index all Resolver contracts on Base (includes ThreeDNS's Resolver)
             ...chainConfigForContract(
               config.globalBlockrange,
               basenames.chain.id,
@@ -125,7 +125,9 @@ export default createPlugin({
               lineanames.chain.id,
               lineanames.contracts.Resolver,
             ),
-            // index ThreeDNSToken's Resolver on Optimism
+            // index ThreeDNS's Resolver on Optimism
+            // TODO: if ever necessary, implement more general indexing of all Resolver contracts
+            // on Optimism instead of just this specific Resolver identified by `threeDNSOptimism.contracts.Resolver.address`
             ...chainConfigForContract(
               config.globalBlockrange,
               threeDNSOptimism.chain.id,
@@ -188,7 +190,7 @@ export default createPlugin({
         // a multi-chain ThreeDNS Resolver ContractConfig
         // NOTE: the actual indexing of Resolver records is handled by the Resolver config above. we
         // include this ContractConfig in the ponder config so that it's available on `context.contracts`
-        // in order to map the Domain-Resolver relationships for ThreeDNSToken nodes correctly
+        // in order to map the Node-Resolver relationships for ThreeDNSToken nodes correctly
         [namespaceContract(pluginName, "ThreeDNSResolver")]: {
           abi: ResolverABI,
           chain: {

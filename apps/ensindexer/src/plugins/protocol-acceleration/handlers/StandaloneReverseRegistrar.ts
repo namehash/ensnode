@@ -1,15 +1,20 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import config from "@/config";
-import { makePrimaryNameId } from "@/lib/ids";
-import { interpretNameRecordValue } from "@/lib/interpret-record-values";
-import { namespaceContract } from "@/lib/plugin-helpers";
+
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, PluginName, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
 
+import { interpretNameRecordValue } from "@/lib/interpret-record-values";
+import { namespaceContract } from "@/lib/plugin-helpers";
+
+import { makePrimaryNameId } from "../lib/ids";
+
 /**
- * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts. These contracts manage
- * `name` records for an address, per-coinType (derived from context.chain.id).
+ * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts in the Protocol Acceleration
+ * plugin.
+ * - manages `name` records for an address, per-coinType (derived from context.chain.id).
  */
 export default function () {
   ponder.on(

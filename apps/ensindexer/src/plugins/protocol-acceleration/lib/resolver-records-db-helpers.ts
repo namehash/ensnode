@@ -1,7 +1,9 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
+import { type Address } from "viem";
 
-import { makeKeyedResolverRecordId, makeResolverRecordsId } from "@/lib/ids";
+import { Node } from "@ensnode/ensnode-sdk";
+
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
@@ -9,8 +11,8 @@ import {
   interpretTextRecordValue,
 } from "@/lib/interpret-record-values";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { Node } from "@ensnode/ensnode-sdk";
-import { type Address } from "viem";
+
+import { makeKeyedResolverRecordId, makeResolverRecordsId } from "./ids";
 
 export async function ensureResolverRecords(
   context: Context,

@@ -1,15 +1,19 @@
-import { Context, ponder } from "ponder:registry";
 import config from "@/config";
+
+import { Context, ponder } from "ponder:registry";
+import { Address, isAddressEqual, zeroAddress } from "viem";
+
+import { getENSRootChainId } from "@ensnode/datasources";
+import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { migrateNode, nodeIsMigrated } from "@/lib/registry-migration-status";
+
 import {
   removeDomainResolverRelation,
   upsertDomainResolverRelation,
-} from "@/plugins/protocol-acceleration/lib/domain-resolver-relationship-db-helpers";
-import { getENSRootChainId } from "@ensnode/datasources";
-import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-import { Address, isAddressEqual, zeroAddress } from "viem";
+} from "../lib/node-resolver-relationship-db-helpers";
+import { migrateNode, nodeIsMigrated } from "../lib/registry-migration-status";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 
@@ -31,15 +35,15 @@ async function handleNewResolver({
 }
 
 /**
- * Handler functions for managing Domain-Resolver Relationships in Regsitry contracts. Includes
- * RegistryOld migration logic, ignoring events on RegistryOld when the node is migrated to the
- * (new) Registry contract.
+ * Handler functions for Regsitry contracts in the Protocol Acceleration plugin.
+ * - indexes Registry migration status
+ * - indexes Node-Resolver Relationships
  */
 export default function () {
   /**
-   * Implements Registry migration tracking for the ProtocolAcceleration plugin by tracking instances
+   * Implements Registry migration tracking for the ProtocolAcceleration plugin by tracking instances.
    *
-   * TODO:
+   * Note that this registry migration status tracking is isolated to the protocol
    */
   ponder.on(
     namespaceContract(PluginName.ProtocolAcceleration, "Registry:NewOwner"),

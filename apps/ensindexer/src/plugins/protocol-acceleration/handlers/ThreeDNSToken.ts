@@ -1,12 +1,16 @@
 import { Context, ponder } from "ponder:registry";
-import { namespaceContract } from "@/lib/plugin-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { upsertDomainResolverRelation } from "@/plugins/protocol-acceleration/lib/domain-resolver-relationship-db-helpers";
+
 import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 
+import { namespaceContract } from "@/lib/plugin-helpers";
+import { EventWithArgs } from "@/lib/ponder-helpers";
+
+import { upsertDomainResolverRelation } from "../lib/node-resolver-relationship-db-helpers";
+
 /**
- * Handler functions for managing Domain-Resolver Relationships in ThreeDNSToken contracts.
+ * Handler functions for ThreeDNSToken contracts in the Protocol Acceleration plugin.
+ * - manages Node-Resolver Relationships
  */
 export default function () {
   ponder.on(
@@ -32,7 +36,7 @@ export default function () {
         namespaceContract(PluginName.ProtocolAcceleration, "ThreeDNSResolver")
       ].address! as Address;
 
-      // all ThreeDNSToken nodes have a hardcoded resolver at `resolverAddress`
+      // all ThreeDNSToken nodes have a hardcoded resolver at that address
       await upsertDomainResolverRelation(context, node, resolverAddress);
     },
   );

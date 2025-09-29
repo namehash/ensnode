@@ -5,4 +5,3 @@ export * from "./subgraph.schema";
 export * from "./protocol-acceleration.schema";
 export * from "./referrals.schema";
 export * from "./tokenscope.schema";
-export * from "./migrated-nodes.schema";

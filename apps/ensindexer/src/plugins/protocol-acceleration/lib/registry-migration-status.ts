@@ -1,6 +1,8 @@
+import config from "@/config";
+
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import config from "@/config";
+
 import { getENSRootChainId } from "@ensnode/datasources";
 import { Node } from "@ensnode/ensnode-sdk";
 
