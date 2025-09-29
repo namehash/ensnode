@@ -6,8 +6,8 @@ import {
   type ChainId,
   PluginName,
   deserializeChainId,
-  isHttpEndpointURL,
-  isWebSocketEndpointURL,
+  isHttpProtocol,
+  isWebSocketProtocol,
   uniq,
 } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
@@ -27,8 +27,8 @@ import {
   invariant_requiredDatasources,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_rpcConfigsSpecifiedForRootChain,
-  invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL,
-  invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL,
+  invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
+  invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
   invariant_validContractConfigs,
 } from "./validations";
 
@@ -56,8 +56,8 @@ const RpcConfigSchema = z
   .string()
   .transform((val) => val.split(","))
   .pipe(z.array(makeUrlSchema("RPC_URL_*")))
-  .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPEndpointURL)
-  .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsEndpointURL);
+  .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL)
+  .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL);
 
 const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
   error: (issue) => {
@@ -130,11 +130,11 @@ const RpcConfigsSchema = z
     const rpcConfigs = new Map<ChainId, RpcConfig>();
 
     for (const [chainIdString, rpcConfig] of Object.entries(records)) {
-      // rpcConfig is guaranteed to include at least one HTTP endpoint URL
-      const httpRPCs = rpcConfig.filter(isHttpEndpointURL) as [URL, ...URL[]];
+      // rpcConfig is guaranteed to include at least one HTTP protocol URL
+      const httpRPCs = rpcConfig.filter(isHttpProtocol) as [URL, ...URL[]];
 
-      // rpcConfig is guaranteed to include at most one WebSocket endpoint URL
-      const websocketRPC = rpcConfig.find(isWebSocketEndpointURL);
+      // rpcConfig is guaranteed to include at most one WebSocket protocol URL
+      const websocketRPC = rpcConfig.find(isWebSocketProtocol);
 
       rpcConfigs.set(deserializeChainId(chainIdString), {
         httpRPCs,

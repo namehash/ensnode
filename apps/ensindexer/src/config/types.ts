@@ -3,25 +3,25 @@ import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/en
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
- * Indexing RPC configuration for a single chain.
+ * RPC configuration for indexing a single chain.
  *
- * Ponder automatically manages the use of provided RPC endpoints.
+ * Ponder automatically manages the use of RPC endpoints for each indexed chain.
  *
  * @see https://ponder.sh/docs/config/chains#rpc-endpoints
  * @see https://ponder.sh/docs/config/chains#websocket
  */
 export interface RpcConfig {
   /**
-   * The HTTP endpoint URLs for RPCs to the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
+   * The HTTP protocol URLs for RPCs to the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
    * For proper indexing behavior, each RPC must support high request rate limits (ex: 500+ requests a second).
    *
    * The order of RPC URLs matters. The first HTTP/HTTPS RPC for a given chain
    * will be the RPC that is used for Resolution API request processing.
    *
    * Invariants:
-   * - Includes one or more URLs
-   * - Each URL in the array is guaranteed to be distinct
-   * - Each URL protocol is guaranteed to be "http:" or "https:"
+   * - Includes one or more URLs.
+   * - Each URL in the array is guaranteed to be distinct.
+   * - The protocol of each URL is guaranteed to be "http" or "https".
    */
   httpRPCs: [URL, ...URL[]];
 
@@ -31,7 +31,7 @@ export interface RpcConfig {
    * If defined, it is used to accelerate discovery of new "realtime" blocks.
    *
    * Invariants:
-   * - If defined, URL protocol is guaranteed to be "ws:" or "wss:".
+   * - If defined, the protocol of the URL is guaranteed to be "ws" or "wss".
    */
   websocketRPC?: URL;
 }
@@ -235,7 +235,7 @@ export interface ENSIndexerConfig {
 /**
  * Represents the raw unvalidated environment variable for the RPCs associated with a chain.
  *
- * It might be a single URL string, or a comma separated list of URL strings.
+ * May contain a comma separated list of one or more URLs.
  */
 export type RpcConfigEnvironment = string;
 

@@ -16,7 +16,7 @@ function serializeRpcConfigs(
   const serializedRpcConfigs: SerializedENSIndexerConfig["rpcConfigs"] = {};
 
   for (const [chainId, rpcConfig] of rpcConfigs.entries()) {
-    const serializedHttpRPCs = rpcConfig.httpRPCs.map(serializeUrl) as [UrlString, ...UrlString[]];
+    const serializedHttpRPCs = rpcConfig.httpRPCs.map(serializeUrl) as [UrlString, ...UrlString[]]; // guaranteed to include at least one URL
     const serializedWebsocketRPC = rpcConfig.websocketRPC
       ? serializeUrl(rpcConfig.websocketRPC)
       : undefined;
@@ -45,7 +45,7 @@ function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
   for (const [chainId, rpcConfig] of config.rpcConfigs.entries()) {
     const redactURL = (sourceURL: URL) => new URL(`/${REDACTED}`, sourceURL.href);
 
-    const redactedHttpRPCs = rpcConfig.httpRPCs.map(redactURL) as [URL, ...URL[]];
+    const redactedHttpRPCs = rpcConfig.httpRPCs.map(redactURL) as [URL, ...URL[]]; // guaranteed to include at least one URL
     const redactedWebsocketRPC = rpcConfig.websocketRPC
       ? redactURL(rpcConfig.websocketRPC)
       : undefined;

@@ -7,12 +7,14 @@ import type { ENSIndexerConfig, RpcConfig } from "./types";
  */
 export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "websocketRPC"> {
   /**
-   * String representation of {@link RpcConfig.httpRPCs}.
+   * Serialized representation of {@link RpcConfig.httpRPCs}.
+   *
+   * Array guaranteed to contain at least 1 element.
    */
   httpRPCs: [UrlString, ...UrlString[]];
 
   /**
-   * String representation of {@link RpcConfig.websocketRPC}.
+   * Serialized representation of {@link RpcConfig.websocketRPC}.
    */
   websocketRPC?: UrlString;
 }
@@ -31,22 +33,22 @@ export interface SerializedENSIndexerConfig
     | "rpcConfigs"
   > {
   /**
-   * String representation of {@link ENSIndexerConfig.ensAdminUrl}.
+   * Serialized representation of {@link ENSIndexerConfig.ensAdminUrl}.
    */
   ensAdminUrl: UrlString;
 
   /**
-   * String representation of {@link ENSIndexerConfig.ensIndexerUrl}.
+   * Serialized representation of {@link ENSIndexerConfig.ensIndexerUrl}.
    */
   ensIndexerUrl: UrlString;
 
   /**
-   * String representation of {@link ENSIndexerConfig.ensNodePublicUrl}.
+   * Serialized representation of {@link ENSIndexerConfig.ensNodePublicUrl}.
    */
   ensNodePublicUrl: UrlString;
 
   /**
-   * String representation of {@link ENSIndexerConfig.ensRainbowUrl}.
+   * Serialized representation of {@link ENSIndexerConfig.ensRainbowUrl}.
    */
   ensRainbowUrl: UrlString;
 
@@ -56,12 +58,12 @@ export interface SerializedENSIndexerConfig
   labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
-   * String representation of {@link ENSIndexerConfig.indexedChainIds}.
+   * Serialized representation of {@link ENSIndexerConfig.indexedChainIds}.
    */
   indexedChainIds: ChainId[];
 
   /**
-   * String representation of {@link ENSIndexerConfig.rpcConfigs}.
+   * Serialized representation of {@link ENSIndexerConfig.rpcConfigs}.
    */
   rpcConfigs: Record<ChainIdString, SerializedRpcConfig>;
 }

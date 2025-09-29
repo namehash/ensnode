@@ -389,7 +389,7 @@ describe("config (with base env)", () => {
   });
 
   describe(".chains", () => {
-    it("returns the chains if it is a valid object (one HTTP endpoint)", async () => {
+    it("returns the chains if it is a valid object (one HTTP protocol URL)", async () => {
       vi.stubEnv("RPC_URL_1", VALID_RPC_URL);
       const config = await getConfig();
 
@@ -406,7 +406,7 @@ describe("config (with base env)", () => {
       );
     });
 
-    it("returns the chains if it is a valid object (multiple HTTP endpoints)", async () => {
+    it("returns the chains if it is a valid object (multiple HTTP protocol URLs)", async () => {
       vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL_ALT},${VALID_RPC_URL}`);
       const config = await getConfig();
 
@@ -423,7 +423,7 @@ describe("config (with base env)", () => {
       );
     });
 
-    it("returns the chains if it is a valid object (multiple HTTP endpoints, and one WebSocket endpoint)", async () => {
+    it("returns the chains if it is a valid object (multiple HTTP protocol URLs, and one WebSocket protocol URL)", async () => {
       vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_WS_URL},${VALID_RPC_URL_ALT}`);
       const config = await getConfig();
 
@@ -445,18 +445,18 @@ describe("config (with base env)", () => {
       await expect(getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
     });
 
-    it("throws an error if RPC_URL_1 includes less than one HTTP endpoint URL", async () => {
+    it("throws an error if RPC_URL_1 includes less than one HTTP protocol URL", async () => {
       vi.stubEnv("RPC_URL_1", `${VALID_RPC_WS_URL},${VALID_RPC_WS_URL_ALT}`);
-      await expect(getConfig()).rejects.toThrow(`Failed to parse environment configuration: 
-✖ RPC endpoint configuration must include at least one HTTP/HTTPS URL.
-  → at rpcConfigs.1`);
+      await expect(getConfig()).rejects.toThrow(
+        /RPC endpoint configuration for a chain must include at least one http\/https protocol URL/i,
+      );
     });
 
-    it("throws an error if RPC_URL_1 includes more than one WebSockets endpoint URL", async () => {
+    it("throws an error if RPC_URL_1 includes more than one WebSockets protocol URL", async () => {
       vi.stubEnv("RPC_URL_1", `${VALID_RPC_URL},${VALID_RPC_WS_URL},${VALID_RPC_WS_URL_ALT}`);
-      await expect(getConfig()).rejects.toThrow(`Failed to parse environment configuration: 
-✖ RPC endpoint configuration must include at most one WS/WSS URL.
-  → at rpcConfigs.1`);
+      await expect(getConfig()).rejects.toThrow(
+        /RPC endpoint configuration for a chain must include at most one websocket \(ws\/wss\) protocol URL./i,
+      );
     });
   });
 

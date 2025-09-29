@@ -9,7 +9,7 @@ export const DEFAULT_SUBGRAPH_COMPAT = false;
  * Extracts dynamic chain configuration from environment variables.
  *
  * This function scans all environment variables for keys matching the pattern
- * "RPC_URL_{chainId}", where {chainId} must be a valid chainId (e.g., "1", "10", "8453").
+ * "RPC_URL_{chainId}", where {chainId} must be a valid ChainId (e.g., "1", "10", "8453").
  *
  * This function returns raw RpcConfigEnvironment values which are not yet parsed or validated.
  */
@@ -29,7 +29,9 @@ export function getRpcConfigsFromEnv(): Record<ChainIdString, RpcConfigEnvironme
     const maybeChainId = match[1];
 
     // Invariant: maybeChainId is a string value
-    if (!maybeChainId) return;
+    if (typeof maybeChainId !== "string") {
+      return;
+    }
 
     try {
       const chainId = deserializeChainId(maybeChainId);
