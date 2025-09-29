@@ -1,3 +1,3 @@
-export default function ActionsNameNavigationPage() {
+export default function ActionsExploreNamesPage() {
   return null;
 }

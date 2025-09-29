@@ -8,25 +8,32 @@ import { Name } from "@ensnode/ensnode-sdk";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
 
-export default function NameNavigationPage() {
-  //TODO: theoretically, the "View Name" button could just be a child of the <Link> component,
-  // but I feel like this violates how <form> should work, hence the useRouter approach
-  const router = useRouter();
-  const [searchedName, setSearchedName] = useState<string>("");
+const EXAMPLE_NAMES = [
+  "vitalik.eth",
+  "gregskril.eth",
+  "katzman.base.eth",
+  "jesse.base.eth",
+  "alain.linea.eth",
+  "goinfrex.linea.eth",
+  "gift.box",
+  "barmstrong.cb.id",
+  "argent.xyz",
+  "lens.xyz",
+];
 
-  //TODO: For now pressing enter will only submit the form if the input is focused.
-  // Not sure if that satisfies this requirement:
-  // 'If the form is "submittable" then pressing enter should automatically submit the form.'
+export default function ExploreNamesPage() {
+  const router = useRouter();
+  const [searchedName, setSearchedName] = useState<Name>("");
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.target as HTMLFormElement);
     const name = formData.get("ens-name") as Name;
 
-    //TODO: should we automatically check for and&or add ".eth" TLD?
-    // I am unsure how this adheres to this requirement: "For now, there will be no validation or transformations
-    // on the input into this field. All inputs will be valid and interpreted literally."
-    // is to be satisfied.
+    //TODO: validation is to be established.
+    // Since it brings a significant amount of complexity it's preferable
+    // to not do it at all until we do it right.
     router.push(getNameDetailsRelativePath(name));
   };
 
@@ -43,25 +50,36 @@ export default function NameNavigationPage() {
           <CardTitle className="text-2xl">Explore ENS Names</CardTitle>
         </CardHeader>
         <CardContent className="max-sm:px-3 max-sm:pb-3">
-          {/*//TODO: Maybe we could create a short list of example names for users to pick from?
-                    Similarly to how it's done in the 'RecordsResolution' ?*/}
-          <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-2 pb-3 sm:pb-4" onSubmit={handleSubmit}>
             <fieldset className="flex flex-col sm:flex-row gap-2 justify-start items-center">
               <Input
-                autoFocus
-                type="text"
-                required
-                id="ens-name"
-                name="ens-name"
-                placeholder="Search for a name..."
-                value={searchedName}
-                onChange={handleChange}
+                  autoFocus
+                  type="text"
+                  required
+                  id="ens-name"
+                  name="ens-name"
+                  placeholder="Search for a name..."
+                  value={searchedName}
+                  onChange={handleChange}
               />
-              <Button type="submit" disabled={searchedName.length === 0} className="max-sm:self-stretch">
+              <Button
+                  type="submit"
+                  disabled={searchedName.length === 0}
+                  className="max-sm:self-stretch"
+              >
                 View Name
               </Button>
             </fieldset>
           </form>
+          <div className="flex flex-col gap-2 justify-center">
+            <p className="text-sm font-medium leading-none">Examples:</p>
+            <div className="flex flex-row flex-wrap gap-2 -mx-6 px-6">
+              {EXAMPLE_NAMES.map((exampleName) => <Button variant={searchedName === exampleName ? "default" : "outline"}
+                                                          size="sm" key={`example-name-${exampleName}`}
+                                                          onClick={() => setSearchedName(exampleName)}
+                                                          className="font-mono rounded-full">{exampleName}</Button>)}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </section>
