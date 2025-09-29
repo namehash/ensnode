@@ -4,7 +4,6 @@ import {
   DatasourceName,
   ENSNamespaceId,
   ResolverABI,
-  ResolverFilter,
   maybeGetDatasource,
 } from "@ensnode/datasources";
 import { ContractConfig } from "ponder";
@@ -27,7 +26,6 @@ export function resolverContractConfig(
         (memo, datasource) => ({
           ...memo,
           [datasource.chain.id.toString()]: {
-            filter: ResolverFilter,
             ...constrainBlockrange(
               globalBlockrange,
               // NOTE: all of the relevant datasources provide a Resolver ContractConfig with a `startBlock`
