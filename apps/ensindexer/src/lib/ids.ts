@@ -154,7 +154,7 @@ export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
  * Makes a unique ID for a domain-resolver relation on a given chain. DomainResolverRelations are
  * unique by (chainId, domainId).
  *
- * @see packages/ensnode-schema/src/resolver-relations.schema.ts
+ * @see packages/ensnode-schema/src/protocol-acceleration.schema.ts
  *
  * @example `${chainId}-${domainId}`
  *

@@ -11,7 +11,8 @@ import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-hel
 
 /**
  * Describes the indexing behavior for all entities that power Protocol Acceleration:
- * - indexing of ResolverRecords
+ * - indexing of Resolver Records
+ * - indexing of Domain-Resolver Relationships
  * - indexing of LegacyReverseResolvers
  * - indexing of ENSIP-19 StandaloneReverseRegistrars
  */
@@ -23,6 +24,7 @@ const ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES = [
   DatasourceNames.Basenames,
   DatasourceNames.Lineanames,
   DatasourceNames.ThreeDNSOptimism,
+  DatasourceNames.ThreeDNSBase,
 
   // LegacyReverseResolvers & StandaloneReverseRegistrars
   DatasourceNames.ReverseResolverRoot,
@@ -59,6 +61,11 @@ export default createPlugin({
       config.namespace,
       DatasourceNames.ThreeDNSOptimism,
     );
+    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.ThreeDNSBase,
+    );
+
     const rrRoot = getDatasourceAsFullyDefinedAtCompileTime(
       config.namespace,
       DatasourceNames.ReverseResolverRoot,
@@ -106,7 +113,7 @@ export default createPlugin({
               root.chain.id,
               root.contracts.Resolver,
             ),
-            // index all Resolver contracts on Base (includes ThreeDNSToken)
+            // index all Resolver contracts on Base (includes ThreeDNSToken's Resolver)
             ...chainConfigForContract(
               config.globalBlockrange,
               basenames.chain.id,
@@ -118,11 +125,82 @@ export default createPlugin({
               lineanames.chain.id,
               lineanames.contracts.Resolver,
             ),
-            // index ThreeDNSToken as Resolver on Optimism
+            // index ThreeDNSToken's Resolver on Optimism
             ...chainConfigForContract(
               config.globalBlockrange,
               threeDNSOptimism.chain.id,
               threeDNSOptimism.contracts.Resolver,
+            ),
+          },
+        },
+
+        // index the RegistryOld on ENS Root Chain
+        [namespaceContract(pluginName, "RegistryOld")]: {
+          abi: root.contracts.RegistryOld.abi,
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              root.chain.id,
+              root.contracts.RegistryOld,
+            ),
+          },
+        },
+
+        // a multi-chain Registry ContractConfig
+        [namespaceContract(pluginName, "Registry")]: {
+          abi: root.contracts.Registry.abi,
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              root.chain.id,
+              root.contracts.Registry,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              basenames.chain.id,
+              basenames.contracts.Registry,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              lineanames.chain.id,
+              lineanames.contracts.Registry,
+            ),
+          },
+        },
+
+        // a multi-chain ThreeDNSToken ContractConfig
+        [namespaceContract(pluginName, "ThreeDNSToken")]: {
+          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSOptimism.chain.id,
+              threeDNSOptimism.contracts.ThreeDNSToken,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSBase.chain.id,
+              threeDNSBase.contracts.ThreeDNSToken,
+            ),
+          },
+        },
+
+        // a multi-chain ThreeDNS Resolver ContractConfig
+        // NOTE: the actual indexing of Resolver records is handled by the Resolver config above. we
+        // include this ContractConfig in the ponder config so that it's available on `context.contracts`
+        // in order to map the Domain-Resolver relationships for ThreeDNSToken nodes correctly
+        [namespaceContract(pluginName, "ThreeDNSResolver")]: {
+          abi: ResolverABI,
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSOptimism.chain.id,
+              threeDNSOptimism.contracts.Resolver,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              threeDNSBase.chain.id,
+              threeDNSBase.contracts.Resolver,
             ),
           },
         },
