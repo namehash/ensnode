@@ -188,22 +188,23 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           //////////////////////////////////////////////////
-          // ENSIP-19 Reverse Resolvers
+          // Protocol Acceleration: ENSIP-19 Reverse Resolvers
           //   If:
-          //    1) the ProtocolAcceleration plugin is active, and
-          //    2) the activeResolver is a Known ENSIP-19 Reverse Resolver,
+          //    1) the caller requested acceleration, and
+          //    2) the ProtocolAcceleration plugin is active, and
+          //    3) the activeResolver is a Known ENSIP-19 Reverse Resolver,
           //   then we can just read the name record value directly from the index.
           //////////////////////////////////////////////////
           if (accelerate) {
             const isIndexingReverseRegistrars = config.plugins.includes(
               PluginName.ProtocolAcceleration,
             );
-            const _isKnownENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
+            const activeResolverIsKnownENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
               chainId,
               activeResolver,
             );
 
-            if (isIndexingReverseRegistrars && _isKnownENSIP19ReverseResolver) {
+            if (isIndexingReverseRegistrars && activeResolverIsKnownENSIP19ReverseResolver) {
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
@@ -244,22 +245,16 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 },
               );
             }
-
-            addProtocolStepEvent(
-              protocolTracingSpan,
-              TraceableENSProtocol.ForwardResolution,
-              ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
-              false,
-            );
           }
 
           //////////////////////////////////////////////////
-          // CCIP-Read Short-Circuit:
+          // Protocol Acceleration: CCIP-Read Short-Circuit
           //   If:
-          //    1) the activeResolver is a Known OffchainLookup Resolver, and
-          //    2) the plugin it defers resolution to is active,
-          //   then we can short-circuit the CCIP-Read and continue resolving the requested records directly
-          //   from the data indexed by that plugin.
+          //    1) the caller requested acceleration, and
+          //    2) the activeResolver is a Known OffchainLookup Resolver, and
+          //    3) the plugin it defers resolution to is active,
+          //   then we can short-circuit the CCIP-Read and continue resolving the requested records
+          //   directly from the data indexed by that plugin.
           //////////////////////////////////////////////////
           if (accelerate) {
             const defers = possibleKnownOffchainLookupResolverDefersTo(chainId, activeResolver);
@@ -283,21 +278,22 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           }
 
           //////////////////////////////////////////////////
-          // Known On-Chain Static Resolvers
+          // Protocol Acceleration: Known On-Chain Static Resolvers
           //   If:
-          //    1) activeResolver is a Known Onchain Static Resolver on this chain, and
-          //    2) ENSIndexer indexes records for all Resolver contracts on this chain,
+          //    1) the caller requested acceleration, and
+          //    2) activeResolver is a Known Onchain Static Resolver on this chain, and
+          //    3) ENSIndexer indexes records for all Resolver contracts on this chain,
           //   then we can retrieve records directly from the database.
           //////////////////////////////////////////////////
           if (accelerate) {
-            const _isKnownOnchainStaticResolver = isKnownOnchainStaticResolver(
+            const activeResolverIsKnownOnchainStaticResolver = isKnownOnchainStaticResolver(
               chainId,
               activeResolver,
             );
 
             const resolverRecordsAreIndexed = areResolverRecordsIndexedOnChain(chainId);
 
-            if (_isKnownOnchainStaticResolver && resolverRecordsAreIndexed) {
+            if (activeResolverIsKnownOnchainStaticResolver && resolverRecordsAreIndexed) {
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,

@@ -1,4 +1,9 @@
-import { DatasourceNames, ResolverABI, StandaloneReverseRegistrarABI } from "@ensnode/datasources";
+import {
+  DatasourceName,
+  DatasourceNames,
+  ResolverABI,
+  StandaloneReverseRegistrarABI,
+} from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { ChainConfig, createConfig } from "ponder";
 
@@ -8,6 +13,8 @@ import {
   namespaceContract,
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
+import { DATASOURCES_WITH_RESOLVERS } from "@/lib/protocol-acceleration/datasources-with-resolvers";
+import { resolverContractConfig } from "@/lib/resolver-contract-config";
 
 /**
  * Describes the indexing behavior for all entities that power Protocol Acceleration:
@@ -18,14 +25,7 @@ import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-hel
  */
 export const pluginName = PluginName.ProtocolAcceleration;
 
-const ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES = [
-  // Resolvers
-  DatasourceNames.ENSRoot,
-  DatasourceNames.Basenames,
-  DatasourceNames.Lineanames,
-  DatasourceNames.ThreeDNSOptimism,
-  DatasourceNames.ThreeDNSBase,
-
+const DATASOURCES_WITH_REVERSE_RESOLVERS = [
   // LegacyReverseResolvers & StandaloneReverseRegistrars
   DatasourceNames.ReverseResolverRoot,
   DatasourceNames.ReverseResolverBase,
@@ -33,13 +33,18 @@ const ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES = [
   DatasourceNames.ReverseResolverOptimism,
   DatasourceNames.ReverseResolverArbitrum,
   DatasourceNames.ReverseResolverScroll,
-] as const;
+] as const satisfies DatasourceName[];
+
+const ALL_DATASOURCE_NAMES = [
+  ...DATASOURCES_WITH_RESOLVERS,
+  ...DATASOURCES_WITH_REVERSE_RESOLVERS,
+] as const satisfies DatasourceName[];
 
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES,
+  requiredDatasourceNames: ALL_DATASOURCE_NAMES,
   createPonderConfig(config) {
-    const allDatasources = ALL_REVERSE_RESOLUTION_DATASOURCE_NAMES.map((datasourceName) =>
+    const allDatasources = ALL_DATASOURCE_NAMES.map((datasourceName) =>
       getDatasourceAsFullyDefinedAtCompileTime(config.namespace, datasourceName),
     );
 
@@ -104,37 +109,11 @@ export default createPlugin({
 
       contracts: {
         // a multi-chain Resolver ContractConfig
-        [namespaceContract(pluginName, "Resolver")]: {
-          abi: ResolverABI,
-          chain: {
-            // index all Resolver contracts on ENS Root
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              root.chain.id,
-              root.contracts.Resolver,
-            ),
-            // index all Resolver contracts on Base (includes ThreeDNS's Resolver)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              basenames.chain.id,
-              basenames.contracts.Resolver,
-            ),
-            // index all Resolver contracts on Linea
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              lineanames.chain.id,
-              lineanames.contracts.Resolver,
-            ),
-            // index ThreeDNS's Resolver on Optimism
-            // TODO: if ever necessary, implement more general indexing of all Resolver contracts
-            // on Optimism instead of just this specific Resolver identified by `threeDNSOptimism.contracts.Resolver.address`
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              threeDNSOptimism.chain.id,
-              threeDNSOptimism.contracts.Resolver,
-            ),
-          },
-        },
+        [namespaceContract(pluginName, "Resolver")]: resolverContractConfig(
+          config.namespace,
+          DATASOURCES_WITH_RESOLVERS,
+          config.globalBlockrange,
+        ),
 
         // index the RegistryOld on ENS Root Chain
         [namespaceContract(pluginName, "RegistryOld")]: {
