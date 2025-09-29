@@ -55,10 +55,10 @@ export default function () {
 
       const id = await ensureResolverRecords(context, event);
 
+      // this is a LegacyPublicResolver (DefaultPublicResolver1) event which does not emit `value`,
+      // so we fetch it here if possible
       let value: string | null = null;
       try {
-        // this is a LegacyPublicResolver (DefaultPublicResolver1) event which does not emit `value`,
-        // so we fetch it here if possible
         value = await context.client.readContract({
           abi: context.contracts.Resolver.abi,
           address: event.log.address,
