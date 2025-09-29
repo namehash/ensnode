@@ -9,8 +9,8 @@ import { useConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { getServerConnectionLibrary } from "@/lib/env";
 import {
+  isNormalizableUrl,
   isValidENSNodeConnectionUrl,
-  isValidUrl,
   normalizeUrl,
   validateAndNormalizeENSNodeUrl,
 } from "@/lib/url-utils";
@@ -26,7 +26,7 @@ export interface ConnectionOption {
 }
 
 const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
-  return uniq(urls.filter(isValidUrl).map(normalizeUrl).filter(isValidENSNodeConnectionUrl));
+  return uniq(urls.filter(isNormalizableUrl).map(normalizeUrl).filter(isValidENSNodeConnectionUrl));
 };
 
 /**

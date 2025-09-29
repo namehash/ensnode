@@ -9,7 +9,7 @@ export const normalizeUrl = (url: UrlString): UrlString => {
   }
 };
 
-export const isValidUrl = (url: UrlString): boolean => {
+export const isNormalizableUrl = (url: UrlString): boolean => {
   try {
     normalizeUrl(url);
     return true;
