@@ -136,9 +136,6 @@ describe("ENSIndexer: Config", () => {
             labelSetId: "subgraph",
             labelSetVersion: 0,
           },
-          healReverseAddresses: false,
-          indexAdditionalResolverRecords: false,
-          replaceUnnormalized: false,
           indexedChainIds: [1],
           isSubgraphCompatible: true,
           namespace: "mainnet" as const,
@@ -162,10 +159,6 @@ describe("ENSIndexer: Config", () => {
         expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
         expect(Array.from(parsedConfig.indexedChainIds)).toEqual([1]);
         expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);
-        expect(parsedConfig.healReverseAddresses).toBe(validConfig.healReverseAddresses);
-        expect(parsedConfig.indexAdditionalResolverRecords).toBe(
-          validConfig.indexAdditionalResolverRecords,
-        );
         expect(parsedConfig.isSubgraphCompatible).toBe(validConfig.isSubgraphCompatible);
         expect(parsedConfig.namespace).toBe(validConfig.namespace);
         expect(parsedConfig.plugins).toEqual(validConfig.plugins);

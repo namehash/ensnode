@@ -1,14 +1,11 @@
 import type { RpcConfigEnvironment } from "@/config/types";
-import { ENSNamespaceIds } from "@ensnode/datasources";
 
 // Default rate limit for RPC services
 // Public (rate limited) RPC endpoints will not provide acceptable performance.
 export const DEFAULT_RPC_RATE_LIMIT = 500;
 export const DEFAULT_ENSADMIN_URL = new URL("https://admin.ensnode.io");
 export const DEFAULT_PORT = 42069;
-export const DEFAULT_HEAL_REVERSE_ADDRESSES = true;
-export const DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS = true;
-export const DEFAULT_REPLACE_UNNORMALIZED = true;
+export const DEFAULT_SUBGRAPH_COMPAT = false;
 
 /**
  * Extracts dynamic chain configuration from environment variables.
