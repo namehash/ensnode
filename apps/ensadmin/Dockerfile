@@ -10,8 +10,8 @@ COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # Set the environment variable for the server's library of ENSNode URLs
-ARG NEXT_PUBLIC_SERVER_ENSNODE_URLS
-ENV NEXT_PUBLIC_SERVER_ENSNODE_URLS=${NEXT_PUBLIC_SERVER_ENSNODE_URLS}
+ARG NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY
+ENV NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=${NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY}
 
 # Set the environment variable for next.config.ts
 # This will be used to determine if the build output should be standalone

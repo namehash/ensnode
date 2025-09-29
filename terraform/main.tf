@@ -121,7 +121,7 @@ module "ensadmin" {
   ensnode_environment_name = var.render_environment
   anthropic_api_key        = var.anthropic_api_key
 
-  # NEXT_PUBLIC_SERVER_ENSNODE_URLS is not currently configurable through
+  # NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
 }
 

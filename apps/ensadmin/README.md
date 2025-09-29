@@ -16,7 +16,7 @@ pnpm install
 cp .env.local.example .env.local
 ```
 
-You can update the `NEXT_PUBLIC_SERVER_ENSNODE_URLS` environment variable if you wish ENSAdmin to include a given list of comma-separated URLs as the server-defined library of connection options.
+You can update the `NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY` environment variable if you wish ENSAdmin to include a given list of comma-separated URLs as the server-defined library of connection options.
 
 ### Run development server
 

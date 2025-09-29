@@ -72,10 +72,10 @@ services:
       # Override ENSADMIN_PUBLIC_URL to point to docker compose ensnode-api
       # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSADMIN_PUBLIC_URL: http://localhost:4173
-      # Override NEXT_PUBLIC_SERVER_ENSNODE_URLS to the docker compose ensnode-api
+      # Override NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY to the docker compose ensnode-api
       # Note: it must be a comma-separated list of URLs that are accessible from a web browser
       # (i.e. it cannot be a hostname in the docker network)
-      NEXT_PUBLIC_SERVER_ENSNODE_URLS: http://localhost:42069
+      NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY: http://localhost:42069
     env_file:
       # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
       - path: ./apps/ensadmin/.env.local

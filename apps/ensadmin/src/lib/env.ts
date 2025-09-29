@@ -110,12 +110,12 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY =
  * @returns a list 1 or more normalized and unique `URL` values representing the server's ENSNode connection library.
  */
 export function getServerConnectionLibrary(): URL[] {
-  const envVarName = "NEXT_PUBLIC_SERVER_ENSNODE_URLS";
-  let envVarValue = process.env.NEXT_PUBLIC_SERVER_ENSNODE_URLS;
+  const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
+  let envVarValue = process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY;
 
   if (!envVarValue) {
     console.warn(
-      `No server ENSNode URLs provided in "${envVarName}". Using fallback: ${DEFAULT_SERVER_CONNECTION_LIBRARY}`,
+      `No server connection library ofENSNode URLs provided in "${envVarName}". Using fallback: ${DEFAULT_SERVER_CONNECTION_LIBRARY}`,
     );
 
     envVarValue = DEFAULT_SERVER_CONNECTION_LIBRARY;
