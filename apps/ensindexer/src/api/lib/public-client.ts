@@ -10,5 +10,5 @@ export function getPublicClient(chainId: ChainId) {
   }
 
   // create an un-cached publicClient
-  return createPublicClient({ transport: http(rpcConfig.url.href) });
+  return createPublicClient({ transport: http(rpcConfig.httpRPCs[0].toString()) });
 }
