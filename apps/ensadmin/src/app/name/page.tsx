@@ -53,19 +53,19 @@ export default function ExploreNamesPage() {
           <form className="flex flex-col gap-2 pb-3 sm:pb-4" onSubmit={handleSubmit}>
             <fieldset className="flex flex-col sm:flex-row gap-2 justify-start items-center">
               <Input
-                  autoFocus
-                  type="text"
-                  required
-                  id="ens-name"
-                  name="ens-name"
-                  placeholder="Search for a name..."
-                  value={searchedName}
-                  onChange={handleChange}
+                autoFocus
+                type="text"
+                required
+                id="ens-name"
+                name="ens-name"
+                placeholder="Search for a name..."
+                value={searchedName}
+                onChange={handleChange}
               />
               <Button
-                  type="submit"
-                  disabled={searchedName.length === 0}
-                  className="max-sm:self-stretch"
+                type="submit"
+                disabled={searchedName.length === 0}
+                className="max-sm:self-stretch"
               >
                 View Name
               </Button>
@@ -74,10 +74,17 @@ export default function ExploreNamesPage() {
           <div className="flex flex-col gap-2 justify-center">
             <p className="text-sm font-medium leading-none">Examples:</p>
             <div className="flex flex-row flex-wrap gap-2 -mx-6 px-6">
-              {EXAMPLE_NAMES.map((exampleName) => <Button variant={searchedName === exampleName ? "default" : "outline"}
-                                                          size="sm" key={`example-name-${exampleName}`}
-                                                          onClick={() => setSearchedName(exampleName)}
-                                                          className="font-mono rounded-full">{exampleName}</Button>)}
+              {EXAMPLE_NAMES.map((exampleName) => (
+                <Button
+                  variant={searchedName === exampleName ? "default" : "outline"}
+                  size="sm"
+                  key={`example-name-${exampleName}`}
+                  onClick={() => setSearchedName(exampleName)}
+                  className="font-mono rounded-full"
+                >
+                  {exampleName}
+                </Button>
+              ))}
             </div>
           </div>
         </CardContent>
