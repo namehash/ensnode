@@ -1,11 +1,38 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
+import config from "@/config";
+import { getENSRootChainId } from "@ensnode/datasources";
 import { Node } from "@ensnode/ensnode-sdk";
 
+const ensRootChainId = getENSRootChainId(config.namespace);
+
 /**
- * Retrieves from the subgraph plugin whether the node's has migrated to the new Regsitry.
+ * Returns whether the `node` has migrated to the new Registry contract.
+ *
+ * See packages/ensnode-schema/src/migrated-nodes.schema.ts for additional context.
  */
-export async function subgraph_nodeIsMigrated(context: Context, node: Node) {
-  const domain = await context.db.find(schema.domain, { id: node });
-  return domain?.isMigrated ?? false;
+export async function nodeIsMigrated(context: Context, node: Node) {
+  if (context.chain.id !== ensRootChainId) {
+    throw new Error(
+      `Invariant(nodeIsMigrated): Node migration status is only relevant on the ENS Root Chain, and this function was called in the context of ${context.chain.id}.`,
+    );
+  }
+
+  const record = await context.db.find(schema.ext_migratedNodes, { node });
+  return !!record;
+}
+
+/**
+ * Record that the `node` has migrated to the new Registry contract.
+ *
+ * See packages/ensnode-schema/src/migrated-nodes.schema.ts for additional context.
+ */
+export async function migrateNode(context: Context, node: Node) {
+  if (context.chain.id !== ensRootChainId) {
+    throw new Error(
+      `Invariant(migrateNode): Node migration status is only relevant on the ENS Root Chain, and this function was called in the context of ${context.chain.id}.`,
+    );
+  }
+
+  await context.db.insert(schema.ext_migratedNodes).values({ node }).onConflictDoNothing();
 }
