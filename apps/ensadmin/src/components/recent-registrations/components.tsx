@@ -1,10 +1,17 @@
 "use client";
 
-import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  getENSRootChainId,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
+import {
+  ChainId,
   type ENSIndexerOverallIndexingCompletedStatus,
   type ENSIndexerOverallIndexingFollowingStatus,
   type ENSIndexerPublicConfig,
+  Name,
   OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
@@ -144,9 +151,51 @@ interface RegistrationRowProps {
 }
 
 /**
+ * NOTE: This function is a "dirty-hack".
+ *
+ * TODO: Update our indexed data model for registrations so that this dirty hack
+ *       is no longer needed.
+ */
+const guessChainIdFromRegisteredName = (name: Name, namespaceId: ENSNamespaceId): ChainId => {
+  const labels = name.split(".");
+
+  if (labels.length === 3) {
+    if (name.endsWith(".base.eth")) {
+      // name is a direct subname of .base.eth
+      // we will therefore assume it occured within Basenames.
+      // NOTE: this assumption is not necessarily true, nothing technically stops
+      // subnames of base.eth from occurring on the ENS root chain. And some have.
+      // Therefore, this is only a "dirty-hack" approximation.
+      const basenames = maybeGetDatasource(namespaceId, DatasourceNames.Basenames);
+
+      if (basenames) return basenames.chain.id;
+
+      // basenames is undefined for the namespace, therefore fallback
+      // to the ENS root chain
+    } else if (name.endsWith(".linea.eth")) {
+      // name is a direct subname of .linea.eth
+      // we will therefore assume it occured within Lineanames.
+      // NOTE: this assumption is not necessarily true, nothing technically stops
+      // subnames of linea.eth from occurring on the ENS root chain. And some have.
+      // Therefore, this is only a "dirty-hack" approximation.
+      const linea = maybeGetDatasource(namespaceId, DatasourceNames.Lineanames);
+
+      if (linea) return linea.chain.id;
+
+      // basenames is undefined for the namespace, therefore fallback
+      // to the ENS root chain
+    }
+  }
+
+  // fallback to assuming the the registration occurred on the ENS root chain
+  return getENSRootChainId(namespaceId);
+};
+
+/**
  * Displays the data of a single Registration within a row
  */
 function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
+  const chainIdGuess = guessChainIdFromRegisteredName(registration.name, namespaceId);
   return (
     <TableRow>
       <TableCell>
@@ -161,7 +210,12 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
       </TableCell>
       <TableCell>
-        <Identity address={registration.owner} namespaceId={namespaceId} showAvatar={true} />
+        <Identity
+          address={registration.owner}
+          namespaceId={namespaceId}
+          showAvatar={true}
+          chainId={chainIdGuess}
+        />
       </TableCell>
     </TableRow>
   );
