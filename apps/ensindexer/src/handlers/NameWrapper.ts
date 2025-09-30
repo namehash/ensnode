@@ -177,21 +177,22 @@ export const makeNameWrapperHandlers = ({
       await upsertAccount(context, owner);
 
       // NOTE: NameWrapper emits a DNS-Encoded LiteralName, so we cast the DNSEncodedName as such
-      const { label, name } = config.replaceUnnormalized
-        ? decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
-        : decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
+      const { label, name } = config.isSubgraphCompatible
+        ? decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
+        : decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
       const domain = await context.db.find(schema.domain, { id: node });
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label
-      // NOTE: this means that future wraps of a domain with an EncodedLabelHash in the name
-      //   will _not_ use the newly healed label emitted by the NameWrapper contract, and will
-      //   continue to have an un-healed EncodedLabelHash in its name field
-      // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
-      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
+      //
       // NOTE: truthy/falsy boolean check is _intended_ here, to match legacy subgraph logic
-      if (domain.labelName && label) {
+      // https://github.com/ensdomains/ens-subgraph/blob/master/src/nameWrapper.ts#L83
+      if (!domain.labelName && label) {
+        // NOTE: this encodes a minor bug: future wraps of a domain with an EncodedLabelHash in the
+        // name will _not_ use the newly healed label emitted by the NameWrapper contract, and will
+        // continue to have an un-healed EncodedLabelHash in its name field
+        // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
         await context.db.update(schema.domain, { id: node }).set({ labelName: label, name });
       }
 

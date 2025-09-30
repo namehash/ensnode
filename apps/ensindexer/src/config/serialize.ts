@@ -1,4 +1,9 @@
-import { serializeChainId, serializeIndexedChainIds, serializeUrl } from "@ensnode/ensnode-sdk";
+import {
+  UrlString,
+  serializeChainId,
+  serializeIndexedChainIds,
+  serializeUrl,
+} from "@ensnode/ensnode-sdk";
 import { SerializedENSIndexerConfig } from "./serialized-types";
 import type { ENSIndexerConfig } from "./types";
 
@@ -11,9 +16,14 @@ function serializeRpcConfigs(
   const serializedRpcConfigs: SerializedENSIndexerConfig["rpcConfigs"] = {};
 
   for (const [chainId, rpcConfig] of rpcConfigs.entries()) {
+    const serializedHttpRPCs = rpcConfig.httpRPCs.map(serializeUrl) as [UrlString, ...UrlString[]]; // guaranteed to include at least one URL
+    const serializedWebsocketRPC = rpcConfig.websocketRPC
+      ? serializeUrl(rpcConfig.websocketRPC)
+      : undefined;
+
     serializedRpcConfigs[serializeChainId(chainId)] = {
-      maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
-      url: serializeUrl(rpcConfig.url),
+      httpRPCs: serializedHttpRPCs,
+      websocketRPC: serializedWebsocketRPC,
     };
   }
 
@@ -33,11 +43,16 @@ function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
   const redactedRpcConfigs: ENSIndexerConfig["rpcConfigs"] = new Map();
 
   for (const [chainId, rpcConfig] of config.rpcConfigs.entries()) {
-    const redactedRpcUrl = new URL(`/${REDACTED}`, rpcConfig.url.href);
+    const redactURL = (sourceURL: URL) => new URL(`/${REDACTED}`, sourceURL.href);
+
+    const redactedHttpRPCs = rpcConfig.httpRPCs.map(redactURL) as [URL, ...URL[]]; // guaranteed to include at least one URL
+    const redactedWebsocketRPC = rpcConfig.websocketRPC
+      ? redactURL(rpcConfig.websocketRPC)
+      : undefined;
 
     redactedRpcConfigs.set(chainId, {
-      ...rpcConfig,
-      url: redactedRpcUrl,
+      httpRPCs: redactedHttpRPCs,
+      websocketRPC: redactedWebsocketRPC,
     });
   }
 
@@ -67,9 +82,6 @@ export function serializeRedactedENSIndexerConfig(
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     labelSet: redactedConfig.labelSet,
     globalBlockrange: redactedConfig.globalBlockrange,
-    healReverseAddresses: redactedConfig.healReverseAddresses,
-    indexAdditionalResolverRecords: redactedConfig.indexAdditionalResolverRecords,
-    replaceUnnormalized: redactedConfig.replaceUnnormalized,
     indexedChainIds: serializeIndexedChainIds(redactedConfig.indexedChainIds),
     isSubgraphCompatible: redactedConfig.isSubgraphCompatible,
     namespace: redactedConfig.namespace,

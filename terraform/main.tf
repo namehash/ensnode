@@ -20,60 +20,50 @@ locals {
   render_region = "ohio"
   ensindexer_instances = {
     holesky = {
-      ensnode_indexer_type              = "holesky"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "holeskySchema-${var.ensnode_version}"
-      plugins                           = "subgraph"
-      namespace                         = "holesky"
-      heal_reverse_addresses            = "false"
-      index_additional_resolver_records = "false"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "starter"
+      ensnode_indexer_type     = "holesky"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "holeskySchema-${var.ensnode_version}"
+      plugins                  = "subgraph"
+      namespace                = "holesky"
+      render_instance_plan     = "starter"
+      subgraph_compat          = true
     }
     sepolia = {
-      ensnode_indexer_type              = "sepolia"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "sepoliaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph"
-      namespace                         = "sepolia"
-      heal_reverse_addresses            = "false"
-      index_additional_resolver_records = "false"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "starter"
+      ensnode_indexer_type     = "sepolia"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "sepoliaSchema-${var.ensnode_version}"
+      plugins                  = "subgraph"
+      namespace                = "sepolia"
+      render_instance_plan     = "starter"
+      subgraph_compat          = true
     }
     mainnet = {
-      ensnode_indexer_type              = "mainnet"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "mainnetSchema-${var.ensnode_version}"
-      plugins                           = "subgraph"
-      namespace                         = "mainnet"
-      heal_reverse_addresses            = "false"
-      index_additional_resolver_records = "false"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "standard"
+      ensnode_indexer_type     = "mainnet"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "mainnetSchema-${var.ensnode_version}"
+      plugins                  = "subgraph"
+      namespace                = "mainnet"
+      render_instance_plan     = "standard"
+      subgraph_compat          = true
     }
     alpha = {
-      ensnode_indexer_type              = "alpha"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "alphaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
-      namespace                         = "mainnet"
-      heal_reverse_addresses            = "true"
-      index_additional_resolver_records = "true"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "standard"
+      ensnode_indexer_type     = "alpha"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "alphaSchema-${var.ensnode_version}"
+      plugins                  = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
+      namespace                = "mainnet"
+      render_instance_plan     = "standard"
+      subgraph_compat          = false
     }
 
     alpha-sepolia = {
-      ensnode_indexer_type              = "alpha-sepolia"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
-      namespace                         = "sepolia"
-      heal_reverse_addresses            = "true"
-      index_additional_resolver_records = "true"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "starter"
+      ensnode_indexer_type     = "alpha-sepolia"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
+      plugins                  = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
+      namespace                = "sepolia"
+      render_instance_plan     = "starter"
+      subgraph_compat          = false
     }
   }
 }
@@ -130,15 +120,13 @@ module "ensindexer" {
   for_each = local.ensindexer_instances
 
   # Instance-specific configuration
-  ensnode_indexer_type              = each.value.ensnode_indexer_type
-  render_instance_plan              = each.value.render_instance_plan
-  ensnode_environment_name          = each.value.ensnode_environment_name
-  database_schema                   = each.value.database_schema
-  plugins                           = each.value.plugins
-  namespace                         = each.value.namespace
-  heal_reverse_addresses            = each.value.heal_reverse_addresses
-  index_additional_resolver_records = each.value.index_additional_resolver_records
-  replace_unnormalized              = each.value.replace_unnormalized
+  ensnode_indexer_type     = each.value.ensnode_indexer_type
+  render_instance_plan     = each.value.render_instance_plan
+  ensnode_environment_name = each.value.ensnode_environment_name
+  database_schema          = each.value.database_schema
+  plugins                  = each.value.plugins
+  namespace                = each.value.namespace
+  subgraph_compat          = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
   hosted_zone_name = local.hosted_zone_name

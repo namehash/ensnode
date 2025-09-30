@@ -50,15 +50,15 @@ export const makeRegistrarHandlers = ({
     cost: bigint,
   ) {
     // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
-    if (!config.replaceUnnormalized && !isLabelSubgraphIndexable(label)) return;
+    if (config.isSubgraphCompatible && !isLabelSubgraphIndexable(label)) return;
 
-    const interpretedLabel = config.replaceUnnormalized
-      ? // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
+    const interpretedLabel = config.isSubgraphCompatible
+      ? // A subgraph-indexable Literal Label is a Subgraph Interpreted Label
+        (label as Label as SubgraphInterpretedLabel)
+      : // NOTE(replace-unnormalized): Interpret the `label` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
-        literalLabelToInterpretedLabel(label)
-      : // A subgraph-indexable Literal Label is a Subgraph Interpreted Label
-        (label as Label as SubgraphInterpretedLabel);
+        literalLabelToInterpretedLabel(label);
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
     const domain = await context.db.find(schema.domain, { id: node });
@@ -160,7 +160,15 @@ export const makeRegistrarHandlers = ({
 
       let label: InterpretedLabel | SubgraphInterpretedLabel | undefined = undefined;
       let name: InterpretedName | SubgraphInterpretedName | undefined = undefined;
-      if (config.replaceUnnormalized) {
+      if (config.isSubgraphCompatible) {
+        // only update the label/name if label is subgraph-indexable
+        if (isLabelSubgraphIndexable(healedLabel)) {
+          // if subgraph-indexable, the label is Subgraph Interpreted
+          label = healedLabel as Label as SubgraphInterpretedLabel;
+          // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
+          name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;
+        }
+      } else {
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
@@ -172,14 +180,6 @@ export const makeRegistrarHandlers = ({
 
         // a name constructed of Interpreted Labels is Interpreted
         name = `${label}.${registrarManagedName}` as InterpretedName;
-      } else {
-        // only update the label/name if label is subgraph-indexable
-        if (isLabelSubgraphIndexable(healedLabel)) {
-          // if subgraph-indexable, the label is Subgraph Interpreted
-          label = healedLabel as Label as SubgraphInterpretedLabel;
-          // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
-          name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;
-        }
       }
 
       // update Domain
