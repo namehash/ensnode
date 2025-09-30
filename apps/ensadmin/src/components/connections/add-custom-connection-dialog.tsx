@@ -17,40 +17,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface AddConnectionDialogProps {
+interface AddCustomConnectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (url: UrlString) => void;
+  onSubmit: (rawUrl: string) => void;
   isLoading?: boolean;
   error?: string | null;
   onErrorReset?: () => void;
 }
 
-export function AddConnectionDialog({
+export function AddCustomConnectionDialog({
   open,
   onOpenChange,
-  onAdd,
+  onSubmit,
   isLoading = false,
   error = null,
   onErrorReset,
-}: AddConnectionDialogProps) {
-  const [newUrl, setNewUrl] = useState("");
+}: AddCustomConnectionDialogProps) {
+  const [rawUrl, setRawUrl] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newUrl.trim()) {
-      onAdd(newUrl.trim() as UrlString);
-    }
+    onSubmit(rawUrl);
   };
 
   const handleClose = () => {
-    setNewUrl("");
+    setRawUrl("");
     onErrorReset?.();
     onOpenChange(false);
   };
 
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewUrl(e.target.value);
+  const handleRawUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRawUrl(e.target.value);
     if (error && onErrorReset) {
       onErrorReset();
     }
@@ -60,7 +58,7 @@ export function AddConnectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[460px]">
         <DialogHeader>
-          <DialogTitle>Add ENSNode Connection</DialogTitle>
+          <DialogTitle>Add Custom ENSNode Connection</DialogTitle>
           <DialogDescription>
             Enter the URL of the ENSNode you want to connect to.
           </DialogDescription>
@@ -72,8 +70,8 @@ export function AddConnectionDialog({
               id="url"
               type="text"
               placeholder="https://your-ens-node.example.com"
-              value={newUrl}
-              onChange={handleUrlChange}
+              value={rawUrl}
+              onChange={handleRawUrlChange}
               className={cn("font-mono", error ? "border-destructive" : "")}
             />
             {error && <p className="text-xs text-destructive">{error}</p>}
@@ -83,14 +81,14 @@ export function AddConnectionDialog({
           <Button type="button" variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleSubmit} disabled={isLoading || !newUrl.trim()}>
+          <Button type="submit" onClick={handleSubmit} disabled={isLoading || !rawUrl}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Adding...
               </>
             ) : (
-              "Add Connection"
+              "Add Custom Connection"
             )}
           </Button>
         </DialogFooter>

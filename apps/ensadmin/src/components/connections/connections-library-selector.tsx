@@ -3,8 +3,8 @@
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useState } from "react";
 
-import { AddConnectionDialog } from "@/components/connections/add-connection-dialog";
-import { ConnectionsList } from "@/components/connections/connections-list";
+import { AddCustomConnectionDialog } from "@/components/connections/add-custom-connection-dialog";
+import { ConnectionsLibraryList } from "@/components/connections/connections-library-list";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import {
   DropdownMenu,
@@ -20,11 +20,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ConnectionOption, useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
+import { ConnectionOption, useConnectionsLibrary } from "@/hooks/use-connections-library";
 import { beautifyUrl } from "@/lib/beautify-url";
 import { buildHttpHostname } from "@/lib/url-utils";
 
-export function ConnectionSelector() {
+export function ConnectionsLibrarySelector() {
   const { isMobile } = useSidebar();
 
   const {
@@ -33,36 +33,33 @@ export function ConnectionSelector() {
     addCustomConnection,
     removeCustomConnection,
     selectConnection,
-  } = useAvailableENSNodeConnections();
+  } = useConnectionsLibrary();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleConnectionLibrarySelection = (option: ConnectionOption) => {
+  const handleConnectionsLibrarySelection = (option: ConnectionOption) => {
     selectConnection(option.url);
     setDialogOpen(false);
   };
 
-  const handleAddCustomConnection = (rawUrl: string) => {
-    setIsLoading(true);
-    setError(null);
+  const handleSubmitNewCustomConnection = (rawUrl: string) => {
+    const validation = buildHttpHostname(rawUrl);
 
-    try {
-      const validation = buildHttpHostname(rawUrl);
-
-      if (!validation.isValid) {
-        throw new Error(`Invalid connection URL: ${validation.error}`);
-      }
-
+    if (!validation.isValid) {
+      setError(validation.error);
+      setIsLoading(false);
+    } else {
       const url = validation.url;
+      setIsLoading(true);
       const addedUrl = addCustomConnection(url);
+      setIsLoading(false);
       setDialogOpen(false);
+      setError(null);
+
+      // automatically select the newly added connection
       selectConnection(addedUrl);
-      setIsLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add connection");
-      setIsLoading(false);
     }
   };
 
@@ -74,18 +71,19 @@ export function ConnectionSelector() {
 
   if (!selectedConnection) {
     connectionMessage = "Disconnected";
-  } else if (!selectedConnection.validSelectedConnection) {
+  } else if (!selectedConnection.validatedSelectedConnection.isValid) {
     connectionMessage = "Invalid connection";
   } else {
-    connectionMessage = beautifyUrl(selectedConnection.validSelectedConnection);
+    connectionMessage = beautifyUrl(selectedConnection.validatedSelectedConnection.url);
   }
 
   const serverConnections = connectionLibrary.filter((connection) => connection.type === "server");
   const customConnections = connectionLibrary.filter((connection) => connection.type === "custom");
 
-  const selectedConnectionUrl = selectedConnection
-    ? selectedConnection.validSelectedConnection
-    : null;
+  const selectedConnectionUrl =
+    selectedConnection && selectedConnection.validatedSelectedConnection.isValid
+      ? selectedConnection.validatedSelectedConnection.url
+      : null;
 
   return (
     <>
@@ -114,12 +112,12 @@ export function ConnectionSelector() {
               sideOffset={4}
             >
               <DropdownMenuLabel className="text-xs text-muted-foreground">
-                ENSNode Connection Library
+                Server Connection Library
               </DropdownMenuLabel>
-              <ConnectionsList
+              <ConnectionsLibraryList
                 connections={serverConnections}
                 selectedConnection={selectedConnectionUrl}
-                onSelectConnection={handleConnectionLibrarySelection}
+                onSelectConnection={handleConnectionsLibrarySelection}
               />
 
               {customConnections.length > 0 && (
@@ -128,10 +126,10 @@ export function ConnectionSelector() {
                   <DropdownMenuLabel className="text-xs text-muted-foreground">
                     My Custom Connections
                   </DropdownMenuLabel>
-                  <ConnectionsList
+                  <ConnectionsLibraryList
                     connections={customConnections}
                     selectedConnection={selectedConnectionUrl}
-                    onSelectConnection={handleConnectionLibrarySelection}
+                    onSelectConnection={handleConnectionsLibrarySelection}
                     onRemoveCustomConnection={removeCustomConnection}
                   />
                 </>
@@ -146,17 +144,17 @@ export function ConnectionSelector() {
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Plus className="size-4" />
                 </div>
-                <div className="font-medium text-muted-foreground">Add connection</div>
+                <div className="font-medium text-muted-foreground">Add custom connection</div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <AddConnectionDialog
+      <AddCustomConnectionDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onAdd={handleAddCustomConnection}
+        onSubmit={handleSubmitNewCustomConnection}
         isLoading={isLoading}
         error={error}
         onErrorReset={handleErrorReset}

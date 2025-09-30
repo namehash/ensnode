@@ -1,12 +1,12 @@
 "use client";
 
 import { CopyButton } from "@/components/copy-button";
-import { useSelectedENSNodeConnection } from "@/hooks/active/use-selected-ensnode-connection";
+import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 export default function ActionsSubgraphCompatPage() {
   // TODO: we need a broader refactor to recognize the difference between
   // a selected connection being in a valid format or not.
-  const baseUrl = useSelectedENSNodeConnection().rawSelectedConnection;
+  const { rawSelectedConnection: baseUrl } = useSelectedConnection();
   const url = new URL(`/subgraph`, baseUrl).toString();
 
   return (

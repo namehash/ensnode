@@ -8,7 +8,12 @@ import { toast } from "sonner";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { getServerConnectionLibrary } from "@/lib/env";
-import { HttpHostname, buildHttpHostname, buildHttpHostnames } from "@/lib/url-utils";
+import {
+  BuildHttpHostnameResult,
+  HttpHostname,
+  buildHttpHostname,
+  buildHttpHostnames,
+} from "@/lib/url-utils";
 import { uniq } from "@ensnode/ensnode-sdk";
 
 const CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY = "ensadmin:custom-connections:urls";
@@ -29,11 +34,9 @@ export interface SelectedConnectionResult {
   rawSelectedConnection: string;
 
   /**
-   * The validated connection URL.
-   *
-   * `null` if and only if `rawSelectedConnection` is an invalid `HttpHostname`.
+   * Holds the result of building a `HttpHostname` from `rawSelectedConnection`.
    */
-  validSelectedConnection: HttpHostname | null;
+  validatedSelectedConnection: BuildHttpHostnameResult;
 }
 
 /**
@@ -44,7 +47,7 @@ export interface SelectedConnectionResult {
 const serverConnectionLibrary = getServerConnectionLibrary();
 const defaultSelectedConnection = serverConnectionLibrary[0];
 
-function _useAvailableENSNodeConnections() {
+function _useConnectionsLibrary() {
   const hydrated = useHydrated();
   const { rawConnectionUrlParam, setRawConnectionUrlParam } = useRawConnectionUrlParam();
 
@@ -112,7 +115,7 @@ function _useAvailableENSNodeConnections() {
 
       return url;
     },
-    [customConnectionLibrary, storeRawCustomConnectionUrls],
+    [storeRawCustomConnectionUrls],
   );
 
   const removeCustomConnection = useCallback(
@@ -129,13 +132,10 @@ function _useAvailableENSNodeConnections() {
   const selectedConnection = useMemo<SelectedConnectionResult | null>(() => {
     // no selected ensnode connection in server environments
     if (!hydrated) return null;
-
     if (!rawConnectionUrlParam) return null;
-
-    const validatedParam = buildHttpHostname(rawConnectionUrlParam);
     return {
       rawSelectedConnection: rawConnectionUrlParam,
-      validSelectedConnection: validatedParam.isValid ? validatedParam.url : null,
+      validatedSelectedConnection: buildHttpHostname(rawConnectionUrlParam),
     };
   }, [hydrated, rawConnectionUrlParam]);
 
@@ -176,14 +176,12 @@ function _useAvailableENSNodeConnections() {
   };
 }
 
-const [AvailableENSNodeConnectionsProviderInner, useAvailableENSNodeConnections] = constate(
-  _useAvailableENSNodeConnections,
-);
+const [ConnectionsLibraryProviderInner, useConnectionsLibrary] = constate(_useConnectionsLibrary);
 
-export { useAvailableENSNodeConnections };
+export { useConnectionsLibrary };
 
 /**
- * Provider for ENSNode connection management.
+ * Provider for Connections Library management.
  *
  * Wraps the inner provider with Suspense boundary to handle the async nature
  * of useSearchParams() which can suspend during SSR/hydration.
@@ -197,16 +195,14 @@ export { useAvailableENSNodeConnections };
  * - removeCustomConnection: Callback for removing a custom connection
  * - selectConnection: Callback for selecting a connection
  */
-export function AvailableENSNodeConnectionsProvider({
+export function ConnectionsLibraryProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <Suspense fallback={null}>
-      <AvailableENSNodeConnectionsProviderInner>
-        {children}
-      </AvailableENSNodeConnectionsProviderInner>
+      <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>
     </Suspense>
   );
 }

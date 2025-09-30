@@ -1,7 +1,6 @@
 "use client";
 
-import { useSelectedENSNodeConnection } from "@/hooks/active/use-selected-ensnode-connection";
-import { buildHttpHostname } from "@/lib/url-utils";
+import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { ENSNodeProvider } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
 
@@ -17,11 +16,13 @@ import { PropsWithChildren } from "react";
  * @param children - React children to render within the provider context
  */
 export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
-  const selectedConnection = useSelectedENSNodeConnection();
+  const selectedConnection = useSelectedConnection();
 
-  if (selectedConnection.validSelectedConnection) {
+  if (selectedConnection.validatedSelectedConnection.isValid) {
     return (
-      <ENSNodeProvider config={{ client: { url: selectedConnection.validSelectedConnection } }}>
+      <ENSNodeProvider
+        config={{ client: { url: selectedConnection.validatedSelectedConnection.url } }}
+      >
         {children}
       </ENSNodeProvider>
     );
@@ -31,16 +32,10 @@ export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
     // This logic will throw and an error and break if the selected connection
     // is in an invalid format.
 
-    const validation = buildHttpHostname(selectedConnection.rawSelectedConnection);
-
-    if (validation.isValid) {
-      // sanity check
-      throw new Error(`Invariant(SelectedENSNodeProvider): Expected an invalid connection`);
-    }
-
     return (
       <div>
-        Invalid connection: "{selectedConnection.rawSelectedConnection}" ({validation.error})
+        Invalid connection: "{selectedConnection.rawSelectedConnection}" (
+        {selectedConnection.validatedSelectedConnection.error})
       </div>
     );
   }

@@ -59,7 +59,8 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
       } else {
         params.set(RAW_CONNECTION_PARAM_KEY, rawUrl);
       }
-      router.replace(`?${params.toString()}`);
+      const paramString = params.toString();
+      router.replace(paramString ? `?${paramString}` : "");
     },
     [router, searchParams],
   );

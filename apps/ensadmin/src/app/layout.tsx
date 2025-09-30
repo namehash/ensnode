@@ -3,14 +3,14 @@ import { Suspense } from "react";
 import "./globals.css";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { RequireActiveConnection } from "@/components/connections/require-active-connection";
+import { RequireSelectedConnection } from "@/components/connections/require-selected-connection";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
 import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
 import { QueryClientProvider } from "@/components/query-client/components";
-import { RequireActiveENSNodeConfig } from "@/components/require-active-ensnode-config";
-import { RequireSelectedENSNodeConnection } from "@/components/require-selected-ensnode-connection";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { AvailableENSNodeConnectionsProvider } from "@/hooks/ensnode-connections";
+import { ConnectionsLibraryProvider } from "@/hooks/use-connections-library";
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";
 
@@ -65,8 +65,8 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <AvailableENSNodeConnectionsProvider>
-            <RequireSelectedENSNodeConnection>
+          <ConnectionsLibraryProvider>
+            <RequireSelectedConnection>
               <SidebarProvider>
                 <Suspense>
                   <AppSidebar />
@@ -79,12 +79,12 @@ export default function Layout({
                       </HeaderNav>
                       <HeaderActions>{actions}</HeaderActions>
                     </Header>
-                    <RequireActiveENSNodeConfig>{children}</RequireActiveENSNodeConfig>
+                    <RequireActiveConnection>{children}</RequireActiveConnection>
                   </SelectedENSNodeProvider>
                 </SidebarInset>
               </SidebarProvider>
-            </RequireSelectedENSNodeConnection>
-          </AvailableENSNodeConnectionsProvider>
+            </RequireSelectedConnection>
+          </ConnectionsLibraryProvider>
         </QueryClientProvider>
         <Toaster />
       </body>

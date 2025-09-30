@@ -3,25 +3,25 @@
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { ConnectionOption } from "@/hooks/ensnode-connections";
+import { ConnectionOption } from "@/hooks/use-connections-library";
 import { beautifyUrl } from "@/lib/beautify-url";
 import { HttpHostname } from "@/lib/url-utils";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 
-interface ConnectionsListProps {
+interface ConnectionsLibraryListProps {
   connections: ConnectionOption[];
   selectedConnection: HttpHostname | null;
   onSelectConnection: (option: ConnectionOption) => void;
   onRemoveCustomConnection?: (url: HttpHostname) => void;
 }
 
-export function ConnectionsList({
+export function ConnectionsLibraryList({
   connections,
   selectedConnection,
   onSelectConnection,
   onRemoveCustomConnection,
-}: ConnectionsListProps): JSX.Element {
+}: ConnectionsLibraryListProps): JSX.Element {
   return (
     <>
       {connections.map((connection) => {
