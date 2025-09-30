@@ -8,7 +8,6 @@ import { DEFAULT_EVM_COIN_TYPE, PluginName, evmChainIdToCoinType } from "@ensnod
 
 import { interpretNameRecordValue } from "@/lib/interpret-record-values";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { makePrimaryNameId } from "@/lib/protocol-acceleration/ids";
 
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts in the Protocol Acceleration
@@ -31,7 +30,8 @@ export default function () {
           ? DEFAULT_EVM_COIN_TYPE
           : evmChainIdToCoinType(context.chain.id);
 
-      const id = makePrimaryNameId(address, coinType);
+      // construct the Primary Name entity's Composite Primary Key
+      const id = { address, coinType: BigInt(coinType) };
 
       // interpret the emitted name record value (see `interpretNameRecordValue` for guarantees)
       const interpretedValue = interpretNameRecordValue(name);
@@ -40,18 +40,13 @@ export default function () {
       const isDeletion = interpretedValue === null;
       if (isDeletion) {
         // delete
-        await context.db.delete(schema.ext_primaryName, { id });
+        await context.db.delete(schema.ext_primaryName, id);
       } else {
         // upsert
         await context.db
           .insert(schema.ext_primaryName)
           // create a new primary name entity
-          .values({
-            id,
-            address,
-            coinType: BigInt(coinType),
-            name: interpretedValue,
-          })
+          .values({ ...id, name: interpretedValue })
           // or update the existing one
           .onConflictDoUpdate({ name: interpretedValue });
       }

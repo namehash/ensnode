@@ -2,7 +2,7 @@
  * Schema Definitions that power Protocol Acceleration in the Resolution API.
  */
 
-import { onchainTable, relations, uniqueIndex } from "ponder";
+import { onchainTable, primaryKey, relations } from "ponder";
 
 /**
  * Tracks an Account's ENSIP-19 Primary Name by CoinType.
@@ -21,8 +21,6 @@ export const ext_primaryName = onchainTable(
   "ext_primary_names",
   (t) => ({
     // keyed by (address, coinType)
-    id: t.text().primaryKey(),
-
     address: t.hex().notNull(),
     coinType: t.bigint().notNull(),
 
@@ -37,7 +35,7 @@ export const ext_primaryName = onchainTable(
     name: t.text().notNull(),
   }),
   (t) => ({
-    byAddressAndCoinType: uniqueIndex().on(t.address, t.coinType),
+    pk: primaryKey({ columns: [t.address, t.coinType] }),
   }),
 );
 
@@ -51,14 +49,17 @@ export const ext_nodeResolverRelation = onchainTable(
   "ext_node_resolver_relations",
   (t) => ({
     // keyed by (chainId, node)
-    id: t.text().primaryKey(),
     chainId: t.integer().notNull(),
     node: t.hex().notNull(),
 
+    /**
+     * The Address of the Resolver contract this `node` has set (via Registry#NewResolver) within
+     * the Registry on `chainId`.
+     */
     resolverAddress: t.hex().notNull(),
   }),
   (t) => ({
-    byChainIdAndNode: uniqueIndex().on(t.chainId, t.node),
+    pk: primaryKey({ columns: [t.chainId, t.node] }),
   }),
 );
 
@@ -77,11 +78,9 @@ export const ext_nodeResolverRelation = onchainTable(
 export const ext_resolverRecords = onchainTable(
   "ext_resolver_records",
   (t) => ({
-    // keyed by (chainId, address, node)
-    id: t.text().primaryKey(),
-
+    // keyed by (chainId, resolver, node)
     chainId: t.integer().notNull(),
-    address: t.hex().notNull(),
+    resolver: t.hex().notNull(),
     node: t.hex().notNull(),
 
     /**
@@ -96,7 +95,9 @@ export const ext_resolverRecords = onchainTable(
      */
     name: t.text(),
   }),
-  (t) => ({}),
+  (t) => ({
+    pk: primaryKey({ columns: [t.chainId, t.resolver, t.node] }),
+  }),
 );
 
 // add the additional `Resolver.records` relationship to subgraph's Resolver entity
@@ -111,10 +112,10 @@ export const ext_resolverRecords_relations = relations(ext_resolverRecords, ({ o
 export const ext_resolverAddressRecords = onchainTable(
   "ext_resolver_address_records",
   (t) => ({
-    // keyed by (resolverRecordsId, coinType)
-    id: t.text().primaryKey(),
-
-    resolverRecordsId: t.text().notNull(),
+    // keyed by (chainId, resolver, node, coinType)
+    chainId: t.integer().notNull(),
+    resolver: t.hex().notNull(),
+    node: t.hex().notNull(),
     coinType: t.bigint().notNull(),
 
     /**
@@ -126,7 +127,7 @@ export const ext_resolverAddressRecords = onchainTable(
     address: t.text().notNull(),
   }),
   (t) => ({
-    byResolverRecordsIdAndCoinType: uniqueIndex().on(t.resolverRecordsId, t.coinType),
+    pk: primaryKey({ columns: [t.chainId, t.resolver, t.node, t.coinType] }),
   }),
 );
 
@@ -135,8 +136,16 @@ export const ext_resolverAddressRecordsRelations = relations(
   ({ one, many }) => ({
     // belongs to resolverRecords
     resolver: one(ext_resolverRecords, {
-      fields: [ext_resolverAddressRecords.resolverRecordsId],
-      references: [ext_resolverRecords.id],
+      fields: [
+        ext_resolverAddressRecords.chainId,
+        ext_resolverAddressRecords.resolver,
+        ext_resolverAddressRecords.node,
+      ],
+      references: [
+        ext_resolverRecords.chainId,
+        ext_resolverRecords.resolver,
+        ext_resolverRecords.node,
+      ],
     }),
   }),
 );
@@ -144,10 +153,10 @@ export const ext_resolverAddressRecordsRelations = relations(
 export const ext_resolverTextRecords = onchainTable(
   "ext_resolver_text_records",
   (t) => ({
-    // keyed by (resolverRecordsId, key)
-    id: t.text().primaryKey(),
-
-    resolverRecordsId: t.text().notNull(),
+    // keyed by (chainId, resolver, node, key)
+    chainId: t.integer().notNull(),
+    resolver: t.hex().notNull(),
+    node: t.hex().notNull(),
     key: t.text().notNull(),
 
     /**
@@ -159,7 +168,7 @@ export const ext_resolverTextRecords = onchainTable(
     value: t.text().notNull(),
   }),
   (t) => ({
-    byResolverRecordsIdAndKey: uniqueIndex().on(t.resolverRecordsId, t.key),
+    pk: primaryKey({ columns: [t.chainId, t.resolver, t.node, t.key] }),
   }),
 );
 
@@ -168,8 +177,16 @@ export const ext_resolverTextRecordsRelations = relations(
   ({ one, many }) => ({
     // belongs to resolverRecords
     resolver: one(ext_resolverRecords, {
-      fields: [ext_resolverTextRecords.resolverRecordsId],
-      references: [ext_resolverRecords.id],
+      fields: [
+        ext_resolverTextRecords.chainId,
+        ext_resolverTextRecords.resolver,
+        ext_resolverTextRecords.node,
+      ],
+      references: [
+        ext_resolverRecords.chainId,
+        ext_resolverRecords.resolver,
+        ext_resolverRecords.node,
+      ],
     }),
   }),
 );

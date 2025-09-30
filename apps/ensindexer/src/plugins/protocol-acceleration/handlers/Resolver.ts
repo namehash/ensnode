@@ -9,6 +9,7 @@ import {
   handleResolverAddressRecordUpdate,
   handleResolverNameUpdate,
   handleResolverTextRecordUpdate,
+  makeResolverRecordsId,
 } from "@/lib/protocol-acceleration/resolver-records-db-helpers";
 
 /**
@@ -21,8 +22,10 @@ export default function () {
     async ({ context, event }) => {
       const { a: address } = event.args;
 
-      // AddrChanged is just AddressChanged with implicit coinType of ETH
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
+
+      // the Resolver#AddrChanged event is just Resolver#AddressChanged with implicit coinType of ETH
       await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), address);
     },
   );
@@ -32,7 +35,8 @@ export default function () {
     async ({ context, event }) => {
       const { coinType, newAddress } = event.args;
 
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
     },
   );
@@ -42,7 +46,8 @@ export default function () {
     async ({ context, event }) => {
       const { name } = event.args;
 
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverNameUpdate(context, id, name);
     },
   );
@@ -54,8 +59,6 @@ export default function () {
     ),
     async ({ context, event }) => {
       const { node, key } = event.args;
-
-      const id = await ensureResolverRecords(context, event);
 
       // this is a LegacyPublicResolver (DefaultPublicResolver1) event which does not emit `value`,
       // so we fetch it here if possible
@@ -71,6 +74,8 @@ export default function () {
         });
       } catch {} // no-op if readContract throws for whatever reason
 
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -83,7 +88,8 @@ export default function () {
     async ({ context, event }) => {
       const { key, value } = event.args;
 
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -99,7 +105,8 @@ export default function () {
       const { key, value } = parseDnsTxtRecordArgs(event.args);
       if (key === null) return; // no key to operate over? args were malformed, ignore event
 
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -114,7 +121,8 @@ export default function () {
       const { key, value } = parseDnsTxtRecordArgs(event.args);
       if (key === null) return; // no key to operate over? args were malformed, ignore event
 
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -125,7 +133,8 @@ export default function () {
       const { key } = parseDnsTxtRecordArgs(event.args);
       if (key === null) return; // no key to operate over? args were malformed, ignore event
 
-      const id = await ensureResolverRecords(context, event);
+      const id = makeResolverRecordsId(context, event);
+      await ensureResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, null);
     },
   );

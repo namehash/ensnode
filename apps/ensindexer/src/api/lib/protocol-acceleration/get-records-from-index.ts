@@ -2,7 +2,6 @@ import { db } from "ponder:api";
 import { onchainStaticResolverImplementsDefaultAddress } from "@/api/lib/protocol-acceleration/known-onchain-static-resolver";
 import type { IndexedResolverRecords } from "@/api/lib/resolution/make-records-response";
 import { withSpanAsync } from "@/lib/auto-span";
-import { makeResolverRecordsId } from "@/lib/protocol-acceleration/ids";
 import {
   ChainId,
   DEFAULT_EVM_COIN_TYPE,
@@ -27,12 +26,15 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
   node: Node;
   selection: SELECTION;
 }): Promise<IndexedResolverRecords | null> {
-  const resolverRecordsId = makeResolverRecordsId(chainId, resolverAddress, node);
-
   // fetch the Resolver Records from index
   const resolverRecords = await withSpanAsync(tracer, "resolver.findFirst", {}, async () => {
     const record = await db.query.ext_resolverRecords.findFirst({
-      where: (resolver, { eq }) => eq(resolver.id, resolverRecordsId),
+      where: (resolver, { and, eq }) =>
+        and(
+          eq(resolver.chainId, chainId),
+          eq(resolver.resolver, resolverAddress),
+          eq(resolver.node, node),
+        ),
       columns: { name: true },
       with: { addressRecords: true, textRecords: true },
     });

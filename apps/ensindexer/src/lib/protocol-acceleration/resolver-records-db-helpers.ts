@@ -12,65 +12,73 @@ import {
 } from "@/lib/interpret-record-values";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 
-import { makeKeyedResolverRecordId, makeResolverRecordsId } from "./ids";
+/**
+ * Infer the type of the ResolverRecords entity's composite primary key.
+ */
+type ResolverRecordsId = Pick<
+  typeof schema.ext_resolverRecords.$inferInsert,
+  "chainId" | "resolver" | "node"
+>;
 
-export async function ensureResolverRecords(
+/**
+ * Constructs a ResolverRecordsId from a provided Resolver event.
+ *
+ * @returns ResolverRecordsId
+ */
+export function makeResolverRecordsId(
   context: Context,
   event: EventWithArgs<{ node: Node }>,
-) {
-  const chainId = context.chain.id;
-  const address = event.log.address;
-  const { node } = event.args;
-
-  const id = makeResolverRecordsId(chainId, address, node);
-
-  await context.db
-    .insert(schema.ext_resolverRecords)
-    .values({
-      id,
-      chainId,
-      address,
-      node,
-    })
-    .onConflictDoNothing();
-
-  return id;
+): ResolverRecordsId {
+  return {
+    chainId: context.chain.id,
+    resolver: event.log.address,
+    node: event.args.node,
+  };
 }
 
+/**
+ * Ensures that the ResolverRecords entity described by `id` exists.
+ */
+export async function ensureResolverRecords(context: Context, id: ResolverRecordsId) {
+  await context.db.insert(schema.ext_resolverRecords).values(id).onConflictDoNothing();
+}
+
+/**
+ * Updates the `name` record value for the ResolverRecords described by `id`.
+ */
 export async function handleResolverNameUpdate(
   context: Context,
-  resolverRecordsId: string,
+  id: ResolverRecordsId,
   name: string,
 ) {
   await context.db
-    .update(schema.ext_resolverRecords, { id: resolverRecordsId })
+    .update(schema.ext_resolverRecords, id)
     .set({ name: interpretNameRecordValue(name) });
 }
 
 export async function handleResolverAddressRecordUpdate(
   context: Context,
-  resolverRecordsId: string,
+  resolverRecordsId: ResolverRecordsId,
   coinType: bigint,
   address: Address,
 ) {
-  const recordId = makeKeyedResolverRecordId(resolverRecordsId, coinType.toString());
+  // construct the ResolverAddressRecord's Composite Key
+  const id = { ...resolverRecordsId, coinType };
+
+  // interpret the incoming address record value
   const interpretedValue = interpretAddressRecordValue(address);
 
+  // consider this a deletion iff the interpreted value is null
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverAddressRecords, { id: recordId });
+    await context.db.delete(schema.ext_resolverAddressRecords, id);
   } else {
     // upsert
     await context.db
       .insert(schema.ext_resolverAddressRecords)
       // create a new address record entity
-      .values({
-        id: recordId,
-        resolverRecordsId,
-        coinType,
-        address: interpretedValue,
-      })
+      .values({ ...id, address: interpretedValue })
       // or update the existing one
       .onConflictDoUpdate({ address: interpretedValue });
   }
@@ -78,7 +86,7 @@ export async function handleResolverAddressRecordUpdate(
 
 export async function handleResolverTextRecordUpdate(
   context: Context,
-  resolverRecordsId: string,
+  resolverRecordsId: ResolverRecordsId,
   key: string,
   value: string | null,
 ) {
@@ -87,7 +95,8 @@ export async function handleResolverTextRecordUpdate(
   // ignore updates involving keys that should be ignored as per `interpretTextRecordKey`
   if (interpretedKey === null) return;
 
-  const recordId = makeKeyedResolverRecordId(resolverRecordsId, interpretedKey);
+  // construct the ResolverTextRecord's Composite Key
+  const id = { ...resolverRecordsId, key: interpretedKey };
 
   // interpret the incoming text record value
   const interpretedValue = value == null ? null : interpretTextRecordValue(value);
@@ -96,18 +105,13 @@ export async function handleResolverTextRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverTextRecords, { id: recordId });
+    await context.db.delete(schema.ext_resolverTextRecords, id);
   } else {
     // upsert
     await context.db
       .insert(schema.ext_resolverTextRecords)
       // create a new text record entity
-      .values({
-        id: recordId,
-        resolverRecordsId,
-        key: interpretedKey,
-        value: interpretedValue,
-      })
+      .values({ ...id, value: interpretedValue })
       // or update the existing one
       .onConflictDoUpdate({ value: interpretedValue });
   }
