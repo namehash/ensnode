@@ -6,7 +6,7 @@ import { Address } from "viem";
 import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
-import { upsertDomainResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+import { upsertNodeResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 
 const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
@@ -55,7 +55,7 @@ export default function () {
       }
 
       // all ThreeDNSToken nodes have a hardcoded resolver at that address
-      await upsertDomainResolverRelation(context, node, resolverAddress);
+      await upsertNodeResolverRelation(context, node, resolverAddress);
     },
   );
 }

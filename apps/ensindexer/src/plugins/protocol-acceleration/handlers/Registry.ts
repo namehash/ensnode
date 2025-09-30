@@ -9,8 +9,8 @@ import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
-  removeDomainResolverRelation,
-  upsertDomainResolverRelation,
+  removeNodeResolverRelation,
+  upsertNodeResolverRelation,
 } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
 import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
 
@@ -27,9 +27,9 @@ async function handleNewResolver({
   const isZeroResolver = isAddressEqual(zeroAddress, resolverAddress);
 
   if (isZeroResolver) {
-    await removeDomainResolverRelation(context, node);
+    await removeNodeResolverRelation(context, node);
   } else {
-    await upsertDomainResolverRelation(context, node, resolverAddress);
+    await upsertNodeResolverRelation(context, node, resolverAddress);
   }
 }
 

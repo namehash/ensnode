@@ -4,13 +4,13 @@ import { Address } from "viem";
 
 import { Node } from "@ensnode/ensnode-sdk";
 
-export async function removeDomainResolverRelation(context: Context, node: Node) {
+export async function removeNodeResolverRelation(context: Context, node: Node) {
   const chainId = context.chain.id;
 
   await context.db.delete(schema.ext_nodeResolverRelation, { chainId, node });
 }
 
-export async function upsertDomainResolverRelation(
+export async function upsertNodeResolverRelation(
   context: Context,
   node: Node,
   resolverAddress: Address,
