@@ -56,7 +56,7 @@ export function possibleKnownOffchainLookupResolverDefersTo(
       | Address
       | undefined;
 
-    // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Lineanames plugin
+    // the ENSRoot's LineanamesL1Resolver, if exists, defers to the Lineanames plugin
     if (
       lineanamesL1ResolverAddress &&
       isAddressEqual(resolverAddress, lineanamesL1ResolverAddress) &&
