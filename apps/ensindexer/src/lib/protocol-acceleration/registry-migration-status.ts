@@ -10,8 +10,6 @@ const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
  * Returns whether the `node` has migrated to the new Registry contract.
- *
- * See packages/ensnode-schema/src/migrated-nodes.schema.ts for additional context.
  */
 export async function nodeIsMigrated(context: Context, node: Node) {
   if (context.chain.id !== ensRootChainId) {
@@ -26,8 +24,6 @@ export async function nodeIsMigrated(context: Context, node: Node) {
 
 /**
  * Record that the `node` has migrated to the new Registry contract.
- *
- * See packages/ensnode-schema/src/migrated-nodes.schema.ts for additional context.
  */
 export async function migrateNode(context: Context, node: Node) {
   if (context.chain.id !== ensRootChainId) {
