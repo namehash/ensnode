@@ -56,7 +56,7 @@ export const ext_nodeResolverRelation = onchainTable(
      * The Address of the Resolver contract this `node` has set (via Registry#NewResolver) within
      * the Registry on `chainId`.
      */
-    resolverAddress: t.hex().notNull(),
+    resolver: t.hex().notNull(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.node] }),

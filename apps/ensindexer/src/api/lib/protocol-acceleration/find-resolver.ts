@@ -183,11 +183,11 @@ async function findResolverWithIndex(
               inArray(nrr.node, nodes), // find Relations for the following Nodes
               eq(nrr.chainId, chainId), // exclusively on the requested chainId
             ),
-          columns: { node: true, resolverAddress: true },
+          columns: { node: true, resolver: true },
         });
 
         // cast into our semantic types
-        return records as { node: Node; resolverAddress: Address }[];
+        return records as { node: Node; resolver: Address }[];
       },
     );
 
@@ -195,12 +195,12 @@ async function findResolverWithIndex(
     nodeResolverRelations.sort((a, b) => (nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1));
 
     // 4. iterate up the hierarchy and return the first valid resolver
-    for (const { node, resolverAddress } of nodeResolverRelations) {
+    for (const { node, resolver } of nodeResolverRelations) {
       // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
       // encodes a zeroAddress resolver as the _absence_ of a Domain-Resolver relation, so there is
       // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
       // we include this invariant here to encode that expectation explicitly.
-      if (isAddressEqual(resolverAddress, zeroAddress)) {
+      if (isAddressEqual(resolver, zeroAddress)) {
         throw new Error(
           `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for node ${node}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
         );
@@ -219,7 +219,7 @@ async function findResolverWithIndex(
 
       return {
         activeName,
-        activeResolver: resolverAddress,
+        activeResolver: resolver,
         // this resolver must have wildcard support if it was not for the first node in our hierarchy
         requiresWildcardSupport: indexInHierarchy > 0,
       };

@@ -10,15 +10,11 @@ export async function removeNodeResolverRelation(context: Context, node: Node) {
   await context.db.delete(schema.ext_nodeResolverRelation, { chainId, node });
 }
 
-export async function upsertNodeResolverRelation(
-  context: Context,
-  node: Node,
-  resolverAddress: Address,
-) {
+export async function upsertNodeResolverRelation(context: Context, node: Node, resolver: Address) {
   const chainId = context.chain.id;
 
   return context.db
     .insert(schema.ext_nodeResolverRelation)
-    .values({ chainId, node, resolverAddress })
-    .onConflictDoUpdate({ resolverAddress });
+    .values({ chainId, node, resolver })
+    .onConflictDoUpdate({ resolver });
 }

@@ -27,20 +27,25 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
   selection: SELECTION;
 }): Promise<IndexedResolverRecords | null> {
   // fetch the Resolver Records from index
-  const resolverRecords = await withSpanAsync(tracer, "resolver.findFirst", {}, async () => {
-    const record = await db.query.ext_resolverRecords.findFirst({
-      where: (resolver, { and, eq }) =>
-        and(
-          eq(resolver.chainId, chainId),
-          eq(resolver.resolver, resolverAddress),
-          eq(resolver.node, node),
-        ),
-      columns: { name: true },
-      with: { addressRecords: true, textRecords: true },
-    });
+  const resolverRecords = await withSpanAsync(
+    tracer,
+    "ext_resolverRecords.findFirst",
+    {},
+    async () => {
+      const record = await db.query.ext_resolverRecords.findFirst({
+        where: (resolver, { and, eq }) =>
+          and(
+            eq(resolver.chainId, chainId),
+            eq(resolver.resolver, resolverAddress),
+            eq(resolver.node, node),
+          ),
+        columns: { name: true },
+        with: { addressRecords: true, textRecords: true },
+      });
 
-    return record as IndexedResolverRecords | undefined;
-  });
+      return record as IndexedResolverRecords | undefined;
+    },
+  );
 
   if (!resolverRecords) return null;
 
