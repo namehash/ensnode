@@ -6,21 +6,30 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 import { usePrimaryName } from "@ensnode/ensnode-react";
-import { ChainId } from "@ensnode/ensnode-sdk";
+import {
+  DefaultableChainId,
+  getResolvePrimaryNameChainIdParam,
+  translateDefaultableChainIdToChainId,
+} from "@ensnode/ensnode-sdk";
 import * as React from "react";
 import type { Address } from "viem";
-import { AddressDisplay, AddressLink, NameDisplay, NameLink } from "./utils";
+import { ResolvedIdentity } from "./types";
+import { AddressDisplay, IdentityLink, NameDisplay } from "./utils";
 
 interface IdentityProps {
   address: Address;
   namespaceId: ENSNamespaceId;
+  chainId?: DefaultableChainId;
   showAvatar?: boolean;
   className?: string;
-  chainId?: ChainId;
 }
 
 /**
- * Displays an ENS identity (name, avatar, etc.) for an Ethereum address via ENSNode.
+ * Displays the ENS identity as resolved through ENSNode for the
+ * provided `address`, `namespaceId`, and `chainId`.
+ *
+ * If no chainId is provided, the ENS Root Chain Id for the provided
+ * `namespaceId` is used.
  *
  * If the provided address has a primary name set, displays that primary name and links to the profile for that name.
  * Else, if the provided address doesn't have a primary name, displays the truncated address and links to the profile for that address.
@@ -33,16 +42,16 @@ export function Identity({
   showAvatar = false,
   className,
 }: IdentityProps) {
-  const ensRootChainId = getENSRootChainId(namespaceId);
+  if (chainId === undefined) {
+    // default to resolving the identity for `address` on the ENS Root Chain
+    // for the provided `namespaceId`.
+    chainId = getENSRootChainId(namespaceId);
+  }
 
-  // Establish chainId, preferring user-supplied and defaulting to the ENS Root Chain Id.
-  const definedChainId = chainId ?? ensRootChainId;
-
-  // Lookup the primary name for address using ENSNode
+  // resolve the primary name for `address` on `chainId` using ENSNode
   const { data, status } = usePrimaryName({
     address,
-    // NOTE(ENSIP-19): the Primary Name for the ENS Root Chain is always using chainId: 1
-    chainId: definedChainId === ensRootChainId ? 1 : definedChainId,
+    chainId: getResolvePrimaryNameChainIdParam(chainId, namespaceId),
   });
 
   // If loading, show a skeleton
@@ -50,27 +59,44 @@ export function Identity({
     return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
   }
 
-  const renderAddress = () => (
-    <AddressLink address={address} namespaceId={namespaceId} chainId={definedChainId}>
-      {showAvatar && <ChainIcon chainId={definedChainId} height={24} width={24} />}
-      <AddressDisplay address={address} />
-    </AddressLink>
+  const identity: ResolvedIdentity = {
+    address,
+    name: null, // default to null for the case `status` !== "success"
+    namespaceId,
+    chainId,
+  };
+
+  const renderUnnamedIdentity = () => (
+    <IdentityLink identity={identity}>
+      {showAvatar && (
+        <ChainIcon
+          chainId={translateDefaultableChainIdToChainId(identity.chainId, identity.namespaceId)}
+          height={24}
+          width={24}
+        />
+      )}
+      <AddressDisplay address={identity.address} />
+    </IdentityLink>
   );
 
-  // If there is an error looking up the primary name, fallback to showing the address
-  if (status === "error") return renderAddress();
+  // If there is an error looking up the primary name,
+  // fallback to showing the unnamed identity
+  if (status === "error") return renderUnnamedIdentity();
 
-  const ensName = data.name;
+  identity.name = data.name;
 
-  // If there is no primary name for the resolvedChainId, fallback to showing the address
-  if (ensName === null) return renderAddress();
+  // If there is no primary name for `address` on `chainId`,
+  // fallback to showing the unnamed identity
+  if (identity.name === null) return renderUnnamedIdentity();
 
-  // Otherwise, render the primary name
+  // Otherwise, render the named identity we resolved for `address` on `chainId`
   return (
-    <NameLink name={ensName}>
-      {showAvatar && <EnsAvatar name={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
-      <NameDisplay name={ensName} />
-    </NameLink>
+    <IdentityLink identity={identity}>
+      {showAvatar && (
+        <EnsAvatar name={identity.name} namespaceId={namespaceId} className="h-6 w-6" />
+      )}
+      <NameDisplay name={identity.name} />
+    </IdentityLink>
   );
 }
 Identity.Placeholder = IdentityPlaceholder;
