@@ -13,6 +13,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { convertCommand } from "@/commands/convert-command";
+import { convertCsvCommand } from "@/commands/convert-csv-command";
 // import { ingestCommand } from "@/commands/ingest-command";
 import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
@@ -55,6 +56,13 @@ interface PurgeArgs {
 }
 
 interface ConvertArgs {
+  "input-file": string;
+  "output-file": string;
+  "label-set-id": LabelSetId;
+  "label-set-version": LabelSetVersion;
+}
+
+interface ConvertCsvArgs {
   "input-file": string;
   "output-file": string;
   "label-set-id": LabelSetId;
@@ -184,7 +192,7 @@ export function createCLI(options: CLIOptions = {}) {
       )
       .command(
         "convert",
-        "Convert rainbow tables from SQL dump to protobuf format",
+        "Convert rainbow tables from SQL dump to ensrainbow format",
         (yargs: Argv) => {
           return yargs
             .option("input-file", {
@@ -194,7 +202,7 @@ export function createCLI(options: CLIOptions = {}) {
             })
             .option("output-file", {
               type: "string",
-              description: "Path to the output protobuf file",
+              description: "Path to the output ensrainbow file",
               default: join(process.cwd(), "rainbow-records.ensrainbow"),
             })
             .option("label-set-id", {
@@ -212,6 +220,43 @@ export function createCLI(options: CLIOptions = {}) {
         },
         async (argv: ArgumentsCamelCase<ConvertArgs>) => {
           await convertCommand({
+            inputFile: argv["input-file"],
+            outputFile: argv["output-file"],
+            labelSetId: argv["label-set-id"],
+            labelSetVersion: argv["label-set-version"],
+          });
+        },
+      )
+      .command(
+        "convert-csv",
+        "Convert rainbow tables from CSV format to ensrainbow format",
+        (yargs: Argv) => {
+          return yargs
+            .option("input-file", {
+              type: "string",
+              description: "Path to the CSV input file",
+              demandOption: true,
+            })
+            .option("output-file", {
+              type: "string",
+              description: "Path to the output ensrainbow file",
+              default: join(process.cwd(), "rainbow-records.ensrainbow"),
+            })
+            .option("label-set-id", {
+              type: "string",
+              description: "Label set id for the rainbow record collection",
+              demandOption: true,
+            })
+            .coerce("label-set-id", buildLabelSetId)
+            .option("label-set-version", {
+              type: "number",
+              description: "Label set version for the rainbow record collection",
+              demandOption: true,
+            })
+            .coerce("label-set-version", buildLabelSetVersion);
+        },
+        async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
+          await convertCsvCommand({
             inputFile: argv["input-file"],
             outputFile: argv["output-file"],
             labelSetId: argv["label-set-id"],
