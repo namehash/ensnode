@@ -1,61 +1,71 @@
 "use client";
 
-import { type UrlString } from "@ensnode/ensnode-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-// This value is the query param key for the active
-// connection used in the URL state manager
-export const CONNECTION_PARAM_KEY = "connection";
+// The query param key for the raw selected connection
+const RAW_CONNECTION_PARAM_KEY = "connection";
 
-interface UseConnectionUrlParamReturn {
-  /** The current connection URL from the URL parameter, or null if not present */
-  currentConnectionUrl: string | null;
-  /** Sets the connection URL parameter in the browser URL */
-  setConnectionUrl: (url: UrlString) => void;
+interface UseRawConnectionUrlParamResult {
+  /**
+   * The current raw connection URL param, or null if param not present in current URL
+   */
+  rawConnectionUrlParam: string | null;
+
+  /**
+   * Sets the raw connection URL param in the browser URL.
+   *
+   * @param rawUrl - The raw connection URL to set in the browser URL, or `null` to
+   *                 remove the param.
+   */
+  setRawConnectionUrlParam: (rawUrl: string | null) => void;
 }
 
 /**
- * Custom hook for managing the connection URL parameter in the browser URL.
+ * Hook for managing the raw connection URL param in the browser URL.
  *
  * This hook provides a centralized interface for all operations related to the
  * CONNECTION_PARAM_KEY URL parameter, ensuring consistent URL management across
  * the application.
  *
- * @returns {UseConnectionUrlParamReturn} Object containing URL parameter management functions
+ * @returns A {UseRawConnectionUrlParamResult} object.
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { currentConnectionUrl, setConnectionUrl } = useConnectionUrlParam();
+ *   const { rawConnectionUrlParam, setRawConnectionUrlParam } = useRawConnectionUrlParam();
  *
- *   // Read current connection URL from URL parameter
- *   console.log(currentConnectionUrl); // "https://api.example.com" or null
+ *   // Read current connection URL from URL param
+ *   console.log(rawConnectionUrlParam); // "https://api.example.com" or null
  *
- *   // Set connection URL parameter
- *   setConnectionUrl("https://api.example.com");
+ *   // Set raw connection URL param
+ *   setRawConnectionUrlParam("https://api.example.com");
  * }
  * ```
  */
-export function useConnectionUrlParam(): UseConnectionUrlParamReturn {
+export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get the current connection URL from the URL parameter
-  const currentConnectionUrl = searchParams.get(CONNECTION_PARAM_KEY);
+  // Get the current raw connection URL param
+  const rawConnectionUrlParam = searchParams.get(RAW_CONNECTION_PARAM_KEY);
 
-  // Set the connection URL parameter
-  const setConnectionUrl = useCallback(
-    (url: UrlString) => {
+  // Build callback for setting the raw connection URL param
+  const setRawConnectionUrlParam = useCallback(
+    (rawUrl: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set(CONNECTION_PARAM_KEY, url);
+      if (rawUrl === null) {
+        params.delete(RAW_CONNECTION_PARAM_KEY);
+      } else {
+        params.set(RAW_CONNECTION_PARAM_KEY, rawUrl);
+      }
       router.replace(`?${params.toString()}`);
     },
     [router, searchParams],
   );
 
   return {
-    currentConnectionUrl,
-    setConnectionUrl,
+    rawConnectionUrlParam,
+    setRawConnectionUrlParam,
   };
 }

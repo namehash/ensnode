@@ -2,62 +2,44 @@
 
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ConnectionOption } from "@/hooks/ensnode-connections";
+import { beautifyUrl } from "@/lib/beautify-url";
+import { HttpHostname } from "@/lib/url-utils";
 import { cn } from "@/lib/utils";
-import type { UrlString } from "@ensnode/ensnode-sdk";
 import { Trash2 } from "lucide-react";
 
 interface ConnectionsListProps {
-  connectionLibrary: ConnectionOption[];
-  selectedConnectionUrl: UrlString;
-  onSelectConnection: (url: UrlString) => void;
-  onRemoveCustomConnection?: (url: UrlString) => void;
-  type: "server" | "custom";
+  connections: ConnectionOption[];
+  selectedConnection: HttpHostname | null;
+  onSelectConnection: (option: ConnectionOption) => void;
+  onRemoveCustomConnection?: (url: HttpHostname) => void;
 }
 
 export function ConnectionsList({
-  connectionLibrary,
-  selectedConnectionUrl,
+  connections,
+  selectedConnection,
   onSelectConnection,
   onRemoveCustomConnection,
-  type,
-}: ConnectionsListProps): JSX.Element | null {
-  const connections = connectionLibrary.filter(({ fromServerLibrary }) =>
-    type === "server" ? fromServerLibrary : !fromServerLibrary,
-  );
-
-  if (connections.length === 0) {
-    return null;
-  }
-
-  const label = type === "server" ? "ENSNode Connection Library" : "My Custom Connections";
-  const showSeparator = type === "custom";
-
+}: ConnectionsListProps): JSX.Element {
   return (
     <>
-      {showSeparator && <DropdownMenuSeparator />}
-      <DropdownMenuLabel className="text-xs text-muted-foreground">{label}</DropdownMenuLabel>
-
-      {connections.map(({ url: connectionUrl }) => {
-        const isActiveConnection = connectionUrl === selectedConnectionUrl;
-        const isCustomConnection = type === "custom";
-        const canRemove = isCustomConnection && !isActiveConnection;
+      {connections.map((connection) => {
+        const isSelectedConnection = connection.url === selectedConnection;
+        const isCustomConnection = connection.type === "custom";
+        const canRemove = isCustomConnection && !isSelectedConnection;
+        const beautifiedUrl = beautifyUrl(connection.url);
 
         return (
-          <div key={connectionUrl} className="flex items-center justify-between gap-1">
+          <div key={connection.url.toString()} className="flex items-center justify-between gap-1">
             <DropdownMenuItem
-              onClick={() => onSelectConnection(connectionUrl)}
+              onClick={() => onSelectConnection(connection)}
               className={cn(
                 "cursor-pointer flex-1 py-2.5 truncate",
-                isActiveConnection ? "bg-primary/10 text-primary" : null,
+                isSelectedConnection ? "bg-primary/10 text-primary" : null,
               )}
             >
-              <span className="font-mono text-xs flex-1">{connectionUrl}</span>
+              <span className="font-mono text-xs flex-1">{beautifiedUrl}</span>
             </DropdownMenuItem>
             <div className="flex items-center">
               {canRemove && onRemoveCustomConnection && (
@@ -66,13 +48,13 @@ export function ConnectionsList({
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRemoveCustomConnection(connectionUrl);
+                    onRemoveCustomConnection(connection.url);
                   }}
                 >
                   <Trash2 className="w-3 h-3" />
                 </Button>
               )}
-              <CopyButton value={connectionUrl} />
+              <CopyButton value={beautifiedUrl} />
             </div>
           </div>
         );

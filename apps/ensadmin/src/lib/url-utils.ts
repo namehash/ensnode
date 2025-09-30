@@ -1,92 +1,127 @@
-import { type UrlString } from "@ensnode/ensnode-sdk";
-
-export const normalizeUrl = (url: UrlString): UrlString => {
-  try {
-    return new URL(url).toString();
-  } catch {
-    // If URL parsing fails, try prefixing with https://
-    return new URL(`https://${url}`).toString();
+/**
+ * Builds a `URL` from the given string.
+ *
+ * If no explicit protocol found in `rawUrl` assumes an implicit
+ * 'https://' default protocol.
+ *
+ * @param rawUrl a string that may be in the format of a `URL`.
+ * @returns a `URL` object for the given `rawUrl`.
+ * @throws if `rawUrl` cannot be converted to a `URL`.
+ */
+const buildUrl = (rawUrl: string): URL => {
+  if (!rawUrl.includes("://")) {
+    // no explicit protocol found in `rawUrl`, assume implicit https:// protocol
+    rawUrl = `https://${rawUrl}`;
   }
+
+  return new URL(rawUrl);
 };
 
-export const isNormalizableUrl = (url: UrlString): boolean => {
-  try {
-    normalizeUrl(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
+/**
+ * Invariants:
+ *
+ * A `URL` that:
+ * - has protocol that is either 'http:' or 'https:'
+ * - has a hostname that:
+ *   - contains at least one dot or is "localhost"
+ *   - does not start or end with dots or have consecutive dots (no empty labels)
+ * - does not include a non-root path, query params, or link fragment
+ * - optionally includes a port
+ *
+ * For simplicity, at this time no further validation is performed.
+ */
+export type HttpHostname = URL;
 
-type ValidationResult =
-  | { isValid: true; normalizedUrl: UrlString }
+export type BuildHttpHostnameResult =
+  | { isValid: true; url: HttpHostname }
   | { isValid: false; error: string };
 
 /**
- * Validates and normalizes a raw URL input to ensure it's a valid ENSNode connection URL.
- * This is the standard pipeline for processing URL input from any source (user input, env vars, etc).
+ * Builds a validated `HttpHostname` from a raw URL.
  *
- * Pipeline: raw input -> normalizeUrl() -> isValidENSNodeConnectionUrl()
- *
- * @param rawUrl - Raw URL input from any source
- * @returns ValidationResult with either normalized URL or error message
+ * @param rawUrl - a string that may be in the format of a URL
+ * @returns a `BuildHttpHostnameResult` with either a valid `HttpHostname`
+ *          or `error` message describing why the `rawUrl` cannot be converted
+ *          to a `HttpHostname`.
  */
-export const validateAndNormalizeENSNodeUrl = (rawUrl: string): ValidationResult => {
+export const buildHttpHostname = (rawUrl: string): BuildHttpHostnameResult => {
+  let url: URL;
   try {
-    // Step 1: Normalize the URL
-    const normalizedUrl = normalizeUrl(rawUrl);
-
-    // Step 2: Validate it as an ENSNode connection URL
-    if (!isValidENSNodeConnectionUrl(normalizedUrl)) {
-      return {
-        isValid: false,
-        error: "Invalid ENSNode connection URL format",
-      };
-    }
-
-    return {
-      isValid: true,
-      normalizedUrl,
-    };
+    url = buildUrl(rawUrl);
   } catch {
     return {
       isValid: false,
-      error: "Please enter a valid URL",
+      error: "Invalid URL",
     };
   }
+
+  // validate protocol as HTTP or HTTPS (case insensitive)
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return {
+      isValid: false,
+      error: "URL must use HTTP or HTTPS protocol",
+    };
+  }
+
+  // validate hostname as containing at least one dot or be localhost
+  // ex: if the hostname is "abc" it's assumed to be invalid
+  if (!url.hostname.includes(".") && url.hostname !== "localhost") {
+    return {
+      isValid: false,
+      error: "Invalid hostname",
+    };
+  }
+
+  // URL constructor accepts hostnames with empty labels, but we reject them
+  if (url.hostname.startsWith(".") || url.hostname.includes("..") || url.hostname.endsWith(".")) {
+    return {
+      isValid: false,
+      error: "Invalid hostname",
+    };
+  }
+
+  if (url.pathname !== "/") {
+    return {
+      isValid: false,
+      error: "URL must not include a non-root path (e.g. '/path/to/resource')",
+    };
+  }
+
+  if (url.search !== "") {
+    return {
+      isValid: false,
+      error: "URL must not include query params (e.g. '?query=value')",
+    };
+  }
+
+  if (url.hash !== "") {
+    return {
+      isValid: false,
+      error: "URL must not include a link fragment (e.g. '#anchor')",
+    };
+  }
+
+  return {
+    isValid: true,
+    url: url,
+  };
 };
 
 /**
- * Validates if a normalized URL string is a valid ENSNode connection URL.
- * This function should only be called on URLs that have already passed through normalizeUrl().
+ * Converts a list of raw URLs into a list of `HttpHostname` objects.
  *
- * @param normalizedUrl - A URL string that has been normalized via normalizeUrl()
- * @returns true if the URL is a valid ENSNode connection URL, false otherwise
+ * Any urls in the input that cannot be converted to a `HttpHostname` will be
+ * excluded from the resulting list.
+ *
+ * Note: this does not deduplicate the URLs as full deduplication of URLs
+ * is a lot more complicated than it seems. Ex: implicit ports, http vs https,
+ * capitalization of hostnames, ip address vs hostname, etc..
+ *
+ * @param rawUrls A list of raw URLs
+ * @returns A list of `HttpHostname` objects
  */
-export const isValidENSNodeConnectionUrl = (normalizedUrl: UrlString): boolean => {
-  try {
-    const parsedUrl = new URL(normalizedUrl);
-
-    // Must use HTTP or HTTPS protocol
-    if (!parsedUrl.protocol.startsWith("http")) {
-      return false;
-    }
-
-    // Validate hostname - must contain at least one dot or be localhost
-    if (!parsedUrl.hostname.includes(".") && parsedUrl.hostname !== "localhost") {
-      return false;
-    }
-
-    // Check for reasonable hostname format (basic validation)
-    // Validates a domain/hostname (labels separated by dots, alphanumeric with optional internal hyphens, no leading/trailing hyphens or dots)
-    const hostnamePattern =
-      /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
-    if (!hostnamePattern.test(parsedUrl.hostname) && parsedUrl.hostname !== "localhost") {
-      return false;
-    }
-
-    return true;
-  } catch {
-    return false;
-  }
+export const buildHttpHostnames = (rawUrls: string[]): HttpHostname[] => {
+  const allResults = rawUrls.map((rawUrl) => buildHttpHostname(rawUrl));
+  const validResults = allResults.filter((result) => result.isValid);
+  return validResults.map((result) => result.url);
 };

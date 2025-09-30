@@ -5,177 +5,166 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
-import { useConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { getServerConnectionLibrary } from "@/lib/env";
-import {
-  isNormalizableUrl,
-  isValidENSNodeConnectionUrl,
-  normalizeUrl,
-  validateAndNormalizeENSNodeUrl,
-} from "@/lib/url-utils";
-import { type UrlString, uniq } from "@ensnode/ensnode-sdk";
+import { HttpHostname, buildHttpHostname, buildHttpHostnames } from "@/lib/url-utils";
+import { uniq } from "@ensnode/ensnode-sdk";
 
-export const CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY = "ensadmin:custom-connections:urls";
+const CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY = "ensadmin:custom-connections:urls";
+
+export type ConnectionOptionType = "server" | "custom";
 
 export interface ConnectionOption {
-  /** Normalized URL that passes isValidENSNodeConnectionUrl validation */
-  url: UrlString;
-  /** True if this connection comes from the server library, false if it's a custom connection */
-  fromServerLibrary: boolean;
+  url: HttpHostname;
+  type: ConnectionOptionType;
 }
 
-const validateAndNormalizeUrls = (urls: UrlString[]): UrlString[] => {
-  return uniq(urls.filter(isNormalizableUrl).map(normalizeUrl).filter(isValidENSNodeConnectionUrl));
-};
+export interface SelectedConnectionResult {
+  /**
+   * The raw value for the selected connection.
+   *
+   * Useful for displaying error messages in the UI if this value is invalid.
+   */
+  rawSelectedConnection: string;
+
+  /**
+   * The validated connection URL.
+   *
+   * `null` if and only if `rawSelectedConnection` is an invalid `HttpHostname`.
+   */
+  validSelectedConnection: HttpHostname | null;
+}
 
 /**
- * Server connection library - ENSNode connection URLs provided by the server with guaranteed invariants:
- * - Each URL is normalized (via normalizeUrl in getServerConnectionLibrary)
- * - Each URL passes isValidENSNodeConnectionUrl validation (via getServerConnectionLibrary)
- * - All URLs are unique (via getServerConnectionLibrary)
- * - Contains at least 1 URL (via getServerConnectionLibrary)
- *
- * These invariants are maintained by getServerConnectionLibrary() which uses the standard pipeline:
- * raw input -> normalizeUrl() -> isValidENSNodeConnectionUrl() -> deduplication
+ * Invariants:
+ * - At least 1 connection
+ * - All connections are (naively) deduplicated
  */
-const serverConnectionLibrary = getServerConnectionLibrary().map((url) => url.toString());
+const serverConnectionLibrary = getServerConnectionLibrary();
+const defaultSelectedConnection = serverConnectionLibrary[0];
 
 function _useAvailableENSNodeConnections() {
   const hydrated = useHydrated();
-  const { currentConnectionUrl: rawSelectedConnection, setConnectionUrl } = useConnectionUrlParam();
-  const [rawCustomConnectionUrls, storeCustomConnections] = useLocalstorageState<UrlString[]>(
+  const { rawConnectionUrlParam, setRawConnectionUrlParam } = useRawConnectionUrlParam();
+
+  // get raw custom connection library URLs from localStorage
+  const [rawCustomConnectionUrls, storeRawCustomConnectionUrls] = useLocalstorageState<string[]>(
     CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY,
     [],
   );
 
-  const [existingConnectionUrl, setExistingConnectionUrl] = useState<UrlString | null>(null);
-  // Validate and normalize URLs from localStorage - Custom Connection Library
-  const customConnectionLibrary = useMemo(
-    () => validateAndNormalizeUrls(rawCustomConnectionUrls),
-    [rawCustomConnectionUrls],
-  );
-
-  // Clean up localStorage if validation/normalization changed anything
-  useEffect(() => {
-    if (JSON.stringify(customConnectionLibrary) !== JSON.stringify(rawCustomConnectionUrls)) {
-      storeCustomConnections(customConnectionLibrary);
-    }
-  }, [customConnectionLibrary, rawCustomConnectionUrls, storeCustomConnections]);
+  const [rawExistingConnectionUrl, setRawExistingConnectionUrl] = useState<string | null>(null);
 
   /**
-   * Connection Library - dynamically generated union of ServerConnectionLibrary and CustomConnectionLibrary with guaranteed invariants:
-   *
-   * Format:
-   * - Array of ConnectionOption objects with { url: UrlString, fromServerLibrary: boolean }
-   * - url: Normalized URL string that passes isValidENSNodeConnectionUrl validation
-   * - fromServerLibrary: true for server connections, false for custom ones
-   *
-   * Content guarantees:
-   * - Always contains at least 1 connection (from serverConnectionLibrary)
-   * - All URLs are normalized (via normalizeUrl)
-   * - All URLs pass isValidENSNodeConnectionUrl validation
-   * - All URLs are unique (no duplicates)
-   * - No duplicate URLs (custom connections filtered against server connections)
-   * - Server connections always come first in array
-   * - Custom connections are filtered to exclude any that match server connections
-   *
-   * Order:
-   * 1. All server connections (fromServerLibrary: true)
-   * 2. Custom connections not in server library (fromServerLibrary: false)
+   * Invariants:
+   * - 0 or more connections
+   * - All connections are (naively) deduplicated
+   */
+  const customConnectionLibrary: HttpHostname[] = useMemo(() => {
+    const connections = buildHttpHostnames(rawCustomConnectionUrls);
+
+    // naive deduplication
+    const uniqueConnections = uniq(connections);
+
+    return uniqueConnections;
+  }, [rawCustomConnectionUrls]);
+
+  // clean up custom connection library URLs in localStorage if validation changed anything
+  useEffect(() => {
+    if (JSON.stringify(customConnectionLibrary) !== JSON.stringify(rawCustomConnectionUrls)) {
+      storeRawCustomConnectionUrls(customConnectionLibrary.map((url) => url.toString()));
+    }
+  }, [customConnectionLibrary, rawCustomConnectionUrls, storeRawCustomConnectionUrls]);
+
+  /**
+   * Invariants:
+   * - At least 1 connection
+   * - All connections are (naively) deduplicated
+   *   - All connections from the server connection library are guaranteed in the result
+   *   - All connections from the custom connection library that are not in the server
+   *     connection library are guaranteed in the result
+   * - All connections are in the order they are defined in the server connection library
+   *   followed by the order they are defined in the custom connection library.
    */
   const connectionLibrary = useMemo<ConnectionOption[]>(
     () => [
-      // include the server connections
+      // first, include all records from the server connection library
       ...serverConnectionLibrary.map((url) => ({
         url,
-        fromServerLibrary: true,
+        type: "server" as const,
       })),
-      // include the user's connections that aren't already in server library
+      // then include all records from the user's custom connection library
+      // that aren't already in the server connection library
       ...customConnectionLibrary
         .filter((url) => !serverConnectionLibrary.includes(url))
-        .map((url) => ({ url, fromServerLibrary: false })),
+        .map((url) => ({ url, type: "custom" as const })),
     ],
     [customConnectionLibrary],
   );
 
   const addCustomConnection = useCallback(
-    (_url: UrlString) => {
-      const validation = validateAndNormalizeENSNodeUrl(_url);
-      if (!validation.isValid) {
-        throw new Error(validation.error);
-      }
-
-      const url = validation.normalizedUrl;
-
-      if (connectionLibrary.some((c) => c.url === url)) return url;
-
-      storeCustomConnections((customConnections) => [...customConnections, url]);
+    (url: HttpHostname) => {
+      storeRawCustomConnectionUrls((customConnections) => {
+        // naive deduplication
+        return uniq([...customConnections, url.toString()]);
+      });
 
       return url;
     },
-    [connectionLibrary, storeCustomConnections],
+    [customConnectionLibrary, storeRawCustomConnectionUrls],
   );
 
   const removeCustomConnection = useCallback(
-    (url: UrlString) => {
-      storeCustomConnections((customConnections) =>
-        customConnections.filter((_url) => _url !== url),
+    (url: HttpHostname) => {
+      storeRawCustomConnectionUrls((customConnections) =>
+        customConnections.filter((rawUrl) => rawUrl !== url.toString()),
       );
 
       return url;
     },
-    [storeCustomConnections],
+    [storeRawCustomConnectionUrls],
   );
 
-  // the selected connection is the current connection (from URL param) or the first from server library
-  const selectedConnection = useMemo<URL | null>(() => {
+  const selectedConnection = useMemo<SelectedConnectionResult | null>(() => {
     // no selected ensnode connection in server environments
     if (!hydrated) return null;
 
-    // NOTE: guaranteed to have a valid set of `connectionLibrary` here, on the client
-    // NOTE: guaranteed to have at least 1 connection because server library must have length > 0
-    const defaultSelectedConnection = connectionLibrary[0].url;
+    if (!rawConnectionUrlParam) return null;
 
-    if (!rawSelectedConnection) return new URL(defaultSelectedConnection);
+    const validatedParam = buildHttpHostname(rawConnectionUrlParam);
+    return {
+      rawSelectedConnection: rawConnectionUrlParam,
+      validSelectedConnection: validatedParam.isValid ? validatedParam.url : null,
+    };
+  }, [hydrated, rawConnectionUrlParam]);
 
-    // Allow any valid URL as selected connection, even if not in connection library
-    try {
-      return new URL(rawSelectedConnection);
-    } catch {
-      // If rawSelectedConnection is invalid, fall back to default connection
-      return new URL(defaultSelectedConnection);
+  // Automatically (and explicitly) select the default selected connection
+  // if no connection has been selected yet.
+  useEffect(() => {
+    if (hydrated && !rawConnectionUrlParam) {
+      setRawConnectionUrlParam(defaultSelectedConnection.toString());
     }
-  }, [hydrated, connectionLibrary, rawSelectedConnection]);
-  // Show connection success toast
+  }, [hydrated, rawConnectionUrlParam, setRawConnectionUrlParam]);
+
+  // Show connection selected toast
   useEffect(() => {
     if (
-      existingConnectionUrl !== null &&
-      existingConnectionUrl !== rawSelectedConnection &&
-      rawSelectedConnection
+      rawExistingConnectionUrl !== null &&
+      rawConnectionUrlParam !== null &&
+      rawExistingConnectionUrl.toString() !== rawConnectionUrlParam
     ) {
-      toast.success(`Connected to ${rawSelectedConnection}`);
+      toast.success(`Selected connection to ${rawConnectionUrlParam}`);
     }
 
-    setExistingConnectionUrl(rawSelectedConnection);
-  }, [rawSelectedConnection, existingConnectionUrl]);
-
-  // Handle URL parameter synchronization when no connection parameter exists
-  useEffect(() => {
-    if (!hydrated) return;
-    if (rawSelectedConnection) return;
-
-    // If no connection parameter exists and we have a selected connection, update URL
-    if (selectedConnection) {
-      setConnectionUrl(selectedConnection.toString());
-    }
-  }, [hydrated, rawSelectedConnection, selectedConnection, setConnectionUrl]);
+    setRawExistingConnectionUrl(rawConnectionUrlParam);
+  }, [rawConnectionUrlParam, rawExistingConnectionUrl]);
 
   const selectConnection = useCallback(
-    (url: UrlString) => {
-      setConnectionUrl(url);
+    (url: HttpHostname) => {
+      setRawConnectionUrlParam(url.toString());
     },
-    [setConnectionUrl],
+    [setRawConnectionUrlParam],
   );
 
   return {
@@ -194,16 +183,19 @@ const [AvailableENSNodeConnectionsProviderInner, useAvailableENSNodeConnections]
 export { useAvailableENSNodeConnections };
 
 /**
- * Provider for ENSNode connections (ServerConnectionLibrary + CustomConnectionLibrary).
+ * Provider for ENSNode connection management.
  *
  * Wraps the inner provider with Suspense boundary to handle the async nature
  * of useSearchParams() which can suspend during SSR/hydration.
  *
  * Provides access to:
- * - connectionLibrary: All connections (server + custom)
- * - selectedConnection: Currently selected connection URL
- * - addCustomConnection: Add a new custom connection
- * - removeCustomConnection: Remove a custom connection
+ * - connectionLibrary: List of 1 or more `ConnectionOption` values
+ *   (includes both `server` and `custom` `ConnectionOptionType`)
+ * - selectedConnection: Currently selected connection as a
+ *   `SelectedConnectionResult` or `null` if no connection is selected.
+ * - addCustomConnection: Callback for adding a new custom connection
+ * - removeCustomConnection: Callback for removing a custom connection
+ * - selectConnection: Callback for selecting a connection
  */
 export function AvailableENSNodeConnectionsProvider({
   children,

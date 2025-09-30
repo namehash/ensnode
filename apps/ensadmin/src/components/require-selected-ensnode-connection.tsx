@@ -3,7 +3,8 @@
 import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
 import { PropsWithChildren } from "react";
 
-// Allows consumers to use `useActiveENSNodeConnection` by blocking rendering until it is available.
+// Allows consumers to use `useSelectedENSNodeConnection` by blocking rendering
+// until it is available.
 export function RequireSelectedENSNodeConnection({ children }: PropsWithChildren<{}>) {
   const { selectedConnection } = useAvailableENSNodeConnections();
 

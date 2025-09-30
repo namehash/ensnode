@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -19,31 +20,42 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useSelectedENSNodeUrl } from "@/hooks/active/use-selected-ensnode-url";
-import { useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
-import { type UrlString } from "@ensnode/ensnode-sdk";
+import { ConnectionOption, useAvailableENSNodeConnections } from "@/hooks/ensnode-connections";
+import { beautifyUrl } from "@/lib/beautify-url";
+import { buildHttpHostname } from "@/lib/url-utils";
 
 export function ConnectionSelector() {
   const { isMobile } = useSidebar();
 
-  const { connectionLibrary, addCustomConnection, removeCustomConnection, selectConnection } =
-    useAvailableENSNodeConnections();
-  const selectedENSNodeUrl = useSelectedENSNodeUrl().toString();
+  const {
+    connectionLibrary,
+    selectedConnection,
+    addCustomConnection,
+    removeCustomConnection,
+    selectConnection,
+  } = useAvailableENSNodeConnections();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSelect = (url: UrlString) => {
-    selectConnection(url);
+  const handleConnectionLibrarySelection = (option: ConnectionOption) => {
+    selectConnection(option.url);
     setDialogOpen(false);
   };
 
-  const handleAdd = (url: UrlString) => {
+  const handleAddCustomConnection = (rawUrl: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
+      const validation = buildHttpHostname(rawUrl);
+
+      if (!validation.isValid) {
+        throw new Error(`Invalid connection URL: ${validation.error}`);
+      }
+
+      const url = validation.url;
       const addedUrl = addCustomConnection(url);
       setDialogOpen(false);
       selectConnection(addedUrl);
@@ -57,6 +69,23 @@ export function ConnectionSelector() {
   const handleErrorReset = () => {
     setError(null);
   };
+
+  let connectionMessage: string;
+
+  if (!selectedConnection) {
+    connectionMessage = "Disconnected";
+  } else if (!selectedConnection.validSelectedConnection) {
+    connectionMessage = "Invalid connection";
+  } else {
+    connectionMessage = beautifyUrl(selectedConnection.validSelectedConnection);
+  }
+
+  const serverConnections = connectionLibrary.filter((connection) => connection.type === "server");
+  const customConnections = connectionLibrary.filter((connection) => connection.type === "custom");
+
+  const selectedConnectionUrl = selectedConnection
+    ? selectedConnection.validSelectedConnection
+    : null;
 
   return (
     <>
@@ -73,7 +102,7 @@ export function ConnectionSelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{selectedENSNodeUrl}</span>
+                  <span className="truncate text-xs font-mono">{connectionMessage}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
@@ -84,20 +113,29 @@ export function ConnectionSelector() {
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
             >
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                ENSNode Connection Library
+              </DropdownMenuLabel>
               <ConnectionsList
-                connectionLibrary={connectionLibrary}
-                selectedConnectionUrl={selectedENSNodeUrl}
-                onSelectConnection={handleSelect}
-                type="server"
+                connections={serverConnections}
+                selectedConnection={selectedConnectionUrl}
+                onSelectConnection={handleConnectionLibrarySelection}
               />
 
-              <ConnectionsList
-                connectionLibrary={connectionLibrary}
-                selectedConnectionUrl={selectedENSNodeUrl}
-                onSelectConnection={handleSelect}
-                onRemoveCustomConnection={removeCustomConnection}
-                type="custom"
-              />
+              {customConnections.length > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    My Custom Connections
+                  </DropdownMenuLabel>
+                  <ConnectionsList
+                    connections={customConnections}
+                    selectedConnection={selectedConnectionUrl}
+                    onSelectConnection={handleConnectionLibrarySelection}
+                    onRemoveCustomConnection={removeCustomConnection}
+                  />
+                </>
+              )}
 
               <DropdownMenuSeparator />
 
@@ -118,7 +156,7 @@ export function ConnectionSelector() {
       <AddConnectionDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onAdd={handleAdd}
+        onAdd={handleAddCustomConnection}
         isLoading={isLoading}
         error={error}
         onErrorReset={handleErrorReset}
