@@ -179,7 +179,7 @@ export async function handleTextChanged({
     address: event.log.address,
   });
 
-  // TODO(null-bytes): represent null bytes in the database correctly
+  // NOTE(subgraph-compat): subgraph implicitly strips null bytes from event args
   const sanitizedKey = stripNullBytes(key);
 
   // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver (DefaultPublicResolver1)
