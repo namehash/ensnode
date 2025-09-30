@@ -67,6 +67,7 @@ interface ConvertCsvArgs {
   "output-file": string;
   "label-set-id": LabelSetId;
   "label-set-version": LabelSetVersion;
+  "progress-interval"?: number;
 }
 
 export interface CLIOptions {
@@ -253,7 +254,12 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Label set version for the rainbow record collection",
               demandOption: true,
             })
-            .coerce("label-set-version", buildLabelSetVersion);
+            .coerce("label-set-version", buildLabelSetVersion)
+            .option("progress-interval", {
+              type: "number",
+              description: "Number of records to process before logging progress",
+              default: 10000,
+            });
         },
         async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
           await convertCsvCommand({
@@ -261,6 +267,7 @@ export function createCLI(options: CLIOptions = {}) {
             outputFile: argv["output-file"],
             labelSetId: argv["label-set-id"],
             labelSetVersion: argv["label-set-version"],
+            progressInterval: argv["progress-interval"],
           });
         },
       )
