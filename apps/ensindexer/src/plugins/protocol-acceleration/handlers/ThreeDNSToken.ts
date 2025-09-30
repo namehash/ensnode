@@ -18,7 +18,7 @@ const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
   .reduce(
     (memo, datasource) => ({
       ...memo,
-      // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
+      // each ThreeDNS* Datasource defines a 'Resolver' ContractConfig with a single Address
       [datasource.chain.id]: datasource.contracts.Resolver!.address as Address,
     }),
     {},
@@ -26,7 +26,7 @@ const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
 
 /**
  * Handler functions for ThreeDNSToken contracts in the Protocol Acceleration plugin.
- * - manages Node-Resolver Relationships
+ * - indexes Node-Resolver Relationships for all nodes registred in ThreeDNSToken
  */
 export default function () {
   ponder.on(

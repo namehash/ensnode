@@ -13,7 +13,7 @@ import {
 
 /**
  * Handlers for Resolver contracts in the Protocol Acceleration plugin.
- * - indexes Resolver Records
+ * - indexes all Resolver Records described by protocol-acceleration.schema.ts
  */
 export default function () {
   ponder.on(
@@ -59,6 +59,8 @@ export default function () {
 
       // this is a LegacyPublicResolver (DefaultPublicResolver1) event which does not emit `value`,
       // so we fetch it here if possible
+
+      // default record value as 'null' which will be interpreted as deletion/non-existence of record
       let value: string | null = null;
       try {
         value = await context.client.readContract({
@@ -67,9 +69,7 @@ export default function () {
           functionName: "text",
           args: [node, key],
         });
-      } catch {
-        // readContract threw, record value as 'null' which will be interpreted as deletion
-      }
+      } catch {} // no-op if readContract throws for whatever reason
 
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
@@ -97,9 +97,7 @@ export default function () {
     ),
     async ({ context, event }) => {
       const { key, value } = parseDnsTxtRecordArgs(event.args);
-
-      // no key to operate over? no-op
-      if (key === null) return;
+      if (key === null) return; // no key to operate over? args were malformed, ignore event
 
       const id = await ensureResolverRecords(context, event);
       await handleResolverTextRecordUpdate(context, id, key, value);
@@ -114,9 +112,7 @@ export default function () {
     ),
     async ({ context, event }) => {
       const { key, value } = parseDnsTxtRecordArgs(event.args);
-
-      // no key to operate over? no-op
-      if (key === null) return;
+      if (key === null) return; // no key to operate over? args were malformed, ignore event
 
       const id = await ensureResolverRecords(context, event);
       await handleResolverTextRecordUpdate(context, id, key, value);
@@ -127,9 +123,7 @@ export default function () {
     namespaceContract(PluginName.ProtocolAcceleration, "Resolver:DNSRecordDeleted"),
     async ({ context, event }) => {
       const { key } = parseDnsTxtRecordArgs(event.args);
-
-      // no key to operate over? no-op
-      if (key === null) return;
+      if (key === null) return; // no key to operate over? args were malformed, ignore event
 
       const id = await ensureResolverRecords(context, event);
       await handleResolverTextRecordUpdate(context, id, key, null);

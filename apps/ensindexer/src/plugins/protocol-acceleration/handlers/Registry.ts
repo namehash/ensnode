@@ -35,14 +35,15 @@ async function handleNewResolver({
 
 /**
  * Handler functions for Regsitry contracts in the Protocol Acceleration plugin.
- * - indexes Registry migration status
- * - indexes Node-Resolver Relationships
+ * - indexes ENS Root Chain Registry migration status
+ * - indexes Node-Resolver Relationships for all Registry contracts
+ *
+ * Note that this registry migration status tracking is isolated to the protocol
  */
 export default function () {
   /**
-   * Implements Registry migration tracking for the ProtocolAcceleration plugin by tracking instances.
-   *
-   * Note that this registry migration status tracking is isolated to the protocol
+   * Handles Registry#NewOwner for:
+   * - ENS Root Chain's (new) Registry
    */
   ponder.on(
     namespaceContract(PluginName.ProtocolAcceleration, "Registry:NewOwner"),
@@ -68,6 +69,10 @@ export default function () {
     },
   );
 
+  /**
+   * Handles Registry#NewResolver for:
+   * - ENS Root Chain's RegistryOld
+   */
   ponder.on(
     namespaceContract(PluginName.ProtocolAcceleration, "RegistryOld:NewResolver"),
     async ({
@@ -85,8 +90,22 @@ export default function () {
     },
   );
 
+  /**
+   * Handles Registry#NewResolver for:
+   * - ENS Root Chain's (new) Registry
+   * - Basename's (shadow) Registry
+   * - Lineanames's (shadow) Registry
+   */
   ponder.on(
     namespaceContract(PluginName.ProtocolAcceleration, "Registry:NewResolver"),
-    handleNewResolver,
+    async ({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: EventWithArgs<{ node: Node; resolver: Address }>;
+    }) => {
+      await handleNewResolver({ context, event });
+    },
   );
 }

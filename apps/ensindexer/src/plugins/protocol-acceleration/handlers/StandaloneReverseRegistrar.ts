@@ -13,7 +13,7 @@ import { makePrimaryNameId } from "@/lib/protocol-acceleration/ids";
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts in the Protocol Acceleration
  * plugin.
- * - manages `name` records for an address, per-coinType (derived from context.chain.id).
+ * - indexes Primary Name for an address, per-coinType (derived from context.chain.id)
  */
 export default function () {
   ponder.on(

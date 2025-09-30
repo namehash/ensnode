@@ -19,14 +19,18 @@ import { resolverContractConfig } from "@/lib/resolver-contract-config";
 /**
  * Describes the indexing behavior for all entities that power Protocol Acceleration:
  * - indexing of Resolver Records for all Resolver contracts on ENS Root, Base, Linea, and Optimism
+ *   - in order to accelerate Forward Resolution
  * - indexing of Node-Resolver Relationships for ENS Root, Basenames, Lineanames, and ThreeDNS
- * - indexing of LegacyReverseResolvers
+ *   - in order to accelerate UniversalResolver#findResolver
  * - indexing of ENSIP-19 StandaloneReverseRegistrars for Base, Linea, Optimism, Arbitrum, and Scroll
+ *   - in order to accelerate ENSIP-19 Reverse Resolvers
  */
 export const pluginName = PluginName.ProtocolAcceleration;
 
+/**
+ * The set of DatasourceNames that include the ENSIP-19 StandaloneReverseRegistrar contracts.
+ */
 const DATASOURCES_WITH_REVERSE_RESOLVERS = [
-  // LegacyReverseResolvers & StandaloneReverseRegistrars
   DatasourceNames.ReverseResolverRoot,
   DatasourceNames.ReverseResolverBase,
   DatasourceNames.ReverseResolverLinea,
@@ -131,16 +135,19 @@ export default createPlugin({
         [namespaceContract(pluginName, "Registry")]: {
           abi: root.contracts.Registry.abi,
           chain: {
+            // ENS Root Chain Registry
             ...chainConfigForContract(
               config.globalBlockrange,
               root.chain.id,
               root.contracts.Registry,
             ),
+            // Basenames (shadow)Registry
             ...chainConfigForContract(
               config.globalBlockrange,
               basenames.chain.id,
               basenames.contracts.Registry,
             ),
+            // Lineanames (shadow)Registry
             ...chainConfigForContract(
               config.globalBlockrange,
               lineanames.chain.id,
@@ -166,74 +173,41 @@ export default createPlugin({
           },
         },
 
-        // a multi-chain ThreeDNS Resolver ContractConfig
-        // NOTE: the actual indexing of Resolver records is handled by the Resolver config above. we
-        // include this ContractConfig in the ponder config so that it's available on `context.contracts`
-        // in order to map the Node-Resolver relationships for ThreeDNSToken nodes correctly
-        [namespaceContract(pluginName, "ThreeDNSResolver")]: {
-          abi: ResolverABI,
-          chain: {
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              threeDNSOptimism.chain.id,
-              threeDNSOptimism.contracts.Resolver,
-            ),
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              threeDNSBase.chain.id,
-              threeDNSBase.contracts.Resolver,
-            ),
-          },
-        },
-
-        // a multi-chain LegacyReverseResolver ContractConfig
-        [namespaceContract(pluginName, "LegacyReverseResolver")]: {
-          abi: ResolverABI,
-          chain: {
-            // the Root chain's DefaultReverseResolver2 is a LegacyReverseResolver
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrRoot.chain.id,
-              rrRoot.contracts.DefaultReverseResolver2,
-            ),
-          },
-        },
-
         // a multi-chain StandaloneReverseRegistrar ContractConfig
         [namespaceContract(pluginName, "StandaloneReverseRegistrar")]: {
           abi: StandaloneReverseRegistrarABI,
           chain: {
-            // the Root chain's StandaloneReverseRegistrar
+            // the Root chain's DefaultReverseRegistrar (is StandaloneReverseRegistrar)
             ...chainConfigForContract(
               config.globalBlockrange,
               rrRoot.chain.id,
               rrRoot.contracts.DefaultReverseRegistrar,
             ),
-            // Base's L2ReverseRegistrar
+            // Base's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...chainConfigForContract(
               config.globalBlockrange,
               rrBase.chain.id,
               rrBase.contracts.L2ReverseRegistrar,
             ),
-            // Linea's L2ReverseRegistrar
+            // Linea's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...chainConfigForContract(
               config.globalBlockrange,
               rrLinea.chain.id,
               rrLinea.contracts.L2ReverseRegistrar,
             ),
-            // Optimism's L2ReverseRegistrar
+            // Optimism's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...chainConfigForContract(
               config.globalBlockrange,
               rrOptimism.chain.id,
               rrOptimism.contracts.L2ReverseRegistrar,
             ),
-            // Arbitrum's L2ReverseRegistrar
+            // Arbitrum's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...chainConfigForContract(
               config.globalBlockrange,
               rrArbitrum.chain.id,
               rrArbitrum.contracts.L2ReverseRegistrar,
             ),
-            // Scroll's L2ReverseRegistrar
+            // Scroll's L2ReverseRegistrar (is StandaloneReverseRegistrar)
             ...chainConfigForContract(
               config.globalBlockrange,
               rrScroll.chain.id,
