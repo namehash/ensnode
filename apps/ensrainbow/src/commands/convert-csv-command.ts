@@ -17,11 +17,14 @@ import {
 } from "../utils/protobuf-schema.js";
 
 /**
- * Parse CSV using csv-simple-parser
+ * Parse CSV using csv-simple-parser with proper type safety
  */
 function parseCsvLine(line: string): string[] {
   const result = parse(line);
-  return result.length > 0 ? (result[0] as string[]) : [];
+  if (result.length === 0) return [];
+  const firstRow = result[0];
+  if (!Array.isArray(firstRow)) return [];
+  return firstRow.filter((item) => typeof item === "string");
 }
 
 // No label validation - ENS accepts any UTF-8 string
@@ -31,14 +34,15 @@ export interface ConvertCsvCommandOptions {
   outputFile: string;
   labelSetId: string;
   labelSetVersion: number;
+  progressInterval?: number;
 }
+
+// Configuration constants
+const DEFAULT_PROGRESS_INTERVAL = 10000;
 
 interface ConversionStats {
   totalLines: number;
   processedRecords: number;
-  skippedRecords: number;
-  invalidLabels: number;
-  duplicates: number;
   startTime: Date;
   endTime?: Date;
 }
@@ -115,10 +119,121 @@ function logSummary(stats: ConversionStats) {
   logger.info("=== Conversion Summary ===");
   logger.info(`Total lines processed: ${stats.totalLines}`);
   logger.info(`Valid records: ${stats.processedRecords}`);
-  logger.info(`Skipped records: ${stats.skippedRecords}`);
-  logger.info(`Invalid labels: ${stats.invalidLabels}`);
-  logger.info(`Duplicates found: ${stats.duplicates}`);
   logger.info(`Duration: ${duration}ms`);
+}
+
+/**
+ * Initialize conversion setup and logging
+ */
+function initializeConversion(options: ConvertCsvCommandOptions) {
+  logger.info("Starting conversion from CSV to protobuf format...");
+  logger.info(`Input file: ${options.inputFile}`);
+  logger.info(`Output file: ${options.outputFile}`);
+  logger.info(`Label set id: ${options.labelSetId}`);
+  logger.info(`Label set version: ${options.labelSetVersion}`);
+
+  const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
+  const outputStream = setupWriteStream(options.outputFile);
+
+  writeHeader(
+    outputStream,
+    RainbowRecordCollectionType,
+    options.labelSetId,
+    options.labelSetVersion,
+  );
+
+  logger.info("Reading and processing CSV file line by line with streaming...");
+
+  return { RainbowRecordType, outputStream };
+}
+
+/**
+ * Create rainbow record from parsed CSV columns
+ */
+function createRainbowRecord(parsedColumns: string[]): { labelhash: Buffer; label: string } {
+  const label = parsedColumns[0];
+
+  if (parsedColumns.length === 1) {
+    // Single column: compute labelhash using labelhash function
+    const labelHashBytes = labelHashToBytes(labelhash(label));
+    return {
+      labelhash: Buffer.from(labelHashBytes),
+      label: label,
+    };
+  } else {
+    // Two columns: validate and use provided hash
+    const [, providedHash] = parsedColumns;
+    const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
+    const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
+    return {
+      labelhash: Buffer.from(labelHash),
+      label: label,
+    };
+  }
+}
+
+/**
+ * Process a single CSV record
+ */
+function processRecord(
+  line: string,
+  expectedColumns: number,
+  RainbowRecordType: any,
+  outputStream: NodeJS.WritableStream,
+): void {
+  const parsedColumns = processStreamingCsvLine(line, expectedColumns);
+  const rainbowRecord = createRainbowRecord(parsedColumns);
+
+  // Create protobuf message and write immediately
+  const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
+  outputStream.write(Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish()));
+}
+
+/**
+ * Process the entire CSV file
+ */
+async function processCSVFile(
+  rl: ReturnType<typeof setupReadStream>,
+  RainbowRecordType: any,
+  outputStream: NodeJS.WritableStream,
+  progressInterval: number,
+): Promise<{ totalLines: number; processedRecords: number }> {
+  let expectedColumns: number | null = null;
+  let lineNumber = 0;
+  let processedRecords = 0;
+
+  for await (const line of rl) {
+    lineNumber++;
+
+    // Skip empty lines
+    if (line.trim() === "") {
+      continue;
+    }
+
+    try {
+      // For the first line, detect column count
+      if (expectedColumns === null) {
+        const firstLineParsed = parseCsvLine(line);
+        expectedColumns = firstLineParsed.length;
+        logger.info(`Detected ${expectedColumns} columns using csv-simple-parser`);
+      }
+
+      processRecord(line, expectedColumns, RainbowRecordType, outputStream);
+      processedRecords++;
+
+      // Log progress for large files
+      if (processedRecords % progressInterval === 0) {
+        logger.info(`Processed ${processedRecords} records so far...`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `CSV conversion failed due to invalid data on line ${lineNumber}: ${errorMessage}`,
+      );
+    }
+  }
+
+  return { totalLines: lineNumber, processedRecords };
 }
 
 /**
@@ -128,121 +243,44 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
   const stats: ConversionStats = {
     totalLines: 0,
     processedRecords: 0,
-    skippedRecords: 0,
-    invalidLabels: 0,
-    duplicates: 0,
     startTime: new Date(),
   };
 
+  let rl: ReturnType<typeof setupReadStream> | null = null;
+
   try {
-    logger.info("Starting conversion from CSV to protobuf format...");
-    logger.info(`Input file: ${options.inputFile}`);
-    logger.info(`Output file: ${options.outputFile}`);
-    logger.info(`Label set id: ${options.labelSetId}`);
-    logger.info(`Label set version: ${options.labelSetVersion}`);
-
-    // Setup protobuf schema
-    const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
-
-    // Setup streams
-    const outputStream = setupWriteStream(options.outputFile);
-
-    // Write header
-    writeHeader(
-      outputStream,
-      RainbowRecordCollectionType,
-      options.labelSetId,
-      options.labelSetVersion,
-    );
-
-    logger.info("Reading and processing CSV file line by line with streaming...");
+    const { RainbowRecordType, outputStream } = initializeConversion(options);
 
     // Setup streaming CSV reader
-    const rl = setupReadStream(options.inputFile);
+    rl = setupReadStream(options.inputFile);
 
-    let expectedColumns: number | null = null;
-    let lineNumber = 0;
-    let processedRecords = 0;
+    const progressInterval = options.progressInterval ?? DEFAULT_PROGRESS_INTERVAL;
 
-    // Process line by line with csv-simple-parser
-    for await (const line of rl) {
-      lineNumber++;
+    // Process the CSV file
+    const { totalLines, processedRecords } = await processCSVFile(
+      rl,
+      RainbowRecordType,
+      outputStream,
+      progressInterval,
+    );
 
-      // Skip empty lines
-      if (line.trim() === "") {
-        continue;
-      }
-
-      try {
-        // For the first line, detect column count
-        if (expectedColumns === null) {
-          const firstLineParsed = parseCsvLine(line);
-          expectedColumns = firstLineParsed.length;
-          logger.info(`Detected ${expectedColumns} columns using csv-simple-parser`);
-        }
-
-        // Parse current line with csv-simple-parser
-        const parsedColumns = processStreamingCsvLine(line, expectedColumns);
-
-        // Get label (no validation - ENS accepts any UTF-8 string)
-        const label = parsedColumns[0];
-
-        // Build rainbow record immediately (streaming)
-        let rainbowRecord;
-
-        if (parsedColumns.length === 1) {
-          // Single column: compute labelhash using labelhash function
-          const labelHashBytes = labelHashToBytes(labelhash(label));
-
-          rainbowRecord = {
-            labelhash: Buffer.from(labelHashBytes),
-            label: label,
-          };
-        } else {
-          // Two columns: validate and use provided hash
-          const [, providedHash] = parsedColumns;
-
-          // Ensure the hash has 0x prefix for labelHashToBytes
-          const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
-          const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
-
-          rainbowRecord = {
-            labelhash: Buffer.from(labelHash),
-            label: label,
-          };
-        }
-
-        // Create protobuf message and write immediately
-        const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
-        outputStream.write(Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish()));
-
-        processedRecords++;
-
-        // Log progress for large files
-        if (processedRecords % 10000 === 0) {
-          logger.info(`Processed ${processedRecords} records so far...`);
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(
-          `CSV conversion failed due to invalid data on line ${lineNumber}: ${errorMessage}`,
-        );
-      }
-    }
-
-    stats.totalLines = lineNumber;
+    stats.totalLines = totalLines;
     stats.processedRecords = processedRecords;
 
     // Close output stream
     outputStream.end();
 
     logger.info(`✅ Processed ${processedRecords} records with streaming csv-simple-parser`);
-
     logSummary(stats);
     logger.info("✅ CSV conversion completed successfully!");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error("❌ CSV conversion failed:", errorMessage);
     throw error;
+  } finally {
+    // Ensure readline interface is properly closed to prevent resource leaks
+    if (rl) {
+      rl.close();
+    }
   }
 }
