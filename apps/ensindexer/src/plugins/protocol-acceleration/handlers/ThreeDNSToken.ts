@@ -1,11 +1,28 @@
 import { Context, ponder } from "ponder:registry";
 
-import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
+import { ChainId, LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 
+import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { upsertDomainResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+
+const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
+  DatasourceNames.ThreeDNSBase,
+  DatasourceNames.ThreeDNSOptimism,
+]
+  .map((datasourceName) => maybeGetDatasource(config.namespace, datasourceName))
+  .filter((ds) => !!ds)
+  .reduce(
+    (memo, datasource) => ({
+      ...memo,
+      // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
+      [datasource.chain.id]: datasource.contracts.Resolver!.address as Address,
+    }),
+    {},
+  );
 
 /**
  * Handler functions for ThreeDNSToken contracts in the Protocol Acceleration plugin.
@@ -30,10 +47,12 @@ export default function () {
       const { label: labelHash, node: parentNode } = event.args;
       const node = makeSubdomainNode(labelHash, parentNode);
 
-      // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
-      const resolverAddress = context.contracts[
-        namespaceContract(PluginName.ProtocolAcceleration, "ThreeDNSResolver")
-      ].address! as Address;
+      const resolverAddress = ThreeDNSResolverByChainId[context.chain.id];
+      if (!resolverAddress) {
+        throw new Error(
+          `Invariant: ThreeDNSToken ${event.log.address} on chain ${context.chain.id} doesn't have an associated Resolver?`,
+        );
+      }
 
       // all ThreeDNSToken nodes have a hardcoded resolver at that address
       await upsertDomainResolverRelation(context, node, resolverAddress);
