@@ -58,7 +58,7 @@ const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 25;
  *
  * @throws If both error and any from the pair of ensIndexerConfig & indexingStatus are defined
  */
-interface RecentRegistrationsProps {
+export interface RecentRegistrationsProps {
   ensIndexerConfig?: ENSIndexerPublicConfig;
   indexingStatus?: ENSIndexerOverallIndexingStatus;
   error?: ErrorInfoProps;
@@ -94,6 +94,8 @@ export function RecentRegistrations({
       return <RecentRegistrationsLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
   }
 
+  //TODO: Not sure if we need a separate case for indexer-error
+    // since it's displayed by the indexing status. Advice appreciated
   if (indexingStatus.overallStatus !== OverallIndexingStatusIds.Completed && indexingStatus.overallStatus !== OverallIndexingStatusIds.Following){
       return <RegistrationsNotAvailableMessage />;
   }
@@ -235,18 +237,19 @@ function RecentRegistrationsLoading({ rowCount }: RegistrationLoadingProps) {
 }
 
 function RegistrationsNotAvailableMessage(){
-    const noDisplayMessage = "The latest indexed registrations will be available once the indexing status is Following or Completed."
-    const monitorStatusMessage = "Check the current indexing status"
+    const monitorStatusMessage = "Check current indexing status";
+
     return <Card className="w-full">
         <CardHeader className="sm:pb-4 max-sm:p-3">
             <CardTitle>
                 Latest indexed registrations are not available
             </CardTitle>
         </CardHeader>
-        <CardContent>
-            {noDisplayMessage}
-            <Button asChild variant="outline">
-                <Link href="/status">{monitorStatusMessage}</Link>
+        <CardContent className="flex flex-col justify-start items-start gap-4 sm:gap-3">
+            <p>The latest indexed registrations will be available once the indexing status is <span className="font-mono bg-muted p-1 rounded-md">Following</span> or <span className="font-mono bg-muted p-1 rounded-md">Completed</span>.
+            </p>
+            <Button asChild variant="default">
+            <Link href="/status">{monitorStatusMessage}</Link>
             </Button>
         </CardContent>
     </Card>;

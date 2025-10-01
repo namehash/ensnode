@@ -19,6 +19,9 @@ export default function MockList() {
               <Link href="/mock/indexing-stats">IndexingStats</Link>
             </Button>
             <Button asChild variant="outline">
+              <Link href="/mock/recent-registrations">RecentRegistrations</Link>
+            </Button>
+            <Button asChild variant="outline">
               <Link href="/mock/relative-time">RelativeTime</Link>
             </Button>
           </div>
