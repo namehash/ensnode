@@ -1,6 +1,7 @@
 "use client";
 
-import { Activity, PlugZap, RadioTower } from "lucide-react";
+import { Activity, PlugZap, RadioTower, Telescope } from "lucide-react";
+
 import * as React from "react";
 
 import { IconENS } from "@/components/icons/ens";
@@ -19,6 +20,13 @@ const navItems = [
     title: "Status",
     url: "/status",
     icon: Activity,
+  },
+  {
+    title: "ENS Explorer",
+    url: "#",
+    icon: Telescope,
+    isActive: true,
+    items: [{ title: "Names", url: "/name" }],
   },
   {
     title: "ENS Protocol Inspector",
