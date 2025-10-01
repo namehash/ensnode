@@ -15,6 +15,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { UrlString } from "@ensnode/ensnode-sdk";
 
 export function NavMain({
   items,
@@ -33,7 +34,7 @@ export function NavMain({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const appendQueryParams = (url: string) => {
+  const appendQueryParams = (url: UrlString) => {
     if (pathname.startsWith("/inspector") && !url.startsWith("/inspector")) {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("strategy");
@@ -55,7 +56,7 @@ export function NavMain({
     return url;
   };
 
-  const isActive = (url: string): boolean => {
+  const isActive = (url: UrlString): boolean => {
     const urlPathname = url.split("?")[0];
 
     return pathname === urlPathname;
