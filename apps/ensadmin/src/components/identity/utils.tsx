@@ -1,5 +1,6 @@
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { ChainId, Name } from "@ensnode/ensnode-sdk";
@@ -22,8 +23,6 @@ export function NameDisplay({ name, className = "font-medium" }: NameDisplayProp
 
 /**
  * Gets the relative path of the internal name details page for a given name.
- *
- * @returns relative path to the internal name details page for the given name.
  */
 export function getNameDetailsRelativePath(name: Name): string {
   return `/name/${encodeURIComponent(name)}`;
@@ -35,21 +34,18 @@ interface NameLinkProps {
 }
 
 /**
- * Displays an ENS name with a link to the internal name detail page.
- * Wraps NameDisplay component with navigation to /name/[name].
+ * Displays an ENS name with a link to the internal name detail page that
+ * retains the current connection URL parameter if it exists.
  *
  * Can take other components (ex.Avatar) as children
  * and display them alongside the link as one common interaction area.
  */
-
 export function NameLink({ name, className, children }: PropsWithChildren<NameLinkProps>) {
-  const nameDetailsRelativePath = getNameDetailsRelativePath(name);
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
+  const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(name));
 
   return (
-    <Link
-      href={nameDetailsRelativePath}
-      className={`inline-flex items-center gap-2 text-blue-600 hover:underline ${className || ""}`}
-    >
+    <Link href={href} className={`${className || ""}`}>
       {children}
     </Link>
   );

@@ -131,26 +131,22 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
         endBlock = ponderSource.chain[chainName].endBlock;
       }
 
-      if (typeof startBlock !== "undefined") {
-        chainStartBlocks.push(deserializeBlockNumber(startBlock));
-      }
-
-      if (typeof endBlock !== "undefined") {
-        chainEndBlocks.push(deserializeBlockNumber(endBlock));
-      }
+      chainStartBlocks.push(startBlock ? deserializeBlockNumber(startBlock) : 0);
+      chainEndBlocks.push(endBlock ? deserializeBlockNumber(endBlock) : Infinity);
     }
 
-    // 2. Get the smallest startBlock for the chain.
-    const chainMinStartBlock =
+    // 2. Get the lowest startBlock for the chain.
+    const chainLowestStartBlock =
       chainStartBlocks.length > 0 ? Math.min(...chainStartBlocks) : undefined;
 
-    // 3. Get the largest endBLock for the chain.
-    const chainMaxEndBlock = chainEndBlocks.length > 0 ? Math.min(...chainEndBlocks) : undefined;
+    // 3. Get the highest endBLock for the chain.
+    const chainHighestEndBlock =
+      chainEndBlocks.length > 0 ? Math.max(...chainEndBlocks) : undefined;
 
     // 4. Enforce invariants
 
     // Invariant: the indexed chain must have its startBlock defined as number.
-    if (typeof chainMinStartBlock === "undefined") {
+    if (typeof chainLowestStartBlock === "undefined") {
       throw new Error(
         `No minimum start block found for chain '${chainName}'. Either all contracts, accounts, and block intervals use "latest" (unsupported) or the chain is misconfigured.`,
       );
@@ -159,8 +155,8 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
     // 5. Assign a valid blockrange to the chain
 
     chainsBlockrange[chainName] = deserializeBlockrange({
-      startBlock: chainMinStartBlock,
-      endBlock: chainMaxEndBlock,
+      startBlock: chainLowestStartBlock,
+      endBlock: Number.isFinite(chainHighestEndBlock) ? chainHighestEndBlock : undefined,
     });
   }
 

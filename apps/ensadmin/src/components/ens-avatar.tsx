@@ -54,4 +54,4 @@ const EnsAvatarFallback = ({ name }: EnsAvatarFallbackProps) => (
   <BoringAvatar name={name} colors={avatarFallbackColors} variant="beam" />
 );
 
-const AvatarLoading = () => <div className="h-6 w-6 rounded-full animate-pulse bg-muted" />;
+const AvatarLoading = () => <div className="h-full w-full rounded-full animate-pulse bg-muted" />;

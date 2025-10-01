@@ -23,6 +23,7 @@ import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegist
 import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
+import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
@@ -146,6 +147,16 @@ export default {
         abi: base_RegistrarController,
         address: "0x49ae3cc2e3aa768b1e5654f5d3c6002144a59581",
         startBlock: 13298580,
+      },
+      UpgradeableRegistrarController: {
+        /**
+         * This controller was added to BaseRegistrar contract
+         * with the following tx:
+         * https://sepolia.basescan.org/tx/0x648d984c1a379a6c300851b9561fe98a9b5282a26ca8c2c7660b11c53f0564bc
+         */
+        abi: base_UpgradeableRegistrarController,
+        address: "0x82c858CDF64b3D893Fe54962680edFDDC37e94C8", // a proxy contract
+        startBlock: 29896051,
       },
     },
   },
