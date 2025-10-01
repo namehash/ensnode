@@ -2,7 +2,7 @@
 locals {
   # The `hosted_zone_name` represents the "base" domain name of the zone in AWS Route53
   # where "hosted" ENSNode app instances (such as ENSIndexer and ENSRainbow) are nested beneath.
-  # 
+  #
   # For example, if:
   # - `hosted_zone_name` is "ensnode.io"
   # - `ensnode_environment_name` is "blue"
@@ -11,7 +11,7 @@ locals {
   # The fqdn for "API"-style ENSIndexer instances is generated as follows:
   # - api.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
   # - example: api.alpha-sepolia.blue.ensnode.io
-  # 
+  #
   # The fqdn for "Indexer"-style ENSIndexer instances is generated as follows:
   # - indexer.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}
   # - example: indexer.alpha-sepolia.blue.ensnode.io
@@ -20,60 +20,50 @@ locals {
   render_region = "ohio"
   ensindexer_instances = {
     holesky = {
-      ensnode_indexer_type              = "holesky"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "holeskySchema-${var.ensnode_version}"
-      plugins                           = "subgraph"
-      namespace                         = "holesky"
-      heal_reverse_addresses            = "false"
-      index_additional_resolver_records = "false"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "starter"
+      ensnode_indexer_type     = "holesky"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "holeskySchema-${var.ensnode_version}"
+      plugins                  = "subgraph"
+      namespace                = "holesky"
+      render_instance_plan     = "starter"
+      subgraph_compat          = true
     }
     sepolia = {
-      ensnode_indexer_type              = "sepolia"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "sepoliaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph"
-      namespace                         = "sepolia"
-      heal_reverse_addresses            = "false"
-      index_additional_resolver_records = "false"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "starter"
+      ensnode_indexer_type     = "sepolia"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "sepoliaSchema-${var.ensnode_version}"
+      plugins                  = "subgraph"
+      namespace                = "sepolia"
+      render_instance_plan     = "starter"
+      subgraph_compat          = true
     }
     mainnet = {
-      ensnode_indexer_type              = "mainnet"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "mainnetSchema-${var.ensnode_version}"
-      plugins                           = "subgraph"
-      namespace                         = "mainnet"
-      heal_reverse_addresses            = "false"
-      index_additional_resolver_records = "false"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "standard"
+      ensnode_indexer_type     = "mainnet"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "mainnetSchema-${var.ensnode_version}"
+      plugins                  = "subgraph"
+      namespace                = "mainnet"
+      render_instance_plan     = "standard"
+      subgraph_compat          = true
     }
     alpha = {
-      ensnode_indexer_type              = "alpha"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "alphaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
-      namespace                         = "mainnet"
-      heal_reverse_addresses            = "true"
-      index_additional_resolver_records = "true"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "standard"
+      ensnode_indexer_type     = "alpha"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "alphaSchema-${var.ensnode_version}"
+      plugins                  = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
+      namespace                = "mainnet"
+      render_instance_plan     = "standard"
+      subgraph_compat          = false
     }
 
     alpha-sepolia = {
-      ensnode_indexer_type              = "alpha-sepolia"
-      ensnode_environment_name          = var.render_environment
-      database_schema                   = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                           = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
-      namespace                         = "sepolia"
-      heal_reverse_addresses            = "true"
-      index_additional_resolver_records = "true"
-      replace_unnormalized              = "false"
-      render_instance_plan              = "starter"
+      ensnode_indexer_type     = "alpha-sepolia"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
+      plugins                  = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
+      namespace                = "sepolia"
+      render_instance_plan     = "starter"
+      subgraph_compat          = false
     }
   }
 }
@@ -121,7 +111,7 @@ module "ensadmin" {
   ensnode_environment_name = var.render_environment
   anthropic_api_key        = var.anthropic_api_key
 
-  # NEXT_PUBLIC_DEFAULT_ENSNODE_URLS is not currently configurable through
+  # NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
 }
 
@@ -130,15 +120,13 @@ module "ensindexer" {
   for_each = local.ensindexer_instances
 
   # Instance-specific configuration
-  ensnode_indexer_type              = each.value.ensnode_indexer_type
-  render_instance_plan              = each.value.render_instance_plan
-  ensnode_environment_name          = each.value.ensnode_environment_name
-  database_schema                   = each.value.database_schema
-  plugins                           = each.value.plugins
-  namespace                         = each.value.namespace
-  heal_reverse_addresses            = each.value.heal_reverse_addresses
-  index_additional_resolver_records = each.value.index_additional_resolver_records
-  replace_unnormalized              = each.value.replace_unnormalized
+  ensnode_indexer_type     = each.value.ensnode_indexer_type
+  render_instance_plan     = each.value.render_instance_plan
+  ensnode_environment_name = each.value.ensnode_environment_name
+  database_schema          = each.value.database_schema
+  plugins                  = each.value.plugins
+  namespace                = each.value.namespace
+  subgraph_compat          = each.value.subgraph_compat
 
   # Common configuration (spread operator merges the map)
   hosted_zone_name = local.hosted_zone_name

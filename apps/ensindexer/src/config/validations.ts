@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { PluginName, uniq } from "@ensnode/ensnode-sdk";
+import { isHttpProtocol, isWebSocketProtocol, uniq } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -144,19 +144,38 @@ export function invariant_validContractConfigs(
   }
 }
 
-// Invariant: ReverseResolvers plugin requires indexAdditionalResolverRecords
-export function invariant_reverseResolversPluginNeedsResolverRecords(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins" | "indexAdditionalResolverRecords">>,
+/**
+ * Invariant: RPC endpoint configuration for a chain must include at least one http/https protocol URL.
+ */
+export function invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL(
+  ctx: ZodCheckFnInput<URL[]>,
 ) {
-  const { value: config } = ctx;
+  const endpoints = ctx.value;
+  const httpEndpoints = endpoints.filter(isHttpProtocol);
 
-  const reverseResolversPluginActive = config.plugins.includes(PluginName.ReverseResolvers);
-
-  if (reverseResolversPluginActive && !config.indexAdditionalResolverRecords) {
+  if (httpEndpoints.length < 1) {
     ctx.issues.push({
       code: "custom",
-      input: config,
-      message: `The 'reverse-resolvers' plugin requires INDEX_ADDITIONAL_RESOLVER_RECORDS to be 'true'.`,
+      input: endpoints,
+      message: `RPC endpoint configuration for a chain must include at least one http/https protocol URL.`,
+    });
+  }
+}
+
+/**
+ * Invariant: RPC configuration for a chain must include at most one WS/WSS protocol URL.
+ */
+export function invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL(
+  ctx: ZodCheckFnInput<URL[]>,
+) {
+  const endpoints = ctx.value;
+  const wsEndpoints = endpoints.filter(isWebSocketProtocol);
+
+  if (wsEndpoints.length > 1) {
+    ctx.issues.push({
+      code: "custom",
+      input: endpoints,
+      message: `RPC endpoint configuration for a chain must include at most one websocket (ws/wss) protocol URL.`,
     });
   }
 }

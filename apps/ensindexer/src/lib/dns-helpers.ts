@@ -3,7 +3,6 @@ import { Hex } from "viem";
 
 import { interpretTextRecordKey, interpretTextRecordValue } from "@/lib/interpret-record-values";
 import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
-import { hasNullByte } from "@/lib/lib-helpers";
 import {
   DNSEncodedLiteralName,
   DNSEncodedName,
@@ -20,7 +19,7 @@ import {
  * Implements the original ENS Subgraph DNS-Encoded Name decoding logic, in particular the additional
  * check that each label in the decoded name is subgraph-indexable (see {@link isLabelSubgraphIndexable}).
  *
- * NOTE(subgraph-compat): This behavior is required when config.replaceUnnormalized = false in order
+ * NOTE(subgraph-compat): This behavior is required when config.isSubgraphCompatible = true in order
  * to match the output of the legacy ENS Subgraph.
  *
  * @param packet a hex string that encodes a DNSEncodedLiteralName

@@ -16,9 +16,6 @@ describe("ENSIndexer: Config", () => {
           labelSetId: "subgraph",
           labelSetVersion: 0,
         },
-        healReverseAddresses: false,
-        indexAdditionalResolverRecords: false,
-        replaceUnnormalized: false,
         indexedChainIds: new Set([1]),
         isSubgraphCompatible: true,
         namespace: "mainnet",
@@ -60,9 +57,6 @@ describe("ENSIndexer: Config", () => {
         labelSetId: "subgraph",
         labelSetVersion: 0,
       },
-      healReverseAddresses: false,
-      indexAdditionalResolverRecords: false,
-      replaceUnnormalized: false,
       indexedChainIds: [1, 10, 8453],
       isSubgraphCompatible: true,
       namespace: "mainnet",
@@ -102,45 +96,6 @@ describe("ENSIndexer: Config", () => {
       expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).not.toThrowError();
     });
 
-    const errorMessage = `Cannot deserialize ENSIndexerPublicConfig:
-✖ 'isSubgraphCompatible' requires only the 'subgraph' plugin to be active, 'indexAdditionalResolverRecords', 'healReverseAddresses', and 'replaceUnnormalized' must be set to 'false', and labelSet must be {labelSetId: "subgraph", labelSetVersion: 0}`;
-
-    it("can enforce invariants: broken subgraph-compatibility (healReverseAddresses = 'true')", () => {
-      // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
-        structuredClone(correctSerializedConfig);
-
-      serializedConfig.isSubgraphCompatible = true;
-      serializedConfig.healReverseAddresses = true;
-
-      // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
-    });
-
-    it("can enforce invariants: broken subgraph-compatibility (indexAdditionalResolverRecords = 'true')", () => {
-      // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
-        structuredClone(correctSerializedConfig);
-
-      serializedConfig.isSubgraphCompatible = true;
-      serializedConfig.indexAdditionalResolverRecords = true;
-
-      // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
-    });
-
-    it("can enforce invariants: broken subgraph-compatibility (replaceUnnormalized = 'true')", () => {
-      // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
-        structuredClone(correctSerializedConfig);
-
-      serializedConfig.isSubgraphCompatible = true;
-      serializedConfig.replaceUnnormalized = true;
-
-      // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
-    });
-
     it("can enforce invariants: broken subgraph-compatibility (wrong plugins active)", () => {
       // arrange
       const serializedConfig: SerializedENSIndexerPublicConfig =
@@ -150,19 +105,8 @@ describe("ENSIndexer: Config", () => {
       serializedConfig.plugins.push(PluginName.Lineanames);
 
       // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(errorMessage);
-    });
-
-    it("can enforce invariants: reverse-resolver plugin requirements", () => {
-      // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
-        structuredClone(correctSerializedConfig);
-
-      serializedConfig.plugins.push(PluginName.ReverseResolvers);
-
-      // act & assert
       expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(
-        `The 'reverse-resolvers' plugin requires 'indexAdditionalResolverRecords' to be 'true'`,
+        /isSubgraphCompatible/,
       );
     });
   });
