@@ -16,6 +16,33 @@ ENSNode v1 provides an ENS Subgraph-Compatible GraphQL endpoint for the purposes
 3. Gradual migration from the subgraph
    - users may wish to gradually migrate from the subgraph & its API to ENSNode's Subgraph API
 
+## Configuration
+
+To enable full ENS Subgraph compatibility, configure ENSIndexer with `SUBGRAPH_COMPAT=true`. This single flag:
+
+1. **Applies Subgraph Indexing Behavior**: Uses Subgraph Interpreted Labels and Names, allowing unnormalized labels to be returned as they appear in the original ENS Subgraph
+2. **Sets Default Plugins & Label Set**: Defaults to `PLUGINS=subgraph`, `LABEL_SET_ID=subgraph` and `LABEL_SET_VERSION=0` to match subgraph indexing logic and label healing behavior
+
+When `SUBGRAPH_COMPAT=false` (default), ENSIndexer operates in enhanced mode with:
+
+- **Enhanced Indexing Behavior**: Uses Interpreted Labels and Names with improved security by encoding unnormalized labels as labelhashes
+- **Expanded Plugin Support**: Defaults to `PLUGINS=subgraph,basenames,lineanames,threedns` for multichain ENS indexing
+- **Reverse Address Healing**: Attempts to heal subnames of addr.reverse for enhanced reverse resolution support
+
+### Migration from Legacy Configuration
+
+If you were previously using the individual configuration flags, migrate as follows:
+
+```bash
+# Legacy configuration for subgraph compatibility
+HEAL_REVERSE_ADDRESSES=false
+INDEX_ADDITIONAL_RESOLVER_RECORDS=false
+REPLACE_UNNORMALIZED=false
+
+# New simplified configuration
+SUBGRAPH_COMPAT=true
+```
+
 ## Compatibility Tooling
 
 ENSNode has developed tooling to verify subgraph compatibility and ease migration from the ENS Subgraph.

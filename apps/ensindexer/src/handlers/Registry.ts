@@ -90,7 +90,7 @@ export const handleNewOwner =
       let healedLabel: LiteralLabel | null = null;
 
       // If:
-      //  1. healing labels from reverse addresses is enabled, and
+      //  1. healing labels from reverse addresses is enabled (!isSubgraphCompatible), and
       //  2. the new domain is a child of addr.reverse, and
       //  3. the event is emitted on the ENS Root chain,
       // then: attempt to heal the unknown label via transaction context.
@@ -102,7 +102,7 @@ export const handleNewOwner =
       // the ENS Registry: wildcard resolution is used, so this NewOwner event will never be emitted
       // with a domain created as a child of a Coin-Type specific Reverse Node (ex: [coinType].reverse).
       if (
-        config.healReverseAddresses &&
+        !config.isSubgraphCompatible &&
         parentNode === ADDR_REVERSE_NODE &&
         context.chain.id === getENSRootChainId(config.namespace)
       ) {
@@ -116,7 +116,27 @@ export const handleNewOwner =
         healedLabel = await labelByLabelHash(labelHash);
       }
 
-      if (config.replaceUnnormalized) {
+      if (config.isSubgraphCompatible) {
+        // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-indexable)
+        // NOTE: for TLDs, the parent is null, so we just use the label value as is
+        const subgraphInterpretedLabel = (
+          isLabelSubgraphIndexable(healedLabel) ? healedLabel : encodeLabelHash(labelHash)
+        ) as SubgraphInterpretedLabel;
+
+        // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
+        const subgraphInterpretedName = (
+          parent?.name ? `${subgraphInterpretedLabel}.${parent.name}` : subgraphInterpretedLabel
+        ) as SubgraphInterpretedName;
+
+        await context.db.update(schema.domain, { id: node }).set({
+          name: subgraphInterpretedName,
+          // NOTE(subgraph-compat): update Domain.labelName iff label is subgraph-indexable
+          //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
+          // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
+          //   is updated to, if it is subgraph-indexable, _not_ the Subgraph Interpreted Label
+          labelName: isLabelSubgraphIndexable(healedLabel) ? healedLabel : undefined,
+        });
+      } else {
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
         // see https://ensnode.io/docs/reference/terminology#literal-label
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
@@ -136,26 +156,6 @@ export const handleNewOwner =
         await context.db.update(schema.domain, { id: node }).set({
           name: interpretedName,
           labelName: interpretedLabel,
-        });
-      } else {
-        // to construct `Domain.name` use the parent's name and the label value (encoded if not subgraph-indexable)
-        // NOTE: for TLDs, the parent is null, so we just use the label value as is
-        const subgraphInterpretedLabel = (
-          isLabelSubgraphIndexable(healedLabel) ? healedLabel : encodeLabelHash(labelHash)
-        ) as SubgraphInterpretedLabel;
-
-        // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
-        const subgraphInterpretedName = (
-          parent?.name ? `${subgraphInterpretedLabel}.${parent.name}` : subgraphInterpretedLabel
-        ) as SubgraphInterpretedName;
-
-        await context.db.update(schema.domain, { id: node }).set({
-          name: subgraphInterpretedName,
-          // NOTE(subgraph-compat): update Domain.labelName iff label is subgraph-indexable
-          //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
-          // NOTE(replace-unnormalized): it's specifically the Literal Label value that labelName
-          //   is updated to, if it is subgraph-indexable, _not_ the Subgraph Interpreted Label
-          labelName: isLabelSubgraphIndexable(healedLabel) ? healedLabel : undefined,
         });
       }
     }

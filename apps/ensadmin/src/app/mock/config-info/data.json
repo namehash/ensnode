@@ -8,9 +8,6 @@
     },
     "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352, 567],
     "databaseSchemaName": "alphaSchema0.34.0",
-    "healReverseAddresses": true,
-    "indexAdditionalResolverRecords": true,
-    "replaceUnnormalized": true,
     "isSubgraphCompatible": false,
     "namespace": "mainnet",
     "plugins": [
@@ -53,9 +50,6 @@
       "referrals"
     ],
     "databaseSchemaName": "alphaSepoliaSchema0.34.0",
-    "healReverseAddresses": true,
-    "indexAdditionalResolverRecords": true,
-    "replaceUnnormalized": true,
     "isSubgraphCompatible": false
   },
   "Subgraph Mainnet": {
@@ -75,9 +69,6 @@
     "namespace": "mainnet",
     "plugins": ["subgraph"],
     "databaseSchemaName": "mainnetSchema0.34.0",
-    "healReverseAddresses": false,
-    "indexAdditionalResolverRecords": false,
-    "replaceUnnormalized": false,
     "isSubgraphCompatible": true
   },
   "Subgraph Sepolia": {
@@ -97,9 +88,6 @@
     "namespace": "sepolia",
     "plugins": ["subgraph"],
     "databaseSchemaName": "sepoliaSchema0.34.0",
-    "healReverseAddresses": false,
-    "indexAdditionalResolverRecords": false,
-    "replaceUnnormalized": false,
     "isSubgraphCompatible": true
   },
   "Subgraph Holesky": {
@@ -119,9 +107,6 @@
     "namespace": "holesky",
     "plugins": ["subgraph"],
     "databaseSchemaName": "holeskySchema0.34.0",
-    "healReverseAddresses": false,
-    "indexAdditionalResolverRecords": false,
-    "replaceUnnormalized": false,
     "isSubgraphCompatible": true
   },
   "Serialization Error": {
@@ -141,9 +126,6 @@
     "namespace": "holesky",
     "plugins": ["subgraph"],
     "databaseSchemaName": "DeserializationSchema0.34.0",
-    "healReverseAddresses": false,
-    "indexAdditionalResolverRecords": false,
-    "replaceUnnormalized": false,
     "isSubgraphCompatible": true
   }
 }
