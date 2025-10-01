@@ -20,14 +20,12 @@ import {
  * Parse CSV using csv-simple-parser with proper type safety
  */
 function parseCsvLine(line: string): string[] {
-  const result = parse(line);
+  const result = parse(line, {optimistic: false});
   if (result.length === 0) return [];
   const firstRow = result[0];
   if (!Array.isArray(firstRow)) return [];
-  return firstRow.filter((item) => typeof item === "string");
+  return firstRow.map((item) => String(item));
 }
-
-// No label validation - ENS accepts any UTF-8 string
 
 export interface ConvertCsvCommandOptions {
   inputFile: string;
@@ -156,6 +154,7 @@ function createRainbowRecord(parsedColumns: string[]): { labelhash: Buffer; labe
   if (parsedColumns.length === 1) {
     // Single column: compute labelhash using labelhash function
     const labelHashBytes = labelHashToBytes(labelhash(label));
+    console.log(label);
     return {
       labelhash: Buffer.from(labelHashBytes),
       label: label,

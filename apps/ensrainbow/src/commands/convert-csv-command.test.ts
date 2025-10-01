@@ -4,8 +4,10 @@ import { mkdtemp, rm, stat, writeFile } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createCLI } from "@/cli";
-import { type LabelSetId, type LabelSetVersion } from "@ensnode/ensnode-sdk";
+import { labelHashToBytes, type LabelSetId, type LabelSetVersion } from "@ensnode/ensnode-sdk";
 import { convertCsvCommand } from "./convert-csv-command";
+import { ENSRainbowDB } from "@/lib/database";
+import { labelhash } from "viem";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "..", "test", "fixtures");
@@ -47,14 +49,13 @@ describe("convert-csv-command", () => {
       const cli = createCLI({ exitProcess: false });
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
-      // Verify database was created
-      const dbStats = await stat(dataDir);
-      expect(dbStats.isDirectory()).toBe(true);
-
-      // Verify database contents by validating it
-      await cli.parse(["validate", "--data-dir", dataDir, "--lite"]);
-
-      // Database validation passed, which means records are accessible
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(recordsCount).toBe(11);
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("123"))))?.label).toBe("123");
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234"))))).toBe(null);
+      await db.close();
     });
 
     it("should convert two column CSV with provided hashes and ingest successfully", async () => {
@@ -79,9 +80,13 @@ describe("convert-csv-command", () => {
       const cli = createCLI({ exitProcess: false });
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
 
-      // Verify database was created
-      const dbStats = await stat(dataDir);
-      expect(dbStats.isDirectory()).toBe(true);
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(recordsCount).toBe(10);
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("test123"))))?.label).toBe("test123");
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234"))))).toBe(null);
+      await db.close();
     });
 
     it("should fail when CSV has inconsistent column count", async () => {
@@ -99,9 +104,10 @@ describe("convert-csv-command", () => {
       ).rejects.toThrow(/CSV conversion failed due to invalid data/);
     });
 
-    it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
+    it.only("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_special_chars.csv");
       const outputFile = join(tempDir, "output_special.ensrainbow");
+      const dataDir = join(tempDir, "db_special");
 
       // Convert CSV to ensrainbow format
       await convertCsvCommand({
@@ -119,7 +125,27 @@ describe("convert-csv-command", () => {
       // Verify special characters were processed correctly by checking logs
       // The conversion completed successfully, which means csv-simple-parser
       // handled emojis, unicode, quoted fields with commas, etc.
-      expect(true).toBe(true); // Test passes if conversion doesn't crash
+
+      // Ingest the converted file into database
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
+
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(recordsCount).toBe(10);
+      const labels = [
+        "🔥emoji-label🚀", 
+        "special\"quotes\"inside",
+        "label with newline\n character",
+        "label-with-null\0byte",
+      ];
+      for (const label of labels) {
+        expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label))))?.label).toBe(label);
+      }
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234"))))).toBe(null);
+      await db.close();
+
     });
 
     it("should fail when CSV contains invalid labelhash format", async () => {
