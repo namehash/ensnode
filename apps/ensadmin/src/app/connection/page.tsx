@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import ConnectionInfo from "@/components/connection";
 import { LoadingSpinner } from "@/components/loading-spinner";
 
-export default function Connection() {
+export default function ConnectionPage() {
   return (
     <Suspense fallback={<Loading />}>
       <ConnectionInfo />

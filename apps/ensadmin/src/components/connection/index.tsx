@@ -3,8 +3,6 @@
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 
-//TODO: Would appreciate advice about the naming convention here,
-// since @/app/connection/page.tsx already has a component named "Connection"
 export default function ConnectionInfo() {
   const ensIndexerConfigQuery = useENSIndexerConfig();
 
