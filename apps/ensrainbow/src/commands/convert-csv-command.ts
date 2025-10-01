@@ -1,31 +1,19 @@
 /**
  * ENSRAINBOW CSV FILE CREATION COMMAND
  *
- * Converts CSV files to .ensrainbow format with csv-simple-parser
+ * Converts CSV files to .ensrainbow format with fast-csv
  * Supports 1-column (label only) and 2-column (label,labelhash) formats
  */
 
 import { createReadStream, createWriteStream } from "fs";
-import { createInterface } from "readline";
 import { type LabelHash, labelHashToBytes } from "@ensnode/ensnode-sdk";
-import parse from "csv-simple-parser";
+import { parse } from "@fast-csv/parse";
 import { labelhash } from "viem";
 import { logger } from "../utils/logger.js";
 import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
   createRainbowProtobufRoot,
 } from "../utils/protobuf-schema.js";
-
-/**
- * Parse CSV using csv-simple-parser with proper type safety
- */
-function parseCsvLine(line: string): string[] {
-  const result = parse(line, {optimistic: false});
-  if (result.length === 0) return [];
-  const firstRow = result[0];
-  if (!Array.isArray(firstRow)) return [];
-  return firstRow.map((item) => String(item));
-}
 
 export interface ConvertCsvCommandOptions {
   inputFile: string;
@@ -43,37 +31,6 @@ interface ConversionStats {
   processedRecords: number;
   startTime: Date;
   endTime?: Date;
-}
-
-/**
- * Process a single CSV line with csv-simple-parser and validation
- */
-function processStreamingCsvLine(line: string, expectedColumns: number): string[] {
-  if (line.trim() === "") {
-    throw new Error("Empty line");
-  }
-
-  const parsedLine = parseCsvLine(line);
-
-  // Validate column count
-  if (parsedLine.length !== expectedColumns) {
-    throw new Error(
-      `Expected ${expectedColumns} columns, but found ${parsedLine.length} in line: ${line}`,
-    );
-  }
-
-  return parsedLine;
-}
-
-/**
- * Setup input stream for reading CSV line by line
- */
-function setupReadStream(inputFile: string) {
-  const fileStream = createReadStream(inputFile, { encoding: "utf8" });
-  return createInterface({
-    input: fileStream,
-    crlfDelay: Infinity,
-  });
 }
 
 /**
@@ -146,12 +103,12 @@ function initializeConversion(options: ConvertCsvCommandOptions) {
 }
 
 /**
- * Create rainbow record from parsed CSV columns
+ * Create rainbow record from parsed CSV row
  */
-function createRainbowRecord(parsedColumns: string[]): { labelhash: Buffer; label: string } {
-  const label = parsedColumns[0];
+function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string } {
+  const label = String(row[0]);
 
-  if (parsedColumns.length === 1) {
+  if (row.length === 1) {
     // Single column: compute labelhash using labelhash function
     const labelHashBytes = labelHashToBytes(labelhash(label));
     console.log(label);
@@ -161,7 +118,7 @@ function createRainbowRecord(parsedColumns: string[]): { labelhash: Buffer; labe
     };
   } else {
     // Two columns: validate and use provided hash
-    const [, providedHash] = parsedColumns;
+    const providedHash = String(row[1]);
     const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
     const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
     return {
@@ -175,13 +132,20 @@ function createRainbowRecord(parsedColumns: string[]): { labelhash: Buffer; labe
  * Process a single CSV record
  */
 function processRecord(
-  line: string,
+  row: string[],
   expectedColumns: number,
   RainbowRecordType: any,
   outputStream: NodeJS.WritableStream,
+  lineNumber: number,
 ): void {
-  const parsedColumns = processStreamingCsvLine(line, expectedColumns);
-  const rainbowRecord = createRainbowRecord(parsedColumns);
+  // Validate column count
+  if (row.length !== expectedColumns) {
+    throw new Error(
+      `Expected ${expectedColumns} columns, but found ${row.length} in line ${lineNumber}`,
+    );
+  }
+
+  const rainbowRecord = createRainbowRecord(row);
 
   // Create protobuf message and write immediately
   const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
@@ -189,54 +153,67 @@ function processRecord(
 }
 
 /**
- * Process the entire CSV file
+ * Process the entire CSV file using fast-csv
  */
 async function processCSVFile(
-  rl: ReturnType<typeof setupReadStream>,
+  inputFile: string,
   RainbowRecordType: any,
   outputStream: NodeJS.WritableStream,
   progressInterval: number,
 ): Promise<{ totalLines: number; processedRecords: number }> {
-  let expectedColumns: number | null = null;
-  let lineNumber = 0;
-  let processedRecords = 0;
+  return new Promise((resolve, reject) => {
+    let expectedColumns: number | null = null;
+    let lineNumber = 0;
+    let processedRecords = 0;
 
-  for await (const line of rl) {
-    lineNumber++;
+    const fileStream = createReadStream(inputFile, { encoding: "utf8" });
 
-    // Skip empty lines
-    if (line.trim() === "") {
-      continue;
-    }
+    const csvStream = parse()
+      .on("data", (row: string[]) => {
+        lineNumber++;
 
-    try {
-      // For the first line, detect column count
-      if (expectedColumns === null) {
-        const firstLineParsed = parseCsvLine(line);
-        expectedColumns = firstLineParsed.length;
-        logger.info(`Detected ${expectedColumns} columns using csv-simple-parser`);
-      }
+        try {
+          // For the first row, detect column count
+          if (expectedColumns === null) {
+            expectedColumns = row.length;
+            logger.info(`Detected ${expectedColumns} columns using fast-csv`);
+          }
 
-      processRecord(line, expectedColumns, RainbowRecordType, outputStream);
-      processedRecords++;
+          processRecord(row, expectedColumns, RainbowRecordType, outputStream, lineNumber);
+          processedRecords++;
 
-      // Log progress for large files
-      if (processedRecords % progressInterval === 0) {
-        logger.info(`Processed ${processedRecords} records so far...`);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(
-        `CSV conversion failed due to invalid data on line ${lineNumber}: ${errorMessage}`,
-      );
-    }
-  }
+          // Log progress for large files
+          if (processedRecords % progressInterval === 0) {
+            logger.info(`Processed ${processedRecords} records so far...`);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          csvStream.destroy();
+          fileStream.destroy();
+          reject(
+            new Error(
+              `CSV conversion failed due to invalid data on line ${lineNumber}: ${errorMessage}`,
+            ),
+          );
+        }
+      })
+      .on("error", (error: Error) => {
+        reject(new Error(`CSV parsing error: ${error.message}`));
+      })
+      .on("end", () => {
+        resolve({ totalLines: lineNumber, processedRecords });
+      });
 
-  return { totalLines: lineNumber, processedRecords };
+    fileStream
+      .on("error", (error: Error) => {
+        reject(error);
+      })
+      .pipe(csvStream);
+  });
 }
 
 /**
- * Main CSV conversion command with true streaming using csv-simple-parser
+ * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
   const stats: ConversionStats = {
@@ -245,19 +222,14 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     startTime: new Date(),
   };
 
-  let rl: ReturnType<typeof setupReadStream> | null = null;
-
   try {
     const { RainbowRecordType, outputStream } = initializeConversion(options);
-
-    // Setup streaming CSV reader
-    rl = setupReadStream(options.inputFile);
 
     const progressInterval = options.progressInterval ?? DEFAULT_PROGRESS_INTERVAL;
 
     // Process the CSV file
     const { totalLines, processedRecords } = await processCSVFile(
-      rl,
+      options.inputFile,
       RainbowRecordType,
       outputStream,
       progressInterval,
@@ -269,17 +241,12 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // Close output stream
     outputStream.end();
 
-    logger.info(`✅ Processed ${processedRecords} records with streaming csv-simple-parser`);
+    logger.info(`✅ Processed ${processedRecords} records with streaming fast-csv`);
     logSummary(stats);
     logger.info("✅ CSV conversion completed successfully!");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logger.error("❌ CSV conversion failed:", errorMessage);
     throw error;
-  } finally {
-    // Ensure readline interface is properly closed to prevent resource leaks
-    if (rl) {
-      rl.close();
-    }
   }
 }
