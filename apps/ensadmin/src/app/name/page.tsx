@@ -33,9 +33,8 @@ export default function ExploreNamesPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    //TODO: validation is to be established.
-    // Since it brings a significant amount of complexity it's preferable
-    // to not do it at all until we do it right.
+    // TODO: Input validation and normalization.
+    // see: https://github.com/namehash/ensnode/issues/1140
 
     const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
 
