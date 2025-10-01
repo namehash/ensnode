@@ -2,10 +2,9 @@
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
-  type ENSIndexerOverallIndexingCompletedStatus,
-  type ENSIndexerOverallIndexingFollowingStatus,
-  type ENSIndexerPublicConfig,
-  OverallIndexingStatusIds,
+    ENSIndexerOverallIndexingStatus,
+    type ENSIndexerPublicConfig,
+    OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
@@ -24,18 +23,45 @@ import {
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
 import type { Registration } from "./types";
+import {ErrorInfo, ErrorInfoProps} from "@/components/error-info";
+import {Button} from "@/components/ui/button";
+import Link from "next/link";
 
 /**
  * Max number of latest registrations to display
  */
-const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
+const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 25;
 
+/**
+ * RecentRegistrations display variations:
+ *
+ * Standard -
+ *      ensIndexerConfig: ENSIndexerPublicConfig,
+ *      indexingStatus: ENSIndexerOverallIndexingCompletedStatus |
+ *          ENSIndexerOverallIndexingFollowingStatus ,
+ *      error: undefined
+ *
+ * RegistrationsNotAvailableMessage -
+ *      ensIndexerConfig: ENSIndexerPublicConfig,
+ *      indexingStatus: statuses different from Following & Completed,
+ *      error: undefined
+ *
+ * Loading -
+ *      ensIndexerConfig: undefined,
+ *      indexingStatus: undefined,
+ *      error: undefined
+ *
+ * Error (including ENSIndexerOverallIndexingErrorStatus response)-
+ *      ensIndexerConfig: undefined,
+ *      indexingStatus: undefined,
+ *      error: ErrorInfoProps
+ *
+ * @throws If both error and any from the pair of ensIndexerConfig & indexingStatus are defined
+ */
 interface RecentRegistrationsProps {
-  ensIndexerConfig: ENSIndexerPublicConfig;
-
-  indexingStatus:
-    | ENSIndexerOverallIndexingCompletedStatus
-    | ENSIndexerOverallIndexingFollowingStatus;
+  ensIndexerConfig?: ENSIndexerPublicConfig;
+  indexingStatus?: ENSIndexerOverallIndexingStatus;
+  error?: ErrorInfoProps;
 }
 
 /**
@@ -48,12 +74,29 @@ interface RecentRegistrationsProps {
 export function RecentRegistrations({
   ensIndexerConfig,
   indexingStatus,
+    error,
 }: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  if (error !== undefined && (ensIndexerConfig !== undefined || indexingStatus !== undefined)) {
+      throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
+  }
+
+  if (error !== undefined) {
+      return <ErrorInfo {...error} />;
+  }
+
+  if (ensIndexerConfig === undefined || indexingStatus === undefined){
+      return <RecentRegistrationsLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
+  }
+
+  if (indexingStatus.overallStatus !== OverallIndexingStatusIds.Completed && indexingStatus.overallStatus !== OverallIndexingStatusIds.Following){
+      return <RegistrationsNotAvailableMessage />;
+  }
 
   const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
 
@@ -178,4 +221,33 @@ function RegistrationsListLoading({ rowCount }: RegistrationLoadingProps) {
       ))}
     </div>
   );
+}
+
+function RecentRegistrationsLoading({ rowCount }: RegistrationLoadingProps) {
+    return <Card>
+        <CardHeader className="max-sm:p-3">
+            <div className="h-6 bg-muted rounded w-1/4" />
+        </CardHeader>
+        <CardContent className="max-sm:p-3 max-sm:pt-0">
+            <RegistrationsListLoading rowCount={rowCount} />
+        </CardContent>
+    </Card>
+}
+
+function RegistrationsNotAvailableMessage(){
+    const noDisplayMessage = "The latest indexed registrations will be available once the indexing status is Following or Completed."
+    const monitorStatusMessage = "Check the current indexing status"
+    return <Card className="w-full">
+        <CardHeader className="sm:pb-4 max-sm:p-3">
+            <CardTitle>
+                Latest indexed registrations are not available
+            </CardTitle>
+        </CardHeader>
+        <CardContent>
+            {noDisplayMessage}
+            <Button asChild variant="outline">
+                <Link href="/status">{monitorStatusMessage}</Link>
+            </Button>
+        </CardContent>
+    </Card>;
 }
