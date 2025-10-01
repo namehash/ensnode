@@ -32,7 +32,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
     "ext_resolverRecords.findFirst",
     {},
     async () => {
-      const record = await db.query.ext_resolverRecords.findFirst({
+      const records = await db.query.ext_resolverRecords.findFirst({
         where: (resolver, { and, eq }) =>
           and(
             eq(resolver.chainId, chainId),
@@ -43,7 +43,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
         with: { addressRecords: true, textRecords: true },
       });
 
-      return record as IndexedResolverRecords | undefined;
+      return records as IndexedResolverRecords | undefined;
     },
   );
 

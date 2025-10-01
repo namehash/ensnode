@@ -18,7 +18,7 @@ export async function nodeIsMigrated(context: Context, node: Node) {
     );
   }
 
-  const record = await context.db.find(schema.ext_migratedNodes, { node });
+  const record = await context.db.find(schema.ext_migratedNode, { node });
   return !!record;
 }
 
@@ -32,5 +32,5 @@ export async function migrateNode(context: Context, node: Node) {
     );
   }
 
-  await context.db.insert(schema.ext_migratedNodes).values({ node }).onConflictDoNothing();
+  await context.db.insert(schema.ext_migratedNode).values({ node }).onConflictDoNothing();
 }

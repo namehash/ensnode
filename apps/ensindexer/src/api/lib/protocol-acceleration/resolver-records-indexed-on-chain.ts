@@ -22,7 +22,7 @@ const CHAIN_IDS_IN_RESOLVER_CONFIG = Object.keys(DUMMY_RESOLVER_CONTRACT_CONFIG.
  * @returns true if resolver records are indexed on the given chain, false otherwise
  */
 export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
-  // the ProtocolAcceleration plugin describes ResolverRecord indexing behavior: it must be enabled
+  // the ProtocolAcceleration plugin describes Resolver Record indexing behavior: it must be enabled
   if (!config.plugins.includes(PluginName.ProtocolAcceleration)) return false;
 
   // if ProtocolAccleration plugin is enabled, records are available on this chainId iff this chain

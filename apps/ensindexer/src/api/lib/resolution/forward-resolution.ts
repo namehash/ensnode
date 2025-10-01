@@ -18,7 +18,7 @@ import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
 import { findResolver } from "@/api/lib/protocol-acceleration/find-resolver";
-import { getPrimaryNameFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
+import { getENSIP19ReverseNameRecordFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
 import { getRecordsFromIndex } from "@/api/lib/protocol-acceleration/get-records-from-index";
 import { isKnownENSIP19ReverseResolver } from "@/api/lib/protocol-acceleration/known-ensip-19-reverse-resolvers";
 import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/protocol-acceleration/known-offchain-lookup-resolver";
@@ -235,7 +235,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                   }
 
                   // retrieve the name record from the index
-                  const nameRecordValue = await getPrimaryNameFromIndex(
+                  const nameRecordValue = await getENSIP19ReverseNameRecordFromIndex(
                     parsed.address,
                     parsed.coinType,
                   );

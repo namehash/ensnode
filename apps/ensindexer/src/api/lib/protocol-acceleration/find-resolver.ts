@@ -61,7 +61,7 @@ export async function findResolver({
   }
 
   // If findResolver is called for a non-root-chain, we _must_ have access to the indexed Node-Resolver
-  // relations necessary to look up the Domain's configured Resolver (see invariant in `findResolverWithIndex`)
+  // relations necessary to look up the Node's configured Resolver (see invariant in `findResolverWithIndex`)
   return findResolverWithIndex(chainId, name);
 }
 
@@ -171,7 +171,7 @@ async function findResolverWithIndex(
     // 2. compute node of each via namehash
     const nodes = names.map((name) => namehash(name) as Node);
 
-    // 3. for each domain, find its associated resolver (only on the specified chain)
+    // 3. for each node, find its associated resolver (only on the specified chain)
     const nodeResolverRelations = await withSpanAsync(
       tracer,
       "ext_nodeResolverRelation.findMany",
@@ -197,7 +197,7 @@ async function findResolverWithIndex(
     // 4. iterate up the hierarchy and return the first valid resolver
     for (const { node, resolver } of nodeResolverRelations) {
       // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
-      // encodes a zeroAddress resolver as the _absence_ of a Domain-Resolver relation, so there is
+      // encodes a zeroAddress resolver as the _absence_ of a Node-Resolver relation, so there is
       // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
       // we include this invariant here to encode that expectation explicitly.
       if (isAddressEqual(resolver, zeroAddress)) {

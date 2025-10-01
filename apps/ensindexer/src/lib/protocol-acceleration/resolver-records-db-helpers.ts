@@ -13,7 +13,7 @@ import {
 import { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
- * Infer the type of the ResolverRecords entity's composite primary key.
+ * Infer the type of the ResolverRecord entity's composite primary key.
  */
 type ResolverRecordsId = Pick<
   typeof schema.ext_resolverRecords.$inferInsert,
@@ -72,14 +72,12 @@ export async function handleResolverAddressRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverAddressRecords, id);
+    await context.db.delete(schema.ext_resolverAddressRecord, id);
   } else {
     // upsert
     await context.db
-      .insert(schema.ext_resolverAddressRecords)
-      // create a new address record entity
+      .insert(schema.ext_resolverAddressRecord)
       .values({ ...id, address: interpretedValue })
-      // or update the existing one
       .onConflictDoUpdate({ address: interpretedValue });
   }
 }
@@ -105,14 +103,12 @@ export async function handleResolverTextRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverTextRecords, id);
+    await context.db.delete(schema.ext_resolverTextRecord, id);
   } else {
     // upsert
     await context.db
-      .insert(schema.ext_resolverTextRecords)
-      // create a new text record entity
+      .insert(schema.ext_resolverTextRecord)
       .values({ ...id, value: interpretedValue })
-      // or update the existing one
       .onConflictDoUpdate({ value: interpretedValue });
   }
 }

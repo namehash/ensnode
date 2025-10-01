@@ -13,22 +13,19 @@ const rrRoot = maybeGetDatasource(config.namespace, DatasourceNames.ReverseResol
  * We encode this behavior here, for the purposes of Protocol Acceleration.
  */
 export function isKnownENSIP19ReverseResolver(chainId: ChainId, resolverAddress: Address): boolean {
-  if (chainId === rrRoot?.chain.id) {
-    return [
-      // DefaultReverseResolver (default.reverse)
-      rrRoot?.contracts.DefaultReverseResolver3?.address,
-      // the following are each ChainReverseResolver ([coinType].reverse)
-      rrRoot?.contracts.BaseReverseResolver?.address,
-      rrRoot?.contracts.LineaReverseResolver?.address,
-      rrRoot?.contracts.OptimismReverseResolver?.address,
-      rrRoot?.contracts.ArbitrumReverseResolver?.address,
-      rrRoot?.contracts.ScrollReverseResolver?.address,
-    ]
-      .filter((address): address is Address => !!address)
-      .includes(resolverAddress);
-  }
-
   // NOTE: ENSIP-19 Reverse Resolvers are only valid in the context of the ENS Root chain
+  if (chainId !== rrRoot?.chain.id) return false;
 
-  return false;
+  return [
+    // DefaultReverseResolver (default.reverse)
+    rrRoot?.contracts.DefaultReverseResolver3?.address,
+    // the following are each ChainReverseResolver ([coinType].reverse)
+    rrRoot?.contracts.BaseReverseResolver?.address,
+    rrRoot?.contracts.LineaReverseResolver?.address,
+    rrRoot?.contracts.OptimismReverseResolver?.address,
+    rrRoot?.contracts.ArbitrumReverseResolver?.address,
+    rrRoot?.contracts.ScrollReverseResolver?.address,
+  ]
+    .filter((address): address is Address => !!address)
+    .includes(resolverAddress);
 }

@@ -12,7 +12,7 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 /**
  * Handler functions for ENSIP-19 StandaloneReverseRegistrar contracts in the Protocol Acceleration
  * plugin.
- * - indexes Primary Name for an address, per-coinType (derived from context.chain.id)
+ * - indexes ENSIP-19 Reverse Name Records for an address, per-coinType (derived from context.chain.id)
  */
 export default function () {
   ponder.on(
@@ -30,7 +30,7 @@ export default function () {
           ? DEFAULT_EVM_COIN_TYPE
           : evmChainIdToCoinType(context.chain.id);
 
-      // construct the Primary Name entity's Composite Primary Key
+      // construct the ReverseNameRecord entity's Composite Primary Key
       const id = { address, coinType: BigInt(coinType) };
 
       // interpret the emitted name record value (see `interpretNameRecordValue` for guarantees)
@@ -40,15 +40,13 @@ export default function () {
       const isDeletion = interpretedValue === null;
       if (isDeletion) {
         // delete
-        await context.db.delete(schema.ext_primaryName, id);
+        await context.db.delete(schema.ext_reverseNameRecord, id);
       } else {
         // upsert
         await context.db
-          .insert(schema.ext_primaryName)
-          // create a new primary name entity
-          .values({ ...id, name: interpretedValue })
-          // or update the existing one
-          .onConflictDoUpdate({ name: interpretedValue });
+          .insert(schema.ext_reverseNameRecord)
+          .values({ ...id, value: interpretedValue })
+          .onConflictDoUpdate({ value: interpretedValue });
       }
     },
   );

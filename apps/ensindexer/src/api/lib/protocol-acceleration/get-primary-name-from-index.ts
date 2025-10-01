@@ -8,7 +8,7 @@ const tracer = trace.getTracer("get-primary-name");
 
 const DEFAULT_EVM_COIN_TYPE_BIGINT = BigInt(DEFAULT_EVM_COIN_TYPE);
 
-export async function getPrimaryNameFromIndex(
+export async function getENSIP19ReverseNameRecordFromIndex(
   address: Address,
   coinType: CoinType,
 ): Promise<Name | null> {
@@ -17,10 +17,10 @@ export async function getPrimaryNameFromIndex(
   // retrieve from index
   const records = await withSpanAsync(
     tracer,
-    "ext_primaryName.findMany",
+    "ext_reverseNameRecord.findMany",
     { address, coinType: coinTypeReverseLabel(coinType) },
     () =>
-      db.query.ext_primaryName.findMany({
+      db.query.ext_reverseNameRecord.findMany({
         where: (t, { and, inArray, eq }) =>
           and(
             // address = address
@@ -28,14 +28,14 @@ export async function getPrimaryNameFromIndex(
             // AND coinType IN [_coinType, DEFAULT_EVM_COIN_TYPE]
             inArray(t.coinType, [_coinType, DEFAULT_EVM_COIN_TYPE_BIGINT]),
           ),
-        columns: { coinType: true, name: true },
+        columns: { coinType: true, value: true },
       }),
   );
 
-  const coinTypeName = records.find((pn) => pn.coinType === _coinType)?.name ?? null;
+  const coinTypeName = records.find((pn) => pn.coinType === _coinType)?.value ?? null;
 
   const defaultName =
-    records.find((pn) => pn.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT)?.name ?? null;
+    records.find((pn) => pn.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT)?.value ?? null;
 
   return coinTypeName ?? defaultName;
 }
