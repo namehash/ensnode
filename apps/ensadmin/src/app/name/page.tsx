@@ -1,6 +1,6 @@
 "use client";
 
-import { getNameDetailsRelativePath } from "@/components/identity/utils";
+import { NameDisplay, NameLink, getNameDetailsRelativePath } from "@/components/identity/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,8 @@ const EXAMPLE_NAMES = [
   "barmstrong.cb.id",
   "argent.xyz",
   "lens.xyz",
+  "brantly.eth",
+  "lightwalker.eth",
 ];
 
 export default function ExploreNamesPage() {
@@ -67,7 +69,7 @@ export default function ExploreNamesPage() {
                 disabled={searchedName.length === 0}
                 className="max-sm:self-stretch"
               >
-                View Name
+                View Profile
               </Button>
             </fieldset>
           </form>
@@ -75,15 +77,17 @@ export default function ExploreNamesPage() {
             <p className="text-sm font-medium leading-none">Examples:</p>
             <div className="flex flex-row flex-wrap gap-2 -mx-6 px-6">
               {EXAMPLE_NAMES.map((exampleName) => (
-                <Button
-                  variant={searchedName === exampleName ? "default" : "outline"}
-                  size="sm"
-                  key={`example-name-${exampleName}`}
-                  onClick={() => setSearchedName(exampleName)}
-                  className="font-mono rounded-full"
-                >
-                  {exampleName}
-                </Button>
+                <NameLink name={exampleName} key={`example-name-link-${exampleName}`}>
+                  <Button
+                    variant={"outline"}
+                    size="sm"
+                    key={`example-name-button-${exampleName}`}
+                    className="font-mono rounded-full"
+                    asChild
+                  >
+                    <NameDisplay name={exampleName} />
+                  </Button>
+                </NameLink>
               ))}
             </div>
           </div>
