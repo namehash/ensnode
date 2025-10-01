@@ -4,6 +4,7 @@ import { ChainId } from "@ensnode/ensnode-sdk";
 import { Address } from "viem";
 
 const rrRoot = maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot);
+const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames);
 
 /**
  * Returns whether `resolverAddress` on `chainId` is a Known Onchain Static Resolver.
@@ -37,6 +38,17 @@ export function isKnownOnchainStaticResolver(chainId: ChainId, resolverAddress: 
       .includes(resolverAddress);
   }
 
+  // on Base Chain
+  if (chainId === basenames?.chain.id) {
+    return [
+      // the Basenames Default Resolvers are Onchain Static Resolvers
+      basenames.contracts.L2Resolver1?.address,
+      basenames.contracts.L2Resolver2?.address,
+    ]
+      .filter((address): address is Address => !!address)
+      .includes(resolverAddress);
+  }
+
   return false;
 }
 
@@ -49,10 +61,21 @@ export function onchainStaticResolverImplementsDefaultAddress(
   chainId: ChainId,
   resolverAddress: Address,
 ): boolean {
+  // on ENS Root Chain
   if (chainId === rrRoot?.chain.id) {
     return [
       // the DefaultPublicResolver3 (ENSIP-19 default PublicResolver) implements address defaulting
       rrRoot.contracts.DefaultPublicResolver3?.address,
+    ]
+      .filter((address): address is Address => !!address)
+      .includes(resolverAddress);
+  }
+
+  // on Base Chain
+  if (chainId === basenames?.chain.id) {
+    return [
+      // the Basenames L2Resolver2 implements address defaulting
+      basenames.contracts.L2Resolver2?.address,
     ]
       .filter((address): address is Address => !!address)
       .includes(resolverAddress);

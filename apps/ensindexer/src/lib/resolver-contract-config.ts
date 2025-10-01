@@ -36,13 +36,10 @@ export function resolverContractConfig(
       .reduce(
         (memo, datasource) => ({
           ...memo,
-          [datasource.chain.id.toString()]: {
-            ...constrainBlockrange(
-              globalBlockrange,
-              // NOTE: ! ok due to .filter above
-              datasource.contracts.Resolver!.startBlock ?? 0,
-            ),
-          },
+          [datasource.chain.id.toString()]: constrainBlockrange(
+            globalBlockrange,
+            datasource.contracts.Resolver!, // ! ok due to above,
+          ),
         }),
         {},
       ),
