@@ -25,24 +25,21 @@ const EXAMPLE_NAMES = [
 
 export default function ExploreNamesPage() {
   const router = useRouter();
-  const [searchedName, setSearchedName] = useState<Name>("");
+  const [rawInputName, setRawInputName] = useState<Name>("");
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.target as HTMLFormElement);
-    const name = formData.get("ens-name") as Name;
-
     //TODO: validation is to be established.
     // Since it brings a significant amount of complexity it's preferable
     // to not do it at all until we do it right.
-    router.push(getNameDetailsRelativePath(name));
+    router.push(getNameDetailsRelativePath(rawInputName));
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
 
-    setSearchedName(e.target.value);
+    setRawInputName(e.target.value);
   };
 
   return (
@@ -61,12 +58,12 @@ export default function ExploreNamesPage() {
                 id="ens-name"
                 name="ens-name"
                 placeholder="Search for a name..."
-                value={searchedName}
-                onChange={handleChange}
+                value={rawInputName}
+                onChange={handleRawInputNameChange}
               />
               <Button
                 type="submit"
-                disabled={searchedName.length === 0}
+                disabled={rawInputName.length === 0}
                 className="max-sm:self-stretch"
               >
                 View Profile
