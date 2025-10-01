@@ -148,12 +148,12 @@ export default {
       RegistrarController: {
         /**
          * This controller was removed from BaseRegistrar contract
-         * at block 35936564 with the following tx:
          * https://basescan.org/tx/0x88a3cc03291bb1a4b2bd9ccfe6b770988470001905d96c32bd41b866797b684b
          */
         abi: base_RegistrarController,
         address: "0x4ccb0bb02fcaba27e82a56646e81d8c5bc4119a5",
         startBlock: 18619035,
+        endBlock: 35936564,
       },
       UpgradeableRegistrarController: {
         /**
@@ -165,18 +165,16 @@ export default {
         address: "0xa7d2607c6BD39Ae9521e514026CBB078405Ab322", // a proxy contract
         startBlock: 35286620,
       },
-      // QUESTION: do we need to track this one?
       L2Resolver: {
         abi: ResolverABI,
         address: "0xc6d566a56a1aff6508b41f6c90ff131615583bcd",
         startBlock: 17575714,
       },
-      // QUESTION: do we need to track this one?
-      // UpgradeableL2Resolver: {
-      //   abi: ResolverABI,
-      //   address: "0x426fA03fB86E510d0Dd9F70335Cf102a98b10875",
-      //   startBlock: 35286620,
-      // },
+      UpgradeableL2Resolver: {
+        abi: ResolverABI,
+        address: "0x426fA03fB86E510d0Dd9F70335Cf102a98b10875",
+        startBlock: 35286620,
+      },
     },
   },
 
