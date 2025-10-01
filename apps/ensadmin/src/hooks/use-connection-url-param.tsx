@@ -19,6 +19,16 @@ interface UseRawConnectionUrlParamResult {
    *                 remove the param.
    */
   setRawConnectionUrlParam: (rawUrl: string | null) => void;
+
+  /**
+   * Attaches the current raw connection URL param (if it exists) to the given`basePath`.
+   *
+   * @param basePath - The base path to attach the current raw connection URL
+   *                   param to. Must not contain any existing query parameters
+   *                   (e.g. `?query=value`) or link fragment (e.g. `#anchor`).
+   * @returns The `basePath` with the current raw connection URL param attached.
+   */
+  retainCurrentRawConnectionUrlParam: (basePath: string) => string;
 }
 
 /**
@@ -65,8 +75,22 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
     [router, searchParams],
   );
 
+  // Build callback for attaching the current raw connection URL param
+  // to the given `basePath`
+  const retainCurrentRawConnectionUrlParam = useCallback(
+    (basePath: string): string => {
+      const pathWithRetainedConnection = rawConnectionUrlParam
+        ? `${basePath}?${RAW_CONNECTION_PARAM_KEY}=${encodeURIComponent(rawConnectionUrlParam)}`
+        : basePath;
+
+      return pathWithRetainedConnection;
+    },
+    [rawConnectionUrlParam],
+  );
+
   return {
     rawConnectionUrlParam,
     setRawConnectionUrlParam,
+    retainCurrentRawConnectionUrlParam,
   };
 }
