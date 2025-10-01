@@ -4,6 +4,7 @@ import { NameDisplay, NameLink, getNameDetailsRelativePath } from "@/components/
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { Name } from "@ensnode/ensnode-sdk";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
@@ -27,13 +28,18 @@ export default function ExploreNamesPage() {
   const router = useRouter();
   const [rawInputName, setRawInputName] = useState<Name>("");
 
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     //TODO: validation is to be established.
     // Since it brings a significant amount of complexity it's preferable
     // to not do it at all until we do it right.
-    router.push(getNameDetailsRelativePath(rawInputName));
+
+    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
+
+    router.push(href);
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
