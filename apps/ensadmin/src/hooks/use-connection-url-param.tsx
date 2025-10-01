@@ -21,7 +21,8 @@ interface UseRawConnectionUrlParamResult {
   setRawConnectionUrlParam: (rawUrl: string | null) => void;
 
   /**
-   * Attaches the current raw connection URL param (if it exists) to the given`basePath`.
+   * Attaches the current raw connection URL param (if it exists) to the given
+   * `basePath`.
    *
    * @param basePath - The base path to attach the current raw connection URL
    *                   param to. Must not contain any existing query parameters
