@@ -39,7 +39,7 @@
     "protobufjs": "^7.4.0",
     "viem": "catalog:",
     "yargs": "^17.7.2",
-    "csv-simple-parser": "^2.0.2"
+    "@fast-csv/parse": "^5.0.0"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",

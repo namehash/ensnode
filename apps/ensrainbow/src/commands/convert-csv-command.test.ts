@@ -4,10 +4,10 @@ import { mkdtemp, rm, stat, writeFile } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createCLI } from "@/cli";
-import { labelHashToBytes, type LabelSetId, type LabelSetVersion } from "@ensnode/ensnode-sdk";
-import { convertCsvCommand } from "./convert-csv-command";
 import { ENSRainbowDB } from "@/lib/database";
+import { type LabelSetId, type LabelSetVersion, labelHashToBytes } from "@ensnode/ensnode-sdk";
 import { labelhash } from "viem";
+import { convertCsvCommand } from "./convert-csv-command";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "..", "test", "fixtures");
@@ -53,8 +53,10 @@ describe("convert-csv-command", () => {
       expect(await db.validate()).toBe(true);
       const recordsCount = await db.getPrecalculatedRainbowRecordCount();
       expect(recordsCount).toBe(11);
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("123"))))?.label).toBe("123");
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234"))))).toBe(null);
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("123"))))?.label).toBe(
+        "123",
+      );
+      expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
       await db.close();
     });
 
@@ -84,8 +86,10 @@ describe("convert-csv-command", () => {
       expect(await db.validate()).toBe(true);
       const recordsCount = await db.getPrecalculatedRainbowRecordCount();
       expect(recordsCount).toBe(10);
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("test123"))))?.label).toBe("test123");
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234"))))).toBe(null);
+      expect(
+        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("test123"))))?.label,
+      ).toBe("test123");
+      expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
       await db.close();
     });
 
@@ -104,7 +108,7 @@ describe("convert-csv-command", () => {
       ).rejects.toThrow(/CSV conversion failed due to invalid data/);
     });
 
-    it.only("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
+    it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_special_chars.csv");
       const outputFile = join(tempDir, "output_special.ensrainbow");
       const dataDir = join(tempDir, "db_special");
@@ -135,17 +139,18 @@ describe("convert-csv-command", () => {
       const recordsCount = await db.getPrecalculatedRainbowRecordCount();
       expect(recordsCount).toBe(10);
       const labels = [
-        "🔥emoji-label🚀", 
-        "special\"quotes\"inside",
+        "🔥emoji-label🚀",
+        'special"quotes"inside',
         "label with newline\n character",
         "label-with-null\0byte",
       ];
       for (const label of labels) {
-        expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label))))?.label).toBe(label);
+        expect(
+          (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label))))?.label,
+        ).toBe(label);
       }
-      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234"))))).toBe(null);
+      expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
       await db.close();
-
     });
 
     it("should fail when CSV contains invalid labelhash format", async () => {
