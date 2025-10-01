@@ -92,60 +92,6 @@ export interface ENSIndexerPublicConfig {
   plugins: PluginName[];
 
   /**
-   * Enable or disable healing of addr.reverse subnames.
-   * If this is set to true, ENSIndexer will attempt to heal subnames of
-   * addr.reverse.
-   */
-  healReverseAddresses: boolean;
-
-  /**
-   * Enable or disable the indexing of Resolver record values.
-   * If this is set to false, ENSIndexer will apply subgraph-backwards
-   * compatible logic that only tracks the keys of Resolver records.
-   * If this is set to true, ENSIndexer will track both the keys and the values
-   * of Resolver records.
-   *
-   * WARNING: Special care must be taken when interacting with indexed resolver
-   * record values. It is unsafe to naively assume that indexed resolver record
-   * values are equivalent to the resolver record values that would be returned
-   * through dynamic lookups via the ENS protocol. For example, if a resolver
-   * implements CCIP-Read, the resolver records may not be discoverable through
-   * onchain indexing. This feature is under R&D. At this time we do not
-   * recommend anyone directly use indexed resolver record values in their
-   * applications. Features are planned in the ENSNode roadmap that will
-   * provide safe use of indexed resolver record values (in appropriate
-   * contexts).
-   *
-   * Note that enabling {@link indexAdditionalResolverRecords} results in indexed data becoming a
-   * _superset_ of the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
-   * {@link indexAdditionalResolverRecords} should be `false`.
-   */
-  indexAdditionalResolverRecords: boolean;
-
-  /**
-   * Controls ENSIndexer's handling of Literal Labels and Literal Names
-   * This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.
-   *
-   * When set to true, all Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
-   * - https://ensnode.io/docs/reference/terminology#interpreted-label
-   * - https://ensnode.io/docs/reference/terminology#interpreted-name
-   *
-   * That is,
-   * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
-   *    LabelHash, and
-   * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
-   *    may be represented as an Encoded LabelHash of the Literal Label value found onchain.
-   *
-   * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
-   * interpretation.
-   * - https://ensnode.io/docs/reference/terminology#literal-label
-   * - https://ensnode.io/docs/reference/terminology#literal-name
-   *
-   * NOTE: {@link replaceUnnormalized} must be `false` for subgraph compatible indexing behavior.
-   */
-  replaceUnnormalized: boolean;
-
-  /**
    * Indexed Chain IDs
    *
    * Includes the {@link ChainId} for each chain being indexed.
@@ -153,15 +99,41 @@ export interface ENSIndexerPublicConfig {
   indexedChainIds: Set<ChainId>;
 
   /**
-   * A flag derived from the built config indicating whether ENSIndexer is operating in a
-   * subgraph-compatible way. This flag is true if:
-   * a) only the subgraph plugin is activated,
-   * b) healReverseAddresess is false, and
-   * c) indexRecordValues is false
+   * A feature flag to enable/disable ENSIndexer's Subgraph Compatible Indexing Behavior.
    *
-   * If {@link isSubgraphCompatible} is true, ENSIndexer will:
-   * 1) use subgraph-compatible IDs for entities and events
-   * 2) limit indexing behavior to subgraph indexing semantics
+   * If {@link isSubgraphCompatible} is true, indexing behavior will match that of the legacy ENS
+   * Subgraph.
+   *
+   * ENSIndexer will store and return Literal Labels and Literal Names without further interpretation.
+   * @see https://ensnode.io/docs/reference/terminology#literal-label
+   * @see https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * If {@link isSubgraphCompatible} is true, the following invariants are true for the ENSIndexerConfig:
+   * 1. only the 'subgraph' plugin is enabled, and
+   * 2. the labelSet must be { labelSetId: 'subgraph', labelSetVersion: 0 }
+   *
+   * If {@link isSubgraphCompatible} is false, ENSIndexer will additionally:
+   *
+   * 1. ENSIndexer will heal all subnames of addr.reverse on the ENS Root Chain.
+   *
+   * 2. ENSIndexer will track both the keys and the values of Resolver records.
+   *
+   * WARNING: Special care must be taken when interacting with indexed resolver record values. It
+   * is unsafe to naively assume that indexed resolver record values are equivalent to the
+   * resolver record values that would be returned through dynamic lookups via the ENS protocol.
+   * For example, if a resolver implements CCIP-Read, the resolver records may not be
+   * discoverable through onchain indexing.
+   *
+   * 3. Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
+   * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+   * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+   *
+   * That is,
+   * a) all Labels stored and returned by ENSIndexer will be Interpreted Labels, which are either:
+   *    i. normalized, or
+   *    ii. represented as an Encoded LabelHash of the Literal Label value found onchain, and
+   * b) all Names stored and returned by ENSIndexer will be Interpreted Names, which are exclusively
+   *   composed of Interpreted Labels.
    */
   isSubgraphCompatible: boolean;
 

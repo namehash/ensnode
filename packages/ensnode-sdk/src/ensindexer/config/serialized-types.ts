@@ -9,12 +9,12 @@ export type SerializedIndexedChainIds = Array<ChainId>;
 export interface SerializedENSIndexerPublicConfig
   extends Omit<ENSIndexerPublicConfig, "ensAdminUrl" | "ensNodePublicUrl" | "indexedChainIds"> {
   /**
-   * String representation of {@link ENSIndexerPublicConfig.ensAdminUrl}.
+   * Serialized representation of {@link ENSIndexerPublicConfig.ensAdminUrl}.
    */
   ensAdminUrl: UrlString;
 
   /**
-   * String representation of {@link ENSIndexerPublicConfig.ensNodePublicUrl}.
+   * Serialized representation of {@link ENSIndexerPublicConfig.ensNodePublicUrl}.
    */
   ensNodePublicUrl: UrlString;
 

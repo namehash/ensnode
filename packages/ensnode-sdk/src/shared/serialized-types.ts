@@ -1,5 +1,5 @@
 /**
- * A string representation of {@link ChainId}.
+ * Serialized representation of {@link ChainId}.
  **/
 export type ChainIdString = string;
 
@@ -11,6 +11,6 @@ export type ChainIdString = string;
 export type DatetimeISO8601 = string;
 
 /**
- * A string representation of a {@link URL}.
+ * Serialized representation of a {@link URL}.
  */
 export type UrlString = string;

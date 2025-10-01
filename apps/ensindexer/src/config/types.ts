@@ -3,26 +3,37 @@ import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/en
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
- * Configuration for a single RPC used by ENSIndexer.
+ * RPC configuration for indexing a single chain.
+ *
+ * Ponder automatically manages the use of RPC endpoints for each indexed chain.
+ *
+ * @see https://ponder.sh/docs/config/chains#rpc-endpoints
+ * @see https://ponder.sh/docs/config/chains#websocket
  */
 export interface RpcConfig {
   /**
-   * The RPC endpoint URL for the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
-   * For nominal indexing behavior, must be an endpoint with high rate limits.
+   * The HTTP protocol URLs for RPCs to the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
+   * For proper indexing behavior, each RPC must support high request rate limits (ex: 500+ requests a second).
+   *
+   * The order of RPC URLs matters. The first HTTP/HTTPS RPC for a given chain
+   * will be the RPC that is used for Resolution API request processing.
    *
    * Invariants:
-   * - localhost urls are allowed (and expected).
+   * - Includes one or more URLs.
+   * - Each URL in the array is guaranteed to be distinct.
+   * - The protocol of each URL is guaranteed to be "http" or "https".
    */
-  url: URL;
+  httpRPCs: [URL, ...URL[]];
 
   /**
-   * The maximum number of RPC requests per second allowed for this chain, defaulting to
-   * 500 (DEFAULT_RPC_RATE_LIMIT). This is used to avoid rate limiting by the RPC provider.
+   * The websocket RPC for the chain.
+   *
+   * If defined, it is used to accelerate discovery of new "realtime" blocks.
    *
    * Invariants:
-   * - The value must be an integer greater than 0
+   * - If defined, the protocol of the URL is guaranteed to be "ws" or "wss".
    */
-  maxRequestsPerSecond: number;
+  websocketRPC?: URL;
 }
 
 /**
@@ -111,60 +122,6 @@ export interface ENSIndexerConfig {
   plugins: PluginName[];
 
   /**
-   * Enable or disable healing of addr.reverse subnames, defaulting to true (DEFAULT_HEAL_REVERSE_ADDRESSES).
-   * If this is set to true, ENSIndexer will attempt to heal subnames of addr.reverse.
-   *
-   * Note that enabling {@link healReverseAddresses} results in indexed data no longer being backwards
-   * compatible with the ENS Subgraph. For full data-level backwards compatibility with the ENS
-   * Subgraph, {@link healReverseAddresses} should be `false`.
-   */
-  healReverseAddresses: boolean;
-
-  /**
-   * Enable or disable the indexing of Resolver record values, defaulting to true (DEFAULT_INDEX_ADDITIONAL_RESOLVER_RECORDS).
-   * If this is set to false, ENSIndexer will apply subgraph-backwards compatible logic that only tracks the keys of Resolver records.
-   * If this is set to true, ENSIndexer will track both the keys and the values of Resolver records.
-   *
-   * WARNING: Special care must be taken when interacting with indexed resolver record values. It is
-   * unsafe to naively assume that indexed resolver record values are equivalent to the resolver
-   * record values that would be returned through dynamic lookups via the ENS protocol. For example,
-   * if a resolver implements CCIP-Read, the resolver records may not be discoverable through
-   * onchain indexing. This feature is under R&D. At this time we do not recommend anyone directly
-   * use indexed resolver record values in their applications. Features are planned in the ENSNode
-   * roadmap that will provide safe use of indexed resolver record values (in appropriate contexts).
-   *
-   * Note that enabling {@link indexAdditionalResolverRecords} results in indexed data becoming a _superset_ of
-   * the Subgraph. For exact data-level backwards compatibility with the ENS Subgraph,
-   * {@link indexAdditionalResolverRecords} should be `false`.
-   */
-  indexAdditionalResolverRecords: boolean;
-
-  /**
-   * Controls ENSIndexer's handling of Literal Labels and Literal Names
-   * This configuration only applies to the Subgraph datamodel and Subgraph Compatible GraphQL API responses.
-   *
-   * Optional. If this is not set, the default value is set to `DEFAULT_REPLACE_UNNORMALIZED` (true).
-   *
-   * When set to true, all Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
-   * - https://ensnode.io/docs/reference/terminology#interpreted-label
-   * - https://ensnode.io/docs/reference/terminology#interpreted-name
-   *
-   * That is,
-   * 1) all Labels stored and returned by ENSIndexer will either be normalized or represented as an Encoded
-   *    LabelHash, and
-   * 2) all Names stored and returned by ENSIndexer will either be normalized or consist of Labels that
-   *    may be represented as an Encoded LabelHash of the Literal Label value found onchain.
-   *
-   * When set to false, ENSIndexer will store and return Literal Labels and Literal Names without further
-   * interpretation.
-   * - https://ensnode.io/docs/reference/terminology#literal-label
-   * - https://ensnode.io/docs/reference/terminology#literal-name
-   *
-   * NOTE: {@link replaceUnnormalized} must be `false` for subgraph compatible indexing behavior.
-   */
-  replaceUnnormalized: boolean;
-
-  /**
    * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
    *
    * Invariants:
@@ -236,26 +193,51 @@ export interface ENSIndexerConfig {
   globalBlockrange: Blockrange;
 
   /**
-   * A flag derived from the built config indicating whether ENSIndexer is operating in a
-   * subgraph-compatible way. This flag is true if:
-   * a) only the subgraph plugin is activated,
-   * b) healReverseAddresess is false, and
-   * c) indexRecordValues is false
+   * A feature flag to enable/disable ENSIndexer's Subgraph Compatible Indexing Behavior.
    *
-   * If {@link isSubgraphCompatible} is true, ENSIndexer will:
-   * 1) use subgraph-compatible IDs for entities and events
-   * 2) limit indexing behavior to subgraph indexing semantics
+   * If {@link isSubgraphCompatible} is true, indexing behavior will match that of the legacy ENS
+   * Subgraph.
+   *
+   * ENSIndexer will store and return Literal Labels and Literal Names without further interpretation.
+   * @see https://ensnode.io/docs/reference/terminology#literal-label
+   * @see https://ensnode.io/docs/reference/terminology#literal-name
+   *
+   * If {@link isSubgraphCompatible} is true, the following invariants are true for the ENSIndexerConfig:
+   * 1. only the 'subgraph' plugin is enabled, and
+   * 2. the labelSet must be { labelSetId: 'subgraph', labelSetVersion: 0 }
+   *
+   * If {@link isSubgraphCompatible} is false, ENSIndexer will additionally:
+   *
+   * 1. ENSIndexer will heal all subnames of addr.reverse on the ENS Root Chain.
+   *
+   * 2. ENSIndexer will track both the keys and the values of Resolver records.
+   *
+   * WARNING: Special care must be taken when interacting with indexed resolver record values. It
+   * is unsafe to naively assume that indexed resolver record values are equivalent to the
+   * resolver record values that would be returned through dynamic lookups via the ENS protocol.
+   * For example, if a resolver implements CCIP-Read, the resolver records may not be
+   * discoverable through onchain indexing.
+   *
+   * 3. Literal Labels and Literal Names encountered by ENSIndexer will be Interpreted.
+   * @see https://ensnode.io/docs/reference/terminology#interpreted-label
+   * @see https://ensnode.io/docs/reference/terminology#interpreted-name
+   *
+   * That is,
+   * a) all Labels stored and returned by ENSIndexer will be Interpreted Labels, which are either:
+   *    i. normalized, or
+   *    ii. represented as an Encoded LabelHash of the Literal Label value found onchain, and
+   * b) all Names stored and returned by ENSIndexer will be Interpreted Names, which are exclusively
+   *   composed of Interpreted Labels.
    */
   isSubgraphCompatible: boolean;
 }
 
 /**
- * Represents the raw unvalidated environment variables for an rpc endpoint.
+ * Represents the raw unvalidated environment variable for the RPCs associated with a chain.
+ *
+ * May contain a comma separated list of one or more URLs.
  */
-export interface RpcConfigEnvironment {
-  url: string;
-  maxRequestsPerSecond: string | undefined;
-}
+export type RpcConfigEnvironment = string;
 
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.
@@ -279,12 +261,10 @@ export interface ENSIndexerEnvironment {
   ensNodePublicUrl: string | undefined;
   ensIndexerUrl: string | undefined;
   ensAdminUrl: string | undefined;
-  healReverseAddresses: string | undefined;
-  indexAdditionalResolverRecords: string | undefined;
-  replaceUnnormalized: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;
   };
   rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
+  isSubgraphCompatible: string | undefined;
 }
