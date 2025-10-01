@@ -56,6 +56,9 @@ export async function handleResolverNameUpdate(
     .set({ name: interpretNameRecordValue(name) });
 }
 
+/**
+ * Updates the `address` record value by `coinType` for the ResolverRecords described by `id`.
+ */
 export async function handleResolverAddressRecordUpdate(
   context: Context,
   resolverRecordsId: ResolverRecordsId,
@@ -82,6 +85,11 @@ export async function handleResolverAddressRecordUpdate(
   }
 }
 
+/**
+ * Updates the `text` record value by `key` for the ResolverRecords described by `id`.
+ *
+ * If `value` is null, it will be interpreted as a deletion of the associated record.
+ */
 export async function handleResolverTextRecordUpdate(
   context: Context,
   resolverRecordsId: ResolverRecordsId,
