@@ -4,6 +4,7 @@ sidebar:
   label: Hosted ENSNode Instances
   order: 1
 ---
+
 import HostedEnsNodeInstances from "../../../../components/molecules/HostedEnsNodeInstances.astro";
 
 ## Hosted Instances
@@ -26,21 +27,23 @@ Main difference from client perspective is chain being indexed and list of plugi
 These ENSNode instances focus on pushing the boundaries of what's possible with ENSNode.
 
 #### ENSNode 'Alpha'
+
 <HostedEnsNodeInstances
-    instanceURL="https://api.alpha.ensnode.io"
-    connectWithENSAdminURL="https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Fapi.alpha.ensnode.io"
-    namespace="mainnet"
-    plugins="subgraph, basenames, lineanames, threedns, protocol-acceleration, referrals"
-    purpose="Demonstration of ENSNode's multichain ENS indexing capability for the ENS namespace rooted on Mainnet. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
+  instanceURL="https://api.alpha.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io?connection=https%3A%2F%2Fapi.alpha.ensnode.io"
+  namespace="mainnet"
+  plugins="subgraph, basenames, lineanames, threedns, protocol-acceleration, referrals"
+  purpose="Demonstration of ENSNode's multichain ENS indexing capability for the ENS namespace rooted on Mainnet. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
 />
 
 #### ENSNode 'Alpha-Sepolia'
+
 <HostedEnsNodeInstances
-    instanceURL="https://api.alpha-sepolia.ensnode.io"
-    connectWithENSAdminURL="https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Fapi.alpha-sepolia.ensnode.io"
-    namespace="sepolia"
-    plugins="subgraph, basenames, lineanames, protocol-acceleration, referrals"
-    purpose="Demonstration of ENSNode's multichain ENS indexing capability for the ENS namespace rooted on Sepolia. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
+  instanceURL="https://api.alpha-sepolia.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io?connection=https%3A%2F%2Fapi.alpha-sepolia.ensnode.io"
+  namespace="sepolia"
+  plugins="subgraph, basenames, lineanames, protocol-acceleration, referrals"
+  purpose="Demonstration of ENSNode's multichain ENS indexing capability for the ENS namespace rooted on Sepolia. Provides a superset of the data indexed by the ENS Subgraph. Offers a preview of ENS Protocol Acceleration."
 />
 
 ### Subgraph-style Deployments
@@ -48,30 +51,33 @@ These ENSNode instances focus on pushing the boundaries of what's possible with 
 These ENSNode instances focus on maximizing backwards compatibility with the ENS Subgraph.
 
 #### ENSNode 'Mainnet'
+
 <HostedEnsNodeInstances
-    instanceURL="https://api.mainnet.ensnode.io"
-    connectWithENSAdminURL="https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Fapi.mainnet.ensnode.io"
-    namespace="mainnet"
-    plugins="subgraph"
-    purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet."
+  instanceURL="https://api.mainnet.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io?connection=https%3A%2F%2Fapi.mainnet.ensnode.io"
+  namespace="mainnet"
+  plugins="subgraph"
+  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on mainnet."
 />
 
 #### ENSNode 'Sepolia'
+
 <HostedEnsNodeInstances
-    instanceURL="https://api.sepolia.ensnode.io"
-    connectWithENSAdminURL="https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Fapi.sepolia.ensnode.io"
-    namespace="sepolia"
-    plugins="subgraph"
-    purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia."
+  instanceURL="https://api.sepolia.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io?connection=https%3A%2F%2Fapi.sepolia.ensnode.io"
+  namespace="sepolia"
+  plugins="subgraph"
+  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Sepolia."
 />
 
 #### ENSNode 'Holesky'
+
 <HostedEnsNodeInstances
-    instanceURL="https://api.holesky.ensnode.io"
-    connectWithENSAdminURL="https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Fapi.holesky.ensnode.io"
-    namespace="holesky"
-    plugins="subgraph"
-    purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Holesky."
+  instanceURL="https://api.holesky.ensnode.io"
+  connectWithENSAdminURL="https://admin.ensnode.io?connection=https%3A%2F%2Fapi.holesky.ensnode.io"
+  namespace="holesky"
+  plugins="subgraph"
+  purpose="Demonstration of ENSNode's backwards compatibility with the ENS Subgraph. Provides 1:1 Subgraph compatible data on Holesky."
 />
 
 ## Endpoints
