@@ -2,15 +2,17 @@
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
-    ENSIndexerOverallIndexingStatus,
-    type ENSIndexerPublicConfig,
-    OverallIndexingStatusIds,
+  ENSIndexerOverallIndexingStatus,
+  type ENSIndexerPublicConfig,
+  OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { Duration, RelativeTime } from "@/components/datetime-utils";
+import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -20,12 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
 import type { Registration } from "./types";
-import {ErrorInfo, ErrorInfoProps} from "@/components/error-info";
-import {Button} from "@/components/ui/button";
-import Link from "next/link";
 
 /**
  * Max number of latest registrations to display
@@ -74,7 +74,7 @@ export interface RecentRegistrationsProps {
 export function RecentRegistrations({
   ensIndexerConfig,
   indexingStatus,
-    error,
+  error,
 }: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -83,21 +83,24 @@ export function RecentRegistrations({
   }, []);
 
   if (error !== undefined && (ensIndexerConfig !== undefined || indexingStatus !== undefined)) {
-      throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
+    throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
   }
 
   if (error !== undefined) {
-      return <ErrorInfo {...error} />;
+    return <ErrorInfo {...error} />;
   }
 
-  if (ensIndexerConfig === undefined || indexingStatus === undefined){
-      return <RecentRegistrationsLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
+  if (ensIndexerConfig === undefined || indexingStatus === undefined) {
+    return <RecentRegistrationsLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
   }
 
   //TODO: Not sure if we need a separate case for indexer-error
-    // since it's displayed by the indexing status. Advice appreciated
-  if (indexingStatus.overallStatus !== OverallIndexingStatusIds.Completed && indexingStatus.overallStatus !== OverallIndexingStatusIds.Following){
-      return <RegistrationsNotAvailableMessage />;
+  // since it's displayed by the indexing status. Advice appreciated
+  if (
+    indexingStatus.overallStatus !== OverallIndexingStatusIds.Completed &&
+    indexingStatus.overallStatus !== OverallIndexingStatusIds.Following
+  ) {
+    return <RegistrationsNotAvailableMessage />;
   }
 
   const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
@@ -226,31 +229,36 @@ function RegistrationsListLoading({ rowCount }: RegistrationLoadingProps) {
 }
 
 function RecentRegistrationsLoading({ rowCount }: RegistrationLoadingProps) {
-    return <Card>
-        <CardHeader className="max-sm:p-3">
-            <div className="h-6 bg-muted rounded w-1/4" />
-        </CardHeader>
-        <CardContent className="max-sm:p-3 max-sm:pt-0">
-            <RegistrationsListLoading rowCount={rowCount} />
-        </CardContent>
+  return (
+    <Card>
+      <CardHeader className="max-sm:p-3">
+        <div className="h-6 bg-muted rounded w-1/4" />
+      </CardHeader>
+      <CardContent className="max-sm:p-3 max-sm:pt-0">
+        <RegistrationsListLoading rowCount={rowCount} />
+      </CardContent>
     </Card>
+  );
 }
 
-function RegistrationsNotAvailableMessage(){
-    const monitorStatusMessage = "Check current indexing status";
+function RegistrationsNotAvailableMessage() {
+  const monitorStatusMessage = "Check current indexing status";
 
-    return <Card className="w-full">
-        <CardHeader className="sm:pb-4 max-sm:p-3">
-            <CardTitle>
-                Latest indexed registrations are not available
-            </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col justify-start items-start gap-4 sm:gap-3">
-            <p>The latest indexed registrations will be available once the indexing status is <span className="font-mono bg-muted p-1 rounded-md">Following</span> or <span className="font-mono bg-muted p-1 rounded-md">Completed</span>.
-            </p>
-            <Button asChild variant="default">
-            <Link href="/status">{monitorStatusMessage}</Link>
-            </Button>
-        </CardContent>
-    </Card>;
+  return (
+    <Card className="w-full">
+      <CardHeader className="sm:pb-4 max-sm:p-3">
+        <CardTitle>Latest indexed registrations are not available</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col justify-start items-start gap-4 sm:gap-3">
+        <p>
+          The latest indexed registrations will be available once the indexing status is{" "}
+          <span className="font-mono bg-muted p-1 rounded-md">Following</span> or{" "}
+          <span className="font-mono bg-muted p-1 rounded-md">Completed</span>.
+        </p>
+        <Button asChild variant="default">
+          <Link href="/status">{monitorStatusMessage}</Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
 }

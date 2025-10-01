@@ -97,7 +97,7 @@
       "omnichainIndexingCursor": 1580899661
     }
   },
-  "following" : {
+  "following": {
     "ensIndexerConfig": {
       "ensAdminUrl": "https://admin.ensnode.io/",
       "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",

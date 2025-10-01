@@ -21,8 +21,8 @@ const navItems = [
     icon: Telescope,
     isActive: true,
     items: [
-        { title: "Names", url: "/name" },
-      { title: "Registrations", url: "/registration"},
+      { title: "Names", url: "/name" },
+      { title: "Registrations", url: "/registration" },
     ],
   },
   {

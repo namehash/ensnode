@@ -1,3 +1,3 @@
 export default function ActionsExploreRegistrationsPage() {
-    return null;
+  return null;
 }
