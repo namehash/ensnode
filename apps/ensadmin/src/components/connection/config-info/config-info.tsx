@@ -88,10 +88,7 @@ export function ENSNodeConfigInfo({
         docsLink={new URL("https://ensnode.io/ensadmin/")}
       />
 
-      {/* Connecting line */}
-      <div className="relative h-10 pl-10">
-        <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
-      </div>
+      <ConnectionLine />
 
       <ConfigInfoAppCard
         name="Connection"
@@ -108,10 +105,7 @@ export function ENSNodeConfigInfo({
         ]}
       />
 
-      {/* Connecting line */}
-      <div className="relative h-10 pl-10">
-        <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
-      </div>
+      <ConnectionLine />
 
       <Card className="w-full">
         <CardHeader className="sm:pb-4 max-sm:p-3">
@@ -338,5 +332,13 @@ function ENSNodeConfigInfoLoading() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function ConnectionLine() {
+  return (
+    <div className="relative h-10 pl-10">
+      <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
+    </div>
   );
 }
