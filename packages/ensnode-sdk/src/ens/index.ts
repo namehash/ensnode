@@ -8,3 +8,4 @@ export * from "./parse-reverse-name";
 export * from "./is-normalized";
 export * from "./encode-labelhash";
 export * from "./dns-encoded-name";
+export * from "./metadata-service";

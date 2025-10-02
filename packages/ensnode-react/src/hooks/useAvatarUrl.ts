@@ -1,11 +1,9 @@
 "use client";
 
-import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Name } from "@ensnode/ensnode-sdk";
+import { type Name, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
-import { buildEnsMetadataServiceAvatarUrl } from "../utils/ensMetadataService";
 import { useENSIndexerConfig } from "./useENSIndexerConfig";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 import { useRecords } from "./useRecords";
@@ -17,11 +15,6 @@ import { useRecords } from "./useRecords";
  */
 export interface UseAvatarUrlParameters extends QueryParameter<string | null>, ConfigParameter {
   name: Name | null;
-  /**
-   * The ENS namespace ID for the name. Optional - if not provided, it will be automatically
-   * fetched from the ENSNode config. This is used for the default ENS Metadata Service fallback.
-   */
-  namespaceId?: ENSNamespaceId | null;
   /**
    * Optional custom fallback function to get avatar URL when the avatar text record
    * uses a complex protocol (not http/https).
@@ -78,12 +71,10 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  * @example
  * ```typescript
  * import { useAvatarUrl } from "@ensnode/ensnode-react";
- * import { ENSNamespaceIds } from "@ensnode/datasources";
  *
  * function ProfileAvatar() {
  *   const { data: avatarUrl, isLoading, error } = useAvatarUrl({
- *     name: "vitalik.eth",
- *     namespaceId: ENSNamespaceIds.Mainnet
+ *     name: "vitalik.eth"
  *   });
  *
  *   if (isLoading) return <div>Loading...</div>;
@@ -113,13 +104,7 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  * ```
  */
 export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
-  const {
-    name,
-    config,
-    query: queryOptions,
-    fallback,
-    namespaceId: providedNamespaceId,
-  } = parameters;
+  const { name, config, query: queryOptions, fallback } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
@@ -132,9 +117,9 @@ export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
     query: { enabled: canEnable },
   });
 
-  // Get namespace from config if not provided
+  // Get namespace from config
   const configQuery = useENSIndexerConfig({ config: _config });
-  const namespaceId = providedNamespaceId ?? configQuery.data?.namespace ?? null;
+  const namespaceId = configQuery.data?.namespace ?? null;
 
   // Create default fallback using ENS Metadata Service if namespaceId is available
   const defaultFallback =

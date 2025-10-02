@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { ENSNamespaceId } from "@ensnode/datasources";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
@@ -9,7 +8,6 @@ import * as React from "react";
 
 interface EnsAvatarProps {
   name: Name;
-  namespaceId: ENSNamespaceId;
   className?: string;
 }
 
@@ -17,12 +15,11 @@ type ImageLoadingStatus = Parameters<
   NonNullable<React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]>
 >[0];
 
-export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
+export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
 
   const { data: avatarUrl } = useAvatarUrl({
     name,
-    namespaceId,
   });
 
   if (avatarUrl === null || avatarUrl === undefined) {
