@@ -16,6 +16,7 @@ import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegist
 import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
+import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
@@ -144,15 +145,38 @@ export default {
         address: "0xd3e6775ed9b7dc12b205c8e608dc3767b9e5efda",
         startBlock: 17575699,
       },
+      /**
+       * This controller was removed from BaseRegistrar contract
+       * https://basescan.org/tx/0x88a3cc03291bb1a4b2bd9ccfe6b770988470001905d96c32bd41b866797b684b
+       */
       RegistrarController: {
         abi: base_RegistrarController,
         address: "0x4ccb0bb02fcaba27e82a56646e81d8c5bc4119a5",
         startBlock: 18619035,
+        endBlock: 35936564,
       },
-      L2Resolver: {
+      /**
+       * This controller was added to BaseRegistrar contract
+       * with the following tx:
+       * https://basescan.org/tx/0x52aed4dc975ba6c2b8b54d94f5b0b86a9cc0f27e81e78deb4a0b8b568f5e71ed
+       */
+      UpgradeableRegistrarController: {
+        abi: base_UpgradeableRegistrarController,
+        address: "0xa7d2607c6BD39Ae9521e514026CBB078405Ab322", // a proxy contract
+        startBlock: 35286620,
+      },
+
+      // NOTE: not indexed, but referenced for Protocol Acceleration
+      L2Resolver1: {
         abi: ResolverABI,
         address: "0xc6d566a56a1aff6508b41f6c90ff131615583bcd",
         startBlock: 17575714,
+      },
+      // NOTE: not indexed, but referenced for Protocol Acceleration
+      L2Resolver2: {
+        abi: ResolverABI,
+        address: "0x426fA03fB86E510d0Dd9F70335Cf102a98b10875",
+        startBlock: 35286620,
       },
     },
   },

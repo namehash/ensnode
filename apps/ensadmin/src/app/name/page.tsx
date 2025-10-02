@@ -1,9 +1,10 @@
 "use client";
 
-import { getNameDetailsRelativePath } from "@/components/identity/utils";
+import { NameDisplay, NameLink, getNameDetailsRelativePath } from "@/components/identity/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { Name } from "@ensnode/ensnode-sdk";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useState } from "react";
@@ -19,28 +20,31 @@ const EXAMPLE_NAMES = [
   "barmstrong.cb.id",
   "argent.xyz",
   "lens.xyz",
+  "brantly.eth",
+  "lightwalker.eth",
 ];
 
 export default function ExploreNamesPage() {
   const router = useRouter();
-  const [searchedName, setSearchedName] = useState<Name>("");
+  const [rawInputName, setRawInputName] = useState<Name>("");
+
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.target as HTMLFormElement);
-    const name = formData.get("ens-name") as Name;
+    // TODO: Input validation and normalization.
+    // see: https://github.com/namehash/ensnode/issues/1140
 
-    //TODO: validation is to be established.
-    // Since it brings a significant amount of complexity it's preferable
-    // to not do it at all until we do it right.
-    router.push(getNameDetailsRelativePath(name));
+    const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
+
+    router.push(href);
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
 
-    setSearchedName(e.target.value);
+    setRawInputName(e.target.value);
   };
 
   return (
@@ -59,15 +63,15 @@ export default function ExploreNamesPage() {
                 id="ens-name"
                 name="ens-name"
                 placeholder="Search for a name..."
-                value={searchedName}
-                onChange={handleChange}
+                value={rawInputName}
+                onChange={handleRawInputNameChange}
               />
               <Button
                 type="submit"
-                disabled={searchedName.length === 0}
+                disabled={rawInputName.length === 0}
                 className="max-sm:self-stretch"
               >
-                View Name
+                View Profile
               </Button>
             </fieldset>
           </form>
@@ -75,15 +79,17 @@ export default function ExploreNamesPage() {
             <p className="text-sm font-medium leading-none">Examples:</p>
             <div className="flex flex-row flex-wrap gap-2 -mx-6 px-6">
               {EXAMPLE_NAMES.map((exampleName) => (
-                <Button
-                  variant={searchedName === exampleName ? "default" : "outline"}
-                  size="sm"
-                  key={`example-name-${exampleName}`}
-                  onClick={() => setSearchedName(exampleName)}
-                  className="font-mono rounded-full"
-                >
-                  {exampleName}
-                </Button>
+                <NameLink name={exampleName} key={`example-name-link-${exampleName}`}>
+                  <Button
+                    variant={"outline"}
+                    size="sm"
+                    key={`example-name-button-${exampleName}`}
+                    className="font-mono rounded-full"
+                    asChild
+                  >
+                    <NameDisplay name={exampleName} />
+                  </Button>
+                </NameLink>
               ))}
             </div>
           </div>

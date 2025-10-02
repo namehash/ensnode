@@ -1,6 +1,6 @@
 import { type Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { ETH_COIN_TYPE, Node, uniq } from "@ensnode/ensnode-sdk";
+import { Node, uniq } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex } from "viem";
 
 import config from "@/config";
@@ -9,11 +9,6 @@ import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, stripNullBytes } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import {
-  handleResolverAddressRecordUpdate,
-  handleResolverNameUpdate,
-  handleResolverTextRecordUpdate,
-} from "@/lib/resolver-records-helpers";
 
 /**
  * These functions describe the shared indexing behavior for Resolver functions across all indexed
@@ -55,11 +50,6 @@ export async function handleAddrChanged({
     resolverId: id,
     addrId: address,
   });
-
-  if (!config.isSubgraphCompatible) {
-    // AddrChanged is just AddressChanged with implicit coinType of ETH
-    await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), address);
-  }
 }
 
 export async function handleAddressChanged({
@@ -90,10 +80,6 @@ export async function handleAddressChanged({
     coinType,
     addr: newAddress,
   });
-
-  if (!config.isSubgraphCompatible) {
-    await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
-  }
 }
 
 export async function handleNameChanged({
@@ -119,10 +105,6 @@ export async function handleNameChanged({
     resolverId: id,
     name,
   });
-
-  if (!config.isSubgraphCompatible) {
-    await handleResolverNameUpdate(context, id, name);
-  }
 }
 
 export async function handleABIChanged({
@@ -223,23 +205,6 @@ export async function handleTextChanged({
     key: sanitizedKey,
     value: sanitizedValue,
   });
-
-  if (!config.isSubgraphCompatible) {
-    // if value is undefined, this is a LegacyPublicResolver (DefaultPublicResolver1) event and
-    // if we are indexing additional resolver records, we need the actual record value in order
-    // to accelerate at resolution-time. so fetch it here if necessary
-    const recordValue =
-      value !== undefined
-        ? value
-        : await context.client.readContract({
-            abi: context.contracts.Resolver.abi,
-            address: event.log.address,
-            functionName: "text",
-            args: [node, key],
-          });
-
-    await handleResolverTextRecordUpdate(context, id, key, recordValue);
-  }
 }
 
 export async function handleContenthashChanged({
@@ -408,10 +373,6 @@ export async function handleDNSRecordChanged({
     key,
     value,
   });
-
-  if (!config.isSubgraphCompatible) {
-    await handleResolverTextRecordUpdate(context, id, key, value);
-  }
 }
 
 export async function handleDNSRecordDeleted({
@@ -454,10 +415,6 @@ export async function handleDNSRecordDeleted({
     key,
     value: null,
   });
-
-  if (!config.isSubgraphCompatible) {
-    await handleResolverTextRecordUpdate(context, id, key, null);
-  }
 }
 
 export async function handleDNSZonehashChanged({

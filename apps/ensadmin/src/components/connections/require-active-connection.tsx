@@ -1,6 +1,6 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/indexing-status/config-info";
+import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
 

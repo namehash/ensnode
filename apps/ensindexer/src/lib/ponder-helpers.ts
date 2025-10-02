@@ -21,27 +21,34 @@ export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Even
 };
 
 /**
- * Given a contract's start block, returns a block range describing a start and end block
+ * Given a contract's block range, returns a block range describing a start and end block
  * that maintains validity within the global blockrange. The returned start block will always be
  * defined, but if no end block is specified, the returned end block will be undefined.
  *
- * @param blockrange a Blockrange
- * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
- * @returns the start and end blocks, contrained to the provided `start` and `end`
- *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
+ * @param globalBlockrange a global block range across all indexed contracts
+ * @param contractBlockrange the preferred blockrange for the given contract
+ * @returns the start and end blocks, constrained to the provided `start` and `end`
+ *  i.e. (globalStartBlock || 0) <= (contractStartBlock || 0) <= (contractEndBlock if specificed) <= (globalEndBlock if specificed)
  */
 export const constrainBlockrange = (
-  blockrange: Blockrange,
-  contractStartBlock: number | undefined = 0,
+  globalBlockrange: Blockrange,
+  contractBlockrange: Blockrange,
 ): Blockrange => {
-  const { startBlock, endBlock } = blockrange;
+  const highestStartBlock = Math.max(
+    globalBlockrange.startBlock || 0,
+    contractBlockrange.startBlock || 0,
+  );
 
-  const isEndConstrained = endBlock !== undefined;
-  const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
+  const lowestEndBlock = Math.min(
+    globalBlockrange.endBlock || Infinity,
+    contractBlockrange.endBlock || Infinity,
+  );
+
+  const isEndConstrained = Number.isFinite(lowestEndBlock);
 
   return {
-    startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
-    endBlock,
+    startBlock: isEndConstrained ? Math.min(highestStartBlock, lowestEndBlock) : highestStartBlock,
+    endBlock: isEndConstrained ? lowestEndBlock : undefined,
   };
 };
 
@@ -299,8 +306,13 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
   chainId: number,
   contractConfig: CONTRACT_CONFIG,
 ) {
+  const contractBlockrange = {
+    startBlock: contractConfig.startBlock,
+    endBlock: contractConfig.endBlock,
+  } satisfies Blockrange;
+
   // Ponder will index the contract in perpetuity if endBlock is `undefined`
-  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractConfig.startBlock);
+  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractBlockrange);
 
   return {
     [chainId.toString()]: {
