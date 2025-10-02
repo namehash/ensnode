@@ -12,8 +12,8 @@ interface ConfigInfoAppCardContent {
 }
 
 export interface ConfigInfoAppCardProps {
-  name: string;
-  icon: ReactElement;
+  name?: string;
+  icon?: ReactElement;
   items: ConfigInfoAppCardContent[];
   version?: string;
   docsLink?: URL;
@@ -31,7 +31,7 @@ export interface ConfigInfoAppCardProps {
 export function ConfigInfoAppCard({
   name,
   icon,
-  items,
+  items = [],
   version,
   docsLink,
   checks,
@@ -44,30 +44,38 @@ export function ConfigInfoAppCard({
   const checksWrapperStyles = "flex flex-row flex-nowrap justify-start items-center gap-2";
 
   return (
-    <Card>
-      <CardHeader className="pb-5 max-sm:p-3 max-sm:pb-4">
-        <div className={cardHeaderLayoutStyles}>
-          <CardTitle className={cn(baseCardTitleStyles, "text-lg leading-normal font-semibold")}>
-            {icon}
-            <span>{name}</span>
-          </CardTitle>
-          <div className={baseCardTitleStyles}>
-            {version && (
-              <p className="text-sm leading-normal font-normal text-muted-foreground">v{version}</p>
-            )}
-            {docsLink && (
-              <a
-                href={docsLink.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="flex items-center gap-1 text-sm leading-normal text-blue-600 hover:underline font-normal"
+    <Card className="shadow-sm">
+      {(docsLink || name || icon) && (
+        <CardHeader className="pb-5 max-sm:p-3 max-sm:pb-4">
+          <div className={cardHeaderLayoutStyles}>
+            {name && (
+              <CardTitle
+                className={cn(baseCardTitleStyles, "text-lg leading-normal font-semibold")}
               >
-                View Docs <ExternalLink size={14} className="inline-block" />
-              </a>
+                {icon}
+                <span>{name}</span>
+              </CardTitle>
             )}
+            <div className={baseCardTitleStyles}>
+              {version && (
+                <p className="text-sm leading-normal font-normal text-muted-foreground">
+                  v{version}
+                </p>
+              )}
+              {docsLink && (
+                <a
+                  href={docsLink.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex items-center gap-1 text-sm leading-normal text-blue-600 hover:underline font-normal"
+                >
+                  View Docs <ExternalLink size={14} className="inline-block" />
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
+      )}
       <CardContent className={cardContentStyles}>
         {items.map((item) => (
           <div
