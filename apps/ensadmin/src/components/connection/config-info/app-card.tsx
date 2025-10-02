@@ -50,7 +50,7 @@ export function ConfigInfoAppCard({
           <div className={cardHeaderLayoutStyles}>
             {name && (
               <CardTitle
-                className={cn(baseCardTitleStyles, "text-lg leading-normal font-semibold")}
+                className={cn(baseCardTitleStyles, "text-xl leading-normal font-semibold")}
               >
                 {icon}
                 <span>{name}</span>

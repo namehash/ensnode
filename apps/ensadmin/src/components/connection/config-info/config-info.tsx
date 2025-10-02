@@ -45,7 +45,7 @@ export function ENSNodeConfigInfo({
   error,
   ensAdminVersion,
 }: ENSNodeConfigProps) {
-  const baseCardTitleStyles = "flex items-center gap-2";
+  const baseCardTitleStyles = "flex items-center gap-2 text-xl";
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
   const { rawSelectedConnection } = useSelectedConnection();
@@ -67,7 +67,7 @@ export function ENSNodeConfigInfo({
       {/*ENSAdmin*/}
       <ConfigInfoAppCard
         name="ENSAdmin"
-        icon={<ENSAdminIcon width={26} height={26} />}
+        icon={<ENSAdminIcon width={28} height={28} />}
         version={ensAdminVersion}
         docsLink={new URL("https://ensnode.io/ensadmin/")}
       />
@@ -94,7 +94,7 @@ export function ENSNodeConfigInfo({
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className={cn(baseCardTitleStyles, "text-2xl")}>
+          <CardTitle className={baseCardTitleStyles}>
             <ENSNodeIcon width={28} height={28} />
             <span>ENSNode</span>
           </CardTitle>
