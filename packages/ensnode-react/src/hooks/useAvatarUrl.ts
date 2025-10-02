@@ -9,6 +9,12 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
 import { useRecords } from "./useRecords";
 
 /**
+ * Type alias for avatar URLs. Avatar URLs must be URLs to an image asset
+ * accessible via the http or https protocol.
+ */
+export type AvatarUrl = URL;
+
+/**
  * Parameters for the useAvatarUrl hook.
  *
  * If `name` is null, the query will not be executed.
@@ -17,7 +23,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
   name: Name | null;
   /**
    * Optional custom fallback function to get avatar URL when the avatar text record
-   * uses a complex protocol (not http/https).
+   * uses a non-http/https protocol.
    *
    * If not provided, defaults to using the ENS Metadata Service.
    *
@@ -28,19 +34,20 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
 }
 
 /**
- * Normalizes a website URL by ensuring it has a valid protocol.
+ * Normalizes an avatar URL by ensuring it has a valid protocol.
+ * Avatar URLs should be URLs to an image asset accessible via the http or https protocol.
  *
  * @param url - The URL string to normalize
  * @returns A URL object if the input is valid, null otherwise
  *
  * @example
  * ```typescript
- * normalizeWebsiteUrl("example.com") // Returns URL with https://example.com
- * normalizeWebsiteUrl("http://example.com") // Returns URL with http://example.com
- * normalizeWebsiteUrl("invalid url") // Returns null
+ * normalizeAvatarUrl("example.com/avatar.png") // Returns URL with https://example.com/avatar.png
+ * normalizeAvatarUrl("http://example.com/avatar.png") // Returns URL with http://example.com/avatar.png
+ * normalizeAvatarUrl("invalid url") // Returns null
  * ```
  */
-function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
+function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
   if (!url) return null;
 
   try {
@@ -79,7 +86,7 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  *
  *   if (isLoading) return <div>Loading...</div>;
  *   if (error) return <div>Error: {error.message}</div>;
- *   if (!avatarUrl) return <div>No avatar</div>;
+ *   if (!avatarUrl) return <div>No avatar url configured or avatar url configuration is invalid</div>;
  *
  *   return <img src={avatarUrl} alt="Avatar" />;
  * }
@@ -88,14 +95,15 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  * @example
  * ```typescript
  * // With custom fallback
- * import { useAvatarUrl } from "@ensnode/ensnode-react";
+ * import { useAvatarUrl, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-react";
  *
  * function ProfileAvatar() {
  *   const { data: avatarUrl } = useAvatarUrl({
  *     name: "vitalik.eth",
  *     fallback: async (name) => {
- *       // Custom fallback logic for IPFS, NFT URIs, etc.
- *       return `https://custom-resolver.example.com/${name}`;
+ *       // Use the ENS Metadata Service for the current namespace
+ *       const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+ *       return url?.toString() ?? null;
  *     }
  *   });
  *
@@ -148,7 +156,7 @@ export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
       }
 
       // Try to normalize the avatar URL
-      const normalizedUrl = normalizeWebsiteUrl(avatarTextRecord);
+      const normalizedUrl = normalizeAvatarUrl(avatarTextRecord);
 
       // If normalization failed, return null
       if (!normalizedUrl) {
