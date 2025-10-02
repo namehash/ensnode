@@ -50,7 +50,7 @@ describe("ENSIndexer: Config", () => {
         ).toContain("Plugins cannot contain duplicate values");
 
         expect(formatParseError(makePluginsListSchema().safeParse([]))).toMatch(
-          /Plugins must be a list with at least one valid plugin name. Valid plugins are/,
+          /Plugins must be a list of strings with at least one string value/,
         );
       });
 
