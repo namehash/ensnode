@@ -16,7 +16,7 @@
         "basenames",
         "lineanames",
         "threedns",
-        "reverse-resolvers",
+        "protocol-acceleration",
         "referrals",
         "tokenscope"
       ],
@@ -114,7 +114,7 @@
         "basenames",
         "lineanames",
         "threedns",
-        "reverse-resolvers",
+        "protocol-acceleration",
         "referrals",
         "tokenscope"
       ],
@@ -226,7 +226,7 @@
         "basenames",
         "lineanames",
         "threedns",
-        "reverse-resolvers",
+        "protocol-acceleration",
         "referrals",
         "tokenscope"
       ],
