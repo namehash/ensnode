@@ -131,8 +131,13 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
         endBlock = ponderSource.chain[chainName].endBlock;
       }
 
-      chainStartBlocks.push(startBlock ? deserializeBlockNumber(startBlock) : 0);
-      chainEndBlocks.push(endBlock ? deserializeBlockNumber(endBlock) : Infinity);
+      if (typeof startBlock === "number") {
+        chainStartBlocks.push(deserializeBlockNumber(startBlock));
+      }
+
+      if (typeof endBlock === "number") {
+        chainEndBlocks.push(deserializeBlockNumber(endBlock));
+      }
     }
 
     // 2. Get the lowest startBlock for the chain.
