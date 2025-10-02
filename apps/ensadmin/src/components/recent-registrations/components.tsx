@@ -132,7 +132,10 @@ function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
   return (
     <TableRow>
       <TableCell>
-        <NameLink name={registration.name}>
+        <NameLink
+          name={registration.name}
+          className="inline-flex items-center gap-2 text-blue-600 hover:underline"
+        >
           <NameDisplay name={registration.name} />
         </NameLink>
       </TableCell>

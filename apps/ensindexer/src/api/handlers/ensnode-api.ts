@@ -7,7 +7,6 @@ import {
   createRealtimeStatusProjection,
   serializeENSIndexerPublicConfig,
   serializeIndexingStatusResponse,
-  serializeRealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";

@@ -17,10 +17,10 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   async redirects() {
     return [
-      // redirect the homepage to /status
+      // redirect the homepage to /connection
       {
         source: "/",
-        destination: "/status",
+        destination: "/connection",
         permanent: false,
       },
       {

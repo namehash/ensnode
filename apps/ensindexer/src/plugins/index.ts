@@ -3,8 +3,8 @@ import { PluginName } from "@ensnode/ensnode-sdk";
 import type { MergedTypes } from "@/lib/lib-helpers";
 import basenamesPlugin from "./basenames/plugin";
 import lineaNamesPlugin from "./lineanames/plugin";
+import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
 import referralsPlugin from "./referrals/plugin";
-import reverseResolversPlugin from "./reverse-resolvers/plugin";
 import subgraphPlugin from "./subgraph/plugin";
 import threednsPlugin from "./threedns/plugin";
 import tokenScopePlugin from "./tokenscope/plugin";
@@ -15,7 +15,7 @@ export const ALL_PLUGINS = [
   lineaNamesPlugin,
   threednsPlugin,
   tokenScopePlugin,
-  reverseResolversPlugin,
+  protocolAccelerationPlugin,
   referralsPlugin,
 ] as const;
 

@@ -18,15 +18,10 @@ import {
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
-import {
-  sharedEventValues,
-  upsertAccount,
-  upsertDomainResolverRelation,
-  upsertResolver,
-} from "@/lib/db-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
-import { makeDomainResolverRelationId, makeResolverId } from "@/lib/ids";
+import { makeResolverId } from "@/lib/ids";
 import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
@@ -251,11 +246,6 @@ export async function handleNewResolver({
         .set({ resolverId: null, resolvedAddressId: null });
     }
 
-    // NOTE(resolver-relations): unlink multi-chain-compatible Domain and Resolver on this chain
-    await context.db.delete(schema.ext_domainResolverRelation, {
-      id: makeDomainResolverRelationId(context.chain.id, node),
-    });
-
     // garbage collect newly 'empty' domain iff necessary
     await recursivelyRemoveEmptyDomainFromParentSubdomainCount(context, node);
   } else {
@@ -275,15 +265,6 @@ export async function handleNewResolver({
         resolvedAddressId: resolver.addrId,
       });
     }
-
-    // NOTE(resolver-relations): link multi-chain-compatible Domain and Resolver on this chain
-    await upsertDomainResolverRelation(context, {
-      id: makeDomainResolverRelationId(context.chain.id, node),
-      chainId: context.chain.id,
-      domainId: node,
-
-      resolverId,
-    });
   }
 
   // log DomainEvent

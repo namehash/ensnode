@@ -5,5 +5,5 @@ export default function BreadcrumbsNameLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <BreadcrumbsGroup name="Name">{children}</BreadcrumbsGroup>;
+  return <BreadcrumbsGroup name="ENS Explorer">{children}</BreadcrumbsGroup>;
 }

@@ -1,11 +1,5 @@
 import config from "@/config";
-import {
-  type CoinType,
-  type LabelHash,
-  type Node,
-  coinTypeReverseLabel,
-  deserializeChainId,
-} from "@ensnode/ensnode-sdk";
+import { type LabelHash, type Node } from "@ensnode/ensnode-sdk";
 import { type Address } from "viem";
 
 /**
@@ -30,38 +24,6 @@ export const makeResolverId = (chainId: number, address: Address, node: Node) =>
   ]
     .filter(Boolean)
     .join("-");
-
-/**
- * Parses a resolver ID string back into its components.
- * Handles both subgraph-compatible and chain-scoped formats.
- * Checksums the address.
- *
- * @param resolverId The resolver ID string to parse
- * @returns object describing each segment of the resolver ID
- */
-export const parseResolverId = (
-  resolverId: string,
-): { chainId: number | null; address: Address; node: Node } => {
-  const parts = resolverId.split("-");
-
-  if (parts.length === 2) {
-    return {
-      chainId: null,
-      address: parts[0] as Address, // guaranteed to be fully lowercase
-      node: parts[1] as Node,
-    };
-  }
-
-  if (parts.length === 3) {
-    return {
-      chainId: deserializeChainId(parts[0] as string),
-      address: parts[1] as Address, // guaranteed to be fully lowercase
-      node: parts[2] as Node,
-    };
-  }
-
-  throw new Error(`Invalid resolver ID format: ${resolverId}`);
-};
 
 /**
  * Makes a unique, chain-scoped event ID.
@@ -125,52 +87,3 @@ export const makeRegistrationId = (labelHash: LabelHash, node: Node) => {
   if (config.isSubgraphCompatible) return labelHash;
   return node;
 };
-
-/**
- * Makes a unique ID for any resolver record entity that is keyed beyond Node
- * (i.e. text, address records).
- *
- * See comment in packages/ensnode-schema/src/subgraph.schema.ts for additional context.
- *
- * @example
- * ```ts
- * // For address records in a Resolver, use coinType as key
- * makeKeyedResolverRecordId(resolverId, coinType.toString())
- * // => "0x123...-60" // for ETH (coinType 60)
- *
- * // For text records in a Resolver, use the text key
- * makeKeyedResolverRecordId(resolverId, "avatar")
- * // => "0x123...-avatar"
- * ```
- *
- * @param resolverId the id of the resolver entity
- * @param key the unique id of the resolver record within a resolverId
- * @returns a unique resolver record entity id
- */
-export const makeKeyedResolverRecordId = (resolverId: string, key: string) =>
-  [resolverId, key].join("-");
-
-/**
- * Makes a unique ID for a domain-resolver relation on a given chain. DomainResolverRelations are
- * unique by (chainId, domainId).
- *
- * @see packages/ensnode-schema/src/resolver-relations.schema.ts
- *
- * @example `${chainId}-${domainId}`
- *
- * @param chainId the chain ID
- * @param domainId the domain ID (node)
- * @returns a unique domain-resolver relation ID
- */
-export const makeDomainResolverRelationId = (chainId: number, domainId: Node) =>
-  [chainId, domainId].join("-");
-
-/**
- * Makes a unique ID for a primary name record, keyed by (address, coinType).
- *
- * @param address the address for which the primary name is set
- * @param coinType the coin type
- * @returns a unique primary name id
- */
-export const makePrimaryNameId = (address: Address, coinType: CoinType) =>
-  [address, coinTypeReverseLabel(coinType)].join("-");
