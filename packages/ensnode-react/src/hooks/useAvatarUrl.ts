@@ -19,7 +19,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * uses a complex protocol (not http/https).
    *
    * This allows consumers to provide their own fallback strategy, such as
-   * using the ENS Metadata Service or other avatar resolution services.
+   * using the ENS Metadata Service or other avatar resolution proxy services.
    *
    * @param name - The ENS name to get the avatar URL for
    * @returns Promise resolving to the avatar URL, or null if unavailable
