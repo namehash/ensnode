@@ -1,9 +1,12 @@
 "use client";
 
+import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { Name } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
+import { buildEnsMetadataServiceAvatarUrl } from "../utils/ensMetadataService";
+import { useENSIndexerConfig } from "./useENSIndexerConfig";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 import { useRecords } from "./useRecords";
 
@@ -15,11 +18,15 @@ import { useRecords } from "./useRecords";
 export interface UseAvatarUrlParameters extends QueryParameter<string | null>, ConfigParameter {
   name: Name | null;
   /**
-   * Optional fallback function to get avatar URL when the avatar text record
+   * The ENS namespace ID for the name. Optional - if not provided, it will be automatically
+   * fetched from the ENSNode config. This is used for the default ENS Metadata Service fallback.
+   */
+  namespaceId?: ENSNamespaceId | null;
+  /**
+   * Optional custom fallback function to get avatar URL when the avatar text record
    * uses a complex protocol (not http/https).
    *
-   * This allows consumers to provide their own fallback strategy, such as
-   * using the ENS Metadata Service or other avatar resolution services.
+   * If not provided, defaults to using the ENS Metadata Service.
    *
    * @param name - The ENS name to get the avatar URL for
    * @returns Promise resolving to the avatar URL, or null if unavailable
@@ -63,7 +70,7 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  * 1. Fetching the avatar text record using useRecords
  * 2. Normalizing the avatar text record as a URL
  * 3. Returning the URL if it uses http or https protocol
- * 4. Falling back to a custom fallback function if provided for other protocols
+ * 4. Falling back to the ENS Metadata Service (default) or custom fallback for other protocols
  *
  * @param parameters - Configuration for the avatar URL resolution
  * @returns Query result with the avatar URL, loading state, and error handling
@@ -71,10 +78,12 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  * @example
  * ```typescript
  * import { useAvatarUrl } from "@ensnode/ensnode-react";
+ * import { ENSNamespaceIds } from "@ensnode/datasources";
  *
  * function ProfileAvatar() {
  *   const { data: avatarUrl, isLoading, error } = useAvatarUrl({
- *     name: "vitalik.eth"
+ *     name: "vitalik.eth",
+ *     namespaceId: ENSNamespaceIds.Mainnet
  *   });
  *
  *   if (isLoading) return <div>Loading...</div>;
@@ -87,7 +96,7 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  *
  * @example
  * ```typescript
- * // With ENS Metadata Service fallback
+ * // With custom fallback
  * import { useAvatarUrl } from "@ensnode/ensnode-react";
  *
  * function ProfileAvatar() {
@@ -95,7 +104,7 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  *     name: "vitalik.eth",
  *     fallback: async (name) => {
  *       // Custom fallback logic for IPFS, NFT URIs, etc.
- *       return `https://metadata.ens.domains/mainnet/avatar/${name}`;
+ *       return `https://custom-resolver.example.com/${name}`;
  *     }
  *   });
  *
@@ -104,7 +113,13 @@ function normalizeWebsiteUrl(url: string | null | undefined): URL | null {
  * ```
  */
 export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
-  const { name, config, query: queryOptions, fallback } = parameters;
+  const {
+    name,
+    config,
+    query: queryOptions,
+    fallback,
+    namespaceId: providedNamespaceId,
+  } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
@@ -117,9 +132,25 @@ export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
     query: { enabled: canEnable },
   });
 
+  // Get namespace from config if not provided
+  const configQuery = useENSIndexerConfig({ config: _config });
+  const namespaceId = providedNamespaceId ?? configQuery.data?.namespace ?? null;
+
+  // Create default fallback using ENS Metadata Service if namespaceId is available
+  const defaultFallback =
+    namespaceId !== null && namespaceId !== undefined
+      ? async (name: Name) => {
+          const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+          return url?.toString() ?? null;
+        }
+      : undefined;
+
+  // Use custom fallback if provided, otherwise use default
+  const activeFallback = fallback ?? defaultFallback;
+
   // Then process the avatar URL
   return useQuery({
-    queryKey: ["avatarUrl", name, _config.client.url.href, !!fallback],
+    queryKey: ["avatarUrl", name, _config.client.url.href, namespaceId, !!fallback],
     queryFn: async (): Promise<string | null> => {
       if (!name || !recordsQuery.data) return null;
 
@@ -144,10 +175,10 @@ export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
         return normalizedUrl.toString();
       }
 
-      // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if provided
-      if (fallback) {
+      // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if available
+      if (activeFallback) {
         try {
-          return await fallback(name);
+          return await activeFallback(name);
         } catch {
           return null;
         }

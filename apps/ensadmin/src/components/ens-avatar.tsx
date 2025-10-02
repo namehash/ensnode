@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
@@ -23,10 +22,7 @@ export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
 
   const { data: avatarUrl } = useAvatarUrl({
     name,
-    fallback: async (name) => {
-      const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-      return url?.toString() ?? null;
-    },
+    namespaceId,
   });
 
   if (avatarUrl === null || avatarUrl === undefined) {
