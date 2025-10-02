@@ -45,7 +45,7 @@ export function ConfigInfoAppCard({
 
   return (
     <Card className="shadow-sm">
-      {(docsLink || name || icon) && (
+      {(docsLink || name || icon || version) && (
         <CardHeader className="pb-5 max-sm:p-3 max-sm:pb-4">
           <div className={cardHeaderLayoutStyles}>
             {name && (
