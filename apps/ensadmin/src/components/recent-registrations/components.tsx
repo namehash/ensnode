@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import Link from "next/link";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
@@ -245,6 +246,7 @@ function RecentRegistrationsLoading({ rowCount }: RegistrationLoadingProps) {
 }
 
 function RegistrationsNotAvailableMessage() {
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const monitorStatusMessage = "Check current indexing status";
 
   return (
@@ -259,7 +261,7 @@ function RegistrationsNotAvailableMessage() {
           <span className="font-mono bg-muted p-1 rounded-md">Completed</span>.
         </p>
         <Button asChild variant="default">
-          <Link href="/status">{monitorStatusMessage}</Link>
+          <Link href={retainCurrentRawConnectionUrlParam("/status")}>{monitorStatusMessage}</Link>
         </Button>
       </CardContent>
     </Card>

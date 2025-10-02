@@ -36,7 +36,7 @@ export default function MockRegistrationsPage() {
         return {
           error: {
             title: "RecentRegistrations Error",
-            description: "Failed to fetch ENSIndexer Config or IndexingStatus.",
+            description: "Failed to fetch ENSIndexerConfig or IndexingStatus.",
           },
         };
 
