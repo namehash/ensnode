@@ -23,7 +23,7 @@ import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { ExternalLink, Replace } from "lucide-react";
+import { ExternalLink, PlugZap, Replace } from "lucide-react";
 
 /**
  * ENSNodeConfigInfo display variations:
@@ -67,23 +67,7 @@ export function ENSNodeConfigInfo({
       {/*ENSAdmin*/}
       <ConfigInfoAppCard
         name="ENSAdmin"
-        icon={<ENSAdminIcon width={24} height={24} />}
-        items={[
-          {
-            label: "URL",
-            value: (
-              <a
-                href={ensIndexerConfig.ensAdminUrl.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:underline text-sm leading-6 font-normal"
-              >
-                {ensIndexerConfig.ensAdminUrl.href}
-                <ExternalLink size={14} className="inline-block" />
-              </a>
-            ),
-          },
-        ]}
+        icon={<ENSAdminIcon width={26} height={26} />}
         version={ensAdminVersion}
         docsLink={new URL("https://ensnode.io/ensadmin/")}
       />
@@ -92,9 +76,10 @@ export function ENSNodeConfigInfo({
 
       <ConfigInfoAppCard
         name="Connection"
+        icon={<PlugZap className="size-7" />}
         items={[
           {
-            label: "URL",
+            label: "Selected Connection",
             value: (
               <span className="flex flex-row flex-no-wrap justify-start items-center gap-0.5 text-sm/6">
                 {rawSelectedConnection}{" "}
@@ -108,7 +93,7 @@ export function ENSNodeConfigInfo({
       <ConnectionLine />
 
       <Card className="w-full">
-        <CardHeader className="sm:pb-4 max-sm:p-3">
+        <CardHeader>
           <CardTitle className={cn(baseCardTitleStyles, "text-2xl")}>
             <ENSNodeIcon width={28} height={28} />
             <span>ENSNode</span>
@@ -337,7 +322,7 @@ function ENSNodeConfigInfoLoading() {
 
 function ConnectionLine() {
   return (
-    <div className="relative h-10 pl-10">
+    <div className="relative h-10 pl-[38px]">
       <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
     </div>
   );
