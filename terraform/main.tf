@@ -50,7 +50,7 @@ locals {
       ensnode_indexer_type     = "alpha"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
+      plugins                  = "subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope"
       namespace                = "mainnet"
       render_instance_plan     = "standard"
       subgraph_compat          = false
@@ -60,7 +60,7 @@ locals {
       ensnode_indexer_type     = "alpha-sepolia"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
+      plugins                  = "subgraph,basenames,lineanames,protocol-acceleration,referrals"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
       subgraph_compat          = false
@@ -111,7 +111,7 @@ module "ensadmin" {
   ensnode_environment_name = var.render_environment
   anthropic_api_key        = var.anthropic_api_key
 
-  # NEXT_PUBLIC_DEFAULT_ENSNODE_URLS is not currently configurable through
+  # NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
 }
 

@@ -91,7 +91,9 @@ export function Identity({
 
   // Otherwise, render the named identity we resolved for `address` on `chainId`
   return (
-    <IdentityLink identity={identity}>
+    <IdentityLink
+      identity={identity}
+      className="inline-flex items-center gap-2 text-blue-600 hover:underline">
       {showAvatar && (
         <EnsAvatar name={identity.name} namespaceId={namespaceId} className="h-6 w-6" />
       )}

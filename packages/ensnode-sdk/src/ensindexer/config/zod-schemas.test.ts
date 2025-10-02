@@ -31,9 +31,13 @@ describe("ENSIndexer: Config", () => {
           makePluginsListSchema().parse([
             `${PluginName.Subgraph}`,
             `${PluginName.Referrals}`,
-            `${PluginName.ReverseResolvers}`,
+            `${PluginName.ProtocolAcceleration}`,
           ]),
-        ).toStrictEqual([PluginName.Subgraph, PluginName.Referrals, PluginName.ReverseResolvers]);
+        ).toStrictEqual([
+          PluginName.Subgraph,
+          PluginName.Referrals,
+          PluginName.ProtocolAcceleration,
+        ]);
 
         expect(
           formatParseError(
@@ -45,8 +49,8 @@ describe("ENSIndexer: Config", () => {
           ),
         ).toContain("Plugins cannot contain duplicate values");
 
-        expect(formatParseError(makePluginsListSchema().safeParse([]))).toContain(
-          "Plugins must be a list with at least one valid plugin name. Valid plugins are: subgraph, basenames, lineanames, threedns, reverse-resolvers, referrals, tokenscope",
+        expect(formatParseError(makePluginsListSchema().safeParse([]))).toMatch(
+          /Plugins must be a list of strings with at least one string value/,
         );
       });
 

@@ -12,7 +12,7 @@ export enum PluginName {
   Basenames = "basenames",
   Lineanames = "lineanames",
   ThreeDNS = "threedns",
-  ReverseResolvers = "reverse-resolvers",
+  ProtocolAcceleration = "protocol-acceleration",
   Referrals = "referrals",
   TokenScope = "tokenscope",
 }
@@ -84,12 +84,15 @@ export interface ENSIndexerPublicConfig {
   databaseSchemaName: string;
 
   /**
-   * A set of {@link PluginName}s indicating which plugins to activate.
+   * A set of strings referring to the names of plugins that are active.
+   *
+   * For future-proofing, this is a list of strings that may or may
+   * not be currently valid {@link PluginName} values.
    *
    * Invariants:
-   * - A set of valid {@link PluginName}s with at least one value
+   * - A set of strings with at least one value.
    */
-  plugins: PluginName[];
+  plugins: string[];
 
   /**
    * Indexed Chain IDs

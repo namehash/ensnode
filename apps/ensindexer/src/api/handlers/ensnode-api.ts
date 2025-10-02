@@ -9,8 +9,8 @@ import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
+import { validate } from "@/api/lib/handlers/validate";
 import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
-import { validate } from "@/api/lib/validate";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { getUnixTime } from "date-fns";

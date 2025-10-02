@@ -126,4 +126,40 @@ export default function () {
       });
     },
   );
+
+  ponder.on(
+    namespaceContract(pluginName, "UpgradeableRegistrarController:NameRegistered"),
+    async ({ context, event }) => {
+      await handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // UpgradeableRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            cost: 0n,
+          },
+        },
+      });
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "UpgradeableRegistrarController:NameRenewed"),
+    async ({ context, event }) => {
+      await handleNameRenewedByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // UpgradeableRegistrarController incorrectly names its event arguments, so we re-map them here
+            label: event.args.name,
+            labelHash: event.args.label,
+            cost: 0n,
+          },
+        },
+      });
+    },
+  );
 }

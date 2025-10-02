@@ -5,7 +5,7 @@ import schema from "ponder:schema";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import { sdk } from "@/api/lib/instrumentation";
+import { sdk } from "@/api/lib/tracing/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
 import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
@@ -46,8 +46,8 @@ app.onError((error, ctx) => {
 
 // use root to redirect to the environment's ENSAdmin URL configured to connect back to the environment's ENSNode Public URL
 app.use("/", async (ctx) => {
-  const ensAdminRedirectUrl = new URL("connect", config.ensAdminUrl);
-  ensAdminRedirectUrl.searchParams.set("ensnode", config.ensNodePublicUrl.href);
+  const ensAdminRedirectUrl = new URL(config.ensAdminUrl);
+  ensAdminRedirectUrl.searchParams.set("connection", config.ensNodePublicUrl.href);
 
   return ctx.redirect(ensAdminRedirectUrl);
 });
