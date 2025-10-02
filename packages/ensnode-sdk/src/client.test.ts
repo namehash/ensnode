@@ -3,8 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ErrorResponse,
   IndexingStatusResponse,
+  IndexingStatusResponseCodes,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesResponse,
+  SerializedIndexingStatusResponseOk,
+  deserializeIndexingStatusResponse,
+  serializeIndexingStatusResponse,
 } from "./api";
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
@@ -12,16 +16,14 @@ import { Name } from "./ens";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  IndexingStrategyIds,
+  CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
   PluginName,
-  SerializedCurrentIndexingProjectionOmnichain,
   type SerializedENSIndexerPublicConfig,
-  type SerializedOmnichainIndexingSnapshotBackfill,
-  type SerializedOmnichainIndexingSnapshotFollowing,
-  deserializeCurrentIndexingProjection,
+  type SerializedOmnichainIndexingStatusSnapshotBackfill,
+  type SerializedOmnichainIndexingStatusSnapshotFollowing,
   deserializeENSIndexerPublicConfig,
-  deserializeOmnichainIndexingSnapshot,
+  deserializeRealtimeIndexingStatusProjection,
 } from "./ensindexer";
 import { ResolverRecordsSelection } from "./resolution";
 
@@ -80,104 +82,114 @@ const EXAMPLE_CONFIG_RESPONSE = {
   },
 } satisfies SerializedENSIndexerPublicConfig;
 
-const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = {
-  type: IndexingStrategyIds.Omnichain,
-
-  realtime: 1496124946,
-
-  maxRealtimeDistance: 13,
-
-  snapshot: {
-    omnichainStatus: OmnichainIndexingStatusIds.Backfill,
-    chains: {
-      "1": {
-        status: ChainIndexingStatusIds.Backfill,
-        config: {
-          type: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: {
-            timestamp: 1489165544,
-            number: 3327417,
+const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeIndexingStatusResponse({
+  realtimeProjection: {
+    projectedAt: 1755182604,
+    worstCaseDistance: 1013,
+    snapshot: {
+      strategy: CrossChainIndexingStrategyIds.Omnichain,
+      slowestChainIndexingCursor: 1755181591,
+      snapshotTime: 1755182591,
+      omnichainSnapshot: {
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: {
+          "1": {
+            chainStatus: ChainIndexingStatusIds.Backfill,
+            config: {
+              configType: ChainIndexingConfigTypeIds.Indefinite,
+              startBlock: {
+                timestamp: 1489165544,
+                number: 3327417,
+              },
+              endBlock: null,
+            },
+            latestIndexedBlock: {
+              timestamp: 1755181591,
+              number: 3791243,
+            },
+            backfillEndBlock: {
+              timestamp: 1755182591,
+              number: 23139951,
+            },
           },
-          endBlock: null,
-        },
-        latestIndexedBlock: {
-          timestamp: 1496124933,
-          number: 3791243,
-        },
-        backfillEndBlock: {
-          timestamp: 1755182591,
-          number: 23139951,
-        },
-      },
-      "8453": {
-        status: ChainIndexingStatusIds.Queued,
-        config: {
-          type: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: {
-            timestamp: 1721932307,
-            number: 17571480,
-          },
-          endBlock: null,
-        },
-      },
-    },
-    omnichainIndexingCursor: 1496124933,
-    snapshotTime: 1496124945,
-  } satisfies SerializedOmnichainIndexingSnapshotBackfill,
-} as SerializedCurrentIndexingProjectionOmnichain;
-
-const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE = {
-  type: IndexingStrategyIds.Omnichain,
-
-  realtime: 1496124934,
-
-  maxRealtimeDistance: 86400,
-
-  snapshot: {
-    omnichainStatus: OmnichainIndexingStatusIds.Following,
-    chains: {
-      "1": {
-        status: ChainIndexingStatusIds.Following,
-        config: {
-          type: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: {
-            timestamp: 1_484_015_544,
-            number: 23_327_417,
+          "8453": {
+            chainStatus: ChainIndexingStatusIds.Queued,
+            config: {
+              configType: ChainIndexingConfigTypeIds.Indefinite,
+              startBlock: {
+                timestamp: 1755181691,
+                number: 17571480,
+              },
+              endBlock: null,
+            },
           },
         },
-        latestIndexedBlock: {
-          timestamp: 1_496_124_533,
-          number: 23_791_243,
-        },
-        latestKnownBlock: {
-          timestamp: 1_496_124_564,
-          number: 23_791_247,
-        },
-      },
-      "8453": {
-        status: ChainIndexingStatusIds.Backfill,
-        config: {
-          type: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: {
-            timestamp: 1_496_123_537,
-            number: 17_571_480,
-          },
-          endBlock: null,
-        },
-        latestIndexedBlock: {
-          timestamp: 1_496_124_536,
-          number: 17_599_999,
-        },
-        backfillEndBlock: {
-          timestamp: 1_499_456_537,
-          number: 18_000_000,
-        },
+        omnichainIndexingCursor: 1755181591,
       },
     },
-    omnichainIndexingCursor: 1_496_124_533,
-    snapshotTime: 1_496_124_534,
-  } satisfies SerializedOmnichainIndexingSnapshotFollowing,
-} as SerializedCurrentIndexingProjectionOmnichain;
+  },
+
+  responseCode: IndexingStatusResponseCodes.Ok,
+} satisfies SerializedIndexingStatusResponseOk);
+
+const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: IndexingStatusResponse =
+  deserializeIndexingStatusResponse({
+    realtimeProjection: {
+      projectedAt: 1_499_456_547,
+      worstCaseDistance: 30,
+      snapshot: {
+        strategy: CrossChainIndexingStrategyIds.Omnichain,
+        slowestChainIndexingCursor: 1_499_456_517,
+        snapshotTime: 1_499_456_537,
+
+        omnichainSnapshot: {
+          omnichainStatus: OmnichainIndexingStatusIds.Following,
+          chains: {
+            "1": {
+              chainStatus: ChainIndexingStatusIds.Following,
+              config: {
+                configType: ChainIndexingConfigTypeIds.Indefinite,
+                startBlock: {
+                  timestamp: 1_496_123_537,
+                  number: 23_327_417,
+                },
+              },
+              latestIndexedBlock: {
+                timestamp: 1_499_456_517,
+                number: 23_791_243,
+              },
+              latestKnownBlock: {
+                timestamp: 1_499_456_527,
+                number: 23_791_247,
+              },
+            },
+            "8453": {
+              chainStatus: ChainIndexingStatusIds.Backfill,
+              config: {
+                configType: ChainIndexingConfigTypeIds.Indefinite,
+                startBlock: {
+                  timestamp: 1_484_015_544,
+                  number: 17_571_480,
+                },
+                endBlock: null,
+              },
+              latestIndexedBlock: {
+                timestamp: 1_499_456_516,
+                number: 17_599_999,
+              },
+              backfillEndBlock: {
+                timestamp: 1_499_456_529,
+                number: 18_000_000,
+              },
+            },
+          },
+          omnichainIndexingCursor: 1_499_456_517,
+        } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing,
+      },
+    },
+
+    responseCode: IndexingStatusResponseCodes.Ok,
+  });
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -430,13 +442,13 @@ describe("ENSNodeClient", () => {
     it("can fetch overall indexing 'backfill' status object successfully", async () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
-      const serializedMockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
-      const mockedResponse = deserializeCurrentIndexingProjection(serializedMockedResponse);
+      const mockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
+
       const client = new ENSNodeClient();
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => serializedMockedResponse,
+        json: async () => serializeIndexingStatusResponse(mockedResponse),
       });
 
       // act & assert

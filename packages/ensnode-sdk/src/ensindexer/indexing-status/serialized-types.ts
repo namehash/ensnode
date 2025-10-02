@@ -1,103 +1,116 @@
 import type { ChainIdString } from "../../shared";
 import type {
-  ChainIndexingSnapshot,
-  ChainIndexingSnapshotBackfill,
-  ChainIndexingSnapshotCompleted,
-  ChainIndexingSnapshotFollowing,
-  ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
-  ChainIndexingSnapshotQueued,
-  CurrentIndexingProjection,
-  CurrentIndexingProjectionOmnichain,
-  CurrentIndexingProjectionUnavailable,
-  OmnichainIndexingSnapshot,
-  OmnichainIndexingSnapshotBackfill,
-  OmnichainIndexingSnapshotCompleted,
-  OmnichainIndexingSnapshotFollowing,
-  OmnichainIndexingSnapshotUnstarted,
+  ChainIndexingStatusSnapshot,
+  ChainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotFollowing,
+  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotQueued,
+  CrossChainIndexingStatusSnapshot,
+  CrossChainIndexingStatusSnapshotOmnichain,
+  OmnichainIndexingStatusSnapshot,
+  OmnichainIndexingStatusSnapshotBackfill,
+  OmnichainIndexingStatusSnapshotCompleted,
+  OmnichainIndexingStatusSnapshotFollowing,
+  OmnichainIndexingStatusSnapshotUnstarted,
+  RealtimeIndexingStatusProjection,
 } from "./types";
 
 /**
- * Serialized representation of {@link ChainIndexingSnapshot}
+ * Serialized representation of {@link ChainIndexingStatusSnapshot}
  */
-export type SerializedChainIndexingSnapshot = ChainIndexingSnapshot;
+export type SerializedChainIndexingStatusSnapshot = ChainIndexingStatusSnapshot;
 
 /**
- * Serialized representation of {@link ChainIndexingSnapshotQueued}
+ * Serialized representation of {@link ChainIndexingStatusSnapshotQueued}
  */
-export type SerializedChainIndexingSnapshotQueued = ChainIndexingSnapshotQueued;
+export type SerializedChainIndexingStatusSnapshotQueued = ChainIndexingStatusSnapshotQueued;
 
 /**
- * Serialized representation of {@link ChainIndexingSnapshotBackfill}
+ * Serialized representation of {@link ChainIndexingStatusSnapshotBackfill}
  */
-export type SerializedChainIndexingSnapshotBackfill = ChainIndexingSnapshotBackfill;
+export type SerializedChainIndexingStatusSnapshotBackfill = ChainIndexingStatusSnapshotBackfill;
 
 /**
- * Serialized representation of {@link ChainIndexingSnapshotCompleted}
+ * Serialized representation of {@link ChainIndexingStatusSnapshotCompleted}
  */
-export type SerializedChainIndexingSnapshotCompleted = ChainIndexingSnapshotCompleted;
+export type SerializedChainIndexingStatusSnapshotCompleted = ChainIndexingStatusSnapshotCompleted;
 
 /**
- * Serialized representation of {@link ChainIndexingSnapshotFollowing}
+ * Serialized representation of {@link ChainIndexingStatusSnapshotFollowing}
  */
-export type SerializedChainIndexingSnapshotFollowing = ChainIndexingSnapshotFollowing;
+export type SerializedChainIndexingStatusSnapshotFollowing = ChainIndexingStatusSnapshotFollowing;
 
 /**
- * Serialized representation of {@link OmnichainIndexingSnapshotUnstarted}
+ * Serialized representation of {@link OmnichainIndexingStatusSnapshotUnstarted}
  */
-export interface SerializedOmnichainIndexingSnapshotUnstarted
-  extends Omit<OmnichainIndexingSnapshotUnstarted, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingSnapshotQueued>;
+export interface SerializedOmnichainIndexingStatusSnapshotUnstarted
+  extends Omit<OmnichainIndexingStatusSnapshotUnstarted, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingStatusSnapshotQueued>;
 }
 
 /**
- * Serialized representation of {@link OmnichainIndexingSnapshotBackfill}
+ * Serialized representation of {@link OmnichainIndexingStatusSnapshotBackfill}
  */
-export interface SerializedOmnichainIndexingSnapshotBackfill
-  extends Omit<OmnichainIndexingSnapshotBackfill, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill>;
+export interface SerializedOmnichainIndexingStatusSnapshotBackfill
+  extends Omit<OmnichainIndexingStatusSnapshotBackfill, "chains"> {
+  chains: Record<
+    ChainIdString,
+    ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill
+  >;
 }
 
 /**
- * Serialized representation of {@link OmnichainIndexingSnapshotCompleted}
+ * Serialized representation of {@link OmnichainIndexingStatusSnapshotCompleted}
  */
-export interface SerializedOmnichainIndexingSnapshotCompleted
-  extends Omit<OmnichainIndexingSnapshotCompleted, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingSnapshotCompleted>;
+export interface SerializedOmnichainIndexingStatusSnapshotCompleted
+  extends Omit<OmnichainIndexingStatusSnapshotCompleted, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingStatusSnapshotCompleted>;
 }
 
 /**
- * Serialized representation of {@link OmnichainIndexingSnapshotFollowing}
+ * Serialized representation of {@link OmnichainIndexingStatusSnapshotFollowing}
  */
-export interface SerializedOmnichainIndexingSnapshotFollowing
-  extends Omit<OmnichainIndexingSnapshotFollowing, "chains"> {
-  chains: Record<ChainIdString, ChainIndexingSnapshot>;
+export interface SerializedOmnichainIndexingStatusSnapshotFollowing
+  extends Omit<OmnichainIndexingStatusSnapshotFollowing, "chains"> {
+  chains: Record<ChainIdString, ChainIndexingStatusSnapshot>;
 }
 
 /**
- * Serialized representation of {@link OmnichainIndexingSnapshot}
+ * Serialized representation of {@link OmnichainIndexingStatusSnapshot}
  */
-export type SerializedOmnichainIndexingSnapshot =
-  | SerializedOmnichainIndexingSnapshotUnstarted
-  | SerializedOmnichainIndexingSnapshotBackfill
-  | SerializedOmnichainIndexingSnapshotCompleted
-  | SerializedOmnichainIndexingSnapshotFollowing;
+export type SerializedOmnichainIndexingStatusSnapshot =
+  | SerializedOmnichainIndexingStatusSnapshotUnstarted
+  | SerializedOmnichainIndexingStatusSnapshotBackfill
+  | SerializedOmnichainIndexingStatusSnapshotCompleted
+  | SerializedOmnichainIndexingStatusSnapshotFollowing;
 
 /**
- * Serialized representation of {@link CurrentIndexingProjectionOmnichain}
+ * Serialized representation of {@link CrossChainIndexingStatusSnapshotOmnichain}
+ */
+export interface SerializedCrossChainIndexingStatusSnapshotOmnichain
+  extends Omit<CrossChainIndexingStatusSnapshotOmnichain, "omnichainSnapshot"> {
+  omnichainSnapshot: SerializedOmnichainIndexingStatusSnapshot;
+}
+
+/**
+ * Serialized representation of {@link CrossChainIndexingStatusSnapshot}
+ */
+export type SerializedCrossChainIndexingStatusSnapshot =
+  SerializedCrossChainIndexingStatusSnapshotOmnichain;
+
+/**
+ * Serialized representation of {@link RealtimeIndexingStatusProjection}
  */
 export interface SerializedCurrentIndexingProjectionOmnichain
-  extends Omit<CurrentIndexingProjectionOmnichain, "snapshot"> {
-  snapshot: SerializedOmnichainIndexingSnapshot;
+  extends Omit<RealtimeIndexingStatusProjection, "snapshot"> {
+  snapshot: SerializedOmnichainIndexingStatusSnapshot;
 }
 
 /**
- * Serialized representation of {@link CurrentIndexingProjectionUnavailable}
+ * Serialized representation of {@link RealtimeIndexingStatusProjection}
  */
-export type SerializedCurrentIndexingProjectionUnavailable = CurrentIndexingProjectionUnavailable;
-
-/**
- * Serialized representation of {@link CurrentIndexingProjection}
- */
-export type SerializedCurrentIndexingProjection =
-  | SerializedCurrentIndexingProjectionOmnichain
-  | SerializedCurrentIndexingProjectionUnavailable;
+export interface SerializedRealtimeIndexingStatusProjection
+  extends Omit<RealtimeIndexingStatusProjection, "snapshot"> {
+  snapshot: SerializedCrossChainIndexingStatusSnapshot;
+}

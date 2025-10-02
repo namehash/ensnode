@@ -1,26 +1,26 @@
 import type { ParsePayload } from "zod/v4/core";
-import { ChainId, ChainIdString } from "../../shared";
+import type { ChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
 import {
-  checkChainIndexingStatusesForOmnichainStatusBackfill,
-  checkChainIndexingStatusesForOmnichainStatusCompleted,
-  checkChainIndexingStatusesForOmnichainStatusFollowing,
-  checkChainIndexingStatusesForOmnichainStatusUnstarted,
-  getOmnichainIndexingCursor,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted,
   getOmnichainIndexingStatus,
 } from "./helpers";
 import {
-  ChainIndexingSnapshot,
-  ChainIndexingSnapshotBackfill,
-  ChainIndexingSnapshotCompleted,
-  ChainIndexingSnapshotFollowing,
-  ChainIndexingSnapshotQueued,
+  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  CurrentIndexingProjection,
-  CurrentIndexingProjectionOmnichain,
-  type OmnichainIndexingSnapshot,
-  OmnichainIndexingSnapshotCompleted,
-  OmnichainIndexingSnapshotFollowing,
+  ChainIndexingStatusSnapshot,
+  ChainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotFollowing,
+  ChainIndexingStatusSnapshotQueued,
+  CrossChainIndexingStatusSnapshot,
+  CrossChainIndexingStatusSnapshotOmnichain,
+  type OmnichainIndexingStatusSnapshot,
+  OmnichainIndexingStatusSnapshotFollowing,
+  RealtimeIndexingStatusProjection,
 } from "./types";
 
 /**
@@ -32,7 +32,7 @@ import {
  * - `config.endBlock` (if set) is after `config.startBlock`.
  */
 export function invariant_chainSnapshotQueuedBlocks(
-  ctx: ParsePayload<ChainIndexingSnapshotQueued>,
+  ctx: ParsePayload<ChainIndexingStatusSnapshotQueued>,
 ) {
   const { config } = ctx.value;
 
@@ -52,7 +52,7 @@ export function invariant_chainSnapshotQueuedBlocks(
  * - `backfillEndBlock` is the same as `config.endBlock` (if set).
  */
 export function invariant_chainSnapshotBackfillBlocks(
-  ctx: ParsePayload<ChainIndexingSnapshotBackfill>,
+  ctx: ParsePayload<ChainIndexingStatusSnapshotBackfill>,
 ) {
   const { config, latestIndexedBlock, backfillEndBlock } = ctx.value;
 
@@ -87,7 +87,7 @@ export function invariant_chainSnapshotBackfillBlocks(
  * - `latestIndexedBlock` is before or same as `config.endBlock`.
  */
 export function invariant_chainSnapshotCompletedBlocks(
-  ctx: ParsePayload<ChainIndexingSnapshotCompleted>,
+  ctx: ParsePayload<ChainIndexingStatusSnapshotCompleted>,
 ) {
   const { config, latestIndexedBlock } = ctx.value;
 
@@ -114,7 +114,7 @@ export function invariant_chainSnapshotCompletedBlocks(
  * - `latestIndexedBlock` is before or same as `latestKnownBlock`.
  */
 export function invariant_chainSnapshotFollowingBlocks(
-  ctx: ParsePayload<ChainIndexingSnapshotFollowing>,
+  ctx: ParsePayload<ChainIndexingStatusSnapshotFollowing>,
 ) {
   const { config, latestIndexedBlock, latestKnownBlock } = ctx.value;
 
@@ -144,7 +144,7 @@ export function invariant_chainSnapshotFollowingBlocks(
  * `omnichainStatus` is set based on the snapshots of individual chains.
  */
 export function invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot(
-  ctx: ParsePayload<OmnichainIndexingSnapshot>,
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshot>,
 ) {
   const snapshot = ctx.value;
   const chains = Array.from(snapshot.chains.values());
@@ -161,71 +161,18 @@ export function invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot(
 }
 
 /**
- * Invariant: For omnichain snapshot,
- * `snapshotTime` is after the `omnichainIndexingCursor`.
- */
-export function invariant_omnichainSnapshotTimeIsAfterOmnichainIndexingCursor(
-  ctx: ParsePayload<OmnichainIndexingSnapshot>,
-) {
-  const snapshot = ctx.value;
-
-  if (snapshot.omnichainIndexingCursor > snapshot.snapshotTime) {
-    ctx.issues.push({
-      code: "custom",
-      input: snapshot,
-      message: "`snapshotTime` must be after or same as `omnichainIndexingCursor`.",
-    });
-  }
-}
-
-/**
- * Invariant: For omnichain snapshot,
- * `snapshotTime` is after the `latestKnownBlock` of all chains
- * in 'following' status (if any exist).
- */
-export function invariant_omnichainSnapshotTimeIsAfterLatestKnownBlock(
-  ctx: ParsePayload<OmnichainIndexingSnapshot>,
-) {
-  const snapshot = ctx.value;
-  const followingChains = Object.values(snapshot.chains).filter(
-    (chain) => chain.status === ChainIndexingStatusIds.Following,
-  );
-
-  // there are no following chains
-  if (followingChains.length === 0) {
-    // the invariant holds
-    return;
-  }
-
-  const latestKnownBlockTimes = followingChains.map((chain) => chain.latestKnownBlock.timestamp);
-  const maxLatestKnownBlockTime = Math.max(...latestKnownBlockTimes);
-
-  // there are following chains
-  // the invariant holds if the snapshot time is after the highest latestKnownBlock
-  // of all chains in 'following' status
-  if (maxLatestKnownBlockTime > snapshot.snapshotTime) {
-    ctx.issues.push({
-      code: "custom",
-      input: snapshot,
-      message:
-        "`snapshotTime` must be after or same as the highest `latestKnownBlock` of all chains in 'following' status.",
-    });
-  }
-}
-
-/**
- * Invariant: For omnichain snapshot,
+ * Invariant: For omnichain status snapshot,
  * `omnichainIndexingCursor` is lower than the earliest start block
  * across all queued chains.
  *
  * Note: if there are no queued chains, the invariant holds.
  */
 export function invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains(
-  ctx: ParsePayload<OmnichainIndexingSnapshot>,
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshot>,
 ) {
   const snapshot = ctx.value;
   const queuedChains = Array.from(snapshot.chains.values()).filter(
-    (chain) => chain.status === ChainIndexingStatusIds.Queued,
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Queued,
   );
 
   // there are no queued chains
@@ -251,14 +198,14 @@ export function invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcro
 }
 
 /**
- * Invariant: For omnichain snapshot,
+ * Invariant: For omnichain status snapshot,
  * `omnichainIndexingCursor` is same as the highest latestIndexedBlock
  * across all indexed chains.
  *
  * Note: if there are no indexed chains, the invariant holds.
  */
 export function invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain(
-  ctx: ParsePayload<OmnichainIndexingSnapshot>,
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshot>,
 ) {
   const snapshot = ctx.value;
   const indexedChains = Object.values(snapshot.chains).filter(
@@ -293,14 +240,14 @@ export function invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBl
 }
 
 /**
- * Invariant: For omnichain snapshot 'unstarted',
+ * Invariant: For omnichain status snapshot 'unstarted',
  * all chains must have "queued" status.
  */
 export function invariant_omnichainSnapshotUnstartedHasValidChains(
-  ctx: ParsePayload<Map<ChainId, ChainIndexingSnapshot>>,
+  ctx: ParsePayload<Map<ChainId, ChainIndexingStatusSnapshot>>,
 ) {
   const chains = ctx.value;
-  const hasValidChains = checkChainIndexingStatusesForOmnichainStatusUnstarted(
+  const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted(
     Array.from(chains.values()),
   );
 
@@ -308,22 +255,22 @@ export function invariant_omnichainSnapshotUnstartedHasValidChains(
     ctx.issues.push({
       code: "custom",
       input: chains,
-      message: 'All chains must have "queued" status.',
+      message: `For omnichain status snapshot 'unstarted', all chains must have "queued" status.`,
     });
   }
 }
 
 /**
- * Invariant: For omnichain snapshot 'backfill',
+ * Invariant: For omnichain status snapshot 'backfill',
  * at least one chain must be in "backfill" status and
  * each chain has to have a status of either "queued", "backfill"
  * or "completed".
  */
-export function invariant_omnichainSnapshotBackfillHasValidChains(
-  ctx: ParsePayload<Map<ChainId, ChainIndexingSnapshot>>,
+export function invariant_omnichainStatusSnapshotBackfillHasValidChains(
+  ctx: ParsePayload<Map<ChainId, ChainIndexingStatusSnapshot>>,
 ) {
   const chains = ctx.value;
-  const hasValidChains = checkChainIndexingStatusesForOmnichainStatusBackfill(
+  const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill(
     Array.from(chains.values()),
   );
 
@@ -331,21 +278,20 @@ export function invariant_omnichainSnapshotBackfillHasValidChains(
     ctx.issues.push({
       code: "custom",
       input: chains,
-      message:
-        'At least one chain must be in "backfill" status and each chain has to have a status of either "queued", "backfill" or "completed".',
+      message: `For omnichain status snapshot 'backfill', at least one chain must be in "backfill" status and each chain has to have a status of either "queued", "backfill" or "completed".`,
     });
   }
 }
 
 /**
- * Invariant: For omnichain snapshot 'completed',
+ * Invariant: For omnichain status snapshot 'completed',
  * all chains must have "completed" status.
  */
-export function invariant_omnichainSnapshotCompletedHasValidChains(
-  ctx: ParsePayload<Map<ChainId, ChainIndexingSnapshot>>,
+export function invariant_omnichainStatusSnapshotCompletedHasValidChains(
+  ctx: ParsePayload<Map<ChainId, ChainIndexingStatusSnapshot>>,
 ) {
   const chains = ctx.value;
-  const hasValidChains = checkChainIndexingStatusesForOmnichainStatusCompleted(
+  const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted(
     Array.from(chains.values()),
   );
 
@@ -353,20 +299,20 @@ export function invariant_omnichainSnapshotCompletedHasValidChains(
     ctx.issues.push({
       code: "custom",
       input: chains,
-      message: 'All chains must have "completed" status.',
+      message: `For omnichain status snapshot 'completed', all chains must have "completed" status.`,
     });
   }
 }
 
 /**
- * Invariant: For omnichain snapshot 'following',
+ * Invariant: For omnichain status snapshot 'following',
  * at least one chain must be in 'following' status.
  */
-export function invariant_omnichainSnapshotFollowingHasValidChains(
-  ctx: ParsePayload<OmnichainIndexingSnapshotFollowing>,
+export function invariant_omnichainStatusSnapshotFollowingHasValidChains(
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshotFollowing>,
 ) {
   const snapshot = ctx.value;
-  const hasValidChains = checkChainIndexingStatusesForOmnichainStatusFollowing(
+  const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing(
     Array.from(snapshot.chains.values()),
   );
 
@@ -380,47 +326,115 @@ export function invariant_omnichainSnapshotFollowingHasValidChains(
 }
 
 /**
- * Invariants for {@link CurrentIndexingProjection}.
+ * Invariants for {@link CrossChainIndexingStatusSnapshotOmnichain}.
  */
 
 /**
- * Invariant: For omnichain projection,
- * `realtime` is after or same as `snapshot.snapshotTime`.
+ * Invariant: for cross-chain indexing status snapshot omnichain,
+ * slowestChainIndexingCursor equals to omnichainSnapshot.omnichainIndexingCursor
  */
-export function invariant_currentIndexingProjectionOmnichainRealtimeIsAfterOrEqualToSnapshotTime(
-  ctx: ParsePayload<CurrentIndexingProjectionOmnichain>,
+export function invariant_slowestChainEqualsToOmnichainSnapshotTime(
+  ctx: ParsePayload<CrossChainIndexingStatusSnapshotOmnichain>,
 ) {
-  const projection = ctx.value;
+  const { slowestChainIndexingCursor, omnichainSnapshot } = ctx.value;
+  const { omnichainIndexingCursor } = omnichainSnapshot;
 
-  const { snapshot, realtime } = projection;
-
-  if (snapshot.snapshotTime > realtime) {
+  if (slowestChainIndexingCursor !== omnichainIndexingCursor) {
+    console.log("invariant_slowestChainEqualsToOmnichainSnapshotTime", {
+      slowestChainIndexingCursor,
+      omnichainIndexingCursor,
+    });
     ctx.issues.push({
       code: "custom",
-      input: projection,
-      message: "`realtime` must be after or same as `snapshot.snapshotTime`.",
+      input: ctx.value,
+      message: `'slowestChainIndexingCursor' must be equal to 'omnichainSnapshot.omnichainIndexingCursor'`,
     });
   }
 }
 
 /**
- * Invariant: For omnichain projection,
- * `maxRealtimeDistance` is the difference between `realtime`
- * and `snapshot.omnichainIndexingCursor`.
+ * Invariant: for cross-chain indexing status snapshot omnichain,
+ * snapshotTime is greater than or equal to the "highest known block" timestamp.
  */
-export function invariant_currentIndexingProjectionOmnichainMaxRealtimeDistanceIsCorrect(
-  ctx: ParsePayload<CurrentIndexingProjectionOmnichain>,
+export function invariant_snapshotTimeIsTheHighestKnownBlockTimestamp(
+  ctx: ParsePayload<CrossChainIndexingStatusSnapshotOmnichain>,
+) {
+  const { snapshotTime, omnichainSnapshot } = ctx.value;
+  const chains = Array.from(omnichainSnapshot.chains.values());
+
+  const startBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
+
+  const endBlockTimestamps = chains
+    .filter((chain) => chain.config.configType === ChainIndexingConfigTypeIds.Definite)
+    .map((chain) => chain.config.endBlock!.timestamp);
+
+  const backfillEndBlockTimestamps = chains
+    .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill)
+    .map((chain) => chain.backfillEndBlock.timestamp);
+
+  const latestKnownBlockTimestamps = chains
+    .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Following)
+    .map((chain) => chain.latestKnownBlock.timestamp);
+
+  const highestKnownBlockTimestamp = Math.max(
+    ...startBlockTimestamps,
+    ...endBlockTimestamps,
+    ...backfillEndBlockTimestamps,
+    ...latestKnownBlockTimestamps,
+  );
+
+  if (snapshotTime < highestKnownBlockTimestamp) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `'snapshotTime' must be greater than or equal to  the "highest known block timestamp" (${highestKnownBlockTimestamp})`,
+    });
+  }
+}
+
+/**
+ * Invariants for {@link RealtimeIndexingStatusProjection}.
+ */
+
+/**
+ * Invariant: For realtime indexing status projection,
+ * `projectedAt` is after or same as `snapshot.snapshotTime`.
+ */
+export function invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime(
+  ctx: ParsePayload<RealtimeIndexingStatusProjection>,
 ) {
   const projection = ctx.value;
-  const { snapshot, maxRealtimeDistance } = projection;
-  const expectedMaxRealtimeDistance = projection.realtime - snapshot.omnichainIndexingCursor;
 
-  if (maxRealtimeDistance !== expectedMaxRealtimeDistance) {
+  const { snapshot, projectedAt } = projection;
+
+  if (snapshot.snapshotTime > projectedAt) {
+    ctx.issues.push({
+      code: "custom",
+      input: projection,
+      message: "`projectedAt` must be after or same as `snapshot.snapshotTime`.",
+    });
+  }
+}
+
+/**
+ * Invariant: For realtime indexing status projection,
+ * `worstCaseDistance` is the difference between `projectedAt`
+ * and `omnichainIndexingCursor`.
+ */
+export function invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect(
+  ctx: ParsePayload<RealtimeIndexingStatusProjection>,
+) {
+  const projection = ctx.value;
+  const { projectedAt, snapshot, worstCaseDistance } = projection;
+  const { omnichainSnapshot } = snapshot;
+  const expectedWorstCaseDistance = projectedAt - omnichainSnapshot.omnichainIndexingCursor;
+
+  if (worstCaseDistance !== expectedWorstCaseDistance) {
     ctx.issues.push({
       code: "custom",
       input: projection,
       message:
-        "`maxRealtimeDistance` must be the exact difference between `realtime` and `snapshot.omnichainIndexingCursor`.",
+        "`worstCaseDistance` must be the exact difference between `projectedAt` and `snapshot.omnichainIndexingCursor`.",
     });
   }
 }

@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChainIndexingStatusIds,
-  OmnichainIndexingSnapshot,
-  OmnichainIndexingSnapshotBackfill,
-  OmnichainIndexingSnapshotCompleted,
-  OmnichainIndexingSnapshotFollowing,
-  OmnichainIndexingSnapshotUnstarted,
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
+  OmnichainIndexingStatusSnapshot,
+  OmnichainIndexingStatusSnapshotBackfill,
+  OmnichainIndexingStatusSnapshotCompleted,
+  OmnichainIndexingStatusSnapshotFollowing,
+  OmnichainIndexingStatusSnapshotUnstarted,
   sortAscChainStatusesByStartBlock,
 } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
@@ -24,7 +24,7 @@ import { PropsWithChildren } from "react";
 import { cn } from "@/lib/utils";
 import { BlockStats, blockViewModel } from "./block-refs";
 
-interface IndexingSnapshotProps<IndexingSnapshotType extends OmnichainIndexingSnapshot> {
+interface IndexingSnapshotProps<IndexingSnapshotType extends OmnichainIndexingStatusSnapshot> {
   indexingSnapshot: IndexingSnapshotType;
 }
 
@@ -46,7 +46,7 @@ export function IndexingStatsForUnavailableSnapshot() {
  */
 export function IndexingStatsForSnapshotUnstarted({
   indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingSnapshotUnstarted>) {
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotUnstarted>) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
@@ -65,9 +65,9 @@ export function IndexingStatsForSnapshotUnstarted({
 
             <Badge
               className={cn("uppercase text-xs leading-none")}
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -93,7 +93,7 @@ export function IndexingStatsForSnapshotUnstarted({
  */
 export function IndexingStatsForSnapshotBackfill({
   indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingSnapshotBackfill>) {
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotBackfill>) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
@@ -112,9 +112,9 @@ export function IndexingStatsForSnapshotBackfill({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -129,7 +129,7 @@ export function IndexingStatsForSnapshotBackfill({
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
 
-            {chain.status === ChainIndexingStatusIds.Backfill && (
+            {chain.chainStatus === ChainIndexingStatusIds.Backfill && (
               <>
                 <BlockStats
                   chainId={chainId}
@@ -156,7 +156,7 @@ export function IndexingStatsForSnapshotBackfill({
  */
 export function IndexingStatsForSnapshotCompleted({
   indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingSnapshotCompleted>) {
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotCompleted>) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
@@ -175,9 +175,9 @@ export function IndexingStatsForSnapshotCompleted({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -209,7 +209,7 @@ export function IndexingStatsForSnapshotCompleted({
  */
 export function IndexingStatsForSnapshotFollowing({
   indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingSnapshotFollowing>) {
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotFollowing>) {
   const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
@@ -228,9 +228,9 @@ export function IndexingStatsForSnapshotFollowing({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -245,7 +245,7 @@ export function IndexingStatsForSnapshotFollowing({
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
 
-            {chain.status === ChainIndexingStatusIds.Backfill && (
+            {chain.chainStatus === ChainIndexingStatusIds.Backfill && (
               <>
                 <BlockStats
                   chainId={chainId}
@@ -261,7 +261,7 @@ export function IndexingStatsForSnapshotFollowing({
               </>
             )}
 
-            {chain.status === ChainIndexingStatusIds.Following && (
+            {chain.chainStatus === ChainIndexingStatusIds.Following && (
               <>
                 <BlockStats
                   chainId={chainId}

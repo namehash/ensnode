@@ -1,64 +1,51 @@
 import { describe, expect, it } from "vitest";
-import { deserializeOmnichainIndexingSnapshot } from "./deserialize";
-import { createProjection } from "./projection";
+import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
+import { createRealtimeStatusProjection } from "./projection";
 import { earlierBlockRef, laterBlockRef } from "./test-helpers";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  IndexingStrategyIds,
+  CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
+  RealtimeIndexingStatusProjection,
 } from "./types";
 
-describe("Current Indexing Projection", () => {
+describe("Realtime Indexing Status Projection", () => {
   it("can be created from existing omnichain snapshot", () => {
     // arrange
     const now = Math.floor(Date.now() / 1000);
     const snapshotTime = now - 20;
     const omnichainIndexingCursor = now - 100;
 
-    const snapshot = deserializeOmnichainIndexingSnapshot({
-      omnichainStatus: OmnichainIndexingStatusIds.Following,
-      chains: {
-        "1": {
-          status: ChainIndexingStatusIds.Following,
-          config: {
-            type: ChainIndexingConfigTypeIds.Indefinite,
-            startBlock: earlierBlockRef,
-          },
-          latestIndexedBlock: earlierBlockRef,
-          latestKnownBlock: laterBlockRef,
-        },
-      },
-      omnichainIndexingCursor,
+    const snapshot = deserializeCrossChainIndexingStatusSnapshot({
+      strategy: CrossChainIndexingStrategyIds.Omnichain,
+      slowestChainIndexingCursor: omnichainIndexingCursor,
       snapshotTime,
+      omnichainSnapshot: {
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: {
+          "1": {
+            chainStatus: ChainIndexingStatusIds.Following,
+            config: {
+              configType: ChainIndexingConfigTypeIds.Indefinite,
+              startBlock: earlierBlockRef,
+            },
+            latestIndexedBlock: earlierBlockRef,
+            latestKnownBlock: laterBlockRef,
+          },
+        },
+        omnichainIndexingCursor,
+      },
     });
 
     // act
-    const projection = createProjection(snapshot, now);
+    const projection = createRealtimeStatusProjection(snapshot, now);
 
     // assert
     expect(projection).toStrictEqual({
-      type: IndexingStrategyIds.Omnichain,
-      realtime: now,
-      maxRealtimeDistance: now - omnichainIndexingCursor,
+      projectedAt: now,
+      worstCaseDistance: now - omnichainIndexingCursor,
       snapshot,
-    });
-  });
-
-  it("can be created if omnichain snapshot was unavailable", () => {
-    // arrange
-    const now = Math.floor(Date.now() / 1000);
-    const snapshot = null;
-
-    // act
-    const projection = createProjection(snapshot, now);
-
-    // assert
-    expect(projection).toStrictEqual({
-      type: null,
-      realtime: now,
-      maxRealtimeDistance: null,
-      snapshot,
-    });
+    } satisfies RealtimeIndexingStatusProjection);
   });
 });

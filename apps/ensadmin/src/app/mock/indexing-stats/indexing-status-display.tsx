@@ -1,7 +1,11 @@
 // Temporary mock page until indexing-status is detached from data loading
 "use client";
 
-import { OmnichainIndexingSnapshot, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import {
+  OmnichainIndexingStatusIds,
+  OmnichainIndexingStatusSnapshot,
+  RealtimeIndexingStatusProjection,
+} from "@ensnode/ensnode-sdk";
 import { type ReactElement } from "react";
 
 import { BackfillStatus } from "@/components/indexing-status/backfill-status";
@@ -16,7 +20,7 @@ import {
 import { IndexingStatusLoading } from "@/components/indexing-status/indexing-status-loading";
 
 interface MockIndexingStatusDisplayPropsProps {
-  indexingSnapshot: OmnichainIndexingSnapshot | null;
+  indexingSnapshot: OmnichainIndexingStatusSnapshot | null;
 }
 
 export function MockIndexingStatusDisplay({
@@ -60,11 +64,11 @@ export function MockIndexingStatusDisplay({
 }
 
 export function MockIndexingStatusDisplayWithProps({
-  indexingSnapshot,
+  indexingProjection,
   loading = false,
   error = null,
 }: {
-  indexingSnapshot?: OmnichainIndexingSnapshot;
+  indexingProjection?: RealtimeIndexingStatusProjection;
   loading?: boolean;
   error?: string | null;
 }) {
@@ -72,9 +76,11 @@ export function MockIndexingStatusDisplayWithProps({
     return <p className="p-6">Failed to fetch data: {error}</p>;
   }
 
-  if (loading || !indexingSnapshot) {
+  if (loading || !indexingProjection) {
     return <IndexingStatusLoading />;
   }
 
-  return <MockIndexingStatusDisplay indexingSnapshot={indexingSnapshot} />;
+  return (
+    <MockIndexingStatusDisplay indexingSnapshot={indexingProjection.snapshot.omnichainSnapshot} />
+  );
 }

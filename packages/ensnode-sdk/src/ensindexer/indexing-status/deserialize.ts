@@ -1,33 +1,36 @@
 import { prettifyError } from "zod/v4";
 import type {
-  SerializedChainIndexingSnapshot,
-  SerializedCurrentIndexingProjection,
-  SerializedOmnichainIndexingSnapshot,
+  SerializedChainIndexingStatusSnapshot,
+  SerializedCrossChainIndexingStatusSnapshot,
+  SerializedOmnichainIndexingStatusSnapshot,
+  SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import type {
-  ChainIndexingSnapshot,
-  CurrentIndexingProjection,
-  OmnichainIndexingSnapshot,
+  ChainIndexingStatusSnapshot,
+  CrossChainIndexingStatusSnapshot,
+  OmnichainIndexingStatusSnapshot,
+  RealtimeIndexingStatusProjection,
 } from "./types";
 import {
-  makeChainIndexingSnapshotSchema,
-  makeCurrentIndexingProjectionSchema,
-  makeOmnichainIndexingSnapshotSchema,
+  makeChainIndexingStatusSnapshotSchema,
+  makeCrossChainIndexingStatusSnapshotSchema,
+  makeOmnichainIndexingStatusSnapshotSchema,
+  makeRealtimeIndexingStatusProjectionSchema,
 } from "./zod-schemas";
 
 /**
  * Deserialize into a {@link ChainIndexingSnapshot} object.
  */
-export function deserializeChainIndexingSnapshot(
-  maybeSnapshot: SerializedChainIndexingSnapshot,
+export function deserializeChainIndexingStatusSnapshot(
+  maybeSnapshot: SerializedChainIndexingStatusSnapshot,
   valueLabel?: string,
-): ChainIndexingSnapshot {
-  const schema = makeChainIndexingSnapshotSchema(valueLabel);
+): ChainIndexingStatusSnapshot {
+  const schema = makeChainIndexingStatusSnapshotSchema(valueLabel);
   const parsed = schema.safeParse(maybeSnapshot);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize into ChainIndexingSnapshot:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize into ChainIndexingStatusSnapshot:\n${prettifyError(parsed.error)}\n`,
     );
   }
 
@@ -35,18 +38,18 @@ export function deserializeChainIndexingSnapshot(
 }
 
 /**
- * Deserialize an {@link OmnichainIndexingSnapshot} object.
+ * Deserialize an {@link OmnichainIndexingStatusSnapshot} object.
  */
-export function deserializeOmnichainIndexingSnapshot(
-  maybeSnapshot: SerializedOmnichainIndexingSnapshot,
+export function deserializeOmnichainIndexingStatusSnapshot(
+  maybeSnapshot: SerializedOmnichainIndexingStatusSnapshot,
   valueLabel?: string,
-): OmnichainIndexingSnapshot {
-  const schema = makeOmnichainIndexingSnapshotSchema(valueLabel);
+): OmnichainIndexingStatusSnapshot {
+  const schema = makeOmnichainIndexingStatusSnapshotSchema(valueLabel);
   const parsed = schema.safeParse(maybeSnapshot);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize into OmnichainIndexingSnapshot:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize into OmnichainIndexingStatusSnapshot:\n${prettifyError(parsed.error)}\n`,
     );
   }
 
@@ -54,18 +57,37 @@ export function deserializeOmnichainIndexingSnapshot(
 }
 
 /**
- * Deserialize into a {@link CurrentIndexingProjection} object.
+ * Deserialize an {@link CrossChainIndexingStatusSnapshot} object.
  */
-export function deserializeCurrentIndexingProjection(
-  maybeProjection: SerializedCurrentIndexingProjection,
+export function deserializeCrossChainIndexingStatusSnapshot(
+  maybeSnapshot: SerializedCrossChainIndexingStatusSnapshot,
   valueLabel?: string,
-): CurrentIndexingProjection {
-  const schema = makeCurrentIndexingProjectionSchema(valueLabel);
+): CrossChainIndexingStatusSnapshot {
+  const schema = makeCrossChainIndexingStatusSnapshotSchema(valueLabel);
+  const parsed = schema.safeParse(maybeSnapshot);
+
+  if (parsed.error) {
+    throw new Error(
+      `Cannot deserialize into CrossChainIndexingStatusSnapshot:\n${prettifyError(parsed.error)}\n`,
+    );
+  }
+
+  return parsed.data;
+}
+
+/**
+ * Deserialize into a {@link RealtimeIndexingStatusProjection} object.
+ */
+export function deserializeRealtimeIndexingStatusProjection(
+  maybeProjection: SerializedRealtimeIndexingStatusProjection,
+  valueLabel?: string,
+): RealtimeIndexingStatusProjection {
+  const schema = makeRealtimeIndexingStatusProjectionSchema(valueLabel);
   const parsed = schema.safeParse(maybeProjection);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize into CurrentIndexingProjection:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize into RealtimeIndexingStatusProjection:\n${prettifyError(parsed.error)}\n`,
     );
   }
 

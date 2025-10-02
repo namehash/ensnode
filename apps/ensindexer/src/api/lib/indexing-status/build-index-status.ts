@@ -11,15 +11,15 @@
  */
 
 import {
-  type IndexingStatusResponse,
+  type CrossChainIndexingStatusSnapshotOmnichain,
+  CrossChainIndexingStrategyIds,
+  type OmnichainIndexingStatusSnapshot,
   type UnixTimestamp,
-  createProjection,
-  deserializeOmnichainIndexingSnapshot,
+  deserializeOmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
 import ponderConfig from "@/ponder/config";
-import { getUnixTime } from "date-fns";
 import {
   type ChainBlockRefs,
   type ChainName,
@@ -27,7 +27,7 @@ import {
   type PrometheusMetrics,
   type PublicClient,
   createSerializedChainSnapshots,
-  createSerializedOmnichainIndexingSnapshot,
+  createSerializedOmnichainIndexingStatusSnapshot,
   fetchPonderMetrics,
   fetchPonderStatus,
   getChainsBlockRefs,
@@ -80,20 +80,9 @@ async function getChainsBlockRefsCached(
   return chainsBlockRefs;
 }
 
-/**
- * Build {@link ENSIndexerIndexingStatus} object from Ponder metadata.
- *
- * Note: Ponder metadata must come from an ENSIndexer instance that is
- * guaranteed to provide indexing status data.
- * @see https://ponder.sh/docs/api-reference/ponder/cli#dev
- * @see https://ponder.sh/docs/api-reference/ponder/cli#start
- *
- * @throws error when fetched Ponder Metadata was invalid.
- */
-export async function buildIndexingStatus(
+export async function buildOmnichainIndexingStatusSnapshot(
   publicClients: Record<ChainName, PublicClient>,
-  systemTimestamp: UnixTimestamp,
-): Promise<IndexingStatusResponse> {
+): Promise<OmnichainIndexingStatusSnapshot> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
 
@@ -107,12 +96,10 @@ export async function buildIndexingStatus(
     metrics = ponderMetrics;
     status = ponderStatus;
   } catch (error) {
-    console.error(`Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}`);
-
-    // omnichain indexing snapshot is unavailable
-    const snapshot = null;
-
-    return createProjection(snapshot, systemTimestamp);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(
+      `Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}: ${errorMessage}.`,
+    );
   }
 
   // get BlockRefs for relevant blocks
@@ -126,20 +113,20 @@ export async function buildIndexingStatus(
     status,
   );
 
-  // TODO: ensure that `systemTimestamp` is the right timestamp to use here.
-  const serializedOmnichainSnapshot = createSerializedOmnichainIndexingSnapshot(
-    serializedChainSnapshots,
-    systemTimestamp,
-  );
-  const omnichainSnapshot = deserializeOmnichainIndexingSnapshot(serializedOmnichainSnapshot);
+  const serializedOmnichainSnapshot =
+    createSerializedOmnichainIndexingStatusSnapshot(serializedChainSnapshots);
 
-  // Get the current system timestamp for the new time
-  // Note: this timestamp might be significantly later than `systemTimestamp`
-  // passed as `buildIndexingStatus` input param, depending on how long
-  // the above operations took to complete (network requests, validation, etc).
-  // TODO: ensure that a "now" timestamp is the right timestamp to use here.
-  const now = getUnixTime(new Date());
+  return deserializeOmnichainIndexingStatusSnapshot(serializedOmnichainSnapshot);
+}
 
-  // create the indexing status response
-  return createProjection(omnichainSnapshot, now);
+export function createCrossChainIndexingStatusSnapshotOmnichain(
+  omnichainSnapshot: OmnichainIndexingStatusSnapshot,
+  snapshotTime: UnixTimestamp,
+): CrossChainIndexingStatusSnapshotOmnichain {
+  return {
+    strategy: CrossChainIndexingStrategyIds.Omnichain,
+    slowestChainIndexingCursor: omnichainSnapshot.omnichainIndexingCursor,
+    snapshotTime,
+    omnichainSnapshot,
+  };
 }

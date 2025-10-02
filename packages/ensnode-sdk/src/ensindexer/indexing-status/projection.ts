@@ -1,34 +1,19 @@
-import { UnixTimestamp } from "../../shared";
-import {
-  CurrentIndexingProjection,
-  CurrentIndexingProjectionOmnichain,
-  CurrentIndexingProjectionUnavailable,
-  OmnichainIndexingSnapshot,
-} from "./types";
+import type { UnixTimestamp } from "../../shared";
+import type { CrossChainIndexingStatusSnapshot, RealtimeIndexingStatusProjection } from "./types";
 
 /**
- * Create current indexing projection from
- * omnichain indexing snapshot (if available).
+ * Create realtime indexing status projection from
+ * omnichain indexing status snapshot.
  */
-export function createProjection(
-  snapshot: OmnichainIndexingSnapshot | null,
+export function createRealtimeStatusProjection(
+  snapshot: CrossChainIndexingStatusSnapshot,
   now: UnixTimestamp,
-): CurrentIndexingProjection {
-  if (snapshot === null) {
-    return {
-      type: null,
-      realtime: now,
-      maxRealtimeDistance: null,
-      snapshot: null,
-    } satisfies CurrentIndexingProjectionUnavailable;
-  }
-
-  const realtime = Math.max(now, snapshot.snapshotTime);
+): RealtimeIndexingStatusProjection {
+  const projectedAt = Math.max(now, snapshot.snapshotTime);
 
   return {
-    type: "omnichain",
-    realtime,
-    maxRealtimeDistance: realtime - snapshot.omnichainIndexingCursor,
+    projectedAt,
+    worstCaseDistance: projectedAt - snapshot.slowestChainIndexingCursor,
     snapshot,
-  } satisfies CurrentIndexingProjectionOmnichain;
+  } satisfies RealtimeIndexingStatusProjection;
 }

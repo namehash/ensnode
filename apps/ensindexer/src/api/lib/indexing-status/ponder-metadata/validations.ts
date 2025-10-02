@@ -1,11 +1,11 @@
 import { PonderAppSettingsSchema } from "@/api/lib/indexing-status/ponder-metadata/zod-schemas";
 import {
   OmnichainIndexingStatusIds,
-  SerializedOmnichainIndexingSnapshot,
-  checkChainIndexingStatusesForOmnichainStatusBackfill,
-  checkChainIndexingStatusesForOmnichainStatusCompleted,
-  checkChainIndexingStatusesForOmnichainStatusFollowing,
-  checkChainIndexingStatusesForOmnichainStatusUnstarted,
+  SerializedOmnichainIndexingStatusSnapshot,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing,
+  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted,
 } from "@ensnode/ensnode-sdk";
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";
 import { ParsePayload, prettifyError } from "zod/v4/core";
@@ -34,11 +34,11 @@ export function validatePonderMetrics(metrics: PrometheusMetrics) {
 /**
  * Invariant: SerializedOmnichainSnapshot Has Valid Chains
  *
- * Validates that the `chains` property of a {@link SerializedOmnichainIndexingSnapshot}
+ * Validates that the `chains` property of a {@link SerializedOmnichainIndexingStatusSnapshot}
  * is consistent with the reported `omnichainStatus`.
  */
 export function invariant_serializedOmnichainSnapshotHasValidChains(
-  ctx: ParsePayload<SerializedOmnichainIndexingSnapshot>,
+  ctx: ParsePayload<SerializedOmnichainIndexingStatusSnapshot>,
 ) {
   const omnichainSnapshot = ctx.value;
   const chains = Object.values(omnichainSnapshot.chains);
@@ -46,19 +46,19 @@ export function invariant_serializedOmnichainSnapshotHasValidChains(
 
   switch (omnichainSnapshot.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
-      hasValidChains = checkChainIndexingStatusesForOmnichainStatusUnstarted(chains);
+      hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted(chains);
       break;
 
     case OmnichainIndexingStatusIds.Backfill:
-      hasValidChains = checkChainIndexingStatusesForOmnichainStatusBackfill(chains);
+      hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill(chains);
       break;
 
     case OmnichainIndexingStatusIds.Completed:
-      hasValidChains = checkChainIndexingStatusesForOmnichainStatusCompleted(chains);
+      hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted(chains);
       break;
 
     case OmnichainIndexingStatusIds.Following:
-      hasValidChains = checkChainIndexingStatusesForOmnichainStatusFollowing(chains);
+      hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing(chains);
       break;
   }
 

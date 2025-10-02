@@ -1,50 +1,55 @@
 import { ChainId, ChainIdString, serializeChainId } from "../../shared";
 import {
-  SerializedCurrentIndexingProjection,
+  SerializedCrossChainIndexingStatusSnapshot,
   SerializedCurrentIndexingProjectionOmnichain,
-  SerializedCurrentIndexingProjectionUnavailable,
-  SerializedOmnichainIndexingSnapshot,
-  SerializedOmnichainIndexingSnapshotBackfill,
-  SerializedOmnichainIndexingSnapshotCompleted,
-  SerializedOmnichainIndexingSnapshotFollowing,
-  SerializedOmnichainIndexingSnapshotUnstarted,
+  SerializedOmnichainIndexingStatusSnapshot,
+  SerializedOmnichainIndexingStatusSnapshotBackfill,
+  SerializedOmnichainIndexingStatusSnapshotCompleted,
+  SerializedOmnichainIndexingStatusSnapshotFollowing,
+  SerializedOmnichainIndexingStatusSnapshotUnstarted,
+  SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import {
-  ChainIndexingSnapshot,
-  CurrentIndexingProjection,
-  OmnichainIndexingSnapshot,
+  ChainIndexingStatusSnapshot,
+  CrossChainIndexingStatusSnapshot,
   OmnichainIndexingStatusIds,
+  OmnichainIndexingStatusSnapshot,
+  RealtimeIndexingStatusProjection,
 } from "./types";
 
-export function serializedCurrentIndexingProjection(
-  indexingProjection: CurrentIndexingProjection,
-): SerializedCurrentIndexingProjection {
-  if (indexingProjection.type === null) {
-    return {
-      type: null,
-      realtime: indexingProjection.realtime,
-      snapshot: null,
-      maxRealtimeDistance: null,
-    } satisfies SerializedCurrentIndexingProjectionUnavailable;
-  }
-
+export function serializeCrossChainIndexingStatusSnapshotOmnichain({
+  strategy,
+  slowestChainIndexingCursor,
+  snapshotTime,
+  omnichainSnapshot,
+}: CrossChainIndexingStatusSnapshot): SerializedCrossChainIndexingStatusSnapshot {
   return {
-    type: indexingProjection.type,
-    realtime: indexingProjection.realtime,
-    snapshot: serializeOmnichainIndexingSnapshot(indexingProjection.snapshot),
-    maxRealtimeDistance: indexingProjection.maxRealtimeDistance,
-  } satisfies SerializedCurrentIndexingProjectionOmnichain;
+    strategy,
+    slowestChainIndexingCursor,
+    snapshotTime,
+    omnichainSnapshot: serializeOmnichainIndexingStatusSnapshot(omnichainSnapshot),
+  };
+}
+
+export function serializeRealtimeIndexingStatusProjection(
+  indexingProjection: RealtimeIndexingStatusProjection,
+): SerializedRealtimeIndexingStatusProjection {
+  return {
+    projectedAt: indexingProjection.projectedAt,
+    worstCaseDistance: indexingProjection.worstCaseDistance,
+    snapshot: serializeCrossChainIndexingStatusSnapshotOmnichain(indexingProjection.snapshot),
+  } satisfies SerializedRealtimeIndexingStatusProjection;
 }
 
 /**
  * Serialize chain indexing snapshots.
  */
 export function serializeChainIndexingSnapshots<
-  ChainIndexingSnapshotType extends ChainIndexingSnapshot,
+  ChainIndexingStatusSnapshotType extends ChainIndexingStatusSnapshot,
 >(
-  chains: Map<ChainId, ChainIndexingSnapshotType>,
-): Record<ChainIdString, ChainIndexingSnapshotType> {
-  const serializedSnapshots: Record<ChainIdString, ChainIndexingSnapshotType> = {};
+  chains: Map<ChainId, ChainIndexingStatusSnapshotType>,
+): Record<ChainIdString, ChainIndexingStatusSnapshotType> {
+  const serializedSnapshots: Record<ChainIdString, ChainIndexingStatusSnapshotType> = {};
 
   for (const [chainId, snapshot] of chains.entries()) {
     serializedSnapshots[serializeChainId(chainId)] = snapshot;
@@ -54,35 +59,32 @@ export function serializeChainIndexingSnapshots<
 }
 
 /**
- * Serialize a {@link ENSIndexerIndexingStatus} object.
+ * Serialize a {@link OmnichainIndexingStatusSnapshot} object.
  */
-export function serializeOmnichainIndexingSnapshot(
-  indexingStatus: OmnichainIndexingSnapshot,
-): SerializedOmnichainIndexingSnapshot {
+export function serializeOmnichainIndexingStatusSnapshot(
+  indexingStatus: OmnichainIndexingStatusSnapshot,
+): SerializedOmnichainIndexingStatusSnapshot {
   switch (indexingStatus.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
       return {
         omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
         chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        snapshotTime: indexingStatus.snapshotTime,
-      } satisfies SerializedOmnichainIndexingSnapshotUnstarted;
+      } satisfies SerializedOmnichainIndexingStatusSnapshotUnstarted;
 
     case OmnichainIndexingStatusIds.Backfill:
       return {
         omnichainStatus: OmnichainIndexingStatusIds.Backfill,
         chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        snapshotTime: indexingStatus.snapshotTime,
-      } satisfies SerializedOmnichainIndexingSnapshotBackfill;
+      } satisfies SerializedOmnichainIndexingStatusSnapshotBackfill;
 
     case OmnichainIndexingStatusIds.Completed: {
       return {
         omnichainStatus: OmnichainIndexingStatusIds.Completed,
         chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        snapshotTime: indexingStatus.snapshotTime,
-      } satisfies SerializedOmnichainIndexingSnapshotCompleted;
+      } satisfies SerializedOmnichainIndexingStatusSnapshotCompleted;
     }
 
     case OmnichainIndexingStatusIds.Following:
@@ -90,7 +92,6 @@ export function serializeOmnichainIndexingSnapshot(
         omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: serializeChainIndexingSnapshots(indexingStatus.chains),
         omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
-        snapshotTime: indexingStatus.snapshotTime,
-      } satisfies SerializedOmnichainIndexingSnapshotFollowing;
+      } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing;
   }
 }

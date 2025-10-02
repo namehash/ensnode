@@ -1,11 +1,11 @@
 /**
  * This file describes UI components required for displaying a timeline for
- * the {@link OmnichainIndexingSnapshotBackfill} indexing status object.
+ * the {@link OmnichainIndexingStatusSnapshotBackfill} indexing status object.
  */
 
 import {
   ChainIndexingStatusIds,
-  OmnichainIndexingSnapshotBackfill,
+  OmnichainIndexingStatusSnapshotBackfill,
   UnixTimestamp,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
@@ -32,7 +32,7 @@ interface ChainIndexingPhaseViewModel {
 }
 
 interface BackfillStatusProps {
-  indexingSnapshot: OmnichainIndexingSnapshotBackfill;
+  indexingSnapshot: OmnichainIndexingStatusSnapshotBackfill;
 }
 
 /**
@@ -145,7 +145,7 @@ export function BackfillStatus({ indexingSnapshot }: BackfillStatusProps) {
               });
 
               const lastIndexedBlock =
-                chain.status === ChainIndexingStatusIds.Backfill
+                chain.chainStatus === ChainIndexingStatusIds.Backfill
                   ? blockViewModel(chain.latestIndexedBlock)
                   : null;
 

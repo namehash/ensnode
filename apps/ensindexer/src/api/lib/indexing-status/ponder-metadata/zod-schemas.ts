@@ -10,7 +10,7 @@
  * Ponder metrics and Ponder status endpoints and make this data fit
  * into the ENSIndexer application data model (and its constraints).
  */
-import { type ChainIdString, type ChainIndexingSnapshot } from "@ensnode/ensnode-sdk";
+import { type ChainIdString, type ChainIndexingStatusSnapshot } from "@ensnode/ensnode-sdk";
 import {
   makeBlockRefSchema,
   makeChainIdSchema,
@@ -63,16 +63,19 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     })
 
     .transform((chains) => {
-      let serializedChainIndexingSnapshots = {} as Record<ChainIdString, ChainIndexingSnapshot>;
+      let SerializedChainIndexingStatusSnapshots = {} as Record<
+        ChainIdString,
+        ChainIndexingStatusSnapshot
+      >;
 
       for (const chainName of indexedChainNames) {
         const indexedChain = chains.get(chainName)!;
 
-        serializedChainIndexingSnapshots[indexedChain.chainId] =
+        SerializedChainIndexingStatusSnapshots[indexedChain.chainId] =
           createChainIndexingSnapshot(indexedChain);
       }
 
-      return serializedChainIndexingSnapshots;
+      return SerializedChainIndexingStatusSnapshots;
     });
 };
 

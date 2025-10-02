@@ -2,16 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  SerializedOmnichainIndexingSnapshot,
-  deserializeOmnichainIndexingSnapshot,
-} from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
 import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
 
-import mockDataJson from "./data.json";
-
-const mockStatusData = mockDataJson as Record<string, SerializedOmnichainIndexingSnapshot>;
+import * as mockStatusData from "./data";
 
 type StatusVariant = keyof typeof mockStatusData;
 
@@ -20,7 +14,7 @@ export default function MockIndexingStatusPage() {
 
   const { deserializedStatus, validationError } = useMemo(() => {
     try {
-      const status = deserializeOmnichainIndexingSnapshot(mockStatusData[selectedVariant]);
+      const status = mockStatusData[selectedVariant];
       return { deserializedStatus: status, validationError: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown validation error";
@@ -64,7 +58,9 @@ export default function MockIndexingStatusPage() {
       )}
 
       {deserializedStatus && (
-        <MockIndexingStatusDisplayWithProps indexingSnapshot={deserializedStatus} />
+        <MockIndexingStatusDisplayWithProps
+          indexingProjection={deserializedStatus.realtimeProjection}
+        />
       )}
     </section>
   );

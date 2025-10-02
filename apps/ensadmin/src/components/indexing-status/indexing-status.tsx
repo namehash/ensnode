@@ -4,7 +4,12 @@
  */
 "use client";
 
-import { OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import {
+  ENSIndexerPublicConfig,
+  IndexingStatusResponseCodes,
+  OmnichainIndexingStatusIds,
+  RealtimeIndexingStatusProjection,
+} from "@ensnode/ensnode-sdk";
 import { type ReactElement, Suspense } from "react";
 
 import { RecentRegistrations } from "@/components/recent-registrations";
@@ -53,29 +58,47 @@ export function IndexingStatus() {
   const ensIndexerConfig = ensIndexerConfigQuery.data;
   const indexingStatus = indexingStatusQuery.data;
 
+  switch (indexingStatus.responseCode) {
+    case IndexingStatusResponseCodes.Ok:
+      return (
+        <IndexingStatsForRealtimeStatusProjection
+          ensIndexerConfig={ensIndexerConfig}
+          realtimeProjection={indexingStatus.realtimeProjection}
+        />
+      );
+    case IndexingStatusResponseCodes.Error:
+      return <IndexingStatsForUnavailableSnapshot />;
+  }
+}
+
+interface IndexingStatsForRealtimeStatusProjectionProps {
+  ensIndexerConfig: ENSIndexerPublicConfig;
+  realtimeProjection: RealtimeIndexingStatusProjection;
+}
+
+function IndexingStatsForRealtimeStatusProjection({
+  ensIndexerConfig,
+  realtimeProjection,
+}: IndexingStatsForRealtimeStatusProjectionProps) {
   let indexingStats: ReactElement;
   let maybeRecentRegistrations: ReactElement | undefined;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  switch (indexingStatus.snapshot?.omnichainStatus) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+
+  switch (omnichainSnapshot.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
-      indexingStats = (
-        <IndexingStatsForSnapshotUnstarted indexingSnapshot={indexingStatus.snapshot} />
-      );
+      indexingStats = <IndexingStatsForSnapshotUnstarted indexingSnapshot={omnichainSnapshot} />;
       break;
 
     case OmnichainIndexingStatusIds.Backfill:
-      indexingStats = (
-        <IndexingStatsForSnapshotBackfill indexingSnapshot={indexingStatus.snapshot} />
-      );
+      indexingStats = <IndexingStatsForSnapshotBackfill indexingSnapshot={omnichainSnapshot} />;
 
-      maybeIndexingTimeline = <BackfillStatus indexingSnapshot={indexingStatus.snapshot} />;
+      maybeIndexingTimeline = <BackfillStatus indexingSnapshot={omnichainSnapshot} />;
       break;
 
     case OmnichainIndexingStatusIds.Completed:
-      indexingStats = (
-        <IndexingStatsForSnapshotCompleted indexingSnapshot={indexingStatus.snapshot} />
-      );
+      indexingStats = <IndexingStatsForSnapshotCompleted indexingSnapshot={omnichainSnapshot} />;
 
       maybeRecentRegistrations = (
         <Suspense>
@@ -85,9 +108,7 @@ export function IndexingStatus() {
       break;
 
     case OmnichainIndexingStatusIds.Following:
-      indexingStats = (
-        <IndexingStatsForSnapshotFollowing indexingSnapshot={indexingStatus.snapshot} />
-      );
+      indexingStats = <IndexingStatsForSnapshotFollowing indexingSnapshot={omnichainSnapshot} />;
 
       maybeRecentRegistrations = (
         <Suspense>
@@ -95,9 +116,6 @@ export function IndexingStatus() {
         </Suspense>
       );
       break;
-
-    default:
-      indexingStats = <IndexingStatsForUnavailableSnapshot />;
   }
 
   return (
@@ -106,7 +124,7 @@ export function IndexingStatus() {
 
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={indexingStatus.snapshot?.omnichainStatus}>
+      <IndexingStatsShell omnichainStatus={omnichainSnapshot.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
 

@@ -1,20 +1,24 @@
 import { publicClients } from "ponder:api";
 import {
   IndexingStatusResponseCodes,
+  IndexingStatusResponseError,
+  IndexingStatusResponseOk,
+  OmnichainIndexingStatusSnapshot,
+  createRealtimeStatusProjection,
   serializeENSIndexerPublicConfig,
-  serializeOmnichainIndexingSnapshot,
-  serializedCurrentIndexingProjection,
+  serializeIndexingStatusResponse,
+  serializeRealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
-import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
-import { buildIndexingStatus } from "@/api/lib/indexing-status";
-import { validate } from "@/api/lib/validate";
+import {
+  buildOmnichainIndexingStatusSnapshot,
+  createCrossChainIndexingStatusSnapshotOmnichain,
+} from "@/api/lib/indexing-status";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { getUnixTime } from "date-fns";
-import type { UnofficialStatusCode } from "hono/utils/http-status";
 import resolutionApi from "./resolution-api";
 
 const app = new Hono();
@@ -35,20 +39,40 @@ app.get("/indexing-status", async (c) => {
   // get system timestamp for the current request
   const systemTimestamp = getUnixTime(new Date());
 
-  const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
+  let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
-  const serializedIndexingStatus = serializedCurrentIndexingProjection(indexingStatus);
+  try {
+    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
+  } catch (error) {
+    console.error(`Omnichain snapshot is currently not available.`);
+  }
 
-  // respond with server error if current indexing projection is unavailable
-  if (indexingStatus.type === null) {
+  // return IndexingStatusResponseError
+  if (typeof omnichainSnapshot === "undefined") {
     return c.json(
-      serializedIndexingStatus,
-      IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
+      serializeIndexingStatusResponse({
+        responseCode: IndexingStatusResponseCodes.Error,
+      } satisfies IndexingStatusResponseError),
+      500,
     );
   }
 
-  // respond with the serialized indexing status object
-  return c.json(serializedIndexingStatus);
+  // otherwise, proceed with creating IndexingStatusResponseOk
+  const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
+    omnichainSnapshot,
+    systemTimestamp,
+  );
+
+  const now = getUnixTime(new Date());
+  const realtimeProjection = createRealtimeStatusProjection(crossChainSnapshot, now);
+
+  // return the serialized indexing status response object
+  return c.json(
+    serializeIndexingStatusResponse({
+      responseCode: IndexingStatusResponseCodes.Ok,
+      realtimeProjection,
+    } satisfies IndexingStatusResponseOk),
+  );
 });
 
 // Resolution API

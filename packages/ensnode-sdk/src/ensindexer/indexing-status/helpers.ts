@@ -4,13 +4,13 @@ import {
   ChainIndexingConfigDefinite,
   ChainIndexingConfigIndefinite,
   ChainIndexingConfigTypeIds,
-  ChainIndexingSnapshot,
-  ChainIndexingSnapshotBackfill,
-  ChainIndexingSnapshotCompleted,
-  ChainIndexingSnapshotFollowing,
-  ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill,
-  ChainIndexingSnapshotQueued,
   ChainIndexingStatusIds,
+  ChainIndexingStatusSnapshot,
+  ChainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotFollowing,
+  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotQueued,
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
 } from "./types";
@@ -27,21 +27,21 @@ import {
  * @throws an error if unable to determine overall indexing status
  */
 export function getOmnichainIndexingStatus(
-  chains: ChainIndexingSnapshot[],
+  chains: ChainIndexingStatusSnapshot[],
 ): OmnichainIndexingStatusId {
-  if (checkChainIndexingStatusesForOmnichainStatusFollowing(chains)) {
+  if (checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing(chains)) {
     return OmnichainIndexingStatusIds.Following;
   }
 
-  if (checkChainIndexingStatusesForOmnichainStatusBackfill(chains)) {
+  if (checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill(chains)) {
     return OmnichainIndexingStatusIds.Backfill;
   }
 
-  if (checkChainIndexingStatusesForOmnichainStatusUnstarted(chains)) {
+  if (checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted(chains)) {
     return OmnichainIndexingStatusIds.Unstarted;
   }
 
-  if (checkChainIndexingStatusesForOmnichainStatusCompleted(chains)) {
+  if (checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted(chains)) {
     return OmnichainIndexingStatusIds.Completed;
   }
 
@@ -51,10 +51,10 @@ export function getOmnichainIndexingStatus(
 
 /**
  * Get lowest of the highest end block across all chains which status is
- * {@link ChainIndexingSnapshot}.
+ * {@link ChainIndexingStatusSnapshot}.
  */
 export function getTimestampForLowestOmnichainStartBlock(
-  chains: ChainIndexingSnapshot[],
+  chains: ChainIndexingStatusSnapshot[],
 ): UnixTimestamp {
   const earliestKnownBlockTimestamps: UnixTimestamp[] = chains.map(
     (chain) => chain.config.startBlock.timestamp,
@@ -65,15 +65,15 @@ export function getTimestampForLowestOmnichainStartBlock(
 
 /**
  * Get timestamp of the highest known block across all chains which status is
- * {@link ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill}.
+ * {@link ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill}.
  */
 export function getTimestampForHighestOmnichainKnownBlock(
-  chains: ChainIndexingSnapshot[],
+  chains: ChainIndexingStatusSnapshot[],
 ): UnixTimestamp {
   const latestKnownBlockTimestamps: UnixTimestamp[] = [];
 
   for (const chain of chains) {
-    switch (chain.status) {
+    switch (chain.chainStatus) {
       case ChainIndexingStatusIds.Queued:
         if (chain.config.endBlock) {
           latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
@@ -107,13 +107,13 @@ export function getTimestampForHighestOmnichainKnownBlock(
  *
  * @throws an error if no chains are provided
  */
-export function getOmnichainIndexingCursor(chains: ChainIndexingSnapshot[]): UnixTimestamp {
+export function getOmnichainIndexingCursor(chains: ChainIndexingStatusSnapshot[]): UnixTimestamp {
   if (chains.length === 0) {
     throw new Error(`Unable to determine omnichain indexing cursor when no chains were provided.`);
   }
 
   // if all chains are queued, the cursor tracks the moment just before
-  if (chains.every((chain) => chain.status === ChainIndexingStatusIds.Queued)) {
+  if (chains.every((chain) => chain.chainStatus === ChainIndexingStatusIds.Queued)) {
     // the earliest start block timestamp across those chains
     const earliestStartBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
 
@@ -123,7 +123,7 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingSnapshot[]): Uni
   // otherwise, the cursor tracks the "highest" latest indexed block timestamp
   // across all indexed chains
   const latestIndexedBlockTimestamps = chains
-    .filter((chain) => chain.status !== ChainIndexingStatusIds.Queued)
+    .filter((chain) => chain.chainStatus !== ChainIndexingStatusIds.Queued)
     .map((chain) => chain.latestIndexedBlock.timestamp);
 
   return Math.max(...latestIndexedBlockTimestamps);
@@ -141,100 +141,100 @@ export function createIndexingConfig(
 ): ChainIndexingConfig {
   if (endBlock) {
     return {
-      type: ChainIndexingConfigTypeIds.Definite,
+      configType: ChainIndexingConfigTypeIds.Definite,
       startBlock,
       endBlock,
     } satisfies ChainIndexingConfigDefinite;
   }
 
   return {
-    type: ChainIndexingConfigTypeIds.Indefinite,
+    configType: ChainIndexingConfigTypeIds.Indefinite,
     startBlock,
     endBlock: null,
   } satisfies ChainIndexingConfigIndefinite;
 }
 
 /**
- * Check if Chain Indexing Statuses fit the 'unstarted' overall status
- * requirements:
+ * Check if Chain Indexing Status Snapshots fit the 'unstarted' overall status
+ * snapshot requirements:
  * - All chains are guaranteed to have a status of "queued".
  *
- * Note: This function narrows the {@link ChainIndexingSnapshot} type to
- * {@link ChainIndexingSnapshotQueued}.
+ * Note: This function narrows the {@link ChainIndexingStatusSnapshot} type to
+ * {@link ChainIndexingStatusSnapshotQueued}.
  */
-export function checkChainIndexingStatusesForOmnichainStatusUnstarted(
-  chains: ChainIndexingSnapshot[],
-): chains is ChainIndexingSnapshotQueued[] {
-  return chains.every((chain) => chain.status === ChainIndexingStatusIds.Queued);
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshotQueued[] {
+  return chains.every((chain) => chain.chainStatus === ChainIndexingStatusIds.Queued);
 }
 
 /**
- * Check if Chain Indexing Statuses fit the 'backfill' overall status
- * requirements:
+ * Check if Chain Indexing Status Snapshots fit the 'backfill' overall status
+ * snapshot requirements:
  * - At least one chain is guaranteed to be in the "backfill" status.
  * - Each chain is guaranteed to have a status of either "queued",
  *   "backfill" or "completed".
  *
- * Note: This function narrows the {@linkChainIndexingStatus} type to
- * {@link ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill}.
+ * Note: This function narrows the {@link ChainIndexingStatusSnapshot} type to
+ * {@link ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill}.
  */
-export function checkChainIndexingStatusesForOmnichainStatusBackfill(
-  chains: ChainIndexingSnapshot[],
-): chains is ChainIndexingSnapshotForOmnichainIndexingSnapshotBackfill[] {
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill[] {
   const atLeastOneChainInTargetStatus = chains.some(
-    (chain) => chain.status === ChainIndexingStatusIds.Backfill,
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill,
   );
   const otherChainsHaveValidStatuses = chains.every(
     (chain) =>
-      chain.status === ChainIndexingStatusIds.Queued ||
-      chain.status === ChainIndexingStatusIds.Backfill ||
-      chain.status === ChainIndexingStatusIds.Completed,
+      chain.chainStatus === ChainIndexingStatusIds.Queued ||
+      chain.chainStatus === ChainIndexingStatusIds.Backfill ||
+      chain.chainStatus === ChainIndexingStatusIds.Completed,
   );
 
   return atLeastOneChainInTargetStatus && otherChainsHaveValidStatuses;
 }
 
 /**
- * Checks if Chain Indexing Statuses fit the 'completed' overall status
- * requirements:
+ * Checks if Chain Indexing Status Snapshots fit the 'completed' overall status
+ * snapshot requirements:
  * - All chains are guaranteed to have a status of "completed".
  *
- * Note: This function narrows the {@linkChainIndexingStatus} type to
- * {@link ChainIndexingSnapshotCompleted}.
+ * Note: This function narrows the {@link ChainIndexingStatusSnapshot} type to
+ * {@link ChainIndexingStatusSnapshotCompleted}.
  */
-export function checkChainIndexingStatusesForOmnichainStatusCompleted(
-  chains: ChainIndexingSnapshot[],
-): chains is ChainIndexingSnapshotCompleted[] {
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshotCompleted[] {
   const allChainsHaveValidStatuses = chains.every(
-    (chain) => chain.status === ChainIndexingStatusIds.Completed,
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Completed,
   );
 
   return allChainsHaveValidStatuses;
 }
 
 /**
- * Checks Chain Indexing Statuses fit the 'following' overall status
- * requirements:
+ * Checks Chain Indexing Status Snapshots fit the 'following' overall status
+ * snapshot requirements:
  * - At least one chain is guaranteed to be in the "following" status.
  * - Any other chain can have any status.
  */
-export function checkChainIndexingStatusesForOmnichainStatusFollowing(
-  chains: ChainIndexingSnapshot[],
-): chains is ChainIndexingSnapshot[] {
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshot[] {
   const allChainsHaveValidStatuses = chains.some(
-    (chain) => chain.status === ChainIndexingStatusIds.Following,
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Following,
   );
 
   return allChainsHaveValidStatuses;
 }
 
 /**
- * Sort a list of [{@link ChainId}, {@link ChainIndexingSnapshot}] tuples
+ * Sort a list of [{@link ChainId}, {@link ChainIndexingStatusSnapshot}] tuples
  * by the omnichain start block timestamp in ascending order.
  */
-export function sortAscChainStatusesByStartBlock<ChainStatusType extends ChainIndexingSnapshot>(
-  chains: [ChainId, ChainStatusType][],
-): [ChainId, ChainStatusType][] {
+export function sortAscChainStatusesByStartBlock<
+  ChainStatusType extends ChainIndexingStatusSnapshot,
+>(chains: [ChainId, ChainStatusType][]): [ChainId, ChainStatusType][] {
   // Sort the chain statuses by the omnichain first block to index timestamp
   chains.sort(
     ([, chainA], [, chainB]) =>
