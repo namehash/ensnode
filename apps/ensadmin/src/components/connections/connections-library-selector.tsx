@@ -99,7 +99,7 @@ export function ConnectionsLibrarySelector() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">ENSAdmin</span>
-                  <span className="truncate text-xs font-mono">{connectionMessage}</span>
+                  <span className="truncate text-xs">{connectionMessage}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />
               </SidebarMenuButton>
