@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 import { SerializedIndexingStatusResponse } from "./serialized-types";
-import type { ErrorResponse } from "./types";
+import type { ErrorResponse, IndexingStatusResponse } from "./types";
 import { ErrorResponseSchema, makeIndexingStatusResponseSchema } from "./zod-schemas";
 
 export function deserializeErrorResponse(maybeErrorResponse: unknown): ErrorResponse {
@@ -13,7 +13,9 @@ export function deserializeErrorResponse(maybeErrorResponse: unknown): ErrorResp
   return parsed.data;
 }
 
-export function deserializeIndexingStatusResponse(maybeResponse: SerializedIndexingStatusResponse) {
+export function deserializeIndexingStatusResponse(
+  maybeResponse: SerializedIndexingStatusResponse,
+): IndexingStatusResponse {
   const parsed = makeIndexingStatusResponseSchema().safeParse(maybeResponse);
 
   if (parsed.error) {
