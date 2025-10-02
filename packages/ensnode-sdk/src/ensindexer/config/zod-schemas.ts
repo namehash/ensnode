@@ -32,23 +32,18 @@ export const makeIndexedChainIdsSchema = (valueLabel: string = "Indexed Chain ID
     .transform((v) => new Set(v));
 
 /**
- * Makes a schema for parsing a list of {@link PluginName} items.
+ * Makes a schema for parsing a list of strings that (for future-proofing)
+ * may or may not be current {@link PluginName} values.
  *
- * The list is guaranteed to include at least one item exists, and no duplicates.
+ * The list is guaranteed to include at least one string and no duplicates.
  */
 export const makePluginsListSchema = (valueLabel: string = "Plugins") =>
   z
-    .array(
-      z.enum(PluginName, {
-        error: `${valueLabel} must be a list with at least one valid plugin name. Valid plugins are: ${Object.values(
-          PluginName,
-        ).join(", ")}`,
-      }),
-    )
+    .array(z.string(), {
+      error: `${valueLabel} must be a list of strings.`,
+    })
     .min(1, {
-      error: `${valueLabel} must be a list with at least one valid plugin name. Valid plugins are: ${Object.values(
-        PluginName,
-      ).join(", ")}`,
+      error: `${valueLabel} must be a list of strings with at least one string value`,
     })
     .refine((arr) => arr.length === uniq(arr).length, {
       error: `${valueLabel} cannot contain duplicate values.`,

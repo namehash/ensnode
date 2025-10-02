@@ -31,6 +31,7 @@ export interface SerializedENSIndexerConfig
     | "ensRainbowUrl"
     | "indexedChainIds"
     | "rpcConfigs"
+    | "plugins"
   > {
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensAdminUrl}.
@@ -66,4 +67,15 @@ export interface SerializedENSIndexerConfig
    * Serialized representation of {@link ENSIndexerConfig.rpcConfigs}.
    */
   rpcConfigs: Record<ChainIdString, SerializedRpcConfig>;
+
+  /**
+   * Serialized representation of {@link ENSIndexerConfig.plugins}.
+   *
+   * For future-proofing, this is a list of strings that may or may
+   * not be currently valid {@link PluginName} values.
+   *
+   * Invariants:
+   * - A set of strings with at least one value.
+   */
+  plugins: string[];
 }
