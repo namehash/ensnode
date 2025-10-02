@@ -3,6 +3,8 @@
  * ENSNode's public configuration.
  */
 
+"use client";
+
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
@@ -11,17 +13,17 @@ import { CopyIcon } from "@/components/icons/CopyIcon";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { IconENS } from "@/components/icons/ens";
-import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { ExternalLink, Replace } from "lucide-react";
+import { Replace } from "lucide-react";
 
 /**
  * ENSNodeConfigInfo display variations:
@@ -42,6 +44,8 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
 
+  const { rawSelectedConnection } = useSelectedConnection();
+
   if (error !== undefined && ensIndexerConfig !== undefined) {
     throw new Error("Invariant: ENSNodeConfigInfo with both ensIndexerConfig and error defined.");
   }
@@ -53,6 +57,7 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
   if (ensIndexerConfig === undefined) {
     return <ENSNodeConfigInfoLoading />;
   }
+
   return (
     <Card className="w-full">
       <CardHeader className="sm:pb-4 max-sm:p-3">
@@ -66,9 +71,9 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
           <div className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start">
             <p className="text-sm leading-6 font-semibold text-gray-500">Connection</p>
             <p className="flex flex-row flex-nowrap justify-start items-center gap-[2px] text-sm leading-6 font-normal text-black">
-              {ensIndexerConfig.ensNodePublicUrl.href}
+              {rawSelectedConnection}
               <CopyButton
-                value={ensIndexerConfig.ensNodePublicUrl.href}
+                value={rawSelectedConnection}
                 icon={<CopyIcon />}
                 className="max-sm:hidden"
               />
@@ -76,28 +81,6 @@ export function ENSNodeConfigInfo({ ensIndexerConfig, error }: ENSNodeConfigProp
           </div>
         </div>
         <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
-          {/*ENSAdmin*/}
-          <ConfigInfoAppCard
-            name="ENSAdmin"
-            icon={<ENSAdminIcon width={24} height={24} />}
-            items={[
-              {
-                label: "URL",
-                value: (
-                  <a
-                    href={ensIndexerConfig.ensAdminUrl.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-blue-600 hover:underline text-sm leading-6 font-normal"
-                  >
-                    {ensIndexerConfig.ensAdminUrl.href}
-                    <ExternalLink size={14} className="inline-block" />
-                  </a>
-                ),
-              },
-            ]}
-            docsLink={new URL("https://ensnode.io/ensadmin/")}
-          />
           {/*ENSDb*/}
           <ConfigInfoAppCard
             name="ENSDb"

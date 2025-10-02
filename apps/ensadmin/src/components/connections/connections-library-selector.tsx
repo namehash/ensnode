@@ -21,7 +21,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { ConnectionOption, useConnectionsLibrary } from "@/hooks/use-connections-library";
-import { beautifyUrl } from "@/lib/beautify-url";
 import { buildHttpHostname } from "@/lib/url-utils";
 
 export function ConnectionsLibrarySelector() {
@@ -74,7 +73,7 @@ export function ConnectionsLibrarySelector() {
   } else if (!selectedConnection.validatedSelectedConnection.isValid) {
     connectionMessage = "Invalid connection";
   } else {
-    connectionMessage = beautifyUrl(selectedConnection.validatedSelectedConnection.url);
+    connectionMessage = "Select ENSNode";
   }
 
   const serverConnections = connectionLibrary.filter((connection) => connection.type === "server");
