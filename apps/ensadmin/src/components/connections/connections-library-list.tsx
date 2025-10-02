@@ -39,7 +39,7 @@ export function ConnectionsLibraryList({
                 isSelectedConnection ? "bg-primary/10 text-primary" : null,
               )}
             >
-              <span className="font-mono text-xs flex-1">{beautifiedUrl}</span>
+              <span className="text-xs flex-1 font-mono">{beautifiedUrl}</span>
             </DropdownMenuItem>
             <div className="flex items-center">
               {canRemove && onRemoveCustomConnection && (

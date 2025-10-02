@@ -12,9 +12,9 @@ interface ConfigInfoAppCardContent {
 }
 
 export interface ConfigInfoAppCardProps {
-  name: string;
-  icon: ReactElement;
-  items: ConfigInfoAppCardContent[];
+  name?: string;
+  icon?: ReactElement;
+  items?: ConfigInfoAppCardContent[];
   version?: string;
   docsLink?: URL;
   checks?: {
@@ -31,7 +31,7 @@ export interface ConfigInfoAppCardProps {
 export function ConfigInfoAppCard({
   name,
   icon,
-  items,
+  items = [],
   version,
   docsLink,
   checks,
@@ -44,54 +44,66 @@ export function ConfigInfoAppCard({
   const checksWrapperStyles = "flex flex-row flex-nowrap justify-start items-center gap-2";
 
   return (
-    <Card>
-      <CardHeader className="pb-5 max-sm:p-3 max-sm:pb-4">
-        <div className={cardHeaderLayoutStyles}>
-          <CardTitle className={cn(baseCardTitleStyles, "text-lg leading-normal font-semibold")}>
-            {icon}
-            <span>{name}</span>
-          </CardTitle>
-          <div className={baseCardTitleStyles}>
-            {version && (
-              <p className="text-sm leading-normal font-normal text-muted-foreground">v{version}</p>
-            )}
-            {docsLink && (
-              <a
-                href={docsLink.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="flex items-center gap-1 text-sm leading-normal text-blue-600 hover:underline font-normal"
+    <Card className="shadow-sm">
+      {(docsLink || name || icon || version) && (
+        <CardHeader className="pb-6 max-sm:p-3">
+          <div className={cardHeaderLayoutStyles}>
+            {name && (
+              <CardTitle
+                className={cn(baseCardTitleStyles, "text-xl leading-normal font-semibold")}
               >
-                View Docs <ExternalLink size={14} className="inline-block" />
-              </a>
+                {icon}
+                <span>{name}</span>
+              </CardTitle>
             )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className={cardContentStyles}>
-        {items.map((item) => (
-          <div
-            key={`${name}-${item.label}-item`}
-            className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start"
-          >
-            <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
-              {item.label}
-              {item.additionalInfo && (
-                <Tooltip>
-                  <TooltipTrigger asChild>{<InfoIcon className="flex-shrink-0" />}</TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
-                  >
-                    {item.additionalInfo}
-                  </TooltipContent>
-                </Tooltip>
+            <div className={baseCardTitleStyles}>
+              {version && (
+                <p className="text-sm leading-normal font-normal text-muted-foreground">
+                  v{version}
+                </p>
               )}
-            </p>
-            {item.value}
+              {docsLink && (
+                <a
+                  href={docsLink.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex items-center gap-1 text-sm leading-normal text-blue-600 hover:underline font-normal"
+                >
+                  View Docs <ExternalLink size={14} className="inline-block" />
+                </a>
+              )}
+            </div>
           </div>
-        ))}
-      </CardContent>
+        </CardHeader>
+      )}
+      {items && items.length > 0 && (
+        <CardContent className={cardContentStyles}>
+          {items.map((item) => (
+            <div
+              key={`${name}-${item.label}-item`}
+              className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start"
+            >
+              <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
+                {item.label}
+                {item.additionalInfo && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      {<InfoIcon className="flex-shrink-0" />}
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
+                    >
+                      {item.additionalInfo}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </p>
+              {item.value}
+            </div>
+          ))}
+        </CardContent>
+      )}
       {checks && (
         <CardContent className={cardContentStyles}>
           <span className="w-full self-stretch h-[1px] bg-gray-300" />
