@@ -27,7 +27,11 @@ export function Registrations() {
   }
 
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
-    return <RecentRegistrations />;
+    return (
+      <section className="flex flex-col gap-6 p-6">
+        <RecentRegistrations />
+      </section>
+    );
   }
 
   const ensIndexerConfig = ensIndexerConfigQuery.data;
