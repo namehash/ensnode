@@ -60,6 +60,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*"
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "@ensnode/datasources": "workspace:*"
   }
 }

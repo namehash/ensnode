@@ -1,15 +1,13 @@
 "use client";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
+import { useAvatarUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
 interface EnsAvatarProps {
   name: Name;
-  namespaceId: ENSNamespaceId;
   className?: string;
 }
 
@@ -17,11 +15,14 @@ type ImageLoadingStatus = Parameters<
   NonNullable<React.ComponentProps<typeof AvatarImage>["onLoadingStatusChange"]>
 >[0];
 
-export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
+export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
-  const avatarUrl = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
 
-  if (avatarUrl === null) {
+  const { data: avatarUrl } = useAvatarUrl({
+    name,
+  });
+
+  if (avatarUrl === null || avatarUrl === undefined) {
     return (
       <Avatar className={className}>
         <EnsAvatarFallback name={name} />
@@ -32,7 +33,7 @@ export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
   return (
     <Avatar className={className}>
       <AvatarImage
-        src={avatarUrl.href}
+        src={avatarUrl}
         alt={name}
         onLoadingStatusChange={(status: ImageLoadingStatus) => {
           setLoadingStatus(status);

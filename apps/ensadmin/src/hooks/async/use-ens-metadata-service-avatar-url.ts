@@ -1,9 +1,8 @@
 "use client";
 
+import { buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
-
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 
 import { useNamespace } from "./use-namespace";
 

@@ -601,6 +601,9 @@ importers:
 
   packages/ensnode-react:
     dependencies:
+      '@ensnode/datasources':
+        specifier: workspace:*
+        version: link:../datasources
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
