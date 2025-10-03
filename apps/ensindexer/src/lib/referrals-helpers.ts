@@ -58,9 +58,9 @@ export async function handleRegistrationReferral(
     id: event.id,
 
     // referral data
-    referrerId: referrer,
-    refereeId: referee,
-    domainId: node,
+    referrer,
+    referee,
+    node,
     baseCost,
     premium,
     total,
@@ -105,9 +105,9 @@ export async function handleRenewalReferral(
     id: event.id,
 
     // referral data
-    referrerId: referrer,
-    refereeId: referee,
-    domainId: node,
+    referrer,
+    referee,
+    node,
     cost,
 
     // metadata
