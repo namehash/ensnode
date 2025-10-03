@@ -16,6 +16,7 @@ import { useRecentRegistrations } from "./hooks";
 import {Badge} from "@/components/ui/badge";
 import {cn} from "@/lib/utils";
 import {RegistrationCard} from "@/components/recent-registrations/registration-card";
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 
 /**
  * Max number of latest registrations to display
@@ -136,6 +137,8 @@ function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: Registration
     maxRecords,
   });
 
+  const [animationParent] = useAutoAnimate();
+
   if (recentRegistrationsQuery.isLoading) {
     return <RegistrationsListLoading rowCount={maxRecords} />;
   }
@@ -150,7 +153,7 @@ function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: Registration
   }
 
   return (
-          <div className="w-full h-fit box-border flex flex-col justify-start items-center gap-3">
+          <div ref={animationParent} className="w-full h-fit box-border flex flex-col justify-start items-center gap-3">
               {recentRegistrationsQuery.data?.map((registration) => (
                   <RegistrationCard
                       key={registration.name}
