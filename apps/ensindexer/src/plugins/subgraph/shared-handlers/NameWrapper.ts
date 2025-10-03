@@ -193,7 +193,9 @@ export const makeNameWrapperHandlers = ({
         // name will _not_ use the newly healed label emitted by the NameWrapper contract, and will
         // continue to have an un-healed EncodedLabelHash in its name field
         // ex: domain id 0x0093b7095a35094ecbd246f5d5638cb094c3061a5f29679f5969ad0abcfae27f
-        await context.db.update(schema.subgraph_domain, { id: node }).set({ labelName: label, name });
+        await context.db
+          .update(schema.subgraph_domain, { id: node })
+          .set({ labelName: label, name });
       }
 
       // update the WrappedDomain that was created in handleTransfer
@@ -294,7 +296,9 @@ export const makeNameWrapperHandlers = ({
       const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
       if (wrappedDomain) {
         // update expiryDate
-        await context.db.update(schema.subgraph_wrappedDomain, { id: node }).set({ expiryDate: expiry });
+        await context.db
+          .update(schema.subgraph_wrappedDomain, { id: node })
+          .set({ expiryDate: expiry });
 
         // materialize the domain's expiryDate
         await materializeDomainExpiryDate(context, node);

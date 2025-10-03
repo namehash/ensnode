@@ -5,7 +5,5 @@
     "../../apps/ensindexer/src/lib/filter-schema-by-prefix.ts",
     "../../apps/ensindexer/test/filter-schema-by-prefix.test.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

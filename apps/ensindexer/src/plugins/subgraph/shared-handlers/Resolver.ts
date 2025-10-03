@@ -41,7 +41,9 @@ export async function handleAddrChanged({
   // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
   const domain = await context.db.find(schema.subgraph_domain, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(schema.subgraph_domain, { id: node }).set({ resolvedAddressId: address });
+    await context.db
+      .update(schema.subgraph_domain, { id: node })
+      .set({ resolvedAddressId: address });
   }
 
   // log ResolverEvent
