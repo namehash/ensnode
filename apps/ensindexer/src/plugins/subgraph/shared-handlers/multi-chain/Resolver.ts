@@ -15,7 +15,7 @@ import {
   handleTextChanged,
   handleVersionChanged,
   handleZoneCreated,
-} from "@/handlers/Resolver";
+} from "../Resolver";
 
 /**
  * Shared Resolver indexing functions should be registered exactly once, or Ponder will complain about

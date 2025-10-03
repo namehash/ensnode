@@ -3,7 +3,6 @@ import { resetMockConfig, setupConfigMock, updateMockConfig } from "./utils/mock
 setupConfigMock(); // setup config mock before importing dependent modules
 
 import { makeEventId, makeRegistrationId, makeResolverId } from "@/lib/ids";
-import { DEFAULT_EVM_COIN_TYPE } from "@ensnode/ensnode-sdk";
 import { labelhash, namehash, zeroAddress } from "viem";
 
 const CHAIN_ID = 1337;

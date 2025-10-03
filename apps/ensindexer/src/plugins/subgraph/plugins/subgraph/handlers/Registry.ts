@@ -2,14 +2,14 @@ import { type Context, ponder } from "ponder:registry";
 import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
 import schema from "ponder:schema";
+import { namespaceContract } from "@/lib/plugin-helpers";
+import { setupRootNode } from "@/lib/subgraph-helpers";
 import {
   handleNewOwner,
   handleNewResolver,
   handleNewTTL,
   handleTransfer,
-} from "@/handlers/Registry";
-import { namespaceContract } from "@/lib/plugin-helpers";
-import { setupRootNode } from "@/lib/subgraph-helpers";
+} from "@/plugins/subgraph/shared-handlers/Registry";
 
 // NOTE: Due to a security issue, ENS migrated from an old registry contract to a new registry
 // contract. When indexing events, the indexer ignores any events on the old regsitry for domains

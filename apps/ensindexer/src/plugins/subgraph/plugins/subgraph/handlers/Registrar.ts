@@ -1,8 +1,8 @@
 import { ponder } from "ponder:registry";
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
-import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 
 /**
  * When direct subnames of .eth are registered through the ETHRegistrarController contract on

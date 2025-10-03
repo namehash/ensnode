@@ -3,8 +3,8 @@ import { ponder } from "ponder:registry";
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
-import { makeRegistrarHandlers } from "@/handlers/Registrar";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**

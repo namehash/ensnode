@@ -17,7 +17,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
-import { handleNewOwner } from "@/handlers/Registry";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { makeRegistrationId } from "@/lib/ids";
@@ -25,6 +24,7 @@ import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import type { RegistrarManagedName } from "@/lib/types";
+import { handleNewOwner } from "@/plugins/subgraph/shared-handlers/Registry";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 

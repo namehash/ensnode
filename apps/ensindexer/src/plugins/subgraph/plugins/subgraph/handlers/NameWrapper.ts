@@ -1,7 +1,7 @@
 import { ponder } from "ponder:registry";
 
-import { makeNameWrapperHandlers } from "@/handlers/NameWrapper";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { makeNameWrapperHandlers } from "@/plugins/subgraph/shared-handlers/NameWrapper";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**

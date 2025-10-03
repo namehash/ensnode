@@ -2,14 +2,14 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { namespaceContract } from "@/lib/plugin-helpers";
+import { setupRootNode } from "@/lib/subgraph-helpers";
 import {
   handleNewOwner,
   handleRegistrationCreated,
   handleRegistrationExtended,
   handleTransfer,
-} from "@/handlers/ThreeDNSToken";
-import { namespaceContract } from "@/lib/plugin-helpers";
-import { setupRootNode } from "@/lib/subgraph-helpers";
+} from "@/plugins/subgraph/shared-handlers/ThreeDNSToken";
 
 /**
  * Registers event handlers with Ponder.

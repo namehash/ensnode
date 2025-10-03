@@ -2,6 +2,7 @@ import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { namespaceContract } from "@/lib/plugin-helpers";
 import {
   handleABIChanged,
   handleAddrChanged,
@@ -17,8 +18,7 @@ import {
   handleTextChanged,
   handleVersionChanged,
   handleZoneCreated,
-} from "@/handlers/Resolver";
-import { namespaceContract } from "@/lib/plugin-helpers";
+} from "@/plugins/subgraph/shared-handlers/Resolver";
 
 /**
  * Registers event handlers with Ponder.
