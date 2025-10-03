@@ -6,11 +6,14 @@
  */
 
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";
+import { validatePonderMetrics } from "./validations";
 
 export { PrometheusMetrics } from "@ensnode/ponder-metadata";
 
 /**
  * Fetch metrics for requested Ponder instance.
+ *
+ * @throws Will throw if the Ponder metrics are not valid.
  */
 export async function fetchPonderMetrics(ponderAppUrl: URL): Promise<PrometheusMetrics> {
   const ponderMetricsUrl = new URL("/metrics", ponderAppUrl);
@@ -18,7 +21,11 @@ export async function fetchPonderMetrics(ponderAppUrl: URL): Promise<PrometheusM
   try {
     const metricsText = await fetch(ponderMetricsUrl).then((r) => r.text());
 
-    return PrometheusMetrics.parse(metricsText);
+    const ponderMetrics = PrometheusMetrics.parse(metricsText);
+
+    validatePonderMetrics(ponderMetrics);
+
+    return ponderMetrics;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
 

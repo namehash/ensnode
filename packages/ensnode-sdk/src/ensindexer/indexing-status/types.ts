@@ -1,451 +1,596 @@
 import type { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
 
-export const ChainIndexingStatusIds = {
-  Queued: "queued",
-  Backfill: "backfill",
-  Following: "following",
-  Completed: "completed",
-} as const;
-
 /**
- * ChainIndexingStatusId is the derived string union of possible Chain Indexing Status identifiers.
+ * The type of indexing configuration for a chain.
  */
-export type ChainIndexingStatusId =
-  (typeof ChainIndexingStatusIds)[keyof typeof ChainIndexingStatusIds];
-
-export const OverallIndexingStatusIds = {
-  Unstarted: "unstarted",
-  Backfill: "backfill",
-  Following: "following",
-  Completed: "completed",
-  IndexerError: "indexer-error",
-} as const;
-
-/**
- * OverallIndexingStatusId is the derived string union of possible Overall Indexing Status identifiers.
- */
-export type OverallIndexingStatusId =
-  (typeof OverallIndexingStatusIds)[keyof typeof OverallIndexingStatusIds];
-
-export const ChainIndexingStrategyIds = {
+export const ChainIndexingConfigTypeIds = {
+  /**
+   * Represents that indexing of the chain should be performed for an indefinite range.
+   */
   Indefinite: "indefinite",
+
+  /**
+   * Represents that indexing of the chain should be performed for a definite range.
+   */
   Definite: "definite",
 } as const;
 
 /**
- * ChainIndexingStrategyIds is the derived string union of possible Chain Indexing Strategy identifiers.
+ * The derived string union of possible {@link ChainIndexingConfigTypeIds}.
  */
-export type ChainIndexingStrategyId =
-  (typeof ChainIndexingStrategyIds)[keyof typeof ChainIndexingStrategyIds];
+export type ChainIndexingConfigTypeId =
+  (typeof ChainIndexingConfigTypeIds)[keyof typeof ChainIndexingConfigTypeIds];
 
 /**
- * Chain Indexing Indefinite Config
+ * Chain indexing config for a chain whose indexing config `configType` is
+ * {@link ChainIndexingConfigTypeIds.Indefinite}.
  *
- * Configures a chain to be indexed for an indefinite range.
+ * Invariants:
+ * - `configType` is always `ChainIndexingConfigTypeIds.Indefinite`.
  */
-export interface ChainIndexingIndefiniteConfig {
+export interface ChainIndexingConfigIndefinite {
   /**
-   * Chain indexing strategy.
+   * The type of chain indexing config.
    */
-  strategy: typeof ChainIndexingStrategyIds.Indefinite;
+  configType: typeof ChainIndexingConfigTypeIds.Indefinite;
 
   /**
-   * The block where indexing of the chain starts.
-   *
-   * An indexed chain always has its `startBlock` defined.
+   * A {@link BlockRef} to the block where indexing of the chain should start.
    */
   startBlock: BlockRef;
 
   /**
-   * Indefinite chain indexing configs always have a null `endBlock`.
+   * A {@link BlockRef} to the block where indexing of the chain should end.
    */
   endBlock?: null;
 }
 
 /**
- * Chain Indexing Definite Config
- *
- * Configures a chain to be indexed for a definite range.
+ * Chain indexing config for a chain whose indexing config `configType` is
+ * {@link ChainIndexingConfigTypeIds.Definite}.
  *
  * Invariants:
- * - `startBlock` is always before or the same as `endBlock`
+ * - `configType` is always `ChainIndexingConfigTypeIds.Definite`.
+ * - `startBlock` is always before or the same as `endBlock`.
  */
-export interface ChainIndexingDefiniteConfig {
+export interface ChainIndexingConfigDefinite {
   /**
-   * Chain indexing strategy.
+   * The type of chain indexing config.
    */
-  strategy: typeof ChainIndexingStrategyIds.Definite;
+  configType: typeof ChainIndexingConfigTypeIds.Definite;
 
   /**
-   * The block where indexing of the chain starts.
-   *
-   * `startBlock` must always be defined.
+   * A {@link BlockRef} to the block where indexing of the chain should start.
    */
   startBlock: BlockRef;
 
   /**
-   * The block where indexing of the chain ends.
-   *
-   * Definite chain indexing configs always have a defined `endBlock`.
+   * A {@link BlockRef} to the block where indexing of the chain should end.
    */
   endBlock: BlockRef;
 }
 
 /**
- * Chain Indexing Config
+ * Indexing configuration for a chain.
  *
- * Configuration of an indexed chain.
+ * Use the `configType` field to determine the specific type interpretation
+ * at runtime.
  */
-export type ChainIndexingConfig = ChainIndexingIndefiniteConfig | ChainIndexingDefiniteConfig;
+export type ChainIndexingConfig = ChainIndexingConfigIndefinite | ChainIndexingConfigDefinite;
 
 /**
- * Max Realtime Indexing Distance
+ * The status of indexing a chain at the time an indexing status snapshot
+ * is captured.
  */
-export type MaxRealtimeIndexingDistance<SatisfiesRequestedDistanceType extends boolean> = {
+export const ChainIndexingStatusIds = {
   /**
-   * Requested max realtime indexing distance.
+   * Represents that indexing of the chain is not ready to begin yet because:
+   * - ENSIndexer is in its initialization phase and the data to build a
+   *   "true" {@link ChainIndexingSnapshot} for the chain is still being loaded; or
+   * - ENSIndexer is using an omnichain indexing strategy and the
+   *   `omnichainIndexingCursor` is <= `config.startBlock.timestamp` for the chain's
+   *   {@link ChainIndexingSnapshot}.
    */
-  requestedDistance: Duration;
+  Queued: "chain-queued",
 
   /**
-   * Has the requested max realtime indexing distance been achieved?
+   * Represents that indexing of the chain is in progress and under a special
+   * "backfill" phase that optimizes for accelerated indexing until reaching the
+   * "fixed target" `backfillEndBlock`.
    */
-  satisfiesRequestedDistance: SatisfiesRequestedDistanceType;
-};
+  Backfill: "chain-backfill",
+
+  /**
+   * Represents that the "backfill" phase of indexing the chain is completed
+   * and that the chain is configured to be indexed for an indefinite range.
+   * Therefore, indexing of the chain remains indefinitely in progress where
+   * ENSIndexer will continuously work to discover and index new blocks as they
+   * are added to the chain across time.
+   */
+  Following: "chain-following",
+
+  /**
+   * Represents that indexing of the chain is completed as the chain is configured
+   * to be indexed for a definite range and the indexing of all blocks through
+   * that definite range is completed.
+   */
+  Completed: "chain-completed",
+} as const;
 
 /**
- * Chain Indexing Status: Queued
- *
- * Notes:
- * - The "queued" status applies when using omnichain ordering and
- *   the omnichainIndexingCursor from the overall indexing status <= config.startBlock.timestamp.
+ * The derived string union of possible {@link ChainIndexingStatusIds}.
  */
-export interface ChainIndexingQueuedStatus {
-  status: typeof ChainIndexingStatusIds.Queued;
+export type ChainIndexingStatusId =
+  (typeof ChainIndexingStatusIds)[keyof typeof ChainIndexingStatusIds];
+
+/**
+ * Chain indexing status snapshot for a chain whose `chainStatus` is
+ * {@link ChainIndexingStatusIds.Queued}.
+ *
+ * Invariants:
+ * - `chainStatus` is always {@link ChainIndexingStatusIds.Queued}.
+ */
+export interface ChainIndexingStatusSnapshotQueued {
+  /**
+   * The status of indexing the chain at the time the indexing status snapshot
+   * was captured.
+   */
+  chainStatus: typeof ChainIndexingStatusIds.Queued;
+
+  /**
+   * The indexing configuration of the chain.
+   */
   config: ChainIndexingConfig;
 }
 
 /**
- * Chain Indexing Status: Backfill
+ * Chain indexing status snapshot for a chain whose `chainStatus` is
+ * {@link ChainIndexingStatusIds.Backfill}.
  *
  * During a backfill, special performance optimizations are applied to
- * index all blocks between config.startBlock and backfillEndBlock
+ * index all blocks between `config.startBlock` and `backfillEndBlock`
  * as fast as possible.
  *
- * Notes:
- * - The backfillEndBlock is either config.endBlock (if present) or
- *   the latest block on the chain when the ENSIndexer process started up.
- *   Note how this means the backfillEndBlock is always a "fixed target".
- * - When latestIndexedBlock reaches backfillEndBlock, the backfill is complete.
- *   The moment backfill is complete the status does not immediately transition.
- *   Instead, internal processing is completed for a period of time while
- *   the status remains "backfill". After this internal processing is completed
- *   the status will change to "following" or "completed" depending on
- *   the configured indexing strategy. If the strategy is indefinite,
- *   changes to "following", else if the strategy is definite, changes to
- *   "completed".
+ * Note how `backfillEndBlock` is a "fixed target" that does not change during
+ * the lifetime of an ENSIndexer process instance:
+ * - If the `config` is {@link ChainIndexingConfigDefinite}:
+ *   `backfillEndBlock` is always the same as `config.endBlock`.
+ * - If the `config` is {@link ChainIndexingConfigIndefinite}:
+ *   `backfillEndBlock` is a {@link BlockRef} to what was the latest block on the
+ *    chain when the ENSIndexer process was performing its initialization. Note how
+ *    this means that if the backfill process takes X hours to complete, because the
+ *    `backfillEndBlock` is a "fixed target", when `chainStatus` transitions to
+ *    {@link ChainIndexingStatusIds.Following} the chain will be X hours behind
+ *    "realtime" indexing.
+ *
+ * When `latestIndexedBlock` reaches `backfillEndBlock` the backfill is complete.
+ * The moment backfill is complete the `chainStatus` may not immediately transition.
+ * Instead, internal processing is completed for a period of time while
+ * `chainStatus` remains {@link ChainIndexingStatusIds.Backfill}. After this internal
+ * processing is completed `chainStatus` will transition:
+ * - to {@link ChainIndexingStatusIds.Following} if the `config` is
+ *   {@link ChainIndexingConfigIndefinite}.
+ * - to {@link ChainIndexingStatusIds.Completed} if the `config` is
+ *   {@link ChainIndexingConfigDefinite}.
  *
  * Invariants:
+ * - `chainStatus` is always {@link ChainIndexingStatusIds.Backfill}.
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
+ * - `config.endBlock` is always the same as `backfillEndBlock` if and only if
+ *   the config is {@link ChainIndexingConfigDefinite}.
  * - `latestIndexedBlock` is always before or the same as `backfillEndBlock`
- * - `backfillEndBlock` is the same as `config.endBlock` if and only if
- *   the config is definite.
  */
-export interface ChainIndexingBackfillStatus {
-  status: typeof ChainIndexingStatusIds.Backfill;
+export interface ChainIndexingStatusSnapshotBackfill {
+  /**
+   * The status of indexing the chain at the time the indexing status snapshot
+   * was captured.
+   */
+  chainStatus: typeof ChainIndexingStatusIds.Backfill;
+
+  /**
+   * The indexing configuration of the chain.
+   */
   config: ChainIndexingConfig;
 
   /**
-   * The block that was most recently indexed.
+   * A {@link BlockRef} to the block that was most recently indexed as of the time the
+   * indexing status snapshot was captured.
    */
   latestIndexedBlock: BlockRef;
 
   /**
-   * The block that is the target for finishing the backfill.
+   * A {@link BlockRef} to the block where the backfill will end.
    */
   backfillEndBlock: BlockRef;
 }
 
 /**
- * Chain Indexing Status: Following
- *
- * Following occurs after the backfill of a chain is completed and represents
- * the process of indefinitely following (and indexing!) new blocks as they are
- * added to the indexed chain across time.
+ * Chain indexing status snapshot for a chain whose `chainStatus` is
+ * {@link ChainIndexingStatusIds.Following}.
  *
  * Invariants:
+ * - `chainStatus` is always {@link ChainIndexingStatusIds.Following}.
+ * - `config` is always {@link ChainIndexingConfigIndefinite}
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always before or the same as `latestKnownBlock`
  */
-export interface ChainIndexingFollowingStatus {
-  status: typeof ChainIndexingStatusIds.Following;
-
-  config: ChainIndexingIndefiniteConfig;
+export interface ChainIndexingStatusSnapshotFollowing {
+  /**
+   * The status of indexing the chain at the time the indexing status snapshot
+   * was captured.
+   */
+  chainStatus: typeof ChainIndexingStatusIds.Following;
 
   /**
-   * The block that was most recently indexed.
+   * The indexing configuration of the chain.
+   */
+  config: ChainIndexingConfigIndefinite;
+
+  /**
+   * A {@link BlockRef} to the block that was most recently indexed as of the time the
+   * indexing status snapshot was captured.
    */
   latestIndexedBlock: BlockRef;
 
   /**
-   * The "highest" block that has been fetched by RPC calls and stored in
-   * the RPC cache as part of the indexing process.
+   * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
+   * and stored in the RPC cache as of the time the indexing status snapshot was
+   * captured.
    */
   latestKnownBlock: BlockRef;
-
-  /**
-   * The number of seconds between `latestIndexedBlock.timestamp` and
-   * the current time in ENSIndexer. This represents the upper-bound worst case
-   * distance approximation between the latest block on the chain (independent
-   * of it becoming known to us) and the latest block that has completed
-   * indexing. The true distance to the latest block on the chain will be less
-   * if the latest block on the chain was not issued at the current second.
-   */
-  approxRealtimeDistance: Duration;
 }
 
 /**
- * Chain Indexing Status: Completed
+ * Chain indexing status snapshot for a chain whose `chainStatus` is
+ * {@link ChainIndexingStatusIds.Completed}.
  *
- * Indexing of a chain is completed after the backfill when the chain is
- * not configured to be indefinitely indexed.
+ * After the backfill of a chain is completed, if the chain was configured
+ * to be indexed for a definite range, the chain indexing status will transition to
+ * {@link ChainIndexingStatusIds.Completed}.
  *
  * Invariants:
+ * - `chainStatus` is always {@link ChainIndexingStatusIds.Completed}.
+ * - `config` is always {@link ChainIndexingConfigDefinite}
  * - `config.startBlock` is always before or the same as `latestIndexedBlock`
  * - `latestIndexedBlock` is always the same as `config.endBlock`.
  */
-export interface ChainIndexingCompletedStatus {
-  status: typeof ChainIndexingStatusIds.Completed;
-  config: ChainIndexingDefiniteConfig;
+export interface ChainIndexingStatusSnapshotCompleted {
+  /**
+   * The status of indexing the chain at the time the indexing status snapshot
+   * was captured.
+   */
+  chainStatus: typeof ChainIndexingStatusIds.Completed;
 
   /**
-   * The block that was most recently indexed.
+   * The indexing configuration of the chain.
+   */
+  config: ChainIndexingConfigDefinite;
+
+  /**
+   * A {@link BlockRef} to the block that was most recently indexed as of the time the
+   * indexing status snapshot was captured.
    */
   latestIndexedBlock: BlockRef;
 }
 
 /**
- * Chain Indexing Status
+ * Indexing status snapshot for a single chain.
  *
- * Use the `status` field to determine the correct type interpretation at runtime.
+ * Use the `chainStatus` field to determine the specific type interpretation
+ * at runtime.
  */
-export type ChainIndexingStatus =
-  | ChainIndexingQueuedStatus
-  | ChainIndexingBackfillStatus
-  | ChainIndexingFollowingStatus
-  | ChainIndexingCompletedStatus;
+export type ChainIndexingStatusSnapshot =
+  | ChainIndexingStatusSnapshotQueued
+  | ChainIndexingStatusSnapshotBackfill
+  | ChainIndexingStatusSnapshotFollowing
+  | ChainIndexingStatusSnapshotCompleted;
 
 /**
- * ENSIndexer Overall Indexing Status: Unstarted
- *
- * Describes the current state of indexing operations across all indexed chains
- * when the overall indexing status is {@link OverallIndexingStatusIds.Unstarted}.
+ * The status of omnichain indexing at the time an omnichain indexing status
+ * snapshot is captured.
  */
-export interface ENSIndexerOverallIndexingUnstartedStatus {
+export const OmnichainIndexingStatusIds = {
   /**
-   * Overall Indexing Status
+   * Represents that omnichain indexing is not ready to begin yet because
+   * ENSIndexer is in its initialization phase and the data to build a "true"
+   * {@link OmnichainIndexingStatusSnapshot} is still being loaded.
    */
-  overallStatus: typeof OverallIndexingStatusIds.Unstarted;
+  Unstarted: "omnichain-unstarted",
 
   /**
-   * Indexing Status for each chain.
-   *
-   * Each chain is guaranteed to have the "queued" status.
-   * It's impossible for any chain to have status other than "queued".
+   * Represents that omnichain indexing is in an overall "backfill" status because
+   * - At least one indexed chain has a `chainStatus` of
+   *   {@link ChainIndexingStatusIds.Backfill}; and
+   * - No indexed chain has a `chainStatus` of {@link ChainIndexingStatusIds.Following}.
    */
-  chains: Map<ChainId, ChainIndexingQueuedStatus>;
+  Backfill: "omnichain-backfill",
 
   /**
-   * Max realtime indexing distance
-   *
-   * Optional, if provided, describes the requested max realtime distance,
-   * and how it was not satisfied for the 'unstarted' overall status.
+   * Represents that omnichain indexing is in an overall "following" status because
+   * at least one indexed chain has a `chainStatus` of
+   * {@link ChainIndexingStatusIds.Following}.
    */
-  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
-}
+  Following: "omnichain-following",
+
+  /**
+   * Represents that omnichain indexing has completed because all indexed chains have
+   * a `chainStatus` of {@link ChainIndexingStatusIds.Completed}.
+   */
+  Completed: "omnichain-completed",
+} as const;
 
 /**
- * Chain Indexing Status allowed when overall status is 'backfill'.
+ * The derived string union of possible {@link OmnichainIndexingStatusIds}.
  */
-export type ChainIndexingStatusForBackfillOverallStatus =
-  | ChainIndexingQueuedStatus
-  | ChainIndexingBackfillStatus
-  | ChainIndexingCompletedStatus;
+export type OmnichainIndexingStatusId =
+  (typeof OmnichainIndexingStatusIds)[keyof typeof OmnichainIndexingStatusIds];
 
 /**
- * ENSIndexer Overall Indexing Status: Backfill
+ * Omnichain indexing status snapshot when the overall `omnichainStatus` is
+ * {@link OmnichainIndexingStatusIds.Unstarted}.
  *
- * Describes the current state of indexing operations across all indexed chains
- * when the overall indexing status is {@link OverallIndexingStatusIds.Backfill}.
+ * Invariants:
+ * - `omnichainStatus` is always {@link OmnichainIndexingStatusIds.Unstarted}.
+ * - `chains` is always a map to {@link ChainIndexingStatusSnapshotQueued} values exclusively.
+ * - `omnichainIndexingCursor` is always < the `config.startBlock.timestamp` for all
+ *   chains with `chainStatus` of {@link ChainIndexingStatusIds.Queued}.
  */
-export interface ENSIndexerOverallIndexingBackfillStatus {
+export interface OmnichainIndexingStatusSnapshotUnstarted {
   /**
-   * Overall Indexing Status
+   * The status of omnichain indexing.
    */
-  overallStatus: typeof OverallIndexingStatusIds.Backfill;
+  omnichainStatus: typeof OmnichainIndexingStatusIds.Unstarted;
 
   /**
-   * Omnichain Indexing Cursor
-   *
-   * Identifies the timestamp of the progress of omnichain indexing across
-   * all indexed chains.
-   *
-   * Invariants:
-   * - guaranteed to be equal to
-   *   the timestamp of the highest `latestIndexedBlock` across all chains that
-   *   have started indexing (are not queued).
-   * - guaranteed to be lower than
-   *   the `config.startBlock` timestamp for all queued chains.
+   * The indexing status snapshot for each indexed chain.
+   */
+  chains: Map<ChainId, ChainIndexingStatusSnapshotQueued>;
+
+  /**
+   * The timestamp of omnichain indexing progress across all indexed chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
-
-  /**
-   * Indexing Status for each chain.
-   *
-   * At least one chain is guaranteed to be in the "backfill" status.
-   * Each chain is guaranteed to have a status of either "queued",
-   * "backfill" or "completed". It's impossible for any chain to be
-   * in the "following" status.
-   */
-  chains: Map<ChainId, ChainIndexingStatusForBackfillOverallStatus>;
-
-  /**
-   * Max realtime indexing distance
-   *
-   * Optional, if provided, describes the requested max realtime distance,
-   * and how it was not satisfied for the 'backfill' overall status.
-   */
-  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
 }
 
 /**
- * ENSIndexer Overall Indexing Status: Completed
+ * The range of {@link ChainIndexingSnapshot} types allowed when the
+ * overall omnichain indexing status is {@link OmnichainIndexingStatusIds.Backfill}.
  *
- * Describes the final state of indexing operations across all indexed chains
- * when all indexed chains are configured for a definite indexing strategy and
- * all indexing of that definite range is completed.
+ * Note that this is all of the {@link ChainIndexingSnapshot} types with the exception
+ * of {@link ChainIndexingStatusSnapshotFollowing}.
  */
-export interface ENSIndexerOverallIndexingCompletedStatus {
+export type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill =
+  | ChainIndexingStatusSnapshotQueued
+  | ChainIndexingStatusSnapshotBackfill
+  | ChainIndexingStatusSnapshotCompleted;
+
+/**
+ * Omnichain indexing status snapshot when the `omnichainStatus` is
+ * {@link OmnichainIndexingStatusIds.Backfill}.
+ *
+ * Invariants:
+ * - `omnichainStatus` is always {@link OmnichainIndexingStatusIds.Backfill}.
+ * - `chains` is guaranteed to contain at least one chain with a `chainStatus` of
+ *   {@link ChainIndexingStatusIds.Backfill}.
+ * - `chains` is guaranteed to not to contain any chain with a `chainStatus` of
+ *   {@link ChainIndexingStatusIds.Following}
+ * - `omnichainIndexingCursor` is always < the `config.startBlock.timestamp` for all
+ *   chains with `chainStatus` of {@link ChainIndexingStatusIds.Queued}.
+ * - `omnichainIndexingCursor` is always <= the `backfillEndBlock.timestamp` for all
+ *   chains with `chainStatus` of {@link ChainIndexingStatusIds.Backfill}.
+ * - `omnichainIndexingCursor` is always >= the `latestIndexedBlock.timestamp` for all
+ *    chains with `chainStatus` of {@link ChainIndexingStatusIds.Completed}.
+ * - `omnichainIndexingCursor` is always equal to the timestamp of the highest
+ *   `latestIndexedBlock` across all chains that have started indexing
+ *   (`chainStatus` is not {@link ChainIndexingStatusIds.Queued}).
+ */
+export interface OmnichainIndexingStatusSnapshotBackfill {
   /**
-   * Overall Indexing Status
+   * The status of omnichain indexing.
    */
-  overallStatus: typeof OverallIndexingStatusIds.Completed;
+  omnichainStatus: typeof OmnichainIndexingStatusIds.Backfill;
 
   /**
-   * Omnichain Indexing Cursor
-   *
-   * Identifies the timestamp of the progress of omnichain indexing across
-   * all indexed chains.
-   *
-   * Invariants:
-   * - guaranteed to be equal to
-   *   the timestamp of the highest `latestIndexedBlock` across all chains that
-   *   have started indexing (are not queued).
-   * - guaranteed to be lower than
-   *   the `config.startBlock` timestamp for all queued chains.
+   * The indexing status snapshot for each indexed chain.
+   */
+  chains: Map<ChainId, ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill>;
+
+  /**
+   * The timestamp of omnichain indexing progress across all indexed chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
-
-  /**
-   * Indexing Status for each chain.
-   *
-   * Each chain is guaranteed to have the "completed" status.
-   * It's impossible for any chain to have status other than "completed".
-   */
-  chains: Map<ChainId, ChainIndexingCompletedStatus>;
-
-  /**
-   * Max realtime indexing distance
-   *
-   * Optional, if provided, describes the requested max realtime distance,
-   * and how it was not satisfied for the 'completed' overall status.
-   */
-  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
 }
 
 /**
- * ENSIndexer Overall Indexing Status: Following
+ * Omnichain indexing status snapshot when the overall `omnichainStatus` is
+ * {@link OmnichainIndexingStatusIds.Following}.
  *
- * Describes the state when the overall indexing status is
- * {@link OverallIndexingStatusIds.Following}.
+ * Invariants:
+ * - `omnichainStatus` is always {@link OmnichainIndexingStatusIds.Following}.
+ * - `chains` is guaranteed to contain at least one chain with a `status` of
+ *   {@link ChainIndexingStatusIds.Following}.
+ * - `omnichainIndexingCursor` is always < the `config.startBlock.timestamp` for all
+ *   chains with `chainStatus` of {@link ChainIndexingStatusIds.Queued}.
+ * - `omnichainIndexingCursor` is always <= the `backfillEndBlock.timestamp` for all
+ *   chains with `chainStatus` of {@link ChainIndexingStatusIds.Backfill}.
+ * - `omnichainIndexingCursor` is always >= the `latestIndexedBlock.timestamp` for all
+ *    chains with `chainStatus` of {@link ChainIndexingStatusIds.Completed}.
+ * - `omnichainIndexingCursor` is always equal to the timestamp of the highest
+ *   `latestIndexedBlock` across all chains that have started indexing
+ *   (`chainStatus` is not {@link ChainIndexingStatusIds.Queued}).
  */
-export interface ENSIndexerOverallIndexingFollowingStatus {
+export interface OmnichainIndexingStatusSnapshotFollowing {
   /**
-   * Overall Indexing Status
+   * The status of omnichain indexing.
    */
-  overallStatus: typeof OverallIndexingStatusIds.Following;
+  omnichainStatus: typeof OmnichainIndexingStatusIds.Following;
 
   /**
-   * Omnichain Indexing Cursor
-   *
-   * Identifies the timestamp of the progress of omnichain indexing across
-   * all indexed chains.
-   *
-   * Invariants:
-   * - guaranteed to be equal to
-   *   the timestamp of the highest `latestIndexedBlock` across all chains that
-   *   have started indexing (are not queued).
-   * - guaranteed to be lower than
-   *   the `config.startBlock` timestamp for all queued chains.
+   * The indexing status snapshot for each indexed chain.
+   */
+  chains: Map<ChainId, ChainIndexingStatusSnapshot>;
+
+  /**
+   * The timestamp of omnichain indexing progress across all indexed chains.
    */
   omnichainIndexingCursor: UnixTimestamp;
-
-  /**
-   * Indexing Status for each chain.
-   *
-   * At least one chain is guaranteed to be in the "following" status.
-   * Each chain is guaranteed to have a status of either "queued",
-   * "backfill", "following" or "completed".
-   */
-  chains: Map<ChainId, ChainIndexingStatus>;
-
-  /**
-   * The maximum
-   * {@link ChainIndexingFollowingStatus.approxRealtimeDistance} value
-   * across all chains with status: 'following'.
-   */
-  overallApproxRealtimeDistance: Duration;
-
-  /**
-   * Max realtime indexing distance
-   *
-   * Optional, if provided, describes the requested max realtime distance,
-   * and if it was satisfied for the 'following' overall status.
-   */
-  maxRealtimeDistance?: MaxRealtimeIndexingDistance<boolean>;
 }
 
 /**
- * ENSIndexer Overall Indexing Status: Error
+ * Omnichain indexing status snapshot when the overall `omnichainStatus` is
+ * {@link OmnichainIndexingStatusIds.Completed}.
  *
- * Describes the state when ENSIndexer failed to return the indexing status for
- * all indexed chains.
- *
- * This state suggests an error with the "primary" ENSIndexer.
+ * Invariants:
+ * - `omnichainStatus` is always {@link OmnichainIndexingStatusIds.Completed}.
+ * - `chains` is always a map to {@link ChainIndexingStatusSnapshotCompleted} values exclusively.
+ * - `omnichainIndexingCursor` is always equal to the highest
+ *   `latestIndexedBlock.timestamp` for all chains.
  */
-export interface ENSIndexerOverallIndexingErrorStatus {
+export interface OmnichainIndexingStatusSnapshotCompleted {
   /**
-   * Overall Indexing Status
+   * The status of omnichain indexing.
    */
-  overallStatus: typeof OverallIndexingStatusIds.IndexerError;
+  omnichainStatus: typeof OmnichainIndexingStatusIds.Completed;
 
   /**
-   * Max realtime indexing distance
-   *
-   * Optional, if provided, describes the requested max realtime distance,
-   * and how it was not satisfied for the 'indexer-error' overall status.
+   * The indexing status snapshot for each indexed chain.
    */
-  maxRealtimeDistance?: MaxRealtimeIndexingDistance<false>;
+  chains: Map<ChainId, ChainIndexingStatusSnapshotCompleted>;
+
+  /**
+   * The timestamp of omnichain indexing progress across all indexed chains.
+   */
+  omnichainIndexingCursor: UnixTimestamp;
 }
 
 /**
- * ENSIndexer Overall Indexing Status
+ * Omnichain indexing status snapshot for one or more chains.
  *
- * Describes the overall state of indexing operations.
+ * Use the `omnichainStatus` field to determine the specific type interpretation
+ * at runtime.
  */
-export type ENSIndexerOverallIndexingStatus =
-  | ENSIndexerOverallIndexingUnstartedStatus
-  | ENSIndexerOverallIndexingBackfillStatus
-  | ENSIndexerOverallIndexingCompletedStatus
-  | ENSIndexerOverallIndexingFollowingStatus
-  | ENSIndexerOverallIndexingErrorStatus;
+export type OmnichainIndexingStatusSnapshot =
+  | OmnichainIndexingStatusSnapshotUnstarted
+  | OmnichainIndexingStatusSnapshotBackfill
+  | OmnichainIndexingStatusSnapshotCompleted
+  | OmnichainIndexingStatusSnapshotFollowing;
+
+/**
+ * The strategy used for indexing one or more chains.
+ *
+ * @see https://ponder.sh/docs/api-reference/ponder/config#parameters
+ */
+export const CrossChainIndexingStrategyIds = {
+  /**
+   * Represents that the indexing of events across all indexed chains will
+   * proceed in a deterministic "omnichain" ordering by block timestamp, chain ID,
+   * and block number.
+   *
+   * This strategy is "deterministic" in that the order of processing cross-chain indexed
+   * events and each resulting indexed data state transition recorded in ENSDb is always
+   * the same for each ENSIndexer instance operating with an equivalent
+   * `ENSIndexerConfig` and ENSIndexer version. However it also has the drawbacks of:
+   * - increased indexing latency that must wait for the slowest indexed chain to
+   *   add new blocks or to discover new blocks through the configured RPCs.
+   * - if any indexed chain gets "stuck" due to chain or RPC failures, all indexed chains
+   *   will be affected.
+   */
+  Omnichain: "omnichain",
+} as const;
+
+/**
+ * The derived string union of possible {@link CrossChainIndexingStrategyIds}.
+ */
+export type CrossChainIndexingStrategyId =
+  (typeof CrossChainIndexingStrategyIds)[keyof typeof CrossChainIndexingStrategyIds];
+
+/**
+ * Cross-chain indexing status snapshot when the `strategy` is
+ * {@link CrossChainIndexingStrategyId.Omnichain}.
+ *
+ * Invariants:
+ * - `strategy` is always {@link CrossChainIndexingStrategyId.Omnichain}.
+ * - `slowestChainIndexingCursor` is always equal to
+ *   `omnichainSnapshot.omnichainIndexingCursor`.
+ * - `snapshotTime` is always >= the "highest known block timestamp", defined as the max of:
+ *     - the `slowestChainIndexingCursor`.
+ *     - the `config.startBlock.timestamp` for all indexed chains.
+ *     - the `config.endBlock.timestamp` for all indexed chains with a `config.configType` of
+ *       {@link ChainIndexingConfigTypeIds.Definite}.
+ *     - the `backfillEndBlock.timestamp` for all chains with `chainStatus` of
+ *       {@link ChainIndexingStatusIds.Backfill}.
+ *     - the `latestKnownBlock.timestamp` for all chains with `chainStatus` of
+ *       {@link ChainIndexingStatusIds.Following}.
+ */
+export interface CrossChainIndexingStatusSnapshotOmnichain {
+  /**
+   * The strategy used for indexing one or more chains.
+   */
+  strategy: typeof CrossChainIndexingStrategyIds.Omnichain;
+
+  /**
+   * The timestamp of the "slowest" latest indexed block timestamp
+   * across all indexed chains.
+   */
+  slowestChainIndexingCursor: UnixTimestamp;
+
+  /**
+   * The timestamp when the cross-chain indexing status snapshot was generated.
+   *
+   * Due to possible clock skew between different systems this value must be set
+   * to the max of each of the following values to ensure all invariants are followed:
+   * - the current system time of the system generating this cross-chain indexing
+   *   status snapshot.
+   * - the "highest known block timestamp" (see invariants above for full definition).
+   */
+  snapshotTime: UnixTimestamp;
+
+  /**
+   * The omnichain indexing status snapshot for one or more chains.
+   */
+  omnichainSnapshot: OmnichainIndexingStatusSnapshot;
+}
+
+/**
+ * Cross-chain indexing status snapshot for one or more chains.
+ *
+ * Use the `strategy` field to determine the specific type interpretation
+ * at runtime.
+ *
+ * Currently, only omnichain indexing is supported. This type could theoretically
+ * be extended to support other cross-chain indexing strategies in the future,
+ * such as Ponder's "multichain" indexing strategy that indexes each chain
+ * independently without deterministic ordering.
+ */
+export type CrossChainIndexingStatusSnapshot = CrossChainIndexingStatusSnapshotOmnichain;
+
+/**
+ * A "realtime" indexing status projection based on worst-case assumptions
+ * from the `snapshot`.
+ *
+ * Invariants:
+ * - `projectedAt` is always >= `snapshot.snapshotTime`.
+ * - `worstCaseDistance` is always equal to
+ *   `projectedAt - snapshot.slowestChainIndexingCursor`.
+ */
+export type RealtimeIndexingStatusProjection = {
+  /**
+   * The timestamp representing "now" as of the time this projection was generated.
+   */
+  projectedAt: UnixTimestamp;
+
+  /**
+   * The distance between `projectedAt` and `snapshot.slowestChainIndexingCursor`.
+   *
+   * This is "worst-case" because it assumes all of the following:
+   * - the `snapshot` (which may have `snapshot.snapshotTime < projectedAt`) is still the
+   *   latest snapshot and no indexing progress has been made since `snapshotTime`.
+   * - each indexed chain has added a new block as of `projectedAt`.
+   */
+  worstCaseDistance: Duration;
+
+  /**
+   * The {@link CrossChainIndexingStatusSnapshot} that this projection is based on.
+   */
+  snapshot: CrossChainIndexingStatusSnapshot;
+};
