@@ -29,7 +29,7 @@ export function Registrations() {
   if (!ensIndexerConfigQuery.isSuccess || !indexingStatusQuery.isSuccess) {
     return (
       <section className="flex flex-col gap-6 p-6">
-        <RecentRegistrations />
+        <RecentRegistrations /> {/*display loading state*/}
       </section>
     );
   }

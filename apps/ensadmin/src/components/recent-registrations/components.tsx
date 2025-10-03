@@ -2,9 +2,9 @@
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
-  ENSIndexerOverallIndexingStatus,
-  type ENSIndexerPublicConfig,
-  OverallIndexingStatusIds,
+    ENSIndexerOverallIndexingStatus,
+    type ENSIndexerPublicConfig, OverallIndexingStatusId,
+    OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
@@ -27,11 +27,18 @@ import Link from "next/link";
 import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
 import type { Registration } from "./types";
+import {Badge} from "@/components/ui/badge";
+import {cn} from "@/lib/utils";
 
 /**
  * Max number of latest registrations to display
  */
-const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 25;
+const DEFAULT_MAX_ROWS = 25;
+
+/**
+ * Omnichain indexing statuses that allow the display of registrations.
+ */
+const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OverallIndexingStatusId[] = [OverallIndexingStatusIds.Following, OverallIndexingStatusIds.Completed]
 
 /**
  * RecentRegistrations display variations:
@@ -42,7 +49,7 @@ const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 25;
  *          ENSIndexerOverallIndexingFollowingStatus ,
  *      error: undefined
  *
- * RegistrationsNotAvailableMessage -
+ * UnsupportedOmnichainIndexingStatusMessage -
  *      ensIndexerConfig: ENSIndexerPublicConfig,
  *      indexingStatus: statuses different from Following & Completed,
  *      error: undefined
@@ -52,7 +59,7 @@ const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 25;
  *      indexingStatus: undefined,
  *      error: undefined
  *
- * Error (including ENSIndexerOverallIndexingErrorStatus response)-
+ * Error -
  *      ensIndexerConfig: undefined,
  *      indexingStatus: undefined,
  *      error: ErrorInfoProps
@@ -63,6 +70,7 @@ export interface RecentRegistrationsProps {
   ensIndexerConfig?: ENSIndexerPublicConfig;
   indexingStatus?: ENSIndexerOverallIndexingStatus;
   error?: ErrorInfoProps;
+  maxRows?: number;
 }
 
 /**
@@ -76,6 +84,7 @@ export function RecentRegistrations({
   ensIndexerConfig,
   indexingStatus,
   error,
+  maxRows = DEFAULT_MAX_ROWS,
 }: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
@@ -92,25 +101,14 @@ export function RecentRegistrations({
   }
 
   if (ensIndexerConfig === undefined || indexingStatus === undefined) {
-    return <RecentRegistrationsLoading rowCount={MAX_NUMBER_OF_LATEST_REGISTRATIONS} />;
+    return <RecentRegistrationsLoading rowCount={maxRows} />;
   }
 
-  //TODO: Not sure if we need a separate case for indexer-error
-  // since it's displayed by the indexing status. Advice appreciated
-  if (
-    indexingStatus.overallStatus !== OverallIndexingStatusIds.Completed &&
-    indexingStatus.overallStatus !== OverallIndexingStatusIds.Following
-  ) {
-    return <RegistrationsNotAvailableMessage />;
+  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(indexingStatus.overallStatus)) {
+    return <UnsupportedOmnichainIndexingStatusMessage overallOmnichainIndexingStatus={indexingStatus.overallStatus} />;
   }
 
   const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
-
-  // Get the current indexing date from the indexing status
-  const currentIndexingDate =
-    indexingStatus.overallStatus === OverallIndexingStatusIds.Following
-      ? fromUnixTime(indexingStatus.omnichainIndexingCursor)
-      : null;
 
   return (
     <Card className="w-full">
@@ -124,7 +122,7 @@ export function RecentRegistrations({
           <RegistrationsList
             ensNodeUrl={ensNodeUrl}
             namespaceId={namespaceId}
-            maxRecords={MAX_NUMBER_OF_LATEST_REGISTRATIONS}
+            maxRecords={maxRows}
           />
         )}
       </CardContent>
@@ -235,9 +233,11 @@ function RegistrationsListLoading({ rowCount }: RegistrationLoadingProps) {
 function RecentRegistrationsLoading({ rowCount }: RegistrationLoadingProps) {
   return (
     <Card>
-      <CardHeader className="max-sm:p-3">
-        <div className="h-6 bg-muted rounded w-1/4" />
-      </CardHeader>
+        <CardHeader>
+            <CardTitle className="flex justify-between items-center">
+                <span>Latest indexed registrations</span>
+            </CardTitle>
+        </CardHeader>
       <CardContent className="max-sm:p-3 max-sm:pt-0">
         <RegistrationsListLoading rowCount={rowCount} />
       </CardContent>
@@ -245,24 +245,49 @@ function RecentRegistrationsLoading({ rowCount }: RegistrationLoadingProps) {
   );
 }
 
-function RegistrationsNotAvailableMessage() {
+interface UnsupportedOmnichainIndexingStatusMessageProps {
+    overallOmnichainIndexingStatus: OverallIndexingStatusId;
+}
+
+function UnsupportedOmnichainIndexingStatusMessage({overallOmnichainIndexingStatus} : UnsupportedOmnichainIndexingStatusMessageProps) {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
-  const monitorStatusMessage = "Check current indexing status";
 
   return (
     <Card className="w-full">
       <CardHeader className="sm:pb-4 max-sm:p-3">
-        <CardTitle>Latest indexed registrations are not available</CardTitle>
+          {/*TODO: the wording for the indexer-error is awkward, advice appreciated*/}
+        <CardTitle>{overallOmnichainIndexingStatus === OverallIndexingStatusIds.IndexerError ? "Please investigate your ENSNode instance" : "Please wait for indexing to advance"}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-start items-start gap-4 sm:gap-3">
-        <p>
-          The latest indexed registrations will be available once the indexing status is{" "}
-          <span className="font-mono bg-muted p-1 rounded-md">Following</span> or{" "}
-          <span className="font-mono bg-muted p-1 rounded-md">Completed</span>.
-        </p>
-        <Button asChild variant="default">
-          <Link href={retainCurrentRawConnectionUrlParam("/status")}>{monitorStatusMessage}</Link>
-        </Button>
+          <div className="flex flex-row flex-nowrap justify-start items-center gap-2">
+              <p>Current overall omnichain indexing status:</p>
+              <Badge
+                  className={cn(
+                      "uppercase text-xs leading-none",
+                      overallOmnichainIndexingStatus === OverallIndexingStatusIds.IndexerError && "bg-red-600 text-white",
+                  )}
+                  title={`Current overall omnichain indexing status: ${overallOmnichainIndexingStatus}`}
+              >
+                  {overallOmnichainIndexingStatus === OverallIndexingStatusIds.IndexerError
+                      ? "Indexer Error"
+                      : overallOmnichainIndexingStatus}
+              </Badge>
+          </div>
+          {overallOmnichainIndexingStatus === OverallIndexingStatusIds.IndexerError ?
+              <p> It appears that the indexing of new blocks has been interrupted. API requests to this ENSNode
+                  should continue working successfully but may serve data that isn't updated to the latest
+                  onchain state.</p> : <p>
+                  The latest indexed registrations will be available once the omnichain indexing status is{" "}
+                  {SUPPORTED_OMNICHAIN_INDEXING_STATUSES.map((supportedOmnichainIndexingStatus, idx) =>
+                      <>
+                          <span className="font-mono bg-muted p-1 rounded-md">{supportedOmnichainIndexingStatus}</span>
+                          {idx < SUPPORTED_OMNICHAIN_INDEXING_STATUSES.length - 1 && " or "}
+                      </>
+                  )}.
+              </p>}
+          <Button asChild variant="default">
+              <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
+          </Button>
       </CardContent>
     </Card>
   );
