@@ -3,212 +3,164 @@ import { BlockRef } from "../../shared";
 import {
   createIndexingConfig,
   getOmnichainIndexingCursor,
-  getOverallApproxRealtimeDistance,
-  getOverallIndexingStatus,
+  getOmnichainIndexingStatus,
 } from "./helpers";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
-  ChainIndexingBackfillStatus,
-  ChainIndexingCompletedStatus,
-  ChainIndexingDefiniteConfig,
-  ChainIndexingFollowingStatus,
-  ChainIndexingIndefiniteConfig,
-  ChainIndexingQueuedStatus,
-  ChainIndexingStatus,
+  ChainIndexingConfigDefinite,
+  ChainIndexingConfigIndefinite,
+  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
-  OverallIndexingStatusIds,
+  ChainIndexingStatusSnapshot,
+  ChainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotFollowing,
+  ChainIndexingStatusSnapshotQueued,
+  OmnichainIndexingStatusIds,
 } from "./types";
 
-describe("ENSIndexer: Indexing Status helpers", () => {
-  describe("getOverallIndexingStatus", () => {
+describe("ENSIndexer: Indexing Snapshot helpers", () => {
+  describe("getOmnichainIndexingStatus", () => {
     it("can correctly derive 'completed' status if all chains are 'completed'", () => {
       // arrange
-      const chainStatuses: ChainIndexingStatus[] = [
+      const chainStatuses: ChainIndexingStatusSnapshot[] = [
         {
-          status: ChainIndexingStatusIds.Completed,
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
 
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
-        } satisfies ChainIndexingCompletedStatus,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
 
         {
-          status: ChainIndexingStatusIds.Completed,
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
-        } satisfies ChainIndexingCompletedStatus,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
       ];
 
       // act
-      const overallIndexingStatus = getOverallIndexingStatus(chainStatuses);
+      const overallIndexingStatus = getOmnichainIndexingStatus(chainStatuses);
 
       // assert
-      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Completed);
+      expect(overallIndexingStatus).toStrictEqual(OmnichainIndexingStatusIds.Completed);
     });
 
     it("can correctly derive 'unstarted' status if all chains are in 'queued' status", () => {
       // arrange
-      const chainStatuses: ChainIndexingStatus[] = [
+      const chainStatuses: ChainIndexingStatusSnapshot[] = [
         {
-          status: ChainIndexingStatusIds.Queued,
+          chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
-        } satisfies ChainIndexingQueuedStatus,
+        } satisfies ChainIndexingStatusSnapshotQueued,
         {
-          status: ChainIndexingStatusIds.Queued,
+          chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingQueuedStatus,
+        } satisfies ChainIndexingStatusSnapshotQueued,
       ];
 
       // act
-      const overallIndexingStatus = getOverallIndexingStatus(chainStatuses);
+      const overallIndexingStatus = getOmnichainIndexingStatus(chainStatuses);
 
       // assert
-      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Unstarted);
+      expect(overallIndexingStatus).toStrictEqual(OmnichainIndexingStatusIds.Unstarted);
     });
 
     it("can correctly derive 'backfill' status if all chains are either 'queued', 'backfill' or 'completed'", () => {
       // arrange
-      const chainStatuses: ChainIndexingStatus[] = [
+      const chainStatuses: ChainIndexingStatusSnapshot[] = [
         {
-          status: ChainIndexingStatusIds.Queued,
+          chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
-        } satisfies ChainIndexingQueuedStatus,
+        } satisfies ChainIndexingStatusSnapshotQueued,
 
         {
-          status: ChainIndexingStatusIds.Backfill,
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
+            configType: ChainIndexingConfigTypeIds.Indefinite,
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           backfillEndBlock: latestBlockRef,
-        } satisfies ChainIndexingBackfillStatus,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
 
         {
-          status: ChainIndexingStatusIds.Completed,
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
-        } satisfies ChainIndexingCompletedStatus,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
       ];
 
       // act
-      const overallIndexingStatus = getOverallIndexingStatus(chainStatuses);
+      const overallIndexingStatus = getOmnichainIndexingStatus(chainStatuses);
 
       // assert
-      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Backfill);
+      expect(overallIndexingStatus).toStrictEqual(OmnichainIndexingStatusIds.Backfill);
     });
 
     it("can correctly derive 'following' status if at least one chain is 'following", () => {
       // arrange
-      const chainStatuses: ChainIndexingStatus[] = [
+      const chainStatuses: ChainIndexingStatusSnapshot[] = [
         {
-          status: ChainIndexingStatusIds.Following,
+          chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
+            configType: ChainIndexingConfigTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           latestKnownBlock: latestBlockRef,
-          approxRealtimeDistance: 123,
-        } satisfies ChainIndexingFollowingStatus,
+        } satisfies ChainIndexingStatusSnapshotFollowing,
 
         {
-          status: ChainIndexingStatusIds.Backfill,
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           backfillEndBlock: latestBlockRef,
-        } satisfies ChainIndexingBackfillStatus,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
 
         {
-          status: ChainIndexingStatusIds.Completed,
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earliestBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
-        } satisfies ChainIndexingCompletedStatus,
+        } satisfies ChainIndexingStatusSnapshotCompleted,
       ];
 
       // act
-      const overallIndexingStatus = getOverallIndexingStatus(chainStatuses);
+      const overallIndexingStatus = getOmnichainIndexingStatus(chainStatuses);
 
       // assert
-      expect(overallIndexingStatus).toStrictEqual(OverallIndexingStatusIds.Following);
-    });
-  });
-
-  describe("getOverallApproxRealtimeDistance", () => {
-    it("returns overall approximate realtime distance across 'following' chains", () => {
-      // arrange
-      const chainStatuses: ChainIndexingStatus[] = [
-        {
-          status: ChainIndexingStatusIds.Following,
-          config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
-            startBlock: earlierBlockRef,
-          },
-          latestIndexedBlock: laterBlockRef,
-          latestKnownBlock: latestBlockRef,
-          approxRealtimeDistance: 123,
-        } satisfies ChainIndexingFollowingStatus,
-
-        {
-          status: ChainIndexingStatusIds.Backfill,
-          config: {
-            strategy: ChainIndexingStrategyIds.Definite,
-            startBlock: earliestBlockRef,
-            endBlock: latestBlockRef,
-          },
-          latestIndexedBlock: earlierBlockRef,
-          backfillEndBlock: latestBlockRef,
-        } satisfies ChainIndexingBackfillStatus,
-
-        {
-          status: ChainIndexingStatusIds.Following,
-          config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
-            startBlock: earliestBlockRef,
-          },
-          latestIndexedBlock: earlierBlockRef,
-          latestKnownBlock: laterBlockRef,
-          approxRealtimeDistance: 432,
-        } satisfies ChainIndexingFollowingStatus,
-      ];
-
-      // act
-      const overallApproxRealtimeDistance = getOverallApproxRealtimeDistance(chainStatuses);
-
-      // assert
-      expect(overallApproxRealtimeDistance).toBe(432);
+      expect(overallIndexingStatus).toStrictEqual(OmnichainIndexingStatusIds.Following);
     });
   });
 
@@ -223,10 +175,10 @@ describe("ENSIndexer: Indexing Status helpers", () => {
 
       // assert
       expect(indexingConfig).toStrictEqual({
-        strategy: ChainIndexingStrategyIds.Definite,
+        configType: ChainIndexingConfigTypeIds.Definite,
         startBlock: earlierBlockRef,
         endBlock: laterBlockRef,
-      } satisfies ChainIndexingDefiniteConfig);
+      } satisfies ChainIndexingConfigDefinite);
     });
 
     it("returns 'indefinite' indexer config if the endBlock exists", () => {
@@ -239,18 +191,17 @@ describe("ENSIndexer: Indexing Status helpers", () => {
 
       // assert
       expect(indexingConfig).toStrictEqual({
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: earlierBlockRef,
         endBlock: null,
-      } satisfies ChainIndexingIndefiniteConfig);
+      } satisfies ChainIndexingConfigIndefinite);
     });
   });
 });
 
 describe("getOmnichainIndexingCursor", () => {
-  it("returns the correct cursor for the given chain statuses", () => {
+  it("returns the correct cursor for the given chains in any status", () => {
     // arrange
-
     const evenLaterBlockRef: BlockRef = {
       timestamp: latestBlockRef.timestamp + 1000,
       number: latestBlockRef.number + 1000,
@@ -258,43 +209,42 @@ describe("getOmnichainIndexingCursor", () => {
 
     const chainStatuses = [
       {
-        status: ChainIndexingStatusIds.Queued,
+        chainStatus: ChainIndexingStatusIds.Queued,
         config: {
-          strategy: ChainIndexingStrategyIds.Indefinite,
+          configType: ChainIndexingConfigTypeIds.Indefinite,
           startBlock: evenLaterBlockRef,
         },
-      } satisfies ChainIndexingQueuedStatus,
+      } satisfies ChainIndexingStatusSnapshotQueued,
 
       {
-        status: ChainIndexingStatusIds.Backfill,
+        chainStatus: ChainIndexingStatusIds.Backfill,
         config: {
-          strategy: ChainIndexingStrategyIds.Definite,
+          configType: ChainIndexingConfigTypeIds.Definite,
           startBlock: earliestBlockRef,
           endBlock: latestBlockRef,
         },
         latestIndexedBlock: earlierBlockRef,
         backfillEndBlock: laterBlockRef,
-      } satisfies ChainIndexingBackfillStatus,
+      } satisfies ChainIndexingStatusSnapshotBackfill,
 
       {
-        status: ChainIndexingStatusIds.Following,
+        chainStatus: ChainIndexingStatusIds.Following,
         config: {
-          strategy: ChainIndexingStrategyIds.Indefinite,
+          configType: ChainIndexingConfigTypeIds.Indefinite,
           startBlock: earliestBlockRef,
         },
         latestIndexedBlock: earlierBlockRef,
         latestKnownBlock: laterBlockRef,
-        approxRealtimeDistance: 432,
-      } satisfies ChainIndexingFollowingStatus,
+      } satisfies ChainIndexingStatusSnapshotFollowing,
       {
-        status: ChainIndexingStatusIds.Completed,
+        chainStatus: ChainIndexingStatusIds.Completed,
         config: {
-          strategy: ChainIndexingStrategyIds.Definite,
+          configType: ChainIndexingConfigTypeIds.Definite,
           startBlock: earlierBlockRef,
           endBlock: latestBlockRef,
         },
         latestIndexedBlock: latestBlockRef,
-      } satisfies ChainIndexingCompletedStatus,
+      } satisfies ChainIndexingStatusSnapshotCompleted,
     ];
 
     // act
@@ -304,23 +254,76 @@ describe("getOmnichainIndexingCursor", () => {
     expect(omnichainIndexingCursor).toEqual(latestBlockRef.timestamp);
   });
 
+  it("returns the correct cursor for the given queued chains only", () => {
+    expect(
+      getOmnichainIndexingCursor([
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: laterBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+      ]),
+    ).toEqual(earliestBlockRef.timestamp - 1);
+  });
+
+  it("returns the correct cursor for the given indexed chains", () => {
+    // arrange
+    const evenLaterBlockRef: BlockRef = {
+      timestamp: latestBlockRef.timestamp + 1000,
+      number: latestBlockRef.number + 1000,
+    };
+
+    const chainStatuses = [
+      {
+        chainStatus: ChainIndexingStatusIds.Backfill,
+        config: {
+          configType: ChainIndexingConfigTypeIds.Definite,
+          startBlock: earliestBlockRef,
+          endBlock: latestBlockRef,
+        },
+        latestIndexedBlock: earlierBlockRef,
+        backfillEndBlock: laterBlockRef,
+      } satisfies ChainIndexingStatusSnapshotBackfill,
+
+      {
+        chainStatus: ChainIndexingStatusIds.Following,
+        config: {
+          configType: ChainIndexingConfigTypeIds.Indefinite,
+          startBlock: earliestBlockRef,
+        },
+        latestIndexedBlock: evenLaterBlockRef,
+        latestKnownBlock: laterBlockRef,
+      } satisfies ChainIndexingStatusSnapshotFollowing,
+      {
+        chainStatus: ChainIndexingStatusIds.Completed,
+        config: {
+          configType: ChainIndexingConfigTypeIds.Definite,
+          startBlock: earlierBlockRef,
+          endBlock: latestBlockRef,
+        },
+        latestIndexedBlock: latestBlockRef,
+      } satisfies ChainIndexingStatusSnapshotCompleted,
+    ];
+
+    // act
+    const omnichainIndexingCursor = getOmnichainIndexingCursor(chainStatuses);
+
+    // assert
+    expect(omnichainIndexingCursor).toEqual(evenLaterBlockRef.timestamp);
+  });
+
   it("throws error when no chains were provided", () => {
     expect(() => getOmnichainIndexingCursor([])).toThrowError(
       /Unable to determine omnichain indexing cursor/,
     );
-  });
-
-  it("throws error when all chains are in 'queued' status", () => {
-    expect(() =>
-      getOmnichainIndexingCursor([
-        {
-          status: ChainIndexingStatusIds.Queued,
-          config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
-            startBlock: earliestBlockRef,
-          },
-        } satisfies ChainIndexingQueuedStatus,
-      ]),
-    ).toThrowError(/Unable to determine omnichain indexing cursor/);
   });
 });

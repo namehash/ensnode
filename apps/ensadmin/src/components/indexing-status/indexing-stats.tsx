@@ -1,5 +1,5 @@
 /**
- * This file describes UI components for each of {@link OverallIndexingStatusId}.
+ * This file describes UI components for each of {@link OmnichainIndexingStatusId}.
  *
  * Each overall status will enable presenting of different indexing stats.
  */
@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChainIndexingStatusIds,
-  ENSIndexerOverallIndexingBackfillStatus,
-  ENSIndexerOverallIndexingCompletedStatus,
-  ENSIndexerOverallIndexingFollowingStatus,
-  ENSIndexerOverallIndexingStatus,
-  ENSIndexerOverallIndexingUnstartedStatus,
-  OverallIndexingStatusId,
-  OverallIndexingStatusIds,
+  OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
+  OmnichainIndexingStatusSnapshot,
+  OmnichainIndexingStatusSnapshotBackfill,
+  OmnichainIndexingStatusSnapshotCompleted,
+  OmnichainIndexingStatusSnapshotFollowing,
+  OmnichainIndexingStatusSnapshotUnstarted,
   sortAscChainStatusesByStartBlock,
 } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
@@ -24,14 +24,14 @@ import { PropsWithChildren } from "react";
 import { cn } from "@/lib/utils";
 import { BlockStats, blockViewModel } from "./block-refs";
 
-interface IndexingStatusProps<IndexingStatusType extends ENSIndexerOverallIndexingStatus> {
-  indexingStatus: IndexingStatusType;
+interface IndexingSnapshotProps<IndexingSnapshotType extends OmnichainIndexingStatusSnapshot> {
+  indexingSnapshot: IndexingSnapshotType;
 }
 
 /**
- * Indexing stats for {@link OverallIndexingStatusIds.IndexerError}.
+ * Indexing stats for {@link OmnichainIndexingStatusIds.IndexerError}.
  */
-export function IndexingStatsForIndexerErrorStatus() {
+export function IndexingStatsForUnavailableSnapshot() {
   return (
     <p>
       It appears that the indexing of new blocks has been interrupted. API requests to this ENSNode
@@ -42,12 +42,12 @@ export function IndexingStatsForIndexerErrorStatus() {
 }
 
 /**
- * Indexing stats for {@link OverallIndexingStatusIds.Unstarted}.
+ * Indexing stats for {@link OmnichainIndexingStatusIds.Unstarted}.
  */
-export function IndexingStatsForUnstartedStatus({
-  indexingStatus,
-}: IndexingStatusProps<ENSIndexerOverallIndexingUnstartedStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+export function IndexingStatsForSnapshotUnstarted({
+  indexingSnapshot,
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotUnstarted>) {
+  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -65,9 +65,9 @@ export function IndexingStatsForUnstartedStatus({
 
             <Badge
               className={cn("uppercase text-xs leading-none")}
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -89,12 +89,12 @@ export function IndexingStatsForUnstartedStatus({
 }
 
 /**
- * Indexing stats for {@link OverallIndexingStatusIds.Backfill}.
+ * Indexing stats for {@link OmnichainIndexingStatusIds.Backfill}.
  */
-export function IndexingStatsForBackfillStatus({
-  indexingStatus,
-}: IndexingStatusProps<ENSIndexerOverallIndexingBackfillStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+export function IndexingStatsForSnapshotBackfill({
+  indexingSnapshot,
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotBackfill>) {
+  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -112,9 +112,9 @@ export function IndexingStatsForBackfillStatus({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -129,7 +129,7 @@ export function IndexingStatsForBackfillStatus({
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
 
-            {chain.status === ChainIndexingStatusIds.Backfill && (
+            {chain.chainStatus === ChainIndexingStatusIds.Backfill && (
               <>
                 <BlockStats
                   chainId={chainId}
@@ -152,12 +152,12 @@ export function IndexingStatsForBackfillStatus({
 }
 
 /**
- * Indexing stats for {@link OverallIndexingStatusIds.Completed}.
+ * Indexing stats for {@link OmnichainIndexingStatusIds.Completed}.
  */
-export function IndexingStatsForCompletedStatus({
-  indexingStatus,
-}: IndexingStatusProps<ENSIndexerOverallIndexingCompletedStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+export function IndexingStatsForSnapshotCompleted({
+  indexingSnapshot,
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotCompleted>) {
+  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -175,9 +175,9 @@ export function IndexingStatsForCompletedStatus({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -205,12 +205,12 @@ export function IndexingStatsForCompletedStatus({
 }
 
 /**
- * Indexing stats for {@link OverallIndexingStatusIds.Following}.
+ * Indexing stats for {@link OmnichainIndexingStatusIds.Following}.
  */
-export function IndexingStatsForFollowingStatus({
-  indexingStatus,
-}: IndexingStatusProps<ENSIndexerOverallIndexingFollowingStatus>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+export function IndexingStatsForSnapshotFollowing({
+  indexingSnapshot,
+}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotFollowing>) {
+  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -228,9 +228,9 @@ export function IndexingStatsForFollowingStatus({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.status}`}
+              title={`Chain indexing status: ${chain.chainStatus}`}
             >
-              {chain.status}
+              {chain.chainStatus}
             </Badge>
           </div>
         </CardHeader>
@@ -245,7 +245,7 @@ export function IndexingStatsForFollowingStatus({
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
 
-            {chain.status === ChainIndexingStatusIds.Backfill && (
+            {chain.chainStatus === ChainIndexingStatusIds.Backfill && (
               <>
                 <BlockStats
                   chainId={chainId}
@@ -261,7 +261,7 @@ export function IndexingStatsForFollowingStatus({
               </>
             )}
 
-            {chain.status === ChainIndexingStatusIds.Following && (
+            {chain.chainStatus === ChainIndexingStatusIds.Following && (
               <>
                 <BlockStats
                   chainId={chainId}
@@ -289,26 +289,23 @@ export function IndexingStatsForFollowingStatus({
  * UI component for presenting indexing stats UI for specific overall status.
  */
 export function IndexingStatsShell({
-  overallStatus,
+  omnichainStatus,
   children,
-}: PropsWithChildren<{ overallStatus: OverallIndexingStatusId }>) {
+}: PropsWithChildren<{ omnichainStatus?: OmnichainIndexingStatusId }>) {
   return (
     <Card className="w-full flex flex-col gap-2">
       <CardHeader>
         <CardTitle className="flex gap-2 items-center">
           <span>Indexing Status</span>
 
-          <Badge
-            className={cn(
-              "uppercase text-xs leading-none",
-              overallStatus === OverallIndexingStatusIds.IndexerError && "bg-red-600 text-white",
-            )}
-            title={`Overall indexing status: ${overallStatus}`}
-          >
-            {overallStatus === OverallIndexingStatusIds.IndexerError
-              ? "Indexer Error"
-              : overallStatus}
-          </Badge>
+          {omnichainStatus && (
+            <Badge
+              className={cn("uppercase text-xs leading-none")}
+              title={`Overall indexing status: ${omnichainStatus}`}
+            >
+              {omnichainStatus}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
 

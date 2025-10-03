@@ -2,313 +2,318 @@ import { describe, expect, it } from "vitest";
 import { type ZodSafeParseResult, prettifyError } from "zod/v4";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
-  ChainIndexingBackfillStatus,
-  ChainIndexingCompletedStatus,
-  ChainIndexingFollowingStatus,
-  ChainIndexingQueuedStatus,
-  ChainIndexingStatus,
+  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
+  ChainIndexingStatusSnapshot,
+  ChainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotFollowing,
+  ChainIndexingStatusSnapshotQueued,
 } from "./types";
-import { makeChainIndexingStatusSchema } from "./zod-schemas";
+import { makeChainIndexingStatusSnapshotSchema } from "./zod-schemas";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Zod Schemas", () => {
     const formatParseError = <T>(zodParseError: ZodSafeParseResult<T>) =>
       prettifyError(zodParseError.error!);
 
-    describe("ChainIndexingQueuedStatus", () => {
+    describe("ChainIndexingStatusSnapshotQueued", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Queued,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingQueuedStatus;
+        } satisfies ChainIndexingStatusSnapshotQueued;
 
         // act
-        const parsed = makeChainIndexingStatusSchema().parse(serialized);
+        const parsed = makeChainIndexingStatusSnapshotSchema().parse(serialized);
 
         // assert
         expect(parsed).toStrictEqual({
-          status: ChainIndexingStatusIds.Queued,
+          chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
-        } satisfies ChainIndexingQueuedStatus);
+        } satisfies ChainIndexingStatusSnapshotQueued);
       });
 
       it("won't parse if the config.startBlock is after the config.endBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Queued,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Queued,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: laterBlockRef,
             endBlock: earlierBlockRef,
           },
-        } satisfies ChainIndexingQueuedStatus;
+        } satisfies ChainIndexingStatusSnapshotQueued;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as config.endBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `config.endBlock`.",
+        );
       });
     });
 
-    describe("ChainIndexingBackfillStatus", () => {
+    describe("ChainIndexingStatusSnapshotBackfill", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Backfill,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
           backfillEndBlock: latestBlockRef,
-        } satisfies ChainIndexingBackfillStatus;
+        } satisfies ChainIndexingStatusSnapshotBackfill;
 
         // act
-        const parsed = makeChainIndexingStatusSchema().parse(serialized);
+        const parsed = makeChainIndexingStatusSnapshotSchema().parse(serialized);
 
         // assert
         expect(parsed).toStrictEqual({
-          status: ChainIndexingStatusIds.Backfill,
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: latestBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
           backfillEndBlock: latestBlockRef,
-        } satisfies ChainIndexingBackfillStatus);
+        } satisfies ChainIndexingStatusSnapshotBackfill);
       });
 
       it("won't parse if the config.startBlock is after the latestIndexedBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Backfill,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: earliestBlockRef,
           backfillEndBlock: laterBlockRef,
-        } satisfies ChainIndexingBackfillStatus;
+        } satisfies ChainIndexingStatusSnapshotBackfill;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        );
       });
 
       it("won't parse if the latestIndexedBlock is after the backfillEndBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Backfill,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
           backfillEndBlock: laterBlockRef,
-        } satisfies ChainIndexingBackfillStatus;
+        } satisfies ChainIndexingStatusSnapshotBackfill;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as backfillEndBlock.`);
+        expect(notParsed).toBe(
+          "✖ `latestIndexedBlock` must be before or same as `backfillEndBlock`.",
+        );
       });
 
       it("won't parse if the backfillEndBlock different than the config.endBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Backfill,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Backfill,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
           backfillEndBlock: latestBlockRef,
-        } satisfies ChainIndexingBackfillStatus;
+        } satisfies ChainIndexingStatusSnapshotBackfill;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ backfillEndBlock must be the same as config.endBlock.`);
+        expect(notParsed).toBe("✖ `backfillEndBlock` must be the same as `config.endBlock`.");
       });
     });
 
-    describe("ChainIndexingFollowingStatus", () => {
+    describe("ChainIndexingStatusSnapshotFollowing", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Following,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
+            configType: ChainIndexingConfigTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           latestKnownBlock: latestBlockRef,
-          approxRealtimeDistance: 0,
-        } satisfies ChainIndexingFollowingStatus;
+        } satisfies ChainIndexingStatusSnapshotFollowing;
 
         // act
-        const parsed = makeChainIndexingStatusSchema().parse(serialized);
+        const parsed = makeChainIndexingStatusSnapshotSchema().parse(serialized);
 
         // assert
         expect(parsed).toStrictEqual({
-          status: ChainIndexingStatusIds.Following,
+          chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
+            configType: ChainIndexingConfigTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
           latestKnownBlock: latestBlockRef,
-          approxRealtimeDistance: 0,
-        } satisfies ChainIndexingFollowingStatus);
+        } satisfies ChainIndexingStatusSnapshotFollowing);
       });
 
       it("won't parse if the config.startBlock is after the latestIndexedBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Following,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
+            configType: ChainIndexingConfigTypeIds.Indefinite,
             startBlock: laterBlockRef,
           },
           latestIndexedBlock: earlierBlockRef,
           latestKnownBlock: laterBlockRef,
-          approxRealtimeDistance: 777,
-        } satisfies ChainIndexingFollowingStatus;
+        } satisfies ChainIndexingStatusSnapshotFollowing;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        );
       });
 
       it("won't parse if the latestIndexedBlock is after the latestKnownBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Following,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Following,
           config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
+            configType: ChainIndexingConfigTypeIds.Indefinite,
             startBlock: earlierBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
           latestKnownBlock: laterBlockRef,
-          approxRealtimeDistance: 777,
-        } satisfies ChainIndexingFollowingStatus;
+        } satisfies ChainIndexingStatusSnapshotFollowing;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as latestKnownBlock.`);
-      });
-
-      it("won't parse if the approxRealtimeDistance was a negative integer", () => {
-        // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Following,
-          config: {
-            strategy: ChainIndexingStrategyIds.Indefinite,
-            startBlock: earlierBlockRef,
-          },
-          latestIndexedBlock: earlierBlockRef,
-          latestKnownBlock: laterBlockRef,
-          approxRealtimeDistance: -1,
-        } satisfies ChainIndexingFollowingStatus;
-
-        // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
-
-        // assert
-        expect(notParsed).toBe(`✖ Value must be a non-negative integer (>=0).
-  → at approxRealtimeDistance`);
+        expect(notParsed).toBe(
+          "✖ `latestIndexedBlock` must be before or same as `latestKnownBlock`.",
+        );
       });
     });
 
-    describe("ChainIndexingCompletedStatus", () => {
+    describe("ChainIndexingStatusSnapshotCompleted", () => {
       it("can parse a valid serialized status object", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Completed,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
-        } satisfies ChainIndexingCompletedStatus;
+        } satisfies ChainIndexingStatusSnapshotCompleted;
 
         // act
-        const parsed = makeChainIndexingStatusSchema().parse(serialized);
+        const parsed = makeChainIndexingStatusSnapshotSchema().parse(serialized);
 
         // assert
         expect(parsed).toStrictEqual({
-          status: ChainIndexingStatusIds.Completed,
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
-        } satisfies ChainIndexingCompletedStatus);
+        } satisfies ChainIndexingStatusSnapshotCompleted);
       });
 
       it("won't parse if the config.startBlock is after the latestIndexedBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Completed,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: latestBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: laterBlockRef,
-        } satisfies ChainIndexingCompletedStatus;
+        } satisfies ChainIndexingStatusSnapshotCompleted;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ config.startBlock must be before or same as latestIndexedBlock.`);
+        expect(notParsed).toBe(
+          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        );
       });
 
       it("won't parse if the latestIndexedBlock is after the config.endBlock", () => {
         // arrange
-        const serialized: ChainIndexingStatus = {
-          status: ChainIndexingStatusIds.Completed,
+        const serialized: ChainIndexingStatusSnapshot = {
+          chainStatus: ChainIndexingStatusIds.Completed,
           config: {
-            strategy: ChainIndexingStrategyIds.Definite,
+            configType: ChainIndexingConfigTypeIds.Definite,
             startBlock: earlierBlockRef,
             endBlock: laterBlockRef,
           },
           latestIndexedBlock: latestBlockRef,
-        } satisfies ChainIndexingCompletedStatus;
+        } satisfies ChainIndexingStatusSnapshotCompleted;
 
         // act
-        const notParsed = formatParseError(makeChainIndexingStatusSchema().safeParse(serialized));
+        const notParsed = formatParseError(
+          makeChainIndexingStatusSnapshotSchema().safeParse(serialized),
+        );
 
         // assert
-        expect(notParsed).toBe(`✖ latestIndexedBlock must be before or same as config.endBlock.`);
+        expect(notParsed).toBe(
+          "✖ `latestIndexedBlock` must be before or same as `config.endBlock`.",
+        );
       });
     });
   });

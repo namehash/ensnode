@@ -1,12 +1,7 @@
 "use client";
 
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import {
-  type ENSIndexerOverallIndexingCompletedStatus,
-  type ENSIndexerOverallIndexingFollowingStatus,
-  type ENSIndexerPublicConfig,
-  OverallIndexingStatusIds,
-} from "@ensnode/ensnode-sdk";
+import { type ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
 
@@ -32,10 +27,6 @@ const MAX_NUMBER_OF_LATEST_REGISTRATIONS = 5;
 
 interface RecentRegistrationsProps {
   ensIndexerConfig: ENSIndexerPublicConfig;
-
-  indexingStatus:
-    | ENSIndexerOverallIndexingCompletedStatus
-    | ENSIndexerOverallIndexingFollowingStatus;
 }
 
 /**
@@ -45,10 +36,7 @@ interface RecentRegistrationsProps {
  * Note: The Recent Registrations Panel is only visible when the
  * overall indexing status is either "completed", or "following".
  */
-export function RecentRegistrations({
-  ensIndexerConfig,
-  indexingStatus,
-}: RecentRegistrationsProps) {
+export function RecentRegistrations({ ensIndexerConfig }: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -56,12 +44,6 @@ export function RecentRegistrations({
   }, []);
 
   const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
-
-  // Get the current indexing date from the indexing status
-  const currentIndexingDate =
-    indexingStatus.overallStatus === OverallIndexingStatusIds.Following
-      ? fromUnixTime(indexingStatus.omnichainIndexingCursor)
-      : null;
 
   return (
     <Card className="w-full">
