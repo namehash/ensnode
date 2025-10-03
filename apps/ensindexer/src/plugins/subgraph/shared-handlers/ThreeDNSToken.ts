@@ -113,7 +113,7 @@ export async function handleNewOwner({
 
   // the domain in question is a subdomain of `parentNode`
   const node = makeSubdomainNode(labelHash, parentNode);
-  let domain = await context.db.find(schema.domain, { id: node });
+  let domain = await context.db.find(schema.subgraph_domain, { id: node });
 
   // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
   const resolverAddress = context.contracts["threedns/Resolver"].address! as Address;
@@ -129,10 +129,10 @@ export async function handleNewOwner({
 
   if (domain) {
     // if the domain already exists, this is just an update of the owner record
-    domain = await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
+    domain = await context.db.update(schema.subgraph_domain, { id: node }).set({ ownerId: owner });
   } else {
     // otherwise create the domain
-    domain = await context.db.insert(schema.domain).values({
+    domain = await context.db.insert(schema.subgraph_domain).values({
       id: node,
       ownerId: owner,
       parentId: parentNode,
@@ -146,7 +146,7 @@ export async function handleNewOwner({
 
     // and increment parent subdomainCount
     await context.db
-      .update(schema.domain, { id: parentNode })
+      .update(schema.subgraph_domain, { id: parentNode })
       .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
   }
 
@@ -155,7 +155,7 @@ export async function handleNewOwner({
   // always emit `RegistrationCreated`, including Domain's `name`, before this `NewOwner` event
   // is indexed.
   if (domain.name === null) {
-    const parent = await context.db.find(schema.domain, { id: parentNode });
+    const parent = await context.db.find(schema.subgraph_domain, { id: parentNode });
 
     // 1. attempt metadata retrieval
     const tokenId = getThreeDNSTokenId(node);
@@ -183,12 +183,12 @@ export async function handleNewOwner({
     ) as InterpretedName;
 
     await context.db
-      .update(schema.domain, { id: node })
+      .update(schema.subgraph_domain, { id: node })
       .set({ name: interpretedName, labelName: interpretedLabel });
   }
 
   // log DomainEvent
-  await context.db.insert(schema.newOwner).values({
+  await context.db.insert(schema.subgraph_newOwner).values({
     ...sharedEventValues(context.chain.id, event),
     parentDomainId: parentNode,
     domainId: node,
@@ -208,7 +208,7 @@ export async function handleTransfer({
   await upsertAccount(context, owner);
 
   // update owner (Domain is guaranteed to exist because NewOwner fires before Transfer)
-  await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
+  await context.db.update(schema.subgraph_domain, { id: node }).set({ ownerId: owner });
 
   // garbage collect newly 'empty' domain iff necessary
   if (isAddressEqual(owner, zeroAddress)) {
@@ -216,7 +216,7 @@ export async function handleTransfer({
   }
 
   // log DomainEvent
-  await context.db.insert(schema.transfer).values({
+  await context.db.insert(schema.subgraph_transfer).values({
     ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ownerId: owner,
@@ -282,7 +282,7 @@ export async function handleRegistrationCreated({
   });
 
   // log RegistrationEvent
-  await context.db.insert(schema.nameRegistered).values({
+  await context.db.insert(schema.subgraph_nameRegistered).values({
     ...sharedEventValues(context.chain.id, event),
     registrationId,
     registrantId: registrant,
@@ -300,16 +300,16 @@ export async function handleRegistrationExtended({
   const { node, duration, newExpiry } = event.args;
 
   // update domain expiry date
-  await context.db.update(schema.domain, { id: node }).set({ expiryDate: newExpiry });
+  await context.db.update(schema.subgraph_domain, { id: node }).set({ expiryDate: newExpiry });
 
   // udpate registration expiry date
   const registrationId = makeRegistrationId(zeroHash, node);
   await context.db
-    .update(schema.registration, { id: registrationId })
+    .update(schema.subgraph_registration, { id: registrationId })
     .set({ expiryDate: newExpiry });
 
   // log RegistratioEvent
-  await context.db.insert(schema.nameRenewed).values({
+  await context.db.insert(schema.subgraph_nameRenewed).values({
     ...sharedEventValues(context.chain.id, event),
     registrationId,
     expiryDate: newExpiry,

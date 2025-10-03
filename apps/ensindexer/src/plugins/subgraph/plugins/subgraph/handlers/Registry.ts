@@ -20,7 +20,7 @@ import {
 // these handlers should ignore 'RegistryOld' events for a given domain if it has been migrated to the
 // (new) Registry, which is tracked in the `Domain.isMigrated` field
 async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
-  const domain = await context.db.find(schema.domain, { id: node });
+  const domain = await context.db.find(schema.subgraph_domain, { id: node });
   return domain?.isMigrated ?? false;
 }
 

@@ -3,7 +3,6 @@
  */
 
 import { index, onchainTable, relations } from "ponder";
-import { domain, account } from "./subgraph.schema";
 
 /**
  * A RegistrationReferral tracks individual occurences of referrals for ENS name registrations.
@@ -42,16 +41,6 @@ export const ext_registrationReferral_relations = relations(
       fields: [ext_registrationReferral.referrerId],
       references: [ext_referrer.id],
     }),
-    // RegistrationReferral references one Account (as referee)
-    referee: one(account, {
-      fields: [ext_registrationReferral.refereeId],
-      references: [account.id],
-    }),
-    // RegistrationReferral references one Domain
-    domain: one(domain, {
-      fields: [ext_registrationReferral.domainId],
-      references: [domain.id],
-    }),
   }),
 );
 
@@ -88,25 +77,6 @@ export const ext_renewalReferral_relations = relations(ext_renewalReferral, ({ o
     fields: [ext_renewalReferral.referrerId],
     references: [ext_referrer.id],
   }),
-  // RenewalReferral references one Account (as referee)
-  referee: one(account, {
-    fields: [ext_renewalReferral.refereeId],
-    references: [account.id],
-  }),
-  // RenewalReferral references one Domain
-  domain: one(domain, {
-    fields: [ext_renewalReferral.domainId],
-    references: [domain.id],
-  }),
-}));
-
-// add Domain relations
-export const ext_referrals_domain_relations = relations(domain, ({ one, many }) => ({
-  // Domain has many RegistrationReferrals
-  registrationReferrals: many(ext_registrationReferral),
-
-  // Domain has many RenewalReferrals
-  renewalReferrals: many(ext_renewalReferral),
 }));
 
 /**

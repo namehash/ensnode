@@ -39,13 +39,15 @@ export async function handleAddrChanged({
   });
 
   // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
-  const domain = await context.db.find(schema.domain, { id: node });
+  const domain = await context.db.find(schema.subgraph_domain, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: address });
+    await context.db
+      .update(schema.subgraph_domain, { id: node })
+      .set({ resolvedAddressId: address });
   }
 
   // log ResolverEvent
-  await context.db.insert(schema.addrChanged).values({
+  await context.db.insert(schema.subgraph_addrChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     addrId: address,
@@ -70,11 +72,11 @@ export async function handleAddressChanged({
 
   // upsert the new coinType
   await context.db
-    .update(schema.resolver, { id })
+    .update(schema.subgraph_resolver, { id })
     .set({ coinTypes: uniq([...(resolver.coinTypes ?? []), coinType]) });
 
   // log ResolverEvent
-  await context.db.insert(schema.multicoinAddrChanged).values({
+  await context.db.insert(schema.subgraph_multicoinAddrChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     coinType,
@@ -100,7 +102,7 @@ export async function handleNameChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.nameChanged).values({
+  await context.db.insert(schema.subgraph_nameChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     name,
@@ -126,7 +128,7 @@ export async function handleABIChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.abiChanged).values({
+  await context.db.insert(schema.subgraph_abiChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     contentType,
@@ -151,7 +153,7 @@ export async function handlePubkeyChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.pubkeyChanged).values({
+  await context.db.insert(schema.subgraph_pubkeyChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     x,
@@ -195,11 +197,11 @@ export async function handleTextChanged({
   // NOTE(subgraph-compat): we insert sanitized key even if it's empty string to match subgraph behavior
   // of implicitly stripping null bytes
   await context.db
-    .update(schema.resolver, { id })
+    .update(schema.subgraph_resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), sanitizedKey]) });
 
   // log ResolverEvent
-  await context.db.insert(schema.textChanged).values({
+  await context.db.insert(schema.subgraph_textChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key: sanitizedKey,
@@ -224,7 +226,7 @@ export async function handleContenthashChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.contenthashChanged).values({
+  await context.db.insert(schema.subgraph_contenthashChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     hash,
@@ -247,7 +249,7 @@ export async function handleInterfaceChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.interfaceChanged).values({
+  await context.db.insert(schema.subgraph_interfaceChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     interfaceID,
@@ -277,7 +279,7 @@ export async function handleAuthorisationChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.authorisationChanged).values({
+  await context.db.insert(schema.subgraph_authorisationChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     owner,
@@ -298,9 +300,9 @@ export async function handleVersionChanged({
   const id = makeResolverId(context.chain.id, event.log.address, node);
 
   // materialize the Domain's resolvedAddress field iff exists and is set to this Resolver
-  const domain = await context.db.find(schema.domain, { id: node });
+  const domain = await context.db.find(schema.subgraph_domain, { id: node });
   if (domain?.resolverId === id) {
-    await context.db.update(schema.domain, { id: node }).set({ resolvedAddressId: null });
+    await context.db.update(schema.subgraph_domain, { id: node }).set({ resolvedAddressId: null });
   }
 
   await upsertResolver(context, {
@@ -316,7 +318,7 @@ export async function handleVersionChanged({
   });
 
   // log ResolverEvent
-  await context.db.insert(schema.versionChanged).values({
+  await context.db.insert(schema.subgraph_versionChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     version: newVersion,
@@ -363,11 +365,11 @@ export async function handleDNSRecordChanged({
 
   // upsert new key
   await context.db
-    .update(schema.resolver, { id })
+    .update(schema.subgraph_resolver, { id })
     .set({ texts: uniq([...(resolver.texts ?? []), key]) });
 
   // log ResolverEvent
-  await context.db.insert(schema.textChanged).values({
+  await context.db.insert(schema.subgraph_textChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key,
@@ -405,11 +407,11 @@ export async function handleDNSRecordDeleted({
 
   // remove relevant key
   await context.db
-    .update(schema.resolver, { id })
+    .update(schema.subgraph_resolver, { id })
     .set({ texts: (resolver.texts ?? []).filter((text) => text !== key) });
 
   // log ResolverEvent
-  await context.db.insert(schema.textChanged).values({
+  await context.db.insert(schema.subgraph_textChanged).values({
     ...sharedEventValues(context.chain.id, event),
     resolverId: id,
     key,
