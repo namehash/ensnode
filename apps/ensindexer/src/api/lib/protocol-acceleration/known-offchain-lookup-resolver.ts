@@ -1,16 +1,22 @@
 import config from "@/config";
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { getDatasourceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
+import { DatasourceNames } from "@ensnode/datasources";
+import { AccountId, ChainId } from "@ensnode/ensnode-sdk";
 import { Address, isAddressEqual } from "viem";
 
-// NOTE: we know ensRoot is defined for all namespaces, so enforce that at runtime with !
-const ensRoot = maybeGetDatasource(config.namespace, DatasourceNames.ENSRoot)!;
-const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames);
-const lineanames = maybeGetDatasource(config.namespace, DatasourceNames.Lineanames);
+const ensRoot = getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceNames.ENSRoot);
+const basenames = getDatasourceAsFullyDefinedAtCompileTime(
+  config.namespace,
+  DatasourceNames.Basenames,
+);
+const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
+  config.namespace,
+  DatasourceNames.Lineanames,
+);
 
 /**
- * For a given `resolverAddress` on a specific `chainId`, return the `PluginName` that, if it were
- * active, indexes all Domains (and Resolvers) necessary to answer resolution requests.
+ * For a given `resolverAddress` on a specific `chainId`, if it is an Offchain Lookup Resolver, return
+ * the chainId whose (shadow)Registry it defers resolution to.
  *
  * These Offchain Lookup Resolvers must abide the following pattern:
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
@@ -21,51 +27,39 @@ const lineanames = maybeGetDatasource(config.namespace, DatasourceNames.Lineanam
  *
  * The intent is to encode the following information:
  * - base.eth name on ENS Root Chain always emits OffchainLookup to resolve against the
- *   (sub-)Registry on Base (or Base Sepolia, etc)
+ *   (shadow)Registry on Base (or Base Sepolia, etc)
  * - linea.eth name on ENS Root Chain always emits OffchainLookup to resolve against the
- *   (sub-)Registry on Linea (or Linea Sepolia, etc)
- *
- * NOTE: ContractConfig['address'] can be Address | Address[] but we know all of these are just Address
+ *   (shadow)Registry on Linea (or Linea Sepolia, etc)
  *
  * TODO: these relationships could/should be encoded in an ENSIP, likely as a mapping from
- * resolverAddress to (sub-)Registry on a specified chain.
+ * resolverAddress to (shadow)Registry on a specified chain.
  */
 export function possibleKnownOffchainLookupResolverDefersTo(
   chainId: ChainId,
   resolverAddress: Address,
-): { pluginName: PluginName; chainId: ChainId } | null {
+): AccountId | null {
   // on the ENS Deployment Chain
   if (chainId === ensRoot.chain.id) {
-    const basenamesL1ResolverAddress = ensRoot.contracts.BasenamesL1Resolver?.address as
-      | Address
-      | undefined;
-
-    // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames plugin,
-    if (
-      basenamesL1ResolverAddress &&
-      isAddressEqual(resolverAddress, basenamesL1ResolverAddress) &&
-      basenames
-    ) {
-      return {
-        pluginName: PluginName.Basenames,
-        chainId: basenames.chain.id,
-      };
+    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime definition check
+    if (basenames) {
+      // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames chain
+      if (isAddressEqual(resolverAddress, ensRoot.contracts.BasenamesL1Resolver.address)) {
+        return {
+          chainId: basenames.chain.id,
+          address: basenames.contracts.Registry.address as Address,
+        };
+      }
     }
 
-    const lineanamesL1ResolverAddress = ensRoot.contracts.LineanamesL1Resolver?.address as
-      | Address
-      | undefined;
-
-    // the ENSRoot's LineanamesL1Resolver, if exists, defers to the Lineanames plugin
-    if (
-      lineanamesL1ResolverAddress &&
-      isAddressEqual(resolverAddress, lineanamesL1ResolverAddress) &&
-      lineanames
-    ) {
-      return {
-        pluginName: PluginName.Lineanames,
-        chainId: lineanames.chain.id,
-      };
+    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime definition check
+    if (lineanames) {
+      // the ENSRoot's LineanamesL1Resolver, if exists, defers to the Lineanames chain
+      if (isAddressEqual(resolverAddress, ensRoot.contracts.LineanamesL1Resolver.address)) {
+        return {
+          chainId: lineanames.chain.id,
+          address: lineanames.contracts.Registry.address,
+        };
+      }
     }
 
     // TODO: ThreeDNS

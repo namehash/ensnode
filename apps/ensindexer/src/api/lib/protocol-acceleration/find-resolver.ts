@@ -1,7 +1,7 @@
 import { db } from "ponder:api";
 import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
 import {
-  ChainId,
+  AccountId,
   type Name,
   type Node,
   NormalizedName,
@@ -44,16 +44,16 @@ const ensRootChainId = getENSRootChainId(config.namespace);
  * Identifies the active resolver on `chainId` for `name`.
  */
 export async function findResolver({
-  chainId,
+  registry,
   name,
   accelerate,
   publicClient,
-}: { chainId: ChainId; name: NormalizedName; accelerate: boolean; publicClient: PublicClient }) {
-  if (chainId === ensRootChainId) {
+}: { registry: AccountId; name: NormalizedName; accelerate: boolean; publicClient: PublicClient }) {
+  if (registry.chainId === ensRootChainId) {
     // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
     // ProtocolAcceleration plugin is active
     if (accelerate && config.plugins.includes(PluginName.ProtocolAcceleration)) {
-      return findResolverWithIndex(chainId, name);
+      return findResolverWithIndex(registry, name);
     }
 
     // otherwise, query the UniversalResolver on the ENSRoot Chain (via RPC)
@@ -62,7 +62,7 @@ export async function findResolver({
 
   // If findResolver is called for a non-root-chain, we _must_ have access to the indexed Node-Resolver
   // relations necessary to look up the Node's configured Resolver (see invariant in `findResolverWithIndex`)
-  return findResolverWithIndex(chainId, name);
+  return findResolverWithIndex(registry, name);
 }
 
 /**
@@ -139,7 +139,7 @@ async function findResolverWithUniversalResolver(
  * Identifies the active resolver for a given ENS name, using indexed data, following ENSIP-10.
  * This function parallels UniversalResolver#findResolver.
  *
- * @param chainId — the chain ID upon which to find a Resolver
+ * @param registry — the AccountId of the Registry to use
  * @param name - The ENS name to find the Resolver for
  * @returns The resolver ID if found, null otherwise
  *
@@ -150,82 +150,90 @@ async function findResolverWithUniversalResolver(
  * ```
  */
 async function findResolverWithIndex(
-  chainId: ChainId,
+  registry: AccountId,
   name: NormalizedName,
 ): Promise<FindResolverResult> {
   if (!config.plugins.includes(PluginName.ProtocolAcceleration)) {
     throw new Error(
-      `Invariant(findResolverWithIndex): ProtocolAcceleration plugin must be enabled in order to accelerate the identification of a name's active resolver on chain ${chainId}.`,
+      `Invariant(findResolverWithIndex): ProtocolAcceleration plugin must be enabled in order to accelerate the identification of a name's active resolver on chain ${registry.chainId}.`,
     );
   }
 
-  return withActiveSpanAsync(tracer, "findResolverWithIndex", { chainId, name }, async () => {
-    // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
-    const names = getNameHierarchy(name);
+  return withActiveSpanAsync(
+    tracer,
+    "findResolverWithIndex",
+    { chainId: registry.chainId, registry: registry.address, name },
+    async () => {
+      // 1. construct a hierarchy of names. i.e. sub.example.eth -> [sub.example.eth, example.eth, eth]
+      const names = getNameHierarchy(name);
 
-    // Invariant: there is at least 1 name in the hierarchy
-    if (names.length === 0) {
-      throw new Error(`Invariant(findResolverWithIndex): received an invalid name: '${name}'`);
-    }
-
-    // 2. compute node of each via namehash
-    const nodes = names.map((name) => namehash(name) as Node);
-
-    // 3. for each node, find its associated resolver (only on the specified chain)
-    const nodeResolverRelations = await withSpanAsync(
-      tracer,
-      "ext_nodeResolverRelation.findMany",
-      {},
-      async () => {
-        const records = await db.query.ext_nodeResolverRelation.findMany({
-          where: (nrr, { inArray, and, eq }) =>
-            and(
-              inArray(nrr.node, nodes), // find Relations for the following Nodes
-              eq(nrr.chainId, chainId), // exclusively on the requested chainId
-            ),
-          columns: { node: true, resolver: true },
-        });
-
-        // cast into our semantic types
-        return records as { node: Node; resolver: Address }[];
-      },
-    );
-
-    // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
-    nodeResolverRelations.sort((a, b) => (nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1));
-
-    // 4. iterate up the hierarchy and return the first valid resolver
-    for (const { node, resolver } of nodeResolverRelations) {
-      // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
-      // encodes a zeroAddress resolver as the _absence_ of a Node-Resolver relation, so there is
-      // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
-      // we include this invariant here to encode that expectation explicitly.
-      if (isAddressEqual(resolver, zeroAddress)) {
-        throw new Error(
-          `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for node ${node}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
-        );
+      // Invariant: there is at least 1 name in the hierarchy
+      if (names.length === 0) {
+        throw new Error(`Invariant(findResolverWithIndex): received an invalid name: '${name}'`);
       }
 
-      // map the relation's `node` back to its name in `names`
-      const indexInHierarchy = nodes.indexOf(node);
-      const activeName = names[indexInHierarchy];
+      // 2. compute node of each via namehash
+      const nodes = names.map((name) => namehash(name) as Node);
 
-      // will never occur, exlusively for typechecking
-      if (!activeName) {
-        throw new Error(
-          `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's node: ${node}.`,
-        );
+      // 3. for each node, find its associated resolver (only on the specified chain)
+      const nodeResolverRelations = await withSpanAsync(
+        tracer,
+        "ext_nodeResolverRelation.findMany",
+        {},
+        async () => {
+          const records = await db.query.ext_nodeResolverRelation.findMany({
+            where: (nrr, { inArray, and, eq }) =>
+              and(
+                eq(nrr.chainId, registry.chainId), // exclusively for the requested registry
+                eq(nrr.registry, registry.address), // exclusively for the requested registry
+                inArray(nrr.node, nodes), // find Relations for the following Nodes
+              ),
+            columns: { node: true, resolver: true },
+          });
+
+          // cast into our semantic types
+          return records as { node: Node; resolver: Address }[];
+        },
+      );
+
+      // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
+      nodeResolverRelations.sort((a, b) =>
+        nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1,
+      );
+
+      // 4. iterate up the hierarchy and return the first valid resolver
+      for (const { node, resolver } of nodeResolverRelations) {
+        // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
+        // encodes a zeroAddress resolver as the _absence_ of a Node-Resolver relation, so there is
+        // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
+        // we include this invariant here to encode that expectation explicitly.
+        if (isAddressEqual(resolver, zeroAddress)) {
+          throw new Error(
+            `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for node ${node}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
+          );
+        }
+
+        // map the relation's `node` back to its name in `names`
+        const indexInHierarchy = nodes.indexOf(node);
+        const activeName = names[indexInHierarchy];
+
+        // will never occur, exlusively for typechecking
+        if (!activeName) {
+          throw new Error(
+            `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's node: ${node}.`,
+          );
+        }
+
+        return {
+          activeName,
+          activeResolver: resolver,
+          // this resolver must have wildcard support if it was not for the first node in our hierarchy
+          requiresWildcardSupport: indexInHierarchy > 0,
+        };
       }
 
-      return {
-        activeName,
-        activeResolver: resolver,
-        // this resolver must have wildcard support if it was not for the first node in our hierarchy
-        requiresWildcardSupport: indexInHierarchy > 0,
-      };
-    }
-
-    // 5. unable to find an active resolver
-    return NULL_RESULT;
-  });
+      // 5. unable to find an active resolver
+      return NULL_RESULT;
+    },
+  );
 }
