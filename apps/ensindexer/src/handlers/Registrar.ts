@@ -61,7 +61,7 @@ export const makeRegistrarHandlers = ({
         literalLabelToInterpretedLabel(label);
 
     const node = makeSubdomainNode(labelHash, registrarManagedNode);
-    const domain = await context.db.find(schema.domain, { id: node });
+    const domain = await context.db.find(schema.subgraph_domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
     if (!domain) throw new Error("domain expected in setNamePreimage but not found");
@@ -74,13 +74,13 @@ export const makeRegistrarHandlers = ({
         | SubgraphInterpretedName;
 
       await context.db
-        .update(schema.domain, { id: node })
+        .update(schema.subgraph_domain, { id: node })
         .set({ labelName: interpretedLabel, name: interpretedName });
     }
 
     // update the registration's labelName
     await context.db
-      .update(schema.registration, { id: makeRegistrationId(labelHash, node) })
+      .update(schema.subgraph_registration, { id: makeRegistrationId(labelHash, node) })
       .set({ labelName: interpretedLabel, cost });
   }
 
@@ -126,7 +126,7 @@ export const makeRegistrarHandlers = ({
       // Therefore, if a Domain does not exist in Registrar#NameRegistered, it _must_ be a 'preminted'
       // name, tracked only in the Registrar. If/when these 'preminted' names are _actually_ registered
       // in the future, they will emit NewOwner as expected.
-      const domain = await context.db.find(schema.domain, { id: node });
+      const domain = await context.db.find(schema.subgraph_domain, { id: node });
       if (!domain) {
         // invariant: if the domain does not exist and the plugin does not support preminted names, panic
         if (!pluginSupportsPremintedNames(pluginName)) {
@@ -183,7 +183,7 @@ export const makeRegistrarHandlers = ({
       }
 
       // update Domain
-      await context.db.update(schema.domain, { id: node }).set({
+      await context.db.update(schema.subgraph_domain, { id: node }).set({
         registrantId: owner,
         expiryDate: expires + GRACE_PERIOD_SECONDS,
         labelName: label,
@@ -204,7 +204,7 @@ export const makeRegistrarHandlers = ({
       });
 
       // log RegistrationEvent
-      await context.db.insert(schema.nameRegistered).values({
+      await context.db.insert(schema.subgraph_nameRegistered).values({
         ...sharedEventValues(context.chain.id, event),
         registrationId,
         registrantId: owner,
@@ -267,15 +267,15 @@ export const makeRegistrarHandlers = ({
       const id = makeRegistrationId(labelHash, node);
 
       // update Registration expiry
-      await context.db.update(schema.registration, { id }).set({ expiryDate: expires });
+      await context.db.update(schema.subgraph_registration, { id }).set({ expiryDate: expires });
 
       // update Domain expiry
       await context.db
-        .update(schema.domain, { id: node })
+        .update(schema.subgraph_domain, { id: node })
         .set({ expiryDate: expires + GRACE_PERIOD_SECONDS });
 
       // log RegistrationEvent
-      await context.db.insert(schema.nameRenewed).values({
+      await context.db.insert(schema.subgraph_nameRenewed).values({
         ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         expiryDate: expires,
@@ -299,17 +299,17 @@ export const makeRegistrarHandlers = ({
 
       // if the Transfer event occurs before the Registration entity exists (i.e. the initial
       // registration, which is Transfer -> NewOwner -> NameRegistered), no-op
-      const registration = await context.db.find(schema.registration, { id });
+      const registration = await context.db.find(schema.subgraph_registration, { id });
       if (!registration) return;
 
       // update registration registrant
-      await context.db.update(schema.registration, { id }).set({ registrantId: to });
+      await context.db.update(schema.subgraph_registration, { id }).set({ registrantId: to });
 
       // update domain registrant
-      await context.db.update(schema.domain, { id: node }).set({ registrantId: to });
+      await context.db.update(schema.subgraph_domain, { id: node }).set({ registrantId: to });
 
       // log RegistrationEvent
-      await context.db.insert(schema.nameTransferred).values({
+      await context.db.insert(schema.subgraph_nameTransferred).values({
         ...sharedEventValues(context.chain.id, event),
         registrationId: id,
         newOwnerId: to,

@@ -1,5 +1,11 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.ponder.json",
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "./**/*.ts",
+    "../../apps/ensindexer/src/lib/filter-schema-by-prefix.ts",
+    "../../apps/ensindexer/test/filter-schema-by-prefix.test.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

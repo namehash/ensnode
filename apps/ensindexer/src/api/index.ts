@@ -8,7 +8,7 @@ import { cors } from "hono/cors";
 import { sdk } from "@/api/lib/tracing/instrumentation";
 import config from "@/config";
 import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
-import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
+import { filterSchemaByPrefix } from "@/lib/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
   fetchEnsRainbowVersion,
@@ -24,8 +24,6 @@ import {
 } from "@ensnode/ponder-subgraph";
 
 import ensNodeApi from "@/api/handlers/ensnode-api";
-
-const schemaWithoutExtensions = filterSchemaExtensions(schema);
 
 const app = new Hono();
 
@@ -87,35 +85,39 @@ app.use(
   subgraphGraphQL({
     db,
     graphqlSchema: buildSubgraphGraphQLSchema({
-      schema: schemaWithoutExtensions,
+      schema: filterSchemaByPrefix("subgraph_", schema),
       // provide the schema with ponder's internal metadata to power _meta
       metadataProvider: makePonderMetadataProvider({ db, publicClients }),
       // describes the polymorphic (interface) relationships in the schema
       polymorphicConfig: {
         types: {
           DomainEvent: [
-            schema.transfer,
-            schema.newOwner,
-            schema.newResolver,
-            schema.newTTL,
-            schema.wrappedTransfer,
-            schema.nameWrapped,
-            schema.nameUnwrapped,
-            schema.fusesSet,
-            schema.expiryExtended,
+            schema.subgraph_transfer,
+            schema.subgraph_newOwner,
+            schema.subgraph_newResolver,
+            schema.subgraph_newTTL,
+            schema.subgraph_wrappedTransfer,
+            schema.subgraph_nameWrapped,
+            schema.subgraph_nameUnwrapped,
+            schema.subgraph_fusesSet,
+            schema.subgraph_expiryExtended,
           ],
-          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+          RegistrationEvent: [
+            schema.subgraph_nameRegistered,
+            schema.subgraph_nameRenewed,
+            schema.subgraph_nameTransferred,
+          ],
           ResolverEvent: [
-            schema.addrChanged,
-            schema.multicoinAddrChanged,
-            schema.nameChanged,
-            schema.abiChanged,
-            schema.pubkeyChanged,
-            schema.textChanged,
-            schema.contenthashChanged,
-            schema.interfaceChanged,
-            schema.authorisationChanged,
-            schema.versionChanged,
+            schema.subgraph_addrChanged,
+            schema.subgraph_multicoinAddrChanged,
+            schema.subgraph_nameChanged,
+            schema.subgraph_abiChanged,
+            schema.subgraph_pubkeyChanged,
+            schema.subgraph_textChanged,
+            schema.subgraph_contenthashChanged,
+            schema.subgraph_interfaceChanged,
+            schema.subgraph_authorisationChanged,
+            schema.subgraph_versionChanged,
           ],
         },
         fields: {
