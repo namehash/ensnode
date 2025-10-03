@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   IndexedResolverRecords,
   makeRecordsResponseFromIndexedRecords,
-} from "@/api/lib/make-records-response";
+} from "@/api/lib/resolution/make-records-response";
 
 describe("lib-resolution", () => {
   describe("makeRecordsResponseFromIndexedRecords", () => {

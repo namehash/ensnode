@@ -11,54 +11,28 @@
  */
 
 import {
-  type BlockRef,
-  Duration,
-  ENSIndexerOverallIndexingErrorStatus,
-  ENSIndexerOverallIndexingStatus,
-  OverallIndexingStatusIds,
-  UnixTimestamp,
-  deserializeENSIndexerIndexingStatus,
+  type CrossChainIndexingStatusSnapshotOmnichain,
+  CrossChainIndexingStrategyIds,
+  type OmnichainIndexingStatusSnapshot,
+  type UnixTimestamp,
+  deserializeOmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
-import { prettifyError } from "zod/v4";
 
 import config from "@/config";
 import ponderConfig from "@/ponder/config";
 import {
+  type ChainBlockRefs,
   type ChainName,
   type PonderStatus,
   type PrometheusMetrics,
   type PublicClient,
-  type UnvalidatedChainMetadata,
-  fetchBlockRef,
+  createSerializedChainSnapshots,
+  createSerializedOmnichainIndexingStatusSnapshot,
   fetchPonderMetrics,
   fetchPonderStatus,
+  getChainsBlockRefs,
   getChainsBlockrange,
 } from "./ponder-metadata";
-import {
-  PonderAppSettingsSchema,
-  makePonderChainMetadataSchema,
-} from "./ponder-metadata/zod-schemas";
-
-/**
- * Chain Block Refs
- *
- * Represents information about indexing scope for an indexed chain.
- */
-interface ChainBlockRefs {
-  /**
-   * Based on Ponder Configuration
-   */
-  config: {
-    startBlock: BlockRef;
-
-    endBlock: BlockRef | null;
-  };
-
-  /**
-   * Based on Ponder runtime metrics
-   */
-  backfillEndBlock: BlockRef;
-}
 
 /**
  * Names for each indexed chain
@@ -82,17 +56,17 @@ const chainsBlockrange = getChainsBlockrange(ponderConfig);
  *
  * Note: works as cache for {@link getChainsBlockRefs}.
  */
-const chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
+let chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
 
 /**
- * Get {@link IndexedChainBlockRefs} for indexed chains.
+ * Get cached {@link IndexedChainBlockRefs} for indexed chains.
  *
  * Guaranteed to include {@link ChainBlockRefs} for each indexed chain.
  *
  * Note: performs a network request only once and caches response to
  * re-use it for further `getChainsBlockRefs` calls.
  */
-async function getChainsBlockRefs(
+async function getChainsBlockRefsCached(
   metrics: PrometheusMetrics,
   publicClients: Record<ChainName, PublicClient>,
 ): Promise<Map<ChainName, ChainBlockRefs>> {
@@ -101,73 +75,14 @@ async function getChainsBlockRefs(
     return chainsBlockRefs;
   }
 
-  // otherwise, build the chain block refs
-
-  for (const chainName of chainNames) {
-    const blockrange = chainsBlockrange[chainName];
-    const startBlock = blockrange?.startBlock;
-    const endBlock = blockrange?.endBlock;
-
-    const publicClient = publicClients[chainName];
-
-    if (typeof startBlock !== "number") {
-      throw new Error(`startBlock not found for chain ${chainName}`);
-    }
-
-    if (typeof publicClient === "undefined") {
-      throw new Error(`publicClient not found for chain ${chainName}`);
-    }
-
-    const historicalTotalBlocks = metrics.getValue("ponder_historical_total_blocks", {
-      chain: chainName,
-    });
-
-    if (typeof historicalTotalBlocks !== "number") {
-      throw new Error(`No historical total blocks metric found for chain ${chainName}`);
-    }
-
-    const backfillEndBlock = startBlock + historicalTotalBlocks - 1;
-
-    try {
-      // fetch relevant block refs using RPC
-      const [startBlockRef, endBlockRef, backfillEndBlockRef] = await Promise.all([
-        fetchBlockRef(publicClient, startBlock),
-        endBlock ? fetchBlockRef(publicClient, endBlock) : null,
-        fetchBlockRef(publicClient, backfillEndBlock),
-      ]);
-
-      const chainBlockRef = {
-        config: {
-          startBlock: startBlockRef,
-          endBlock: endBlockRef,
-        },
-        backfillEndBlock: backfillEndBlockRef,
-      } satisfies ChainBlockRefs;
-
-      chainsBlockRefs.set(chainName, chainBlockRef);
-    } catch {
-      throw new Error(`Could not get BlockRefs for chain ${chainName}`);
-    }
-  }
+  chainsBlockRefs = await getChainsBlockRefs(chainNames, chainsBlockrange, metrics, publicClients);
 
   return chainsBlockRefs;
 }
 
-/**
- * Build {@link ENSIndexerIndexingStatus} object from Ponder metadata.
- *
- * Note: Ponder metadata must come from an ENSIndexer instance that is
- * guaranteed to provide indexing status data.
- * @see https://ponder.sh/docs/api-reference/ponder/cli#dev
- * @see https://ponder.sh/docs/api-reference/ponder/cli#start
- *
- * @throws error when fetched Ponder Metadata was invalid.
- */
-export async function buildIndexingStatus(
+export async function buildOmnichainIndexingStatusSnapshot(
   publicClients: Record<ChainName, PublicClient>,
-  systemTimestamp: UnixTimestamp,
-  maxRealtimeDistance: Duration | undefined,
-): Promise<ENSIndexerOverallIndexingStatus> {
+): Promise<OmnichainIndexingStatusSnapshot> {
   let metrics: PrometheusMetrics;
   let status: PonderStatus;
 
@@ -181,76 +96,37 @@ export async function buildIndexingStatus(
     metrics = ponderMetrics;
     status = ponderStatus;
   } catch (error) {
-    console.error(`Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}`);
-
-    return deserializeENSIndexerIndexingStatus({
-      overallStatus: OverallIndexingStatusIds.IndexerError,
-      maxRealtimeDistance: maxRealtimeDistance
-        ? {
-            requestedDistance: maxRealtimeDistance,
-            satisfiesRequestedDistance: false,
-          }
-        : undefined,
-    } satisfies ENSIndexerOverallIndexingErrorStatus);
-  }
-
-  // Invariant: Ponder command & ordering are as expected
-  const parsedAppSettings = PonderAppSettingsSchema.safeParse({
-    command: metrics.getLabel("ponder_settings_info", "command"),
-    ordering: metrics.getLabel("ponder_settings_info", "ordering"),
-  });
-
-  if (parsedAppSettings.error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     throw new Error(
-      "Failed to build IndexingStatus object: \n" + prettifyError(parsedAppSettings.error) + "\n",
+      `Could not fetch data from ENSIndexer at ${config.ensIndexerUrl.href}: ${errorMessage}.`,
     );
   }
 
   // get BlockRefs for relevant blocks
-  const chainsBlockRefs = await getChainsBlockRefs(metrics, publicClients);
+  const chainsBlockRefs = await getChainsBlockRefsCached(metrics, publicClients);
 
-  const chains = new Map<ChainName, UnvalidatedChainMetadata>();
+  // create serialized chain indexing snapshot for each indexed chain
+  const serializedChainSnapshots = createSerializedChainSnapshots(
+    chainNames,
+    chainsBlockRefs,
+    metrics,
+    status,
+  );
 
-  // collect unvalidated chain metadata for each indexed chain
-  for (const chainName of chainNames) {
-    const chainBlockRefs = chainsBlockRefs.get(chainName);
+  const serializedOmnichainSnapshot =
+    createSerializedOmnichainIndexingStatusSnapshot(serializedChainSnapshots);
 
-    const chainMetadata = {
-      chainId: status[chainName]?.id,
-      config: chainBlockRefs?.config,
-      backfillEndBlock: chainBlockRefs?.backfillEndBlock,
-      historicalTotalBlocks: metrics.getValue("ponder_historical_total_blocks", {
-        chain: chainName,
-      }),
-      isSyncComplete: metrics.getValue("ponder_sync_is_complete", { chain: chainName }),
-      isSyncRealtime: metrics.getValue("ponder_sync_is_realtime", { chain: chainName }),
-      syncBlock: {
-        number: metrics.getValue("ponder_sync_block", { chain: chainName }),
-        timestamp: metrics.getValue("ponder_sync_block_timestamp", { chain: chainName }),
-      },
-      statusBlock: {
-        number: status[chainName]?.block.number,
-        timestamp: status[chainName]?.block.timestamp,
-      },
-    } satisfies UnvalidatedChainMetadata;
+  return deserializeOmnichainIndexingStatusSnapshot(serializedOmnichainSnapshot);
+}
 
-    chains.set(chainName, chainMetadata);
-  }
-
-  // parse chain metadata for each indexed chain
-  const schema = makePonderChainMetadataSchema(chainNames, systemTimestamp);
-  const parsed = schema.safeParse({
-    appSettings: parsedAppSettings.data,
-    chains,
-    maxRealtimeDistance,
-  });
-
-  if (!parsed.success) {
-    throw new Error(
-      "Failed to build IndexingStatus object: \n" + prettifyError(parsed.error) + "\n",
-    );
-  }
-
-  // construct the final ENSIndexerIndexingStatus object from validated chain metadata
-  return deserializeENSIndexerIndexingStatus(parsed.data);
+export function createCrossChainIndexingStatusSnapshotOmnichain(
+  omnichainSnapshot: OmnichainIndexingStatusSnapshot,
+  snapshotTime: UnixTimestamp,
+): CrossChainIndexingStatusSnapshotOmnichain {
+  return {
+    strategy: CrossChainIndexingStrategyIds.Omnichain,
+    slowestChainIndexingCursor: omnichainSnapshot.omnichainIndexingCursor,
+    snapshotTime,
+    omnichainSnapshot,
+  };
 }

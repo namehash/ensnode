@@ -1,11 +1,11 @@
 /**
  * This file describes UI components required for displaying a timeline for
- * the {@link ENSIndexerOverallIndexingBackfillStatus} indexing status object.
+ * the {@link OmnichainIndexingStatusSnapshotBackfill} indexing status object.
  */
 
 import {
   ChainIndexingStatusIds,
-  ENSIndexerOverallIndexingBackfillStatus,
+  OmnichainIndexingStatusSnapshotBackfill,
   UnixTimestamp,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
@@ -32,14 +32,14 @@ interface ChainIndexingPhaseViewModel {
 }
 
 interface BackfillStatusProps {
-  indexingStatus: ENSIndexerOverallIndexingBackfillStatus;
+  indexingSnapshot: OmnichainIndexingStatusSnapshotBackfill;
 }
 
 /**
  * Presents indexing status when overall status is "backfill".
  */
-export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingStatus.chains.entries()]);
+export function BackfillStatus({ indexingSnapshot }: BackfillStatusProps) {
+  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
   const chains = chainEntries.map(([, chain]) => chain);
 
   const timelineStartsAt = getTimestampForLowestOmnichainStartBlock(chains);
@@ -47,7 +47,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
 
   const yearMarkers = generateYearMarkers(timelineStartsAt, timelineEndsAt);
   const timelinePositionValue = getTimelinePosition(
-    indexingStatus.omnichainIndexingCursor,
+    indexingSnapshot.omnichainIndexingCursor,
     timelineStartsAt,
     timelineEndsAt,
   );
@@ -69,7 +69,7 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               <span className="text-sm font-medium">
                 Indexed through{" "}
                 <AbsoluteTime
-                  timestamp={indexingStatus.omnichainIndexingCursor}
+                  timestamp={indexingSnapshot.omnichainIndexingCursor}
                   options={{
                     year: "numeric",
                     month: "short",
@@ -145,14 +145,14 @@ export function BackfillStatus({ indexingStatus }: BackfillStatusProps) {
               });
 
               const lastIndexedBlock =
-                chain.status === ChainIndexingStatusIds.Backfill
+                chain.chainStatus === ChainIndexingStatusIds.Backfill
                   ? blockViewModel(chain.latestIndexedBlock)
                   : null;
 
               return (
                 <ChainIndexingTimeline
                   key={chainId}
-                  omnichainIndexingCursor={indexingStatus.omnichainIndexingCursor}
+                  omnichainIndexingCursor={indexingSnapshot.omnichainIndexingCursor}
                   chainStatus={{
                     chainId,
                     firstBlockToIndex: blockViewModel(chain.config.startBlock),

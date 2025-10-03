@@ -67,7 +67,10 @@ export function Identity({
 
   // Otherwise, render the primary name
   return (
-    <NameLink name={ensName}>
+    <NameLink
+      name={ensName}
+      className="inline-flex items-center gap-2 text-blue-600 hover:underline"
+    >
       {showAvatar && <EnsAvatar name={ensName} namespaceId={namespaceId} className="h-6 w-6" />}
       <NameDisplay name={ensName} />
     </NameLink>

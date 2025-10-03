@@ -1,1 +1,4 @@
-export { buildIndexingStatus } from "./build-index-status";
+export {
+  createCrossChainIndexingStatusSnapshotOmnichain,
+  buildOmnichainIndexingStatusSnapshot,
+} from "./build-index-status";

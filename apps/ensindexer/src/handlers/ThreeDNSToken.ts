@@ -1,15 +1,13 @@
 import { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, isAddressEqual, labelhash, zeroAddress, zeroHash } from "viem";
+import { Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
 
 import {
   DNSEncodedLiteralName,
   DNSEncodedName,
   InterpretedLabel,
   InterpretedName,
-  Label,
   type LabelHash,
-  LiteralLabel,
   type Node,
   decodeDNSEncodedLiteralName,
   encodeLabelHash,
@@ -24,12 +22,11 @@ import {
   sharedEventValues,
   upsertAccount,
   upsertDomain,
-  upsertDomainResolverRelation,
   upsertRegistration,
   upsertResolver,
 } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import { makeDomainResolverRelationId, makeRegistrationId, makeResolverId } from "@/lib/ids";
+import { makeRegistrationId, makeResolverId } from "@/lib/ids";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
 import { EventWithArgs } from "@/lib/ponder-helpers";
 import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
@@ -133,14 +130,6 @@ export async function handleNewOwner({
   if (domain) {
     // if the domain already exists, this is just an update of the owner record
     domain = await context.db.update(schema.domain, { id: node }).set({ ownerId: owner });
-
-    // NOTE(resolver-relations): link Domain and Resolver on this chain
-    await upsertDomainResolverRelation(context, {
-      id: makeDomainResolverRelationId(context.chain.id, node),
-      chainId: context.chain.id,
-      domainId: node,
-      resolverId,
-    });
   } else {
     // otherwise create the domain
     domain = await context.db.insert(schema.domain).values({

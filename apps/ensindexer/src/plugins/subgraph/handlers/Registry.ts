@@ -1,8 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
-import schema from "ponder:schema";
-
 import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
 
+import schema from "ponder:schema";
 import {
   handleNewOwner,
   handleNewResolver,

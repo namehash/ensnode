@@ -50,6 +50,14 @@ export default createPlugin({
           ),
           abi: contracts.RegistrarController.abi,
         },
+        [namespaceContract(pluginName, "UpgradeableRegistrarController")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.UpgradeableRegistrarController,
+          ),
+          abi: contracts.UpgradeableRegistrarController.abi,
+        },
         // NOTE: shared (non-namespaced) Resolver definition/implementation (see plugins/shared/Resolver.ts)
         Resolver: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Resolver),

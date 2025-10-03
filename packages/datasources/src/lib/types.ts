@@ -98,18 +98,21 @@ export type ContractConfig =
       readonly address: Address;
       readonly filter?: never;
       readonly startBlock: number;
+      readonly endBlock?: number;
     }
   | {
       readonly abi: Abi;
       readonly address: Address[];
       readonly filter?: never;
       readonly startBlock: number;
+      readonly endBlock?: number;
     }
   | {
       readonly abi: Abi;
       readonly address?: never;
       readonly filter: EventFilter[];
       readonly startBlock: number;
+      readonly endBlock?: number;
     };
 
 /**

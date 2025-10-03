@@ -1,8 +1,11 @@
-import { deserializeErrorResponse } from "./api";
+import {
+  SerializedIndexingStatusResponse,
+  deserializeErrorResponse,
+  deserializeIndexingStatusResponse,
+} from "./api";
 import {
   type ConfigResponse,
   type ErrorResponse,
-  type IndexingStatusRequest,
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,
   type ResolvePrimaryNameRequest,
@@ -14,11 +17,11 @@ import {
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
-  OverallIndexingStatusIds,
-  type SerializedENSIndexerOverallIndexingStatus,
+  RealtimeIndexingStatusProjection,
   type SerializedENSIndexerPublicConfig,
-  deserializeENSIndexerIndexingStatus,
+  SerializedRealtimeIndexingStatusProjection,
   deserializeENSIndexerPublicConfig,
+  deserializeRealtimeIndexingStatusProjection,
 } from "./ensindexer";
 import { ResolverRecordsSelection } from "./resolution";
 
@@ -311,16 +314,7 @@ export class ENSNodeClient {
   /**
    * Fetch ENSNode Indexing Status
    *
-   * Fetch the ENSNode's multichain indexing status.
-   *
-   * @param options additional options
-   * @param options.maxRealtimeDistance the max allowed distance between the
-   *  latest indexed block of each chain and the "tip" of all indexed chains.
-   *  Setting this parameter influences the HTTP response code as follows:
-   *  - Success (200 OK): The latest indexed block of each chain is within the
-   *    requested distance from realtime.
-   *  - Service Unavailable (503): The latest indexed block of each chain is NOT
-   *    within the requested distance from realtime.
+   * Fetch the ENSNode's cross-chain indexing status.
    *
    * @returns {IndexingStatusResponse}
    *
@@ -328,12 +322,8 @@ export class ENSNodeClient {
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
    */
-  async indexingStatus(options?: IndexingStatusRequest): Promise<IndexingStatusResponse> {
+  async indexingStatus(): Promise<IndexingStatusResponse> {
     const url = new URL(`/api/indexing-status`, this.options.url);
-
-    if (typeof options?.maxRealtimeDistance !== "undefined") {
-      url.searchParams.set("maxRealtimeDistance", `${options.maxRealtimeDistance}`);
-    }
 
     const response = await fetch(url);
 
@@ -367,23 +357,6 @@ export class ENSNodeClient {
       }
     }
 
-    // deserialize indexing status data
-    const indexingStatus = deserializeENSIndexerIndexingStatus(
-      responseData as SerializedENSIndexerOverallIndexingStatus,
-    );
-
-    // log indexer error if overall status is 'indexer-error'
-    if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
-      console.error("Indexing Status API: indexer error");
-    }
-
-    // log indexer error if maxRealtimeDistance was requested,
-    // but not satisfied
-    if (indexingStatus.maxRealtimeDistance?.satisfiesRequestedDistance !== true) {
-      console.error("Indexing Status API: Requested realtime indexing distance was not satisfied");
-    }
-
-    // returned deserialized indexing status data
-    return indexingStatus;
+    return deserializeIndexingStatusResponse(responseData as SerializedIndexingStatusResponse);
   }
 }

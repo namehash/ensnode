@@ -2,26 +2,24 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  SerializedENSIndexerOverallIndexingStatus,
-  deserializeENSIndexerIndexingStatus,
-} from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
 import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
 
-import Link from "next/link";
-import mockDataJson from "./data.json";
-
-const mockStatusData = mockDataJson as Record<string, SerializedENSIndexerOverallIndexingStatus>;
-
-type StatusVariant = keyof typeof mockStatusData;
+import {
+  IndexingStatusResponseCodes,
+  OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
+import { indexingStatusResponseOmnichain } from "./data";
 
 export default function MockIndexingStatusPage() {
-  const [selectedVariant, setSelectedVariant] = useState<StatusVariant>("unstarted");
+  const [selectedVariant, setSelectedVariant] = useState<OmnichainIndexingStatusId>(
+    OmnichainIndexingStatusIds.Unstarted,
+  );
 
   const { deserializedStatus, validationError } = useMemo(() => {
     try {
-      const status = deserializeENSIndexerIndexingStatus(mockStatusData[selectedVariant]);
+      const status = indexingStatusResponseOmnichain[selectedVariant];
       return { deserializedStatus: status, validationError: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown validation error";
@@ -39,12 +37,17 @@ export default function MockIndexingStatusPage() {
 
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {Object.keys(mockStatusData).map((variant) => (
+            {[
+              OmnichainIndexingStatusIds.Unstarted,
+              OmnichainIndexingStatusIds.Backfill,
+              OmnichainIndexingStatusIds.Following,
+              OmnichainIndexingStatusIds.Completed,
+            ].map((variant) => (
               <Button
                 key={variant}
                 variant={selectedVariant === variant ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedVariant(variant as StatusVariant)}
+                onClick={() => setSelectedVariant(variant)}
               >
                 {variant}
               </Button>
@@ -64,8 +67,10 @@ export default function MockIndexingStatusPage() {
         </Card>
       )}
 
-      {deserializedStatus && (
-        <MockIndexingStatusDisplayWithProps indexingStatus={deserializedStatus} />
+      {deserializedStatus?.responseCode === IndexingStatusResponseCodes.Ok && (
+        <MockIndexingStatusDisplayWithProps
+          indexingProjection={deserializedStatus.realtimeProjection}
+        />
       )}
     </section>
   );

@@ -69,11 +69,6 @@ const selection = {
 const queryParamSchema = z.preprocess((v) => (v === "" ? undefined : v), z.unknown());
 
 export const routes = {
-  indexingStatus: {
-    query: z.object({
-      maxRealtimeDistance: queryParamSchema.pipe(makeDurationSchema().optional()),
-    }),
-  },
   records: {
     params: z.object({ name }),
     query: z

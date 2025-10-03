@@ -5,20 +5,20 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { Hono } from "hono";
 
-import { errorResponse } from "@/api/lib/error-response";
+import { errorResponse } from "@/api/lib/handlers/error-response";
+import { validate } from "@/api/lib/handlers/validate";
 import { canAccelerateResolution } from "@/api/lib/indexing-status/can-accelerate-resolution";
-import { captureTrace } from "@/api/lib/protocol-tracing";
 import { resolveForward } from "@/api/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
-import { validate } from "@/api/lib/validate";
+import { captureTrace } from "@/api/lib/tracing/protocol-tracing";
 import { simpleMemoized } from "@/lib/simple-memoized";
 import { routes } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
 
 // memoizes the result of canAccelerateResolution within a 30s window
-// this means that the effective maxRealtimeDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
+// this means that the effective worstCaseDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
 // and the initial request(s) in between ENSApi startup and the first resolution of
 // canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
 const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
