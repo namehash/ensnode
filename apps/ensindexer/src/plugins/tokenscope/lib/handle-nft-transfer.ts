@@ -2,7 +2,7 @@ import { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { Address, zeroAddress } from "viem";
 
-import { upsertAccount } from "@/lib/db-helpers";
+import { upsertAccount } from "@/lib/subgraph/db-helpers";
 import {
   NFTMintStatuses,
   NFTTransferEventMetadata,
