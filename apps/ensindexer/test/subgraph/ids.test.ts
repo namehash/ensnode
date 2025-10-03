@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { resetMockConfig, setupConfigMock, updateMockConfig } from "./utils/mockConfig";
+import { resetMockConfig, setupConfigMock, updateMockConfig } from "../utils/mockConfig";
 setupConfigMock(); // setup config mock before importing dependent modules
 
 import { makeEventId, makeRegistrationId, makeResolverId } from "@/lib/subgraph/ids";
