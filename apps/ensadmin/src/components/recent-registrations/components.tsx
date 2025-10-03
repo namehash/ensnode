@@ -6,29 +6,16 @@ import {
     type ENSIndexerPublicConfig, OverallIndexingStatusId,
     OverallIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
-import { fromUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
-
-import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
-import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import Link from "next/link";
-import { Identity } from "../identity";
 import { useRecentRegistrations } from "./hooks";
-import type { Registration } from "./types";
 import {Badge} from "@/components/ui/badge";
 import {cn} from "@/lib/utils";
+import {RegistrationCard} from "@/components/recent-registrations/registration-card";
 
 /**
  * Max number of latest registrations to display
@@ -163,57 +150,15 @@ function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: Registration
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow className="hover:bg-white">
-          <TableHead>Name</TableHead>
-          <TableHead>Registered</TableHead>
-          <TableHead>Duration</TableHead>
-          <TableHead>Owner</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {recentRegistrationsQuery.data?.map((registration) => (
-          <RegistrationRow
-            key={registration.name}
-            registration={registration}
-            namespaceId={namespaceId}
-          />
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-interface RegistrationRowProps {
-  registration: Registration;
-  namespaceId: ENSNamespaceId;
-}
-
-/**
- * Displays the data of a single Registration within a row
- */
-function RegistrationRow({ registration, namespaceId }: RegistrationRowProps) {
-  return (
-    <TableRow>
-      <TableCell>
-        <NameLink
-          name={registration.name}
-          className="inline-flex items-center gap-2 text-blue-600 hover:underline"
-        >
-          <NameDisplay name={registration.name} />
-        </NameLink>
-      </TableCell>
-      <TableCell>
-        <RelativeTime timestamp={registration.registeredAt} tooltipPosition="top" />
-      </TableCell>
-      <TableCell>
-        <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
-      </TableCell>
-      <TableCell>
-        <Identity address={registration.owner} namespaceId={namespaceId} showAvatar={true} />
-      </TableCell>
-    </TableRow>
+          <div className="w-full h-fit box-border flex flex-col justify-start items-center gap-3">
+              {recentRegistrationsQuery.data?.map((registration) => (
+                  <RegistrationCard
+                      key={registration.name}
+                      registration={registration}
+                      namespaceId={namespaceId}
+                  />
+              ))}
+          </div>
   );
 }
 
