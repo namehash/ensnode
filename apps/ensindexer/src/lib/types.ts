@@ -1,3 +1,5 @@
+import { Name } from "@ensnode/ensnode-sdk";
+
 /**
  * RegistrarManagedName is an explicit type representing this concept within the shared handlers:
  *   "the parent name a Registrar contract registers subnames of"
@@ -20,7 +22,7 @@
  * (via our shared registrar indexing handlers). We will be working to support more expressive
  * or custom cases in the future, which will be necessary for 3DNS and other specialized integrations.
  */
-export type RegistrarManagedName = string;
+export type RegistrarManagedName = Name;
 
 /**
  * Describes a ponder-compatible blockrange with optional start and end blocks, minus 'latest' support.

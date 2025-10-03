@@ -3,9 +3,9 @@ import schema from "ponder:schema";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
-import { upsertAccount } from "@/lib/db-helpers";
-import { makeEventId } from "@/lib/ids";
 import { namespaceContract } from "@/lib/plugin-helpers";
+import { upsertAccount } from "@/lib/subgraph/db-helpers";
+import { makeEventId } from "@/lib/subgraph/ids";
 import { buildSupportedNFTAssetId } from "@/lib/tokenscope/assets";
 import { getSupportedSaleFromOrderFulfilledEvent } from "@/lib/tokenscope/seaport";
 

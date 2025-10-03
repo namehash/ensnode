@@ -21,7 +21,6 @@ import {
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   type DeepPartial,
   OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
   type SerializedChainIndexingStatusSnapshot,
   type SerializedChainIndexingStatusSnapshotBackfill,
   type SerializedChainIndexingStatusSnapshotCompleted,
@@ -32,10 +31,8 @@ import {
   type SerializedOmnichainIndexingStatusSnapshotCompleted,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
   type SerializedOmnichainIndexingStatusSnapshotUnstarted,
-  type UnixTimestamp,
   createIndexingConfig,
   deserializeChainIndexingStatusSnapshot,
-  deserializeOmnichainIndexingStatusSnapshot,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
 } from "@ensnode/ensnode-sdk";
