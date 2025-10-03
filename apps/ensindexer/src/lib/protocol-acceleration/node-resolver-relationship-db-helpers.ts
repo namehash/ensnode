@@ -4,17 +4,22 @@ import { Address } from "viem";
 
 import { Node } from "@ensnode/ensnode-sdk";
 
-export async function removeNodeResolverRelation(context: Context, node: Node) {
+export async function removeNodeResolverRelation(context: Context, registry: Address, node: Node) {
   const chainId = context.chain.id;
 
-  await context.db.delete(schema.ext_nodeResolverRelation, { chainId, node });
+  await context.db.delete(schema.ext_nodeResolverRelation, { chainId, registry, node });
 }
 
-export async function upsertNodeResolverRelation(context: Context, node: Node, resolver: Address) {
+export async function upsertNodeResolverRelation(
+  context: Context,
+  registry: Address,
+  node: Node,
+  resolver: Address,
+) {
   const chainId = context.chain.id;
 
   return context.db
     .insert(schema.ext_nodeResolverRelation)
-    .values({ chainId, node, resolver })
+    .values({ chainId, registry, node, resolver })
     .onConflictDoUpdate({ resolver });
 }

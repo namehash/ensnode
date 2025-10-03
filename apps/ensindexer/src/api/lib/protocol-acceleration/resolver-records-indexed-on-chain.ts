@@ -1,31 +1,29 @@
-import config from "@/config";
-import { ChainId, PluginName, deserializeChainId } from "@ensnode/ensnode-sdk";
+import { ChainId, ENSNamespaceId, deserializeChainId } from "@ensnode/ensnode-sdk";
 
 import { DATASOURCES_WITH_RESOLVERS } from "@/lib/protocol-acceleration/datasources-with-resolvers";
 import { resolverContractConfig } from "@/lib/resolver-contract-config";
 
-// construct a dummy Resolver ContractConfig with the same `datasourceNames` as the ProtocolAcceleration plugin
-const DUMMY_RESOLVER_CONTRACT_CONFIG = resolverContractConfig(
-  config.namespace,
-  DATASOURCES_WITH_RESOLVERS,
-  { startBlock: 0, endBlock: 0 },
-);
-
-// if enabled, Resolver Records are being indexed on the set of chains described by the ContractConfig
-const CHAIN_IDS_IN_RESOLVER_CONFIG = Object.keys(DUMMY_RESOLVER_CONTRACT_CONFIG.chain) //
-  .map((chainIdString) => deserializeChainId(chainIdString));
-
 /**
- * Determines, for a given chain, whether Resolver Records are indexed.
+ * Determines, for a given chain, whether Resolver Records are indexed by the ProtocolAcceleration plugin.
  *
  * @param chainId - The chain ID to check for resolver record indexing
  * @returns true if resolver records are indexed on the given chain, false otherwise
+ * @dev the caller has the responsibility of checking if the ProtocolAcceleration plugin is enabled
+ *   before relying on Resolver Records.
  */
-export function areResolverRecordsIndexedOnChain(chainId: ChainId) {
-  // the ProtocolAcceleration plugin describes Resolver Record indexing behavior: it must be enabled
-  if (!config.plugins.includes(PluginName.ProtocolAcceleration)) return false;
+export function areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
+  namespace: ENSNamespaceId,
+  chainId: ChainId,
+) {
+  // construct a dummy Resolver ContractConfig with the same `datasourceNames` as the ProtocolAcceleration plugin
+  const dummyContractConfig = resolverContractConfig(namespace, DATASOURCES_WITH_RESOLVERS, {
+    startBlock: 0,
+    endBlock: 0,
+  });
 
-  // if ProtocolAccleration plugin is enabled, records are available on this chainId iff this chain
-  // is included in the Resolver contract config used by the ProtocolAcceleration plugin
-  return CHAIN_IDS_IN_RESOLVER_CONFIG.includes(chainId);
+  // records are available on this chainId iff this chain is included in the Resolver contract config
+  // used by the ProtocolAcceleration plugin
+  return Object.keys(dummyContractConfig.chain) //
+    .map((chainIdString) => deserializeChainId(chainIdString))
+    .includes(chainId);
 }

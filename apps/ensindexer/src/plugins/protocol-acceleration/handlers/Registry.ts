@@ -24,12 +24,13 @@ async function handleNewResolver({
   event: EventWithArgs<{ node: Node; resolver: Address }>;
 }) {
   const { node, resolver: resolverAddress } = event.args;
+  const registry = event.log.address;
   const isZeroResolver = isAddressEqual(zeroAddress, resolverAddress);
 
   if (isZeroResolver) {
-    await removeNodeResolverRelation(context, node);
+    await removeNodeResolverRelation(context, registry, node);
   } else {
-    await upsertNodeResolverRelation(context, node, resolverAddress);
+    await upsertNodeResolverRelation(context, registry, node, resolverAddress);
   }
 }
 
