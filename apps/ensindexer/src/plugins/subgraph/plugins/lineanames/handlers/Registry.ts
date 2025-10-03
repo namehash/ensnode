@@ -3,7 +3,7 @@ import { ponder } from "ponder:registry";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { setupRootNode } from "@/lib/subgraph-helpers";
+import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {
   handleNewOwner,
   handleNewResolver,

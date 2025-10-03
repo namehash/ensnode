@@ -18,13 +18,13 @@ import {
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
-import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
-import { makeResolverId } from "@/lib/ids";
-import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
 import { type EventWithArgs } from "@/lib/ponder-helpers";
-import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";
+import { makeResolverId } from "@/lib/subgraph/ids";
+import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
+import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph/subgraph-helpers";
 
 /**
  * shared handlers for a Registry contract

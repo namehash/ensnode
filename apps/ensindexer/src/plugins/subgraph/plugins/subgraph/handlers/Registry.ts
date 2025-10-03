@@ -3,7 +3,7 @@ import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/en
 
 import schema from "ponder:schema";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { setupRootNode } from "@/lib/subgraph-helpers";
+import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {
   handleNewOwner,
   handleNewResolver,

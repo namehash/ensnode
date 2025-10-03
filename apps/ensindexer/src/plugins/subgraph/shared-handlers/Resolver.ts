@@ -4,11 +4,11 @@ import { Node, uniq } from "@ensnode/ensnode-sdk";
 import { type Address, Hash, type Hex } from "viem";
 
 import config from "@/config";
-import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/db-helpers";
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
-import { makeResolverId } from "@/lib/ids";
 import { hasNullByte, stripNullBytes } from "@/lib/lib-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
+import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";
+import { makeResolverId } from "@/lib/subgraph/ids";
 
 /**
  * These functions describe the shared indexing behavior for Resolver functions across all indexed

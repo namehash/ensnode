@@ -18,18 +18,18 @@ import {
   makeSubdomainNode,
 } from "@ensnode/ensnode-sdk";
 
+import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
+import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   sharedEventValues,
   upsertAccount,
   upsertDomain,
   upsertRegistration,
   upsertResolver,
-} from "@/lib/db-helpers";
-import { labelByLabelHash } from "@/lib/graphnode-helpers";
-import { makeRegistrationId, makeResolverId } from "@/lib/ids";
-import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph-helpers";
+} from "@/lib/subgraph/db-helpers";
+import { makeRegistrationId, makeResolverId } from "@/lib/subgraph/ids";
+import { recursivelyRemoveEmptyDomainFromParentSubdomainCount } from "@/lib/subgraph/subgraph-helpers";
 import { getThreeDNSTokenId } from "@/lib/threedns-helpers";
 
 /**

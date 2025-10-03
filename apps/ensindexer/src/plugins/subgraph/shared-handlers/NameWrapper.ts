@@ -18,11 +18,11 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import config from "@/config";
-import { sharedEventValues, upsertAccount } from "@/lib/db-helpers";
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
-import { makeEventId } from "@/lib/ids";
 import { bigintMax } from "@/lib/lib-helpers";
 import { EventWithArgs } from "@/lib/ponder-helpers";
+import { sharedEventValues, upsertAccount } from "@/lib/subgraph/db-helpers";
+import { makeEventId } from "@/lib/subgraph/ids";
 import type { RegistrarManagedName } from "@/lib/types";
 
 /**

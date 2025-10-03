@@ -2,7 +2,7 @@ import type { Context, Event } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
 
-import { makeEventId } from "@/lib/ids";
+import { makeEventId } from "@/lib/subgraph/ids";
 
 export async function upsertAccount(context: Context, address: Address) {
   return context.db.insert(schema.account).values({ id: address }).onConflictDoNothing();
