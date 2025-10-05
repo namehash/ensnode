@@ -187,7 +187,7 @@ export function useAvatarUrl(
   const activeFallback = browserUnsupportedProtocolFallback ?? defaultFallback;
 
   // Then process the avatar URL
-  return useQuery({
+  return useQuery<UseAvatarUrlResult, Error>({
     queryKey: [
       "avatarUrl",
       name,
