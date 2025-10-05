@@ -73,16 +73,20 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
  * ```typescript
  * import { useAvatarUrl } from "@ensnode/ensnode-react";
  *
- * function ProfileAvatar() {
- *   const { data: avatarUrl, isLoading, error } = useAvatarUrl({
- *     name: "vitalik.eth"
- *   });
+ * function ProfileAvatar({ name }: { name: string }) {
+ *   const { data, isLoading } = useAvatarUrl({ name });
  *
- *   if (isLoading) return <div>Loading...</div>;
- *   if (error) return <div>Error: {error.message}</div>;
- *   if (!avatarUrl) return <div>No avatar url configured or avatar url configuration is invalid</div>;
+ *   const avatarUrl = data?.browserSupportedAvatarUrl;
  *
- *   return <img src={avatarUrl} alt="Avatar" />;
+ *   return (
+ *     <div className="avatar">
+ *       {isLoading || !avatarUrl ? (
+ *         <div className="avatar-placeholder" />
+ *       ) : (
+ *         <img src={avatarUrl} alt={`${name} avatar`} />
+ *       )}
+ *     </div>
+ *   );
  * }
  * ```
  *
@@ -91,9 +95,9 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
  * // With custom fallback
  * import { useAvatarUrl, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-react";
  *
- * function ProfileAvatar() {
- *   const { data: avatarUrl } = useAvatarUrl({
- *     name: "vitalik.eth",
+ * function ProfileAvatar({ name, namespaceId }: { name: string; namespaceId: string }) {
+ *   const { data, isLoading } = useAvatarUrl({
+ *     name,
  *     browserUnsupportedProtocolFallback: async (name) => {
  *       // Use the ENS Metadata Service for the current namespace
  *       const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
@@ -101,13 +105,23 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
  *     }
  *   });
  *
- *   return avatarUrl ? <img src={avatarUrl} alt="Avatar" /> : null;
+ *   const avatarUrl = data?.browserSupportedAvatarUrl;
+ *
+ *   return (
+ *     <div className="avatar">
+ *       {isLoading || !avatarUrl ? (
+ *         <div className="avatar-placeholder" />
+ *       ) : (
+ *         <img src={avatarUrl} alt={`${name} avatar`} />
+ *       )}
+ *     </div>
+ *   );
  * }
  * ```
  */
 export function useAvatarUrl(
   parameters: UseAvatarUrlParameters,
-): ReturnType<typeof useQuery<string | null>> {
+): ReturnType<typeof useQuery<UseAvatarUrlResult>> {
   const { name, config, query: queryOptions, browserUnsupportedProtocolFallback } = parameters;
   const _config = useENSNodeConfig(config);
 
@@ -146,45 +160,80 @@ export function useAvatarUrl(
       namespaceId,
       !!browserUnsupportedProtocolFallback,
     ],
-    queryFn: async (): Promise<string | null> => {
-      if (!name || !recordsQuery.data) return null;
+    queryFn: async (): Promise<UseAvatarUrlResult> => {
+      if (!name || !recordsQuery.data) {
+        return {
+          rawAvatarUrl: null,
+          browserSupportedAvatarUrl: null,
+          fromFallback: false,
+        };
+      }
 
       // Get avatar text record from useRecords result
-      const avatarTextRecord = recordsQuery.data.records?.texts?.avatar;
+      const avatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
-      // If no avatar text record, return null
+      // If no avatar text record, return null values
       if (!avatarTextRecord) {
-        return null;
+        return {
+          rawAvatarUrl: null,
+          browserSupportedAvatarUrl: null,
+          fromFallback: false,
+        };
       }
 
       // Try to normalize the avatar URL
       const normalizedUrl = normalizeAvatarUrl(avatarTextRecord);
 
-      // If normalization failed, return null
+      // If normalization failed, the URL is completely invalid
       if (!normalizedUrl) {
-        return null;
+        return {
+          rawAvatarUrl: avatarTextRecord,
+          browserSupportedAvatarUrl: null,
+          fromFallback: false,
+        };
       }
 
       // If the URL uses http or https protocol, return it
       if (normalizedUrl.protocol === "http:" || normalizedUrl.protocol === "https:") {
-        return normalizedUrl.toString();
+        return {
+          rawAvatarUrl: avatarTextRecord,
+          browserSupportedAvatarUrl: normalizedUrl.toString(),
+          fromFallback: false,
+        };
       }
 
       // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if available
       if (activeFallback) {
         try {
-          return await activeFallback(name);
+          const fallbackUrl = await activeFallback(name);
+          return {
+            rawAvatarUrl: avatarTextRecord,
+            browserSupportedAvatarUrl: fallbackUrl,
+            fromFallback: fallbackUrl !== null,
+          };
         } catch {
-          return null;
+          return {
+            rawAvatarUrl: avatarTextRecord,
+            browserSupportedAvatarUrl: null,
+            fromFallback: false,
+          };
         }
       }
 
       // No fallback available
-      return null;
+      return {
+        rawAvatarUrl: avatarTextRecord,
+        browserSupportedAvatarUrl: null,
+        fromFallback: false,
+      };
     },
     enabled: canEnable && recordsQuery.isSuccess,
     retry: false,
-    placeholderData: null,
+    placeholderData: {
+      rawAvatarUrl: null,
+      browserSupportedAvatarUrl: null,
+      fromFallback: false,
+    },
     ...queryOptions,
   });
 }
