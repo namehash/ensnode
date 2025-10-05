@@ -1,6 +1,6 @@
 "use client";
 
-import { type Name, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-sdk";
+import { type Name, buildEnsMetadataServiceAvatarUrl, buildUrl } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
@@ -51,13 +51,7 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
   if (!url) return null;
 
   try {
-    // Try to parse as-is first
-    try {
-      return new URL(url);
-    } catch {
-      // If that fails, try adding https:// prefix
-      return new URL(`https://${url}`);
-    }
+    return buildUrl(url);
   } catch {
     return null;
   }

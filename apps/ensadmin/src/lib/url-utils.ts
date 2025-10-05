@@ -1,21 +1,4 @@
-/**
- * Builds a `URL` from the given string.
- *
- * If no explicit protocol found in `rawUrl` assumes an implicit
- * 'https://' default protocol.
- *
- * @param rawUrl a string that may be in the format of a `URL`.
- * @returns a `URL` object for the given `rawUrl`.
- * @throws if `rawUrl` cannot be converted to a `URL`.
- */
-const buildUrl = (rawUrl: string): URL => {
-  if (!rawUrl.includes("://")) {
-    // no explicit protocol found in `rawUrl`, assume implicit https:// protocol
-    rawUrl = `https://${rawUrl}`;
-  }
-
-  return new URL(rawUrl);
-};
+import { buildUrl } from "@ensnode/ensnode-sdk";
 
 /**
  * Invariants:
