@@ -1,12 +1,22 @@
 "use client";
 
 import { type Name, buildEnsMetadataServiceAvatarUrl, buildUrl } from "@ensnode/ensnode-sdk";
-import { useQuery } from "@tanstack/react-query";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
 import { useENSIndexerConfig } from "./useENSIndexerConfig";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 import { useRecords } from "./useRecords";
+
+/**
+ * The ENS avatar text record key.
+ */
+const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
+
+/**
+ * Protocols supported by browsers for direct image rendering.
+ */
+const BROWSER_SUPPORTED_PROTOCOLS = ["http:", "https:"] as const;
 
 /**
  * Type alias for avatar URLs. Avatar URLs must be URLs to an image asset
@@ -37,6 +47,9 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
  * Normalizes an avatar URL by ensuring it has a valid protocol.
  * Avatar URLs should be URLs to an image asset accessible via the http or https protocol.
  *
+ * If the URL lacks a protocol, https:// is prepended. Non-http/https protocols (e.g., ipfs://, ar://)
+ * are preserved and can be handled by fallback mechanisms.
+ *
  * @param url - The URL string to normalize
  * @returns A URL object if the input is valid, null otherwise
  *
@@ -44,6 +57,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
  * ```typescript
  * normalizeAvatarUrl("example.com/avatar.png") // Returns URL with https://example.com/avatar.png
  * normalizeAvatarUrl("http://example.com/avatar.png") // Returns URL with http://example.com/avatar.png
+ * normalizeAvatarUrl("ipfs://QmHash") // Returns URL with ipfs://QmHash (requires fallback)
  * normalizeAvatarUrl("invalid url") // Returns null
  * ```
  */
@@ -55,6 +69,28 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Result returned by the useAvatarUrl hook.
+ */
+export interface UseAvatarUrlResult {
+  /**
+   * The original avatar text record value from ENS, before any normalization or fallback processing.
+   * Null if no avatar record exists.
+   */
+  rawAvatarUrl: string | null;
+  /**
+   * A browser-supported (http/https) avatar URL ready for use in <img> tags.
+   * Populated when the avatar uses http/https protocol or when a fallback successfully resolves.
+   * Null if no avatar exists or resolution fails.
+   */
+  browserSupportedAvatarUrl: string | null;
+  /**
+   * Indicates whether the browserSupportedAvatarUrl was obtained via the fallback mechanism
+   * (true) or directly from the avatar text record (false).
+   */
+  fromFallback: boolean;
 }
 
 /**
@@ -121,16 +157,15 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
  */
 export function useAvatarUrl(
   parameters: UseAvatarUrlParameters,
-): ReturnType<typeof useQuery<UseAvatarUrlResult>> {
+): UseQueryResult<UseAvatarUrlResult, Error> {
   const { name, config, query: queryOptions, browserUnsupportedProtocolFallback } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
 
-  // First, get the avatar text record
   const recordsQuery = useRecords({
     name,
-    selection: { texts: ["avatar"] },
+    selection: { texts: [AVATAR_TEXT_RECORD_KEY] },
     config: _config,
     query: { enabled: canEnable },
   });
@@ -169,7 +204,6 @@ export function useAvatarUrl(
         };
       }
 
-      // Get avatar text record from useRecords result
       const avatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
       // If no avatar text record, return null values
@@ -194,7 +228,11 @@ export function useAvatarUrl(
       }
 
       // If the URL uses http or https protocol, return it
-      if (normalizedUrl.protocol === "http:" || normalizedUrl.protocol === "https:") {
+      if (
+        BROWSER_SUPPORTED_PROTOCOLS.includes(
+          normalizedUrl.protocol as (typeof BROWSER_SUPPORTED_PROTOCOLS)[number],
+        )
+      ) {
         return {
           rawAvatarUrl: avatarTextRecord,
           browserSupportedAvatarUrl: normalizedUrl.toString(),
