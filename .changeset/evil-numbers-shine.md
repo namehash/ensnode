@@ -1,7 +1,7 @@
 ---
-"@ensnode/ensnode-react": minor
-"@ensnode/ensnode-sdk": minor
 "ensadmin": minor
 ---
 
-useAvatarUrl
+Refactored avatar URL handling to use centralized utilities from `ensnode-sdk`
+Removed duplicate `buildEnsMetadataServiceAvatarUrl` and `buildUrl` functions in favor of SDK exports
+Updated `ens-avatar` component to use new avatar URL utilities
