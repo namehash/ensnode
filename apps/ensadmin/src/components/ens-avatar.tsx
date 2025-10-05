@@ -18,9 +18,11 @@ type ImageLoadingStatus = Parameters<
 export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
 
-  const { data: avatarUrl } = useAvatarUrl({
+  const { data: avatarData } = useAvatarUrl({
     name,
   });
+
+  const avatarUrl = avatarData?.browserSupportedAvatarUrl;
 
   if (avatarUrl === null || avatarUrl === undefined) {
     return (

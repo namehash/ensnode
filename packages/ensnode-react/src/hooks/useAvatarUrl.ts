@@ -186,15 +186,21 @@ export function useAvatarUrl(
   // Use custom fallback if provided, otherwise use default
   const activeFallback = browserUnsupportedProtocolFallback ?? defaultFallback;
 
-  // Then process the avatar URL
-  return useQuery<UseAvatarUrlResult, Error>({
+  // Construct query options object
+  const baseQueryOptions: {
+    queryKey: readonly unknown[];
+    queryFn: () => Promise<UseAvatarUrlResult>;
+    enabled: boolean;
+    retry: boolean;
+    placeholderData: UseAvatarUrlResult;
+  } = {
     queryKey: [
       "avatarUrl",
       name,
       _config.client.url.href,
       namespaceId,
       !!browserUnsupportedProtocolFallback,
-    ],
+    ] as const,
     queryFn: async (): Promise<UseAvatarUrlResult> => {
       if (!name || !recordsQuery.data) {
         return {
@@ -271,7 +277,14 @@ export function useAvatarUrl(
       rawAvatarUrl: null,
       browserSupportedAvatarUrl: null,
       fromFallback: false,
-    },
+    } as const,
+  };
+
+  const options = {
+    ...baseQueryOptions,
     ...queryOptions,
-  });
+    enabled: canEnable && recordsQuery.isSuccess && (queryOptions?.enabled ?? true),
+  } as typeof baseQueryOptions;
+
+  return useQuery<UseAvatarUrlResult, Error>(options);
 }
