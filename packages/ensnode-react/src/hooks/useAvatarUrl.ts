@@ -23,14 +23,14 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
   name: Name | null;
   /**
    * Optional custom fallback function to get avatar URL when the avatar text record
-   * uses a non-http/https protocol.
+   * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
    *
    * If not provided, defaults to using the ENS Metadata Service.
    *
    * @param name - The ENS name to get the avatar URL for
    * @returns Promise resolving to the avatar URL, or null if unavailable
    */
-  fallback?: (name: Name) => Promise<string | null>;
+  browserUnsupportedProtocolFallback?: (name: Name) => Promise<string | null>;
 }
 
 /**
@@ -94,7 +94,7 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
  * function ProfileAvatar() {
  *   const { data: avatarUrl } = useAvatarUrl({
  *     name: "vitalik.eth",
- *     fallback: async (name) => {
+ *     browserUnsupportedProtocolFallback: async (name) => {
  *       // Use the ENS Metadata Service for the current namespace
  *       const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
  *       return url?.toString() ?? null;
@@ -105,8 +105,10 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
  * }
  * ```
  */
-export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
-  const { name, config, query: queryOptions, fallback } = parameters;
+export function useAvatarUrl(
+  parameters: UseAvatarUrlParameters,
+): ReturnType<typeof useQuery<string | null>> {
+  const { name, config, query: queryOptions, browserUnsupportedProtocolFallback } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
@@ -133,11 +135,17 @@ export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
       : undefined;
 
   // Use custom fallback if provided, otherwise use default
-  const activeFallback = fallback ?? defaultFallback;
+  const activeFallback = browserUnsupportedProtocolFallback ?? defaultFallback;
 
   // Then process the avatar URL
   return useQuery({
-    queryKey: ["avatarUrl", name, _config.client.url.href, namespaceId, !!fallback],
+    queryKey: [
+      "avatarUrl",
+      name,
+      _config.client.url.href,
+      namespaceId,
+      !!browserUnsupportedProtocolFallback,
+    ],
     queryFn: async (): Promise<string | null> => {
       if (!name || !recordsQuery.data) return null;
 
@@ -176,6 +184,7 @@ export function useAvatarUrl(parameters: UseAvatarUrlParameters) {
     },
     enabled: canEnable && recordsQuery.isSuccess,
     retry: false,
+    placeholderData: null,
     ...queryOptions,
   });
 }
