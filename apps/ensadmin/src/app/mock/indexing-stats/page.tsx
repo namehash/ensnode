@@ -69,7 +69,7 @@ export default function MockIndexingStatusPage() {
 
       {deserializedStatus?.responseCode === IndexingStatusResponseCodes.Ok && (
         <MockIndexingStatusDisplayWithProps
-          indexingProjection={deserializedStatus.realtimeProjection}
+          realtimeProjection={deserializedStatus.realtimeProjection}
         />
       )}
     </section>

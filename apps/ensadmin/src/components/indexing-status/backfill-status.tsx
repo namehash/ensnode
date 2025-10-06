@@ -6,6 +6,7 @@
 import {
   ChainIndexingStatusIds,
   OmnichainIndexingStatusSnapshotBackfill,
+  RealtimeIndexingStatusProjection,
   UnixTimestamp,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
@@ -32,14 +33,15 @@ interface ChainIndexingPhaseViewModel {
 }
 
 interface BackfillStatusProps {
-  indexingSnapshot: OmnichainIndexingStatusSnapshotBackfill;
+  realtimeProjection: RealtimeIndexingStatusProjection;
 }
 
 /**
  * Presents indexing status when overall status is "backfill".
  */
-export function BackfillStatus({ indexingSnapshot }: BackfillStatusProps) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
+export function BackfillStatus({ realtimeProjection }: BackfillStatusProps) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
   const chains = chainEntries.map(([, chain]) => chain);
 
   const timelineStartsAt = getTimestampForLowestOmnichainStartBlock(chains);
@@ -47,7 +49,7 @@ export function BackfillStatus({ indexingSnapshot }: BackfillStatusProps) {
 
   const yearMarkers = generateYearMarkers(timelineStartsAt, timelineEndsAt);
   const timelinePositionValue = getTimelinePosition(
-    indexingSnapshot.omnichainIndexingCursor,
+    omnichainSnapshot.omnichainIndexingCursor,
     timelineStartsAt,
     timelineEndsAt,
   );
@@ -69,7 +71,7 @@ export function BackfillStatus({ indexingSnapshot }: BackfillStatusProps) {
               <span className="text-sm font-medium">
                 Indexed through{" "}
                 <AbsoluteTime
-                  timestamp={indexingSnapshot.omnichainIndexingCursor}
+                  timestamp={omnichainSnapshot.omnichainIndexingCursor}
                   options={{
                     year: "numeric",
                     month: "short",
@@ -152,7 +154,7 @@ export function BackfillStatus({ indexingSnapshot }: BackfillStatusProps) {
               return (
                 <ChainIndexingTimeline
                   key={chainId}
-                  omnichainIndexingCursor={indexingSnapshot.omnichainIndexingCursor}
+                  omnichainIndexingCursor={omnichainSnapshot.omnichainIndexingCursor}
                   chainStatus={{
                     chainId,
                     firstBlockToIndex: blockViewModel(chain.config.startBlock),

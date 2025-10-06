@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChainIndexingStatusIds,
+  CrossChainIndexingStatusSnapshotOmnichain,
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   OmnichainIndexingStatusSnapshot,
@@ -17,6 +18,7 @@ import {
   OmnichainIndexingStatusSnapshotCompleted,
   OmnichainIndexingStatusSnapshotFollowing,
   OmnichainIndexingStatusSnapshotUnstarted,
+  RealtimeIndexingStatusProjection,
   sortAscChainStatusesByStartBlock,
 } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
@@ -24,8 +26,15 @@ import { PropsWithChildren } from "react";
 import { cn } from "@/lib/utils";
 import { BlockStats, blockViewModel } from "./block-refs";
 
-interface IndexingSnapshotProps<IndexingSnapshotType extends OmnichainIndexingStatusSnapshot> {
-  indexingSnapshot: IndexingSnapshotType;
+interface IndexingStatsProps<
+  OmnichainIndexingStatusSnapshotType extends
+    OmnichainIndexingStatusSnapshot = OmnichainIndexingStatusSnapshot,
+> {
+  realtimeProjection: Omit<RealtimeIndexingStatusProjection, "snapshot"> & {
+    snapshot: Omit<CrossChainIndexingStatusSnapshotOmnichain, "omnichainSnapshot"> & {
+      omnichainSnapshot: OmnichainIndexingStatusSnapshotType;
+    };
+  };
 }
 
 /**
@@ -45,9 +54,10 @@ export function IndexingStatsForUnavailableSnapshot() {
  * Indexing stats for {@link OmnichainIndexingStatusIds.Unstarted}.
  */
 export function IndexingStatsForSnapshotUnstarted({
-  indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotUnstarted>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
+  realtimeProjection,
+}: IndexingStatsProps<OmnichainIndexingStatusSnapshotUnstarted>) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -92,9 +102,10 @@ export function IndexingStatsForSnapshotUnstarted({
  * Indexing stats for {@link OmnichainIndexingStatusIds.Backfill}.
  */
 export function IndexingStatsForSnapshotBackfill({
-  indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotBackfill>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
+  realtimeProjection,
+}: IndexingStatsProps<OmnichainIndexingStatusSnapshotBackfill>) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -155,9 +166,10 @@ export function IndexingStatsForSnapshotBackfill({
  * Indexing stats for {@link OmnichainIndexingStatusIds.Completed}.
  */
 export function IndexingStatsForSnapshotCompleted({
-  indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotCompleted>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
+  realtimeProjection,
+}: IndexingStatsProps<OmnichainIndexingStatusSnapshotCompleted>) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -208,9 +220,10 @@ export function IndexingStatsForSnapshotCompleted({
  * Indexing stats for {@link OmnichainIndexingStatusIds.Following}.
  */
 export function IndexingStatsForSnapshotFollowing({
-  indexingSnapshot,
-}: IndexingSnapshotProps<OmnichainIndexingStatusSnapshotFollowing>) {
-  const chainEntries = sortAscChainStatusesByStartBlock([...indexingSnapshot.chains.entries()]);
+  realtimeProjection,
+}: IndexingStatsProps<OmnichainIndexingStatusSnapshotFollowing>) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;

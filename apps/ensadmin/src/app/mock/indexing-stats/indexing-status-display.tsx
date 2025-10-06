@@ -20,43 +20,100 @@ import {
 import { IndexingStatusLoading } from "@/components/indexing-status/indexing-status-loading";
 
 interface MockIndexingStatusDisplayPropsProps {
-  indexingSnapshot: OmnichainIndexingStatusSnapshot | null;
+  realtimeProjection: RealtimeIndexingStatusProjection | null;
 }
 
 export function MockIndexingStatusDisplay({
-  indexingSnapshot,
+  realtimeProjection,
 }: MockIndexingStatusDisplayPropsProps) {
   let indexingStats: ReactElement;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  switch (indexingSnapshot?.omnichainStatus) {
+  if (!realtimeProjection) {
+    return (
+      <IndexingStatsShell>
+        <IndexingStatsForUnavailableSnapshot />
+      </IndexingStatsShell>
+    );
+  }
+
+  const omnichainStatusSnapshot = realtimeProjection.snapshot.omnichainSnapshot;
+
+  switch (omnichainStatusSnapshot.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
-      indexingStats = <IndexingStatsForSnapshotUnstarted indexingSnapshot={indexingSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotUnstarted
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
       break;
 
     case OmnichainIndexingStatusIds.Backfill:
-      indexingStats = <IndexingStatsForSnapshotBackfill indexingSnapshot={indexingSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotBackfill
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
 
-      maybeIndexingTimeline = <BackfillStatus indexingSnapshot={indexingSnapshot} />;
+      maybeIndexingTimeline = (
+        <BackfillStatus
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
       break;
 
     case OmnichainIndexingStatusIds.Completed:
-      indexingStats = <IndexingStatsForSnapshotCompleted indexingSnapshot={indexingSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotCompleted
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
       break;
 
     case OmnichainIndexingStatusIds.Following:
-      indexingStats = <IndexingStatsForSnapshotFollowing indexingSnapshot={indexingSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotFollowing
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
       break;
-
-    default:
-      indexingStats = <IndexingStatsForUnavailableSnapshot />;
   }
 
   return (
     <>
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={indexingSnapshot?.omnichainStatus}>
+      <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
     </>
@@ -64,11 +121,11 @@ export function MockIndexingStatusDisplay({
 }
 
 export function MockIndexingStatusDisplayWithProps({
-  indexingProjection,
+  realtimeProjection,
   loading = false,
   error = null,
 }: {
-  indexingProjection?: RealtimeIndexingStatusProjection;
+  realtimeProjection?: RealtimeIndexingStatusProjection;
   loading?: boolean;
   error?: string | null;
 }) {
@@ -76,11 +133,9 @@ export function MockIndexingStatusDisplayWithProps({
     return <p className="p-6">Failed to fetch data: {error}</p>;
   }
 
-  if (loading || !indexingProjection) {
+  if (loading || !realtimeProjection) {
     return <IndexingStatusLoading />;
   }
 
-  return (
-    <MockIndexingStatusDisplay indexingSnapshot={indexingProjection.snapshot.omnichainSnapshot} />
-  );
+  return <MockIndexingStatusDisplay realtimeProjection={realtimeProjection} />;
 }

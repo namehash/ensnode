@@ -79,25 +79,72 @@ function IndexingStatsForRealtimeStatusProjection({
   ensIndexerConfig,
   realtimeProjection,
 }: IndexingStatsForRealtimeStatusProjectionProps) {
+  if (!realtimeProjection) {
+    return (
+      <IndexingStatsShell>
+        <IndexingStatsForUnavailableSnapshot />
+      </IndexingStatsShell>
+    );
+  }
+
+  const omnichainStatusSnapshot = realtimeProjection.snapshot.omnichainSnapshot;
   let indexingStats: ReactElement;
   let maybeRecentRegistrations: ReactElement | undefined;
   let maybeIndexingTimeline: ReactElement | undefined;
 
-  const { omnichainSnapshot } = realtimeProjection.snapshot;
-
-  switch (omnichainSnapshot.omnichainStatus) {
+  switch (omnichainStatusSnapshot.omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted:
-      indexingStats = <IndexingStatsForSnapshotUnstarted indexingSnapshot={omnichainSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotUnstarted
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
       break;
 
     case OmnichainIndexingStatusIds.Backfill:
-      indexingStats = <IndexingStatsForSnapshotBackfill indexingSnapshot={omnichainSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotBackfill
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
 
-      maybeIndexingTimeline = <BackfillStatus indexingSnapshot={omnichainSnapshot} />;
+      maybeIndexingTimeline = (
+        <BackfillStatus
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
       break;
 
     case OmnichainIndexingStatusIds.Completed:
-      indexingStats = <IndexingStatsForSnapshotCompleted indexingSnapshot={omnichainSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotCompleted
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
 
       maybeRecentRegistrations = (
         <Suspense>
@@ -107,7 +154,17 @@ function IndexingStatsForRealtimeStatusProjection({
       break;
 
     case OmnichainIndexingStatusIds.Following:
-      indexingStats = <IndexingStatsForSnapshotFollowing indexingSnapshot={omnichainSnapshot} />;
+      indexingStats = (
+        <IndexingStatsForSnapshotFollowing
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
 
       maybeRecentRegistrations = (
         <Suspense>
@@ -121,7 +178,7 @@ function IndexingStatsForRealtimeStatusProjection({
     <section className="flex flex-col gap-6 p-6">
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={omnichainSnapshot.omnichainStatus}>
+      <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
 
