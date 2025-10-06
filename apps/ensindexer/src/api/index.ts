@@ -18,10 +18,7 @@ import {
   makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
-import {
-  buildGraphQLSchema as buildSubgraphGraphQLSchema,
-  graphql as subgraphGraphQL,
-} from "@ensnode/ponder-subgraph";
+import { subgraphGraphQLAPIMiddleware } from "@ensnode/ponder-subgraph";
 
 import ensNodeApi from "@/api/handlers/ensnode-api";
 
@@ -78,55 +75,53 @@ app.get(
 app.route("/api", ensNodeApi);
 
 // use our custom graphql middleware at /subgraph with description injection
+const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
 app.use("/subgraph", fixContentLengthMiddleware);
 app.use("/subgraph", makeApiDocumentationMiddleware("/subgraph"));
 app.use(
   "/subgraph",
-  subgraphGraphQL({
-    db,
-    graphqlSchema: buildSubgraphGraphQLSchema({
-      schema: filterSchemaByPrefix("subgraph_", schema),
-      // provide the schema with ponder's internal metadata to power _meta
-      metadataProvider: makePonderMetadataProvider({ db, publicClients }),
-      // describes the polymorphic (interface) relationships in the schema
-      polymorphicConfig: {
-        types: {
-          DomainEvent: [
-            schema.subgraph_transfer,
-            schema.subgraph_newOwner,
-            schema.subgraph_newResolver,
-            schema.subgraph_newTTL,
-            schema.subgraph_wrappedTransfer,
-            schema.subgraph_nameWrapped,
-            schema.subgraph_nameUnwrapped,
-            schema.subgraph_fusesSet,
-            schema.subgraph_expiryExtended,
-          ],
-          RegistrationEvent: [
-            schema.subgraph_nameRegistered,
-            schema.subgraph_nameRenewed,
-            schema.subgraph_nameTransferred,
-          ],
-          ResolverEvent: [
-            schema.subgraph_addrChanged,
-            schema.subgraph_multicoinAddrChanged,
-            schema.subgraph_nameChanged,
-            schema.subgraph_abiChanged,
-            schema.subgraph_pubkeyChanged,
-            schema.subgraph_textChanged,
-            schema.subgraph_contenthashChanged,
-            schema.subgraph_interfaceChanged,
-            schema.subgraph_authorisationChanged,
-            schema.subgraph_versionChanged,
-          ],
-        },
-        fields: {
-          "Domain.events": "DomainEvent",
-          "Registration.events": "RegistrationEvent",
-          "Resolver.events": "ResolverEvent",
-        },
+  subgraphGraphQLAPIMiddleware({
+    schema: subgraphSchema,
+    // provide the schema with ponder's internal metadata to power _meta
+    metadataProvider: makePonderMetadataProvider({ db, publicClients }),
+    // describes the polymorphic (interface) relationships in the schema
+    polymorphicConfig: {
+      types: {
+        DomainEvent: [
+          subgraphSchema.transfer,
+          subgraphSchema.newOwner,
+          subgraphSchema.newResolver,
+          subgraphSchema.newTTL,
+          subgraphSchema.wrappedTransfer,
+          subgraphSchema.nameWrapped,
+          subgraphSchema.nameUnwrapped,
+          subgraphSchema.fusesSet,
+          subgraphSchema.expiryExtended,
+        ],
+        RegistrationEvent: [
+          subgraphSchema.nameRegistered,
+          subgraphSchema.nameRenewed,
+          subgraphSchema.nameTransferred,
+        ],
+        ResolverEvent: [
+          subgraphSchema.addrChanged,
+          subgraphSchema.multicoinAddrChanged,
+          subgraphSchema.nameChanged,
+          subgraphSchema.abiChanged,
+          subgraphSchema.pubkeyChanged,
+          subgraphSchema.textChanged,
+          subgraphSchema.contenthashChanged,
+          subgraphSchema.interfaceChanged,
+          subgraphSchema.authorisationChanged,
+          subgraphSchema.versionChanged,
+        ],
       },
-    }),
+      fields: {
+        "Domain.events": "DomainEvent",
+        "Registration.events": "RegistrationEvent",
+        "Resolver.events": "ResolverEvent",
+      },
+    },
   }),
 );
 
