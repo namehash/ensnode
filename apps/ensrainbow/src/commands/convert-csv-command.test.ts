@@ -126,10 +126,6 @@ describe("convert-csv-command", () => {
       expect(outputStats.isFile()).toBe(true);
       expect(outputStats.size).toBeGreaterThan(0);
 
-      // Verify special characters were processed correctly by checking logs
-      // The conversion completed successfully, which means csv-simple-parser
-      // handled emojis, unicode, quoted fields with commas, etc.
-
       // Ingest the converted file into database
       const cli = createCLI({ exitProcess: false });
       await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
@@ -141,8 +137,8 @@ describe("convert-csv-command", () => {
       const labels = [
         "🔥emoji-label🚀",
         'special"quotes"inside',
-        "label with newline\n character",
-        "label-with-null\0byte",
+        "label with newline\n character", // new line
+        "label-with-null\0byte", // null byte
       ];
       for (const label of labels) {
         expect(
