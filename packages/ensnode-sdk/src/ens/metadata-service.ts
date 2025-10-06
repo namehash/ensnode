@@ -2,6 +2,7 @@ import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { BrowserSupportedAssetUrl } from "../shared/url";
+import { toBrowserSupportedUrl } from "../shared/url";
 import type { Name } from "./types";
 
 /**
@@ -28,9 +29,13 @@ export function buildEnsMetadataServiceAvatarUrl(
 ): BrowserSupportedAssetUrl | null {
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
-      return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
+      return toBrowserSupportedUrl(
+        new URL(name, `https://metadata.ens.domains/mainnet/avatar/`).toString(),
+      );
     case ENSNamespaceIds.Sepolia:
-      return new URL(name, `https://metadata.ens.domains/sepolia/avatar/`);
+      return toBrowserSupportedUrl(
+        new URL(name, `https://metadata.ens.domains/sepolia/avatar/`).toString(),
+      );
     case ENSNamespaceIds.Holesky:
       // metadata.ens.domains doesn't currently support holesky
       return null;

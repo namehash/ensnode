@@ -172,13 +172,10 @@ export function useAvatarUrl(
   const configQuery = useENSIndexerConfig({ config: _config });
   const namespaceId = configQuery.data?.namespace ?? null;
 
-  // Create default fallback using ENS Metadata Service if namespaceId is available
-  const defaultFallback =
-    namespaceId !== null && namespaceId !== undefined
-      ? async (name: Name) => {
-          return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-        }
-      : undefined;
+  // Create default fallback using ENS Metadata Service
+  const defaultFallback = async (name: Name) => {
+    return buildEnsMetadataServiceAvatarUrl(name, namespaceId!);
+  };
 
   // Use custom fallback if provided, otherwise use default
   const activeFallback = browserUnsupportedProtocolFallback ?? defaultFallback;
@@ -265,7 +262,7 @@ export function useAvatarUrl(
         fromFallback: false,
       };
     },
-    enabled: canEnable && recordsQuery.isSuccess,
+    enabled: canEnable && recordsQuery.isSuccess && configQuery.isSuccess,
     retry: false,
     placeholderData: {
       rawAvatarUrl: null,
@@ -277,7 +274,11 @@ export function useAvatarUrl(
   const options = {
     ...baseQueryOptions,
     ...queryOptions,
-    enabled: canEnable && recordsQuery.isSuccess && (queryOptions?.enabled ?? true),
+    enabled:
+      canEnable &&
+      recordsQuery.isSuccess &&
+      configQuery.isSuccess &&
+      (queryOptions?.enabled ?? true),
   } as typeof baseQueryOptions;
 
   return useQuery<UseAvatarUrlResult, Error>(options);
