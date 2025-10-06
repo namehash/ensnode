@@ -27,11 +27,20 @@ export interface DependencyInfo {
   /** Ponder framework version */
   ponder: string;
 
+  /** ENSDB service version */
+  ensDb: string;
+
+  /** ENSIndexer service version */
+  ensIndexer: string;
+
   /** ENSRainbow service version */
   ensRainbow: string;
 
   /** ENSRainbow schema version */
   ensRainbowSchema: number;
+
+  /** ENS Normalize package version */
+  ensNormalize: string;
 }
 
 /**

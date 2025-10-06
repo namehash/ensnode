@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import packageJson from "@/../package.json";
 import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 import { DependencyInfo } from "@ensnode/ensnode-sdk";
 import { makeDependencyInfoSchema } from "@ensnode/ensnode-sdk/internal";
@@ -67,17 +68,30 @@ export async function getDependencyInfo(): Promise<DependencyInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();
   const { versionInfo: ensRainbowDependencyInfo } = await ensRainbowApiClient.version();
 
+  // ENSRainbow version (fetched from the actual ENSRainbow service instance)
   // use a fallback for backwards compatibility
   const ensRainbowSchema =
     ensRainbowDependencyInfo.dbSchemaVersion ||
     // @ts-ignore
     ensRainbowDependencyInfo.schema_version;
 
+  // ENSIndexer version
+  const ensIndexerVersion = packageJson.version;
+
+  // ENSDb version
+  //
+  // For now ENSIndexer should always set this version number to be the same as
+  // the version number of ENSIndexer
+  const ensDbVersion = ensIndexerVersion;
+
   const schema = makeDependencyInfoSchema();
   const data = {
     ensRainbow: ensRainbowDependencyInfo.version,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
+    ensDb: ensDbVersion,
+    ensIndexer: ensIndexerVersion,
+    ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
     ensRainbowSchema,
   } satisfies DependencyInfo;
 

@@ -123,6 +123,9 @@ export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
     {
       nodejs: makeNonEmptyStringSchema(),
       ponder: makeNonEmptyStringSchema(),
+      ensDb: makeNonEmptyStringSchema(),
+      ensIndexer: makeNonEmptyStringSchema(),
+      ensNormalize: makeNonEmptyStringSchema(),
       ensRainbow: makeNonEmptyStringSchema(),
       ensRainbowSchema: makePositiveIntegerSchema(),
     },

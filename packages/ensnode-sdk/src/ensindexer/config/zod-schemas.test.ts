@@ -103,12 +103,18 @@ describe("ENSIndexer: Config", () => {
           makeDependencyInfoSchema().parse({
             nodejs: "v22.22.22",
             ponder: "0.11.25",
+            ensDb: "0.32.0",
+            ensIndexer: "0.32.0",
+            ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
           } satisfies DependencyInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
           ponder: "0.11.25",
+          ensDb: "0.32.0",
+          ensIndexer: "0.32.0",
+          ensNormalize: "1.11.1",
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
         } satisfies DependencyInfo);
@@ -118,6 +124,9 @@ describe("ENSIndexer: Config", () => {
             makeDependencyInfoSchema().safeParse({
               nodejs: "",
               ponder: "",
+              ensDb: "",
+              ensIndexer: "",
+              ensNormalize: "",
               ensRainbow: "",
               ensRainbowSchema: -1,
             } satisfies DependencyInfo),
@@ -126,6 +135,12 @@ describe("ENSIndexer: Config", () => {
   → at nodejs
 ✖ Value must be a non-empty string.
   → at ponder
+✖ Value must be a non-empty string.
+  → at ensDb
+✖ Value must be a non-empty string.
+  → at ensIndexer
+✖ Value must be a non-empty string.
+  → at ensNormalize
 ✖ Value must be a non-empty string.
   → at ensRainbow
 ✖ Value must be a positive integer (>0).
@@ -148,6 +163,9 @@ describe("ENSIndexer: Config", () => {
           dependencyInfo: {
             nodejs: "v22.22.22",
             ponder: "0.11.25",
+            ensDb: "0.32.0",
+            ensIndexer: "0.32.0",
+            ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
           } satisfies DependencyInfo,
