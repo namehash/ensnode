@@ -12,7 +12,7 @@ import type { ENSNodeConfig } from "../types";
  * @throws Error if no config is available in context or parameters
  */
 export function useENSNodeConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
-  config: TConfig | undefined,
+  config: TConfig | undefined
 ): TConfig {
   const contextConfig = useContext(ENSNodeContext);
 
@@ -21,7 +21,7 @@ export function useENSNodeConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
 
   if (!resolvedConfig) {
     throw new Error(
-      "useENSNodeConfig must be used within an ENSNodeProvider or you must pass a config parameter",
+      "useENSNodeConfig must be used within an ENSNodeProvider or you must pass a config parameter"
     );
   }
 
