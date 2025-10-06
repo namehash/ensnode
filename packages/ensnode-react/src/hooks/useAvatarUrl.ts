@@ -33,7 +33,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * If not provided, defaults to using the ENS Metadata Service as a fallback proxy for browser-supported avatar urls.
    *
    * @param name - The ENS name to get the avatar URL for
-   * @returns Promise resolving to the avatar URL, or null if unavailable
+   * @returns Promise resolving to the browser supported avatar URL, or null if unavailable
    */
   browserUnsupportedProtocolFallback?: (name: Name) => Promise<BrowserSupportedAssetUrl | null>;
 }
