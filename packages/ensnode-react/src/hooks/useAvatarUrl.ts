@@ -30,7 +30,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * Optional custom fallback function to get avatar URL when the avatar text record
    * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
    *
-   * If not provided, defaults to using the ENS Metadata Service.
+   * If not provided, defaults to using the ENS Metadata Service as a fallback proxy for browser-supported avatar urls.
    *
    * @param name - The ENS name to get the avatar URL for
    * @returns Promise resolving to the avatar URL, or null if unavailable
