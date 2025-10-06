@@ -1,7 +1,10 @@
 "use client";
 
 import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
-import {RegistrationCard, RegistrationCardLoading} from "@/components/recent-registrations/registration-card";
+import {
+  RegistrationCard,
+  RegistrationCardLoading,
+} from "@/components/recent-registrations/registration-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -216,14 +219,14 @@ function UnsupportedOmnichainIndexingStatusMessage({
   // We don't want the user-facing list of supported statuses to include "Indexer Error".
   // That's technically true, but it's very confusing UX.
   // Therefore, the list in the message should just show "Following" and "Completed" statuses.
-  const filteredSupportedOmnichainIndexingStatuses = SUPPORTED_OMNICHAIN_INDEXING_STATUSES.filter((omnichainIndexingStatus) => omnichainIndexingStatus !== OverallIndexingStatusIds.IndexerError);
+  const filteredSupportedOmnichainIndexingStatuses = SUPPORTED_OMNICHAIN_INDEXING_STATUSES.filter(
+    (omnichainIndexingStatus) => omnichainIndexingStatus !== OverallIndexingStatusIds.IndexerError,
+  );
 
   return (
     <Card className="w-full">
       <CardHeader className="sm:pb-4 max-sm:p-3">
-        <CardTitle>
-            Please wait for indexing to advance
-        </CardTitle>
+        <CardTitle>Please wait for indexing to advance</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-start items-start gap-4 sm:gap-3">
         <div className="flex flex-row flex-nowrap justify-start items-center gap-2">
@@ -235,19 +238,23 @@ function UnsupportedOmnichainIndexingStatusMessage({
             {overallOmnichainIndexingStatus}
           </Badge>
         </div>
-          <p>
-            The latest indexed registrations will be available once the omnichain indexing status is{" "}
-            {
-                filteredSupportedOmnichainIndexingStatuses.map((supportedOmnichainIndexingStatus, idx) => (
+        <p>
+          The latest indexed registrations will be available once the omnichain indexing status is{" "}
+          {filteredSupportedOmnichainIndexingStatuses.map(
+            (supportedOmnichainIndexingStatus, idx) => (
               <>
-                <Badge className="uppercase text-xs leading-none" title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}>
+                <Badge
+                  className="uppercase text-xs leading-none"
+                  title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
+                >
                   {supportedOmnichainIndexingStatus}
                 </Badge>
                 {idx < filteredSupportedOmnichainIndexingStatuses.length - 1 && " or "}
               </>
-            ))}
-            .
-          </p>
+            ),
+          )}
+          .
+        </p>
         <Button asChild variant="default">
           <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
         </Button>
