@@ -1,4 +1,3 @@
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   AccountId,
   ForwardResolutionArgs,
@@ -18,6 +17,7 @@ import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
+import { ENS_ROOT_REGISTRY } from "@/api/lib/protocol-acceleration/ens-root-registry";
 import { findResolver } from "@/api/lib/protocol-acceleration/find-resolver";
 import { getENSIP19ReverseNameRecordFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
 import { getRecordsFromIndex } from "@/api/lib/protocol-acceleration/get-records-from-index";
@@ -43,12 +43,6 @@ import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 
 const tracer = trace.getTracer("forward-resolution");
 // const metric = metrics.getMeter("forward-resolution");
-
-const ensRoot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
-const ENS_ROOT_REGISTRY: AccountId = {
-  chainId: ensRoot.chain.id,
-  address: ensRoot.contracts.Registry.address,
-};
 
 // NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
 // first trace generated here would be unusually slow)

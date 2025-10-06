@@ -15,13 +15,13 @@ const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
 );
 
 /**
- * For a given `resolverAddress` on a specific `chainId`, if it is an Offchain Lookup Resolver, return
- * the chainId whose (shadow)Registry it defers resolution to.
+ * For a given `resolverAddress` on a specific `chainId`, if it is a known Offchain Lookup Resolver,
+ * return the AccountId describing the (shadow)Registry it defers resolution to.
  *
  * These Offchain Lookup Resolvers must abide the following pattern:
  * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
  * 2. That CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
- *   the indicated chain.
+ *   the indicated Registry / Shadow Registry.
  * 3. Its behavior is unlikely to change (i.e. the contract is not upgradable or is unlikely to be
  *   upgraded in a way that violates principles 1. or 2.).
  *
@@ -40,20 +40,20 @@ export function possibleKnownOffchainLookupResolverDefersTo(
 ): AccountId | null {
   // on the ENS Deployment Chain
   if (chainId === ensRoot.chain.id) {
-    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime definition check
+    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
     if (basenames) {
-      // the ENSRoot's BasenamesL1Resolver, if exists, defers to the Basenames chain
+      // the ENSRoot's BasenamesL1Resolver defers to the Basenames chain
       if (isAddressEqual(resolverAddress, ensRoot.contracts.BasenamesL1Resolver.address)) {
         return {
           chainId: basenames.chain.id,
-          address: basenames.contracts.Registry.address as Address,
+          address: basenames.contracts.Registry.address,
         };
       }
     }
 
-    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime definition check
+    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
     if (lineanames) {
-      // the ENSRoot's LineanamesL1Resolver, if exists, defers to the Lineanames chain
+      // the ENSRoot's LineanamesL1Resolver defers to the Lineanames chain
       if (isAddressEqual(resolverAddress, ensRoot.contracts.LineanamesL1Resolver.address)) {
         return {
           chainId: lineanames.chain.id,

@@ -19,6 +19,7 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
+import { isENSRootRegistry } from "@/api/lib/protocol-acceleration/ens-root-registry";
 import config from "@/config";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
@@ -38,10 +39,12 @@ const NULL_RESULT: FindResolverResult = {
 };
 
 const tracer = trace.getTracer("find-resolver");
-const ensRootChainId = getENSRootChainId(config.namespace);
 
 /**
- * Identifies the active resolver on `chainId` for `name`.
+ * Identifies `name`'s active resolver in `registry`.
+ *
+ * Note that any `registry` that is not the ENS Root Chain's Registry is a Shadow Registry like
+ * Basenames' or Lineanames' (shadow)Registry contracts.
  */
 export async function findResolver({
   registry,
@@ -49,20 +52,26 @@ export async function findResolver({
   accelerate,
   publicClient,
 }: { registry: AccountId; name: NormalizedName; accelerate: boolean; publicClient: PublicClient }) {
-  if (registry.chainId === ensRootChainId) {
-    // if we're on the ENS Root Chain, we have the option to accelerate resolver lookups iff the
-    // ProtocolAcceleration plugin is active
-    if (accelerate && config.plugins.includes(PluginName.ProtocolAcceleration)) {
-      return findResolverWithIndex(registry, name);
-    }
-
-    // otherwise, query the UniversalResolver on the ENSRoot Chain (via RPC)
-    return findResolverWithUniversalResolver(publicClient, name);
+  //////////////////////////////////////////////////
+  // Protocol Acceleration: Active Resolver Identification
+  //   If:
+  //    1) the caller requested acceleration, and
+  //    2) the ProtocolAcceleration plugin is active,
+  //   then we can identify a node's active resolver via the indexed Node-Resolver Relationships.
+  //////////////////////////////////////////////////
+  if (accelerate && config.plugins.includes(PluginName.ProtocolAcceleration)) {
+    return findResolverWithIndex(registry, name);
   }
 
-  // If findResolver is called for a non-root-chain, we _must_ have access to the indexed Node-Resolver
-  // relations necessary to look up the Node's configured Resolver (see invariant in `findResolverWithIndex`)
-  return findResolverWithIndex(registry, name);
+  // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
+  if (!isENSRootRegistry(registry)) {
+    throw new Error(
+      `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
+    );
+  }
+
+  // query the UniversalResolver on the ENSRoot Chain (via RPC)
+  return findResolverWithUniversalResolver(publicClient, name);
 }
 
 /**
@@ -139,7 +148,7 @@ async function findResolverWithUniversalResolver(
  * Identifies the active resolver for a given ENS name, using indexed data, following ENSIP-10.
  * This function parallels UniversalResolver#findResolver.
  *
- * @param registry — the AccountId of the Registry to use
+ * @param registry — the AccountId of the Registry / Shadow Registry to use
  * @param name - The ENS name to find the Resolver for
  * @returns The resolver ID if found, null otherwise
  *
@@ -175,7 +184,7 @@ async function findResolverWithIndex(
       // 2. compute node of each via namehash
       const nodes = names.map((name) => namehash(name) as Node);
 
-      // 3. for each node, find its associated resolver (only on the specified chain)
+      // 3. for each node, find its associated resolver (only in the specified registry)
       const nodeResolverRelations = await withSpanAsync(
         tracer,
         "ext_nodeResolverRelation.findMany",
