@@ -14,6 +14,18 @@
  * 8. temporarily ignores column normalization that was fixed in
  *    https://github.com/ponder-sh/ponder/pull/1517/files
  */
+
+// here we inline the following types from this original import
+// import type { Drizzle, OnchainTable, Schema } from "ponder";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+import type { PgliteDatabase } from "drizzle-orm/pglite";
+
+export type Drizzle<TSchema extends Schema = { [name: string]: never }> =
+  | NodePgDatabase<TSchema>
+  | PgliteDatabase<TSchema>;
+
+export type Schema = { [name: string]: unknown };
+
 export const onchain = Symbol.for("ponder:onchain");
 
 export type OnchainTable<
@@ -98,7 +110,6 @@ import {
 } from "graphql";
 import { GraphQLJSON } from "graphql-scalars";
 
-import { Drizzle, Schema } from "./drizzle";
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
 import type { PonderMetadataProvider } from "./types";

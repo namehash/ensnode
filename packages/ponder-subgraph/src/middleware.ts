@@ -10,18 +10,19 @@
 import { maxAliasesPlugin } from "@escape.tech/graphql-armor-max-aliases";
 import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
+import { GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
-import { Schema, makeDb } from "./drizzle";
-import { buildDataLoaderCache, buildGraphQLSchema } from "./graphql";
+import { buildDataLoaderCache } from "./graphql";
 
-export function subgraphGraphQLAPIMiddleware(
+export function subgraphGraphQLMiddleware(
   {
-    schema,
-    ...rest
+    drizzle,
+    graphqlSchema,
   }: {
-    schema: Schema;
-  } & Parameters<typeof buildGraphQLSchema>[0],
+    drizzle: any;
+    graphqlSchema: GraphQLSchema;
+  },
   {
     maxOperationTokens = 1000,
     maxOperationDepth = 100,
@@ -38,12 +39,6 @@ export function subgraphGraphQLAPIMiddleware(
     maxOperationAliases: 30,
   },
 ) {
-  const drizzle = makeDb(schema);
-  const graphqlSchema = buildGraphQLSchema({
-    schema,
-    ...rest,
-  });
-
   const yoga = createYoga({
     graphqlEndpoint: "*", // Disable built-in route validation, use Hono routing instead
     schema: graphqlSchema,
