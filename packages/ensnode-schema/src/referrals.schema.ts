@@ -3,7 +3,6 @@
  */
 
 import { index, onchainTable, relations } from "ponder";
-import { domain, account } from "./subgraph.schema";
 
 /**
  * A RegistrationReferral tracks individual occurences of referrals for ENS name registrations.
@@ -14,9 +13,9 @@ export const ext_registrationReferral = onchainTable(
     // keyed by any arbitrary unique id, usually `event.id`
     id: t.text().primaryKey(),
 
-    referrerId: t.hex().notNull(),
-    domainId: t.text().notNull(),
-    refereeId: t.hex().notNull(),
+    referrer: t.hex().notNull(),
+    node: t.hex().notNull(),
+    referee: t.hex().notNull(),
     baseCost: t.bigint().notNull(),
     premium: t.bigint().notNull(),
     total: t.bigint().notNull(),
@@ -29,28 +28,18 @@ export const ext_registrationReferral = onchainTable(
     timestamp: t.bigint().notNull(),
   }),
   (t) => ({
-    byRefereeId: index().on(t.refereeId),
-    byReferrerId: index().on(t.referrerId),
+    byReferee: index().on(t.referee),
+    byReferrer: index().on(t.referrer),
   }),
 );
 
 export const ext_registrationReferral_relations = relations(
   ext_registrationReferral,
   ({ one, many }) => ({
-    // RegistrationReferral references one Referrer
+    // RegistrationReferral belongs to Referrer
     referrer: one(ext_referrer, {
-      fields: [ext_registrationReferral.referrerId],
+      fields: [ext_registrationReferral.referrer],
       references: [ext_referrer.id],
-    }),
-    // RegistrationReferral references one Account (as referee)
-    referee: one(account, {
-      fields: [ext_registrationReferral.refereeId],
-      references: [account.id],
-    }),
-    // RegistrationReferral references one Domain
-    domain: one(domain, {
-      fields: [ext_registrationReferral.domainId],
-      references: [domain.id],
     }),
   }),
 );
@@ -64,9 +53,9 @@ export const ext_renewalReferral = onchainTable(
     // keyed by any arbitrary unique id, usually `event.id`
     id: t.text().primaryKey(),
 
-    referrerId: t.hex().notNull(),
-    refereeId: t.hex().notNull(),
-    domainId: t.text().notNull(),
+    referrer: t.hex().notNull(),
+    referee: t.hex().notNull(),
+    node: t.hex().notNull(),
     cost: t.bigint().notNull(),
 
     // chainId the transaction occurred on
@@ -77,41 +66,23 @@ export const ext_renewalReferral = onchainTable(
     timestamp: t.bigint().notNull(),
   }),
   (t) => ({
-    byRefereeId: index().on(t.refereeId),
-    byReferrerId: index().on(t.referrerId),
+    byReferee: index().on(t.referee),
+    byReferrer: index().on(t.referrer),
   }),
 );
 
 export const ext_renewalReferral_relations = relations(ext_renewalReferral, ({ one, many }) => ({
-  // RenewalReferral references one Referrer
+  // RenewalReferral belongs to Referrer
   referrer: one(ext_referrer, {
-    fields: [ext_renewalReferral.referrerId],
+    fields: [ext_renewalReferral.referrer],
     references: [ext_referrer.id],
   }),
-  // RenewalReferral references one Account (as referee)
-  referee: one(account, {
-    fields: [ext_renewalReferral.refereeId],
-    references: [account.id],
-  }),
-  // RenewalReferral references one Domain
-  domain: one(domain, {
-    fields: [ext_renewalReferral.domainId],
-    references: [domain.id],
-  }),
-}));
-
-// add Domain relations
-export const ext_referrals_domain_relations = relations(domain, ({ one, many }) => ({
-  // Domain has many RegistrationReferrals
-  registrationReferrals: many(ext_registrationReferral),
-
-  // Domain has many RenewalReferrals
-  renewalReferrals: many(ext_renewalReferral),
 }));
 
 /**
- * Referrer represents an individual referrer, keyed by their onchain address. It holds aggregate
- * statistics about referrals, namely the total value (in wei) they've referred to the ENS protocol.
+ * Referrer represents an individual referrer, keyed by unique `referrer` id (bytes32). It holds
+ * aggregate statistics about referrals, namely the total value (in wei) they've referred to the
+ * ENS protocol.
  */
 export const ext_referrer = onchainTable(
   "ext_referral_totals",
