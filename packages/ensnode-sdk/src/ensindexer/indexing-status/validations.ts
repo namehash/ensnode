@@ -199,6 +199,43 @@ export function invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcro
 
 /**
  * Invariant: For omnichain status snapshot,
+ * `omnichainIndexingCursor` is lower than or equal to
+ * the highest `backfillEndBlock` across all backfill chains.
+ *
+ * Note: if there are no backfill chains, the invariant holds.
+ */
+export function invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains(
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshot>,
+) {
+  const snapshot = ctx.value;
+  const backfillChains = Array.from(snapshot.chains.values()).filter(
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill,
+  );
+
+  // there are no backfill chains
+  if (backfillChains.length === 0) {
+    // the invariant holds
+    return;
+  }
+
+  const backfillEndBlocks = backfillChains.map((chain) => chain.backfillEndBlock.timestamp);
+  const highestBackfillEndBlock = Math.max(...backfillEndBlocks);
+
+  // there are backfill chains
+  // the invariant holds if the omnichainIndexingCursor is lower than or
+  // equal to the highest backfillEndBlock across all backfill chains.
+  if (snapshot.omnichainIndexingCursor > highestBackfillEndBlock) {
+    ctx.issues.push({
+      code: "custom",
+      input: snapshot,
+      message:
+        "`omnichainIndexingCursor` must be lower than or equal to the highest `backfillEndBlock` across all backfill chains.",
+    });
+  }
+}
+
+/**
+ * Invariant: For omnichain status snapshot,
  * `omnichainIndexingCursor` is same as the highest latestIndexedBlock
  * across all indexed chains.
  *
@@ -208,11 +245,11 @@ export function invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBl
   ctx: ParsePayload<OmnichainIndexingStatusSnapshot>,
 ) {
   const snapshot = ctx.value;
-  const indexedChains = Object.values(snapshot.chains).filter(
+  const indexedChains = Array.from(snapshot.chains.values()).filter(
     (chain) =>
-      chain.status === ChainIndexingStatusIds.Backfill ||
-      chain.status === ChainIndexingStatusIds.Completed ||
-      chain.status === ChainIndexingStatusIds.Following,
+      chain.chainStatus === ChainIndexingStatusIds.Backfill ||
+      chain.chainStatus === ChainIndexingStatusIds.Completed ||
+      chain.chainStatus === ChainIndexingStatusIds.Following,
   );
 
   // there are no indexed chains

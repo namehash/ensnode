@@ -112,9 +112,9 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingStatusSnapshot[]
     throw new Error(`Unable to determine omnichain indexing cursor when no chains were provided.`);
   }
 
-  // if all chains are queued, the cursor tracks the moment just before
-  if (chains.every((chain) => chain.chainStatus === ChainIndexingStatusIds.Queued)) {
-    // the earliest start block timestamp across those chains
+  // for omnichain indexing status snapshot 'unstarted', the cursor tracks
+  // the moment just before the indexing would start from.
+  if (getOmnichainIndexingStatus(chains) === OmnichainIndexingStatusIds.Unstarted) {
     const earliestStartBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
 
     return Math.min(...earliestStartBlockTimestamps) - 1;

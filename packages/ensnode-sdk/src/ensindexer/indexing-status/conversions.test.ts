@@ -28,7 +28,7 @@ describe("ENSIndexer: Indexing Status", () => {
                 configType: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earliestBlockRef,
               },
-              latestIndexedBlock: earlierBlockRef,
+              latestIndexedBlock: laterBlockRef,
               latestKnownBlock: latestBlockRef,
             } satisfies ChainIndexingStatusSnapshotFollowing,
           ],
@@ -57,7 +57,7 @@ describe("ENSIndexer: Indexing Status", () => {
             } satisfies ChainIndexingStatusSnapshotQueued,
           ],
         ]),
-        omnichainIndexingCursor: earlierBlockRef.timestamp,
+        omnichainIndexingCursor: laterBlockRef.timestamp,
       } satisfies OmnichainIndexingStatusSnapshot;
 
       // act
@@ -73,7 +73,7 @@ describe("ENSIndexer: Indexing Status", () => {
               configType: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earliestBlockRef,
             },
-            latestIndexedBlock: earlierBlockRef,
+            latestIndexedBlock: laterBlockRef,
             latestKnownBlock: latestBlockRef,
           } satisfies ChainIndexingStatusSnapshotFollowing,
           "8453": {
@@ -95,7 +95,7 @@ describe("ENSIndexer: Indexing Status", () => {
             backfillEndBlock: latestBlockRef,
           } satisfies ChainIndexingStatusSnapshotBackfill,
         },
-        omnichainIndexingCursor: earlierBlockRef.timestamp,
+        omnichainIndexingCursor: laterBlockRef.timestamp,
       } satisfies SerializedOmnichainIndexingStatusSnapshot);
 
       // bonus step: deserialize serialized

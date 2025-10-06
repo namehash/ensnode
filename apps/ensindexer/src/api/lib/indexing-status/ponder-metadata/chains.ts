@@ -187,7 +187,7 @@ export function createChainIndexingSnapshot(
 /**
  * Create Serialized Omnichain Indexing Snapshot
  *
- * Creates {@link SerializedOmnichainIndexingStatusSnapshot} from serialized chain snapshots and "now" timestamp.
+ * Creates {@link SerializedOmnichainIndexingStatusSnapshot} from serialized chain snapshots.
  */
 export function createSerializedOmnichainIndexingStatusSnapshot(
   serializedChainSnapshots: Record<ChainIdString, SerializedChainIndexingStatusSnapshot>,

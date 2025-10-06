@@ -15,7 +15,7 @@ describe("Realtime Indexing Status Projection", () => {
     // arrange
     const now = Math.floor(Date.now() / 1000);
     const snapshotTime = now - 20;
-    const omnichainIndexingCursor = now - 100;
+    const omnichainIndexingCursor = earlierBlockRef.timestamp;
 
     const snapshot = deserializeCrossChainIndexingStatusSnapshot({
       strategy: CrossChainIndexingStrategyIds.Omnichain,

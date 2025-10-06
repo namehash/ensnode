@@ -41,6 +41,7 @@ import {
   invariant_chainSnapshotQueuedBlocks,
   invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain,
   invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains,
+  invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains,
   invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot,
   invariant_omnichainSnapshotUnstartedHasValidChains,
   invariant_omnichainStatusSnapshotBackfillHasValidChains,
@@ -223,6 +224,9 @@ export const makeOmnichainIndexingStatusSnapshotSchema = (
     ])
     .check(invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot)
     .check(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains)
+    .check(
+      invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains,
+    )
     .check(invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain);
 
 /**
