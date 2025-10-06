@@ -41,21 +41,23 @@ export const ext_reverseNameRecord = onchainTable(
 );
 
 /**
- * Tracks Node-Resolver relationships to accelerate the identification of a node's active resolver.
+ * Tracks Node-Resolver relationships to accelerate the identification of a node's active resolver
+ * in a specific (shadow)Registry.
  *
- * Note that this model supports the indexing of Node-Resolver relationships across multiple chains,
- * in particular to support the acceleration of ForwardResolution#findResolver for the the ENS Root
- * Chain's Registry as well as Basenames' and Lineanames' Shadow Registries. If the chainId in this
- * entity is not the ENS Root Chain, then the entity represents a Node-Resolver relationship within
- * the chainId's respective Shadow Registry.
+ * Note that this model supports the indexing of Node-Resolver relationships across any Registry on
+ * on any chain, in particular to support the acceleration of ForwardResolution#findResolver for the
+ * ENS Root Chain's Registry which can have any number of (shadow)Registries (like Basenames' and
+ * Lineanames') on any chain.
  *
- * It is keyed by (chainId, node) to match the on-chain datamodel of Registry Node-Resolver relationships.
+ * It is keyed by (chainId, registry, node) to match the on-chain datamodel of Registry/(shadow)Registry
+ * Node-Resolver relationships.
  */
 export const ext_nodeResolverRelation = onchainTable(
   "ext_node_resolver_relations",
   (t) => ({
-    // keyed by (chainId, node)
+    // keyed by (chainId, registry, node)
     chainId: t.integer().notNull(),
+    registry: t.hex().notNull(),
     node: t.hex().notNull(),
 
     /**
@@ -65,7 +67,7 @@ export const ext_nodeResolverRelation = onchainTable(
     resolver: t.hex().notNull(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.node] }),
+    pk: primaryKey({ columns: [t.chainId, t.registry, t.node] }),
   }),
 );
 
