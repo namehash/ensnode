@@ -14,26 +14,32 @@ const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
 );
 
 /**
- * For a given `resolverAddress` on a specific `chainId`, if it is a known Offchain Lookup Resolver,
- * return the AccountId describing the (shadow)Registry it defers resolution to.
+ * For a given `resolver`, if it is a known CCIP-Read Shadow Registry Resolver, return the
+ * AccountId describing the (shadow)Registry it defers resolution to.
  *
- * These Offchain Lookup Resolvers must abide the following pattern:
- * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway
- * 2. That CCIP-Read Gateway exclusively sources the data necessary to process CCIP-Read Requests from
- *   the indicated Registry / Shadow Registry.
+ * These CCIP-Read Shadow Registry Resolvers must abide the following pattern:
+ * 1. They _always_ emit OffchainLookup for any resolve() call to a well-known CCIP-Read Gateway,
+ * 2. That CCIP-Read Gateway exclusively consults a specific (shadow)Registry in order to identify
+ *   a name's active resolver and resolve records, and
  * 3. Its behavior is unlikely to change (i.e. the contract is not upgradable or is unlikely to be
  *   upgraded in a way that violates principles 1. or 2.).
  *
- * The intent is to encode the following information:
- * - base.eth name on ENS Root Chain always emits OffchainLookup to resolve against the
- *   (shadow)Registry on Base (or Base Sepolia, etc)
- * - linea.eth name on ENS Root Chain always emits OffchainLookup to resolve against the
- *   (shadow)Registry on Linea (or Linea Sepolia, etc)
+ * The goal is to encode the pattern followed by projects like Basenames and Lineanames where a
+ * wildcard resolver is used for subnames of base.eth and that L1Resolver always returns OffchainLookup
+ * instructing the caller to consult a well-known CCIP-Read Gateway. This CCIP-Read Gateway then
+ * exclusively behaves in the following way: it identifies the name's active resolver via a well-known
+ * (shadow)Registry (likely on an L2), and resolves records on that active resolver.
+ *
+ * In these cases, if the Node-Resolver relationships for the (shadow)Registry in question are indexed,
+ * then the CCIP-Read can be short-circuited, in favor of performing an _accelerated_ Forward Resolution
+ * against the (shadow)Registry in question.
  *
  * TODO: these relationships could/should be encoded in an ENSIP, likely as a mapping from
  * resolverAddress to (shadow)Registry on a specified chain.
  */
-export function possibleKnownOffchainLookupResolverDefersTo(resolver: AccountId): AccountId | null {
+export function possibleKnownCCIPReadShadowRegistryResolverDefersTo(
+  resolver: AccountId,
+): AccountId | null {
   // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
   if (basenames) {
     // the ENSRoot's BasenamesL1Resolver defers to the Basenames (shadow)Registry

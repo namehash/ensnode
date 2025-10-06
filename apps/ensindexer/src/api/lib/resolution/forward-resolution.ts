@@ -21,8 +21,8 @@ import { ENS_ROOT_REGISTRY } from "@/api/lib/protocol-acceleration/ens-root-regi
 import { findResolver } from "@/api/lib/protocol-acceleration/find-resolver";
 import { getENSIP19ReverseNameRecordFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
 import { getRecordsFromIndex } from "@/api/lib/protocol-acceleration/get-records-from-index";
+import { possibleKnownCCIPReadShadowRegistryResolverDefersTo } from "@/api/lib/protocol-acceleration/known-ccip-read-shadow-registry-resolver";
 import { isKnownENSIP19ReverseResolver } from "@/api/lib/protocol-acceleration/known-ensip-19-reverse-resolvers";
-import { possibleKnownOffchainLookupResolverDefersTo } from "@/api/lib/protocol-acceleration/known-offchain-lookup-resolver";
 import { isKnownOnchainStaticResolver } from "@/api/lib/protocol-acceleration/known-onchain-static-resolver";
 import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/api/lib/protocol-acceleration/resolver-records-indexed-on-chain";
 import {
@@ -256,23 +256,21 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           }
 
           //////////////////////////////////////////////////
-          // Protocol Acceleration: CCIP-Read Short-Circuit
+          // Protocol Acceleration: CCIP-Read Shadow Registry Resolvers
           //   If:
           //    1) the caller requested acceleration, and
           //    2) the ProtocolAcceleration Plugin is active, and
-          //    3) the activeResolver is a Known OffchainLookup Resolver,
-          //   then we can short-circuit the CCIP-Read and continue resolving the requested records
-          //   directly from the data indexed by that plugin.
+          //    3) the activeResolver is a CCIP-Read Shadow Registry Resolver,
+          //   then we can short-circuit the CCIP-Read and defer resolution to the indicated
+          //   (shadow)Registry.
           //////////////////////////////////////////////////
           if (accelerate) {
-            const defersToRegistry = possibleKnownOffchainLookupResolverDefersTo({
+            const defersToRegistry = possibleKnownCCIPReadShadowRegistryResolverDefersTo({
               chainId,
               address: activeResolver,
             });
 
             if (hasProtocolAccelerationPlugin && defersToRegistry !== null) {
-              // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
-              // that ENSIndexer is actively indexing the necessary plugin on the specified chain.
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
