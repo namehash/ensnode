@@ -200,6 +200,7 @@ export function useAvatarUrl(
       _config.client.url.href,
       namespaceId,
       !!browserUnsupportedProtocolFallback,
+      recordsQuery.data?.records?.texts?.avatar ?? null,
     ] as const,
     queryFn: async (): Promise<UseAvatarUrlResult> => {
       if (!name || !recordsQuery.data) {
