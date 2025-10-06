@@ -1,8 +1,7 @@
 import config from "@/config";
 import { getDatasourceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { DatasourceNames } from "@ensnode/datasources";
-import { AccountId, ChainId } from "@ensnode/ensnode-sdk";
-import { Address, isAddressEqual } from "viem";
+import { AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
 
 const ensRoot = getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceNames.ENSRoot);
 const basenames = getDatasourceAsFullyDefinedAtCompileTime(
@@ -34,36 +33,40 @@ const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
  * TODO: these relationships could/should be encoded in an ENSIP, likely as a mapping from
  * resolverAddress to (shadow)Registry on a specified chain.
  */
-export function possibleKnownOffchainLookupResolverDefersTo(
-  chainId: ChainId,
-  resolverAddress: Address,
-): AccountId | null {
-  // on the ENS Deployment Chain
-  if (chainId === ensRoot.chain.id) {
-    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
-    if (basenames) {
-      // the ENSRoot's BasenamesL1Resolver defers to the Basenames chain
-      if (isAddressEqual(resolverAddress, ensRoot.contracts.BasenamesL1Resolver.address)) {
-        return {
-          chainId: basenames.chain.id,
-          address: basenames.contracts.Registry.address,
-        };
-      }
-    }
+export function possibleKnownOffchainLookupResolverDefersTo(resolver: AccountId): AccountId | null {
+  // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
+  if (basenames) {
+    // the ENSRoot's BasenamesL1Resolver defers to the Basenames (shadow)Registry
+    const isBasenamesL1Resolver = accountIdEqual(resolver, {
+      chainId: ensRoot.chain.id,
+      address: ensRoot.contracts.BasenamesL1Resolver.address,
+    });
 
-    // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
-    if (lineanames) {
-      // the ENSRoot's LineanamesL1Resolver defers to the Lineanames chain
-      if (isAddressEqual(resolverAddress, ensRoot.contracts.LineanamesL1Resolver.address)) {
-        return {
-          chainId: lineanames.chain.id,
-          address: lineanames.contracts.Registry.address,
-        };
-      }
+    if (isBasenamesL1Resolver) {
+      return {
+        chainId: basenames.chain.id,
+        address: basenames.contracts.Registry.address,
+      };
     }
-
-    // TODO: ThreeDNS
   }
+
+  // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
+  if (lineanames) {
+    // the ENSRoot's LineanamesL1Resolver defers to the Lineanames (shadow)Registry
+    const isLineanamesL1Resolver = accountIdEqual(resolver, {
+      chainId: ensRoot.chain.id,
+      address: ensRoot.contracts.LineanamesL1Resolver.address,
+    });
+
+    if (isLineanamesL1Resolver) {
+      return {
+        chainId: lineanames.chain.id,
+        address: lineanames.contracts.Registry.address,
+      };
+    }
+  }
+
+  // TODO: ThreeDNS
 
   return null;
 }

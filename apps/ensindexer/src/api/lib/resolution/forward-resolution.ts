@@ -265,10 +265,10 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //   directly from the data indexed by that plugin.
           //////////////////////////////////////////////////
           if (accelerate) {
-            const defersToRegistry = possibleKnownOffchainLookupResolverDefersTo(
+            const defersToRegistry = possibleKnownOffchainLookupResolverDefersTo({
               chainId,
-              activeResolver,
-            );
+              address: activeResolver,
+            });
 
             if (hasProtocolAccelerationPlugin && defersToRegistry !== null) {
               // can short-circuit CCIP-Read and defer resolution to the specified chainId with the knowledge
