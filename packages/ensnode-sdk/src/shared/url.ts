@@ -1,4 +1,10 @@
 /**
+ * Type alias for URLs to assets that are supported by browsers for direct rendering.
+ * Assets must be accessible via the http or https protocol.
+ */
+export type BrowserSupportedAssetUrl = URL;
+
+/**
  * Builds a `URL` from the given string.
  *
  * If no explicit protocol found in `rawUrl` assumes an implicit

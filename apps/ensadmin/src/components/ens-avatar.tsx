@@ -22,9 +22,9 @@ export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
     name,
   });
 
-  const avatarUrl = avatarData?.browserSupportedAvatarUrl;
-
-  if (avatarUrl === null || avatarUrl === undefined) {
+  // While useAvatarUrl has placeholderData, TanStack Query types data as possibly undefined
+  // browserSupportedAvatarUrl is BrowserSupportedAssetUrl | null when present
+  if (!avatarData || avatarData.browserSupportedAvatarUrl === null) {
     return (
       <Avatar className={className}>
         <EnsAvatarFallback name={name} />
@@ -32,10 +32,12 @@ export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
     );
   }
 
+  const avatarUrl = avatarData.browserSupportedAvatarUrl;
+
   return (
     <Avatar className={className}>
       <AvatarImage
-        src={avatarUrl}
+        src={avatarUrl.toString()}
         alt={name}
         onLoadingStatusChange={(status: ImageLoadingStatus) => {
           setLoadingStatus(status);

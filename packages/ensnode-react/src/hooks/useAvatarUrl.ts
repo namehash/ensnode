@@ -1,6 +1,12 @@
 "use client";
 
-import { type Name, buildEnsMetadataServiceAvatarUrl, buildUrl } from "@ensnode/ensnode-sdk";
+import {
+  type BrowserSupportedAssetUrl,
+  type Name,
+  buildEnsMetadataServiceAvatarUrl,
+  buildUrl,
+  isHttpProtocol,
+} from "@ensnode/ensnode-sdk";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
@@ -12,17 +18,6 @@ import { useRecords } from "./useRecords";
  * The ENS avatar text record key.
  */
 const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
-
-/**
- * Protocols supported by browsers for direct image rendering.
- */
-const BROWSER_SUPPORTED_PROTOCOLS = ["http:", "https:"] as const;
-
-/**
- * Type alias for avatar URLs. Avatar URLs must be URLs to an image asset
- * accessible via the http or https protocol.
- */
-export type AvatarUrl = URL;
 
 /**
  * Parameters for the useAvatarUrl hook.
@@ -40,7 +35,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * @param name - The ENS name to get the avatar URL for
    * @returns Promise resolving to the avatar URL, or null if unavailable
    */
-  browserUnsupportedProtocolFallback?: (name: Name) => Promise<string | null>;
+  browserUnsupportedProtocolFallback?: (name: Name) => Promise<BrowserSupportedAssetUrl | null>;
 }
 
 /**
@@ -61,7 +56,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
  * normalizeAvatarUrl("invalid url") // Returns null
  * ```
  */
-function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
+function normalizeAvatarUrl(url: string | null | undefined): BrowserSupportedAssetUrl | null {
   if (!url) return null;
 
   try {
@@ -73,19 +68,22 @@ function normalizeAvatarUrl(url: string | null | undefined): AvatarUrl | null {
 
 /**
  * Result returned by the useAvatarUrl hook.
+ *
+ * Invariant: If rawAvatarUrl is null, then browserSupportedAvatarUrl must also be null.
  */
 export interface UseAvatarUrlResult {
   /**
    * The original avatar text record value from ENS, before any normalization or fallback processing.
-   * Null if no avatar record exists.
+   * Null if the avatar text record is not set for the ENS name.
    */
   rawAvatarUrl: string | null;
   /**
    * A browser-supported (http/https) avatar URL ready for use in <img> tags.
    * Populated when the avatar uses http/https protocol or when a fallback successfully resolves.
-   * Null if no avatar exists or resolution fails.
+   * Null if the avatar text record is not set, or if the avatar uses a non-http/https protocol
+   * and either no fallback is available or the fallback fails to resolve.
    */
-  browserSupportedAvatarUrl: string | null;
+  browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
    * Indicates whether the browserSupportedAvatarUrl was obtained via the fallback mechanism
    * (true) or directly from the avatar text record (false).
@@ -178,8 +176,7 @@ export function useAvatarUrl(
   const defaultFallback =
     namespaceId !== null && namespaceId !== undefined
       ? async (name: Name) => {
-          const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-          return url?.toString() ?? null;
+          return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
         }
       : undefined;
 
@@ -235,14 +232,10 @@ export function useAvatarUrl(
       }
 
       // If the URL uses http or https protocol, return it
-      if (
-        BROWSER_SUPPORTED_PROTOCOLS.includes(
-          normalizedUrl.protocol as (typeof BROWSER_SUPPORTED_PROTOCOLS)[number],
-        )
-      ) {
+      if (isHttpProtocol(normalizedUrl)) {
         return {
           rawAvatarUrl: avatarTextRecord,
-          browserSupportedAvatarUrl: normalizedUrl.toString(),
+          browserSupportedAvatarUrl: normalizedUrl,
           fromFallback: false,
         };
       }
