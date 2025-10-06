@@ -1,8 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import Link from "next/link";
 
 export default function MockList() {
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
+
   return (
     <section className="flex flex-col gap-6 p-4">
       <Card>
@@ -13,13 +18,24 @@ export default function MockList() {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">
-              <Link href="/mock/config-info">ENSNodeConfigInfo</Link>
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/config-info")}>
+                ENSNodeConfigInfo
+              </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/mock/indexing-stats">IndexingStats</Link>
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/indexing-stats")}>
+                IndexingStats
+              </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/mock/relative-time">RelativeTime</Link>
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/recent-registrations")}>
+                RecentRegistrations
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/relative-time")}>
+                RelativeTime
+              </Link>
             </Button>
           </div>
         </CardContent>
