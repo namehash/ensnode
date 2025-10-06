@@ -39,11 +39,10 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
 }
 
 /**
- * Normalizes an avatar URL by ensuring it has a valid protocol.
- * Avatar URLs should be URLs to an image asset accessible via the http or https protocol.
+ * Normalizes a URL string by ensuring it has a valid protocol.
  *
- * If the URL lacks a protocol, https:// is prepended. Non-http/https protocols (e.g., ipfs://, ar://)
- * are preserved and can be handled by fallback mechanisms.
+ * If the URL lacks a protocol, https:// is prepended.
+ * URLs with existing protocols (http://, https://, ipfs://, ar://, eip155://, etc.) are preserved as-is.
  *
  * @param url - The URL string to normalize
  * @returns A URL object if the input is valid, null otherwise
@@ -52,7 +51,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
  * ```typescript
  * normalizeAvatarUrl("example.com/avatar.png") // Returns URL with https://example.com/avatar.png
  * normalizeAvatarUrl("http://example.com/avatar.png") // Returns URL with http://example.com/avatar.png
- * normalizeAvatarUrl("ipfs://QmHash") // Returns URL with ipfs://QmHash (requires fallback)
+ * normalizeAvatarUrl("ipfs://QmHash") // Returns URL with ipfs://QmHash
  * normalizeAvatarUrl("invalid url") // Returns null
  * ```
  */
@@ -85,8 +84,10 @@ export interface UseAvatarUrlResult {
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
-   * Indicates whether the browserSupportedAvatarUrl was obtained via the fallback mechanism
-   * (true) or directly from the avatar text record (false).
+   * Indicates whether the browserSupportedAvatarUrl was obtained via the fallback mechanism.
+   * True if a fallback successfully resolved the URL.
+   * False if the URL was used directly from the avatar text record, or if there's no avatar,
+   * or if the fallback failed to resolve.
    */
   fromFallback: boolean;
 }
@@ -98,7 +99,8 @@ export interface UseAvatarUrlResult {
  * 1. Fetching the avatar text record using useRecords
  * 2. Normalizing the avatar text record as a URL
  * 3. Returning the URL if it uses http or https protocol
- * 4. Falling back to the ENS Metadata Service (default) or custom fallback for other protocols
+ * 4. Falling back to the ENS Metadata Service (which proxies decentralized storage protocols
+ *    like IPFS/Arweave to browser-accessible URLs) or a custom fallback for other protocols
  *
  * @param parameters - Configuration for the avatar URL resolution
  * @returns Query result with the avatar URL, loading state, and error handling
