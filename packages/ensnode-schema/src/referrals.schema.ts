@@ -14,7 +14,7 @@ export const ext_registrationReferral = onchainTable(
     id: t.text().primaryKey(),
 
     referrer: t.hex().notNull(),
-    node: t.text().notNull(),
+    node: t.hex().notNull(),
     referee: t.hex().notNull(),
     baseCost: t.bigint().notNull(),
     premium: t.bigint().notNull(),
@@ -55,7 +55,7 @@ export const ext_renewalReferral = onchainTable(
 
     referrer: t.hex().notNull(),
     referee: t.hex().notNull(),
-    node: t.text().notNull(),
+    node: t.hex().notNull(),
     cost: t.bigint().notNull(),
 
     // chainId the transaction occurred on
