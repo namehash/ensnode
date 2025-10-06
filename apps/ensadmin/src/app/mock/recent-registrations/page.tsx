@@ -24,8 +24,8 @@ type RegistrationsVariant = keyof typeof mockIndexerData | LoadingVariant;
 
 const DEFAULT_VARIANT = "following";
 export default function MockRegistrationsPage() {
-  // assuming no need for serialization error variant
-  // because it's covered in mocks for ENSNodeConfigInfo and IndexingStatus
+  // TODO: Add a serialization error variant,
+  //  once a custom API for querying registration data is implemented.
   const [selectedVariant, setSelectedVariant] = useState<RegistrationsVariant>(DEFAULT_VARIANT);
   const props: RecentRegistrationsProps = useMemo(() => {
     switch (selectedVariant) {

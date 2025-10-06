@@ -41,6 +41,25 @@ export function RegistrationCard({ registration, namespaceId }: RegistrationCard
   );
 }
 
+export function RegistrationCardLoading() {
+    return (
+        <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
+            <RegistrationCardElement elementName="Name" className="w-[45%] min-w-[200px]">
+                <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5"/>
+            </RegistrationCardElement>
+            <RegistrationCardElement elementName="Registered" className="w-[15%] min-w-[100px]">
+                <div className="animate-pulse mt-1 h-6 bg-muted rounded w-full"/>
+            </RegistrationCardElement>
+            <RegistrationCardElement elementName="Duration" className="w-[10%]  min-w-[100px]">
+                <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-full"/>
+            </RegistrationCardElement>
+            <RegistrationCardElement elementName="Owner" className="w-1/5 overflow-x-auto min-w-[150px]">
+                <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5"/>
+            </RegistrationCardElement>
+        </div>
+    );
+}
+
 interface RegistrationCardElementProps {
   elementName: string;
   className?: string;
