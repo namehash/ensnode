@@ -1,4 +1,4 @@
-import { getDependencyInfo } from "@/lib/dependency-info";
+import { getDependencyInfo } from "@/lib/version-info";
 import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
