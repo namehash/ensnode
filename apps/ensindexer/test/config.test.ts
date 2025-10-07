@@ -1,6 +1,6 @@
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/config/defaults";
 import { EnvironmentDefaults } from "@/config/environment-defaults";
 import type { RpcConfig } from "@/config/types";
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/lib/lib-config";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -324,7 +324,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("PLUGINS", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          plugins: EnvironmentDefaults.subgraphCompatible.plugins.split(","),
+          plugins: EnvironmentDefaults.subgraphCompatible.PLUGINS.split(","),
         });
       });
     });
@@ -342,7 +342,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
 
         await expect(getConfig()).resolves.toMatchObject({
-          plugins: EnvironmentDefaults.alpha.plugins.split(","),
+          plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
         });
       });
     });
@@ -442,7 +442,7 @@ describe("config (with base env)", () => {
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/RPC URL must be a valid URL string/i);
     });
 
     it("throws an error if RPC_URL_1 includes less than one HTTP protocol URL", async () => {
@@ -700,7 +700,7 @@ describe("config (minimal base env)", () => {
       });
 
       await expect(getConfig()).resolves.toMatchObject({
-        plugins: EnvironmentDefaults.alpha.plugins.split(","),
+        plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
       });
     });
 

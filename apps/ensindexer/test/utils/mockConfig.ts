@@ -1,30 +1,29 @@
-import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { DEFAULT_PORT } from "@/config/defaults";
 import { ENSIndexerConfig } from "@/config/types";
-import { DEFAULT_PORT } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
+import { PluginName } from "@ensnode/ensnode-sdk";
 import { vi } from "vitest";
 
 // default, non-exported mock configuration template
-const _defaultMockConfig = buildConfigFromEnvironment({
+const _defaultMockConfig: ENSIndexerConfig = {
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   namespace: "mainnet",
-  ensNodePublicUrl: "http://localhost:42069",
-  ensIndexerUrl: "http://localhost:42069",
-  ensAdminUrl: "http://localhost:3000",
+  plugins: [PluginName.Subgraph],
+  ensNodePublicUrl: new URL("http://localhost:42069"),
+  ensIndexerUrl: new URL("http://localhost:42069"),
+  ensAdminUrl: new URL("http://localhost:3000"),
   databaseSchemaName: "test_schema",
-  plugins: "subgraph",
-  ensRainbowUrl: "https://api.ensrainbow.io",
+  ensRainbowUrl: new URL("https://api.ensrainbow.io"),
   labelSet: {
     labelSetId: "ens-test-env",
-    labelSetVersion: "0",
+    labelSetVersion: 0,
   },
-  port: DEFAULT_PORT.toString(),
-  rpcConfigs: {
-    1: "https://eth-mainnet.g.alchemy.com/v2/1234",
-  },
+  port: DEFAULT_PORT,
+  rpcConfigs: new Map([[1, { httpRPCs: [new URL("https://eth-mainnet.g.alchemy.com/v2/1234")] }]]),
   globalBlockrange: { startBlock: undefined, endBlock: undefined },
-  isSubgraphCompatible: undefined,
-});
+  isSubgraphCompatible: false,
+  indexedChainIds: new Set([1]),
+};
 
 // the current, mutable ENSIndexerConfig for tests
 let currentMockConfig: ENSIndexerConfig;

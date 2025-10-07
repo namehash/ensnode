@@ -16,7 +16,9 @@ import {
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_SUBGRAPH_COMPAT } from "@/lib/lib-config";
+import { buildRpcConfigsFromEnv } from "./rpc-configs-from-env";
+
+import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
 
 import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
 
@@ -55,7 +57,7 @@ const makeBlockNumberSchema = (envVarKey: string) =>
 const RpcConfigSchema = z
   .string()
   .transform((val) => val.split(","))
-  .pipe(z.array(makeUrlSchema("RPC_URL_*")))
+  .pipe(z.array(makeUrlSchema("RPC URL")))
   .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL)
   .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL);
 
@@ -220,31 +222,58 @@ const ENSIndexerConfigSchema = z
   .check(invariant_globalBlockrange);
 
 /**
- * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object.
+ * Builds the ENSIndexer configuration object using the process environment.
  *
  * First parses the SUBGRAPH_COMPAT environment variable to determine compatibility mode,
  * then applies appropriate environment defaults based on that mode (subgraphCompatible or alpha).
+ *
+ * Next, construct rpcConfigs based on availability of RPC provider API keys or specific RPC_URL_*
+ * environment variables.
+ *
  * Finally validates and parses the complete environment configuration using ENSIndexerConfigSchema.
  *
- * @param environment - The environment variables object to build config from
  * @returns A validated ENSIndexerConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
+export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSIndexerConfig {
   try {
-    // first parse the SUBGRAPH_COMPAT env variable
-    const subgraphCompat = IsSubgraphCompatibleSchema.parse(environment.isSubgraphCompatible);
+    // first parse the SUBGRAPH_COMPAT and NAMESPACE env variables
+    const isSubgraphCompatible = IsSubgraphCompatibleSchema.parse(_env.SUBGRAPH_COMPAT);
 
     // based on indicated subgraph compatibility preference, provide sensible defaults for the config
-    const environmentDefaults = subgraphCompat
+    const environmentDefaults = isSubgraphCompatible
       ? EnvironmentDefaults.subgraphCompatible
       : EnvironmentDefaults.alpha;
 
-    // apply the partial defaults to the ENSIndexerEnvironment
-    const environmentWithDefaults = applyDefaults(environment, environmentDefaults);
+    // apply the partial defaults to the provided env
+    const env = applyDefaults(_env, environmentDefaults);
 
-    // parse with ENSIndexerConfigSchema
-    return ENSIndexerConfigSchema.parse(environmentWithDefaults);
+    // and use that to generate rpcConfigs
+    const namespace = ENSNamespaceSchema.parse(env.NAMESPACE);
+    const rpcConfigs = buildRpcConfigsFromEnv(env, namespace);
+
+    // parse/validate with ENSIndexerConfigSchema
+    return ENSIndexerConfigSchema.parse({
+      port: env.PORT,
+      databaseSchemaName: env.DATABASE_SCHEMA,
+      databaseUrl: env.DATABASE_URL,
+      isSubgraphCompatible: env.SUBGRAPH_COMPAT,
+      namespace: env.NAMESPACE,
+      plugins: env.PLUGINS,
+      ensRainbowUrl: env.ENSRAINBOW_URL,
+      labelSet: {
+        labelSetId: env.LABEL_SET_ID,
+        labelSetVersion: env.LABEL_SET_VERSION,
+      },
+      ensNodePublicUrl: env.ENSNODE_PUBLIC_URL,
+      ensIndexerUrl: env.ENSINDEXER_URL,
+      ensAdminUrl: env.ENSADMIN_URL,
+      globalBlockrange: {
+        startBlock: env.START_BLOCK,
+        endBlock: env.END_BLOCK,
+      },
+      rpcConfigs,
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       throw new Error(

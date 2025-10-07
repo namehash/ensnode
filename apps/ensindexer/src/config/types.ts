@@ -1,5 +1,5 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
@@ -247,23 +247,22 @@ export type RpcConfigEnvironment = string;
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
 export interface ENSIndexerEnvironment {
-  port: string | undefined;
-  databaseSchemaName: string | undefined;
-  databaseUrl: string | undefined;
-  namespace: string | undefined;
-  plugins: string | undefined;
-  ensRainbowUrl: string | undefined;
-  labelSet: {
-    labelSetId: string | undefined;
-    labelSetVersion: string | undefined;
-  };
-  ensNodePublicUrl: string | undefined;
-  ensIndexerUrl: string | undefined;
-  ensAdminUrl: string | undefined;
-  globalBlockrange: {
-    startBlock: string | undefined;
-    endBlock: string | undefined;
-  };
-  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
-  isSubgraphCompatible: string | undefined;
+  PORT: string | undefined;
+  DATABASE_SCHEMA: string | undefined;
+  DATABASE_URL: string | undefined;
+  NAMESPACE: string | undefined;
+  PLUGINS: string | undefined;
+  ENSRAINBOW_URL: string | undefined;
+  LABEL_SET_ID: string | undefined;
+  LABEL_SET_VERSION: string | undefined;
+  ENSNODE_PUBLIC_URL: string | undefined;
+  ENSINDEXER_URL: string | undefined;
+  ENSADMIN_URL: string | undefined;
+  START_BLOCK: string | undefined;
+  END_BLOCK: string | undefined;
+  SUBGRAPH_COMPAT: string | undefined;
+
+  [x: `RPC_URL_${number}`]: string | undefined;
+  ALCHEMY_API_KEY: string | undefined;
+  DRPC_API_KEY: string | undefined;
 }
