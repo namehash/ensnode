@@ -10,9 +10,8 @@ import {
   OmnichainIndexingStatusIds,
   RealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
-import { type ReactElement, Suspense } from "react";
 
-import { RecentRegistrations } from "@/components/recent-registrations";
+import { type ReactElement } from "react";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { ENSNodeConfigInfo } from "../connection/config-info";
@@ -89,7 +88,6 @@ function IndexingStatsForRealtimeStatusProjection({
 
   const omnichainStatusSnapshot = realtimeProjection.snapshot.omnichainSnapshot;
   let indexingStats: ReactElement;
-  let maybeRecentRegistrations: ReactElement | undefined;
   let maybeIndexingTimeline: ReactElement | undefined;
 
   switch (omnichainStatusSnapshot.omnichainStatus) {
@@ -145,12 +143,6 @@ function IndexingStatsForRealtimeStatusProjection({
           }}
         />
       );
-
-      maybeRecentRegistrations = (
-        <Suspense>
-          <RecentRegistrations ensIndexerConfig={ensIndexerConfig} />
-        </Suspense>
-      );
       break;
 
     case OmnichainIndexingStatusIds.Following:
@@ -165,12 +157,6 @@ function IndexingStatsForRealtimeStatusProjection({
           }}
         />
       );
-
-      maybeRecentRegistrations = (
-        <Suspense>
-          <RecentRegistrations ensIndexerConfig={ensIndexerConfig} />
-        </Suspense>
-      );
       break;
   }
 
@@ -181,8 +167,6 @@ function IndexingStatsForRealtimeStatusProjection({
       <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
         {indexingStats}
       </IndexingStatsShell>
-
-      {maybeRecentRegistrations}
     </section>
   );
 }
