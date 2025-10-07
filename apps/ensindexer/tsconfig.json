@@ -2,19 +2,10 @@
   "extends": "@ensnode/shared-configs/tsconfig.ponder.json",
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
-    "typeRoots": [
-      "./types"
-    ]
+    "typeRoots": ["./types"]
   },
-  "include": [
-    "types/**/*.d.ts",
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
 }
