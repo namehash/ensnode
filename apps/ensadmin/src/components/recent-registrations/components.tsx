@@ -14,7 +14,7 @@ import {
   type ENSIndexerPublicConfig,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
+  type RealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
@@ -33,6 +33,16 @@ const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OmnichainIndexingStatusId[] = [
   OmnichainIndexingStatusIds.Following,
   OmnichainIndexingStatusIds.Completed,
 ];
+
+export interface RecentRegistrationsOkProps {
+  ensIndexerConfig: ENSIndexerPublicConfig | undefined;
+  realtimeProjection: RealtimeIndexingStatusProjection | undefined;
+  maxRecords?: number;
+}
+
+export interface RecentRegistrationsErrorProps {
+  error: ErrorInfoProps;
+}
 
 /**
  * RecentRegistrations display variations:
@@ -60,13 +70,7 @@ const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OmnichainIndexingStatusId[] = [
  *
  * @throws If both error and any from the pair of ensIndexerConfig & indexingStatus are defined
  */
-export interface RecentRegistrationsProps {
-  ensIndexerConfig?: ENSIndexerPublicConfig;
-  indexingStatus?: OmnichainIndexingStatusSnapshot;
-  error?: ErrorInfoProps;
-  maxRecords?: number;
-}
-
+export type RecentRegistrationsProps = RecentRegistrationsOkProps | RecentRegistrationsErrorProps;
 /**
  * Displays a panel containing the list of the most recently indexed
  * registrations and the date of the most recently indexed block.
@@ -74,34 +78,29 @@ export interface RecentRegistrationsProps {
  * Note: The Recent Registrations Panel is only visible when the
  * overall indexing status is either "completed", or "following".
  */
-export function RecentRegistrations({
-  ensIndexerConfig,
-  indexingStatus,
-  error,
-  maxRecords = DEFAULT_MAX_RECORDS,
-}: RecentRegistrationsProps) {
+export function RecentRegistrations(props: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (error !== undefined && (ensIndexerConfig !== undefined || indexingStatus !== undefined)) {
-    throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
+  if ("error" in props) {
+    return <ErrorInfo {...props.error} />;
   }
 
-  if (error !== undefined) {
-    return <ErrorInfo {...error} />;
-  }
+  const { ensIndexerConfig, realtimeProjection, maxRecords = DEFAULT_MAX_RECORDS } = props;
 
-  if (ensIndexerConfig === undefined || indexingStatus === undefined) {
+  if (ensIndexerConfig === undefined || realtimeProjection === undefined) {
     return <RecentRegistrationsLoading recordCount={maxRecords} />;
   }
 
-  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(indexingStatus.omnichainStatus)) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+
+  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(omnichainSnapshot.omnichainStatus)) {
     return (
       <UnsupportedOmnichainIndexingStatusMessage
-        omnichainIndexingStatus={indexingStatus.omnichainStatus}
+        omnichainIndexingStatus={omnichainSnapshot.omnichainStatus}
       />
     );
   }

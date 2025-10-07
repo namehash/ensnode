@@ -4,6 +4,7 @@ import {
   CrossChainIndexingStrategyIds,
   IndexingStatusResponse,
   IndexingStatusResponseCodes,
+  IndexingStatusResponseError,
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   SerializedChainIndexingStatusSnapshotBackfill,
@@ -17,22 +18,26 @@ import {
   deserializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
-export const indexingStatusResponseOmnichain: Record<
+export const indexingStatusResponseError: IndexingStatusResponseError = {
+  responseCode: IndexingStatusResponseCodes.Error,
+};
+
+export const indexingStatusResponseOkOmnichain: Record<
   OmnichainIndexingStatusId,
   IndexingStatusResponse
 > = {
   [OmnichainIndexingStatusIds.Unstarted]: deserializeIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
-      projectedAt: 1759409670,
-      worstCaseDistance: 2,
+      projectedAt: 1759409669,
+      worstCaseDistance: 38_640_678,
       snapshot: {
         strategy: CrossChainIndexingStrategyIds.Omnichain,
-        slowestChainIndexingCursor: 1759409665,
-        snapshotTime: 1759409668,
+        slowestChainIndexingCursor: 1720768991,
+        snapshotTime: 1759409667,
         omnichainSnapshot: {
           omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
-          omnichainIndexingCursor: 1759409665,
+          omnichainIndexingCursor: 1720768991,
           chains: {
             "1": {
               chainStatus: ChainIndexingStatusIds.Queued,
@@ -42,6 +47,7 @@ export const indexingStatusResponseOmnichain: Record<
                   timestamp: 1759409665,
                   number: 3327417,
                 },
+                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
 
@@ -50,7 +56,7 @@ export const indexingStatusResponseOmnichain: Record<
               config: {
                 configType: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: {
-                  timestamp: 1696386695,
+                  timestamp: 1731834595,
                   number: 110393959,
                 },
                 endBlock: null,
@@ -89,14 +95,14 @@ export const indexingStatusResponseOmnichain: Record<
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
       projectedAt: 1759409670,
-      worstCaseDistance: 2,
+      worstCaseDistance: 178510009,
       snapshot: {
         strategy: CrossChainIndexingStrategyIds.Omnichain,
-        slowestChainIndexingCursor: 1759409665,
+        slowestChainIndexingCursor: 1580899661,
         snapshotTime: 1759409668,
         omnichainSnapshot: {
           omnichainStatus: OmnichainIndexingStatusIds.Backfill,
-          omnichainIndexingCursor: 1759409665,
+          omnichainIndexingCursor: 1580899661,
           chains: {
             "1": {
               chainStatus: ChainIndexingStatusIds.Backfill,
@@ -172,14 +178,14 @@ export const indexingStatusResponseOmnichain: Record<
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
       projectedAt: 1755667460,
-      worstCaseDistance: 10,
+      worstCaseDistance: 9,
       snapshot: {
         strategy: CrossChainIndexingStrategyIds.Omnichain,
-        slowestChainIndexingCursor: 1755667449,
-        snapshotTime: 1755667450,
+        slowestChainIndexingCursor: 1755667451,
+        snapshotTime: 1755667453,
         omnichainSnapshot: {
           omnichainStatus: OmnichainIndexingStatusIds.Following,
-          omnichainIndexingCursor: 1755667449,
+          omnichainIndexingCursor: 1755667451,
           chains: {
             "1": {
               chainStatus: ChainIndexingStatusIds.Following,
@@ -264,12 +270,12 @@ export const indexingStatusResponseOmnichain: Record<
   [OmnichainIndexingStatusIds.Completed]: deserializeIndexingStatusResponse({
     responseCode: IndexingStatusResponseCodes.Ok,
     realtimeProjection: {
-      projectedAt: 1689337587,
-      worstCaseDistance: 2,
+      projectedAt: 1689337668,
+      worstCaseDistance: 84,
       snapshot: {
         strategy: CrossChainIndexingStrategyIds.Omnichain,
         slowestChainIndexingCursor: 1689337584,
-        snapshotTime: 1689337585,
+        snapshotTime: 1689337648,
         omnichainSnapshot: {
           omnichainStatus: OmnichainIndexingStatusIds.Completed,
           omnichainIndexingCursor: 1689337584,

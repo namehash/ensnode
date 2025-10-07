@@ -1,33 +1,33 @@
 "use client";
-import { RecentRegistrations, RecentRegistrationsProps } from "@/components/recent-registrations";
+import {
+  RecentRegistrations,
+  type RecentRegistrationsErrorProps,
+  type RecentRegistrationsOkProps,
+} from "@/components/recent-registrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  SerializedENSIndexerOverallIndexingStatus,
-  SerializedENSIndexerPublicConfig,
-  deserializeENSIndexerIndexingStatus,
-  deserializeENSIndexerPublicConfig,
+  IndexingStatusResponseCodes,
+  type OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
 import { useMemo, useState } from "react";
-import mockDataJson from "./data.json";
 
-const mockIndexerData = mockDataJson as Record<
-  string,
-  {
-    ensIndexerConfig: SerializedENSIndexerPublicConfig;
-    indexingStatus: SerializedENSIndexerOverallIndexingStatus;
-  }
->;
+import { ensIndexerPublicConfig } from "../config-api.mock";
+import { indexingStatusResponseOkOmnichain } from "../indexing-status-api.mock";
 
 type LoadingVariant = "Loading" | "Loading Error";
-type RegistrationsVariant = keyof typeof mockIndexerData | LoadingVariant;
+type ResponseVariant = "Response Error";
+type RegistrationsVariant = OmnichainIndexingStatusId | LoadingVariant | ResponseVariant;
 
-const DEFAULT_VARIANT = "following";
+const DEFAULT_VARIANT = OmnichainIndexingStatusIds.Following;
+
 export default function MockRegistrationsPage() {
   // TODO: Add a serialization error variant,
   //  once a custom API for querying registration data is implemented.
   const [selectedVariant, setSelectedVariant] = useState<RegistrationsVariant>(DEFAULT_VARIANT);
-  const props: RecentRegistrationsProps = useMemo(() => {
+
+  const props = useMemo(() => {
     switch (selectedVariant) {
       case "Loading":
         return {};
@@ -38,17 +38,29 @@ export default function MockRegistrationsPage() {
             title: "RecentRegistrations Error",
             description: "Failed to fetch ENSIndexerConfig or IndexingStatus.",
           },
-        };
+        } satisfies RecentRegistrationsErrorProps;
+
+      case "Response Error":
+        return {
+          error: {
+            title: "IndexingStatus error",
+            description: "Indexing Status is currently unavailable.",
+          },
+        } satisfies RecentRegistrationsErrorProps;
 
       default:
         try {
-          const config = deserializeENSIndexerPublicConfig(
-            mockIndexerData[selectedVariant].ensIndexerConfig,
-          );
-          const indexingStatus = deserializeENSIndexerIndexingStatus(
-            mockIndexerData[selectedVariant].indexingStatus,
-          );
-          return { ensIndexerConfig: config, indexingStatus: indexingStatus };
+          const indexingStatus = indexingStatusResponseOkOmnichain[selectedVariant];
+
+          // Invariant: mocked response is an OK response
+          if (indexingStatus.responseCode !== IndexingStatusResponseCodes.Ok) {
+            throw new Error("Indexing Status API Response should have the `ok` response code.");
+          }
+
+          return {
+            ensIndexerConfig: ensIndexerPublicConfig,
+            realtimeProjection: indexingStatus.realtimeProjection,
+          } satisfies RecentRegistrationsOkProps;
         } catch (error) {
           const errorMessage =
             error instanceof Error
@@ -56,10 +68,17 @@ export default function MockRegistrationsPage() {
               : "Unknown RecentRegistrations mock data deserialization error";
           return {
             error: { title: "Deserialization Error", description: errorMessage },
-          };
+          } satisfies RecentRegistrationsErrorProps;
         }
     }
   }, [selectedVariant]);
+
+  const variants = [
+    ...Object.keys(indexingStatusResponseOkOmnichain),
+    "Loading",
+    "Loading Error",
+    "Response Error",
+  ];
 
   return (
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
@@ -71,7 +90,7 @@ export default function MockRegistrationsPage() {
 
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {[...Object.keys(mockIndexerData), "Loading", "Loading Error"].map((variant) => (
+            {variants.map((variant) => (
               <Button
                 key={variant}
                 variant={selectedVariant === variant ? "default" : "outline"}
@@ -85,7 +104,14 @@ export default function MockRegistrationsPage() {
         </CardContent>
       </Card>
 
-      <RecentRegistrations {...props} />
+      {typeof props.error !== "undefined" ? (
+        <RecentRegistrations error={props.error} />
+      ) : (
+        <RecentRegistrations
+          ensIndexerConfig={props.ensIndexerConfig}
+          realtimeProjection={props.realtimeProjection}
+        />
+      )}
     </section>
   );
 }

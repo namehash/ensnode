@@ -10,7 +10,7 @@ import {
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
 } from "@ensnode/ensnode-sdk";
-import { indexingStatusResponseOmnichain } from "./data";
+import { indexingStatusResponseOkOmnichain } from "../indexing-status-api.mock";
 
 export default function MockIndexingStatusPage() {
   const [selectedVariant, setSelectedVariant] = useState<OmnichainIndexingStatusId>(
@@ -19,7 +19,7 @@ export default function MockIndexingStatusPage() {
 
   const { deserializedStatus, validationError } = useMemo(() => {
     try {
-      const status = indexingStatusResponseOmnichain[selectedVariant];
+      const status = indexingStatusResponseOkOmnichain[selectedVariant];
       return { deserializedStatus: status, validationError: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown validation error";
