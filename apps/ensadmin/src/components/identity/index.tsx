@@ -93,7 +93,8 @@ export function Identity({
   return (
     <IdentityLink
       identity={identity}
-      className="inline-flex items-center gap-2 text-blue-600 hover:underline">
+      className="inline-flex items-center gap-2 text-blue-600 hover:underline"
+    >
       {showAvatar && (
         <EnsAvatar name={identity.name} namespaceId={namespaceId} className="h-6 w-6" />
       )}
