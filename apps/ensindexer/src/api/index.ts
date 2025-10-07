@@ -29,7 +29,7 @@ const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
 // and a drizzle db object that accesses it
 const subgaphDrizzle = makeDrizzle({
   schema: subgraphSchema,
-  databaseUrl: config.databaseUrl!,
+  databaseUrl: config.databaseUrl,
   databaseSchema: config.databaseSchemaName,
 });
 

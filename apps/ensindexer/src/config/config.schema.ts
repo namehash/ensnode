@@ -145,23 +145,20 @@ const RpcConfigsSchema = z
     return rpcConfigs;
   });
 
-const DatabaseUrlSchema = z.union(
-  [
-    z.string().refine((url) => {
-      try {
-        if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-          return false;
-        }
-        const config = parseConnectionString(url);
-        return !!(config.host && config.port && config.database);
-      } catch {
+const DatabaseUrlSchema = z.string().refine(
+  (url) => {
+    try {
+      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
         return false;
       }
-    }),
-    z.undefined(),
-  ],
+      const config = parseConnectionString(url);
+      return !!(config.host && config.port && config.database);
+    } catch {
+      return false;
+    }
+  },
   {
-    message:
+    error:
       "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
   },
 );
