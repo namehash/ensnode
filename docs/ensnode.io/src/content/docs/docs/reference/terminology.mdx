@@ -106,13 +106,21 @@ Outside of this terminology reference & ENSNode, the word 'labelhash' may refer 
 
 As ENSNode processes ENS data from multiple sources, labels and names exist in various states depending on normalization and data availability. These classifications are essential for proper display and validation.
 
+### ENS normalization algorithm
+
+The **ENS normalization algorithm** is defined by [the ENSIP-15: Name Normalization](https://docs.ens.domains/ensip/15/) standard, which relies on the Unicode Standard.
+
+### ENS Normalize
+
+The **ENS Normalize** is a specific implementation of the **ENS normalization algorithm** available in the [`@adraffy/ens-normalize` package](https://www.npmjs.com/package/@adraffy/ens-normalize). The package is being actively maintained to cover [annual updates to the Unicode Standard](https://www.unicode.org/versions/#schedule). The **ENS Normalize** version can be referenced in the ENSIndexer Config API.
+
 ### Normalized Label
 
-A **Normalized Label** is a **Label** that has been processed through the ENS normalization algorithm and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
+A **Normalized Label** is a **Label** that has been processed through the **ENS Normalize** and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
 
 ### Unnormalized Label
 
-An **Unnormalized Label** is a **Label** that has not been processed through the ENS normalization algorithm, or one that would change if processed through normalization.
+An **Unnormalized Label** is a **Label** that has not been processed through the **ENS Normalize**, or one that would change if processed through normalization.
 
 ### Unknown Label
 
@@ -124,7 +132,7 @@ A **Normalized Name** is a **name** composed entirely of **Normalized Labels**. 
 
 ### Unnormalized Name
 
-An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the ENS normalization algorithm.
+An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the **ENS Normalize**.
 
 ## Display Encoding Formats
 
