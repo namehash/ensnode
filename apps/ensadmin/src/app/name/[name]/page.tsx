@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useRecords } from "@ensnode/ensnode-react";
+import { IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
 import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
 import { useParams } from "next/navigation";
 
@@ -60,6 +60,7 @@ export default function NameDetailPage() {
   const { data, status } = useRecords({
     name,
     selection,
+    query: IMMUTABLE_QUERY,
   });
 
   if (status === "pending") return <NameDetailPageSkeleton />;
