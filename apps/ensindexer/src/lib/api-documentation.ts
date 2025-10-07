@@ -1,36 +1,25 @@
-import { capitalize } from "@ensnode/ponder-subgraph";
-import {
-  createDocumentationMiddleware,
-  extendWithBaseDefinitions,
-  generateTypeDocSet,
-} from "ponder-enrich-gql-docs-middleware";
+import { extendWithBaseDefinitions, generateTypeDocSet } from "ponder-enrich-gql-docs-middleware";
 
-export const makeApiDocumentationMiddleware = (path: "/ponder" | "/subgraph") =>
-  createDocumentationMiddleware(makeApiDocumentation(path === "/subgraph"), { path });
-
-const makeApiDocumentation = (isSubgraph: boolean) => {
-  // subgraph type names are capitalized, ponder type name are not
-  const maybeCapitalizeTypeName = (name: string) => (isSubgraph ? capitalize(name) : name);
-
+export const makeSubgraphApiDocumentation = () => {
+  // simple helper to prefix field names
   const generateTypeDocSetWithTypeName = (
     name: string,
     description: string,
     fields: Record<string, string>,
   ) =>
     generateTypeDocSet(
-      maybeCapitalizeTypeName(name),
+      name,
       description,
-      Object.keys(fields).reduce(
-        (memo, fieldName) => ({
-          [`${maybeCapitalizeTypeName(name)}.${fieldName}`]: fields[fieldName],
-          ...memo,
-        }),
-        {},
+      Object.fromEntries(
+        Object.entries(fields).map(([fieldName, description]) => [
+          `${name}.${fieldName}`,
+          description,
+        ]),
       ),
     );
 
   return extendWithBaseDefinitions({
-    ...generateTypeDocSetWithTypeName("domain", "a domain", {
+    ...generateTypeDocSetWithTypeName("Domain", "a domain", {
       id: "The namehash of the name",
       name: "The human readable name, if known. Unknown portions replaced with hash in square brackets (eg, foo.[1234].eth)",
       labelName: "The human readable label name (imported from CSV), if known",
@@ -58,20 +47,20 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       wrappedDomain: "The wrapped domain associated with the domain",
       events: "The events associated with the domain",
     }),
-    ...generateTypeDocSetWithTypeName("domainEvent", "an event related to a Domain", {
+    ...generateTypeDocSetWithTypeName("DomainEvent", "an event related to a Domain", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
     }),
-    ...generateTypeDocSetWithTypeName("transfer", "a transfer event", {
+    ...generateTypeDocSetWithTypeName("Transfer", "a transfer event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       owner: "The account that owns the domain after the transfer",
     }),
-    ...generateTypeDocSetWithTypeName("newOwner", "a new owner event", {
+    ...generateTypeDocSetWithTypeName("NewOwner", "a new owner event", {
       id: "The unique identifier of the event",
       parentDomain: "The parent domain of the domain name associated with the event",
       domain: "The domain name associated with the event",
@@ -79,28 +68,28 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       transactionID: "The transaction hash of the transaction that triggered the event",
       owner: "The new account that owns the domain",
     }),
-    ...generateTypeDocSetWithTypeName("newResolver", "a new resolver event", {
+    ...generateTypeDocSetWithTypeName("NewResolver", "a new resolver event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       resolver: "The new resolver contract address associated with the domain",
     }),
-    ...generateTypeDocSetWithTypeName("newTTL", "a new TTL event", {
+    ...generateTypeDocSetWithTypeName("NewTTL", "a new TTL event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       ttl: "The new TTL value (in seconds) associated with the domain",
     }),
-    ...generateTypeDocSetWithTypeName("wrappedTransfer", "a wrapped transfer event", {
+    ...generateTypeDocSetWithTypeName("WrappedTransfer", "a wrapped transfer event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       owner: "The account that owns the wrapped domain after the transfer",
     }),
-    ...generateTypeDocSetWithTypeName("nameWrapped", "a name wrapped event", {
+    ...generateTypeDocSetWithTypeName("NameWrapped", "a name wrapped event", {
       id: "The unique identifier of the wrapped domain",
       domain: "The domain name associated with the wrapped domain",
       blockNumber: "The block number at which the wrapped domain was wrapped",
@@ -110,28 +99,28 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       owner: "The account that owns the wrapped domain",
       expiryDate: "The expiry date of the wrapped domain registration",
     }),
-    ...generateTypeDocSetWithTypeName("nameUnwrapped", "a name unwrapped event", {
+    ...generateTypeDocSetWithTypeName("NameUnwrapped", "a name unwrapped event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       owner: "The account that owns the domain after it was unwrapped",
     }),
-    ...generateTypeDocSetWithTypeName("fusesSet", "a fuses set event", {
+    ...generateTypeDocSetWithTypeName("FusesSet", "a fuses set event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       fuses: "The number of fuses associated with the domain after the set event",
     }),
-    ...generateTypeDocSetWithTypeName("expiryExtended", "an expiry extended event", {
+    ...generateTypeDocSetWithTypeName("ExpiryExtended", "an expiry extended event", {
       id: "The unique identifier of the event",
       domain: "The domain name associated with the event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash of the transaction that triggered the event",
       expiryDate: "The new expiry date associated with the domain after the extension event",
     }),
-    ...generateTypeDocSetWithTypeName("registration", "a domain registration", {
+    ...generateTypeDocSetWithTypeName("Registration", "a domain registration", {
       id: "The unique identifier of the registration",
       domain: "The domain name associated with the registration",
       domainId: "The domain name associated with the registration",
@@ -143,13 +132,13 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       labelName: "The human-readable label name associated with the domain registration",
       events: "The events associated with the domain registration",
     }),
-    ...generateTypeDocSetWithTypeName("registrationEvent", "a registration event", {
+    ...generateTypeDocSetWithTypeName("RegistrationEvent", "a registration event", {
       id: "The unique identifier of the registration event",
       registration: "The registration associated with the event",
       blockNumber: "The block number of the event",
       transactionID: "The transaction ID associated with the event",
     }),
-    ...generateTypeDocSetWithTypeName("nameRegistered", "a name registered event", {
+    ...generateTypeDocSetWithTypeName("NameRegistered", "a name registered event", {
       id: "The unique identifier of the NameRegistered event",
       registration: "The registration associated with the event",
       blockNumber: "The block number of the event",
@@ -157,21 +146,21 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       registrant: "The account that registered the name",
       expiryDate: "The expiry date of the registration",
     }),
-    ...generateTypeDocSetWithTypeName("nameRenewed", "a name renewed event", {
+    ...generateTypeDocSetWithTypeName("NameRenewed", "a name renewed event", {
       id: "The unique identifier of the NameRenewed event",
       registration: "The registration associated with the event",
       blockNumber: "The block number of the event",
       transactionID: "The transaction ID associated with the event",
       expiryDate: "The new expiry date of the registration",
     }),
-    ...generateTypeDocSetWithTypeName("nameTransferred", "a name transferred event", {
+    ...generateTypeDocSetWithTypeName("NameTransferred", "a name transferred event", {
       id: "The ID of the event",
       registration: "The registration associated with the event",
       blockNumber: "The block number of the event",
       transactionID: "The transaction ID of the event",
       newOwner: "The new owner of the domain",
     }),
-    ...generateTypeDocSetWithTypeName("wrappedDomain", "a wrapped domain", {
+    ...generateTypeDocSetWithTypeName("WrappedDomain", "a wrapped domain", {
       id: "The unique identifier for each instance of the WrappedDomain entity",
       domain: "The domain that is wrapped by this WrappedDomain",
       domainId: "The domain that is wrapped by this WrappedDomain",
@@ -181,13 +170,13 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       ownerId: "The account that owns this WrappedDomain",
       name: "The name of the wrapped domain",
     }),
-    ...generateTypeDocSetWithTypeName("account", "an account", {
+    ...generateTypeDocSetWithTypeName("Account", "an account", {
       id: "The unique identifier for the account",
       domains: "The domains owned by the account",
       wrappedDomains: "The WrappedDomains owned by the account",
       registrations: "The Registrations made by the account",
     }),
-    ...generateTypeDocSetWithTypeName("resolver", "a resolver", {
+    ...generateTypeDocSetWithTypeName("Resolver", "a resolver", {
       id: "The unique identifier for this resolver, which is a concatenation of the domain namehash and the resolver address",
       domain: "The domain that this resolver is associated with",
       domainId: "The domain that this resolver is associated with",
@@ -202,20 +191,20 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       // resolver-records.schema.ts additional properties
       name: "the value of the reverse-resolution name() record for this resolver",
     }),
-    ...generateTypeDocSetWithTypeName("resolverEvent", "a resolver event", {
+    ...generateTypeDocSetWithTypeName("ResolverEvent", "a resolver event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "The block number that the event occurred on",
       transactionID: "The transaction hash of the event",
     }),
-    ...generateTypeDocSetWithTypeName("addrChanged", "an address changed event", {
+    ...generateTypeDocSetWithTypeName("AddrChanged", "an address changed event", {
       id: "Unique identifier for this event",
       resolver: "The resolver associated with this event",
       blockNumber: "The block number at which this event occurred",
       transactionID: "The transaction ID for the transaction in which this event occurred",
       addr: "The new address associated with the resolver",
     }),
-    ...generateTypeDocSetWithTypeName("multicoinAddrChanged", "a multicoin address changed event", {
+    ...generateTypeDocSetWithTypeName("MulticoinAddrChanged", "a multicoin address changed event", {
       id: "Unique identifier for the event",
       resolver: "Resolver associated with this event",
       blockNumber: "Block number in which this event was emitted",
@@ -223,21 +212,21 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       coinType: "The coin type of the changed address",
       addr: "The new address value for the given coin type",
     }),
-    ...generateTypeDocSetWithTypeName("nameChanged", "a name changed event", {
+    ...generateTypeDocSetWithTypeName("NameChanged", "a name changed event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "Block number where event occurred",
       transactionID: "Unique transaction ID where event occurred",
       name: "New ENS name value",
     }),
-    ...generateTypeDocSetWithTypeName("abiChanged", "an ABI changed event", {
+    ...generateTypeDocSetWithTypeName("AbiChanged", "an ABI changed event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "The block number at which the event was emitted",
       transactionID: "The transaction hash of the transaction in which the event was emitted",
       contentType: "The content type of the ABI change",
     }),
-    ...generateTypeDocSetWithTypeName("pubkeyChanged", "a pubkey changed event", {
+    ...generateTypeDocSetWithTypeName("PubkeyChanged", "a pubkey changed event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "Block number of the Ethereum block where the event occurred",
@@ -245,7 +234,7 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       x: "The x-coordinate of the new public key",
       y: "The y-coordinate of the new public key",
     }),
-    ...generateTypeDocSetWithTypeName("textChanged", "a text changed event", {
+    ...generateTypeDocSetWithTypeName("TextChanged", "a text changed event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "Block number of the Ethereum block in which the event occurred",
@@ -253,14 +242,14 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       key: "The key of the text record that was changed",
       value: "The new value of the text record that was changed",
     }),
-    ...generateTypeDocSetWithTypeName("contenthashChanged", "a content hash changed event", {
+    ...generateTypeDocSetWithTypeName("ContenthashChanged", "a content hash changed event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "The block number where the event occurred",
       transactionID: "The ID of the transaction where the event occurred",
       hash: "The new content hash for the domain",
     }),
-    ...generateTypeDocSetWithTypeName("interfaceChanged", "an interface changed event", {
+    ...generateTypeDocSetWithTypeName("InterfaceChanged", "an interface changed event", {
       id: "Concatenation of block number and log ID",
       resolver: "Used to derive relationships to Resolvers",
       blockNumber: "The block number in which the event occurred",
@@ -268,7 +257,7 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       interfaceID: "The ID of the EIP-1820 interface that was changed",
       implementer: "The address of the contract that implements the interface",
     }),
-    ...generateTypeDocSetWithTypeName("authorisationChanged", "an authorisation changed event", {
+    ...generateTypeDocSetWithTypeName("AuthorisationChanged", "an authorisation changed event", {
       id: "Unique identifier for this event",
       resolver: "The resolver associated with this event",
       blockNumber: "The block number at which the event occurred",
@@ -277,33 +266,12 @@ const makeApiDocumentation = (isSubgraph: boolean) => {
       target: "The target of the authorisation",
       isAuthorized: "Whether the authorisation was added or removed",
     }),
-    ...generateTypeDocSetWithTypeName("versionChanged", "a version changed event", {
+    ...generateTypeDocSetWithTypeName("VersionChanged", "a version changed event", {
       id: "Unique identifier for this event",
       resolver: "The resolver associated with this event",
       blockNumber: "The block number at which the event occurred",
       transactionID: "The transaction hash associated with the event",
       version: "The new version number of the resolver",
     }),
-    /**
-     * The following is documentation for packages/ensnode-schema/src/resolver-records.schema.ts
-     */
-    ...generateTypeDocSetWithTypeName(
-      "ext_resolverAddressRecords",
-      "address records in a Resolver for a Node",
-      {
-        id: "Unique identifier for this address record",
-        coinType: "SLIP-44 coinType for this address record",
-        address: "Value of the address record",
-      },
-    ),
-    ...generateTypeDocSetWithTypeName(
-      "ext_resolverTextRecords",
-      "text records in a Resolver for a Node",
-      {
-        id: "Unique identifier for this text record",
-        key: "Key of the text record",
-        value: "Value of the text record",
-      },
-    ),
   });
 };

@@ -477,36 +477,27 @@ describe("config (with base env)", () => {
 
     it("throws an error if DATABASE_URL is not set", async () => {
       vi.stubEnv("DATABASE_URL", undefined);
-      const config = await getConfig();
-      expect(config.databaseUrl).toBeUndefined();
+      await expect(getConfig()).rejects.toThrow(/Invalid input/);
     });
 
     it("throws an error if DATABASE_URL is empty", async () => {
       vi.stubEnv("DATABASE_URL", "");
-      await expect(getConfig()).rejects.toThrow(
-        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-      );
+      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("throws an error if DATABASE_URL is not a valid postgres connection string", async () => {
       vi.stubEnv("DATABASE_URL", "not-a-postgres-connection-string");
-      await expect(getConfig()).rejects.toThrow(
-        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-      );
+      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("throws an error if DATABASE_URL uses the wrong protocol", async () => {
       vi.stubEnv("DATABASE_URL", "mysql://user:password@localhost:3306/mydb");
-      await expect(getConfig()).rejects.toThrow(
-        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-      );
+      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("throws an error if DATABASE_URL is missing required components", async () => {
       vi.stubEnv("DATABASE_URL", "postgresql://localhost:5432");
-      await expect(getConfig()).rejects.toThrow(
-        "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-      );
+      await expect(getConfig()).rejects.toThrow(/Invalid PostgreSQL connection string/);
     });
 
     it("accepts postgres:// protocol", async () => {
@@ -674,6 +665,7 @@ describe("config (minimal base env)", () => {
       ENSNODE_PUBLIC_URL,
       ENSINDEXER_URL,
       ENSRAINBOW_URL,
+      DATABASE_URL,
       DATABASE_SCHEMA,
       RPC_URL_1,
     } = BASE_ENV;
@@ -682,6 +674,7 @@ describe("config (minimal base env)", () => {
       ENSNODE_PUBLIC_URL,
       ENSINDEXER_URL,
       ENSRAINBOW_URL,
+      DATABASE_URL,
       DATABASE_SCHEMA,
       RPC_URL_1,
     });

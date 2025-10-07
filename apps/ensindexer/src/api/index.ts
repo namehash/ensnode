@@ -4,11 +4,12 @@ import { db, publicClients } from "ponder:api";
 import schema from "ponder:schema";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
 import { sdk } from "@/api/lib/tracing/instrumentation";
 import config from "@/config";
-import { makeApiDocumentationMiddleware } from "@/lib/api-documentation";
-import { filterSchemaExtensions } from "@/lib/filter-schema-extensions";
+import { makeSubgraphApiDocumentation } from "@/lib/api-documentation";
+import { filterSchemaByPrefix } from "@/lib/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/lib/fix-content-length-middleware";
 import {
   fetchEnsRainbowVersion,
@@ -18,14 +19,19 @@ import {
   makePonderMetadataProvider,
 } from "@/lib/ponder-metadata-provider";
 import { ponderMetadata } from "@ensnode/ponder-metadata";
-import {
-  buildGraphQLSchema as buildSubgraphGraphQLSchema,
-  graphql as subgraphGraphQL,
-} from "@ensnode/ponder-subgraph";
+import { buildGraphQLSchema, subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import ensNodeApi from "@/api/handlers/ensnode-api";
+import { makeDrizzle } from "@/api/lib/handlers/drizzle";
 
-const schemaWithoutExtensions = filterSchemaExtensions(schema);
+// generate a subgraph-specific subset of the schema
+const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
+// and a drizzle db object that accesses it
+const subgaphDrizzle = makeDrizzle({
+  schema: subgraphSchema,
+  databaseUrl: config.databaseUrl,
+  databaseSchema: config.databaseSchemaName,
+});
 
 const app = new Hono();
 
@@ -79,43 +85,50 @@ app.get(
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
 
-// use our custom graphql middleware at /subgraph with description injection
-app.use("/subgraph", fixContentLengthMiddleware);
-app.use("/subgraph", makeApiDocumentationMiddleware("/subgraph"));
+// at /subgraph
 app.use(
   "/subgraph",
-  subgraphGraphQL({
-    db,
-    graphqlSchema: buildSubgraphGraphQLSchema({
-      schema: schemaWithoutExtensions,
-      // provide the schema with ponder's internal metadata to power _meta
+  // hotfix content length after documentation injection
+  fixContentLengthMiddleware,
+  // inject api documentation into graphql introspection requests
+  createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/subgraph" }),
+  // use our custom graphql middleware
+  subgraphGraphQLMiddleware({
+    drizzle: subgaphDrizzle,
+    graphqlSchema: buildGraphQLSchema({
+      schema: subgraphSchema,
+      // provide PonderMetadataProvider to power `_meta` field
       metadataProvider: makePonderMetadataProvider({ db, publicClients }),
       // describes the polymorphic (interface) relationships in the schema
       polymorphicConfig: {
         types: {
           DomainEvent: [
-            schema.transfer,
-            schema.newOwner,
-            schema.newResolver,
-            schema.newTTL,
-            schema.wrappedTransfer,
-            schema.nameWrapped,
-            schema.nameUnwrapped,
-            schema.fusesSet,
-            schema.expiryExtended,
+            subgraphSchema.transfer,
+            subgraphSchema.newOwner,
+            subgraphSchema.newResolver,
+            subgraphSchema.newTTL,
+            subgraphSchema.wrappedTransfer,
+            subgraphSchema.nameWrapped,
+            subgraphSchema.nameUnwrapped,
+            subgraphSchema.fusesSet,
+            subgraphSchema.expiryExtended,
           ],
-          RegistrationEvent: [schema.nameRegistered, schema.nameRenewed, schema.nameTransferred],
+          RegistrationEvent: [
+            subgraphSchema.nameRegistered,
+            subgraphSchema.nameRenewed,
+            subgraphSchema.nameTransferred,
+          ],
           ResolverEvent: [
-            schema.addrChanged,
-            schema.multicoinAddrChanged,
-            schema.nameChanged,
-            schema.abiChanged,
-            schema.pubkeyChanged,
-            schema.textChanged,
-            schema.contenthashChanged,
-            schema.interfaceChanged,
-            schema.authorisationChanged,
-            schema.versionChanged,
+            subgraphSchema.addrChanged,
+            subgraphSchema.multicoinAddrChanged,
+            subgraphSchema.nameChanged,
+            subgraphSchema.abiChanged,
+            subgraphSchema.pubkeyChanged,
+            subgraphSchema.textChanged,
+            subgraphSchema.contenthashChanged,
+            subgraphSchema.interfaceChanged,
+            subgraphSchema.authorisationChanged,
+            subgraphSchema.versionChanged,
           ],
         },
         fields: {

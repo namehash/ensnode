@@ -1,7 +1,7 @@
 import { index, onchainTable } from "ponder";
 
-export const ext_nameSales = onchainTable(
-  "ext_name_sales",
+export const nameSales = onchainTable(
+  "name_sales",
   (t) => ({
     /**
      * Unique and deterministic identifier of the onchain event associated with the sale.
@@ -112,8 +112,8 @@ export const ext_nameSales = onchainTable(
   }),
 );
 
-export const ext_nameTokens = onchainTable(
-  "ext_name_tokens",
+export const nameTokens = onchainTable(
+  "name_tokens",
   (t) => ({
     /**
      * The CAIP-19 Asset ID of the token.

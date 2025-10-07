@@ -8,7 +8,6 @@ export default defineConfig({
   bundle: true,
   splitting: false,
   sourcemap: true,
-  // dts: true,
   clean: true,
   external: ["viem", "ponder", "drizzle-orm", "drizzle-orm/pg-core"],
   outDir: "./dist",

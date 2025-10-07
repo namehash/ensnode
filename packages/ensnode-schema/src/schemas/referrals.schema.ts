@@ -7,8 +7,8 @@ import { index, onchainTable, relations } from "ponder";
 /**
  * A RegistrationReferral tracks individual occurences of referrals for ENS name registrations.
  */
-export const ext_registrationReferral = onchainTable(
-  "ext_registration_referral",
+export const registrationReferral = onchainTable(
+  "registration_referral",
   (t) => ({
     // keyed by any arbitrary unique id, usually `event.id`
     id: t.text().primaryKey(),
@@ -33,22 +33,19 @@ export const ext_registrationReferral = onchainTable(
   }),
 );
 
-export const ext_registrationReferral_relations = relations(
-  ext_registrationReferral,
-  ({ one, many }) => ({
-    // RegistrationReferral belongs to Referrer
-    referrer: one(ext_referrer, {
-      fields: [ext_registrationReferral.referrer],
-      references: [ext_referrer.id],
-    }),
+export const registrationReferral_relations = relations(registrationReferral, ({ one, many }) => ({
+  // RegistrationReferral belongs to Referrer
+  referrer: one(referrer, {
+    fields: [registrationReferral.referrer],
+    references: [referrer.id],
   }),
-);
+}));
 
 /**
  * A RenewalReferral tracks individual occurences of referrals for ENS name renewals.
  */
-export const ext_renewalReferral = onchainTable(
-  "ext_renewal_referral",
+export const renewalReferral = onchainTable(
+  "renewal_referral",
   (t) => ({
     // keyed by any arbitrary unique id, usually `event.id`
     id: t.text().primaryKey(),
@@ -71,11 +68,11 @@ export const ext_renewalReferral = onchainTable(
   }),
 );
 
-export const ext_renewalReferral_relations = relations(ext_renewalReferral, ({ one, many }) => ({
+export const renewalReferral_relations = relations(renewalReferral, ({ one, many }) => ({
   // RenewalReferral belongs to Referrer
-  referrer: one(ext_referrer, {
-    fields: [ext_renewalReferral.referrer],
-    references: [ext_referrer.id],
+  referrer: one(referrer, {
+    fields: [renewalReferral.referrer],
+    references: [referrer.id],
   }),
 }));
 
@@ -84,8 +81,8 @@ export const ext_renewalReferral_relations = relations(ext_renewalReferral, ({ o
  * aggregate statistics about referrals, namely the total value (in wei) they've referred to the
  * ENS protocol.
  */
-export const ext_referrer = onchainTable(
-  "ext_referral_totals",
+export const referrer = onchainTable(
+  "referral_totals",
   (t) => ({
     // keyed by Referrer's id (bytes32 hex)
     id: t.hex().primaryKey(),
@@ -94,10 +91,10 @@ export const ext_referrer = onchainTable(
   (t) => ({}),
 );
 
-export const ext_referrer_relations = relations(ext_referrer, ({ one, many }) => ({
+export const referrer_relations = relations(referrer, ({ one, many }) => ({
   // Referrer has many RegistrationReferrals
-  registrationReferrals: many(ext_registrationReferral),
+  registrationReferrals: many(registrationReferral),
 
   // Referrer has many RenewalReferrals
-  renewalReferrals: many(ext_renewalReferral),
+  renewalReferrals: many(renewalReferral),
 }));

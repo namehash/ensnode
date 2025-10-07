@@ -10,17 +10,17 @@
 import { maxAliasesPlugin } from "@escape.tech/graphql-armor-max-aliases";
 import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
-import type { GraphQLSchema } from "graphql";
+import { GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
 import { buildDataLoaderCache } from "./graphql";
 
-export const graphql = (
+export function subgraphGraphQLMiddleware(
   {
-    db,
+    drizzle,
     graphqlSchema,
   }: {
-    db: any;
+    drizzle: any;
     graphqlSchema: GraphQLSchema;
   },
   {
@@ -38,14 +38,14 @@ export const graphql = (
     maxOperationDepth: 100,
     maxOperationAliases: 30,
   },
-) => {
+) {
   const yoga = createYoga({
     graphqlEndpoint: "*", // Disable built-in route validation, use Hono routing instead
     schema: graphqlSchema,
     context: () => {
-      const getDataLoader = buildDataLoaderCache({ drizzle: db });
+      const getDataLoader = buildDataLoaderCache({ drizzle });
 
-      return { drizzle: db, getDataLoader };
+      return { drizzle, getDataLoader };
     },
     maskedErrors:
       process.env.NODE_ENV === "production"
@@ -76,4 +76,4 @@ export const graphql = (
 
     return response;
   });
-};
+}
