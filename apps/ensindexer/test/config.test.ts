@@ -1,6 +1,6 @@
 import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/config/defaults";
 import { EnvironmentDefaults } from "@/config/environment-defaults";
-import type { RpcConfig } from "@/config/types";
+import type { ENSIndexerEnvironment, RpcConfig } from "@/config/types";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,7 +9,7 @@ const VALID_RPC_URL_ALT = "https://lb.drpc.org/ethereum/987";
 const VALID_RPC_WS_URL = "wss://eth-mainnet.g.alchemy.com/v2/1234";
 const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 
-const BASE_ENV = {
+const BASE_ENV: ENSIndexerEnvironment = {
   ENSNODE_PUBLIC_URL: "http://localhost:42069",
   ENSINDEXER_URL: "http://localhost:42069",
   ENSADMIN_URL: "https://admin.ensnode.io",
@@ -30,7 +30,7 @@ async function getConfig() {
   return configModule.default;
 }
 
-async function stubEnv(env: Record<string, string>) {
+async function stubEnv(env: ENSIndexerEnvironment) {
   Object.entries(env).forEach(([key, value]) => vi.stubEnv(key, value));
 }
 
@@ -679,6 +679,7 @@ describe("config (minimal base env)", () => {
       RPC_URL_1,
     });
   });
+
   afterEach(() => {
     vi.unstubAllEnvs();
   });
@@ -713,6 +714,80 @@ describe("config (minimal base env)", () => {
       });
 
       await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
+    });
+
+    describe("with ALCHEMY_API_KEY", async () => {
+      beforeEach(() => {
+        stubEnv({ ALCHEMY_API_KEY: "anything" });
+        vi.stubEnv("RPC_URL_1", undefined);
+      });
+
+      it("should provide rpcConfigs for all mainnet chains", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        // should provide some rpcConfigs
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
+          "must have http rpc url",
+        ).toBe(true);
+
+        // TODO: update this when auto-generated ws:// urls are added, this test will have failed
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with DRPC_API_KEY", async () => {
+      beforeEach(() => {
+        stubEnv({ DRPC_API_KEY: "anything" });
+        vi.stubEnv("RPC_URL_1", undefined);
+      });
+
+      it("should provide rpcConfigs for all mainnet chains", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        // should provide some rpcConfigs
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
+          "must have http rpc url",
+        ).toBe(true);
+
+        // TODO: update this when auto-generated ws:// urls are added, this test will have failed
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY, DRPC_API_KEY, and RPC_URL_1", async () => {
+      beforeEach(() => {
+        stubEnv({ ALCHEMY_API_KEY: "anything" });
+        stubEnv({ DRPC_API_KEY: "anything" });
+      });
+
+      it("should provide rpcConfigs for all mainnet chains with order", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        // should provide some rpcConfigs
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+
+        expect(config.rpcConfigs.get(1)!.httpRPCs.length).toBe(3); // with RPC_URL_1
+        expect(config.rpcConfigs.get(1)!.httpRPCs[0]!.href).toBe(VALID_RPC_URL);
+        expect(config.rpcConfigs.get(1)!.httpRPCs[1]!.href).toContain("alchemy");
+        expect(config.rpcConfigs.get(1)!.httpRPCs[2]!.href).toContain("drpc");
+
+        expect(config.rpcConfigs.get(10)!.httpRPCs.length).toBe(2);
+        expect(config.rpcConfigs.get(10)!.httpRPCs[0]!.href).toContain("alchemy");
+        expect(config.rpcConfigs.get(10)!.httpRPCs[1]!.href).toContain("drpc");
+      });
     });
   });
 });
