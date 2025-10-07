@@ -21,7 +21,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRecentRegistrations } from "./hooks";
 
 /**
@@ -139,8 +139,9 @@ interface RegistrationsListProps {
  */
 function RegistrationsList({ namespaceId, maxRecords }: RegistrationsListProps) {
   const { rawSelectedConnection } = useSelectedConnection();
+  const ensNodeUrl = useMemo(() => new URL(rawSelectedConnection), [rawSelectedConnection]);
   const recentRegistrationsQuery = useRecentRegistrations({
-    ensNodeUrl: useMemo(() => new URL(rawSelectedConnection), [rawSelectedConnection]),
+    ensNodeUrl,
     namespaceId,
     maxRecords,
   });
@@ -234,11 +235,11 @@ function UnsupportedOmnichainIndexingStatusMessage({
             {overallOmnichainIndexingStatus}
           </Badge>
         </div>
-        <p>
+        <div>
           The latest indexed registrations will be available once the omnichain indexing status is{" "}
           {filteredSupportedOmnichainIndexingStatuses.map(
             (supportedOmnichainIndexingStatus, idx) => (
-              <>
+              <React.Fragment key={supportedOmnichainIndexingStatus}>
                 <Badge
                   className="uppercase text-xs leading-none"
                   title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
@@ -246,11 +247,11 @@ function UnsupportedOmnichainIndexingStatusMessage({
                   {supportedOmnichainIndexingStatus}
                 </Badge>
                 {idx < filteredSupportedOmnichainIndexingStatuses.length - 1 && " or "}
-              </>
+              </React.Fragment>
             ),
           )}
           .
-        </p>
+        </div>
         <Button asChild variant="default">
           <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
         </Button>
