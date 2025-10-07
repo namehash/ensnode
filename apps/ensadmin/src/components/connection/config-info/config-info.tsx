@@ -9,6 +9,7 @@ import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
 import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { IconENS } from "@/components/icons/ens";
@@ -23,7 +24,7 @@ import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { ExternalLink, PlugZap, Replace } from "lucide-react";
+import { PlugZap, Replace } from "lucide-react";
 
 /**
  * ENSNodeConfigInfo display variations:
@@ -123,7 +124,7 @@ export function ENSNodeConfigInfo({
                   value: <p className={cardItemValueStyles}>Postgres</p>,
                 },
               ]}
-              version={ensIndexerConfig.dependencyInfo.ensRainbow}
+              version={ensIndexerConfig.dependencyInfo.ensDb}
               docsLink={new URL("https://ensnode.io/ensdb/")}
             />
             {/*It's safe to assume that the version number of ENSDb is always equal to the version number of ENSIndexer.
@@ -143,6 +144,25 @@ export function ENSNodeConfigInfo({
                   label: "Node.js",
                   value: (
                     <p className={cardItemValueStyles}>{ensIndexerConfig.dependencyInfo.nodejs}</p>
+                  ),
+                },
+                {
+                  label: "ENS Normalize",
+                  value: (
+                    <p className={cardItemValueStyles}>
+                      {ensIndexerConfig.dependencyInfo.ensNormalize}
+                    </p>
+                  ),
+                  additionalInfo: (
+                    <p>
+                      Version of{" "}
+                      <ExternalLinkWithIcon
+                        href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensIndexerConfig.dependencyInfo.ensNormalize}`}
+                      >
+                        <code className="text-xs">@adraffy/ens-normalize</code> package
+                      </ExternalLinkWithIcon>{" "}
+                      used for ENS Names normalization.
+                    </p>
                   ),
                 },
                 {
@@ -231,7 +251,7 @@ export function ENSNodeConfigInfo({
                   icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0" />,
                 },
               ]}
-              version={ensIndexerConfig.dependencyInfo.ensRainbow}
+              version={ensIndexerConfig.dependencyInfo.ensIndexer}
               docsLink={new URL("https://ensnode.io/ensindexer/")}
             />
             {/*TODO: The current approach to displaying the version of ENSIndexer is a stretch.
