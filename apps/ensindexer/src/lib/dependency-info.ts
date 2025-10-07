@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import packageJson from "@/../package.json";
@@ -23,16 +23,21 @@ export function getPackageVersion(packageName: string) {
     let searchDir = dirname(currentFile);
 
     while (true) {
-      // Check if we've reached the workspace root
       const workspaceFile = join(searchDir, "pnpm-workspace.yaml");
       const isWorkspaceRoot = existsSync(workspaceFile);
 
       // Check for node_modules in current directory
       const nodeModulesPath = join(searchDir, "node_modules", packageName, "package.json");
-
       if (existsSync(nodeModulesPath)) {
         const packageJson = JSON.parse(readFileSync(nodeModulesPath, "utf8"));
         return packageJson.version;
+      }
+
+      // Check PNPM's .pnpm virtual store
+      const pnpmDir = join(searchDir, "node_modules", ".pnpm");
+      if (existsSync(pnpmDir)) {
+        const version = searchPnpmStore(pnpmDir, packageName);
+        if (version) return version;
       }
 
       // If we're at workspace root and still haven't found it, stop searching
@@ -62,6 +67,35 @@ export function getPackageVersion(packageName: string) {
 }
 
 /**
+ * Search PNPM's .pnpm directory for a package
+ * PNPM stores packages like: .pnpm/@adraffy+ens-normalize@1.10.1/node_modules/@adraffy/ens-normalize
+ */
+function searchPnpmStore(pnpmDir: string, packageName: string): string | null {
+  try {
+    const entries = readdirSync(pnpmDir);
+
+    // Convert package name to PNPM's format: @scope/name -> @scope+name
+    const normalizedName = packageName.replace("/", "+");
+
+    // Find entries that match the package name
+    // They will be in format: packagename@version or @scope+packagename@version
+    for (const entry of entries) {
+      if (entry.startsWith(normalizedName + "@")) {
+        const pkgPath = join(pnpmDir, entry, "node_modules", packageName, "package.json");
+        if (existsSync(pkgPath)) {
+          const packageJson = JSON.parse(readFileSync(pkgPath, "utf8"));
+          return packageJson.version;
+        }
+      }
+    }
+  } catch (error) {
+    // Ignore errors in this helper
+  }
+
+  return null;
+}
+
+/**
  * Get complete {@link DependencyInfo} for ENSIndexer app.
  */
 export async function getDependencyInfo(): Promise<DependencyInfo> {
@@ -69,11 +103,7 @@ export async function getDependencyInfo(): Promise<DependencyInfo> {
   const { versionInfo: ensRainbowDependencyInfo } = await ensRainbowApiClient.version();
 
   // ENSRainbow version (fetched from the actual ENSRainbow service instance)
-  // use a fallback for backwards compatibility
-  const ensRainbowSchema =
-    ensRainbowDependencyInfo.dbSchemaVersion ||
-    // @ts-ignore
-    ensRainbowDependencyInfo.schema_version;
+  const ensRainbowSchema = ensRainbowDependencyInfo.dbSchemaVersion;
 
   // ENSIndexer version
   const ensIndexerVersion = packageJson.version;

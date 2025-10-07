@@ -29,7 +29,6 @@
     "get-test-data": "DATA_VERSION=test ./download-rainbow-tables.sh"
   },
   "dependencies": {
-    "@adraffy/ens-normalize": "catalog:",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@hono/node-server": "^1.4.1",

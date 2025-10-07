@@ -103,9 +103,6 @@ importers:
 
   apps/ensadmin:
     dependencies:
-      '@adraffy/ens-normalize':
-        specifier: 1.11.1
-        version: 1.11.1
       '@anthropic-ai/sdk':
         specifier: ^0.60.0
         version: 0.60.0
@@ -275,9 +272,6 @@ importers:
 
   apps/ensindexer:
     dependencies:
-      '@adraffy/ens-normalize':
-        specifier: 1.11.1
-        version: 1.11.1
       '@ensdomains/ensjs':
         specifier: ^4.0.2
         version: 4.0.2(typescript@5.7.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.7))(zod@3.25.7)
@@ -387,9 +381,6 @@ importers:
 
   apps/ensrainbow:
     dependencies:
-      '@adraffy/ens-normalize':
-        specifier: 1.11.1
-        version: 1.11.1
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../../packages/ensnode-sdk

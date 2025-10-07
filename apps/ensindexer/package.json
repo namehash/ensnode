@@ -23,7 +23,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@adraffy/ens-normalize": "catalog:",
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
