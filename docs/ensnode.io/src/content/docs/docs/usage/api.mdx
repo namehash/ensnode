@@ -85,8 +85,8 @@ The response includes several important configuration categories:
 - **Feature Flags**: Boolean settings for experimental features and optional
   functionality
 - **Plugins**: Activated plugins
-- **Dependency Information**: Node.js version, Ponder framework version, and
-  ENSRainbow schema details
+- **Version Information**: Node.js version, Ponder framework version,
+  ENSRainbow version and schema details, ENSDb version, ENSIndexer version, [ENS Normalize version](https://www.npmjs.com/package/@adraffy/ens-normalize)
 
 ### Example response
 
@@ -102,8 +102,12 @@ The response includes several important configuration categories:
     42161,
     534352
   ],
-  "databaseSchemaName": "alphaSchema0.31.0",
+  "databaseSchemaName": "alphaSchema0.35.0",
   "isSubgraphCompatible": false,
+  "labelSet": {
+    "labelSetId": "subgraph",
+    "labelSetVersion": 0
+  },
   "namespace": "mainnet",
   "plugins": [
     "subgraph",
@@ -114,11 +118,14 @@ The response includes several important configuration categories:
     "referrals",
     "tokenscope"
   ],
-  "dependencyInfo": {
+  "versionInfo": {
     "nodejs": "22.18.0",
     "ponder": "0.11.43",
-    "ensRainbow": "0.31.0",
-    "ensRainbowSchema": 2
+    "ensDb": "0.35.0",
+    "ensIndexer": "0.35.0",
+    "ensNormalize": "1.11.1",
+    "ensRainbow": "0.34.0",
+    "ensRainbowSchema": 3
   }
 }
 ```

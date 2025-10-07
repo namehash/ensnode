@@ -24,7 +24,7 @@ export function serializeENSIndexerPublicConfig(
     isSubgraphCompatible,
     namespace,
     plugins,
-    dependencyInfo,
+    versionInfo,
   } = config;
 
   return {
@@ -36,6 +36,6 @@ export function serializeENSIndexerPublicConfig(
     isSubgraphCompatible,
     namespace,
     plugins,
-    dependencyInfo,
+    versionInfo,
   } satisfies SerializedENSIndexerPublicConfig;
 }

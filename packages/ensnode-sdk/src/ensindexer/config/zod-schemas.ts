@@ -118,7 +118,7 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
+export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
   z.strictObject(
     {
       nodejs: makeNonEmptyStringSchema(),
@@ -130,7 +130,7 @@ export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
       ensRainbowSchema: makePositiveIntegerSchema(),
     },
     {
-      error: `${valueLabel} must be a valid DependencyInfo object.`,
+      error: `${valueLabel} must be a valid VersionInfo object.`,
     },
   );
 
@@ -168,7 +168,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      dependencyInfo: makeDependencyInfoSchema(`${valueLabel}.dependencyInfo`),
+      versionInfo: makeVersionInfoSchema(`${valueLabel}.versionInfo`),
     })
     /**
      * Validations

@@ -3,8 +3,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import packageJson from "@/../package.json";
 import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-import { DependencyInfo } from "@ensnode/ensnode-sdk";
-import { makeDependencyInfoSchema } from "@ensnode/ensnode-sdk/internal";
+import { VersionInfo } from "@ensnode/ensnode-sdk";
+import { makeVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
 import { prettifyError } from "zod/v4";
 
 /**
@@ -96,14 +96,14 @@ function searchPnpmStore(pnpmDir: string, packageName: string): string | null {
 }
 
 /**
- * Get complete {@link DependencyInfo} for ENSIndexer app.
+ * Get complete {@link VersionInfo} for ENSIndexer app.
  */
-export async function getDependencyInfo(): Promise<DependencyInfo> {
+export async function getVersionInfo(): Promise<VersionInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();
-  const { versionInfo: ensRainbowDependencyInfo } = await ensRainbowApiClient.version();
+  const { versionInfo: ensRainbowVersionInfo } = await ensRainbowApiClient.version();
 
   // ENSRainbow version (fetched from the actual ENSRainbow service instance)
-  const ensRainbowSchema = ensRainbowDependencyInfo.dbSchemaVersion;
+  const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
 
   // ENSIndexer version
   const ensIndexerVersion = packageJson.version;
@@ -114,21 +114,21 @@ export async function getDependencyInfo(): Promise<DependencyInfo> {
   // the version number of ENSIndexer
   const ensDbVersion = ensIndexerVersion;
 
-  const schema = makeDependencyInfoSchema();
+  const schema = makeVersionInfoSchema();
   const data = {
-    ensRainbow: ensRainbowDependencyInfo.version,
+    ensRainbow: ensRainbowVersionInfo.version,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
     ensDb: ensDbVersion,
     ensIndexer: ensIndexerVersion,
     ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
     ensRainbowSchema,
-  } satisfies DependencyInfo;
+  } satisfies VersionInfo;
 
   const parsed = schema.safeParse(data);
 
   if (parsed.error) {
-    throw new Error(`Cannot deserialize DependencyInfo:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(`Cannot deserialize VersionInfo:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;

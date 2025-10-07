@@ -18,9 +18,9 @@ export enum PluginName {
 }
 
 /**
- * Information about ENSIndexer's dependencies.
+ * Version info about ENSIndexer and its dependencies.
  */
-export interface DependencyInfo {
+export interface VersionInfo {
   /**
    * Node.js runtime version
    *
@@ -38,7 +38,7 @@ export interface DependencyInfo {
   /**
    * ENSDb service version
    *
-   * Guaranteed to be the same as {@link DependencyInfo.ensIndexer}.
+   * Guaranteed to be the same as {@link VersionInfo.ensIndexer}.
    * */
   ensDb: string;
 
@@ -180,5 +180,5 @@ export interface ENSIndexerPublicConfig {
   /**
    * Information about the ENSIndexer instance dependencies.
    */
-  dependencyInfo: DependencyInfo;
+  versionInfo: VersionInfo;
 }
