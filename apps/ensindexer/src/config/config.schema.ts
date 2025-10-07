@@ -16,7 +16,7 @@ import {
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_SUBGRAPH_COMPAT } from "@/lib/lib-config";
+import { DEFAULT_SUBGRAPH_COMPAT } from "@/lib/lib-config";
 
 import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
 
@@ -76,8 +76,6 @@ const BlockrangeSchema = z
     { error: "END_BLOCK must be greater than START_BLOCK." },
   );
 
-const EnsNodePublicUrlSchema = makeUrlSchema("ENSNODE_PUBLIC_URL");
-const EnsAdminUrlSchema = makeUrlSchema("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL);
 const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
 
 const PonderDatabaseSchemaSchema = z
@@ -110,13 +108,6 @@ const PluginsSchema = z.coerce
   .refine((arr) => arr.length === uniq(arr).length, {
     error: "PLUGINS cannot contain duplicate values",
   });
-
-const PortSchema = z.coerce
-  .number({ error: "PORT must be an integer." })
-  .int({ error: "PORT must be an integer." })
-  .min(1, { error: "PORT must be an integer between 1 and 65535." })
-  .max(65535, { error: "PORT must be an integer between 1 and 65535." })
-  .default(DEFAULT_PORT);
 
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
@@ -170,12 +161,9 @@ const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
     globalBlockrange: BlockrangeSchema,
-    ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
-    ensAdminUrl: EnsAdminUrlSchema,
     databaseSchemaName: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
-    port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
     rpcConfigs: RpcConfigsSchema,

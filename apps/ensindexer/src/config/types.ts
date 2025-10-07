@@ -48,28 +48,6 @@ export interface ENSIndexerConfig {
   namespace: ENSNamespaceId;
 
   /**
-   * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).
-   * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
-   *
-   * The ENSNode root api route `/` redirects to {@link ensAdminUrl}, configuring
-   * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  ensAdminUrl: URL;
-
-  /**
-   * The publicly accessible endpoint of the ENSNode api (ex: http://localhost:42069).
-   *
-   * ENSAdmin will use this url to connect to the ENSNode api for querying state about the ENSNode instance.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  ensNodePublicUrl: URL;
-
-  /**
    * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses ENSRainbow to 'heal'
    * unknown labelhashes.
    * @see https://ensnode.io/ensrainbow/overview/what-is-ensrainbow
@@ -120,14 +98,6 @@ export interface ENSIndexerConfig {
    *   each chain the plugin indexes
    */
   plugins: PluginName[];
-
-  /**
-   * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
-   *
-   * Invariants:
-   * - The port must be an integer between 1 and 65535
-   */
-  port: number;
 
   /**
    * Configuration for each indexable RPC, keyed by chain id.
@@ -247,7 +217,6 @@ export type RpcConfigEnvironment = string;
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
 export interface ENSIndexerEnvironment {
-  port: string | undefined;
   databaseSchemaName: string | undefined;
   databaseUrl: string | undefined;
   namespace: string | undefined;
@@ -257,9 +226,7 @@ export interface ENSIndexerEnvironment {
     labelSetId: string | undefined;
     labelSetVersion: string | undefined;
   };
-  ensNodePublicUrl: string | undefined;
   ensIndexerUrl: string | undefined;
-  ensAdminUrl: string | undefined;
   globalBlockrange: {
     startBlock: string | undefined;
     endBlock: string | undefined;

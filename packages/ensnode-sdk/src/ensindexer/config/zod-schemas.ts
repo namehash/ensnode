@@ -157,8 +157,6 @@ export function invariant_isSubgraphCompatibleRequirements(
 export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
-      ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),

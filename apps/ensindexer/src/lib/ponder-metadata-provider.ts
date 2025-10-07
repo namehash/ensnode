@@ -33,10 +33,10 @@ export const fetchEnsRainbowVersion = async (): Promise<EnsRainbow.VersionInfo> 
 };
 
 // setup prometheus metrics fetching
-export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.port);
+export const fetchPrometheusMetrics = createPrometheusMetricsFetcher(config.ensIndexerUrl);
 
 // setup Ponder Status fetching
-export const fetchPonderStatus = createPonderStatusFetcher(config.port);
+export const fetchPonderStatus = createPonderStatusFetcher(config.ensIndexerUrl);
 
 export const makePonderMetadataProvider = ({
   db,

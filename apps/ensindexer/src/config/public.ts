@@ -15,8 +15,6 @@ export async function buildENSIndexerPublicConfig(
 
   return {
     databaseSchemaName: config.databaseSchemaName,
-    ensAdminUrl: config.ensAdminUrl,
-    ensNodePublicUrl: config.ensNodePublicUrl,
     labelSet: config.labelSet,
     indexedChainIds: config.indexedChainIds,
     isSubgraphCompatible: config.isSubgraphCompatible,

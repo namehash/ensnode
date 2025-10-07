@@ -49,26 +49,6 @@ export interface ENSIndexerPublicConfig {
   namespace: ENSNamespaceId;
 
   /**
-   * An ENSAdmin URL
-   *
-   * The ENSNode root api route `/` redirects to {@link ensAdminUrl},
-   * configuring ENSAdmin with an entry for this instance of ENSNode,
-   * identified by {@link ensNodePublicUrl}.
-   *
-   * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
-   */
-  ensAdminUrl: URL;
-
-  /**
-   * The publicly accessible endpoint of the ENSNode API
-   * (ex: http://localhost:42069).
-   *
-   * ENSAdmin will use this url to connect to the ENSNode api for querying
-   * state about the ENSNode instance.
-   */
-  ensNodePublicUrl: URL;
-
-  /**
    * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;

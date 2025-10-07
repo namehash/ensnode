@@ -1,6 +1,5 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { ENSIndexerConfig } from "@/config/types";
-import { DEFAULT_PORT } from "@/lib/lib-config";
 import { deepClone } from "@/lib/lib-helpers";
 import { vi } from "vitest";
 
@@ -8,9 +7,7 @@ import { vi } from "vitest";
 const _defaultMockConfig = buildConfigFromEnvironment({
   databaseUrl: "postgresql://postgres:postgres@localhost:5432/postgres",
   namespace: "mainnet",
-  ensNodePublicUrl: "http://localhost:42069",
   ensIndexerUrl: "http://localhost:42069",
-  ensAdminUrl: "http://localhost:3000",
   databaseSchemaName: "test_schema",
   plugins: "subgraph",
   ensRainbowUrl: "https://api.ensrainbow.io",
@@ -18,7 +15,6 @@ const _defaultMockConfig = buildConfigFromEnvironment({
     labelSetId: "ens-test-env",
     labelSetVersion: "0",
   },
-  port: DEFAULT_PORT.toString(),
   rpcConfigs: {
     1: "https://eth-mainnet.g.alchemy.com/v2/1234",
   },

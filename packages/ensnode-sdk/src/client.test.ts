@@ -53,8 +53,6 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_CONFIG_RESPONSE = {
-  ensAdminUrl: "https://admin.ensnode.io/",
-  ensNodePublicUrl: "https://api.alpha.ensnode.io/",
   labelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
