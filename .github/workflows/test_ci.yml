@@ -66,6 +66,20 @@ jobs:
   integrity-check:
     name: "Integrity Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204
+    services:
+      # run postgres alongside this job
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -79,7 +93,7 @@ jobs:
       # ensure the app healthcheck is live. If the command does not
       # print the log with the healthcheck message within that time, the step
       # will exit with a failure.
-      # This runtime check uses a pglite database that only lives in the CI
+      # This runtime check uses an ephemeral postgres database that only lives in the CI
       # environment. It will be discarded after the CI run. The app will not
       # check anything beyond the healthcheck as its job is to ensure the app
       # starts successfully only. With the configured RPCs there is likely to
@@ -92,6 +106,8 @@ jobs:
           # Public RPC URLs are used as fallbacks for repository forks
           # that don't have the relevant secrets configured.
           NAMESPACE: mainnet
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          DATABASE_SCHEMA: public
           PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope
           RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
           RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
@@ -99,11 +115,12 @@ jobs:
           RPC_URL_59144: ${{ secrets.LINEA_RPC_URL || 'https://linea.drpc.org' }}
           RPC_URL_42161: ${{ secrets.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org' }}
           RPC_URL_534352: ${{ secrets.SCROLL_RPC_URL || 'https://scroll.drpc.org' }}
-          HEALTH_CHECK_TIMEOUT: 60
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
           ENSINDEXER_URL: http://localhost:42069
           # Label Set Configuration (REQUIRED)
           LABEL_SET_ID: ens-test-env
           LABEL_SET_VERSION: 0
+          # healthcheck script env variables
+          HEALTH_CHECK_TIMEOUT: 60
         run: ./.github/scripts/run_ensindexer_healthcheck.sh
