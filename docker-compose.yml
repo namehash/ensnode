@@ -32,13 +32,6 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
       # Same ENSRAINBOW_URL as ensindexer instance
       ENSRAINBOW_URL: http://ensrainbow:3223
-      # Same ENSADMIN_URL as ensindexer instance
-      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
-      ENSADMIN_URL: http://localhost:4173
-      # Override ENSNODE_PUBLIC_URL to point to the docker compose ensindexer-api
-      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
-      ENSNODE_PUBLIC_URL: http://localhost:42069
-
     env_file:
       # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example). Requires same env configuration as ensindexer
       # Copy .env.local.example to .env.local and configure all required values
