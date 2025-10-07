@@ -71,6 +71,7 @@ jobs:
       postgres:
         image: postgres:17
         env:
+          POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
         ports:
@@ -118,9 +119,6 @@ jobs:
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSNODE_PUBLIC_URL: http://localhost:42069
           ENSINDEXER_URL: http://localhost:42069
-          # Label Set Configuration (REQUIRED)
-          LABEL_SET_ID: ens-test-env
-          LABEL_SET_VERSION: 0
           # healthcheck script env variables
           HEALTH_CHECK_TIMEOUT: 60
         run: ./.github/scripts/run_ensindexer_healthcheck.sh
