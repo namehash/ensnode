@@ -222,7 +222,7 @@ const ENSIndexerConfigSchema = z
   .check(invariant_globalBlockrange);
 
 /**
- * Builds the ENSIndexer configuration object using the process environment.
+ * Builds the ENSIndexer configuration object from an ENSIndexerEnvironment object.
  *
  * First parses the SUBGRAPH_COMPAT environment variable to determine compatibility mode,
  * then applies appropriate environment defaults based on that mode (subgraphCompatible or alpha).
