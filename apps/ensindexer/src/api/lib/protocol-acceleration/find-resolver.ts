@@ -187,10 +187,10 @@ async function findResolverWithIndex(
       // 3. for each node, find its associated resolver (only in the specified registry)
       const nodeResolverRelations = await withSpanAsync(
         tracer,
-        "ext_nodeResolverRelation.findMany",
+        "nodeResolverRelation.findMany",
         {},
         async () => {
-          const records = await db.query.ext_nodeResolverRelation.findMany({
+          const records = await db.query.nodeResolverRelation.findMany({
             where: (nrr, { inArray, and, eq }) =>
               and(
                 eq(nrr.chainId, registry.chainId), // exclusively for the requested registry
