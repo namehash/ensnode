@@ -5,9 +5,7 @@
 "use client";
 
 import { OverallIndexingStatusIds } from "@ensnode/ensnode-sdk";
-import { type ReactElement, Suspense } from "react";
-
-import { RecentRegistrations } from "@/components/recent-registrations";
+import { type ReactElement } from "react";
 
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { ENSNodeConfigInfo } from "../connection/config-info";
@@ -53,7 +51,6 @@ export function IndexingStatus() {
   const indexingStatus = indexingStatusQuery.data;
 
   let indexingStats: ReactElement;
-  let maybeRecentRegistrations: ReactElement | undefined;
   let maybeIndexingTimeline: ReactElement | undefined;
 
   switch (indexingStatus.overallStatus) {
@@ -73,28 +70,10 @@ export function IndexingStatus() {
 
     case OverallIndexingStatusIds.Completed:
       indexingStats = <IndexingStatsForCompletedStatus indexingStatus={indexingStatus} />;
-
-      maybeRecentRegistrations = (
-        <Suspense>
-          <RecentRegistrations
-            ensIndexerConfig={ensIndexerConfig}
-            indexingStatus={indexingStatus}
-          />
-        </Suspense>
-      );
       break;
 
     case OverallIndexingStatusIds.Following:
       indexingStats = <IndexingStatsForFollowingStatus indexingStatus={indexingStatus} />;
-
-      maybeRecentRegistrations = (
-        <Suspense>
-          <RecentRegistrations
-            ensIndexerConfig={ensIndexerConfig}
-            indexingStatus={indexingStatus}
-          />
-        </Suspense>
-      );
       break;
 
     case OverallIndexingStatusIds.IndexerError:
@@ -108,8 +87,6 @@ export function IndexingStatus() {
       <IndexingStatsShell overallStatus={indexingStatus.overallStatus}>
         {indexingStats}
       </IndexingStatsShell>
-
-      {maybeRecentRegistrations}
     </section>
   );
 }

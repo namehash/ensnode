@@ -2,7 +2,7 @@ import dnsPacket, { Answer } from "dns-packet";
 import { Hex } from "viem";
 
 import { interpretTextRecordKey, interpretTextRecordValue } from "@/lib/interpret-record-values";
-import { isLabelSubgraphIndexable } from "@/lib/is-label-subgraph-indexable";
+import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
 import {
   DNSEncodedLiteralName,
   DNSEncodedName,
