@@ -107,7 +107,7 @@ jobs:
           # Public RPC URLs are used as fallbacks for repository forks
           # that don't have the relevant secrets configured.
           NAMESPACE: mainnet
-          DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres
           DATABASE_SCHEMA: public
           PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope
           RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
