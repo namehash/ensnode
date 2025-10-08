@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { cn } from "@/lib/utils";
-import type { ENSNamespaceId } from "@ensnode/datasources";
+import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import {
   ENSIndexerOverallIndexingStatus,
   type ENSIndexerPublicConfig,
@@ -108,8 +107,6 @@ export function RecentRegistrations({
     );
   }
 
-  const { namespace: namespaceId } = ensIndexerConfig;
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -117,32 +114,29 @@ export function RecentRegistrations({
           <span>Latest indexed registrations</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        {isClient && <RegistrationsList namespaceId={namespaceId} maxRecords={maxRecords} />}
-      </CardContent>
+      <CardContent>{isClient && <RegistrationsList maxRecords={maxRecords} />}</CardContent>
     </Card>
   );
 }
 
 interface RegistrationsListProps {
-  namespaceId: ENSNamespaceId;
   maxRecords: number;
 }
 
 /**
  * Displays recently indexed registrations as a table
- *
- * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  */
-function RegistrationsList({ namespaceId, maxRecords }: RegistrationsListProps) {
+function RegistrationsList({ maxRecords }: RegistrationsListProps) {
   const recentRegistrationsQuery = useRecentRegistrations({
-    namespaceId,
     maxRecords,
   });
 
+  const configQuery = useENSIndexerConfig();
+  const namespaceId = configQuery.data?.namespace;
+
   const [animationParent] = useAutoAnimate();
 
-  if (recentRegistrationsQuery.isLoading) {
+  if (recentRegistrationsQuery.isLoading || !namespaceId) {
     return <RegistrationsListLoading recordCount={maxRecords} />;
   }
 
