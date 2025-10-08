@@ -108,7 +108,7 @@ export function RecentRegistrations({
     );
   }
 
-  const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
+  const { namespace: namespaceId } = ensIndexerConfig;
 
   return (
     <Card className="w-full">
@@ -118,20 +118,13 @@ export function RecentRegistrations({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isClient && (
-          <RegistrationsList
-            ensNodeUrl={ensNodeUrl}
-            namespaceId={namespaceId}
-            maxRecords={maxRecords}
-          />
-        )}
+        {isClient && <RegistrationsList namespaceId={namespaceId} maxRecords={maxRecords} />}
       </CardContent>
     </Card>
   );
 }
 
 interface RegistrationsListProps {
-  ensNodeUrl: URL;
   namespaceId: ENSNamespaceId;
   maxRecords: number;
 }
@@ -140,11 +133,9 @@ interface RegistrationsListProps {
  * Displays recently indexed registrations as a table
  *
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
- * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: RegistrationsListProps) {
+function RegistrationsList({ namespaceId, maxRecords }: RegistrationsListProps) {
   const recentRegistrationsQuery = useRecentRegistrations({
-    ensNodeUrl,
     namespaceId,
     maxRecords,
   });

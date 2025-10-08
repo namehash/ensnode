@@ -2,7 +2,7 @@ import { ConfigResponse } from "@ensnode/ensnode-sdk";
 
 import { useQuery } from "@tanstack/react-query";
 import { ConfigParameter, QueryParameter } from "../types";
-import { IMMUTABLE_QUERY, createENSIndexerConfigQueryOptions } from "../utils/query";
+import { ASSUME_IMMUTABLE_QUERY, createENSIndexerConfigQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 
 type UseENSIndexerConfigParameters = QueryParameter<ConfigResponse>;
@@ -17,7 +17,7 @@ export function useENSIndexerConfig(
 
   const options = {
     ...queryOptions,
-    ...IMMUTABLE_QUERY,
+    ...ASSUME_IMMUTABLE_QUERY,
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
   };
