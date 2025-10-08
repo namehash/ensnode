@@ -21,10 +21,11 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
 
 /**
  * Parameters for the useAvatarUrl hook.
- *
- * If `name` is null, the query will not be executed.
  */
 export interface UseAvatarUrlParameters extends QueryParameter<string | null>, ConfigParameter {
+  /**
+   * If null, the query will not be executed.
+   */
   name: Name | null;
   /**
    * Optional custom fallback function to get avatar URL when the avatar text record
