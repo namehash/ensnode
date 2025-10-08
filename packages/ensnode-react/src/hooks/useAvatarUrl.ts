@@ -113,12 +113,16 @@ export interface UseAvatarUrlResult {
  * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({ name });
  *
+ *   if (isLoading) {
+ *     return <div className="avatar-loading" />;
+ *   }
+ *
  *   const avatarUrl = data?.browserSupportedAvatarUrl;
  *
  *   return (
  *     <div className="avatar">
- *       {isLoading || !avatarUrl ? (
- *         <div className="avatar-placeholder" />
+ *       {!avatarUrl ? (
+ *         <div className="avatar-fallback" />
  *       ) : (
  *         <img src={avatarUrl} alt={`${name} avatar`} />
  *       )}
@@ -142,12 +146,16 @@ export interface UseAvatarUrlResult {
  *     }
  *   });
  *
+ *   if (isLoading) {
+ *     return <div className="avatar-loading" />;
+ *   }
+ *
  *   const avatarUrl = data?.browserSupportedAvatarUrl;
  *
  *   return (
  *     <div className="avatar">
- *       {isLoading || !avatarUrl ? (
- *         <div className="avatar-placeholder" />
+ *       {!avatarUrl ? (
+ *         <div className="avatar-fallback" />
  *       ) : (
  *         <img src={avatarUrl} alt={`${name} avatar`} />
  *       )}
