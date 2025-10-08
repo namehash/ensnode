@@ -1,3 +1,4 @@
+import { ENSNamespaceIds } from "@ensnode/datasources";
 import { describe, expect, it } from "vitest";
 import { isSubgraphCompatible } from "./helpers";
 import { PluginName } from "./types";
@@ -12,6 +13,7 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'true' when only the '${PluginName.Subgraph}' plugin is active, no extended indexing features are on, and label set is subgraph/0`, () => {
       expect(
         isSubgraphCompatible({
+          namespace: ENSNamespaceIds.Mainnet,
           plugins: [PluginName.Subgraph],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -21,6 +23,7 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'false' when active plugins are something else than just '${PluginName.Subgraph}'`, () => {
       expect(
         isSubgraphCompatible({
+          namespace: ENSNamespaceIds.Mainnet,
           plugins: [],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -28,6 +31,7 @@ describe("ENSIndexer: Config helpers", () => {
 
       expect(
         isSubgraphCompatible({
+          namespace: ENSNamespaceIds.Mainnet,
           plugins: [PluginName.Subgraph, PluginName.Lineanames],
           labelSet: subgraphCompatibleLabelSet,
         }),
@@ -37,6 +41,7 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'false' when label set id is not 'subgraph'`, () => {
       expect(
         isSubgraphCompatible({
+          namespace: ENSNamespaceIds.Mainnet,
           plugins: [PluginName.Subgraph],
           labelSet: {
             labelSetId: "other-label-set",
@@ -49,6 +54,7 @@ describe("ENSIndexer: Config helpers", () => {
     it(`returns 'false' when label set version is not 0`, () => {
       expect(
         isSubgraphCompatible({
+          namespace: ENSNamespaceIds.Mainnet,
           plugins: [PluginName.Subgraph],
           labelSet: {
             labelSetId: "subgraph",
@@ -56,6 +62,19 @@ describe("ENSIndexer: Config helpers", () => {
           },
         }),
       ).toBe(false);
+    });
+
+    it(`returns 'true' when ens-test-env`, () => {
+      expect(
+        isSubgraphCompatible({
+          namespace: ENSNamespaceIds.EnsTestEnv,
+          plugins: [PluginName.Subgraph],
+          labelSet: {
+            labelSetId: "ens-test-env",
+            labelSetVersion: 0,
+          },
+        }),
+      ).toBe(true);
     });
   });
 });
