@@ -158,6 +158,7 @@ export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
     Pick<
       ENSIndexerPublicConfig,
+      | "namespace"
       | "plugins"
       | "isSubgraphCompatible"
       | "healReverseAddresses"
