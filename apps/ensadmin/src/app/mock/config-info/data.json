@@ -1,7 +1,5 @@
 {
   "Alpha Mainnet": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
@@ -27,8 +25,6 @@
     }
   },
   "Alpha Sepolia": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.alpha-sepolia.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
@@ -53,8 +49,6 @@
     "isSubgraphCompatible": false
   },
   "Subgraph Mainnet": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.mainnet.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
@@ -72,8 +66,6 @@
     "isSubgraphCompatible": true
   },
   "Subgraph Sepolia": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.sepolia.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
@@ -91,8 +83,6 @@
     "isSubgraphCompatible": true
   },
   "Subgraph Holesky": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.holesky.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
@@ -110,8 +100,6 @@
     "isSubgraphCompatible": true
   },
   "Serialization Error": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "invalid",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0

@@ -1,5 +1,5 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
@@ -211,26 +211,24 @@ export type RpcConfigEnvironment = string;
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.
  *
- * Keys correspond to the environment variable names, and all values are
- * strings or undefined, reflecting their state in `process.env`.
- * This interface is intended to be the source type which then gets
+ * Keys correspond to the environment variable names, and all values are optional strings, reflecting
+ * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
 export interface ENSIndexerEnvironment {
-  databaseSchemaName: string | undefined;
-  databaseUrl: string | undefined;
-  namespace: string | undefined;
-  plugins: string | undefined;
-  ensRainbowUrl: string | undefined;
-  labelSet: {
-    labelSetId: string | undefined;
-    labelSetVersion: string | undefined;
-  };
-  ensIndexerUrl: string | undefined;
-  globalBlockrange: {
-    startBlock: string | undefined;
-    endBlock: string | undefined;
-  };
-  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
-  isSubgraphCompatible: string | undefined;
+  DATABASE_SCHEMA?: string;
+  DATABASE_URL?: string;
+  NAMESPACE?: string;
+  PLUGINS?: string;
+  ENSRAINBOW_URL?: string;
+  LABEL_SET_ID?: string;
+  LABEL_SET_VERSION?: string;
+  ENSINDEXER_URL?: string;
+  START_BLOCK?: string;
+  END_BLOCK?: string;
+  SUBGRAPH_COMPAT?: string;
+
+  [x: `RPC_URL_${number}`]: string | undefined;
+  ALCHEMY_API_KEY?: string;
+  DRPC_API_KEY?: string;
 }

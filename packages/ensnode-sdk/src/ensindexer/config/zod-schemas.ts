@@ -134,7 +134,7 @@ export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<ENSIndexerPublicConfig, "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
