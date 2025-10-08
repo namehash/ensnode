@@ -162,7 +162,7 @@ export default {
        */
       UpgradeableRegistrarController: {
         abi: base_UpgradeableRegistrarController,
-        address: "0xa7d2607c6BD39Ae9521e514026CBB078405Ab322", // a proxy contract
+        address: "0xa7d2607c6bd39ae9521e514026cbb078405ab322", // a proxy contract
         startBlock: 35286620,
       },
 
@@ -175,7 +175,7 @@ export default {
       // NOTE: not indexed, but referenced for Protocol Acceleration
       L2Resolver2: {
         abi: ResolverABI,
-        address: "0x426fA03fB86E510d0Dd9F70335Cf102a98b10875",
+        address: "0x426fa03fb86e510d0dd9f70335cf102a98b10875",
         startBlock: 35286620,
       },
     },

@@ -1,7 +1,7 @@
 import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/config/defaults";
 import { EnvironmentDefaults } from "@/config/environment-defaults";
 import type { ENSIndexerEnvironment, RpcConfig } from "@/config/types";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -785,6 +785,29 @@ describe("config (minimal base env)", () => {
         expect(config.rpcConfigs.get(10)!.httpRPCs.length).toBe(2);
         expect(config.rpcConfigs.get(10)!.httpRPCs[0]!.href).toContain("alchemy");
         expect(config.rpcConfigs.get(10)!.httpRPCs[1]!.href).toContain("drpc");
+      });
+    });
+  });
+
+  describe("SUBGAPH_COMPAT=true", () => {
+    beforeEach(() => {
+      stubEnv({ SUBGRAPH_COMPAT: "true" });
+    });
+
+    it("ens-test-env namespace/labelset is subgraph-compatible", async () => {
+      stubEnv({
+        NAMESPACE: "ens-test-env",
+        LABEL_SET_ID: "ens-test-env",
+        LABEL_SET_VERSION: "0",
+        RPC_URL_15658733: VALID_RPC_URL,
+      });
+      await expect(getConfig()).resolves.toMatchObject({
+        namespace: ENSNamespaceIds.EnsTestEnv,
+        labelSet: {
+          labelSetId: "ens-test-env",
+          labelSetVersion: 0,
+        },
+        isSubgraphCompatible: true,
       });
     });
   });
