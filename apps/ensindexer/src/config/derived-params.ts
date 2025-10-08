@@ -41,6 +41,7 @@ export const derive_indexedChainIds = <
 export const derive_isSubgraphCompatible = <
   CONFIG extends Pick<
     ENSIndexerConfig,
+    | "namespace"
     | "plugins"
     | "healReverseAddresses"
     | "indexAdditionalResolverRecords"
