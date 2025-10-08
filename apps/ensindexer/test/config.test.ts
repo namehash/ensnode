@@ -14,7 +14,7 @@ const BASE_ENV: ENSIndexerEnvironment = {
   DATABASE_SCHEMA: "ensnode",
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
   ENSINDEXER_URL: "http://localhost:42069",
-  ENSRAINBOW_URL: "https://api.ensrainbow.io",
+  ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
   RPC_URL_1: VALID_RPC_URL,
@@ -46,7 +46,7 @@ describe("config (with base env)", () => {
       expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
       expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
-      expect(config.ensRainbowUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
+      expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
     });
 
     it("refreshes config when module is re-imported with new environment variables", async () => {

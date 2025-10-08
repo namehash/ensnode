@@ -10,7 +10,7 @@ const _defaultMockConfig = buildConfigFromEnvironment({
   NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
   ENSINDEXER_URL: "http://localhost:42069",
-  ENSRAINBOW_URL: "https://api.ensrainbow.io",
+  ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
   RPC_URL_1: "https://eth-mainnet.g.alchemy.com/v2/1234",

@@ -58,7 +58,7 @@ export const constrainBlockrange = (
  * It's a workaround for the lack of an internal API allowing to access
  * Prometheus metrics for the Ponder application.
  *
- * @param ensIndexerUrl the URL of ENSIndexer
+ * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
  * @returns fetcher function
  */
 export function createPrometheusMetricsFetcher(ensIndexerUrl: URL): () => Promise<string> {
@@ -106,7 +106,7 @@ const PonderDataSchema = {
  * It's a workaround for the lack of an internal API allowing to access
  * Ponder Status metrics for the Ponder application.
  *
- * @param ensIndexerUrl the URL of ENSIndexer
+ * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
  * @returns fetcher function
  */
 export function createPonderStatusFetcher(ensIndexerUrl: URL): () => Promise<PonderStatus> {
