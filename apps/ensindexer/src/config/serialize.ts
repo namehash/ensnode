@@ -76,8 +76,6 @@ export function serializeRedactedENSIndexerConfig(
   return {
     databaseSchemaName: redactedConfig.databaseSchemaName,
     databaseUrl: redactedConfig.databaseUrl,
-    ensAdminUrl: serializeUrl(redactedConfig.ensAdminUrl),
-    ensNodePublicUrl: serializeUrl(redactedConfig.ensNodePublicUrl),
     ensIndexerUrl: serializeUrl(redactedConfig.ensIndexerUrl),
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     labelSet: redactedConfig.labelSet,
@@ -86,7 +84,6 @@ export function serializeRedactedENSIndexerConfig(
     isSubgraphCompatible: redactedConfig.isSubgraphCompatible,
     namespace: redactedConfig.namespace,
     plugins: redactedConfig.plugins,
-    port: redactedConfig.port,
     rpcConfigs: serializeRpcConfigs(redactedConfig.rpcConfigs),
   } satisfies SerializedENSIndexerConfig;
 }

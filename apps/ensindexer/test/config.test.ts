@@ -1,7 +1,6 @@
 import { EnvironmentDefaults } from "@/config/environment-defaults";
-import type { RpcConfig } from "@/config/types";
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT } from "@/lib/lib-config";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerEnvironment, RpcConfig } from "@/config/types";
+import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -9,19 +8,16 @@ const VALID_RPC_URL_ALT = "https://lb.drpc.org/ethereum/987";
 const VALID_RPC_WS_URL = "wss://eth-mainnet.g.alchemy.com/v2/1234";
 const VALID_RPC_WS_URL_ALT = "wss://lb.drpc.org/ethereum/987";
 
-const BASE_ENV = {
-  ENSNODE_PUBLIC_URL: "http://localhost:42069",
-  ENSINDEXER_URL: "http://localhost:42069",
-  ENSADMIN_URL: "https://admin.ensnode.io",
-  DATABASE_SCHEMA: "ensnode",
+const BASE_ENV: ENSIndexerEnvironment = {
+  NAMESPACE: "mainnet",
   PLUGINS: "subgraph",
-  PORT: "3000",
-  ENSRAINBOW_URL: "https://api.ensrainbow.io",
+  DATABASE_SCHEMA: "ensnode",
+  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
+  ENSINDEXER_URL: "http://localhost:42069",
+  ENSRAINBOW_URL: "http://localhost:3223",
   LABEL_SET_ID: "ens-test-env",
   LABEL_SET_VERSION: "0",
-  NAMESPACE: "mainnet",
   RPC_URL_1: VALID_RPC_URL,
-  DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
 };
 
 async function getConfig() {
@@ -30,7 +26,7 @@ async function getConfig() {
   return configModule.default;
 }
 
-async function stubEnv(env: Record<string, string>) {
+async function stubEnv(env: ENSIndexerEnvironment) {
   Object.entries(env).forEach(([key, value]) => vi.stubEnv(key, value));
 }
 
@@ -48,21 +44,18 @@ describe("config (with base env)", () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
       expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
-      expect(config.ensNodePublicUrl).toStrictEqual(new URL("http://localhost:42069"));
-      expect(config.ensAdminUrl).toStrictEqual(new URL("https://admin.ensnode.io"));
       expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
-      expect(config.port).toBe(3000);
-      expect(config.ensRainbowUrl).toStrictEqual(new URL("https://api.ensrainbow.io"));
+      expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
     });
 
     it("refreshes config when module is re-imported with new environment variables", async () => {
       const initialConfig = await getConfig();
 
-      vi.stubEnv("PORT", "4000");
+      vi.stubEnv("LABEL_SET_ID", "subgraph");
       const newConfig = await getConfig();
 
-      expect(newConfig.port).toBe(4000);
+      expect(newConfig.labelSet.labelSetId).toBe("subgraph");
       expect(newConfig).not.toBe(initialConfig);
     });
   });
@@ -134,34 +127,6 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".ensNodePublicUrl", () => {
-    it("throws an error if ENSNODE_PUBLIC_URL is not a valid URL", async () => {
-      vi.stubEnv("ENSNODE_PUBLIC_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSNODE_PUBLIC_URL is empty", async () => {
-      vi.stubEnv("ENSNODE_PUBLIC_URL", "");
-      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
-    });
-
-    it("throws an error if ENSNODE_PUBLIC_URL is undefined (explicitly testing the refine)", async () => {
-      vi.stubEnv("ENSNODE_PUBLIC_URL", undefined);
-      await expect(getConfig()).rejects.toThrow(/ENSNODE_PUBLIC_URL must be a valid URL string/i);
-    });
-
-    it("returns the ENSNODE_PUBLIC_URL if it is a valid URL", async () => {
-      const config = await getConfig();
-      expect(config.ensNodePublicUrl).toStrictEqual(new URL("http://localhost:42069"));
-    });
-
-    it("returns a different valid ENSNODE_PUBLIC_URL if set", async () => {
-      vi.stubEnv("ENSNODE_PUBLIC_URL", "https://someotherurl.com");
-      const config = await getConfig();
-      expect(config.ensNodePublicUrl).toStrictEqual(new URL("https://someotherurl.com"));
-    });
-  });
-
   describe(".ensIndexerUrl", () => {
     it("throws an error if ENSINDEXER_URL is not a valid URL", async () => {
       vi.stubEnv("ENSINDEXER_URL", "invalid url");
@@ -187,25 +152,6 @@ describe("config (with base env)", () => {
       vi.stubEnv("ENSINDEXER_URL", "https://someotherurl.com");
       const config = await getConfig();
       expect(config.ensIndexerUrl).toStrictEqual(new URL("https://someotherurl.com"));
-    });
-  });
-
-  describe(".ensAdminUrl", () => {
-    it("throws an error if ENSADMIN_URL is not a valid URL", async () => {
-      vi.stubEnv("ENSADMIN_URL", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/ENSADMIN_URL must be a valid URL string/i);
-    });
-
-    it("returns the provided ENSADMIN_URL if it is a valid URL", async () => {
-      vi.stubEnv("ENSADMIN_URL", "https://customadmin.com");
-      const config = await getConfig();
-      expect(config.ensAdminUrl).toStrictEqual(new URL("https://customadmin.com"));
-    });
-
-    it("returns the default ENSADMIN_URL if it is not set", async () => {
-      vi.stubEnv("ENSADMIN_URL", undefined);
-      const config = await getConfig();
-      expect(config.ensAdminUrl).toStrictEqual(DEFAULT_ENSADMIN_URL);
     });
   });
 
@@ -254,45 +200,6 @@ describe("config (with base env)", () => {
     });
   });
 
-  describe(".port", () => {
-    it("returns the PORT if it is a valid number", async () => {
-      vi.stubEnv("PORT", "3001");
-      const config = await getConfig();
-      expect(config.port).toBe(3001);
-    });
-
-    it("returns the default PORT if it is not set", async () => {
-      vi.stubEnv("PORT", undefined);
-      const config = await getConfig();
-      expect(config.port).toBe(DEFAULT_PORT);
-    });
-
-    it("throws if PORT is not a number", async () => {
-      vi.stubEnv("PORT", "not-a-port");
-      await expect(getConfig()).rejects.toThrow(/PORT must be an integer/i);
-    });
-
-    it("throws if PORT is not an integer", async () => {
-      vi.stubEnv("PORT", "3000.5");
-      await expect(getConfig()).rejects.toThrow(/PORT must be an integer/i);
-    });
-
-    it("throws if PORT is less than 1", async () => {
-      vi.stubEnv("PORT", "0");
-      await expect(getConfig()).rejects.toThrow(/PORT must be an integer between 1 and 65535/i);
-    });
-
-    it("throws if PORT is a negative number", async () => {
-      vi.stubEnv("PORT", "-100");
-      await expect(getConfig()).rejects.toThrow(/PORT must be an integer between 1 and 65535/i);
-    });
-
-    it("throws if PORT is greater than 65535", async () => {
-      vi.stubEnv("PORT", "65536");
-      await expect(getConfig()).rejects.toThrow(/PORT must be an integer between 1 and 65535/i);
-    });
-  });
-
   describe(".namespace", () => {
     it("returns the NAMESPACE if set", async () => {
       vi.stubEnv("NAMESPACE", "sepolia");
@@ -324,7 +231,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("PLUGINS", undefined);
 
         await expect(getConfig()).resolves.toMatchObject({
-          plugins: EnvironmentDefaults.subgraphCompatible.plugins.split(","),
+          plugins: EnvironmentDefaults.subgraphCompatible.PLUGINS.split(","),
         });
       });
     });
@@ -342,7 +249,7 @@ describe("config (with base env)", () => {
         vi.stubEnv("RPC_URL_8453", VALID_RPC_URL);
 
         await expect(getConfig()).resolves.toMatchObject({
-          plugins: EnvironmentDefaults.alpha.plugins.split(","),
+          plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
         });
       });
     });
@@ -442,7 +349,7 @@ describe("config (with base env)", () => {
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/RPC_URL_\* must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/RPC URL must be a valid URL string/i);
     });
 
     it("throws an error if RPC_URL_1 includes less than one HTTP protocol URL", async () => {
@@ -660,18 +567,10 @@ describe("config (with base env)", () => {
  */
 describe("config (minimal base env)", () => {
   beforeEach(() => {
-    const {
-      NAMESPACE,
-      ENSNODE_PUBLIC_URL,
-      ENSINDEXER_URL,
-      ENSRAINBOW_URL,
-      DATABASE_URL,
-      DATABASE_SCHEMA,
-      RPC_URL_1,
-    } = BASE_ENV;
+    const { NAMESPACE, ENSINDEXER_URL, ENSRAINBOW_URL, DATABASE_URL, DATABASE_SCHEMA, RPC_URL_1 } =
+      BASE_ENV;
     stubEnv({
       NAMESPACE,
-      ENSNODE_PUBLIC_URL,
       ENSINDEXER_URL,
       ENSRAINBOW_URL,
       DATABASE_URL,
@@ -679,6 +578,7 @@ describe("config (minimal base env)", () => {
       RPC_URL_1,
     });
   });
+
   afterEach(() => {
     vi.unstubAllEnvs();
   });
@@ -700,7 +600,7 @@ describe("config (minimal base env)", () => {
       });
 
       await expect(getConfig()).resolves.toMatchObject({
-        plugins: EnvironmentDefaults.alpha.plugins.split(","),
+        plugins: EnvironmentDefaults.alpha.PLUGINS.split(","),
       });
     });
 
@@ -713,6 +613,101 @@ describe("config (minimal base env)", () => {
       });
 
       await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
+    });
+
+    describe("with ALCHEMY_API_KEY", async () => {
+      beforeEach(() => {
+        stubEnv({ ALCHEMY_API_KEY: "anything" });
+        vi.stubEnv("RPC_URL_1", undefined);
+      });
+
+      it("should provide rpcConfigs for all mainnet chains", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        // should provide some rpcConfigs
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
+          "must have http rpc url",
+        ).toBe(true);
+
+        // TODO: update this when auto-generated ws:// urls are added, this test will have failed
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with DRPC_API_KEY", async () => {
+      beforeEach(() => {
+        stubEnv({ DRPC_API_KEY: "anything" });
+        vi.stubEnv("RPC_URL_1", undefined);
+      });
+
+      it("should provide rpcConfigs for all mainnet chains", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        // should provide some rpcConfigs
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
+          "must have http rpc url",
+        ).toBe(true);
+
+        // TODO: update this when auto-generated ws:// urls are added, this test will have failed
+        expect(
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
+          "must not have ws rpc url",
+        ).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY, DRPC_API_KEY, and RPC_URL_1", async () => {
+      beforeEach(() => {
+        stubEnv({ ALCHEMY_API_KEY: "anything" });
+        stubEnv({ DRPC_API_KEY: "anything" });
+      });
+
+      it("should provide rpcConfigs for all mainnet chains with order", async () => {
+        const config = await getConfig();
+        const rpcConfigs = [...config.rpcConfigs.values()];
+
+        // should provide some rpcConfigs
+        expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
+
+        expect(config.rpcConfigs.get(1)!.httpRPCs.length).toBe(1); // with RPC_URL_1
+        expect(config.rpcConfigs.get(1)!.httpRPCs[0]!.href).toBe(VALID_RPC_URL);
+
+        expect(config.rpcConfigs.get(10)!.httpRPCs.length).toBe(2);
+        expect(config.rpcConfigs.get(10)!.httpRPCs[0]!.href).toContain("alchemy");
+        expect(config.rpcConfigs.get(10)!.httpRPCs[1]!.href).toContain("drpc");
+      });
+    });
+  });
+
+  describe("SUBGAPH_COMPAT=true", () => {
+    beforeEach(() => {
+      stubEnv({ SUBGRAPH_COMPAT: "true" });
+    });
+
+    it("ens-test-env namespace/labelset is subgraph-compatible", async () => {
+      stubEnv({
+        NAMESPACE: "ens-test-env",
+        LABEL_SET_ID: "ens-test-env",
+        LABEL_SET_VERSION: "0",
+        RPC_URL_15658733: VALID_RPC_URL,
+      });
+      await expect(getConfig()).resolves.toMatchObject({
+        namespace: ENSNamespaceIds.EnsTestEnv,
+        labelSet: {
+          labelSetId: "ens-test-env",
+          labelSetVersion: 0,
+        },
+        isSubgraphCompatible: true,
+      });
     });
   });
 });

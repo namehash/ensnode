@@ -1,5 +1,5 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 /**
@@ -46,28 +46,6 @@ export interface ENSIndexerConfig {
    * See {@link ENSNamespaceIds} for available namespace identifiers.
    */
   namespace: ENSNamespaceId;
-
-  /**
-   * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).
-   * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
-   *
-   * The ENSNode root api route `/` redirects to {@link ensAdminUrl}, configuring
-   * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  ensAdminUrl: URL;
-
-  /**
-   * The publicly accessible endpoint of the ENSNode api (ex: http://localhost:42069).
-   *
-   * ENSAdmin will use this url to connect to the ENSNode api for querying state about the ENSNode instance.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  ensNodePublicUrl: URL;
 
   /**
    * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses ENSRainbow to 'heal'
@@ -120,14 +98,6 @@ export interface ENSIndexerConfig {
    *   each chain the plugin indexes
    */
   plugins: PluginName[];
-
-  /**
-   * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
-   *
-   * Invariants:
-   * - The port must be an integer between 1 and 65535
-   */
-  port: number;
 
   /**
    * Configuration for each indexable RPC, keyed by chain id.
@@ -241,29 +211,24 @@ export type RpcConfigEnvironment = string;
 /**
  * Represents the raw, unvalidated environment variables for the ENSIndexer application.
  *
- * Keys correspond to the environment variable names, and all values are
- * strings or undefined, reflecting their state in `process.env`.
- * This interface is intended to be the source type which then gets
+ * Keys correspond to the environment variable names, and all values are optional strings, reflecting
+ * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
 export interface ENSIndexerEnvironment {
-  port: string | undefined;
-  databaseSchemaName: string | undefined;
-  databaseUrl: string | undefined;
-  namespace: string | undefined;
-  plugins: string | undefined;
-  ensRainbowUrl: string | undefined;
-  labelSet: {
-    labelSetId: string | undefined;
-    labelSetVersion: string | undefined;
-  };
-  ensNodePublicUrl: string | undefined;
-  ensIndexerUrl: string | undefined;
-  ensAdminUrl: string | undefined;
-  globalBlockrange: {
-    startBlock: string | undefined;
-    endBlock: string | undefined;
-  };
-  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
-  isSubgraphCompatible: string | undefined;
+  DATABASE_SCHEMA?: string;
+  DATABASE_URL?: string;
+  NAMESPACE?: string;
+  PLUGINS?: string;
+  ENSRAINBOW_URL?: string;
+  LABEL_SET_ID?: string;
+  LABEL_SET_VERSION?: string;
+  ENSINDEXER_URL?: string;
+  START_BLOCK?: string;
+  END_BLOCK?: string;
+  SUBGRAPH_COMPAT?: string;
+
+  [x: `RPC_URL_${number}`]: string | undefined;
+  ALCHEMY_API_KEY?: string;
+  DRPC_API_KEY?: string;
 }

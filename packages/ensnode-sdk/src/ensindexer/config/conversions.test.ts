@@ -10,8 +10,6 @@ describe("ENSIndexer: Config", () => {
       // arrange
       const config = {
         databaseSchemaName: "public",
-        ensAdminUrl: new URL("https://admin.ensnode.io"),
-        ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
         labelSet: {
           labelSetId: "subgraph",
           labelSetVersion: 0,
@@ -37,8 +35,6 @@ describe("ENSIndexer: Config", () => {
       // assert
       expect(result).toStrictEqual({
         ...config,
-        ensAdminUrl: "https://admin.ensnode.io/",
-        ensNodePublicUrl: "https://api.alpha.ensnode.io/",
         indexedChainIds: [1],
       } satisfies SerializedENSIndexerPublicConfig);
 
@@ -54,8 +50,6 @@ describe("ENSIndexer: Config", () => {
   describe("deserialization", () => {
     const correctSerializedConfig = {
       databaseSchemaName: "public",
-      ensAdminUrl: "https://admin.ensnode.io",
-      ensNodePublicUrl: "https://api.alpha.ensnode.io",
       labelSet: {
         labelSetId: "subgraph",
         labelSetVersion: 0,
@@ -85,8 +79,6 @@ describe("ENSIndexer: Config", () => {
       // assert
       expect(result).toStrictEqual({
         ...serializedConfig,
-        ensAdminUrl: new URL("https://admin.ensnode.io"),
-        ensNodePublicUrl: new URL("https://api.alpha.ensnode.io"),
         indexedChainIds: new Set([1, 10, 8453]),
       } satisfies ENSIndexerPublicConfig);
     });

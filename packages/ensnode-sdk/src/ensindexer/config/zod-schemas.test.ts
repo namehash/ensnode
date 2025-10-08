@@ -149,8 +149,6 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse full ENSIndexerPublicConfig with label set", () => {
         const validConfig = {
-          ensAdminUrl: "https://admin.ensnode.io",
-          ensNodePublicUrl: "http://localhost:42069",
           labelSet: {
             labelSetId: "subgraph",
             labelSetVersion: 0,
@@ -174,10 +172,6 @@ describe("ENSIndexer: Config", () => {
         const parsedConfig = makeENSIndexerPublicConfigSchema().parse(validConfig);
 
         // The schema transforms URLs and arrays, so we need to check the transformed values
-        expect(parsedConfig.ensAdminUrl).toBeInstanceOf(URL);
-        expect(parsedConfig.ensAdminUrl.toString()).toBe("https://admin.ensnode.io/");
-        expect(parsedConfig.ensNodePublicUrl).toBeInstanceOf(URL);
-        expect(parsedConfig.ensNodePublicUrl.toString()).toBe("http://localhost:42069/");
         expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
         expect(Array.from(parsedConfig.indexedChainIds)).toEqual([1]);
         expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);

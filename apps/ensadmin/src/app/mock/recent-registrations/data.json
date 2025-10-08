@@ -1,8 +1,6 @@
 {
   "unstarted or backfill": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -102,8 +100,6 @@
   },
   "indexer-error": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -137,8 +133,6 @@
   },
   "following": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -252,8 +246,6 @@
   },
   "completed": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0

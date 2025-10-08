@@ -137,7 +137,7 @@ export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<ENSIndexerPublicConfig, "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
@@ -160,8 +160,6 @@ export function invariant_isSubgraphCompatibleRequirements(
 export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
-      ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),

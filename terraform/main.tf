@@ -137,7 +137,6 @@ module "ensindexer" {
   render_region         = local.render_region
   render_environment_id = render_project.ensnode.environments["default"].id
   ensdb_url             = module.ensdb.internal_connection_string
-  ensadmin_public_url   = module.ensadmin.ensadmin_public_url
 
   # Mainnet RPC URLs
   ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url

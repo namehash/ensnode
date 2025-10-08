@@ -1,5 +1,4 @@
 import { ChainId } from "../../shared";
-import { serializeUrl } from "../../shared/serialize";
 import { SerializedENSIndexerPublicConfig, SerializedIndexedChainIds } from "./serialized-types";
 import { ENSIndexerPublicConfig } from "./types";
 
@@ -16,8 +15,6 @@ export function serializeENSIndexerPublicConfig(
   config: ENSIndexerPublicConfig,
 ): SerializedENSIndexerPublicConfig {
   const {
-    ensAdminUrl,
-    ensNodePublicUrl,
     labelSet,
     indexedChainIds,
     databaseSchemaName,
@@ -28,8 +25,6 @@ export function serializeENSIndexerPublicConfig(
   } = config;
 
   return {
-    ensAdminUrl: serializeUrl(ensAdminUrl),
-    ensNodePublicUrl: serializeUrl(ensNodePublicUrl),
     labelSet,
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     databaseSchemaName,

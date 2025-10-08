@@ -155,7 +155,7 @@ export default {
        */
       UpgradeableRegistrarController: {
         abi: base_UpgradeableRegistrarController,
-        address: "0x82c858CDF64b3D893Fe54962680edFDDC37e94C8", // a proxy contract
+        address: "0x82c858cdf64b3d893fe54962680edfddc37e94c8", // a proxy contract
         startBlock: 29896051,
       },
     },

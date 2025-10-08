@@ -117,7 +117,6 @@ jobs:
           RPC_URL_42161: ${{ secrets.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org' }}
           RPC_URL_534352: ${{ secrets.SCROLL_RPC_URL || 'https://scroll.drpc.org' }}
           ENSRAINBOW_URL: https://api.ensrainbow.io
-          ENSNODE_PUBLIC_URL: http://localhost:42069
           ENSINDEXER_URL: http://localhost:42069
           # healthcheck script env variables
           HEALTH_CHECK_TIMEOUT: 60

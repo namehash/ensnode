@@ -12,19 +12,20 @@ import { DeepPartial, PluginName } from "@ensnode/ensnode-sdk";
  */
 export const EnvironmentDefaults = {
   subgraphCompatible: {
-    plugins: [PluginName.Subgraph].join(","),
-    labelSet: { labelSetId: "subgraph", labelSetVersion: "0" },
+    PLUGINS: [PluginName.Subgraph].join(","),
+    LABEL_SET_ID: "subgraph",
+    LABEL_SET_VERSION: "0",
   },
   alpha: {
-    plugins: [
-      // TODO: collapse all of these subgraph-specific core plugins into 'subgraph' plugin
+    PLUGINS: [
       PluginName.Subgraph,
       PluginName.Basenames,
       PluginName.Lineanames,
       PluginName.ThreeDNS,
     ].join(","),
     // TODO: set these to the most up-to-date ENSRainbow Label Set
-    labelSet: { labelSetId: "subgraph", labelSetVersion: "0" },
+    LABEL_SET_ID: "subgraph",
+    LABEL_SET_VERSION: "0",
   },
 } satisfies Record<string, Partial<ENSIndexerEnvironment>>;
 
