@@ -8,8 +8,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import {
   ENSIndexerOverallIndexingStatus,
   type ENSIndexerPublicConfig,
@@ -130,13 +130,10 @@ function RegistrationsList({ maxRecords }: RegistrationsListProps) {
   const recentRegistrationsQuery = useRecentRegistrations({
     maxRecords,
   });
-
-  const configQuery = useENSIndexerConfig();
-  const namespaceId = configQuery.data?.namespace;
-
+  const namespaceId = useActiveNamespace();
   const [animationParent] = useAutoAnimate();
 
-  if (recentRegistrationsQuery.isLoading || !namespaceId) {
+  if (recentRegistrationsQuery.isLoading) {
     return <RegistrationsListLoading recordCount={maxRecords} />;
   }
 

@@ -1,3 +1,4 @@
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
@@ -155,15 +156,12 @@ interface UseRecentRegistrationsProps {
 export function useRecentRegistrations({ maxRecords }: UseRecentRegistrationsProps) {
   const config = useENSNodeConfig(undefined);
   const ensNodeUrl = config.client.url;
-
-  const configQuery = useENSIndexerConfig({ config });
-  const namespaceId = configQuery.data?.namespace ?? null;
+  const namespaceId = useActiveNamespace();
 
   return useQuery({
     queryKey: [ensNodeUrl.href, namespaceId, "recent-registrations", maxRecords],
-    queryFn: () => fetchRecentRegistrations(ensNodeUrl, maxRecords, namespaceId!),
-    refetchInterval: 10 * 1000, // 10 seconds - poll for new registrations
-    enabled: namespaceId !== null,
+    queryFn: () => fetchRecentRegistrations(ensNodeUrl, maxRecords, namespaceId),
+    refetchInterval: 10 * 1000,
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeUrl}'. Cause: ${error.message}`,
