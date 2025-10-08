@@ -187,7 +187,6 @@ export function useAvatarUrl(
   const baseQueryOptions: {
     queryKey: readonly unknown[];
     queryFn: () => Promise<UseAvatarUrlResult>;
-    enabled: boolean;
     retry: boolean;
     placeholderData: UseAvatarUrlResult;
   } = {
@@ -265,7 +264,6 @@ export function useAvatarUrl(
         fromFallback: false,
       };
     },
-    enabled: canEnable && recordsQuery.isSuccess && configQuery.isSuccess,
     retry: false,
     placeholderData: {
       rawAvatarUrl: null,
