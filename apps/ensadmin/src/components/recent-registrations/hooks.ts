@@ -164,7 +164,7 @@ export function useRecentRegistrations({ namespaceId, maxRecords }: UseRecentReg
   return useQuery({
     queryKey: [ensNodeUrl.href, namespaceId, "recent-registrations", maxRecords],
     queryFn: () => fetchRecentRegistrations(ensNodeUrl, maxRecords, namespaceId),
-    refetchInterval: 10 * 1000, // 10 seconds - poll for new registrations
+    refetchInterval: 10 * 1000,
     throwOnError(error) {
       throw new Error(
         `Could not fetch recent registrations from '${ensNodeUrl}'. Cause: ${error.message}`,
