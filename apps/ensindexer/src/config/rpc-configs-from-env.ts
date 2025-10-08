@@ -30,9 +30,14 @@ export function buildRpcConfigsFromEnv(
   const rpcConfigs: Record<ChainIdString, RpcConfigEnvironment> = {};
 
   for (const chain of chainsInNamespace) {
+    // RPC_URL_* takes precedence over convenience generation
+    const specificValue = env[`RPC_URL_${chain.id}`];
+    if (specificValue) {
+      rpcConfigs[serializeChainId(chain.id)] = specificValue;
+      continue;
+    }
+
     const urls = [
-      // specific env value, if specified
-      env[`RPC_URL_${chain.id}`],
       // alchemy, if specified
       alchemyApiKey && buildAlchemyUrl(chain.id, alchemyApiKey),
       // drpc, if specified

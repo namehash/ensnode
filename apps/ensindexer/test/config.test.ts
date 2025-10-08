@@ -779,10 +779,8 @@ describe("config (minimal base env)", () => {
         // should provide some rpcConfigs
         expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
 
-        expect(config.rpcConfigs.get(1)!.httpRPCs.length).toBe(3); // with RPC_URL_1
+        expect(config.rpcConfigs.get(1)!.httpRPCs.length).toBe(1); // with RPC_URL_1
         expect(config.rpcConfigs.get(1)!.httpRPCs[0]!.href).toBe(VALID_RPC_URL);
-        expect(config.rpcConfigs.get(1)!.httpRPCs[1]!.href).toContain("alchemy");
-        expect(config.rpcConfigs.get(1)!.httpRPCs[2]!.href).toContain("drpc");
 
         expect(config.rpcConfigs.get(10)!.httpRPCs.length).toBe(2);
         expect(config.rpcConfigs.get(10)!.httpRPCs[0]!.href).toContain("alchemy");
