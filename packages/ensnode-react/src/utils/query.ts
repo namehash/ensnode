@@ -12,21 +12,21 @@ import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 import type { ENSNodeConfig } from "../types";
 
 /**
- * Immutable query options for data that should only be fetched once per unique key.
+ * Immutable query options for data that is assumed to be immutable and should only be fetched once per full page refresh per unique key.
  * Similar to SWR's immutable: true API.
  *
- * Use this for data that doesn't change (e.g., records for a specific name at a point in time).
+ * Use this for data that is assumed not to change (e.g., records for a specific name) until the next full page refresh.
  *
  * @example
  * ```tsx
  * useRecords({
  *   name: "vitalik.eth",
  *   selection: { texts: ["avatar"] },
- *   query: IMMUTABLE_QUERY
+ *   query: ASSUME_IMMUTABLE_QUERY
  * })
  * ```
  */
-export const IMMUTABLE_QUERY = {
+export const ASSUME_IMMUTABLE_QUERY = {
   staleTime: Infinity,
   gcTime: Infinity,
   refetchOnWindowFocus: false,
