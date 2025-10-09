@@ -118,7 +118,7 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeVersionInfoSchema = (valueLabel: string = "Value") =>
+export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
   z.strictObject(
     {
       nodejs: makeNonEmptyStringSchema(),
@@ -166,7 +166,7 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      versionInfo: makeVersionInfoSchema(`${valueLabel}.versionInfo`),
+      versionInfo: makeENSIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
     })
     /**
      * Validations

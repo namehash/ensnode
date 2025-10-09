@@ -1,11 +1,17 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import packageJson from "@/../package.json";
 import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-import { VersionInfo } from "@ensnode/ensnode-sdk";
-import { makeVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+import { type ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
+import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
 import { prettifyError } from "zod/v4";
+
+/**
+ * Get version of ENSIndexer application.
+ */
+export async function getENSIndexerVersion(): Promise<string> {
+  return import("@/../package.json").then(({ version }) => version);
+}
 
 /**
  * Get NPM package version.
@@ -36,7 +42,7 @@ export function getPackageVersion(packageName: string) {
       // Check PNPM's .pnpm virtual store
       const pnpmDir = join(searchDir, "node_modules", ".pnpm");
       if (existsSync(pnpmDir)) {
-        const version = searchPnpmStore(pnpmDir, packageName);
+        const version = getPackageVersionFromPnpmStore(pnpmDir, packageName);
         if (version) return version;
       }
 
@@ -67,10 +73,16 @@ export function getPackageVersion(packageName: string) {
 }
 
 /**
- * Search PNPM's .pnpm directory for a package
- * PNPM stores packages like: .pnpm/@adraffy+ens-normalize@1.10.1/node_modules/@adraffy/ens-normalize
+ * Get package version from PNPM virtual store.
+ *
+ * PNPM stores packages in its virtual store that
+ * can be located at, for example, `./node_modules/.pnpm` path.
+ *
+ * This function is used in a fallback method by {@link getPackageVersion} to
+ * get package version by package name in case it was not found
+ * directly in `./node_modules` directory.
  */
-function searchPnpmStore(pnpmDir: string, packageName: string): string | null {
+function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): string | null {
   try {
     const entries = readdirSync(pnpmDir);
 
@@ -96,9 +108,9 @@ function searchPnpmStore(pnpmDir: string, packageName: string): string | null {
 }
 
 /**
- * Get complete {@link VersionInfo} for ENSIndexer app.
+ * Get complete {@link ENSIndexerVersionInfo} for ENSIndexer app.
  */
-export async function getVersionInfo(): Promise<VersionInfo> {
+export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();
   const { versionInfo: ensRainbowVersionInfo } = await ensRainbowApiClient.version();
 
@@ -106,7 +118,7 @@ export async function getVersionInfo(): Promise<VersionInfo> {
   const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
 
   // ENSIndexer version
-  const ensIndexerVersion = packageJson.version;
+  const ensIndexerVersion = await getENSIndexerVersion();
 
   // ENSDb version
   //
@@ -114,8 +126,9 @@ export async function getVersionInfo(): Promise<VersionInfo> {
   // the version number of ENSIndexer
   const ensDbVersion = ensIndexerVersion;
 
-  const schema = makeVersionInfoSchema();
-  const data = {
+  // parse unvalidated version info
+  const schema = makeENSIndexerVersionInfoSchema();
+  const parsed = schema.safeParse({
     ensRainbow: ensRainbowVersionInfo.version,
     nodejs: process.versions.node,
     ponder: getPackageVersion("ponder"),
@@ -123,13 +136,12 @@ export async function getVersionInfo(): Promise<VersionInfo> {
     ensIndexer: ensIndexerVersion,
     ensNormalize: getPackageVersion("@adraffy/ens-normalize"),
     ensRainbowSchema,
-  } satisfies VersionInfo;
-
-  const parsed = schema.safeParse(data);
+  } satisfies SerializedENSIndexerVersionInfo);
 
   if (parsed.error) {
     throw new Error(`Cannot deserialize VersionInfo:\n${prettifyError(parsed.error)}\n`);
   }
 
+  // validated version info
   return parsed.data;
 }

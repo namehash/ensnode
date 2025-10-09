@@ -20,7 +20,7 @@ export enum PluginName {
 /**
  * Version info about ENSIndexer and its dependencies.
  */
-export interface VersionInfo {
+export interface ENSIndexerVersionInfo {
   /**
    * Node.js runtime version
    *
@@ -160,5 +160,5 @@ export interface ENSIndexerPublicConfig {
   /**
    * Information about the ENSIndexer instance dependencies.
    */
-  versionInfo: VersionInfo;
+  versionInfo: ENSIndexerVersionInfo;
 }

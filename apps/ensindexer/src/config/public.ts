@@ -1,4 +1,4 @@
-import { getVersionInfo } from "@/lib/version-info";
+import { getENSIndexerVersionInfo } from "@/lib/version-info";
 import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import type { ENSIndexerConfig } from "./types";
 
@@ -11,7 +11,7 @@ import type { ENSIndexerConfig } from "./types";
 export async function buildENSIndexerPublicConfig(
   config: ENSIndexerConfig,
 ): Promise<ENSIndexerPublicConfig> {
-  const versionInfo = await getVersionInfo();
+  const versionInfo = await getENSIndexerVersionInfo();
 
   return {
     databaseSchemaName: config.databaseSchemaName,

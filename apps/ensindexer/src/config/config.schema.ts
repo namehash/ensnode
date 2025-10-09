@@ -10,9 +10,9 @@ import {
   isWebSocketProtocol,
   uniq,
 } from "@ensnode/ensnode-sdk";
-import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import {
   invariant_isSubgraphCompatibleRequirements,
+  makeFullyPinnedLabelSetSchema,
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
