@@ -1,6 +1,5 @@
 ---
 "ensindexer": minor
-"ensrainbow": minor
 "ensadmin": minor
 ---
 

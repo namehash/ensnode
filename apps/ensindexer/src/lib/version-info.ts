@@ -114,16 +114,14 @@ export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo>
   const ensRainbowApiClient = getENSRainbowApiClient();
   const { versionInfo: ensRainbowVersionInfo } = await ensRainbowApiClient.version();
 
-  // ENSRainbow version (fetched from the actual ENSRainbow service instance)
+  // ENSRainbow version (fetched dynamically from the connected ENSRainbow service instance)
   const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
 
   // ENSIndexer version
   const ensIndexerVersion = await getENSIndexerVersion();
 
   // ENSDb version
-  //
-  // For now ENSIndexer should always set this version number to be the same as
-  // the version number of ENSIndexer
+  // ENSDb version is same as the ENSIndexer version
   const ensDbVersion = ensIndexerVersion;
 
   // parse unvalidated version info
@@ -139,9 +137,9 @@ export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo>
   } satisfies SerializedENSIndexerVersionInfo);
 
   if (parsed.error) {
-    throw new Error(`Cannot deserialize VersionInfo:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(`Cannot deserialize ENSIndexerVersionInfo:\n${prettifyError(parsed.error)}\n`);
   }
 
-  // validated version info
+  // return version info we have now validated
   return parsed.data;
 }

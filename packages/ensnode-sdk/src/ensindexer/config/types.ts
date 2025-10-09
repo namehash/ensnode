@@ -38,7 +38,7 @@ export interface ENSIndexerVersionInfo {
   /**
    * ENSDb service version
    *
-   * Guaranteed to be the same as {@link VersionInfo.ensIndexer}.
+   * Guaranteed to be the same as {@link ENSIndexerVersionInfo.ensIndexer}.
    * */
   ensDb: string;
 
@@ -158,7 +158,7 @@ export interface ENSIndexerPublicConfig {
   isSubgraphCompatible: boolean;
 
   /**
-   * Information about the ENSIndexer instance dependencies.
+   * Version info about ENSIndexer.
    */
   versionInfo: ENSIndexerVersionInfo;
 }

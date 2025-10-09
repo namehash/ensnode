@@ -19,6 +19,7 @@ import {
 import { isSubgraphCompatible } from "./helpers";
 import { PluginName } from "./types";
 import type { ENSIndexerPublicConfig } from "./types";
+import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
 /**
  * Makes a schema for parsing {@link IndexedChainIds}.
@@ -119,20 +120,22 @@ const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
 export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
-  z.strictObject(
-    {
-      nodejs: makeNonEmptyStringSchema(),
-      ponder: makeNonEmptyStringSchema(),
-      ensDb: makeNonEmptyStringSchema(),
-      ensIndexer: makeNonEmptyStringSchema(),
-      ensNormalize: makeNonEmptyStringSchema(),
-      ensRainbow: makeNonEmptyStringSchema(),
-      ensRainbowSchema: makePositiveIntegerSchema(),
-    },
-    {
-      error: `${valueLabel} must be a valid VersionInfo object.`,
-    },
-  );
+  z
+    .strictObject(
+      {
+        nodejs: makeNonEmptyStringSchema(),
+        ponder: makeNonEmptyStringSchema(),
+        ensDb: makeNonEmptyStringSchema(),
+        ensIndexer: makeNonEmptyStringSchema(),
+        ensNormalize: makeNonEmptyStringSchema(),
+        ensRainbow: makeNonEmptyStringSchema(),
+        ensRainbowSchema: makePositiveIntegerSchema(),
+      },
+      {
+        error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
+      },
+    )
+    .check(invariant_ensDbVersionIsSameAsEnsIndexerVersion);
 
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(

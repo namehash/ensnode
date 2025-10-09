@@ -3,4 +3,4 @@
 "ensindexer": minor
 ---
 
-Extend `DependencyInfo` with `ensDb`, `ensIndexer`, and `ensNormalize` fields.
+Extend `ENSIndexerVersionInfo` with `ensDb`, `ensIndexer`, and `ensNormalize` fields.

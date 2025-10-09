@@ -16,7 +16,7 @@ export function ExternalLinkWithIcon({ href, children, className }: ExternalLink
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
+      className={`inline-flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
     >
       {children}
       <ExternalLinkIcon size={12} />

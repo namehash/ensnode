@@ -2,4 +2,4 @@
 "ensadmin": minor
 ---
 
-Present all entries from `DependencyInfo` in the UI.
+Present all entries from `ENSIndexerVersionInfo` in the UI.
