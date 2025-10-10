@@ -38,42 +38,47 @@ const featureActivationsWrapperStyles =
 function FeaturesActivationList({
   features,
   isActivated,
-}: { features: ConfigInfoAppCardFeature[] | undefined; isActivated: boolean }) {
+}: {
+  features: ConfigInfoAppCardFeature[] | undefined;
+  isActivated: boolean;
+}) {
   const relevantFeatures = features?.filter((feature) => feature.isActivated === isActivated) ?? [];
 
   return (
     relevantFeatures.length > 0 && (
       <CardContent className={cardContentStyles}>
-        <div className="flex flex-col justify-start items-start gap-2">
-          <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
+        <div className="flex flex-col justify-start items-start gap-1">
+          <p className="text-sm leading-6 font-semibold text-gray-500">
             {isActivated ? "Activated Features" : "Deactivated Features"}
           </p>
-          {relevantFeatures.map((feature) => (
-            <div
-              key={`${feature.label}-check`}
-              className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
-            >
-              <div className={featureActivationsWrapperStyles}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      key={`${feature.label}-badge`}
-                      className="flex justify-start items-center py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap gap-1"
+          <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
+            {relevantFeatures.map((feature) => (
+              <div
+                key={`${feature.label}-check`}
+                className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1"
+              >
+                <div className={featureActivationsWrapperStyles}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        key={`${feature.label}-badge`}
+                        className="flex justify-start items-center py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap gap-1"
+                      >
+                        {feature.icon}
+                        {feature.label}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
                     >
-                      {feature.icon}
-                      {feature.label}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
-                  >
-                    {feature.description}
-                  </TooltipContent>
-                </Tooltip>
+                      {feature.description}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </CardContent>
     )
@@ -126,7 +131,7 @@ export function ConfigInfoAppCard({
           {items.map((item) => (
             <div
               key={`${name}-${item.label}-item`}
-              className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start"
+              className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start gap-1"
             >
               <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
                 {item.label}
