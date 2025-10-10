@@ -113,10 +113,10 @@ The **ENS name normalization standard** is defined by [ENSIP-15: Name Normalizat
 ### ENS Normalize
 
 We define **ENS Normalize** as a specific implementation of the **ENS name normalization standard** associated with a versioned release of the [`@adraffy/ens-normalize` package](https://www.npmjs.com/package/@adraffy/ens-normalize) to NPM.
-It is important to note that the logic in this package changes across time with new releases. Therefore, labels / names that were unnormalized when using version X of this package may become normalized when using version X+N of this package.
-Generally such logic changes are based on [updates to the Unicode standard](https://www.unicode.org/versions/#schedule), such as how Unicode tends to officially release a set of new emojis each year.
-The ENSIndexer Config API provides details of the specific **ENS Normalize** release being used.
-It is also important for apps building on ENSNode to match their **ENS Normalize** version with the version of the **ENS Normalize** package used by ENSIndexer. If ENS normalization implementations are not equivalent, the guarantees ENSNode provides for **Interpreted Labels** and **Interpreted Names** may not be met. For example, if ENSNode is using a more recent version of **ENS Normalize** than an app building on ENSNode, the app may receive an Interpreted Label / Interpreted Name from ENSNode that is not formatted as an encoded labelhash (because it is normalized in version X+N of **ENS Normalize**) but the app might consider that to be an unnormalized label / name because the app is still using version X of **ENS Normalize**.
+
+It is important to note that the logic in this package changes across time with new releases. Therefore, labels / names that were unnormalized when using version X of this package may become normalized when using version X+N of this package. Generally such logic changes are based on [updates to the Unicode standard](https://www.unicode.org/versions/#schedule), such as how Unicode tends to officially release a set of new emojis each year.
+
+The ENSIndexer Config API provides details of the specific **ENS Normalize** release being used. It is also important for apps building on ENSNode to match their **ENS Normalize** version with the version of the **ENS Normalize** package used by ENSIndexer. If ENS normalization implementations are not equivalent, the guarantees ENSNode provides for **Interpreted Labels** and **Interpreted Names** may not be met. For example, if ENSNode is using a more recent version of **ENS Normalize** than an app building on ENSNode, the app may receive an Interpreted Label / Interpreted Name from ENSNode that is not formatted as an encoded labelhash (because it is normalized in version X+N of **ENS Normalize**) but the app might consider that to be an unnormalized label / name because the app is still using version X of **ENS Normalize**.
 
 ### Normalized Label
 
