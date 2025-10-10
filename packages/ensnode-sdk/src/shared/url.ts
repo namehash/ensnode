@@ -39,13 +39,17 @@ export function isWebSocketProtocol(url: URL): boolean {
  *
  * @param urlString - The URL string to validate (must include protocol)
  * @returns A BrowserSupportedAssetUrl if the protocol is http/https
- * @throws if the URL string is invalid or uses an unsupported protocol
+ * @throws if the URL string cannot be successfully converted to a BrowserSupportedAssetUrl
  */
-export function toBrowserSupportedUrl(urlString: string): BrowserSupportedAssetUrl {
-  const url = new URL(urlString);
+export function toBrowserSupportedUrl(
+  urlString: string
+): BrowserSupportedAssetUrl {
+  const url = buildUrl(urlString);
 
   if (!isHttpProtocol(url)) {
-    throw new Error(`URL must use http or https protocol, got: ${url.protocol}`);
+    throw new Error(
+      `BrowserSupportedAssetUrl must use http or https protocol, got: ${url.protocol}`
+    );
   }
 
   return url;
