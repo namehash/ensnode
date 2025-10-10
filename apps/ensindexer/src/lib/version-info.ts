@@ -121,7 +121,7 @@ export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo>
   const ensIndexerVersion = await getENSIndexerVersion();
 
   // ENSDb version
-  // ENSDb version is same as the ENSIndexer version
+  // ENSDb version is always the same as the ENSIndexer version number
   const ensDbVersion = ensIndexerVersion;
 
   // parse unvalidated version info

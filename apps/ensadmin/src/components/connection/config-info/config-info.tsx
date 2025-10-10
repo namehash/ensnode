@@ -190,8 +190,10 @@ export function ENSNodeConfigInfo({
                   label: "Label Set",
                   value: (
                     <ul className={cardItemValueStyles}>
-                      <li>ID: {ensIndexerConfig.labelSet.labelSetId ?? "latest"}</li>
-                      <li>Version: {ensIndexerConfig.labelSet.labelSetVersion ?? "latest"}</li>
+                      <li>
+                        {ensIndexerConfig.labelSet.labelSetId}:{" "}
+                        {ensIndexerConfig.labelSet.labelSetVersion}
+                      </li>
                     </ul>
                   ),
                   additionalInfo: (

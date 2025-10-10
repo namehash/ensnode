@@ -126,5 +126,7 @@ export function getServerConnectionLibrary(): HttpHostname[] {
 }
 
 export async function ensAdminVersion(): Promise<string> {
-  return import("../../package.json").then(({ version }) => version);
+  const packageJson = await import("@/../package.json");
+
+  return packageJson.version;
 }
