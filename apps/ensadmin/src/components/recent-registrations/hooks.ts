@@ -151,7 +151,7 @@ interface UseRecentRegistrationsProps {
 
 /**
  * Hook to fetch info about most recently registered domains that have been indexed.
- * Uses the selected ENSNode connection URL and namespace from context.
+ * Uses the selected and validated ENSNode connection URL and namespace from context.
  */
 export function useRecentRegistrations({ maxRecords }: UseRecentRegistrationsProps) {
   const config = useENSNodeConfig(undefined);
