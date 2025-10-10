@@ -40,33 +40,6 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
 }
 
 /**
- * Normalizes a URL string by ensuring it has a valid protocol.
- *
- * If the URL lacks a protocol, https:// is prepended.
- * URLs with existing protocols (http://, https://, ipfs://, ar://, eip155://, etc.) are preserved as-is.
- *
- * @param url - The URL string to normalize
- * @returns A URL object if the input is valid, null otherwise
- *
- * @example
- * ```typescript
- * normalizeAvatarUrl("example.com/avatar.png") // Returns URL with https://example.com/avatar.png
- * normalizeAvatarUrl("http://example.com/avatar.png") // Returns URL with http://example.com/avatar.png
- * normalizeAvatarUrl("ipfs://QmHash") // Returns URL with ipfs://QmHash
- * normalizeAvatarUrl("invalid url") // Returns null
- * ```
- */
-function normalizeAvatarUrl(url: string | null | undefined): BrowserSupportedAssetUrl | null {
-  if (!url) return null;
-
-  try {
-    return buildUrl(url);
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Result returned by the useAvatarUrl hook.
  *
  * Invariant: If rawAvatarUrl is null, then browserSupportedAvatarUrl must also be null.
@@ -226,11 +199,12 @@ export function useAvatarUrl(
         };
       }
 
-      // Try to normalize the avatar URL
-      const normalizedUrl = normalizeAvatarUrl(avatarTextRecord);
-
-      // If normalization failed, the URL is completely invalid
-      if (!normalizedUrl) {
+      // Try to parse the avatar URL
+      let parsedUrl: URL;
+      try {
+        parsedUrl = buildUrl(avatarTextRecord);
+      } catch {
+        // If parsing failed, the URL is completely invalid
         return {
           rawAvatarUrl: avatarTextRecord,
           browserSupportedAvatarUrl: null,
@@ -239,10 +213,10 @@ export function useAvatarUrl(
       }
 
       // If the URL uses http or https protocol, return it
-      if (isHttpProtocol(normalizedUrl)) {
+      if (isHttpProtocol(parsedUrl)) {
         return {
           rawAvatarUrl: avatarTextRecord,
-          browserSupportedAvatarUrl: normalizedUrl,
+          browserSupportedAvatarUrl: parsedUrl,
           fromFallback: false,
         };
       }
