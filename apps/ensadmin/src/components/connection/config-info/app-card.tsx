@@ -30,8 +30,7 @@ export interface ConfigInfoAppCardProps {
 const cardHeaderLayoutStyles =
   "flex flex-row flex-nowrap justify-between items-center max-sm:flex-col max-sm:justify-start max-sm:items-start max-sm:gap-2";
 const baseCardTitleStyles = "flex items-center gap-2";
-const cardContentStyles =
-  "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:gap-3 max-sm:px-3 max-sm:pb-3";
+const cardContentStyles = "flex flex-row flex-wrap gap-5 max-sm:flex-col max-sm:px-3 max-sm:pb-3";
 const featureActivationsWrapperStyles =
   "flex flex-row flex-nowrap justify-start items-center gap-2";
 
@@ -47,7 +46,7 @@ function FeaturesActivationList({
   return (
     relevantFeatures.length > 0 && (
       <CardContent className={cardContentStyles}>
-        <div className="flex flex-col justify-start items-start gap-1">
+        <div className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start">
           <p className="text-sm leading-6 font-semibold text-gray-500">
             {isActivated ? "Activated Features" : "Deactivated Features"}
           </p>
@@ -131,7 +130,7 @@ export function ConfigInfoAppCard({
           {items.map((item) => (
             <div
               key={`${name}-${item.label}-item`}
-              className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start gap-1"
+              className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start"
             >
               <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
                 {item.label}
