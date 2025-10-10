@@ -1,8 +1,8 @@
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
 import { ENSNamespaceId } from "@ensnode/datasources";
+import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import { Name, UnixTimestamp, deserializeUnixTimestamp } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { Address, getAddress, isAddressEqual } from "viem";
@@ -154,14 +154,9 @@ interface UseRecentRegistrationsProps {
  * Uses the selected ENSNode connection URL and namespace from context.
  */
 export function useRecentRegistrations({ maxRecords }: UseRecentRegistrationsProps) {
-  const { validatedSelectedConnection } = useSelectedConnection();
+  const config = useENSNodeConfig(undefined);
+  const ensNodeUrl = config.client.url;
   const namespaceId = useActiveNamespace();
-
-  if (!validatedSelectedConnection.isValid) {
-    throw new Error(`Invalid ENSNode connection: ${validatedSelectedConnection.error}`);
-  }
-
-  const ensNodeUrl = validatedSelectedConnection.url;
 
   return useQuery({
     queryKey: ["recent-registrations", ensNodeUrl.href, namespaceId, maxRecords],
