@@ -4,8 +4,7 @@ import {
   type BrowserSupportedAssetUrl,
   type Name,
   buildEnsMetadataServiceAvatarUrl,
-  buildUrl,
-  isHttpProtocol,
+  toBrowserSupportedUrl,
 } from "@ensnode/ensnode-sdk";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
@@ -199,26 +198,16 @@ export function useAvatarUrl(
         };
       }
 
-      // Try to parse the avatar URL
-      let parsedUrl: URL;
       try {
-        parsedUrl = buildUrl(avatarTextRecord);
-      } catch {
-        // If parsing failed, the URL is completely invalid
-        return {
-          rawAvatarUrl: avatarTextRecord,
-          browserSupportedAvatarUrl: null,
-          fromFallback: false,
-        };
-      }
+        const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
 
-      // If the URL uses http or https protocol, return it
-      if (isHttpProtocol(parsedUrl)) {
         return {
           rawAvatarUrl: avatarTextRecord,
-          browserSupportedAvatarUrl: parsedUrl,
+          browserSupportedAvatarUrl: browserSupportedUrl,
           fromFallback: false,
         };
+      } catch {
+        // Continue to fallback handling below
       }
 
       // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if available
