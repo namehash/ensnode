@@ -8,6 +8,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useActiveConnection } from "@/hooks/active/use-active-connection";
+import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
@@ -18,7 +20,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRecentRegistrations } from "./hooks";
 
 /**
@@ -105,7 +107,7 @@ export function RecentRegistrations(props: RecentRegistrationsProps) {
     );
   }
 
-  const { ensNodePublicUrl: ensNodeUrl, namespace: namespaceId } = ensIndexerConfig;
+  const { namespace: namespaceId } = ensIndexerConfig;
 
   return (
     <Card className="w-full">
@@ -115,20 +117,13 @@ export function RecentRegistrations(props: RecentRegistrationsProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isClient && (
-          <RegistrationsList
-            ensNodeUrl={ensNodeUrl}
-            namespaceId={namespaceId}
-            maxRecords={maxRecords}
-          />
-        )}
+        {isClient && <RegistrationsList namespaceId={namespaceId} maxRecords={maxRecords} />}
       </CardContent>
     </Card>
   );
 }
 
 interface RegistrationsListProps {
-  ensNodeUrl: URL;
   namespaceId: ENSNamespaceId;
   maxRecords: number;
 }
@@ -139,7 +134,9 @@ interface RegistrationsListProps {
  * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
  * @param ensNodeUrl URL of currently selected ENSNode instance
  */
-function RegistrationsList({ ensNodeUrl, namespaceId, maxRecords }: RegistrationsListProps) {
+function RegistrationsList({ namespaceId, maxRecords }: RegistrationsListProps) {
+  const { rawSelectedConnection } = useSelectedConnection();
+  const ensNodeUrl = useMemo(() => new URL(rawSelectedConnection), [rawSelectedConnection]);
   const recentRegistrationsQuery = useRecentRegistrations({
     ensNodeUrl,
     namespaceId,
@@ -230,10 +227,10 @@ function UnsupportedOmnichainIndexingStatusMessage({
             {omnichainIndexingStatus}
           </Badge>
         </div>
-        <p>
+        <div>
           The latest indexed registrations will be available once the omnichain indexing status is{" "}
           {supportedOmnichainIndexingStatuses.map((supportedOmnichainIndexingStatus, idx) => (
-            <>
+            <React.Fragment key={supportedOmnichainIndexingStatus}>
               <Badge
                 className="uppercase text-xs leading-none"
                 title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
@@ -241,10 +238,10 @@ function UnsupportedOmnichainIndexingStatusMessage({
                 {supportedOmnichainIndexingStatus}
               </Badge>
               {idx < supportedOmnichainIndexingStatuses.length - 1 && " or "}
-            </>
+            </React.Fragment>
           ))}
           .
-        </p>
+        </div>
         <Button asChild variant="default">
           <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
         </Button>

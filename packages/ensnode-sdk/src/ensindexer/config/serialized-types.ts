@@ -1,5 +1,5 @@
-import type { ChainId, UrlString } from "../../shared";
-import type { ENSIndexerPublicConfig } from "./types";
+import type { ChainId } from "../../shared";
+import type { ENSIndexerPublicConfig, ENSIndexerVersionInfo } from "./types";
 
 export type SerializedIndexedChainIds = Array<ChainId>;
 
@@ -7,19 +7,14 @@ export type SerializedIndexedChainIds = Array<ChainId>;
  * Serialized representation of {@link ENSIndexerPublicConfig}
  */
 export interface SerializedENSIndexerPublicConfig
-  extends Omit<ENSIndexerPublicConfig, "ensAdminUrl" | "ensNodePublicUrl" | "indexedChainIds"> {
-  /**
-   * Serialized representation of {@link ENSIndexerPublicConfig.ensAdminUrl}.
-   */
-  ensAdminUrl: UrlString;
-
-  /**
-   * Serialized representation of {@link ENSIndexerPublicConfig.ensNodePublicUrl}.
-   */
-  ensNodePublicUrl: UrlString;
-
+  extends Omit<ENSIndexerPublicConfig, "indexedChainIds"> {
   /**
    * Array representation of {@link ENSIndexerPublicConfig.indexedChainIds}.
    */
   indexedChainIds: ChainId[];
 }
+
+/**
+ * Serialized representation of {@link ENSIndexerVersionInfo}
+ */
+export type SerializedENSIndexerVersionInfo = ENSIndexerVersionInfo;

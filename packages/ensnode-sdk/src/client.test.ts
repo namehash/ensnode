@@ -56,8 +56,6 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_CONFIG_RESPONSE = {
-  ensAdminUrl: "https://admin.ensnode.io/",
-  ensNodePublicUrl: "https://api.alpha.ensnode.io/",
   labelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
@@ -74,9 +72,12 @@ const EXAMPLE_CONFIG_RESPONSE = {
     PluginName.ProtocolAcceleration,
     PluginName.Referrals,
   ],
-  dependencyInfo: {
+  versionInfo: {
     nodejs: "22.18.0",
     ponder: "0.11.43",
+    ensDb: "0.32.0",
+    ensIndexer: "0.32.0",
+    ensNormalize: "1.11.1",
     ensRainbow: "0.31.0",
     ensRainbowSchema: 2,
   },

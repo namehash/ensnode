@@ -14,7 +14,7 @@ import { Node } from "@ensnode/ensnode-sdk";
  */
 async function updateReferrerWithValue(context: Context, referrer: Hex, valueWei: bigint) {
   await context.db
-    .insert(schema.ext_referrer)
+    .insert(schema.referrer)
     .values({
       id: referrer,
       valueWei,
@@ -54,7 +54,7 @@ export async function handleRegistrationReferral(
   const total = baseCost + premium;
 
   // create the Referral event
-  await context.db.insert(schema.ext_registrationReferral).values({
+  await context.db.insert(schema.registrationReferral).values({
     id: event.id,
 
     // referral data
@@ -101,7 +101,7 @@ export async function handleRenewalReferral(
   }
 
   // create the Referral event
-  await context.db.insert(schema.ext_renewalReferral).values({
+  await context.db.insert(schema.renewalReferral).values({
     id: event.id,
 
     // referral data

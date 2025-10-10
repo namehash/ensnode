@@ -23,7 +23,7 @@ export async function setupRootNode({ context }: { context: Context }) {
 
   // create the ENS root domain (if not exists)
   await context.db
-    .insert(schema.domain)
+    .insert(schema.subgraph_domain)
     .values({
       id: ROOT_NODE,
       ownerId: zeroAddress,
@@ -46,7 +46,7 @@ export async function setupRootNode({ context }: { context: Context }) {
 
 // a domain is 'empty' if it has no resolver, no owner, and no subdomains
 // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/ensRegistry.ts#L65
-function isDomainEmpty(domain: typeof schema.domain.$inferSelect) {
+function isDomainEmpty(domain: typeof schema.subgraph_domain.$inferSelect) {
   return (
     domain.resolverId === null &&
     isAddressEqual(domain.ownerId, zeroAddress) &&
@@ -60,13 +60,13 @@ export async function recursivelyRemoveEmptyDomainFromParentSubdomainCount(
   context: Context,
   node: Node,
 ) {
-  const domain = await context.db.find(schema.domain, { id: node });
+  const domain = await context.db.find(schema.subgraph_domain, { id: node });
   if (!domain) throw new Error(`Domain not found: ${node}`);
 
   if (isDomainEmpty(domain) && domain.parentId !== null) {
     // decrement parent's subdomain count
     await context.db
-      .update(schema.domain, { id: domain.parentId })
+      .update(schema.subgraph_domain, { id: domain.parentId })
       .set((row) => ({ subdomainCount: row.subdomainCount - 1 }));
 
     // recurse to parent

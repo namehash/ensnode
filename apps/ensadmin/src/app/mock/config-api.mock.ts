@@ -4,8 +4,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
-  ensAdminUrl: "https://admin.ensnode.io/",
-  ensNodePublicUrl: "https://api.alpha.green.ensnode.io/",
   labelSet: {
     labelSetId: "subgraph",
     labelSetVersion: 0,
@@ -23,10 +21,13 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     "referrals",
     "tokenscope",
   ],
-  dependencyInfo: {
+  versionInfo: {
     nodejs: "22.18.0",
     ponder: "0.11.43",
+    ensIndexer: "0.35.0",
+    ensDb: "0.35.0",
     ensRainbow: "0.34.0",
     ensRainbowSchema: 3,
+    ensNormalize: "1.11.1",
   },
 } satisfies SerializedENSIndexerPublicConfig);

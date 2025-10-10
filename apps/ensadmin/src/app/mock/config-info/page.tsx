@@ -35,7 +35,7 @@ export default function MockConfigPage() {
       default:
         try {
           const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { ensIndexerConfig: config };
+          return { ensIndexerConfig: config, ensAdminVersion: "0.35.0" };
         } catch (error) {
           const errorMessage =
             error instanceof Error
