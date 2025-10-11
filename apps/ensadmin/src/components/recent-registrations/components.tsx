@@ -8,11 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useActiveConnection } from "@/hooks/active/use-active-connection";
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { cn } from "@/lib/utils";
-import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
   ENSIndexerOverallIndexingStatus,
   type ENSIndexerPublicConfig,
@@ -21,7 +17,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
-import React, { useEffect, useMemo, useState } from "react";
+import { Fragment } from "react";
 import { useRecentRegistrations } from "./hooks";
 
 /**
@@ -84,12 +80,6 @@ export function RecentRegistrations({
   error,
   maxRecords = DEFAULT_MAX_RECORDS,
 }: RecentRegistrationsProps) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   if (error !== undefined && (ensIndexerConfig !== undefined || indexingStatus !== undefined)) {
     throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
   }
@@ -110,8 +100,6 @@ export function RecentRegistrations({
     );
   }
 
-  const { namespace: namespaceId } = ensIndexerConfig;
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -120,32 +108,23 @@ export function RecentRegistrations({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isClient && <RegistrationsList namespaceId={namespaceId} maxRecords={maxRecords} />}
+        <RegistrationsList maxRecords={maxRecords} />
       </CardContent>
     </Card>
   );
 }
 
 interface RegistrationsListProps {
-  namespaceId: ENSNamespaceId;
   maxRecords: number;
 }
 
 /**
- * Displays recently indexed registrations as a table
- *
- * @param ensNodeMetadata data about connected ENSNode instance necessary for fetching registrations
- * @param ensNodeUrl URL of currently selected ENSNode instance
+ * Displays recently indexed registrations
  */
-function RegistrationsList({ namespaceId, maxRecords }: RegistrationsListProps) {
-  const { rawSelectedConnection } = useSelectedConnection();
-  const ensNodeUrl = useMemo(() => new URL(rawSelectedConnection), [rawSelectedConnection]);
+function RegistrationsList({ maxRecords }: RegistrationsListProps) {
   const recentRegistrationsQuery = useRecentRegistrations({
-    ensNodeUrl,
-    namespaceId,
     maxRecords,
   });
-
   const [animationParent] = useAutoAnimate();
 
   if (recentRegistrationsQuery.isLoading) {
@@ -167,11 +146,7 @@ function RegistrationsList({ namespaceId, maxRecords }: RegistrationsListProps) 
       className="w-full h-fit box-border flex flex-col justify-start items-center gap-3"
     >
       {recentRegistrationsQuery.data?.map((registration) => (
-        <RegistrationCard
-          key={registration.name}
-          registration={registration}
-          namespaceId={namespaceId}
-        />
+        <RegistrationCard key={registration.name} registration={registration} />
       ))}
     </div>
   );
@@ -239,7 +214,7 @@ function UnsupportedOmnichainIndexingStatusMessage({
           The latest indexed registrations will be available once the omnichain indexing status is{" "}
           {filteredSupportedOmnichainIndexingStatuses.map(
             (supportedOmnichainIndexingStatus, idx) => (
-              <React.Fragment key={supportedOmnichainIndexingStatus}>
+              <Fragment key={supportedOmnichainIndexingStatus}>
                 <Badge
                   className="uppercase text-xs leading-none"
                   title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
@@ -247,7 +222,7 @@ function UnsupportedOmnichainIndexingStatusMessage({
                   {supportedOmnichainIndexingStatus}
                 </Badge>
                 {idx < filteredSupportedOmnichainIndexingStatuses.length - 1 && " or "}
-              </React.Fragment>
+              </Fragment>
             ),
           )}
           .

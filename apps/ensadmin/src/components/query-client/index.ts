@@ -10,7 +10,6 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 5 * 1000, // 5 seconds
-        refetchInterval: 10 * 1000, // 10 seconds
       },
       dehydrate: {
         // include pending queries in dehydration

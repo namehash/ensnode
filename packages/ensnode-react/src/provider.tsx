@@ -74,6 +74,7 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
             retry: 3,
             staleTime: 1000 * 60 * 5, // 5 minutes
             gcTime: 1000 * 60 * 30, // 30 minutes
+            refetchInterval: 1000 * 10, // 10 seconds
           },
         },
         ...queryClientOptions,
@@ -91,9 +92,7 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
 /**
  * Helper function to create ENSNode configuration
  */
-export function createConfig(options?: {
-  url?: string | URL;
-}): ENSNodeConfig {
+export function createConfig(options?: { url?: string | URL }): ENSNodeConfig {
   const url = options?.url ? new URL(options.url) : ENSNodeClient.defaultOptions().url;
 
   return {
