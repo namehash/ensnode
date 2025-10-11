@@ -68,11 +68,7 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <EnsAvatar
-              className="-mt-16 h-20 w-20 ring-4 ring-white"
-              name={name}
-              namespaceId={namespace}
-            />
+            <EnsAvatar className="-mt-16 h-20 w-20 ring-4 ring-white" name={name} />
             <div className="flex-1">
               <h1>
                 <NameDisplay className="text-3xl font-bold" name={name} />

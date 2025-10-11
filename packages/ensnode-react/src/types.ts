@@ -35,33 +35,36 @@ export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> 
 
 /**
  * Parameters for the useRecords hook.
- *
- * If `name` is null, the query will not be executed.
  */
 export interface UseRecordsParameters<SELECTION extends ResolverRecordsSelection>
   extends Omit<ResolveRecordsRequest<SELECTION>, "name">,
     QueryParameter<ResolveRecordsResponse<SELECTION>> {
+  /**
+   * If null, the query will not be executed.
+   */
   name: ResolveRecordsRequest<SELECTION>["name"] | null;
 }
 
 /**
  * Parameters for the usePrimaryName hook.
- *
- * If `address` is null, the query will not be executed.
  */
 export interface UsePrimaryNameParameters
   extends Omit<ResolvePrimaryNameRequest, "address">,
     QueryParameter<ResolvePrimaryNameResponse> {
+  /**
+   * If null, the query will not be executed.
+   */
   address: ResolvePrimaryNameRequest["address"] | null;
 }
 
 /**
  * Parameters for the usePrimaryNames hook.
- *
- * If `address` is null, the query will not be executed.
  */
 export interface UsePrimaryNamesParameters
   extends Omit<ResolvePrimaryNamesRequest, "address">,
     QueryParameter<ResolvePrimaryNamesResponse> {
+  /**
+   * If null, the query will not be executed.
+   */
   address: ResolvePrimaryNamesRequest["address"] | null;
 }
