@@ -32,16 +32,16 @@ pnpm dev
 
 Following [Next.js docs](https://nextjs.org/docs/pages/api-reference/cli/next#next-build-options):
 
-> Creates an optimized production build of your application.
+> Creates an optimized static export build of your application.
 
 ```bash
 pnpm build
 ```
 
-> Starts the application in production mode.
+This creates a static export in the `out` directory. To preview locally, you can use a static file server:
 
 ```bash
-pnpm start
+npx serve out
 ```
 
 ## Documentation

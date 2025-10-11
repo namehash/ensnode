@@ -3,15 +3,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useRecords } from "@ensnode/ensnode-react";
 import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-import { AdditionalRecords } from "./_components/AdditionalRecords";
-import { Addresses } from "./_components/Addresses";
-import { NameDetailPageSkeleton } from "./_components/NameDetailPageSkeleton";
-import { ProfileHeader } from "./_components/ProfileHeader";
-import { ProfileInformation } from "./_components/ProfileInformation";
-import { SocialLinks } from "./_components/SocialLinks";
+import { AdditionalRecords } from "./AdditionalRecords";
+import { Addresses } from "./Addresses";
+import { NameDetailPageSkeleton } from "./NameDetailPageSkeleton";
+import { ProfileHeader } from "./ProfileHeader";
+import { ProfileInformation } from "./ProfileInformation";
+import { SocialLinks } from "./SocialLinks";
 
 const HeaderPanelTextRecords = ["url", "avatar", "header"];
 const ProfilePanelTextRecords = ["description", "email"];
@@ -37,8 +37,9 @@ const AllRequestedTextRecords = [
   ...AdditionalTextRecords,
 ];
 
-export default function NameDetailPage() {
-  const { name } = useParams<{ name: string }>();
+export function NameDetailPageContent() {
+  const searchParams = useSearchParams();
+  const name = searchParams.get("name");
   const namespace = useActiveNamespace();
 
   const selection = {
@@ -61,6 +62,16 @@ export default function NameDetailPage() {
     name,
     selection,
   });
+
+  if (!name) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-red-600">No name provided in query string</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (status === "pending") return <NameDetailPageSkeleton />;
 

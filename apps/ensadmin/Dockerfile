@@ -13,29 +13,26 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 ARG NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY
 ENV NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=${NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY}
 
-# Set the environment variable for next.config.ts
-# This will be used to determine if the build output should be standalone
-ENV NEXT_BUILD_OUTPUT_STANDALONE=true
-
-# build ensadmin
+# build ensadmin (static export outputs to /apps/ensadmin/out)
 RUN pnpm --filter ensadmin build
 
-# runner
-FROM base AS runner
+# runner - use nginx to serve static files
+FROM nginx:alpine AS runner
 
-ENV NODE_ENV=production
+# Copy the static export files to nginx html directory
+COPY --from=builder /app/apps/ensadmin/out /usr/share/nginx/html
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/apps/ensadmin/public ./apps/ensadmin/public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/static ./apps/ensadmin/.next/static
-
-USER nextjs
+# Create nginx configuration for SPA (handle client-side routing)
+RUN echo 'server { \n\
+    listen 4173; \n\
+    server_name localhost; \n\
+    root /usr/share/nginx/html; \n\
+    index index.html; \n\
+    location / { \n\
+    try_files $uri $uri/ /index.html; \n\
+    } \n\
+    }' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 4173
-ENV PORT=4173
-ENV HOSTNAME=0.0.0.0
 
-CMD ["node", "apps/ensadmin/server.js"]
+CMD ["nginx", "-g", "daemon off;"]

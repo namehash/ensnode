@@ -1,9 +1,10 @@
-import { BreadcrumbItem, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { Suspense } from "react";
+import { BreadcrumbsNamePageContent } from "./BreadcrumbsNamePageContent";
 
 export default function Page() {
   return (
-    <BreadcrumbItem>
-      <BreadcrumbPage>Names</BreadcrumbPage>
-    </BreadcrumbItem>
+    <Suspense fallback={null}>
+      <BreadcrumbsNamePageContent />
+    </Suspense>
   );
 }
