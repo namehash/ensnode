@@ -40,11 +40,11 @@ export default function () {
       const isDeletion = interpretedValue === null;
       if (isDeletion) {
         // delete
-        await context.db.delete(schema.ext_reverseNameRecord, id);
+        await context.db.delete(schema.reverseNameRecord, id);
       } else {
         // upsert
         await context.db
-          .insert(schema.ext_reverseNameRecord)
+          .insert(schema.reverseNameRecord)
           .values({ ...id, value: interpretedValue })
           .onConflictDoUpdate({ value: interpretedValue });
       }

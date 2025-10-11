@@ -17,8 +17,8 @@ import { onchainTable, primaryKey, relations } from "ponder";
  * Forward Resolution to resolve a consistent set of an Account's ENSIP-19 Primary Names. These records
  * are used to power Protocol Acceleration for those ReverseResolvers backed by a StandloneReverseRegistrar.
  */
-export const ext_reverseNameRecord = onchainTable(
-  "ext_reverse_name_records",
+export const reverseNameRecord = onchainTable(
+  "reverse_name_records",
   (t) => ({
     // keyed by (address, coinType)
     address: t.hex().notNull(),
@@ -41,21 +41,23 @@ export const ext_reverseNameRecord = onchainTable(
 );
 
 /**
- * Tracks Node-Resolver relationships to accelerate the identification of a node's active resolver.
+ * Tracks Node-Resolver relationships to accelerate the identification of a node's active resolver
+ * in a specific (shadow)Registry.
  *
- * Note that this model supports the indexing of Node-Resolver relationships across multiple chains,
- * in particular to support the acceleration of ForwardResolution#findResolver for the the ENS Root
- * Chain's Registry as well as Basenames' and Lineanames' Shadow Registries. If the chainId in this
- * entity is not the ENS Root Chain, then the entity represents a Node-Resolver relationship within
- * the chainId's respective Shadow Registry.
+ * Note that this model supports the indexing of Node-Resolver relationships across any Registry on
+ * on any chain, in particular to support the acceleration of ForwardResolution#findResolver for the
+ * ENS Root Chain's Registry which can have any number of (shadow)Registries (like Basenames' and
+ * Lineanames') on any chain.
  *
- * It is keyed by (chainId, node) to match the on-chain datamodel of Registry Node-Resolver relationships.
+ * It is keyed by (chainId, registry, node) to match the on-chain datamodel of Registry/(shadow)Registry
+ * Node-Resolver relationships.
  */
-export const ext_nodeResolverRelation = onchainTable(
-  "ext_node_resolver_relations",
+export const nodeResolverRelation = onchainTable(
+  "node_resolver_relations",
   (t) => ({
-    // keyed by (chainId, node)
+    // keyed by (chainId, registry, node)
     chainId: t.integer().notNull(),
+    registry: t.hex().notNull(),
     node: t.hex().notNull(),
 
     /**
@@ -65,7 +67,7 @@ export const ext_nodeResolverRelation = onchainTable(
     resolver: t.hex().notNull(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.node] }),
+    pk: primaryKey({ columns: [t.chainId, t.registry, t.node] }),
   }),
 );
 
@@ -83,8 +85,8 @@ export const ext_nodeResolverRelation = onchainTable(
  * without following Forward Resolution according to the ENS protocol: a direct query to the database
  * for a record's value is not ENSIP-10 nor CCIP-Read compliant.
  */
-export const ext_resolverRecords = onchainTable(
-  "ext_resolver_records",
+export const resolverRecords = onchainTable(
+  "resolver_records",
   (t) => ({
     // keyed by (chainId, resolver, node)
     chainId: t.integer().notNull(),
@@ -108,12 +110,12 @@ export const ext_resolverRecords = onchainTable(
   }),
 );
 
-export const ext_resolverRecords_relations = relations(ext_resolverRecords, ({ one, many }) => ({
+export const resolverRecords_relations = relations(resolverRecords, ({ one, many }) => ({
   // resolverRecord has many address records
-  addressRecords: many(ext_resolverAddressRecord),
+  addressRecords: many(resolverAddressRecord),
 
   // resolverRecord has many text records
-  textRecords: many(ext_resolverTextRecord),
+  textRecords: many(resolverTextRecord),
 }));
 
 /**
@@ -123,8 +125,8 @@ export const ext_resolverRecords_relations = relations(ext_resolverRecords, ({ o
  * segment (chainId, resolver, node) describes a ResolverRecord entity. A ResolverAddressRecord is
  * then additionally keyed by (coinType).
  */
-export const ext_resolverAddressRecord = onchainTable(
-  "ext_resolver_address_records",
+export const resolverAddressRecord = onchainTable(
+  "resolver_address_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), coinType)
     chainId: t.integer().notNull(),
@@ -145,24 +147,17 @@ export const ext_resolverAddressRecord = onchainTable(
   }),
 );
 
-export const ext_resolverAddressRecordRelations = relations(
-  ext_resolverAddressRecord,
-  ({ one, many }) => ({
-    // belongs to resolverRecord
-    resolver: one(ext_resolverRecords, {
-      fields: [
-        ext_resolverAddressRecord.chainId,
-        ext_resolverAddressRecord.resolver,
-        ext_resolverAddressRecord.node,
-      ],
-      references: [
-        ext_resolverRecords.chainId,
-        ext_resolverRecords.resolver,
-        ext_resolverRecords.node,
-      ],
-    }),
+export const resolverAddressRecordRelations = relations(resolverAddressRecord, ({ one, many }) => ({
+  // belongs to resolverRecord
+  resolver: one(resolverRecords, {
+    fields: [
+      resolverAddressRecord.chainId,
+      resolverAddressRecord.resolver,
+      resolverAddressRecord.node,
+    ],
+    references: [resolverRecords.chainId, resolverRecords.resolver, resolverRecords.node],
   }),
-);
+}));
 
 /**
  * Tracks text records for a `node` by `key` within a `resolver` on `chainId`.
@@ -171,8 +166,8 @@ export const ext_resolverAddressRecordRelations = relations(
  * segment (chainId, resolver, node) describes a ResolverRecord entity. A ResolverTextRecord is
  * then additionally keyed by (key).
  */
-export const ext_resolverTextRecord = onchainTable(
-  "ext_resolver_text_records",
+export const resolverTextRecord = onchainTable(
+  "resolver_trecords",
   (t) => ({
     // keyed by ((chainId, resolver, node), key)
     chainId: t.integer().notNull(),
@@ -193,24 +188,13 @@ export const ext_resolverTextRecord = onchainTable(
   }),
 );
 
-export const ext_resolverTextRecordRelations = relations(
-  ext_resolverTextRecord,
-  ({ one, many }) => ({
-    // belongs to resolverRecord
-    resolver: one(ext_resolverRecords, {
-      fields: [
-        ext_resolverTextRecord.chainId,
-        ext_resolverTextRecord.resolver,
-        ext_resolverTextRecord.node,
-      ],
-      references: [
-        ext_resolverRecords.chainId,
-        ext_resolverRecords.resolver,
-        ext_resolverRecords.node,
-      ],
-    }),
+export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one, many }) => ({
+  // belongs to resolverRecord
+  resolver: one(resolverRecords, {
+    fields: [resolverTextRecord.chainId, resolverTextRecord.resolver, resolverTextRecord.node],
+    references: [resolverRecords.chainId, resolverRecords.resolver, resolverRecords.node],
   }),
-);
+}));
 
 /**
  * Tracks the migration status of a node.
@@ -234,6 +218,6 @@ export const ext_resolverTextRecordRelations = relations(
  * plugin, we allow the Protocol acceleration plugin to be run independently of a core plugin
  * (and could be run _without_ a core plugin, for example).
  */
-export const ext_migratedNode = onchainTable("ext_migrated_nodes", (t) => ({
+export const migratedNode = onchainTable("migrated_nodes", (t) => ({
   node: t.hex().primaryKey(),
 }));

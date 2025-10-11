@@ -17,10 +17,10 @@ export async function getENSIP19ReverseNameRecordFromIndex(
   // retrieve from index
   const records = await withSpanAsync(
     tracer,
-    "ext_reverseNameRecord.findMany",
+    "reverseNameRecord.findMany",
     { address, coinType: coinTypeReverseLabel(coinType) },
     () =>
-      db.query.ext_reverseNameRecord.findMany({
+      db.query.reverseNameRecord.findMany({
         where: (t, { and, inArray, eq }) =>
           and(
             // address = address

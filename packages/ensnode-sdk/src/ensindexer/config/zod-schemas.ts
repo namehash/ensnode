@@ -19,6 +19,7 @@ import {
 import { isSubgraphCompatible } from "./helpers";
 import { PluginName } from "./types";
 import type { ENSIndexerPublicConfig } from "./types";
+import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
 /**
  * Makes a schema for parsing {@link IndexedChainIds}.
@@ -118,23 +119,28 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
-  z.strictObject(
-    {
-      nodejs: makeNonEmptyStringSchema(),
-      ponder: makeNonEmptyStringSchema(),
-      ensRainbow: makeNonEmptyStringSchema(),
-      ensRainbowSchema: makePositiveIntegerSchema(),
-    },
-    {
-      error: `${valueLabel} must be a valid DependencyInfo object.`,
-    },
-  );
+export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
+  z
+    .strictObject(
+      {
+        nodejs: makeNonEmptyStringSchema(),
+        ponder: makeNonEmptyStringSchema(),
+        ensDb: makeNonEmptyStringSchema(),
+        ensIndexer: makeNonEmptyStringSchema(),
+        ensNormalize: makeNonEmptyStringSchema(),
+        ensRainbow: makeNonEmptyStringSchema(),
+        ensRainbowSchema: makePositiveIntegerSchema(),
+      },
+      {
+        error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
+      },
+    )
+    .check(invariant_ensDbVersionIsSameAsEnsIndexerVersion);
 
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<ENSIndexerPublicConfig, "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
@@ -157,15 +163,13 @@ export function invariant_isSubgraphCompatibleRequirements(
 export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
-      ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      dependencyInfo: makeDependencyInfoSchema(`${valueLabel}.dependencyInfo`),
+      versionInfo: makeENSIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
     })
     /**
      * Validations

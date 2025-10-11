@@ -2,7 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.1",
   "scripts": {
     "lint": "pnpm -r --parallel --aggregate-output lint",
     "lint:ci": "pnpm -r --parallel --aggregate-output lint:ci",
@@ -30,6 +30,7 @@
   },
   "pnpm": {
     "overrides": {
+      "@adraffy/ens-normalize": "catalog:",
       "@graphiql/react>@headlessui/react": "2.2.0",
       "@eslint/plugin-kit@<0.3.4": ">=0.3.4",
       "esbuild@<=0.24.2": ">=0.25.0",
