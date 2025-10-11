@@ -11,13 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveConnection } from "@/hooks/active/use-active-connection";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { cn } from "@/lib/utils";
+import { formatOmnichainStatus } from "@/lib/indexing-status";
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
-  ENSIndexerOverallIndexingStatus,
   type ENSIndexerPublicConfig,
-  OverallIndexingStatusId,
-  OverallIndexingStatusIds,
+  type OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
+  type RealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
@@ -32,17 +32,26 @@ const DEFAULT_MAX_RECORDS = 25;
 /**
  * Omnichain indexing statuses where ENSAdmin allows itself to query registrations.
  */
-const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OverallIndexingStatusId[] = [
-  OverallIndexingStatusIds.Following,
-  OverallIndexingStatusIds.Completed,
-  OverallIndexingStatusIds.IndexerError,
+const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OmnichainIndexingStatusId[] = [
+  OmnichainIndexingStatusIds.Following,
+  OmnichainIndexingStatusIds.Completed,
 ];
+
+export interface RecentRegistrationsOkProps {
+  ensIndexerConfig: ENSIndexerPublicConfig | undefined;
+  realtimeProjection: RealtimeIndexingStatusProjection | undefined;
+  maxRecords?: number;
+}
+
+export interface RecentRegistrationsErrorProps {
+  error: ErrorInfoProps;
+}
 
 /**
  * RecentRegistrations display variations:
  *
  * Standard -
- *      ensIndexerConfig: ENSIndexerPublicConfig,
+ *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
  *      indexingStatus: ENSIndexerOverallIndexingCompletedStatus |
  *          ENSIndexerOverallIndexingFollowingStatus ,
  *      error: undefined
@@ -64,13 +73,7 @@ const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OverallIndexingStatusId[] = [
  *
  * @throws If both error and any from the pair of ensIndexerConfig & indexingStatus are defined
  */
-export interface RecentRegistrationsProps {
-  ensIndexerConfig?: ENSIndexerPublicConfig;
-  indexingStatus?: ENSIndexerOverallIndexingStatus;
-  error?: ErrorInfoProps;
-  maxRecords?: number;
-}
-
+export type RecentRegistrationsProps = RecentRegistrationsOkProps | RecentRegistrationsErrorProps;
 /**
  * Displays a panel containing the list of the most recently indexed
  * registrations and the date of the most recently indexed block.
@@ -78,34 +81,29 @@ export interface RecentRegistrationsProps {
  * Note: The Recent Registrations Panel is only visible when the
  * overall indexing status is either "completed", or "following".
  */
-export function RecentRegistrations({
-  ensIndexerConfig,
-  indexingStatus,
-  error,
-  maxRecords = DEFAULT_MAX_RECORDS,
-}: RecentRegistrationsProps) {
+export function RecentRegistrations(props: RecentRegistrationsProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (error !== undefined && (ensIndexerConfig !== undefined || indexingStatus !== undefined)) {
-    throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
+  if ("error" in props) {
+    return <ErrorInfo {...props.error} />;
   }
 
-  if (error !== undefined) {
-    return <ErrorInfo {...error} />;
-  }
+  const { ensIndexerConfig, realtimeProjection, maxRecords = DEFAULT_MAX_RECORDS } = props;
 
-  if (ensIndexerConfig === undefined || indexingStatus === undefined) {
+  if (ensIndexerConfig === undefined || realtimeProjection === undefined) {
     return <RecentRegistrationsLoading recordCount={maxRecords} />;
   }
 
-  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(indexingStatus.overallStatus)) {
+  const { omnichainSnapshot } = realtimeProjection.snapshot;
+
+  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(omnichainSnapshot.omnichainStatus)) {
     return (
       <UnsupportedOmnichainIndexingStatusMessage
-        overallOmnichainIndexingStatus={indexingStatus.overallStatus}
+        omnichainIndexingStatus={omnichainSnapshot.omnichainStatus}
       />
     );
   }
@@ -206,19 +204,14 @@ function RecentRegistrationsLoading({ recordCount }: RegistrationLoadingProps) {
 }
 
 interface UnsupportedOmnichainIndexingStatusMessageProps {
-  overallOmnichainIndexingStatus: OverallIndexingStatusId;
+  omnichainIndexingStatus: OmnichainIndexingStatusId;
 }
 
 function UnsupportedOmnichainIndexingStatusMessage({
-  overallOmnichainIndexingStatus,
+  omnichainIndexingStatus,
 }: UnsupportedOmnichainIndexingStatusMessageProps) {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
-  // We don't want the user-facing list of supported statuses to include "Indexer Error".
-  // That's technically true, but it's very confusing UX.
-  // Therefore, the list in the message should just show "Following" and "Completed" statuses.
-  const filteredSupportedOmnichainIndexingStatuses = SUPPORTED_OMNICHAIN_INDEXING_STATUSES.filter(
-    (omnichainIndexingStatus) => omnichainIndexingStatus !== OverallIndexingStatusIds.IndexerError,
-  );
+  const supportedOmnichainIndexingStatuses = SUPPORTED_OMNICHAIN_INDEXING_STATUSES;
 
   return (
     <Card className="w-full">
@@ -227,29 +220,27 @@ function UnsupportedOmnichainIndexingStatusMessage({
       </CardHeader>
       <CardContent className="flex flex-col justify-start items-start gap-4 sm:gap-3">
         <div className="flex flex-row flex-nowrap justify-start items-center gap-2">
-          <p>Current overall omnichain indexing status:</p>
+          <p>Current omnichain indexing status:</p>
           <Badge
             className="uppercase text-xs leading-none"
-            title={`Current overall omnichain indexing status: ${overallOmnichainIndexingStatus}`}
+            title={`Current omnichain indexing status: ${formatOmnichainStatus(omnichainIndexingStatus)}`}
           >
-            {overallOmnichainIndexingStatus}
+            {formatOmnichainStatus(omnichainIndexingStatus)}
           </Badge>
         </div>
         <div>
           The latest indexed registrations will be available once the omnichain indexing status is{" "}
-          {filteredSupportedOmnichainIndexingStatuses.map(
-            (supportedOmnichainIndexingStatus, idx) => (
-              <React.Fragment key={supportedOmnichainIndexingStatus}>
-                <Badge
-                  className="uppercase text-xs leading-none"
-                  title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
-                >
-                  {supportedOmnichainIndexingStatus}
-                </Badge>
-                {idx < filteredSupportedOmnichainIndexingStatuses.length - 1 && " or "}
-              </React.Fragment>
-            ),
-          )}
+          {supportedOmnichainIndexingStatuses.map((supportedOmnichainIndexingStatus, idx) => (
+            <React.Fragment key={supportedOmnichainIndexingStatus}>
+              <Badge
+                className="uppercase text-xs leading-none"
+                title={`Supported overall omnichain indexing status: ${formatOmnichainStatus(supportedOmnichainIndexingStatus)}`}
+              >
+                {formatOmnichainStatus(supportedOmnichainIndexingStatus)}
+              </Badge>
+              {idx < supportedOmnichainIndexingStatuses.length - 1 && " or "}
+            </React.Fragment>
+          ))}
           .
         </div>
         <Button asChild variant="default">

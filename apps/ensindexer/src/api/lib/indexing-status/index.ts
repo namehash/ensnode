@@ -1,2 +1,4 @@
-export { buildIndexingStatus } from "./build-index-status";
-export { hasAchievedRequestedDistance } from "./realtime-indexing-distance";
+export {
+  createCrossChainIndexingStatusSnapshotOmnichain,
+  buildOmnichainIndexingStatusSnapshot,
+} from "./build-index-status";

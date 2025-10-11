@@ -29,8 +29,7 @@ export const queryKeys = {
 
   config: (url: string) => [...queryKeys.base(url), "config"] as const,
 
-  indexingStatus: (url: string, args: IndexingStatusRequest) =>
-    [...queryKeys.base(url), "config", args] as const,
+  indexingStatus: (url: string) => [...queryKeys.base(url), "indexing-status"] as const,
 };
 
 /**
@@ -101,16 +100,13 @@ export function createENSIndexerConfigQueryOptions(config: ENSNodeConfig) {
 /**
  * Creates query options for ENSIndexer Indexing Status API
  */
-export function createIndexingStatusQueryOptions(
-  config: ENSNodeConfig,
-  args: IndexingStatusRequest,
-) {
+export function createIndexingStatusQueryOptions(config: ENSNodeConfig) {
   return {
     enabled: true,
-    queryKey: queryKeys.indexingStatus(config.client.url.href, args),
+    queryKey: queryKeys.indexingStatus(config.client.url.href),
     queryFn: async () => {
       const client = new ENSNodeClient(config.client);
-      return client.indexingStatus(args);
+      return client.indexingStatus();
     },
   };
 }
