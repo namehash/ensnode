@@ -8,7 +8,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import {
   ENSIndexerOverallIndexingStatus,
@@ -18,7 +17,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { Fragment } from "react";
 import { useRecentRegistrations } from "./hooks";
 
 /**
@@ -81,19 +80,8 @@ export function RecentRegistrations({
   error,
   maxRecords = DEFAULT_MAX_RECORDS,
 }: RecentRegistrationsProps) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (
-    error !== undefined &&
-    (ensIndexerConfig !== undefined || indexingStatus !== undefined)
-  ) {
-    throw new Error(
-      "Invariant: RecentRegistrations with both indexer data and error defined."
-    );
+  if (error !== undefined && (ensIndexerConfig !== undefined || indexingStatus !== undefined)) {
+    throw new Error("Invariant: RecentRegistrations with both indexer data and error defined.");
   }
 
   if (error !== undefined) {
@@ -104,11 +92,7 @@ export function RecentRegistrations({
     return <RecentRegistrationsLoading recordCount={maxRecords} />;
   }
 
-  if (
-    !SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(
-      indexingStatus.overallStatus
-    )
-  ) {
+  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(indexingStatus.overallStatus)) {
     return (
       <UnsupportedOmnichainIndexingStatusMessage
         overallOmnichainIndexingStatus={indexingStatus.overallStatus}
@@ -124,7 +108,7 @@ export function RecentRegistrations({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isClient && <RegistrationsList maxRecords={maxRecords} />}
+        <RegistrationsList maxRecords={maxRecords} />
       </CardContent>
     </Card>
   );
@@ -141,7 +125,6 @@ function RegistrationsList({ maxRecords }: RegistrationsListProps) {
   const recentRegistrationsQuery = useRecentRegistrations({
     maxRecords,
   });
-  const namespaceId = useActiveNamespace();
   const [animationParent] = useAutoAnimate();
 
   if (recentRegistrationsQuery.isLoading) {
@@ -163,11 +146,7 @@ function RegistrationsList({ maxRecords }: RegistrationsListProps) {
       className="w-full h-fit box-border flex flex-col justify-start items-center gap-3"
     >
       {recentRegistrationsQuery.data?.map((registration) => (
-        <RegistrationCard
-          key={registration.name}
-          registration={registration}
-          namespaceId={namespaceId}
-        />
+        <RegistrationCard key={registration.name} registration={registration} />
       ))}
     </div>
   );
@@ -212,11 +191,9 @@ function UnsupportedOmnichainIndexingStatusMessage({
   // We don't want the user-facing list of supported statuses to include "Indexer Error".
   // That's technically true, but it's very confusing UX.
   // Therefore, the list in the message should just show "Following" and "Completed" statuses.
-  const filteredSupportedOmnichainIndexingStatuses =
-    SUPPORTED_OMNICHAIN_INDEXING_STATUSES.filter(
-      (omnichainIndexingStatus) =>
-        omnichainIndexingStatus !== OverallIndexingStatusIds.IndexerError
-    );
+  const filteredSupportedOmnichainIndexingStatuses = SUPPORTED_OMNICHAIN_INDEXING_STATUSES.filter(
+    (omnichainIndexingStatus) => omnichainIndexingStatus !== OverallIndexingStatusIds.IndexerError,
+  );
 
   return (
     <Card className="w-full">
@@ -234,28 +211,24 @@ function UnsupportedOmnichainIndexingStatusMessage({
           </Badge>
         </div>
         <div>
-          The latest indexed registrations will be available once the omnichain
-          indexing status is{" "}
+          The latest indexed registrations will be available once the omnichain indexing status is{" "}
           {filteredSupportedOmnichainIndexingStatuses.map(
             (supportedOmnichainIndexingStatus, idx) => (
-              <React.Fragment key={supportedOmnichainIndexingStatus}>
+              <Fragment key={supportedOmnichainIndexingStatus}>
                 <Badge
                   className="uppercase text-xs leading-none"
                   title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
                 >
                   {supportedOmnichainIndexingStatus}
                 </Badge>
-                {idx < filteredSupportedOmnichainIndexingStatuses.length - 1 &&
-                  " or "}
-              </React.Fragment>
-            )
+                {idx < filteredSupportedOmnichainIndexingStatuses.length - 1 && " or "}
+              </Fragment>
+            ),
           )}
           .
         </div>
         <Button asChild variant="default">
-          <Link href={retainCurrentRawConnectionUrlParam("/status")}>
-            Check status
-          </Link>
+          <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
         </Button>
       </CardContent>
     </Card>
