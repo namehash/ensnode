@@ -11,7 +11,7 @@ import { type HttpHostname, buildHttpHostname, buildHttpHostnames } from "./url-
  * @throws when Vercel platform was detected but could not determine HttpHostname
  */
 export function ensAdminPublicUrl(): HttpHostname {
-  const envVarName = "ENSADMIN_PUBLIC_URL";
+  const envVarName = "NEXT_PUBLIC_ENSADMIN_PUBLIC_URL";
   let envVarValue = process.env[envVarName];
 
   if (!envVarValue) {

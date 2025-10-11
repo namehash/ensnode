@@ -3,10 +3,13 @@
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { Button } from "@/components/ui/button";
 import { useENSAppProfileUrl } from "@/hooks/async/use-ens-app-profile-url";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
-export default function ActionsNamePage() {
-  const { name } = useParams<{ name: string }>();
+export function ActionsNamePageContent() {
+  const searchParams = useSearchParams();
+  const name = searchParams.get("name");
+
+  if (!name) return null;
 
   const { data: ensAppProfileUrl } = useENSAppProfileUrl(name);
 

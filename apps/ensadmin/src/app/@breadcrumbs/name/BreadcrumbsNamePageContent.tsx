@@ -1,5 +1,6 @@
 "use client";
 
+import BreadcrumbsGroup from "@/components/breadcrumbs/group";
 import { NameDisplay } from "@/components/identity/utils";
 import {
   BreadcrumbItem,
@@ -9,16 +10,20 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { Name } from "@ensnode/ensnode-sdk";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
-export default function Page() {
-  const params = useParams();
-  const name = decodeURIComponent(params.name as Name);
+export function BreadcrumbsNamePageContent() {
+  const searchParams = useSearchParams();
+  const nameParam = searchParams.get("name");
+
+  if (!nameParam) return null;
+
+  const name = decodeURIComponent(nameParam) as Name;
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
   const exploreNamesBaseHref = retainCurrentRawConnectionUrlParam("/name");
 
   return (
-    <>
+    <BreadcrumbsGroup name="ENS Explorer">
       <BreadcrumbLink href={exploreNamesBaseHref} className="hidden md:block">
         Names
       </BreadcrumbLink>
@@ -28,6 +33,6 @@ export default function Page() {
           <NameDisplay name={name} />
         </BreadcrumbPage>
       </BreadcrumbItem>
-    </>
+    </BreadcrumbsGroup>
   );
 }
