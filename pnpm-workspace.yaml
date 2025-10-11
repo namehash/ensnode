@@ -8,7 +8,7 @@ catalog:
   "@biomejs/biome": ^1.9.4
   "@ponder/utils": 0.2.13
   "@types/node": ^22.14.0
-  astro: ^5.13.4
+  astro: ^5.14.3
   date-fns: ^4.1.0
   drizzle-orm: =0.41.0
   hono: ^4.9.7
