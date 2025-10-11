@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveConnection } from "@/hooks/active/use-active-connection";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { cn } from "@/lib/utils";
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
   ENSIndexerOverallIndexingStatus,
