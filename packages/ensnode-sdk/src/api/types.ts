@@ -86,7 +86,7 @@ export type ConfigResponse = ENSIndexerPublicConfig;
 export type IndexingStatusRequest = {};
 
 /**
- * A status code for generating an indexing status response.
+ * A status code for indexing status responses.
  */
 export const IndexingStatusResponseCodes = {
   /**

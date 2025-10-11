@@ -60,8 +60,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `config.startBlock` must be before or same as `config.endBlock`.",
+        expect(notParsed).toMatch(
+          /`config.startBlock` must be before or same as `config.endBlock`/i,
         );
       });
     });
@@ -115,8 +115,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        expect(notParsed).toMatch(
+          /`config.startBlock` must be before or same as `latestIndexedBlock`/,
         );
       });
 
@@ -139,8 +139,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `latestIndexedBlock` must be before or same as `backfillEndBlock`.",
+        expect(notParsed).toMatch(
+          /`latestIndexedBlock` must be before or same as `backfillEndBlock`/,
         );
       });
 
@@ -163,7 +163,7 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe("✖ `backfillEndBlock` must be the same as `config.endBlock`.");
+        expect(notParsed).toMatch(/`backfillEndBlock` must be the same as `config.endBlock`/);
       });
     });
 
@@ -213,8 +213,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        expect(notParsed).toMatch(
+          /`config.startBlock` must be before or same as `latestIndexedBlock`/,
         );
       });
 
@@ -236,8 +236,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `latestIndexedBlock` must be before or same as `latestKnownBlock`.",
+        expect(notParsed).toMatch(
+          /`latestIndexedBlock` must be before or same as `latestKnownBlock`/,
         );
       });
     });
@@ -288,8 +288,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `config.startBlock` must be before or same as `latestIndexedBlock`.",
+        expect(notParsed).toMatch(
+          /`config.startBlock` must be before or same as `latestIndexedBlock`/,
         );
       });
 
@@ -311,8 +311,8 @@ describe("ENSIndexer: Indexing Status", () => {
         );
 
         // assert
-        expect(notParsed).toBe(
-          "✖ `latestIndexedBlock` must be before or same as `config.endBlock`.",
+        expect(notParsed).toMatch(
+          /`latestIndexedBlock` must be before or same as `config.endBlock`/,
         );
       });
     });

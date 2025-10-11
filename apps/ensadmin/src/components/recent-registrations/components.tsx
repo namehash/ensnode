@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveConnection } from "@/hooks/active/use-active-connection";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { formatOmnichainStatus } from "@/lib/indexing-status";
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import {
   type ENSIndexerPublicConfig,
@@ -222,9 +223,9 @@ function UnsupportedOmnichainIndexingStatusMessage({
           <p>Current omnichain indexing status:</p>
           <Badge
             className="uppercase text-xs leading-none"
-            title={`Current omnichain indexing status: ${omnichainIndexingStatus}`}
+            title={`Current omnichain indexing status: ${formatOmnichainStatus(omnichainIndexingStatus)}`}
           >
-            {omnichainIndexingStatus}
+            {formatOmnichainStatus(omnichainIndexingStatus)}
           </Badge>
         </div>
         <div>
@@ -233,9 +234,9 @@ function UnsupportedOmnichainIndexingStatusMessage({
             <React.Fragment key={supportedOmnichainIndexingStatus}>
               <Badge
                 className="uppercase text-xs leading-none"
-                title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
+                title={`Supported overall omnichain indexing status: ${formatOmnichainStatus(supportedOmnichainIndexingStatus)}`}
               >
-                {supportedOmnichainIndexingStatus}
+                {formatOmnichainStatus(supportedOmnichainIndexingStatus)}
               </Badge>
               {idx < supportedOmnichainIndexingStatuses.length - 1 && " or "}
             </React.Fragment>

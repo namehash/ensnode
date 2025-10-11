@@ -142,7 +142,8 @@ export const makeChainIndexingStatusSnapshotSchema = (valueLabel: string = "Valu
 export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
   z
     .record(makeChainIdStringSchema(), makeChainIndexingStatusSnapshotSchema(valueLabel), {
-      error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
+      error:
+        "Chains indexing statuses must be an object mapping valid chain IDs to their indexing status snapshots.",
     })
     .transform((serializedChainsIndexingStatus) => {
       const chainsIndexingStatus = new Map<ChainId, ChainIndexingStatusSnapshot>();

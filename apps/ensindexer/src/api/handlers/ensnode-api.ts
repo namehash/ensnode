@@ -4,7 +4,7 @@ import {
   IndexingStatusResponseError,
   IndexingStatusResponseOk,
   OmnichainIndexingStatusSnapshot,
-  createRealtimeStatusProjection,
+  createRealtimeIndexingStatusProjection,
   serializeENSIndexerPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
@@ -36,14 +36,15 @@ app.get("/config", async (c) => {
 
 app.get("/indexing-status", async (c) => {
   // get system timestamp for the current request
-  const systemTimestamp = getUnixTime(new Date());
+  const snapshotTime = getUnixTime(new Date());
 
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
     omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
   } catch (error) {
-    console.error(`Omnichain snapshot is currently not available.`);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
   }
 
   // return IndexingStatusResponseError
@@ -59,11 +60,14 @@ app.get("/indexing-status", async (c) => {
   // otherwise, proceed with creating IndexingStatusResponseOk
   const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
     omnichainSnapshot,
-    systemTimestamp,
+    snapshotTime,
   );
 
-  const now = getUnixTime(new Date());
-  const realtimeProjection = createRealtimeStatusProjection(crossChainSnapshot, now);
+  const projectedAt = getUnixTime(new Date());
+  const realtimeProjection = createRealtimeIndexingStatusProjection(
+    crossChainSnapshot,
+    projectedAt,
+  );
 
   // return the serialized indexing status response object
   return c.json(

@@ -10,7 +10,7 @@ import {
   UnixTimestamp,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
-  sortAscChainStatusesByStartBlock,
+  sortChainStatusesByStartBlockAsc,
 } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { Clock } from "lucide-react";
@@ -41,7 +41,7 @@ interface BackfillStatusProps {
  */
 export function BackfillStatus({ realtimeProjection }: BackfillStatusProps) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
-  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
+  const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
   const chains = chainEntries.map(([, chain]) => chain);
 
   const timelineStartsAt = getTimestampForLowestOmnichainStartBlock(chains);

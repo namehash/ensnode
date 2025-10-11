@@ -1,4 +1,4 @@
-import { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
+import { BlockRef, ChainId, UnixTimestamp } from "../../shared";
 import {
   ChainIndexingConfig,
   ChainIndexingConfigDefinite,
@@ -6,9 +6,7 @@ import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotBackfill,
   ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotFollowing,
   ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   ChainIndexingStatusSnapshotQueued,
   OmnichainIndexingStatusId,
@@ -18,11 +16,8 @@ import {
 /**
  * Get {@link OmnichainIndexingStatusId} based on indexed chains' statuses.
  *
- * This function decides what is the current overall indexing status,
- * based on provided chain indexing statuses. The fact that chain indexing
- * statuses were provided to this function guarantees there was no indexer
- * error, and that the overall indexing status is never
- * an {@link OmnichainIndexingStatusIds.IndexerError}
+ * This function decides what is the `OmnichainIndexingStatusId` is,
+ * based on provided chain indexing statuses.
  *
  * @throws an error if unable to determine overall indexing status
  */
@@ -50,8 +45,11 @@ export function getOmnichainIndexingStatus(
 }
 
 /**
- * Get lowest of the highest end block across all chains which status is
+ * Get timestamp of the lowest `config.startBlock` across all chains in status
  * {@link ChainIndexingStatusSnapshot}.
+ *
+ * Such timestamp is useful when presenting the "lowest" block
+ * to be indexed across all chains.
  */
 export function getTimestampForLowestOmnichainStartBlock(
   chains: ChainIndexingStatusSnapshot[],
@@ -64,8 +62,17 @@ export function getTimestampForLowestOmnichainStartBlock(
 }
 
 /**
- * Get timestamp of the highest known block across all chains which status is
+ * Get timestamp of the highest "known block" across all chains in status
  * {@link ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill}.
+ *
+ * Such timestamp is useful when presenting the "highest" block
+ * to be indexed across all chains.
+ *
+ * The "known block" is, based on the chain status:
+ * - `config.endBlock` for a "queued" chain,
+ * - `backfillEndBlock` for a "backfill" chain,
+ * - `latestIndexedBlock` for a "completed" chain,
+ * - `latestKnownBlock` for a "following" chain.
  */
 export function getTimestampForHighestOmnichainKnownBlock(
   chains: ChainIndexingStatusSnapshot[],
@@ -125,6 +132,11 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingStatusSnapshot[]
   const latestIndexedBlockTimestamps = chains
     .filter((chain) => chain.chainStatus !== ChainIndexingStatusIds.Queued)
     .map((chain) => chain.latestIndexedBlock.timestamp);
+
+  // Invariant: there's at least one element in `latestIndexedBlockTimestamps` array
+  if (latestIndexedBlockTimestamps.length < 1) {
+    throw new Error("latestIndexedBlockTimestamps array must include at least one element");
+  }
 
   return Math.max(...latestIndexedBlockTimestamps);
 }
@@ -232,7 +244,7 @@ export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollo
  * Sort a list of [{@link ChainId}, {@link ChainIndexingStatusSnapshot}] tuples
  * by the omnichain start block timestamp in ascending order.
  */
-export function sortAscChainStatusesByStartBlock<
+export function sortChainStatusesByStartBlockAsc<
   ChainStatusType extends ChainIndexingStatusSnapshot,
 >(chains: [ChainId, ChainStatusType][]): [ChainId, ChainStatusType][] {
   // Sort the chain statuses by the omnichain first block to index timestamp

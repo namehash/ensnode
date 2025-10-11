@@ -17,7 +17,7 @@ import {
   OmnichainIndexingStatusSnapshotFollowing,
   OmnichainIndexingStatusSnapshotUnstarted,
   RealtimeIndexingStatusProjection,
-  sortAscChainStatusesByStartBlock,
+  sortChainStatusesByStartBlockAsc,
 } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren, ReactElement } from "react";
 
@@ -25,6 +25,7 @@ import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ChainName } from "@/components/chains/ChainName";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatChainStatus, formatOmnichainStatus } from "@/lib/indexing-status";
 import { cn } from "@/lib/utils";
 import { BackfillStatus } from "./backfill-status";
 import { BlockStats, blockViewModel } from "./block-refs";
@@ -61,7 +62,7 @@ export function IndexingStatsForSnapshotUnstarted({
   realtimeProjection,
 }: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotUnstarted>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
-  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
+  const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -79,9 +80,9 @@ export function IndexingStatsForSnapshotUnstarted({
 
             <Badge
               className={cn("uppercase text-xs leading-none")}
-              title={`Chain indexing status: ${chain.chainStatus}`}
+              title={`Chain indexing status: ${formatChainStatus(chain.chainStatus)}`}
             >
-              {chain.chainStatus}
+              {formatChainStatus(chain.chainStatus)}
             </Badge>
           </div>
         </CardHeader>
@@ -109,7 +110,7 @@ export function IndexingStatsForSnapshotBackfill({
   realtimeProjection,
 }: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotBackfill>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
-  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
+  const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -127,9 +128,9 @@ export function IndexingStatsForSnapshotBackfill({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.chainStatus}`}
+              title={`Chain indexing status: ${formatChainStatus(chain.chainStatus)}`}
             >
-              {chain.chainStatus}
+              {formatChainStatus(chain.chainStatus)}
             </Badge>
           </div>
         </CardHeader>
@@ -173,7 +174,7 @@ export function IndexingStatsForSnapshotCompleted({
   realtimeProjection,
 }: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotCompleted>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
-  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
+  const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -191,9 +192,9 @@ export function IndexingStatsForSnapshotCompleted({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.chainStatus}`}
+              title={`Chain indexing status: ${formatChainStatus(chain.chainStatus)}`}
             >
-              {chain.chainStatus}
+              {formatChainStatus(chain.chainStatus)}
             </Badge>
           </div>
         </CardHeader>
@@ -227,7 +228,7 @@ export function IndexingStatsForSnapshotFollowing({
   realtimeProjection,
 }: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotFollowing>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
-  const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
+  const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
     const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
@@ -245,9 +246,9 @@ export function IndexingStatsForSnapshotFollowing({
 
             <Badge
               className="uppercase text-xs leading-none"
-              title={`Chain indexing status: ${chain.chainStatus}`}
+              title={`Chain indexing status: ${formatChainStatus(chain.chainStatus)}`}
             >
-              {chain.chainStatus}
+              {formatChainStatus(chain.chainStatus)}
             </Badge>
           </div>
         </CardHeader>
@@ -318,9 +319,9 @@ export function IndexingStatsShell({
           {omnichainStatus && (
             <Badge
               className={cn("uppercase text-xs leading-none")}
-              title={`Overall indexing status: ${omnichainStatus}`}
+              title={`Overall indexing status: ${formatOmnichainStatus(omnichainStatus)}`}
             >
-              {omnichainStatus}
+              {formatOmnichainStatus(omnichainStatus)}
             </Badge>
           )}
         </CardTitle>
@@ -331,6 +332,23 @@ export function IndexingStatsShell({
       </CardContent>
     </Card>
   );
+}
+
+function buildIndexingStatsProps<
+  const OmnichainIndexingStatusSnapshotType extends OmnichainIndexingStatusSnapshot,
+>(
+  realtimeProjection: RealtimeIndexingStatusProjection,
+  omnichainStatusSnapshot: OmnichainIndexingStatusSnapshotType,
+): IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotType> {
+  return {
+    realtimeProjection: {
+      ...realtimeProjection,
+      snapshot: {
+        ...realtimeProjection.snapshot,
+        omnichainSnapshot: omnichainStatusSnapshot,
+      },
+    },
+  };
 }
 
 interface IndexingStatsForRealtimeStatusProjectionProps {
@@ -351,13 +369,7 @@ export function IndexingStatsForRealtimeStatusProjection({
     case OmnichainIndexingStatusIds.Unstarted:
       indexingStats = (
         <IndexingStatsForSnapshotUnstarted
-          realtimeProjection={{
-            ...realtimeProjection,
-            snapshot: {
-              ...realtimeProjection.snapshot,
-              omnichainSnapshot: omnichainStatusSnapshot,
-            },
-          }}
+          {...buildIndexingStatsProps(realtimeProjection, omnichainStatusSnapshot)}
         />
       );
       break;
@@ -365,39 +377,19 @@ export function IndexingStatsForRealtimeStatusProjection({
     case OmnichainIndexingStatusIds.Backfill:
       indexingStats = (
         <IndexingStatsForSnapshotBackfill
-          realtimeProjection={{
-            ...realtimeProjection,
-            snapshot: {
-              ...realtimeProjection.snapshot,
-              omnichainSnapshot: omnichainStatusSnapshot,
-            },
-          }}
+          {...buildIndexingStatsProps(realtimeProjection, omnichainStatusSnapshot)}
         />
       );
 
       maybeIndexingTimeline = (
-        <BackfillStatus
-          realtimeProjection={{
-            ...realtimeProjection,
-            snapshot: {
-              ...realtimeProjection.snapshot,
-              omnichainSnapshot: omnichainStatusSnapshot,
-            },
-          }}
-        />
+        <BackfillStatus {...buildIndexingStatsProps(realtimeProjection, omnichainStatusSnapshot)} />
       );
       break;
 
     case OmnichainIndexingStatusIds.Completed:
       indexingStats = (
         <IndexingStatsForSnapshotCompleted
-          realtimeProjection={{
-            ...realtimeProjection,
-            snapshot: {
-              ...realtimeProjection.snapshot,
-              omnichainSnapshot: omnichainStatusSnapshot,
-            },
-          }}
+          {...buildIndexingStatsProps(realtimeProjection, omnichainStatusSnapshot)}
         />
       );
       break;
@@ -405,13 +397,7 @@ export function IndexingStatsForRealtimeStatusProjection({
     case OmnichainIndexingStatusIds.Following:
       indexingStats = (
         <IndexingStatsForSnapshotFollowing
-          realtimeProjection={{
-            ...realtimeProjection,
-            snapshot: {
-              ...realtimeProjection.snapshot,
-              omnichainSnapshot: omnichainStatusSnapshot,
-            },
-          }}
+          {...buildIndexingStatsProps(realtimeProjection, omnichainStatusSnapshot)}
         />
       );
       break;

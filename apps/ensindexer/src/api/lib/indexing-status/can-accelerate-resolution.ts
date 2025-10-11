@@ -2,15 +2,16 @@ import { publicClients } from "ponder:api";
 import { getUnixTime } from "date-fns";
 
 import {
-  OmnichainIndexingStatusSnapshot,
-  createRealtimeStatusProjection,
+  type Duration,
+  type OmnichainIndexingStatusSnapshot,
+  createRealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
 import {
   buildOmnichainIndexingStatusSnapshot,
   createCrossChainIndexingStatusSnapshotOmnichain,
 } from "./build-index-status";
 
-const MAX_REALTIME_DISTANCE_TO_ACCELERATE = 60; // seconds
+const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // seconds
 
 /**
  * Determines whether the indexer is near-enough to realtime to plausibly accelerate resolution
@@ -22,7 +23,7 @@ const MAX_REALTIME_DISTANCE_TO_ACCELERATE = 60; // seconds
 export async function canAccelerateResolution(): Promise<boolean> {
   try {
     // get system timestamp for the current request
-    const systemTimestamp = getUnixTime(new Date());
+    const snapshotTime = getUnixTime(new Date());
 
     let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
@@ -35,11 +36,14 @@ export async function canAccelerateResolution(): Promise<boolean> {
     // otherwise, proceed with creating IndexingStatusResponseOk
     const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
       omnichainSnapshot,
-      systemTimestamp,
+      snapshotTime,
     );
 
-    const now = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeStatusProjection(crossChainSnapshot, now);
+    const projectedAt = getUnixTime(new Date());
+    const realtimeProjection = createRealtimeIndexingStatusProjection(
+      crossChainSnapshot,
+      projectedAt,
+    );
 
     return realtimeProjection.worstCaseDistance <= MAX_REALTIME_DISTANCE_TO_ACCELERATE;
   } catch {

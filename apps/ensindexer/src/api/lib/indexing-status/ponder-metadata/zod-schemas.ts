@@ -63,7 +63,7 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     })
 
     .transform((chains) => {
-      let SerializedChainIndexingStatusSnapshots = {} as Record<
+      let serializedChainIndexingStatusSnapshots = {} as Record<
         ChainIdString,
         ChainIndexingStatusSnapshot
       >;
@@ -71,11 +71,11 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
       for (const chainName of indexedChainNames) {
         const indexedChain = chains.get(chainName)!;
 
-        SerializedChainIndexingStatusSnapshots[indexedChain.chainId] =
+        serializedChainIndexingStatusSnapshots[indexedChain.chainId] =
           createChainIndexingSnapshot(indexedChain);
       }
 
-      return SerializedChainIndexingStatusSnapshots;
+      return serializedChainIndexingStatusSnapshots;
     });
 };
 

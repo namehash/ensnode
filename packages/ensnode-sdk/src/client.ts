@@ -314,8 +314,6 @@ export class ENSNodeClient {
   /**
    * Fetch ENSNode Indexing Status
    *
-   * Fetch the ENSNode's cross-chain indexing status.
-   *
    * @returns {IndexingStatusResponse}
    *
    * @throws if the ENSNode request fails

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
-import { createRealtimeStatusProjection } from "./projection";
+import { createRealtimeIndexingStatusProjection } from "./projection";
 import { earlierBlockRef, laterBlockRef } from "./test-helpers";
 import {
   ChainIndexingConfigTypeIds,
@@ -39,7 +39,7 @@ describe("Realtime Indexing Status Projection", () => {
     });
 
     // act
-    const projection = createRealtimeStatusProjection(snapshot, now);
+    const projection = createRealtimeIndexingStatusProjection(snapshot, now);
 
     // assert
     expect(projection).toStrictEqual({
