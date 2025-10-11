@@ -1,30 +1,73 @@
 "use client";
 
+import { IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMemo, useState } from "react";
-import { MockIndexingStatusDisplayWithProps } from "./indexing-status-display";
-
+import { useQuery } from "@tanstack/react-query";
 import {
-  IndexingStatusResponseCodes,
-  OmnichainIndexingStatusId,
-  OmnichainIndexingStatusIds,
-} from "@ensnode/ensnode-sdk";
-import { indexingStatusResponseOkOmnichain } from "../indexing-status-api.mock";
+  indexingStatusResponseError,
+  indexingStatusResponseOkOmnichain,
+} from "../indexing-status-api.mock";
+
+type LoadingVariant = "Loading" | "Loading Error";
+type ResponseOkVariant = keyof typeof indexingStatusResponseOkOmnichain;
+type ResponseErrorVariant = "Response Error";
+type Variant = ResponseOkVariant | ResponseErrorVariant | LoadingVariant;
+
+const variants = [
+  OmnichainIndexingStatusIds.Unstarted,
+  OmnichainIndexingStatusIds.Backfill,
+  OmnichainIndexingStatusIds.Following,
+  OmnichainIndexingStatusIds.Completed,
+  "Loading",
+  "Loading Error",
+  "Response Error",
+] as const;
+
+let loadingTimeoutId: number;
+
+async function fetchMockedIndexingStatus(
+  selectedVariant: Variant,
+): Promise<IndexingStatusResponse> {
+  // always try clearing loading timeout when performing a mocked fetch
+  // this way we get a fresh and very long request to observe the loading state
+  if (loadingTimeoutId) {
+    clearTimeout(loadingTimeoutId);
+  }
+
+  switch (selectedVariant) {
+    case OmnichainIndexingStatusIds.Unstarted:
+    case OmnichainIndexingStatusIds.Backfill:
+    case OmnichainIndexingStatusIds.Following:
+    case OmnichainIndexingStatusIds.Completed:
+      return indexingStatusResponseOkOmnichain[selectedVariant];
+    case "Response Error":
+      return indexingStatusResponseError;
+    case "Loading":
+      return new Promise<IndexingStatusResponse>((resolve, reject) => {
+        loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
+      });
+    case "Loading Error":
+      throw new Error("Fetch failed");
+  }
+}
 
 export default function MockIndexingStatusPage() {
-  const [selectedVariant, setSelectedVariant] = useState<OmnichainIndexingStatusId>(
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(
     OmnichainIndexingStatusIds.Unstarted,
   );
 
-  const { deserializedStatus, validationError } = useMemo(() => {
-    try {
-      const status = indexingStatusResponseOkOmnichain[selectedVariant];
-      return { deserializedStatus: status, validationError: null };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown validation error";
-      return { deserializedStatus: null, validationError: errorMessage };
-    }
+  const mockedIndexingStatus = useQuery({
+    queryKey: ["mock", "useIndexingStatus", selectedVariant],
+    queryFn: () => fetchMockedIndexingStatus(selectedVariant),
+    retry: false, // allows loading error to be observed immediately
+  });
+
+  useEffect(() => {
+    mockedIndexingStatus.refetch();
   }, [selectedVariant]);
 
   return (
@@ -37,12 +80,7 @@ export default function MockIndexingStatusPage() {
 
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {[
-              OmnichainIndexingStatusIds.Unstarted,
-              OmnichainIndexingStatusIds.Backfill,
-              OmnichainIndexingStatusIds.Following,
-              OmnichainIndexingStatusIds.Completed,
-            ].map((variant) => (
+            {variants.map((variant) => (
               <Button
                 key={variant}
                 variant={selectedVariant === variant ? "default" : "outline"}
@@ -56,22 +94,7 @@ export default function MockIndexingStatusPage() {
         </CardContent>
       </Card>
 
-      {validationError && (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader>
-            <CardTitle className="text-red-800">Mock JSON Data Validation Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="text-sm text-red-700 whitespace-pre-wrap">{validationError}</pre>
-          </CardContent>
-        </Card>
-      )}
-
-      {deserializedStatus?.responseCode === IndexingStatusResponseCodes.Ok && (
-        <MockIndexingStatusDisplayWithProps
-          realtimeProjection={deserializedStatus.realtimeProjection}
-        />
-      )}
+      <IndexingStats {...mockedIndexingStatus} />
     </section>
   );
 }

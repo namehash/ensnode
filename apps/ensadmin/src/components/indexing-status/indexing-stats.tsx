@@ -3,14 +3,12 @@
  *
  * Each overall status will enable presenting of different indexing stats.
  */
-
-import { ChainIcon } from "@/components/chains/ChainIcon";
-import { ChainName } from "@/components/chains/ChainName";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIndexingStatus } from "@ensnode/ensnode-react";
 import {
   ChainIndexingStatusIds,
   CrossChainIndexingStatusSnapshotOmnichain,
+  IndexingStatusResponse,
+  IndexingStatusResponseCodes,
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   OmnichainIndexingStatusSnapshot,
@@ -21,12 +19,18 @@ import {
   RealtimeIndexingStatusProjection,
   sortAscChainStatusesByStartBlock,
 } from "@ensnode/ensnode-sdk";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, ReactElement } from "react";
 
+import { ChainIcon } from "@/components/chains/ChainIcon";
+import { ChainName } from "@/components/chains/ChainName";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { BackfillStatus } from "./backfill-status";
 import { BlockStats, blockViewModel } from "./block-refs";
+import { IndexingStatusLoading } from "./indexing-status-loading";
 
-interface IndexingStatsProps<
+interface IndexingStatsForOmnichainStatusSnapshotProps<
   OmnichainIndexingStatusSnapshotType extends
     OmnichainIndexingStatusSnapshot = OmnichainIndexingStatusSnapshot,
 > {
@@ -38,7 +42,7 @@ interface IndexingStatsProps<
 }
 
 /**
- * Indexing stats for {@link OmnichainIndexingStatusIds.IndexerError}.
+ * Indexing stats when indexing status snapshot was not available.
  */
 export function IndexingStatsForUnavailableSnapshot() {
   return (
@@ -55,7 +59,7 @@ export function IndexingStatsForUnavailableSnapshot() {
  */
 export function IndexingStatsForSnapshotUnstarted({
   realtimeProjection,
-}: IndexingStatsProps<OmnichainIndexingStatusSnapshotUnstarted>) {
+}: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotUnstarted>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
   const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
@@ -103,7 +107,7 @@ export function IndexingStatsForSnapshotUnstarted({
  */
 export function IndexingStatsForSnapshotBackfill({
   realtimeProjection,
-}: IndexingStatsProps<OmnichainIndexingStatusSnapshotBackfill>) {
+}: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotBackfill>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
   const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
@@ -167,7 +171,7 @@ export function IndexingStatsForSnapshotBackfill({
  */
 export function IndexingStatsForSnapshotCompleted({
   realtimeProjection,
-}: IndexingStatsProps<OmnichainIndexingStatusSnapshotCompleted>) {
+}: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotCompleted>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
   const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
@@ -221,7 +225,7 @@ export function IndexingStatsForSnapshotCompleted({
  */
 export function IndexingStatsForSnapshotFollowing({
   realtimeProjection,
-}: IndexingStatsProps<OmnichainIndexingStatusSnapshotFollowing>) {
+}: IndexingStatsForOmnichainStatusSnapshotProps<OmnichainIndexingStatusSnapshotFollowing>) {
   const { omnichainSnapshot } = realtimeProjection.snapshot;
   const chainEntries = sortAscChainStatusesByStartBlock([...omnichainSnapshot.chains.entries()]);
 
@@ -326,5 +330,133 @@ export function IndexingStatsShell({
         <section className="grid gap-8 grid-cols-1 sm:grid-cols-2">{children}</section>
       </CardContent>
     </Card>
+  );
+}
+
+interface IndexingStatsForRealtimeStatusProjectionProps {
+  realtimeProjection: RealtimeIndexingStatusProjection;
+}
+
+/**
+ * Display indexing stats for a {@link RealtimeIndexingStatusProjection}.
+ */
+export function IndexingStatsForRealtimeStatusProjection({
+  realtimeProjection,
+}: IndexingStatsForRealtimeStatusProjectionProps) {
+  const omnichainStatusSnapshot = realtimeProjection.snapshot.omnichainSnapshot;
+  let indexingStats: ReactElement;
+  let maybeIndexingTimeline: ReactElement | undefined;
+
+  switch (omnichainStatusSnapshot.omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted:
+      indexingStats = (
+        <IndexingStatsForSnapshotUnstarted
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
+      break;
+
+    case OmnichainIndexingStatusIds.Backfill:
+      indexingStats = (
+        <IndexingStatsForSnapshotBackfill
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
+
+      maybeIndexingTimeline = (
+        <BackfillStatus
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
+      break;
+
+    case OmnichainIndexingStatusIds.Completed:
+      indexingStats = (
+        <IndexingStatsForSnapshotCompleted
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
+      break;
+
+    case OmnichainIndexingStatusIds.Following:
+      indexingStats = (
+        <IndexingStatsForSnapshotFollowing
+          realtimeProjection={{
+            ...realtimeProjection,
+            snapshot: {
+              ...realtimeProjection.snapshot,
+              omnichainSnapshot: omnichainStatusSnapshot,
+            },
+          }}
+        />
+      );
+      break;
+  }
+
+  return (
+    <section className="flex flex-col gap-6">
+      {maybeIndexingTimeline}
+
+      <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
+        {indexingStats}
+      </IndexingStatsShell>
+    </section>
+  );
+}
+
+type IndexingStatsProps = ReturnType<typeof useIndexingStatus>;
+
+/**
+ * Display indexing stats based on query results from {@link useIndexingStatus}.
+ */
+export function IndexingStats(props: IndexingStatsProps) {
+  const indexingStatusQuery = props;
+
+  if (indexingStatusQuery.status === "error") {
+    return <p>Failed to fetch Indexing Status.</p>;
+  }
+
+  if (indexingStatusQuery.status === "pending") {
+    return <IndexingStatusLoading />;
+  }
+
+  const indexingStatus = indexingStatusQuery.data;
+
+  if (indexingStatus.responseCode === IndexingStatusResponseCodes.Error) {
+    return (
+      <IndexingStatsShell>
+        <IndexingStatsForUnavailableSnapshot />
+      </IndexingStatsShell>
+    );
+  }
+
+  return (
+    <IndexingStatsForRealtimeStatusProjection
+      realtimeProjection={indexingStatus.realtimeProjection}
+    />
   );
 }
