@@ -124,7 +124,7 @@ interface RegistrationsListProps {
 }
 
 /**
- * Displays recently indexed registrations as a table
+ * Displays recently indexed registrations
  */
 function RegistrationsList({ maxRecords }: RegistrationsListProps) {
   const recentRegistrationsQuery = useRecentRegistrations({
