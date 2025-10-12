@@ -15,7 +15,7 @@ export const guessChainIdFromRegisteredName = (
 ): ChainId | null => {
   const labels = name.split(".");
 
-  if (labels.length === 3) {
+  if (labels.length >= 3) {
     if (name.endsWith(".base.eth")) {
       // name is a direct subname of .base.eth
       // we will therefore assume it occured within Basenames.

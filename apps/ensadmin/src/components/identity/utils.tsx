@@ -1,15 +1,24 @@
 import { ChainIcon } from "@/components/chains/ChainIcon";
-import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
-import { ResolvedIdentity } from "@/components/identity/types";
+import { CopyButton } from "@/components/copy-button";
+import { ChainExplorerIcon } from "@/components/icons/chain-explorer-icon";
+import { IconENS } from "@/components/icons/ens";
+import { ExternalLink, InternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { getAddressDetailsUrl, getChainName } from "@/lib/namespace-utils";
+import {
+  getAddressDetailsUrl,
+  getBlockExplorerUrlForAddress,
+  getChainName,
+} from "@/lib/namespace-utils";
 import {
   DEFAULT_EVM_CHAIN_ID,
+  ENSNamespaceId,
+  Identity,
   Name,
+  ResolutionStatusIds,
+  isResolvedIdentity,
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
-import Link from "next/link";
 import { PropsWithChildren } from "react";
 import { Address, getAddress } from "viem";
 
@@ -50,9 +59,9 @@ export function NameLink({ name, className, children }: PropsWithChildren<NameLi
   const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(name));
 
   return (
-    <Link href={href} className={`${className || ""}`}>
+    <InternalLink href={href} className={className}>
       {children}
-    </Link>
+    </InternalLink>
   );
 }
 
@@ -65,14 +74,15 @@ interface AddressDisplayProps {
  * Displays a truncated checksummed address without any navigation.
  * Pure display component for showing addresses.
  */
-export function AddressDisplay({ address, className = "font-medium" }: AddressDisplayProps) {
+export function AddressDisplay({ address, className }: AddressDisplayProps) {
   const checksummedAddress = getAddress(address);
   const truncatedAddress = `${checksummedAddress.slice(0, 6)}...${checksummedAddress.slice(-4)}`;
   return <span className={className}>{truncatedAddress}</span>;
 }
 
-interface IdentityLink {
-  identity: ResolvedIdentity;
+interface IdentityLinkProps {
+  identity: Identity;
+  namespaceId: ENSNamespaceId;
   className?: string;
 }
 
@@ -84,62 +94,80 @@ interface IdentityLink {
  * Can take other components (ex.ChainIcon) as children
  * and display them alongside the link as one common interaction area.
  */
-export function IdentityLink({ identity, className, children }: PropsWithChildren<IdentityLink>) {
-  const ensAppAddressDetailsUrl = getAddressDetailsUrl(identity.address, identity.namespaceId);
+export function IdentityLink({
+  identity,
+  namespaceId,
+  className,
+  children,
+}: PropsWithChildren<IdentityLinkProps>) {
+  const ensAppAddressDetailsUrl = getAddressDetailsUrl(identity.address, namespaceId);
 
   if (!ensAppAddressDetailsUrl) {
-    return <IdentityInfoTooltip identity={identity}>{children}</IdentityInfoTooltip>;
+    return <>{children}</>;
   }
 
+  // TODO: build an "internal" address details page so that we can convert this to an
+  // `InternalLink`. We are proactively converting this from an `ExternalLinkWithIcon`
+  // to an `ExternalLink` (without icon) in preparation for this future enhancement.
   return (
-    <IdentityInfoTooltip identity={identity}>
-      <ExternalLinkWithIcon
-        href={ensAppAddressDetailsUrl.toString()}
-        className={`font-medium gap-2 ${className || ""}`}
-      >
-        {children}
-      </ExternalLinkWithIcon>
-    </IdentityInfoTooltip>
+    <ExternalLink href={ensAppAddressDetailsUrl.toString()} className={className}>
+      {children}
+    </ExternalLink>
   );
 }
 
-interface IdentityInfoTooltipProps {
-  identity: ResolvedIdentity;
+export interface IdentityTooltipProps {
+  identity: Identity;
+  namespaceId: ENSNamespaceId;
 }
 
 /**
  * On hover displays details on how the primary name for
  * the address of the identity was resolved.
  */
-const IdentityInfoTooltip = ({
-  children,
+export const IdentityTooltip = ({
   identity,
-}: PropsWithChildren<IdentityInfoTooltipProps>) => {
+  namespaceId,
+  children,
+}: PropsWithChildren<IdentityTooltipProps>) => {
+  if (!isResolvedIdentity(identity)) {
+    // identity is still loading, don't build any tooltip components yet.
+    return children;
+  }
+
   const chainDescription =
     identity.chainId === DEFAULT_EVM_CHAIN_ID
       ? 'the "default" EVM Chain'
       : getChainName(identity.chainId);
 
-  const header =
-    identity.name !== null
-      ? `Primary name on ${chainDescription} for address:`
-      : `Unnamed address on ${chainDescription}:`;
+  let header: string;
 
-  const ensAppAddressDetailsUrl = getAddressDetailsUrl(identity.address, identity.namespaceId);
+  switch (identity.resolutionStatus) {
+    case ResolutionStatusIds.Named:
+      header = `Primary name on ${chainDescription} for address:`;
+      break;
+    case ResolutionStatusIds.Unnamed:
+      header = `Unnamed address on ${chainDescription}:`;
+      break;
+    case ResolutionStatusIds.Unknown:
+      header = `Error resolving address on ${chainDescription}:`;
+      break;
+  }
 
-  const body = ensAppAddressDetailsUrl ? (
-    <ExternalLinkWithIcon href={ensAppAddressDetailsUrl.toString()} className={`font-medium gap-2`}>
-      <AddressDisplay address={identity.address} />
-    </ExternalLinkWithIcon>
-  ) : (
-    <span className={`font-medium gap-2`}>
+  const ensAppAddressDetailsUrl = getAddressDetailsUrl(identity.address, namespaceId);
+
+  const body = (
+    <span>
       <AddressDisplay address={identity.address} />
     </span>
   );
 
+  const effectiveChainId = translateDefaultableChainIdToChainId(identity.chainId, namespaceId);
+  const chainExplorerUrl = getBlockExplorerUrlForAddress(effectiveChainId, identity.address);
+
   return (
     <Tooltip delayDuration={1000}>
-      <TooltipTrigger>{children}</TooltipTrigger>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side="top"
         className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
@@ -147,7 +175,7 @@ const IdentityInfoTooltip = ({
         <div className="flex gap-4">
           <div className="flex items-center">
             <ChainIcon
-              chainId={translateDefaultableChainIdToChainId(identity.chainId, identity.namespaceId)}
+              chainId={translateDefaultableChainIdToChainId(identity.chainId, namespaceId)}
               height={24}
               width={24}
             />
@@ -156,6 +184,30 @@ const IdentityInfoTooltip = ({
             {header}
             <br />
             {body}
+          </div>
+          <div className="flex items-center gap-2">
+            <CopyButton
+              value={identity.address}
+              className="text-gray-500 hover:text-gray-700 transition-colors"
+            />
+            {chainExplorerUrl && (
+              <ExternalLink href={chainExplorerUrl.toString()}>
+                <ChainExplorerIcon
+                  height={24}
+                  width={24}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                />
+              </ExternalLink>
+            )}
+            {ensAppAddressDetailsUrl && (
+              <ExternalLink href={ensAppAddressDetailsUrl.toString()}>
+                <IconENS
+                  height={24}
+                  width={24}
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
+                />
+              </ExternalLink>
+            )}
           </div>
         </div>
       </TooltipContent>

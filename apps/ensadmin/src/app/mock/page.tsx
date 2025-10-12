@@ -37,6 +37,11 @@ export default function MockList() {
                 RelativeTime
               </Link>
             </Button>
+            <Button asChild variant="outline">
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/display-identity")}>
+                DisplayIdentity
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

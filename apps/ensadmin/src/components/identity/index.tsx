@@ -3,114 +3,143 @@
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { EnsAvatar } from "@/components/ens-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { cn } from "@/lib/utils";
-import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
-import { usePrimaryName } from "@ensnode/ensnode-react";
+import { useResolvedIdentity } from "@ensnode/ensnode-react";
 import {
-  DefaultableChainId,
-  getResolvePrimaryNameChainIdParam,
+  ENSNamespaceId,
+  Identity,
+  ResolutionStatusIds,
+  UnresolvedIdentity,
+  isResolvedIdentity,
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
 import * as React from "react";
-import type { Address } from "viem";
-import { ResolvedIdentity } from "./types";
-import { AddressDisplay, IdentityLink, NameDisplay } from "./utils";
+import { AddressDisplay, IdentityLink, IdentityTooltip, NameDisplay } from "./utils";
 
-interface IdentityProps {
-  address: Address;
-  namespaceId: ENSNamespaceId;
-  chainId?: DefaultableChainId;
-  showAvatar?: boolean;
+interface ResolveAndDisplayIdentityProps {
+  identity: UnresolvedIdentity;
+  withLink?: boolean;
+  withTooltip?: boolean;
+  withAvatar?: boolean;
   className?: string;
 }
 
 /**
- * Displays the ENS identity as resolved through ENSNode for the
- * provided `address`, `namespaceId`, and `chainId`.
+ * Resolves the provided `UnresolvedIdentity` through ENSNode and displays the result.
  *
- * If no chainId is provided, the ENS Root Chain Id for the provided
- * `namespaceId` is used.
- *
- * If the provided address has a primary name set, displays that primary name and links to the profile for that name.
- * Else, if the provided address doesn't have a primary name, displays the truncated address and links to the profile for that address.
- * Also, optionally displays an avatar image and external link.
+ * @param identity - The `UnresolvedIdentity` to resolve and display.
+ * @param withLink - Whether to wrap the displayed identity in an `IdentityLink` component.
+ * @param withTooltip - Whether to wrap the displayed identity in an `IdentityInfoTooltip` component.
+ * @param withAvatar - Whether to display an avatar image.
+ * @param className - The class name to apply to the displayed identity.
  */
-export function Identity({
-  address,
-  namespaceId,
-  chainId,
-  showAvatar = false,
+export function ResolveAndDisplayIdentity({
+  identity,
+  withLink = true,
+  withTooltip = true,
+  withAvatar = false,
   className,
-}: IdentityProps) {
-  if (chainId === undefined) {
-    // default to resolving the identity for `address` on the ENS Root Chain
-    // for the provided `namespaceId`.
-    chainId = getENSRootChainId(namespaceId);
-  }
+}: ResolveAndDisplayIdentityProps) {
+  const namespaceId = useActiveNamespace();
 
-  // resolve the primary name for `address` on `chainId` using ENSNode
-  const { data, status } = usePrimaryName({
-    address,
-    chainId: getResolvePrimaryNameChainIdParam(chainId, namespaceId),
-  });
+  // resolve the primary name for `identity` using ENSNode
+  // TODO: extract out the concept of resolving an `Identity` into a provider that child
+  //       components can then hook into.
+  const { identity: identityResult } = useResolvedIdentity({ identity, namespaceId });
 
-  // If loading, show a skeleton
-  if (status === "pending") {
-    return <IdentityPlaceholder showAvatar={showAvatar} className={className} />;
-  }
-
-  const identity: ResolvedIdentity = {
-    address,
-    name: null, // default to null for the case `status` !== "success"
-    namespaceId,
-    chainId,
-  };
-
-  const renderUnnamedIdentity = () => (
-    <IdentityLink identity={identity}>
-      {showAvatar && (
-        <ChainIcon
-          chainId={translateDefaultableChainIdToChainId(identity.chainId, identity.namespaceId)}
-          height={24}
-          width={24}
-        />
-      )}
-      <AddressDisplay address={identity.address} />
-    </IdentityLink>
-  );
-
-  // If there is an error looking up the primary name,
-  // fallback to showing the unnamed identity
-  if (status === "error") return renderUnnamedIdentity();
-
-  identity.name = data.name;
-
-  // If there is no primary name for `address` on `chainId`,
-  // fallback to showing the unnamed identity
-  if (identity.name === null) return renderUnnamedIdentity();
-
-  // Otherwise, render the named identity we resolved for `address` on `chainId`
   return (
-    <IdentityLink
-      identity={identity}
-      className="inline-flex items-center gap-2 text-blue-600 hover:underline"
-    >
-      {showAvatar && (
-        <EnsAvatar name={identity.name} namespaceId={namespaceId} className="h-6 w-6" />
-      )}
-      <NameDisplay name={identity.name} />
-    </IdentityLink>
+    <DisplayIdentity
+      identity={identityResult}
+      namespaceId={namespaceId}
+      withLink={withLink}
+      withTooltip={withTooltip}
+      withAvatar={withAvatar}
+      className={className}
+    />
   );
 }
-Identity.Placeholder = IdentityPlaceholder;
 
-interface IdentityPlaceholderProps extends Pick<IdentityProps, "showAvatar" | "className"> {}
+interface DisplayIdentityProps {
+  identity: Identity;
+  namespaceId: ENSNamespaceId;
+  withLink?: boolean;
+  withTooltip?: boolean;
+  withAvatar?: boolean;
+  className?: string;
+}
 
-function IdentityPlaceholder({ showAvatar = false, className }: IdentityPlaceholderProps) {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      {showAvatar && <Skeleton className="h-6 w-6 rounded-full" />}
-      <Skeleton className="h-4 w-24" />
+/**
+ * Displays the provided `Identity`.
+ *
+ * Performs _NO_ resolution if the provided `identity` is not already a `ResolvedIdentity`.
+ *
+ * @param identity - The identity to display. May be a `ResolvedIdentity` or an `UnresolvedIdentity`.
+ *                      If not a `ResolvedIdentity` (and therefore just an `UnresolvedIdentity`) then displays a loading state.
+ * @param withLink - Whether to wrap the displayed identity in an `IdentityLink` component.
+ * @param withTooltip - Whether to wrap the displayed identity in an `IdentityInfoTooltip` component.
+ * @param withAvatar - Whether to display an avatar image.
+ * @param className - The class name to apply to the displayed identity.
+ */
+export function DisplayIdentity({
+  identity,
+  namespaceId,
+  withLink = true,
+  withTooltip = true,
+  withAvatar = false,
+  className,
+}: DisplayIdentityProps) {
+  let avatar;
+  let identitifer;
+
+  if (!isResolvedIdentity(identity)) {
+    // identity is an `UnresolvedIdentity` which represents that it hasn't been resolved yet
+    // display loading state
+    avatar = <Skeleton className="h-6 w-6 rounded-full" />;
+    identitifer = <Skeleton className={cn("h-4 w-24", className)} />;
+  } else if (
+    identity.resolutionStatus === ResolutionStatusIds.Unnamed ||
+    identity.resolutionStatus === ResolutionStatusIds.Unknown
+  ) {
+    avatar = (
+      <ChainIcon
+        chainId={translateDefaultableChainIdToChainId(identity.chainId, namespaceId)}
+        height={24}
+        width={24}
+      />
+    );
+    identitifer = <AddressDisplay address={identity.address} className={className} />;
+  } else {
+    avatar = <EnsAvatar name={identity.name} namespaceId={namespaceId} className="h-6 w-6" />;
+    identitifer = <NameDisplay name={identity.name} className={className} />;
+  }
+
+  let result = (
+    <div className="inline-flex items-center gap-2">
+      {/* TODO: extract the `EnsAvatar` / `ChainIcon` out of this component and remove the
+      `withAvatar` prop. */}
+      {withAvatar && avatar}
+      {identitifer}
     </div>
   );
+
+  // TODO: extract the `IdentityInfoTooltip` out of this component and remove the `withTooltip` prop.
+  if (withTooltip) {
+    result = (
+      <IdentityTooltip identity={identity} namespaceId={namespaceId}>
+        {result}
+      </IdentityTooltip>
+    );
+  }
+
+  // TODO: extract the `IdentityLink` out of this component and remove the `withLink` prop.
+  if (withLink) {
+    result = (
+      <IdentityLink identity={identity} namespaceId={namespaceId}>
+        {result}
+      </IdentityLink>
+    );
+  }
+
+  return result;
 }

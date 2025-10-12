@@ -180,6 +180,19 @@ export const getBlockExplorerUrlForBlock = (chainId: ChainId, blockNumber: numbe
 };
 
 /**
+ * Gets the block explorer URL for a specific address on a specific chainId
+ *
+ * @returns complete block explorer URL for a specific address on a specific chainId,
+ * or null if the referenced chain doesn't have a known block explorer
+ */
+export const getBlockExplorerUrlForAddress = (chainId: ChainId, address: Address): URL | null => {
+  const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
+  if (!chainBlockExplorer) return null;
+
+  return new URL(`address/${address}`, chainBlockExplorer.toString());
+};
+
+/**
  * Returns a prettified chain name for the provided chain id.
  */
 export function getChainName(chainId: ChainId): string {
