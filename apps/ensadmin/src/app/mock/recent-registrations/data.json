@@ -1,8 +1,6 @@
 {
   "unstarted or backfill": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -20,9 +18,12 @@
         "referrals",
         "tokenscope"
       ],
-      "dependencyInfo": {
+      "versionInfo": {
         "nodejs": "22.18.0",
         "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
         "ensRainbow": "0.34.0",
         "ensRainbowSchema": 3
       }
@@ -99,8 +100,6 @@
   },
   "indexer-error": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -118,9 +117,12 @@
         "referrals",
         "tokenscope"
       ],
-      "dependencyInfo": {
+      "versionInfo": {
         "nodejs": "22.18.0",
         "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
         "ensRainbow": "0.34.0",
         "ensRainbowSchema": 3
       }
@@ -131,8 +133,6 @@
   },
   "following": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -150,9 +150,12 @@
         "referrals",
         "tokenscope"
       ],
-      "dependencyInfo": {
+      "versionInfo": {
         "nodejs": "22.18.0",
         "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
         "ensRainbow": "0.34.0",
         "ensRainbowSchema": 3
       }
@@ -243,8 +246,6 @@
   },
   "completed": {
     "ensIndexerConfig": {
-      "ensAdminUrl": "https://admin.ensnode.io/",
-      "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
       "labelSet": {
         "labelSetId": "subgraph",
         "labelSetVersion": 0
@@ -262,9 +263,12 @@
         "referrals",
         "tokenscope"
       ],
-      "dependencyInfo": {
+      "versionInfo": {
         "nodejs": "22.18.0",
         "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
         "ensRainbow": "0.34.0",
         "ensRainbowSchema": 3
       }

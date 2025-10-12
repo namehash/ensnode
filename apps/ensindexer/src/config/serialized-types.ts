@@ -25,28 +25,12 @@ export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "webso
 export interface SerializedENSIndexerConfig
   extends Omit<
     ENSIndexerConfig,
-    | "ensAdminUrl"
-    | "ensNodePublicUrl"
-    | "ensIndexerUrl"
-    | "ensRainbowUrl"
-    | "indexedChainIds"
-    | "rpcConfigs"
-    | "plugins"
+    "ensIndexerUrl" | "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins"
   > {
-  /**
-   * Serialized representation of {@link ENSIndexerConfig.ensAdminUrl}.
-   */
-  ensAdminUrl: UrlString;
-
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensIndexerUrl}.
    */
   ensIndexerUrl: UrlString;
-
-  /**
-   * Serialized representation of {@link ENSIndexerConfig.ensNodePublicUrl}.
-   */
-  ensNodePublicUrl: UrlString;
 
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensRainbowUrl}.

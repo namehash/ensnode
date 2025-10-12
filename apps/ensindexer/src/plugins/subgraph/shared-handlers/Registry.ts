@@ -52,18 +52,18 @@ export const handleNewOwner =
     // the domain in question is a subdomain of `parentNode`
     const node = makeSubdomainNode(labelHash, parentNode);
 
-    let domain = await context.db.find(schema.domain, { id: node });
+    let domain = await context.db.find(schema.subgraph_domain, { id: node });
 
     // note that we set isMigrated in each branch such that if this domain is being
     // interacted with on the new registry, its migration status is set here
     if (domain) {
       // if the domain already exists, this is just an update of the owner record (& isMigrated)
       domain = await context.db
-        .update(schema.domain, { id: node })
+        .update(schema.subgraph_domain, { id: node })
         .set({ ownerId: owner, isMigrated });
     } else {
       // otherwise create the domain (w/ isMigrated)
-      domain = await context.db.insert(schema.domain).values({
+      domain = await context.db.insert(schema.subgraph_domain).values({
         id: node,
         ownerId: owner,
         parentId: parentNode,
@@ -74,13 +74,13 @@ export const handleNewOwner =
 
       // and increment parent subdomainCount
       await context.db
-        .update(schema.domain, { id: parentNode })
+        .update(schema.subgraph_domain, { id: parentNode })
         .set((row) => ({ subdomainCount: row.subdomainCount + 1 }));
     }
 
     // if the domain doesn't yet have a name, attempt to construct it here
     if (domain.name === null) {
-      const parent = await context.db.find(schema.domain, { id: parentNode });
+      const parent = await context.db.find(schema.subgraph_domain, { id: parentNode });
 
       let healedLabel: LiteralLabel | null = null;
 
@@ -123,7 +123,7 @@ export const handleNewOwner =
           parent?.name ? `${subgraphInterpretedLabel}.${parent.name}` : subgraphInterpretedLabel
         ) as SubgraphInterpretedName;
 
-        await context.db.update(schema.domain, { id: node }).set({
+        await context.db.update(schema.subgraph_domain, { id: node }).set({
           name: subgraphInterpretedName,
           // NOTE(subgraph-compat): update Domain.labelName iff label is subgraph-indexable
           //   via: https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L113
@@ -148,7 +148,7 @@ export const handleNewOwner =
           parent?.name ? `${interpretedLabel}.${parent.name}` : interpretedLabel
         ) as InterpretedName;
 
-        await context.db.update(schema.domain, { id: node }).set({
+        await context.db.update(schema.subgraph_domain, { id: node }).set({
           name: interpretedName,
           labelName: interpretedLabel,
         });
@@ -162,7 +162,7 @@ export const handleNewOwner =
     }
 
     // log DomainEvent
-    await context.db.insert(schema.newOwner).values({
+    await context.db.insert(schema.subgraph_newOwner).values({
       ...sharedEventValues(context.chain.id, event),
       parentDomainId: parentNode,
       domainId: node,
@@ -183,7 +183,7 @@ export async function handleTransfer({
 
   // ensure domain & update owner
   await context.db
-    .insert(schema.domain)
+    .insert(schema.subgraph_domain)
     .values([{ id: node, ownerId: owner, createdAt: event.block.timestamp }])
     .onConflictDoUpdate({ ownerId: owner });
 
@@ -193,7 +193,7 @@ export async function handleTransfer({
   }
 
   // log DomainEvent
-  await context.db.insert(schema.transfer).values({
+  await context.db.insert(schema.subgraph_transfer).values({
     ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ownerId: owner,
@@ -213,10 +213,10 @@ export async function handleNewTTL({
   // never deleted, so we avoid implementing that check here
   // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L215
 
-  await context.db.update(schema.domain, { id: node }).set({ ttl });
+  await context.db.update(schema.subgraph_domain, { id: node }).set({ ttl });
 
   // log DomainEvent
-  await context.db.insert(schema.newTTL).values({
+  await context.db.insert(schema.subgraph_newTTL).values({
     ...sharedEventValues(context.chain.id, event),
     domainId: node,
     ttl,
@@ -242,7 +242,7 @@ export async function handleNewResolver({
     // NOTE(resolver-relations): unlink subgraph-schema Domain-Resolver relationship iff this is the ENSRoot's chain
     if (context.chain.id === ensRootChainId) {
       await context.db
-        .update(schema.domain, { id: node })
+        .update(schema.subgraph_domain, { id: node })
         .set({ resolverId: null, resolvedAddressId: null });
     }
 
@@ -260,7 +260,7 @@ export async function handleNewResolver({
     if (context.chain.id === ensRootChainId) {
       // update the domain to point to it, and materialize the eth addr
       // via https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ensRegistry.ts#L193
-      await context.db.update(schema.domain, { id: node }).set({
+      await context.db.update(schema.subgraph_domain, { id: node }).set({
         resolverId,
         resolvedAddressId: resolver.addrId,
       });
@@ -268,7 +268,7 @@ export async function handleNewResolver({
   }
 
   // log DomainEvent
-  await context.db.insert(schema.newResolver).values({
+  await context.db.insert(schema.subgraph_newResolver).values({
     ...sharedEventValues(context.chain.id, event),
     domainId: node,
     // NOTE: this actually produces a bug in the subgraph's graphql layer — `resolver` is not nullable

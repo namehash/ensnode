@@ -9,21 +9,22 @@ import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
 import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
+import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
-import { IconENS } from "@/components/icons/ens";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
+import { IconGraphNetwork } from "@/components/icons/graph-network";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { ExternalLink, PlugZap, Replace } from "lucide-react";
+import { PlugZap, Replace } from "lucide-react";
 
 /**
  * ENSNodeConfigInfo display variations:
@@ -61,6 +62,58 @@ export function ENSNodeConfigInfo({
   if (ensIndexerConfig === undefined) {
     return <ENSNodeConfigInfoLoading />;
   }
+
+  const healReverseAddressesActivated = !ensIndexerConfig.isSubgraphCompatible;
+  const indexAdditionalRecordsActivated = !ensIndexerConfig.isSubgraphCompatible;
+  const replaceUnnormalizedLabelsActivated = !ensIndexerConfig.isSubgraphCompatible;
+  const subgraphCompatibilityActivated = ensIndexerConfig.isSubgraphCompatible;
+
+  const healReverseAddressesDescription = healReverseAddressesActivated ? (
+    <p>Subnames of addr.reverse will all be known (healed) labels.</p>
+  ) : (
+    <p>Subnames of addr.reverse will generally be unknown labels.</p>
+  );
+
+  const indexAdditionalRecordsDescription = indexAdditionalRecordsActivated ? (
+    <p>
+      The keys and values of all onchain resolver records will be indexed across all indexed chains.
+    </p>
+  ) : (
+    <p>
+      Only the keys (generally none of the values) of onchain resolver records will be indexed
+      across all indexed chains.
+    </p>
+  );
+
+  const replaceUnnormalizedLabelsDescription = replaceUnnormalizedLabelsActivated ? (
+    <p>
+      All labels and names that ENSIndexer stores in ENSDb will meet the strong guarantees of
+      "Interpreted Labels" and "Interpreted Names". Therefore apps integrating with this ENSNode
+      don't need to worry about receiving unnormalized labels from ENSNode that are not encoded
+      labelhashes.{" "}
+      <ExternalLinkWithIcon href="https://ensnode.io/docs/reference/terminology/#interpreted-label">
+        Learn more.
+      </ExternalLinkWithIcon>
+    </p>
+  ) : (
+    <p>
+      All labels and names that ENSIndexer stores in ENSDb will meet the loose guarantees of
+      "Subgraph Interpreted Labels" and "Subgraph Interpreted Names". Therefore apps integrating
+      with this ENSNode need to worry about receiving unnormalized labels and names from ENSNode.
+    </p>
+  );
+
+  const subgraphCompatibilityDescription = subgraphCompatibilityActivated ? (
+    <p>
+      ENSIndexer is operating in a subgraph-compatible way. It will use subgraph-compatible IDs for
+      entities and events and limit indexing behavior to subgraph indexing semantics.
+    </p>
+  ) : (
+    <p>
+      ENSIndexer has activated feature enhancements and/or plugins that provide key benefits but are
+      not fully backwards compatible with the ENS Subgraph.
+    </p>
+  );
 
   return (
     <div className="relative">
@@ -107,42 +160,104 @@ export function ENSNodeConfigInfo({
               icon={<ENSDbIcon width={24} height={24} />}
               items={[
                 {
+                  label: "Database",
+                  value: <p className={cardItemValueStyles}>Postgres</p>,
+                },
+                {
                   label: "Database Schema",
                   value: (
                     <p className={cardItemValueStyles}>{ensIndexerConfig.databaseSchemaName}</p>
                   ),
                   additionalInfo: (
                     <p>
-                      A Postgres database schema name. ENSIndexer writes indexed data to tables
-                      within this schema.
+                      ENSIndexer writes indexed data to tables within this Postgres database schema.
                     </p>
                   ),
                 },
-                {
-                  label: "Database",
-                  value: <p className={cardItemValueStyles}>Postgres</p>,
-                },
               ]}
-              version={ensIndexerConfig.dependencyInfo.ensRainbow}
+              version={ensIndexerConfig.versionInfo.ensDb}
               docsLink={new URL("https://ensnode.io/ensdb/")}
             />
-            {/*It's safe to assume that the version number of ENSDb is always equal to the version number of ENSIndexer.
-             Until changes to ENSIndexerPublicConfig are made this logic is correct (see a comment about ENSIndexer version)*/}
+
             {/*ENSIndexer*/}
             <ConfigInfoAppCard
               name="ENSIndexer"
               icon={<ENSIndexerIcon width={24} height={24} />}
               items={[
                 {
-                  label: "Ponder",
+                  label: "Node.js",
                   value: (
-                    <p className={cardItemValueStyles}>{ensIndexerConfig.dependencyInfo.ponder}</p>
+                    <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.nodejs}</p>
+                  ),
+                  additionalInfo: (
+                    <p>
+                      Version of the{" "}
+                      <ExternalLinkWithIcon
+                        href={`https://nodejs.org/en/download/archive/v${ensIndexerConfig.versionInfo.nodejs}`}
+                      >
+                        Node.js
+                      </ExternalLinkWithIcon>{" "}
+                      runtime.
+                    </p>
                   ),
                 },
                 {
-                  label: "Node.js",
+                  label: "Ponder",
                   value: (
-                    <p className={cardItemValueStyles}>{ensIndexerConfig.dependencyInfo.nodejs}</p>
+                    <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.ponder}</p>
+                  ),
+                  additionalInfo: (
+                    <p>
+                      Version of the{" "}
+                      <ExternalLinkWithIcon
+                        href={`https://www.npmjs.com/package/ponder/v/${ensIndexerConfig.versionInfo.ponder}`}
+                      >
+                        ponder
+                      </ExternalLinkWithIcon>{" "}
+                      package used for indexing onchain data.
+                    </p>
+                  ),
+                },
+                {
+                  label: "ens-normalize.js",
+                  value: (
+                    <p className={cardItemValueStyles}>
+                      {ensIndexerConfig.versionInfo.ensNormalize}
+                    </p>
+                  ),
+                  additionalInfo: (
+                    <p>
+                      Version of the{" "}
+                      <ExternalLinkWithIcon
+                        href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensIndexerConfig.versionInfo.ensNormalize}`}
+                      >
+                        @adraffy/ens-normalize
+                      </ExternalLinkWithIcon>{" "}
+                      package used for ENS name normalization.
+                    </p>
+                  ),
+                },
+                {
+                  label: "Client LabelSet",
+                  value: (
+                    <ul className={cardItemValueStyles}>
+                      <li>
+                        {ensIndexerConfig.labelSet.labelSetId}:
+                        {ensIndexerConfig.labelSet.labelSetVersion}
+                      </li>
+                    </ul>
+                  ),
+                  additionalInfo: (
+                    <p>
+                      The "fully pinned" labelset id and version used for deterministic healing of
+                      unknown labels across time. The label set version may be equal to or less than
+                      the highest label set version offered by the connected ENSRainbow server.{" "}
+                      <ExternalLinkWithIcon
+                        href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/#client-behavior`}
+                      >
+                        Learn more.
+                      </ExternalLinkWithIcon>
+                    </p>
                   ),
                 },
                 {
@@ -186,101 +301,72 @@ export function ENSNodeConfigInfo({
                   ),
                 },
               ]}
-              checks={[
+              features={[
                 {
                   label: "Heal Reverse Addresses",
-                  description: {
-                    descWhenTrue: "ENSIndexer won't attempt to heal subnames of addr.reverse.",
-                    descWhenFalse: "ENSIndexer will attempt to heal subnames of addr.reverse.",
-                  },
-                  value: ensIndexerConfig.isSubgraphCompatible,
-                  icon: <HealIcon className="flex-shrink-0" />,
+                  description: healReverseAddressesDescription,
+                  isActivated: healReverseAddressesActivated,
+                  icon: <HealIcon width={15} height={15} className="flex-shrink-0" />,
                 },
                 {
                   label: "Index Additional Resolver Records",
-                  description: {
-                    descWhenTrue: "ENSIndexer will only track the keys of Resolver records.",
-                    descWhenFalse:
-                      "ENSIndexer will track both the keys and the values of Resolver records.",
-                  },
-                  value: ensIndexerConfig.isSubgraphCompatible,
-                  icon: <IndexAdditionalRecordsIcon className="flex-shrink-0" />,
-                },
-                {
-                  label: "Replace Unnormalized Labels",
-                  description: {
-                    descWhenTrue:
-                      "ENSIndexer will store and return Literal Labels and Literal Names without further interpretation",
-                    descWhenFalse:
-                      "All Literal Labels and Literal Names encountered by ENSIndexer will be interpreted.",
-                  },
-                  value: ensIndexerConfig.isSubgraphCompatible,
+                  description: indexAdditionalRecordsDescription,
+                  isActivated: indexAdditionalRecordsActivated,
                   icon: (
-                    <Replace width={20} height={20} stroke="#3F3F46" className="flex-shrink-0" />
+                    <IndexAdditionalRecordsIcon width={15} height={15} className="flex-shrink-0" />
                   ),
                 },
                 {
-                  label: "Subgraph Compatible",
-                  description: {
-                    descWhenTrue:
-                      "ENSIndexer is operating in a subgraph-compatible way. It will use subgraph-compatible IDs for entities and events and limit indexing behavior to subgraph indexing semantics",
-                    descWhenFalse:
-                      "ENSIndexer is not operating in a subgraph-compatible way and includes additional indexing enhancements.",
-                  },
-                  value: ensIndexerConfig.isSubgraphCompatible,
-                  icon: <IconENS width={18} height={18} className="text-[#3F3F46] flex-shrink-0" />,
+                  label: "Replace Unnormalized Labels",
+                  description: replaceUnnormalizedLabelsDescription,
+                  isActivated: replaceUnnormalizedLabelsActivated,
+                  icon: (
+                    <Replace width={15} height={15} stroke="#3F3F46" className="flex-shrink-0" />
+                  ),
+                },
+                {
+                  label: "Subgraph Compatibility",
+                  description: subgraphCompatibilityDescription,
+                  isActivated: subgraphCompatibilityActivated,
+                  icon: (
+                    <IconGraphNetwork
+                      width={15}
+                      height={15}
+                      className="text-[#3F3F46] flex-shrink-0"
+                    />
+                  ),
                 },
               ]}
-              version={ensIndexerConfig.dependencyInfo.ensRainbow}
+              version={ensIndexerConfig.versionInfo.ensIndexer}
               docsLink={new URL("https://ensnode.io/ensindexer/")}
             />
-            {/*TODO: The current approach to displaying the version of ENSIndexer is a stretch.
-           We need to make another update that improves the data model of ENSIndexerPublicConfig and related */}
+
             {/*ENSRainbow*/}
             <ConfigInfoAppCard
               name="ENSRainbow"
               icon={<ENSRainbowIcon width={24} height={24} />}
               items={[
                 {
-                  label: "Schema Version",
+                  label: "Server LabelSet",
                   value: (
                     <p className={cardItemValueStyles}>
-                      {ensIndexerConfig.dependencyInfo.ensRainbowSchema}
-                    </p>
-                  ),
-                },
-                {
-                  label: "LabelSetId",
-                  value: (
-                    <p className={cardItemValueStyles}>{ensIndexerConfig.labelSet.labelSetId}</p>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      Optional label set ID that the ENSRainbow server is expected to use. If
-                      provided, heal operations will validate the ENSRainbow server is using this
-                      labelSetId.
-                    </p>
-                  ),
-                },
-                {
-                  label: "Highest label set version",
-                  value: (
-                    <p className={cardItemValueStyles}>
+                      {ensIndexerConfig.labelSet.labelSetId}:
                       {ensIndexerConfig.labelSet.labelSetVersion}
                     </p>
                   ),
                   additionalInfo: (
                     <p>
-                      Optional highest label set version of label set id to query. Enables
-                      deterministic heal results across time even if the ENSRainbow server ingests
-                      label sets with greater versions than this value. If provided, only labels
-                      from label sets with versions less than or equal to this value will be
-                      returned. If not provided, the server will use the latest available version.
+                      The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
+                      <ExternalLinkWithIcon
+                        href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/`}
+                      >
+                        Learn more.
+                      </ExternalLinkWithIcon>
                     </p>
                   ),
                 },
               ]}
-              version={ensIndexerConfig.dependencyInfo.ensRainbow}
+              version={ensIndexerConfig.versionInfo.ensRainbow}
               docsLink={new URL("https://ensnode.io/ensrainbow/")}
             />
           </div>

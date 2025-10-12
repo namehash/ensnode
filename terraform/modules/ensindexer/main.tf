@@ -8,7 +8,6 @@ locals {
     "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
     "PLUGINS"           = { value = var.plugins },
     "NAMESPACE"         = { value = var.namespace },
-    "ENSADMIN_URL"      = { value = var.ensadmin_public_url },
     "SUBGRAPH_COMPAT"   = { value = var.subgraph_compat }
 
     # Mainnet networks
@@ -50,9 +49,6 @@ resource "render_web_service" "ensindexer" {
   env_vars = merge(
     local.common_variables,
     {
-      ENSNODE_PUBLIC_URL = {
-        value = "https://${local.ensindexer_fqdn}"
-      },
       ENSINDEXER_URL = {
         value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       }
@@ -84,9 +80,6 @@ resource "render_web_service" "ensindexer_api" {
   env_vars = merge(
     local.common_variables,
     {
-      ENSNODE_PUBLIC_URL = {
-        value = "https://${local.ensindexer_api_fqdn}"
-      },
       ENSINDEXER_URL = {
         value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       },
