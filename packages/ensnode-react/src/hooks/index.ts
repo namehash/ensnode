@@ -5,6 +5,7 @@ export * from "./usePrimaryNames";
 export * from "./useENSIndexerConfig";
 export * from "./useIndexingStatus";
 export * from "./useAvatarUrl";
+export * from "./useProfile";
 
 // Re-export BrowserSupportedAssetUrl for convenience
 export type { BrowserSupportedAssetUrl } from "@ensnode/ensnode-sdk";
