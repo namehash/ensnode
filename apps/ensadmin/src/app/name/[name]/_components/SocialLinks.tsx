@@ -1,28 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ENSAdminProfile, ENSAdminSocialLinkKey } from "@/hooks/use-ensadmin-profile";
 import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 
-const SOCIAL_LINK_KEYS = [
-  "com.twitter",
-  "com.farcaster",
-  "com.github",
-  "org.telegram",
-  "com.linkedin",
-  "com.reddit",
-] as const;
+interface SocialLinksProps {
+  profile: ENSAdminProfile;
+}
 
-type SocialLinkKey = (typeof SOCIAL_LINK_KEYS)[number];
-type SocialLinkValue = string;
-
-export function SocialLinks({
-  links,
-}: { links: { key: SocialLinkKey; value: SocialLinkValue }[] }) {
-  if (links.length === 0) return null;
+export function SocialLinks({ profile }: SocialLinksProps) {
+  if (profile.socialLinks.length === 0) return null;
 
   return (
     <Card>
@@ -30,8 +19,8 @@ export function SocialLinks({
         <CardTitle>Social Links</CardTitle>
       </CardHeader>
       <CardContent className="gap-3 flex flex-col md:flex-row flex-wrap">
-        {links.map(({ key, value }) => {
-          switch (key) {
+        {profile.socialLinks.map(({ key, value }) => {
+          switch (key as ENSAdminSocialLinkKey) {
             case "com.twitter": {
               return (
                 <div key={key} className="inline-flex items-center gap-2">
@@ -104,22 +93,3 @@ export function SocialLinks({
     </Card>
   );
 }
-
-SocialLinks.Texts = function SocialLinksTexts({
-  texts,
-}: { texts: Record<string, string | null | undefined> }) {
-  const links = useMemo(
-    () =>
-      SOCIAL_LINK_KEYS
-        // map social keys to a set of links
-        .map((key) => ({ key, value: texts[key] }))
-        // filter those links by those that exist
-        .filter(
-          (link): link is { key: SocialLinkKey; value: SocialLinkValue } =>
-            typeof link.value === "string",
-        ),
-    [texts],
-  );
-
-  return <SocialLinks links={links} />;
-};
