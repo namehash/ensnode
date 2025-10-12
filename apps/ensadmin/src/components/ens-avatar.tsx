@@ -20,8 +20,11 @@ type ImageLoadingStatus = Parameters<
  *
  * This component handles three distinct states:
  * 1. **Loading**: Shows a pulsing placeholder while fetching the avatar URL from ENS records
- * 2. **Avatar Available**: Displays the avatar image once loaded, with an additional loading state for the image itself
- * 3. **Fallback**: Shows a generated avatar based on the ENS name when no avatar is available or if the image fails to load
+ *    and while loading the avatar image asset itself
+ * 2. **Avatar Loaded**: Displays the avatar image once loaded
+ * 3. **Fallback**: Shows a generated avatar based on the ENS name when no avatar record is set for `name`,
+ *    or the avatar record set for `name` is not formatted as a proper url, or if no browser-supported url
+ *    was available, or if the browser-supported url for the avatar failed to load.
  *
  * The component ensures that the fallback avatar is only shown as a final state, never during loading,
  * preventing unwanted visual transitions from fallback to actual avatar.
@@ -40,14 +43,14 @@ type ImageLoadingStatus = Parameters<
  * ```
  */
 export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
-  const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
+  const [imageLoadingStatus, setImageLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
 
-  const { data: avatarData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
+  const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
     name,
   });
 
-  // Show loading state while fetching avatar URL
-  if (isAvatarUrlLoading) {
+  // Show loading state while fetching avatar URL or if data is not yet available
+  if (isAvatarUrlLoading || !avatarUrlData) {
     return (
       <Avatar className={className}>
         <AvatarLoading />
@@ -55,9 +58,8 @@ export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
     );
   }
 
-  // While useAvatarUrl has placeholderData, TanStack Query types data as possibly undefined
-  // browserSupportedAvatarUrl is BrowserSupportedAssetUrl | null when present
-  if (!avatarData || avatarData.browserSupportedAvatarUrl === null) {
+  // No avatar available - show fallback
+  if (avatarUrlData.browserSupportedAvatarUrl === null) {
     return (
       <Avatar className={className}>
         <EnsAvatarFallback name={name} />
@@ -65,7 +67,7 @@ export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
     );
   }
 
-  const avatarUrl = avatarData.browserSupportedAvatarUrl;
+  const avatarUrl = avatarUrlData.browserSupportedAvatarUrl;
 
   return (
     <Avatar className={className}>
@@ -73,11 +75,11 @@ export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
         src={avatarUrl.toString()}
         alt={name}
         onLoadingStatusChange={(status: ImageLoadingStatus) => {
-          setLoadingStatus(status);
+          setImageLoadingStatus(status);
         }}
       />
-      {loadingStatus === "error" && <EnsAvatarFallback name={name} />}
-      {(loadingStatus === "idle" || loadingStatus === "loading") && <AvatarLoading />}
+      {imageLoadingStatus === "error" && <EnsAvatarFallback name={name} />}
+      {(imageLoadingStatus === "idle" || imageLoadingStatus === "loading") && <AvatarLoading />}
     </Avatar>
   );
 };

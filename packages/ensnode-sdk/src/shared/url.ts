@@ -1,6 +1,8 @@
 /**
  * Type alias for URLs to assets that are supported by browsers for direct rendering.
  * Assets must be accessible via the http or https protocol.
+ *
+ * Invariant: value guaranteed to pass isHttpProtocol check.
  */
 export type BrowserSupportedAssetUrl = URL;
 

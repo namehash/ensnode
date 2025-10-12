@@ -4,6 +4,7 @@ import {
   type BrowserSupportedAssetUrl,
   type Name,
   buildEnsMetadataServiceAvatarUrl,
+  isHttpProtocol,
   toBrowserSupportedUrl,
 } from "@ensnode/ensnode-sdk";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
@@ -31,6 +32,10 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
    *
    * If not provided, defaults to using the ENS Metadata Service as a fallback proxy for browser-supported avatar urls.
+   *
+   * IMPORTANT: Custom implementations MUST use `toBrowserSupportedUrl()` to create BrowserSupportedAssetUrl values,
+   * or return the result from `buildEnsMetadataServiceAvatarUrl()`. The returned URL is validated at runtime
+   * to ensure it passes the `isHttpProtocol` check.
    *
    * @param name - The ENS name to get the avatar URL for
    * @returns Promise resolving to the browser supported avatar URL, or null if unavailable
@@ -85,18 +90,16 @@ export interface UseAvatarUrlResult {
  * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({ name });
  *
- *   if (isLoading) {
+ *   if (isLoading || !data) {
  *     return <div className="avatar-loading" />;
  *   }
  *
- *   const avatarUrl = data?.browserSupportedAvatarUrl;
- *
  *   return (
  *     <div className="avatar">
- *       {!avatarUrl ? (
+ *       {!data.browserSupportedAvatarUrl ? (
  *         <div className="avatar-fallback" />
  *       ) : (
- *         <img src={avatarUrl} alt={`${name} avatar`} />
+ *         <img src={data.browserSupportedAvatarUrl.href} alt={`${name} avatar`} />
  *       )}
  *     </div>
  *   );
@@ -118,18 +121,16 @@ export interface UseAvatarUrlResult {
  *     }
  *   });
  *
- *   if (isLoading) {
+ *   if (isLoading || !data) {
  *     return <div className="avatar-loading" />;
  *   }
  *
- *   const avatarUrl = data?.browserSupportedAvatarUrl;
- *
  *   return (
  *     <div className="avatar">
- *       {!avatarUrl ? (
+ *       {!data.browserSupportedAvatarUrl ? (
  *         <div className="avatar-fallback" />
  *       ) : (
- *         <img src={avatarUrl} alt={`${name} avatar`} />
+ *         <img src={data.browserSupportedAvatarUrl.href} alt={`${name} avatar`} />
  *       )}
  *     </div>
  *   );
@@ -153,15 +154,6 @@ export function useAvatarUrl(
 
   // Get namespace from config
   const configQuery = useENSIndexerConfig({ config: _config });
-  const namespaceId = configQuery.data?.namespace ?? null;
-
-  // Create default fallback using ENS Metadata Service
-  const defaultFallback = async (name: Name) => {
-    return buildEnsMetadataServiceAvatarUrl(name, namespaceId!);
-  };
-
-  // Use custom fallback if provided, otherwise use default
-  const activeFallback = browserUnsupportedProtocolFallback ?? defaultFallback;
 
   // Construct query options object
   const baseQueryOptions: {
@@ -174,18 +166,21 @@ export function useAvatarUrl(
       "avatarUrl",
       name,
       _config.client.url.href,
-      namespaceId,
+      configQuery.data?.namespace,
       !!browserUnsupportedProtocolFallback,
       recordsQuery.data?.records?.texts?.avatar ?? null,
     ] as const,
     queryFn: async (): Promise<UseAvatarUrlResult> => {
-      if (!name || !recordsQuery.data) {
+      if (!name || !recordsQuery.data || !configQuery.data) {
         return {
           rawAvatarUrl: null,
           browserSupportedAvatarUrl: null,
           fromFallback: false,
         };
       }
+
+      // Invariant: configQuery.data.namespace is guaranteed to be defined when configQuery.data exists
+      const namespaceId = configQuery.data.namespace;
 
       const avatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
@@ -210,10 +205,27 @@ export function useAvatarUrl(
         // Continue to fallback handling below
       }
 
+      // Create default fallback using ENS Metadata Service
+      const defaultFallback = async (name: Name): Promise<BrowserSupportedAssetUrl | null> => {
+        return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+      };
+
+      // Use custom fallback if provided, otherwise use default
+      const activeFallback: (name: Name) => Promise<BrowserSupportedAssetUrl | null> =
+        browserUnsupportedProtocolFallback ?? defaultFallback;
+
       // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if available
       if (activeFallback) {
         try {
           const fallbackUrl = await activeFallback(name);
+
+          // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
+          if (fallbackUrl !== null && !isHttpProtocol(fallbackUrl)) {
+            throw new Error(
+              `browserUnsupportedProtocolFallback returned a URL with unsupported protocol: ${fallbackUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
+            );
+          }
+
           return {
             rawAvatarUrl: avatarTextRecord,
             browserSupportedAvatarUrl: fallbackUrl,
