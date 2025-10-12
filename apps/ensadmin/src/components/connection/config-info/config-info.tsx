@@ -9,7 +9,6 @@ import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
 import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
-import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
@@ -18,6 +17,7 @@ import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon"
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
 import { IconGraphNetwork } from "@/components/icons/graph-network";
+import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
