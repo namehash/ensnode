@@ -45,6 +45,7 @@ export default function () {
       }>;
     }) => {
       const { label: labelHash, node: parentNode } = event.args;
+      const registry = event.log.address;
       const node = makeSubdomainNode(labelHash, parentNode);
 
       const resolverAddress = ThreeDNSResolverByChainId[context.chain.id];
@@ -55,7 +56,7 @@ export default function () {
       }
 
       // all ThreeDNSToken nodes have a hardcoded resolver at that address
-      await upsertNodeResolverRelation(context, node, resolverAddress);
+      await upsertNodeResolverRelation(context, registry, node, resolverAddress);
     },
   );
 }

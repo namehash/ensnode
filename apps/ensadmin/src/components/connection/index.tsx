@@ -1,9 +1,14 @@
 "use client";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
+import { ensAdminVersion } from "@/lib/env";
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+import { Suspense, use } from "react";
+
+const versionPromise = ensAdminVersion();
 
 export default function ConnectionInfo() {
+  const version = use(versionPromise);
   const ensIndexerConfigQuery = useENSIndexerConfig();
 
   if (ensIndexerConfigQuery.isError) {
@@ -13,6 +18,7 @@ export default function ConnectionInfo() {
           title: "ENSNodeConfigInfo Error",
           description: ensIndexerConfigQuery.error.message,
         }}
+        ensAdminVersion={version}
       />
     );
   }
@@ -20,7 +26,7 @@ export default function ConnectionInfo() {
   if (!ensIndexerConfigQuery.isSuccess) {
     return (
       <section className="flex flex-col gap-6 p-6">
-        <ENSNodeConfigInfo /> {/*display loading state*/}
+        <ENSNodeConfigInfo ensAdminVersion={version} /> {/*display loading state*/}
       </section>
     );
   }
@@ -29,7 +35,7 @@ export default function ConnectionInfo() {
 
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ENSNodeConfigInfo ensIndexerConfig={ensIndexerConfig} />
+      <ENSNodeConfigInfo ensIndexerConfig={ensIndexerConfig} ensAdminVersion={version} />
     </section>
   );
 }

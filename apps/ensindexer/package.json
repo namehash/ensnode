@@ -47,6 +47,7 @@
     "date-fns": "catalog:",
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",
+    "drizzle-orm": "catalog:",
     "hono": "catalog:",
     "pg-connection-string": "^2.9.0",
     "ponder": "catalog:",

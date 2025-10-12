@@ -18,20 +18,57 @@ export enum PluginName {
 }
 
 /**
- * Information about ENSIndexer's dependencies.
+ * Version info about ENSIndexer and its dependencies.
  */
-export interface DependencyInfo {
-  /** Node.js runtime version */
+export interface ENSIndexerVersionInfo {
+  /**
+   * Node.js runtime version
+   *
+   * @see https://nodejs.org/en/about/previous-releases
+   **/
   nodejs: string;
 
-  /** Ponder framework version */
+  /**
+   * Ponder framework version
+   *
+   * @see https://www.npmjs.com/package/ponder
+   **/
   ponder: string;
 
-  /** ENSRainbow service version */
+  /**
+   * ENSDb service version
+   *
+   * Guaranteed to be the same as {@link ENSIndexerVersionInfo.ensIndexer}.
+   * */
+  ensDb: string;
+
+  /**
+   * ENSIndexer service version
+   *
+   * @see https://ghcr.io/namehash/ensnode/ensindexer
+   **/
+  ensIndexer: string;
+
+  /**
+   * ENSRainbow service version
+   *
+   * @see https://ghcr.io/namehash/ensnode/ensindexer
+   **/
   ensRainbow: string;
 
-  /** ENSRainbow schema version */
+  /**
+   * ENSRainbow schema version
+   **/
   ensRainbowSchema: number;
+
+  /**
+   * ENS Normalize package version
+   *
+   * Available on NPM as: `@adraffy/ens-normalize`
+   *
+   * @see https://www.npmjs.com/package/@adraffy/ens-normalize
+   **/
+  ensNormalize: string;
 }
 
 /**
@@ -49,26 +86,6 @@ export interface ENSIndexerPublicConfig {
   namespace: ENSNamespaceId;
 
   /**
-   * An ENSAdmin URL
-   *
-   * The ENSNode root api route `/` redirects to {@link ensAdminUrl},
-   * configuring ENSAdmin with an entry for this instance of ENSNode,
-   * identified by {@link ensNodePublicUrl}.
-   *
-   * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
-   */
-  ensAdminUrl: URL;
-
-  /**
-   * The publicly accessible endpoint of the ENSNode API
-   * (ex: http://localhost:42069).
-   *
-   * ENSAdmin will use this url to connect to the ENSNode api for querying
-   * state about the ENSNode instance.
-   */
-  ensNodePublicUrl: URL;
-
-  /**
    * The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
    */
   labelSet: Required<EnsRainbowClientLabelSet>;
@@ -84,12 +101,15 @@ export interface ENSIndexerPublicConfig {
   databaseSchemaName: string;
 
   /**
-   * A set of {@link PluginName}s indicating which plugins to activate.
+   * A set of strings referring to the names of plugins that are active.
+   *
+   * For future-proofing, this is a list of strings that may or may
+   * not be currently valid {@link PluginName} values.
    *
    * Invariants:
-   * - A set of valid {@link PluginName}s with at least one value
+   * - A set of strings with at least one value.
    */
-  plugins: PluginName[];
+  plugins: string[];
 
   /**
    * Indexed Chain IDs
@@ -138,7 +158,7 @@ export interface ENSIndexerPublicConfig {
   isSubgraphCompatible: boolean;
 
   /**
-   * Information about the ENSIndexer instance dependencies.
+   * Version info about ENSIndexer.
    */
-  dependencyInfo: DependencyInfo;
+  versionInfo: ENSIndexerVersionInfo;
 }

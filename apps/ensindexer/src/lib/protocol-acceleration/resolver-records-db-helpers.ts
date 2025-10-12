@@ -16,7 +16,7 @@ import { EventWithArgs } from "@/lib/ponder-helpers";
  * Infer the type of the ResolverRecord entity's composite primary key.
  */
 type ResolverRecordsId = Pick<
-  typeof schema.ext_resolverRecords.$inferInsert,
+  typeof schema.resolverRecords.$inferInsert,
   "chainId" | "resolver" | "node"
 >;
 
@@ -40,7 +40,7 @@ export function makeResolverRecordsId(
  * Ensures that the ResolverRecords entity described by `id` exists.
  */
 export async function ensureResolverRecords(context: Context, id: ResolverRecordsId) {
-  await context.db.insert(schema.ext_resolverRecords).values(id).onConflictDoNothing();
+  await context.db.insert(schema.resolverRecords).values(id).onConflictDoNothing();
 }
 
 /**
@@ -51,9 +51,7 @@ export async function handleResolverNameUpdate(
   id: ResolverRecordsId,
   name: string,
 ) {
-  await context.db
-    .update(schema.ext_resolverRecords, id)
-    .set({ name: interpretNameRecordValue(name) });
+  await context.db.update(schema.resolverRecords, id).set({ name: interpretNameRecordValue(name) });
 }
 
 /**
@@ -75,11 +73,11 @@ export async function handleResolverAddressRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverAddressRecord, id);
+    await context.db.delete(schema.resolverAddressRecord, id);
   } else {
     // upsert
     await context.db
-      .insert(schema.ext_resolverAddressRecord)
+      .insert(schema.resolverAddressRecord)
       .values({ ...id, address: interpretedValue })
       .onConflictDoUpdate({ address: interpretedValue });
   }
@@ -111,11 +109,11 @@ export async function handleResolverTextRecordUpdate(
   const isDeletion = interpretedValue === null;
   if (isDeletion) {
     // delete
-    await context.db.delete(schema.ext_resolverTextRecord, id);
+    await context.db.delete(schema.resolverTextRecord, id);
   } else {
     // upsert
     await context.db
-      .insert(schema.ext_resolverTextRecord)
+      .insert(schema.resolverTextRecord)
       .values({ ...id, value: interpretedValue })
       .onConflictDoUpdate({ value: interpretedValue });
   }

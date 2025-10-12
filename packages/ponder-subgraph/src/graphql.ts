@@ -76,7 +76,6 @@ import {
 import { toSnakeCase } from "drizzle-orm/casing";
 import {
   type PgColumnBuilderBase,
-  PgDialect,
   type PgEnum,
   PgEnumColumn,
   PgInteger,
@@ -803,7 +802,7 @@ async function executePluralQuery(
   const isSlowQuery = queryDurationSeconds > 2;
   if (isSlowQuery) {
     console.warn(`Slow Query Detected (${queryDurationSeconds.toFixed(4)}s)`);
-    console.warn(new PgDialect().sqlToQuery(query.getSQL()).sql);
+    console.warn(query.toSQL().sql);
     console.log("\n");
   }
 

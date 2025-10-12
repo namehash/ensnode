@@ -58,19 +58,16 @@ export const constrainBlockrange = (
  * It's a workaround for the lack of an internal API allowing to access
  * Prometheus metrics for the Ponder application.
  *
- * @param ponderApplicationPort the port the Ponder application is served at
+ * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
  * @returns fetcher function
  */
-export function createPrometheusMetricsFetcher(
-  ponderApplicationPort: number,
-): () => Promise<string> {
+export function createPrometheusMetricsFetcher(ensIndexerUrl: URL): () => Promise<string> {
   /**
    * Fetches the Prometheus metrics from the Ponder application endpoint.
    * @returns Prometheus metrics as a text string
    */
   return async function fetchPrometheusMetrics(): Promise<string> {
-    const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
-
+    const response = await fetch(new URL("/metrics", ensIndexerUrl));
     return response.text();
   };
 }
@@ -109,18 +106,16 @@ const PonderDataSchema = {
  * It's a workaround for the lack of an internal API allowing to access
  * Ponder Status metrics for the Ponder application.
  *
- * @param ponderApplicationPort the port the Ponder application is served at
+ * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
  * @returns fetcher function
  */
-export function createPonderStatusFetcher(
-  ponderApplicationPort: number,
-): () => Promise<PonderStatus> {
+export function createPonderStatusFetcher(ensIndexerUrl: URL): () => Promise<PonderStatus> {
   /**
    * Fetches the Ponder Ponder status from the Ponder application endpoint.
    * @returns Parsed Ponder Status object.
    */
   return async function fetchPonderStatus() {
-    const response = await fetch(`http://localhost:${ponderApplicationPort}/status`);
+    const response = await fetch(new URL("/status", ensIndexerUrl));
     const responseData = await response.json();
 
     return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;

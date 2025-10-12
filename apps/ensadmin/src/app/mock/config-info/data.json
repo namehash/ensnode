@@ -1,7 +1,5 @@
 {
   "Alpha Mainnet": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.alpha.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
@@ -19,23 +17,27 @@
       "referrals",
       "tokenscope"
     ],
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     }
   },
   "Alpha Sepolia": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.alpha-sepolia.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -53,15 +55,16 @@
     "isSubgraphCompatible": false
   },
   "Subgraph Mainnet": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.mainnet.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -72,15 +75,16 @@
     "isSubgraphCompatible": true
   },
   "Subgraph Sepolia": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.sepolia.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -91,15 +95,16 @@
     "isSubgraphCompatible": true
   },
   "Subgraph Holesky": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "https://api.holesky.green.ensnode.io/",
     "labelSet": {
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -110,17 +115,18 @@
     "isSubgraphCompatible": true
   },
   "Serialization Error": {
-    "ensAdminUrl": "https://admin.ensnode.io/",
-    "ensNodePublicUrl": "invalid",
     "labelSet": {
-      "labelSetId": "subgraph",
+      "labelSetId": "",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
+    "versionInfo": {
+      "nodejs": "",
+      "ponder": "",
+      "ensDb": "",
+      "ensIndexer": "",
+      "ensNormalize": "",
+      "ensRainbow": "",
+      "ensRainbowSchema": -1
     },
     "indexedChainIds": [17000],
     "namespace": "holesky",

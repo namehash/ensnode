@@ -25,27 +25,12 @@ export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "webso
 export interface SerializedENSIndexerConfig
   extends Omit<
     ENSIndexerConfig,
-    | "ensAdminUrl"
-    | "ensNodePublicUrl"
-    | "ensIndexerUrl"
-    | "ensRainbowUrl"
-    | "indexedChainIds"
-    | "rpcConfigs"
+    "ensIndexerUrl" | "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins"
   > {
-  /**
-   * Serialized representation of {@link ENSIndexerConfig.ensAdminUrl}.
-   */
-  ensAdminUrl: UrlString;
-
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensIndexerUrl}.
    */
   ensIndexerUrl: UrlString;
-
-  /**
-   * Serialized representation of {@link ENSIndexerConfig.ensNodePublicUrl}.
-   */
-  ensNodePublicUrl: UrlString;
 
   /**
    * Serialized representation of {@link ENSIndexerConfig.ensRainbowUrl}.
@@ -66,4 +51,15 @@ export interface SerializedENSIndexerConfig
    * Serialized representation of {@link ENSIndexerConfig.rpcConfigs}.
    */
   rpcConfigs: Record<ChainIdString, SerializedRpcConfig>;
+
+  /**
+   * Serialized representation of {@link ENSIndexerConfig.plugins}.
+   *
+   * For future-proofing, this is a list of strings that may or may
+   * not be currently valid {@link PluginName} values.
+   *
+   * Invariants:
+   * - A set of strings with at least one value.
+   */
+  plugins: string[];
 }

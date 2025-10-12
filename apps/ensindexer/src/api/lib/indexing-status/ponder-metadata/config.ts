@@ -131,17 +131,28 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
         endBlock = ponderSource.chain[chainName].endBlock;
       }
 
-      chainStartBlocks.push(startBlock ? deserializeBlockNumber(startBlock) : 0);
-      chainEndBlocks.push(endBlock ? deserializeBlockNumber(endBlock) : Infinity);
+      if (typeof startBlock === "number") {
+        chainStartBlocks.push(deserializeBlockNumber(startBlock));
+      }
+
+      if (typeof endBlock === "number") {
+        chainEndBlocks.push(deserializeBlockNumber(endBlock));
+      }
     }
 
     // 2. Get the lowest startBlock for the chain.
     const chainLowestStartBlock =
       chainStartBlocks.length > 0 ? Math.min(...chainStartBlocks) : undefined;
 
-    // 3. Get the highest endBLock for the chain.
-    const chainHighestEndBlock =
-      chainEndBlocks.length > 0 ? Math.max(...chainEndBlocks) : undefined;
+    // 3.a) The endBlock can only be set for a chain if and only if every
+    //      ponderSource for that chain has its respective `endBlock` defined.
+    const isEndBlockForChainAllowed = chainEndBlocks.length === chainStartBlocks.length;
+
+    // 3.b) Get the highest endBLock for the chain.
+    let chainHighestEndBlock =
+      isEndBlockForChainAllowed && chainEndBlocks.length > 0
+        ? Math.max(...chainEndBlocks)
+        : undefined;
 
     // 4. Enforce invariants
 
@@ -156,7 +167,7 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
 
     chainsBlockrange[chainName] = deserializeBlockrange({
       startBlock: chainLowestStartBlock,
-      endBlock: Number.isFinite(chainHighestEndBlock) ? chainHighestEndBlock : undefined,
+      endBlock: chainHighestEndBlock,
     });
   }
 

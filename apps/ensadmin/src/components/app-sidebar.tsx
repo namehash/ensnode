@@ -26,7 +26,10 @@ const navItems = [
     url: "#",
     icon: Telescope,
     isActive: true,
-    items: [{ title: "Names", url: "/name" }],
+    items: [
+      { title: "Names", url: "/name" },
+      { title: "Registrations", url: "/registration" },
+    ],
   },
   {
     title: "ENS Protocol Inspector",

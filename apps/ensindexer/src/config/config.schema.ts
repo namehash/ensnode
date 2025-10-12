@@ -10,16 +10,17 @@ import {
   isWebSocketProtocol,
   uniq,
 } from "@ensnode/ensnode-sdk";
-import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
 import {
   invariant_isSubgraphCompatibleRequirements,
+  makeFullyPinnedLabelSetSchema,
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { DEFAULT_ENSADMIN_URL, DEFAULT_PORT, DEFAULT_SUBGRAPH_COMPAT } from "@/lib/lib-config";
+import { buildRpcConfigsFromEnv } from "./rpc-configs-from-env";
 
 import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
 
+import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
 import { derive_indexedChainIds } from "./derived-params";
 import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
 import {
@@ -55,7 +56,7 @@ const makeBlockNumberSchema = (envVarKey: string) =>
 const RpcConfigSchema = z
   .string()
   .transform((val) => val.split(","))
-  .pipe(z.array(makeUrlSchema("RPC_URL_*")))
+  .pipe(z.array(makeUrlSchema("RPC URL")))
   .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL)
   .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL);
 
@@ -76,8 +77,6 @@ const BlockrangeSchema = z
     { error: "END_BLOCK must be greater than START_BLOCK." },
   );
 
-const EnsNodePublicUrlSchema = makeUrlSchema("ENSNODE_PUBLIC_URL");
-const EnsAdminUrlSchema = makeUrlSchema("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL);
 const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
 
 const PonderDatabaseSchemaSchema = z
@@ -111,13 +110,6 @@ const PluginsSchema = z.coerce
     error: "PLUGINS cannot contain duplicate values",
   });
 
-const PortSchema = z.coerce
-  .number({ error: "PORT must be an integer." })
-  .int({ error: "PORT must be an integer." })
-  .min(1, { error: "PORT must be an integer between 1 and 65535." })
-  .max(65535, { error: "PORT must be an integer between 1 and 65535." })
-  .default(DEFAULT_PORT);
-
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
 const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
@@ -145,23 +137,20 @@ const RpcConfigsSchema = z
     return rpcConfigs;
   });
 
-const DatabaseUrlSchema = z.union(
-  [
-    z.string().refine((url) => {
-      try {
-        if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-          return false;
-        }
-        const config = parseConnectionString(url);
-        return !!(config.host && config.port && config.database);
-      } catch {
+const DatabaseUrlSchema = z.string().refine(
+  (url) => {
+    try {
+      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
         return false;
       }
-    }),
-    z.undefined(),
-  ],
+      const config = parseConnectionString(url);
+      return !!(config.host && config.port && config.database);
+    } catch {
+      return false;
+    }
+  },
   {
-    message:
+    error:
       "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
   },
 );
@@ -173,12 +162,9 @@ const ENSIndexerConfigSchema = z
   .object({
     namespace: ENSNamespaceSchema,
     globalBlockrange: BlockrangeSchema,
-    ensNodePublicUrl: EnsNodePublicUrlSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
-    ensAdminUrl: EnsAdminUrlSchema,
     databaseSchemaName: PonderDatabaseSchemaSchema,
     plugins: PluginsSchema,
-    port: PortSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
     rpcConfigs: RpcConfigsSchema,
@@ -227,27 +213,51 @@ const ENSIndexerConfigSchema = z
  *
  * First parses the SUBGRAPH_COMPAT environment variable to determine compatibility mode,
  * then applies appropriate environment defaults based on that mode (subgraphCompatible or alpha).
+ *
+ * Next, construct rpcConfigs based on availability of RPC provider API keys or specific RPC_URL_*
+ * environment variables.
+ *
  * Finally validates and parses the complete environment configuration using ENSIndexerConfigSchema.
  *
- * @param environment - The environment variables object to build config from
  * @returns A validated ENSIndexerConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
+export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSIndexerConfig {
   try {
-    // first parse the SUBGRAPH_COMPAT env variable
-    const subgraphCompat = IsSubgraphCompatibleSchema.parse(environment.isSubgraphCompatible);
+    // first parse the SUBGRAPH_COMPAT and NAMESPACE env variables
+    const isSubgraphCompatible = IsSubgraphCompatibleSchema.parse(_env.SUBGRAPH_COMPAT);
 
     // based on indicated subgraph compatibility preference, provide sensible defaults for the config
-    const environmentDefaults = subgraphCompat
+    const environmentDefaults = isSubgraphCompatible
       ? EnvironmentDefaults.subgraphCompatible
       : EnvironmentDefaults.alpha;
 
-    // apply the partial defaults to the ENSIndexerEnvironment
-    const environmentWithDefaults = applyDefaults(environment, environmentDefaults);
+    // apply the partial defaults to the provided env
+    const env = applyDefaults(_env, environmentDefaults);
 
-    // parse with ENSIndexerConfigSchema
-    return ENSIndexerConfigSchema.parse(environmentWithDefaults);
+    // and use that to generate rpcConfigs
+    const namespace = ENSNamespaceSchema.parse(env.NAMESPACE);
+    const rpcConfigs = buildRpcConfigsFromEnv(env, namespace);
+
+    // parse/validate with ENSIndexerConfigSchema
+    return ENSIndexerConfigSchema.parse({
+      databaseSchemaName: env.DATABASE_SCHEMA,
+      databaseUrl: env.DATABASE_URL,
+      isSubgraphCompatible: env.SUBGRAPH_COMPAT,
+      namespace: env.NAMESPACE,
+      plugins: env.PLUGINS,
+      ensRainbowUrl: env.ENSRAINBOW_URL,
+      labelSet: {
+        labelSetId: env.LABEL_SET_ID,
+        labelSetVersion: env.LABEL_SET_VERSION,
+      },
+      ensIndexerUrl: env.ENSINDEXER_URL,
+      globalBlockrange: {
+        startBlock: env.START_BLOCK,
+        endBlock: env.END_BLOCK,
+      },
+      rpcConfigs,
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       throw new Error(

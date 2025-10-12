@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Explore the ENS Protocol like never before",
   "license": "MIT",
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
@@ -28,6 +28,7 @@
     "@ensnode/ensnode-schema": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
+    "@formkit/auto-animate": "^0.9.0",
     "@gqlpt/adapter-anthropic": "0.0.0-alpha.33",
     "@graphiql/plugin-explorer": "^4.0.2",
     "@graphiql/react": "^0.28.2",
