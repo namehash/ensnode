@@ -73,7 +73,7 @@ function DisplayNameRecords() {
 #### Primary Name Resolution — `usePrimaryName`
 
 ```tsx
-import { mainnet } from 'viem/chains';
+import { mainnet } from "viem/chains";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryName() {
@@ -88,7 +88,7 @@ function DisplayPrimaryName() {
   return (
     <div>
       <h3>Primary Name (for Mainnet)</h3>
-      <p>{data.name ?? 'No Primary Name'}</p>
+      <p>{data.name ?? "No Primary Name"}</p>
     </div>
   );
 }
@@ -97,7 +97,7 @@ function DisplayPrimaryName() {
 #### Primary Names Resolution — `usePrimaryNames`
 
 ```tsx
-import { mainnet } from 'viem/chains';
+import { mainnet } from "viem/chains";
 import { usePrimaryNames } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryNames() {
@@ -116,6 +116,33 @@ function DisplayPrimaryNames() {
           <p>{name}</p>
         </div>
       ))}
+    </div>
+  );
+}
+```
+
+#### Avatar URL Resolution — `useAvatarUrl`
+
+```tsx
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+
+function ProfileAvatar({ name }: { name: string }) {
+  const { data, isLoading } = useAvatarUrl({ name });
+
+  if (isLoading || !data) {
+    return <div className="avatar-loading" />;
+  }
+
+  return (
+    <div className="avatar">
+      {!data.browserSupportedAvatarUrl ? (
+        <div className="avatar-fallback" />
+      ) : (
+        <img
+          src={data.browserSupportedAvatarUrl.toString()}
+          alt={`${name} avatar`}
+        />
+      )}
     </div>
   );
 }
@@ -224,6 +251,189 @@ const { data, isLoading, error, refetch } = usePrimaryNames({
 });
 ```
 
+### `useAvatarUrl`
+
+Hook that resolves the avatar URL for an ENS name. This hook automatically handles the avatar text record resolution and provides browser-compatible URLs.
+
+#### Resolution Flow
+
+The hook follows this resolution process:
+
+1. **Fetches the avatar text record** using `useRecords` internally
+2. **Normalizes the avatar text record** as a URL
+3. **Returns the URL directly** if it uses http or https protocol
+4. **Falls back to ENS Metadata Service** (or custom fallback) for non-http/https protocols (e.g., `ipfs://`, `ar://`, `eip155://`)
+
+The ENS Metadata Service acts as a proxy, converting decentralized storage protocols like IPFS and Arweave to browser-accessible URLs.
+
+#### Invariants
+
+- **If `rawAvatarUrl` is `null`, then `browserSupportedAvatarUrl` must also be `null`**
+- The `browserSupportedAvatarUrl` is guaranteed to use http or https protocol when non-null
+- The `fromFallback` flag is `true` only when a fallback successfully resolved the URL
+
+#### Parameters
+
+- `name`: The ENS Name whose avatar URL to resolve (set to `null` to disable the query)
+- `browserUnsupportedProtocolFallback`: (optional) Custom fallback function for non-http/https protocols. Must return a `BrowserSupportedAssetUrl` created using `toBrowserSupportedUrl()` or from `buildEnsMetadataServiceAvatarUrl()`. Defaults to using the ENS Metadata Service.
+- `query`: (optional) TanStack Query options for customization
+
+#### Return Value
+
+```tsx
+interface UseAvatarUrlResult {
+  rawAvatarUrl: string | null;
+  browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
+  fromFallback: boolean;
+}
+```
+
+- `rawAvatarUrl`: The original avatar text record value from ENS, before any normalization or fallback processing. `null` if no avatar text record is set.
+- `browserSupportedAvatarUrl`: A browser-supported (http/https) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, or if the avatar uses a non-http/https protocol and the fallback fails to resolve.
+- `fromFallback`: Indicates whether the `browserSupportedAvatarUrl` was obtained via the fallback mechanism.
+
+<details>
+<summary><strong>Basic Example</strong></summary>
+
+```tsx
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+
+function ProfileAvatar({ name }: { name: string }) {
+  const { data, isLoading } = useAvatarUrl({ name });
+
+  if (isLoading || !data) {
+    return <div className="avatar-loading" />;
+  }
+
+  return (
+    <div className="avatar">
+      {!data.browserSupportedAvatarUrl ? (
+        <div className="avatar-fallback">No avatar</div>
+      ) : (
+        <img
+          src={data.browserSupportedAvatarUrl.toString()}
+          alt={`${name} avatar`}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Advanced Example with Loading States</strong></summary>
+
+```tsx
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { useState } from "react";
+
+function EnsAvatar({ name }: { name: string }) {
+  const [imageLoadingStatus, setImageLoadingStatus] = useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
+  const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
+    name,
+  });
+
+  // Show loading state while fetching avatar URL
+  if (isAvatarUrlLoading || !avatarUrlData) {
+    return <div className="h-12 w-12 rounded-full animate-pulse bg-gray-200" />;
+  }
+
+  // No avatar available - show fallback
+  if (avatarUrlData.browserSupportedAvatarUrl === null) {
+    return (
+      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-600" />
+    );
+  }
+
+  const avatarUrl = avatarUrlData.browserSupportedAvatarUrl;
+
+  return (
+    <div className="relative h-12 w-12">
+      <img
+        src={avatarUrl.toString()}
+        alt={`${name} avatar`}
+        className="h-full w-full rounded-full object-cover"
+        onLoad={() => setImageLoadingStatus("loaded")}
+        onError={() => setImageLoadingStatus("error")}
+      />
+
+      {/* Show loading state while image is loading */}
+      {(imageLoadingStatus === "idle" || imageLoadingStatus === "loading") && (
+        <div className="absolute inset-0 rounded-full animate-pulse bg-gray-200" />
+      )}
+
+      {/* Show fallback if image fails to load */}
+      {imageLoadingStatus === "error" && (
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-purple-600" />
+      )}
+    </div>
+  );
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Custom Fallback Example</strong></summary>
+
+```tsx
+import {
+  useAvatarUrl,
+  buildEnsMetadataServiceAvatarUrl,
+  toBrowserSupportedUrl,
+} from "@ensnode/ensnode-react";
+
+function ProfileAvatar({
+  name,
+  namespaceId,
+}: {
+  name: string;
+  namespaceId: string;
+}) {
+  const { data, isLoading } = useAvatarUrl({
+    name,
+    browserUnsupportedProtocolFallback: async (name) => {
+      // Option 1: Use ENS Metadata Service for a specific namespace
+      return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+
+      // Option 2: Use your own custom IPFS gateway
+      // const avatarRecord = /* get from somewhere */;
+      // if (avatarRecord.startsWith('ipfs://')) {
+      //   const ipfsHash = avatarRecord.replace('ipfs://', '');
+      //   return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
+      // }
+      // return null;
+    },
+  });
+
+  if (isLoading || !data) {
+    return <div className="avatar-loading" />;
+  }
+
+  return (
+    <div className="avatar">
+      {!data.browserSupportedAvatarUrl ? (
+        <div className="avatar-fallback" />
+      ) : (
+        <>
+          <img
+            src={data.browserSupportedAvatarUrl.toString()}
+            alt={`${name} avatar`}
+          />
+          {data.fromFallback && <span className="badge">Via Fallback</span>}
+        </>
+      )}
+    </div>
+  );
+}
+```
+
+</details>
+
 ## Advanced Usage
 
 ### Custom Query Configuration
@@ -284,7 +494,7 @@ const [address, setAddress] = useState("");
 // only executes when address is not null
 const { data } = usePrimaryName({
   address: address || null,
-  chainId: 1
+  chainId: 1,
 });
 ```
 
