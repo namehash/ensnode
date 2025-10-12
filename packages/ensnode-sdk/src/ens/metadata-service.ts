@@ -30,11 +30,11 @@ export function buildEnsMetadataServiceAvatarUrl(
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
       return toBrowserSupportedUrl(
-        new URL(name, `https://metadata.ens.domains/mainnet/avatar/`).toString(),
+        `https://metadata.ens.domains/mainnet/avatar/${encodeURIComponent(name)}`,
       );
     case ENSNamespaceIds.Sepolia:
       return toBrowserSupportedUrl(
-        new URL(name, `https://metadata.ens.domains/sepolia/avatar/`).toString(),
+        `https://metadata.ens.domains/sepolia/avatar/${encodeURIComponent(name)}`,
       );
     case ENSNamespaceIds.Holesky:
       // metadata.ens.domains doesn't currently support holesky
