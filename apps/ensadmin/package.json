@@ -22,6 +22,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@adraffy/ens-normalize": "catalog:",
     "@anthropic-ai/sdk": "^0.60.0",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-react": "workspace:*",

@@ -10,6 +10,7 @@ import {
   getBlockExplorerUrlForAddress,
   getChainName,
 } from "@/lib/namespace-utils";
+import { ens_beautify } from "@adraffy/ens-normalize";
 import {
   DEFAULT_EVM_CHAIN_ID,
   ENSNamespaceId,
@@ -28,11 +29,19 @@ interface NameDisplayProps {
 }
 
 /**
- * Displays an ENS name without any navigation.
- * Pure display component for showing names.
+ * Displays a normalized ENS name in beautified form.
+ *
+ * @param name - The normalized ENS name to display.
+ *
+ * The "beautified form" of a normalized name converts special sequences of
+ * emojis and other special characters to their "beautified" equivalents. All
+ * such conversions transform X -> Y where Y is normalizable and normalizes back to X.
+ * Ex: '1⃣2⃣.eth' (normalized) to '1️⃣2️⃣.eth' (normalizable)
+ * Ex: 'ξethereum.eth' (normalized) to 'Ξethereum.eth' (normalizable)
  */
 export function NameDisplay({ name, className = "font-medium" }: NameDisplayProps) {
-  return <span className={className}>{name}</span>;
+  const beautifiedName = ens_beautify(name);
+  return <span className={className}>{beautifiedName}</span>;
 }
 
 /**
