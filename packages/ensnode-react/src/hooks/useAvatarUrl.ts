@@ -99,7 +99,7 @@ export interface UseAvatarUrlResult {
  *       {!data.browserSupportedAvatarUrl ? (
  *         <div className="avatar-fallback" />
  *       ) : (
- *         <img src={data.browserSupportedAvatarUrl.href} alt={`${name} avatar`} />
+ *         <img src={data.browserSupportedAvatarUrl.toString()} alt={`${name} avatar`} />
  *       )}
  *     </div>
  *   );
@@ -116,8 +116,7 @@ export interface UseAvatarUrlResult {
  *     name,
  *     browserUnsupportedProtocolFallback: async (name) => {
  *       // Use the ENS Metadata Service for the current namespace
- *       const url = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
- *       return url?.toString() ?? null;
+ *       return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
  *     }
  *   });
  *
@@ -130,7 +129,7 @@ export interface UseAvatarUrlResult {
  *       {!data.browserSupportedAvatarUrl ? (
  *         <div className="avatar-fallback" />
  *       ) : (
- *         <img src={data.browserSupportedAvatarUrl.href} alt={`${name} avatar`} />
+ *         <img src={data.browserSupportedAvatarUrl.toString()} alt={`${name} avatar`} />
  *       )}
  *     </div>
  *   );
