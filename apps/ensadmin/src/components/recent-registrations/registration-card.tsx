@@ -2,20 +2,21 @@ import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { Identity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import type { Registration } from "@/components/recent-registrations/types";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { cn } from "@/lib/utils";
-import type { ENSNamespaceId } from "@ensnode/datasources";
 import { PropsWithChildren } from "react";
 
 export interface RegistrationCardProps {
   registration: Registration;
-  namespaceId: ENSNamespaceId;
 }
 
 /**
  * Displays the data of a single Registration
  */
 
-export function RegistrationCard({ registration, namespaceId }: RegistrationCardProps) {
+export function RegistrationCard({ registration }: RegistrationCardProps) {
+  const namespaceId = useActiveNamespace();
+
   return (
     <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
       <RegistrationCardElement elementName="Name" className="w-[45%] min-w-[200px]">

@@ -16,6 +16,7 @@ export function useIndexingStatus(parameters: ConfigParameter & UseIndexingStatu
 
   const options = {
     ...queryOptions,
+    refetchInterval: 10 * 1000, // 10 seconds - indexing status changes frequently
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
   };
