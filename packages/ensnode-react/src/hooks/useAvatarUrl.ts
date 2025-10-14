@@ -23,7 +23,9 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
 /**
  * Parameters for the useAvatarUrl hook.
  */
-export interface UseAvatarUrlParameters extends QueryParameter<string | null>, ConfigParameter {
+export interface UseAvatarUrlParameters
+  extends QueryParameter<string | null>,
+    ConfigParameter {
   /**
    * If null, the query will not be executed.
    */
@@ -44,7 +46,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    */
   browserSupportedAvatarUrlProxy?: (
     name: Name,
-    rawAvatarUrl: string,
+    rawAvatarUrl: string
   ) => BrowserSupportedAssetUrl | null;
 }
 
@@ -147,9 +149,14 @@ export interface UseAvatarUrlResult {
  * ```
  */
 export function useAvatarUrl(
-  parameters: UseAvatarUrlParameters,
+  parameters: UseAvatarUrlParameters
 ): UseQueryResult<UseAvatarUrlResult, Error> {
-  const { name, config, query: queryOptions, browserUnsupportedProtocolFallback } = parameters;
+  const {
+    name,
+    config,
+    query: queryOptions,
+    browserSupportedAvatarUrlProxy,
+  } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
@@ -176,7 +183,7 @@ export function useAvatarUrl(
       name,
       _config.client.url.href,
       configQuery.data?.namespace,
-      !!browserUnsupportedProtocolFallback,
+      !!browserSupportedAvatarUrlProxy,
       recordsQuery.data?.records?.texts?.avatar ?? null,
     ] as const,
     queryFn: async (): Promise<UseAvatarUrlResult> => {
@@ -229,13 +236,19 @@ export function useAvatarUrl(
       }
 
       // Default proxy is to use the ENS Metadata Service
-      const defaultProxy = (name: Name, rawAvatarUrl: string): BrowserSupportedAssetUrl | null => {
+      const defaultProxy = (
+        name: Name,
+        rawAvatarUrl: string
+      ): BrowserSupportedAssetUrl | null => {
         return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
       };
 
       // Use custom proxy if provided, otherwise use default
-      const activeProxy: (name: Name, rawAvatarUrl: string) => BrowserSupportedAssetUrl | null =
-        browserUnsupportedProtocolFallback ?? defaultProxy;
+      const activeProxy: (
+        name: Name,
+        rawAvatarUrl: string
+      ) => BrowserSupportedAssetUrl | null =
+        browserSupportedAvatarUrlProxy ?? defaultProxy;
 
       // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
       if (activeProxy) {
@@ -245,7 +258,7 @@ export function useAvatarUrl(
           // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
           if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
             throw new Error(
-              `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
+              `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`
             );
           }
 
