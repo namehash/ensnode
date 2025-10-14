@@ -1,5 +1,28 @@
 # @ensnode/ensnode-sdk
 
+## 0.36.0
+
+### Minor Changes
+
+- [#1015](https://github.com/namehash/ensnode/pull/1015) [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9) Thanks [@tk-o](https://github.com/tk-o)! - Rename chain indexing status from `Unstarted` to `Queued`.
+
+- [#1074](https://github.com/namehash/ensnode/pull/1074) [`e4d3ce3`](https://github.com/namehash/ensnode/commit/e4d3ce3d9659430a8f0597a4c719ad1993342eaf) Thanks [@tk-o](https://github.com/tk-o)! - Assume all `Address` values to be lowercase EVM addresses.
+
+- [#1137](https://github.com/namehash/ensnode/pull/1137) [`1460d20`](https://github.com/namehash/ensnode/commit/1460d204a4b4ff798597577f63c3a2a801bfc815) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Introduce data models for Identity / UnresolvedIdentity / ResolvedIdentity
+
+- [#1157](https://github.com/namehash/ensnode/pull/1157) [`ffb4103`](https://github.com/namehash/ensnode/commit/ffb4103aeb2ce3cb4c5a37885de62fa4f435362d) Thanks [@tk-o](https://github.com/tk-o)! - Extend `ENSIndexerVersionInfo` with `ensDb`, `ensIndexer`, and `ensNormalize` fields.
+
+- [#1015](https://github.com/namehash/ensnode/pull/1015) [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9) Thanks [@tk-o](https://github.com/tk-o)! - Extends the `ENSIndexerOverallIndexingCompletedStatus` data model with the `omnichainIndexingCursor` field.
+
+- [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
+
+- [#1095](https://github.com/namehash/ensnode/pull/1095) [`16b4748`](https://github.com/namehash/ensnode/commit/16b474849386387141fe2534574f8b16defbcb09) Thanks [@tk-o](https://github.com/tk-o)! - Refine Indexing Status API data model around _snapshots_ and _projections_.
+
+### Patch Changes
+
+- Updated dependencies [[`afbf575`](https://github.com/namehash/ensnode/commit/afbf575d8448446f52ab0da8cbe8f5f2d7da6827), [`7fc0465`](https://github.com/namehash/ensnode/commit/7fc0465d3b816affe2930c7f36577d0214d145b9)]:
+  - @ensnode/datasources@0.36.0
+
 ## 0.35.0
 
 ### Patch Changes

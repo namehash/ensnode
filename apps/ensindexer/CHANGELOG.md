@@ -1,5 +1,88 @@
 # ensindexer
 
+## 0.36.0
+
+### Minor Changes
+
+- [#1015](https://github.com/namehash/ensnode/pull/1015) [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9) Thanks [@tk-o](https://github.com/tk-o)! - Rename chain indexing status from `Unstarted` to `Queued`.
+
+- [#1118](https://github.com/namehash/ensnode/pull/1118) [`22514f8`](https://github.com/namehash/ensnode/commit/22514f82f43c5cdb239631a3ca45c9dd20bbf1db) Thanks [@shrugs](https://github.com/shrugs)! - Introduces new `SUBGRAPH_COMPAT` flag (default false) to configure ENSIndexer's subgraph-compatible indexing behavior and removes the `HEAL_REVERSE_ADDRESSES`, `INDEX_ADDITIONAL_RESOLVER_RECORDS`, and `REPLACE_UNNORMALIZED` configuration flags.
+
+  If `SUBGRAPH_COMPAT=true`, the following default configuration is provided:
+
+  - `PLUGINS=subgraph`
+  - `LABEL_SET_ID=subgraph`
+  - `LABEL_SET_VERSION=0`
+
+  If `SUBGRAPH_COMPAT=false` (default behavior), the following default configuration is provided:
+
+  - `PLUGINS=subgraph,basenames,lineanames,threedns`
+  - `LABEL_SET_ID=subgraph`
+  - `LABEL_SET_VERSION=0`
+
+  To continue runnning ENSIndexer with legacy ENS Subgraph indexing behavior, use `SUBGRAPH_COMPAT=true` in place of `HEAL_REVERSE_ADDRESSES=false INDEX_ADDITIONAL_RESOLVER_RECORDS=false REPLACE_UNNORMALIZED=false`.
+
+- [#1074](https://github.com/namehash/ensnode/pull/1074) [`e4d3ce3`](https://github.com/namehash/ensnode/commit/e4d3ce3d9659430a8f0597a4c719ad1993342eaf) Thanks [@tk-o](https://github.com/tk-o)! - Assume all `Address` values to be lowercase EVM addresses.
+
+- [#1124](https://github.com/namehash/ensnode/pull/1124) [`e636a5b`](https://github.com/namehash/ensnode/commit/e636a5bdd0e6b2de05f243a83d3d3c3545ae8d1b) Thanks [@tk-o](https://github.com/tk-o)! - Drop `RPC_REQUEST_RATE_LIMIT_*` configuration. This is automatically managed by Ponder.
+
+- [#1095](https://github.com/namehash/ensnode/pull/1095) [`16b4748`](https://github.com/namehash/ensnode/commit/16b474849386387141fe2534574f8b16defbcb09) Thanks [@tk-o](https://github.com/tk-o)! - Implement refined Indexing Status API data model.
+
+- [#1161](https://github.com/namehash/ensnode/pull/1161) [`5c8973d`](https://github.com/namehash/ensnode/commit/5c8973d2c17323349e415b651caf757a598d543a) Thanks [@shrugs](https://github.com/shrugs)! - `ALCHEMY_API_KEY` and `DRPC_API_KEY` may now be set in lieu of `RPC_URL_*` environment variables. If specified the `RPC_URL_*` value will take precedence over Alchemy and DRPC RPCs. If both Alchemy and DRPC are specified, they will be used in the following priority: Alchemy > DRPC.
+
+- [#1008](https://github.com/namehash/ensnode/pull/1008) [`3780a9c`](https://github.com/namehash/ensnode/commit/3780a9c2703507939929f90a501cdf8eea3b610f) Thanks [@shrugs](https://github.com/shrugs)! - Fix NameWrapper indexing error when REPLACE_UNNORMALIZED=true.
+
+- [#1052](https://github.com/namehash/ensnode/pull/1052) [`1d75de1`](https://github.com/namehash/ensnode/commit/1d75de17f0eb74cc7c1f56992e3f777452981dfc) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer can now correctly index the LegacyDefaultResolver's TextChanged record values when INDEX_ADDITIONAL_RESOLVER_VALUES is true.
+
+- [#1034](https://github.com/namehash/ensnode/pull/1034) [`555c782`](https://github.com/namehash/ensnode/commit/555c78254ce92724d20b91440b627819eb28d2cd) Thanks [@shrugs](https://github.com/shrugs)! - ENSIndexer now requires the NAMESPACE env variable, no longer defaulting to 'mainnet'.
+
+- [#1157](https://github.com/namehash/ensnode/pull/1157) [`ffb4103`](https://github.com/namehash/ensnode/commit/ffb4103aeb2ce3cb4c5a37885de62fa4f435362d) Thanks [@tk-o](https://github.com/tk-o)! - Extend `ENSIndexerVersionInfo` with `ensDb`, `ensIndexer`, and `ensNormalize` fields.
+
+- [#1133](https://github.com/namehash/ensnode/pull/1133) [`afbf575`](https://github.com/namehash/ensnode/commit/afbf575d8448446f52ab0da8cbe8f5f2d7da6827) Thanks [@tk-o](https://github.com/tk-o)! - Index `UpgradeableRegistrarController` for Basenames.
+
+- [#1160](https://github.com/namehash/ensnode/pull/1160) [`da38beb`](https://github.com/namehash/ensnode/commit/da38beb790f69030fd1b36db6865131b5f2a08e7) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: Removed ENSNODE_PUBLIC_URL, ENSADMIN_URL, PORT configuration variables. PORT is still overridable, and defaults to Ponder's default (of 42069) as before. Removes "ENSAdmin Loopback" behavior when accessing ENSIndexer at '/'.
+
+- [#1128](https://github.com/namehash/ensnode/pull/1128) [`678e24b`](https://github.com/namehash/ensnode/commit/678e24b4d04e7451de26a70f65a296b401f83681) Thanks [@shrugs](https://github.com/shrugs)! - Upgrade ponder to 0.13.x, which brings speed and reliability improvements.
+
+- [#1015](https://github.com/namehash/ensnode/pull/1015) [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9) Thanks [@tk-o](https://github.com/tk-o)! - Extends the `ENSIndexerOverallIndexingCompletedStatus` data model with the `omnichainIndexingCursor` field.
+
+- [#1152](https://github.com/namehash/ensnode/pull/1152) [`bd84b5f`](https://github.com/namehash/ensnode/commit/bd84b5fa1c3f9fe7e43271dd0601bb9daab9a228) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: Removed support for PgLite: DATABASE_URL is now required and must be a valid PostgresQL Connection String.
+
+- [#1009](https://github.com/namehash/ensnode/pull/1009) [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8) Thanks [@tk-o](https://github.com/tk-o)! - Drops `latestSyncedBlock` field from `ChainIndexingBackfillStatus` data model.
+
+- [#1124](https://github.com/namehash/ensnode/pull/1124) [`e636a5b`](https://github.com/namehash/ensnode/commit/e636a5bdd0e6b2de05f243a83d3d3c3545ae8d1b) Thanks [@tk-o](https://github.com/tk-o)! - Extend chain RPC configuration to expect at least one HTTP endpoint URL, and at most one WebSockets endpoint URL.
+
+- [#1128](https://github.com/namehash/ensnode/pull/1128) [`678e24b`](https://github.com/namehash/ensnode/commit/678e24b4d04e7451de26a70f65a296b401f83681) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the new `protocol-acceleration` plugin to replace the `reverse-resolvers` plugin with enhanced Protocol Acceleration capabilities. It can be run in isolation to speed up the performance of ENSNode's Resolution API.
+
+  **Migration Required**
+
+  If you're using the `reverse-resolvers` plugin, you need to update your configuration:
+
+  1. Replace `reverse-resolvers` with `protocol-acceleration` in your `PLUGINS` environment variable
+  2. This is a breaking change that requires re-indexing from scratch due to database schema changes
+
+  Example:
+
+  ```bash
+  # Before (example)
+  PLUGINS=subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals
+
+  # After (example)
+  PLUGINS=subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals
+  ```
+
+- [#1157](https://github.com/namehash/ensnode/pull/1157) [`ffb4103`](https://github.com/namehash/ensnode/commit/ffb4103aeb2ce3cb4c5a37885de62fa4f435362d) Thanks [@tk-o](https://github.com/tk-o)! - Ensure only the selected version of `@adraffy/ens-normalize` package is used across all apps.
+
+### Patch Changes
+
+- Updated dependencies [[`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9), [`e4d3ce3`](https://github.com/namehash/ensnode/commit/e4d3ce3d9659430a8f0597a4c719ad1993342eaf), [`1460d20`](https://github.com/namehash/ensnode/commit/1460d204a4b4ff798597577f63c3a2a801bfc815), [`ffb4103`](https://github.com/namehash/ensnode/commit/ffb4103aeb2ce3cb4c5a37885de62fa4f435362d), [`afbf575`](https://github.com/namehash/ensnode/commit/afbf575d8448446f52ab0da8cbe8f5f2d7da6827), [`7fc0465`](https://github.com/namehash/ensnode/commit/7fc0465d3b816affe2930c7f36577d0214d145b9), [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9), [`98983ac`](https://github.com/namehash/ensnode/commit/98983ac3c026073da5133aeb64025cbaf88523c8), [`16b4748`](https://github.com/namehash/ensnode/commit/16b474849386387141fe2534574f8b16defbcb09)]:
+  - @ensnode/ensnode-sdk@0.36.0
+  - @ensnode/datasources@0.36.0
+  - @ensnode/ensrainbow-sdk@0.36.0
+  - @ensnode/ponder-metadata@0.36.0
+  - @ensnode/ensnode-schema@0.36.0
+  - @ensnode/ponder-subgraph@0.36.0
+
 ## 0.35.0
 
 ### Minor Changes
