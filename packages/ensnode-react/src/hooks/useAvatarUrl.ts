@@ -62,12 +62,12 @@ export interface UseAvatarUrlResult {
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
-   * Indicates whether the browserSupportedAvatarUrl was obtained via the fallback mechanism.
-   * True if a fallback successfully resolved the URL.
+   * Indicates whether the browserSupportedAvatarUrl was obtained via a proxy service.
+   * True if a proxy (either the default ENS Metadata Service or a custom proxy) successfully resolved the URL.
    * False if the URL was used directly from the avatar text record, or if there's no avatar,
-   * or if the fallback failed to resolve.
+   * or if the proxy failed to resolve.
    */
-  fromFallback: boolean;
+  usesProxy: boolean;
 }
 
 /**
@@ -174,7 +174,7 @@ export function useAvatarUrl(
         return {
           rawAvatarUrl: null,
           browserSupportedAvatarUrl: null,
-          fromFallback: false,
+          usesProxy: false,
         };
       }
 
@@ -188,7 +188,7 @@ export function useAvatarUrl(
         return {
           rawAvatarUrl: null,
           browserSupportedAvatarUrl: null,
-          fromFallback: false,
+          usesProxy: false,
         };
       }
 
@@ -198,7 +198,7 @@ export function useAvatarUrl(
         return {
           rawAvatarUrl: avatarTextRecord,
           browserSupportedAvatarUrl: browserSupportedUrl,
-          fromFallback: false,
+          usesProxy: false,
         };
       } catch {
         // Continue to proxy handling below
@@ -228,13 +228,13 @@ export function useAvatarUrl(
           return {
             rawAvatarUrl: avatarTextRecord,
             browserSupportedAvatarUrl: fallbackUrl,
-            fromFallback: fallbackUrl !== null,
+            usesProxy: fallbackUrl !== null,
           };
         } catch {
           return {
             rawAvatarUrl: avatarTextRecord,
             browserSupportedAvatarUrl: null,
-            fromFallback: false,
+            usesProxy: false,
           };
         }
       }
@@ -243,14 +243,14 @@ export function useAvatarUrl(
       return {
         rawAvatarUrl: avatarTextRecord,
         browserSupportedAvatarUrl: null,
-        fromFallback: false,
+        usesProxy: false,
       };
     },
     retry: false,
     placeholderData: {
       rawAvatarUrl: null,
       browserSupportedAvatarUrl: null,
-      fromFallback: false,
+      usesProxy: false,
     } as const,
   };
 
