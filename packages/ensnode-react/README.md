@@ -290,7 +290,7 @@ interface UseAvatarUrlResult {
 ```
 
 - `rawAvatarUrl`: The original avatar text record value from ENS, before any normalization or proxy processing. `null` if no avatar text record is set.
-- `browserSupportedAvatarUrl`: A browser-supported (http/https) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, or if the avatar uses a non-http/https protocol and no proxy url is available.
+- `browserSupportedAvatarUrl`: A browser-supported (http/https) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, if the avatar that is set is an invalid URL, or if the avatar uses a non-http/https protocol and no proxy url is available.
 - `usesProxy `: Indicates if the `browserSupportedAvatarUrl` uses the configured proxy.
 
 <details>
