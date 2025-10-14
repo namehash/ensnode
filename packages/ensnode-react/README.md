@@ -384,34 +384,20 @@ function EnsAvatar({ name }: { name: Name }) {
 <summary><strong>Custom Proxy Example</strong></summary>
 
 ```tsx
-import {
-  useAvatarUrl,
-  buildEnsMetadataServiceAvatarUrl,
-  toBrowserSupportedUrl,
-} from "@ensnode/ensnode-react";
+import { useAvatarUrl, toBrowserSupportedUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
-import { ENSNamespaceId } from "@ensnode/datasources";
 
-function ProfileAvatar({
-  name,
-  namespaceId,
-}: {
-  name: Name;
-  namespaceId: ENSNamespaceId;
-}) {
+function ProfileAvatar({ name }: { name: Name }) {
   const { data, isLoading } = useAvatarUrl({
     name,
     browserUnsupportedProtocolFallback: async (name) => {
-      // Option 1: Use ENS Metadata Service for a specific namespace
-      return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-
-      // Option 2: Use your own custom IPFS gateway
-      // const avatarRecord = /* get from somewhere */;
-      // if (avatarRecord.startsWith('ipfs://')) {
-      //   const ipfsHash = avatarRecord.replace('ipfs://', '');
-      //   return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
-      // }
-      // return null;
+      // Use your own custom IPFS gateway
+      const avatarRecord = /* get from somewhere */;
+      if (avatarRecord.startsWith('ipfs://')) {
+        const ipfsHash = avatarRecord.replace('ipfs://', '');
+        return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
+      }
+      return null;
     },
   });
 
