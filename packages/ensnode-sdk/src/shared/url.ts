@@ -39,7 +39,7 @@ export function isWebSocketProtocol(url: URL): boolean {
  * This function strictly validates that the URL uses a browser-supported protocol (http/https)
  * before returning it as a BrowserSupportedAssetUrl type.
  *
- * @param urlString - The URL string to validate (must include protocol)
+ * @param urlString - The URL string to validate and convert
  * @returns A BrowserSupportedAssetUrl if the protocol is http/https
  * @throws if the URL string cannot be successfully converted to a BrowserSupportedAssetUrl
  */

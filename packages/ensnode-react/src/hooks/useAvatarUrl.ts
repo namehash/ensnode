@@ -31,16 +31,16 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * Optional custom fallback function to get avatar URL when the avatar text record
    * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
    *
-   * If not provided, defaults to using the ENS Metadata Service as a fallback proxy for browser-supported avatar urls.
+   * If undefined, defaults to using the ENS Metadata Service as a proxy for browser-supported avatar urls.
    *
    * IMPORTANT: Custom implementations MUST use `toBrowserSupportedUrl()` to create BrowserSupportedAssetUrl values,
    * or return the result from `buildEnsMetadataServiceAvatarUrl()`. The returned URL is validated at runtime
    * to ensure it passes the `isHttpProtocol` check.
    *
-   * @param name - The ENS name to get the avatar URL for
+   * @param name - The ENS name to get the browser supported avatar URL for
    * @returns Promise resolving to the browser supported avatar URL, or null if unavailable
    */
-  browserUnsupportedProtocolFallback?: (name: Name) => Promise<BrowserSupportedAssetUrl | null>;
+  browserSupportedAvatarUrlProxy?: (name: Name) => Promise<BrowserSupportedAssetUrl | null>;
 }
 
 /**
@@ -114,7 +114,7 @@ export interface UseAvatarUrlResult {
  * function ProfileAvatar({ name, namespaceId }: { name: string; namespaceId: string }) {
  *   const { data, isLoading } = useAvatarUrl({
  *     name,
- *     browserUnsupportedProtocolFallback: async (name) => {
+ *     browserSupportedAvatarUrlProxy: async (name) => {
  *       // Use the ENS Metadata Service for the current namespace
  *       return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
  *     }
@@ -201,27 +201,27 @@ export function useAvatarUrl(
           fromFallback: false,
         };
       } catch {
-        // Continue to fallback handling below
+        // Continue to proxy handling below
       }
 
-      // Create default fallback using ENS Metadata Service
-      const defaultFallback = async (name: Name): Promise<BrowserSupportedAssetUrl | null> => {
+      // Default proxy is to use the ENS Metadata Service
+      const defaultProxy = async (name: Name): Promise<BrowserSupportedAssetUrl | null> => {
         return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
       };
 
-      // Use custom fallback if provided, otherwise use default
-      const activeFallback: (name: Name) => Promise<BrowserSupportedAssetUrl | null> =
+      // Use custom proxy if provided, otherwise use default
+      const activeProxy: (name: Name) => Promise<BrowserSupportedAssetUrl | null> =
         browserUnsupportedProtocolFallback ?? defaultFallback;
 
-      // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if available
+      // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
       if (activeFallback) {
         try {
-          const fallbackUrl = await activeFallback(name);
+          const proxyUrl = await activeFallback(name);
 
           // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
           if (fallbackUrl !== null && !isHttpProtocol(fallbackUrl)) {
             throw new Error(
-              `browserUnsupportedProtocolFallback returned a URL with unsupported protocol: ${fallbackUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
+              `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${fallbackUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
             );
           }
 

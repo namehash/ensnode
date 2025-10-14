@@ -253,7 +253,7 @@ const { data, isLoading, error, refetch } = usePrimaryNames({
 
 ### `useAvatarUrl`
 
-Hook that resolves the avatar URL for an ENS name. This hook automatically handles the avatar text record resolution and provides browser-compatible URLs.
+Hook that resolves the avatar URL for an ENS name. This hook automatically handles the avatar text record resolution and provides browser-compatible URLs (potentially using a proxy).
 
 #### Resolution Flow
 
@@ -261,21 +261,21 @@ The hook follows this resolution process:
 
 1. **Fetches the avatar text record** using `useRecords` internally
 2. **Normalizes the avatar text record** as a URL
-3. **Returns the URL directly** if it uses http or https protocol
-4. **Falls back to ENS Metadata Service** (or custom fallback) for non-http/https protocols (e.g., `ipfs://`, `ar://`, `eip155://`)
+3. **Returns the normalized URL directly** if it uses http or https protocol
+4. **Falls back to ENS Metadata Service** (or custom proxy) if the avatar text record is a valid url, but uses non-http/https protocols (e.g., `ipfs://`, `ar://`, `eip155://`)
 
-The ENS Metadata Service acts as a proxy, converting decentralized storage protocols like IPFS and Arweave to browser-accessible URLs.
+The ENS Metadata Service can be used as a proxy for loading avatar images when the related avatar text records use non-browser-supported protocols.
 
 #### Invariants
 
 - **If `rawAvatarUrl` is `null`, then `browserSupportedAvatarUrl` must also be `null`**
 - The `browserSupportedAvatarUrl` is guaranteed to use http or https protocol when non-null
-- The `fromFallback` flag is `true` only when a fallback successfully resolved the URL
+- The `usesProxy ` flag is `true` if `browserSupportedAvatarUrl` will use the configured proxy.
 
 #### Parameters
 
 - `name`: The ENS Name whose avatar URL to resolve (set to `null` to disable the query)
-- `browserUnsupportedProtocolFallback`: (optional) Custom fallback function for non-http/https protocols. Must return a `BrowserSupportedAssetUrl` created using `toBrowserSupportedUrl()` or from `buildEnsMetadataServiceAvatarUrl()`. Defaults to using the ENS Metadata Service.
+- `browserSupportedAvatarUrlProxy `: (optional) Custom function to build a proxy URL for loading the avatar image for a name who's avatar text records that are formatted as valid URLs but use non-http/https protocols. Must return a `BrowserSupportedAssetUrl` created using `toBrowserSupportedUrl()` or from `buildEnsMetadataServiceAvatarUrl()`. Defaults to using the ENS Metadata Service.
 - `query`: (optional) TanStack Query options for customization
 
 #### Return Value
@@ -284,13 +284,13 @@ The ENS Metadata Service acts as a proxy, converting decentralized storage proto
 interface UseAvatarUrlResult {
   rawAvatarUrl: string | null;
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
-  fromFallback: boolean;
+  usesProxy: boolean;
 }
 ```
 
-- `rawAvatarUrl`: The original avatar text record value from ENS, before any normalization or fallback processing. `null` if no avatar text record is set.
-- `browserSupportedAvatarUrl`: A browser-supported (http/https) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, or if the avatar uses a non-http/https protocol and the fallback fails to resolve.
-- `fromFallback`: Indicates whether the `browserSupportedAvatarUrl` was obtained via the fallback mechanism.
+- `rawAvatarUrl`: The original avatar text record value from ENS, before any normalization or proxy processing. `null` if no avatar text record is set.
+- `browserSupportedAvatarUrl`: A browser-supported (http/https) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, or if the avatar uses a non-http/https protocol and no proxy url is available.
+- `usesProxy `: Indicates if the `browserSupportedAvatarUrl` uses the configured proxy.
 
 <details>
 <summary><strong>Basic Example</strong></summary>
@@ -378,7 +378,7 @@ function EnsAvatar({ name }: { name: string }) {
 </details>
 
 <details>
-<summary><strong>Custom Fallback Example</strong></summary>
+<summary><strong>Custom Proxy Example</strong></summary>
 
 ```tsx
 import {
@@ -391,7 +391,7 @@ function ProfileAvatar({
   name,
   namespaceId,
 }: {
-  name: string;
+  name: Name;
   namespaceId: string;
 }) {
   const { data, isLoading } = useAvatarUrl({
@@ -424,7 +424,7 @@ function ProfileAvatar({
             src={data.browserSupportedAvatarUrl.toString()}
             alt={`${name} avatar`}
           />
-          {data.fromFallback && <span className="badge">Via Fallback</span>}
+          {data.usesProxy && <span className="badge">Uses Proxy</span>}
         </>
       )}
     </div>
