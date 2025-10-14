@@ -9,4 +9,3 @@ export * from "./useResolvedIdentity";
 
 // Re-export BrowserSupportedAssetUrl for convenience
 export type { BrowserSupportedAssetUrl } from "@ensnode/ensnode-sdk";
-
