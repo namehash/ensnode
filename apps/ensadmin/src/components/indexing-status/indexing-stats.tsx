@@ -1,13 +1,12 @@
 /**
  * This file describes UI components for each of {@link OmnichainIndexingStatusId}.
  *
- * Each overall status will enable presenting of different indexing stats.
+ * Each omnichain status can present different indexing stats.
  */
 import { useIndexingStatus } from "@ensnode/ensnode-react";
 import {
   ChainIndexingStatusIds,
   CrossChainIndexingStatusSnapshotOmnichain,
-  IndexingStatusResponse,
   IndexingStatusResponseCodes,
   OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
