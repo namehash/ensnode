@@ -45,8 +45,8 @@ export function getOmnichainIndexingStatus(
 }
 
 /**
- * Get timestamp of the lowest `config.startBlock` across all chains in status
- * {@link ChainIndexingStatusSnapshot}.
+ * Get the timestamp of the lowest `config.startBlock` across all chains
+ * in the provided array of {@link ChainIndexingStatusSnapshot}.
  *
  * Such timestamp is useful when presenting the "lowest" block
  * to be indexed across all chains.
@@ -62,13 +62,13 @@ export function getTimestampForLowestOmnichainStartBlock(
 }
 
 /**
- * Get timestamp of the highest "known block" across all chains in status
- * {@link ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill}.
+ * Get the timestamp of the "highest known block" across all chains
+ * in the provided array of {@link ChainIndexingStatusSnapshot}.
  *
- * Such timestamp is useful when presenting the "highest" block
+ * Such timestamp is useful when presenting the "highest known block"
  * to be indexed across all chains.
  *
- * The "known block" is, based on the chain status:
+ * The "highest known block" for a chain depends on its status:
  * - `config.endBlock` for a "queued" chain,
  * - `backfillEndBlock` for a "backfill" chain,
  * - `latestIndexedBlock` for a "completed" chain,
@@ -134,6 +134,8 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingStatusSnapshot[]
     .map((chain) => chain.latestIndexedBlock.timestamp);
 
   // Invariant: there's at least one element in `latestIndexedBlockTimestamps` array
+  // This is theoretically impossible based on the 2 checks above,
+  // but the invariant is explicitly added here as a formality.
   if (latestIndexedBlockTimestamps.length < 1) {
     throw new Error("latestIndexedBlockTimestamps array must include at least one element");
   }

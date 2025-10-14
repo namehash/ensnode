@@ -24,7 +24,7 @@ import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ChainName } from "@/components/chains/ChainName";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatChainStatus, formatOmnichainStatus } from "@/lib/indexing-status";
+import { formatChainStatus, formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 import { cn } from "@/lib/utils";
 import { BackfillStatus } from "./backfill-status";
 import { BlockStats, blockViewModel } from "./block-refs";
@@ -318,9 +318,9 @@ export function IndexingStatsShell({
           {omnichainStatus && (
             <Badge
               className={cn("uppercase text-xs leading-none")}
-              title={`Overall indexing status: ${formatOmnichainStatus(omnichainStatus)}`}
+              title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainStatus)}`}
             >
-              {formatOmnichainStatus(omnichainStatus)}
+              {formatOmnichainIndexingStatus(omnichainStatus)}
             </Badge>
           )}
         </CardTitle>

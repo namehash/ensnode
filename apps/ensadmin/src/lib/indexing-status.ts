@@ -6,7 +6,7 @@ export function formatChainStatus(status: ChainIndexingStatusId): string {
   return formattedStatus;
 }
 
-export function formatOmnichainStatus(status: OmnichainIndexingStatusId): string {
+export function formatOmnichainIndexingStatus(status: OmnichainIndexingStatusId): string {
   const [, formattedStatus] = status.split("-");
 
   return formattedStatus;

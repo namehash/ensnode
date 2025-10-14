@@ -9,11 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { formatOmnichainStatus } from "@/lib/indexing-status";
+import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 import {
   type ENSIndexerPublicConfig,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
+  type OmnichainIndexingStatusSnapshotCompleted,
+  type OmnichainIndexingStatusSnapshotFollowing,
   type RealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -22,7 +25,7 @@ import { Fragment } from "react";
 import { useRecentRegistrations } from "./hooks";
 
 /**
- * Max number of latest registrations to display
+ * Max number of recent registrations to display
  */
 const DEFAULT_MAX_RECORDS = 25;
 
@@ -49,26 +52,21 @@ export interface RecentRegistrationsErrorProps {
  *
  * Standard -
  *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
- *      indexingStatus: ENSIndexerOverallIndexingCompletedStatus |
- *          ENSIndexerOverallIndexingFollowingStatus ,
- *      error: undefined
+ *      indexingStatus: {@link OmnichainIndexingStatusSnapshotCompleted} |
+ *          {@link OmnichainIndexingStatusSnapshotFollowing},
  *
  * UnsupportedOmnichainIndexingStatusMessage -
- *      ensIndexerConfig: ENSIndexerPublicConfig,
- *      indexingStatus: statuses different from Following & Completed,
- *      error: undefined
+ *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
+ *      indexingStatus:  {@link OmnichainIndexingStatusSnapshot} other than
+ *          {@link OmnichainIndexingStatusSnapshotCompleted} |
+ *          {@link OmnichainIndexingStatusSnapshotFollowing},
  *
  * Loading -
  *      ensIndexerConfig: undefined,
  *      indexingStatus: undefined,
- *      error: undefined
  *
  * Error -
- *      ensIndexerConfig: undefined,
- *      indexingStatus: undefined,
- *      error: ErrorInfoProps
- *
- * @throws If both error and any from the pair of ensIndexerConfig & indexingStatus are defined
+ *      error: {@link ErrorInfoProps}
  */
 export type RecentRegistrationsProps = RecentRegistrationsOkProps | RecentRegistrationsErrorProps;
 /**
@@ -199,9 +197,9 @@ function UnsupportedOmnichainIndexingStatusMessage({
           <p>Current omnichain indexing status:</p>
           <Badge
             className="uppercase text-xs leading-none"
-            title={`Current omnichain indexing status: ${formatOmnichainStatus(omnichainIndexingStatus)}`}
+            title={`Current omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainIndexingStatus)}`}
           >
-            {formatOmnichainStatus(omnichainIndexingStatus)}
+            {formatOmnichainIndexingStatus(omnichainIndexingStatus)}
           </Badge>
         </div>
         <div>

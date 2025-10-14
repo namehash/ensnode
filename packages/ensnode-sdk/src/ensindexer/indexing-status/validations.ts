@@ -118,8 +118,6 @@ export function invariant_chainSnapshotFollowingBlocks(
   const { config, latestIndexedBlock, latestKnownBlock } = ctx.value;
 
   if (blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock) === false) {
-    console.log("invariant_chainSnapshotFollowingBlocks", JSON.stringify(ctx.value, null, 2));
-
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
