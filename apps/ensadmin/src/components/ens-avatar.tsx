@@ -2,12 +2,13 @@
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
-import { Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceId, Name, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
 interface EnsAvatarProps {
   name: Name;
+  namespaceId: ENSNamespaceId;
   className?: string;
 }
 
@@ -42,11 +43,15 @@ type ImageLoadingStatus = Parameters<
  * <EnsAvatar name="example.eth" className="h-12 w-12" />
  * ```
  */
-export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
+export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
   const [imageLoadingStatus, setImageLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
 
   const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
     name,
+    browserSupportedAvatarUrlProxy: React.useCallback(
+      (name: Name) => buildEnsMetadataServiceAvatarUrl(name, namespaceId),
+      [namespaceId],
+    ),
   });
 
   // Show loading state while fetching avatar URL or if data is not yet available
