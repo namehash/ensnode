@@ -49,7 +49,7 @@ export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
   const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
     name,
     browserSupportedAvatarUrlProxy: React.useCallback(
-      (name: Name) => buildEnsMetadataServiceAvatarUrl(name, namespaceId),
+      (name: Name, rawAvatarUrl: string) => buildEnsMetadataServiceAvatarUrl(name, namespaceId),
       [namespaceId],
     ),
   });

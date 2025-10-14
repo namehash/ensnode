@@ -29,8 +29,8 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    */
   name: Name | null;
   /**
-   * Optional custom proxy function to get avatar URL when the avatar text record
-   * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
+   * Optional function to build a BrowserSupportedAssetUrl for a name's avatar image
+   *  when the avatar text record uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
    *
    * If undefined, defaults to using the ENS Metadata Service as a proxy for browser-supported avatar urls.
    *
@@ -61,16 +61,16 @@ export interface UseAvatarUrlResult {
   rawAvatarUrl: string | null;
   /**
    * A browser-supported (http/https) avatar URL ready for use in <img> tags.
-   * Populated when the avatar uses http/https protocol or when a proxy successfully resolves it.
+   * Populated when the rawAvatarUrl is a valid URL that uses the http/https protocol or when a url is available to load the avatar using a proxy.
    * Null if the avatar text record is not set, if the avatar text record is malformed/invalid,
-   * or if the avatar uses a non-http/https protocol and either no proxy is available or the proxy fails to resolve it.
+   * or if the avatar uses a non-http/https protocol and no url is known for how to load the avatar using a proxy.
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
-   * Indicates whether the browserSupportedAvatarUrl was obtained via a proxy service.
-   * True if a proxy (either the default ENS Metadata Service or a custom proxy) successfully resolved the URL.
-   * False if the URL was used directly from the avatar text record, or if there's no avatar,
-   * or if the proxy failed to resolve.
+   * Indicates whether the browserSupportedAvatarUrl uses a proxy service.
+   * True if the url uses a proxy (either the default ENS Metadata Service or a custom proxy).
+   * False if the URL comes directly from the avatar text record, or if there's no avatar text record,
+   * or if the avatar text record has an invalid format, or if no url is known for loading the avatar using a proxy.
    */
   usesProxy: boolean;
 }
@@ -114,18 +114,32 @@ export interface UseAvatarUrlResult {
  *
  * @example
  * ```typescript
- * // With custom proxy
+ * // With custom IPFS gateway proxy
  * import { useAvatarUrl, toBrowserSupportedUrl } from "@ensnode/ensnode-react";
  *
  * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({
  *     name,
  *     browserSupportedAvatarUrlProxy: (name, rawAvatarUrl) => {
- *       // Use your own custom IPFS gateway
+ *       // Handle IPFS protocol URLs with a custom gateway
  *       if (rawAvatarUrl.startsWith('ipfs://')) {
- *         const ipfsHash = rawAvatarUrl.replace('ipfs://', '');
- *         return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
+ *         // Extract CID and optional path from ipfs://{CID}/{path}
+ *         const ipfsPath = rawAvatarUrl.replace('ipfs://', '');
+ *
+ *         // Use ipfs.io public gateway (best-effort, not for production)
+ *         return toBrowserSupportedUrl(`https://ipfs.io/ipfs/${ipfsPath}`);
+ *
+ *         // Or use your own gateway:
+ *         // return toBrowserSupportedUrl(`https://my-gateway.example.com/ipfs/${ipfsPath}`);
  *       }
+ *
+ *       // Handle Arweave protocol
+ *       if (rawAvatarUrl.startsWith('ar://')) {
+ *         const arweaveId = rawAvatarUrl.replace('ar://', '');
+ *         return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
+ *       }
+ *
+ *       // Fall back to ENS Metadata Service for other protocols
  *       return null;
  *     }
  *   });
