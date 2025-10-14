@@ -30,4 +30,4 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     ensRainbowSchema: 3,
     ensNormalize: "1.11.1",
   },
-} satisfies SerializedENSIndexerPublicConfig);
+});

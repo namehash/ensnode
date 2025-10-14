@@ -47,7 +47,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1759409665,
                   number: 3327417,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
 
@@ -59,7 +58,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1731834595,
                   number: 110393959,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
             "8453": {
@@ -70,7 +68,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1721834595,
                   number: 17522624,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
 
@@ -82,7 +79,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1720768992,
                   number: 6682888,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
           },
@@ -112,7 +108,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1489165544,
                   number: 3327417,
                 },
-                endBlock: null,
               },
               latestIndexedBlock: {
                 timestamp: 1580899661,
@@ -132,7 +127,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1696386695,
                   number: 110393959,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
             "8453": {
@@ -143,7 +137,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1721834595,
                   number: 17522624,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
             "59144": {
@@ -154,7 +147,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1720768992,
                   number: 6682888,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
             "567": {
@@ -165,7 +157,6 @@ export const indexingStatusResponseOkOmnichain: Record<
                   timestamp: 1720768999,
                   number: 6682889,
                 },
-                endBlock: null,
               },
             } satisfies SerializedChainIndexingStatusSnapshotQueued,
           },

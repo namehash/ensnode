@@ -60,7 +60,6 @@ const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
     z.strictObject({
       configType: z.literal(ChainIndexingConfigTypeIds.Indefinite),
       startBlock: makeBlockRefSchema(valueLabel),
-      endBlock: z.null(),
     }),
     z.strictObject({
       configType: z.literal(ChainIndexingConfigTypeIds.Definite),

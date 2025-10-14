@@ -361,7 +361,6 @@ describe("createChainIndexingSnapshot", () => {
       config: {
         configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
-        endBlock: null,
       },
     } satisfies ChainIndexingStatusSnapshotQueued);
   });
@@ -473,7 +472,6 @@ describe("createChainIndexingSnapshot", () => {
       config: {
         configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
-        endBlock: null,
       },
       latestIndexedBlock: blockRef(15, 1500),
       backfillEndBlock: blockRef(30, 3000),

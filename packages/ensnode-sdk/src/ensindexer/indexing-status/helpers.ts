@@ -162,7 +162,6 @@ export function createIndexingConfig(
   return {
     configType: ChainIndexingConfigTypeIds.Indefinite,
     startBlock,
-    endBlock: null,
   } satisfies ChainIndexingConfigIndefinite;
 }
 

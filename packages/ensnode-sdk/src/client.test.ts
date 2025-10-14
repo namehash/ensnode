@@ -102,7 +102,6 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeIndexingStatusRespo
                 timestamp: 1489165544,
                 number: 3327417,
               },
-              endBlock: null,
             },
             latestIndexedBlock: {
               timestamp: 1755181591,
@@ -121,7 +120,6 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeIndexingStatusRespo
                 timestamp: 1755181691,
                 number: 17571480,
               },
-              endBlock: null,
             },
           },
         },
@@ -172,7 +170,6 @@ const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: IndexingStatusResponse =
                   timestamp: 1_484_015_544,
                   number: 17_571_480,
                 },
-                endBlock: null,
               },
               latestIndexedBlock: {
                 timestamp: 1_499_456_516,

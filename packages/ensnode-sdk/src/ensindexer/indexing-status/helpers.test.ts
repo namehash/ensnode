@@ -193,7 +193,6 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
       expect(indexingConfig).toStrictEqual({
         configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: earlierBlockRef,
-        endBlock: null,
       } satisfies ChainIndexingConfigIndefinite);
     });
   });

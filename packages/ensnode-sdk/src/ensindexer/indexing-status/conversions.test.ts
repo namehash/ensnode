@@ -39,7 +39,6 @@ describe("ENSIndexer: Indexing Status", () => {
               config: {
                 configType: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: earlierBlockRef,
-                endBlock: null,
               },
               latestIndexedBlock: laterBlockRef,
               backfillEndBlock: latestBlockRef,
@@ -52,7 +51,6 @@ describe("ENSIndexer: Indexing Status", () => {
               config: {
                 configType: ChainIndexingConfigTypeIds.Indefinite,
                 startBlock: latestBlockRef,
-                endBlock: null,
               },
             } satisfies ChainIndexingStatusSnapshotQueued,
           ],
@@ -81,7 +79,6 @@ describe("ENSIndexer: Indexing Status", () => {
             config: {
               configType: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: latestBlockRef,
-              endBlock: null,
             },
           } satisfies ChainIndexingStatusSnapshotQueued,
           "10": {
@@ -89,7 +86,6 @@ describe("ENSIndexer: Indexing Status", () => {
             config: {
               configType: ChainIndexingConfigTypeIds.Indefinite,
               startBlock: earlierBlockRef,
-              endBlock: null,
             },
             latestIndexedBlock: laterBlockRef,
             backfillEndBlock: latestBlockRef,
