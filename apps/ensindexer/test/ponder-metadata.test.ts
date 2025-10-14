@@ -1,17 +1,17 @@
 import {
   BlockRef,
-  ChainIndexingBackfillStatus,
-  ChainIndexingCompletedStatus,
-  ChainIndexingFollowingStatus,
-  ChainIndexingQueuedStatus,
+  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStrategyIds,
+  ChainIndexingStatusSnapshotBackfill,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotFollowing,
+  ChainIndexingStatusSnapshotQueued,
 } from "@ensnode/ensnode-sdk";
 import { describe, expect, it } from "vitest";
 
 import {
   ChainMetadata,
-  getChainIndexingStatus,
+  createChainIndexingSnapshot,
 } from "@/api/lib/indexing-status/ponder-metadata/chains";
 import {
   PonderConfigType,
@@ -311,7 +311,7 @@ describe("getChainsBlockrange", () => {
   });
 });
 
-describe("getChainIndexingStatus", () => {
+describe("createChainIndexingSnapshot", () => {
   it("returns 'queued' status if startBlock equals statusBlock (definite)", () => {
     // arrange
     const meta: ChainMetadata = {
@@ -326,17 +326,17 @@ describe("getChainIndexingStatus", () => {
     };
 
     // act
-    const chainIndexingStatus = getChainIndexingStatus(meta, 3000);
+    const chainIndexingStatus = createChainIndexingSnapshot(meta);
 
     // assert
     expect(chainIndexingStatus).toStrictEqual({
-      status: ChainIndexingStatusIds.Queued,
+      chainStatus: ChainIndexingStatusIds.Queued,
       config: {
-        strategy: ChainIndexingStrategyIds.Definite,
+        configType: ChainIndexingConfigTypeIds.Definite,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
-    } satisfies ChainIndexingQueuedStatus);
+    } satisfies ChainIndexingStatusSnapshotQueued);
   });
 
   it("returns 'queued' status if startBlock equals statusBlock (indefinite)", () => {
@@ -353,17 +353,16 @@ describe("getChainIndexingStatus", () => {
     };
 
     // act
-    const chainIndexingStatus = getChainIndexingStatus(meta, 3000);
+    const chainIndexingStatus = createChainIndexingSnapshot(meta);
 
     // assert
     expect(chainIndexingStatus).toStrictEqual({
-      status: ChainIndexingStatusIds.Queued,
+      chainStatus: ChainIndexingStatusIds.Queued,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
-        endBlock: null,
       },
-    } satisfies ChainIndexingQueuedStatus);
+    } satisfies ChainIndexingStatusSnapshotQueued);
   });
 
   it("returns 'completed' status if isSyncComplete is true", () => {
@@ -380,18 +379,18 @@ describe("getChainIndexingStatus", () => {
     };
 
     // act
-    const chainIndexingStatus = getChainIndexingStatus(meta, 3000);
+    const chainIndexingStatus = createChainIndexingSnapshot(meta);
 
     // assert
     expect(chainIndexingStatus).toStrictEqual({
-      status: ChainIndexingStatusIds.Completed,
+      chainStatus: ChainIndexingStatusIds.Completed,
       config: {
-        strategy: ChainIndexingStrategyIds.Definite,
+        configType: ChainIndexingConfigTypeIds.Definite,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
       latestIndexedBlock: blockRef(20, 2000),
-    } satisfies ChainIndexingCompletedStatus);
+    } satisfies ChainIndexingStatusSnapshotCompleted);
   });
 
   it("returns 'following' status if isSyncRealtime is true", () => {
@@ -408,19 +407,18 @@ describe("getChainIndexingStatus", () => {
     };
 
     // act
-    const chainIndexingStatus = getChainIndexingStatus(meta, 4000);
+    const chainIndexingStatus = createChainIndexingSnapshot(meta);
 
     // assert
     expect(chainIndexingStatus).toStrictEqual({
-      status: ChainIndexingStatusIds.Following,
+      chainStatus: ChainIndexingStatusIds.Following,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
       },
       latestIndexedBlock: blockRef(25, 2500),
       latestKnownBlock: blockRef(30, 3000),
-      approxRealtimeDistance: 1500,
-    } satisfies ChainIndexingFollowingStatus);
+    } satisfies ChainIndexingStatusSnapshotFollowing);
   });
 
   it("returns Backfill status otherwise (definite config)", () => {
@@ -431,25 +429,25 @@ describe("getChainIndexingStatus", () => {
       isSyncComplete: false,
       isSyncRealtime: false,
       config: { startBlock: blockRef(10, 1000), endBlock: blockRef(20, 2000) },
-      backfillEndBlock: blockRef(30, 3000),
-      syncBlock: blockRef(30, 3000),
+      backfillEndBlock: blockRef(20, 2000),
+      syncBlock: blockRef(18, 1800),
       statusBlock: blockRef(15, 1500),
     };
 
     // act
-    const chainIndexingStatus = getChainIndexingStatus(meta, 4000);
+    const chainIndexingStatus = createChainIndexingSnapshot(meta);
 
     // assert
     expect(chainIndexingStatus).toStrictEqual({
-      status: ChainIndexingStatusIds.Backfill,
+      chainStatus: ChainIndexingStatusIds.Backfill,
       config: {
-        strategy: ChainIndexingStrategyIds.Definite,
+        configType: ChainIndexingConfigTypeIds.Definite,
         startBlock: blockRef(10, 1000),
         endBlock: blockRef(20, 2000),
       },
       latestIndexedBlock: blockRef(15, 1500),
-      backfillEndBlock: blockRef(30, 3000),
-    } satisfies ChainIndexingBackfillStatus);
+      backfillEndBlock: blockRef(20, 2000),
+    } satisfies ChainIndexingStatusSnapshotBackfill);
   });
 
   it("returns Backfill status otherwise (indefinite config)", () => {
@@ -466,18 +464,17 @@ describe("getChainIndexingStatus", () => {
     };
 
     // act
-    const chainIndexingStatus = getChainIndexingStatus(meta, 4000);
+    const chainIndexingStatus = createChainIndexingSnapshot(meta);
 
     // assert
     expect(chainIndexingStatus).toStrictEqual({
-      status: ChainIndexingStatusIds.Backfill,
+      chainStatus: ChainIndexingStatusIds.Backfill,
       config: {
-        strategy: ChainIndexingStrategyIds.Indefinite,
+        configType: ChainIndexingConfigTypeIds.Indefinite,
         startBlock: blockRef(10, 1000),
-        endBlock: null,
       },
       latestIndexedBlock: blockRef(15, 1500),
       backfillEndBlock: blockRef(30, 3000),
-    } satisfies ChainIndexingBackfillStatus);
+    } satisfies ChainIndexingStatusSnapshotBackfill);
   });
 });

@@ -8,7 +8,31 @@ import {
   ResolveRecordsRequest,
   ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
+import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 import type { ENSNodeConfig } from "../types";
+
+/**
+ * Immutable query options for data that is assumed to be immutable and should only be fetched once per full page refresh per unique key.
+ * Similar to SWR's immutable: true API.
+ *
+ * Use this for data that is assumed not to change (e.g., records for a specific name) until the next full page refresh.
+ *
+ * @example
+ * ```tsx
+ * useRecords({
+ *   name: "vitalik.eth",
+ *   selection: { texts: ["avatar"] },
+ *   query: ASSUME_IMMUTABLE_QUERY
+ * })
+ * ```
+ */
+export const ASSUME_IMMUTABLE_QUERY = {
+  staleTime: Infinity,
+  gcTime: Infinity,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+  refetchOnMount: false,
+} as const satisfies Partial<UndefinedInitialDataOptions>;
 
 /**
  * Query keys for hooks. Simply keys by path and arguments.
@@ -29,8 +53,7 @@ export const queryKeys = {
 
   config: (url: string) => [...queryKeys.base(url), "config"] as const,
 
-  indexingStatus: (url: string, args: IndexingStatusRequest) =>
-    [...queryKeys.base(url), "config", args] as const,
+  indexingStatus: (url: string) => [...queryKeys.base(url), "indexing-status"] as const,
 };
 
 /**
@@ -101,16 +124,13 @@ export function createENSIndexerConfigQueryOptions(config: ENSNodeConfig) {
 /**
  * Creates query options for ENSIndexer Indexing Status API
  */
-export function createIndexingStatusQueryOptions(
-  config: ENSNodeConfig,
-  args: IndexingStatusRequest,
-) {
+export function createIndexingStatusQueryOptions(config: ENSNodeConfig) {
   return {
     enabled: true,
-    queryKey: queryKeys.indexingStatus(config.client.url.href, args),
+    queryKey: queryKeys.indexingStatus(config.client.url.href),
     queryFn: async () => {
       const client = new ENSNodeClient(config.client);
-      return client.indexingStatus(args);
+      return client.indexingStatus();
     },
   };
 }

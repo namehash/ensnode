@@ -114,7 +114,7 @@ export default function MockRelativeTimePage() {
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: RelativeTime</CardTitle>
+          <CardTitle className="text-2xl leading-normal">Mock: RelativeTime</CardTitle>
           <CardDescription>Select a mock RelativeTime variant</CardDescription>
         </CardHeader>
 

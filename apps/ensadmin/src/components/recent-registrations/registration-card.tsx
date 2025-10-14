@@ -1,21 +1,30 @@
 import { Duration, RelativeTime } from "@/components/datetime-utils";
-import { Identity } from "@/components/identity";
+import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import type { Registration } from "@/components/recent-registrations/types";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { guessChainIdFromRegisteredName } from "@/lib/guess-registration-chain-id";
 import { cn } from "@/lib/utils";
-import type { ENSNamespaceId } from "@ensnode/datasources";
+import { buildUnresolvedIdentity } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
 
 export interface RegistrationCardProps {
   registration: Registration;
-  namespaceId: ENSNamespaceId;
 }
 
 /**
  * Displays the data of a single Registration
  */
+export function RegistrationCard({ registration }: RegistrationCardProps) {
+  const namespaceId = useActiveNamespace();
 
-export function RegistrationCard({ registration, namespaceId }: RegistrationCardProps) {
+  // "dirty-hack": fallback to guessing that the registration occurred on the ENS root chain
+  // TODO: Update our indexed data model for registrations so that this "dirty-hack"
+  //       is no longer needed.
+  const chainIdGuess = guessChainIdFromRegisteredName(registration.name, namespaceId) ?? undefined;
+
+  const owner = buildUnresolvedIdentity(registration.owner, namespaceId, chainIdGuess);
+
   return (
     <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
       <RegistrationCardElement elementName="Name" className="w-[45%] min-w-[200px]">
@@ -35,7 +44,7 @@ export function RegistrationCard({ registration, namespaceId }: RegistrationCard
         <Duration beginsAt={registration.registeredAt} endsAt={registration.expiresAt} />
       </RegistrationCardElement>
       <RegistrationCardElement elementName="Owner" className="w-1/5 overflow-x-auto min-w-[150px]">
-        <Identity address={registration.owner} namespaceId={namespaceId} showAvatar={true} />
+        <ResolveAndDisplayIdentity identity={owner} withAvatar={true} className="font-medium" />
       </RegistrationCardElement>
     </div>
   );

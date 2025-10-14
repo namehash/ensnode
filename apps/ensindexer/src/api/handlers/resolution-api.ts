@@ -18,7 +18,7 @@ import { routes } from "@ensnode/ensnode-sdk/internal";
 const app = new Hono();
 
 // memoizes the result of canAccelerateResolution within a 30s window
-// this means that the effective maxRealtimeDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
+// this means that the effective worstCaseDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
 // and the initial request(s) in between ENSApi startup and the first resolution of
 // canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
 const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
