@@ -390,13 +390,13 @@ import { Name } from "@ensnode/ensnode-sdk";
 function ProfileAvatar({ name }: { name: Name }) {
   const { data, isLoading } = useAvatarUrl({
     name,
-    browserUnsupportedProtocolFallback: async (name) => {
+    browserSupportedAvatarUrlProxy: (name, rawAvatarUrl) => {
       // Use your own custom IPFS gateway
-      const avatarRecord = /* get from somewhere */;
-      if (avatarRecord.startsWith('ipfs://')) {
-        const ipfsHash = avatarRecord.replace('ipfs://', '');
+      if (rawAvatarUrl.startsWith("ipfs://")) {
+        const ipfsHash = rawAvatarUrl.replace("ipfs://", "");
         return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
       }
+      // Could handle other protocols like ar://, eip155://, etc.
       return null;
     },
   });

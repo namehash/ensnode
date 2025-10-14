@@ -28,7 +28,7 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    */
   name: Name | null;
   /**
-   * Optional custom fallback function to get avatar URL when the avatar text record
+   * Optional custom proxy function to get avatar URL when the avatar text record
    * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
    *
    * If undefined, defaults to using the ENS Metadata Service as a proxy for browser-supported avatar urls.
@@ -38,9 +38,13 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * to ensure it passes the `isHttpProtocol` check.
    *
    * @param name - The ENS name to get the browser supported avatar URL for
-   * @returns Promise resolving to the browser supported avatar URL, or null if unavailable
+   * @param rawAvatarUrl - The original avatar text record value, allowing protocol-specific logic (e.g., ipfs:// vs ar://)
+   * @returns The browser supported avatar URL, or null if unavailable
    */
-  browserSupportedAvatarUrlProxy?: (name: Name) => Promise<BrowserSupportedAssetUrl | null>;
+  browserSupportedAvatarUrlProxy?: (
+    name: Name,
+    rawAvatarUrl: string,
+  ) => BrowserSupportedAssetUrl | null;
 }
 
 /**
@@ -108,15 +112,19 @@ export interface UseAvatarUrlResult {
  *
  * @example
  * ```typescript
- * // With custom fallback
- * import { useAvatarUrl, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-react";
+ * // With custom proxy
+ * import { useAvatarUrl, toBrowserSupportedUrl } from "@ensnode/ensnode-react";
  *
- * function ProfileAvatar({ name, namespaceId }: { name: string; namespaceId: string }) {
+ * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({
  *     name,
- *     browserSupportedAvatarUrlProxy: async (name) => {
- *       // Use the ENS Metadata Service for the current namespace
- *       return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+ *     browserSupportedAvatarUrlProxy: (name, rawAvatarUrl) => {
+ *       // Use your own custom IPFS gateway
+ *       if (rawAvatarUrl.startsWith('ipfs://')) {
+ *         const ipfsHash = rawAvatarUrl.replace('ipfs://', '');
+ *         return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
+ *       }
+ *       return null;
  *     }
  *   });
  *
@@ -205,30 +213,30 @@ export function useAvatarUrl(
       }
 
       // Default proxy is to use the ENS Metadata Service
-      const defaultProxy = async (name: Name): Promise<BrowserSupportedAssetUrl | null> => {
+      const defaultProxy = (name: Name, rawAvatarUrl: string): BrowserSupportedAssetUrl | null => {
         return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
       };
 
       // Use custom proxy if provided, otherwise use default
-      const activeProxy: (name: Name) => Promise<BrowserSupportedAssetUrl | null> =
-        browserUnsupportedProtocolFallback ?? defaultFallback;
+      const activeProxy: (name: Name, rawAvatarUrl: string) => BrowserSupportedAssetUrl | null =
+        browserUnsupportedProtocolFallback ?? defaultProxy;
 
       // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
-      if (activeFallback) {
+      if (activeProxy) {
         try {
-          const proxyUrl = await activeFallback(name);
+          const proxyUrl = activeProxy(name, avatarTextRecord);
 
           // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
-          if (fallbackUrl !== null && !isHttpProtocol(fallbackUrl)) {
+          if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
             throw new Error(
-              `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${fallbackUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
+              `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
             );
           }
 
           return {
             rawAvatarUrl: avatarTextRecord,
-            browserSupportedAvatarUrl: fallbackUrl,
-            usesProxy: fallbackUrl !== null,
+            browserSupportedAvatarUrl: proxyUrl,
+            usesProxy: proxyUrl !== null,
           };
         } catch {
           return {
