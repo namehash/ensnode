@@ -2,21 +2,22 @@ import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import type { Registration } from "@/components/recent-registrations/types";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { guessChainIdFromRegisteredName } from "@/lib/guess-registration-chain-id";
 import { cn } from "@/lib/utils";
-import { type ENSNamespaceId } from "@ensnode/datasources";
 import { buildUnresolvedIdentity } from "@ensnode/ensnode-sdk";
 import { PropsWithChildren } from "react";
 
 export interface RegistrationCardProps {
   registration: Registration;
-  namespaceId: ENSNamespaceId;
 }
 
 /**
  * Displays the data of a single Registration
  */
-export function RegistrationCard({ registration, namespaceId }: RegistrationCardProps) {
+export function RegistrationCard({ registration }: RegistrationCardProps) {
+  const namespaceId = useActiveNamespace();
+
   // "dirty-hack": fallback to guessing that the registration occurred on the ENS root chain
   // TODO: Update our indexed data model for registrations so that this "dirty-hack"
   //       is no longer needed.

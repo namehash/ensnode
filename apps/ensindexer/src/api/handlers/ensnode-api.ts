@@ -1,20 +1,23 @@
 import { publicClients } from "ponder:api";
 import {
   IndexingStatusResponseCodes,
-  OverallIndexingStatusIds,
-  serializeENSIndexerIndexingStatus,
+  IndexingStatusResponseError,
+  IndexingStatusResponseOk,
+  OmnichainIndexingStatusSnapshot,
+  createRealtimeIndexingStatusProjection,
   serializeENSIndexerPublicConfig,
+  serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
-import { routes } from "@ensnode/ensnode-sdk/internal";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
-import { validate } from "@/api/lib/handlers/validate";
-import { buildIndexingStatus, hasAchievedRequestedDistance } from "@/api/lib/indexing-status";
+import {
+  buildOmnichainIndexingStatusSnapshot,
+  createCrossChainIndexingStatusSnapshotOmnichain,
+} from "@/api/lib/indexing-status";
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { getUnixTime } from "date-fns";
-import type { UnofficialStatusCode } from "hono/utils/http-status";
 import resolutionApi from "./resolution-api";
 
 const app = new Hono();
@@ -31,38 +34,48 @@ app.get("/config", async (c) => {
   return c.json(serializeENSIndexerPublicConfig(publicConfig));
 });
 
-app.get("/indexing-status", validate("query", routes.indexingStatus.query), async (c) => {
-  const { maxRealtimeDistance } = c.req.valid("query");
-
+app.get("/indexing-status", async (c) => {
   // get system timestamp for the current request
-  const systemTimestamp = getUnixTime(new Date());
+  const snapshotTime = getUnixTime(new Date());
 
-  const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
-  const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
+  let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
-  // respond with custom server error if ENSIndexer is not available
-  if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
+  try {
+    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
+  }
+
+  // return IndexingStatusResponseError
+  if (typeof omnichainSnapshot === "undefined") {
     return c.json(
-      serializedIndexingStatus,
-      IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
+      serializeIndexingStatusResponse({
+        responseCode: IndexingStatusResponseCodes.Error,
+      } satisfies IndexingStatusResponseError),
+      500,
     );
   }
 
-  const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
-    indexingStatus,
-    maxRealtimeDistance,
+  // otherwise, proceed with creating IndexingStatusResponseOk
+  const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
+    omnichainSnapshot,
+    snapshotTime,
   );
 
-  // respond with custom server error if requested distance hasn't been achieved yet
-  if (!hasAchievedRequestedRealtimeIndexingDistance) {
-    return c.json(
-      serializedIndexingStatus,
-      IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
-    );
-  }
+  const projectedAt = getUnixTime(new Date());
+  const realtimeProjection = createRealtimeIndexingStatusProjection(
+    crossChainSnapshot,
+    projectedAt,
+  );
 
-  // respond with the serialized indexing status object
-  return c.json(serializedIndexingStatus);
+  // return the serialized indexing status response object
+  return c.json(
+    serializeIndexingStatusResponse({
+      responseCode: IndexingStatusResponseCodes.Ok,
+      realtimeProjection,
+    } satisfies IndexingStatusResponseOk),
+  );
 });
 
 // Resolution API
