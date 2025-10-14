@@ -4,6 +4,7 @@ import {
   type BrowserSupportedAssetUrl,
   type Name,
   buildEnsMetadataServiceAvatarUrl,
+  buildUrl,
   isHttpProtocol,
   toBrowserSupportedUrl,
 } from "@ensnode/ensnode-sdk";
@@ -61,8 +62,8 @@ export interface UseAvatarUrlResult {
   /**
    * A browser-supported (http/https) avatar URL ready for use in <img> tags.
    * Populated when the avatar uses http/https protocol or when a proxy successfully resolves it.
-   * Null if the avatar text record is not set, or if the avatar uses a non-http/https protocol
-   * and either no proxy is available or the proxy fails to resolve it.
+   * Null if the avatar text record is not set, if the avatar text record is malformed/invalid,
+   * or if the avatar uses a non-http/https protocol and either no proxy is available or the proxy fails to resolve it.
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
@@ -81,8 +82,9 @@ export interface UseAvatarUrlResult {
  * 1. Fetching the avatar text record using useRecords
  * 2. Normalizing the avatar text record as a URL
  * 3. Returning the URL if it uses http or https protocol
- * 4. Falling back to the ENS Metadata Service (which proxies decentralized storage protocols
- *    like IPFS/Arweave to browser-accessible URLs) or a custom fallback for other protocols
+ * 4. For valid URLs with unsupported protocols (e.g., ipfs://, ar://), using the ENS Metadata Service
+ *    (or a custom proxy) to convert them to browser-accessible URLs
+ * 5. For malformed/invalid URLs, returning null without attempting proxy conversion
  *
  * @param parameters - Configuration for the avatar URL resolution
  * @returns Query result with the avatar URL, loading state, and error handling
@@ -209,7 +211,21 @@ export function useAvatarUrl(
           usesProxy: false,
         };
       } catch {
-        // Continue to proxy handling below
+        // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
+        // Try to parse as a general URL to determine which case we're in
+        try {
+          buildUrl(avatarTextRecord);
+          // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
+          // Continue to proxy handling below
+        } catch {
+          // buildUrl failed, so the avatar text record is malformed/invalid
+          // Skip proxy logic and return null
+          return {
+            rawAvatarUrl: avatarTextRecord,
+            browserSupportedAvatarUrl: null,
+            usesProxy: false,
+          };
+        }
       }
 
       // Default proxy is to use the ENS Metadata Service
