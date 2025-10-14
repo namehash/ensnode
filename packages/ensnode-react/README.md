@@ -381,7 +381,9 @@ function EnsAvatar({ name }: { name: Name }) {
 </details>
 
 <details>
-<summary><strong>Custom Proxy Example</strong></summary>
+<summary><strong>Custom IPFS Gateway Proxy Example</strong></summary>
+
+When ENS avatars use the IPFS protocol (e.g., `ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco`), you can configure a custom IPFS gateway to load the images. This is useful for using your own infrastructure or a preferred public gateway.
 
 ```tsx
 import { useAvatarUrl, toBrowserSupportedUrl } from "@ensnode/ensnode-react";
@@ -391,12 +393,34 @@ function ProfileAvatar({ name }: { name: Name }) {
   const { data, isLoading } = useAvatarUrl({
     name,
     browserSupportedAvatarUrlProxy: (name, rawAvatarUrl) => {
-      // Use your own custom IPFS gateway
+      // Handle IPFS protocol URLs
       if (rawAvatarUrl.startsWith("ipfs://")) {
-        const ipfsHash = rawAvatarUrl.replace("ipfs://", "");
-        return toBrowserSupportedUrl(`https://my-gateway.io/ipfs/${ipfsHash}`);
+        // Extract the CID (Content Identifier) from the IPFS URL
+        // Format: ipfs://{CID} or ipfs://{CID}/{path}
+        const ipfsPath = rawAvatarUrl.replace("ipfs://", "");
+
+        // Option 1: Use ipfs.io public gateway (path-based)
+        // Note: Public gateways are best-effort and not for production
+        return toBrowserSupportedUrl(`https://ipfs.io/ipfs/${ipfsPath}`);
+
+        // Option 2: Use dweb.link public gateway (subdomain-based, better origin isolation)
+        // return toBrowserSupportedUrl(`https://dweb.link/ipfs/${ipfsPath}`);
+
+        // Option 3: Use your own IPFS gateway
+        // return toBrowserSupportedUrl(`https://my-gateway.example.com/ipfs/${ipfsPath}`);
+
+        // Option 4: Use Cloudflare's IPFS gateway
+        // return toBrowserSupportedUrl(`https://cloudflare-ipfs.com/ipfs/${ipfsPath}`);
       }
-      // Could handle other protocols like ar://, eip155://, etc.
+
+      // Handle Arweave protocol URLs (ar://)
+      if (rawAvatarUrl.startsWith("ar://")) {
+        const arweaveId = rawAvatarUrl.replace("ar://", "");
+        return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
+      }
+
+      // For other protocols, fall back to ENS Metadata Service
+      // by returning null (the default behavior)
       return null;
     },
   });
@@ -422,6 +446,16 @@ function ProfileAvatar({ name }: { name: Name }) {
   );
 }
 ```
+
+**Important Notes:**
+
+- **IPFS URL Format**: IPFS URLs follow the format `ipfs://{CID}` or `ipfs://{CID}/{path}`, where CID is the Content Identifier (hash) of the content.
+- **Public Gateways**: The IPFS Foundation provides public gateways like `ipfs.io` and `dweb.link` on a best-effort basis. These are **not intended for production use** and may throttle or block heavy usage.
+- **Production Use**: For production applications, consider:
+  - Running your own IPFS node and gateway
+  - Using a commercial IPFS pinning service with gateway access (e.g., Pinata, Infura, Fleek)
+  - Using a CDN with IPFS support (e.g., Cloudflare)
+- **Testing**: To test with real IPFS avatars, you can use ENS names like those that have set IPFS-based avatar records in their resolver.
 
 </details>
 
