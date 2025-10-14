@@ -4,7 +4,6 @@ import { EnsAvatar } from "@/components/ens-avatar";
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
 import { Name } from "@ensnode/ensnode-sdk";
 
@@ -15,8 +14,6 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderProps) {
-  const namespace = useActiveNamespace();
-
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12
   // See: https://docs.ens.domains/ensip/12#uri-types

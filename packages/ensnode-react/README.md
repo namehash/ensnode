@@ -125,8 +125,9 @@ function DisplayPrimaryNames() {
 
 ```tsx
 import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
 
-function ProfileAvatar({ name }: { name: string }) {
+function ProfileAvatar({ name }: { name: Name }) {
   const { data, isLoading } = useAvatarUrl({ name });
 
   if (isLoading || !data) {
@@ -297,8 +298,9 @@ interface UseAvatarUrlResult {
 
 ```tsx
 import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
 
-function ProfileAvatar({ name }: { name: string }) {
+function ProfileAvatar({ name }: { name: Name }) {
   const { data, isLoading } = useAvatarUrl({ name });
 
   if (isLoading || !data) {
@@ -308,7 +310,7 @@ function ProfileAvatar({ name }: { name: string }) {
   return (
     <div className="avatar">
       {!data.browserSupportedAvatarUrl ? (
-        <div className="avatar-fallback">No avatar</div>
+        <div className="avatar-fallback" />
       ) : (
         <img
           src={data.browserSupportedAvatarUrl.toString()}
@@ -327,9 +329,10 @@ function ProfileAvatar({ name }: { name: string }) {
 
 ```tsx
 import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
 import { useState } from "react";
 
-function EnsAvatar({ name }: { name: string }) {
+function EnsAvatar({ name }: { name: Name }) {
   const [imageLoadingStatus, setImageLoadingStatus] = useState<
     "idle" | "loading" | "loaded" | "error"
   >("idle");
@@ -386,13 +389,15 @@ import {
   buildEnsMetadataServiceAvatarUrl,
   toBrowserSupportedUrl,
 } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceId } from "@ensnode/datasources";
 
 function ProfileAvatar({
   name,
   namespaceId,
 }: {
   name: Name;
-  namespaceId: string;
+  namespaceId: ENSNamespaceId;
 }) {
   const { data, isLoading } = useAvatarUrl({
     name,
