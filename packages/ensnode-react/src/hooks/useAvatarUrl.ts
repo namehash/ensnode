@@ -54,15 +54,15 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
  */
 export interface UseAvatarUrlResult {
   /**
-   * The original avatar text record value from ENS, before any normalization or fallback processing.
+   * The original avatar text record value from ENS, before any normalization or proxy processing.
    * Null if the avatar text record is not set for the ENS name.
    */
   rawAvatarUrl: string | null;
   /**
    * A browser-supported (http/https) avatar URL ready for use in <img> tags.
-   * Populated when the avatar uses http/https protocol or when a fallback successfully resolves.
+   * Populated when the avatar uses http/https protocol or when a proxy successfully resolves it.
    * Null if the avatar text record is not set, or if the avatar uses a non-http/https protocol
-   * and either no fallback is available or the fallback fails to resolve.
+   * and either no proxy is available or the proxy fails to resolve it.
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
