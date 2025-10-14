@@ -67,7 +67,10 @@ export default function MockRegistrationsPage() {
               ? error.message
               : "Unknown RecentRegistrations mock data deserialization error";
           return {
-            error: { title: "Deserialization Error", description: errorMessage },
+            error: {
+              title: "Deserialization Error",
+              description: errorMessage,
+            },
           } satisfies RecentRegistrationsErrorProps;
         }
     }
@@ -84,7 +87,7 @@ export default function MockRegistrationsPage() {
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: RecentRegistrations</CardTitle>
+          <CardTitle className="text-2xl leading-normal">Mock: RecentRegistrations</CardTitle>
           <CardDescription>Select a mock RecentRegistrations variant</CardDescription>
         </CardHeader>
 

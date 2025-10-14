@@ -42,7 +42,10 @@ export default function MockConfigPage() {
               ? error.message
               : "Unknown ENSIndexerPublicConfig deserialization error";
           return {
-            error: { title: "Deserialization Error", description: errorMessage },
+            error: {
+              title: "Deserialization Error",
+              description: errorMessage,
+            },
           };
         }
     }
@@ -52,7 +55,7 @@ export default function MockConfigPage() {
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: ENSNodeConfigInfo</CardTitle>
+          <CardTitle className="text-2xl leading-normal">Mock: ENSNodeConfigInfo</CardTitle>
           <CardDescription>Select a mock ENSNodeConfigInfo variant</CardDescription>
         </CardHeader>
 

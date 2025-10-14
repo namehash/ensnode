@@ -119,7 +119,8 @@ export default function MockDisplayIdentityPage() {
     <section className="flex flex-col lg:flex-row gap-6 p-6 max-sm:p-4">
       <Card className="flex-1">
         <CardHeader>
-          <CardTitle>Input</CardTitle>
+          <CardTitle className="text-2xl leading-normal">Mock: DisplayIdentity</CardTitle>
+          <CardDescription>Select a mock DisplayIdentity variant</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <Card>

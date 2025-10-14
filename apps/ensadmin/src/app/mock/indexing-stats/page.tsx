@@ -71,11 +71,11 @@ export default function MockIndexingStatusPage() {
   }, [selectedVariant]);
 
   return (
-    <section className="flex flex-col gap-6 p-4">
+    <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: IndexingStats</CardTitle>
-          <CardDescription>Select a mock IndexingStats scenario</CardDescription>
+          <CardTitle className="text-2xl leading-normal">Mock: IndexingStats</CardTitle>
+          <CardDescription>Select a mock IndexingStats variant</CardDescription>
         </CardHeader>
 
         <CardContent>
