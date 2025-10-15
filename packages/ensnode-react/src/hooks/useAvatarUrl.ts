@@ -50,29 +50,39 @@ export function resolveAvatarUrl(
     };
   }
 
-  try {
-    const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
+  // Check for EIP-155 NFT URIs (CAIP-22 ERC-721 or CAIP-29 ERC-1155)
+  // These require proxy handling to resolve NFT metadata from blockchain
+  const isEip155Uri = /^eip155:\d+\/(erc721|erc1155):/i.test(avatarTextRecord);
 
-    return {
-      rawAvatarUrl: avatarTextRecord,
-      browserSupportedAvatarUrl: browserSupportedUrl,
-      usesProxy: false,
-    };
-  } catch {
-    // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
-    // Try to parse as a general URL to determine which case we're in
+  if (isEip155Uri) {
+    // Skip toBrowserSupportedUrl normalization and go directly to proxy handling
+    // This prevents buildUrl from incorrectly prepending https:// to the URI
+  } else {
+    // Try to convert to browser-supported URL first
     try {
-      buildUrl(avatarTextRecord);
-      // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
-      // Continue to proxy handling below
-    } catch {
-      // buildUrl failed, so the avatar text record is malformed/invalid
-      // Skip proxy logic and return null
+      const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
+
       return {
         rawAvatarUrl: avatarTextRecord,
-        browserSupportedAvatarUrl: null,
+        browserSupportedAvatarUrl: browserSupportedUrl,
         usesProxy: false,
       };
+    } catch {
+      // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
+      // Try to parse as a general URL to determine which case we're in
+      try {
+        buildUrl(avatarTextRecord);
+        // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
+        // Continue to proxy handling below
+      } catch {
+        // buildUrl failed, so the avatar text record is malformed/invalid
+        // Skip proxy logic and return null
+        return {
+          rawAvatarUrl: avatarTextRecord,
+          browserSupportedAvatarUrl: null,
+          usesProxy: false,
+        };
+      }
     }
   }
 
