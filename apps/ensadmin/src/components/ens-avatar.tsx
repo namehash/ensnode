@@ -2,8 +2,14 @@
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
-import { ENSNamespaceId, Name, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-sdk";
+import {
+  ENSNamespaceId,
+  Name,
+  buildEnsMetadataServiceAvatarUrl,
+  deserializeChainId,
+} from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
+import { AssetId } from "caip";
 import * as React from "react";
 
 interface EnsAvatarProps {
@@ -49,7 +55,33 @@ export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
   const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
     name,
     browserSupportedAvatarUrlProxy: React.useCallback(
-      (name: Name, rawAvatarUrl: string) => buildEnsMetadataServiceAvatarUrl(name, namespaceId),
+      (name: Name, rawAvatarUrl: string) => {
+        try {
+          // TODO: handle parse error
+          const asset = AssetId.parse(rawAvatarUrl);
+
+          if (typeof asset.chainId === "string") {
+            console.log("asset chain id string", asset.chainId);
+            return null;
+          }
+
+          if (typeof asset.assetName === "string") {
+            console.log("asset name string", asset.assetName);
+            return null;
+          }
+
+          const chainId = deserializeChainId(asset.chainId.reference);
+          // TODO: validate contract address
+          const contractAddress = asset.assetName.reference;
+
+          // TODO: validate tokenId
+          const tokenId = asset.tokenId;
+
+          return new URL(rawAvatarUrl);
+        } catch {
+          return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+        }
+      },
       [namespaceId],
     ),
   });

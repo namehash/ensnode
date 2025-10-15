@@ -5,6 +5,8 @@ import {
   IndexingStatusResponseOk,
   OmnichainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
+  deserializeChainId,
+  deserializeUrl,
   serializeENSIndexerPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
@@ -18,6 +20,7 @@ import {
 import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { getUnixTime } from "date-fns";
+import { getAddress } from "viem";
 import resolutionApi from "./resolution-api";
 
 const app = new Hono();
@@ -80,5 +83,129 @@ app.get("/indexing-status", async (c) => {
 
 // Resolution API
 app.route("/resolve", resolutionApi);
+
+/**
+ * > AssetId.parse("eip155:1/erc721:0x60e4d786628fea6478f785a6d7e704777c86a7c6/6007")
+{
+  chainId: { namespace: 'eip155', reference: '1' },
+  assetName: {
+    namespace: 'erc721',
+    reference: '0x60e4d786628fea6478f785a6d7e704777c86a7c6'
+  },
+  tokenId: '6007'
+}
+ */
+
+const tokenUriAbi = {
+  erc721: [
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
+        },
+      ],
+      name: "tokenURI",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+  ],
+  erc1155: [
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+      ],
+      name: "uri",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+  ],
+} as const;
+
+// NFT token image URL resolution
+app.get("/nft/:chainId/:assetNamespace/:contractAddress/:tokenId", async (c) => {
+  // TODO: validate input
+  const chainId = deserializeChainId(c.req.param("chainId"));
+  const assetNamespace = c.req.param("assetNamespace");
+  const contractAddress = getAddress(c.req.param("contractAddress"));
+  const tokenId = BigInt(c.req.param("tokenId"));
+
+  const publicClient = Object.values(publicClients).find(
+    (publicClient) => publicClient.chain?.id === chainId,
+  );
+
+  // Invariant: publicClient for chainId is available
+  if (!publicClient) {
+    throw new Error(`No public client found for '${chainId}' chainId`);
+  }
+
+  // Invariant: tokenUriAbi exists for selected asset namespace
+  if (assetNamespace !== "erc721" && assetNamespace !== "erc1155") {
+    throw new Error(`No Token URI ABI found for '${assetNamespace}' asset namespace`);
+  }
+
+  let tokenUri: string;
+
+  switch (assetNamespace) {
+    case "erc721":
+      {
+        tokenUri = await publicClient.readContract({
+          address: contractAddress,
+          functionName: "tokenURI",
+          args: [tokenId],
+          abi: tokenUriAbi.erc721,
+        });
+      }
+      break;
+    case "erc1155":
+      {
+        tokenUri = await publicClient.readContract({
+          address: contractAddress,
+          functionName: "uri",
+          args: [tokenId],
+          abi: tokenUriAbi.erc1155,
+        });
+      }
+      break;
+  }
+
+  try {
+    // validate all network values
+    const tokenURL = deserializeUrl(tokenUri);
+
+    const tokenMetadataJson = await fetch(tokenURL).then((r) => r.json());
+
+    const tokenImageUrl = new URL(tokenMetadataJson.image);
+
+    return c.json({
+      chainId,
+      contractAddress,
+      tokenId: tokenId.toString(),
+      tokenImageUrl: tokenImageUrl.toString(),
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Could not handle the request");
+  }
+});
 
 export default app;

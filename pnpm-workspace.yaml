@@ -9,6 +9,7 @@ catalog:
   "@ponder/utils": 0.2.14
   "@types/node": ^22.14.0
   astro: ^5.14.3
+  caip: 1.1.1
   date-fns: ^4.1.0
   drizzle-orm: =0.41.0
   hono: ^4.9.7
