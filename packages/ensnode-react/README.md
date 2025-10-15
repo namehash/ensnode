@@ -447,16 +447,6 @@ function ProfileAvatar({ name }: { name: Name }) {
 }
 ```
 
-**Important Notes:**
-
-- **IPFS URL Format**: IPFS URLs follow the format `ipfs://{CID}` or `ipfs://{CID}/{path}`, where CID is the Content Identifier (hash) of the content.
-- **Public Gateways**: The IPFS Foundation provides public gateways like `ipfs.io` and `dweb.link` on a best-effort basis. These are **not intended for production use** and may throttle or block heavy usage.
-- **Production Use**: For production applications, consider:
-  - Running your own IPFS node and gateway
-  - Using a commercial IPFS pinning service with gateway access (e.g., Pinata, Infura, Fleek)
-  - Using a CDN with IPFS support (e.g., Cloudflare)
-- **Testing**: To test with real IPFS avatars, you can use ENS names like those that have set IPFS-based avatar records in their resolver.
-
 </details>
 
 ## Advanced Usage
