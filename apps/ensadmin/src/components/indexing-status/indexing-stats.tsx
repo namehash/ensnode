@@ -183,7 +183,10 @@ export function IndexingStatsForSnapshotCompleted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock = chain.config.endBlock ? chain.config.endBlock : null;
+    const endBlock =
+      chain.config.configType === ChainIndexingConfigTypeIds.Definite
+        ? chain.config.endBlock
+        : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
