@@ -35,6 +35,12 @@ export function invariant_chainSnapshotQueuedBlocks(
 ) {
   const { config } = ctx.value;
 
+  // The `config.endBlock` does not exists for `indefinite` config type
+  if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
+    // invariant holds
+    return;
+  }
+
   if (config.endBlock && blockRef.isBeforeOrEqualTo(config.startBlock, config.endBlock) === false) {
     ctx.issues.push({
       code: "custom",
@@ -69,6 +75,12 @@ export function invariant_chainSnapshotBackfillBlocks(
       input: ctx.value,
       message: "`latestIndexedBlock` must be before or same as `backfillEndBlock`.",
     });
+  }
+
+  // The `config.endBlock` does not exists for `indefinite` config type
+  if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
+    // invariant holds
+    return;
   }
 
   if (config.endBlock && blockRef.isEqualTo(backfillEndBlock, config.endBlock) === false) {
@@ -401,8 +413,9 @@ export function invariant_snapshotTimeIsTheHighestKnownBlockTimestamp(
   const startBlockTimestamps = chains.map((chain) => chain.config.startBlock.timestamp);
 
   const endBlockTimestamps = chains
-    .filter((chain) => chain.config.configType === ChainIndexingConfigTypeIds.Definite)
-    .map((chain) => chain.config.endBlock!.timestamp);
+    .map((chain) => chain.config)
+    .filter((chainConfig) => chainConfig.configType === ChainIndexingConfigTypeIds.Definite)
+    .map((chainConfig) => chainConfig.endBlock.timestamp);
 
   const backfillEndBlockTimestamps = chains
     .filter((chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill)

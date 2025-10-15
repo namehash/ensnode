@@ -38,11 +38,6 @@ export interface ChainIndexingConfigIndefinite {
    * A {@link BlockRef} to the block where indexing of the chain should start.
    */
   startBlock: BlockRef;
-
-  /**
-   * A {@link BlockRef} to the block where indexing of the chain should end.
-   */
-  endBlock?: null;
 }
 
 /**

@@ -210,7 +210,7 @@ function UnsupportedOmnichainIndexingStatusMessage({
                 className="uppercase text-xs leading-none"
                 title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
               >
-                {supportedOmnichainIndexingStatus}
+                {formatOmnichainIndexingStatus(supportedOmnichainIndexingStatus)}
               </Badge>
               {idx < supportedOmnichainIndexingStatuses.length - 1 && " or "}
             </Fragment>

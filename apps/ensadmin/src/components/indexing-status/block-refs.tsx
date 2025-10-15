@@ -8,23 +8,9 @@ import { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
-export interface BlockRefViewModel extends BlockRef {
-  get date(): Date;
-}
-
 interface BlockNumberProps {
   chainId: ChainId;
-  block: BlockRefViewModel;
-}
-
-export function blockViewModel(blockRef: BlockRef): BlockRefViewModel {
-  return {
-    ...blockRef,
-
-    get date(): Date {
-      return fromUnixTime(blockRef.timestamp);
-    },
-  };
+  block: BlockRef;
 }
 
 /**
@@ -55,7 +41,7 @@ function BlockNumber({ chainId, block }: BlockNumberProps) {
 interface BlockStatsProps {
   chainId: ChainId;
   label: string;
-  block: BlockRefViewModel | null;
+  block: BlockRef | null;
 }
 
 /**

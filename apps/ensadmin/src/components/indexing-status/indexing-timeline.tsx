@@ -3,12 +3,10 @@
  */
 
 import { cn } from "@/lib/utils";
-import { ChainId, ChainIndexingStatusIds, UnixTimestamp } from "@ensnode/ensnode-sdk";
-import { intlFormat } from "date-fns";
+import { BlockRef, ChainId, ChainIndexingStatusIds, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { AbsoluteTime } from "@/components/datetime-utils";
-import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatChainStatus } from "@/lib/indexing-status";
 import { getChainName } from "@/lib/namespace-utils";
@@ -98,8 +96,8 @@ interface ChainIndexingTimelineProps {
   timelineEndsAt: UnixTimestamp;
   chainStatus: {
     chainId: ChainId;
-    firstBlockToIndex: BlockRefViewModel;
-    lastIndexedBlock: BlockRefViewModel | null;
+    firstBlockToIndex: BlockRef;
+    lastIndexedBlock: BlockRef | null;
     phases: ChainIndexingTimelinePhaseViewModel[];
   };
 }
