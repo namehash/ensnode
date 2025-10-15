@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
-import { ENSNamespaceId, Name, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
@@ -48,10 +48,6 @@ export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
 
   const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
     name,
-    browserSupportedAvatarUrlProxy: React.useCallback(
-      (name: Name, rawAvatarUrl: string) => buildEnsMetadataServiceAvatarUrl(name, namespaceId),
-      [namespaceId],
-    ),
   });
 
   // Show loading state while fetching avatar URL or if data is not yet available
