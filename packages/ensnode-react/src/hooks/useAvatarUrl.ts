@@ -2,6 +2,7 @@
 
 import {
   type BrowserSupportedAssetUrl,
+  ENSNamespaceId,
   type Name,
   buildEnsMetadataServiceAvatarUrl,
   buildUrl,
@@ -19,6 +20,104 @@ import { useRecords } from "./useRecords";
  * The ENS avatar text record key.
  */
 const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
+
+/**
+ * Resolves an avatar text record to a browser-supported URL.
+ * This is the core resolution logic extracted for testing.
+ *
+ * @param avatarTextRecord - The raw avatar text record value from ENS
+ * @param name - The ENS name
+ * @param namespaceId - The ENS namespace ID
+ * @param browserSupportedAvatarUrlProxy - Optional custom proxy function
+ * @returns The resolved avatar URL result
+ * @internal
+ */
+export function resolveAvatarUrl(
+  avatarTextRecord: string | null,
+  name: Name,
+  namespaceId: ENSNamespaceId,
+  browserSupportedAvatarUrlProxy?: (
+    name: Name,
+    rawAvatarUrl: string,
+  ) => BrowserSupportedAssetUrl | null,
+): UseAvatarUrlResult {
+  // If no avatar text record, return null values
+  if (!avatarTextRecord) {
+    return {
+      rawAvatarUrl: null,
+      browserSupportedAvatarUrl: null,
+      usesProxy: false,
+    };
+  }
+
+  try {
+    const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
+
+    return {
+      rawAvatarUrl: avatarTextRecord,
+      browserSupportedAvatarUrl: browserSupportedUrl,
+      usesProxy: false,
+    };
+  } catch {
+    // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
+    // Try to parse as a general URL to determine which case we're in
+    try {
+      buildUrl(avatarTextRecord);
+      // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
+      // Continue to proxy handling below
+    } catch {
+      // buildUrl failed, so the avatar text record is malformed/invalid
+      // Skip proxy logic and return null
+      return {
+        rawAvatarUrl: avatarTextRecord,
+        browserSupportedAvatarUrl: null,
+        usesProxy: false,
+      };
+    }
+  }
+
+  // Default proxy is to use the ENS Metadata Service
+  const defaultProxy = (name: Name, rawAvatarUrl: string): BrowserSupportedAssetUrl | null => {
+    return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+  };
+
+  // Use custom proxy if provided, otherwise use default
+  const activeProxy: (name: Name, rawAvatarUrl: string) => BrowserSupportedAssetUrl | null =
+    browserSupportedAvatarUrlProxy ?? defaultProxy;
+
+  // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
+  if (activeProxy) {
+    try {
+      const proxyUrl = activeProxy(name, avatarTextRecord);
+
+      // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
+      if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
+        throw new Error(
+          `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
+        );
+      }
+
+      return {
+        rawAvatarUrl: avatarTextRecord,
+        browserSupportedAvatarUrl: proxyUrl,
+        usesProxy: proxyUrl !== null,
+      };
+    } catch {
+      return {
+        rawAvatarUrl: avatarTextRecord,
+        browserSupportedAvatarUrl: null,
+        usesProxy: false,
+      };
+    }
+  }
+
+  // No fallback available
+  return {
+    rawAvatarUrl: avatarTextRecord,
+    browserSupportedAvatarUrl: null,
+    usesProxy: false,
+  };
+}
 
 /**
  * Parameters for the useAvatarUrl hook.
@@ -175,7 +274,6 @@ export function useAvatarUrl(
     query: { enabled: canEnable },
   });
 
-  // Get namespace from config
   const configQuery = useENSIndexerConfig({ config: _config });
 
   // Construct query options object
@@ -207,82 +305,7 @@ export function useAvatarUrl(
 
       const avatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
-      // If no avatar text record, return null values
-      if (!avatarTextRecord) {
-        return {
-          rawAvatarUrl: null,
-          browserSupportedAvatarUrl: null,
-          usesProxy: false,
-        };
-      }
-
-      try {
-        const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
-
-        return {
-          rawAvatarUrl: avatarTextRecord,
-          browserSupportedAvatarUrl: browserSupportedUrl,
-          usesProxy: false,
-        };
-      } catch {
-        // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
-        // Try to parse as a general URL to determine which case we're in
-        try {
-          buildUrl(avatarTextRecord);
-          // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
-          // Continue to proxy handling below
-        } catch {
-          // buildUrl failed, so the avatar text record is malformed/invalid
-          // Skip proxy logic and return null
-          return {
-            rawAvatarUrl: avatarTextRecord,
-            browserSupportedAvatarUrl: null,
-            usesProxy: false,
-          };
-        }
-      }
-
-      // Default proxy is to use the ENS Metadata Service
-      const defaultProxy = (name: Name, rawAvatarUrl: string): BrowserSupportedAssetUrl | null => {
-        return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-      };
-
-      // Use custom proxy if provided, otherwise use default
-      const activeProxy: (name: Name, rawAvatarUrl: string) => BrowserSupportedAssetUrl | null =
-        browserSupportedAvatarUrlProxy ?? defaultProxy;
-
-      // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
-      if (activeProxy) {
-        try {
-          const proxyUrl = activeProxy(name, avatarTextRecord);
-
-          // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
-          if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
-            throw new Error(
-              `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
-            );
-          }
-
-          return {
-            rawAvatarUrl: avatarTextRecord,
-            browserSupportedAvatarUrl: proxyUrl,
-            usesProxy: proxyUrl !== null,
-          };
-        } catch {
-          return {
-            rawAvatarUrl: avatarTextRecord,
-            browserSupportedAvatarUrl: null,
-            usesProxy: false,
-          };
-        }
-      }
-
-      // No fallback available
-      return {
-        rawAvatarUrl: avatarTextRecord,
-        browserSupportedAvatarUrl: null,
-        usesProxy: false,
-      };
+      return resolveAvatarUrl(avatarTextRecord, name, namespaceId, browserSupportedAvatarUrlProxy);
     },
     retry: false,
     placeholderData: {

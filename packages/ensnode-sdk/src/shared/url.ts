@@ -1,8 +1,8 @@
 /**
  * Type alias for URLs to assets that are supported by browsers for direct rendering.
- * Assets must be accessible via the http or https protocol.
+ * Assets must be accessible via the http, https, or data protocol.
  *
- * Invariant: value guaranteed to pass isHttpProtocol check.
+ * Invariant: value guaranteed to pass isBrowserSupportedProtocol check.
  */
 export type BrowserSupportedAssetUrl = URL;
 
@@ -34,21 +34,50 @@ export function isWebSocketProtocol(url: URL): boolean {
 }
 
 /**
+ * Checks if a URL uses a protocol that is supported by browsers for direct asset rendering.
+ * Supported protocols include http, https, and data.
+ *
+ * @param url - The URL to check
+ * @returns true if the URL protocol is http:, https:, or data:
+ *
+ * @example
+ * ```typescript
+ * const httpUrl = new URL('https://example.com/image.png');
+ * isBrowserSupportedProtocol(httpUrl); // true
+ *
+ * const dataUrl = new URL('data:image/svg+xml;base64,PHN2Zy8+');
+ * isBrowserSupportedProtocol(dataUrl); // true
+ *
+ * const ipfsUrl = new URL('ipfs://QmHash');
+ * isBrowserSupportedProtocol(ipfsUrl); // false
+ * ```
+ */
+export function isBrowserSupportedProtocol(url: URL): boolean {
+  return ["http:", "https:", "data:"].includes(url.protocol);
+}
+
+/**
  * Validates and converts a URL string to a BrowserSupportedAssetUrl.
  *
  * This function normalizes the URL string (adding 'https://' if no protocol is specified),
- * then validates that the resulting URL uses a browser-supported protocol (http/https)
+ * then validates that the resulting URL uses a browser-supported protocol (http/https/data)
  * before returning it as a BrowserSupportedAssetUrl type.
  *
+ * Special handling for data: URLs - they are parsed directly without normalization to preserve
+ * the data content integrity.
+ *
  * @param urlString - The URL string to validate and convert. If no protocol is specified, 'https://' will be prepended.
- * @returns A BrowserSupportedAssetUrl if the protocol is (or becomes) http/https
- * @throws if the URL string is invalid or uses a non-http/https protocol
+ * @returns A BrowserSupportedAssetUrl if the protocol is (or becomes) http/https/data
+ * @throws if the URL string is invalid or uses a non-browser-supported protocol
  *
  * @example
  * ```typescript
  * // Explicit protocol - no transformation
  * toBrowserSupportedUrl('https://example.com') // returns URL with https://
  * toBrowserSupportedUrl('http://example.com')  // returns URL with http://
+ *
+ * // Data URLs - direct parsing without normalization (ENS avatar standard compliant)
+ * toBrowserSupportedUrl('data:image/svg+xml;base64,PHN2Zy8+') // returns data: URL
  *
  * // Implicit protocol - adds https://
  * toBrowserSupportedUrl('example.com') // returns URL with https://example.com
@@ -58,11 +87,18 @@ export function isWebSocketProtocol(url: URL): boolean {
  * ```
  */
 export function toBrowserSupportedUrl(urlString: string): BrowserSupportedAssetUrl {
-  const url = buildUrl(urlString);
+  // data: URLs should be parsed directly without normalization
+  // buildUrl() would incorrectly prepend https:// to them
+  let url: URL;
+  if (urlString.startsWith("data:")) {
+    url = new URL(urlString);
+  } else {
+    url = buildUrl(urlString);
+  }
 
-  if (!isHttpProtocol(url)) {
+  if (!isBrowserSupportedProtocol(url)) {
     throw new Error(
-      `BrowserSupportedAssetUrl must use http or https protocol, got: ${url.protocol}`,
+      `BrowserSupportedAssetUrl must use http, https, or data protocol, got: ${url.protocol}`,
     );
   }
 
