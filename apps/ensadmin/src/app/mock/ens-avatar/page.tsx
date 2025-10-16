@@ -2,11 +2,13 @@
 
 import { EnsAvatar } from "@/components/ens-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
 import { AlertCircle, Check, X } from "lucide-react";
+import { useState } from "react";
 
 const TEST_NAMES: Name[] = [
   "lightwalker.eth",
@@ -15,16 +17,16 @@ const TEST_NAMES: Name[] = [
   "nick.eth",
   "7⃣7⃣7⃣.eth",
   "jesse.base.eth",
-  "barmstrong.cd.id",
   "000.eth",
   "vitalik.eth",
 ];
 
 interface AvatarTestCardProps {
-  name: Name;
+  defaultName: Name;
 }
 
-function AvatarTestCard({ name }: AvatarTestCardProps) {
+function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
+  const [name, setName] = useState(defaultName);
   const { data, isLoading, error } = useAvatarUrl({ name });
 
   if (error) {
@@ -33,7 +35,12 @@ function AvatarTestCard({ name }: AvatarTestCardProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-red-500" />
-            {name}
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value as Name)}
+              className="flex-1"
+            />
           </CardTitle>
           <CardDescription className="text-red-600">Error loading avatar</CardDescription>
         </CardHeader>
@@ -48,7 +55,14 @@ function AvatarTestCard({ name }: AvatarTestCardProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{name}</CardTitle>
+          <CardTitle className="text-lg">
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value as Name)}
+              className="w-full"
+            />
+          </CardTitle>
           <CardDescription>Loading avatar information...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -73,11 +87,16 @@ function AvatarTestCard({ name }: AvatarTestCardProps) {
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
           {hasAvatar ? (
-            <Check className="h-5 w-5 text-green-600" />
+            <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
           ) : (
-            <X className="h-5 w-5 text-gray-400" />
+            <X className="h-5 w-5 text-gray-400 flex-shrink-0" />
           )}
-          {name}
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value as Name)}
+            className="flex-1"
+          />
         </CardTitle>
         <CardDescription>{hasAvatar ? "Avatar available" : "No avatar available"}</CardDescription>
       </CardHeader>
@@ -149,19 +168,16 @@ export default function MockAvatarUrlPage() {
         <CardHeader>
           <CardTitle className="text-2xl leading-normal">Mock: ENS Avatar</CardTitle>
           <CardDescription>
-            View and test ENS avatar functionality across multiple names. Displays avatar images,
-            raw URLs, browser-supported URLs, and proxy usage for each ENS name.
+            Displays avatar images, raw URLs, browser-supported URLs, and proxy usage for each ENS
+            name.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="pt-4">
-              <h3 className="text-lg font-semibold mb-4">Avatar Test Results</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {TEST_NAMES.map((name) => (
-                  <AvatarTestCard key={name} name={name} />
-                ))}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {TEST_NAMES.map((name) => (
+                <AvatarTestCard key={name} defaultName={name} />
+              ))}
             </div>
           </div>
         </CardContent>
