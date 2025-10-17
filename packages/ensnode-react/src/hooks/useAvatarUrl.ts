@@ -26,7 +26,7 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
  * This is the core resolution logic extracted for testing.
  *
  * @param rawAvatarTextRecord - The raw avatar text record value resolved for `name` on `namespaceId`, or null if `name` has no avatar text record on `namespaceId`.
- * @param name - The ENS name
+ * @param name - The ENS name whose avatar text record value was `rawAvatarTextRecord` on `namespaceId`.
  * @param namespaceId - The ENS namespace ID
  * @param browserSupportedAvatarUrlProxy - Optional custom proxy function
  * @returns The resolved avatar URL result
