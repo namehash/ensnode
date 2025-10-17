@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-import { resolveAvatarUrl, useAvatarUrl } from "@ensnode/ensnode-react";
+import { buildBrowserSupportedAvatarUrl, useAvatarUrl } from "@ensnode/ensnode-react";
 import { Name } from "@ensnode/ensnode-sdk";
 import { AlertCircle, Check, X } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -76,7 +76,7 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
   }
 
   const hasAvatar = data.browserSupportedAvatarUrl !== null;
-  const hasRawUrl = data.rawAvatarUrl !== null;
+  const hasRawUrl = data.rawAvatarTextRecord !== null;
 
   return (
     <Card className={hasAvatar ? "border-green-200" : "border-gray-200"}>
@@ -115,7 +115,7 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
               )}
             </div>
             <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
-              {data.rawAvatarUrl || "Not set"}
+              {data.rawAvatarTextRecord || "Not set"}
             </div>
           </div>
 
@@ -168,7 +168,7 @@ function CustomAvatarWrapper({ customUrl }: { customUrl: string }) {
   // Resolve the avatar URL using the same logic as useAvatarUrl
   // This supports http/https and data: URLs directly
   const resolvedData = useMemo(() => {
-    return resolveAvatarUrl(customUrl, testName, namespaceId);
+    return buildBrowserSupportedAvatarUrl(customUrl, testName, namespaceId);
   }, [customUrl, testName, namespaceId]);
 
   const hasAvatar = resolvedData.browserSupportedAvatarUrl !== null;
@@ -188,14 +188,14 @@ function CustomAvatarWrapper({ customUrl }: { customUrl: string }) {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Raw Avatar URL:</span>
-            {resolvedData.rawAvatarUrl ? (
+            {resolvedData.rawAvatarTextRecord ? (
               <Check className="h-4 w-4 text-green-600" />
             ) : (
               <X className="h-4 w-4 text-gray-400" />
             )}
           </div>
           <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
-            {resolvedData.rawAvatarUrl || "Not set"}
+            {resolvedData.rawAvatarTextRecord || "Not set"}
           </div>
         </div>
 

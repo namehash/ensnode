@@ -269,7 +269,7 @@ The ENS Metadata Service can be used as a proxy for loading avatar images when t
 
 #### Invariants
 
-- **If `rawAvatarUrl` is `null`, then `browserSupportedAvatarUrl` must also be `null`**
+- **If `rawAvatarTextRecord` is `null`, then `browserSupportedAvatarUrl` must also be `null`**
 - The `browserSupportedAvatarUrl` is guaranteed to use http or https protocol when non-null
 - The `usesProxy ` flag is `true` if `browserSupportedAvatarUrl` will use the configured proxy.
 
@@ -283,13 +283,13 @@ The ENS Metadata Service can be used as a proxy for loading avatar images when t
 
 ```tsx
 interface UseAvatarUrlResult {
-  rawAvatarUrl: string | null;
+  rawAvatarTextRecord: string | null;
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   usesProxy: boolean;
 }
 ```
 
-- `rawAvatarUrl`: The original avatar text record value from ENS, before any normalization or proxy processing. `null` if no avatar text record is set.
+- `rawAvatarTextRecord`: The original avatar text record value from ENS, before any normalization or proxy processing. `null` if no avatar text record is set.
 - `browserSupportedAvatarUrl`: A browser-supported (http/https/data) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, if the avatar that is set is an invalid URL, or if the avatar uses a non-http/https/data protocol and no proxy url is available.
 - `usesProxy `: Indicates if the `browserSupportedAvatarUrl` uses the configured proxy.
 

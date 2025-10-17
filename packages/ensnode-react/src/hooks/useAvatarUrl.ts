@@ -23,7 +23,6 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
 
 /**
  * Builds a browser-supported asset URL for a name's avatar image from the name's raw avatar text record value.
- * This is the core resolution logic extracted for testing.
  *
  * @param rawAvatarTextRecord - The raw avatar text record value resolved for `name` on `namespaceId`, or null if `name` has no avatar text record on `namespaceId`.
  * @param name - The ENS name whose avatar text record value was `rawAvatarTextRecord` on `namespaceId`.
@@ -32,16 +31,16 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
  * @returns The {@link UseAvatarUrlResult} result
  * @internal
  */
-export function resolveAvatarUrl(
-  avatarTextRecord: string | null,
+export function buildBrowserSupportedAvatarUrl(
+  rawAvatarTextRecord: string | null,
   name: Name,
   namespaceId: ENSNamespaceId,
   browserSupportedAvatarUrlProxy?: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null,
 ): UseAvatarUrlResult {
   // If no avatar text record, return null values
-  if (!avatarTextRecord) {
+  if (!rawAvatarTextRecord) {
     return {
-      rawAvatarUrl: null,
+      rawAvatarTextRecord: null,
       browserSupportedAvatarUrl: null,
       usesProxy: false,
     };
@@ -49,7 +48,7 @@ export function resolveAvatarUrl(
 
   // Check for EIP-155 NFT URIs (CAIP-22 ERC-721 or CAIP-29 ERC-1155)
   // These require proxy handling to resolve NFT metadata from blockchain
-  const isEip155Uri = /^eip155:\d+\/(erc721|erc1155):/i.test(avatarTextRecord);
+  const isEip155Uri = /^eip155:\d+\/(erc721|erc1155):/i.test(rawAvatarTextRecord);
 
   if (isEip155Uri) {
     // Skip toBrowserSupportedUrl normalization and go directly to proxy handling
@@ -57,25 +56,25 @@ export function resolveAvatarUrl(
   } else {
     // Try to convert to browser-supported URL first
     try {
-      const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
+      const browserSupportedAvatarUrl = toBrowserSupportedUrl(rawAvatarTextRecord);
 
       return {
-        rawAvatarUrl: avatarTextRecord,
-        browserSupportedAvatarUrl: browserSupportedUrl,
+        rawAvatarTextRecord,
+        browserSupportedAvatarUrl,
         usesProxy: false,
       };
     } catch {
       // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
       // Try to parse as a general URL to determine which case we're in
       try {
-        buildUrl(avatarTextRecord);
+        buildUrl(rawAvatarTextRecord);
         // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
         // Continue to proxy handling below
       } catch {
         // buildUrl failed, so the avatar text record is malformed/invalid
         // Skip proxy logic and return null
         return {
-          rawAvatarUrl: avatarTextRecord,
+          rawAvatarTextRecord,
           browserSupportedAvatarUrl: null,
           usesProxy: false,
         };
@@ -95,7 +94,7 @@ export function resolveAvatarUrl(
   // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
   if (activeProxy) {
     try {
-      const proxyUrl = activeProxy(name, buildUrl(avatarTextRecord));
+      const proxyUrl = activeProxy(name, buildUrl(rawAvatarTextRecord));
 
       // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
       if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
@@ -105,13 +104,13 @@ export function resolveAvatarUrl(
       }
 
       return {
-        rawAvatarUrl: avatarTextRecord,
+        rawAvatarTextRecord,
         browserSupportedAvatarUrl: proxyUrl,
         usesProxy: proxyUrl !== null,
       };
     } catch {
       return {
-        rawAvatarUrl: avatarTextRecord,
+        rawAvatarTextRecord,
         browserSupportedAvatarUrl: null,
         usesProxy: false,
       };
@@ -120,7 +119,7 @@ export function resolveAvatarUrl(
 
   // No fallback available
   return {
-    rawAvatarUrl: avatarTextRecord,
+    rawAvatarTextRecord,
     browserSupportedAvatarUrl: null,
     usesProxy: false,
   };
@@ -154,17 +153,17 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
 /**
  * Result returned by the useAvatarUrl hook.
  *
- * Invariant: If rawAvatarUrl is null, then browserSupportedAvatarUrl must also be null.
+ * Invariant: If rawAvatarTextRecord is null, then browserSupportedAvatarUrl must also be null.
  */
 export interface UseAvatarUrlResult {
   /**
    * The original avatar text record value from ENS, before any normalization or proxy processing.
    * Null if the avatar text record is not set for the ENS name.
    */
-  rawAvatarUrl: string | null;
+  rawAvatarTextRecord: string | null;
   /**
    * A browser-supported (http/https) avatar URL ready for use in <img> tags.
-   * Populated when the rawAvatarUrl is a valid URL that uses the http/https protocol or when a url is available to load the avatar using a proxy.
+   * Populated when the rawAvatarTextRecord is a valid URL that uses the http/https protocol or when a url is available to load the avatar using a proxy.
    * Null if the avatar text record is not set, if the avatar text record is malformed/invalid,
    * or if the avatar uses a non-http/https protocol and no url is known for how to load the avatar using a proxy.
    */
@@ -298,7 +297,7 @@ export function useAvatarUrl(
     queryFn: async (): Promise<UseAvatarUrlResult> => {
       if (!name || !recordsQuery.data || !configQuery.data) {
         return {
-          rawAvatarUrl: null,
+          rawAvatarTextRecord: null,
           browserSupportedAvatarUrl: null,
           usesProxy: false,
         };
@@ -307,13 +306,18 @@ export function useAvatarUrl(
       // Invariant: configQuery.data.namespace is guaranteed to be defined when configQuery.data exists
       const namespaceId = configQuery.data.namespace;
 
-      const avatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
+      const rawAvatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
-      return resolveAvatarUrl(avatarTextRecord, name, namespaceId, browserSupportedAvatarUrlProxy);
+      return buildBrowserSupportedAvatarUrl(
+        rawAvatarTextRecord,
+        name,
+        namespaceId,
+        browserSupportedAvatarUrlProxy,
+      );
     },
     retry: false,
     placeholderData: {
-      rawAvatarUrl: null,
+      rawAvatarTextRecord: null,
       browserSupportedAvatarUrl: null,
       usesProxy: false,
     } as const,
