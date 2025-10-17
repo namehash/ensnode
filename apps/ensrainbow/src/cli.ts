@@ -68,6 +68,7 @@ interface ConvertCsvArgs {
   "label-set-id": LabelSetId;
   "label-set-version": LabelSetVersion;
   "progress-interval"?: number;
+  "existing-db-path"?: string;
 }
 
 export interface CLIOptions {
@@ -259,6 +260,10 @@ export function createCLI(options: CLIOptions = {}) {
               type: "number",
               description: "Number of records to process before logging progress",
               default: 10000,
+            })
+            .option("existing-db-path", {
+              type: "string",
+              description: "Path to existing ENSRainbow database to filter out existing labels",
             });
         },
         async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
@@ -268,6 +273,7 @@ export function createCLI(options: CLIOptions = {}) {
             labelSetId: argv["label-set-id"],
             labelSetVersion: argv["label-set-version"],
             progressInterval: argv["progress-interval"],
+            existingDbPath: argv["existing-db-path"],
           });
         },
       )

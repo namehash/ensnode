@@ -123,7 +123,8 @@ pnpm run convert-csv \
   --output-file <output.ensrainbow> \
   --label-set-id <label-set-id> \
   --label-set-version <version-number> \
-  [--progress-interval <number>]
+  [--progress-interval <number>] \
+  [--existing-db-path <path/to/existing/database>]
 ```
 
 ### Required Parameters
@@ -136,6 +137,7 @@ pnpm run convert-csv \
 
 - `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
 - `--progress-interval`: Progress logging frequency (default: 10000 records)
+- `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels
 
 ### CSV Format Support
 
@@ -158,6 +160,42 @@ ens,0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da
 ```
 
 The converter validates that provided labelhashes match the computed hash for each label.
+
+### Label Filtering
+
+The CSV converter includes built-in filtering capabilities to prevent duplicate labels:
+
+#### Filtering Existing Labels
+Use `--existing-db-path` to filter out labels that already exist in an existing ENSRainbow database:
+
+```bash
+pnpm run convert-csv \
+  --input-file new-labels.csv \
+  --output-file incremental_1.ensrainbow \
+  --label-set-id my-dataset \
+  --label-set-version 1 \
+  --existing-db-path data-my-dataset
+```
+
+This will:
+- Check each label against the existing database
+- Skip labels that already exist (avoiding duplicates)
+- Only write new labels to the output file
+- Log filtering statistics in the conversion summary
+
+#### Filtering Duplicate Labels Within CSV
+The converter automatically filters duplicate labels within the same CSV file, keeping only the first occurrence of each label.
+
+#### Filtering Statistics
+The conversion process logs detailed statistics:
+```
+=== Conversion Summary ===
+Total lines processed: 1000
+Valid records: 850
+Filtered existing labels: 100
+Filtered duplicates: 50
+Duration: 150ms
+```
 
 ### Example: Creating Test Dataset
 
@@ -188,7 +226,9 @@ pnpm run convert-csv \
 2. **Streams** CSV parsing using fast-csv for memory efficiency
 3. **Validates** column count and data format
 4. **Computes** or validates labelhashes as needed
-5. **Writes** protobuf messages with the same format as SQL conversion
+5. **Filters** existing labels if `--existing-db-path` is provided
+6. **Filters** duplicate labels within the same CSV file
+7. **Writes** protobuf messages with the same format as SQL conversion
 
 ## Common Workflows
 
@@ -256,7 +296,39 @@ pnpm run ingest-ensrainbow \
 pnpm run serve --data-dir data-custom --port 3223
 ```
 
-### Workflow 4: Using Custom Label Set Server
+### Workflow 4: Creating Incremental Updates
+
+```bash
+# 1. Create initial dataset
+pnpm run convert-csv \
+  --input-file initial-labels.csv \
+  --output-file my-dataset_0.ensrainbow \
+  --label-set-id my-dataset \
+  --label-set-version 0
+
+# 2. Ingest initial data
+pnpm run ingest-ensrainbow \
+  --input-file my-dataset_0.ensrainbow \
+  --data-dir data-my-dataset
+
+# 3. Create incremental update (filtering existing labels)
+pnpm run convert-csv \
+  --input-file new-labels.csv \
+  --output-file my-dataset_1.ensrainbow \
+  --label-set-id my-dataset \
+  --label-set-version 1 \
+  --existing-db-path data-my-dataset
+
+# 4. Ingest incremental update
+pnpm run ingest-ensrainbow \
+  --input-file my-dataset_1.ensrainbow \
+  --data-dir data-my-dataset
+
+# 5. Serve updated data
+pnpm run serve --data-dir data-my-dataset --port 3223
+```
+
+### Workflow 5: Using Custom Label Set Server
 
 ```bash
 # 1. Configure custom label set server
@@ -317,6 +389,14 @@ pnpm run convert-csv \
   --output-file my-dataset_0.ensrainbow \
   --label-set-id my-dataset \
   --label-set-version 0
+
+# For CSV data with filtering (if you have an existing database)
+pnpm run convert-csv \
+  --input-file my-labels.csv \
+  --output-file my-dataset_1.ensrainbow \
+  --label-set-id my-dataset \
+  --label-set-version 1 \
+  --existing-db-path data-my-dataset
 
 # For SQL data
 pnpm run convert \
