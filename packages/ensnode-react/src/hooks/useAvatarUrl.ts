@@ -22,7 +22,7 @@ import { useRecords } from "./useRecords";
 const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
 
 /**
- * Resolves an avatar text record to a browser-supported URL.
+ * Builds a browser-supported asset URL for a name's avatar image from the name's raw avatar text record value.
  * This is the core resolution logic extracted for testing.
  *
  * @param avatarTextRecord - The raw avatar text record value from ENS
