@@ -216,6 +216,195 @@ describe("convert-csv-command", () => {
     });
   });
 
+  describe("Filtering functionality", () => {
+    it("should filter out labels that already exist in the database", async () => {
+      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
+      const outputFile = join(tempDir, "output_filtered.ensrainbow");
+      const dataDir = join(tempDir, "db_filtered");
+
+      // First, create an initial database with some labels
+      const initialOutputFile = join(tempDir, "initial.ensrainbow");
+      await convertCsvCommand({
+        inputFile,
+        outputFile: initialOutputFile,
+        labelSetId: "test-filtering" as LabelSetId,
+        labelSetVersion: 0 as LabelSetVersion,
+      });
+
+      // Ingest the initial file
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse([
+        "ingest-ensrainbow",
+        "--input-file",
+        initialOutputFile,
+        "--data-dir",
+        dataDir,
+      ]);
+
+      // Verify initial database
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const initialCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(initialCount).toBe(11);
+      await db.close();
+
+      // Now convert the same CSV file again, but with filtering enabled
+      await convertCsvCommand({
+        inputFile,
+        outputFile,
+        labelSetId: "test-filtering" as LabelSetId,
+        labelSetVersion: 0 as LabelSetVersion, // Use same version as initial
+        existingDbPath: dataDir,
+      });
+
+      // Verify the filtered output file was created
+      const outputStats = await stat(outputFile);
+      expect(outputStats.isFile()).toBe(true);
+
+      // The filtered file should be smaller than the original since it excludes existing labels
+      const initialStats = await stat(initialOutputFile);
+      expect(outputStats.size).toBeLessThan(initialStats.size);
+
+      // Verify that the filtered file contains fewer records
+      const filteredDataDir = join(tempDir, "db_filtered_result");
+      await cli.parse([
+        "ingest-ensrainbow",
+        "--input-file",
+        outputFile,
+        "--data-dir",
+        filteredDataDir,
+      ]);
+
+      const filteredDb = await ENSRainbowDB.open(filteredDataDir);
+      expect(await filteredDb.validate()).toBe(true);
+      const filteredCount = await filteredDb.getPrecalculatedRainbowRecordCount();
+      expect(filteredCount).toBe(0); // All labels should be filtered out since they already exist
+      await filteredDb.close();
+    });
+
+    it("should filter out duplicate labels within the same conversion", async () => {
+      // Create a CSV file with duplicate labels
+      const csvContent = "label1\nlabel2\nlabel1\nlabel3\nlabel2\nlabel4";
+      const inputFile = join(tempDir, "duplicates.csv");
+      await writeFile(inputFile, csvContent);
+
+      const outputFile = join(tempDir, "output_no_duplicates.ensrainbow");
+
+      // Convert CSV with duplicate filtering
+      await convertCsvCommand({
+        inputFile,
+        outputFile,
+        labelSetId: "test-duplicates" as LabelSetId,
+        labelSetVersion: 0 as LabelSetVersion,
+      });
+
+      // Verify the output file was created
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+
+      // Ingest and verify only unique labels were processed
+      const dataDir = join(tempDir, "db_no_duplicates");
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
+
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+
+      // Should have 4 unique labels (label1, label2, label3, label4)
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(recordsCount).toBe(4);
+
+      // Verify specific labels exist
+      expect(
+        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label1"))))?.label,
+      ).toBe("label1");
+      expect(
+        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label2"))))?.label,
+      ).toBe("label2");
+      expect(
+        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label3"))))?.label,
+      ).toBe("label3");
+      expect(
+        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("label4"))))?.label,
+      ).toBe("label4");
+
+      await db.close();
+    });
+
+    it("should handle non-existent database path gracefully", async () => {
+      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
+      const outputFile = join(tempDir, "output_no_db.ensrainbow");
+      const nonExistentDbPath = join(tempDir, "non-existent-db");
+
+      // Should not throw error even with non-existent database path
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-no-db" as LabelSetId,
+          labelSetVersion: 0 as LabelSetVersion,
+          existingDbPath: nonExistentDbPath,
+        }),
+      ).resolves.not.toThrow();
+
+      // Verify the output file was still created
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+    });
+
+    it("should work through CLI with existing database path", async () => {
+      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
+      const outputFile = join(tempDir, "cli_output_with_db.ensrainbow");
+      const dataDir = join(tempDir, "cli_db_with_filtering");
+
+      // First create a database
+      const initialOutputFile = join(tempDir, "initial_cli.ensrainbow");
+      const cli = createCLI({ exitProcess: false });
+
+      await cli.parse([
+        "convert-csv",
+        "--input-file",
+        inputFile,
+        "--output-file",
+        initialOutputFile,
+        "--label-set-id",
+        "test-cli-filtering",
+        "--label-set-version",
+        "0",
+      ]);
+
+      await cli.parse([
+        "ingest-ensrainbow",
+        "--input-file",
+        initialOutputFile,
+        "--data-dir",
+        dataDir,
+      ]);
+
+      // Now test CLI with existing database path
+      await cli.parse([
+        "convert-csv",
+        "--input-file",
+        inputFile,
+        "--output-file",
+        outputFile,
+        "--label-set-id",
+        "test-cli-filtering",
+        "--label-set-version",
+        "1",
+        "--existing-db-path",
+        dataDir,
+      ]);
+
+      // Verify file was created
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+    });
+  });
+
   describe("Streaming performance", () => {
     it("should handle small CSV files efficiently", async () => {
       const inputFile = join(tempDir, "small_test.csv");
