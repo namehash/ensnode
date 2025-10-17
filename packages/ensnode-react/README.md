@@ -392,12 +392,12 @@ import { Name } from "@ensnode/ensnode-sdk";
 function ProfileAvatar({ name }: { name: Name }) {
   const { data, isLoading } = useAvatarUrl({
     name,
-    browserSupportedAvatarUrlProxy: (name, rawAvatarUrl) => {
+    browserSupportedAvatarUrlProxy: (name, avatarUrl) => {
       // Handle IPFS protocol URLs
-      if (rawAvatarUrl.startsWith("ipfs://")) {
+      if (avatarUrl.protocol === "ipfs:") {
         // Extract the CID (Content Identifier) from the IPFS URL
         // Format: ipfs://{CID} or ipfs://{CID}/{path}
-        const ipfsPath = rawAvatarUrl.replace("ipfs://", "");
+        const ipfsPath = avatarUrl.href.replace("ipfs://", "");
 
         // Option 1: Use ipfs.io public gateway (path-based)
         // Note: Public gateways are best-effort and not for production
@@ -414,8 +414,8 @@ function ProfileAvatar({ name }: { name: Name }) {
       }
 
       // Handle Arweave protocol URLs (ar://)
-      if (rawAvatarUrl.startsWith("ar://")) {
-        const arweaveId = rawAvatarUrl.replace("ar://", "");
+      if (avatarUrl.protocol === "ar:") {
+        const arweaveId = avatarUrl.href.replace("ar://", "");
         return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
       }
 

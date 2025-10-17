@@ -36,10 +36,7 @@ export function resolveAvatarUrl(
   avatarTextRecord: string | null,
   name: Name,
   namespaceId: ENSNamespaceId,
-  browserSupportedAvatarUrlProxy?: (
-    name: Name,
-    rawAvatarUrl: string,
-  ) => BrowserSupportedAssetUrl | null,
+  browserSupportedAvatarUrlProxy?: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null,
 ): UseAvatarUrlResult {
   // If no avatar text record, return null values
   if (!avatarTextRecord) {
@@ -87,18 +84,18 @@ export function resolveAvatarUrl(
   }
 
   // Default proxy is to use the ENS Metadata Service
-  const defaultProxy = (name: Name, rawAvatarUrl: string): BrowserSupportedAssetUrl | null => {
+  const defaultProxy = (name: Name, avatarUrl: URL): BrowserSupportedAssetUrl | null => {
     return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
   };
 
   // Use custom proxy if provided, otherwise use default
-  const activeProxy: (name: Name, rawAvatarUrl: string) => BrowserSupportedAssetUrl | null =
+  const activeProxy: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null =
     browserSupportedAvatarUrlProxy ?? defaultProxy;
 
   // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
   if (activeProxy) {
     try {
-      const proxyUrl = activeProxy(name, avatarTextRecord);
+      const proxyUrl = activeProxy(name, buildUrl(avatarTextRecord));
 
       // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
       if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
@@ -148,13 +145,10 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    * to ensure it passes the `isHttpProtocol` check.
    *
    * @param name - The ENS name to get the browser supported avatar URL for
-   * @param rawAvatarUrl - The original avatar text record value, allowing protocol-specific logic (e.g., ipfs:// vs ar://)
+   * @param avatarUrl - The avatar URL parsed as a URL object, allowing protocol-specific logic (e.g., ipfs:// vs ar://)
    * @returns The browser supported avatar URL, or null if unavailable
    */
-  browserSupportedAvatarUrlProxy?: (
-    name: Name,
-    rawAvatarUrl: string,
-  ) => BrowserSupportedAssetUrl | null;
+  browserSupportedAvatarUrlProxy?: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null;
 }
 
 /**
@@ -229,11 +223,11 @@ export interface UseAvatarUrlResult {
  * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({
  *     name,
- *     browserSupportedAvatarUrlProxy: (name, rawAvatarUrl) => {
+ *     browserSupportedAvatarUrlProxy: (name, avatarUrl) => {
  *       // Handle IPFS protocol URLs with a custom gateway
- *       if (rawAvatarUrl.startsWith('ipfs://')) {
+ *       if (avatarUrl.protocol === 'ipfs:') {
  *         // Extract CID and optional path from ipfs://{CID}/{path}
- *         const ipfsPath = rawAvatarUrl.replace('ipfs://', '');
+ *         const ipfsPath = avatarUrl.href.replace('ipfs://', '');
  *
  *         // Use ipfs.io public gateway (best-effort, not for production)
  *         return toBrowserSupportedUrl(`https://ipfs.io/ipfs/${ipfsPath}`);
@@ -243,8 +237,8 @@ export interface UseAvatarUrlResult {
  *       }
  *
  *       // Handle Arweave protocol
- *       if (rawAvatarUrl.startsWith('ar://')) {
- *         const arweaveId = rawAvatarUrl.replace('ar://', '');
+ *       if (avatarUrl.protocol === 'ar:') {
+ *         const arweaveId = avatarUrl.href.replace('ar://', '');
  *         return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
  *       }
  *
