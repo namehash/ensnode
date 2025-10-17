@@ -2,12 +2,9 @@
 
 import {
   type BrowserSupportedAssetUrl,
-  ENSNamespaceId,
+  type BrowserSupportedAssetUrlProxy,
   type Name,
-  buildEnsMetadataServiceAvatarUrl,
-  buildUrl,
-  isHttpProtocol,
-  toBrowserSupportedUrl,
+  buildBrowserSupportedAvatarUrl,
 } from "@ensnode/ensnode-sdk";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
@@ -22,110 +19,6 @@ import { useRecords } from "./useRecords";
 const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
 
 /**
- * Builds a browser-supported asset URL for a name's avatar image from the name's raw avatar text record value.
- *
- * @param rawAvatarTextRecord - The raw avatar text record value resolved for `name` on `namespaceId`, or null if `name` has no avatar text record on `namespaceId`.
- * @param name - The ENS name whose avatar text record value was `rawAvatarTextRecord` on `namespaceId`.
- * @param namespaceId - The ENS namespace where `name` has the avatar text record set to `rawAvatarTextRecord`.
- * @param browserSupportedAvatarUrlProxy - Optional function for generating browser support asset urls that route through a custom proxy.
- * @returns The {@link UseAvatarUrlResult} result
- * @internal
- */
-export function buildBrowserSupportedAvatarUrl(
-  rawAvatarTextRecord: string | null,
-  name: Name,
-  namespaceId: ENSNamespaceId,
-  browserSupportedAvatarUrlProxy?: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null,
-): UseAvatarUrlResult {
-  // If no avatar text record, return null values
-  if (!rawAvatarTextRecord) {
-    return {
-      rawAvatarTextRecord: null,
-      browserSupportedAvatarUrl: null,
-      usesProxy: false,
-    };
-  }
-
-  // Check for EIP-155 NFT URIs (CAIP-22 ERC-721 or CAIP-29 ERC-1155)
-  // These require proxy handling to resolve NFT metadata from blockchain
-  const isEip155Uri = /^eip155:\d+\/(erc721|erc1155):/i.test(rawAvatarTextRecord);
-
-  if (isEip155Uri) {
-    // Skip toBrowserSupportedUrl normalization and go directly to proxy handling
-    // This prevents buildUrl from incorrectly prepending https:// to the URI
-  } else {
-    // Try to convert to browser-supported URL first
-    try {
-      const browserSupportedAvatarUrl = toBrowserSupportedUrl(rawAvatarTextRecord);
-
-      return {
-        rawAvatarTextRecord,
-        browserSupportedAvatarUrl,
-        usesProxy: false,
-      };
-    } catch {
-      // toBrowserSupportedUrl failed - could be unsupported protocol or malformed URL
-      // Try to parse as a general URL to determine which case we're in
-      try {
-        buildUrl(rawAvatarTextRecord);
-        // buildUrl succeeded, so the avatar text record is a valid URL with an unsupported protocol
-        // Continue to proxy handling below
-      } catch {
-        // buildUrl failed, so the avatar text record is malformed/invalid
-        // Skip proxy logic and return null
-        return {
-          rawAvatarTextRecord,
-          browserSupportedAvatarUrl: null,
-          usesProxy: false,
-        };
-      }
-    }
-  }
-
-  // Default proxy is to use the ENS Metadata Service
-  const defaultProxy = (name: Name, avatarUrl: URL): BrowserSupportedAssetUrl | null => {
-    return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-  };
-
-  // Use custom proxy if provided, otherwise use default
-  const activeProxy: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null =
-    browserSupportedAvatarUrlProxy ?? defaultProxy;
-
-  // For other protocols (ipfs, data, NFT URIs, etc.), use proxy if available
-  if (activeProxy) {
-    try {
-      const proxyUrl = activeProxy(name, buildUrl(rawAvatarTextRecord));
-
-      // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
-      if (proxyUrl !== null && !isHttpProtocol(proxyUrl)) {
-        throw new Error(
-          `browserSupportedAvatarUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
-        );
-      }
-
-      return {
-        rawAvatarTextRecord,
-        browserSupportedAvatarUrl: proxyUrl,
-        usesProxy: proxyUrl !== null,
-      };
-    } catch {
-      return {
-        rawAvatarTextRecord,
-        browserSupportedAvatarUrl: null,
-        usesProxy: false,
-      };
-    }
-  }
-
-  // No fallback available
-  return {
-    rawAvatarTextRecord,
-    browserSupportedAvatarUrl: null,
-    usesProxy: false,
-  };
-}
-
-/**
  * Parameters for the useAvatarUrl hook.
  */
 export interface UseAvatarUrlParameters extends QueryParameter<string | null>, ConfigParameter {
@@ -135,19 +28,20 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
   name: Name | null;
   /**
    * Optional function to build a BrowserSupportedAssetUrl for a name's avatar image
-   *  when the avatar text record uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
+   *  when the avatar text record uses a non-browser-supported protocol (e.g., ipfs://, ar://, eip155:/).
    *
    * If undefined, defaults to using the ENS Metadata Service as a proxy for browser-supported avatar urls.
    *
    * IMPORTANT: Custom implementations MUST use `toBrowserSupportedUrl()` to create BrowserSupportedAssetUrl values,
    * or return the result from `buildEnsMetadataServiceAvatarUrl()`. The returned URL is validated at runtime
-   * to ensure it passes the `isHttpProtocol` check.
+   * to ensure it passes the `isBrowserSupportedProtocol` check (http, https, or data protocols).
    *
    * @param name - The ENS name to get the browser supported avatar URL for
    * @param avatarUrl - The avatar URL parsed as a URL object, allowing protocol-specific logic (e.g., ipfs:// vs ar://)
+   * @param namespaceId - The ENS namespace identifier for the name
    * @returns The browser supported avatar URL, or null if unavailable
    */
-  browserSupportedAvatarUrlProxy?: (name: Name, avatarUrl: URL) => BrowserSupportedAssetUrl | null;
+  browserSupportedAvatarUrlProxy?: BrowserSupportedAssetUrlProxy;
 }
 
 /**
@@ -162,10 +56,10 @@ export interface UseAvatarUrlResult {
    */
   rawAvatarTextRecord: string | null;
   /**
-   * A browser-supported (http/https) avatar URL ready for use in <img> tags.
-   * Populated when the rawAvatarTextRecord is a valid URL that uses the http/https protocol or when a url is available to load the avatar using a proxy.
+   * A browser-supported (http/https/data) avatar URL ready for use in <img> tags.
+   * Populated when the rawAvatarTextRecord is a valid URL that uses a browser-supported protocol (http, https, or data) or when a url is available to load the avatar using a proxy.
    * Null if the avatar text record is not set, if the avatar text record is malformed/invalid,
-   * or if the avatar uses a non-http/https protocol and no url is known for how to load the avatar using a proxy.
+   * or if the avatar uses a non-browser-supported protocol and no url is known for how to load the avatar using a proxy.
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
@@ -183,8 +77,8 @@ export interface UseAvatarUrlResult {
  * This hook attempts to get the avatar URL by:
  * 1. Fetching the avatar text record using useRecords
  * 2. Normalizing the avatar text record as a URL
- * 3. Returning the URL if it uses http or https protocol
- * 4. For valid URLs with unsupported protocols (e.g., ipfs://, ar://), using the ENS Metadata Service
+ * 3. Returning the URL if it uses a browser-supported protocol (http, https, or data)
+ * 4. For valid URLs with non-browser-supported protocols (e.g., ipfs://, ar://), using the ENS Metadata Service
  *    (or a custom proxy) to convert them to browser-accessible URLs
  * 5. For malformed/invalid URLs, returning null without attempting proxy conversion
  *
@@ -217,12 +111,12 @@ export interface UseAvatarUrlResult {
  * @example
  * ```typescript
  * // With custom IPFS gateway proxy
- * import { useAvatarUrl, toBrowserSupportedUrl } from "@ensnode/ensnode-react";
+ * import { useAvatarUrl, toBrowserSupportedUrl, defaultBrowserSupportedAssetUrlProxy } from "@ensnode/ensnode-sdk";
  *
  * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({
  *     name,
- *     browserSupportedAvatarUrlProxy: (name, avatarUrl) => {
+ *     browserSupportedAvatarUrlProxy: (name, avatarUrl, namespaceId) => {
  *       // Handle IPFS protocol URLs with a custom gateway
  *       if (avatarUrl.protocol === 'ipfs:') {
  *         // Extract CID and optional path from ipfs://{CID}/{path}
@@ -241,8 +135,8 @@ export interface UseAvatarUrlResult {
  *         return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
  *       }
  *
- *       // Fall back to ENS Metadata Service for other protocols
- *       return null;
+ *       // For other protocols, fall back to the ENS Metadata Service
+ *       return defaultBrowserSupportedAssetUrlProxy(name, avatarUrl, namespaceId);
  *     }
  *   });
  *
@@ -308,12 +202,18 @@ export function useAvatarUrl(
 
       const rawAvatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
-      return buildBrowserSupportedAvatarUrl(
+      const result = buildBrowserSupportedAvatarUrl(
         rawAvatarTextRecord,
         name,
         namespaceId,
         browserSupportedAvatarUrlProxy,
       );
+
+      return {
+        rawAvatarTextRecord: result.rawAssetTextRecord,
+        browserSupportedAvatarUrl: result.browserSupportedAssetUrl,
+        usesProxy: result.usesProxy,
+      };
     },
     retry: false,
     placeholderData: {

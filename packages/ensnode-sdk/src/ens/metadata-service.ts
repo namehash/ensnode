@@ -2,8 +2,155 @@ import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { BrowserSupportedAssetUrl } from "../shared/url";
-import { toBrowserSupportedUrl } from "../shared/url";
+import { buildUrl, isBrowserSupportedProtocol, toBrowserSupportedUrl } from "../shared/url";
 import type { Name } from "./types";
+
+/**
+ * Function type for generating browser-supported asset URLs through a custom proxy.
+ *
+ * @param name - The ENS name to get the browser supported asset URL for
+ * @param assetUrl - The asset URL parsed as a URL object, allowing protocol-specific logic (e.g., ipfs:// vs ar://)
+ * @param namespaceId - The ENS namespace identifier for the name
+ * @returns The browser supported asset URL, or null if unavailable
+ */
+export type BrowserSupportedAssetUrlProxy = (
+  name: Name,
+  assetUrl: URL,
+  namespaceId: ENSNamespaceId,
+) => BrowserSupportedAssetUrl | null;
+
+/**
+ * Default proxy implementation that uses the ENS Metadata Service.
+ *
+ * @param name - The ENS name to get the browser supported asset URL for
+ * @param assetUrl - The asset URL (not used in default implementation)
+ * @param namespaceId - The ENS namespace identifier for the name
+ * @returns The browser supported asset URL from ENS Metadata Service, or null if unavailable
+ */
+export const defaultBrowserSupportedAssetUrlProxy: BrowserSupportedAssetUrlProxy = (
+  name: Name,
+  assetUrl: URL,
+  namespaceId: ENSNamespaceId,
+): BrowserSupportedAssetUrl | null => {
+  return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+};
+
+/**
+ * Result returned by buildBrowserSupportedAvatarUrl.
+ *
+ * Invariant: If rawAssetTextRecord is null, then browserSupportedAssetUrl must also be null.
+ */
+export interface BrowserSupportedAssetUrlResult {
+  /**
+   * The original asset text record value from ENS, before any normalization or proxy processing.
+   * Null if the asset text record is not set for the ENS name.
+   */
+  rawAssetTextRecord: string | null;
+  /**
+   * A browser-supported (http/https/data) asset URL ready for use in <img> tags or other browser contexts.
+   * Populated when the rawAssetTextRecord is a valid URL that uses a browser-supported protocol (http, https, or data) or when a url is available to load the asset using a proxy.
+   * Null if the asset text record is not set, if the asset text record is malformed/invalid,
+   * or if the asset uses a non-browser-supported protocol and no url is known for how to load the asset using a proxy.
+   */
+  browserSupportedAssetUrl: BrowserSupportedAssetUrl | null;
+  /**
+   * Indicates whether the browserSupportedAssetUrl uses a proxy service.
+   * True if the url uses a proxy (either the default ENS Metadata Service or a custom proxy).
+   * False if the URL comes directly from the asset text record, or if there's no asset text record,
+   * or if the asset text record has an invalid format, or if no url is known for loading the asset using a proxy.
+   */
+  usesProxy: boolean;
+}
+
+/**
+ * Builds a browser-supported asset URL for a name's asset image from the name's raw asset text record value.
+ *
+ * @param rawAssetTextRecord - The raw asset text record value resolved for `name` on `namespaceId`, or null if `name` has no asset text record on `namespaceId`.
+ * @param name - The ENS name whose asset text record value was `rawAssetTextRecord` on `namespaceId`.
+ * @param namespaceId - The ENS namespace where `name` has the asset text record set to `rawAssetTextRecord`.
+ * @param browserSupportedAssetUrlProxy - Optional function for generating browser support asset urls that route through a custom proxy. If not provided, uses {@link defaultBrowserSupportedAssetUrlProxy}.
+ * @returns The {@link BrowserSupportedAssetUrlResult} result
+ * @internal
+ */
+export function buildBrowserSupportedAvatarUrl(
+  rawAssetTextRecord: string | null,
+  name: Name,
+  namespaceId: ENSNamespaceId,
+  browserSupportedAssetUrlProxy?: BrowserSupportedAssetUrlProxy,
+): BrowserSupportedAssetUrlResult {
+  // If no asset text record, return null values
+  if (!rawAssetTextRecord) {
+    return {
+      rawAssetTextRecord: null,
+      browserSupportedAssetUrl: null,
+      usesProxy: false,
+    };
+  }
+
+  // Check for EIP-155 NFT URIs (CAIP-22 ERC-721 or CAIP-29 ERC-1155)
+  // These require proxy handling to resolve NFT metadata from blockchain
+  const isEip155Uri = /^eip155:\d+\/(erc721|erc1155):/i.test(rawAssetTextRecord);
+
+  if (isEip155Uri) {
+    // Skip toBrowserSupportedUrl normalization and go directly to proxy handling
+    // This prevents buildUrl from incorrectly prepending https:// to the URI
+  } else {
+    // Try to convert to browser-supported URL first
+    try {
+      const browserSupportedAssetUrl = toBrowserSupportedUrl(rawAssetTextRecord);
+
+      return {
+        rawAssetTextRecord,
+        browserSupportedAssetUrl,
+        usesProxy: false,
+      };
+    } catch {
+      // toBrowserSupportedUrl failed - could be non-browser-supported protocol or malformed URL
+      // Try to parse as a general URL to determine which case we're in
+      try {
+        buildUrl(rawAssetTextRecord);
+        // buildUrl succeeded, so the asset text record is a valid URL with a non-browser-supported protocol
+        // Continue to proxy handling below
+      } catch {
+        // buildUrl failed, so the asset text record is malformed/invalid
+        // Skip proxy logic and return null
+        return {
+          rawAssetTextRecord,
+          browserSupportedAssetUrl: null,
+          usesProxy: false,
+        };
+      }
+    }
+  }
+
+  // Use custom proxy if provided, otherwise use default
+  const activeProxy: BrowserSupportedAssetUrlProxy =
+    browserSupportedAssetUrlProxy ?? defaultBrowserSupportedAssetUrlProxy;
+
+  // For non-browser-supported protocols (ipfs, ar, NFT URIs, etc.), use proxy to convert to browser-supported URL
+  try {
+    const proxyUrl = activeProxy(name, buildUrl(rawAssetTextRecord), namespaceId);
+
+    // Invariant: BrowserSupportedAssetUrl must pass isBrowserSupportedProtocol check
+    if (proxyUrl !== null && !isBrowserSupportedProtocol(proxyUrl)) {
+      throw new Error(
+        `browserSupportedAssetUrlProxy returned a URL with unsupported protocol: ${proxyUrl.protocol}. BrowserSupportedAssetUrl must use http, https, or data protocol.`,
+      );
+    }
+
+    return {
+      rawAssetTextRecord,
+      browserSupportedAssetUrl: proxyUrl,
+      usesProxy: proxyUrl !== null,
+    };
+  } catch {
+    return {
+      rawAssetTextRecord,
+      browserSupportedAssetUrl: null,
+      usesProxy: false,
+    };
+  }
+}
 
 /**
  * Builds a browser-supported avatar image URL for an ENS name using the ENS Metadata Service
