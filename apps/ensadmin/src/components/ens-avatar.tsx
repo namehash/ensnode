@@ -2,13 +2,18 @@
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useAvatarUrl } from "@ensnode/ensnode-react";
-import { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
+import { Name } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
 
 interface EnsAvatarProps {
   name: Name;
-  namespaceId: ENSNamespaceId;
+  className?: string;
+}
+
+interface EnsAvatarDisplayProps {
+  name: Name;
+  avatarUrl: URL | null;
   className?: string;
 }
 
@@ -17,7 +22,62 @@ type ImageLoadingStatus = Parameters<
 >[0];
 
 /**
+ * Display component that renders an avatar with proper loading and fallback states.
+ * This is a pure presentational component that doesn't fetch data.
+ *
+ * This component handles three distinct states:
+ * 1. **Loading**: Shows a pulsing placeholder while loading the avatar image asset
+ * 2. **Avatar Loaded**: Displays the avatar image once loaded
+ * 3. **Fallback**: Shows a generated avatar based on the ENS name when no avatar URL is provided
+ *    or if the avatar image fails to load.
+ *
+ * The component ensures that the fallback avatar is only shown as a final state, never during loading,
+ * preventing unwanted visual transitions from fallback to actual avatar.
+ *
+ * @param name - The ENS name (used for fallback avatar generation)
+ * @param avatarUrl - The avatar URL to display, or null to show fallback
+ * @param className - Optional CSS class name to apply to the avatar container
+ *
+ * @example
+ * ```tsx
+ * <EnsAvatarDisplay name="vitalik.eth" avatarUrl={new URL("https://...")} />
+ * ```
+ *
+ * @example
+ * ```tsx
+ * <EnsAvatarDisplay name="example.eth" avatarUrl={null} className="h-12 w-12" />
+ * ```
+ */
+export const EnsAvatarDisplay = ({ name, avatarUrl, className }: EnsAvatarDisplayProps) => {
+  const [imageLoadingStatus, setImageLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
+
+  // No avatar available - show fallback
+  if (avatarUrl === null) {
+    return (
+      <Avatar className={className}>
+        <EnsAvatarFallback name={name} />
+      </Avatar>
+    );
+  }
+
+  return (
+    <Avatar className={className}>
+      <AvatarImage
+        src={avatarUrl.toString()}
+        alt={name}
+        onLoadingStatusChange={(status: ImageLoadingStatus) => {
+          setImageLoadingStatus(status);
+        }}
+      />
+      {imageLoadingStatus === "error" && <EnsAvatarFallback name={name} />}
+      {(imageLoadingStatus === "idle" || imageLoadingStatus === "loading") && <AvatarLoading />}
+    </Avatar>
+  );
+};
+
+/**
  * Displays an avatar for an ENS name with proper loading and fallback states.
+ * This component fetches the avatar URL from ENS records and renders it.
  *
  * This component handles three distinct states:
  * 1. **Loading**: Shows a pulsing placeholder while fetching the avatar URL from ENS records
@@ -43,9 +103,7 @@ type ImageLoadingStatus = Parameters<
  * <EnsAvatar name="example.eth" className="h-12 w-12" />
  * ```
  */
-export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
-  const [imageLoadingStatus, setImageLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
-
+export const EnsAvatar = ({ name, className }: EnsAvatarProps) => {
   const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
     name,
   });
@@ -59,30 +117,9 @@ export const EnsAvatar = ({ name, namespaceId, className }: EnsAvatarProps) => {
     );
   }
 
-  // No avatar available - show fallback
-  if (avatarUrlData.browserSupportedAvatarUrl === null) {
-    return (
-      <Avatar className={className}>
-        <EnsAvatarFallback name={name} />
-      </Avatar>
-    );
-  }
-
   const avatarUrl = avatarUrlData.browserSupportedAvatarUrl;
 
-  return (
-    <Avatar className={className}>
-      <AvatarImage
-        src={avatarUrl.toString()}
-        alt={name}
-        onLoadingStatusChange={(status: ImageLoadingStatus) => {
-          setImageLoadingStatus(status);
-        }}
-      />
-      {imageLoadingStatus === "error" && <EnsAvatarFallback name={name} />}
-      {(imageLoadingStatus === "idle" || imageLoadingStatus === "loading") && <AvatarLoading />}
-    </Avatar>
-  );
+  return <EnsAvatarDisplay name={name} avatarUrl={avatarUrl} className={className} />;
 };
 
 interface EnsAvatarFallbackProps {
