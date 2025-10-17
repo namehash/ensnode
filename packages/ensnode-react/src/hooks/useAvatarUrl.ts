@@ -29,7 +29,7 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
  * @param name - The ENS name whose avatar text record value was `rawAvatarTextRecord` on `namespaceId`.
  * @param namespaceId - The ENS namespace where `name` has the avatar text record set to `rawAvatarTextRecord`.
  * @param browserSupportedAvatarUrlProxy - Optional function for generating browser support asset urls that route through a custom proxy.
- * @returns The resolved avatar URL result
+ * @returns The {@link UseAvatarUrlResult} result
  * @internal
  */
 export function resolveAvatarUrl(
