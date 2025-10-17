@@ -25,7 +25,7 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
  * Builds a browser-supported asset URL for a name's avatar image from the name's raw avatar text record value.
  * This is the core resolution logic extracted for testing.
  *
- * @param avatarTextRecord - The raw avatar text record value from ENS
+ * @param rawAvatarTextRecord - The raw avatar text record value resolved for `name` on `namespaceId`, or null if `name` has no avatar text record on `namespaceId`.
  * @param name - The ENS name
  * @param namespaceId - The ENS namespace ID
  * @param browserSupportedAvatarUrlProxy - Optional custom proxy function
