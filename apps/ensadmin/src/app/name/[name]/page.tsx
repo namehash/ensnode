@@ -78,6 +78,7 @@ export default function NameDetailPage() {
     <div className="container mx-auto p-6 max-w-4xl">
       <ProfileHeader
         name={name}
+        namespaceId={namespace}
         headerImage={data?.records?.texts?.header}
         websiteUrl={data?.records?.texts?.url}
       />

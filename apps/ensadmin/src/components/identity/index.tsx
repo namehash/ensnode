@@ -46,7 +46,10 @@ export function ResolveAndDisplayIdentity({
   // resolve the primary name for `identity` using ENSNode
   // TODO: extract out the concept of resolving an `Identity` into a provider that child
   //       components can then hook into.
-  const { identity: identityResult } = useResolvedIdentity({ identity, namespaceId });
+  const { identity: identityResult } = useResolvedIdentity({
+    identity,
+    namespaceId,
+  });
 
   return (
     <DisplayIdentity
@@ -110,7 +113,7 @@ export function DisplayIdentity({
     );
     identitifer = <AddressDisplay address={identity.address} className={className} />;
   } else {
-    avatar = <EnsAvatar name={identity.name} namespaceId={namespaceId} className="h-6 w-6" />;
+    avatar = <EnsAvatar name={identity.name} className="h-6 w-6" />;
     identitifer = <NameDisplay name={identity.name} className={className} />;
   }
 
