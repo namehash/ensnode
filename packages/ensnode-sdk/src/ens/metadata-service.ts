@@ -1,9 +1,74 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds } from "@ensnode/datasources";
+import { AssetId } from "caip";
 
 import type { BrowserSupportedAssetUrl } from "../shared/url";
 import { buildUrl, isBrowserSupportedProtocol, toBrowserSupportedUrl } from "../shared/url";
 import type { Name } from "./types";
+
+/**
+ * Validates if a string is a valid IPFS URL.
+ *
+ * @param value - The string to validate
+ * @returns True if the value is a valid IPFS URL, false otherwise
+ */
+function isValidIpfsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "ipfs:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validates if a string is a valid CAIP-22 (ERC-721) or CAIP-29 (ERC-1155) identifier.
+ *
+ * Uses the caip package's AssetId parser to validate the identifier format
+ * and checks that it follows the eip155 namespace with erc721 or erc1155 asset types.
+ *
+ * @param value - The string to validate as a CAIP-22/29 identifier
+ * @returns True if the value is a valid CAIP-22 or CAIP-29 identifier, false otherwise
+ *
+ * @example
+ * // Valid CAIP-22 (ERC-721)
+ * isValidCaipNftIdentifier("eip155:1/erc721:0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/771769")
+ * // => true
+ *
+ * @example
+ * // Valid CAIP-29 (ERC-1155)
+ * isValidCaipNftIdentifier("eip155:1/erc1155:0xfaafdc07907ff5120a76b34b731b278c38d6043c/1")
+ * // => true
+ */
+function isValidCaipNftIdentifier(value: string): boolean {
+  try {
+    // Use caip package to parse the identifier
+    const parsed = AssetId.parse(value);
+
+    // Verify it's an eip155 chain
+    if (
+      typeof parsed.chainId === "object" &&
+      "namespace" in parsed.chainId &&
+      parsed.chainId.namespace !== "eip155"
+    ) {
+      return false;
+    }
+
+    // Verify it's erc721 or erc1155
+    if (
+      typeof parsed.assetName === "object" &&
+      "namespace" in parsed.assetName &&
+      parsed.assetName.namespace !== "erc721" &&
+      parsed.assetName.namespace !== "erc1155"
+    ) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Function type for generating browser-supported asset URLs through a custom proxy.
@@ -87,14 +152,12 @@ export function buildBrowserSupportedAvatarUrl(
     };
   }
 
-  // Check for EIP-155 NFT URIs (CAIP-22 ERC-721 or CAIP-29 ERC-1155)
-  // These require proxy handling to resolve NFT metadata from blockchain
-  const isEip155Uri = /^eip155:\d+\/(erc721|erc1155):/i.test(rawAssetTextRecord);
+  // Check for valid IPFS URLs or CAIP-22/29 identifiers that require proxy handling
+  const requiresProxy =
+    isValidIpfsUrl(rawAssetTextRecord) || isValidCaipNftIdentifier(rawAssetTextRecord);
 
-  if (isEip155Uri) {
-    // Skip toBrowserSupportedUrl normalization and go directly to proxy handling
-    // This prevents buildUrl from incorrectly prepending https:// to the URI
-  } else {
+  // If the asset text record doesn't require a proxy, attempt to use it directly
+  if (!requiresProxy) {
     // Try to convert to browser-supported URL first
     try {
       const browserSupportedAssetUrl = toBrowserSupportedUrl(rawAssetTextRecord);
@@ -122,6 +185,11 @@ export function buildBrowserSupportedAvatarUrl(
       }
     }
   }
+
+  // Invariant: At this point, the asset text record either:
+  // 1. Requires a proxy (IPFS URL or CAIP-22/29 NFT identifier), OR
+  // 2. Is a valid URL with a non-browser-supported protocol (e.g., ar://)
+  // In both cases, we attempt to use a proxy to convert to a browser-supported URL.
 
   // Use custom proxy if provided, otherwise use default
   const activeProxy: BrowserSupportedAssetUrlProxy =
