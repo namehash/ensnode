@@ -3,10 +3,18 @@
 import { EnsAvatar, EnsAvatarDisplay } from "@/components/ens-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-import { buildBrowserSupportedAvatarUrl, useAvatarUrl } from "@ensnode/ensnode-react";
-import { Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceIds } from "@ensnode/datasources";
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { ENSNamespaceId, Name, buildBrowserSupportedAvatarUrl } from "@ensnode/ensnode-sdk";
 import { AlertCircle, Check, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -20,11 +28,10 @@ const TEST_NAMES: Name[] = [
 ];
 
 interface AvatarTestCardProps {
-  defaultName: Name;
+  name: Name;
 }
 
-function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
-  const [name, setName] = useState(defaultName);
+function AvatarTestCard({ name }: AvatarTestCardProps) {
   const { data, isLoading, error } = useAvatarUrl({ name });
 
   if (error) {
@@ -33,12 +40,7 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-red-500" />
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value as Name)}
-              className="flex-1"
-            />
+            <span>{name}</span>
           </CardTitle>
           <CardDescription className="text-red-600">Error loading avatar</CardDescription>
         </CardHeader>
@@ -53,14 +55,7 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">
-            <Input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value as Name)}
-              className="w-full"
-            />
-          </CardTitle>
+          <CardTitle className="text-lg">{name}</CardTitle>
           <CardDescription>Loading avatar information...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -87,24 +82,15 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
           ) : (
             <X className="h-5 w-5 text-gray-400 flex-shrink-0" />
           )}
-          <Input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value as Name)}
-            className="flex-1"
-          />
+          <span>{name}</span>
         </CardTitle>
-        <CardDescription>{hasAvatar ? "Avatar available" : "No avatar available"}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Avatar Display */}
         <div className="flex justify-center">
           <EnsAvatar name={name} className="h-32 w-32" />
         </div>
 
-        {/* Avatar Details */}
         <div className="space-y-3">
-          {/* Raw Avatar URL */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Raw Avatar URL:</span>
@@ -119,7 +105,6 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
             </div>
           </div>
 
-          {/* Browser-Supported URL */}
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Browser-Supported URL:</span>
@@ -134,7 +119,6 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
             </div>
           </div>
 
-          {/* Uses Proxy Indicator */}
           <div className="flex items-center justify-between p-2 bg-muted rounded">
             <span className="text-sm font-medium">Uses Proxy:</span>
             <div className="flex items-center gap-2">
@@ -158,27 +142,32 @@ function AvatarTestCard({ defaultName }: AvatarTestCardProps) {
 }
 
 /**
- * Wrapper component that resolves and renders an avatar using a custom URL.
- * Supports http/https and data: URLs directly.
+ * Wrapper component that resolves and renders an avatar using a custom raw avatar text record.
+ * Does not make any requests - only uses the provided inputs for resolution.
  */
-function CustomAvatarWrapper({ customUrl }: { customUrl: string }) {
-  const testName = "custom-test.eth" as Name;
-  const namespaceId = useActiveNamespace();
-
+function CustomAvatarWrapper({
+  rawAssetTextRecord,
+  name,
+  namespaceId,
+}: {
+  rawAssetTextRecord: string;
+  name: Name;
+  namespaceId: ENSNamespaceId;
+}) {
   // Resolve the avatar URL using the same logic as useAvatarUrl
-  // This supports http/https and data: URLs directly
+  // This does NOT make any network requests - it only processes the provided raw text record
   const resolvedData = useMemo(() => {
-    return buildBrowserSupportedAvatarUrl(customUrl, testName, namespaceId);
-  }, [customUrl, testName, namespaceId]);
+    return buildBrowserSupportedAvatarUrl(rawAssetTextRecord, name, namespaceId);
+  }, [rawAssetTextRecord, name, namespaceId]);
 
-  const hasAvatar = resolvedData.browserSupportedAvatarUrl !== null;
+  const hasAvatar = resolvedData.browserSupportedAssetUrl !== null;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-center">
         <EnsAvatarDisplay
-          name={testName}
-          avatarUrl={resolvedData.browserSupportedAvatarUrl}
+          name={name}
+          avatarUrl={resolvedData.browserSupportedAssetUrl}
           className="h-32 w-32"
         />
       </div>
@@ -187,15 +176,15 @@ function CustomAvatarWrapper({ customUrl }: { customUrl: string }) {
       <div className="space-y-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Raw Avatar URL:</span>
-            {resolvedData.rawAvatarTextRecord ? (
+            <span className="text-sm font-medium">Raw Avatar Text Record:</span>
+            {resolvedData.rawAssetTextRecord ? (
               <Check className="h-4 w-4 text-green-600" />
             ) : (
               <X className="h-4 w-4 text-gray-400" />
             )}
           </div>
           <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
-            {resolvedData.rawAvatarTextRecord || "Not set"}
+            {resolvedData.rawAssetTextRecord || "Not set"}
           </div>
         </div>
 
@@ -209,24 +198,7 @@ function CustomAvatarWrapper({ customUrl }: { customUrl: string }) {
             )}
           </div>
           <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
-            {resolvedData.browserSupportedAvatarUrl?.toString() || "Not available"}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between p-2 bg-muted rounded">
-          <span className="text-sm font-medium">Uses Proxy:</span>
-          <div className="flex items-center gap-2">
-            {resolvedData.usesProxy ? (
-              <>
-                <Check className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600">Yes</span>
-              </>
-            ) : (
-              <>
-                <X className="h-4 w-4 text-gray-400" />
-                <span className="text-sm text-gray-600">No</span>
-              </>
-            )}
+            {resolvedData.browserSupportedAssetUrl?.toString() || "Not available"}
           </div>
         </div>
       </div>
@@ -235,39 +207,69 @@ function CustomAvatarWrapper({ customUrl }: { customUrl: string }) {
 }
 
 function CustomAvatarUrlTestCard() {
-  const [customUrl, setCustomUrl] = useState("");
+  const [namespaceId, setNamespaceId] = useState<ENSNamespaceId>(ENSNamespaceIds.Mainnet);
+  const [name, setName] = useState<Name>("" as Name);
+  const [rawAssetTextRecord, setRawAssetTextRecord] = useState("");
 
   return (
     <Card className="border-blue-200">
       <CardHeader>
-        <CardTitle className="text-lg">Custom Avatar URL Test</CardTitle>
+        <CardTitle className="text-lg">Custom Avatar Text Record</CardTitle>
         <CardDescription>
-          Enter a raw avatar URL to test resolution and display. Supports HTTP/HTTPS and data: URLs.
+          Enter an ENS namespace, name, and raw avatar text record to test resolution and display.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* URL Input */}
+        {/* Namespace Selection */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Avatar URL</label>
+          <Label htmlFor="namespace">ENS Namespace</Label>
+          <Select
+            value={namespaceId}
+            onValueChange={(value) => setNamespaceId(value as ENSNamespaceId)}
+          >
+            <SelectTrigger id="namespace">
+              <SelectValue placeholder="Select namespace" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ENSNamespaceIds.Mainnet}>Mainnet</SelectItem>
+              <SelectItem value={ENSNamespaceIds.Sepolia}>Sepolia</SelectItem>
+              <SelectItem value={ENSNamespaceIds.Holesky}>Holesky</SelectItem>
+              <SelectItem value={ENSNamespaceIds.EnsTestEnv}>ENS Test Env</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Name Input */}
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
           <Input
+            id="name"
             type="text"
-            placeholder="https://example.com/avatar.jpg or data:image/svg+xml,..."
-            value={customUrl}
-            onChange={(e) => setCustomUrl(e.target.value)}
+            placeholder="vitalik.eth"
+            value={name}
+            onChange={(e) => setName(e.target.value as Name)}
+          />
+        </div>
+
+        {/* Avatar URL Input */}
+        <div className="space-y-2">
+          <Label htmlFor="avatar-url">Raw Avatar Text Record</Label>
+          <Input
+            id="avatar-url"
+            type="text"
+            placeholder="https://example.com/avatar.jpg, ipfs://..., eip155:1/erc721:..., etc."
+            value={rawAssetTextRecord}
+            onChange={(e) => setRawAssetTextRecord(e.target.value)}
           />
         </div>
 
         {/* Avatar Display */}
-        {customUrl && <CustomAvatarWrapper customUrl={customUrl} />}
-
-        {!customUrl && (
-          <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-            Enter a URL above to see how it would be resolved and displayed.
-            <ul className="mt-2 list-disc list-inside space-y-1">
-              <li>HTTP/HTTPS URLs: e.g., https://example.com/avatar.jpg</li>
-              <li>Data URLs: e.g., data:image/svg+xml,&lt;svg...&gt;&lt;/svg&gt;</li>
-            </ul>
-          </div>
+        {rawAssetTextRecord && name && (
+          <CustomAvatarWrapper
+            rawAssetTextRecord={rawAssetTextRecord}
+            name={name}
+            namespaceId={namespaceId}
+          />
         )}
       </CardContent>
     </Card>
@@ -293,7 +295,7 @@ export default function MockAvatarUrlPage() {
             {/* Existing Test Names Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {TEST_NAMES.map((name) => (
-                <AvatarTestCard key={name} defaultName={name} />
+                <AvatarTestCard key={name} name={name} />
               ))}
             </div>
           </div>
