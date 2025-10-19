@@ -1,4 +1,3 @@
-import { PonderAppSettingsSchema } from "@/api/lib/indexing-status/ponder-metadata/zod-schemas";
 import {
   OmnichainIndexingStatusIds,
   SerializedOmnichainIndexingStatusSnapshot,
@@ -9,6 +8,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";
 import { ParsePayload, prettifyError } from "zod/v4/core";
+
+import { PonderAppSettingsSchema } from "./zod-schemas";
 
 /**
  * Validate Ponder Metrics

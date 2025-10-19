@@ -18,7 +18,7 @@ export async function fetchPonderStatus(ponderAppUrl: URL): Promise<PonderStatus
   try {
     const statusJson = await fetch(ponderStatusUrl).then((r) => r.json());
 
-    return statusJson;
+    return statusJson as PonderStatus;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
 

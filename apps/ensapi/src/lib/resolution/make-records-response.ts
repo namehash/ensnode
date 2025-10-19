@@ -1,10 +1,11 @@
-import { ResolveCallsAndResults } from "@/api/lib/resolution/resolve-calls-and-results";
 import {
   ResolverRecordsResponse,
   ResolverRecordsResponseBase,
   ResolverRecordsSelection,
   bigintToCoinType,
 } from "@ensnode/ensnode-sdk";
+
+import { ResolveCallsAndResults } from "./resolve-calls-and-results";
 
 export interface IndexedResolverRecords {
   name: string | null;

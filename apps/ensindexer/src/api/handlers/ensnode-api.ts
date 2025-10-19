@@ -15,7 +15,7 @@ import { buildENSIndexerPublicConfig } from "@/config/public";
 import {
   buildOmnichainIndexingStatusSnapshot,
   createCrossChainIndexingStatusSnapshotOmnichain,
-} from "@/lib/api/indexing-status/build-index-status";
+} from "@/lib/indexing-status/build-index-status";
 import { getUnixTime } from "date-fns";
 
 const app = new Hono();
