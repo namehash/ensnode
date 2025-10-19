@@ -13,5 +13,8 @@
  */
 
 export * from "./ensindexer/config/zod-schemas";
-export * from "./ensindexer/api/zod-schemas";
 export * from "./shared/zod-schemas";
+
+export * from "./api/zod-schemas";
+export * from "./api/error-response";
+export * from "./api/validate";

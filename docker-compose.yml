@@ -18,28 +18,22 @@ services:
       postgres:
         condition: service_started
 
-  # Instance of ENSIndexer started in Ponder's "serve" mode. This mode causes the ENSIndexer instance to skip the execution of any indexing logic and instead to exclusively focus on the responsibility of serving the main "public-facing" API endpoints for the overall ENSNode deployment. This division of "start" vs "serve" responsibilities between ENSIndexer instances ensures API availability continues uninterrupted for the overall ENSNode deployment through ensnode-api even if an indexing error in ensindexer causes it to crash. The following docs explain more about Ponder's "start" vs "serve" modes: https://ponder.sh/docs/api-reference/ponder-cli#serve.
-  ensnode-api:
-    container_name: ensnode-api
-    # Same Docker image as ensindexer
-    image: ghcr.io/namehash/ensnode/ensindexer:latest
+  ensapi:
+    container_name: ensapi
+    image: ghcr.io/namehash/ensnode/ensapi:latest
     ports:
-      - "42069:42069"
+      - "4334:4334"
     environment:
-      # Start ensindexer instance in "serve" mode. This environment variable is intercepted by the ensindexer Docker image to modify the ensindexer start command.
-      PONDER_COMMAND: serve
-      # Same DATABASE_URL as ensindexer instance
+      # Override DATABASE_URL to point to docker compose postgres
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
-      # Same ENSRAINBOW_URL as ensindexer instance
-      ENSRAINBOW_URL: http://ensrainbow:3223
     env_file:
-      # NOTE: must define apps/ensindexer/.env.local (see apps/ensindexer/.env.local.example). Requires same env configuration as ensindexer
+      # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
       # Copy .env.local.example to .env.local and configure all required values
-      - path: ./apps/ensindexer/.env.local
+      - path: ./apps/ensapi/.env.local
         required: true
     depends_on:
-      ensrainbow:
-        condition: service_healthy
+      ensindexer:
+        condition: service_started
       postgres:
         condition: service_started
 
@@ -69,19 +63,17 @@ services:
     ports:
       - "4173:4173"
     environment:
-      # Override ENSADMIN_PUBLIC_URL to point to docker compose ensnode-api
-      # Note: it must be a "public" URL accessible from a web browser (i.e. it cannot be a hostname exclusive to the internal docker network)
       ENSADMIN_PUBLIC_URL: http://localhost:4173
-      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensnode-api
+      # Override NEXT_PUBLIC_DEFAULT_ENSNODE_URLS to the docker compose ensapi
       # Note: it must be a comma-separated list of URLs that are accessible from a web browser
       # (i.e. it cannot be a hostname in the docker network)
-      NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:42069
+      NEXT_PUBLIC_DEFAULT_ENSNODE_URLS: http://localhost:4334
     env_file:
       # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
       - path: ./apps/ensadmin/.env.local
         required: false
     depends_on:
-      - ensnode-api
+      - ensapi
 
   postgres:
     container_name: postgres

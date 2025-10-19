@@ -1,7 +1,8 @@
-import { errorResponse } from "@/api/lib/handlers/error-response";
 import { zValidator } from "@hono/zod-validator";
 import type { ValidationTargets } from "hono";
 import type { ZodType } from "zod/v4";
+
+import { errorResponse } from "./error-response";
 
 export const validate = <T extends ZodType, Target extends keyof ValidationTargets>(
   target: Target,

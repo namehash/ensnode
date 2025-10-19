@@ -46,7 +46,9 @@
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
+    "@hono/zod-validator": "^0.7.2",
     "@types/node": "catalog:",
+    "hono": "catalog:",
     "tsup": "^8.3.6",
     "typescript": "catalog:",
     "viem": "catalog:",

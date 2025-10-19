@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
-import { filterSchemaByPrefix } from "../src/lib/filter-schema-by-prefix";
+
+import { filterSchemaByPrefix } from "./filter-schema-by-prefix";
 
 describe("filterSchemaByPrefix", () => {
   it("filters schema by prefix and removes prefix from keys", () => {

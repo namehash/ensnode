@@ -2,7 +2,7 @@ import { labelhash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod/v4";
 
-import { DEFAULT_EVM_CHAIN_ID } from "../../ens/coin-type";
+import { DEFAULT_EVM_CHAIN_ID } from "../ens/coin-type";
 import { routes } from "./zod-schemas";
 
 describe("routes.records", () => {

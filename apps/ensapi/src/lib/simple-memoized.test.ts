@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { simpleMemoized } from "../src/lib/simple-memoized";
+
+import { simpleMemoized } from "./simple-memoized";
 
 describe("simpleMemoized", () => {
   it("returns default value immediately on first call", () => {

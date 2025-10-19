@@ -1,0 +1,20 @@
+{
+  "extends": "@ensnode/shared-configs/tsconfig.lib.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "typeRoots": [
+      "./types"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+  },
+  "include": [
+    "./**/*.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

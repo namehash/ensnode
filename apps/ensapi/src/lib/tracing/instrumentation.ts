@@ -33,7 +33,7 @@ if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
 
 export const sdk = new NodeSDK({
   resource: resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: "ensnode-api",
+    [ATTR_SERVICE_NAME]: "ensapi",
     [ATTR_SERVICE_VERSION]: packageJson.version,
   }),
   spanProcessors,

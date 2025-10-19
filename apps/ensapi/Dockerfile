@@ -11,8 +11,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # runner
 FROM deps AS runner
-WORKDIR /app/apps/ensindexer
+WORKDIR /app/apps/ensapi
 ENV NODE_ENV=production
-EXPOSE 42069
+EXPOSE 4334
 
-CMD ["pnpm", "exec", "ponder", "start"]
+CMD ["pnpm", "start"]

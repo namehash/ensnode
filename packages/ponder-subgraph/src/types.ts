@@ -1,4 +1,4 @@
-export type SubgraphMetaBlock = {
+interface MetadataBlockInfo {
   /** Block number */
   number: bigint;
 
@@ -10,28 +10,22 @@ export type SubgraphMetaBlock = {
 
   /** Block parent hash */
   parentHash: `0x${string}`;
-};
+}
 
 /**
  * The metadata provider interface used to fetch data from the application layer.
  */
-export interface PonderMetadataProvider {
+export interface MetadataProvider {
   /**
-   * ENSIndexer app version.
+   * Unique ID to be used as a deployment ID in `_meta_.deployment`.
    */
-  version: string;
+  deployment: string;
 
   /**
    * Get last indexed block status
    * @returns The last indexed block status
    */
-  getLastIndexedENSRootChainBlock(): Promise<SubgraphMetaBlock>;
-
-  /**
-   * Get the Ponder build ID
-   * @returns The Ponder build ID
-   */
-  getPonderBuildId(): Promise<string>;
+  getLastIndexedENSRootChainBlock(): Promise<MetadataBlockInfo>;
 
   /**
    * Get the indexing errors status

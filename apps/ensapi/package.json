@@ -1,28 +1,26 @@
 {
-  "name": "ensindexer",
+  "name": "ensapi",
   "version": "0.35.0",
   "private": true,
   "type": "module",
-  "description": "A multichain ENS indexer, powered by Ponder",
+  "description": "ENSNode's ENS API",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "apps/ensindexer"
+    "directory": "apps/ensapi"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensindexer",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensapi",
   "scripts": {
-    "dev": "DATABASE_SCHEMA=public ponder dev",
-    "start": "ponder start",
-    "serve": "ponder serve",
-    "db": "ponder db",
-    "codegen": "ponder codegen",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsx src/index.ts",
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.5",
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
@@ -44,7 +42,6 @@
     "@types/dns-packet": "^5.6.5",
     "caip": "^1.1.1",
     "date-fns": "catalog:",
-    "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",
@@ -58,6 +55,7 @@
     "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
+    "tsx": "^4.7.1",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

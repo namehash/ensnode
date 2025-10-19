@@ -2,10 +2,23 @@
   "extends": "@ensnode/shared-configs/tsconfig.ponder.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "typeRoots": ["./types"]
+    "typeRoots": [
+      "./types"
+    ]
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "./**/*.ts",
+    "../ensapi/src/lib/subgraph/filter-schema-by-prefix.ts",
+    "../ensapi/src/lib/api-documentation.ts",
+    "../ensapi/src/lib/subgraph/filter-schema-by-prefix.test.ts",
+    "../ensapi/src/handlers/fix-content-length-middleware.ts",
+    "../ensapi/src/lib/protocol-acceleration/can-accelerate-resolution.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

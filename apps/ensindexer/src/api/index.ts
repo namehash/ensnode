@@ -1,47 +1,64 @@
-import packageJson from "@/../package.json";
-
+import { publicClients } from "ponder:api";
+import config from "@/config";
+import { getUnixTime } from "date-fns";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
+import type { UnofficialStatusCode } from "hono/utils/http-status";
 
-import { sdk } from "@/api/lib/tracing/instrumentation";
+import {
+  IndexingStatusResponseCodes,
+  OverallIndexingStatusIds,
+  serializeENSIndexerIndexingStatus,
+  serializeENSIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
+import { routes, validate } from "@ensnode/ensnode-sdk/internal";
 
-import ensNodeApi from "./handlers/ensnode-api";
-import metadataApi from "./handlers/metadata-api";
-import subgraphApi from "./handlers/subgraph-api";
+import { buildENSIndexerPublicConfig } from "@/config/public";
+import { buildIndexingStatus } from "@/lib/api/indexing-status/build-index-status";
+import { hasAchievedRequestedDistance } from "@/lib/api/indexing-status/realtime-indexing-distance";
 
 const app = new Hono();
 
-// set the X-ENSNode-Version header to the current version
-app.use(async (ctx, next) => {
-  ctx.header("x-ensnode-version", packageJson.version);
-  return next();
+// include ENSIndexer Public Config endpoint
+app.get("/config", async (c) => {
+  // prepare the public config object, including dependency info
+  const publicConfig = await buildENSIndexerPublicConfig(config);
+
+  // respond with the serialized public config object
+  return c.json(serializeENSIndexerPublicConfig(publicConfig));
 });
 
-// use CORS middleware
-app.use(cors({ origin: "*" }));
+app.get("/indexing-status", validate("query", routes.indexingStatus.query), async (c) => {
+  const { maxRealtimeDistance } = c.req.valid("query");
 
-// use ENSNode Metadata API at /metadata
-app.route("/metadata", metadataApi);
+  // get system timestamp for the current request
+  const systemTimestamp = getUnixTime(new Date());
 
-// use ENSNode HTTP API at /api
-app.route("/api", ensNodeApi);
+  const indexingStatus = await buildIndexingStatus(publicClients, systemTimestamp);
+  const serializedIndexingStatus = serializeENSIndexerIndexingStatus(indexingStatus);
 
-// use Subgraph GraphQL API at /subgraph
-app.route("/subgraph", subgraphApi);
+  // respond with custom server error if ENSIndexer is not available
+  if (indexingStatus.overallStatus === OverallIndexingStatusIds.IndexerError) {
+    return c.json(
+      serializedIndexingStatus,
+      IndexingStatusResponseCodes.IndexerError as UnofficialStatusCode,
+    );
+  }
 
-// log hono errors to console
-app.onError((error, ctx) => {
-  console.error(error);
-  return ctx.text("Internal server error", 500);
+  const hasAchievedRequestedRealtimeIndexingDistance = hasAchievedRequestedDistance(
+    indexingStatus,
+    maxRealtimeDistance,
+  );
+
+  // respond with custom server error if requested distance hasn't been achieved yet
+  if (!hasAchievedRequestedRealtimeIndexingDistance) {
+    return c.json(
+      serializedIndexingStatus,
+      IndexingStatusResponseCodes.RequestedDistanceNotAchievedError as UnofficialStatusCode,
+    );
+  }
+
+  // respond with the serialized indexing status object
+  return c.json(serializedIndexingStatus);
 });
-
-// start ENSNode API OpenTelemetry SDK
-sdk.start();
-
-// gracefully shut down the SDK on process interrupt/exit
-const shutdownOpenTelemetry = () =>
-  sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
-process.on("SIGINT", shutdownOpenTelemetry);
-process.on("SIGTERM", shutdownOpenTelemetry);
 
 export default app;

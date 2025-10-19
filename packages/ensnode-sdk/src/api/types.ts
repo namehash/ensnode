@@ -1,3 +1,4 @@
+import z from "zod/v4";
 import type { ENSIndexerOverallIndexingStatus, ENSIndexerPublicConfig } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
@@ -10,14 +11,12 @@ import type {
 } from "../resolution";
 import type { Duration } from "../shared";
 import type { ProtocolTrace } from "../tracing";
+import { ErrorResponseSchema } from "./zod-schemas";
 
 /**
  * API Error Response Type
  */
-export interface ErrorResponse {
-  message: string;
-  details?: unknown; // subject to change
-}
+export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
 export interface TraceableRequest {
   trace?: boolean;

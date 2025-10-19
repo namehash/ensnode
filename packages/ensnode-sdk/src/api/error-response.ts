@@ -1,6 +1,7 @@
-import { ErrorResponse } from "@ensnode/ensnode-sdk";
 import type { Context } from "hono";
 import { ZodError, treeifyError } from "zod/v4";
+
+import { ErrorResponse } from "./types";
 
 export const errorResponse = (c: Context, input: ZodError | Error | string | unknown) => {
   if (input instanceof ZodError) {

@@ -112,7 +112,7 @@ import { GraphQLJSON } from "graphql-scalars";
 
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
-import type { PonderMetadataProvider } from "./types";
+import type { MetadataProvider } from "./types";
 
 type Parent = Record<string, any>;
 type Context = {
@@ -161,7 +161,7 @@ export interface PolymorphicConfig {
 interface BuildGraphQLSchemaOptions {
   schema: Schema;
   polymorphicConfig?: PolymorphicConfig;
-  metadataProvider: PonderMetadataProvider;
+  metadataProvider: MetadataProvider;
 }
 
 export function buildGraphQLSchema({
@@ -638,14 +638,13 @@ export function buildGraphQLSchema({
     }),
     resolve: async (_source, _args) => {
       try {
-        const [lastIndexedBlock, hasIndexingErrors, ponderBuildId] = await Promise.all([
+        const [lastIndexedBlock, hasIndexingErrors] = await Promise.all([
           metadataProvider.getLastIndexedENSRootChainBlock(),
           metadataProvider.hasIndexingErrors(),
-          metadataProvider.getPonderBuildId(),
         ]);
 
         return {
-          deployment: `${metadataProvider.version}-${ponderBuildId}`,
+          deployment: metadataProvider.deployment,
           hasIndexingErrors,
           block: {
             number: Number(lastIndexedBlock.number),

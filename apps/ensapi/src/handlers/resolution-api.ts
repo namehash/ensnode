@@ -5,17 +5,18 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { Hono } from "hono";
 
-import { errorResponse } from "@/api/lib/handlers/error-response";
-import { validate } from "@/api/lib/handlers/validate";
-import { canAccelerateResolution } from "@/api/lib/indexing-status/can-accelerate-resolution";
-import { resolveForward } from "@/api/lib/resolution/forward-resolution";
-import { resolvePrimaryNames } from "@/api/lib/resolution/multichain-primary-name-resolution";
-import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
-import { captureTrace } from "@/api/lib/tracing/protocol-tracing";
+import { resolveForward } from "@/lib/resolution/forward-resolution";
+import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
+import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { simpleMemoized } from "@/lib/simple-memoized";
-import { routes } from "@ensnode/ensnode-sdk/internal";
+import { captureTrace } from "@/lib/tracing/protocol-tracing";
+import { errorResponse, routes, validate } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
+
+// TODO: replace with indexing status request with maxRealtimeDistance set (?) or re-derive from
+// cached indexing status
+const canAccelerateResolution = async () => true;
 
 // memoizes the result of canAccelerateResolution within a 30s window
 // this means that the effective maxRealtimeDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
