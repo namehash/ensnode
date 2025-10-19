@@ -10,34 +10,15 @@
  * Ponder metrics and Ponder status endpoints and make this data fit
  * into the ENSIndexer application data model (and its constraints).
  */
-import {
-  type ChainIdString,
-  ChainIndexingCompletedStatus,
-  ChainIndexingQueuedStatus,
-  type ChainIndexingStatus,
-  ChainIndexingStatusForBackfillOverallStatus,
-  ChainIndexingStatusIds,
-  OverallIndexingStatusIds,
-  SerializedENSIndexerOverallIndexingBackfillStatus,
-  SerializedENSIndexerOverallIndexingCompletedStatus,
-  SerializedENSIndexerOverallIndexingFollowingStatus,
-  SerializedENSIndexerOverallIndexingUnstartedStatus,
-  UnixTimestamp,
-  checkChainIndexingStatusesForBackfillOverallStatus,
-  checkChainIndexingStatusesForCompletedOverallStatus,
-  checkChainIndexingStatusesForFollowingOverallStatus,
-  checkChainIndexingStatusesForUnstartedOverallStatus,
-  getOmnichainIndexingCursor,
-  getOverallApproxRealtimeDistance,
-  getOverallIndexingStatus,
-} from "@ensnode/ensnode-sdk";
+import { type ChainIdString, type ChainIndexingStatusSnapshot } from "@ensnode/ensnode-sdk";
 import {
   makeBlockRefSchema,
   makeChainIdSchema,
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
 import z from "zod/v4";
-import { getChainIndexingStatus } from "./chains";
+
+import { createChainIndexingSnapshot } from "./chains";
 import type { ChainName } from "./config";
 
 const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChainNames);
@@ -69,116 +50,32 @@ const PonderChainMetadataSchema = z.strictObject({
   statusBlock: PonderBlockRefSchema,
 });
 
-export const makePonderChainMetadataSchema = (
-  indexedChainNames: string[],
-  systemTimestamp: UnixTimestamp,
-) => {
+export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
   const ChainNameSchema = makeChainNameSchema(indexedChainNames);
 
   const invariant_definedEntryForEachIndexedChain = (v: Map<ChainName, unknown>) =>
     indexedChainNames.every((chainName) => Array.from(v.keys()).includes(chainName));
 
   return z
-    .object({
-      appSettings: PonderAppSettingsSchema,
-
-      chains: z
-        .map(ChainNameSchema, PonderChainMetadataSchema)
-        .refine(invariant_definedEntryForEachIndexedChain, {
-          error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
-        }),
+    .map(ChainNameSchema, PonderChainMetadataSchema)
+    .refine(invariant_definedEntryForEachIndexedChain, {
+      error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
     })
-    .transform((ponderIndexingStatus) => {
-      let serializedChainIndexingStatuses = {} as Record<ChainIdString, ChainIndexingStatus>;
+
+    .transform((chains) => {
+      let serializedChainIndexingStatusSnapshots = {} as Record<
+        ChainIdString,
+        ChainIndexingStatusSnapshot
+      >;
 
       for (const chainName of indexedChainNames) {
-        const indexedChain = ponderIndexingStatus.chains.get(chainName)!;
+        const indexedChain = chains.get(chainName)!;
 
-        serializedChainIndexingStatuses[indexedChain.chainId] = getChainIndexingStatus(
-          indexedChain,
-          systemTimestamp,
-        );
+        serializedChainIndexingStatusSnapshots[indexedChain.chainId] =
+          createChainIndexingSnapshot(indexedChain);
       }
 
-      const chainStatuses = Object.values(serializedChainIndexingStatuses);
-      const overallStatus = getOverallIndexingStatus(chainStatuses);
-
-      switch (overallStatus) {
-        case OverallIndexingStatusIds.Unstarted: {
-          // forcing the type here, will be validated in the following 'check' step
-          const chains = serializedChainIndexingStatuses as Record<
-            ChainIdString,
-            ChainIndexingQueuedStatus
-          >;
-
-          return {
-            overallStatus: OverallIndexingStatusIds.Unstarted,
-            chains,
-          } satisfies SerializedENSIndexerOverallIndexingUnstartedStatus;
-        }
-
-        case OverallIndexingStatusIds.Backfill: {
-          return {
-            overallStatus: OverallIndexingStatusIds.Backfill,
-            chains: serializedChainIndexingStatuses as Record<
-              ChainIdString,
-              ChainIndexingStatusForBackfillOverallStatus
-            >, // forcing the type here, will be validated in the following 'check' step
-            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
-          } satisfies SerializedENSIndexerOverallIndexingBackfillStatus;
-        }
-
-        case OverallIndexingStatusIds.Completed: {
-          return {
-            overallStatus: OverallIndexingStatusIds.Completed,
-            chains: serializedChainIndexingStatuses as Record<
-              ChainIdString,
-              ChainIndexingCompletedStatus
-            >, // forcing the type here, will be validated in the following 'check' step
-            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
-          } satisfies SerializedENSIndexerOverallIndexingCompletedStatus;
-        }
-
-        case OverallIndexingStatusIds.Following:
-          return {
-            overallStatus: OverallIndexingStatusIds.Following,
-            chains: serializedChainIndexingStatuses,
-            overallApproxRealtimeDistance: getOverallApproxRealtimeDistance(chainStatuses),
-            omnichainIndexingCursor: getOmnichainIndexingCursor(chainStatuses),
-          } satisfies SerializedENSIndexerOverallIndexingFollowingStatus;
-      }
-    })
-    .check((ctx) => {
-      const { chains, overallStatus } = ctx.value;
-      const chainStatuses = Object.values(chains);
-      let hasValidChains = false;
-
-      switch (overallStatus) {
-        case OverallIndexingStatusIds.Unstarted:
-          hasValidChains = checkChainIndexingStatusesForUnstartedOverallStatus(chainStatuses);
-          break;
-
-        case OverallIndexingStatusIds.Backfill:
-          hasValidChains = checkChainIndexingStatusesForBackfillOverallStatus(chainStatuses);
-          break;
-
-        case OverallIndexingStatusIds.Completed:
-          hasValidChains = checkChainIndexingStatusesForCompletedOverallStatus(chainStatuses);
-          break;
-
-        case OverallIndexingStatusIds.Following:
-          hasValidChains = checkChainIndexingStatusesForFollowingOverallStatus(chainStatuses);
-          break;
-      }
-
-      if (!hasValidChains) {
-        ctx.issues.push({
-          code: "custom",
-          input: { chains, overallStatus },
-          message:
-            "Ponder Metadata includes 'chains' object misconfigured for selected 'overallStatus'",
-        });
-      }
+      return serializedChainIndexingStatusSnapshots;
     });
 };
 

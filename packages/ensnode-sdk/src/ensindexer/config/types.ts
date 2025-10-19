@@ -18,20 +18,57 @@ export enum PluginName {
 }
 
 /**
- * Information about ENSIndexer's dependencies.
+ * Version info about ENSIndexer and its dependencies.
  */
-export interface DependencyInfo {
-  /** Node.js runtime version */
+export interface ENSIndexerVersionInfo {
+  /**
+   * Node.js runtime version
+   *
+   * @see https://nodejs.org/en/about/previous-releases
+   **/
   nodejs: string;
 
-  /** Ponder framework version */
+  /**
+   * Ponder framework version
+   *
+   * @see https://www.npmjs.com/package/ponder
+   **/
   ponder: string;
 
-  /** ENSRainbow service version */
+  /**
+   * ENSDb service version
+   *
+   * Guaranteed to be the same as {@link ENSIndexerVersionInfo.ensIndexer}.
+   * */
+  ensDb: string;
+
+  /**
+   * ENSIndexer service version
+   *
+   * @see https://ghcr.io/namehash/ensnode/ensindexer
+   **/
+  ensIndexer: string;
+
+  /**
+   * ENSRainbow service version
+   *
+   * @see https://ghcr.io/namehash/ensnode/ensindexer
+   **/
   ensRainbow: string;
 
-  /** ENSRainbow schema version */
+  /**
+   * ENSRainbow schema version
+   **/
   ensRainbowSchema: number;
+
+  /**
+   * ENS Normalize package version
+   *
+   * Available on NPM as: `@adraffy/ens-normalize`
+   *
+   * @see https://www.npmjs.com/package/@adraffy/ens-normalize
+   **/
+  ensNormalize: string;
 }
 
 /**
@@ -121,7 +158,7 @@ export interface ENSIndexerPublicConfig {
   isSubgraphCompatible: boolean;
 
   /**
-   * Information about the ENSIndexer instance dependencies.
+   * Version info about ENSIndexer.
    */
-  dependencyInfo: DependencyInfo;
+  versionInfo: ENSIndexerVersionInfo;
 }

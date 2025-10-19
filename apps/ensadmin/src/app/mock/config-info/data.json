@@ -17,9 +17,12 @@
       "referrals",
       "tokenscope"
     ],
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     }
@@ -29,9 +32,12 @@
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -53,9 +59,12 @@
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -70,9 +79,12 @@
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -87,9 +99,12 @@
       "labelSetId": "subgraph",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
+    "versionInfo": {
       "nodejs": "22.18.0",
       "ponder": "0.11.43",
+      "ensDb": "0.35.0",
+      "ensIndexer": "0.35.0",
+      "ensNormalize": "1.11.1",
       "ensRainbow": "0.34.0",
       "ensRainbowSchema": 3
     },
@@ -101,14 +116,17 @@
   },
   "Serialization Error": {
     "labelSet": {
-      "labelSetId": "subgraph",
+      "labelSetId": "",
       "labelSetVersion": 0
     },
-    "dependencyInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
+    "versionInfo": {
+      "nodejs": "",
+      "ponder": "",
+      "ensDb": "",
+      "ensIndexer": "",
+      "ensNormalize": "",
+      "ensRainbow": "",
+      "ensRainbowSchema": -1
     },
     "indexedChainIds": [17000],
     "namespace": "holesky",

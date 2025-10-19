@@ -9,13 +9,14 @@ interface UseIndexingStatusParameters
     QueryParameter<IndexingStatusResponse> {}
 
 export function useIndexingStatus(parameters: ConfigParameter & UseIndexingStatusParameters = {}) {
-  const { config, query = {}, ...args } = parameters;
+  const { config, query = {} } = parameters;
   const _config = useENSNodeConfig(config);
 
-  const queryOptions = createIndexingStatusQueryOptions(_config, { ...args });
+  const queryOptions = createIndexingStatusQueryOptions(_config);
 
   const options = {
     ...queryOptions,
+    refetchInterval: 10 * 1000, // 10 seconds - indexing status changes frequently
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
   };

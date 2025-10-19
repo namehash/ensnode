@@ -4,17 +4,18 @@ packages:
   - packages/*
 
 catalog:
+  "@adraffy/ens-normalize": 1.11.1
   "@biomejs/biome": ^1.9.4
-  "@ponder/utils": 0.2.13
+  "@ponder/utils": 0.2.14
   "@types/node": ^22.14.0
-  astro: ^5.13.4
+  astro: ^5.14.3
   date-fns: ^4.1.0
   drizzle-orm: =0.41.0
   hono: ^4.9.10
   typescript: ^5.7.3
   viem: ^2.22.13
   vitest: ^3.2.4
-  ponder: 0.13.8
+  ponder: 0.13.14
   tsup: ^8.3.6
   zod: ^3.25.7
   "@astrojs/react": ^4.2.0

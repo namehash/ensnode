@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
+import { ExternalLinkWithIcon } from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { useENSAppProfileUrl } from "@/hooks/async/use-ens-app-profile-url";
 import { useParams } from "next/navigation";

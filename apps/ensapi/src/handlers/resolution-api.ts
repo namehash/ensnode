@@ -3,26 +3,32 @@ import {
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
+import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { simpleMemoized } from "@/lib/simple-memoized";
+import { sdk } from "@/lib/tracing/instrumentation";
 import { captureTrace } from "@/lib/tracing/protocol-tracing";
 import { errorResponse, routes, validate } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
 
-// TODO: replace with indexing status request with maxRealtimeDistance set (?) or re-derive from
-// cached indexing status
+// TODO: derive from indexing status
+// const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // seconds
+// return realtimeProjection.worstCaseDistance <= MAX_REALTIME_DISTANCE_TO_ACCELERATE;
 const canAccelerateResolution = async () => true;
 
 // memoizes the result of canAccelerateResolution within a 30s window
-// this means that the effective maxRealtimeDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
+// this means that the effective worstCaseDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
 // and the initial request(s) in between ENSApi startup and the first resolution of
 // canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
 const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
+
+// include automatic OpenTelemetry instrumentation for incoming requests
+app.use("*", otel());
 
 /**
  * Example queries for /records:
@@ -140,5 +146,14 @@ app.get(
     }
   },
 );
+
+// start ENSNode API OpenTelemetry SDK
+sdk.start();
+
+// gracefully shut down the SDK on process interrupt/exit
+const shutdownOpenTelemetry = () =>
+  sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
+process.on("SIGINT", shutdownOpenTelemetry);
+process.on("SIGTERM", shutdownOpenTelemetry);
 
 export default app;
