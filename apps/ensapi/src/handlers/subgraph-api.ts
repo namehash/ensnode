@@ -31,13 +31,11 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 
 // use our custom graphql middleware
 app.use(async (c, next) => {
-  // TODO: this might be really inefficient, making a new yoga every request
+  // TODO: this might be really inefficient, making a new yoga every request?
   const middleware = subgraphGraphQLMiddleware({
     drizzle,
     graphqlSchema: buildGraphQLSchema({
       schema: subgraphSchema,
-      // provide PonderMetadataProvider to power `_meta` field
-      // TODO: derive from c.var.indexingStatus
       metadataProvider: metadataProviderFromIndexingStatus(
         c.var.ensIndexerPublicConfig,
         c.var.indexingStatus,

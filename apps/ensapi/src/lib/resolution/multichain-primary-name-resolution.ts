@@ -38,6 +38,9 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
  * @param address the adddress whose Primary Names to resolve
  * @param chainIds the set of chainIds within which to resolve the address' Primary Name (default:
  * all ENSIP-19 supported chains)
+ * @param options Optional settings
+ * @param options.accelerate Whether acceleration is requested (default: true)
+ * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
 export async function resolvePrimaryNames(
   address: MultichainPrimaryNameResolutionArgs["address"],
