@@ -56,7 +56,7 @@ sdk.start();
 const server = serve(
   {
     fetch: app.fetch,
-    port: 4334, // TODO: add to config, environment, etc
+    port: config.port,
   },
   (info) => {
     console.log(`ENSAPI listening on port ${info.port} with config:`);

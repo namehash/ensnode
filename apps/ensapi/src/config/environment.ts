@@ -2,6 +2,7 @@ import {
   DatabaseEnvironment,
   EnsIndexerUrlEnvironment,
   EnsNamespaceEnvironment,
+  PortEnvironment,
   RpcEnvironment,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -15,4 +16,5 @@ import {
 export type EnsApiEnvironment = DatabaseEnvironment &
   EnsIndexerUrlEnvironment &
   RpcEnvironment &
-  EnsNamespaceEnvironment;
+  EnsNamespaceEnvironment &
+  PortEnvironment;

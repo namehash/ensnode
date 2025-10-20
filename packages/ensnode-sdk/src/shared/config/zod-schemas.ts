@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 import { deserializeChainId } from "../deserialize";
 import { ChainId } from "../types";
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
-import { makeChainIdStringSchema, makeUrlSchema } from "../zod-schemas";
+import { makeChainIdStringSchema, makePositiveIntegerSchema, makeUrlSchema } from "../zod-schemas";
 import { RpcConfig } from "./types";
 import {
   invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
@@ -74,3 +74,12 @@ export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
   error: ({ input }) =>
     `Invalid NAMESPACE. Got '${input}', but supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`,
 });
+
+/**
+ * Parses a numeric value as a port number.
+ */
+export const PortSchema = z.coerce
+  .number({ error: "PORT must be a number." })
+  .min(1, { error: "PORT must be greater than 1." })
+  .max(65535, { error: "PORT must be less than 65535" })
+  .optional();

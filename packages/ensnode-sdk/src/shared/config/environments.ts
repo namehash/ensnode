@@ -1,24 +1,39 @@
-// TODO: docstring
+/**
+ * Environment variables for database configuration.
+ */
 export interface DatabaseEnvironment {
   DATABASE_URL?: string;
   DATABASE_SCHEMA?: string;
 }
 
-// TODO: docstring
+/**
+ * Environment variables for RPC configuration.
+ */
 export interface RpcEnvironment {
   [x: `RPC_URL_${number}`]: ChainIdSpecificRpcEnvironmentVariable | undefined;
   ALCHEMY_API_KEY?: string;
   DRPC_API_KEY?: string;
 }
 
-// TODO: docstring
+/**
+ * Environment variables for ENSIndexer URL configuration.
+ */
 export interface EnsIndexerUrlEnvironment {
   ENSINDEXER_URL?: string;
 }
 
-// TODO: docstring
+/**
+ * Environment variables for ENSNamespace configuration.
+ */
 export interface EnsNamespaceEnvironment {
   NAMESPACE?: string;
+}
+
+/**
+ * Environment variables for port configuration.
+ */
+export interface PortEnvironment {
+  PORT?: string;
 }
 
 /**

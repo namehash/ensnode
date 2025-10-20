@@ -1,9 +1,11 @@
+import { ENSAPI_DEFAULT_PORT } from "@/config/defaults";
 import { EnsApiEnvironment } from "@/config/environment";
 import {
   DatabaseSchemaNameSchema,
   DatabaseUrlSchema,
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
+  PortSchema,
   RpcConfigsSchema,
   buildRpcConfigsFromEnv,
   invariant_rpcConfigsSpecifiedForRootChain,
@@ -12,6 +14,7 @@ import { ZodError, prettifyError, z } from "zod/v4";
 
 const EnsApiConfigSchema = z
   .object({
+    port: PortSchema.default(ENSAPI_DEFAULT_PORT),
     databaseUrl: DatabaseUrlSchema,
     databaseSchemaName: DatabaseSchemaNameSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
@@ -38,6 +41,7 @@ export function buildConfigFromEnvironment(env: EnsApiEnvironment): EnsApiConfig
     const rpcConfigs = buildRpcConfigsFromEnv(env, namespace);
 
     return EnsApiConfigSchema.parse({
+      port: env.PORT,
       databaseUrl: env.DATABASE_URL,
       databaseSchemaName: env.DATABASE_SCHEMA,
       ensIndexerUrl: env.ENSINDEXER_URL,

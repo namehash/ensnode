@@ -1,0 +1,1 @@
+export const ENSAPI_DEFAULT_PORT = 4334;
