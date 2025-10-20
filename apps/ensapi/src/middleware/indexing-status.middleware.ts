@@ -4,23 +4,27 @@ import pRetry from "p-retry";
 
 import config from "@/config";
 import { factory } from "@/lib/hono-factory";
-import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+import { ENSNodeClient, TtlCache } from "@ensnode/ensnode-sdk";
 
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
-// TODO: memoize with expiry-map and ttl
-const fetcher = pMemoize(async () =>
-  pReflect(
-    pRetry(() => client.indexingStatus(), {
-      retries: 3,
-      onFailedAttempt: ({ error, attemptNumber, retriesLeft, retriesConsumed }) => {
-        console.log(
-          `Fetch client.indexingStatus() attempt ${attemptNumber} failed. ${retriesLeft} retries left. ${retriesConsumed} retries consumed.`,
-        );
-        console.error(error);
-      },
-    }),
-  ),
+const TTL_MS = 5_000; // 5 seconds
+
+// memoizes the reflected indexing-status-with-retries promise across TTL_MS
+const fetcher = pMemoize(
+  async () =>
+    pReflect(
+      pRetry(() => client.indexingStatus(), {
+        retries: 3,
+        onFailedAttempt: ({ error, attemptNumber, retriesLeft, retriesConsumed }) => {
+          console.log(
+            `Fetch client.indexingStatus() attempt ${attemptNumber} failed. ${retriesLeft} retries left. ${retriesConsumed} retries consumed.`,
+          );
+          console.error(error);
+        },
+      }),
+    ),
+  { cache: new TtlCache(TTL_MS) },
 );
 
 export type IndexingStatusVariables = {

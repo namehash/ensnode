@@ -1,15 +1,8 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
   "compilerOptions": {
-    "lib": [
-      "ESNext",
-      "DOM"
-    ]
+    "rootDir": "."
   },
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "dist"
-  ]
+  "include": ["./**/*.ts"],
+  "exclude": ["dist"]
 }
