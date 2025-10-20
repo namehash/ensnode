@@ -50,7 +50,8 @@ jobs:
 
       - name: Switch Traefik Routing
         run: |
-          sudo apt install redis-tools
+          sudo apt update && \
+            apt install redis-tools
 
           # ALPHA
           redis-cli -u $REDIS_URL SET traefik/http/routers/alpha-api-router/service "${TARGET_ENVIRONMENT}-alpha-api"
