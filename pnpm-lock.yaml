@@ -284,12 +284,6 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../../packages/ensnode-sdk
-      '@ensnode/ensrainbow-sdk':
-        specifier: workspace:*
-        version: link:../../packages/ensrainbow-sdk
-      '@ensnode/ponder-metadata':
-        specifier: workspace:*
-        version: link:../../packages/ponder-metadata
       '@ensnode/ponder-subgraph':
         specifier: workspace:*
         version: link:../../packages/ponder-subgraph
@@ -332,18 +326,6 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: ^1.34.0
         version: 1.36.0
-      '@types/dns-packet':
-        specifier: ^5.6.5
-        version: 5.6.5
-      caip:
-        specifier: ^1.1.1
-        version: 1.1.1
-      date-fns:
-        specifier: 'catalog:'
-        version: 4.1.0
-      dns-packet:
-        specifier: ^5.6.1
-        version: 5.6.1
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -414,45 +396,6 @@ importers:
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
-      '@ensnode/ponder-subgraph':
-        specifier: workspace:*
-        version: link:../../packages/ponder-subgraph
-      '@hono/otel':
-        specifier: ^0.2.2
-        version: 0.2.2(hono@4.9.10)
-      '@opentelemetry/api':
-        specifier: ^1.9.0
-        version: 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
-      '@opentelemetry/core':
-        specifier: ^2.0.1
-        version: 2.0.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/exporter-metrics-otlp-proto':
-        specifier: ^0.202.0
-        version: 0.202.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/exporter-trace-otlp-proto':
-        specifier: ^0.202.0
-        version: 0.202.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/resources':
-        specifier: ^2.0.1
-        version: 2.0.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/sdk-metrics':
-        specifier: ^2.0.1
-        version: 2.0.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/sdk-node':
-        specifier: ^0.202.0
-        version: 0.202.0(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/sdk-trace-base':
-        specifier: ^2.0.1
-        version: 2.0.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/sdk-trace-node':
-        specifier: ^2.0.1
-        version: 2.0.1(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))
-      '@opentelemetry/semantic-conventions':
-        specifier: ^1.34.0
-        version: 1.36.0
-      '@types/dns-packet':
-        specifier: ^5.6.5
-        version: 5.6.5
       caip:
         specifier: ^1.1.1
         version: 1.1.1
@@ -465,18 +408,12 @@ importers:
       dns-packet:
         specifier: ^5.6.1
         version: 5.6.1
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.11.3)
       hono:
         specifier: 'catalog:'
         version: 4.9.10
       ponder:
         specifier: 'catalog:'
         version: 0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.9.10)(jiti@2.4.2)(lightningcss@1.29.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.76))(yaml@2.7.0)(zod@3.25.76)
-      ponder-enrich-gql-docs-middleware:
-        specifier: ^0.1.3
-        version: 0.1.3(graphql@16.10.0)(hono@4.9.10)
       viem:
         specifier: 'catalog:'
         version: 2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -490,6 +427,9 @@ importers:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../../packages/shared-configs
+      '@types/dns-packet':
+        specifier: ^5.6.5
+        version: 5.6.5
       '@types/node':
         specifier: 'catalog:'
         version: 22.15.3
