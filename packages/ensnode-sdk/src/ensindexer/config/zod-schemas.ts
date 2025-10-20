@@ -14,9 +14,8 @@ import {
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  makeUrlSchema,
 } from "../../shared/zod-schemas";
-import { isSubgraphCompatible } from "./helpers";
+import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import { PluginName } from "./types";
 import type { ENSIndexerPublicConfig } from "./types";
 import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";

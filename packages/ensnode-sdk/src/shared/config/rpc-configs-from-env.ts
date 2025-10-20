@@ -1,7 +1,10 @@
-import type { ENSIndexerEnvironment, RpcConfigEnvironment } from "@/config/types";
-import { buildAlchemyUrl, buildDRPCUrl } from "@/lib/build-rpc-urls";
-import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
+import { Datasource, getENSNamespace } from "@ensnode/datasources";
 import { type ChainIdString, ENSNamespaceId, serializeChainId } from "@ensnode/ensnode-sdk";
+import {
+  ChainIdSpecificRpcEnvironmentVariable,
+  RpcEnvironment,
+} from "@ensnode/ensnode-sdk/internal";
+import { buildAlchemyUrl, buildDRPCUrl } from "./build-rpc-urls";
 
 /**
  * Constructs dynamic chain configuration from environment variables, scoped to chain IDs that appear
@@ -17,17 +20,17 @@ import { type ChainIdString, ENSNamespaceId, serializeChainId } from "@ensnode/e
  * NOTE: This function returns raw RpcConfigEnvironment values which are not yet parsed or validated.
  */
 export function buildRpcConfigsFromEnv(
-  env: ENSIndexerEnvironment,
+  env: RpcEnvironment,
   namespace: ENSNamespaceId,
-): Record<ChainIdString, RpcConfigEnvironment> {
-  const chainsInNamespace = Object.entries(
-    getENSNamespaceAsFullyDefinedAtCompileTime(namespace),
-  ).map(([, datasource]) => datasource.chain);
+): Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> {
+  const chainsInNamespace = Object.entries(getENSNamespace(namespace)).map(
+    ([, datasource]) => (datasource as Datasource).chain,
+  );
 
   const alchemyApiKey = env["ALCHEMY_API_KEY"];
   const drpcKey = env["DRPC_API_KEY"];
 
-  const rpcConfigs: Record<ChainIdString, RpcConfigEnvironment> = {};
+  const rpcConfigs: Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> = {};
 
   for (const chain of chainsInNamespace) {
     // RPC_URL_* takes precedence over convenience generation

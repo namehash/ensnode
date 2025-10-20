@@ -1,5 +1,6 @@
+import { ENSIndexerEnvironment } from "@/config/environment";
 import { EnvironmentDefaults } from "@/config/environment-defaults";
-import type { ENSIndexerEnvironment, RpcConfig } from "@/config/types";
+import type { RpcConfig } from "@/config/types";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 

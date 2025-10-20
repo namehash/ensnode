@@ -1,39 +1,30 @@
-import { parse as parseConnectionString } from "pg-connection-string";
 import { ZodError, prettifyError, z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
+import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
-  type ChainId,
-  PluginName,
-  deserializeChainId,
-  isHttpProtocol,
-  isWebSocketProtocol,
-  uniq,
-} from "@ensnode/ensnode-sdk";
-import {
+  DatabaseSchemaNameSchema,
+  DatabaseUrlSchema,
+  RpcConfigsSchema,
+  buildRpcConfigsFromEnv,
   invariant_isSubgraphCompatibleRequirements,
   makeFullyPinnedLabelSetSchema,
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { buildRpcConfigsFromEnv } from "./rpc-configs-from-env";
-
 import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
 
 import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
+import { ENSIndexerEnvironment } from "@/config/environment";
 import { derive_indexedChainIds } from "./derived-params";
-import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
+import type { ENSIndexerConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_rpcConfigsSpecifiedForRootChain,
-  invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
-  invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
   invariant_validContractConfigs,
 } from "./validations";
-
-const chainIdSchema = z.number().int().min(1);
 
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
@@ -53,13 +44,6 @@ const makeBlockNumberSchema = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-const RpcConfigSchema = z
-  .string()
-  .transform((val) => val.split(","))
-  .pipe(z.array(makeUrlSchema("RPC URL")))
-  .check(invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL)
-  .check(invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL);
-
 const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
   error: (issue) => {
     return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
@@ -78,15 +62,6 @@ const BlockrangeSchema = z
   );
 
 const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
-
-const PonderDatabaseSchemaSchema = z
-  .string({
-    error: "DATABASE_SCHEMA is required.",
-  })
-  .trim()
-  .min(1, {
-    error: "DATABASE_SCHEMA is required and cannot be an empty string.",
-  });
 
 const PluginsSchema = z.coerce
   .string()
@@ -114,62 +89,22 @@ const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
 const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 
-const RpcConfigsSchema = z
-  .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
-    error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
-  })
-  .transform((records) => {
-    const rpcConfigs = new Map<ChainId, RpcConfig>();
-
-    for (const [chainIdString, rpcConfig] of Object.entries(records)) {
-      // rpcConfig is guaranteed to include at least one HTTP protocol URL
-      const httpRPCs = rpcConfig.filter(isHttpProtocol) as [URL, ...URL[]];
-
-      // rpcConfig is guaranteed to include at most one WebSocket protocol URL
-      const websocketRPC = rpcConfig.find(isWebSocketProtocol);
-
-      rpcConfigs.set(deserializeChainId(chainIdString), {
-        httpRPCs,
-        websocketRPC,
-      });
-    }
-
-    return rpcConfigs;
-  });
-
-const DatabaseUrlSchema = z.string().refine(
-  (url) => {
-    try {
-      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-        return false;
-      }
-      const config = parseConnectionString(url);
-      return !!(config.host && config.port && config.database);
-    } catch {
-      return false;
-    }
-  },
-  {
-    error:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-  },
-);
-
 const IsSubgraphCompatibleSchema =
   makeEnvStringBoolSchema("SUBGRAPH_COMPAT").default(DEFAULT_SUBGRAPH_COMPAT);
 
 const ENSIndexerConfigSchema = z
   .object({
-    namespace: ENSNamespaceSchema,
-    globalBlockrange: BlockrangeSchema,
+    databaseUrl: DatabaseUrlSchema,
+    databaseSchemaName: DatabaseSchemaNameSchema,
+    rpcConfigs: RpcConfigsSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
-    databaseSchemaName: PonderDatabaseSchemaSchema,
+
+    namespace: ENSNamespaceSchema,
     plugins: PluginsSchema,
+    isSubgraphCompatible: IsSubgraphCompatibleSchema,
+    globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
-    rpcConfigs: RpcConfigsSchema,
-    databaseUrl: DatabaseUrlSchema,
-    isSubgraphCompatible: IsSubgraphCompatibleSchema,
   })
   /**
    * Invariant enforcement
@@ -241,22 +176,23 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSInde
 
     // parse/validate with ENSIndexerConfigSchema
     return ENSIndexerConfigSchema.parse({
-      databaseSchemaName: env.DATABASE_SCHEMA,
       databaseUrl: env.DATABASE_URL,
-      isSubgraphCompatible: env.SUBGRAPH_COMPAT,
+      databaseSchemaName: env.DATABASE_SCHEMA,
+      rpcConfigs,
+      ensIndexerUrl: env.ENSINDEXER_URL,
+
       namespace: env.NAMESPACE,
       plugins: env.PLUGINS,
+      isSubgraphCompatible: env.SUBGRAPH_COMPAT,
       ensRainbowUrl: env.ENSRAINBOW_URL,
       labelSet: {
         labelSetId: env.LABEL_SET_ID,
         labelSetVersion: env.LABEL_SET_VERSION,
       },
-      ensIndexerUrl: env.ENSINDEXER_URL,
       globalBlockrange: {
         startBlock: env.START_BLOCK,
         endBlock: env.END_BLOCK,
       },
-      rpcConfigs,
     });
   } catch (error) {
     if (error instanceof ZodError) {

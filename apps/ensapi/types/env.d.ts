@@ -1,4 +1,4 @@
-import type { EnsApiEnvironment } from "@/config/types";
+import type { EnsApiEnvironment } from "@/config/environment";
 
 declare global {
   namespace NodeJS {

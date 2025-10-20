@@ -8,8 +8,8 @@ import { Hono } from "hono";
 import { z } from "zod/v4";
 
 import { errorResponse } from "@/lib/handlers/error-response";
+import { params, transformSelection } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
-import { params, transformSelection } from "@/lib/handlers/zod-schemas";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
