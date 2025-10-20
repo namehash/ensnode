@@ -16,6 +16,11 @@ export interface EnsIndexerUrlEnvironment {
   ENSINDEXER_URL?: string;
 }
 
+// TODO: docstring
+export interface EnsNamespaceEnvironment {
+  NAMESPACE?: string;
+}
+
 /**
  * Represents the raw unvalidated environment variable for the RPCs associated with a chain.
  *

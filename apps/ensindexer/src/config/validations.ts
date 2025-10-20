@@ -47,23 +47,6 @@ export function invariant_requiredDatasources(
   }
 }
 
-// Invariant: rpcConfig is specified for the ENS Root Chain of the configured namespace
-export function invariant_rpcConfigsSpecifiedForRootChain(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "rpcConfigs">>,
-) {
-  const { value: config } = ctx;
-
-  const ensRootChainId = getENSRootChainId(config.namespace);
-
-  if (!config.rpcConfigs.has(ensRootChainId)) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `An RPC_URL_${ensRootChainId} (for the ENS Root Chain) is required, but none was specified.`,
-    });
-  }
-}
-
 // Invariant: rpcConfig is specified for each indexed chain
 export function invariant_rpcConfigsSpecifiedForIndexedChains(
   ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "plugins" | "rpcConfigs">>,

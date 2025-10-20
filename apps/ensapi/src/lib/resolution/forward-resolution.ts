@@ -17,29 +17,29 @@ import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
-import { ENS_ROOT_REGISTRY } from "@/api/lib/protocol-acceleration/ens-root-registry";
-import { findResolver } from "@/api/lib/protocol-acceleration/find-resolver";
-import { getENSIP19ReverseNameRecordFromIndex } from "@/api/lib/protocol-acceleration/get-primary-name-from-index";
-import { getRecordsFromIndex } from "@/api/lib/protocol-acceleration/get-records-from-index";
-import { possibleKnownCCIPReadShadowRegistryResolverDefersTo } from "@/api/lib/protocol-acceleration/known-ccip-read-shadow-registry-resolver";
-import { isKnownENSIP19ReverseResolver } from "@/api/lib/protocol-acceleration/known-ensip-19-reverse-resolvers";
-import { isKnownOnchainStaticResolver } from "@/api/lib/protocol-acceleration/known-onchain-static-resolver";
-import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/api/lib/protocol-acceleration/resolver-records-indexed-on-chain";
+import config from "@/config";
+import { ENS_ROOT_REGISTRY } from "@/lib/protocol-acceleration/ens-root-registry";
+import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
+import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
+import { getRecordsFromIndex } from "@/lib/protocol-acceleration/get-records-from-index";
+import { possibleKnownCCIPReadShadowRegistryResolverDefersTo } from "@/lib/protocol-acceleration/known-ccip-read-shadow-registry-resolver";
+import { isKnownENSIP19ReverseResolver } from "@/lib/protocol-acceleration/known-ensip-19-reverse-resolvers";
+import { isKnownOnchainStaticResolver } from "@/lib/protocol-acceleration/known-onchain-static-resolver";
+import { areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId } from "@/lib/protocol-acceleration/resolver-records-indexed-on-chain";
 import {
   makeEmptyResolverRecordsResponse,
   makeRecordsResponseFromIndexedRecords,
   makeRecordsResponseFromResolveResults,
-} from "@/api/lib/resolution/make-records-response";
+} from "@/lib/resolution/make-records-response";
 import {
   executeResolveCalls,
   interpretRawCallsAndResults,
   makeResolveCalls,
-} from "@/api/lib/resolution/resolve-calls-and-results";
-import { supportsENSIP10Interface } from "@/api/lib/rpc/ensip-10";
-import { getPublicClient } from "@/api/lib/rpc/public-client";
-import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/tracing/protocol-tracing";
-import config from "@/config";
+} from "@/lib/resolution/resolve-calls-and-results";
+import { supportsENSIP10Interface } from "@/lib/rpc/ensip-10";
+import { getPublicClient } from "@/lib/rpc/public-client";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
+import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
 
 const tracer = trace.getTracer("forward-resolution");
 // const metric = metrics.getMeter("forward-resolution");

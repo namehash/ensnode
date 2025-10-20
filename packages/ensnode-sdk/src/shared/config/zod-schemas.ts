@@ -1,3 +1,4 @@
+import { ENSNamespaceIds } from "@ensnode/datasources";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
 import { deserializeChainId } from "../deserialize";
@@ -68,3 +69,7 @@ export const RpcConfigsSchema = z
   });
 
 export const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
+
+export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
+  error: `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`,
+});

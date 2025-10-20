@@ -8,7 +8,7 @@ import { Hono } from "hono";
 import { z } from "zod/v4";
 
 import { errorResponse } from "@/lib/handlers/error-response";
-import { params, transformSelection } from "@/lib/handlers/params.schema";
+import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
@@ -52,13 +52,11 @@ app.get(
   validate("param", z.object({ name: params.name })),
   validate(
     "query",
-    z
-      .object({
-        ...params.selection.shape,
-        trace: params.trace,
-        accelerate: params.accelerate,
-      })
-      .transform(transformSelection),
+    z.object({
+      selection: params.selection,
+      trace: params.trace,
+      accelerate: params.accelerate,
+    }),
   ),
   async (c) => {
     const { name } = c.req.valid("param");

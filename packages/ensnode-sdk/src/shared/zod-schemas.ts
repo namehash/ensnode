@@ -165,6 +165,7 @@ export const makeUrlSchema = (valueLabel: string = "Value") =>
   z
     .url({
       error: `${valueLabel} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
+      abort: true,
     })
     .transform((v) => new URL(v));
 

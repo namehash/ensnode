@@ -47,37 +47,32 @@ const chainIdsWithoutDefaultChainId = z.optional(
   stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
 );
 
-const selection = z.object({
-  name: z.optional(boolstring),
-  addresses: z.optional(stringarray.pipe(z.array(coinType))),
-  texts: z.optional(stringarray),
-});
+const selection = z
+  .object({
+    name: z.optional(boolstring),
+    addresses: z.optional(stringarray.pipe(z.array(coinType))),
+    texts: z.optional(stringarray),
+  })
+  .transform((value, ctx) => {
+    const { name, addresses, texts, ...rest } = value;
+    const selection: ResolverRecordsSelection = {
+      ...(value.name && { name: true }),
+      ...(value.addresses && { addresses: value.addresses }),
+      ...(value.texts && { texts: value.texts }),
+    };
 
-type SelectionQueryParameters = z.infer<typeof selection>;
+    if (isSelectionEmpty(selection)) {
+      ctx.issues.push({
+        code: "custom",
+        message: "Selection cannot be empty.",
+        input: selection,
+      });
 
-export const transformSelection = <VALUE extends SelectionQueryParameters>(
-  value: VALUE,
-  ctx: z.RefinementCtx<VALUE>,
-) => {
-  const { name, addresses, texts, ...rest } = value;
-  const selection: ResolverRecordsSelection = {
-    ...(value.name && { name: true }),
-    ...(value.addresses && { addresses: value.addresses }),
-    ...(value.texts && { texts: value.texts }),
-  };
+      return z.NEVER;
+    }
 
-  if (isSelectionEmpty(selection)) {
-    ctx.issues.push({
-      code: "custom",
-      message: "Selection cannot be empty.",
-      input: selection,
-    });
-
-    return z.NEVER;
-  }
-
-  return { ...rest, selection };
-};
+    return selection;
+  });
 
 export const params = {
   boolstring,

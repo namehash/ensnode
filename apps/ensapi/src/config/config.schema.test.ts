@@ -1,5 +1,6 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
 import { EnsApiEnvironment } from "@/config/environment";
+import { ENSNamespaceIds } from "@ensnode/datasources";
 import { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import { describe, expect, it } from "vitest";
 
@@ -9,7 +10,8 @@ const BASE_ENV = {
   DATABASE_SCHEMA: "ensapi",
   DATABASE_URL: "postgresql://user:password@localhost:5432/mydb",
   ENSINDEXER_URL: "http://localhost:42069",
-  RPC_URL_11155111: VALID_RPC_URL,
+  NAMESPACE: ENSNamespaceIds.Mainnet,
+  RPC_URL_1: VALID_RPC_URL,
 } satisfies EnsApiEnvironment;
 
 describe("buildConfigFromEnvironment", () => {
@@ -20,11 +22,12 @@ describe("buildConfigFromEnvironment", () => {
       databaseUrl: BASE_ENV.DATABASE_URL,
       databaseSchemaName: BASE_ENV.DATABASE_SCHEMA,
       ensIndexerUrl: new URL(BASE_ENV.ENSINDEXER_URL),
+      namespace: ENSNamespaceIds.Mainnet,
       rpcConfigs: new Map([
         [
-          11155111,
+          1,
           {
-            httpRPCs: [new URL(BASE_ENV.RPC_URL_11155111)],
+            httpRPCs: [new URL(BASE_ENV.RPC_URL_1)],
             websocketRPC: undefined,
           } satisfies RpcConfig,
         ],

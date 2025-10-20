@@ -1,14 +1,15 @@
 import { ZodError, prettifyError, z } from "zod/v4";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   DatabaseSchemaNameSchema,
   DatabaseUrlSchema,
+  ENSNamespaceSchema,
   EnsIndexerUrlSchema,
   RpcConfigsSchema,
   buildRpcConfigsFromEnv,
   invariant_isSubgraphCompatibleRequirements,
+  invariant_rpcConfigsSpecifiedForRootChain,
   makeFullyPinnedLabelSetSchema,
   makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -23,7 +24,6 @@ import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
   invariant_rpcConfigsSpecifiedForIndexedChains,
-  invariant_rpcConfigsSpecifiedForRootChain,
   invariant_validContractConfigs,
 } from "./validations";
 
@@ -44,12 +44,6 @@ const makeBlockNumberSchema = (envVarKey: string) =>
     .int({ error: `${envVarKey} must be a positive integer.` })
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
-
-const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
-  error: (issue) => {
-    return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
-  },
-});
 
 const BlockrangeSchema = z
   .object({
@@ -177,20 +171,20 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSInde
     return ENSIndexerConfigSchema.parse({
       databaseUrl: env.DATABASE_URL,
       databaseSchemaName: env.DATABASE_SCHEMA,
-      rpcConfigs,
       ensIndexerUrl: env.ENSINDEXER_URL,
-
       namespace: env.NAMESPACE,
+      rpcConfigs,
+
       plugins: env.PLUGINS,
       isSubgraphCompatible: env.SUBGRAPH_COMPAT,
+      globalBlockrange: {
+        startBlock: env.START_BLOCK,
+        endBlock: env.END_BLOCK,
+      },
       ensRainbowUrl: env.ENSRAINBOW_URL,
       labelSet: {
         labelSetId: env.LABEL_SET_ID,
         labelSetVersion: env.LABEL_SET_VERSION,
-      },
-      globalBlockrange: {
-        startBlock: env.START_BLOCK,
-        endBlock: env.END_BLOCK,
       },
     });
   } catch (error) {

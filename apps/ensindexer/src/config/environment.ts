@@ -1,6 +1,7 @@
 import {
   DatabaseEnvironment,
   EnsIndexerUrlEnvironment,
+  EnsNamespaceEnvironment,
   RpcEnvironment,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -11,18 +12,17 @@ import {
  * their state in `process.env`. This interface is intended to be the source type which then gets
  * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
  */
-export interface ENSIndexerEnvironment
-  extends DatabaseEnvironment,
-    EnsIndexerUrlEnvironment,
-    RpcEnvironment {
-  NAMESPACE?: string;
-  PLUGINS?: string;
-  SUBGRAPH_COMPAT?: string;
+export type ENSIndexerEnvironment = DatabaseEnvironment &
+  EnsIndexerUrlEnvironment &
+  RpcEnvironment &
+  EnsNamespaceEnvironment & {
+    PLUGINS?: string;
+    SUBGRAPH_COMPAT?: string;
 
-  START_BLOCK?: string;
-  END_BLOCK?: string;
+    START_BLOCK?: string;
+    END_BLOCK?: string;
 
-  ENSRAINBOW_URL?: string;
-  LABEL_SET_ID?: string;
-  LABEL_SET_VERSION?: string;
-}
+    ENSRAINBOW_URL?: string;
+    LABEL_SET_ID?: string;
+    LABEL_SET_VERSION?: string;
+  };
