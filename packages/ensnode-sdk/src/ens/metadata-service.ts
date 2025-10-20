@@ -167,8 +167,19 @@ export function buildBrowserSupportedAvatarUrl(
         browserSupportedAssetUrl,
         usesProxy: false,
       };
-    } catch {
+    } catch (error) {
       // toBrowserSupportedUrl failed - could be non-browser-supported protocol or malformed URL
+      // Check if it's a hostname validation error
+      if (error instanceof Error && error.message.includes("Invalid hostname")) {
+        // Hostname validation failed, so the asset text record is malformed/invalid
+        // Skip proxy logic and return null
+        return {
+          rawAssetTextRecord,
+          browserSupportedAssetUrl: null,
+          usesProxy: false,
+        };
+      }
+
       // Try to parse as a general URL to determine which case we're in
       try {
         buildUrl(rawAssetTextRecord);

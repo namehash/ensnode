@@ -61,14 +61,18 @@ export function isBrowserSupportedProtocol(url: URL): boolean {
  *
  * This function normalizes the URL string (adding 'https://' if no protocol is specified),
  * then validates that the resulting URL uses a browser-supported protocol (http/https/data)
- * before returning it as a BrowserSupportedAssetUrl type.
+ * and has a valid hostname structure before returning it as a BrowserSupportedAssetUrl type.
  *
  * Special handling for data: URLs - they are parsed directly without normalization to preserve
  * the data content integrity.
  *
+ * Hostname validation for http/https protocols:
+ * - Must contain at least one dot (.) OR be "localhost"
+ * - Must not have empty labels (no leading, trailing, or consecutive dots)
+ *
  * @param urlString - The URL string to validate and convert. If no protocol is specified, 'https://' will be prepended.
- * @returns A BrowserSupportedAssetUrl if the protocol is (or becomes) http/https/data
- * @throws if the URL string is invalid or uses a non-browser-supported protocol
+ * @returns A BrowserSupportedAssetUrl if the protocol is (or becomes) http/https/data and hostname is valid
+ * @throws if the URL string is invalid, uses a non-browser-supported protocol, or has an invalid hostname
  *
  * @example
  * ```typescript
@@ -84,6 +88,10 @@ export function isBrowserSupportedProtocol(url: URL): boolean {
  *
  * // Non-browser-supported protocols - throws error
  * toBrowserSupportedUrl('ipfs://QmHash') // throws Error
+ *
+ * // Invalid hostnames - throws error
+ * toBrowserSupportedUrl('not-a-valid-url') // throws Error (no dot in hostname)
+ * toBrowserSupportedUrl('https://.com') // throws Error (empty label)
  * ```
  */
 export function toBrowserSupportedUrl(urlString: string): BrowserSupportedAssetUrl {
@@ -100,6 +108,22 @@ export function toBrowserSupportedUrl(urlString: string): BrowserSupportedAssetU
     throw new Error(
       `BrowserSupportedAssetUrl must use http, https, or data protocol, got: ${url.protocol}`,
     );
+  }
+
+  // Validate hostname structure for http/https protocols
+  // data: URLs don't have hostnames, so skip this validation for them
+  if (isHttpProtocol(url)) {
+    // Hostname must contain at least one dot or be "localhost"
+    if (!url.hostname.includes(".") && url.hostname !== "localhost") {
+      throw new Error(
+        `Invalid hostname: ${url.hostname}. Hostname must contain at least one dot or be "localhost"`,
+      );
+    }
+
+    // Hostname must not have empty labels (no leading, trailing, or consecutive dots)
+    if (url.hostname.startsWith(".") || url.hostname.includes("..") || url.hostname.endsWith(".")) {
+      throw new Error(`Invalid hostname: ${url.hostname}. Hostname must not have empty labels`);
+    }
   }
 
   return url;
