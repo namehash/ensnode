@@ -17,12 +17,6 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   async redirects() {
     return [
-      // redirect the homepage to /connection
-      {
-        source: "/",
-        destination: "/connection",
-        permanent: false,
-      },
       {
         // Provide backward compatibility for ENSNode services.
         // The older ones would redirect their homepage to ENSAdmin `/about`

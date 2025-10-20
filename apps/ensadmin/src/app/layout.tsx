@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import "./globals.css";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { RequireActiveConnection } from "@/components/connections/require-active-connection";
-import { RequireSelectedConnection } from "@/components/connections/require-selected-connection";
-import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
-import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 import { QueryClientProvider } from "@/components/query-client/components";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ConnectionsLibraryProvider } from "@/hooks/use-connections-library";
 import { ensAdminPublicUrl } from "@/lib/env";
@@ -66,24 +60,9 @@ export default function Layout({
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
           <ConnectionsLibraryProvider>
-            <RequireSelectedConnection>
-              <SidebarProvider>
-                <Suspense>
-                  <AppSidebar />
-                </Suspense>
-                <SidebarInset className="min-w-0">
-                  <SelectedENSNodeProvider>
-                    <Header>
-                      <HeaderNav>
-                        <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                      </HeaderNav>
-                      <HeaderActions>{actions}</HeaderActions>
-                    </Header>
-                    <RequireActiveConnection>{children}</RequireActiveConnection>
-                  </SelectedENSNodeProvider>
-                </SidebarInset>
-              </SidebarProvider>
-            </RequireSelectedConnection>
+            <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
+              {children}
+            </LayoutWrapper>
           </ConnectionsLibraryProvider>
         </QueryClientProvider>
         <Toaster />
