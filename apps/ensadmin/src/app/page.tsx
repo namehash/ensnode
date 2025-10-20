@@ -6,26 +6,31 @@ import { Button } from "@/components/ui/button";
 export default function SplashPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4 md:gap-8 px-4 text-center select-none">
-        <div className="flex items-center gap-2 md:gap-4 select-none">
+      <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl">
+        <div className="relative w-full max-w-2xl aspect-[1056/820]">
           <Image
-            src="/ensadmin-logo.svg"
-            alt="ENSAdmin Logo"
-            width={64}
-            height={64}
+            src="/ens-admin-illustration.png"
+            alt="ENS Admin Illustration"
+            fill
             priority
-            className="w-8 md:w-16"
+            className="object-contain"
           />
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight">ENSAdmin</h1>
         </div>
 
-        <p className="md:text-xl text-muted-foreground max-w-md">
-          Explore the ENS Protocol like never before.
-        </p>
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex items-center gap-4">
+            <Image src="/ensadmin-logo.svg" alt="ENSAdmin Logo" width={64} height={64} priority />
+            <h1 className="text-5xl font-bold tracking-tight select-none">ENSAdmin</h1>
+          </div>
 
-        <Button asChild size="lg">
-          <Link href="/connection">View Connection</Link>
-        </Button>
+          <p className="md:text-xl text-muted-foreground max-w-md select-none">
+            Explore the ENS Protocol like never before
+          </p>
+
+          <Button asChild size="lg">
+            <Link href="/connection">View Connection</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
