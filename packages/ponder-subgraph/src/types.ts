@@ -25,7 +25,7 @@ export interface MetadataProvider {
    * Get last indexed block status
    * @returns The last indexed block status
    */
-  getLastIndexedENSRootChainBlock(): Promise<MetadataBlockInfo>;
+  getLastIndexedENSRootChainBlock(): Promise<MetadataBlockInfo | null>;
 
   /**
    * Get the indexing errors status

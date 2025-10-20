@@ -8,6 +8,7 @@ import { makeDrizzle } from "@/lib/handlers/drizzle";
 import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
+import { metadataProviderFromIndexingStatus } from "@/lib/subgraph/metadata-provider-from-indexing-status";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 
 // generate a subgraph-specific subset of the schema
@@ -30,22 +31,17 @@ app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/
 
 // use our custom graphql middleware
 app.use(async (c, next) => {
+  // TODO: this might be really inefficient, making a new yoga every request
   const middleware = subgraphGraphQLMiddleware({
     drizzle,
     graphqlSchema: buildGraphQLSchema({
       schema: subgraphSchema,
       // provide PonderMetadataProvider to power `_meta` field
       // TODO: derive from c.var.indexingStatus
-      metadataProvider: {
-        deployment: c.var.ensIndexerPublicConfig.versionInfo.ensIndexer,
-        getLastIndexedENSRootChainBlock: async () => ({
-          hash: "0x1",
-          number: 69n,
-          parentHash: "0x0",
-          timestamp: 1n,
-        }),
-        hasIndexingErrors: async () => false,
-      },
+      metadataProvider: metadataProviderFromIndexingStatus(
+        c.var.ensIndexerPublicConfig,
+        c.var.indexingStatus,
+      ),
       // describes the polymorphic (interface) relationships in the schema
       polymorphicConfig: {
         types: {

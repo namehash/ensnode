@@ -643,6 +643,8 @@ export function buildGraphQLSchema({
           metadataProvider.hasIndexingErrors(),
         ]);
 
+        if (lastIndexedBlock === null) return null;
+
         return {
           deployment: metadataProvider.deployment,
           hasIndexingErrors,
@@ -654,7 +656,7 @@ export function buildGraphQLSchema({
           },
         };
       } catch (error) {
-        console.error("Cannot build subgraph _Meta_", error);
+        console.error("Error building subgraph _Meta_", error);
         return null;
       }
     },

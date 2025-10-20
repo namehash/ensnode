@@ -29,7 +29,9 @@ app.use(cors({ origin: "*" }));
 // NOTE: required for protocol tracing
 app.use(otel());
 
-// add Config & Indexing Status Middleware to all routes for convenience
+// add ENSAPI Middlewares to all routes for convenience
+// NOTE: must mirror Variables type in apps/ensapi/src/lib/hono-factory.ts or c.var.* will not be
+// available at runtime
 app.use(ensIndexerPublicConfigMiddleware);
 app.use(indexingStatusMiddleware);
 app.use(canAccelerateMiddleware);
@@ -38,6 +40,7 @@ app.use(canAccelerateMiddleware);
 app.route("/api", ensNodeApi);
 
 // use Subgraph GraphQL API at /subgraph
+// TODO(ensv2): include core-schema-checking middleware to conditionally 404
 app.route("/subgraph", subgraphApi);
 
 // log hono errors to console
