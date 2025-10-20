@@ -82,7 +82,10 @@ export function getTimestampForHighestOmnichainKnownBlock(
   for (const chain of chains) {
     switch (chain.chainStatus) {
       case ChainIndexingStatusIds.Queued:
-        if (chain.config.endBlock) {
+        if (
+          chain.config.configType === ChainIndexingConfigTypeIds.Definite &&
+          chain.config.endBlock
+        ) {
           latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
         }
         break;

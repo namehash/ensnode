@@ -60,7 +60,7 @@ locals {
       ensnode_indexer_type     = "alpha-sepolia"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,protocol-acceleration,referrals"
+      plugins                  = "subgraph,basenames,lineanames,referrals"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
       subgraph_compat          = false

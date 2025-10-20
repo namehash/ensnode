@@ -5,6 +5,7 @@
  */
 import { useIndexingStatus } from "@ensnode/ensnode-react";
 import {
+  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   CrossChainIndexingStatusSnapshotOmnichain,
   IndexingStatusResponseCodes,
@@ -27,7 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChainStatus, formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 import { cn } from "@/lib/utils";
 import { BackfillStatus } from "./backfill-status";
-import { BlockStats, blockViewModel } from "./block-refs";
+import { BlockStats } from "./block-refs";
 import { IndexingStatusLoading } from "./indexing-status-loading";
 
 interface IndexingStatsForOmnichainStatusSnapshotProps<
@@ -64,7 +65,10 @@ export function IndexingStatsForSnapshotUnstarted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
+    const endBlock =
+      chain.config.configType === ChainIndexingConfigTypeIds.Definite
+        ? chain.config.endBlock
+        : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -91,7 +95,7 @@ export function IndexingStatsForSnapshotUnstarted({
             <BlockStats
               chainId={chainId}
               label="Indexing start block"
-              block={blockViewModel(chain.config.startBlock)}
+              block={chain.config.startBlock}
             />
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
@@ -112,7 +116,10 @@ export function IndexingStatsForSnapshotBackfill({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
+    const endBlock =
+      chain.config.configType === ChainIndexingConfigTypeIds.Definite
+        ? chain.config.endBlock
+        : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -139,7 +146,7 @@ export function IndexingStatsForSnapshotBackfill({
             <BlockStats
               chainId={chainId}
               label="Indexing start block"
-              block={blockViewModel(chain.config.startBlock)}
+              block={chain.config.startBlock}
             />
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
@@ -149,13 +156,13 @@ export function IndexingStatsForSnapshotBackfill({
                 <BlockStats
                   chainId={chainId}
                   label="Latest indexed block"
-                  block={blockViewModel(chain.latestIndexedBlock)}
+                  block={chain.latestIndexedBlock}
                 />
 
                 <BlockStats
                   chainId={chainId}
                   label="Backfill end block"
-                  block={blockViewModel(chain.backfillEndBlock)}
+                  block={chain.backfillEndBlock}
                 />
               </>
             )}
@@ -176,7 +183,10 @@ export function IndexingStatsForSnapshotCompleted({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
+    const endBlock =
+      chain.config.configType === ChainIndexingConfigTypeIds.Definite
+        ? chain.config.endBlock
+        : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -203,7 +213,7 @@ export function IndexingStatsForSnapshotCompleted({
             <BlockStats
               chainId={chainId}
               label="Indexing start block"
-              block={blockViewModel(chain.config.startBlock)}
+              block={chain.config.startBlock}
             />
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
@@ -211,7 +221,7 @@ export function IndexingStatsForSnapshotCompleted({
             <BlockStats
               chainId={chainId}
               label="Latest indexed block"
-              block={blockViewModel(chain.latestIndexedBlock)}
+              block={chain.latestIndexedBlock}
             />
           </div>
         </CardContent>
@@ -230,7 +240,10 @@ export function IndexingStatsForSnapshotFollowing({
   const chainEntries = sortChainStatusesByStartBlockAsc([...omnichainSnapshot.chains.entries()]);
 
   return chainEntries.map(([chainId, chain]) => {
-    const endBlock = chain.config.endBlock ? blockViewModel(chain.config.endBlock) : null;
+    const endBlock =
+      chain.config.configType === ChainIndexingConfigTypeIds.Definite
+        ? chain.config.endBlock
+        : null;
 
     return (
       <Card key={`Chain#${chainId}`}>
@@ -257,7 +270,7 @@ export function IndexingStatsForSnapshotFollowing({
             <BlockStats
               chainId={chainId}
               label="Indexing start block"
-              block={blockViewModel(chain.config.startBlock)}
+              block={chain.config.startBlock}
             />
 
             <BlockStats chainId={chainId} label="Indexing end block" block={endBlock} />
@@ -267,13 +280,13 @@ export function IndexingStatsForSnapshotFollowing({
                 <BlockStats
                   chainId={chainId}
                   label="Latest indexed block"
-                  block={blockViewModel(chain.latestIndexedBlock)}
+                  block={chain.latestIndexedBlock}
                 />
 
                 <BlockStats
                   chainId={chainId}
                   label="Backfill end block"
-                  block={blockViewModel(chain.backfillEndBlock)}
+                  block={chain.backfillEndBlock}
                 />
               </>
             )}
@@ -283,13 +296,13 @@ export function IndexingStatsForSnapshotFollowing({
                 <BlockStats
                   chainId={chainId}
                   label="Latest indexed block"
-                  block={blockViewModel(chain.latestIndexedBlock)}
+                  block={chain.latestIndexedBlock}
                 />
 
                 <BlockStats
                   chainId={chainId}
                   label="Latest known block"
-                  block={blockViewModel(chain.latestKnownBlock)}
+                  block={chain.latestKnownBlock}
                 />
               </>
             )}

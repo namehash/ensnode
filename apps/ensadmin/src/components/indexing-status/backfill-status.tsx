@@ -23,7 +23,6 @@ import {
   generateYearMarkers,
   getTimelinePosition,
 } from "@/components/indexing-status/indexing-timeline-utils";
-import { blockViewModel } from "./block-refs";
 import { ChainIndexingTimeline } from "./indexing-timeline";
 
 interface ChainIndexingPhaseViewModel {
@@ -148,7 +147,7 @@ export function BackfillStatus({ realtimeProjection }: BackfillStatusProps) {
 
               const lastIndexedBlock =
                 chain.chainStatus === ChainIndexingStatusIds.Backfill
-                  ? blockViewModel(chain.latestIndexedBlock)
+                  ? chain.latestIndexedBlock
                   : null;
 
               return (
@@ -157,7 +156,7 @@ export function BackfillStatus({ realtimeProjection }: BackfillStatusProps) {
                   omnichainIndexingCursor={omnichainSnapshot.omnichainIndexingCursor}
                   chainStatus={{
                     chainId,
-                    firstBlockToIndex: blockViewModel(chain.config.startBlock),
+                    firstBlockToIndex: chain.config.startBlock,
                     lastIndexedBlock,
                     phases,
                   }}
