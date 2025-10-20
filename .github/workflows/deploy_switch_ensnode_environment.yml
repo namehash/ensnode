@@ -43,11 +43,6 @@ jobs:
               echo "SLACK_TITLE=:large_red_circle: Unrecognized Environment Activated" >> "$GITHUB_ENV"
           esac
 
-      - name: Promote ENSAdmin Vercel Deployment
-        run: |
-          chmod +x ./.github/scripts/promote_ensadmin.sh
-          ./.github/scripts/promote_ensadmin.sh
-
       - name: Switch Traefik Routing
         run: |
           sudo apt update && \
@@ -75,6 +70,11 @@ jobs:
 
           # ENSRAINBOW
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
+
+      - name: Promote ENSAdmin Vercel Deployment
+        run: |
+          chmod +x ./.github/scripts/promote_ensadmin.sh
+          ./.github/scripts/promote_ensadmin.sh
 
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
