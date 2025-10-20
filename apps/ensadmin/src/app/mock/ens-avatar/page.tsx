@@ -23,7 +23,7 @@ const TEST_NAMES: Name[] = [
   "brantly.eth",
   "ada.eth",
   "jesse.base.eth",
-  "norecordset.eth",
+  "skeleton.mfpurrs.eth",
   "vitalik.eth",
 ];
 
