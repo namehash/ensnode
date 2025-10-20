@@ -47,6 +47,12 @@ const chainIdsWithoutDefaultChainId = z.optional(
   stringarray.pipe(z.array(defaultableChainId.pipe(excludingDefaultChainId))),
 );
 
+const rawSelectionParams = z.object({
+  name: z.string().optional(),
+  addresses: z.string().optional(),
+  texts: z.string().optional(),
+});
+
 const selection = z
   .object({
     name: z.optional(boolstring),
@@ -54,7 +60,6 @@ const selection = z
     texts: z.optional(stringarray),
   })
   .transform((value, ctx) => {
-    const { name, addresses, texts, ...rest } = value;
     const selection: ResolverRecordsSelection = {
       ...(value.name && { name: true }),
       ...(value.addresses && { addresses: value.addresses }),
@@ -83,6 +88,7 @@ export const params = {
   address,
   defaultableChainId,
   coinType,
+  selectionParams: rawSelectionParams,
   selection,
   chainIdsWithoutDefaultChainId,
 };

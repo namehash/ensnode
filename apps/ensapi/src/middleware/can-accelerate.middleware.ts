@@ -1,15 +1,35 @@
 import { factory } from "@/lib/hono-factory";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
 export type CanAccelerateVariables = { canAccelerate: boolean };
 
-// const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // seconds
-// return realtimeProjection.worstCaseDistance <= MAX_REALTIME_DISTANCE_TO_ACCELERATE;
+const MAX_REALTIME_DISTANCE_TO_ACCELERATE = 60; // seconds
 
-// memoizes the result of canAccelerateResolution within a 30s window
-// this means that the effective worstCaseDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
-// and the initial request(s) in between ENSApi startup and the first resolution of
-// canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
+// derives canAccelerate from the indexing status, within MAX_REALTIME_DISTANCE_TO_ACCELERATE of
+// worst case distance. Effective distance is indexing status cache time + MAX_REALTIME_DISTANCE_TO_ACCELERATE
 export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) => {
-  // TODO: implement
-  c.set("canAccelerate", false);
+  // no indexing status? no acceleration
+  if (c.var.indexingStatus.isRejected) {
+    c.set("canAccelerate", false);
+    return await next();
+  }
+
+  // indexing status is failed? no acceleration
+  if (c.var.indexingStatus.value.responseCode === "error") {
+    c.set("canAccelerate", false);
+    return await next();
+  }
+
+  const isWithinMaxRealtime =
+    c.var.indexingStatus.value.realtimeProjection.worstCaseDistance <=
+    MAX_REALTIME_DISTANCE_TO_ACCELERATE;
+
+  const hasProtocolAccelerationPlugin = c.var.ensIndexerPublicConfig.plugins.includes(
+    PluginName.ProtocolAcceleration,
+  );
+
+  const canAccelerate = isWithinMaxRealtime && hasProtocolAccelerationPlugin;
+
+  c.set("canAccelerate", canAccelerate);
+  await next();
 });

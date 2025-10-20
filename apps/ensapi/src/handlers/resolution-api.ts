@@ -33,11 +33,17 @@ app.get(
   validate("param", z.object({ name: params.name })),
   validate(
     "query",
-    z.object({
-      selection: params.selection,
-      trace: params.trace,
-      accelerate: params.accelerate,
-    }),
+    z
+      .object({
+        ...params.selectionParams.shape,
+        trace: params.trace,
+        accelerate: params.accelerate,
+      })
+      .transform((value) => {
+        const { trace, accelerate, ...selectionParams } = value;
+        const selection = params.selection.parse(selectionParams);
+        return { selection, trace, accelerate };
+      }),
   ),
   async (c) => {
     const { name } = c.req.valid("param");

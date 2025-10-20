@@ -7,9 +7,9 @@ const namespace = getENSNamespace(config.namespace) as ENSNamespace;
 
 type ContractConfigWithSingleAddress = ContractConfig & { address: Address };
 const hasSingleAddress = (
-  contractConfig: ContractConfig,
+  contractConfig: ContractConfig | undefined,
 ): contractConfig is ContractConfigWithSingleAddress =>
-  !!contractConfig.address && typeof contractConfig.address === "string";
+  !!contractConfig?.address && typeof contractConfig.address === "string";
 
 /**
  * For a given `resolver`, if it is a known CCIP-Read Shadow Registry Resolver, return the
