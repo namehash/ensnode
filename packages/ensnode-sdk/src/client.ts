@@ -291,10 +291,7 @@ export class ENSNodeClient {
   async config(): Promise<ConfigResponse> {
     const url = new URL(`/api/config`, this.options.url);
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
+    const response = await fetch(url);
 
     let responseData: unknown;
 
@@ -326,10 +323,7 @@ export class ENSNodeClient {
   async indexingStatus(): Promise<IndexingStatusResponse> {
     const url = new URL(`/api/indexing-status`, this.options.url);
 
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
+    const response = await fetch(url);
 
     let responseData: unknown;
 
