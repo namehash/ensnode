@@ -5,6 +5,7 @@ import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   DatabaseSchemaNameSchema,
   DatabaseUrlSchema,
+  EnsIndexerUrlSchema,
   RpcConfigsSchema,
   buildRpcConfigsFromEnv,
   invariant_isSubgraphCompatibleRequirements,
@@ -60,8 +61,6 @@ const BlockrangeSchema = z
       val.startBlock === undefined || val.endBlock === undefined || val.endBlock > val.startBlock,
     { error: "END_BLOCK must be greater than START_BLOCK." },
   );
-
-const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
 
 const PluginsSchema = z.coerce
   .string()

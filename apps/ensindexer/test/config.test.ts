@@ -1,7 +1,7 @@
 import { ENSIndexerEnvironment } from "@/config/environment";
 import { EnvironmentDefaults } from "@/config/environment-defaults";
-import type { RpcConfig } from "@/config/types";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
+import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";

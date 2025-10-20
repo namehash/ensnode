@@ -31,7 +31,9 @@ const canAccelerateResolution = async () => true;
 const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
 
 // include automatic OpenTelemetry instrumentation for incoming requests
-app.use("*", otel());
+app.use(otel());
+
+// TODO: canAccelerate middleware based on c.var.indexingStatus
 
 /**
  * Example queries for /records:

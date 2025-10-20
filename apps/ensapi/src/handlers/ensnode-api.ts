@@ -10,7 +10,7 @@ app.get("/config", async (c) => {
 });
 
 app.get("/indexing-status", async (c) => {
-  // TODO: proxt ensindexer api/indexing-status
+  // TODO: proxy ensindexer api/indexing-status
 });
 
 // Resolution API
