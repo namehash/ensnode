@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { Name } from "@ensnode/ensnode-sdk";
-import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChangeEvent, Suspense, useState } from "react";
+import { NameDetailPageContent } from "./_components/NameDetailPageContent";
+import { NameDetailPageSkeleton } from "./_components/NameDetailPageSkeleton";
 
 const EXAMPLE_NAMES = [
   "vitalik.eth",
@@ -24,8 +26,10 @@ const EXAMPLE_NAMES = [
   "lightwalker.eth",
 ];
 
-export default function ExploreNamesPage() {
+function ExploreNamesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
@@ -46,6 +50,14 @@ export default function ExploreNamesPage() {
 
     setRawInputName(e.target.value);
   };
+
+  if (nameFromQuery) {
+    return (
+      <Suspense fallback={<NameDetailPageSkeleton />}>
+        <NameDetailPageContent />
+      </Suspense>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-6 p-6">
@@ -96,5 +108,13 @@ export default function ExploreNamesPage() {
         </CardContent>
       </Card>
     </section>
+  );
+}
+
+export default function NamePage() {
+  return (
+    <Suspense fallback={<NameDetailPageSkeleton />}>
+      <ExploreNamesContent />
+    </Suspense>
   );
 }
