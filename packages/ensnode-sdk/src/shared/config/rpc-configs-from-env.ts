@@ -27,8 +27,8 @@ export function buildRpcConfigsFromEnv(
     ([, datasource]) => (datasource as Datasource).chain,
   );
 
-  const alchemyApiKey = env["ALCHEMY_API_KEY"];
-  const drpcKey = env["DRPC_API_KEY"];
+  const alchemyApiKey = env.ALCHEMY_API_KEY;
+  const drpcKey = env.DRPC_API_KEY;
 
   const rpcConfigs: Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> = {};
 

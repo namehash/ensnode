@@ -1,7 +1,5 @@
 import dnsPacket, { Answer } from "dns-packet";
 import { Hex } from "viem";
-
-import { interpretTextRecordKey, interpretTextRecordValue } from "@/lib/interpret-record-values";
 import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
 import {
   DNSEncodedLiteralName,
@@ -14,6 +12,7 @@ import {
   decodeDNSEncodedName,
   literalLabelsToLiteralName,
 } from "@ensnode/ensnode-sdk";
+import { interpretTextRecordKey, interpretTextRecordValue } from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Implements the original ENS Subgraph DNS-Encoded Name decoding logic, in particular the additional

@@ -1,8 +1,8 @@
 import config from "@/config";
 import { ChainId } from "@ensnode/ensnode-sdk";
-import { http, createPublicClient } from "viem";
+import { http, PublicClient, createPublicClient } from "viem";
 
-export function getPublicClient(chainId: ChainId) {
+export function getPublicClient(chainId: ChainId): PublicClient {
   // Invariant: ENSIndexer must have an rpcConfig for the requested `chainId`
   const rpcConfig = config.rpcConfigs.get(chainId);
   if (!rpcConfig) {

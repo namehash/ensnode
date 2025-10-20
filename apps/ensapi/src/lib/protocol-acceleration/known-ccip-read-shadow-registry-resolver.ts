@@ -1,17 +1,15 @@
 import config from "@/config";
-import { getDatasourceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
-import { DatasourceNames } from "@ensnode/datasources";
+import { ContractConfig, ENSNamespace, getENSNamespace } from "@ensnode/datasources";
 import { AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
+import { Address } from "viem";
 
-const ensRoot = getDatasourceAsFullyDefinedAtCompileTime(config.namespace, DatasourceNames.ENSRoot);
-const basenames = getDatasourceAsFullyDefinedAtCompileTime(
-  config.namespace,
-  DatasourceNames.Basenames,
-);
-const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
-  config.namespace,
-  DatasourceNames.Lineanames,
-);
+const namespace = getENSNamespace(config.namespace) as ENSNamespace;
+
+type ContractConfigWithSingleAddress = ContractConfig & { address: Address };
+const hasSingleAddress = (
+  contractConfig: ContractConfig,
+): contractConfig is ContractConfigWithSingleAddress =>
+  !!contractConfig.address && typeof contractConfig.address === "string";
 
 /**
  * For a given `resolver`, if it is a known CCIP-Read Shadow Registry Resolver, return the
@@ -40,12 +38,17 @@ const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
 export function possibleKnownCCIPReadShadowRegistryResolverDefersTo(
   resolver: AccountId,
 ): AccountId | null {
-  // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
-  if (basenames) {
+  const { ensroot, basenames, lineanames } = namespace;
+
+  if (
+    basenames &&
+    hasSingleAddress(basenames.contracts.Registry) &&
+    hasSingleAddress(ensroot.contracts.BasenamesL1Resolver)
+  ) {
     // the ENSRoot's BasenamesL1Resolver defers to the Basenames (shadow)Registry
     const isBasenamesL1Resolver = accountIdEqual(resolver, {
-      chainId: ensRoot.chain.id,
-      address: ensRoot.contracts.BasenamesL1Resolver.address,
+      chainId: ensroot.chain.id,
+      address: ensroot.contracts.BasenamesL1Resolver.address,
     });
 
     if (isBasenamesL1Resolver) {
@@ -56,12 +59,15 @@ export function possibleKnownCCIPReadShadowRegistryResolverDefersTo(
     }
   }
 
-  // NOTE: using getDatasourceAsFullyDefinedAtCompileTime requires runtime availability check
-  if (lineanames) {
+  if (
+    lineanames &&
+    hasSingleAddress(lineanames.contracts.Registry) &&
+    hasSingleAddress(ensroot.contracts.LineanamesL1Resolver)
+  ) {
     // the ENSRoot's LineanamesL1Resolver defers to the Lineanames (shadow)Registry
     const isLineanamesL1Resolver = accountIdEqual(resolver, {
-      chainId: ensRoot.chain.id,
-      address: ensRoot.contracts.LineanamesL1Resolver.address,
+      chainId: ensroot.chain.id,
+      address: ensroot.contracts.LineanamesL1Resolver.address,
     });
 
     if (isLineanamesL1Resolver) {

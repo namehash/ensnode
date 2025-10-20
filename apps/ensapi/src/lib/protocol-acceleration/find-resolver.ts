@@ -1,11 +1,9 @@
-import { db } from "ponder:api";
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   AccountId,
   type Name,
   type Node,
   NormalizedName,
-  PluginName,
   getNameHierarchy,
 } from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
@@ -20,6 +18,7 @@ import {
 import { packetToBytes } from "viem/ens";
 
 import config from "@/config";
+import { db } from "@/lib/db";
 import { isENSRootRegistry } from "@/lib/protocol-acceleration/ens-root-registry";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
@@ -50,8 +49,15 @@ export async function findResolver({
   registry,
   name,
   accelerate,
+  canAccelerate,
   publicClient,
-}: { registry: AccountId; name: NormalizedName; accelerate: boolean; publicClient: PublicClient }) {
+}: {
+  registry: AccountId;
+  name: NormalizedName;
+  accelerate: boolean;
+  canAccelerate: boolean;
+  publicClient: PublicClient;
+}) {
   //////////////////////////////////////////////////
   // Protocol Acceleration: Active Resolver Identification
   //   If:
@@ -59,7 +65,7 @@ export async function findResolver({
   //    2) the ProtocolAcceleration plugin is active,
   //   then we can identify a node's active resolver via the indexed Node-Resolver Relationships.
   //////////////////////////////////////////////////
-  if (accelerate && config.plugins.includes(PluginName.ProtocolAcceleration)) {
+  if (accelerate && canAccelerate) {
     return findResolverWithIndex(registry, name);
   }
 
@@ -162,12 +168,6 @@ async function findResolverWithIndex(
   registry: AccountId,
   name: NormalizedName,
 ): Promise<FindResolverResult> {
-  if (!config.plugins.includes(PluginName.ProtocolAcceleration)) {
-    throw new Error(
-      `Invariant(findResolverWithIndex): ProtocolAcceleration plugin must be enabled in order to accelerate the identification of a name's active resolver on chain ${registry.chainId}.`,
-    );
-  }
-
   return withActiveSpanAsync(
     tracer,
     "findResolverWithIndex",

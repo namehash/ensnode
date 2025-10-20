@@ -12,15 +12,14 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensapi",
   "scripts": {
+    "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
-    "build": "tsx src/index.ts",
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^1.19.5",
     "@ensdomains/ensjs": "^4.0.2",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
@@ -28,6 +27,7 @@
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@ensnode/ponder-subgraph": "workspace:*",
+    "@hono/node-server": "^1.19.5",
     "@hono/otel": "^0.2.2",
     "@hono/zod-validator": "^0.7.2",
     "@opentelemetry/api": "^1.9.0",
@@ -44,6 +44,7 @@
     "caip": "^1.1.1",
     "date-fns": "catalog:",
     "dns-packet": "^5.6.1",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",
     "ponder": "catalog:",

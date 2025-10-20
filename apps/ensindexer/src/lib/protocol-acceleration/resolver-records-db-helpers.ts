@@ -4,13 +4,13 @@ import { type Address } from "viem";
 
 import { Node } from "@ensnode/ensnode-sdk";
 
+import { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
-} from "@/lib/interpret-record-values";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+} from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Infer the type of the ResolverRecord entity's composite primary key.

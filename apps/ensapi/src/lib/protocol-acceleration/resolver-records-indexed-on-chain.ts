@@ -1,7 +1,6 @@
-import { ChainId, ENSNamespaceId, deserializeChainId } from "@ensnode/ensnode-sdk";
+import { ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
 
-import { DATASOURCES_WITH_RESOLVERS } from "@/lib/protocol-acceleration/datasources-with-resolvers";
-import { resolverContractConfig } from "@/lib/resolver-contract-config";
+import { getDatasourcesWithResolvers } from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Determines, for a given chain, whether Resolver Records are indexed by the ProtocolAcceleration plugin.
@@ -15,15 +14,8 @@ export function areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
   namespace: ENSNamespaceId,
   chainId: ChainId,
 ) {
-  // construct a dummy Resolver ContractConfig with the same `datasourceNames` as the ProtocolAcceleration plugin
-  const dummyContractConfig = resolverContractConfig(namespace, DATASOURCES_WITH_RESOLVERS, {
-    startBlock: 0,
-    endBlock: 0,
-  });
-
-  // records are available on this chainId iff this chain is included in the Resolver contract config
-  // used by the ProtocolAcceleration plugin
-  return Object.keys(dummyContractConfig.chain) //
-    .map((chainIdString) => deserializeChainId(chainIdString))
-    .includes(chainId);
+  // use same datasources set as the ProtocolAcceleration plugin
+  const datasources = getDatasourcesWithResolvers(namespace);
+  const chainIds = datasources.map((ds) => ds.chain.id);
+  return chainIds.includes(chainId);
 }

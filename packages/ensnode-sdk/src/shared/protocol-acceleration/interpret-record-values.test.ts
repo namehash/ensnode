@@ -1,10 +1,11 @@
+import { describe, expect, it } from "vitest";
+
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
-} from "@/lib/interpret-record-values";
-import { describe, expect, it } from "vitest";
+} from "./interpret-record-values";
 
 describe("interpretNameRecordValue", () => {
   it("returns null for empty string", () => {

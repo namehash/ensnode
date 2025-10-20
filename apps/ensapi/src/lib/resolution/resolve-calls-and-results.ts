@@ -13,12 +13,12 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
   interpretTextRecordValue,
-} from "@/lib/interpret-record-values";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
+} from "@ensnode/ensnode-sdk/internal";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 
@@ -210,7 +210,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
 /**
  * Interprets the raw rpc results into more application-specific semantic values.
  *
- * ex: converting 0x, empty string, or zeroAddress to null, etc
+ * See interpret-record-values.ts for additional context.
  */
 export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSelection>(
   callsAndRawResults: ResolveCallsAndRawResults<SELECTION>,

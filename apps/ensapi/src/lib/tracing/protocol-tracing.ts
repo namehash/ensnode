@@ -1,5 +1,5 @@
-import { filterTreeByScope, treeifySpans } from "@/api/lib/tracing/treeify-trace";
 import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
+import { filterTreeByScope, treeifySpans } from "@/lib/tracing/treeify-trace";
 import {
   ATTR_PROTOCOL_NAME,
   ATTR_PROTOCOL_STEP,

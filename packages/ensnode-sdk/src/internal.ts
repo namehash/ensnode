@@ -20,5 +20,7 @@ export * from "./shared/config/environments";
 export * from "./shared/config/validatons";
 export * from "./shared/config/rpc-configs-from-env";
 export * from "./shared/config/zod-schemas";
+export * from "./shared/datasources-with-resolvers";
+export * from "./shared/protocol-acceleration/interpret-record-values";
 
 export * from "./api/zod-schemas";

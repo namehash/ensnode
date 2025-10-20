@@ -1,6 +1,6 @@
-import { db } from "ponder:api";
-import { onchainStaticResolverImplementsDefaultAddress } from "@/api/lib/protocol-acceleration/known-onchain-static-resolver";
-import type { IndexedResolverRecords } from "@/api/lib/resolution/make-records-response";
+import { db } from "@/lib/db";
+import { onchainStaticResolverImplementsDefaultAddress } from "@/lib/protocol-acceleration/known-onchain-static-resolver";
+import type { IndexedResolverRecords } from "@/lib/resolution/make-records-response";
 import { withSpanAsync } from "@/lib/tracing/auto-span";
 import {
   ChainId,

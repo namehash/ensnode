@@ -1,21 +1,26 @@
 import * as schema from "@ensnode/ensnode-schema";
-import { Hono } from "hono";
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
 import { buildGraphQLSchema, subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import config from "@/config";
 import { makeDrizzle } from "@/lib/handlers/drizzle";
-import { fixContentLengthMiddleware } from "@/lib/handlers/fix-content-length-middleware";
+import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
-import { ensIndexerPublicConfigMiddleware } from "@/middleware/ensindexer-config.middleware";
-import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
 
-const app = new Hono();
+// make subgraph-specific drizzle db
+const drizzle = makeDrizzle({
+  schema: subgraphSchema,
+  databaseUrl: config.databaseUrl,
+  databaseSchema: config.databaseSchemaName,
+});
+
+const app = factory.createApp();
 
 // hotfix content length after documentation injection
 app.use(fixContentLengthMiddleware);
@@ -24,13 +29,7 @@ app.use(fixContentLengthMiddleware);
 app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/subgraph" }));
 
 // use our custom graphql middleware
-app.use(ensIndexerPublicConfigMiddleware, indexingStatusMiddleware, async (c, next) => {
-  const drizzle = makeDrizzle({
-    schema: subgraphSchema,
-    databaseUrl: config.databaseUrl,
-    databaseSchema: config.databaseSchemaName,
-  });
-
+app.use(async (c, next) => {
   const middleware = subgraphGraphQLMiddleware({
     drizzle,
     graphqlSchema: buildGraphQLSchema({
@@ -38,7 +37,7 @@ app.use(ensIndexerPublicConfigMiddleware, indexingStatusMiddleware, async (c, ne
       // provide PonderMetadataProvider to power `_meta` field
       // TODO: derive from c.var.indexingStatus
       metadataProvider: {
-        deployment: c.var.config.versionInfo.ensIndexer,
+        deployment: c.var.ensIndexerPublicConfig.versionInfo.ensIndexer,
         getLastIndexedENSRootChainBlock: async () => ({
           hash: "0x1",
           number: 69n,

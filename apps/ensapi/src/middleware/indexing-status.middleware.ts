@@ -1,13 +1,15 @@
 import config from "@/config";
+import { factory } from "@/lib/hono-factory";
 import { ENSNodeClient, IndexingStatusResponse } from "@ensnode/ensnode-sdk";
-import { createMiddleware } from "hono/factory";
 
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
-export const indexingStatusMiddleware = createMiddleware<{
-  Variables: {
-    indexingStatus: IndexingStatusResponse;
-  };
-}>(async (c, next) => {
+
+export type IndexingStatusVariables = {
+  indexingStatus: IndexingStatusResponse;
+};
+
+export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
+  // TODO: intelligent caching/de-duplication
   const indexingStatus = await client.indexingStatus();
   c.set("indexingStatus", indexingStatus);
 

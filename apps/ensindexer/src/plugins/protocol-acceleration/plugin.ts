@@ -12,9 +12,15 @@ import {
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
-import { DATASOURCES_WITH_RESOLVERS } from "@/lib/protocol-acceleration/datasources-with-resolvers";
-import { resolverContractConfig } from "@/lib/resolver-contract-config";
+import {
+  chainConfigForContract,
+  chainsConnectionConfig,
+  constrainBlockrange,
+} from "@/lib/ponder-helpers";
+import {
+  DATASOURCE_NAMES_WITH_RESOLVERS,
+  getDatasourcesWithResolvers,
+} from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Describes the indexing behavior for all entities that power Protocol Acceleration:
@@ -30,7 +36,7 @@ export const pluginName = PluginName.ProtocolAcceleration;
 /**
  * The set of DatasourceNames that include the ENSIP-19 StandaloneReverseRegistrar contracts.
  */
-const DATASOURCES_WITH_REVERSE_RESOLVERS = [
+const DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS = [
   DatasourceNames.ReverseResolverRoot,
   DatasourceNames.ReverseResolverBase,
   DatasourceNames.ReverseResolverLinea,
@@ -40,8 +46,8 @@ const DATASOURCES_WITH_REVERSE_RESOLVERS = [
 ] as const satisfies DatasourceName[];
 
 const ALL_DATASOURCE_NAMES = [
-  ...DATASOURCES_WITH_RESOLVERS,
-  ...DATASOURCES_WITH_REVERSE_RESOLVERS,
+  ...DATASOURCE_NAMES_WITH_RESOLVERS,
+  ...DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS,
 ] as const satisfies DatasourceName[];
 
 export default createPlugin({
@@ -113,11 +119,19 @@ export default createPlugin({
 
       contracts: {
         // a multi-chain Resolver ContractConfig
-        [namespaceContract(pluginName, "Resolver")]: resolverContractConfig(
-          config.namespace,
-          DATASOURCES_WITH_RESOLVERS,
-          config.globalBlockrange,
-        ),
+        [namespaceContract(pluginName, "Resolver")]: {
+          abi: ResolverABI,
+          chain: getDatasourcesWithResolvers(config.namespace).reduce(
+            (memo, datasource) => ({
+              ...memo,
+              [datasource.chain.id.toString()]: constrainBlockrange(
+                config.globalBlockrange,
+                datasource.contracts.Resolver,
+              ),
+            }),
+            {},
+          ),
+        },
 
         // index the RegistryOld on ENS Root Chain
         [namespaceContract(pluginName, "RegistryOld")]: {

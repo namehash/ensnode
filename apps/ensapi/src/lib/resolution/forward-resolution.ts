@@ -4,7 +4,6 @@ import {
   ForwardResolutionProtocolStep,
   ForwardResolutionResult,
   Node,
-  PluginName,
   ResolverRecordsResponse,
   ResolverRecordsSelection,
   TraceableENSProtocol,
@@ -54,7 +53,8 @@ normalize("example.eth");
  * @param name the ENS name to resolve
  * @param selection selection specifying which records to resolve
  * @param options Optional settings
- * @param options.accelerate Whether to accelerate resolution (default: true)
+ * @param options.accelerate Whether acceleration is requested (default: true)
+ * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  *
  * @example
  * await resolveForward("jesse.base.eth", {
@@ -79,11 +79,11 @@ normalize("example.eth");
 export async function resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
-  { accelerate }: { accelerate: boolean } = { accelerate: true },
+  options: Omit<Parameters<typeof _resolveForward>[2], "registry">,
 ): Promise<ForwardResolutionResult<SELECTION>> {
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
   // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, { registry: ENS_ROOT_REGISTRY, accelerate });
+  return _resolveForward(name, selection, { ...options, registry: ENS_ROOT_REGISTRY });
 }
 
 /**
@@ -94,14 +94,13 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: ForwardResolutionArgs<SELECTION>["name"],
   selection: ForwardResolutionArgs<SELECTION>["selection"],
-  options: { registry: AccountId; accelerate: boolean },
+  options: { registry: AccountId; accelerate: boolean; canAccelerate: boolean },
 ): Promise<ForwardResolutionResult<SELECTION>> {
   const {
     registry: { chainId },
     accelerate = false,
+    canAccelerate = false,
   } = options;
-
-  const hasProtocolAccelerationPlugin = config.plugins.includes(PluginName.ProtocolAcceleration);
 
   const selectionString = JSON.stringify(selection);
 
@@ -167,6 +166,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                   registry: options.registry,
                   name,
                   accelerate,
+                  canAccelerate,
                   publicClient,
                 }),
             );
@@ -212,7 +212,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               activeResolver,
             );
 
-            if (hasProtocolAccelerationPlugin && activeResolverIsKnownENSIP19ReverseResolver) {
+            if (canAccelerate && activeResolverIsKnownENSIP19ReverseResolver) {
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
@@ -270,7 +270,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               address: activeResolver,
             });
 
-            if (hasProtocolAccelerationPlugin && defersToRegistry !== null) {
+            if (canAccelerate && defersToRegistry !== null) {
               return withProtocolStepAsync(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
@@ -310,7 +310,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
 
             if (
-              hasProtocolAccelerationPlugin &&
+              canAccelerate &&
               resolverRecordsAreIndexed &&
               activeResolverIsKnownOnchainStaticResolver
             ) {

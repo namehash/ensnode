@@ -3,6 +3,7 @@ import packageJson from "@/../package.json" with { type: "json" };
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
+import { ErrorResponse } from "@ensnode/ensnode-sdk";
 import ensNodeApi from "./handlers/ensnode-api";
 
 const app = new Hono();
@@ -22,7 +23,7 @@ app.route("/api", ensNodeApi);
 // log hono errors to console
 app.onError((error, ctx) => {
   console.error(error);
-  return ctx.text("Internal server error", 500);
+  return ctx.json({ message: "Internal Server Error" } satisfies ErrorResponse, 500);
 });
 
 export default app;

@@ -1,16 +1,19 @@
-import { Hono } from "hono";
+import { factory } from "@/lib/hono-factory";
 
 import resolutionApi from "./resolution-api";
 
-const app = new Hono();
+const app = factory.createApp();
 
 // include ENSIndexer Public Config endpoint
-app.get("/config", async (c) => {
-  // TODO: proxy ensindexer api/config
+app.get("/config", (c) => {
+  // TODO: handle settled state
+  return c.json(c.var.ensIndexerPublicConfig);
 });
 
-app.get("/indexing-status", async (c) => {
-  // TODO: proxy ensindexer api/indexing-status
+// include ENSIndexer Indexing Status endpoint
+app.get("/indexing-status", (c) => {
+  // TODO: handle settled state
+  return c.json(c.var.indexingStatus);
 });
 
 // Resolution API

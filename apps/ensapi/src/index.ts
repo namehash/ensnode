@@ -1,12 +1,20 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 
+import config from "@/config";
+import { errorResponse } from "@/lib/handlers/error-response";
+import { factory } from "@/lib/hono-factory";
+import { sdk } from "@/lib/tracing/instrumentation";
+import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
+import { ensIndexerPublicConfigMiddleware } from "@/middleware/ensindexer-public-config.middleware";
+import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
-const app = new Hono();
+const app = factory.createApp();
 
 // set the X-ENSNode-Version header to the current version
 app.use(async (ctx, next) => {
@@ -17,6 +25,15 @@ app.use(async (ctx, next) => {
 // use CORS middleware
 app.use(cors({ origin: "*" }));
 
+// include automatic OpenTelemetry instrumentation for incoming requests
+// NOTE: required for protocol tracing
+app.use(otel());
+
+// add Config & Indexing Status Middleware to all routes for convenience
+app.use(ensIndexerPublicConfigMiddleware);
+app.use(indexingStatusMiddleware);
+app.use(canAccelerateMiddleware);
+
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
 
@@ -26,7 +43,46 @@ app.route("/subgraph", subgraphApi);
 // log hono errors to console
 app.onError((error, ctx) => {
   console.error(error);
-  return ctx.text("Internal server error", 500);
+  return errorResponse(ctx, "Internal Server Error");
 });
 
-export default app;
+// start ENSNode API OpenTelemetry SDK
+sdk.start();
+
+// start hono server
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: 4334, // TODO: add to config, environment, etc
+  },
+  (info) => {
+    console.log(`ENSAPI listening on port ${info.port} with config:`);
+    // TODO: pretty-print obfuscated EnsApiConfig
+    console.log(JSON.stringify(config, null, 2));
+  },
+);
+
+// promisify hono server.close
+const closeServer = () =>
+  new Promise<void>((resolve, reject) =>
+    server.close((err) => {
+      if (err) return reject(err);
+      resolve();
+    }),
+  );
+
+const gracefulShutdown = async () => {
+  try {
+    await sdk.shutdown();
+    await closeServer();
+
+    process.exit(0);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
+
+// graceful shutdown
+process.on("SIGINT", gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);

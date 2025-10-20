@@ -1,6 +1,6 @@
-import { hasNullByte } from "@/lib/lib-helpers";
 import { NormalizedName, asLowerCaseAddress, isNormalizedName } from "@ensnode/ensnode-sdk";
 import { isAddress, isAddressEqual, zeroAddress } from "viem";
+import { hasNullByte } from "../null-bytes";
 
 /**
  * Interprets a name record value string and returns null if the value is interpreted as a deletion.

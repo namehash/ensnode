@@ -11,8 +11,8 @@ import {
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { isAddress, isAddressEqual } from "viem";
 
-import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/tracing/protocol-tracing";
 import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
+import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
 import { resolveForward } from "./forward-resolution";
 
 export const REVERSE_RESOLUTION_SELECTION = {
@@ -32,11 +32,12 @@ const tracer = trace.getTracer("reverse-resolution");
  * @param chainId the chainId within which to resolve the address' Primary Name
  * @param options Optional settings
  * @param options.accelerate Whether to accelerate resolution (default: true)
+ * @param options.canAccelerate Whether acceleration is currently possible (default: false)
  */
 export async function resolveReverse(
   address: ReverseResolutionArgs["address"],
   chainId: ReverseResolutionArgs["chainId"],
-  options: { accelerate: boolean } = { accelerate: true },
+  options: Parameters<typeof resolveForward>[2],
 ): Promise<ReverseResolutionResult> {
   const { accelerate = true } = options;
 

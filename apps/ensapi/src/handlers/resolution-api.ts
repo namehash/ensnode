@@ -3,37 +3,18 @@ import {
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
-import { otel } from "@hono/otel";
-import { Hono } from "hono";
 import { z } from "zod/v4";
 
 import { errorResponse } from "@/lib/handlers/error-response";
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
+import { factory } from "@/lib/hono-factory";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
-import { simpleMemoized } from "@/lib/simple-memoized";
-import { sdk } from "@/lib/tracing/instrumentation";
 import { captureTrace } from "@/lib/tracing/protocol-tracing";
 
-const app = new Hono();
-
-// TODO: derive from indexing status
-// const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // seconds
-// return realtimeProjection.worstCaseDistance <= MAX_REALTIME_DISTANCE_TO_ACCELERATE;
-const canAccelerateResolution = async () => true;
-
-// memoizes the result of canAccelerateResolution within a 30s window
-// this means that the effective worstCaseDistance is MAX_REALTIME_DISTANCE_TO_ACCELERATE + 30s
-// and the initial request(s) in between ENSApi startup and the first resolution of
-// canAccelerateResolution will NOT be accelerated (prefers correctness in responses)
-const getCanAccelerateResolution = simpleMemoized(canAccelerateResolution, 30_000, false);
-
-// include automatic OpenTelemetry instrumentation for incoming requests
-app.use(otel());
-
-// TODO: canAccelerate middleware based on c.var.indexingStatus
+const app = factory.createApp();
 
 /**
  * Example queries for /records:
@@ -60,12 +41,12 @@ app.get(
   ),
   async (c) => {
     const { name } = c.req.valid("param");
-    const { selection, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    const accelerate = _accelerate && getCanAccelerateResolution();
+    const { selection, trace: showTrace, accelerate } = c.req.valid("query");
+    const canAccelerate = c.var.canAccelerate;
 
     try {
       const { result, trace } = await captureTrace(() =>
-        resolveForward(name, selection, { accelerate }),
+        resolveForward(name, selection, { accelerate, canAccelerate }),
       );
 
       const response = {
@@ -106,12 +87,12 @@ app.get(
   ),
   async (c) => {
     const { address, chainId } = c.req.valid("param");
-    const { trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    const accelerate = _accelerate && getCanAccelerateResolution();
+    const { trace: showTrace, accelerate } = c.req.valid("query");
+    const canAccelerate = c.var.canAccelerate;
 
     try {
       const { result, trace } = await captureTrace(() =>
-        resolveReverse(address, chainId, { accelerate }),
+        resolveReverse(address, chainId, { accelerate, canAccelerate }),
       );
 
       const response = {
@@ -150,12 +131,12 @@ app.get(
   ),
   async (c) => {
     const { address } = c.req.valid("param");
-    const { chainIds, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
-    const accelerate = _accelerate && getCanAccelerateResolution();
+    const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
+    const canAccelerate = c.var.canAccelerate;
 
     try {
       const { result, trace } = await captureTrace(() =>
-        resolvePrimaryNames(address, chainIds, { accelerate }),
+        resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
       );
 
       const response = {
@@ -171,14 +152,5 @@ app.get(
     }
   },
 );
-
-// start ENSNode API OpenTelemetry SDK
-sdk.start();
-
-// gracefully shut down the SDK on process interrupt/exit
-const shutdownOpenTelemetry = () =>
-  sdk.shutdown().catch((error) => console.error("Error terminating tracing", error));
-process.on("SIGINT", shutdownOpenTelemetry);
-process.on("SIGTERM", shutdownOpenTelemetry);
 
 export default app;

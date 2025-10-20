@@ -6,8 +6,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 
-import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
+import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
 import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 
@@ -42,7 +42,7 @@ const ENSIP19_SUPPORTED_CHAIN_IDS: ChainId[] = uniq(
 export async function resolvePrimaryNames(
   address: MultichainPrimaryNameResolutionArgs["address"],
   chainIds: MultichainPrimaryNameResolutionArgs["chainIds"] = ENSIP19_SUPPORTED_CHAIN_IDS,
-  options: { accelerate: boolean } = { accelerate: true },
+  options: Parameters<typeof resolveReverse>[2],
 ): Promise<MultichainPrimaryNameResolutionResult> {
   // parallel reverseResolve
   const names = await withActiveSpanAsync(tracer, "resolvePrimaryNames", { address }, () =>
