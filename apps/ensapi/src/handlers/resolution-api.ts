@@ -5,14 +5,17 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { otel } from "@hono/otel";
 import { Hono } from "hono";
+import { z } from "zod/v4";
 
+import { errorResponse } from "@/lib/handlers/error-response";
+import { validate } from "@/lib/handlers/validate";
+import { params, transformSelection } from "@/lib/handlers/zod-schemas";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { simpleMemoized } from "@/lib/simple-memoized";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { captureTrace } from "@/lib/tracing/protocol-tracing";
-import { errorResponse, routes, validate } from "@ensnode/ensnode-sdk/internal";
 
 const app = new Hono();
 
@@ -44,8 +47,17 @@ app.use("*", otel());
  */
 app.get(
   "/records/:name",
-  validate("param", routes.records.params),
-  validate("query", routes.records.query),
+  validate("param", z.object({ name: params.name })),
+  validate(
+    "query",
+    z
+      .object({
+        ...params.selection.shape,
+        trace: params.trace,
+        accelerate: params.accelerate,
+      })
+      .transform(transformSelection),
+  ),
   async (c) => {
     const { name } = c.req.valid("param");
     const { selection, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
@@ -84,8 +96,14 @@ app.get(
  */
 app.get(
   "/primary-name/:address/:chainId",
-  validate("param", routes.primaryName.params),
-  validate("query", routes.primaryName.query),
+  validate("param", z.object({ address: params.address, chainId: params.defaultableChainId })),
+  validate(
+    "query",
+    z.object({
+      trace: params.trace,
+      accelerate: params.accelerate,
+    }),
+  ),
   async (c) => {
     const { address, chainId } = c.req.valid("param");
     const { trace: showTrace, accelerate: _accelerate } = c.req.valid("query");
@@ -121,8 +139,15 @@ app.get(
  */
 app.get(
   "/primary-names/:address",
-  validate("param", routes.primaryNames.params),
-  validate("query", routes.primaryNames.query),
+  validate("param", z.object({ address: params.address })),
+  validate(
+    "query",
+    z.object({
+      chainIds: params.chainIdsWithoutDefaultChainId,
+      trace: params.trace,
+      accelerate: params.accelerate,
+    }),
+  ),
   async (c) => {
     const { address } = c.req.valid("param");
     const { chainIds, trace: showTrace, accelerate: _accelerate } = c.req.valid("query");

@@ -299,6 +299,9 @@ importers:
       '@hono/otel':
         specifier: ^0.2.2
         version: 0.2.2(hono@4.9.10)
+      '@hono/zod-validator':
+        specifier: ^0.7.2
+        version: 0.7.2(hono@4.9.10)(zod@3.25.76)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
@@ -807,15 +810,9 @@ importers:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
-      '@hono/zod-validator':
-        specifier: ^0.7.2
-        version: 0.7.2(hono@4.9.10)(zod@3.25.76)
       '@types/node':
         specifier: 'catalog:'
         version: 22.15.3
-      hono:
-        specifier: 'catalog:'
-        version: 4.9.10
       tsup:
         specifier: ^8.3.6
         version: 8.3.6(jiti@2.4.2)(postcss@8.5.6)(tsx@4.19.3)(typescript@5.7.3)(yaml@2.7.0)

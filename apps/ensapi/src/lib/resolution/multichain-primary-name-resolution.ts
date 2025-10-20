@@ -8,7 +8,7 @@ import { trace } from "@opentelemetry/api";
 
 import { resolveReverse } from "@/api/lib/resolution/reverse-resolution";
 import config from "@/config";
-import { withActiveSpanAsync } from "@/lib/auto-span";
+import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
 import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");

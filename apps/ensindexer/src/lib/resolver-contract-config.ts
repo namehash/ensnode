@@ -1,11 +1,11 @@
 import { constrainBlockrange } from "@/lib/ponder-helpers";
-import { Blockrange } from "@/lib/types";
 import {
   DatasourceName,
   ENSNamespaceId,
   ResolverABI,
   maybeGetDatasource,
 } from "@ensnode/datasources";
+import type { Blockrange } from "@ensnode/ensnode-sdk";
 import { ContractConfig } from "ponder";
 
 /**

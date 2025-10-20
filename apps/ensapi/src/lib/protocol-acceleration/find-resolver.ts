@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { DatasourceNames, getDatasource, getENSRootChainId } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   AccountId,
   type Name,
@@ -19,9 +19,9 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { isENSRootRegistry } from "@/api/lib/protocol-acceleration/ens-root-registry";
 import config from "@/config";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
+import { isENSRootRegistry } from "@/lib/protocol-acceleration/ens-root-registry";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 import { bytesToPacket } from "@ensdomains/ensjs/utils";
 
 type FindResolverResult =

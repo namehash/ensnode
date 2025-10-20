@@ -1,5 +1,5 @@
 import { db } from "ponder:api";
-import { withSpanAsync } from "@/lib/auto-span";
+import { withSpanAsync } from "@/lib/tracing/auto-span";
 import { CoinType, DEFAULT_EVM_COIN_TYPE, Name, coinTypeReverseLabel } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import { Address } from "viem";

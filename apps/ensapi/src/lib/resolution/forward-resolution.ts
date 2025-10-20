@@ -39,7 +39,7 @@ import { supportsENSIP10Interface } from "@/api/lib/rpc/ensip-10";
 import { getPublicClient } from "@/api/lib/rpc/public-client";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/tracing/protocol-tracing";
 import config from "@/config";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 const tracer = trace.getTracer("forward-resolution");
 // const metric = metrics.getMeter("forward-resolution");

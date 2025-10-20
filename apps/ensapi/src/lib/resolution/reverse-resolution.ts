@@ -12,7 +12,7 @@ import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { isAddress, isAddressEqual } from "viem";
 
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/api/lib/tracing/protocol-tracing";
-import { withActiveSpanAsync } from "@/lib/auto-span";
+import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
 import { resolveForward } from "./forward-resolution";
 
 export const REVERSE_RESOLUTION_SELECTION = {

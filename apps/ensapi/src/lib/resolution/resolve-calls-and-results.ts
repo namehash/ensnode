@@ -13,12 +13,12 @@ import {
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/auto-span";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
   interpretTextRecordValue,
 } from "@/lib/interpret-record-values";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 
