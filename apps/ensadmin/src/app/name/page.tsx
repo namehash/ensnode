@@ -7,9 +7,8 @@ import { Input } from "@/components/ui/input";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { Name } from "@ensnode/ensnode-sdk";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, Suspense, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
-import { NameDetailPageSkeleton } from "./_components/NameDetailPageSkeleton";
 
 const EXAMPLE_NAMES = [
   "vitalik.eth",
@@ -52,11 +51,7 @@ function ExploreNamesContent() {
   };
 
   if (nameFromQuery) {
-    return (
-      <Suspense fallback={<NameDetailPageSkeleton />}>
-        <NameDetailPageContent />
-      </Suspense>
-    );
+    return <NameDetailPageContent name={nameFromQuery} />;
   }
 
   return (
@@ -112,9 +107,5 @@ function ExploreNamesContent() {
 }
 
 export default function NamePage() {
-  return (
-    <Suspense fallback={<NameDetailPageSkeleton />}>
-      <ExploreNamesContent />
-    </Suspense>
-  );
+  return <ExploreNamesContent />;
 }
