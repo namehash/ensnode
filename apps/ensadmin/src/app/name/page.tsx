@@ -25,7 +25,7 @@ const EXAMPLE_NAMES = [
   "lightwalker.eth",
 ];
 
-function ExploreNamesContent() {
+export default function ExploreNamesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nameFromQuery = searchParams.get("name");
@@ -104,8 +104,4 @@ function ExploreNamesContent() {
       </Card>
     </section>
   );
-}
-
-export default function NamePage() {
-  return <ExploreNamesContent />;
 }
