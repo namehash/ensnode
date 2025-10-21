@@ -3,7 +3,7 @@
 import "graphiql/graphiql.css";
 import "@graphiql/plugin-explorer/style.css";
 
-import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
+// import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
@@ -64,12 +64,12 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
 
   return (
     <section className="flex flex-col flex-1">
-      <AiQueryGeneratorForm
+      {/*<AiQueryGeneratorForm
         onResult={({ query, variables }) => {
           graphiqlEditor.actions.setQueryAndVariables(query, JSON.stringify(variables));
         }}
         url={props.url}
-      />
+      />*/}
 
       <GraphiQLEditor
         {...props}

@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import "./globals.css";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { RequireActiveConnection } from "@/components/connections/require-active-connection";
-import { RequireSelectedConnection } from "@/components/connections/require-selected-connection";
-import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
-import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 import { QueryClientProvider } from "@/components/query-client/components";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ConnectionsLibraryProvider } from "@/hooks/use-connections-library";
 import { ensAdminPublicUrl } from "@/lib/env";
@@ -23,34 +17,32 @@ const siteName = "ENSAdmin";
 const title = "ENSAdmin";
 const description = "Explore the ENS Protocol like never before";
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: title,
+export const metadata: Metadata = {
+  title: title,
+  description: description,
+  metadataBase: ensAdminPublicUrl(),
+  openGraph: {
+    title: {
+      template: `${siteName} - %s`,
+      default: title,
+    },
     description: description,
-    metadataBase: ensAdminPublicUrl(),
-    openGraph: {
-      title: {
-        template: `${siteName} - %s`,
-        default: title,
-      },
-      description: description,
-      url: "/",
-      type: "website",
-      siteName: siteName,
-      images: ["/opengraph-image.png"],
+    url: "/",
+    type: "website",
+    siteName: siteName,
+    images: ["/opengraph-image.png"],
+  },
+  twitter: {
+    title: {
+      template: `${siteName} - %s`,
+      default: title,
     },
-    twitter: {
-      title: {
-        template: `${siteName} - %s`,
-        default: title,
-      },
-      card: "summary_large_image",
-      site: "@NamehashLabs",
-      creator: "@NamehashLabs",
-      images: ["/twitter-image.png"],
-    },
-  };
-}
+    card: "summary_large_image",
+    site: "@NamehashLabs",
+    creator: "@NamehashLabs",
+    images: ["/twitter-image.png"],
+  },
+};
 
 export default function Layout({
   children,
@@ -66,24 +58,9 @@ export default function Layout({
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
           <ConnectionsLibraryProvider>
-            <RequireSelectedConnection>
-              <SidebarProvider>
-                <Suspense>
-                  <AppSidebar />
-                </Suspense>
-                <SidebarInset className="min-w-0">
-                  <SelectedENSNodeProvider>
-                    <Header>
-                      <HeaderNav>
-                        <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
-                      </HeaderNav>
-                      <HeaderActions>{actions}</HeaderActions>
-                    </Header>
-                    <RequireActiveConnection>{children}</RequireActiveConnection>
-                  </SelectedENSNodeProvider>
-                </SidebarInset>
-              </SidebarProvider>
-            </RequireSelectedConnection>
+            <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
+              {children}
+            </LayoutWrapper>
           </ConnectionsLibraryProvider>
         </QueryClientProvider>
         <Toaster />
