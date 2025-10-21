@@ -2,4 +2,4 @@
 "ensadmin": minor
 ---
 
-Remove dynamic params page path for explore ens names
+Transitioned explore name detail page to use query param instead of path
