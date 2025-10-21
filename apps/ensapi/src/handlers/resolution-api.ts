@@ -57,7 +57,9 @@ app.get(
 
       const response = {
         records: result,
-        accelerationAttempted: accelerate,
+
+        accelerationRequested: accelerate,
+        accelerationAttempted: accelerate && canAccelerate,
         ...(showTrace && { trace }),
       } satisfies ResolveRecordsResponse<typeof selection>;
 
@@ -103,7 +105,9 @@ app.get(
 
       const response = {
         name: result,
-        accelerationAttempted: accelerate,
+
+        accelerationRequested: accelerate,
+        accelerationAttempted: accelerate && canAccelerate,
         ...(showTrace && { trace }),
       } satisfies ResolvePrimaryNameResponse;
 
@@ -147,7 +151,9 @@ app.get(
 
       const response = {
         names: result,
-        accelerationAttempted: accelerate,
+
+        accelerationRequested: accelerate,
+        accelerationAttempted: accelerate && canAccelerate,
         ...(showTrace && { trace }),
       } satisfies ResolvePrimaryNamesResponse;
 

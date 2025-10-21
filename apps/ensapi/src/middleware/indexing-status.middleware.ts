@@ -15,7 +15,7 @@ const fetcher = pMemoize(
   async () =>
     pReflect(
       pRetry(() => client.indexingStatus(), {
-        retries: 3,
+        retries: 1,
         onFailedAttempt: ({ error, attemptNumber, retriesLeft, retriesConsumed }) => {
           console.log(
             `Fetch client.indexingStatus() attempt ${attemptNumber} failed. ${retriesLeft} retries left. ${retriesConsumed} retries consumed.`,

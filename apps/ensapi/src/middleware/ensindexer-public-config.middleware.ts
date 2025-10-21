@@ -1,3 +1,5 @@
+import packageJson from "@/../package.json" with { type: "json" };
+
 import pMemoize from "p-memoize";
 import pRetry from "p-retry";
 
@@ -10,15 +12,24 @@ const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 // NOTE: no arguments means memoized for lifetime of process
 const fetcher = pMemoize(async () =>
-  pRetry(() => client.config(), {
-    retries: 3,
-    onFailedAttempt: ({ error, attemptNumber, retriesLeft, retriesConsumed }) => {
+  pRetry(
+    async () => {
+      const config = await client.config();
+      // TODO: pretty-print ensindexer public config
       console.log(
-        `Fetch client.config() attempt ${attemptNumber} failed. ${retriesLeft} retries left. ${retriesConsumed} retries consumed.`,
+        `ENSAPI successfully connected to ENSIndexer with config: ${JSON.stringify(config, null, 2)}`,
       );
-      console.error(error);
+      return config;
     },
-  }),
+    {
+      retries: 3,
+      onFailedAttempt: ({ error, attemptNumber, retriesLeft, retriesConsumed }) => {
+        console.log(
+          `Fetch client.config() attempt ${attemptNumber} failed. ${retriesLeft} retries left. ${retriesConsumed} retries consumed.`,
+        );
+      },
+    },
+  ),
 );
 
 export type EnsIndexerPublicConfigVariables = {
@@ -36,10 +47,32 @@ export const ensIndexerPublicConfigMiddleware = factory.createMiddleware(async (
       );
     }
 
+    // Invariant: ENSAPI & ENSDB must match version numbers
+    if (ensIndexerPublicConfig.versionInfo.ensDb !== packageJson.version) {
+      throw new Error(
+        `Version Mismatch: ENSDB@${ensIndexerPublicConfig.versionInfo.ensDb} !== ENSAPI@${packageJson.version}`,
+      );
+    }
+
+    // Invariant: ENSAPI & ENSIndexer must match version numbers
+    if (ensIndexerPublicConfig.versionInfo.ensIndexer !== packageJson.version) {
+      throw new Error(
+        `Version Mismatch: ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensIndexer} !== ENSAPI@${packageJson.version}`,
+      );
+    }
+
+    // Invariant: ENSAPI & ENSRainbow must match version numbers
+    if (ensIndexerPublicConfig.versionInfo.ensRainbow !== packageJson.version) {
+      throw new Error(
+        `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.versionInfo.ensRainbow} !== ENSAPI@${packageJson.version}`,
+      );
+    }
+
     c.set("ensIndexerPublicConfig", ensIndexerPublicConfig);
   } catch (error) {
-    console.error(`Unable to fetch ENSIndexer's Config: ${error}`);
-    return errorResponse(c, "Unable to fetch ENSIndexer's Config");
+    console.error("Cannot connnect to ENSIndexer");
+    console.error(error);
+    return errorResponse(c, "Internal Server Error: ENSIndexer Unavailable");
   }
 
   return await next();

@@ -30,6 +30,7 @@ export interface AcceleratableRequest {
 }
 
 export interface AcceleratableResponse {
+  accelerationRequested: boolean;
   accelerationAttempted: boolean;
 }
 

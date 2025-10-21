@@ -10,6 +10,7 @@ import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { metadataProviderFromIndexingStatus } from "@/lib/subgraph/metadata-provider-from-indexing-status";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
+import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
@@ -22,6 +23,9 @@ const drizzle = makeDrizzle({
 });
 
 const app = factory.createApp();
+
+// 404 if subgraph core plugin not enabled
+app.use(requireCorePluginMiddleware("subgraph"));
 
 // hotfix content length after documentation injection
 app.use(fixContentLengthMiddleware);

@@ -14,6 +14,13 @@ services:
       # Copy .env.local.example to .env.local and configure all required values
       - path: ./apps/ensindexer/.env.local
         required: true
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:42069/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+      start_interval: 1s
     depends_on:
       ensrainbow:
         condition: service_healthy
@@ -30,13 +37,19 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
       ENSINDEXER_URL: http://ensindexer:42069
     env_file:
-      # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
-      # Copy .env.local.example to .env.local and configure all required values
+      # NOTE: ENSAPI uses a subset of ENSIndexer .env, so it sources ./apps/ensindexer/.env.local
       - path: ./apps/ensindexer/.env.local
         required: true
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:4334/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+      start_interval: 1s
     depends_on:
       ensindexer:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_started
 

@@ -11,6 +11,7 @@ import { sdk } from "@/lib/tracing/instrumentation";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { ensIndexerPublicConfigMiddleware } from "@/middleware/ensindexer-public-config.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
@@ -40,8 +41,12 @@ app.use(canAccelerateMiddleware);
 app.route("/api", ensNodeApi);
 
 // use Subgraph GraphQL API at /subgraph
-// TODO(ensv2): include core-schema-checking middleware to conditionally 404
 app.route("/subgraph", subgraphApi);
+
+// will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
+app.get("/health", async (c) => {
+  return c.json({ ok: true });
+});
 
 // log hono errors to console
 app.onError((error, ctx) => {
@@ -58,10 +63,13 @@ const server = serve(
     fetch: app.fetch,
     port: config.port,
   },
-  (info) => {
+  async (info) => {
     console.log(`ENSAPI listening on port ${info.port} with config:`);
     // TODO: pretty-print obfuscated EnsApiConfig
     console.log(JSON.stringify(config, null, 2));
+
+    // self-healthcheck to connect to ENSIndexer & warm config/indexing-status cache
+    await app.request("/health");
   },
 );
 
