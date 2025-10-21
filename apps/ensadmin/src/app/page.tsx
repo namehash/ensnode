@@ -10,7 +10,7 @@ export default function SplashPage() {
         <div className="relative w-full max-w-2xl aspect-[1056/820]">
           <Image
             src="/ens-admin-illustration.png"
-            alt="ENS Admin Illustration"
+            alt="ENS Admin"
             fill
             priority
             className="object-contain"
