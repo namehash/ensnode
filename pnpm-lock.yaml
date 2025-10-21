@@ -331,9 +331,6 @@ importers:
       '@opentelemetry/semantic-conventions':
         specifier: ^1.34.0
         version: 1.36.0
-      dotenv:
-        specifier: ^17.2.3
-        version: 17.2.3
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.11.3)
@@ -4953,10 +4950,6 @@ packages:
 
   dotenv@16.4.7:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
-    engines: {node: '>=12'}
-
-  dotenv@17.2.3:
-    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
   dotenv@8.6.0:
@@ -13476,8 +13469,6 @@ snapshots:
       type-fest: 3.13.1
 
   dotenv@16.4.7: {}
-
-  dotenv@17.2.3: {}
 
   dotenv@8.6.0: {}
 
