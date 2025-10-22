@@ -9,7 +9,7 @@ export default function SplashPage() {
       <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl border border-gray-300 shadow-sm">
         <div className="relative w-full max-w-2xl aspect-[1056/820]">
           <Image
-            src="/ens-admin-illustration.png"
+            src="/ensadmin-illustration.png"
             alt="ENSAdmin"
             fill
             priority
