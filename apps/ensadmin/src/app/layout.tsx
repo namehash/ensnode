@@ -17,6 +17,7 @@ const siteName = "ENSAdmin";
 const title = "ENSAdmin";
 const description = "Explore the ENS Protocol like never before";
 
+// Static metadata for static export compatibility
 export const metadata: Metadata = {
   title: title,
   description: description,
