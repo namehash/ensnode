@@ -2,16 +2,15 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
-import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
-import { useParams } from "next/navigation";
+import { type Name, type ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
 
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-import { AdditionalRecords } from "./_components/AdditionalRecords";
-import { Addresses } from "./_components/Addresses";
-import { NameDetailPageSkeleton } from "./_components/NameDetailPageSkeleton";
-import { ProfileHeader } from "./_components/ProfileHeader";
-import { ProfileInformation } from "./_components/ProfileInformation";
-import { SocialLinks } from "./_components/SocialLinks";
+import { AdditionalRecords } from "./AdditionalRecords";
+import { Addresses } from "./Addresses";
+import { NameDetailPageSkeleton } from "./NameDetailPageSkeleton";
+import { ProfileHeader } from "./ProfileHeader";
+import { ProfileInformation } from "./ProfileInformation";
+import { SocialLinks } from "./SocialLinks";
 
 const HeaderPanelTextRecords = ["url", "avatar", "header"];
 const ProfilePanelTextRecords = ["description", "email"];
@@ -37,8 +36,11 @@ const AllRequestedTextRecords = [
   ...AdditionalTextRecords,
 ];
 
-export default function NameDetailPage() {
-  const { name } = useParams<{ name: string }>();
+interface NameDetailPageContentProps {
+  name: Name;
+}
+
+export function NameDetailPageContent({ name }: NameDetailPageContentProps) {
   const namespace = useActiveNamespace();
 
   const selection = {
@@ -78,6 +80,7 @@ export default function NameDetailPage() {
     <div className="container mx-auto p-6 max-w-4xl">
       <ProfileHeader
         name={name}
+        namespaceId={namespace}
         headerImage={data?.records?.texts?.header}
         websiteUrl={data?.records?.texts?.url}
       />
