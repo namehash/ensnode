@@ -1,6 +1,6 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/connection/config-info";
+import { ErrorInfo } from "@/components/error-info";
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
 
@@ -13,14 +13,7 @@ export function RequireActiveConnection({ children }: PropsWithChildren<{}>) {
   if (status === "pending") return null;
 
   if (status === "error") {
-    return (
-      <ENSNodeConfigInfo
-        error={{
-          title: "Unable to parse ENSNode Config",
-          description: error.message,
-        }}
-      />
-    );
+    return <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />;
   }
 
   return <>{children}</>;

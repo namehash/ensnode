@@ -7,11 +7,9 @@
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
-import { CopyButton } from "@/components/copy-button";
-import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
+import { ErrorInfo } from "@/components/error-info";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
-import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
@@ -19,49 +17,76 @@ import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon"
 import { IconGraphNetwork } from "@/components/icons/graph-network";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
+import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { PlugZap, Replace } from "lucide-react";
+import { Replace } from "lucide-react";
 
 /**
- * ENSNodeConfigInfo display variations:
- *
- * Standard - ensIndexerConfig: ENSIndexerPublicConfig, error: undefined
- * Loading - ensIndexerConfig: undefined, error: undefined
- * Error - ensIndexerConfig: undefined, error: ErrorInfoProps
- *
- * @throws If both ensIndexerConfig and error are defined
+ * Props for ENSNodeConfigInfoView - internal component that accepts props for testing/mocking
  */
-export interface ENSNodeConfigProps {
+export interface ENSNodeConfigInfoViewProps {
   ensIndexerConfig?: ENSIndexerPublicConfig;
-  error?: ErrorInfoProps;
-  ensAdminVersion?: string;
+  error?: {
+    title: string;
+    description: string;
+  };
+  isLoading?: boolean;
 }
 
-export function ENSNodeConfigInfo({
+/**
+ * Internal view component that accepts props - used by both the main component and mock pages
+ */
+export function ENSNodeConfigInfoView({
   ensIndexerConfig,
   error,
-  ensAdminVersion,
-}: ENSNodeConfigProps) {
+  isLoading = false,
+}: ENSNodeConfigInfoViewProps) {
+  if (error) {
+    return <ErrorInfo title={error.title} description={error.description} />;
+  }
+
+  // Show ENSNode card - shell with skeleton while loading, or content when ready
+  if (isLoading || !ensIndexerConfig) {
+    return <ENSNodeConfigCardLoading />;
+  }
+
+  return <ENSNodeConfigCardContent ensIndexerConfig={ensIndexerConfig} />;
+}
+
+/**
+ * ENSNodeConfigInfo component - fetches and displays ENSNode configuration data
+ */
+export function ENSNodeConfigInfo() {
+  const ensIndexerConfigQuery = useENSIndexerConfig();
+
+  return (
+    <ENSNodeConfigInfoView
+      ensIndexerConfig={ensIndexerConfigQuery.isSuccess ? ensIndexerConfigQuery.data : undefined}
+      error={
+        ensIndexerConfigQuery.isError
+          ? {
+              title: "ENSNodeConfigInfo Error",
+              description: ensIndexerConfigQuery.error.message,
+            }
+          : undefined
+      }
+      isLoading={ensIndexerConfigQuery.isPending}
+    />
+  );
+}
+
+function ENSNodeConfigCardContent({
+  ensIndexerConfig,
+}: {
+  ensIndexerConfig: ENSIndexerPublicConfig;
+}) {
   const baseCardTitleStyles = "flex items-center gap-2 text-xl";
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
   const cardItemValueStyles = "text-sm leading-6 font-normal text-black";
-  const { rawSelectedConnection } = useSelectedConnection();
-
-  if (error !== undefined && ensIndexerConfig !== undefined) {
-    throw new Error("Invariant: ENSNodeConfigInfo with both ensIndexerConfig and error defined.");
-  }
-
-  if (error !== undefined) {
-    return <ErrorInfo {...error} />;
-  }
-
-  if (ensIndexerConfig === undefined) {
-    return <ENSNodeConfigInfoLoading />;
-  }
 
   const healReverseAddressesActivated = !ensIndexerConfig.isSubgraphCompatible;
   const indexAdditionalRecordsActivated = !ensIndexerConfig.isSubgraphCompatible;
@@ -116,263 +141,251 @@ export function ENSNodeConfigInfo({
   );
 
   return (
-    <div className="relative">
-      {/*ENSAdmin*/}
-      <ConfigInfoAppCard
-        name="ENSAdmin"
-        icon={<ENSAdminIcon width={28} height={28} />}
-        version={ensAdminVersion}
-        docsLink={new URL("https://ensnode.io/ensadmin/")}
-      />
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className={baseCardTitleStyles}>
+          <ENSNodeIcon width={28} height={28} />
+          <span>ENSNode</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className={cn(cardContentStyles, "max-sm:pt-0")}>
+        {/*ENSDb*/}
+        <ConfigInfoAppCard
+          name="ENSDb"
+          icon={<ENSDbIcon width={24} height={24} />}
+          items={[
+            {
+              label: "Database",
+              value: <p className={cardItemValueStyles}>Postgres</p>,
+            },
+            {
+              label: "Database Schema",
+              value: <p className={cardItemValueStyles}>{ensIndexerConfig.databaseSchemaName}</p>,
+              additionalInfo: (
+                <p>
+                  ENSIndexer writes indexed data to tables within this Postgres database schema.
+                </p>
+              ),
+            },
+          ]}
+          version={ensIndexerConfig.versionInfo.ensDb}
+          docsLink={new URL("https://ensnode.io/ensdb/")}
+        />
 
-      <ConnectionLine />
-
-      <ConfigInfoAppCard
-        name="Connection"
-        icon={<PlugZap className="size-7" />}
-        items={[
-          {
-            label: "Selected Connection",
-            value: (
-              <span className="flex flex-row flex-no-wrap justify-start items-center gap-0.5 text-sm/6">
-                {rawSelectedConnection}{" "}
-                <CopyButton value={rawSelectedConnection} className="max-sm:hidden" />
-              </span>
-            ),
-          },
-        ]}
-      />
-
-      <ConnectionLine />
-
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className={baseCardTitleStyles}>
-            <ENSNodeIcon width={28} height={28} />
-            <span>ENSNode</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className={cn(cardContentStyles, "max-sm:pt-0")}>
-          <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
-            {/*ENSDb*/}
-            <ConfigInfoAppCard
-              name="ENSDb"
-              icon={<ENSDbIcon width={24} height={24} />}
-              items={[
-                {
-                  label: "Database",
-                  value: <p className={cardItemValueStyles}>Postgres</p>,
-                },
-                {
-                  label: "Database Schema",
-                  value: (
-                    <p className={cardItemValueStyles}>{ensIndexerConfig.databaseSchemaName}</p>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      ENSIndexer writes indexed data to tables within this Postgres database schema.
-                    </p>
-                  ),
-                },
-              ]}
-              version={ensIndexerConfig.versionInfo.ensDb}
-              docsLink={new URL("https://ensnode.io/ensdb/")}
-            />
-
-            {/*ENSIndexer*/}
-            <ConfigInfoAppCard
-              name="ENSIndexer"
-              icon={<ENSIndexerIcon width={24} height={24} />}
-              items={[
-                {
-                  label: "Node.js",
-                  value: (
-                    <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.nodejs}</p>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      Version of the{" "}
-                      <ExternalLinkWithIcon
-                        href={`https://nodejs.org/en/download/archive/v${ensIndexerConfig.versionInfo.nodejs}`}
+        {/*ENSIndexer*/}
+        <ConfigInfoAppCard
+          name="ENSIndexer"
+          icon={<ENSIndexerIcon width={24} height={24} />}
+          items={[
+            {
+              label: "Node.js",
+              value: <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.nodejs}</p>,
+              additionalInfo: (
+                <p>
+                  Version of the{" "}
+                  <ExternalLinkWithIcon
+                    href={`https://nodejs.org/en/download/archive/v${ensIndexerConfig.versionInfo.nodejs}`}
+                  >
+                    Node.js
+                  </ExternalLinkWithIcon>{" "}
+                  runtime.
+                </p>
+              ),
+            },
+            {
+              label: "Ponder",
+              value: <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.ponder}</p>,
+              additionalInfo: (
+                <p>
+                  Version of the{" "}
+                  <ExternalLinkWithIcon
+                    href={`https://www.npmjs.com/package/ponder/v/${ensIndexerConfig.versionInfo.ponder}`}
+                  >
+                    ponder
+                  </ExternalLinkWithIcon>{" "}
+                  package used for indexing onchain data.
+                </p>
+              ),
+            },
+            {
+              label: "ens-normalize.js",
+              value: (
+                <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.ensNormalize}</p>
+              ),
+              additionalInfo: (
+                <p>
+                  Version of the{" "}
+                  <ExternalLinkWithIcon
+                    href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensIndexerConfig.versionInfo.ensNormalize}`}
+                  >
+                    @adraffy/ens-normalize
+                  </ExternalLinkWithIcon>{" "}
+                  package used for ENS name normalization.
+                </p>
+              ),
+            },
+            {
+              label: "Client LabelSet",
+              value: (
+                <ul className={cardItemValueStyles}>
+                  <li>
+                    {ensIndexerConfig.labelSet.labelSetId}:
+                    {ensIndexerConfig.labelSet.labelSetVersion}
+                  </li>
+                </ul>
+              ),
+              additionalInfo: (
+                <p>
+                  The "fully pinned" labelset id and version used for deterministic healing of
+                  unknown labels across time. The label set version may be equal to or less than the
+                  highest label set version offered by the connected ENSRainbow server.{" "}
+                  <ExternalLinkWithIcon
+                    href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/#client-behavior`}
+                  >
+                    Learn more.
+                  </ExternalLinkWithIcon>
+                </p>
+              ),
+            },
+            {
+              label: "ENS Namespace",
+              value: <p className={cardItemValueStyles}>{ensIndexerConfig.namespace}</p>,
+              additionalInfo: <p>The ENS namespace that ENSNode operates in the context of.</p>,
+            },
+            {
+              label: "Indexed Chains",
+              value: (
+                <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
+                  {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
+                    <Tooltip key={`indexed-chain-#${chainId}`}>
+                      <TooltipTrigger className="cursor-default">
+                        <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
                       >
-                        Node.js
-                      </ExternalLinkWithIcon>{" "}
-                      runtime.
-                    </p>
-                  ),
-                },
-                {
-                  label: "Ponder",
-                  value: (
-                    <p className={cardItemValueStyles}>{ensIndexerConfig.versionInfo.ponder}</p>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      Version of the{" "}
-                      <ExternalLinkWithIcon
-                        href={`https://www.npmjs.com/package/ponder/v/${ensIndexerConfig.versionInfo.ponder}`}
-                      >
-                        ponder
-                      </ExternalLinkWithIcon>{" "}
-                      package used for indexing onchain data.
-                    </p>
-                  ),
-                },
-                {
-                  label: "ens-normalize.js",
-                  value: (
-                    <p className={cardItemValueStyles}>
-                      {ensIndexerConfig.versionInfo.ensNormalize}
-                    </p>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      Version of the{" "}
-                      <ExternalLinkWithIcon
-                        href={`https://www.npmjs.com/package/@adraffy/ens-normalize/v/${ensIndexerConfig.versionInfo.ensNormalize}`}
-                      >
-                        @adraffy/ens-normalize
-                      </ExternalLinkWithIcon>{" "}
-                      package used for ENS name normalization.
-                    </p>
-                  ),
-                },
-                {
-                  label: "Client LabelSet",
-                  value: (
-                    <ul className={cardItemValueStyles}>
-                      <li>
-                        {ensIndexerConfig.labelSet.labelSetId}:
-                        {ensIndexerConfig.labelSet.labelSetVersion}
-                      </li>
-                    </ul>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      The "fully pinned" labelset id and version used for deterministic healing of
-                      unknown labels across time. The label set version may be equal to or less than
-                      the highest label set version offered by the connected ENSRainbow server.{" "}
-                      <ExternalLinkWithIcon
-                        href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/#client-behavior`}
-                      >
-                        Learn more.
-                      </ExternalLinkWithIcon>
-                    </p>
-                  ),
-                },
-                {
-                  label: "ENS Namespace",
-                  value: <p className={cardItemValueStyles}>{ensIndexerConfig.namespace}</p>,
-                  additionalInfo: <p>The ENS namespace that ENSNode operates in the context of.</p>,
-                },
-                {
-                  label: "Indexed Chains",
-                  value: (
-                    <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
-                      {Array.from(ensIndexerConfig.indexedChainIds).map((chainId) => (
-                        <Tooltip key={`indexed-chain-#${chainId}`}>
-                          <TooltipTrigger className="cursor-default">
-                            <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
-                          </TooltipTrigger>
-                          <TooltipContent
-                            side="top"
-                            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
-                          >
-                            {getChainName(chainId)}
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                    </div>
-                  ),
-                },
-                {
-                  label: "Plugins",
-                  value: (
-                    <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
-                      {ensIndexerConfig.plugins.map((plugin) => (
-                        <span
-                          key={`${plugin}-plugin-badge`}
-                          className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
-                        >
-                          {plugin}
-                        </span>
-                      ))}
-                    </div>
-                  ),
-                },
-              ]}
-              features={[
-                {
-                  label: "Heal Reverse Addresses",
-                  description: healReverseAddressesDescription,
-                  isActivated: healReverseAddressesActivated,
-                  icon: <HealIcon width={15} height={15} className="flex-shrink-0" />,
-                },
-                {
-                  label: "Index Additional Resolver Records",
-                  description: indexAdditionalRecordsDescription,
-                  isActivated: indexAdditionalRecordsActivated,
-                  icon: (
-                    <IndexAdditionalRecordsIcon width={15} height={15} className="flex-shrink-0" />
-                  ),
-                },
-                {
-                  label: "Replace Unnormalized Labels",
-                  description: replaceUnnormalizedLabelsDescription,
-                  isActivated: replaceUnnormalizedLabelsActivated,
-                  icon: (
-                    <Replace width={15} height={15} stroke="#3F3F46" className="flex-shrink-0" />
-                  ),
-                },
-                {
-                  label: "Subgraph Compatibility",
-                  description: subgraphCompatibilityDescription,
-                  isActivated: subgraphCompatibilityActivated,
-                  icon: (
-                    <IconGraphNetwork
-                      width={15}
-                      height={15}
-                      className="text-[#3F3F46] flex-shrink-0"
-                    />
-                  ),
-                },
-              ]}
-              version={ensIndexerConfig.versionInfo.ensIndexer}
-              docsLink={new URL("https://ensnode.io/ensindexer/")}
-            />
+                        {getChainName(chainId)}
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              label: "Plugins",
+              value: (
+                <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
+                  {ensIndexerConfig.plugins.map((plugin) => (
+                    <span
+                      key={`${plugin}-plugin-badge`}
+                      className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
+                    >
+                      {plugin}
+                    </span>
+                  ))}
+                </div>
+              ),
+            },
+          ]}
+          features={[
+            {
+              label: "Heal Reverse Addresses",
+              description: healReverseAddressesDescription,
+              isActivated: healReverseAddressesActivated,
+              icon: <HealIcon width={15} height={15} className="flex-shrink-0" />,
+            },
+            {
+              label: "Index Additional Resolver Records",
+              description: indexAdditionalRecordsDescription,
+              isActivated: indexAdditionalRecordsActivated,
+              icon: <IndexAdditionalRecordsIcon width={15} height={15} className="flex-shrink-0" />,
+            },
+            {
+              label: "Replace Unnormalized Labels",
+              description: replaceUnnormalizedLabelsDescription,
+              isActivated: replaceUnnormalizedLabelsActivated,
+              icon: <Replace width={15} height={15} stroke="#3F3F46" className="flex-shrink-0" />,
+            },
+            {
+              label: "Subgraph Compatibility",
+              description: subgraphCompatibilityDescription,
+              isActivated: subgraphCompatibilityActivated,
+              icon: (
+                <IconGraphNetwork width={15} height={15} className="text-[#3F3F46] flex-shrink-0" />
+              ),
+            },
+          ]}
+          version={ensIndexerConfig.versionInfo.ensIndexer}
+          docsLink={new URL("https://ensnode.io/ensindexer/")}
+        />
 
-            {/*ENSRainbow*/}
-            <ConfigInfoAppCard
-              name="ENSRainbow"
-              icon={<ENSRainbowIcon width={24} height={24} />}
-              items={[
-                {
-                  label: "Server LabelSet",
-                  value: (
-                    <p className={cardItemValueStyles}>
-                      {ensIndexerConfig.labelSet.labelSetId}:
-                      {ensIndexerConfig.labelSet.labelSetVersion}
-                    </p>
-                  ),
-                  additionalInfo: (
-                    <p>
-                      The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
-                      <ExternalLinkWithIcon
-                        href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/`}
-                      >
-                        Learn more.
-                      </ExternalLinkWithIcon>
-                    </p>
-                  ),
-                },
-              ]}
-              version={ensIndexerConfig.versionInfo.ensRainbow}
-              docsLink={new URL("https://ensnode.io/ensrainbow/")}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        {/*ENSRainbow*/}
+        <ConfigInfoAppCard
+          name="ENSRainbow"
+          icon={<ENSRainbowIcon width={24} height={24} />}
+          items={[
+            {
+              label: "Server LabelSet",
+              value: (
+                <p className={cardItemValueStyles}>
+                  {ensIndexerConfig.labelSet.labelSetId}:{ensIndexerConfig.labelSet.labelSetVersion}
+                </p>
+              ),
+              additionalInfo: (
+                <p>
+                  The labelset id and highest labelset version offered by the ENSRainbow server.{" "}
+                  <ExternalLinkWithIcon
+                    href={`https://ensnode.io/ensrainbow/concepts/label-sets-and-versioning/`}
+                  >
+                    Learn more.
+                  </ExternalLinkWithIcon>
+                </p>
+              ),
+            },
+          ]}
+          version={ensIndexerConfig.versionInfo.ensRainbow}
+          docsLink={new URL("https://ensnode.io/ensrainbow/")}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function ENSNodeConfigCardLoading() {
+  const baseCardTitleStyles = "flex items-center gap-2 text-xl";
+  const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className={baseCardTitleStyles}>
+          <ENSNodeIcon width={28} height={28} />
+          <span>ENSNode</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className={cn(cardContentStyles, "max-sm:pt-0")}>
+        <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
+          {["ENSDb", "ENSIndexer", "ENSRainbow"].map((app) => (
+            <Card key={`${app}-loading`} className="animate-pulse">
+              <CardHeader className="max-sm:p-3">
+                <div className="h-6 bg-muted rounded w-1/3" />
+              </CardHeader>
+              <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -403,13 +416,5 @@ function ENSNodeConfigInfoLoading() {
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function ConnectionLine() {
-  return (
-    <div className="relative h-10 pl-[38px]">
-      <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
-    </div>
   );
 }
