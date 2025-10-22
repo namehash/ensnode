@@ -23,7 +23,7 @@ export default function SplashPage() {
             <h1 className="text-5xl font-bold tracking-tight select-none">ENSAdmin</h1>
           </div>
 
-          <p className="md:text-xl text-muted-foreground max-w-md select-none">
+          <p className="md:text-xl text-muted-foreground max-w-md">
             Explore the ENS Protocol like never before
           </p>
 
