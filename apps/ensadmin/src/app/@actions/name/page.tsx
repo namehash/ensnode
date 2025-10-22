@@ -10,7 +10,7 @@ export default function ActionsNamePage() {
   const searchParams = useSearchParams();
   const nameParam = searchParams.get("name");
 
-  const name = nameParam ? decodeURIComponent(nameParam as Name) : null;
+  const name = nameParam ? (decodeURIComponent(nameParam) as Name) : null;
 
   const { data: ensAppProfileUrl } = useENSAppProfileUrl(name ?? "");
 

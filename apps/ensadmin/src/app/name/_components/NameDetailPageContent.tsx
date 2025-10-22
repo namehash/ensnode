@@ -1,8 +1,8 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useRecords } from "@ensnode/ensnode-react";
-import { ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
+import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
+import { type Name, type ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
 
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { AdditionalRecords } from "./AdditionalRecords";
@@ -37,7 +37,7 @@ const AllRequestedTextRecords = [
 ];
 
 interface NameDetailPageContentProps {
-  name: string;
+  name: Name;
 }
 
 export function NameDetailPageContent({ name }: NameDetailPageContentProps) {
@@ -62,6 +62,7 @@ export function NameDetailPageContent({ name }: NameDetailPageContentProps) {
   const { data, status } = useRecords({
     name,
     selection,
+    query: ASSUME_IMMUTABLE_QUERY,
   });
 
   if (status === "pending") return <NameDetailPageSkeleton />;
