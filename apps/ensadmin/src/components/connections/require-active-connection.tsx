@@ -1,6 +1,7 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/connection/config-info";
+import { ErrorInfo } from "@/components/error-info";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 import { PropsWithChildren } from "react";
 
@@ -10,18 +11,19 @@ import { PropsWithChildren } from "react";
 export function RequireActiveConnection({ children }: PropsWithChildren<{}>) {
   const { status, error } = useENSIndexerConfig();
 
-  if (status === "pending") return null;
+  if (status === "pending") return <Loading />;
 
   if (status === "error") {
-    return (
-      <ENSNodeConfigInfo
-        error={{
-          title: "Unable to parse ENSNode Config",
-          description: error.message,
-        }}
-      />
-    );
+    return <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />;
   }
 
-  return <>{children}</>;
+  return children;
+}
+
+function Loading() {
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <LoadingSpinner className="h-32 w-32" />
+    </div>
+  );
 }
