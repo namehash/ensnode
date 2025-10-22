@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function SplashPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-4 md:gap-8 px-4 text-center select-none">
+      <div className="flex flex-col items-center gap-4 md:gap-8 px-4 text-center">
         <div className="flex items-center gap-2 md:gap-4 select-none">
           <Image
             src="/ensadmin-logo.svg"
@@ -24,7 +24,7 @@ export default function SplashPage() {
         </p>
 
         <Button asChild size="lg">
-          <Link href="/connection">View Connection</Link>
+          <Link href="/connection">View My Connection</Link>
         </Button>
       </div>
     </div>

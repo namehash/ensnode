@@ -1,7 +1,7 @@
 "use client";
 
 import constate from "constate";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
@@ -200,9 +200,5 @@ export function ConnectionsLibraryProvider({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <Suspense fallback={null}>
-      <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>
-    </Suspense>
-  );
+  return <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>;
 }
