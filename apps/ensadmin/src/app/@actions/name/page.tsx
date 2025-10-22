@@ -2,7 +2,8 @@
 
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Button } from "@/components/ui/button";
-import { useENSAppProfileUrl } from "@/hooks/async/use-ens-app-profile-url";
+import { useNamespace } from "@/hooks/async/use-namespace";
+import { buildExternalEnsAppProfileUrl } from "@/lib/namespace-utils";
 import type { Name } from "@ensnode/ensnode-sdk";
 import { useSearchParams } from "next/navigation";
 
@@ -12,9 +13,12 @@ export default function ActionsNamePage() {
 
   const name = nameParam ? (decodeURIComponent(nameParam) as Name) : null;
 
-  const { data: ensAppProfileUrl } = useENSAppProfileUrl(name ?? "");
+  const { data: namespace } = useNamespace();
 
-  if (!name || !ensAppProfileUrl) return null;
+  const ensAppProfileUrl =
+    name && namespace ? buildExternalEnsAppProfileUrl(name, namespace) : null;
+
+  if (!ensAppProfileUrl) return null;
 
   return (
     <Button variant="link" size="sm" asChild>
