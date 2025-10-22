@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 export default function SplashPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl">
+      <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl border border-gray-300 shadow-sm">
         <div className="relative w-full max-w-2xl aspect-[1056/820]">
           <Image
             src="/ens-admin-illustration.png"
-            alt="ENS Admin"
+            alt="ENSAdmin"
             fill
             priority
             className="object-contain"
@@ -28,7 +28,7 @@ export default function SplashPage() {
           </p>
 
           <Button asChild size="lg">
-            <Link href="/connection">View Connection</Link>
+            <Link href="/connection">View My Connection</Link>
           </Button>
         </div>
       </div>
