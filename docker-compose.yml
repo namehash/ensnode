@@ -37,8 +37,9 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
       ENSINDEXER_URL: http://ensindexer:42069
     env_file:
-      # NOTE: ENSAPI uses a subset of ENSIndexer .env, so it sources ./apps/ensindexer/.env.local
-      - path: ./apps/ensindexer/.env.local
+      # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
+      # Copy .env.local.example to .env.local and configure all required values
+      - path: ./apps/ensapi/.env.local
         required: true
     healthcheck:
       test: ["CMD", "curl", "--fail", "-s", "http://localhost:4334/health"]
@@ -59,7 +60,7 @@ services:
     ports:
       - "3223:3223"
     env_file:
-      # NOTE: can define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
+      # NOTE: Optionally define apps/ensrainbow/.env.local (see apps/ensrainbow/.env.local.example)
       - path: ./apps/ensrainbow/.env.local
         required: false
     volumes:
@@ -80,7 +81,9 @@ services:
       - "4173:4173"
     environment:
       # Override environment variables to point to docker instances
+      # NOTE: must be host-accessible (i.e. http://localhost)
       ENSADMIN_PUBLIC_URL: http://localhost:4173
+      # NOTE: must be host-accessible (i.e. http://localhost)
       NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY: http://localhost:4334
     env_file:
       # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
