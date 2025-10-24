@@ -1,5 +1,16 @@
 # @ensnode/ensnode-sdk
 
+## 0.37.0
+
+### Minor Changes
+
+- [#1179](https://github.com/namehash/ensnode/pull/1179) [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2) Thanks [@tk-o](https://github.com/tk-o)! - Removed `endBlock` field from `ChainIndexingConfigIndefinite` type.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@0.37.0
+
 ## 0.36.0
 
 ### Minor Changes
