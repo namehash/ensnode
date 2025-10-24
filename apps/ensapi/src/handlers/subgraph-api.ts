@@ -8,9 +8,10 @@ import { makeDrizzle } from "@/lib/handlers/drizzle";
 import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
-import { metadataProviderFromIndexingStatus } from "@/lib/subgraph/metadata-provider-from-indexing-status";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
+import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
+import { createMiddleware } from "hono/factory";
 
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
@@ -33,16 +34,15 @@ app.use(fixContentLengthMiddleware);
 // inject api documentation into graphql introspection requests
 app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/subgraph" }));
 
-// use our custom graphql middleware
-app.use(async (c, next) => {
-  // TODO: this might be really inefficient, making a new yoga every request?
-  const middleware = subgraphGraphQLMiddleware({
+// inject _meta into the hono (and yoga) context for the subgraph middleware
+app.use(subgraphMetaMiddleware);
+
+// use subgraph middleware
+app.use(
+  subgraphGraphQLMiddleware({
     drizzle,
     graphqlSchema: buildGraphQLSchema({
       schema: subgraphSchema,
-      metadataProvider: metadataProviderFromIndexingStatus(
-        c.var.indexingStatus,
-      ),
       // describes the polymorphic (interface) relationships in the schema
       polymorphicConfig: {
         types: {
@@ -82,9 +82,7 @@ app.use(async (c, next) => {
         },
       },
     }),
-  });
-
-  return middleware(c, next);
-});
+  }),
+);
 
 export default app;

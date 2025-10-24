@@ -112,13 +112,13 @@ import { GraphQLJSON } from "graphql-scalars";
 
 import { capitalize, intersectionOf } from "./helpers";
 import { deserialize, serialize } from "./serialize";
-import type { MetadataProvider } from "./types";
+import type { SubgraphMetaVariables } from "./types";
 
 type Parent = Record<string, any>;
 type Context = {
   getDataLoader: ReturnType<typeof buildDataLoaderCache>;
   drizzle: Drizzle<{ [key: string]: OnchainTable }>;
-};
+} & SubgraphMetaVariables;
 
 // NOTE: subgraph-style pagination
 type PluralArgs = {
@@ -161,13 +161,11 @@ export interface PolymorphicConfig {
 interface BuildGraphQLSchemaOptions {
   schema: Schema;
   polymorphicConfig?: PolymorphicConfig;
-  metadataProvider: MetadataProvider;
 }
 
 export function buildGraphQLSchema({
   schema: _schema,
   polymorphicConfig: _polymorphicConfig,
-  metadataProvider,
 }: BuildGraphQLSchemaOptions): GraphQLSchema {
   const polymorphicConfig = _polymorphicConfig ?? { types: {}, fields: {} };
 
@@ -617,9 +615,9 @@ export function buildGraphQLSchema({
               description: "Information about a specific block.",
               fields: {
                 hash: { type: GraphQLString },
+                parentHash: { type: GraphQLString },
                 number: { type: new GraphQLNonNull(GraphQLInt) },
                 timestamp: { type: new GraphQLNonNull(GraphQLInt) },
-                parentHash: { type: GraphQLString },
               },
             }),
           ),
@@ -636,30 +634,7 @@ export function buildGraphQLSchema({
         },
       },
     }),
-    resolve: async (_source, _args) => {
-      try {
-        const [lastIndexedBlock, hasIndexingErrors] = await Promise.all([
-          metadataProvider.getLastIndexedENSRootChainBlock(),
-          metadataProvider.hasIndexingErrors(),
-        ]);
-
-        if (lastIndexedBlock === null) return null;
-
-        return {
-          deployment: metadataProvider.deployment,
-          hasIndexingErrors,
-          block: {
-            number: Number(lastIndexedBlock.number),
-            timestamp: Number(lastIndexedBlock.timestamp),
-            hash: lastIndexedBlock.hash,
-            parentHash: lastIndexedBlock.parentHash,
-          },
-        };
-      } catch (error) {
-        console.error("Error building subgraph _Meta_", error);
-        return null;
-      }
-    },
+    resolve: async (_source, _args, _context) => _context._meta ?? null,
   };
 
   return new GraphQLSchema({
