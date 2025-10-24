@@ -37,7 +37,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
         await db.close();
         logger.info("Server shutdown complete");
       } catch (error) {
-        logger.error("Error during shutdown:", error);
+        logger.error(error, "Error during shutdown:");
         throw error;
       }
     };
