@@ -109,7 +109,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
       (!didInitialRealtime && isWithinMaxRealtime) || // first time
       (didInitialRealtime && !prevIsWithinMaxRealtime && isWithinMaxRealtime) // future change in status
     ) {
-      console.log(`ENSIndexer is realtime, Protocol Acceleration is ENABLED.`);
+      console.log(`ENSIndexer is realtime, Protocol Acceleration is now ENABLED.`);
     }
 
     // log notice when ENSIndexer transitions out of realtime
@@ -118,7 +118,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
       (didInitialRealtime && prevIsWithinMaxRealtime && !isWithinMaxRealtime) // future change in status
     ) {
       console.warn(
-        `ENSIndexer is NOT realtime (Worst Case Lag: ${c.var.indexingStatus.value.realtimeProjection.worstCaseDistance} seconds > ${MAX_REALTIME_DISTANCE_TO_ACCELERATE} seconds), Protocol Acceleration is DISABLED.`,
+        `ENSIndexer is NOT realtime (Worst Case Lag: ${c.var.indexingStatus.value.realtimeProjection.worstCaseDistance} seconds > ${MAX_REALTIME_DISTANCE_TO_ACCELERATE} seconds), Protocol Acceleration is currently DISABLED.`,
       );
     }
   }

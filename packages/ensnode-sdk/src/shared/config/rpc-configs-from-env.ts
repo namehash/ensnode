@@ -1,10 +1,9 @@
-import { Datasource, getENSNamespace } from "@ensnode/datasources";
-import { type ChainIdString, ENSNamespaceId, serializeChainId } from "@ensnode/ensnode-sdk";
-import {
-  ChainIdSpecificRpcEnvironmentVariable,
-  RpcEnvironment,
-} from "@ensnode/ensnode-sdk/internal";
+import { Datasource, ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+
+import { serializeChainId } from "../serialize";
+import { ChainIdString } from "../serialized-types";
 import { buildAlchemyUrl, buildDRPCUrl } from "./build-rpc-urls";
+import { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./environments";
 
 /**
  * Constructs dynamic chain configuration from environment variables, scoped to chain IDs that appear

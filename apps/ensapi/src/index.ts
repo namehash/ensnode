@@ -1,5 +1,6 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
@@ -12,6 +13,7 @@ import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware"
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
+import { redactEnsApiConfig } from "@/config/redact";
 
 const app = factory.createApp();
 
@@ -62,8 +64,7 @@ const server = serve(
   },
   async (info) => {
     console.log(`ENSApi listening on port ${info.port} with config:`);
-    // TODO: pretty-print obfuscated EnsApiConfig
-    console.log(JSON.stringify(config, null, 2));
+    console.log(prettyPrintJson(redactEnsApiConfig(config)));
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
