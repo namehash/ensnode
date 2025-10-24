@@ -8,7 +8,7 @@ import ensNodeApi from "./handlers/ensnode-api";
 
 const app = new Hono();
 
-// set the X-ENSNode-Version header to the current version
+// set the X-ENSIndexer-Version header to the current version
 app.use(async (ctx, next) => {
   ctx.header("x-ensindexer-version", packageJson.version);
   return next();

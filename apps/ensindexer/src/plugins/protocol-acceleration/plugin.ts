@@ -3,6 +3,8 @@ import {
   DatasourceNames,
   ResolverABI,
   StandaloneReverseRegistrarABI,
+  ThreeDNSTokenABI,
+  getDatasource,
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import { ChainConfig, createConfig } from "ponder";
@@ -52,18 +54,13 @@ const ALL_DATASOURCE_NAMES = [
 
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: ALL_DATASOURCE_NAMES,
+  requiredDatasourceNames: [DatasourceNames.ENSRoot],
   createPonderConfig(config) {
     const allDatasources = ALL_DATASOURCE_NAMES.map((datasourceName) =>
       getDatasourceAsFullyDefinedAtCompileTime(config.namespace, datasourceName),
-    );
+    ).filter((datasource) => !!datasource);
 
-    // TODO: need to make this generic enough to run in non-mainnet namespaces, filter out empty
-    // datasources
-    const root = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-    );
+    const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
     const basenames = getDatasourceAsFullyDefinedAtCompileTime(
       config.namespace,
       DatasourceNames.Basenames,
@@ -135,55 +132,59 @@ export default createPlugin({
 
         // index the RegistryOld on ENS Root Chain
         [namespaceContract(pluginName, "RegistryOld")]: {
-          abi: root.contracts.RegistryOld.abi,
+          abi: ensroot.contracts.RegistryOld.abi,
           chain: {
             ...chainConfigForContract(
               config.globalBlockrange,
-              root.chain.id,
-              root.contracts.RegistryOld,
+              ensroot.chain.id,
+              ensroot.contracts.RegistryOld,
             ),
           },
         },
 
         // a multi-chain Registry ContractConfig
         [namespaceContract(pluginName, "Registry")]: {
-          abi: root.contracts.Registry.abi,
+          abi: ensroot.contracts.Registry.abi,
           chain: {
             // ENS Root Chain Registry
             ...chainConfigForContract(
               config.globalBlockrange,
-              root.chain.id,
-              root.contracts.Registry,
+              ensroot.chain.id,
+              ensroot.contracts.Registry,
             ),
             // Basenames (shadow)Registry
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              basenames.chain.id,
-              basenames.contracts.Registry,
-            ),
+            ...(basenames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                basenames.chain.id,
+                basenames.contracts.Registry,
+              )),
             // Lineanames (shadow)Registry
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              lineanames.chain.id,
-              lineanames.contracts.Registry,
-            ),
+            ...(lineanames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                lineanames.chain.id,
+                lineanames.contracts.Registry,
+              )),
           },
         },
 
         // a multi-chain ThreeDNSToken ContractConfig
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
-          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
+          abi: ThreeDNSTokenABI,
           chain: {
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              threeDNSOptimism.chain.id,
-              threeDNSOptimism.contracts.ThreeDNSToken,
-            ),
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              threeDNSBase.chain.id,
-              threeDNSBase.contracts.ThreeDNSToken,
-            ),
+            ...(threeDNSOptimism &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                threeDNSOptimism.chain.id,
+                threeDNSOptimism.contracts.ThreeDNSToken,
+              )),
+            ...(threeDNSBase &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                threeDNSBase.chain.id,
+                threeDNSBase.contracts.ThreeDNSToken,
+              )),
           },
         },
 
@@ -192,41 +193,47 @@ export default createPlugin({
           abi: StandaloneReverseRegistrarABI,
           chain: {
             // the Root chain's DefaultReverseRegistrar (is StandaloneReverseRegistrar)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrRoot.chain.id,
-              rrRoot.contracts.DefaultReverseRegistrar,
-            ),
+            ...(rrRoot &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                rrRoot.chain.id,
+                rrRoot.contracts.DefaultReverseRegistrar,
+              )),
             // Base's L2ReverseRegistrar (is StandaloneReverseRegistrar)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrBase.chain.id,
-              rrBase.contracts.L2ReverseRegistrar,
-            ),
+            ...(rrBase &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                rrBase.chain.id,
+                rrBase.contracts.L2ReverseRegistrar,
+              )),
             // Linea's L2ReverseRegistrar (is StandaloneReverseRegistrar)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrLinea.chain.id,
-              rrLinea.contracts.L2ReverseRegistrar,
-            ),
+            ...(rrLinea &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                rrLinea.chain.id,
+                rrLinea.contracts.L2ReverseRegistrar,
+              )),
             // Optimism's L2ReverseRegistrar (is StandaloneReverseRegistrar)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrOptimism.chain.id,
-              rrOptimism.contracts.L2ReverseRegistrar,
-            ),
+            ...(rrOptimism &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                rrOptimism.chain.id,
+                rrOptimism.contracts.L2ReverseRegistrar,
+              )),
             // Arbitrum's L2ReverseRegistrar (is StandaloneReverseRegistrar)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrArbitrum.chain.id,
-              rrArbitrum.contracts.L2ReverseRegistrar,
-            ),
+            ...(rrArbitrum &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                rrArbitrum.chain.id,
+                rrArbitrum.contracts.L2ReverseRegistrar,
+              )),
             // Scroll's L2ReverseRegistrar (is StandaloneReverseRegistrar)
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              rrScroll.chain.id,
-              rrScroll.contracts.L2ReverseRegistrar,
-            ),
+            ...(rrScroll &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                rrScroll.chain.id,
+                rrScroll.contracts.L2ReverseRegistrar,
+              )),
           },
         },
       },
