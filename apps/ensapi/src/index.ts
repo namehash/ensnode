@@ -11,7 +11,6 @@ import { sdk } from "@/lib/tracing/instrumentation";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { ensIndexerPublicConfigMiddleware } from "@/middleware/ensindexer-public-config.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
-import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
