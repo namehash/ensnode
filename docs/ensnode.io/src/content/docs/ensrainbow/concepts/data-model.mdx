@@ -104,15 +104,14 @@ subgraph_0.ensrainbow     # labelSetId = "subgraph", version = 0
 subgraph_1.ensrainbow     # next version with incremental labelhash-to-label mappings added
 ```
 
-## Converting Legacy SQL Data
+## Creating ENSRainbow Files
 
-If you have a legacy gzipped rainbow table (`ens_names.sql.gz`) from the ENS Subgraph, you can convert it to the `.ensrainbow` format:
+ENSRainbow provides two methods for creating `.ensrainbow` files from different data sources:
 
-```bash title="Convert legacy SQL data"
-pnpm run convert --input-file path/to/ens_names.sql.gz --output-file subgraph-0.ensrainbow
-```
+- **SQL Conversion**: Convert legacy ENS Subgraph data (`ens_names.sql.gz`) using `pnpm run convert`
+- **CSV Conversion**: Convert custom datasets from CSV files using `pnpm run convert-csv`
 
-This conversion process allows you to migrate existing rainbow table data that was previously stored in SQL format to ENSRainbow's optimized binary format. The resulting `.ensrainbow` file will be equivalent to the rainbow tables used by the ENS Subgraph, maintaining the same label-to-labelhash mappings while providing better performance and storage efficiency.
+For complete instructions, examples, and workflow guidance, see the [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files) guide.
 
 ## Ingestion Process
 
