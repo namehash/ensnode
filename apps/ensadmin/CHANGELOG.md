@@ -1,5 +1,27 @@
 # ensadmin
 
+## 0.37.0
+
+### Minor Changes
+
+- [#1190](https://github.com/namehash/ensnode/pull/1190) [`b9a988c`](https://github.com/namehash/ensnode/commit/b9a988ced492bafe9845fd4524d137cfb0191d2a) Thanks [@notrab](https://github.com/notrab)! - Transitioned explore name detail page to use query param instead of path
+  Replace `useENSAppProfileUrl` hook with pure `buildExternalEnsAppProfileUrl` function for better testability and explicit dependency handling.
+
+- [#1191](https://github.com/namehash/ensnode/pull/1191) [`0090558`](https://github.com/namehash/ensnode/commit/0090558074a585e5591427db54273438919e0216) Thanks [@notrab](https://github.com/notrab)! - Add initial splash screen and remove /connection root redirect
+
+- [#1179](https://github.com/namehash/ensnode/pull/1179) [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2) Thanks [@tk-o](https://github.com/tk-o)! - Replcated `BlockRefViewModel` type with `BlockRef` type from ENSNode SDK package.
+
+- [#1184](https://github.com/namehash/ensnode/pull/1184) [`dc468d1`](https://github.com/namehash/ensnode/commit/dc468d11056fe5b323d1345ce0d97011e8ddb838) Thanks [@notrab](https://github.com/notrab)! - Temporarily disable AI query generator inside GraphiQL until we transition it into the new ENSApi service.
+
+### Patch Changes
+
+- Updated dependencies [[`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2)]:
+  - @ensnode/ensnode-sdk@0.37.0
+  - @ensnode/ensnode-react@0.37.0
+  - @ensnode/datasources@0.37.0
+  - @ensnode/ponder-metadata@0.37.0
+  - @ensnode/ensnode-schema@0.37.0
+
 ## 0.36.0
 
 ### Minor Changes
