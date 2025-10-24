@@ -80,9 +80,22 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
   // to the given `basePath`
   const retainCurrentRawConnectionUrlParam = useCallback(
     (basePath: string): string => {
-      const pathWithRetainedConnection = rawConnectionUrlParam
-        ? `${basePath}?${RAW_CONNECTION_PARAM_KEY}=${encodeURIComponent(rawConnectionUrlParam)}`
-        : basePath;
+      if (!rawConnectionUrlParam) {
+        return basePath;
+      }
+
+      // Parse the basePath to extract pathname, search params, and hash
+      const [pathAndQuery, hash] = basePath.split("#");
+      const [pathname, queryString] = pathAndQuery.split("?");
+
+      // Build URLSearchParams from existing query string
+      const params = new URLSearchParams(queryString);
+      params.set(RAW_CONNECTION_PARAM_KEY, rawConnectionUrlParam);
+
+      // Reconstruct the path with updated params
+      const pathWithRetainedConnection = `${pathname}?${params.toString()}${
+        hash ? `#${hash}` : ""
+      }`;
 
       return pathWithRetainedConnection;
     },

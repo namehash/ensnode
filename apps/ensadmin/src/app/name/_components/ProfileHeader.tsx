@@ -4,19 +4,17 @@ import { EnsAvatar } from "@/components/ens-avatar";
 import { NameDisplay } from "@/components/identity/utils";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { beautifyUrl } from "@/lib/beautify-url";
-import { Name } from "@ensnode/ensnode-sdk";
+import { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 
 interface ProfileHeaderProps {
   name: Name;
+  namespaceId: ENSNamespaceId;
   headerImage?: string | null;
   websiteUrl?: string | null;
 }
 
-export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderProps) {
-  const namespace = useActiveNamespace();
-
+export function ProfileHeader({ name, namespaceId, headerImage, websiteUrl }: ProfileHeaderProps) {
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12
   // See: https://docs.ens.domains/ensip/12#uri-types
@@ -71,7 +69,7 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
             <EnsAvatar
               className="-mt-16 h-20 w-20 ring-4 ring-white"
               name={name}
-              namespaceId={namespace}
+              namespaceId={namespaceId}
             />
             <div className="flex-1">
               <h1>

@@ -43,7 +43,7 @@ export function NameDisplay({ name, className = "font-medium" }: NameDisplayProp
  * Gets the relative path of the internal name details page for a given name.
  */
 export function getNameDetailsRelativePath(name: Name): string {
-  return `/name/${encodeURIComponent(name)}`;
+  return `/name?name=${encodeURIComponent(name)}`;
 }
 
 interface NameLinkProps {

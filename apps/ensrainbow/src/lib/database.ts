@@ -3,7 +3,6 @@ import { ByteArray, Hex, labelhash } from "viem";
 
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
-import { Label } from "@ensnode/ensnode-sdk";
 import {
   EnsRainbowServerLabelSet,
   type LabelSetId,
@@ -164,7 +163,7 @@ export class ENSRainbowDB {
         );
         throw new Error("Database already exists");
       } else {
-        logger.error(error, "Failed to create database:");
+        logger.error(error, "Failed to create database");
         logger.error(`Please ensure the directory ${dataDir} is writable`);
         throw error;
       }
@@ -212,7 +211,7 @@ export class ENSRainbowDB {
         logger.error("Please ensure no other instances of the application are running");
         logger.error("If you're certain no other process is using it, try removing the lock file");
       } else {
-        logger.error(error, "Failed to open database:");
+        logger.error(error, "Failed to open database");
         logger.error(`No database found at ${dataDir}`);
         logger.error("If you want to create a new database, start the ingestion step");
         logger.error(`Please ensure you have read permissions for ${dataDir}`);

@@ -119,7 +119,7 @@ export class ENSRainbowServer {
         label: actualLabel,
       } satisfies EnsRainbow.HealSuccess;
     } catch (error) {
-      logger.error(error, "Error healing label:");
+      logger.error(error, "Error healing label");
       return {
         status: StatusCode.Error,
         error: "Internal server error",
@@ -146,7 +146,7 @@ export class ENSRainbowServer {
         timestamp: new Date().toISOString(),
       } satisfies EnsRainbow.CountSuccess;
     } catch (error) {
-      logger.error(error, "Failed to retrieve precalculated rainbow record count:");
+      logger.error(error, "Failed to retrieve precalculated rainbow record count");
       return {
         status: StatusCode.Error,
         error: "Label count not initialized. Check the validate command.",
