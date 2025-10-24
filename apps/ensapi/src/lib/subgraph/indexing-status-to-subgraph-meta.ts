@@ -7,6 +7,16 @@ import {
 } from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
 
+/**
+ * Converts ENSIndexer indexing status to GraphQL subgraph metadata format.
+ *
+ * Transforms the indexing status response from ENSIndexer into the `_meta` format
+ * expected by legacy subgraph GraphQL APIs. Returns null if the indexing status
+ * indicates an error state or the root chain is not available.
+ *
+ * @param indexingStatus - The indexing status result from ENSIndexer
+ * @returns SubgraphMeta object or null if conversion is not possible
+ */
 export function indexingStatusToSubgraphMeta(
   indexingStatus: IndexingStatusVariables["indexingStatus"],
 ): SubgraphMeta {

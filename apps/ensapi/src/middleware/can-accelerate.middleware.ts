@@ -24,13 +24,27 @@ let prevIsWithinMaxRealtime = false;
 let didInitialIndexingStatus = false;
 let didInitialRealtime = false;
 
+/**
+ * Type guard to check if an indexing status result is successful and OK.
+ *
+ * @param result - Promise result containing IndexingStatusResponse
+ * @returns True if the result is fulfilled and has OK response code
+ */
 const isIndexingStatusOk = (
   result: PromiseResult<IndexingStatusResponse>,
 ): result is PromiseResult<IndexingStatusResponse> & { value: IndexingStatusResponseOk } =>
   result.status === "fulfilled" && result.value.responseCode === IndexingStatusResponseCodes.Ok;
 
-// derives canAccelerate from the indexing status, within MAX_REALTIME_DISTANCE_TO_ACCELERATE of
-// worst case distance. Effective distance is indexing status cache time + MAX_REALTIME_DISTANCE_TO_ACCELERATE
+/**
+ * Middleware that determines if protocol acceleration can be enabled for the current request.
+ *
+ * Checks if ENSIndexer has the protocol-acceleration plugin enabled and is within the
+ * maximum realtime distance threshold. Sets the `canAccelerate` variable on the context
+ * for use by resolution handlers.
+ *
+ * The effective distance for acceleration is indexing status cache time plus
+ * MAX_REALTIME_DISTANCE_TO_ACCELERATE.
+ */
 export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) => {
   // default canAccelerate to false
   c.set("canAccelerate", false);

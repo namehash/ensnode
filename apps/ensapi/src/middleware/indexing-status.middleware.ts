@@ -18,6 +18,13 @@ export type IndexingStatusVariables = {
   indexingStatus: Awaited<ReturnType<typeof fetcher>>;
 };
 
+/**
+ * Middleware that fetches and caches ENSIndexer indexing status.
+ *
+ * Retrieves the current indexing status from the configured ENSIndexer instance
+ * and caches it for TTL_MS duration to avoid excessive API calls. Sets the
+ * `indexingStatus` variable on the context for use by other middleware and handlers.
+ */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
   c.set("indexingStatus", await fetcher());
   await next();

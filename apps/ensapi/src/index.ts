@@ -6,6 +6,7 @@ import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 
 import config from "@/config";
+import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/tracing/instrumentation";
@@ -13,7 +14,6 @@ import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware"
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
-import { redactEnsApiConfig } from "@/config/redact";
 
 const app = factory.createApp();
 
@@ -80,6 +80,7 @@ const closeServer = () =>
     }),
   );
 
+// perform graceful shutdown
 const gracefulShutdown = async () => {
   try {
     await sdk.shutdown();

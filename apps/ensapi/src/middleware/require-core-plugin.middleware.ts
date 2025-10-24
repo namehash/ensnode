@@ -2,8 +2,15 @@ import config from "@/config";
 import { factory } from "@/lib/hono-factory";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-// TODO: move this `core` union to a shared enum and implement shared isCorePluginEnabled
-// logic to rectify the subgraph,basenames,lineanames,threedns unity
+/**
+ * Creates middleware that requires a specific core plugin to be enabled in ENSIndexer.
+ *
+ * Returns a 404 Not Found response if the required core plugin is not enabled
+ * in the connected ENSIndexer configuration.
+ *
+ * @param core - The core plugin type to require ("subgraph" or "ensv2")
+ * @returns Hono middleware that validates plugin availability
+ */
 export const requireCorePluginMiddleware = (core: "subgraph" | "ensv2") =>
   factory.createMiddleware(async (c, next) => {
     if (
