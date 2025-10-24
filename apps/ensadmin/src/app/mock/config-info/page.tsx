@@ -1,7 +1,9 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/connection/config-info";
-import { ENSNodeConfigProps } from "@/components/connection/config-info/config-info";
+import {
+  ENSNodeConfigInfoView,
+  ENSNodeConfigInfoViewProps,
+} from "@/components/connection/config-info/config-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,10 +21,10 @@ type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 const DEFAULT_VARIANT = "Alpha Mainnet";
 export default function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>(DEFAULT_VARIANT);
-  const props: ENSNodeConfigProps = useMemo(() => {
+  const props: ENSNodeConfigInfoViewProps = useMemo(() => {
     switch (selectedConfig) {
       case "Loading":
-        return {};
+        return { isLoading: true };
 
       case "Loading Error":
         return {
@@ -35,7 +37,7 @@ export default function MockConfigPage() {
       default:
         try {
           const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { ensIndexerConfig: config, ensAdminVersion: "0.35.0" };
+          return { ensIndexerConfig: config };
         } catch (error) {
           const errorMessage =
             error instanceof Error
@@ -75,7 +77,7 @@ export default function MockConfigPage() {
         </CardContent>
       </Card>
 
-      <ENSNodeConfigInfo {...props} />
+      <ENSNodeConfigInfoView {...props} />
     </section>
   );
 }

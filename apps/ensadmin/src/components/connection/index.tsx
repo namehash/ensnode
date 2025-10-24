@@ -1,41 +1,56 @@
 "use client";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
-import { ensAdminVersion } from "@/lib/env";
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
-import { Suspense, use } from "react";
+import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
+import { CopyButton } from "@/components/copy-button";
+import { ENSAdminVersion } from "@/components/ensadmin-version";
+import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
+import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
+import { PlugZap } from "lucide-react";
 
-const versionPromise = ensAdminVersion();
+function ConnectionLine() {
+  return (
+    <div className="relative h-10 pl-[38px]">
+      <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
+    </div>
+  );
+}
 
 export default function ConnectionInfo() {
-  const version = use(versionPromise);
-  const ensIndexerConfigQuery = useENSIndexerConfig();
-
-  if (ensIndexerConfigQuery.isError) {
-    return (
-      <ENSNodeConfigInfo
-        error={{
-          title: "ENSNodeConfigInfo Error",
-          description: ensIndexerConfigQuery.error.message,
-        }}
-        ensAdminVersion={version}
-      />
-    );
-  }
-
-  if (!ensIndexerConfigQuery.isSuccess) {
-    return (
-      <section className="flex flex-col gap-6 p-6">
-        <ENSNodeConfigInfo ensAdminVersion={version} /> {/*display loading state*/}
-      </section>
-    );
-  }
-
-  const ensIndexerConfig = ensIndexerConfigQuery.data;
+  const { rawSelectedConnection } = useSelectedConnection();
 
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ENSNodeConfigInfo ensIndexerConfig={ensIndexerConfig} ensAdminVersion={version} />
+      <div className="relative">
+        <ConfigInfoAppCard
+          name="ENSAdmin"
+          icon={<ENSAdminIcon width={28} height={28} />}
+          version={<ENSAdminVersion />}
+          docsLink={new URL("https://ensnode.io/ensadmin/")}
+        />
+
+        <ConnectionLine />
+
+        <ConfigInfoAppCard
+          name="Connection"
+          icon={<PlugZap className="size-7" />}
+          items={[
+            {
+              label: "Selected Connection",
+              value: (
+                <span className="flex flex-row flex-no-wrap justify-start items-center gap-0.5 text-sm/6">
+                  {rawSelectedConnection}{" "}
+                  <CopyButton value={rawSelectedConnection} className="max-sm:hidden" />
+                </span>
+              ),
+            },
+          ]}
+        />
+
+        <ConnectionLine />
+
+        <ENSNodeConfigInfo />
+      </div>
     </section>
   );
 }
