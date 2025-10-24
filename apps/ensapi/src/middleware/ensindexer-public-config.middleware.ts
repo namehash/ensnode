@@ -17,7 +17,7 @@ const fetcher = pMemoize(async () =>
       const config = await client.config();
       // TODO: pretty-print ensindexer public config
       console.log(
-        `ENSAPI successfully connected to ENSIndexer with config: ${JSON.stringify(config, null, 2)}`,
+        `ENSApi successfully connected to ENSIndexer with config: ${JSON.stringify(config, null, 2)}`,
       );
       return config;
     },
@@ -40,31 +40,31 @@ export const ensIndexerPublicConfigMiddleware = factory.createMiddleware(async (
   try {
     const ensIndexerPublicConfig = await fetcher();
 
-    // Invariant: ENSAPI & ENSIndexer must match namespace
+    // Invariant: ENSApi & ENSIndexer must match namespace
     if (ensIndexerPublicConfig.namespace !== config.namespace) {
       throw new Error(
-        `Invariant: ENSAPI must use the same NAMESPACE as the connected ENSIndexer. ENSAPI: ${config.namespace}, ENSIndexer: ${ensIndexerPublicConfig.namespace}.`,
+        `Invariant: ENSApi must use the same NAMESPACE as the connected ENSIndexer. ENSApi: ${config.namespace}, ENSIndexer: ${ensIndexerPublicConfig.namespace}.`,
       );
     }
 
-    // Invariant: ENSAPI & ENSDB must match version numbers
+    // Invariant: ENSApi & ENSDB must match version numbers
     if (ensIndexerPublicConfig.versionInfo.ensDb !== packageJson.version) {
       throw new Error(
-        `Version Mismatch: ENSDB@${ensIndexerPublicConfig.versionInfo.ensDb} !== ENSAPI@${packageJson.version}`,
+        `Version Mismatch: ENSDB@${ensIndexerPublicConfig.versionInfo.ensDb} !== ENSApi@${packageJson.version}`,
       );
     }
 
-    // Invariant: ENSAPI & ENSIndexer must match version numbers
+    // Invariant: ENSApi & ENSIndexer must match version numbers
     if (ensIndexerPublicConfig.versionInfo.ensIndexer !== packageJson.version) {
       throw new Error(
-        `Version Mismatch: ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensIndexer} !== ENSAPI@${packageJson.version}`,
+        `Version Mismatch: ENSIndexer@${ensIndexerPublicConfig.versionInfo.ensIndexer} !== ENSApi@${packageJson.version}`,
       );
     }
 
-    // Invariant: ENSAPI & ENSRainbow must match version numbers
+    // Invariant: ENSApi & ENSRainbow must match version numbers
     if (ensIndexerPublicConfig.versionInfo.ensRainbow !== packageJson.version) {
       throw new Error(
-        `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.versionInfo.ensRainbow} !== ENSAPI@${packageJson.version}`,
+        `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.versionInfo.ensRainbow} !== ENSApi@${packageJson.version}`,
       );
     }
 

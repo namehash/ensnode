@@ -1,4 +1,4 @@
-import { ENSAPI_DEFAULT_PORT } from "@/config/defaults";
+import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import { EnsApiEnvironment } from "@/config/environment";
 import {
   DatabaseSchemaNameSchema,
@@ -14,7 +14,7 @@ import { ZodError, prettifyError, z } from "zod/v4";
 
 const EnsApiConfigSchema = z
   .object({
-    port: PortSchema.default(ENSAPI_DEFAULT_PORT),
+    port: PortSchema.default(ENSApi_DEFAULT_PORT),
     databaseUrl: DatabaseUrlSchema,
     databaseSchemaName: DatabaseSchemaNameSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,

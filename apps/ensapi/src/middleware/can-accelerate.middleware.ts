@@ -43,7 +43,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
   if (!didWarnNoProtocolAccelerationPlugin && !hasProtocolAccelerationPlugin) {
     didWarnNoProtocolAccelerationPlugin = true;
     console.warn(
-      `ENSAPI is connected to an ENSIndexer that does NOT include the ${PluginName.ProtocolAcceleration} plugin: ENSAPI will NOT be able to accelerate Resolution API requests, even if ?accelerate=true. Resolution requests will abide by the full Forward/Reverse Resolution specification, including RPC calls and CCIP-Read requests to external CCIP-Read Gateways.`,
+      `ENSApi is connected to an ENSIndexer that does NOT include the ${PluginName.ProtocolAcceleration} plugin: ENSApi will NOT be able to accelerate Resolution API requests, even if ?accelerate=true. Resolution requests will abide by the full Forward/Reverse Resolution specification, including RPC calls and CCIP-Read requests to external CCIP-Read Gateways.`,
     );
   }
 

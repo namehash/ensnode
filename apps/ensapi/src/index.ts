@@ -30,7 +30,7 @@ app.use(cors({ origin: "*" }));
 // NOTE: required for protocol tracing
 app.use(otel());
 
-// add ENSAPI Middlewares to all routes for convenience
+// add ENSApi Middlewares to all routes for convenience
 // NOTE: must mirror Variables type in apps/ensapi/src/lib/hono-factory.ts or c.var.* will not be
 // available at runtime
 app.use(ensIndexerPublicConfigMiddleware);
@@ -64,7 +64,7 @@ const server = serve(
     port: config.port,
   },
   async (info) => {
-    console.log(`ENSAPI listening on port ${info.port} with config:`);
+    console.log(`ENSApi listening on port ${info.port} with config:`);
     // TODO: pretty-print obfuscated EnsApiConfig
     console.log(JSON.stringify(config, null, 2));
 

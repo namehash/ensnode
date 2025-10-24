@@ -1,5 +1,5 @@
 import { buildConfigFromEnvironment } from "@/config/config.schema";
-import { ENSAPI_DEFAULT_PORT } from "@/config/defaults";
+import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import { EnsApiEnvironment } from "@/config/environment";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 import { RpcConfig } from "@ensnode/ensnode-sdk/internal";
@@ -20,7 +20,7 @@ describe("buildConfigFromEnvironment", () => {
     const config = buildConfigFromEnvironment(BASE_ENV);
 
     expect(config).toStrictEqual({
-      port: ENSAPI_DEFAULT_PORT,
+      port: ENSApi_DEFAULT_PORT,
       databaseUrl: BASE_ENV.DATABASE_URL,
       databaseSchemaName: BASE_ENV.DATABASE_SCHEMA,
       ensIndexerUrl: new URL(BASE_ENV.ENSINDEXER_URL),

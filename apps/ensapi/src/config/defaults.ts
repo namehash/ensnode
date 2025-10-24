@@ -1,1 +1,1 @@
-export const ENSAPI_DEFAULT_PORT = 4334;
+export const ENSApi_DEFAULT_PORT = 4334;

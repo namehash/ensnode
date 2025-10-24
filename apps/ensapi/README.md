@@ -1,4 +1,4 @@
-# ENS API
+# ENSApi
 
 Serves ENSNode's ENS API.
 
