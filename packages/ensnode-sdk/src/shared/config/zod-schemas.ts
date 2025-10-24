@@ -4,7 +4,7 @@ import { z } from "zod/v4";
 import { deserializeChainId } from "../deserialize";
 import { ChainId } from "../types";
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
-import { makeChainIdStringSchema, makePositiveIntegerSchema, makeUrlSchema } from "../zod-schemas";
+import { makeChainIdStringSchema, makeUrlSchema } from "../zod-schemas";
 import { RpcConfig } from "./types";
 import {
   invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
