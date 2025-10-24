@@ -23,13 +23,6 @@ export interface EnsIndexerUrlEnvironment {
 }
 
 /**
- * Environment variables for ENSNamespace configuration.
- */
-export interface EnsNamespaceEnvironment {
-  NAMESPACE?: string;
-}
-
-/**
  * Environment variables for port configuration.
  */
 export interface PortEnvironment {

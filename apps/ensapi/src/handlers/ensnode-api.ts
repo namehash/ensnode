@@ -1,5 +1,6 @@
 import { factory } from "@/lib/hono-factory";
 
+import config from "@/config";
 import {
   IndexingStatusResponseCodes,
   IndexingStatusResponseError,
@@ -12,7 +13,7 @@ const app = factory.createApp();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
-  return c.json(serializeENSIndexerPublicConfig(c.var.ensIndexerPublicConfig));
+  return c.json(serializeENSIndexerPublicConfig(config.ensIndexerPublicConfig));
 });
 
 // include ENSIndexer Indexing Status endpoint

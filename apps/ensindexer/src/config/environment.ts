@@ -1,7 +1,6 @@
 import {
   DatabaseEnvironment,
   EnsIndexerUrlEnvironment,
-  EnsNamespaceEnvironment,
   RpcEnvironment,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -14,8 +13,8 @@ import {
  */
 export type ENSIndexerEnvironment = DatabaseEnvironment &
   EnsIndexerUrlEnvironment &
-  RpcEnvironment &
-  EnsNamespaceEnvironment & {
+  RpcEnvironment & {
+    NAMESPACE?: string;
     PLUGINS?: string;
     SUBGRAPH_COMPAT?: string;
 

@@ -9,7 +9,6 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
-import { ensIndexerPublicConfigMiddleware } from "@/middleware/ensindexer-public-config.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
@@ -32,7 +31,6 @@ app.use(otel());
 // add ENSApi Middlewares to all routes for convenience
 // NOTE: must mirror Variables type in apps/ensapi/src/lib/hono-factory.ts or c.var.* will not be
 // available at runtime
-app.use(ensIndexerPublicConfigMiddleware);
 app.use(indexingStatusMiddleware);
 app.use(canAccelerateMiddleware);
 
@@ -67,7 +65,7 @@ const server = serve(
     // TODO: pretty-print obfuscated EnsApiConfig
     console.log(JSON.stringify(config, null, 2));
 
-    // self-healthcheck to connect to ENSIndexer & warm config/indexing-status cache
+    // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
   },
 );
@@ -96,3 +94,8 @@ const gracefulShutdown = async () => {
 // graceful shutdown
 process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
+
+process.on("uncaughtException", async (error) => {
+  console.error(`Fatal Error:`, error);
+  await gracefulShutdown();
+});

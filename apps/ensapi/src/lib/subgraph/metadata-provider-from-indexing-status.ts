@@ -1,5 +1,4 @@
 import config from "@/config";
-import type { EnsIndexerPublicConfigVariables } from "@/middleware/ensindexer-public-config.middleware";
 import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
 import {
   ChainIndexingStatusIds,
@@ -10,11 +9,10 @@ import type { MetadataProvider } from "@ensnode/ponder-subgraph";
 import { zeroHash } from "viem";
 
 export function metadataProviderFromIndexingStatus(
-  ensIndexerPublicConfig: EnsIndexerPublicConfigVariables["ensIndexerPublicConfig"],
   indexingStatus: IndexingStatusVariables["indexingStatus"],
 ): MetadataProvider {
   return {
-    deployment: ensIndexerPublicConfig.versionInfo.ensIndexer,
+    deployment: config.ensIndexerPublicConfig.versionInfo.ensIndexer,
     getLastIndexedENSRootChainBlock: async () => {
       switch (indexingStatus.status) {
         case "rejected": {

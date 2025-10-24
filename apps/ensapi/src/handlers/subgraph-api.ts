@@ -41,7 +41,6 @@ app.use(async (c, next) => {
     graphqlSchema: buildGraphQLSchema({
       schema: subgraphSchema,
       metadataProvider: metadataProviderFromIndexingStatus(
-        c.var.ensIndexerPublicConfig,
         c.var.indexingStatus,
       ),
       // describes the polymorphic (interface) relationships in the schema

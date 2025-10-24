@@ -1,3 +1,4 @@
+import config from "@/config";
 import { factory } from "@/lib/hono-factory";
 import {
   Duration,
@@ -38,7 +39,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
   /// Protocol Acceleration Plugin Availability
   /////////////////////////////////////////////
 
-  const hasProtocolAccelerationPlugin = c.var.ensIndexerPublicConfig.plugins.includes(
+  const hasProtocolAccelerationPlugin = config.ensIndexerPublicConfig.plugins.includes(
     PluginName.ProtocolAcceleration,
   );
 

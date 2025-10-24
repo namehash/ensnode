@@ -1,3 +1,4 @@
+import config from "@/config";
 import { factory } from "@/lib/hono-factory";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
@@ -7,7 +8,7 @@ export const requireCorePluginMiddleware = (core: "subgraph" | "ensv2") =>
   factory.createMiddleware(async (c, next) => {
     if (
       core === "subgraph" &&
-      !c.var.ensIndexerPublicConfig.plugins.includes(PluginName.Subgraph)
+      !config.ensIndexerPublicConfig.plugins.includes(PluginName.Subgraph)
     ) {
       return c.notFound();
     }
