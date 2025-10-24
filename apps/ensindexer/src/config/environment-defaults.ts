@@ -1,4 +1,4 @@
-import { ENSIndexerEnvironment } from "@/config/types";
+import { ENSIndexerEnvironment } from "@/config/environment";
 import { DeepPartial, PluginName } from "@ensnode/ensnode-sdk";
 
 /**

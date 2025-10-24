@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Image Version (Docker Tag)'
+        description: "Image Version (Docker Tag)"
         type: string
         required: true
 
@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [ensindexer, ensadmin, ensrainbow]
+        app: [ensindexer, ensadmin, ensrainbow, ensapi]
 
     steps:
       - name: Checkout repository

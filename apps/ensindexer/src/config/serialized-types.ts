@@ -1,6 +1,7 @@
 import type { ChainId, ChainIdString, UrlString } from "@ensnode/ensnode-sdk";
+import { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
-import type { ENSIndexerConfig, RpcConfig } from "./types";
+import type { ENSIndexerConfig } from "./types";
 
 /**
  * Serialized representation of {@link RpcConfig}

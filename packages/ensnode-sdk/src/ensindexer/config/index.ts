@@ -1,6 +1,6 @@
 export * from "./deserialize";
 export * from "./types";
-export { isSubgraphCompatible } from "./helpers";
+export * from "./is-subgraph-compatible";
 export * from "./serialize";
 export * from "./serialized-types";
 export * from "./labelset-utils";

@@ -110,6 +110,32 @@ export function starlight(): AstroIntegration {
           ],
         },
         {
+          label: "ENSApi",
+          link: "/ensapi",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSApi?",
+                  link: "/ensapi",
+                },
+              ],
+            },
+            {
+              label: "Using ENSApi",
+              collapsed: false,
+              autogenerate: { directory: "ensapi/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensapi/contributing" },
+            },
+          ],
+        },
+        {
           label: "ENSRainbow",
           link: "/ensrainbow",
           icon: "star",

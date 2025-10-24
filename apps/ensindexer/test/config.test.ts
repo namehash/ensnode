@@ -1,6 +1,7 @@
+import { ENSIndexerEnvironment } from "@/config/environment";
 import { EnvironmentDefaults } from "@/config/environment-defaults";
-import type { ENSIndexerEnvironment, RpcConfig } from "@/config/types";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
+import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
@@ -138,7 +139,7 @@ describe("config (with base env)", () => {
       await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
     });
 
-    it("throws an error if ENSINDEXER_URL is undefined (explicitly testing the refine)", async () => {
+    it("throws an error if ENSINDEXER_URL is undefined", async () => {
       vi.stubEnv("ENSINDEXER_URL", undefined);
       await expect(getConfig()).rejects.toThrow(/ENSINDEXER_URL must be a valid URL string/i);
     });
@@ -349,7 +350,7 @@ describe("config (with base env)", () => {
 
     it("throws an error if RPC_URL_1 is not a valid URL", async () => {
       vi.stubEnv("RPC_URL_1", "invalid url");
-      await expect(getConfig()).rejects.toThrow(/RPC URL must be a valid URL string/i);
+      await expect(getConfig()).rejects.toThrow(/must be a valid URL string/i);
     });
 
     it("throws an error if RPC_URL_1 includes less than one HTTP protocol URL", async () => {

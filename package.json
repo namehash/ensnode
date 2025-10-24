@@ -2,7 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.18.1",
+  "packageManager": "pnpm@10.19.0",
   "scripts": {
     "lint": "pnpm -r --parallel --aggregate-output lint",
     "lint:ci": "pnpm -r --parallel --aggregate-output lint:ci",
@@ -15,6 +15,7 @@
     "docker:build:ensindexer": "docker build -f apps/ensindexer/Dockerfile -t ghcr.io/namehash/ensnode/ensindexer:latest .",
     "docker:build:ensadmin": "docker build -f apps/ensadmin/Dockerfile -t ghcr.io/namehash/ensnode/ensadmin:latest .",
     "docker:build:ensrainbow": "docker build -f apps/ensrainbow/Dockerfile -t ghcr.io/namehash/ensnode/ensrainbow:latest .",
+    "docker:build:ensapi": "docker build -f apps/ensapi/Dockerfile -t ghcr.io/namehash/ensnode/ensapi:latest .",
     "otel-desktop-viewer": "docker run -p 8000:8000 -p 4317:4317 -p 4318:4318 davetron5000/otel-desktop-viewer:alpine-3"
   },
   "devDependencies": {
@@ -34,7 +35,9 @@
       "@graphiql/react>@headlessui/react": "2.2.0",
       "esbuild@<=0.24.2": ">=0.25.0",
       "tmp@<=0.2.3": ">=0.2.4",
-      "ponder>vite": "5.4.21",
+      "ponder>vite": "6.4.1",
+      "@tailwindcss/vite>vite": "7.1.11",
+      "pino": "10.1.0",
       "axios@<1.12.0": ">=1.12.0"
     },
     "ignoredBuiltDependencies": [

@@ -9,6 +9,7 @@
       "ensindexer",
       "ensadmin",
       "ensrainbow",
+      "ensapi",
       "@ensnode/datasources",
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ponder-metadata",

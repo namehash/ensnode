@@ -12,11 +12,11 @@ import { describe, expect, it } from "vitest";
 import {
   ChainMetadata,
   createChainIndexingSnapshot,
-} from "@/api/lib/indexing-status/ponder-metadata/chains";
+} from "@/lib/indexing-status/ponder-metadata/chains";
 import {
   PonderConfigType,
   getChainsBlockrange,
-} from "@/api/lib/indexing-status/ponder-metadata/config";
+} from "@/lib/indexing-status/ponder-metadata/config";
 
 // Minimal helpers to simulate BlockRef
 const blockRef = (number: number, timestamp: number = 0): BlockRef => ({ number, timestamp });

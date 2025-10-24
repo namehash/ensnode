@@ -165,6 +165,7 @@ export const makeUrlSchema = (valueLabel: string = "Value") =>
   z
     .url({
       error: `${valueLabel} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
+      abort: true,
     })
     .transform((v) => new URL(v));
 
@@ -232,12 +233,4 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     error() {
       return `Invalid ${valueLabel}. Supported ENS namespace IDs are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
-  });
-
-/**
- * Parses a numeric value as a port number.
- */
-export const makePortSchema = (valueLabel: string = "Port") =>
-  makePositiveIntegerSchema(valueLabel).max(65535, {
-    error: `${valueLabel} must be an integer between 1 and 65535.`,
   });

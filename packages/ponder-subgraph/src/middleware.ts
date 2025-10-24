@@ -52,7 +52,7 @@ export function subgraphGraphQLMiddleware(
         ? true
         : {
             maskError(error: any) {
-              console.error(error.originalError);
+              console.error(error);
               return error;
             },
           },
@@ -67,7 +67,8 @@ export function subgraphGraphQLMiddleware(
   });
 
   return createMiddleware(async (c) => {
-    const response = await yoga.handle(c.req.raw);
+    const response = await yoga.handle(c.req.raw, c.var);
+
     // TODO: Figure out why Yoga is returning 500 status codes for GraphQL errors.
     // @ts-expect-error
     response.status = 200;

@@ -5,8 +5,8 @@ import schema from "ponder:schema";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import { DEFAULT_EVM_COIN_TYPE, PluginName, evmChainIdToCoinType } from "@ensnode/ensnode-sdk";
+import { interpretNameRecordValue } from "@ensnode/ensnode-sdk/internal";
 
-import { interpretNameRecordValue } from "@/lib/interpret-record-values";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 /**

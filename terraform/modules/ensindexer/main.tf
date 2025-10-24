@@ -64,15 +64,15 @@ resource "render_web_service" "ensindexer" {
 
 # For details on "render_web_service", see:
 # https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
-resource "render_web_service" "ensindexer_api" {
-  name           = "ensindexer_api_${var.ensnode_indexer_type}"
+resource "render_web_service" "ensapi" {
+  name           = "ensapi_${var.ensnode_indexer_type}"
   plan           = "starter"
   region         = var.render_region
   environment_id = var.render_environment_id
 
   runtime_source = {
     image = {
-      image_url = "ghcr.io/namehash/ensnode/ensindexer"
+      image_url = "ghcr.io/namehash/ensnode/ensapi"
       tag       = var.ensnode_version
     }
   }
@@ -83,15 +83,11 @@ resource "render_web_service" "ensindexer_api" {
       ENSINDEXER_URL = {
         value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
       },
-      PONDER_COMMAND = {
-        value = "serve"
-      }
     }
   )
 
   # See https://render.com/docs/custom-domains
   custom_domains = [
-    { name : local.ensindexer_api_fqdn },
+    { name : local.ensapi_fqdn },
   ]
-
 }

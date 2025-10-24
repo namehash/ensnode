@@ -19,3 +19,4 @@ export * from "./account-id";
 export * from "./interpretation";
 export * from "./labelhash";
 export * from "./url";
+export * from "./null-bytes";

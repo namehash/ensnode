@@ -3,7 +3,6 @@ import { ByteArray, Hex, labelhash } from "viem";
 
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
-import { Label } from "@ensnode/ensnode-sdk";
 import {
   EnsRainbowServerLabelSet,
   type LabelSetId,

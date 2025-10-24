@@ -56,10 +56,6 @@ Ensure Postgres in the background, providing its connection details to ENSIndexe
 
 ### 2. Running ENSRainbow
 
-:::note[Running ENSRainbow in Development]
-To run ENSRainbow in development, the rainbow table data dir must be available. Follow instructions in the [ENSRainbow Contribution Guide](/ensrainbow/contributing) to set up your local environment.
-:::
-
 ```bash
 # from monorepo root
 pnpm run -F @ensnode/ensrainbow serve
@@ -69,6 +65,10 @@ pnpm run serve
 ```
 
 ### 3. Running ENSIndexer
+
+:::note
+ENSIndexer's `.env.local` should be placed at `apps/ensindexer/.env.local`, _not_ at the monorepo root.
+:::
 
 :::note[Running ENSIndexer in Development]
 Follow instructions in the [ENSIndexer Contribution Guide](/ensindexer/contributing) to set up your local environment.
@@ -82,7 +82,25 @@ pnpm run -F ensindexer dev
 pnpm run dev
 ```
 
-### 4. Running ENSAdmin
+### 4. Running ENSApi
+
+:::note
+ENSApi's `.env.local` should be placed at `apps/ensapi/.env.local`, _not_ at the monorepo root.
+:::
+
+```bash
+# from monorepo root
+pnpm run -F ensapi dev
+
+# or from apps/ensapi
+pnpm run dev
+```
+
+### 5. Running ENSAdmin
+
+:::note
+ENSAdmins's `.env.local` should be placed at `apps/ensadmin/.env.local`, _not_ at the monorepo root.
+:::
 
 ```bash
 cd apps/ensadmin
@@ -96,10 +114,6 @@ pnpm run -F ensadmin dev
 # or from apps/ensadmin
 pnpm run dev
 ```
-
-:::note
-ENSAdmins's `.env.local` should be placed at `apps/ensadmin/.env.local`, _not_ at the monorepo root.
-:::
 
 ## Using Docker Compose
 
@@ -131,6 +145,7 @@ docker compose up -d
 ```
 
 - **ENSIndexer**: Available at [http://localhost:42069](http://localhost:42069)
+- **ENSApi**: Available at [http://localhost:42069](http://localhost:4334)
 - **ENSRainbow**: Available at [http://localhost:3223](http://localhost:3223)
 - **ENSAdmin**: Available at [http://localhost:4173](http://localhost:4173)
 - **PostgreSQL**: Available on port `5432`
