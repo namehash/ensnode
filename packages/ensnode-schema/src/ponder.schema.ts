@@ -3,5 +3,5 @@
  */
 export * from "./schemas/subgraph.schema";
 export * from "./schemas/protocol-acceleration.schema";
-export * from "./schemas/referrals.schema";
+export * from "./schemas/subregistry.schema";
 export * from "./schemas/tokenscope.schema";

@@ -1,6 +1,7 @@
 export * from "./address";
 export * from "./cache";
 export * from "./collections";
+export * from "./currencies";
 export * from "./types";
 export * from "./serialize";
 export * from "./serialized-types";

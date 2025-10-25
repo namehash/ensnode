@@ -109,7 +109,7 @@ jobs:
           NAMESPACE: mainnet
           DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres
           DATABASE_SCHEMA: public
-          PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope
+          PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,subregistry,tokenscope
           RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
           RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
           RPC_URL_8453: ${{ secrets.BASE_RPC_URL || 'https://base.drpc.org' }}

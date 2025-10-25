@@ -1,6 +1,6 @@
+import { Price } from "@ensnode/ensnode-sdk";
 import { Address, Hex } from "viem";
 
-import { Price } from "@/lib/currencies";
 import { SupportedNFT } from "@/lib/tokenscope/assets";
 
 export interface SupportedPayment {

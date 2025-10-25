@@ -1,5 +1,5 @@
 import { type CoinType } from "@ensdomains/address-encoder";
-import { type Address, isAddress } from "viem";
+import { type Address, type Hex, bytesToHex, hexToBytes, isAddress, isHex } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -19,6 +19,8 @@ import type {
   Duration,
   UnixTimestamp,
 } from "./types";
+
+import { CurrencyIds, type Price } from "./currencies";
 
 /**
  * Zod `.check()` function input.
@@ -130,7 +132,7 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
 /**
  * Parses a serialized representation of an EVM address into a lowercase Address.
  */
-export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
+export const makeLowercaseAddressSchema = (valueLabel: string = "Value") =>
   z
     .string()
     .check((ctx) => {
@@ -240,4 +242,54 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
 export const makePortSchema = (valueLabel: string = "Port") =>
   makePositiveIntegerSchema(valueLabel).max(65535, {
     error: `${valueLabel} must be an integer between 1 and 65535.`,
+  });
+
+/**
+ * Make a schema for {@link Hex} representation of bytes array.
+ */
+export const makeHexStringSchema = (
+  { expectedLength }: { expectedLength: number },
+  valueLabel: string = "String representation of bytes",
+) =>
+  z
+    .string()
+    .check(function invariant_stringStartsWith0x(ctx) {
+      if (!ctx.value.startsWith("0x")) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} type must start with '0x'.`,
+        });
+      }
+    })
+    .check(function invariant_rawReferrerIs32Bytes(ctx) {
+      const bytesString = ctx.value.slice(2);
+      const bytesStringLength = bytesString.length / 2;
+
+      if (bytesStringLength !== expectedLength) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must be represented by exactly ${expectedLength} bytes. Provided bytes count: ${bytesStringLength}.`,
+        });
+      }
+    })
+    .transform((v) => v as Hex);
+
+/**
+ * Schema for {@link Price} type.
+ */
+export const makePriceSchema = (valueLabel: string = "Cost") =>
+  z.strictObject({
+    currency: z.enum(Object.values(CurrencyIds), {
+      error: `${valueLabel} currency must be a valid CurrencyId.`,
+    }),
+
+    amount: z.coerce
+      .bigint({
+        error: `${valueLabel} must represent a bigint.`,
+      })
+      .nonnegative({
+        error: `${valueLabel} must not be negative.`,
+      }),
   });

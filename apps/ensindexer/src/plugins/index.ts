@@ -10,7 +10,7 @@ import threednsPlugin from "./subgraph/plugins/threedns/plugin";
 
 // Core-Schema-Indepdendent Plugins
 import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
-import referralsPlugin from "./referrals/plugin";
+import subRegistryPlugin from "./subregistry/plugin";
 import tokenScopePlugin from "./tokenscope/plugin";
 
 export const ALL_PLUGINS = [
@@ -20,7 +20,7 @@ export const ALL_PLUGINS = [
   threednsPlugin,
   tokenScopePlugin,
   protocolAccelerationPlugin,
-  referralsPlugin,
+  subRegistryPlugin,
 ] as const;
 
 /**
