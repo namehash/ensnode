@@ -26,6 +26,7 @@ jobs:
       TARGET_ENVIRONMENT: ${{ inputs.target }}
       TAG: ${{ inputs.tag }}
       ENSINDEXER_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensindexer:${{ inputs.tag }}"
+      ENSAPI_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensapi:${{ inputs.tag }}"
       ENSRAINBOW_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensrainbow:${{ inputs.tag }}"
       ENSADMIN_DOCKER_IMAGE: "ghcr.io/namehash/ensnode/ensadmin:${{ inputs.tag }}"
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
@@ -39,7 +40,7 @@ jobs:
       # AWS_REGION should be the same as Terraform S3 bucket state region.
       AWS_REGION: us-east-1
       TF_VAR_ensnode_version: ${{ inputs.tag }}
-      TF_VAR_ensindexer_label_set_id:  ${{ vars.LABEL_SET_ID }}
+      TF_VAR_ensindexer_label_set_id: ${{ vars.LABEL_SET_ID }}
       TF_VAR_ensindexer_label_set_version: ${{ vars.LABEL_SET_VERSION }}
       TF_VAR_ensrainbow_label_set_id: ${{ vars.LABEL_SET_ID }}
       TF_VAR_ensrainbow_label_set_version: ${{ vars.LABEL_SET_VERSION }}
@@ -51,21 +52,21 @@ jobs:
       TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID }}
       # RPC URLs
       # Mainnet
-      TF_VAR_ethereum_mainnet_rpc_url:   ${{ secrets.ETH_MAINNET_RPC_URL }}
-      TF_VAR_base_mainnet_rpc_url:      ${{ secrets.BASE_MAINNET_RPC_URL }}
-      TF_VAR_linea_mainnet_rpc_url:     ${{ secrets.LINEA_MAINNET_RPC_URL }}
-      TF_VAR_optimism_mainnet_rpc_url:  ${{ secrets.OPTIMISM_MAINNET_RPC_URL }}
-      TF_VAR_arbitrum_mainnet_rpc_url:  ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
-      TF_VAR_scroll_mainnet_rpc_url:    ${{ secrets.SCROLL_MAINNET_RPC_URL }}
+      TF_VAR_ethereum_mainnet_rpc_url: ${{ secrets.ETH_MAINNET_RPC_URL }}
+      TF_VAR_base_mainnet_rpc_url: ${{ secrets.BASE_MAINNET_RPC_URL }}
+      TF_VAR_linea_mainnet_rpc_url: ${{ secrets.LINEA_MAINNET_RPC_URL }}
+      TF_VAR_optimism_mainnet_rpc_url: ${{ secrets.OPTIMISM_MAINNET_RPC_URL }}
+      TF_VAR_arbitrum_mainnet_rpc_url: ${{ secrets.ARBITRUM_MAINNET_RPC_URL }}
+      TF_VAR_scroll_mainnet_rpc_url: ${{ secrets.SCROLL_MAINNET_RPC_URL }}
       # Sepolia
-      TF_VAR_ethereum_sepolia_rpc_url:   ${{ secrets.ETH_SEPOLIA_RPC_URL }}
-      TF_VAR_base_sepolia_rpc_url:      ${{ secrets.BASE_SEPOLIA_RPC_URL }}
-      TF_VAR_linea_sepolia_rpc_url:     ${{ secrets.LINEA_SEPOLIA_RPC_URL }}
-      TF_VAR_optimism_sepolia_rpc_url:  ${{ secrets.OPTIMISM_SEPOLIA_RPC_URL }}
-      TF_VAR_arbitrum_sepolia_rpc_url:  ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
-      TF_VAR_scroll_sepolia_rpc_url:    ${{ secrets.SCROLL_SEPOLIA_RPC_URL }}
+      TF_VAR_ethereum_sepolia_rpc_url: ${{ secrets.ETH_SEPOLIA_RPC_URL }}
+      TF_VAR_base_sepolia_rpc_url: ${{ secrets.BASE_SEPOLIA_RPC_URL }}
+      TF_VAR_linea_sepolia_rpc_url: ${{ secrets.LINEA_SEPOLIA_RPC_URL }}
+      TF_VAR_optimism_sepolia_rpc_url: ${{ secrets.OPTIMISM_SEPOLIA_RPC_URL }}
+      TF_VAR_arbitrum_sepolia_rpc_url: ${{ secrets.ARBITRUM_SEPOLIA_RPC_URL }}
+      TF_VAR_scroll_sepolia_rpc_url: ${{ secrets.SCROLL_SEPOLIA_RPC_URL }}
       # Holesky
-      TF_VAR_ethereum_holesky_rpc_url:   ${{ secrets.ETH_HOLESKY_RPC_URL }}
+      TF_VAR_ethereum_holesky_rpc_url: ${{ secrets.ETH_HOLESKY_RPC_URL }}
 
     steps:
       - name: Checkout repository
@@ -76,6 +77,7 @@ jobs:
       - name: Check if Docker images exists
         run: |
           docker manifest inspect ${{ env.ENSINDEXER_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSINDEXER_DOCKER_IMAGE }}"; exit 1; }
+          docker manifest inspect ${{ env.ENSAPI_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSAPI_DOCKER_IMAGE }}"; exit 1; }
           docker manifest inspect ${{ env.ENSRAINBOW_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSRAINBOW_DOCKER_IMAGE }}"; exit 1; }
           docker manifest inspect ${{ env.ENSADMIN_DOCKER_IMAGE }} || { echo "Given docker image does not exist: ${{ env.ENSADMIN_DOCKER_IMAGE }}"; exit 1; }
 
@@ -165,19 +167,19 @@ jobs:
           }
 
           #ALPHA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}       ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}       ${{ env.ENSAPI_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}   ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #MAINNET
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}     ${{ env.ENSAPI_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #ALPHA-SEPOLIA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}     ${{ env.ENSAPI_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #SEPOLIA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}     ${{ env.ENSAPI_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #HOLESKY
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}     ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_API_SVC_ID}     ${{ env.ENSAPI_DOCKER_IMAGE }}
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${HOLESKY_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #ENSRAINBOW
           update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}      ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
