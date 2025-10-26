@@ -197,7 +197,9 @@ function UnsupportedOmnichainIndexingStatusMessage({
           <p>Current omnichain indexing status:</p>
           <Badge
             className="uppercase text-xs leading-none"
-            title={`Current omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainIndexingStatus)}`}
+            title={`Current omnichain indexing status: ${formatOmnichainIndexingStatus(
+              omnichainIndexingStatus,
+            )}`}
           >
             {formatOmnichainIndexingStatus(omnichainIndexingStatus)}
           </Badge>

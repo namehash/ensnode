@@ -10,20 +10,27 @@ export function Registrations() {
 
   if (ensIndexerConfigQuery.isError) {
     return (
-      <RecentRegistrations
-        error={{
-          title: "ENSIndexerConfig error",
-          description: ensIndexerConfigQuery.error.message,
-        }}
-      />
+      <section className="flex flex-col gap-6 p-6">
+        <RecentRegistrations
+          error={{
+            title: "ENSIndexerConfig error",
+            description: ensIndexerConfigQuery.error.message,
+          }}
+        />
+      </section>
     );
   }
 
   if (indexingStatusQuery.isError) {
     return (
-      <RecentRegistrations
-        error={{ title: "IndexingStatus error", description: indexingStatusQuery.error.message }}
-      />
+      <section className="flex flex-col gap-6 p-6">
+        <RecentRegistrations
+          error={{
+            title: "IndexingStatus error",
+            description: indexingStatusQuery.error.message,
+          }}
+        />
+      </section>
     );
   }
 
@@ -43,12 +50,14 @@ export function Registrations() {
   // it can still refer to a server-side error
   if (indexingStatus.responseCode === IndexingStatusResponseCodes.Error) {
     return (
-      <RecentRegistrations
-        error={{
-          title: "IndexingStatus error",
-          description: "Indexing Status is currently unavailable.",
-        }}
-      />
+      <section className="flex flex-col gap-6 p-6">
+        <RecentRegistrations
+          error={{
+            title: "IndexingStatus error",
+            description: "Indexing Status is currently unavailable.",
+          }}
+        />
+      </section>
     );
   }
 
