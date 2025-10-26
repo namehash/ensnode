@@ -27,61 +27,54 @@ import { Replace } from "lucide-react";
 import { ReactNode } from "react";
 
 /**
- * Reusable ENSNode card wrapper that provides consistent header and loading state
+ * Reusable ENSNode card wrapper that provides consistent header and accepts children content
  */
 export interface ENSNodeCardProps {
-  isLoading?: boolean;
-  children?: ReactNode;
+  children: ReactNode;
 }
 
-export function ENSNodeCard({ isLoading = false, children }: ENSNodeCardProps) {
-  const baseCardTitleStyles = "flex items-center gap-2 text-xl";
+export function ENSNodeCard({ children }: ENSNodeCardProps) {
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
-
-  if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className={baseCardTitleStyles}>
-            <ENSNodeIcon width={28} height={28} />
-            <span>ENSNode</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className={cn(cardContentStyles, "max-sm:pt-0")}>
-          <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
-            {["ENSDb", "ENSIndexer", "ENSRainbow"].map((app) => (
-              <Card key={`${app}-loading`} className="animate-pulse">
-                <CardHeader className="max-sm:p-3">
-                  <div className="h-6 bg-muted rounded w-1/3" />
-                </CardHeader>
-                <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className={baseCardTitleStyles}>
+        <CardTitle className="flex items-center gap-2 text-xl">
           <ENSNodeIcon width={28} height={28} />
           <span>ENSNode</span>
         </CardTitle>
       </CardHeader>
       <CardContent className={cn(cardContentStyles, "max-sm:pt-0")}>{children}</CardContent>
     </Card>
+  );
+}
+
+/**
+ * Loading skeleton content for ENSNodeCard
+ */
+function ENSNodeCardLoadingSkeleton() {
+  const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
+
+  return (
+    <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
+      {["ENSDb", "ENSIndexer", "ENSRainbow"].map((app) => (
+        <Card key={`${app}-loading`} className="animate-pulse">
+          <CardHeader className="max-sm:p-3">
+            <div className="h-6 bg-muted rounded w-1/3" />
+          </CardHeader>
+          <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 }
 
@@ -129,7 +122,11 @@ export function ENSNodeConfigInfoView({
 
   // Show ENSNode card - shell with skeleton while loading, or content when ready
   if (isLoading || !ensIndexerConfig) {
-    return <ENSNodeCard isLoading={true} />;
+    return (
+      <ENSNodeCard>
+        <ENSNodeCardLoadingSkeleton />
+      </ENSNodeCard>
+    );
   }
 
   return <ENSNodeConfigCardDisplay ensIndexerConfig={ensIndexerConfig} />;
