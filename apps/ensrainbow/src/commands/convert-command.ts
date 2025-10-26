@@ -76,7 +76,7 @@ function setupWriteStream(outputFile: string): ReturnType<typeof createWriteStre
  */
 function writeHeader(
   outputStream: ReturnType<typeof createWriteStream>,
-  RainbowRecordCollectionType: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+  RainbowRecordCollectionType: any,
   labelSetId: LabelSetId,
   labelSetVersion: LabelSetVersion,
 ): void {

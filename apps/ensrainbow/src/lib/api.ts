@@ -82,7 +82,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       )}`,
     );
     const result = await server.heal(labelhash, clientLabelSet);
-    logger.debug(`Heal result:`, result);
+    logger.debug(result, `Heal result:`);
     return c.json(result, result.errorCode);
   });
 
@@ -95,7 +95,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   api.get("/v1/labels/count", async (c: HonoContext) => {
     logger.debug("Label count request");
     const result = await server.labelCount();
-    logger.debug(`Count result:`, result);
+    logger.debug(result, `Count result`);
     return c.json(result, result.errorCode);
   });
 
@@ -109,7 +109,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
         labelSet: server.getServerLabelSet(),
       },
     };
-    logger.debug(`Version result:`, result);
+    logger.debug(result, `Version result`);
     return c.json(result);
   });
 

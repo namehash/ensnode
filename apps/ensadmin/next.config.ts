@@ -10,9 +10,6 @@ const nextConfig: NextConfig = {
   // Docker builds require the standalone output
   // Vercel builds require the default (`undefined`) output
   output,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Enable source maps in production
   productionBrowserSourceMaps: true,
   async redirects() {
