@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConnectionsLibraryProvider } from "@/hooks/use-connections-library";
 import { ensAdminPublicUrl } from "@/lib/env";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -57,11 +58,13 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <ConnectionsLibraryProvider>
-            <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
-              {children}
-            </LayoutWrapper>
-          </ConnectionsLibraryProvider>
+          <Suspense>
+            <ConnectionsLibraryProvider>
+              <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
+                {children}
+              </LayoutWrapper>
+            </ConnectionsLibraryProvider>
+          </Suspense>
         </QueryClientProvider>
         <Toaster />
       </body>
