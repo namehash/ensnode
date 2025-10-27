@@ -65,12 +65,13 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     })
 
     .transform((chains) => {
-      let serializedChainIndexingStatusSnapshots = {} as Record<
+      const serializedChainIndexingStatusSnapshots = {} as Record<
         ChainIdString,
         ChainIndexingStatusSnapshot
       >;
 
       for (const chainName of indexedChainNames) {
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist
         const indexedChain = chains.get(chainName)!;
 
         serializedChainIndexingStatusSnapshots[indexedChain.chainId] =

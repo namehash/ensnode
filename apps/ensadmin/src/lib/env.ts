@@ -13,7 +13,7 @@ import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-
  */
 export function ensAdminPublicUrl(): HttpHostname {
   const envVarName = "ENSADMIN_PUBLIC_URL";
-  let envVarValue = process.env[envVarName];
+  const envVarValue = process.env[envVarName];
 
   if (!envVarValue) {
     const vercelAppPublicUrl = getVercelAppPublicUrl();

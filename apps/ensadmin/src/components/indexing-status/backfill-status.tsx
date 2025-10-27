@@ -3,14 +3,12 @@
  * the {@link OmnichainIndexingStatusSnapshotBackfill} indexing status object.
  */
 
-import { fromUnixTime } from "date-fns";
 import { Clock } from "lucide-react";
 
 import {
   ChainIndexingStatusIds,
   getTimestampForHighestOmnichainKnownBlock,
   getTimestampForLowestOmnichainStartBlock,
-  OmnichainIndexingStatusSnapshotBackfill,
   type RealtimeIndexingStatusProjection,
   sortChainStatusesByStartBlockAsc,
   type UnixTimestamp,

@@ -4,9 +4,9 @@
  * This is currently the ONLY way to create new .ensrainbow files from scratch.
  */
 
-import { createReadStream, createWriteStream } from "fs";
-import { createInterface } from "readline";
-import { createGunzip } from "zlib";
+import { createReadStream, createWriteStream } from "node:fs";
+import { createInterface } from "node:readline";
+import { createGunzip } from "node:zlib";
 
 import ProgressBar from "progress";
 
@@ -155,7 +155,6 @@ async function processRecords(
         logger.warn(`Unknown error processing record - skipping`);
       }
       invalidRecords++;
-      continue;
     }
   }
   return { processedRecords, invalidRecords };

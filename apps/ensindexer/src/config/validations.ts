@@ -1,13 +1,8 @@
 import { type Address, isAddress } from "viem";
 import type { z } from "zod/v4";
 
-import { type DatasourceName, getENSRootChainId } from "@ensnode/datasources";
-import {
-  asLowerCaseAddress,
-  isHttpProtocol,
-  isWebSocketProtocol,
-  uniq,
-} from "@ensnode/ensnode-sdk";
+import type { DatasourceName } from "@ensnode/datasources";
+import { asLowerCaseAddress, uniq } from "@ensnode/ensnode-sdk";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";

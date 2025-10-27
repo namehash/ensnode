@@ -3,25 +3,21 @@ import {
   deserializeIndexingStatusResponse,
   type SerializedIndexingStatusResponse,
 } from "./api";
-import {
-  type ConfigResponse,
-  type ErrorResponse,
-  type IndexingStatusResponse,
-  IndexingStatusResponseCodes,
-  type ResolvePrimaryNameRequest,
-  type ResolvePrimaryNameResponse,
-  type ResolvePrimaryNamesRequest,
-  type ResolvePrimaryNamesResponse,
-  type ResolveRecordsRequest,
-  type ResolveRecordsResponse,
+import type {
+  ConfigResponse,
+  ErrorResponse,
+  IndexingStatusResponse,
+  ResolvePrimaryNameRequest,
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesRequest,
+  ResolvePrimaryNamesResponse,
+  ResolveRecordsRequest,
+  ResolveRecordsResponse,
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
   deserializeENSIndexerPublicConfig,
-  deserializeRealtimeIndexingStatusProjection,
-  RealtimeIndexingStatusProjection,
   type SerializedENSIndexerPublicConfig,
-  SerializedRealtimeIndexingStatusProjection,
 } from "./ensindexer";
 import type { ResolverRecordsSelection } from "./resolution";
 

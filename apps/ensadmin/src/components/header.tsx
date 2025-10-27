@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const HeaderContext = React.createContext<{ className?: string } | null>(null);
 
-function useHeaderContext() {
+function _useHeaderContext() {
   const context = React.useContext(HeaderContext);
   if (!context) {
     throw new Error("Header components must be used within a Header");

@@ -2,7 +2,6 @@
  * This file defines UI components for presenting {@link BlockRef}.
  */
 
-import { fromUnixTime } from "date-fns";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
 import type { BlockRef, ChainId } from "@ensnode/ensnode-sdk";

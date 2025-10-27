@@ -15,13 +15,14 @@ import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
 
 import { buildDataLoaderCache } from "./graphql";
+import type { Drizzle } from "./types";
 
 export function subgraphGraphQLMiddleware(
   {
     drizzle,
     graphqlSchema,
   }: {
-    drizzle: any;
+    drizzle: Drizzle;
     graphqlSchema: GraphQLSchema;
   },
   {
@@ -52,9 +53,10 @@ export function subgraphGraphQLMiddleware(
       process.env.NODE_ENV === "production"
         ? true
         : {
-            maskError(error: any) {
+            maskError(error: unknown) {
               console.error(error);
-              return error;
+              if (error instanceof Error) return error;
+              return new Error(`Internal Server Error`);
             },
           },
     logging: false,

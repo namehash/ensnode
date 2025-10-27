@@ -1,6 +1,6 @@
 import { labelhash, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
-import { ZodError, z } from "zod/v4";
+import { ZodError } from "zod/v4";
 
 import { DEFAULT_EVM_CHAIN_ID } from "@ensnode/ensnode-sdk";
 

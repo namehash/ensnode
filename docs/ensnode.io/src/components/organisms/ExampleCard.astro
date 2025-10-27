@@ -1,6 +1,5 @@
 ---
 import { ENSADMIN_URL } from "astro:env/client";
-import { Icon } from "astro-icon/components";
 
 import type { SavedQuery } from "../../data/savedQueries";
 
@@ -22,7 +21,7 @@ const createGraphiQLUrl = (query: string, variables: string): string => {
   }
 };
 
-const graphiqlUrl = createGraphiQLUrl(example.query, example.variables);
+const _graphiqlUrl = createGraphiQLUrl(example.query, example.variables);
 ---
 
 <div data-example={JSON.stringify(example)} class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col p-6 justify-between space-y-6">

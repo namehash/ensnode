@@ -8,6 +8,11 @@
       }
     }
   },
+  "linter": {
+    "rules": {
+      "recommended": false
+    }
+  },
   "css": {
     "parser": {
       "tailwindDirectives": true

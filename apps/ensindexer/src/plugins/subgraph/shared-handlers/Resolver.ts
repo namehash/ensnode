@@ -421,7 +421,9 @@ export async function handleDNSRecordDeleted({
 }
 
 export async function handleDNSZonehashChanged({
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: explicitly ignored
   context,
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: explicitly ignored
   event,
 }: {
   context: Context;
@@ -431,7 +433,9 @@ export async function handleDNSZonehashChanged({
 }
 
 export async function handleZoneCreated({
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: explicitly ignored
   context,
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: explicitly ignored
   event,
 }: {
   context: Context;

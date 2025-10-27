@@ -1,5 +1,5 @@
-import { join, resolve } from "path";
-import { fileURLToPath } from "url";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -19,7 +19,6 @@ import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
-import { logger } from "@/utils/logger";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;
@@ -31,10 +30,10 @@ export function validatePortConfiguration(cliPort: number): void {
   }
 }
 
-interface IngestArgs {
-  "input-file": string;
-  "data-dir": string;
-}
+// interface IngestArgs {
+//   "input-file": string;
+//   "data-dir": string;
+// }
 
 interface IngestProtobufArgs {
   "input-file": string;
@@ -221,7 +220,7 @@ export function createCLI(options: CLIOptions = {}) {
         },
       )
       .demandCommand(1, "You must specify a command")
-      .fail(function (msg, err, yargs) {
+      .fail((msg, err, yargs) => {
         if (process.env.VITEST) {
           // the test functions expect the default behavior of cli.parse to throw
           if (err) throw err;

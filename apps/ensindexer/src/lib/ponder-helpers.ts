@@ -332,7 +332,7 @@ export function mergeContractConfigs<CONTRACTS extends ContractConfig[]>(contrac
 
   return {
     // just use the first's ABI, they're all identical, no need to mergeAbis
-    abi: contracts[0]!.abi,
+    abi: contracts[0]?.abi,
     startBlock: Math.min(...startBlocks),
     address: addresses,
   };

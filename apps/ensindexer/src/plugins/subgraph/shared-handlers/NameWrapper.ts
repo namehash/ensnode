@@ -51,7 +51,8 @@ function decodeInterpretedNameWrapperName(
     }
 
     return {
-      label: literalLabelToInterpretedLabel(literalLabels[0]!), // ! ok due to length invariant above
+      // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
+      label: literalLabelToInterpretedLabel(literalLabels[0]!),
       name: literalLabelsToInterpretedName(literalLabels),
     };
   } catch {

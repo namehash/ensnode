@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import type { LabelHash } from "../../ens";
 import type { EnsRainbowClientLabelSet, EnsRainbowServerLabelSet } from "../../ensrainbow";
 import {
   buildEnsRainbowClientLabelSet,

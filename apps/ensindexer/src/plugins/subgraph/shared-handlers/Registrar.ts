@@ -159,8 +159,8 @@ export const makeRegistrarHandlers = ({
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByLabelHash(labelHash);
 
-      let label: InterpretedLabel | SubgraphInterpretedLabel | undefined = undefined;
-      let name: InterpretedName | SubgraphInterpretedName | undefined = undefined;
+      let label: InterpretedLabel | SubgraphInterpretedLabel | undefined;
+      let name: InterpretedName | SubgraphInterpretedName | undefined;
       if (config.isSubgraphCompatible) {
         // only update the label/name if label is subgraph-indexable
         if (isLabelSubgraphIndexable(healedLabel)) {

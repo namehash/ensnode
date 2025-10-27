@@ -233,6 +233,10 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
         // interpret text records (see `interpretTextRecordValue` for specific guarantees)
         return { call, result: interpretTextRecordValue(result) };
       }
+      default: {
+        // note: switch is exhaustive, but this makes biome happier about map always returning
+        return { call, result };
+      }
     }
   });
 }

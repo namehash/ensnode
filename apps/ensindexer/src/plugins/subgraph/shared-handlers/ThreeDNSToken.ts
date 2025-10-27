@@ -40,7 +40,7 @@ const getUriForTokenId = async (context: Context, tokenId: bigint): Promise<stri
   // https://ponder.sh/docs/indexing/read-contracts#multiple-chains
   return context.client.readContract({
     abi: context.contracts["threedns/ThreeDNSToken"].abi,
-    // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
+    // biome-ignore lint/style/noNonNullAssertion: NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
     address: context.contracts["threedns/ThreeDNSToken"].address! as Address,
     functionName: "uri",
     args: [tokenId],
@@ -79,8 +79,10 @@ function decodeFQDN(fqdn: DNSEncodedLiteralName): {
   const interpretedLabels = literalLabels as string[] as InterpretedLabel[];
 
   return {
-    labelHash: labelhashLiteralLabel(literalLabels[0]!), // ! ok due to length invariant above
-    label: interpretedLabels[0]!, // ! ok due to length invariant above
+    // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
+    labelHash: labelhashLiteralLabel(literalLabels[0]!),
+    // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
+    label: interpretedLabels[0]!,
     name: interpretedLabelsToInterpretedName(interpretedLabels),
   };
 }
@@ -115,7 +117,7 @@ export async function handleNewOwner({
   const node = makeSubdomainNode(labelHash, parentNode);
   let domain = await context.db.find(schema.subgraph_domain, { id: node });
 
-  // NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
+  // biome-ignore lint/style/noNonNullAssertion: NetworkConfig#address is `Address | Address[] | undefined`, but we know this is a single address
   const resolverAddress = context.contracts["threedns/Resolver"].address! as Address;
 
   // in ThreeDNS there's a hard-coded Resolver that all domains use
@@ -239,7 +241,7 @@ export async function handleRegistrationCreated({
     expiry: bigint;
   }>;
 }) {
-  const { node, tld, fqdn, registrant, controlBitmap, expiry } = event.args;
+  const { node, tld, fqdn, registrant, expiry } = event.args;
 
   await upsertAccount(context, registrant);
 
@@ -297,7 +299,7 @@ export async function handleRegistrationExtended({
   context: Context;
   event: EventWithArgs<{ node: Node; duration: bigint; newExpiry: bigint }>;
 }) {
-  const { node, duration, newExpiry } = event.args;
+  const { node, newExpiry } = event.args;
 
   // update domain expiry date
   await context.db.update(schema.subgraph_domain, { id: node }).set({ expiryDate: newExpiry });

@@ -1,6 +1,6 @@
-import { mkdtemp, rm } from "fs/promises";
-import { tmpdir } from "os";
-import { join } from "path";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";

@@ -19,11 +19,9 @@ import {
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
   deserializeENSIndexerPublicConfig,
-  deserializeRealtimeIndexingStatusProjection,
   OmnichainIndexingStatusIds,
   PluginName,
   type SerializedENSIndexerPublicConfig,
-  type SerializedOmnichainIndexingStatusSnapshotBackfill,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
 } from "./ensindexer";
 import type { ResolverRecordsSelection } from "./resolution";
@@ -134,7 +132,7 @@ const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeIndexingStatusRespo
   responseCode: IndexingStatusResponseCodes.Ok,
 } satisfies SerializedIndexingStatusResponseOk);
 
-const EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: IndexingStatusResponse =
+const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: IndexingStatusResponse =
   deserializeIndexingStatusResponse({
     realtimeProjection: {
       projectedAt: 1_499_456_547,

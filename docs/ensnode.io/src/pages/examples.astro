@@ -1,10 +1,5 @@
 ---
 import { getCollection } from "astro:content";
-import { Icon } from "astro-icon/components";
-
-import StaticHeader from "../components/molecules/StaticHeader.astro";
-import ExampleCard from "../components/organisms/ExampleCard.astro";
-import Layout from "../layouts/Layout.astro";
 
 const examples = await getCollection("examples");
 const examplesData = examples.map((example) => example.data);
@@ -14,7 +9,7 @@ examplesData.forEach((example) => {
   categoryMap.set(example.category, (categoryMap.get(example.category) || 0) + 1);
 });
 
-const categories = Array.from(categoryMap.entries())
+const _categories = Array.from(categoryMap.entries())
   .map(([name, count]) => ({ name, count }))
   .sort((a, b) => a.name.localeCompare(b.name));
 ---

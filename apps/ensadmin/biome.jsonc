@@ -5,5 +5,13 @@
     "parser": {
       "tailwindDirectives": true
     }
+  },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "style": {
+        "noNonNullAssertion": "on"
+      }
+    }
   }
 }

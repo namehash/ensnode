@@ -150,7 +150,7 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
     const isEndBlockForChainAllowed = chainEndBlocks.length === chainStartBlocks.length;
 
     // 3.b) Get the highest endBLock for the chain.
-    let chainHighestEndBlock =
+    const chainHighestEndBlock =
       isEndBlockForChainAllowed && chainEndBlocks.length > 0
         ? Math.max(...chainEndBlocks)
         : undefined;

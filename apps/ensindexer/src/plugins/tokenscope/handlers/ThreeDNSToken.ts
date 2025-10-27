@@ -75,8 +75,9 @@ export default function () {
       }
 
       for (let i = 0; i < event.args.ids.length; i++) {
-        // using ! as we know that ids and values have length > i
+        // biome-ignore lint/style/noNonNullAssertion: using ! as we know that ids and values have length > i
         const tokenId = event.args.ids[i]!;
+        // biome-ignore lint/style/noNonNullAssertion: using ! as we know that ids and values have length > i
         const value = event.args.values[i]!;
 
         const nft = buildSupportedNFT(

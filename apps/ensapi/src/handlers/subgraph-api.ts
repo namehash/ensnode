@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { createMiddleware } from "hono/factory";
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
 import * as schema from "@ensnode/ensnode-schema";

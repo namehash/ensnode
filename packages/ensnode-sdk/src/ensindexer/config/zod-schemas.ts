@@ -103,12 +103,12 @@ export const makeLabelSetVersionSchema = (valueLabel: string) => {
 export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") => {
   let valueLabelLabelSetId = valueLabel;
   let valueLabelLabelSetVersion = valueLabel;
-  if (valueLabel == "LABEL_SET") {
+  if (valueLabel === "LABEL_SET") {
     valueLabelLabelSetId = "LABEL_SET_ID";
     valueLabelLabelSetVersion = "LABEL_SET_VERSION";
   } else {
-    valueLabelLabelSetId = valueLabel + ".labelSetId";
-    valueLabelLabelSetVersion = valueLabel + ".labelSetVersion";
+    valueLabelLabelSetId = `${valueLabel}.labelSetId`;
+    valueLabelLabelSetVersion = `${valueLabel}.labelSetVersion`;
   }
   return z.object({
     labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),

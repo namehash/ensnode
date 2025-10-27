@@ -1,13 +1,12 @@
 import { type ChainId, type ChainIdString, serializeChainId } from "../../shared";
-import {
-  type SerializedCrossChainIndexingStatusSnapshot,
-  SerializedCurrentIndexingProjectionOmnichain,
-  type SerializedOmnichainIndexingStatusSnapshot,
-  type SerializedOmnichainIndexingStatusSnapshotBackfill,
-  type SerializedOmnichainIndexingStatusSnapshotCompleted,
-  type SerializedOmnichainIndexingStatusSnapshotFollowing,
-  type SerializedOmnichainIndexingStatusSnapshotUnstarted,
-  type SerializedRealtimeIndexingStatusProjection,
+import type {
+  SerializedCrossChainIndexingStatusSnapshot,
+  SerializedOmnichainIndexingStatusSnapshot,
+  SerializedOmnichainIndexingStatusSnapshotBackfill,
+  SerializedOmnichainIndexingStatusSnapshotCompleted,
+  SerializedOmnichainIndexingStatusSnapshotFollowing,
+  SerializedOmnichainIndexingStatusSnapshotUnstarted,
+  SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import {
   type ChainIndexingStatusSnapshot,

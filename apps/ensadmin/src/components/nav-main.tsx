@@ -49,7 +49,7 @@ export function NavMain({
       return url;
     }
 
-    if (searchParams && searchParams.toString()) {
+    if (searchParams?.toString()) {
       const separator = url.includes("?") ? "&" : "?";
       return `${url}${separator}${searchParams.toString()}`;
     }

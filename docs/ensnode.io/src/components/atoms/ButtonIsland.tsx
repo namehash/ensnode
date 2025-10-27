@@ -13,7 +13,7 @@ export type ButtonIslandProps = {
 };
 
 export default function ButtonIsland({ text, size, variant, linkData, styles }: ButtonIslandProps) {
-  return linkData != undefined ? (
+  return linkData !== undefined ? (
     <Button variant={variant} size={size} asChild className={styles || ""}>
       <Link target={linkData?.target || "_blank"} href={linkData.link}>
         {text}

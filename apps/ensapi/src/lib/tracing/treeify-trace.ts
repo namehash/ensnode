@@ -51,7 +51,7 @@ export function treeifySpans(trace: ReadableSpan[]): ProtocolTrace {
   for (const node of idToNode.values()) {
     const parentId = node.parentSpanContext?.spanId;
     if (parentId && idToNode.has(parentId)) {
-      idToNode.get(parentId)!.children.push(node);
+      idToNode.get(parentId)?.children.push(node);
     } else {
       roots.push(node);
     }

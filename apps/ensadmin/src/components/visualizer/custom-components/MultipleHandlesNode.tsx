@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: allow ! for handles */
 import { Handle, type NodeProps } from "@xyflow/react";
 
 import { cn } from "@/lib/utils";

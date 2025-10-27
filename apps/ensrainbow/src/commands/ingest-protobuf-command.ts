@@ -1,4 +1,4 @@
-import { createReadStream } from "fs";
+import { createReadStream } from "node:fs";
 
 import ProgressBar from "progress";
 import protobuf from "protobufjs";
@@ -39,7 +39,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
     let ingestionStatus: IngestionStatus;
     try {
       ingestionStatus = await db.getIngestionStatus();
-    } catch (e) {
+    } catch (_e) {
       const errorMessage =
         "Database is in an unknown state!\n" +
         "To fix this:\n" +
@@ -279,7 +279,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             headerRead = true;
             bytesRead += headerLength;
             logger.info("Header processed successfully. Reading records...");
-          } catch (e) {
+          } catch (_e) {
             // If we can't decode the header yet, we need more data
             // Don't proceed to read records until header is done
             return;
@@ -334,7 +334,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Move to the next message
             bytesRead += messageLength;
-          } catch (e) {
+          } catch (_e) {
             // If we can't decode a record message, we need more data
             break;
           }

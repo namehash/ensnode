@@ -50,8 +50,8 @@ export default function MockRelativeTimePage() {
     prefix?: string;
   }[] = useMemo(() => {
     const timestamp = mockRelativeTimestampData[selectedTime].date;
-    // since the value is hardcoded we are sure it exists
-    const relativeToForPast = mockRelativeTimestampData["Past"].relativeTo!;
+    // biome-ignore lint/style/noNonNullAssertion: since the value is hardcoded we are sure it exists
+    const relativeToForPast = mockRelativeTimestampData.Past.relativeTo!;
 
     return selectedTime === "Past"
       ? [
@@ -231,7 +231,7 @@ const RelativeTimePropCheck = ({
             side="top"
             className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
           >
-            {<p>{relativeTimePropsDescriptions.get(checkValue)!.get(checkName)}</p>}
+            {<p>{relativeTimePropsDescriptions.get(checkValue)?.get(checkName)}</p>}
           </TooltipContent>
         </Tooltip>
         {checkValue ? (

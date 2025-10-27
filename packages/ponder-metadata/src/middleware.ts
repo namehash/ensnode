@@ -179,7 +179,7 @@ export function ponderMetadata<
     }
 
     // fetch ENSRainbow version if available
-    let ensRainbowVersionInfo = undefined;
+    let ensRainbowVersionInfo: EnsRainbow.VersionInfo | undefined;
     if (query.ensRainbowVersion) {
       try {
         ensRainbowVersionInfo = await query.ensRainbowVersion();

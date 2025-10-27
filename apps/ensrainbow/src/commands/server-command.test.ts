@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
 
 import { serve } from "@hono/node-server";
 import type { Hono } from "hono";

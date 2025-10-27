@@ -58,7 +58,7 @@ function filterAndRemoveDuplicates(commits: any[]): AuthorInfo[] {
     const author = commit.author;
 
     // Skip bot commits (like dependabot)
-    if (author && author.id && author.login && !author.login.includes("bot")) {
+    if (author?.id && author.login && !author.login.includes("bot")) {
       map.set(author.id, {
         login: author.login,
         id: author.id,
@@ -75,9 +75,9 @@ function filterAndRemoveDuplicates(commits: any[]): AuthorInfo[] {
 }
 
 const MAX_AUTHORS_TO_SHOW = 12;
-const displayedAuthors = uniqueAuthors.slice(0, MAX_AUTHORS_TO_SHOW);
-const hasMoreAuthors = uniqueAuthors.length > MAX_AUTHORS_TO_SHOW;
-const additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
+const _displayedAuthors = uniqueAuthors.slice(0, MAX_AUTHORS_TO_SHOW);
+const _hasMoreAuthors = uniqueAuthors.length > MAX_AUTHORS_TO_SHOW;
+const _additionalAuthorsCount = uniqueAuthors.length - MAX_AUTHORS_TO_SHOW;
 ---
 
 {!error && displayedAuthors.length > 0 && (

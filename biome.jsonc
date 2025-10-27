@@ -45,9 +45,18 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
-      "style": {
-        "useImportType": "on" // auto-adds `type` to type-only imports
+      "recommended": true,
+      "complexity": {
+        "noBannedTypes": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
       }
     }
   },
@@ -60,5 +69,17 @@
     "parser": {
       "cssModules": true
     }
-  }
+  },
+  "overrides": [
+    // Allow test files to do things
+    {
+      "includes": ["**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": { "noNonNullAssertion": "off" },
+          "suspicious": { "useIterableCallbackReturn": "off" }
+        }
+      }
+    }
+  ]
 }

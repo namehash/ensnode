@@ -1,7 +1,4 @@
-import {
-  deserializeENSIndexerPublicConfig,
-  type SerializedENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import { deserializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
 export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
   labelSet: {

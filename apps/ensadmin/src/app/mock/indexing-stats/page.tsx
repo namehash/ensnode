@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
@@ -49,7 +49,7 @@ async function fetchMockedIndexingStatus(
     case "Response Error":
       return indexingStatusResponseError;
     case "Loading":
-      return new Promise<IndexingStatusResponse>((resolve, reject) => {
+      return new Promise<IndexingStatusResponse>((_resolve, reject) => {
         loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
       });
     case "Loading Error":
@@ -70,7 +70,7 @@ export default function MockIndexingStatusPage() {
 
   useEffect(() => {
     mockedIndexingStatus.refetch();
-  }, [selectedVariant]);
+  }, [mockedIndexingStatus.refetch]);
 
   return (
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">

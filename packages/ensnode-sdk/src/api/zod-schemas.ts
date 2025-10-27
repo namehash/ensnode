@@ -28,7 +28,7 @@ export const makeIndexingStatusResponseOkSchema = (
  * Schema for {@link IndexingStatusResponseError}
  **/
 export const makeIndexingStatusResponseErrorSchema = (
-  valueLabel: string = "Indexing Status Response Error",
+  _valueLabel: string = "Indexing Status Response Error",
 ) =>
   z.strictObject({
     responseCode: z.literal(IndexingStatusResponseCodes.Error),

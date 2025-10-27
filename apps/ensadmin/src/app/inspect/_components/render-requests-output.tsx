@@ -47,7 +47,7 @@ export function RenderRequestsOutput<KEY extends string>({
     }
 
     return accelerated.data?.[dataKey] || unaccelerated.data?.[dataKey];
-  }, [accelerated, unaccelerated, tab]);
+  }, [accelerated, unaccelerated, tab, dataKey]);
 
   const someError = accelerated.error || unaccelerated.error;
 
@@ -160,7 +160,10 @@ export function RenderRequestsOutput<KEY extends string>({
                   <TabsTrigger value="accelerated" className="flex flex-row gap-2">
                     <span>Accelerated</span>
                     {accelerated.data ? (
-                      `(${renderTraceDuration(accelerated.data.trace!)})`
+                      `(${
+                        // biome-ignore lint/style/noNonNullAssertion: exists
+                        renderTraceDuration(accelerated.data.trace!)
+                      })`
                     ) : (
                       <LoadingSpinner className="h-4 w-4" />
                     )}
@@ -168,7 +171,10 @@ export function RenderRequestsOutput<KEY extends string>({
                   <TabsTrigger value="unaccelerated" className="flex flex-row gap-2">
                     <span>Unaccelerated</span>
                     {unaccelerated.data ? (
-                      `(${renderTraceDuration(unaccelerated.data.trace!)})`
+                      `(${
+                        // biome-ignore lint/style/noNonNullAssertion: exists
+                        renderTraceDuration(unaccelerated.data.trace!)
+                      })`
                     ) : (
                       <LoadingSpinner className="h-4 w-4" />
                     )}

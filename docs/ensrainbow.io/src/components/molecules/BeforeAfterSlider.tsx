@@ -1,7 +1,5 @@
 import "../../styles/slider-styles.css";
 
-import React from "react";
-
 import unknown_name from "../../assets/Name.svg";
 import known_name from "../../assets/Name-healed.svg";
 import { HealedNameImage } from "../atoms/HealedNameImage.tsx";

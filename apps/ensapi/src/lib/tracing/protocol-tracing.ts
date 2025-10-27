@@ -30,8 +30,9 @@ export class ProtocolTraceExporter implements SpanExporter {
   private constructor() {}
 
   static singleton(): ProtocolTraceExporter {
-    if (!this._instance) this._instance = new ProtocolTraceExporter();
-    return this._instance;
+    if (!ProtocolTraceExporter._instance)
+      ProtocolTraceExporter._instance = new ProtocolTraceExporter();
+    return ProtocolTraceExporter._instance;
   }
 
   export(spans: ReadableSpan[], resultCallback: (result: ExportResult) => void): void {

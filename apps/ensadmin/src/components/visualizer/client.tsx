@@ -8,7 +8,6 @@ import {
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
-import React from "react";
 import "@xyflow/react/dist/style.css";
 
 import { AnimatedSVGEdge } from "./custom-components/AnimatedSVGEdge";
@@ -34,29 +33,27 @@ export default function ReactFlowClient() {
   const safeInitialNodes = Array.isArray(initialNodes) ? initialNodes : [];
   const safeInitialEdges = Array.isArray(initialEdges) ? initialEdges : [];
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(safeInitialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(safeInitialEdges);
+  const [nodes, _setNodes, onNodesChange] = useNodesState(safeInitialNodes);
+  const [edges, _setEdges, onEdgesChange] = useEdgesState(safeInitialEdges);
 
   return (
-    <>
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        fitView
-        style={{ backgroundColor: "#F7F9FB" }}
-        proOptions={{
-          account: "paid-pro",
-          hideAttribution: true,
-        }}
-      >
-        <Controls />
-        <MiniMap />
-        <Background />
-      </ReactFlow>
-    </>
+    <ReactFlow
+      nodes={nodes}
+      nodeTypes={nodeTypes}
+      edges={edges}
+      edgeTypes={edgeTypes}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      fitView
+      style={{ backgroundColor: "#F7F9FB" }}
+      proOptions={{
+        account: "paid-pro",
+        hideAttribution: true,
+      }}
+    >
+      <Controls />
+      <MiniMap />
+      <Background />
+    </ReactFlow>
   );
 }

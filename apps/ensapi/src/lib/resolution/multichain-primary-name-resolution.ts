@@ -56,7 +56,7 @@ export async function resolvePrimaryNames(
 
   // key results by chainId
   return chainIds.reduce((memo, chainId, i) => {
-    // NOTE: names[i] guaranteed to be defined, silly typescript
+    // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
     memo[chainId] = names[i]!;
     return memo;
   }, {} as MultichainPrimaryNameResolutionResult);

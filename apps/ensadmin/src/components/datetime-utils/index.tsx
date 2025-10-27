@@ -95,7 +95,7 @@ export function RelativeTime({
     setRelativeTime(
       formatRelativeTime(timestamp, enforcePast, includeSeconds, conciseFormatting, relativeTo),
     );
-  }, [timestamp]);
+  }, [timestamp, conciseFormatting, enforcePast, includeSeconds, relativeTo]);
 
   return (
     <Tooltip delayDuration={1000}>

@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 
 import { useResolvedIdentity } from "@ensnode/ensnode-react";
 import {
@@ -92,8 +92,8 @@ export function DisplayIdentity({
   withAvatar = false,
   className,
 }: DisplayIdentityProps) {
-  let avatar;
-  let identitifer;
+  let avatar: React.ReactElement;
+  let identitifer: React.ReactElement;
 
   if (!isResolvedIdentity(identity)) {
     // identity is an `UnresolvedIdentity` which represents that it hasn't been resolved yet

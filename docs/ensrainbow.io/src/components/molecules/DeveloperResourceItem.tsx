@@ -28,7 +28,7 @@ export const DeveloperResourceItem = ({ elem }: DeveloperResourceItemProps) => {
     </div>
   );
 
-  return elementLink == undefined ? (
+  return elementLink === undefined ? (
     <div>{content}</div>
   ) : (
     <a

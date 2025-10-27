@@ -26,7 +26,7 @@ const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
     (memo, datasource) => ({
       ...memo,
       // each ThreeDNS* Datasource defines a 'Resolver' ContractConfig with a single Address
-      [datasource.chain.id]: datasource.contracts.Resolver!.address as Address,
+      [datasource.chain.id]: datasource.contracts.Resolver?.address as Address,
     }),
     {},
   );

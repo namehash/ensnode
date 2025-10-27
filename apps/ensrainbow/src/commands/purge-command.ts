@@ -1,4 +1,4 @@
-import { rm } from "fs/promises";
+import { rm } from "node:fs/promises";
 
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";

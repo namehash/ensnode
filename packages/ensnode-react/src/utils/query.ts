@@ -4,7 +4,6 @@ import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 
 import {
   ENSNodeClient,
-  IndexingStatusRequest,
   type ResolvePrimaryNameRequest,
   type ResolvePrimaryNamesRequest,
   type ResolveRecordsRequest,

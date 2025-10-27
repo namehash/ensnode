@@ -9,7 +9,7 @@ import { createMiddleware } from "hono/factory";
  *
  * @todo Remove after https://github.com/bleu/ponder-enrich-gql-docs-middleware/issues/1 is resolved
  */
-export const fixContentLengthMiddleware = createMiddleware(async function (context, next) {
+export const fixContentLengthMiddleware = createMiddleware(async (context, next) => {
   await next();
 
   context.res.headers.delete("Content-Length");

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, use } from "react";
+import { use } from "react";
 
 import { useENSIndexerConfig } from "@ensnode/ensnode-react";
 

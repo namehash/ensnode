@@ -28,7 +28,7 @@ export function validatePonderMetrics(metrics: PrometheusMetrics) {
 
   if (parsedAppSettings.error) {
     throw new Error(
-      "Failed to build IndexingStatus object: \n" + prettifyError(parsedAppSettings.error) + "\n",
+      `Failed to build IndexingStatus object: \n${prettifyError(parsedAppSettings.error)}\n`,
     );
   }
 }

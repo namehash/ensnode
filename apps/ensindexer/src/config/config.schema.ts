@@ -189,9 +189,7 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSInde
     });
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(
-        "Failed to parse environment configuration: \n" + prettifyError(error) + "\n",
-      );
+      throw new Error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
     }
 
     throw error;

@@ -54,10 +54,13 @@ function RenderEvent({
 
   const [eventOpen, setEventOpen] = useState(false);
 
-  const handleEventOpen = useCallback((open: boolean) => {
-    open && setParentOpen(false);
-    setEventOpen(open);
-  }, []);
+  const handleEventOpen = useCallback(
+    (open: boolean) => {
+      open && setParentOpen(false);
+      setEventOpen(open);
+    },
+    [setParentOpen],
+  );
 
   return (
     <Tooltip key={event.name} open={eventOpen} onOpenChange={handleEventOpen}>
@@ -141,7 +144,7 @@ function RenderSpan({ parent }: { parent: ProtocolTrace[number] }) {
       {/* render its children */}
       {parent.children.length > 0 && (
         <div className="flex flex-col gap-2">
-          {parent.children.map((child, i) => {
+          {parent.children.map((child, _i) => {
             const marginLeft = asPercentInDuration(
               child.timestamp - parent.timestamp,
               parent.duration,

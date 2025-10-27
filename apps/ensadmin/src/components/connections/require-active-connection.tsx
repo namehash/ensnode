@@ -10,7 +10,7 @@ import { LoadingSpinner } from "@/components/loading-spinner";
 /**
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.
  */
-export function RequireActiveConnection({ children }: PropsWithChildren<{}>) {
+export function RequireActiveConnection({ children }: PropsWithChildren) {
   const { status, error } = useENSIndexerConfig();
 
   if (status === "pending") return <Loading />;

@@ -48,7 +48,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       if (labelSetVersionParam) {
         labelSetVersion = buildLabelSetVersion(labelSetVersionParam);
       }
-    } catch (error) {
+    } catch (_error) {
       logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
       return c.json(
         {

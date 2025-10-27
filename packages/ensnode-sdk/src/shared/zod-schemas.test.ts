@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { prettifyError, ZodError, type ZodSafeParseResult, z } from "zod/v4";
+import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
 import {
   makeBooleanStringSchema,
