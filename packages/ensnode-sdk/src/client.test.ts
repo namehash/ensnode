@@ -45,11 +45,13 @@ const EXAMPLE_RECORDS_RESPONSE = {
 
 const EXAMPLE_PRIMARY_NAME_RESPONSE = {
   name: EXAMPLE_NAME,
+  accelerationRequested: false,
   accelerationAttempted: false,
 } satisfies ResolvePrimaryNameResponse;
 
 const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
   names: { 1: EXAMPLE_NAME },
+  accelerationRequested: false,
   accelerationAttempted: false,
 } satisfies ResolvePrimaryNamesResponse;
 

@@ -8,22 +8,17 @@ import {
   serializeENSIndexerPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
-import { otel } from "@hono/otel";
 import { Hono } from "hono";
 
+import config from "@/config";
+import { buildENSIndexerPublicConfig } from "@/config/public";
 import {
   buildOmnichainIndexingStatusSnapshot,
   createCrossChainIndexingStatusSnapshotOmnichain,
-} from "@/api/lib/indexing-status";
-import config from "@/config";
-import { buildENSIndexerPublicConfig } from "@/config/public";
+} from "@/lib/indexing-status/build-index-status";
 import { getUnixTime } from "date-fns";
-import resolutionApi from "./resolution-api";
 
 const app = new Hono();
-
-// include automatic OpenTelemetry instrumentation for incoming requests
-app.use("*", otel());
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
@@ -77,8 +72,5 @@ app.get("/indexing-status", async (c) => {
     } satisfies IndexingStatusResponseOk),
   );
 });
-
-// Resolution API
-app.route("/resolve", resolutionApi);
 
 export default app;

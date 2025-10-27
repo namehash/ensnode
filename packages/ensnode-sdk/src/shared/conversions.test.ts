@@ -71,13 +71,9 @@ describe("ENSIndexer: Shared", () => {
     });
 
     it("refuses to deserialize URL for invalid input", () => {
-      const errorMessage = `Cannot deserialize URL:
-✖ Value must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`;
-      expect(() => deserializeUrl("example.com")).toThrowError(errorMessage);
-
-      expect(() => deserializeUrl("https://")).toThrowError(errorMessage);
-
-      expect(() => deserializeUrl("//example.com")).toThrowError(errorMessage);
+      expect(() => deserializeUrl("example.com")).toThrowError(/must be a valid URL string/i);
+      expect(() => deserializeUrl("https://")).toThrowError(/must be a valid URL string/i);
+      expect(() => deserializeUrl("//example.com")).toThrowError(/must be a valid URL string/i);
     });
   });
 });
