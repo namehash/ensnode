@@ -84,32 +84,6 @@ export function starlight(): AstroIntegration {
           ],
         },
         {
-          label: "ENSIndexer",
-          link: "/ensindexer",
-          icon: "star",
-          items: [
-            {
-              label: "Overview",
-              items: [
-                {
-                  label: "What is ENSIndexer?",
-                  link: "/ensindexer",
-                },
-              ],
-            },
-            {
-              label: "Using ENSIndexer",
-              collapsed: false,
-              autogenerate: { directory: "ensindexer/usage" },
-            },
-            {
-              label: "Contributing",
-              collapsed: false,
-              autogenerate: { directory: "ensindexer/contributing" },
-            },
-          ],
-        },
-        {
           label: "ENSApi",
           link: "/ensapi",
           icon: "star",
@@ -132,6 +106,48 @@ export function starlight(): AstroIntegration {
               label: "Contributing",
               collapsed: false,
               autogenerate: { directory: "ensapi/contributing" },
+            },
+          ],
+        },
+        {
+          label: "ENSDb",
+          link: "/ensdb",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "Coming soon",
+                  link: "/ensdb",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: "ENSIndexer",
+          link: "/ensindexer",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSIndexer?",
+                  link: "/ensindexer",
+                },
+              ],
+            },
+            {
+              label: "Using ENSIndexer",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensindexer/contributing" },
             },
           ],
         },
@@ -197,22 +213,6 @@ export function starlight(): AstroIntegration {
               label: "Contributing",
               collapsed: true,
               autogenerate: { directory: "ensadmin/contributing" },
-            },
-          ],
-        },
-        {
-          label: "ENSDb",
-          link: "/ensdb",
-          icon: "star",
-          items: [
-            {
-              label: "Overview",
-              items: [
-                {
-                  label: "Coming soon",
-                  link: "/ensdb",
-                },
-              ],
             },
           ],
         },

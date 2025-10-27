@@ -229,8 +229,11 @@ a[rel="prev"]:hover {
   position: relative; /* For absolute positioning of ::before */
 }
 
-/* Add padding-left only to items that will get a line, to make space for it */
-#starlight__sidebar > div > ul > li:not(:first-child) {
+/*
+ * Add padding-left only to items that will get a line, to make space for it.
+ * Note, including :not(:last-child) to de-indent ENSAdmin.
+ */
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child) {
   padding-left: 20px; /* Space for the line and content */
 }
 
@@ -239,8 +242,11 @@ a[rel="prev"]:hover {
   margin-bottom: var(--sidebar-item-gap);
 }
 
-/* Vertical line segment for relevant list items */
-#starlight__sidebar > div > ul > li:not(:first-child)::before {
+/*
+ * Vertical line segment for relevant list items
+ * Note, including :not(:last-child) to de-indent ENSAdmin.
+ */
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
   content: "";
   position: absolute;
   left: 8px; /* X-position of the vertical line */
