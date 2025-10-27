@@ -1,10 +1,11 @@
 "use client";
 
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
-import { getCommonCoinTypes, type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { getCommonCoinTypes } from "@/lib/default-records-selection";
 
 import { AdditionalRecords } from "./AdditionalRecords";
 import { Addresses } from "./Addresses";
