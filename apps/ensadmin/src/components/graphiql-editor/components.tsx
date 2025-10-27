@@ -52,7 +52,8 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
     <section className="flex flex-col flex-1">
       {/*<AiQueryGeneratorForm
         onResult={({ query, variables }) => {
-          // TODO: Re-implement this with GraphiQL 5 API if needed
+          // TODO: Implement GraphiQLProvider to update the query and variables via context provider when AI is re-enabled
+
         }}
         url={props.url}
       />*/}
