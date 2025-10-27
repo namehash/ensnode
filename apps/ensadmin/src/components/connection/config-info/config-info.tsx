@@ -7,7 +7,7 @@
 
 import { PlugZap, Replace } from "lucide-react";
 
-import type { ENSApiPublicConfig } from "@ensnode/ensnode-sdk";
+import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
@@ -119,6 +119,8 @@ export function ENSNodeConfigInfo({
     </p>
   );
 
+  const ensRootChainId = getENSRootChainId(ensIndexerPublicConfig.namespace);
+
   return (
     <div className="relative">
       {/*ENSAdmin*/}
@@ -176,6 +178,24 @@ export function ENSNodeConfigInfo({
                   ),
                   additionalInfo: (
                     <p>ENSApi reads from tables within this Postgres database schema.</p>
+                  ),
+                },
+                {
+                  label: "RPC Config",
+                  value: (
+                    <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
+                      <Tooltip>
+                        <TooltipTrigger className="cursor-default">
+                          <ChainIcon chainId={ensRootChainId} />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                        >
+                          {getChainName(ensRootChainId)}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                   ),
                 },
               ]}
