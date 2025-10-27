@@ -28,7 +28,7 @@ function ENSNodeInternalProvider({
   children,
   config,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   config: ENSNodeConfig;
 }) {
   // Memoize the config to prevent unnecessary re-renders

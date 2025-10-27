@@ -21,7 +21,7 @@ export function ConnectionsLibraryList({
   selectedConnection,
   onSelectConnection,
   onRemoveCustomConnection,
-}: ConnectionsLibraryListProps): JSX.Element {
+}: ConnectionsLibraryListProps): React.JSX.Element {
   return (
     <>
       {connections.map((connection) => {
