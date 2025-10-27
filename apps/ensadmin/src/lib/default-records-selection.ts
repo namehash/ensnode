@@ -4,10 +4,13 @@ import {
   ENSNamespaceIds,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-
-import { type CoinType, ETH_COIN_TYPE, evmChainIdToCoinType } from "../ens";
-import { uniq } from "../shared";
-import type { ResolverRecordsSelection } from "./resolver-records-selection";
+import {
+  CoinType,
+  ETH_COIN_TYPE,
+  evmChainIdToCoinType,
+  ResolverRecordsSelection,
+  uniq,
+} from "@ensnode/ensnode-sdk";
 
 const getENSIP19SupportedCoinTypes = (namespace: ENSNamespaceId) =>
   uniq(
@@ -37,11 +40,9 @@ const TEXTS = [
   "com.github",
 ] as const satisfies string[];
 
-// TODO: Phase out this concept. All apps should define their own selection of records.
-// Additionally, we should update `useRecords` so that it can return not only all the
-// (texts / addresses) records that are explicitly requested, but also any other (texts / addresses)
-// records that ENSNode has found onchain.
-// see: https://github.com/namehash/ensnode/issues/1084
+/**
+ * Defines a set of 'default' records to query when making Protocol Inspector requests.
+ */
 export const DefaultRecordsSelection = {
   [ENSNamespaceIds.Mainnet]: {
     addresses: getCommonCoinTypes(ENSNamespaceIds.Mainnet),

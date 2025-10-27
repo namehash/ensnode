@@ -1,5 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   type AcceleratableResponse,
@@ -36,29 +36,23 @@ export function RenderRequestsOutput<KEY extends string>({
 }) {
   const [tab, setTab] = useState("accelerated");
 
-  // TODO: produce a diff between accelerated/not-accelerated and display any differences
-  const result = useMemo(() => {
-    if (tab === "accelerated" && accelerated.status === "success") {
-      return accelerated.data[dataKey];
-    }
+  const focused = useMemo(() => {
+    if (tab === "accelerated") return accelerated;
+    if (tab === "unaccelerated") return unaccelerated;
 
-    if (tab === "unaccelerated" && unaccelerated.status === "success") {
-      return unaccelerated.data[dataKey];
-    }
+    throw new Error("never");
+  }, [accelerated, unaccelerated]);
 
-    return accelerated.data?.[dataKey] || unaccelerated.data?.[dataKey];
-  }, [accelerated, unaccelerated, tab, dataKey]);
+  // need special derivation to capture refetching state
+  const acceleratedLoading = accelerated.isPending || accelerated.isRefetching;
+  const unacceleratedLoading = unaccelerated.isPending || unaccelerated.isRefetching;
 
-  const someError = accelerated.error || unaccelerated.error;
-
-  // show major loading if either query is pending/refreshing
-  const showLoading =
-    (accelerated.isPending || accelerated.isRefetching) &&
-    (unaccelerated.isPending || unaccelerated.isRefetching);
+  const acceleratedSuccess = !acceleratedLoading && !accelerated.isError;
+  const unacceleratedSuccess = !unacceleratedLoading && !unaccelerated.isError;
 
   const multipleDiff = useMemo(() => {
-    if (accelerated.status !== "success") return null;
-    if (unaccelerated.status !== "success") return null;
+    if (!acceleratedSuccess) return null;
+    if (!unacceleratedSuccess) return null;
 
     if (!accelerated.data.trace) return null;
     if (!unaccelerated.data.trace) return null;
@@ -66,17 +60,21 @@ export function RenderRequestsOutput<KEY extends string>({
     const acceleratedDuration = getTraceDuration(accelerated.data.trace);
     const unacceleratedDuration = getTraceDuration(unaccelerated.data.trace);
 
-    if (acceleratedDuration === 0) return null;
+    if (acceleratedDuration === 0) return null; // prevent division by zero...
 
-    const multiple = unacceleratedDuration / acceleratedDuration;
-    return multiple;
+    return unacceleratedDuration / acceleratedDuration;
   }, [accelerated, unaccelerated]);
 
-  if (showLoading) {
-    // if we're loading but there's no active fetch, the query is unable to be executed, so render null
-    if (accelerated.fetchStatus === "idle") return null;
+  useEffect(() => {
+    if (unacceleratedLoading) setTab("accelerated");
+  }, [unacceleratedLoading, setTab]);
 
-    // otherwise, we're in-flight, render loading
+  // if we're loading but there's no active fetch, the query is unable to be executed, so render null
+  const isNotExecutable = acceleratedLoading && accelerated.fetchStatus === "idle";
+  if (isNotExecutable) return null;
+
+  // show major loading if accelerated query is pending/refreshing
+  if (acceleratedLoading) {
     return (
       <Card className="w-full">
         <CardContent className="h-96">
@@ -90,20 +88,21 @@ export function RenderRequestsOutput<KEY extends string>({
 
   return (
     <>
+      {/* Response Card */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle>ENSNode Response</CardTitle>
         </CardHeader>
         <CardContent className="max-h-[30rem] overflow-scroll">
           {(() => {
-            if (someError) {
+            if (focused.error) {
               return (
                 <CodeBlock className="rounded-lg text-xs">
                   {JSON.stringify(
                     {
-                      message: someError.message,
-                      ...(someError instanceof ClientError &&
-                        !!someError.details && { details: someError.details }),
+                      message: focused.error.message,
+                      ...(focused.error instanceof ClientError &&
+                        !!focused.error.details && { details: focused.error.details }),
                     },
                     null,
                     2,
@@ -114,13 +113,15 @@ export function RenderRequestsOutput<KEY extends string>({
 
             return (
               <CodeBlock className="rounded-lg text-xs">
-                {JSON.stringify(result, null, 2)}
+                {JSON.stringify(focused.data?.[dataKey], null, 2)}
               </CodeBlock>
             );
           })()}
         </CardContent>
       </Card>
-      {!someError && (accelerated.data?.trace || unaccelerated.data?.trace) && (
+
+      {/* Execution Trace Card */}
+      {acceleratedSuccess && (
         <Tabs value={tab} onValueChange={setTab}>
           <Card className="w-full">
             <CardHeader>
@@ -156,25 +157,24 @@ export function RenderRequestsOutput<KEY extends string>({
 
                   return null;
                 })()}
+
                 <TabsList>
                   <TabsTrigger value="accelerated" className="flex flex-row gap-2">
                     <span>Accelerated</span>
-                    {accelerated.data ? (
-                      `(${
-                        // biome-ignore lint/style/noNonNullAssertion: exists
-                        renderTraceDuration(accelerated.data.trace!)
-                      })`
+                    {acceleratedSuccess && accelerated.data.trace ? (
+                      `(${renderTraceDuration(accelerated.data.trace)})`
                     ) : (
                       <LoadingSpinner className="h-4 w-4" />
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="unaccelerated" className="flex flex-row gap-2">
+                  <TabsTrigger
+                    value="unaccelerated"
+                    className="flex flex-row gap-2"
+                    disabled={unacceleratedLoading}
+                  >
                     <span>Unaccelerated</span>
-                    {unaccelerated.data ? (
-                      `(${
-                        // biome-ignore lint/style/noNonNullAssertion: exists
-                        renderTraceDuration(unaccelerated.data.trace!)
-                      })`
+                    {unacceleratedSuccess && unaccelerated.data.trace ? (
+                      `(${renderTraceDuration(unaccelerated.data.trace)})`
                     ) : (
                       <LoadingSpinner className="h-4 w-4" />
                     )}
@@ -184,44 +184,14 @@ export function RenderRequestsOutput<KEY extends string>({
             </CardHeader>
             <CardContent>
               <TabsContent value="accelerated">
-                {(() => {
-                  switch (accelerated.status) {
-                    case "pending": {
-                      return (
-                        <div className="h-64 w-full flex flex-col justify-center items-center p-8">
-                          <LoadingSpinner className="h-16 w-16" />
-                        </div>
-                      );
-                    }
-                    case "success": {
-                      if (accelerated.data.trace)
-                        return <TraceRenderer trace={accelerated.data.trace} />;
-                      throw new Error(
-                        "Invariant: RenderRequestsOutput accelerated.data.trace is undefined.",
-                      );
-                    }
-                  }
-                })()}
+                {acceleratedSuccess && !!accelerated.data.trace && (
+                  <TraceRenderer trace={accelerated.data.trace} />
+                )}
               </TabsContent>
               <TabsContent value="unaccelerated">
-                {(() => {
-                  switch (unaccelerated.status) {
-                    case "pending": {
-                      return (
-                        <div className="h-64 w-full flex flex-col justify-center items-center p-8">
-                          <LoadingSpinner className="h-16 w-16" />
-                        </div>
-                      );
-                    }
-                    case "success": {
-                      if (unaccelerated.data.trace)
-                        return <TraceRenderer trace={unaccelerated.data.trace} />;
-                      throw new Error(
-                        "Invariant: RenderRequestsOutput unaccelerated.data.trace is undefined.",
-                      );
-                    }
-                  }
-                })()}
+                {unacceleratedSuccess && !!unaccelerated.data.trace && (
+                  <TraceRenderer trace={unaccelerated.data.trace} />
+                )}
               </TabsContent>
             </CardContent>
           </Card>
