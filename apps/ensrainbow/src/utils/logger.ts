@@ -50,18 +50,15 @@ export function createLogger(level: LogLevel = DEFAULT_LOG_LEVEL): pino.Logger {
 
   return pino({
     level,
-    ...(isProduction
-      ? {} // In production, use default pino output format
+    transport: isProduction
+      ? undefined
       : {
-          transport: {
-            target: "pino-pretty",
-            options: {
-              colorize: true,
-              translateTime: "HH:MM:ss",
-              ignore: "pid,hostname",
-            },
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            ignore: "pid,hostname",
           },
-        }),
+        },
   });
 }
 

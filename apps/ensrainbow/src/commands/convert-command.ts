@@ -50,6 +50,7 @@ function setupProgressBar(): ProgressBar {
       incomplete: " ",
       width: 40,
       total: 150000000, // estimated
+      stream: logger.level === "silent" ? createWriteStream("/dev/null") : undefined,
     },
   );
 }

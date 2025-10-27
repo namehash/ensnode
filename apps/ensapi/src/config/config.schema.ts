@@ -17,6 +17,7 @@ import {
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
+import logger from "@/lib/logger";
 
 const EnsApiConfigSchema = z
   .object({
@@ -47,7 +48,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     const ensIndexerPublicConfig = await pRetry(() => client.config(), {
       retries: 3,
       onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-        console.log(
+        logger.info(
           `ENSIndexer Config fetch attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
         );
       },
@@ -67,13 +68,16 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     });
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
+      logger.error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
+      process.exit(1);
     }
 
     if (error instanceof Error) {
-      error.message = `Failed to build EnsApiConfig: ${error.message}`;
+      logger.error(error, `Failed to build EnsApiConfig`);
+      process.exit(1);
     }
 
-    throw error;
+    logger.error(`Unknown Error`);
+    process.exit(1);
   }
 }

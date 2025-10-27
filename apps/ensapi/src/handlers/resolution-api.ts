@@ -6,7 +6,6 @@ import type {
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
 
-import { errorResponse } from "@/lib/handlers/error-response";
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
@@ -51,24 +50,19 @@ app.get(
     const { selection, trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
 
-    try {
-      const { result, trace } = await captureTrace(() =>
-        resolveForward(name, selection, { accelerate, canAccelerate }),
-      );
+    const { result, trace } = await captureTrace(() =>
+      resolveForward(name, selection, { accelerate, canAccelerate }),
+    );
 
-      const response = {
-        records: result,
+    const response = {
+      records: result,
 
-        accelerationRequested: accelerate,
-        accelerationAttempted: accelerate && canAccelerate,
-        ...(showTrace && { trace }),
-      } satisfies ResolveRecordsResponse<typeof selection>;
+      accelerationRequested: accelerate,
+      accelerationAttempted: accelerate && canAccelerate,
+      ...(showTrace && { trace }),
+    } satisfies ResolveRecordsResponse<typeof selection>;
 
-      return c.json(response);
-    } catch (error) {
-      console.error(error);
-      return errorResponse(c, error);
-    }
+    return c.json(response);
   },
 );
 
@@ -99,24 +93,19 @@ app.get(
     const { trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
 
-    try {
-      const { result, trace } = await captureTrace(() =>
-        resolveReverse(address, chainId, { accelerate, canAccelerate }),
-      );
+    const { result, trace } = await captureTrace(() =>
+      resolveReverse(address, chainId, { accelerate, canAccelerate }),
+    );
 
-      const response = {
-        name: result,
+    const response = {
+      name: result,
 
-        accelerationRequested: accelerate,
-        accelerationAttempted: accelerate && canAccelerate,
-        ...(showTrace && { trace }),
-      } satisfies ResolvePrimaryNameResponse;
+      accelerationRequested: accelerate,
+      accelerationAttempted: accelerate && canAccelerate,
+      ...(showTrace && { trace }),
+    } satisfies ResolvePrimaryNameResponse;
 
-      return c.json(response);
-    } catch (error) {
-      console.error(error);
-      return errorResponse(c, error);
-    }
+    return c.json(response);
   },
 );
 
@@ -145,24 +134,19 @@ app.get(
     const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
 
-    try {
-      const { result, trace } = await captureTrace(() =>
-        resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
-      );
+    const { result, trace } = await captureTrace(() =>
+      resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
+    );
 
-      const response = {
-        names: result,
+    const response = {
+      names: result,
 
-        accelerationRequested: accelerate,
-        accelerationAttempted: accelerate && canAccelerate,
-        ...(showTrace && { trace }),
-      } satisfies ResolvePrimaryNamesResponse;
+      accelerationRequested: accelerate,
+      accelerationAttempted: accelerate && canAccelerate,
+      ...(showTrace && { trace }),
+    } satisfies ResolvePrimaryNamesResponse;
 
-      return c.json(response);
-    } catch (error) {
-      console.error(error);
-      return errorResponse(c, error);
-    }
+    return c.json(response);
   },
 );
 

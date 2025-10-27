@@ -35,3 +35,10 @@ export interface PortEnvironment {
  * May contain a comma separated list of one or more URLs.
  */
 export type ChainIdSpecificRpcEnvironmentVariable = string;
+
+/**
+ * Environment variables for log level configuration.
+ */
+export type LogLevelEnvironment = {
+  LOG_LEVEL?: string;
+};

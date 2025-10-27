@@ -1,4 +1,4 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, createWriteStream } from "node:fs";
 
 import ProgressBar from "progress";
 import protobuf from "protobufjs";
@@ -105,6 +105,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
         incomplete: " ",
         width: 40,
         total: 1000000000, // Placeholder total
+        stream: logger.level === "silent" ? createWriteStream("/dev/null") : undefined,
       },
     );
 

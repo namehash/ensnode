@@ -13,6 +13,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
+import logger from "@/lib/logger";
 
 export type CanAccelerateVariables = { canAccelerate: boolean };
 
@@ -62,7 +63,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
 
   // log one warning to the console if !hasProtocolAccelerationPlugin
   if (!didWarnNoProtocolAccelerationPlugin && !hasProtocolAccelerationPlugin) {
-    console.warn(
+    logger.warn(
       `ENSApi is connected to an ENSIndexer that does NOT include the ${PluginName.ProtocolAcceleration} plugin: ENSApi will NOT be able to accelerate Resolution API requests, even if ?accelerate=true. Resolution requests will abide by the full Forward/Reverse Resolution specification, including RPC calls and CCIP-Read requests to external CCIP-Read Gateways.`,
     );
 
@@ -81,7 +82,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
     (!didInitialIndexingStatus && indexingStatusOk) || // first time
     (didInitialIndexingStatus && !prevIndexingStatusOk && indexingStatusOk) // future change in status
   ) {
-    console.log(`ENSIndexer Indexing Status: AVAILABLE`);
+    logger.info(`ENSIndexer Indexing Status: AVAILABLE`);
   }
 
   // log notice with reason when Indexing Status is unavilable
@@ -90,11 +91,11 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
     (didInitialIndexingStatus && prevIndexingStatusOk && !indexingStatusOk) // future change in status
   ) {
     if (c.var.indexingStatus.isRejected) {
-      console.warn(
+      logger.warn(
         `ENSIndexer Indexing Status: UNAVAILABLE. ENSApi was unable to fetch the current ENSIndexer Indexing Status: ${c.var.indexingStatus.reason}`,
       );
     } else if (c.var.indexingStatus.value.responseCode === IndexingStatusResponseCodes.Error) {
-      console.warn(
+      logger.warn(
         `ENSIndexer Indexing Status: UNAVAILABLE. ENSIndexer is reporting an Indexing Status Error.`,
       );
     }
@@ -126,7 +127,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
       (!didInitialRealtime && isWithinMaxRealtime) || // first time
       (didInitialRealtime && !prevIsWithinMaxRealtime && isWithinMaxRealtime) // future change in status
     ) {
-      console.log(`ENSIndexer is realtime, Protocol Acceleration is now ENABLED.`);
+      logger.info(`ENSIndexer is realtime, Protocol Acceleration is now ENABLED.`);
     }
 
     // log notice when ENSIndexer transitions out of realtime
@@ -134,7 +135,7 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
       (!didInitialRealtime && !isWithinMaxRealtime) || // first time
       (didInitialRealtime && prevIsWithinMaxRealtime && !isWithinMaxRealtime) // future change in status
     ) {
-      console.warn(
+      logger.warn(
         `ENSIndexer is NOT realtime (Worst Case Lag: ${c.var.indexingStatus.value.realtimeProjection.worstCaseDistance} seconds > ${MAX_REALTIME_DISTANCE_TO_ACCELERATE} seconds), Protocol Acceleration is currently DISABLED.`,
       );
     }

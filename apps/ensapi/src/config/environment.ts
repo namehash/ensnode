@@ -1,6 +1,7 @@
 import type {
   DatabaseEnvironment,
   EnsIndexerUrlEnvironment,
+  LogLevelEnvironment,
   PortEnvironment,
   RpcEnvironment,
 } from "@ensnode/ensnode-sdk/internal";
@@ -15,4 +16,5 @@ import type {
 export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   EnsIndexerUrlEnvironment &
   RpcEnvironment &
-  PortEnvironment;
+  PortEnvironment &
+  LogLevelEnvironment;

@@ -19,6 +19,7 @@ import {
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
+import logger from "@/lib/logger";
 import { ENS_ROOT_REGISTRY } from "@/lib/protocol-acceleration/ens-root-registry";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
@@ -231,7 +232,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                   // the selection should just be `{ name: true }`, but technically not prohibited to
                   // select more records than just 'name', so just warn if that happens.
                   if (selection.addresses !== undefined || selection.texts !== undefined) {
-                    console.warn(
+                    logger.warn(
                       `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
                     );
                   }

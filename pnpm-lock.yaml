@@ -333,6 +333,9 @@ importers:
       p-retry:
         specifier: ^7.1.0
         version: 7.1.0
+      pino:
+        specifier: 10.1.0
+        version: 10.1.0
       ponder:
         specifier: 'catalog:'
         version: 0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.15.3)(bufferutil@4.0.9)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(typescript@5.7.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.25.76))(yaml@2.7.0)(zod@3.25.76)
@@ -352,6 +355,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.15.3
+      pino-pretty:
+        specifier: ^13.1.2
+        version: 13.1.2
       tsx:
         specifier: ^4.7.1
         version: 4.19.3
@@ -11147,6 +11153,14 @@ snapshots:
       chai: 6.2.0
       tinyrainbow: 3.0.3
 
+  '@vitest/mocker@4.0.3(vite@7.1.11(@types/node@20.17.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))':
+    dependencies:
+      '@vitest/spy': 4.0.3
+      estree-walker: 3.0.3
+      magic-string: 0.30.19
+    optionalDependencies:
+      vite: 7.1.11(@types/node@20.17.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0)
+
   '@vitest/mocker@4.0.3(vite@7.1.11(@types/node@22.15.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       '@vitest/spy': 4.0.3
@@ -15754,7 +15768,7 @@ snapshots:
   vitest@4.0.3(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.6.1)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0):
     dependencies:
       '@vitest/expect': 4.0.3
-      '@vitest/mocker': 4.0.3(vite@7.1.11(@types/node@22.15.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))
+      '@vitest/mocker': 4.0.3(vite@7.1.11(@types/node@20.17.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))
       '@vitest/pretty-format': 4.0.3
       '@vitest/runner': 4.0.3
       '@vitest/snapshot': 4.0.3

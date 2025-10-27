@@ -10,6 +10,7 @@ import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
+import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
@@ -51,7 +52,7 @@ app.get("/health", async (c) => {
 
 // log hono errors to console
 app.onError((error, ctx) => {
-  console.error(error);
+  logger.error(error);
   return errorResponse(ctx, "Internal Server Error");
 });
 
@@ -65,8 +66,9 @@ const server = serve(
     port: config.port,
   },
   async (info) => {
-    console.log(`ENSApi listening on port ${info.port} with config:`);
-    console.log(prettyPrintJson(redactEnsApiConfig(config)));
+    logger.info(
+      `ENSApi listening on port ${info.port} with config:\n${prettyPrintJson(redactEnsApiConfig(config))}`,
+    );
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
@@ -90,7 +92,7 @@ const gracefulShutdown = async () => {
 
     process.exit(0);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     process.exit(1);
   }
 };
@@ -100,6 +102,6 @@ process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
 
 process.on("uncaughtException", async (error) => {
-  console.error(`Fatal Error:`, error);
+  logger.error(error, "uncaughtException");
   await gracefulShutdown();
 });
