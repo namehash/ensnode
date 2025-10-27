@@ -28,6 +28,6 @@ COPY --from=builder /app/apps/ensadmin/nginx.conf /etc/nginx/conf.d/default.conf
 # Remove default nginx config
 RUN rm -f /etc/nginx/conf.d/default.conf.default
 
-EXPOSE 80
+EXPOSE 4173
 
 CMD ["nginx", "-g", "daemon off;"]

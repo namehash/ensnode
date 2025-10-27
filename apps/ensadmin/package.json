@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "next dev -p 4173",
     "build": "next build",
-    "start": "serve out",
+    "start": "serve out -l 4173",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit",
