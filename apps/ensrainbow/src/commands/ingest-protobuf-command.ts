@@ -105,7 +105,10 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
         incomplete: " ",
         width: 40,
         total: 1000000000, // Placeholder total
-        stream: logger.level === "silent" ? createWriteStream("/dev/null") : undefined,
+        stream:
+          logger.level === "silent" || logger.level === "fatal"
+            ? createWriteStream("/dev/null")
+            : undefined,
       },
     );
 

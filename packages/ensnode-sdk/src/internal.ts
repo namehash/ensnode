@@ -23,5 +23,6 @@ export * from "./shared/config/types";
 export * from "./shared/config/validatons";
 export * from "./shared/config/zod-schemas";
 export * from "./shared/datasources-with-resolvers";
+export * from "./shared/log-level";
 export * from "./shared/protocol-acceleration/interpret-record-values";
 export * from "./shared/zod-schemas";
