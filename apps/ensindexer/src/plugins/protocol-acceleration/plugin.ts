@@ -1,13 +1,18 @@
+import { type ChainConfig, createConfig } from "ponder";
+
 import {
-  DatasourceName,
+  type DatasourceName,
   DatasourceNames,
+  getDatasource,
   ResolverABI,
   StandaloneReverseRegistrarABI,
   ThreeDNSTokenABI,
-  getDatasource,
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
-import { ChainConfig, createConfig } from "ponder";
+import {
+  DATASOURCE_NAMES_WITH_RESOLVERS,
+  getDatasourcesWithResolvers,
+} from "@ensnode/ensnode-sdk/internal";
 
 import {
   createPlugin,
@@ -19,10 +24,6 @@ import {
   chainsConnectionConfig,
   constrainBlockrange,
 } from "@/lib/ponder-helpers";
-import {
-  DATASOURCE_NAMES_WITH_RESOLVERS,
-  getDatasourcesWithResolvers,
-} from "@ensnode/ensnode-sdk/internal";
 
 /**
  * Describes the indexing behavior for all entities that power Protocol Acceleration:

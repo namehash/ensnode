@@ -1,10 +1,13 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-import { type ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
-import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+
 import { prettifyError } from "zod/v4";
+
+import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
+import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 
 /**
  * Get version of ENSIndexer application.

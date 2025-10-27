@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { Inter } from "next/font/google";
+
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { Toaster } from "@/components/ui/sonner";
 import { ConnectionsLibraryProvider } from "@/hooks/use-connections-library";
 import { ensAdminPublicUrl } from "@/lib/env";
-import { Inter } from "next/font/google";
 
 const inter = Inter({
   variable: "--font-inter",

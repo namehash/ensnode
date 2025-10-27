@@ -1,5 +1,6 @@
-import { toUnixTimestamp } from "@/components/recent-registrations/hooks";
 import { describe, expect, it } from "vitest";
+
+import { toUnixTimestamp } from "@/components/recent-registrations/hooks";
 
 describe("toUnixTimestamp", () => {
   it("should throw an exception for non-integer input", () => {

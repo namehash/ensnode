@@ -1,15 +1,17 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import { buildConfigFromEnvironment } from "@/config/config.schema";
-import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import { EnsApiEnvironment } from "@/config/environment";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
 import {
-  ENSIndexerPublicConfig,
+  type ENSIndexerPublicConfig,
   PluginName,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
-import { RpcConfig } from "@ensnode/ensnode-sdk/internal";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
+
+import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
+import type { EnsApiEnvironment } from "@/config/environment";
 
 const VALID_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/1234";
 

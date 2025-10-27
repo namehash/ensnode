@@ -1,6 +1,8 @@
+import { type NodeProps, Panel, type PanelPosition } from "@xyflow/react";
+import React, { forwardRef, type HTMLAttributes, memo, type ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
-import { NodeProps, Panel, PanelPosition } from "@xyflow/react";
-import React, { forwardRef, HTMLAttributes, memo, ReactNode } from "react";
+
 import { BaseNode } from "./BaseNode";
 
 /* GROUP NODE Label ------------------------------------------------------- */

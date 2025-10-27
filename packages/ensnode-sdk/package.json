@@ -44,7 +44,6 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "pg-connection-string": "^2.9.0",

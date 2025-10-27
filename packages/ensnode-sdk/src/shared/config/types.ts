@@ -1,6 +1,11 @@
-import { z } from "zod/v4";
-import { ChainId } from "../types";
-import { DatabaseSchemaNameSchema, DatabaseUrlSchema, EnsIndexerUrlSchema } from "./zod-schemas";
+import type { z } from "zod/v4";
+
+import type { ChainId } from "../types";
+import type {
+  DatabaseSchemaNameSchema,
+  DatabaseUrlSchema,
+  EnsIndexerUrlSchema,
+} from "./zod-schemas";
 
 /**
  * RPC configuration for a single chain.

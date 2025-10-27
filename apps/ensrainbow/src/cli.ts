@@ -1,9 +1,16 @@
-import { join } from "path";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { fileURLToPath } from "url";
+
 import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
+
+import {
+  buildLabelSetId,
+  buildLabelSetVersion,
+  type LabelSetId,
+  type LabelSetVersion,
+} from "@ensnode/ensnode-sdk";
 
 import { convertCommand } from "@/commands/convert-command";
 // import { ingestCommand } from "@/commands/ingest-command";
@@ -13,12 +20,6 @@ import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
 import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
 import { logger } from "@/utils/logger";
-import {
-  type LabelSetId,
-  type LabelSetVersion,
-  buildLabelSetId,
-  buildLabelSetVersion,
-} from "@ensnode/ensnode-sdk";
 
 export function validatePortConfiguration(cliPort: number): void {
   const envPort = process.env.PORT;

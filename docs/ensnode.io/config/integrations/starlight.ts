@@ -1,5 +1,5 @@
 import AstroStarlight from "@astrojs/starlight";
-import { type AstroIntegration } from "astro";
+import type { AstroIntegration } from "astro";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightSidebarTopics from "starlight-sidebar-topics";
 

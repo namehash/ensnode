@@ -1,5 +1,4 @@
-import { ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
-
+import type { ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import { getDatasourcesWithResolvers } from "@ensnode/ensnode-sdk/internal";
 
 /**

@@ -1,10 +1,11 @@
 import {
   DatasourceNames,
-  ENSNamespaceId,
+  type ENSNamespaceId,
   ENSNamespaceIds,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-import { CoinType, ETH_COIN_TYPE, evmChainIdToCoinType } from "../ens";
+
+import { type CoinType, ETH_COIN_TYPE, evmChainIdToCoinType } from "../ens";
 import { uniq } from "../shared";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 

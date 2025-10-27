@@ -1,19 +1,21 @@
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { renderMicroseconds } from "@/lib/time";
-import { getProtocolStepInfo } from "@/lib/tracing";
-import { cn } from "@/lib/utils";
+import { useCallback, useState } from "react";
+import { getAddress } from "viem";
+
 import {
   ATTR_PROTOCOL_NAME,
   ATTR_PROTOCOL_STEP,
   ATTR_PROTOCOL_STEP_RESULT,
   ForwardResolutionProtocolStep,
-  ProtocolSpan,
+  type ProtocolSpan,
   type ProtocolTrace,
   ReverseResolutionProtocolStep,
 } from "@ensnode/ensnode-sdk";
-import { useCallback, useState } from "react";
-import { getAddress } from "viem";
+
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { renderMicroseconds } from "@/lib/time";
+import { getProtocolStepInfo } from "@/lib/tracing";
+import { cn } from "@/lib/utils";
 
 const asPercentInDuration = (value: number, duration: number) =>
   `${((value / duration) * 100).toFixed(2)}%`;

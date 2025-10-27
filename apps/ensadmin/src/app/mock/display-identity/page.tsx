@@ -1,5 +1,27 @@
 "use client";
 
+import { useState } from "react";
+import { type Address, isAddress } from "viem";
+
+import { getENSNamespace, getENSRootChainId } from "@ensnode/datasources";
+import {
+  asLowerCaseAddress,
+  type ChainId,
+  DEFAULT_EVM_CHAIN_ID,
+  type DefaultableChainId,
+  type ENSNamespaceId,
+  ENSNamespaceIds,
+  type Identity,
+  type Name,
+  type NamedIdentity,
+  type ResolutionStatusId,
+  ResolutionStatusIds,
+  type UnknownIdentity,
+  type UnnamedIdentity,
+  type UnresolvedIdentity,
+  uniq,
+} from "@ensnode/ensnode-sdk";
+
 import { DisplayIdentity } from "@/components/identity";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,26 +34,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getChainName } from "@/lib/namespace-utils";
-import { getENSNamespace, getENSRootChainId } from "@ensnode/datasources";
-import {
-  ChainId,
-  DEFAULT_EVM_CHAIN_ID,
-  DefaultableChainId,
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  Identity,
-  Name,
-  NamedIdentity,
-  ResolutionStatusId,
-  ResolutionStatusIds,
-  UnknownIdentity,
-  UnnamedIdentity,
-  UnresolvedIdentity,
-  asLowerCaseAddress,
-  uniq,
-} from "@ensnode/ensnode-sdk";
-import { useState } from "react";
-import { Address, isAddress } from "viem";
 
 const DEFAULT_NAMESPACE_ID: ENSNamespaceId = ENSNamespaceIds.Mainnet;
 const DEFAULT_RESOLUTION_STATUS: ResolutionStatusId = ResolutionStatusIds.Named;

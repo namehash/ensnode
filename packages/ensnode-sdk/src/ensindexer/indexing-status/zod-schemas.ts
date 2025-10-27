@@ -7,6 +7,7 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
+
 import { type ChainId, deserializeChainId } from "../../shared";
 import {
   makeBlockRefSchema,
@@ -18,12 +19,12 @@ import {
   ChainIndexingConfig,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStatusSnapshot,
+  type ChainIndexingStatusSnapshot,
   ChainIndexingStatusSnapshotBackfill,
-  ChainIndexingStatusSnapshotCompleted,
+  type ChainIndexingStatusSnapshotCompleted,
   ChainIndexingStatusSnapshotFollowing,
-  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  ChainIndexingStatusSnapshotQueued,
+  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotQueued,
   CrossChainIndexingStatusSnapshot,
   CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,

@@ -1,7 +1,7 @@
 import {
-  SerializedIndexingStatusResponse,
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
+  type SerializedIndexingStatusResponse,
 } from "./api";
 import {
   type ConfigResponse,
@@ -17,13 +17,13 @@ import {
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
+  deserializeENSIndexerPublicConfig,
+  deserializeRealtimeIndexingStatusProjection,
   RealtimeIndexingStatusProjection,
   type SerializedENSIndexerPublicConfig,
   SerializedRealtimeIndexingStatusProjection,
-  deserializeENSIndexerPublicConfig,
-  deserializeRealtimeIndexingStatusProjection,
 } from "./ensindexer";
-import { ResolverRecordsSelection } from "./resolution";
+import type { ResolverRecordsSelection } from "./resolution";
 
 /**
  * Default ENSNode API endpoint URL

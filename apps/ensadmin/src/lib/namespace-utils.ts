@@ -1,12 +1,4 @@
-import {
-  DatasourceNames,
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  ensTestEnvL1Chain,
-  getDatasource,
-} from "@ensnode/datasources";
-import { ChainId, Name } from "@ensnode/ensnode-sdk";
-import { Address } from "viem";
+import type { Address } from "viem";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -22,6 +14,15 @@ import {
   scrollSepolia,
   sepolia,
 } from "viem/chains";
+
+import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  ENSNamespaceIds,
+  ensTestEnvL1Chain,
+  getDatasource,
+} from "@ensnode/datasources";
+import type { ChainId, Name } from "@ensnode/ensnode-sdk";
 
 const SUPPORTED_CHAINS = [
   ensTestEnvL1Chain,

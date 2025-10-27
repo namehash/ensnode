@@ -1,6 +1,6 @@
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
 interface LinkProps {
   href: string;

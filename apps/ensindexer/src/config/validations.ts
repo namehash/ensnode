@@ -1,15 +1,17 @@
-import { DatasourceName, getENSRootChainId } from "@ensnode/datasources";
-import { Address, isAddress } from "viem";
-import { z } from "zod/v4";
+import { type Address, isAddress } from "viem";
+import type { z } from "zod/v4";
 
-import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
-import { getPlugin } from "@/plugins";
+import { type DatasourceName, getENSRootChainId } from "@ensnode/datasources";
 import {
   asLowerCaseAddress,
   isHttpProtocol,
   isWebSocketProtocol,
   uniq,
 } from "@ensnode/ensnode-sdk";
+
+import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
+import { getPlugin } from "@/plugins";
+
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method

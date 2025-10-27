@@ -1,6 +1,7 @@
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Link } from "@namehash/namekit-react";
 import cc from "classcat";
+
 import { RainbowIcon } from "../atoms/icons/RainbowIcon.tsx";
 import { RocketIcon } from "../atoms/icons/RocketIcon.tsx";
 

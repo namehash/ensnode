@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { isSelectionEmpty } from "./resolver-records-selection";
 
 describe("isSelectionEmpty", () => {

@@ -1,5 +1,6 @@
 import { Tooltip } from "@namehash/namekit-react/client";
 import { useEffect, useState } from "react";
+
 import { CopyIcon } from "../atoms/icons/CopyIcon.tsx";
 
 const npmCommand = "npm install @ensnode/ensrainbow-sdk";

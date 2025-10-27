@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { constrainBlockrange, createStartBlockByChainIdMap } from "@/lib/ponder-helpers";
 import type { Blockrange } from "@ensnode/ensnode-sdk";
+
+import { constrainBlockrange, createStartBlockByChainIdMap } from "@/lib/ponder-helpers";
 
 const UNDEFINED_BLOCKRANGE = { startBlock: undefined, endBlock: undefined } satisfies Blockrange;
 const BLOCKRANGE_WITH_END = { startBlock: undefined, endBlock: 1234 } satisfies Blockrange;

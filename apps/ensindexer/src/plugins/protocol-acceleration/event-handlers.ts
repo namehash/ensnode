@@ -1,4 +1,5 @@
 import config from "@/config";
+
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import attach_RegistryHandlers from "./handlers/Registry";

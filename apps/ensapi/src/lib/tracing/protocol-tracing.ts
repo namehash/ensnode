@@ -1,17 +1,19 @@
-import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
-import { filterTreeByScope, treeifySpans } from "@/lib/tracing/treeify-trace";
+import { type AttributeValue, type Span, trace } from "@opentelemetry/api";
+import { type ExportResult, ExportResultCode } from "@opentelemetry/core";
+import type { ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base";
+
 import {
   ATTR_PROTOCOL_NAME,
   ATTR_PROTOCOL_STEP,
   ATTR_PROTOCOL_STEP_RESULT,
-  ForwardResolutionProtocolStep,
-  ProtocolTrace,
-  ReverseResolutionProtocolStep,
-  TraceableENSProtocol,
+  type ForwardResolutionProtocolStep,
+  type ProtocolTrace,
+  type ReverseResolutionProtocolStep,
+  type TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
-import { type AttributeValue, type Span, trace } from "@opentelemetry/api";
-import { ExportResult, ExportResultCode } from "@opentelemetry/core";
-import { type ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base";
+
+import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
+import { filterTreeByScope, treeifySpans } from "@/lib/tracing/treeify-trace";
 
 const PROTOCOL_TRACING_SCOPE = "protocol-tracing";
 const tracer = trace.getTracer(PROTOCOL_TRACING_SCOPE);

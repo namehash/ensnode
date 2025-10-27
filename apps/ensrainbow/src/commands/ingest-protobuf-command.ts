@@ -1,7 +1,15 @@
 import { createReadStream } from "fs";
+
 import ProgressBar from "progress";
 import protobuf from "protobufjs";
-import { ByteArray } from "viem";
+import type { ByteArray } from "viem";
+
+import {
+  buildLabelSetId,
+  buildLabelSetVersion,
+  type LabelSetId,
+  type LabelSetVersion,
+} from "@ensnode/ensnode-sdk";
 
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { getErrorMessage } from "@/utils/error-utils";
@@ -10,12 +18,6 @@ import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
   createRainbowProtobufRoot,
 } from "@/utils/protobuf-schema";
-import {
-  type LabelSetId,
-  type LabelSetVersion,
-  buildLabelSetId,
-  buildLabelSetVersion,
-} from "@ensnode/ensnode-sdk";
 
 export interface IngestProtobufCommandOptions {
   inputFile: string;

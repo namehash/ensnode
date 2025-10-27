@@ -5,16 +5,17 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
+import { uniq } from "@ensnode/ensnode-sdk";
+
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { getServerConnectionLibrary } from "@/lib/env";
 import {
-  BuildHttpHostnameResult,
-  HttpHostname,
+  type BuildHttpHostnameResult,
   buildHttpHostname,
   buildHttpHostnames,
+  type HttpHostname,
 } from "@/lib/url-utils";
-import { uniq } from "@ensnode/ensnode-sdk";
 
 const CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY = "ensadmin:custom-connections:urls";
 
@@ -195,11 +196,7 @@ export { useConnectionsLibrary };
  * - removeCustomConnection: Callback for removing a custom connection
  * - selectConnection: Callback for selecting a connection
  */
-export function ConnectionsLibraryProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ConnectionsLibraryProvider({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={null}>
       <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>

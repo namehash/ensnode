@@ -1,7 +1,7 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
+import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 // Invariant: ENSIndexerPublicConfig VersionInfo must match ENSApi
 export function invariant_ensIndexerPublicConfigVersionInfo(

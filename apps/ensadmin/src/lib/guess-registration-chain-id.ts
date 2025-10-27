@@ -1,5 +1,5 @@
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import { ChainId, ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
+import type { ChainId, ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 
 /**
  * NOTE: This function is a "dirty-hack".

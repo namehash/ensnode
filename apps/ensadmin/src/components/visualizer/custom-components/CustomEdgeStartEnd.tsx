@@ -6,6 +6,7 @@ import {
   getBezierPath,
 } from "@xyflow/react";
 import React, { type FC } from "react";
+
 import EdgeLabel from "./EdgeLabel";
 
 const CustomEdge: FC<

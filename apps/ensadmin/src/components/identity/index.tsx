@@ -1,20 +1,23 @@
 "use client";
 
+import * as React from "react";
+
+import { useResolvedIdentity } from "@ensnode/ensnode-react";
+import {
+  type ENSNamespaceId,
+  type Identity,
+  isResolvedIdentity,
+  ResolutionStatusIds,
+  translateDefaultableChainIdToChainId,
+  type UnresolvedIdentity,
+} from "@ensnode/ensnode-sdk";
+
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { EnsAvatar } from "@/components/ens-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { cn } from "@/lib/utils";
-import { useResolvedIdentity } from "@ensnode/ensnode-react";
-import {
-  ENSNamespaceId,
-  Identity,
-  ResolutionStatusIds,
-  UnresolvedIdentity,
-  isResolvedIdentity,
-  translateDefaultableChainIdToChainId,
-} from "@ensnode/ensnode-sdk";
-import * as React from "react";
+
 import { AddressDisplay, IdentityLink, IdentityTooltip, NameDisplay } from "./utils";
 
 interface ResolveAndDisplayIdentityProps {

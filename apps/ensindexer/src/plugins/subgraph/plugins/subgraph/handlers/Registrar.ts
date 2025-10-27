@@ -1,4 +1,5 @@
 import { ponder } from "ponder:registry";
+
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";

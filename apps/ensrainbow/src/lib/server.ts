@@ -1,3 +1,10 @@
+import type { ByteArray } from "viem";
+
+import {
+  type LabelHash,
+  labelHashToBytes,
+  validateSupportedLabelSetAndVersion,
+} from "@ensnode/ensnode-sdk";
 import {
   type EnsRainbow,
   type EnsRainbowClientLabelSet,
@@ -5,17 +12,11 @@ import {
   ErrorCode,
   StatusCode,
 } from "@ensnode/ensrainbow-sdk";
-import { ByteArray } from "viem";
 
-import { ENSRainbowDB } from "@/lib/database";
-import { VersionedRainbowRecord } from "@/lib/rainbow-record";
+import type { ENSRainbowDB } from "@/lib/database";
+import type { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
-import {
-  LabelHash,
-  labelHashToBytes,
-  validateSupportedLabelSetAndVersion,
-} from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;

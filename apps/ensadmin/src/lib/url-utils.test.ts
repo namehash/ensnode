@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildHttpHostname } from "./url-utils";
 
 describe("buildHttpHostname", () => {

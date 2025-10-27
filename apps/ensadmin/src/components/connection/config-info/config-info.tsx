@@ -5,26 +5,28 @@
 
 "use client";
 
+import { PlugZap, Replace } from "lucide-react";
+
+import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
-import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
-import { HealIcon } from "@/components/icons/HealIcon";
-import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
+import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
 import { IconGraphNetwork } from "@/components/icons/graph-network";
+import { HealIcon } from "@/components/icons/HealIcon";
+import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
-import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { PlugZap, Replace } from "lucide-react";
 
 /**
  * ENSNodeConfigInfo display variations:

@@ -1,11 +1,13 @@
-import { ENSNamespaceIds } from "@ensnode/datasources";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
+
+import { ENSNamespaceIds } from "@ensnode/datasources";
+
 import { deserializeChainId } from "../deserialize";
-import { ChainId } from "../types";
+import type { ChainId } from "../types";
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
 import { makeChainIdStringSchema, makeUrlSchema } from "../zod-schemas";
-import { RpcConfig } from "./types";
+import type { RpcConfig } from "./types";
 import {
   invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
   invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,

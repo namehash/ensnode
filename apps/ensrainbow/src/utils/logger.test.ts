@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  DEFAULT_LOG_LEVEL,
-  VALID_LOG_LEVELS,
   createLogger,
+  DEFAULT_LOG_LEVEL,
   getEnvLogLevel,
   parseLogLevel,
+  VALID_LOG_LEVELS,
 } from "./logger";
 
 describe("logger", () => {

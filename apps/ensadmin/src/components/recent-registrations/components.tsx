@@ -1,15 +1,9 @@
 "use client";
 
-import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
-import {
-  RegistrationCard,
-  RegistrationCardLoading,
-} from "@/components/recent-registrations/registration-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import Link from "next/link";
+import { Fragment } from "react";
+
 import {
   type ENSIndexerPublicConfig,
   type OmnichainIndexingStatusId,
@@ -19,9 +13,18 @@ import {
   type OmnichainIndexingStatusSnapshotFollowing,
   type RealtimeIndexingStatusProjection,
 } from "@ensnode/ensnode-sdk";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import Link from "next/link";
-import { Fragment } from "react";
+
+import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
+import {
+  RegistrationCard,
+  RegistrationCardLoading,
+} from "@/components/recent-registrations/registration-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
+
 import { useRecentRegistrations } from "./hooks";
 
 /**

@@ -1,9 +1,11 @@
+import { mkdtemp, readFile, rm, stat } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
-import { mkdtemp, readFile, rm, stat } from "fs/promises";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DEFAULT_PORT, getEnvPort } from "@/lib/env";
+
 import { createCLI, validatePortConfiguration } from "./cli";
 
 // Path to test fixtures

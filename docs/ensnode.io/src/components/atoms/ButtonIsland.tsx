@@ -1,5 +1,5 @@
 import { Button, Link } from "@namehash/namekit-react";
-import React from "react";
+import type React from "react";
 
 export type ButtonIslandProps = {
   text: string | React.ReactNode;

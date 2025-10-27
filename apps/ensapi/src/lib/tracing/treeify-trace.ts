@@ -1,5 +1,6 @@
-import { ProtocolSpan, ProtocolSpanTreeNode, ProtocolTrace } from "@ensnode/ensnode-sdk";
 import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
+
+import type { ProtocolSpan, ProtocolSpanTreeNode, ProtocolTrace } from "@ensnode/ensnode-sdk";
 
 /**
  * Re-implements hrTimeToMicroseconds to avoid a dependency on @opentelemetry/core.

@@ -1,20 +1,22 @@
-import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
-import { EnsApiEnvironment } from "@/config/environment";
-import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
+import pRetry from "p-retry";
+import { prettifyError, ZodError, z } from "zod/v4";
+
 import { ENSNodeClient, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
+  buildRpcConfigsFromEnv,
   DatabaseSchemaNameSchema,
   DatabaseUrlSchema,
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
-  PortSchema,
-  RpcConfigsSchema,
-  buildRpcConfigsFromEnv,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeENSIndexerPublicConfigSchema,
+  PortSchema,
+  RpcConfigsSchema,
 } from "@ensnode/ensnode-sdk/internal";
-import pRetry from "p-retry";
-import { ZodError, prettifyError, z } from "zod/v4";
+
+import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
+import type { EnsApiEnvironment } from "@/config/environment";
+import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 
 const EnsApiConfigSchema = z
   .object({

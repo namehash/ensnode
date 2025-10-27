@@ -1,7 +1,5 @@
 import { holesky } from "viem/chains";
 
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
-
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
@@ -10,9 +8,9 @@ import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-
 // Shared ABIs
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
  * The Holesky ENSNamespace

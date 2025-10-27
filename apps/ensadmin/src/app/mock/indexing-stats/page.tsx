@@ -1,12 +1,14 @@
 "use client";
 
-import { IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
 import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+
 import {
   indexingStatusResponseError,
   indexingStatusResponseOkOmnichain,

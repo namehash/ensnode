@@ -1,9 +1,11 @@
 "use client";
 
+import { Suspense, use } from "react";
+
+import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { ensAdminVersion } from "@/lib/env";
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
-import { Suspense, use } from "react";
 
 const versionPromise = ensAdminVersion();
 

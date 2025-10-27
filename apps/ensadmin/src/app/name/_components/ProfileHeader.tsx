@@ -1,11 +1,12 @@
 "use client";
 
+import type { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
+
 import { EnsAvatar } from "@/components/ens-avatar";
 import { NameDisplay } from "@/components/identity/utils";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { beautifyUrl } from "@/lib/beautify-url";
-import { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 
 interface ProfileHeaderProps {
   name: Name;

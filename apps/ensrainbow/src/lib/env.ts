@@ -1,4 +1,5 @@
 import { join } from "path";
+
 import { parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
 
 import { logger } from "@/utils/logger";

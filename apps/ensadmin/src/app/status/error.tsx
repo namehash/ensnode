@@ -2,13 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error;
-  reset: () => void;
-}) {
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
     // log the error to the console for operators
     console.error(error);

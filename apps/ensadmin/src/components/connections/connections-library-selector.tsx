@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ConnectionOption, useConnectionsLibrary } from "@/hooks/use-connections-library";
+import { type ConnectionOption, useConnectionsLibrary } from "@/hooks/use-connections-library";
 import { buildHttpHostname } from "@/lib/url-utils";
 
 export function ConnectionsLibrarySelector() {

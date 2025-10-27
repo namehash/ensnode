@@ -5,16 +5,15 @@
  */
 
 import type { Event } from "ponder:registry";
-
 import type { ChainConfig } from "ponder";
-import { Address, PublicClient } from "viem";
+import type { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
-import { ContractConfig } from "@ensnode/datasources";
+import type { ContractConfig } from "@ensnode/datasources";
+import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
-import { ENSIndexerConfig } from "@/config/types";
-import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerConfig } from "@/config/types";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;

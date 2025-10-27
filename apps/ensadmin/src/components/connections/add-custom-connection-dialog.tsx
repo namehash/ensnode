@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import type { UrlString } from "@ensnode/ensnode-sdk";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+
+import type { UrlString } from "@ensnode/ensnode-sdk";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface AddCustomConnectionDialogProps {
   open: boolean;

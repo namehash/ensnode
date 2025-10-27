@@ -1,8 +1,8 @@
-import { Address } from "viem";
+import type { Address } from "viem";
 
 import type { Name } from "../ens";
-import { ChainId, DefaultableChainId } from "../shared";
-import { ResolverRecordsResponse } from "./resolver-records-response";
+import type { ChainId, DefaultableChainId } from "../shared";
+import type { ResolverRecordsResponse } from "./resolver-records-response";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 
 /**

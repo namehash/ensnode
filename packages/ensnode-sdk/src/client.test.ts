@@ -1,31 +1,32 @@
 import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
-  ErrorResponse,
-  IndexingStatusResponse,
-  IndexingStatusResponseCodes,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesResponse,
-  SerializedIndexingStatusResponseOk,
   deserializeIndexingStatusResponse,
+  type ErrorResponse,
+  type IndexingStatusResponse,
+  IndexingStatusResponseCodes,
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesResponse,
+  type SerializedIndexingStatusResponseOk,
   serializeIndexingStatusResponse,
 } from "./api";
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
-import { Name } from "./ens";
+import type { Name } from "./ens";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
+  deserializeENSIndexerPublicConfig,
+  deserializeRealtimeIndexingStatusProjection,
   OmnichainIndexingStatusIds,
   PluginName,
   type SerializedENSIndexerPublicConfig,
   type SerializedOmnichainIndexingStatusSnapshotBackfill,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
-  deserializeENSIndexerPublicConfig,
-  deserializeRealtimeIndexingStatusProjection,
 } from "./ensindexer";
-import { ResolverRecordsSelection } from "./resolution";
+import type { ResolverRecordsSelection } from "./resolution";
 
 const EXAMPLE_NAME: Name = "example.eth";
 const EXAMPLE_ADDRESS: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";

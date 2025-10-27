@@ -1,4 +1,5 @@
 import cc from "classcat";
+
 import type { ImageCharacteristics } from "../../types/imageTypes.ts";
 
 export type AboutRainbowProps = {

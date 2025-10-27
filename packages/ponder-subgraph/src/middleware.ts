@@ -10,9 +10,10 @@
 import { maxAliasesPlugin } from "@escape.tech/graphql-armor-max-aliases";
 import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
-import { GraphQLSchema } from "graphql";
+import type { GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
+
 import { buildDataLoaderCache } from "./graphql";
 
 export function subgraphGraphQLMiddleware(

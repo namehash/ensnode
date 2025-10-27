@@ -1,5 +1,18 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useDebouncedValue } from "rooks";
+import { type Address, isAddress } from "viem";
+
+import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  ENSNamespaceIds,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
+import { usePrimaryName } from "@ensnode/ensnode-react";
+
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { Pill } from "@/components/pill";
 import { Button } from "@/components/ui/button";
@@ -14,18 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getChainName } from "@/lib/namespace-utils";
-import {
-  DatasourceNames,
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  maybeGetDatasource,
-} from "@ensnode/datasources";
-import { usePrimaryName } from "@ensnode/ensnode-react";
-
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { useDebouncedValue } from "rooks";
-import { Address, isAddress } from "viem";
 
 const EXAMPLE_INPUT = [
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet

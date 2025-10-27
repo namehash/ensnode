@@ -10,6 +10,7 @@ import {
 } from "@xyflow/react";
 import React from "react";
 import "@xyflow/react/dist/style.css";
+
 import { AnimatedSVGEdge } from "./custom-components/AnimatedSVGEdge";
 import CustomEdgeStartEnd from "./custom-components/CustomEdgeStartEnd";
 import { LabeledGroupNode } from "./custom-components/LabeledGroupNode";

@@ -4,6 +4,8 @@ import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import type { UrlString } from "@ensnode/ensnode-sdk";
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
@@ -15,7 +17,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { UrlString } from "@ensnode/ensnode-sdk";
 
 export function NavMain({
   items,

@@ -7,7 +7,10 @@
 import { createReadStream, createWriteStream } from "fs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
+
 import ProgressBar from "progress";
+
+import type { LabelSetId, LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
 import { logger } from "@/utils/logger";
 import {
@@ -15,7 +18,6 @@ import {
   createRainbowProtobufRoot,
 } from "@/utils/protobuf-schema";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
-import { type LabelSetId, type LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
 export interface ConvertCommandOptions {
   inputFile: string;

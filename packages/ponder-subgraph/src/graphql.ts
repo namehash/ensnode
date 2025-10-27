@@ -40,16 +40,11 @@ export type OnchainTable<
 
 import DataLoader from "dataloader";
 import {
-  type Column,
-  Many,
-  One,
-  type SQL,
-  Subquery,
-  type TableRelationalConfig,
   and,
   arrayContained,
   arrayContains,
   asc,
+  type Column,
   createTableRelationsHelpers,
   desc,
   eq,
@@ -65,29 +60,34 @@ import {
   like,
   lt,
   lte,
+  Many,
   ne,
   not,
   notInArray,
   notLike,
+  One,
   or,
   relations,
+  type SQL,
+  type Subquery,
   sql,
+  type TableRelationalConfig,
 } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
 import {
+  isPgEnum,
   type PgColumnBuilderBase,
   type PgEnum,
   PgEnumColumn,
   PgInteger,
   PgSerial,
-  PgTable,
-  PgTableExtraConfig,
-  TableConfig,
-  isPgEnum,
+  type PgTable,
+  type PgTableExtraConfig,
   pgTable,
+  type TableConfig,
 } from "drizzle-orm/pg-core";
-import { PgViewBase } from "drizzle-orm/pg-core/view-base";
-import { Relation } from "drizzle-orm/relations";
+import type { PgViewBase } from "drizzle-orm/pg-core/view-base";
+import type { Relation } from "drizzle-orm/relations";
 import {
   GraphQLBoolean,
   GraphQLEnumType,

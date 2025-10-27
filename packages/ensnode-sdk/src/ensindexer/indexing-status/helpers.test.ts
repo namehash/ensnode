@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BlockRef } from "../../shared";
+
+import type { BlockRef } from "../../shared";
 import {
   createIndexingConfig,
   getOmnichainIndexingCursor,
@@ -7,15 +8,15 @@ import {
 } from "./helpers";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
-  ChainIndexingConfigDefinite,
-  ChainIndexingConfigIndefinite,
+  type ChainIndexingConfigDefinite,
+  type ChainIndexingConfigIndefinite,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotBackfill,
-  ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotFollowing,
-  ChainIndexingStatusSnapshotQueued,
+  type ChainIndexingStatusSnapshot,
+  type ChainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotCompleted,
+  type ChainIndexingStatusSnapshotFollowing,
+  type ChainIndexingStatusSnapshotQueued,
   OmnichainIndexingStatusIds,
 } from "./types";
 

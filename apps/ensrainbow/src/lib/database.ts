@@ -1,21 +1,23 @@
 import { ClassicLevel } from "classic-level";
-import { ByteArray, Hex, labelhash } from "viem";
+import { type ByteArray, type Hex, labelhash } from "viem";
 
-import { getErrorMessage } from "@/utils/error-utils";
-import { logger } from "@/utils/logger";
 import {
-  EnsRainbowServerLabelSet,
-  type LabelSetId,
-  type LabelSetVersion,
   buildLabelSetId,
   buildLabelSetVersion,
+  type EnsRainbowServerLabelSet,
+  type LabelSetId,
+  type LabelSetVersion,
   labelHashToBytes,
   parseNonNegativeInteger,
 } from "@ensnode/ensnode-sdk";
+
+import { getErrorMessage } from "@/utils/error-utils";
+import { logger } from "@/utils/logger";
+
 import {
-  type VersionedRainbowRecord,
   buildEncodedVersionedRainbowRecord,
   decodeEncodedVersionedRainbowRecord,
+  type VersionedRainbowRecord,
 } from "./rainbow-record";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes

@@ -1,8 +1,9 @@
 "use client";
 
-import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { createElement, useMemo } from "react";
+
+import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 
 import { ENSNodeContext } from "./context";
 import type { ENSNodeConfig } from "./types";

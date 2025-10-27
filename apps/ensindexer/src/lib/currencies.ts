@@ -1,3 +1,4 @@
+import { type Address, zeroAddress } from "viem";
 import {
   base,
   baseSepolia,
@@ -9,8 +10,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-import { AccountId, ChainId } from "@ensnode/ensnode-sdk";
-import { Address, zeroAddress } from "viem";
+import type { AccountId, ChainId } from "@ensnode/ensnode-sdk";
 
 /**
  * Identifiers for supported currencies.

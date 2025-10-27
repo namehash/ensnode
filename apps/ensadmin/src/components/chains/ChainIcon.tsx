@@ -1,18 +1,3 @@
-import { ArbitrumIcon } from "@/components/icons/chains/ArbitrumIcon";
-import { ArbitrumTestnetIcon } from "@/components/icons/chains/ArbitrumTestnetIcon";
-import { BaseIcon } from "@/components/icons/chains/BaseIcon";
-import { BaseTestnetIcon } from "@/components/icons/chains/BaseTestnetIcon";
-import { EthereumIcon } from "@/components/icons/chains/EthereumIcon";
-import { EthereumLocalIcon } from "@/components/icons/chains/EthereumLocalIcon";
-import { EthereumTestnetIcon } from "@/components/icons/chains/EthereumTestnetIcon";
-import { LineaIcon } from "@/components/icons/chains/LineaIcon";
-import { LineaTestnetIcon } from "@/components/icons/chains/LineaTestnetIcon";
-import { OptimismIcon } from "@/components/icons/chains/OptimismIcon";
-import { OptimismTestnetIcon } from "@/components/icons/chains/OptimismTestnetIcon";
-import { ScrollIcon } from "@/components/icons/chains/ScrollIcon";
-import { ScrollTestnetIcon } from "@/components/icons/chains/ScrollTestnetIcon";
-import { UnrecognizedChainIcon } from "@/components/icons/chains/UnrecognizedChainIcon";
-import { ensTestEnvL1Chain } from "@ensnode/datasources";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -28,6 +13,23 @@ import {
   scrollSepolia,
   sepolia,
 } from "viem/chains";
+
+import { ensTestEnvL1Chain } from "@ensnode/datasources";
+
+import { ArbitrumIcon } from "@/components/icons/chains/ArbitrumIcon";
+import { ArbitrumTestnetIcon } from "@/components/icons/chains/ArbitrumTestnetIcon";
+import { BaseIcon } from "@/components/icons/chains/BaseIcon";
+import { BaseTestnetIcon } from "@/components/icons/chains/BaseTestnetIcon";
+import { EthereumIcon } from "@/components/icons/chains/EthereumIcon";
+import { EthereumLocalIcon } from "@/components/icons/chains/EthereumLocalIcon";
+import { EthereumTestnetIcon } from "@/components/icons/chains/EthereumTestnetIcon";
+import { LineaIcon } from "@/components/icons/chains/LineaIcon";
+import { LineaTestnetIcon } from "@/components/icons/chains/LineaTestnetIcon";
+import { OptimismIcon } from "@/components/icons/chains/OptimismIcon";
+import { OptimismTestnetIcon } from "@/components/icons/chains/OptimismTestnetIcon";
+import { ScrollIcon } from "@/components/icons/chains/ScrollIcon";
+import { ScrollTestnetIcon } from "@/components/icons/chains/ScrollTestnetIcon";
+import { UnrecognizedChainIcon } from "@/components/icons/chains/UnrecognizedChainIcon";
 
 export interface ChainIconProps {
   chainId: number;

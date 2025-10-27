@@ -12,13 +12,14 @@
  * the "highest" endBlock defined for each of the indexed chains.
  */
 
+import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
+
 import {
   type BlockNumber,
   type Blockrange,
   deserializeBlockNumber,
   deserializeBlockrange,
 } from "@ensnode/ensnode-sdk";
-import { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
 /**
  * Chain Name

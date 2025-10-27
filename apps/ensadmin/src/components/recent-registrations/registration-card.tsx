@@ -1,3 +1,7 @@
+import type { PropsWithChildren } from "react";
+
+import { buildUnresolvedIdentity } from "@ensnode/ensnode-sdk";
+
 import { Duration, RelativeTime } from "@/components/datetime-utils";
 import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
@@ -5,8 +9,6 @@ import type { Registration } from "@/components/recent-registrations/types";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { guessChainIdFromRegisteredName } from "@/lib/guess-registration-chain-id";
 import { cn } from "@/lib/utils";
-import { buildUnresolvedIdentity } from "@ensnode/ensnode-sdk";
-import { PropsWithChildren } from "react";
 
 export interface RegistrationCardProps {
   registration: Registration;

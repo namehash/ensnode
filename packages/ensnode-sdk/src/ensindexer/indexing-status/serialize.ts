@@ -1,20 +1,20 @@
-import { ChainId, ChainIdString, serializeChainId } from "../../shared";
+import { type ChainId, type ChainIdString, serializeChainId } from "../../shared";
 import {
-  SerializedCrossChainIndexingStatusSnapshot,
+  type SerializedCrossChainIndexingStatusSnapshot,
   SerializedCurrentIndexingProjectionOmnichain,
-  SerializedOmnichainIndexingStatusSnapshot,
-  SerializedOmnichainIndexingStatusSnapshotBackfill,
-  SerializedOmnichainIndexingStatusSnapshotCompleted,
-  SerializedOmnichainIndexingStatusSnapshotFollowing,
-  SerializedOmnichainIndexingStatusSnapshotUnstarted,
-  SerializedRealtimeIndexingStatusProjection,
+  type SerializedOmnichainIndexingStatusSnapshot,
+  type SerializedOmnichainIndexingStatusSnapshotBackfill,
+  type SerializedOmnichainIndexingStatusSnapshotCompleted,
+  type SerializedOmnichainIndexingStatusSnapshotFollowing,
+  type SerializedOmnichainIndexingStatusSnapshotUnstarted,
+  type SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import {
-  ChainIndexingStatusSnapshot,
-  CrossChainIndexingStatusSnapshot,
+  type ChainIndexingStatusSnapshot,
+  type CrossChainIndexingStatusSnapshot,
   OmnichainIndexingStatusIds,
-  OmnichainIndexingStatusSnapshot,
-  RealtimeIndexingStatusProjection,
+  type OmnichainIndexingStatusSnapshot,
+  type RealtimeIndexingStatusProjection,
 } from "./types";
 
 export function serializeCrossChainIndexingStatusSnapshotOmnichain({

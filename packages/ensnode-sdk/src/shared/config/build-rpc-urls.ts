@@ -14,7 +14,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-import { ChainId } from "@ensnode/ensnode-sdk";
+import type { ChainId } from "@ensnode/ensnode-sdk";
 
 /**
  * Builds an Alchemy RPC URL for the specified chain ID.

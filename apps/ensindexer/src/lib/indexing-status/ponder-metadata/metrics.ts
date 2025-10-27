@@ -6,6 +6,7 @@
  */
 
 import { PrometheusMetrics } from "@ensnode/ponder-metadata";
+
 import { validatePonderMetrics } from "./validations";
 
 export { PrometheusMetrics } from "@ensnode/ponder-metadata";

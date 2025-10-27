@@ -1,7 +1,9 @@
 import config from "@/config";
+
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+
 import { redactENSIndexerConfig } from "@/config/redact";
 import ponderConfig from "@/ponder/config";
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
 ////////
 // Log redacted ENSIndexerConfig for debugging.

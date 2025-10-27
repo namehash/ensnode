@@ -1,8 +1,8 @@
-import { SerializedRealtimeIndexingStatusProjection } from "../ensindexer";
+import type { SerializedRealtimeIndexingStatusProjection } from "../ensindexer";
 import {
   IndexingStatusResponse,
-  IndexingStatusResponseError,
-  IndexingStatusResponseOk,
+  type IndexingStatusResponseError,
+  type IndexingStatusResponseOk,
 } from "./types";
 
 /**

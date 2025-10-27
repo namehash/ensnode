@@ -1,12 +1,14 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import { base, optimism } from "viem/chains";
 
-import config from "@/config";
+import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
+import { type ChainId, PluginName } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
+import type { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
-import { DatasourceName, DatasourceNames } from "@ensnode/datasources";
 
 import { handleERC1155Transfer } from "../lib/handle-nft-transfer";
 

@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 // <?xml version="1.0" encoding="UTF-8"?>
 // Creator: CorelDRAW 2019 (64-Bit)

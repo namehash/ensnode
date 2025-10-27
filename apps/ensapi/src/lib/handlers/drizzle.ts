@@ -1,4 +1,4 @@
-import { Table, isTable } from "drizzle-orm";
+import { isTable, Table } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { isPgEnum } from "drizzle-orm/pg-core";
 

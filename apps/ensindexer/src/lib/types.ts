@@ -1,4 +1,4 @@
-import { Name } from "@ensnode/ensnode-sdk";
+import type { Name } from "@ensnode/ensnode-sdk";
 
 /**
  * RegistrarManagedName is an explicit type representing this concept within the shared handlers:

@@ -1,9 +1,10 @@
+import { ExternalLink } from "lucide-react";
+import type { ReactElement } from "react";
+
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
-import { ReactElement } from "react";
 
 interface ConfigInfoAppCardContent {
   label: string;

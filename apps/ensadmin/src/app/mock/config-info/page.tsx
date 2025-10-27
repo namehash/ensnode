@@ -1,14 +1,17 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
+import {
+  deserializeENSIndexerPublicConfig,
+  type SerializedENSIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
+
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
-import { ENSNodeConfigProps } from "@/components/connection/config-info/config-info";
+import type { ENSNodeConfigProps } from "@/components/connection/config-info/config-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  SerializedENSIndexerPublicConfig,
-  deserializeENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
-import { useMemo, useState } from "react";
+
 import mockDataJson from "./data.json";
 
 const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;

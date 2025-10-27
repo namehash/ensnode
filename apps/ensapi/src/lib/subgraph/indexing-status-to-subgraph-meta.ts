@@ -1,11 +1,13 @@
 import config from "@/config";
-import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
+
 import {
   ChainIndexingStatusIds,
-  IndexingStatusResponseCodes,
   getENSRootChainId,
+  IndexingStatusResponseCodes,
 } from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
+
+import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
 
 /**
  * Converts ENSIndexer indexing status to GraphQL subgraph metadata format.

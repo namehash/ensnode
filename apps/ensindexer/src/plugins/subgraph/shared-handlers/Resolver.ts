@@ -1,9 +1,11 @@
-import { type Context } from "ponder:registry";
-import schema from "ponder:schema";
-import { Node, hasNullByte, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
-import { type Address, Hash, type Hex } from "viem";
-
 import config from "@/config";
+
+import type { Context } from "ponder:registry";
+import schema from "ponder:schema";
+import type { Address, Hash, Hex } from "viem";
+
+import { hasNullByte, type Node, stripNullBytes, uniq } from "@ensnode/ensnode-sdk";
+
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";

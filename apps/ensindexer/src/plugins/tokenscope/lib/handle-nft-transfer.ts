@@ -1,16 +1,16 @@
-import { Context } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, zeroAddress } from "viem";
+import { type Address, zeroAddress } from "viem";
 
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
 import {
-  NFTMintStatuses,
-  NFTTransferEventMetadata,
-  NFTTransferTypes,
-  SupportedNFT,
   buildSupportedNFTAssetId,
   formatNFTTransferEventMetadata,
   getNFTTransferType,
+  NFTMintStatuses,
+  type NFTTransferEventMetadata,
+  NFTTransferTypes,
+  type SupportedNFT,
 } from "@/lib/tokenscope/assets";
 
 export const handleERC1155Transfer = async (

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { beautifyName, getNameHierarchy } from "./names";
-import { Name, NormalizedName } from "./types";
+import type { Name, NormalizedName } from "./types";
 
 describe("names", () => {
   describe("getNameHierarchy", () => {

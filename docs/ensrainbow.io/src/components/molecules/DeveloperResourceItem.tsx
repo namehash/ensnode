@@ -1,4 +1,4 @@
-import { ListSectionElement } from "../../types/listSectionTypes";
+import type { ListSectionElement } from "../../types/listSectionTypes";
 import { RedirectIcon } from "../atoms/icons/RedirectIcon.tsx";
 
 type DeveloperResourceItemProps = {

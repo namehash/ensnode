@@ -1,22 +1,23 @@
-import { type Context } from "ponder:registry";
+import config from "@/config";
+
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, namehash } from "viem";
 
 import {
-  InterpretedLabel,
-  InterpretedName,
+  encodeLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
   type Label,
   type LabelHash,
-  LiteralLabel,
-  PluginName,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
-  encodeLabelHash,
+  type LiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
+  type PluginName,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";

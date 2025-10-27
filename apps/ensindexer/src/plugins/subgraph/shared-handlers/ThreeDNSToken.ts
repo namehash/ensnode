@@ -1,26 +1,26 @@
-import { Context } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
+import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
 
 import {
-  DNSEncodedLiteralName,
-  DNSEncodedName,
-  InterpretedLabel,
-  InterpretedName,
-  type LabelHash,
-  type Node,
+  type DNSEncodedLiteralName,
+  type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   encodeLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
   interpretedLabelsToInterpretedName,
   isNormalizedLabel,
+  type LabelHash,
   labelhashLiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
+  type Node,
 } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { parseLabelAndNameFromOnChainMetadata } from "@/lib/json-metadata";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   sharedEventValues,
   upsertAccount,

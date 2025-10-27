@@ -6,8 +6,9 @@
  * the `publicClients` object imported by ENSIndexer from the `ponder:api`.
  */
 
-import { type BlockNumber, type BlockRef, deserializeBlockRef } from "@ensnode/ensnode-sdk";
 import type { PublicClient } from "viem";
+
+import { type BlockNumber, type BlockRef, deserializeBlockRef } from "@ensnode/ensnode-sdk";
 
 export type { PublicClient } from "viem";
 

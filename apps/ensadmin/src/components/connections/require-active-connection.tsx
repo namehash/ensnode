@@ -1,9 +1,11 @@
 "use client";
 
+import type { PropsWithChildren } from "react";
+
+import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
-import { PropsWithChildren } from "react";
 
 /**
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.

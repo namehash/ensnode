@@ -3,14 +3,15 @@ import { bytesToHex, decodeEventLog, stringToHex, zeroHash } from "viem";
 import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
+import { getDatasource } from "@ensnode/datasources";
+import type { DNSEncodedLiteralName } from "@ensnode/ensnode-sdk";
+
 import {
   decodeTXTData,
   parseDnsTxtRecordArgs,
   parseRRSet,
   subgraph_decodeDNSEncodedLiteralName,
 } from "@/lib/dns-helpers";
-import { getDatasource } from "@ensnode/datasources";
-import { DNSEncodedLiteralName } from "@ensnode/ensnode-sdk";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog

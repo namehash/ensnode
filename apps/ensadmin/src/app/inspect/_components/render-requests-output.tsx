@@ -1,3 +1,13 @@
+import type { UseQueryResult } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+
+import {
+  type AcceleratableResponse,
+  ClientError,
+  type ProtocolTrace,
+  type TraceableResponse,
+} from "@ensnode/ensnode-sdk";
+
 import { CodeBlock } from "@/components/code-block";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { TraceRenderer } from "@/components/tracing/renderer";
@@ -6,14 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { renderMicroseconds } from "@/lib/time";
 import { getTraceDuration } from "@/lib/tracing";
 import { cn } from "@/lib/utils";
-import {
-  AcceleratableResponse,
-  ClientError,
-  ProtocolTrace,
-  TraceableResponse,
-} from "@ensnode/ensnode-sdk";
-import { UseQueryResult } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
 
 type QueryResult<K extends string> = UseQueryResult<
   { [key in K]: unknown } & AcceleratableResponse & TraceableResponse

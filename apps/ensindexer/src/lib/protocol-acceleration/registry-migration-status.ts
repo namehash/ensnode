@@ -1,10 +1,10 @@
 import config from "@/config";
 
-import { Context } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import { Node } from "@ensnode/ensnode-sdk";
+import type { Node } from "@ensnode/ensnode-sdk";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
 

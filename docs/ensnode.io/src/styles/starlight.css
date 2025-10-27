@@ -298,7 +298,9 @@ a[href*="ensdb"] .starlight-sidebar-topics-icon {
 
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
 }
 
 /* Only apply hover effects to non-selected items */
@@ -319,5 +321,8 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
   filter: brightness(1.2) contrast(1.1);
   box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
   border-radius: 4px;
-  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    filter 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }

@@ -1,14 +1,16 @@
 "use client";
 
+import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
+
 import {
   ENSNodeClient,
   IndexingStatusRequest,
-  ResolvePrimaryNameRequest,
-  ResolvePrimaryNamesRequest,
-  ResolveRecordsRequest,
-  ResolverRecordsSelection,
+  type ResolvePrimaryNameRequest,
+  type ResolvePrimaryNamesRequest,
+  type ResolveRecordsRequest,
+  type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
-import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
+
 import type { ENSNodeConfig } from "../types";
 
 /**

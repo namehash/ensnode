@@ -49,7 +49,6 @@
     "graphql-yoga": "^5.10.9"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "hono": "catalog:",

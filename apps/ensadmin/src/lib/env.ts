@@ -1,5 +1,6 @@
 import { uniq } from "@ensnode/ensnode-sdk";
-import { type HttpHostname, buildHttpHostname, buildHttpHostnames } from "./url-utils";
+
+import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
 
 /**
  * Get ENSAdmin service public HttpHostname.

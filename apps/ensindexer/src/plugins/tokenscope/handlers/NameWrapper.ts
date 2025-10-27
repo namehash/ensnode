@@ -1,11 +1,13 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
+
+import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
+import type { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
-import { DatasourceNames } from "@ensnode/datasources";
 
 import { handleERC1155Transfer } from "../lib/handle-nft-transfer";
 

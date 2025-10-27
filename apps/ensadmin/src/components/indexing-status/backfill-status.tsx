@@ -3,26 +3,27 @@
  * the {@link OmnichainIndexingStatusSnapshotBackfill} indexing status object.
  */
 
-import {
-  ChainIndexingStatusIds,
-  OmnichainIndexingStatusSnapshotBackfill,
-  RealtimeIndexingStatusProjection,
-  UnixTimestamp,
-  getTimestampForHighestOmnichainKnownBlock,
-  getTimestampForLowestOmnichainStartBlock,
-  sortChainStatusesByStartBlockAsc,
-} from "@ensnode/ensnode-sdk";
 import { fromUnixTime } from "date-fns";
 import { Clock } from "lucide-react";
 
-import { AbsoluteTime } from "@/components/datetime-utils";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ChainIndexingStatusIds,
+  getTimestampForHighestOmnichainKnownBlock,
+  getTimestampForLowestOmnichainStartBlock,
+  OmnichainIndexingStatusSnapshotBackfill,
+  type RealtimeIndexingStatusProjection,
+  sortChainStatusesByStartBlockAsc,
+  type UnixTimestamp,
+} from "@ensnode/ensnode-sdk";
 
+import { AbsoluteTime } from "@/components/datetime-utils";
 import {
   generateYearMarkers,
   getTimelinePosition,
 } from "@/components/indexing-status/indexing-timeline-utils";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { ChainIndexingTimeline } from "./indexing-timeline";
 
 interface ChainIndexingPhaseViewModel {

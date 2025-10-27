@@ -1,18 +1,20 @@
-import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
+import dnsPacket, { type Answer } from "dns-packet";
+import type { Hex } from "viem";
+
 import {
-  DNSEncodedLiteralName,
-  DNSEncodedName,
-  Label,
-  Name,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
+  type DNSEncodedLiteralName,
+  type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   decodeDNSEncodedName,
+  type Label,
   literalLabelsToLiteralName,
+  type Name,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
 } from "@ensnode/ensnode-sdk";
 import { interpretTextRecordKey, interpretTextRecordValue } from "@ensnode/ensnode-sdk/internal";
-import dnsPacket, { Answer } from "dns-packet";
-import { Hex } from "viem";
+
+import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
 
 /**
  * Implements the original ENS Subgraph DNS-Encoded Name decoding logic, in particular the additional
