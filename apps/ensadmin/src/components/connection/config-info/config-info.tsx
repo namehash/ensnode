@@ -7,7 +7,7 @@
 
 import { PlugZap, Replace } from "lucide-react";
 
-import type { ENSApiPublicConfig, ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import type { ENSApiPublicConfig } from "@ensnode/ensnode-sdk";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
@@ -161,7 +161,24 @@ export function ENSNodeConfigInfo({
             {/*ENSApi*/}
             <ConfigInfoAppCard
               name="ENSApi"
-              icon={<ENSDbIcon width={24} height={24} />}
+              icon={<ENSAdminIcon width={24} height={24} />}
+              items={[
+                {
+                  label: "Database",
+                  value: <p className={cardItemValueStyles}>Postgres</p>,
+                },
+                {
+                  label: "Database Schema",
+                  value: (
+                    <p className={cardItemValueStyles}>
+                      {ensIndexerPublicConfig.databaseSchemaName}
+                    </p>
+                  ),
+                  additionalInfo: (
+                    <p>ENSApi reads from tables within this Postgres database schema.</p>
+                  ),
+                },
+              ]}
               version={ensApiPublicConfig.version}
               docsLink={new URL("https://ensnode.io/ensapi/")}
             />
