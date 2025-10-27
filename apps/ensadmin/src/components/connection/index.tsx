@@ -2,7 +2,7 @@
 
 import { use } from "react";
 
-import { useENSNodeConfigQuery } from "@ensnode/ensnode-react";
+import { useENSNodeConfig } from "@ensnode/ensnode-react";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { ensAdminVersion } from "@/lib/env";
@@ -11,7 +11,7 @@ const versionPromise = ensAdminVersion();
 
 export default function ConnectionInfo() {
   const version = use(versionPromise);
-  const { status, error, data } = useENSNodeConfigQuery();
+  const { status, error, data } = useENSNodeConfig();
 
   if (status === "pending") {
     return (

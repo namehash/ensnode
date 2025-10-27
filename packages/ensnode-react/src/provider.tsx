@@ -7,11 +7,11 @@ import { createElement, useMemo } from "react";
 import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 
 import { ENSNodeContext } from "./context";
-import type { ENSNodeConfig } from "./types";
+import type { ENSNodeSDKConfig } from "./types";
 
 export interface ENSNodeProviderProps {
   /** ENSNode configuration */
-  config: ENSNodeConfig;
+  config: ENSNodeSDKConfig;
 
   /**
    * Optional QueryClient instance. If provided, you must wrap your app with QueryClientProvider yourself.
@@ -31,7 +31,7 @@ function ENSNodeInternalProvider({
   config,
 }: {
   children: React.ReactNode;
-  config: ENSNodeConfig;
+  config: ENSNodeSDKConfig;
 }) {
   // Memoize the config to prevent unnecessary re-renders
   const memoizedConfig = useMemo(() => config, [config]);
@@ -94,7 +94,7 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
 /**
  * Helper function to create ENSNode configuration
  */
-export function createConfig(options?: { url?: string | URL }): ENSNodeConfig {
+export function createConfig(options?: { url?: string | URL }): ENSNodeSDKConfig {
   const url = options?.url ? new URL(options.url) : ENSNodeClient.defaultOptions().url;
 
   return {

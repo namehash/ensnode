@@ -10,7 +10,7 @@ import {
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import type { ENSNodeConfig } from "../types";
+import type { ENSNodeSDKConfig } from "../types";
 
 /**
  * Immutable query options for data that is assumed to be immutable and should only be fetched once per full page refresh per unique key.
@@ -61,7 +61,7 @@ export const queryKeys = {
  * Creates query options for Records Resolution
  */
 export function createRecordsQueryOptions<SELECTION extends ResolverRecordsSelection>(
-  config: ENSNodeConfig,
+  config: ENSNodeSDKConfig,
   args: ResolveRecordsRequest<SELECTION>,
 ) {
   return {
@@ -78,7 +78,7 @@ export function createRecordsQueryOptions<SELECTION extends ResolverRecordsSelec
  * Creates query options for Primary Name Resolution
  */
 export function createPrimaryNameQueryOptions(
-  config: ENSNodeConfig,
+  config: ENSNodeSDKConfig,
   args: ResolvePrimaryNameRequest,
 ) {
   return {
@@ -95,7 +95,7 @@ export function createPrimaryNameQueryOptions(
  * Creates query options for Primary Name Resolution
  */
 export function createPrimaryNamesQueryOptions(
-  config: ENSNodeConfig,
+  config: ENSNodeSDKConfig,
   args: ResolvePrimaryNamesRequest,
 ) {
   return {
@@ -111,7 +111,7 @@ export function createPrimaryNamesQueryOptions(
 /**
  * Creates query options for ENSNode Config API
  */
-export function createConfigQueryOptions(config: ENSNodeConfig) {
+export function createConfigQueryOptions(config: ENSNodeSDKConfig) {
   return {
     enabled: true,
     queryKey: queryKeys.config(config.client.url.href),
@@ -125,7 +125,7 @@ export function createConfigQueryOptions(config: ENSNodeConfig) {
 /**
  * Creates query options for ENSNode Indexing Status API
  */
-export function createIndexingStatusQueryOptions(config: ENSNodeConfig) {
+export function createIndexingStatusQueryOptions(config: ENSNodeSDKConfig) {
   return {
     enabled: true,
     queryKey: queryKeys.indexingStatus(config.client.url.href),

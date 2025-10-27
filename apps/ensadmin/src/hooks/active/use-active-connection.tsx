@@ -1,6 +1,6 @@
 "use client";
 
-import { useENSNodeConfigQuery } from "@ensnode/ensnode-react";
+import { useENSNodeConfig } from "@ensnode/ensnode-react";
 
 /**
  * Hook to get the currently active ENSNode connection synchronously.
@@ -16,7 +16,7 @@ import { useENSNodeConfigQuery } from "@ensnode/ensnode-react";
  * @throws Error if no active ENSNode connection is available
  */
 export function useActiveConnection() {
-  const { data } = useENSNodeConfigQuery();
+  const { data } = useENSNodeConfig();
 
   if (data === undefined) {
     throw new Error(`Invariant(useActiveConnection): Expected an active ENSNode Config`);
