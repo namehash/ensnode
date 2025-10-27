@@ -7,7 +7,7 @@
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
-import { ErrorInfo } from "@/components/error-info";
+import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import { HealIcon } from "@/components/icons/HealIcon";
 import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
@@ -101,10 +101,7 @@ export function ENSNodeConfigCardDisplay({ ensIndexerConfig }: ENSNodeConfigCard
  */
 export interface ENSNodeConfigInfoViewProps {
   ensIndexerConfig?: ENSIndexerPublicConfig;
-  error?: {
-    title: string;
-    description: string;
-  };
+  error?: ErrorInfoProps;
   isLoading?: boolean;
 }
 
