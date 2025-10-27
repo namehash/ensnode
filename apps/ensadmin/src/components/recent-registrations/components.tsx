@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 import {
-  type ENSIndexerPublicConfig,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
@@ -41,7 +40,6 @@ const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OmnichainIndexingStatusId[] = [
 ];
 
 export interface RecentRegistrationsOkProps {
-  ensIndexerConfig: ENSIndexerPublicConfig | undefined;
   realtimeProjection: RealtimeIndexingStatusProjection | undefined;
   maxRecords?: number;
 }
@@ -54,18 +52,15 @@ export interface RecentRegistrationsErrorProps {
  * RecentRegistrations display variations:
  *
  * Standard -
- *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
  *      indexingStatus: {@link OmnichainIndexingStatusSnapshotCompleted} |
  *          {@link OmnichainIndexingStatusSnapshotFollowing},
  *
  * UnsupportedOmnichainIndexingStatusMessage -
- *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
  *      indexingStatus:  {@link OmnichainIndexingStatusSnapshot} other than
  *          {@link OmnichainIndexingStatusSnapshotCompleted} |
  *          {@link OmnichainIndexingStatusSnapshotFollowing},
  *
  * Loading -
- *      ensIndexerConfig: undefined,
  *      indexingStatus: undefined,
  *
  * Error -
@@ -84,9 +79,9 @@ export function RecentRegistrations(props: RecentRegistrationsProps) {
     return <ErrorInfo {...props.error} />;
   }
 
-  const { ensIndexerConfig, realtimeProjection, maxRecords = DEFAULT_MAX_RECORDS } = props;
+  const { realtimeProjection, maxRecords = DEFAULT_MAX_RECORDS } = props;
 
-  if (ensIndexerConfig === undefined || realtimeProjection === undefined) {
+  if (realtimeProjection === undefined) {
     return <RecentRegistrationsLoading recordCount={maxRecords} />;
   }
 

@@ -14,6 +14,7 @@ import {
 import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
 import type { Name } from "./ens";
+import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
@@ -57,32 +58,35 @@ const EXAMPLE_PRIMARY_NAMES_RESPONSE = {
 const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_CONFIG_RESPONSE = {
-  labelSet: {
-    labelSetId: "subgraph",
-    labelSetVersion: 0,
+  version: "0.32.0",
+  ensIndexerPublicConfig: {
+    labelSet: {
+      labelSetId: "subgraph",
+      labelSetVersion: 0,
+    },
+    indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
+    databaseSchemaName: "alphaSchema0.31.0",
+    isSubgraphCompatible: false,
+    namespace: "mainnet",
+    plugins: [
+      PluginName.Subgraph,
+      PluginName.Basenames,
+      PluginName.Lineanames,
+      PluginName.ThreeDNS,
+      PluginName.ProtocolAcceleration,
+      PluginName.Referrals,
+    ],
+    versionInfo: {
+      nodejs: "22.18.0",
+      ponder: "0.11.43",
+      ensDb: "0.32.0",
+      ensIndexer: "0.32.0",
+      ensNormalize: "1.11.1",
+      ensRainbow: "0.31.0",
+      ensRainbowSchema: 2,
+    },
   },
-  indexedChainIds: [1, 8453, 59144, 10, 42161, 534352],
-  databaseSchemaName: "alphaSchema0.31.0",
-  isSubgraphCompatible: false,
-  namespace: "mainnet",
-  plugins: [
-    PluginName.Subgraph,
-    PluginName.Basenames,
-    PluginName.Lineanames,
-    PluginName.ThreeDNS,
-    PluginName.ProtocolAcceleration,
-    PluginName.Referrals,
-  ],
-  versionInfo: {
-    nodejs: "22.18.0",
-    ponder: "0.11.43",
-    ensDb: "0.32.0",
-    ensIndexer: "0.32.0",
-    ensNormalize: "1.11.1",
-    ensRainbow: "0.31.0",
-    ensRainbowSchema: 2,
-  },
-} satisfies SerializedENSIndexerPublicConfig;
+} satisfies SerializedENSApiPublicConfig;
 
 const EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE = deserializeIndexingStatusResponse({
   realtimeProjection: {
@@ -415,7 +419,7 @@ describe("ENSNodeClient", () => {
       // arrange
       const requestUrl = new URL(`/api/config`, DEFAULT_ENSNODE_API_URL);
       const serializedMockedResponse = EXAMPLE_CONFIG_RESPONSE;
-      const mockedResponse = deserializeENSIndexerPublicConfig(serializedMockedResponse);
+      const mockedResponse = deserializeENSApiPublicConfig(serializedMockedResponse);
       const client = new ENSNodeClient();
 
       mockFetch.mockResolvedValueOnce({

@@ -2,7 +2,7 @@
 
 import type { PropsWithChildren } from "react";
 
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+import { useENSNodeConfigQuery } from "@ensnode/ensnode-react";
 
 import { ErrorInfo } from "@/components/error-info";
 import { LoadingSpinner } from "@/components/loading-spinner";
@@ -11,7 +11,7 @@ import { LoadingSpinner } from "@/components/loading-spinner";
  * Allows consumers to use `useActiveConnection` by blocking rendering until it is available.
  */
 export function RequireActiveConnection({ children }: PropsWithChildren) {
-  const { status, error } = useENSIndexerConfig();
+  const { status, error } = useENSNodeConfigQuery();
 
   if (status === "pending") return <Loading />;
 

@@ -109,9 +109,9 @@ export function createPrimaryNamesQueryOptions(
 }
 
 /**
- * Creates query options for ENSIndexer Config API
+ * Creates query options for ENSNode Config API
  */
-export function createENSIndexerConfigQueryOptions(config: ENSNodeConfig) {
+export function createConfigQueryOptions(config: ENSNodeConfig) {
   return {
     enabled: true,
     queryKey: queryKeys.config(config.client.url.href),
@@ -123,7 +123,7 @@ export function createENSIndexerConfigQueryOptions(config: ENSNodeConfig) {
 }
 
 /**
- * Creates query options for ENSIndexer Indexing Status API
+ * Creates query options for ENSNode Indexing Status API
  */
 export function createIndexingStatusQueryOptions(config: ENSNodeConfig) {
   return {

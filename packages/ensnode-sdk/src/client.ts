@@ -15,10 +15,7 @@ import type {
   ResolveRecordsResponse,
 } from "./api/types";
 import { ClientError } from "./client-error";
-import {
-  deserializeENSIndexerPublicConfig,
-  type SerializedENSIndexerPublicConfig,
-} from "./ensindexer";
+import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -289,10 +286,9 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    let responseData: unknown;
-
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
     try {
       responseData = await response.json();
     } catch {
@@ -304,7 +300,7 @@ export class ENSNodeClient {
       throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
     }
 
-    return deserializeENSIndexerPublicConfig(responseData as SerializedENSIndexerPublicConfig);
+    return deserializeENSApiPublicConfig(responseData as SerializedENSApiPublicConfig);
   }
 
   /**
@@ -321,10 +317,9 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    let responseData: unknown;
-
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
     try {
       responseData = await response.json();
     } catch {
@@ -333,9 +328,8 @@ export class ENSNodeClient {
 
     // handle response errors accordingly
     if (!response.ok) {
-      let errorResponse: ErrorResponse | undefined;
-
       // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {

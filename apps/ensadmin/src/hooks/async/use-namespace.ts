@@ -1,4 +1,4 @@
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+import { useENSNodeConfigQuery } from "@ensnode/ensnode-react";
 
 /**
  * Hook to get the namespace ID from the active ENSNode connection.
@@ -22,10 +22,10 @@ import { useENSIndexerConfig } from "@ensnode/ensnode-react";
  * ```
  */
 export function useNamespace() {
-  const query = useENSIndexerConfig();
+  const query = useENSNodeConfigQuery();
 
   return {
     ...query,
-    data: query.data?.namespace ?? null,
+    data: query.data?.ensIndexerPublicConfig.namespace ?? null,
   };
 }

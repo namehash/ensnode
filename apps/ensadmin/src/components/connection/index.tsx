@@ -2,7 +2,7 @@
 
 import { use } from "react";
 
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+import { useENSNodeConfigQuery } from "@ensnode/ensnode-react";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { ensAdminVersion } from "@/lib/env";
@@ -11,33 +11,31 @@ const versionPromise = ensAdminVersion();
 
 export default function ConnectionInfo() {
   const version = use(versionPromise);
-  const ensIndexerConfigQuery = useENSIndexerConfig();
+  const { status, error, data } = useENSNodeConfigQuery();
 
-  if (ensIndexerConfigQuery.isError) {
+  if (status === "pending") {
+    return (
+      <section className="flex flex-col gap-6 p-6">
+        <ENSNodeConfigInfo ensAdminVersion={version} />
+      </section>
+    );
+  }
+
+  if (status === "error") {
     return (
       <ENSNodeConfigInfo
         error={{
           title: "ENSNodeConfigInfo Error",
-          description: ensIndexerConfigQuery.error.message,
+          description: error.message,
         }}
         ensAdminVersion={version}
       />
     );
   }
 
-  if (!ensIndexerConfigQuery.isSuccess) {
-    return (
-      <section className="flex flex-col gap-6 p-6">
-        <ENSNodeConfigInfo ensAdminVersion={version} /> {/*display loading state*/}
-      </section>
-    );
-  }
-
-  const ensIndexerConfig = ensIndexerConfigQuery.data;
-
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ENSNodeConfigInfo ensIndexerConfig={ensIndexerConfig} ensAdminVersion={version} />
+      <ENSNodeConfigInfo ensApiPublicConfig={data} ensAdminVersion={version} />
     </section>
   );
 }

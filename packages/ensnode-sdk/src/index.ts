@@ -6,6 +6,7 @@ export {
 } from "./client";
 export * from "./client-error";
 export * from "./ens";
+export * from "./ensapi";
 export * from "./ensindexer";
 export * from "./ensrainbow";
 export * from "./resolution";

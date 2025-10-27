@@ -1,7 +1,9 @@
+import packageJson from "@/../package.json" with { type: "json" };
+
 import pRetry from "p-retry";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { ENSNodeClient, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import { type ENSApiPublicConfig, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   DatabaseSchemaNameSchema,
@@ -17,6 +19,7 @@ import {
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
+import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
 
 const EnsApiConfigSchema = z
@@ -43,9 +46,8 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   try {
     const ensIndexerUrl = EnsIndexerUrlSchema.parse(env.ENSINDEXER_URL);
-    const client = new ENSNodeClient({ url: ensIndexerUrl });
 
-    const ensIndexerPublicConfig = await pRetry(() => client.config(), {
+    const ensIndexerPublicConfig = await pRetry(() => fetchENSIndexerConfig(ensIndexerUrl), {
       retries: 3,
       onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
         logger.info(
@@ -80,4 +82,17 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
     logger.error(`Unknown Error`);
     process.exit(1);
   }
+}
+
+/**
+ * Builds the ENSApi public configuration from an EnsApiConfig object.
+ *
+ * @param config - The validated EnsApiConfig object
+ * @returns A complete ENSApiPublicConfig object
+ */
+export function buildEnsApiPublicConfig(config: EnsApiConfig): ENSApiPublicConfig {
+  return {
+    version: packageJson.version,
+    ensIndexerPublicConfig: config.ensIndexerPublicConfig,
+  };
 }

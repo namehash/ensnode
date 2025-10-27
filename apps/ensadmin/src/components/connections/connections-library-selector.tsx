@@ -73,7 +73,7 @@ export function ConnectionsLibrarySelector() {
   } else if (!selectedConnection.validatedSelectedConnection.isValid) {
     connectionMessage = "Invalid connection";
   } else {
-    connectionMessage = "Select ENSNode";
+    connectionMessage = selectedConnection.validatedSelectedConnection.url.href;
   }
 
   const serverConnections = connectionLibrary.filter((connection) => connection.type === "server");

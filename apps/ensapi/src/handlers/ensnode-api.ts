@@ -3,19 +3,21 @@ import config from "@/config";
 import {
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
-  serializeENSIndexerPublicConfig,
+  serializeENSApiPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
+import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
 
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
 
-// include ENSIndexer Public Config endpoint
+// include ENSApi Public Config endpoint
 app.get("/config", async (c) => {
-  return c.json(serializeENSIndexerPublicConfig(config.ensIndexerPublicConfig));
+  const ensApiPublicConfig = buildEnsApiPublicConfig(config);
+  return c.json(serializeENSApiPublicConfig(ensApiPublicConfig));
 });
 
 // include ENSIndexer Indexing Status endpoint

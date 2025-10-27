@@ -1,6 +1,7 @@
 import type z from "zod/v4";
 
-import type { ENSIndexerPublicConfig, RealtimeIndexingStatusProjection } from "../ensindexer";
+import type { ENSApiPublicConfig } from "../ensapi";
+import type { RealtimeIndexingStatusProjection } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -79,7 +80,7 @@ export interface ResolvePrimaryNamesResponse extends AcceleratableResponse, Trac
 /**
  * ENSIndexer Public Config Response
  */
-export type ConfigResponse = ENSIndexerPublicConfig;
+export type ConfigResponse = ENSApiPublicConfig;
 
 /**
  * Represents a request to Indexing Status API.
