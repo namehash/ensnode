@@ -175,7 +175,7 @@ a[rel="prev"]:hover {
 
 /* Pagination styles */
 .pagination-links {
-  display: flex;
+  display: flex !important;
   justify-content: space-between;
   margin-top: 3rem;
 
@@ -311,8 +311,8 @@ a[href*="ensdb"] .starlight-sidebar-topics-icon {
 }
 
 a.starlight-sidebar-topics-current {
-  background-color: rgb(0, 128, 188);
-  color: white;
+  background-color: rgb(0, 128, 188) !important;
+  color: white !important;
   border-radius: 6px;
 }
 
