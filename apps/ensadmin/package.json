@@ -28,7 +28,6 @@
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
     "@formkit/auto-animate": "^0.9.0",
-    "@gqlpt/adapter-anthropic": "0.0.0-alpha.33",
     "@graphiql/plugin-explorer": "4.0.2",
     "@graphiql/react": "0.28.2",
     "@graphiql/toolkit": "0.11.1",
