@@ -9,6 +9,7 @@ import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } f
 import { ensTestEnvL1Chain } from "./lib/chains";
 // Shared ABIs
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
+// Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
