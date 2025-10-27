@@ -229,7 +229,11 @@ function ENSNodeConfigCardContent({
             ),
           },
         ]}
-        version={ensIndexerConfig.versionInfo.ensDb}
+        version={
+          <p className="text-sm leading-normal font-normal text-muted-foreground">
+            v{ensIndexerConfig.versionInfo.ensDb}
+          </p>
+        }
         docsLink={new URL("https://ensnode.io/ensdb/")}
       />
 
@@ -376,7 +380,11 @@ function ENSNodeConfigCardContent({
             ),
           },
         ]}
-        version={ensIndexerConfig.versionInfo.ensIndexer}
+        version={
+          <p className="text-sm leading-normal font-normal text-muted-foreground">
+            v{ensIndexerConfig.versionInfo.ensIndexer}
+          </p>
+        }
         docsLink={new URL("https://ensnode.io/ensindexer/")}
       />
 
@@ -404,7 +412,11 @@ function ENSNodeConfigCardContent({
             ),
           },
         ]}
-        version={ensIndexerConfig.versionInfo.ensRainbow}
+        version={
+          <p className="text-sm leading-normal font-normal text-muted-foreground">
+            v{ensIndexerConfig.versionInfo.ensRainbow}
+          </p>
+        }
         docsLink={new URL("https://ensnode.io/ensrainbow/")}
       />
     </>

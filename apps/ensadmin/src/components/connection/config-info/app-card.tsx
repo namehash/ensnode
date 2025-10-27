@@ -22,7 +22,7 @@ export interface ConfigInfoAppCardProps {
   name?: string;
   icon?: ReactElement;
   items?: ConfigInfoAppCardContent[];
-  version?: string | ReactElement;
+  version?: ReactElement;
   docsLink?: URL;
   features?: ConfigInfoAppCardFeature[];
 }
@@ -106,14 +106,7 @@ export function ConfigInfoAppCard({
               </CardTitle>
             )}
             <div className={baseCardTitleStyles}>
-              {version &&
-                (typeof version === "string" ? (
-                  <p className="text-sm leading-normal font-normal text-muted-foreground">
-                    v{version}
-                  </p>
-                ) : (
-                  version
-                ))}
+              {version}
               {docsLink && (
                 <a
                   href={docsLink.href}
