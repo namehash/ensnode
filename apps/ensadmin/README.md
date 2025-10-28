@@ -20,7 +20,6 @@ Available environment variables:
 
 - `NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY` - Comma-separated list of ENSNode URLs offered as connection options (defaults to NameHash's hosted instances)
 - `ENSADMIN_PUBLIC_URL` - The public URL where ENSAdmin is hosted (optional, auto-detected for Vercel)
-- `ANTHROPIC_API_KEY` - API key for GQLPT client to generate GraphQL queries (optional)
 
 ### Run development server
 
