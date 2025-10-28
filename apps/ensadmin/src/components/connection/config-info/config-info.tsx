@@ -5,26 +5,28 @@
 
 "use client";
 
+import { Replace } from "lucide-react";
+import { ReactNode } from "react";
+
+import { useENSIndexerConfig } from "@ensnode/ensnode-react";
+import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
-import { HealIcon } from "@/components/icons/HealIcon";
-import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
 import { ENSRainbowIcon } from "@/components/icons/ensnode-apps/ensrainbow-icon";
 import { IconGraphNetwork } from "@/components/icons/graph-network";
+import { HealIcon } from "@/components/icons/HealIcon";
+import { IndexAdditionalRecordsIcon } from "@/components/icons/IndexAdditionalRecordsIcon";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
-import { useENSIndexerConfig } from "@ensnode/ensnode-react";
-import { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
-import { Replace } from "lucide-react";
-import { ReactNode } from "react";
 
 /**
  * Reusable ENSNode card wrapper that provides consistent header and accepts children content

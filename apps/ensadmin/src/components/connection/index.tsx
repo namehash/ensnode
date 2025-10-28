@@ -1,12 +1,13 @@
 "use client";
 
+import { PlugZap } from "lucide-react";
+
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
 import { ENSAdminVersion } from "@/components/ensadmin-version";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
-import { PlugZap } from "lucide-react";
 
 function ConnectionLine() {
   return (
