@@ -6,57 +6,18 @@ settings:
 
 catalogs:
   default:
-    '@astrojs/react':
-      specifier: ^4.2.0
-      version: 4.2.0
-    '@astrojs/tailwind':
-      specifier: ^6.0.2
-      version: 6.0.2
-    '@namehash/namekit-react':
-      specifier: 0.12.0
-      version: 0.12.0
     '@ponder/utils':
       specifier: 0.2.14
       version: 0.2.14
-    '@types/node':
-      specifier: ^22.14.0
-      version: 22.15.3
-    astro:
-      specifier: ^5.14.3
-      version: 5.14.4
-    astro-font:
-      specifier: ^1.0.0
-      version: 1.0.0
-    astro-seo:
-      specifier: ^0.8.4
-      version: 0.8.4
     date-fns:
       specifier: 4.1.0
       version: 4.1.0
-    drizzle-orm:
-      specifier: '=0.41.0'
-      version: 0.41.0
-    hono:
-      specifier: ^4.10.2
-      version: 4.10.3
-    ponder:
-      specifier: 0.13.14
-      version: 0.13.14
-    tsup:
-      specifier: ^8.3.6
-      version: 8.3.6
-    typescript:
-      specifier: ^5.7.3
-      version: 5.7.3
     viem:
       specifier: ^2.22.13
       version: 2.23.2
     vitest:
       specifier: ^4.0.2
       version: 4.0.3
-    zod:
-      specifier: ^3.25.7
-      version: 3.25.76
 
 overrides:
   '@adraffy/ens-normalize': 1.11.1
@@ -11491,6 +11452,14 @@ snapshots:
       chai: 6.2.0
       tinyrainbow: 3.0.3
 
+  '@vitest/mocker@4.0.3(vite@7.1.11(@types/node@20.17.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))':
+    dependencies:
+      '@vitest/spy': 4.0.3
+      estree-walker: 3.0.3
+      magic-string: 0.30.19
+    optionalDependencies:
+      vite: 7.1.11(@types/node@20.17.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0)
+
   '@vitest/mocker@4.0.3(vite@7.1.11(@types/node@22.15.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       '@vitest/spy': 4.0.3
@@ -12579,10 +12548,10 @@ snapshots:
 
   detect-libc@2.0.3: {}
 
-  detect-libc@2.0.4: {}
-
-  detect-libc@2.1.2:
+  detect-libc@2.0.4:
     optional: true
+
+  detect-libc@2.1.2: {}
 
   detect-node-es@1.1.0: {}
 
@@ -13663,7 +13632,7 @@ snapshots:
 
   lightningcss@1.30.2:
     dependencies:
-      detect-libc: 2.0.4
+      detect-libc: 2.1.2
     optionalDependencies:
       lightningcss-android-arm64: 1.30.2
       lightningcss-darwin-arm64: 1.30.2
@@ -16225,7 +16194,7 @@ snapshots:
   vitest@4.0.3(@types/debug@4.1.12)(@types/node@20.17.14)(jiti@2.6.1)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0):
     dependencies:
       '@vitest/expect': 4.0.3
-      '@vitest/mocker': 4.0.3(vite@7.1.11(@types/node@22.15.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))
+      '@vitest/mocker': 4.0.3(vite@7.1.11(@types/node@20.17.14)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.19.3)(yaml@2.7.0))
       '@vitest/pretty-format': 4.0.3
       '@vitest/runner': 4.0.3
       '@vitest/snapshot': 4.0.3

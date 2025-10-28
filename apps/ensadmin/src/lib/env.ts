@@ -102,15 +102,8 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY =
  */
 export function getServerConnectionLibrary(): HttpHostname[] {
   const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
-  let envVarValue = process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY;
-
-  if (!envVarValue) {
-    console.warn(
-      `No server connection library of ENSNode URLs provided in "${envVarName}". Using fallback: ${DEFAULT_SERVER_CONNECTION_LIBRARY}`,
-    );
-
-    envVarValue = DEFAULT_SERVER_CONNECTION_LIBRARY;
-  }
+  const envVarValue =
+    process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY || DEFAULT_SERVER_CONNECTION_LIBRARY;
 
   const connections = buildHttpHostnames(envVarValue.split(","));
 
