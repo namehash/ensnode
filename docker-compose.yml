@@ -90,7 +90,8 @@ services:
       - path: ./apps/ensadmin/.env.local
         required: false
     depends_on:
-      - ensapi
+      ensapi:
+        condition: service_started
 
   postgres:
     container_name: postgres

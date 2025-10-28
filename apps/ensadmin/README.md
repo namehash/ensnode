@@ -52,14 +52,6 @@ ENSAdmin is deployed as a static site using nginx. The application is built with
 docker build -f apps/ensadmin/Dockerfile -t ensadmin .
 ```
 
-To set the server connection library at build time:
-
-```bash
-docker build -f apps/ensadmin/Dockerfile \
-  --build-arg NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io \
-  -t ensadmin .
-```
-
 ### Run Docker container
 
 ```bash

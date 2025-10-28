@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { Suspense } from "react";
 
 import { LayoutWrapper } from "@/components/layout-wrapper";
@@ -68,6 +69,9 @@ export default function Layout({
           </Suspense>
         </QueryClientProvider>
         <Toaster />
+
+        {/* load the runtime-config.js script ahead of next.js */}
+        <Script src="/runtime-config.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

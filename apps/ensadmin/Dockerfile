@@ -9,9 +9,7 @@ FROM base AS builder
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Set the environment variable for the server's library of ENSNode URLs
-ARG NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY
-ENV NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=${NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY}
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # build ensadmin with static export
 RUN pnpm --filter ensadmin build
@@ -22,12 +20,14 @@ FROM nginx:alpine AS runner
 # Copy the static export output
 COPY --from=builder /app/apps/ensadmin/out /usr/share/nginx/html
 
-# Copy nginx configuration
+# Replace default nginx configuration with our own
+RUN rm -f /etc/nginx/conf.d/default.conf.default
 COPY --from=builder /app/apps/ensadmin/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Remove default nginx config
-RUN rm -f /etc/nginx/conf.d/default.conf.default
+# Include custom docker-entrypoint.sh for generating runtime-config
+COPY --from=builder /app/apps/ensadmin/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 4173
-
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
