@@ -1,7 +1,7 @@
 "use client";
 
 import constate from "constate";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
@@ -197,5 +197,23 @@ export { useConnectionsLibrary };
  * - selectConnection: Callback for selecting a connection
  */
 export function ConnectionsLibraryProvider({ children }: { children: React.ReactNode }) {
-  return <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>;
+  return (
+    <Suspense fallback={null}>
+      <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>
+    </Suspense>
+  );
+}
+
+/**
+ * Wrapper component that delays rendering children until after hydration.
+ * This prevents crashes from useSearchParams during static export hard refreshes.
+ */
+function SuspenseConnectionsWrapper({ children }: { children: React.ReactNode }) {
+  const hydrated = useHydrated();
+
+  if (!hydrated) {
+    return null;
+  }
+
+  return <>{children}</>;
 }

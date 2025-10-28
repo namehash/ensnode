@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 // The query param key for the raw selected connection
 const RAW_CONNECTION_PARAM_KEY = "connection";
@@ -59,7 +59,11 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
   const searchParams = useSearchParams();
 
   // Get the current raw connection URL param
-  const rawConnectionUrlParam = searchParams.get(RAW_CONNECTION_PARAM_KEY);
+  // Use useMemo to prevent unnecessary re-renders
+  const rawConnectionUrlParam = useMemo(
+    () => searchParams.get(RAW_CONNECTION_PARAM_KEY),
+    [searchParams],
+  );
 
   // Build callback for setting the raw connection URL param
   const setRawConnectionUrlParam = useCallback(
