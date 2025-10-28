@@ -1,9 +1,9 @@
-export {
-  ENSNodeConfigInfo,
-  ENSNodeConfigCardDisplay,
-  ENSNodeCard,
-} from "./config-info";
 export type {
-  ENSNodeConfigCardDisplayProps,
   ENSNodeCardProps,
+  ENSNodeConfigCardDisplayProps,
+} from "./config-info";
+export {
+  ENSNodeCard,
+  ENSNodeConfigCardDisplay,
+  ENSNodeConfigInfo,
 } from "./config-info";

@@ -1,5 +1,6 @@
 import { prettifyError } from "zod/v4";
-import { SerializedIndexingStatusResponse } from "./serialized-types";
+
+import type { SerializedIndexingStatusResponse } from "./serialized-types";
 import type { ErrorResponse, IndexingStatusResponse } from "./types";
 import { ErrorResponseSchema, makeIndexingStatusResponseSchema } from "./zod-schemas";
 

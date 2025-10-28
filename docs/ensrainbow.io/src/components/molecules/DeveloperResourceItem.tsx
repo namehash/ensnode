@@ -1,4 +1,4 @@
-import { ListSectionElement } from "../../types/listSectionTypes";
+import type { ListSectionElement } from "../../types/listSectionTypes";
 import { RedirectIcon } from "../atoms/icons/RedirectIcon.tsx";
 
 type DeveloperResourceItemProps = {
@@ -28,7 +28,7 @@ export const DeveloperResourceItem = ({ elem }: DeveloperResourceItemProps) => {
     </div>
   );
 
-  return elementLink == undefined ? (
+  return elementLink === undefined ? (
     <div>{content}</div>
   ) : (
     <a

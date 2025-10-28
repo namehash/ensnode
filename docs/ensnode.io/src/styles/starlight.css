@@ -229,8 +229,11 @@ a[rel="prev"]:hover {
   position: relative; /* For absolute positioning of ::before */
 }
 
-/* Add padding-left only to items that will get a line, to make space for it */
-#starlight__sidebar > div > ul > li:not(:first-child) {
+/*
+ * Add padding-left only to items that will get a line, to make space for it.
+ * Note, including :not(:last-child) to de-indent ENSAdmin.
+ */
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child) {
   padding-left: 20px; /* Space for the line and content */
 }
 
@@ -239,8 +242,11 @@ a[rel="prev"]:hover {
   margin-bottom: var(--sidebar-item-gap);
 }
 
-/* Vertical line segment for relevant list items */
-#starlight__sidebar > div > ul > li:not(:first-child)::before {
+/*
+ * Vertical line segment for relevant list items
+ * Note, including :not(:last-child) to de-indent ENSAdmin.
+ */
+#starlight__sidebar > div > ul > li:not(:first-child):not(:last-child)::before {
   content: "";
   position: absolute;
   left: 8px; /* X-position of the vertical line */
@@ -292,7 +298,9 @@ a[href*="ensdb"] .starlight-sidebar-topics-icon {
 
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
-  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
 }
 
 /* Only apply hover effects to non-selected items */
@@ -313,5 +321,8 @@ a.starlight-sidebar-topics-current .starlight-sidebar-topics-icon {
   filter: brightness(1.2) contrast(1.1);
   box-shadow: 0 0 8px rgba(65, 130, 184, 0.3);
   border-radius: 4px;
-  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    filter 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }

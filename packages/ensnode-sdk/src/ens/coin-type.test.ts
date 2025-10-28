@@ -1,16 +1,15 @@
-import { describe, expect, it } from "vitest";
-
 import {
   coinTypeToEvmChainId as _coinTypeToEvmChainId,
   evmChainIdToCoinType as _evmChainIdToCoinType,
 } from "@ensdomains/address-encoder/utils";
+import { describe, expect, it } from "vitest";
 
 import {
+  bigintToCoinType,
+  coinTypeToEvmChainId,
   DEFAULT_EVM_CHAIN_ID,
   DEFAULT_EVM_COIN_TYPE,
   ETH_COIN_TYPE,
-  bigintToCoinType,
-  coinTypeToEvmChainId,
   evmChainIdToCoinType,
 } from "./coin-type";
 

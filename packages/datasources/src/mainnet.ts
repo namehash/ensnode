@@ -1,7 +1,16 @@
 import { arbitrum, base, linea, mainnet, optimism, scroll } from "viem/chains";
 
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
-
+// ABIs for Basenames Datasource
+import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
+import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
+import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
+import { Registry as base_Registry } from "./abis/basenames/Registry";
+import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for Lineanames Datasource
+import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
+import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
+import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
+import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
@@ -10,25 +19,13 @@ import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-
-// ABIs for Basenames Datasource
-import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
-import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
-import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
-import { Registry as base_Registry } from "./abis/basenames/Registry";
-import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
-
-// ABIs for Lineanames Datasource
-import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
-import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
-import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
-import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
-
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
+// Types
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
  * The Mainnet ENSNamespace

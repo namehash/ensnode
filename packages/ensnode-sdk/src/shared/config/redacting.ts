@@ -2,7 +2,7 @@
  * Generic utilities for redacting sensitive information from configuration objects.
  */
 
-import { RpcConfig, RpcConfigs } from "./types";
+import type { RpcConfig, RpcConfigs } from "./types";
 
 /**
  * Default redacted value placeholder.

@@ -12,7 +12,7 @@ export async function upsertDomain(
   context: Context,
   values: typeof schema.subgraph_domain.$inferInsert,
 ) {
-  // remove id primary key for update values
+  // biome-ignore lint/correctness/noUnusedVariables: remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.subgraph_domain).values(values).onConflictDoUpdate(otherValues);
@@ -22,7 +22,7 @@ export async function upsertResolver(
   context: Context,
   values: typeof schema.subgraph_resolver.$inferInsert,
 ) {
-  // remove id primary key for update values
+  // biome-ignore lint/correctness/noUnusedVariables: remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db.insert(schema.subgraph_resolver).values(values).onConflictDoUpdate(otherValues);
@@ -32,7 +32,7 @@ export async function upsertRegistration(
   context: Context,
   values: typeof schema.subgraph_registration.$inferInsert,
 ) {
-  // remove id primary key for update values
+  // biome-ignore lint/correctness/noUnusedVariables: remove id primary key for update values
   const { id, ...otherValues } = values;
 
   return context.db

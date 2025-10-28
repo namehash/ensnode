@@ -1,9 +1,12 @@
-import { Context } from "ponder:registry";
-import schema from "ponder:schema";
 import config from "@/config";
-import { upsertAccount } from "@/lib/subgraph/db-helpers";
-import { Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
+
+import type { Context } from "ponder:registry";
+import schema from "ponder:schema";
 import { isAddressEqual, zeroAddress } from "viem";
+
+import { type Node, ROOT_NODE } from "@ensnode/ensnode-sdk";
+
+import { upsertAccount } from "@/lib/subgraph/db-helpers";
 
 /**
  * Initializes the ENS root node with the zeroAddress as the owner.

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { deserializeENSIndexerPublicConfig } from "./deserialize";
 import { serializeENSIndexerPublicConfig } from "./serialize";
 import type { SerializedENSIndexerPublicConfig } from "./serialized-types";

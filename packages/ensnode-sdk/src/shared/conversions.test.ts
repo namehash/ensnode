@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { deserializeChainId, deserializeDatetime, deserializeUrl } from "./deserialize";
 import { serializeChainId, serializeDatetime, serializeUrl } from "./serialize";
 

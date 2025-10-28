@@ -1,7 +1,8 @@
 import { type Context, ponder } from "ponder:registry";
-import { type Node, PluginName, ROOT_NODE, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-
 import schema from "ponder:schema";
+
+import { makeSubdomainNode, type Node, PluginName, ROOT_NODE } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { setupRootNode } from "@/lib/subgraph/subgraph-helpers";
 import {

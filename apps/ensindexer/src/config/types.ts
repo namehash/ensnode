@@ -1,10 +1,10 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import {
-  DatabaseSchemaName,
-  DatabaseUrl,
+  type DatabaseSchemaName,
+  type DatabaseUrl,
   RpcConfig,
-  RpcConfigs,
+  type RpcConfigs,
 } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 

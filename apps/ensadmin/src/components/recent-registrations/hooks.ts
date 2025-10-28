@@ -1,12 +1,15 @@
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import { type Address, getAddress, isAddressEqual } from "viem";
+
+import type { ENSNamespaceId } from "@ensnode/datasources";
+import { deserializeUnixTimestamp, type Name, type UnixTimestamp } from "@ensnode/ensnode-sdk";
+
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
-import { Name, UnixTimestamp, deserializeUnixTimestamp } from "@ensnode/ensnode-sdk";
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
-import { Address, getAddress, isAddressEqual } from "viem";
-import { Registration } from "./types";
+
+import type { Registration } from "./types";
 
 /**
  * An integer value (representing a Unix timestamp in seconds) formatted as a string.

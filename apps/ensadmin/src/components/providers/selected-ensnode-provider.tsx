@@ -1,8 +1,10 @@
 "use client";
 
-import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
+import type { PropsWithChildren } from "react";
+
 import { ENSNodeProvider } from "@ensnode/ensnode-react";
-import { PropsWithChildren } from "react";
+
+import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 /**
  * Provider component that configures ENSNodeProvider with the currently

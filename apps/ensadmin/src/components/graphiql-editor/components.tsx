@@ -8,6 +8,7 @@ import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
 import { GraphiQL, type GraphiQLProps } from "graphiql";
 import { useSearchParams } from "next/navigation";
+
 import { useGraphiQLEditor } from "./hooks";
 
 const defaultQuery = `#

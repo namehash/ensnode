@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
+
 import { getSupportedNFTIssuer } from "../src/lib/tokenscope/nft-issuers";
 
 const {

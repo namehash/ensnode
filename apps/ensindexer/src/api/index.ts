@@ -3,7 +3,8 @@ import packageJson from "@/../package.json" with { type: "json" };
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import { ErrorResponse } from "@ensnode/ensnode-sdk";
+import type { ErrorResponse } from "@ensnode/ensnode-sdk";
+
 import ensNodeApi from "./handlers/ensnode-api";
 
 const app = new Hono();

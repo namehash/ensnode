@@ -1,18 +1,20 @@
-import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
+import dnsPacket, { type Answer } from "dns-packet";
+import type { Hex } from "viem";
+
 import {
-  DNSEncodedLiteralName,
-  DNSEncodedName,
-  Label,
-  Name,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
+  type DNSEncodedLiteralName,
+  type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   decodeDNSEncodedName,
+  type Label,
   literalLabelsToLiteralName,
+  type Name,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
 } from "@ensnode/ensnode-sdk";
 import { interpretTextRecordKey, interpretTextRecordValue } from "@ensnode/ensnode-sdk/internal";
-import dnsPacket, { Answer } from "dns-packet";
-import { Hex } from "viem";
+
+import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
 
 /**
  * Implements the original ENS Subgraph DNS-Encoded Name decoding logic, in particular the additional
@@ -51,7 +53,8 @@ export function subgraph_decodeDNSEncodedLiteralName(packet: DNSEncodedLiteralNa
 
   // the label and name are Subgraph Interpreted by virtue of being a subgraph-indexable Literal Label/Name
   return {
-    label: literalLabels[0]! as Label as SubgraphInterpretedLabel, // ! ok due to length invariant above,
+    // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
+    label: literalLabels[0]! as Label as SubgraphInterpretedLabel,
     name: literalLabelsToLiteralName(literalLabels) as Name as SubgraphInterpretedName,
   };
 }
@@ -119,7 +122,8 @@ export function decodeTXTData(data: Buffer[]): string | null {
     );
   }
 
-  return decoded[0]!; // guaranteed to exist due to length check above
+  // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist due to length check above
+  return decoded[0]!;
 }
 
 export function parseDnsTxtRecordArgs({
@@ -174,6 +178,7 @@ export function parseDnsTxtRecordArgs({
     );
   }
 
+  // biome-ignore lint/style/noNonNullAssertion: ok due to checks above
   const value = txtDatas[0]!;
 
   // after decoding, interpret the text record value and return to consumer

@@ -1,4 +1,4 @@
-import { type CoinType } from "@ensdomains/address-encoder";
+import type { CoinType } from "@ensdomains/address-encoder";
 import { type Address, isAddress } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -9,6 +9,7 @@ import { type Address, isAddress } from "viem";
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
+
 import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import type {

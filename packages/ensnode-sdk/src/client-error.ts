@@ -1,4 +1,4 @@
-import { ErrorResponse } from "./api";
+import type { ErrorResponse } from "./api";
 
 export class ClientError extends Error {
   details?: unknown;

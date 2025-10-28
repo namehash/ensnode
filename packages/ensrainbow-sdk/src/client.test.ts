@@ -1,14 +1,13 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   type EnsRainbow,
   EnsRainbowApiClient,
-  EnsRainbowApiClientOptions,
+  type EnsRainbowApiClientOptions,
   isCacheableHealResponse,
   isHealError,
 } from "./client";
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
-
-import { afterEach, vi } from "vitest";
 
 // Mock fetch globally
 const mockFetch = vi.fn();

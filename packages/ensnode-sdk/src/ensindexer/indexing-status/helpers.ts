@@ -1,15 +1,15 @@
-import { BlockRef, ChainId, UnixTimestamp } from "../../shared";
+import type { BlockRef, ChainId, UnixTimestamp } from "../../shared";
 import {
-  ChainIndexingConfig,
-  ChainIndexingConfigDefinite,
-  ChainIndexingConfigIndefinite,
+  type ChainIndexingConfig,
+  type ChainIndexingConfigDefinite,
+  type ChainIndexingConfigIndefinite,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  ChainIndexingStatusSnapshotQueued,
-  OmnichainIndexingStatusId,
+  type ChainIndexingStatusSnapshot,
+  type ChainIndexingStatusSnapshotCompleted,
+  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotQueued,
+  type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
 } from "./types";
 

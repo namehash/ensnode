@@ -1,6 +1,7 @@
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { Link } from "@namehash/namekit-react";
 import cc from "classcat";
+
 import { RainbowIcon } from "../atoms/icons/RainbowIcon.tsx";
 import { RocketIcon } from "../atoms/icons/RocketIcon.tsx";
 
@@ -169,7 +170,7 @@ export default function RoadMap() {
           </p>
         </div>
         <div className="h-fit w-full max-w-[1050px]">
-          <ul role="list" className="space-y-4 w-full h-full flex-shrink-0">
+          <ul className="space-y-4 w-full h-full flex-shrink-0">
             {roadMapElements.map((roadmapElement, idx) => (
               <li key={idx} className="relative flex gap-x-4">
                 <div
@@ -208,7 +209,7 @@ export default function RoadMap() {
                     {badgesMap.get(roadmapElement.stageOfCompletion)}
                   </div>
                   <div className="relative -top-2 w-full h-fit flex flex-col items-start self-stretch rounded-lg border border-gray-200 bg-gray-50 p-5">
-                    <ul role="list" className="list-disc list-outside ml-[15px]">
+                    <ul className="list-disc list-outside ml-[15px]">
                       {roadmapElement.commentSentences.map((sentence, sentenceIdx) => (
                         <li
                           key={`${idx}${sentenceIdx}`}

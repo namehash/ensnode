@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ConnectionOption, useConnectionsLibrary } from "@/hooks/use-connections-library";
+import { type ConnectionOption, useConnectionsLibrary } from "@/hooks/use-connections-library";
 import { buildHttpHostname } from "@/lib/url-utils";
 
 export function ConnectionsLibrarySelector() {
@@ -79,10 +79,9 @@ export function ConnectionsLibrarySelector() {
   const serverConnections = connectionLibrary.filter((connection) => connection.type === "server");
   const customConnections = connectionLibrary.filter((connection) => connection.type === "custom");
 
-  const selectedConnectionUrl =
-    selectedConnection && selectedConnection.validatedSelectedConnection.isValid
-      ? selectedConnection.validatedSelectedConnection.url
-      : null;
+  const selectedConnectionUrl = selectedConnection?.validatedSelectedConnection.isValid
+    ? selectedConnection.validatedSelectedConnection.url
+    : null;
 
   return (
     <>

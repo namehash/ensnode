@@ -1,18 +1,20 @@
+import packageJson from "@/../package.json";
+
+import type { Context as HonoContext } from "hono";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+
 import {
-  type EnsRainbowClientLabelSet,
-  type LabelSetId,
-  type LabelSetVersion,
   buildEnsRainbowClientLabelSet,
   buildLabelSetId,
   buildLabelSetVersion,
+  type EnsRainbowClientLabelSet,
+  type LabelSetId,
+  type LabelSetVersion,
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
-import { Hono } from "hono";
-import type { Context as HonoContext } from "hono";
-import { cors } from "hono/cors";
 
-import packageJson from "@/../package.json";
-import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
+import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -46,7 +48,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       if (labelSetVersionParam) {
         labelSetVersion = buildLabelSetVersion(labelSetVersionParam);
       }
-    } catch (error) {
+    } catch (_error) {
       logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
       return c.json(
         {

@@ -1,4 +1,4 @@
-import { Table, isTable } from "drizzle-orm";
+import { isTable, Table } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { isPgEnum } from "drizzle-orm/pg-core";
 
@@ -8,10 +8,10 @@ type Schema = { [name: string]: unknown };
 const setDatabaseSchema = <T extends Schema>(schema: T, schemaName: string) => {
   for (const table of Object.values(schema)) {
     if (isTable(table)) {
-      // @ts-ignore
+      // @ts-expect-error
       table[Table.Symbol.Schema] = schemaName;
     } else if (isPgEnum(table)) {
-      // @ts-ignore
+      // @ts-expect-error
       table.schema = schemaName;
     }
   }

@@ -1,9 +1,10 @@
-import {
+import { z } from "zod/v4";
+
+import type {
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
-import { z } from "zod/v4";
 
 import { errorResponse } from "@/lib/handlers/error-response";
 import { params } from "@/lib/handlers/params.schema";

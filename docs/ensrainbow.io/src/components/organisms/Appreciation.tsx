@@ -1,6 +1,7 @@
 import cc from "classcat";
-import { LearnMoreButton } from "../atoms/LearnMoreButton.tsx";
+
 import { GraphProtocolIcon } from "../atoms/icons/GraphProtocolIcon.tsx";
+import { LearnMoreButton } from "../atoms/LearnMoreButton.tsx";
 import { ENSLabsLogo } from "../atoms/logos/ENSLabsLogo.tsx";
 
 export default function Appreciation() {

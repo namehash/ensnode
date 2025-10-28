@@ -1,15 +1,17 @@
+import config from "@/config";
+
+import { trace } from "@opentelemetry/api";
+
+import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type ChainId,
   type MultichainPrimaryNameResolutionArgs,
   type MultichainPrimaryNameResolutionResult,
   uniq,
 } from "@ensnode/ensnode-sdk";
-import { trace } from "@opentelemetry/api";
 
-import config from "@/config";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
-import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
@@ -54,7 +56,7 @@ export async function resolvePrimaryNames(
 
   // key results by chainId
   return chainIds.reduce((memo, chainId, i) => {
-    // NOTE: names[i] guaranteed to be defined, silly typescript
+    // biome-ignore lint/style/noNonNullAssertion: names[i] guaranteed to be defined
     memo[chainId] = names[i]!;
     return memo;
   }, {} as MultichainPrimaryNameResolutionResult);

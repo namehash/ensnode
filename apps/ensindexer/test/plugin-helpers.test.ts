@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { namespaceContract } from "@/lib/plugin-helpers";
 import { PluginName } from "@ensnode/ensnode-sdk";
+
+import { namespaceContract } from "@/lib/plugin-helpers";
 
 describe("plugin helpers", () => {
   describe("createPluginNamespace", () => {

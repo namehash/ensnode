@@ -14,7 +14,6 @@
     "./tsconfig.lib.json"
   ],
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "typescript": "catalog:"
   }
 }

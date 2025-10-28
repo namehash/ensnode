@@ -1,11 +1,13 @@
+import { describe, expect, it } from "vitest";
+
 import {
-  ENSNamespace,
+  type ENSNamespace,
   ENSNamespaceIds,
   ensTestEnvL1Chain,
   ensTestEnvL2Chain,
   getENSNamespace,
 } from "@ensnode/datasources";
-import { describe, expect, it } from "vitest";
+
 import { buildAlchemyUrl, buildDRPCUrl } from "./build-rpc-urls";
 
 const KEY = "whatever";

@@ -36,7 +36,7 @@ export function deepClone<T>(obj: T): T {
   // Handle plain objects and other object types
   const clonedObj = {} as T;
   for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (Object.hasOwn(obj, key)) {
       clonedObj[key] = deepClone(obj[key]);
     }
   }

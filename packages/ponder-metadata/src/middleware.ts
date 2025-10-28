@@ -1,6 +1,7 @@
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
-import { MiddlewareHandler } from "hono";
+import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
+
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { queryPonderMeta } from "./db-helpers";
 import { PrometheusMetrics } from "./prometheus-metrics";
@@ -178,7 +179,7 @@ export function ponderMetadata<
     }
 
     // fetch ENSRainbow version if available
-    let ensRainbowVersionInfo = undefined;
+    let ensRainbowVersionInfo: EnsRainbow.VersionInfo | undefined;
     if (query.ensRainbowVersion) {
       try {
         ensRainbowVersionInfo = await query.ensRainbowVersion();

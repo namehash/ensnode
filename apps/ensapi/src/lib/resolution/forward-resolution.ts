@@ -1,22 +1,24 @@
-import {
-  AccountId,
-  ForwardResolutionArgs,
-  ForwardResolutionProtocolStep,
-  ForwardResolutionResult,
-  Node,
-  ResolverRecordsResponse,
-  ResolverRecordsSelection,
-  TraceableENSProtocol,
-  isNormalizedName,
-  isSelectionEmpty,
-  parseReverseName,
-} from "@ensnode/ensnode-sdk";
+import config from "@/config";
+
 import { trace } from "@opentelemetry/api";
 import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
-import config from "@/config";
+import {
+  type AccountId,
+  type ForwardResolutionArgs,
+  ForwardResolutionProtocolStep,
+  type ForwardResolutionResult,
+  isNormalizedName,
+  isSelectionEmpty,
+  type Node,
+  parseReverseName,
+  type ResolverRecordsResponse,
+  type ResolverRecordsSelection,
+  TraceableENSProtocol,
+} from "@ensnode/ensnode-sdk";
+
 import { ENS_ROOT_REGISTRY } from "@/lib/protocol-acceleration/ens-root-registry";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";

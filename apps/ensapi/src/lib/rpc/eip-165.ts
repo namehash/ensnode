@@ -1,4 +1,4 @@
-import { Address, Hex, PublicClient } from "viem";
+import type { Address, Hex, PublicClient } from "viem";
 
 /**
  * EIP-165 ABI

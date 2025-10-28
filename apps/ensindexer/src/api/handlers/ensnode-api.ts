@@ -1,22 +1,24 @@
+import config from "@/config";
+
 import { publicClients } from "ponder:api";
+import { getUnixTime } from "date-fns";
+import { Hono } from "hono";
+
 import {
-  IndexingStatusResponseCodes,
-  IndexingStatusResponseError,
-  IndexingStatusResponseOk,
-  OmnichainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
+  IndexingStatusResponseCodes,
+  type IndexingStatusResponseError,
+  type IndexingStatusResponseOk,
+  type OmnichainIndexingStatusSnapshot,
   serializeENSIndexerPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
-import { Hono } from "hono";
 
-import config from "@/config";
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import {
   buildOmnichainIndexingStatusSnapshot,
   createCrossChainIndexingStatusSnapshotOmnichain,
 } from "@/lib/indexing-status/build-index-status";
-import { getUnixTime } from "date-fns";
 
 const app = new Hono();
 

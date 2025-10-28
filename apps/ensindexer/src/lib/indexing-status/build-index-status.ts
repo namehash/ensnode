@@ -10,28 +10,30 @@
  * all turn into the ENSIndexer data model.
  */
 
+import config from "@/config";
+
 import {
   type CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
+  deserializeOmnichainIndexingStatusSnapshot,
   type OmnichainIndexingStatusSnapshot,
   type UnixTimestamp,
-  deserializeOmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import ponderConfig from "@/ponder/config";
+
 import {
   type ChainBlockRefs,
   type ChainName,
-  type PonderStatus,
-  type PrometheusMetrics,
-  type PublicClient,
   createSerializedChainSnapshots,
   createSerializedOmnichainIndexingStatusSnapshot,
   fetchPonderMetrics,
   fetchPonderStatus,
   getChainsBlockRefs,
   getChainsBlockrange,
+  type PonderStatus,
+  type PrometheusMetrics,
+  type PublicClient,
 } from "./ponder-metadata";
 
 /**

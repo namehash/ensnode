@@ -1,11 +1,11 @@
 "use client";
 
+import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 import { useMemo } from "react";
 
 import { LinkedInIcon } from "@/components/icons/LinkedInIcon";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 
 const SOCIAL_LINK_KEYS = [
   "com.twitter",
@@ -21,7 +21,9 @@ type SocialLinkValue = string;
 
 export function SocialLinks({
   links,
-}: { links: { key: SocialLinkKey; value: SocialLinkValue }[] }) {
+}: {
+  links: { key: SocialLinkKey; value: SocialLinkValue }[];
+}) {
   if (links.length === 0) return null;
 
   return (
@@ -107,7 +109,9 @@ export function SocialLinks({
 
 SocialLinks.Texts = function SocialLinksTexts({
   texts,
-}: { texts: Record<string, string | null | undefined> }) {
+}: {
+  texts: Record<string, string | null | undefined>;
+}) {
   const links = useMemo(
     () =>
       SOCIAL_LINK_KEYS

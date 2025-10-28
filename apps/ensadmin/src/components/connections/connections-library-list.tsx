@@ -1,13 +1,14 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
+
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { ConnectionOption } from "@/hooks/use-connections-library";
+import type { ConnectionOption } from "@/hooks/use-connections-library";
 import { beautifyUrl } from "@/lib/beautify-url";
-import { HttpHostname } from "@/lib/url-utils";
+import type { HttpHostname } from "@/lib/url-utils";
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
 
 interface ConnectionsLibraryListProps {
   connections: ConnectionOption[];

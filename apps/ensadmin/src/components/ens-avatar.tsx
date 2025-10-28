@@ -1,11 +1,13 @@
 "use client";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
-import { ENSNamespaceId } from "@ensnode/datasources";
-import { Name } from "@ensnode/ensnode-sdk";
 import BoringAvatar from "boring-avatars";
 import * as React from "react";
+
+import type { ENSNamespaceId } from "@ensnode/datasources";
+import type { Name } from "@ensnode/ensnode-sdk";
+
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 
 interface EnsAvatarProps {
   name: Name;
