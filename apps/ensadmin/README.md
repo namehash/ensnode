@@ -73,8 +73,7 @@ The application will be available at http://localhost:4173
 The Docker image includes a custom nginx configuration (`nginx.conf`) that:
 
 - Serves the static export from `/usr/share/nginx/html`
-- Provides backward compatibility redirects from legacy ENSNode service paths
-- Disables caching for static assets to prevent stale versions
+- Handles any URL redirects
 - Includes security headers
 
 ## Documentation
