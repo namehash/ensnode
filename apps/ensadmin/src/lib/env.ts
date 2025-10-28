@@ -2,25 +2,23 @@ import { uniq } from "@ensnode/ensnode-sdk";
 
 import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
 
-const isValidRuntimeEnvironmentVariables = (
-  variables: unknown,
-): variables is Record<string, unknown> => {
-  // check variables is non-null object...
-  if (variables === null) return false;
-  if (typeof variables !== "object") return false;
+/**
+ * Determines whether `variables` is a non-null object and a valid Record<string, unknown>.
+ */
+const isValidRuntimeEnvVariables = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-  return true;
-};
-
+/**
+ * Retrieves an env variable from runtime variables, if specified.
+ *
+ * @param key The key of the environment variable
+ * @returns The value, if specified, or undefined.
+ */
 const getRuntimeEnvVariable = (key: string): string | undefined => {
   if (typeof window == "undefined") return undefined;
 
   const variables = (window as any).__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
-  console.log("getRuntimeEnvVariable variables", variables);
-  if (!isValidRuntimeEnvironmentVariables(variables)) {
-    console.log("getRuntimeEnvVariable: invalid variables");
-    return undefined;
-  }
+  if (!isValidRuntimeEnvVariables(variables)) return undefined;
 
   const value = variables[key];
   if (value === undefined) return undefined;
@@ -29,15 +27,6 @@ const getRuntimeEnvVariable = (key: string): string | undefined => {
   if (value === "") return undefined; // empty-string to undefined
 
   return value;
-};
-
-/**
- * Retrieves an env variable from either runtime variables, if specified, or process.env (build-time).
- * @param key The key of the environment variable
- * @returns The value, if specified, or undefined.
- */
-const getEnvVariable = (key: string): string | undefined => {
-  return getRuntimeEnvVariable(key) ?? process.env[key];
 };
 
 /**
@@ -50,22 +39,13 @@ const getEnvVariable = (key: string): string | undefined => {
  * @throws when Vercel platform was detected but could not determine HttpHostname
  */
 export function ensAdminPublicUrl(): HttpHostname {
-  const envVarName = "ENSADMIN_PUBLIC_URL";
-  const envVarValue = getEnvVariable(envVarName);
-
-  if (!envVarValue) {
-    const vercelAppPublicUrl = getVercelAppPublicUrl();
-    if (vercelAppPublicUrl) {
-      return vercelAppPublicUrl;
-    }
-
-    return defaultEnsAdminPublicUrl();
-  }
+  const envVarValue =
+    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || defaultEnsAdminPublicUrl();
 
   const result = buildHttpHostname(envVarValue);
   if (!result.isValid) {
     throw new Error(
-      `Invalid ${envVarName} value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
+      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
     );
   }
   return result.url;
@@ -73,23 +53,16 @@ export function ensAdminPublicUrl(): HttpHostname {
 
 const DEFAULT_ENSADMIN_PORT = 4173;
 
-function defaultEnsAdminPublicUrl(): HttpHostname {
-  const port = getEnvVariable("PORT") || DEFAULT_ENSADMIN_PORT;
-
-  const result = buildHttpHostname(`http://localhost:${port}`);
-  if (!result.isValid) {
-    throw new Error(
-      `Invalid port "${port}". Cannot build default ENSAdmin public HttpHostname: ${result.error}`,
-    );
-  }
-  return result.url;
+function defaultEnsAdminPublicUrl(): string {
+  const port = process.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
+  return `http://localhost:${port}`;
 }
 
 /**
  * Tells if the application runs on Vercel.
  */
 function isAppOnVercelPlatform(): boolean {
-  return getEnvVariable("VERCEL") === "1";
+  return process.env.VERCEL === "1";
 }
 
 /**
@@ -98,33 +71,16 @@ function isAppOnVercelPlatform(): boolean {
  * @returns public URL of the app if it is running on Vercel, else `null`
  * @throws when app is on the Vercel platform but the `HttpHostname` could not be formed.
  */
-function getVercelAppPublicUrl(): HttpHostname | null {
-  if (!isAppOnVercelPlatform()) return null;
+function getVercelAppPublicUrl(): string | undefined {
+  if (!isAppOnVercelPlatform()) return undefined;
 
-  const vercelEnv = getEnvVariable("VERCEL_ENV");
-  let vercelAppHostname: string | undefined;
-
-  switch (vercelEnv) {
+  switch (process.env.VERCEL_ENV) {
     case "production":
-      vercelAppHostname = getEnvVariable("VERCEL_PROJECT_PRODUCTION_URL");
+      return process.env.VERCEL_PROJECT_PRODUCTION_URL;
     case "development":
     case "preview":
-      vercelAppHostname = getEnvVariable("VERCEL_BRANCH_URL") || getEnvVariable("VERCEL_URL");
+      return process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
   }
-
-  if (!vercelAppHostname) {
-    throw new Error(`Could not extract Vercel hostname for Vercel env "${vercelEnv}"`);
-  }
-
-  const result = buildHttpHostname(`https://${vercelAppHostname}`);
-
-  if (!result.isValid) {
-    throw new Error(
-      `Could not build Vercel app public URL for hostname "${vercelAppHostname}": ${result.error}`,
-    );
-  }
-
-  return result.url;
 }
 
 const DEFAULT_SERVER_CONNECTION_LIBRARY =
@@ -139,7 +95,9 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY =
 export function getServerConnectionLibrary(): HttpHostname[] {
   const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
   const envVarValue =
-    getEnvVariable("NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY") || DEFAULT_SERVER_CONNECTION_LIBRARY;
+    getRuntimeEnvVariable("NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY") ||
+    process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY || // NOTE: must specify full key for nextjs to replace
+    DEFAULT_SERVER_CONNECTION_LIBRARY;
 
   const connections = buildHttpHostnames(envVarValue.split(","));
 
