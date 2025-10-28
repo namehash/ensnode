@@ -203,17 +203,3 @@ export function ConnectionsLibraryProvider({ children }: { children: React.React
     </Suspense>
   );
 }
-
-/**
- * Wrapper component that delays rendering children until after hydration.
- * This prevents crashes from useSearchParams during static export hard refreshes.
- */
-function SuspenseConnectionsWrapper({ children }: { children: React.ReactNode }) {
-  const hydrated = useHydrated();
-
-  if (!hydrated) {
-    return null;
-  }
-
-  return <>{children}</>;
-}
