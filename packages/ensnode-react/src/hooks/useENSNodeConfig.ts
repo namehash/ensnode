@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext } from "react";
+
 import { ENSNodeContext } from "../context";
 import type { ENSNodeConfig } from "../types";
 

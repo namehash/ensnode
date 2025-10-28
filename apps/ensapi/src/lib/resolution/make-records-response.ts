@@ -1,11 +1,11 @@
 import {
-  ResolverRecordsResponse,
-  ResolverRecordsResponseBase,
-  ResolverRecordsSelection,
   bigintToCoinType,
+  type ResolverRecordsResponse,
+  type ResolverRecordsResponseBase,
+  type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import { ResolveCallsAndResults } from "./resolve-calls-and-results";
+import type { ResolveCallsAndResults } from "./resolve-calls-and-results";
 
 export interface IndexedResolverRecords {
   name: string | null;

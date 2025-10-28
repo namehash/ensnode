@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Balancer } from "react-wrap-balancer";
-import { ListSectionElement } from "../../types/listSectionTypes.ts";
-import { ListSectionBadge } from "../atoms/ListSectionBadge.tsx";
+
+import type { ListSectionElement } from "../../types/listSectionTypes.ts";
 import { CloudOutlineIcon } from "../atoms/icons/CloudOutlineIcon.tsx";
 import { DockerIcon } from "../atoms/icons/DockerIcon.tsx";
 import { FileOutlineIcon } from "../atoms/icons/FileOutlineIcon.tsx";
@@ -10,6 +10,7 @@ import { GithubIconSmall } from "../atoms/icons/GithubIconSmall.tsx";
 import { NpmIcon } from "../atoms/icons/NpmIcon.tsx";
 import { RailwayIcon } from "../atoms/icons/RailwayIcon.tsx";
 import { TelegramIcon } from "../atoms/icons/TelegramIcon.tsx";
+import { ListSectionBadge } from "../atoms/ListSectionBadge.tsx";
 import { DeveloperResourceItem } from "../molecules/DeveloperResourceItem.tsx";
 
 export default function DevelopersSection() {

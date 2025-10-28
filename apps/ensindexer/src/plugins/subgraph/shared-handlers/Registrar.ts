@@ -1,22 +1,23 @@
-import { type Context } from "ponder:registry";
+import config from "@/config";
+
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, namehash } from "viem";
 
 import {
-  InterpretedLabel,
-  InterpretedName,
+  encodeLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
   type Label,
   type LabelHash,
-  LiteralLabel,
-  PluginName,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
-  encodeLabelHash,
+  type LiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
+  type PluginName,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -158,8 +159,8 @@ export const makeRegistrarHandlers = ({
       // https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L56-L61
       const healedLabel = await labelByLabelHash(labelHash);
 
-      let label: InterpretedLabel | SubgraphInterpretedLabel | undefined = undefined;
-      let name: InterpretedName | SubgraphInterpretedName | undefined = undefined;
+      let label: InterpretedLabel | SubgraphInterpretedLabel | undefined;
+      let name: InterpretedName | SubgraphInterpretedName | undefined;
       if (config.isSubgraphCompatible) {
         // only update the label/name if label is subgraph-indexable
         if (isLabelSubgraphIndexable(healedLabel)) {

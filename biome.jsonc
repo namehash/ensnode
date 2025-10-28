@@ -1,26 +1,63 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.1/schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
-  },
-  "files": {
-    "ignoreUnknown": false,
-    "ignore": [".astro/", ".ponder/", ".next/", "dist/", "generated/", "out"]
+    "useIgnoreFile": true
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "lineWidth": 100
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              // package.json imports at the top
+              "**/package.json",
+              // @/config imports at the top
+              "@/config",
+              ":BLANK_LINE:",
+              // urls & native modules
+              [":URL:", ":BUN:", ":NODE:"],
+              ":BLANK_LINE:",
+              // all packages except monorepo packages
+              [":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:", "!@ensnode/**"],
+              ":BLANK_LINE:",
+              // monorepo packages
+              "@ensnode/**",
+              ":BLANK_LINE:",
+              // project-specific @/ imports
+              ":ALIAS:",
+              ":BLANK_LINE:",
+              // relative path imports
+              ":PATH:"
+            ]
+          }
+        }
+      }
+    }
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false
+      "recommended": true,
+      "complexity": {
+        "noBannedTypes": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      }
     }
   },
   "javascript": {
@@ -34,18 +71,14 @@
     }
   },
   "overrides": [
-    /**
-     * disable biome formatting of package.json because neither biome nor changesets is sufficiently
-     * configurable to play well together regarding the auto-formatting of package.json files
-     *
-     * https://github.com/changesets/changesets/issues/1434
-     * https://github.com/changesets/changesets/issues/1591
-     * https://github.com/biomejs/biome/issues/2684
-     */
+    // Allow test files to do things
     {
-      "include": ["**/package.json"],
-      "formatter": {
-        "enabled": false
+      "includes": ["**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": { "noNonNullAssertion": "off" },
+          "suspicious": { "useIterableCallbackReturn": "off" }
+        }
       }
     }
   ]

@@ -1,18 +1,20 @@
-import {
-  ResolverRecordsSelection,
-  ReverseResolutionArgs,
-  ReverseResolutionProtocolStep,
-  ReverseResolutionResult,
-  TraceableENSProtocol,
-  coinTypeReverseLabel,
-  evmChainIdToCoinType,
-  reverseName,
-} from "@ensnode/ensnode-sdk";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { isAddress, isAddressEqual } from "viem";
 
+import {
+  coinTypeReverseLabel,
+  evmChainIdToCoinType,
+  type ResolverRecordsSelection,
+  type ReverseResolutionArgs,
+  ReverseResolutionProtocolStep,
+  type ReverseResolutionResult,
+  reverseName,
+  TraceableENSProtocol,
+} from "@ensnode/ensnode-sdk";
+
 import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
+
 import { resolveForward } from "./forward-resolution";
 
 export const REVERSE_RESOLUTION_SELECTION = {

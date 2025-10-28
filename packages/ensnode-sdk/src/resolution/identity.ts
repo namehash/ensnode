@@ -1,7 +1,14 @@
-import { ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
-import { Address } from "viem";
-import { DefaultableChainId } from "../shared";
-import { Identity, ResolutionStatusIds, ResolvedIdentity, UnresolvedIdentity } from "./types";
+import type { Address } from "viem";
+
+import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
+
+import type { DefaultableChainId } from "../shared";
+import {
+  type Identity,
+  ResolutionStatusIds,
+  type ResolvedIdentity,
+  type UnresolvedIdentity,
+} from "./types";
 
 /**
  * Builds an {@link UnresolvedIdentity} for the provided {@link Address},

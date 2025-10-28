@@ -1,12 +1,14 @@
-import { factory } from "@/lib/hono-factory";
-
 import config from "@/config";
+
 import {
   IndexingStatusResponseCodes,
-  IndexingStatusResponseError,
+  type IndexingStatusResponseError,
   serializeENSIndexerPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
+
+import { factory } from "@/lib/hono-factory";
+
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();

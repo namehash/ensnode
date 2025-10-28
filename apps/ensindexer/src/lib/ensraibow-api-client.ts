@@ -1,4 +1,5 @@
 import config from "@/config";
+
 import { EnsRainbowApiClient } from "@ensnode/ensrainbow-sdk";
 
 /**

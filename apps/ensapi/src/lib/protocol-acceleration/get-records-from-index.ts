@@ -1,15 +1,17 @@
+import { trace } from "@opentelemetry/api";
+import type { Address } from "viem";
+
+import {
+  type ChainId,
+  DEFAULT_EVM_COIN_TYPE,
+  type Node,
+  type ResolverRecordsSelection,
+} from "@ensnode/ensnode-sdk";
+
 import { db } from "@/lib/db";
 import { onchainStaticResolverImplementsDefaultAddress } from "@/lib/protocol-acceleration/known-onchain-static-resolver";
 import type { IndexedResolverRecords } from "@/lib/resolution/make-records-response";
 import { withSpanAsync } from "@/lib/tracing/auto-span";
-import {
-  ChainId,
-  DEFAULT_EVM_COIN_TYPE,
-  Node,
-  ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
-import { trace } from "@opentelemetry/api";
-import { Address } from "viem";
 
 const tracer = trace.getTracer("get-records");
 

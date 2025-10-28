@@ -2,15 +2,17 @@
  * The Referrals plugin indexes registration and renewal referral data emitted by the `UnwrappedEthRegistrarController` contract.
  */
 
+import * as ponder from "ponder";
+
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+
 import {
   createPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
-import { DatasourceNames } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import * as ponder from "ponder";
 
 const pluginName = PluginName.Referrals;
 

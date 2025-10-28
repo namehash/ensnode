@@ -1,29 +1,25 @@
 import {
-  SerializedIndexingStatusResponse,
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
+  type SerializedIndexingStatusResponse,
 } from "./api";
-import {
-  type ConfigResponse,
-  type ErrorResponse,
-  type IndexingStatusResponse,
-  IndexingStatusResponseCodes,
-  type ResolvePrimaryNameRequest,
-  type ResolvePrimaryNameResponse,
-  type ResolvePrimaryNamesRequest,
-  type ResolvePrimaryNamesResponse,
-  type ResolveRecordsRequest,
-  type ResolveRecordsResponse,
+import type {
+  ConfigResponse,
+  ErrorResponse,
+  IndexingStatusResponse,
+  ResolvePrimaryNameRequest,
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesRequest,
+  ResolvePrimaryNamesResponse,
+  ResolveRecordsRequest,
+  ResolveRecordsResponse,
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
-  RealtimeIndexingStatusProjection,
-  type SerializedENSIndexerPublicConfig,
-  SerializedRealtimeIndexingStatusProjection,
   deserializeENSIndexerPublicConfig,
-  deserializeRealtimeIndexingStatusProjection,
+  type SerializedENSIndexerPublicConfig,
 } from "./ensindexer";
-import { ResolverRecordsSelection } from "./resolution";
+import type { ResolverRecordsSelection } from "./resolution";
 
 /**
  * Default ENSNode API endpoint URL

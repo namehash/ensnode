@@ -1,13 +1,13 @@
 import config from "@/config";
 
-import { Context, ponder } from "ponder:registry";
-import { Address, isAddressEqual, zeroAddress } from "viem";
+import { type Context, ponder } from "ponder:registry";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import { LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
+import { type LabelHash, makeSubdomainNode, type Node, PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
   removeNodeResolverRelation,
   upsertNodeResolverRelation,

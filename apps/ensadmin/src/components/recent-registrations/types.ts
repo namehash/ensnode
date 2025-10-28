@@ -1,5 +1,6 @@
-import { Name, type UnixTimestamp } from "@ensnode/ensnode-sdk";
 import type { Address } from "viem";
+
+import type { Name, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 /**
  * Data associated with a Registration

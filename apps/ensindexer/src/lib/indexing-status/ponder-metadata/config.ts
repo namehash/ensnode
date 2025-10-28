@@ -12,13 +12,14 @@
  * the "highest" endBlock defined for each of the indexed chains.
  */
 
+import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
+
 import {
   type BlockNumber,
   type Blockrange,
   deserializeBlockNumber,
   deserializeBlockrange,
 } from "@ensnode/ensnode-sdk";
-import { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
 /**
  * Chain Name
@@ -149,7 +150,7 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
     const isEndBlockForChainAllowed = chainEndBlocks.length === chainStartBlocks.length;
 
     // 3.b) Get the highest endBLock for the chain.
-    let chainHighestEndBlock =
+    const chainHighestEndBlock =
       isEndBlockForChainAllowed && chainEndBlocks.length > 0
         ? Math.max(...chainEndBlocks)
         : undefined;

@@ -1,7 +1,9 @@
 import config from "@/config";
-import { ContractConfig, ENSNamespace, getENSNamespace } from "@ensnode/datasources";
-import { AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
-import { Address } from "viem";
+
+import type { Address } from "viem";
+
+import { type ContractConfig, type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
+import { type AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
 
 const namespace = getENSNamespace(config.namespace) as ENSNamespace;
 

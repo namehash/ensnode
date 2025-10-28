@@ -1,6 +1,7 @@
 import config from "@/config";
+
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import { AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
+import { type AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
 
 const ensRoot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 

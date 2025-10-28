@@ -1,14 +1,16 @@
 "use client";
 
+import { CheckIcon, X as XIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+
 import mockDataJson from "@/app/mock/relative-time/data.json";
 import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { type UnixTimestamp } from "@ensnode/ensnode-sdk";
-import { CheckIcon, X as XIcon } from "lucide-react";
-import { useMemo, useState } from "react";
 
 const mockRelativeTimestampData = mockDataJson as Record<
   string,
@@ -48,8 +50,8 @@ export default function MockRelativeTimePage() {
     prefix?: string;
   }[] = useMemo(() => {
     const timestamp = mockRelativeTimestampData[selectedTime].date;
-    // since the value is hardcoded we are sure it exists
-    const relativeToForPast = mockRelativeTimestampData["Past"].relativeTo!;
+    // biome-ignore lint/style/noNonNullAssertion: since the value is hardcoded we are sure it exists
+    const relativeToForPast = mockRelativeTimestampData.Past.relativeTo!;
 
     return selectedTime === "Past"
       ? [
@@ -229,7 +231,7 @@ const RelativeTimePropCheck = ({
             side="top"
             className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
           >
-            {<p>{relativeTimePropsDescriptions.get(checkValue)!.get(checkName)}</p>}
+            {<p>{relativeTimePropsDescriptions.get(checkValue)?.get(checkName)}</p>}
           </TooltipContent>
         </Tooltip>
         {checkValue ? (

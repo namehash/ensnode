@@ -1,5 +1,4 @@
 import packageJson from "@/../package.json";
-import { ProtocolTraceExporter } from "./protocol-tracing";
 
 import { DiagConsoleLogger, DiagLogLevel, diag } from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
@@ -8,9 +7,11 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 import {
   BatchSpanProcessor,
   SimpleSpanProcessor,
-  SpanProcessor,
+  type SpanProcessor,
 } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
+
+import { ProtocolTraceExporter } from "./protocol-tracing";
 
 // Something broken with OpenTelemetry? enable debug logging with OTEL_DEBUG=anything
 if (process.env.OTEL_DEBUG) {

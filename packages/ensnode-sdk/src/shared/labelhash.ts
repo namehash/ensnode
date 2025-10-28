@@ -1,5 +1,6 @@
 import { keccak256, stringToBytes } from "viem";
-import { LabelHash, LiteralLabel } from "../ens";
+
+import type { LabelHash, LiteralLabel } from "../ens";
 
 /**
  * Implements the ENS `labelhash` function for Literal Labels.

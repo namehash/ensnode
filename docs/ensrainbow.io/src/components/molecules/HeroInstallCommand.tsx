@@ -1,5 +1,6 @@
 import { Tooltip } from "@namehash/namekit-react/client";
 import { useEffect, useState } from "react";
+
 import { CopyIcon } from "../atoms/icons/CopyIcon.tsx";
 
 const npmCommand = "npm install @ensnode/ensrainbow-sdk";
@@ -16,7 +17,7 @@ export default function HeroInstallCommand() {
     setTimeout(() => {
       setCopiedToClipboard(false);
     }, displayCopiedFor);
-  }, [copiedToClipboard]);
+  }, []);
 
   return (
     <div className="hidden relative z-10 lg:flex items-center gap-2 py-[9px] pl-4 pr-[14px] rounded-lg bg-gray-100 border border-gray-300 sm:gap-3 sm:py-[13px] sm:pl-[20px] sm:pr-[16px]">

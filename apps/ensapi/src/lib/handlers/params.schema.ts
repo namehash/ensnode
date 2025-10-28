@@ -1,16 +1,17 @@
+import { z } from "zod/v4";
+
 import {
   DEFAULT_EVM_CHAIN_ID,
-  Name,
-  ResolverRecordsSelection,
   isNormalizedName,
   isSelectionEmpty,
+  type Name,
+  type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 import {
   makeCoinTypeStringSchema,
   makeDefaultableChainIdStringSchema,
   makeLowercaseAddressSchema,
 } from "@ensnode/ensnode-sdk/internal";
-import { z } from "zod/v4";
 
 const excludingDefaultChainId = z
   .number()

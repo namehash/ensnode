@@ -67,7 +67,6 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",

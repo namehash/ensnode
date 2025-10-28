@@ -11,6 +11,8 @@
  * all come together to form a single view about a chain's indexing status.
  */
 
+import { prettifyError } from "zod/v4/core";
+
 import {
   type BlockRef,
   type ChainId,
@@ -19,7 +21,11 @@ import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  createIndexingConfig,
   type DeepPartial,
+  deserializeChainIndexingStatusSnapshot,
+  getOmnichainIndexingCursor,
+  getOmnichainIndexingStatus,
   OmnichainIndexingStatusIds,
   type SerializedChainIndexingStatusSnapshot,
   type SerializedChainIndexingStatusSnapshotBackfill,
@@ -31,13 +37,9 @@ import {
   type SerializedOmnichainIndexingStatusSnapshotCompleted,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
   type SerializedOmnichainIndexingStatusSnapshotUnstarted,
-  createIndexingConfig,
-  deserializeChainIndexingStatusSnapshot,
-  getOmnichainIndexingCursor,
-  getOmnichainIndexingStatus,
 } from "@ensnode/ensnode-sdk";
-import { PrometheusMetrics } from "@ensnode/ponder-metadata";
-import { prettifyError } from "zod/v4/core";
+import type { PrometheusMetrics } from "@ensnode/ponder-metadata";
+
 import type { ChainBlockRefs } from "./block-refs";
 import type { ChainName } from "./config";
 import type { PonderStatus } from "./status";

@@ -1,8 +1,9 @@
 "use client";
 
+import { Suspense, use } from "react";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { ensAdminVersion } from "@/lib/env";
-import { Suspense, use } from "react";
 
 const versionPromise = ensAdminVersion();
 

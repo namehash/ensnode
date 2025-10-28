@@ -1,5 +1,5 @@
 import { serializeRealtimeIndexingStatusProjection } from "../ensindexer";
-import {
+import type {
   SerializedIndexingStatusResponse,
   SerializedIndexingStatusResponseOk,
 } from "./serialized-types";

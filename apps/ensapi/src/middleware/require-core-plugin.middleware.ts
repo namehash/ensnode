@@ -1,6 +1,8 @@
 import config from "@/config";
-import { factory } from "@/lib/hono-factory";
+
 import { PluginName } from "@ensnode/ensnode-sdk";
+
+import { factory } from "@/lib/hono-factory";
 
 /**
  * Creates middleware that requires a specific core plugin to be enabled in ENSIndexer.

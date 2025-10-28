@@ -3,11 +3,11 @@
  * referral information.
  */
 
-import { Context, Event } from "ponder:registry";
-import { Address, Hex, zeroHash } from "viem";
-
+import type { Context, Event } from "ponder:registry";
 import schema from "ponder:schema";
-import { Node } from "@ensnode/ensnode-sdk";
+import { type Address, type Hex, zeroHash } from "viem";
+
+import type { Node } from "@ensnode/ensnode-sdk";
 
 /**
  * Upserts a Referrer and aggregates their `valueWei`.

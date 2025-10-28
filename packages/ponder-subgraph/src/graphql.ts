@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: allow */
+/** biome-ignore-all lint/style/noNonNullAssertion: allow */
+
 /**
  * This is a graphql schema generated from a drizzle (sql) schema, initially based on ponder's.
  * https://github.com/ponder-sh/ponder/blob/main/packages/core/src/graphql/index.ts
@@ -16,15 +19,7 @@
  */
 
 // here we inline the following types from this original import
-// import type { Drizzle, OnchainTable, Schema } from "ponder";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { PgliteDatabase } from "drizzle-orm/pglite";
-
-export type Drizzle<TSchema extends Schema = { [name: string]: never }> =
-  | NodePgDatabase<TSchema>
-  | PgliteDatabase<TSchema>;
-
-export type Schema = { [name: string]: unknown };
+import type { Drizzle, Schema } from "./types";
 
 export const onchain = Symbol.for("ponder:onchain");
 
@@ -40,16 +35,11 @@ export type OnchainTable<
 
 import DataLoader from "dataloader";
 import {
-  type Column,
-  Many,
-  One,
-  type SQL,
-  Subquery,
-  type TableRelationalConfig,
   and,
   arrayContained,
   arrayContains,
   asc,
+  type Column,
   createTableRelationsHelpers,
   desc,
   eq,
@@ -65,29 +55,34 @@ import {
   like,
   lt,
   lte,
+  Many,
   ne,
   not,
   notInArray,
   notLike,
+  One,
   or,
   relations,
+  type SQL,
+  type Subquery,
   sql,
+  type TableRelationalConfig,
 } from "drizzle-orm";
 import { toSnakeCase } from "drizzle-orm/casing";
 import {
+  isPgEnum,
   type PgColumnBuilderBase,
   type PgEnum,
   PgEnumColumn,
   PgInteger,
   PgSerial,
-  PgTable,
-  PgTableExtraConfig,
-  TableConfig,
-  isPgEnum,
+  type PgTable,
+  type PgTableExtraConfig,
   pgTable,
+  type TableConfig,
 } from "drizzle-orm/pg-core";
-import { PgViewBase } from "drizzle-orm/pg-core/view-base";
-import { Relation } from "drizzle-orm/relations";
+import type { PgViewBase } from "drizzle-orm/pg-core/view-base";
+import type { Relation } from "drizzle-orm/relations";
 import {
   GraphQLBoolean,
   GraphQLEnumType,
@@ -318,7 +313,7 @@ export function buildGraphQLSchema({
         }
 
         // NOTE: add support for relational filters like Domain_filter's { owner_not: String }
-        for (const [relationName, relation] of Object.entries(table.relations)) {
+        for (const [_relationName, relation] of Object.entries(table.relations)) {
           if (is(relation, One)) {
             // TODO: get the type of the relation's reference column & make this like above
             // NOTE: for now, hardcode that singular relation filters are string ids
@@ -484,7 +479,7 @@ export function buildGraphQLSchema({
                 first: { type: GraphQLInt },
                 skip: { type: GraphQLInt },
               },
-              resolve: (parent, args: PluralArgs, context, info) => {
+              resolve: (parent, args: PluralArgs, context, _info) => {
                 const relationalConditions = [] as (SQL | undefined)[];
                 for (let i = 0; i < references.length; i++) {
                   const column = fields[i]!;
@@ -580,7 +575,7 @@ export function buildGraphQLSchema({
         first: { type: GraphQLInt },
         skip: { type: GraphQLInt },
       },
-      resolve: async (_parent, args: PluralArgs, context, info) => {
+      resolve: async (_parent, args: PluralArgs, context, _info) => {
         return executePluralQuery(table, schema[table.tsName] as PgTable, context.drizzle, args);
       },
     };

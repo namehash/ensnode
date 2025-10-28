@@ -1,13 +1,12 @@
 "use client";
 
 import { Activity, PlugZap, RadioTower, Telescope } from "lucide-react";
-
-import * as React from "react";
+import type * as React from "react";
 
 import { IconENS } from "@/components/icons/ens";
 import { NavMain } from "@/components/nav-main";
-
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+
 import { ConnectionsLibrarySelector } from "./connections/connections-library-selector";
 
 const navItems = [

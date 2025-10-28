@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { type ZodSafeParseResult, prettifyError } from "zod/v4";
-import { ENSIndexerVersionInfo, PluginName } from "./types";
+import { prettifyError, type ZodSafeParseResult } from "zod/v4";
+
+import { type ENSIndexerVersionInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
   makeENSIndexerPublicConfigSchema,

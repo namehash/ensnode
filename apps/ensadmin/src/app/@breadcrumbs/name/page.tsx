@@ -1,5 +1,9 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
+import type { Name } from "@ensnode/ensnode-sdk";
+
 import BreadcrumbsGroup from "@/components/breadcrumbs/group";
 import { NameDisplay } from "@/components/identity/utils";
 import {
@@ -9,8 +13,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import type { Name } from "@ensnode/ensnode-sdk";
-import { useSearchParams } from "next/navigation";
 
 export default function Page() {
   const searchParams = useSearchParams();

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import type { AiQueryGeneratorResult } from "./types";
 
 interface QueryPromptExample {

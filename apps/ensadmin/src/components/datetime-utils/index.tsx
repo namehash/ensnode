@@ -1,9 +1,11 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { UnixTimestamp } from "@ensnode/ensnode-sdk";
 import { formatDistance, formatDistanceStrict, fromUnixTime, intlFormat } from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
+import type * as React from "react";
 import { useEffect, useState } from "react";
-import * as React from "react";
+
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /**
  * Client-only absolute time component
@@ -93,7 +95,7 @@ export function RelativeTime({
     setRelativeTime(
       formatRelativeTime(timestamp, enforcePast, includeSeconds, conciseFormatting, relativeTo),
     );
-  }, [timestamp]);
+  }, [timestamp, conciseFormatting, enforcePast, includeSeconds, relativeTo]);
 
   return (
     <Tooltip delayDuration={1000}>
@@ -125,13 +127,7 @@ export function RelativeTime({
 /**
  * Client-only duration component
  */
-export function Duration({
-  beginsAt,
-  endsAt,
-}: {
-  beginsAt: UnixTimestamp;
-  endsAt: UnixTimestamp;
-}) {
+export function Duration({ beginsAt, endsAt }: { beginsAt: UnixTimestamp; endsAt: UnixTimestamp }) {
   const [duration, setDuration] = useState<string>("");
   const beginsAtDate = fromUnixTime(beginsAt);
   const endsAtDate = fromUnixTime(endsAt);

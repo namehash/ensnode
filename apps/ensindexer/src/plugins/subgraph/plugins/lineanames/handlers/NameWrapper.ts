@@ -1,9 +1,12 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
 
-import config from "@/config";
+import { PluginName } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeNameWrapperHandlers } from "@/plugins/subgraph/shared-handlers/NameWrapper";
-import { PluginName } from "@ensnode/ensnode-sdk";
+
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**

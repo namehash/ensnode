@@ -4,10 +4,13 @@
  * This is currently the ONLY way to create new .ensrainbow files from scratch.
  */
 
-import { createReadStream, createWriteStream } from "fs";
-import { createInterface } from "readline";
-import { createGunzip } from "zlib";
+import { createReadStream, createWriteStream } from "node:fs";
+import { createInterface } from "node:readline";
+import { createGunzip } from "node:zlib";
+
 import ProgressBar from "progress";
+
+import type { LabelSetId, LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
 import { logger } from "@/utils/logger";
 import {
@@ -15,7 +18,6 @@ import {
   createRainbowProtobufRoot,
 } from "@/utils/protobuf-schema";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
-import { type LabelSetId, type LabelSetVersion } from "@ensnode/ensrainbow-sdk";
 
 export interface ConvertCommandOptions {
   inputFile: string;
@@ -153,7 +155,6 @@ async function processRecords(
         logger.warn(`Unknown error processing record - skipping`);
       }
       invalidRecords++;
-      continue;
     }
   }
   return { processedRecords, invalidRecords };

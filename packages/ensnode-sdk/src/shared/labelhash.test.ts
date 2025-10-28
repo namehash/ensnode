@@ -1,6 +1,7 @@
 import { keccak256, labelhash, stringToBytes } from "viem";
 import { describe, expect, it } from "vitest";
-import { LiteralLabel, encodeLabelHash } from "../ens";
+
+import { encodeLabelHash, type LiteralLabel } from "../ens";
 import { labelhashLiteralLabel } from "./labelhash";
 
 describe("labelhashLiteralLabel", () => {

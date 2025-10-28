@@ -1,21 +1,23 @@
 import { ClassicLevel } from "classic-level";
-import { ByteArray, Hex, labelhash } from "viem";
+import { type ByteArray, type Hex, labelhash } from "viem";
 
-import { getErrorMessage } from "@/utils/error-utils";
-import { logger } from "@/utils/logger";
 import {
-  EnsRainbowServerLabelSet,
-  type LabelSetId,
-  type LabelSetVersion,
   buildLabelSetId,
   buildLabelSetVersion,
+  type EnsRainbowServerLabelSet,
+  type LabelSetId,
+  type LabelSetVersion,
   labelHashToBytes,
   parseNonNegativeInteger,
 } from "@ensnode/ensnode-sdk";
+
+import { getErrorMessage } from "@/utils/error-utils";
+import { logger } from "@/utils/logger";
+
 import {
-  type VersionedRainbowRecord,
   buildEncodedVersionedRainbowRecord,
   decodeEncodedVersionedRainbowRecord,
+  type VersionedRainbowRecord,
 } from "./rainbow-record";
 
 // System keys must have a byte length different from 32 to avoid collisions with labelHashes
@@ -442,7 +444,7 @@ export class ENSRainbowDB {
     try {
       const count = parseNonNegativeInteger(countStr);
       return count;
-    } catch (error) {
+    } catch (_error) {
       throw new Error(
         `Invalid precalculated count value in database at ${this.dataDir}: ${countStr}`,
       );
@@ -473,7 +475,7 @@ export class ENSRainbowDB {
 
     try {
       return parseNonNegativeInteger(versionStr);
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`Invalid schema version in database: ${versionStr}`);
     }
   }
@@ -556,7 +558,7 @@ export class ENSRainbowDB {
     // 2. Check Schema Version
     try {
       await this.validateSchemaVersion();
-    } catch (error) {
+    } catch (_error) {
       // We already logged the error in validateSchemaVersion
       return false;
     }
@@ -616,7 +618,7 @@ export class ENSRainbowDB {
       try {
         labelHashToBytes(keyHex); // Ensures key is 32 bytes and valid hex
         validHashes++;
-      } catch (e) {
+      } catch (_e) {
         logger.error(`Invalid labelHash key format: ${keyHex}`);
         invalidHashes++;
         continue; // Skip further checks for this invalid record
@@ -738,7 +740,7 @@ export class ENSRainbowDB {
     try {
       const precalculatedCount = await this.getPrecalculatedRainbowRecordCount();
       logger.warn(`Existing precalculated count in database: ${precalculatedCount}`);
-    } catch (error) {
+    } catch (_error) {
       logger.info("No existing precalculated count found in database");
     }
 

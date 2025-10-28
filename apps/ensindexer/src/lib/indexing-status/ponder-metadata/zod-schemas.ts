@@ -10,13 +10,15 @@
  * Ponder metrics and Ponder status endpoints and make this data fit
  * into the ENSIndexer application data model (and its constraints).
  */
-import { type ChainIdString, type ChainIndexingStatusSnapshot } from "@ensnode/ensnode-sdk";
+
+import z from "zod/v4";
+
+import type { ChainIdString, ChainIndexingStatusSnapshot } from "@ensnode/ensnode-sdk";
 import {
   makeBlockRefSchema,
   makeChainIdSchema,
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
-import z from "zod/v4";
 
 import { createChainIndexingSnapshot } from "./chains";
 import type { ChainName } from "./config";
@@ -63,12 +65,13 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     })
 
     .transform((chains) => {
-      let serializedChainIndexingStatusSnapshots = {} as Record<
+      const serializedChainIndexingStatusSnapshots = {} as Record<
         ChainIdString,
         ChainIndexingStatusSnapshot
       >;
 
       for (const chainName of indexedChainNames) {
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist
         const indexedChain = chains.get(chainName)!;
 
         serializedChainIndexingStatusSnapshots[indexedChain.chainId] =

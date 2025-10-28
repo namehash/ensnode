@@ -1,9 +1,9 @@
 import {
-  ContractConfig,
-  Datasource,
-  DatasourceName,
+  type ContractConfig,
+  type Datasource,
+  type DatasourceName,
   DatasourceNames,
-  ENSNamespaceId,
+  type ENSNamespaceId,
   maybeGetDatasource,
 } from "@ensnode/datasources";
 

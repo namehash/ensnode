@@ -1,7 +1,8 @@
-import { ConfigResponse } from "@ensnode/ensnode-sdk";
-
 import { useQuery } from "@tanstack/react-query";
-import { ConfigParameter, QueryParameter } from "../types";
+
+import type { ConfigResponse } from "@ensnode/ensnode-sdk";
+
+import type { ConfigParameter, QueryParameter } from "../types";
 import { ASSUME_IMMUTABLE_QUERY, createENSIndexerConfigQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";
 

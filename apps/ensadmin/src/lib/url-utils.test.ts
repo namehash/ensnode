@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildHttpHostname } from "./url-utils";
 
 describe("buildHttpHostname", () => {
@@ -352,7 +353,7 @@ describe("buildHttpHostname", () => {
 
   describe("edge cases and boundary conditions", () => {
     it("handles URLs with very long hostnames", () => {
-      const longHostname = "a".repeat(100) + ".com";
+      const longHostname = `${"a".repeat(100)}.com`;
       const result = buildHttpHostname(`https://${longHostname}`);
 
       expect(result.isValid).toBe(true);

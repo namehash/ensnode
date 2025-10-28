@@ -1,5 +1,6 @@
-import type { ENSIndexerConfig } from "@/config/types";
 import { redactRpcConfigs, redactString } from "@ensnode/ensnode-sdk/internal";
+
+import type { ENSIndexerConfig } from "@/config/types";
 
 /**
  * Redact sensitive values from ENSIndexer configuration.

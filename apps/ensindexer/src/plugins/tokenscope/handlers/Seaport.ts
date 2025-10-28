@@ -1,8 +1,10 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
+
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";

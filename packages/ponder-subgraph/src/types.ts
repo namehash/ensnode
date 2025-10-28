@@ -1,3 +1,9 @@
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+
+export type Schema = { [name: string]: unknown };
+
+export type Drizzle<TSchema extends Schema = Schema> = NodePgDatabase<TSchema>;
+
 interface SubgraphMetaBlockInfo {
   /** Block number */
   number: number;

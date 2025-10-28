@@ -1,4 +1,5 @@
-import { join } from "path";
+import { join } from "node:path";
+
 import { parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
 
 import { logger } from "@/utils/logger";
@@ -15,7 +16,7 @@ export function getEnvPort(): number {
   try {
     const port = parseNonNegativeInteger(envPort);
     return port;
-  } catch (error: unknown) {
+  } catch (_error: unknown) {
     const errorMessage = `Invalid PORT value "${envPort}": must be a non-negative integer`;
     logger.error(errorMessage);
     throw new Error(errorMessage);

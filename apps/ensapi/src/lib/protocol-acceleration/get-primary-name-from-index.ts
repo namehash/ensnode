@@ -1,8 +1,15 @@
+import { trace } from "@opentelemetry/api";
+import type { Address } from "viem";
+
+import {
+  type CoinType,
+  coinTypeReverseLabel,
+  DEFAULT_EVM_COIN_TYPE,
+  type Name,
+} from "@ensnode/ensnode-sdk";
+
 import { db } from "@/lib/db";
 import { withSpanAsync } from "@/lib/tracing/auto-span";
-import { CoinType, DEFAULT_EVM_COIN_TYPE, Name, coinTypeReverseLabel } from "@ensnode/ensnode-sdk";
-import { trace } from "@opentelemetry/api";
-import { Address } from "viem";
 
 const tracer = trace.getTracer("get-primary-name");
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
 import { createRealtimeIndexingStatusProjection } from "./projection";
 import { earlierBlockRef, laterBlockRef } from "./test-helpers";
@@ -7,7 +8,7 @@ import {
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
-  RealtimeIndexingStatusProjection,
+  type RealtimeIndexingStatusProjection,
 } from "./types";
 
 describe("Realtime Indexing Status Projection", () => {

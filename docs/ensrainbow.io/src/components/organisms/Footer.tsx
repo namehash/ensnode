@@ -1,4 +1,5 @@
 import { Link } from "@namehash/namekit-react";
+
 import { ENSServiceProviderBadge } from "../atoms/ENSServiceProviderBadge.tsx";
 import { EfpIcon } from "../atoms/icons/EfpIcon.tsx";
 import { EmailIcon } from "../atoms/icons/EmailIcon.tsx";

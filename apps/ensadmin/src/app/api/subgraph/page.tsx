@@ -1,9 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
+
 import { SubgraphGraphiQLEditor } from "@/components/graphiql-editor";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
-import { Suspense } from "react";
 
 function SubgraphGraphQLContent() {
   const { validatedSelectedConnection } = useSelectedConnection();

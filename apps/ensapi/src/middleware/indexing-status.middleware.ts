@@ -1,9 +1,11 @@
+import config from "@/config";
+
 import pMemoize from "p-memoize";
 import pReflect from "p-reflect";
 
-import config from "@/config";
-import { factory } from "@/lib/hono-factory";
 import { ENSNodeClient, TtlCache } from "@ensnode/ensnode-sdk";
+
+import { factory } from "@/lib/hono-factory";
 
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 

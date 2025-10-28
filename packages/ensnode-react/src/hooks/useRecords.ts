@@ -1,7 +1,8 @@
 "use client";
 
-import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
+
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import type { ConfigParameter, UseRecordsParameters } from "../types";
 import { createRecordsQueryOptions } from "../utils/query";

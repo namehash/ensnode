@@ -1,4 +1,4 @@
-import { Chain, localhost } from "viem/chains";
+import { type Chain, localhost } from "viem/chains";
 
 /**
  * The Namechain Devnet Default L2 Chain Id

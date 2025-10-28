@@ -1,4 +1,5 @@
 import { Button, Link } from "@namehash/namekit-react";
+
 import { ExternalLinkIcon } from "./icons/ExternalLinkIcon.tsx";
 
 export type LearnMoreButtonProps = {

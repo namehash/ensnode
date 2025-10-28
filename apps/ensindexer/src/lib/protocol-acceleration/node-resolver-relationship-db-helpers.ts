@@ -1,8 +1,8 @@
-import { Context } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { Address } from "viem";
+import type { Address } from "viem";
 
-import { Node } from "@ensnode/ensnode-sdk";
+import type { Node } from "@ensnode/ensnode-sdk";
 
 export async function removeNodeResolverRelation(context: Context, registry: Address, node: Node) {
   const chainId = context.chain.id;

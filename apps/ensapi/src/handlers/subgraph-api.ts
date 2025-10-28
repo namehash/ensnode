@@ -1,9 +1,10 @@
-import * as schema from "@ensnode/ensnode-schema";
+import config from "@/config";
+
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
+import * as schema from "@ensnode/ensnode-schema";
 import { buildGraphQLSchema, subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
-import config from "@/config";
 import { makeDrizzle } from "@/lib/handlers/drizzle";
 import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
@@ -11,7 +12,6 @@ import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
 import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
-import { createMiddleware } from "hono/factory";
 
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);

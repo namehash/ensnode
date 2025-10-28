@@ -6,9 +6,10 @@
  */
 
 import type { BlockRef, Blockrange } from "@ensnode/ensnode-sdk";
+
 import type { ChainName } from "./config";
 import type { PrometheusMetrics } from "./metrics";
-import { type PublicClient, fetchBlockRef } from "./rpc";
+import { fetchBlockRef, type PublicClient } from "./rpc";
 
 /**
  * Chain Block Refs

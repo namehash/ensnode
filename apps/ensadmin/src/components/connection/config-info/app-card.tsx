@@ -1,9 +1,10 @@
+import { ExternalLink } from "lucide-react";
+import type { ReactElement } from "react";
+
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
-import { ReactElement } from "react";
 
 interface ConfigInfoAppCardContent {
   label: string;
@@ -22,7 +23,7 @@ export interface ConfigInfoAppCardProps {
   name?: string;
   icon?: ReactElement;
   items?: ConfigInfoAppCardContent[];
-  version?: string | ReactElement;
+  version?: ReactElement;
   docsLink?: URL;
   features?: ConfigInfoAppCardFeature[];
 }
@@ -106,14 +107,7 @@ export function ConfigInfoAppCard({
               </CardTitle>
             )}
             <div className={baseCardTitleStyles}>
-              {version &&
-                (typeof version === "string" ? (
-                  <p className="text-sm leading-normal font-normal text-muted-foreground">
-                    v{version}
-                  </p>
-                ) : (
-                  version
-                ))}
+              {version}
               {docsLink && (
                 <a
                   href={docsLink.href}

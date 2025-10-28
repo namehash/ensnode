@@ -1,7 +1,9 @@
+import type { z } from "zod/v4";
+
 import { getENSRootChainId } from "@ensnode/datasources";
-import { z } from "zod/v4";
+
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
-import { ZodCheckFnInput } from "../zod-schemas";
+import type { ZodCheckFnInput } from "../zod-schemas";
 import type { ENSNamespaceSchema, RpcConfigsSchema } from "./zod-schemas";
 
 /**

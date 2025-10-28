@@ -2,14 +2,20 @@
  * This file gathers ideas for UI components presenting chain indexing timeline.
  */
 
-import { cn } from "@/lib/utils";
-import { BlockRef, ChainId, ChainIndexingStatusIds, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import {
+  type BlockRef,
+  type ChainId,
+  ChainIndexingStatusIds,
+  type UnixTimestamp,
+} from "@ensnode/ensnode-sdk";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { AbsoluteTime } from "@/components/datetime-utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatChainStatus } from "@/lib/indexing-status";
 import { getChainName } from "@/lib/namespace-utils";
+import { cn } from "@/lib/utils";
+
 import { getTimelinePosition } from "./indexing-timeline-utils";
 
 interface ChainIndexingTimelinePhaseViewModel {
