@@ -6,12 +6,31 @@ title: Quickstart
 This documentation is under active development.
 :::
 
-The easiest way to run ENSAdmin is via Docker container
+The easiest way to run ENSAdmin is via Docker container.
+
+## Running with Docker
+
+ENSAdmin is deployed as a Single Page React Application served by nginx on port 4173.
+
+### Using pre-built image
 
 ```bash
 docker run \
-  -d \ # in the background
-  -p 4173:4173 \ # map to host port
-  -e VITE_ENSNODE_URL=http://localhost:42069 \ # point to locally running ENSNode
+  -d \
+  -p 4173:4173 \
   ghcr.io/namehash/ensnode/ensadmin:latest
 ```
+
+### Building with custom ENSNode URLs
+
+To configure the server connection library at build time:
+
+```bash
+docker build -f apps/ensadmin/Dockerfile \
+  --build-arg NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=http://localhost:42069 \
+  -t ensadmin .
+
+docker run -d -p 4173:4173 ensadmin
+```
+
+The `NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY` environment variable accepts a comma-separated list of ENSNode URLs that will be offered as connection options in the ENSAdmin interface.

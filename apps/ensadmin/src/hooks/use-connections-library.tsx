@@ -1,7 +1,7 @@
 "use client";
 
 import constate from "constate";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocalstorageState } from "rooks";
 import { toast } from "sonner";
 
@@ -11,10 +11,10 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useHydrated } from "@/hooks/use-hydrated";
 import { getServerConnectionLibrary } from "@/lib/env";
 import {
-  type BuildHttpHostnameResult,
+  BuildHttpHostnameResult,
   buildHttpHostname,
   buildHttpHostnames,
-  type HttpHostname,
+  HttpHostname,
 } from "@/lib/url-utils";
 
 const CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY = "ensadmin:custom-connections:urls";
@@ -197,9 +197,5 @@ export { useConnectionsLibrary };
  * - selectConnection: Callback for selecting a connection
  */
 export function ConnectionsLibraryProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={null}>
-      <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>
-    </Suspense>
-  );
+  return <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>;
 }

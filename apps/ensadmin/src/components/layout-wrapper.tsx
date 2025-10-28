@@ -9,6 +9,7 @@ import { RequireSelectedConnection } from "@/components/connections/require-sele
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
 import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function LayoutWrapper({
   children,
@@ -26,23 +27,45 @@ export function LayoutWrapper({
   }
 
   return (
-    <RequireSelectedConnection>
-      <SidebarProvider>
-        <Suspense>
-          <AppSidebar />
-        </Suspense>
-        <SidebarInset className="min-w-0">
-          <SelectedENSNodeProvider>
+    <Suspense
+      fallback={
+        <SidebarProvider>
+          <div className="w-64 h-screen bg-muted animate-pulse" />
+          <SidebarInset className="min-w-0">
             <Header>
               <HeaderNav>
-                <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                <Skeleton className="h-6 w-48" />
               </HeaderNav>
-              <HeaderActions>{actions}</HeaderActions>
+              <HeaderActions>
+                <Skeleton className="h-8 w-32" />
+              </HeaderActions>
             </Header>
-            <RequireActiveConnection>{children}</RequireActiveConnection>
-          </SelectedENSNodeProvider>
-        </SidebarInset>
-      </SidebarProvider>
-    </RequireSelectedConnection>
+            <div className="flex flex-col gap-4 p-6">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
+      }
+    >
+      <RequireSelectedConnection>
+        <SidebarProvider>
+          <Suspense>
+            <AppSidebar />
+          </Suspense>
+          <SidebarInset className="min-w-0">
+            <SelectedENSNodeProvider>
+              <Header>
+                <HeaderNav>
+                  <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                </HeaderNav>
+                <HeaderActions>{actions}</HeaderActions>
+              </Header>
+              <RequireActiveConnection>{children}</RequireActiveConnection>
+            </SelectedENSNodeProvider>
+          </SidebarInset>
+        </SidebarProvider>
+      </RequireSelectedConnection>
+    </Suspense>
   );
 }

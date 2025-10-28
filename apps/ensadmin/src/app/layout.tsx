@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { QueryClientProvider } from "@/components/query-client/components";
@@ -58,11 +59,13 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <ConnectionsLibraryProvider>
-            <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
-              {children}
-            </LayoutWrapper>
-          </ConnectionsLibraryProvider>
+          <Suspense>
+            <ConnectionsLibraryProvider>
+              <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
+                {children}
+              </LayoutWrapper>
+            </ConnectionsLibraryProvider>
+          </Suspense>
         </QueryClientProvider>
         <Toaster />
       </body>

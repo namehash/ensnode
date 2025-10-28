@@ -26,12 +26,14 @@ export function Registrations() {
   // it can still refer to a server-side error
   if (indexingStatus.responseCode === IndexingStatusResponseCodes.Error) {
     return (
-      <RecentRegistrations
-        error={{
-          title: "IndexingStatus error",
-          description: "Indexing Status is currently unavailable.",
-        }}
-      />
+      <section className="flex flex-col gap-6 p-6">
+        <RecentRegistrations
+          error={{
+            title: "IndexingStatus error",
+            description: "Indexing Status is currently unavailable.",
+          }}
+        />
+      </section>
     );
   }
 

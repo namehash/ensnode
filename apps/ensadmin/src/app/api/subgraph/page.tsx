@@ -1,9 +1,12 @@
 "use client";
 
+import { Suspense } from "react";
+
 import { SubgraphGraphiQLEditor } from "@/components/graphiql-editor";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
-export default function SubgraphGraphQLPage() {
+function SubgraphGraphQLContent() {
   const { validatedSelectedConnection } = useSelectedConnection();
 
   // TODO: we need a broader refactor to recognize the difference between
@@ -21,4 +24,18 @@ export default function SubgraphGraphQLPage() {
   const url = new URL(`/subgraph`, validatedSelectedConnection.url).toString();
 
   return <SubgraphGraphiQLEditor url={url} />;
+}
+
+export default function SubgraphGraphQLPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center h-screen">
+          <LoadingSpinner className="h-16 w-16" />
+        </div>
+      }
+    >
+      <SubgraphGraphQLContent />
+    </Suspense>
+  );
 }
