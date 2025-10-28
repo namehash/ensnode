@@ -1,8 +1,9 @@
 "use client";
 
-import { RecentRegistrations } from "@/components/recent-registrations/components";
 import { useENSIndexerConfig, useIndexingStatus } from "@ensnode/ensnode-react";
 import { IndexingStatusResponseCodes } from "@ensnode/ensnode-sdk";
+
+import { RecentRegistrations } from "@/components/recent-registrations/components";
 
 export function Registrations() {
   const ensIndexerConfigQuery = useENSIndexerConfig();

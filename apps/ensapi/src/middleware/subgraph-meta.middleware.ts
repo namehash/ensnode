@@ -1,7 +1,9 @@
-import { indexingStatusToSubgraphMeta } from "@/lib/subgraph/indexing-status-to-subgraph-meta";
-import { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
-import type { SubgraphMetaVariables } from "@ensnode/ponder-subgraph";
 import { createMiddleware } from "hono/factory";
+
+import type { SubgraphMetaVariables } from "@ensnode/ponder-subgraph";
+
+import { indexingStatusToSubgraphMeta } from "@/lib/subgraph/indexing-status-to-subgraph-meta";
+import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
 
 /**
  * Middleware that converts indexing status to subgraph metadata format.

@@ -2,11 +2,12 @@
  * This file defines UI components for presenting {@link BlockRef}.
  */
 
+import { ExternalLink as ExternalLinkIcon } from "lucide-react";
+
+import type { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
+
 import { RelativeTime } from "@/components/datetime-utils";
 import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
-import { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
-import { fromUnixTime } from "date-fns";
-import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
 interface BlockNumberProps {
   chainId: ChainId;

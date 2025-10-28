@@ -2,15 +2,17 @@
  * The ThreeDNS plugin describes indexing behavior for 3DNSToken on both Optimism and Base.
  */
 
+import * as ponder from "ponder";
+
+import { DatasourceNames, ResolverABI } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+
 import {
   createPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
-import { DatasourceNames, ResolverABI } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import * as ponder from "ponder";
 
 const pluginName = PluginName.ThreeDNS;
 

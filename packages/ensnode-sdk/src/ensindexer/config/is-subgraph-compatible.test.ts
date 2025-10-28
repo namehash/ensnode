@@ -1,5 +1,7 @@
-import { ENSNamespaceIds } from "@ensnode/datasources";
 import { describe, expect, it } from "vitest";
+
+import { ENSNamespaceIds } from "@ensnode/datasources";
+
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import { PluginName } from "./types";
 

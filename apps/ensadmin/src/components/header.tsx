@@ -1,13 +1,14 @@
 "use client";
 
+import * as React from "react";
+
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import * as React from "react";
 
 const HeaderContext = React.createContext<{ className?: string } | null>(null);
 
-function useHeaderContext() {
+function _useHeaderContext() {
   const context = React.useContext(HeaderContext);
   if (!context) {
     throw new Error("Header components must be used within a Header");

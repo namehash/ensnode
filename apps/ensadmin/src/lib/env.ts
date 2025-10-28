@@ -1,5 +1,6 @@
 import { uniq } from "@ensnode/ensnode-sdk";
-import { type HttpHostname, buildHttpHostname, buildHttpHostnames } from "./url-utils";
+
+import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
 
 /**
  * Get ENSAdmin service public HttpHostname.
@@ -12,7 +13,7 @@ import { type HttpHostname, buildHttpHostname, buildHttpHostnames } from "./url-
  */
 export function ensAdminPublicUrl(): HttpHostname {
   const envVarName = "ENSADMIN_PUBLIC_URL";
-  let envVarValue = process.env[envVarName];
+  const envVarValue = process.env[envVarName];
 
   if (!envVarValue) {
     const vercelAppPublicUrl = getVercelAppPublicUrl();

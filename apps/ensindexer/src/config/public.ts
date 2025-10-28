@@ -1,5 +1,7 @@
-import { getENSIndexerVersionInfo } from "@/lib/version-info";
 import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+
+import { getENSIndexerVersionInfo } from "@/lib/version-info";
+
 import type { ENSIndexerConfig } from "./types";
 
 /**

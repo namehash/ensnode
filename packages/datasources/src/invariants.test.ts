@@ -1,7 +1,7 @@
+import { type Address, isAddress } from "viem";
 import { describe, expect, it } from "vitest";
 
-import { Address, isAddress } from "viem";
-import { ContractConfig, ENSNamespaceIds, getENSNamespace } from "./index";
+import { type ContractConfig, ENSNamespaceIds, getENSNamespace } from "./index";
 
 describe("datasource invariants", () => {
   Object.values(ENSNamespaceIds).forEach((namespace) => {

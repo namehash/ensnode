@@ -1,16 +1,17 @@
-import { Context } from "ponder:registry";
-import { Address } from "viem";
-
-import { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
-
 import config from "@/config";
+
+import type { Context } from "ponder:registry";
+import type { Address } from "viem";
+
+import { getENSRootChainId } from "@ensnode/datasources";
+import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
+
 import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
-  DebugTraceTransactionSchema,
+  type DebugTraceTransactionSchema,
   getAddressesFromTrace,
 } from "@/lib/trace-transaction-helpers";
-import { getENSRootChainId } from "@ensnode/datasources";
 
 /**
  * Heals the first label of an addr.reverse Reverse Name given a Registry#NewOwner event.

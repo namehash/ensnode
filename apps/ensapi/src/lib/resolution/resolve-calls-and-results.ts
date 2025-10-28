@@ -1,24 +1,25 @@
-import { ResolverABI } from "@ensnode/datasources";
-import { type Name, type Node, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { trace } from "@opentelemetry/api";
 import {
   type Address,
   ContractFunctionExecutionError,
-  type PublicClient,
   decodeAbiParameters,
   encodeFunctionData,
   getAbiItem,
+  type PublicClient,
   size,
   toHex,
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
+import { ResolverABI } from "@ensnode/datasources";
+import type { Name, Node, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
   interpretTextRecordValue,
 } from "@ensnode/ensnode-sdk/internal";
+
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 
@@ -231,6 +232,10 @@ export function interpretRawCallsAndResults<SELECTION extends ResolverRecordsSel
       case "text": {
         // interpret text records (see `interpretTextRecordValue` for specific guarantees)
         return { call, result: interpretTextRecordValue(result) };
+      }
+      default: {
+        // note: switch is exhaustive, but this makes biome happier about map always returning
+        return { call, result };
       }
     }
   });

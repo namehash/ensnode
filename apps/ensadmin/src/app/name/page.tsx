@@ -1,13 +1,16 @@
 "use client";
 
-import { NameDisplay, NameLink, getNameDetailsRelativePath } from "@/components/identity/utils";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type ChangeEvent, useState } from "react";
+
+import type { Name } from "@ensnode/ensnode-sdk";
+
+import { getNameDetailsRelativePath, NameDisplay, NameLink } from "@/components/identity/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { Name } from "@ensnode/ensnode-sdk";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+
 import { NameDetailPageContent } from "./_components/NameDetailPageContent";
 
 const EXAMPLE_NAMES = [

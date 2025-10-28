@@ -1,17 +1,19 @@
 import packageJson from "@/../package.json" with { type: "json" };
+import config from "@/config";
 
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 
-import config from "@/config";
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 

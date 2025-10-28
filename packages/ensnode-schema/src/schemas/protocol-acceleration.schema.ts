@@ -110,7 +110,7 @@ export const resolverRecords = onchainTable(
   }),
 );
 
-export const resolverRecords_relations = relations(resolverRecords, ({ one, many }) => ({
+export const resolverRecords_relations = relations(resolverRecords, ({ many }) => ({
   // resolverRecord has many address records
   addressRecords: many(resolverAddressRecord),
 
@@ -147,7 +147,7 @@ export const resolverAddressRecord = onchainTable(
   }),
 );
 
-export const resolverAddressRecordRelations = relations(resolverAddressRecord, ({ one, many }) => ({
+export const resolverAddressRecordRelations = relations(resolverAddressRecord, ({ one }) => ({
   // belongs to resolverRecord
   resolver: one(resolverRecords, {
     fields: [
@@ -188,7 +188,7 @@ export const resolverTextRecord = onchainTable(
   }),
 );
 
-export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one, many }) => ({
+export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one }) => ({
   // belongs to resolverRecord
   resolver: one(resolverRecords, {
     fields: [resolverTextRecord.chainId, resolverTextRecord.resolver, resolverTextRecord.node],

@@ -1,10 +1,11 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
-import { type Name, type ResolverRecordsSelection, getCommonCoinTypes } from "@ensnode/ensnode-sdk";
+import { getCommonCoinTypes, type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+
 import { AdditionalRecords } from "./AdditionalRecords";
 import { Addresses } from "./Addresses";
 import { NameDetailPageSkeleton } from "./NameDetailPageSkeleton";

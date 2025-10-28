@@ -1,11 +1,13 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
+import type { Name } from "@ensnode/ensnode-sdk";
+
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { useNamespace } from "@/hooks/async/use-namespace";
 import { buildExternalEnsAppProfileUrl } from "@/lib/namespace-utils";
-import type { Name } from "@ensnode/ensnode-sdk";
-import { useSearchParams } from "next/navigation";
 
 export default function ActionsNamePage() {
   const searchParams = useSearchParams();

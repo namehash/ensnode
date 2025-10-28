@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import type { ConfigParameter, UsePrimaryNamesParameters } from "../types";
 import { createPrimaryNamesQueryOptions } from "../utils/query";
 import { useENSNodeConfig } from "./useENSNodeConfig";

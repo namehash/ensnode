@@ -1,11 +1,11 @@
 import ensTestEnv from "./ens-test-env";
 import holesky from "./holesky";
 import {
-  Datasource,
-  DatasourceName,
+  type Datasource,
+  type DatasourceName,
   DatasourceNames,
-  ENSNamespace,
-  ENSNamespaceId,
+  type ENSNamespace,
+  type ENSNamespaceId,
 } from "./lib/types";
 import mainnet from "./mainnet";
 import sepolia from "./sepolia";

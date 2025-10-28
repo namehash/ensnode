@@ -1,27 +1,29 @@
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import {
-  AccountId,
-  type Name,
-  type Node,
-  NormalizedName,
-  getNameHierarchy,
-} from "@ensnode/ensnode-sdk";
+import config from "@/config";
+
+import { bytesToPacket } from "@ensdomains/ensjs/utils";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import {
   type Address,
-  type PublicClient,
   isAddressEqual,
   namehash,
+  type PublicClient,
   toHex,
   zeroAddress,
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
-import config from "@/config";
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
+import {
+  type AccountId,
+  getNameHierarchy,
+  type Name,
+  type Node,
+  type NormalizedName,
+} from "@ensnode/ensnode-sdk";
+
 import { db } from "@/lib/db";
 import { isENSRootRegistry } from "@/lib/protocol-acceleration/ens-root-registry";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
-import { bytesToPacket } from "@ensdomains/ensjs/utils";
 
 type FindResolverResult =
   | {

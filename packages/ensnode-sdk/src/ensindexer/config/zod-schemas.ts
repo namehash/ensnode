@@ -7,17 +7,18 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
+
 import { uniq } from "../../shared";
 import {
-  ZodCheckFnInput,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
+  type ZodCheckFnInput,
 } from "../../shared/zod-schemas";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
-import { PluginName } from "./types";
 import type { ENSIndexerPublicConfig } from "./types";
+import { PluginName } from "./types";
 import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
 /**
@@ -102,12 +103,12 @@ export const makeLabelSetVersionSchema = (valueLabel: string) => {
 export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") => {
   let valueLabelLabelSetId = valueLabel;
   let valueLabelLabelSetVersion = valueLabel;
-  if (valueLabel == "LABEL_SET") {
+  if (valueLabel === "LABEL_SET") {
     valueLabelLabelSetId = "LABEL_SET_ID";
     valueLabelLabelSetVersion = "LABEL_SET_VERSION";
   } else {
-    valueLabelLabelSetId = valueLabel + ".labelSetId";
-    valueLabelLabelSetVersion = valueLabel + ".labelSetVersion";
+    valueLabelLabelSetId = `${valueLabel}.labelSetId`;
+    valueLabelLabelSetVersion = `${valueLabel}.labelSetVersion`;
   }
   return z.object({
     labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),

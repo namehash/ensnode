@@ -1,6 +1,7 @@
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 import type { LabelHash, LiteralLabel } from "@ensnode/ensnode-sdk";
 import { ErrorCode, isHealError } from "@ensnode/ensrainbow-sdk";
+
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 
 const ensRainbowApiClient = getENSRainbowApiClient();
 

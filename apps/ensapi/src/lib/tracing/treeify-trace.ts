@@ -1,5 +1,6 @@
-import { ProtocolSpan, ProtocolSpanTreeNode, ProtocolTrace } from "@ensnode/ensnode-sdk";
 import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
+
+import type { ProtocolSpan, ProtocolSpanTreeNode, ProtocolTrace } from "@ensnode/ensnode-sdk";
 
 /**
  * Re-implements hrTimeToMicroseconds to avoid a dependency on @opentelemetry/core.
@@ -50,6 +51,7 @@ export function treeifySpans(trace: ReadableSpan[]): ProtocolTrace {
   for (const node of idToNode.values()) {
     const parentId = node.parentSpanContext?.spanId;
     if (parentId && idToNode.has(parentId)) {
+      // biome-ignore lint/style/noNonNullAssertion: .has() check
       idToNode.get(parentId)!.children.push(node);
     } else {
       roots.push(node);

@@ -1,23 +1,23 @@
-import { ZodError, prettifyError, z } from "zod/v4";
+import { prettifyError, ZodError, z } from "zod/v4";
 
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
+  buildRpcConfigsFromEnv,
   DatabaseSchemaNameSchema,
   DatabaseUrlSchema,
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
-  RpcConfigsSchema,
-  buildRpcConfigsFromEnv,
   invariant_isSubgraphCompatibleRequirements,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeFullyPinnedLabelSetSchema,
   makeUrlSchema,
+  RpcConfigsSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
-
 import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
-import { ENSIndexerEnvironment } from "@/config/environment";
+import type { ENSIndexerEnvironment } from "@/config/environment";
+import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
+
 import { derive_indexedChainIds } from "./derived-params";
 import type { ENSIndexerConfig } from "./types";
 import {
@@ -189,9 +189,7 @@ export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSInde
     });
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(
-        "Failed to parse environment configuration: \n" + prettifyError(error) + "\n",
-      );
+      throw new Error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
     }
 
     throw error;

@@ -1,26 +1,27 @@
-import { type Context } from "ponder:registry";
+import config from "@/config";
+
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, namehash } from "viem";
 
 import {
-  DNSEncodedLiteralName,
-  DNSEncodedName,
-  InterpretedLabel,
-  InterpretedName,
-  type Node,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
+  type DNSEncodedLiteralName,
+  type DNSEncodedName,
   decodeDNSEncodedLiteralName,
-  literalLabelToInterpretedLabel,
+  type InterpretedLabel,
+  type InterpretedName,
   literalLabelsToInterpretedName,
+  literalLabelToInterpretedLabel,
+  type Node,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { bigintMax } from "@/lib/lib-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount } from "@/lib/subgraph/db-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";
 import type { RegistrarManagedName } from "@/lib/types";
@@ -50,7 +51,8 @@ function decodeInterpretedNameWrapperName(
     }
 
     return {
-      label: literalLabelToInterpretedLabel(literalLabels[0]!), // ! ok due to length invariant above
+      // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
+      label: literalLabelToInterpretedLabel(literalLabels[0]!),
       name: literalLabelsToInterpretedName(literalLabels),
     };
   } catch {

@@ -1,21 +1,22 @@
-import {
-  BlockRef,
-  ChainIndexingConfigTypeIds,
-  ChainIndexingStatusIds,
-  ChainIndexingStatusSnapshotBackfill,
-  ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotFollowing,
-  ChainIndexingStatusSnapshotQueued,
-} from "@ensnode/ensnode-sdk";
 import { describe, expect, it } from "vitest";
 
 import {
-  ChainMetadata,
+  type BlockRef,
+  ChainIndexingConfigTypeIds,
+  ChainIndexingStatusIds,
+  type ChainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotCompleted,
+  type ChainIndexingStatusSnapshotFollowing,
+  type ChainIndexingStatusSnapshotQueued,
+} from "@ensnode/ensnode-sdk";
+
+import {
+  type ChainMetadata,
   createChainIndexingSnapshot,
 } from "@/lib/indexing-status/ponder-metadata/chains";
 import {
-  PonderConfigType,
   getChainsBlockrange,
+  type PonderConfigType,
 } from "@/lib/indexing-status/ponder-metadata/config";
 
 // Minimal helpers to simulate BlockRef

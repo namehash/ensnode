@@ -1,15 +1,18 @@
 import config from "@/config";
-import { factory } from "@/lib/hono-factory";
-import {
-  Duration,
-  IndexingStatusResponse,
-  IndexingStatusResponseCodes,
-  IndexingStatusResponseOk,
-  PluginName,
-  createRealtimeIndexingStatusProjection,
-} from "@ensnode/ensnode-sdk";
+
 import { getUnixTime } from "date-fns";
 import type { PromiseResult } from "p-reflect";
+
+import {
+  createRealtimeIndexingStatusProjection,
+  type Duration,
+  type IndexingStatusResponse,
+  IndexingStatusResponseCodes,
+  type IndexingStatusResponseOk,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
+
+import { factory } from "@/lib/hono-factory";
 
 export type CanAccelerateVariables = { canAccelerate: boolean };
 

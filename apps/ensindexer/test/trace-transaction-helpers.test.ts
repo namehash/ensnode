@@ -1,5 +1,7 @@
-import { getAddressesFromTrace } from "@/lib/trace-transaction-helpers";
 import { describe, expect, it } from "vitest";
+
+import { getAddressesFromTrace } from "@/lib/trace-transaction-helpers";
+
 import {
   getExampleTransactionTrace,
   getExampleTransactionTraceSerializedAddress,

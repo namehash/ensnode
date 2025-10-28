@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export const NameHashLabsLogo = (props: React.SVGProps<SVGSVGElement>) => {
   return (

@@ -1,4 +1,4 @@
-import { BlockRef } from "../../shared";
+import type { BlockRef } from "../../shared";
 
 export const earliestBlockRef = {
   timestamp: 1667260799,

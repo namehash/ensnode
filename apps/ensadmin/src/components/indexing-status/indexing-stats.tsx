@@ -3,23 +3,25 @@
  *
  * Each omnichain status can present different indexing stats.
  */
-import { useIndexingStatus } from "@ensnode/ensnode-react";
+
+import type { PropsWithChildren, ReactElement } from "react";
+
+import type { useIndexingStatus } from "@ensnode/ensnode-react";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  CrossChainIndexingStatusSnapshotOmnichain,
+  type CrossChainIndexingStatusSnapshotOmnichain,
   IndexingStatusResponseCodes,
-  OmnichainIndexingStatusId,
+  type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
-  OmnichainIndexingStatusSnapshot,
-  OmnichainIndexingStatusSnapshotBackfill,
-  OmnichainIndexingStatusSnapshotCompleted,
-  OmnichainIndexingStatusSnapshotFollowing,
-  OmnichainIndexingStatusSnapshotUnstarted,
-  RealtimeIndexingStatusProjection,
+  type OmnichainIndexingStatusSnapshot,
+  type OmnichainIndexingStatusSnapshotBackfill,
+  type OmnichainIndexingStatusSnapshotCompleted,
+  type OmnichainIndexingStatusSnapshotFollowing,
+  type OmnichainIndexingStatusSnapshotUnstarted,
+  type RealtimeIndexingStatusProjection,
   sortChainStatusesByStartBlockAsc,
 } from "@ensnode/ensnode-sdk";
-import { PropsWithChildren, ReactElement } from "react";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ChainName } from "@/components/chains/ChainName";
@@ -27,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChainStatus, formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 import { cn } from "@/lib/utils";
+
 import { BackfillStatus } from "./backfill-status";
 import { BlockStats } from "./block-refs";
 import { IndexingStatusLoading } from "./indexing-status-loading";

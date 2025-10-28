@@ -1,4 +1,5 @@
-import z from "zod/v4";
+import type z from "zod/v4";
+
 import type { ENSIndexerPublicConfig, RealtimeIndexingStatusProjection } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
@@ -10,7 +11,7 @@ import type {
   ReverseResolutionResult,
 } from "../resolution";
 import type { ProtocolTrace } from "../tracing";
-import { ErrorResponseSchema } from "./zod-schemas";
+import type { ErrorResponseSchema } from "./zod-schemas";
 
 /**
  * API Error Response Type

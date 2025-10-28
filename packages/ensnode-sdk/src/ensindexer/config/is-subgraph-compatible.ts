@@ -1,4 +1,5 @@
 import { ENSNamespaceIds } from "@ensnode/datasources";
+
 import { type ENSIndexerPublicConfig, PluginName } from "./types";
 
 /**

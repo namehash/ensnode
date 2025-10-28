@@ -3,15 +3,17 @@
  * legacy ENS Subgraph indexing logic.
  */
 
+import * as ponder from "ponder";
+
+import { DatasourceNames } from "@ensnode/datasources";
+import { PluginName } from "@ensnode/ensnode-sdk";
+
 import {
   createPlugin,
   getDatasourceAsFullyDefinedAtCompileTime,
   namespaceContract,
 } from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
-import { DatasourceNames } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
-import * as ponder from "ponder";
 
 const pluginName = PluginName.Subgraph;
 

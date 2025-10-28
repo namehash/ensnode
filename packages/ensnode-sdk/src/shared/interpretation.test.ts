@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { InterpretedLabel, LiteralLabel, encodeLabelHash } from "../ens";
+import { encodeLabelHash, type InterpretedLabel, type LiteralLabel } from "../ens";
 import {
   interpretedLabelsToInterpretedName,
-  literalLabelToInterpretedLabel,
   literalLabelsToInterpretedName,
+  literalLabelToInterpretedLabel,
 } from "./interpretation";
 import { labelhashLiteralLabel } from "./labelhash";
 

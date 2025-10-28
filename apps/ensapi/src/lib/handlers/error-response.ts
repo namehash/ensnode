@@ -1,6 +1,7 @@
-import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 import type { Context } from "hono";
-import { ZodError, treeifyError } from "zod/v4";
+import { treeifyError, ZodError } from "zod/v4";
+
+import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 
 /**
  * Creates a standardized error response for the ENSApi.

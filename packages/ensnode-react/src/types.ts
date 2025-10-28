@@ -1,3 +1,5 @@
+import type { QueryObserverOptions } from "@tanstack/react-query";
+
 import type {
   ClientOptions,
   ResolvePrimaryNameRequest,
@@ -8,8 +10,6 @@ import type {
   ResolveRecordsResponse,
   ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
-
-import type { QueryObserverOptions } from "@tanstack/react-query";
 
 /**
  * Configuration options for the ENSNode provider

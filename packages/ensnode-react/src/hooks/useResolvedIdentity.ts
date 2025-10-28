@@ -1,16 +1,17 @@
 "use client";
 
 import {
-  ENSNamespaceId,
-  Identity,
-  NamedIdentity,
+  type ENSNamespaceId,
+  getResolvePrimaryNameChainIdParam,
+  type Identity,
+  type NamedIdentity,
   ResolutionStatusIds,
   ResolvedIdentity,
-  UnknownIdentity,
-  UnnamedIdentity,
-  UnresolvedIdentity,
-  getResolvePrimaryNameChainIdParam,
+  type UnknownIdentity,
+  type UnnamedIdentity,
+  type UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
+
 import { usePrimaryName } from "./usePrimaryName";
 
 // TODO: `namespaceId` ideally would not be a parameter for this hook.

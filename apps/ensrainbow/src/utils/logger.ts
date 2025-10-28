@@ -1,5 +1,6 @@
+import pino, { type LevelWithSilent } from "pino";
+
 import { getErrorMessage } from "@/utils/error-utils";
-import pino, { LevelWithSilent } from "pino";
 
 export type LogLevel = LevelWithSilent;
 

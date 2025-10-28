@@ -1,4 +1,5 @@
 import { prettifyError } from "zod/v4";
+
 import type {
   SerializedChainIndexingStatusSnapshot,
   SerializedCrossChainIndexingStatusSnapshot,

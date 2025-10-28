@@ -1,7 +1,8 @@
+import type { ChainId } from "@ensnode/ensnode-sdk";
+
 import type { ENSIndexerConfig } from "@/config/types";
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { ChainId } from "@ensnode/ensnode-sdk";
 
 /**
  * Derive `indexedChainIds` configuration parameter and include it in

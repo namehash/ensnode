@@ -1,6 +1,9 @@
-import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { LabelHash } from "@ensnode/ensnode-sdk";
+
 import { setupConfigMock } from "./utils/mockConfig";
+
 setupConfigMock(); // setup config mock before importing dependent modules
 
 // Mock fetch globally to prevent real network calls
