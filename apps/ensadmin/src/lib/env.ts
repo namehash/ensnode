@@ -125,9 +125,3 @@ export function getServerConnectionLibrary(): HttpHostname[] {
 
   return uniqueConnections;
 }
-
-export async function ensAdminVersion(): Promise<string> {
-  const packageJson = await import("@/../package.json");
-
-  return packageJson.version;
-}

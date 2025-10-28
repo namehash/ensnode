@@ -1,11 +1,12 @@
 "use client";
 
+import packageJson from "@/../package.json" with { type: "json" };
+
 import { PlugZap } from "lucide-react";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
 import { CopyButton } from "@/components/copy-button";
-import { ENSAdminVersion } from "@/components/ensadmin-version";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
@@ -26,7 +27,11 @@ export default function ConnectionInfo() {
         <ConfigInfoAppCard
           name="ENSAdmin"
           icon={<ENSAdminIcon width={28} height={28} />}
-          version={<ENSAdminVersion />}
+          version={
+            <p className="text-sm leading-normal font-normal text-muted-foreground">
+              v{packageJson.version}
+            </p>
+          }
           docsLink={new URL("https://ensnode.io/ensadmin/")}
         />
 

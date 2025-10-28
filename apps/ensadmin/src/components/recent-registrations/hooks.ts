@@ -6,7 +6,6 @@ import { deserializeUnixTimestamp, type Name, type UnixTimestamp } from "@ensnod
 
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
-import { ensAdminVersion } from "@/lib/env";
 import { getNameWrapperAddress } from "@/lib/namespace-utils";
 
 import type { Registration } from "./types";
@@ -126,10 +125,7 @@ async function fetchRecentRegistrations(
 
   const response = await fetch(new URL(`/subgraph`, ensNodeUrl), {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-ensadmin-version": await ensAdminVersion(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query }),
   });
 
