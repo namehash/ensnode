@@ -2,6 +2,15 @@ import { uniq } from "@ensnode/ensnode-sdk";
 
 import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
 
+const DEFAULT_ENSADMIN_PORT = 4173;
+const DEFAULT_SERVER_CONNECTION_LIBRARY = [
+  "https://api.alpha.ensnode.io",
+  "https://api.alpha-sepolia.ensnode.io",
+  "https://api.mainnet.ensnode.io",
+  "https://api.sepolia.ensnode.io",
+  "https://api.holesky.ensnode.io",
+].join(",");
+
 /**
  * Determines whether `variables` is a non-null object and a valid Record<string, unknown>.
  */
@@ -29,31 +38,7 @@ const getRuntimeEnvVariable = (key: string): string | undefined => {
   return value;
 };
 
-/**
- * Get ENSAdmin service public HttpHostname.
- *
- * Note: a Vercel fallback HttpHostname will be used if application runs on Vercel platform.
- * If the Vercel fallback HttpHostname cannot be applied, then default HttpHostname will be used.
- *
- * @returns application public HttpHostname for ENSAdmin
- * @throws when Vercel platform was detected but could not determine HttpHostname
- */
-export function ensAdminPublicUrl(): HttpHostname {
-  const envVarValue =
-    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || defaultEnsAdminPublicUrl();
-
-  const result = buildHttpHostname(envVarValue);
-  if (!result.isValid) {
-    throw new Error(
-      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
-    );
-  }
-  return result.url;
-}
-
-const DEFAULT_ENSADMIN_PORT = 4173;
-
-function defaultEnsAdminPublicUrl(): string {
+function localhostEnsAdminPublicUrl(): string {
   const port = process.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
   return `http://localhost:${port}`;
 }
@@ -83,8 +68,27 @@ function getVercelAppPublicUrl(): string | undefined {
   }
 }
 
-const DEFAULT_SERVER_CONNECTION_LIBRARY =
-  "https://api.alpha.ensnode.io,https://api.alpha-sepolia.ensnode.io,https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io,https://api.holesky.ensnode.io";
+/**
+ * Get ENSAdmin service public HttpHostname.
+ *
+ * Note: a Vercel fallback HttpHostname will be used if application runs on Vercel platform.
+ * If the Vercel fallback HttpHostname cannot be applied, then default HttpHostname will be used.
+ *
+ * @returns application public HttpHostname for ENSAdmin
+ * @throws when Vercel platform was detected but could not determine HttpHostname
+ */
+export function ensAdminPublicUrl(): HttpHostname {
+  const envVarValue =
+    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
+
+  const result = buildHttpHostname(envVarValue);
+  if (!result.isValid) {
+    throw new Error(
+      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
+    );
+  }
+  return result.url;
+}
 
 /**
  * Gets the server's ENSNode connection library.
