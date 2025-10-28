@@ -4,23 +4,18 @@ import { EnsAvatar } from "@/components/ens-avatar";
 import { ExternalLinkWithIcon } from "@/components/external-link-with-icon";
 import { NameDisplay } from "@/components/identity/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import type { ENSAdminProfile } from "@/hooks/use-ensadmin-profile";
 import { beautifyUrl } from "@/lib/beautify-url";
-import { Name } from "@ensnode/ensnode-sdk";
 
 interface ProfileHeaderProps {
-  name: Name;
-  headerImage?: string | null;
-  websiteUrl?: string | null;
+  profile: ENSAdminProfile;
 }
 
-export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderProps) {
-  const namespace = useActiveNamespace();
-
+export function ProfileHeader({ profile }: ProfileHeaderProps) {
   // Parse header image URI and only use it if it's HTTP/HTTPS
   // TODO: Add support for more URI types as defined in ENSIP-12
   // See: https://docs.ens.domains/ensip/12#uri-types
-  const getValidHeaderImageUrl = (headerImage: string | null | undefined): string | null => {
+  const getValidHeaderImageUrl = (headerImage: string | null): string | null => {
     if (!headerImage) return null;
 
     let url: URL;
@@ -36,7 +31,7 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
     return null;
   };
 
-  const normalizeWebsiteUrl = (url: string | null | undefined): URL | null => {
+  const normalizeWebsiteUrl = (url: string | null): URL | null => {
     if (!url) return null;
 
     try {
@@ -50,8 +45,8 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
     }
   };
 
-  const validHeaderImageUrl = getValidHeaderImageUrl(headerImage);
-  const normalizedWebsiteUrl = normalizeWebsiteUrl(websiteUrl);
+  const validHeaderImageUrl = getValidHeaderImageUrl(profile.header.headerImageUrl);
+  const normalizedWebsiteUrl = normalizeWebsiteUrl(profile.header.websiteUrl);
 
   return (
     <Card className="overflow-hidden mb-8">
@@ -68,10 +63,10 @@ export function ProfileHeader({ name, headerImage, websiteUrl }: ProfileHeaderPr
       <CardContent className="pt-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <EnsAvatar className="-mt-16 h-20 w-20 ring-4 ring-white" name={name} />
+            <EnsAvatar className="-mt-16 h-20 w-20 ring-4 ring-white" name={profile.name} />
             <div className="flex-1">
               <h1>
-                <NameDisplay className="text-3xl font-bold" name={name} />
+                <NameDisplay className="text-3xl font-bold" name={profile.name} />
               </h1>
               <div className="flex items-center gap-3 mt-1">
                 {normalizedWebsiteUrl && (
