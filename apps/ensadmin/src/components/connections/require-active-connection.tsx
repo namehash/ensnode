@@ -16,7 +16,11 @@ export function RequireActiveConnection({ children }: PropsWithChildren) {
   if (status === "pending") return <Loading />;
 
   if (status === "error") {
-    return <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />;
+    return (
+      <section className="p-6">
+        <ErrorInfo title="Unable to parse ENSNode Config" description={error.message} />
+      </section>
+    );
   }
 
   return children;

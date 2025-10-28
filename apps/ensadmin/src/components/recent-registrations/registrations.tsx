@@ -9,11 +9,7 @@ export function Registrations() {
   const { status, data: indexingStatus, error } = useIndexingStatus();
 
   if (status === "pending") {
-    return (
-      <section className="flex flex-col gap-6 p-6">
-        <RecentRegistrations realtimeProjection={undefined} />
-      </section>
-    );
+    return <RecentRegistrations realtimeProjection={undefined} />;
   }
 
   if (status === "error") {
@@ -26,14 +22,12 @@ export function Registrations() {
   // it can still refer to a server-side error
   if (indexingStatus.responseCode === IndexingStatusResponseCodes.Error) {
     return (
-      <section className="flex flex-col gap-6 p-6">
-        <RecentRegistrations
-          error={{
-            title: "IndexingStatus error",
-            description: "Indexing Status is currently unavailable.",
-          }}
-        />
-      </section>
+      <RecentRegistrations
+        error={{
+          title: "IndexingStatus error",
+          description: "Indexing Status is currently unavailable.",
+        }}
+      />
     );
   }
 
