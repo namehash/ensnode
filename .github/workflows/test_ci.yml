@@ -110,14 +110,9 @@ jobs:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres
           DATABASE_SCHEMA: public
           PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope
-          RPC_URL_1: ${{ secrets.MAINNET_RPC_URL || 'https://eth.drpc.org' }}
-          RPC_URL_10: ${{ secrets.OPTIMISM_RPC_URL || 'https://optimism.drpc.org' }}
-          RPC_URL_8453: ${{ secrets.BASE_RPC_URL || 'https://base.drpc.org' }}
-          RPC_URL_59144: ${{ secrets.LINEA_RPC_URL || 'https://linea.drpc.org' }}
-          RPC_URL_42161: ${{ secrets.ARBITRUM_RPC_URL || 'https://arbitrum.drpc.org' }}
-          RPC_URL_534352: ${{ secrets.SCROLL_RPC_URL || 'https://scroll.drpc.org' }}
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSINDEXER_URL: http://localhost:42069
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           # healthcheck script env variables
           HEALTH_CHECK_TIMEOUT: 60
         run: ./.github/scripts/run_ensindexer_healthcheck.sh
