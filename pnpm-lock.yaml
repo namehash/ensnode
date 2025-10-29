@@ -67,6 +67,8 @@ overrides:
   '@tailwindcss/vite>vite': 7.1.11
   pino: 10.1.0
   axios@<1.12.0: '>=1.12.0'
+  ensadmin>@types/react: 19.2.2
+  ensadmin>@types/react-dom: 19.2.2
 
 patchedDependencies:
   '@opentelemetry/api':
@@ -238,10 +240,10 @@ importers:
         specifier: ^22
         version: 22.18.13
       '@types/react':
-        specifier: ^19
+        specifier: 19.2.2
         version: 19.2.2
       '@types/react-dom':
-        specifier: ^19
+        specifier: 19.2.2
         version: 19.2.2(@types/react@19.2.2)
       postcss:
         specifier: ^8

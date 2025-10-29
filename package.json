@@ -39,7 +39,9 @@
       "ponder>vite": "6.4.1",
       "@tailwindcss/vite>vite": "7.1.11",
       "pino": "10.1.0",
-      "axios@<1.12.0": ">=1.12.0"
+      "axios@<1.12.0": ">=1.12.0",
+      "ensadmin>@types/react": "19.2.2",
+      "ensadmin>@types/react-dom": "19.2.2"
     },
     "ignoredBuiltDependencies": [
       "bun"
