@@ -8,6 +8,6 @@
       "@workspace/*": ["../../*"]
     },
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "types": ["react", "react-dom"]
   }
 }

@@ -1,7 +1,8 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["react"]
   },
   "include": ["./**/*.ts", "./**/*.tsx"],
   "exclude": ["dist", "**/__tests__/**", "**/examples/**"]
