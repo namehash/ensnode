@@ -1,9 +1,8 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import React from "react";
 
 import type { UrlString } from "@ensnode/ensnode-sdk";
 
@@ -25,7 +24,7 @@ export function NavMain({
   items: {
     title: string;
     url: string;
-    icon?: React.ComponentType;
+    icon?: LucideIcon;
     isActive?: boolean;
     items?: {
       title: string;
