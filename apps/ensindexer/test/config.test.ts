@@ -628,17 +628,15 @@ describe("config (minimal base env)", () => {
         const config = await getConfig();
         const rpcConfigs = [...config.rpcConfigs.values()];
 
-        // should provide some rpcConfigs
         expect(rpcConfigs.length, "should have some configs").toBeGreaterThan(0);
         expect(
           rpcConfigs.every((rpcConfig) => rpcConfig.httpRPCs.length >= 1),
           "must have http rpc url",
         ).toBe(true);
 
-        // TODO: update this when auto-generated ws:// urls are added, this test will have failed
         expect(
-          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
-          "must not have ws rpc url",
+          rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC !== undefined),
+          "must have ws rpc url",
         ).toBe(true);
       });
     });
