@@ -69,8 +69,8 @@ overrides:
   ponder>vite: 6.4.1
   '@tailwindcss/vite>vite': 7.1.11
   axios@<1.12.0: '>=1.12.0'
-  ensadmin>react: 19.2.0
-  ensadmin>@types/react: 19.2.2
+  lucide-react>react: 19.2.0
+  lucide-react>@types/react: 19.2.2
 
 patchedDependencies:
   '@opentelemetry/api':
@@ -214,7 +214,7 @@ importers:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
-        specifier: 19.2.0
+        specifier: ^19
         version: 19.2.0
       react-dom:
         specifier: ^19
@@ -242,7 +242,7 @@ importers:
         specifier: ^22
         version: 22.18.13
       '@types/react':
-        specifier: 19.2.2
+        specifier: ^19
         version: 19.2.2
       '@types/react-dom':
         specifier: ^19
@@ -5451,7 +5451,7 @@ packages:
   lucide-react@0.548.0:
     resolution: {integrity: sha512-63b16z63jM9yc1MwxajHeuu0FRZFsDtljtDjYm26Kd86UQ5HQzu9ksEtoUUw4RBuewodw/tGFmvipePvRsKeDA==}
     peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: 19.2.0
 
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}

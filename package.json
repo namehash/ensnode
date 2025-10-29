@@ -39,8 +39,8 @@
       "ponder>vite": "6.4.1",
       "@tailwindcss/vite>vite": "7.1.11",
       "axios@<1.12.0": ">=1.12.0",
-      "ensadmin>react": "19.2.0",
-      "ensadmin>@types/react": "19.2.2"
+      "lucide-react>react": "19.2.0",
+      "lucide-react>@types/react": "19.2.2"
     },
     "ignoredBuiltDependencies": [
       "bun"
