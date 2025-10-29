@@ -27,8 +27,6 @@
     "@namehash/namekit-react": "catalog:",
     "@octokit/rest": "^20.1.2",
     "@tailwindcss/vite": "^4.1.15",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
     "astro": "catalog:",
     "astro-font": "catalog:",
     "astro-icon": "^1.1.5",
@@ -37,12 +35,16 @@
     "classcat": "5.0.5",
     "fuse.js": "^7.1.0",
     "mermaid": "^11.10.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-wrap-balancer": "^1.1.1",
     "sharp": "^0.33.5",
     "starlight-llms-txt": "^0.5.0",
     "starlight-sidebar-topics": "^0.4.1",
     "tailwindcss": "4.1.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
   }
 }
