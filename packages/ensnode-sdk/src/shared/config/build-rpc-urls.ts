@@ -17,16 +17,16 @@ import {
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
 /**
- * Builds an Alchemy RPC URL for the specified chain ID.
+ * Builds a Alchemy RPC base URL for the specified chain ID.
  *
- * @param chainId - The chain ID to build the RPC URL for
+ * @param chainId - The chain ID to build the RPC base URL for
  * @param key - The Alchemy API key
- * @returns The complete Alchemy RPC URL, or undefined if the chain is not supported
+ * @returns The Alchemy RPC base URL, or undefined if the chain is not supported
  *
  * @example
  * ```typescript
  * const url = buildAlchemyUrl(1, "your-api-key");
- * // Returns: "https://eth-mainnet.g.alchemy.com/v2/your-api-key"
+ * // Returns: "eth-mainnet.g.alchemy.com/v2/your-api-key"
  * ```
  */
 export function buildAlchemyBaseUrl(chainId: ChainId, key: string): string | undefined {

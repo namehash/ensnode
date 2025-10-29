@@ -75,57 +75,6 @@ variable "subgraph_compat" {
   type = bool
 }
 
-# Mainnet RPC URLs
-variable "ethereum_mainnet_rpc_url" {
-  type = string
-}
-
-variable "base_mainnet_rpc_url" {
-  type = string
-}
-
-variable "linea_mainnet_rpc_url" {
-  type = string
-}
-
-variable "optimism_mainnet_rpc_url" {
-  type = string
-}
-
-variable "arbitrum_mainnet_rpc_url" {
-  type = string
-}
-
-variable "scroll_mainnet_rpc_url" {
-  type = string
-}
-
-# Sepolia RPC URLs
-variable "ethereum_sepolia_rpc_url" {
-  type = string
-}
-
-variable "base_sepolia_rpc_url" {
-  type = string
-}
-
-variable "linea_sepolia_rpc_url" {
-  type = string
-}
-
-variable "optimism_sepolia_rpc_url" {
-  type = string
-}
-
-variable "arbitrum_sepolia_rpc_url" {
-  type = string
-}
-
-variable "scroll_sepolia_rpc_url" {
-  type = string
-}
-
-# Holesky RPC URLs
-variable "ethereum_holesky_rpc_url" {
+variable "alchemy_api_key" {
   type = string
 }

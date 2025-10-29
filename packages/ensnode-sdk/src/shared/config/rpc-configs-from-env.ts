@@ -46,7 +46,7 @@ export function buildRpcConfigsFromEnv(
       drpcKey && buildDRPCUrl(chain.id, drpcKey),
     ];
 
-    const wsUrl = alchemyApiKey && `ws://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`;
+    const wsUrl = alchemyApiKey && `wss://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`;
 
     const urls = [...httpUrls, wsUrl]
       // filter out false/undefined values from the set of urls

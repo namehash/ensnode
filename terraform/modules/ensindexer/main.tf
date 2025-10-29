@@ -1,33 +1,8 @@
 locals {
   common_variables = {
     # Common configuration
-    "DATABASE_URL"      = { value = var.ensdb_url },
-    "DATABASE_SCHEMA"   = { value = var.database_schema },
-    "ENSRAINBOW_URL"    = { value = var.ensrainbow_url },
-    "LABEL_SET_ID"      = { value = var.ensindexer_label_set_id },
-    "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
-    "PLUGINS"           = { value = var.plugins },
-    "NAMESPACE"         = { value = var.namespace },
-    "SUBGRAPH_COMPAT"   = { value = var.subgraph_compat }
-
-    # Mainnet networks
-    "RPC_URL_1"      = { value = var.ethereum_mainnet_rpc_url },
-    "RPC_URL_8453"   = { value = var.base_mainnet_rpc_url },
-    "RPC_URL_59144"  = { value = var.linea_mainnet_rpc_url },
-    "RPC_URL_10"     = { value = var.optimism_mainnet_rpc_url },
-    "RPC_URL_42161"  = { value = var.arbitrum_mainnet_rpc_url },
-    "RPC_URL_534352" = { value = var.scroll_mainnet_rpc_url },
-
-    # Sepolia networks
-    "RPC_URL_11155111" = { value = var.ethereum_sepolia_rpc_url },
-    "RPC_URL_84532"    = { value = var.base_sepolia_rpc_url },
-    "RPC_URL_59141"    = { value = var.linea_sepolia_rpc_url },
-    "RPC_URL_11155420" = { value = var.optimism_sepolia_rpc_url },
-    "RPC_URL_421614"   = { value = var.arbitrum_sepolia_rpc_url },
-    "RPC_URL_534351"   = { value = var.scroll_sepolia_rpc_url },
-
-    # Holesky networks
-    "RPC_URL_17000" = { value = var.ethereum_holesky_rpc_url },
+    "DATABASE_URL"    = { value = var.ensdb_url },
+    "ALCHEMY_API_KEY" = { value = var.alchemy_api_key }
   }
 }
 
@@ -46,14 +21,16 @@ resource "render_web_service" "ensindexer" {
     }
   }
 
-  env_vars = merge(
-    local.common_variables,
-    {
-      ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
-      }
-    }
-  )
+  env_vars = merge(locals.common_variables, {
+    "DATABASE_SCHEMA"   = { value = var.database_schema },
+    "ENSRAINBOW_URL"    = { value = var.ensrainbow_url },
+    "LABEL_SET_ID"      = { value = var.ensindexer_label_set_id },
+    "LABEL_SET_VERSION" = { value = var.ensindexer_label_set_version },
+    "PLUGINS"           = { value = var.plugins },
+    "NAMESPACE"         = { value = var.namespace },
+    "SUBGRAPH_COMPAT"   = { value = var.subgraph_compat }
+    "ENSINDEXER_URL"    = { value = "http://ensindexer-${var.ensnode_indexer_type}:10000" }
+  })
 
   # See https://render.com/docs/custom-domains
   custom_domains = [
@@ -77,14 +54,9 @@ resource "render_web_service" "ensapi" {
     }
   }
 
-  env_vars = merge(
-    local.common_variables,
-    {
-      ENSINDEXER_URL = {
-        value = "http://ensindexer-${var.ensnode_indexer_type}:10000"
-      },
-    }
-  )
+  env_vars = merge(locals.common_variables, {
+    "ENSINDEXER_URL" = { value = "http://ensindexer-${var.ensnode_indexer_type}:10000" }
+  })
 
   # See https://render.com/docs/custom-domains
   custom_domains = [
