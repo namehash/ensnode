@@ -17,46 +17,46 @@ import {
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
 /**
- * Builds an Alchemy RPC URL for the specified chain ID.
+ * Builds a Alchemy RPC base URL for the specified chain ID.
  *
- * @param chainId - The chain ID to build the RPC URL for
+ * @param chainId - The chain ID to build the RPC base URL for
  * @param key - The Alchemy API key
- * @returns The complete Alchemy RPC URL, or undefined if the chain is not supported
+ * @returns The Alchemy RPC base URL, or undefined if the chain is not supported
  *
  * @example
  * ```typescript
  * const url = buildAlchemyUrl(1, "your-api-key");
- * // Returns: "https://eth-mainnet.g.alchemy.com/v2/your-api-key"
+ * // Returns: "eth-mainnet.g.alchemy.com/v2/your-api-key"
  * ```
  */
-export function buildAlchemyUrl(chainId: ChainId, key: string): string | undefined {
+export function buildAlchemyBaseUrl(chainId: ChainId, key: string): string | undefined {
   switch (chainId) {
     case mainnet.id:
-      return `https://eth-mainnet.g.alchemy.com/v2/${key}`;
+      return `eth-mainnet.g.alchemy.com/v2/${key}`;
     case sepolia.id:
-      return `https://eth-sepolia.g.alchemy.com/v2/${key}`;
+      return `eth-sepolia.g.alchemy.com/v2/${key}`;
     case holesky.id:
-      return `https://eth-holesky.g.alchemy.com/v2/${key}`;
+      return `eth-holesky.g.alchemy.com/v2/${key}`;
     case arbitrum.id:
-      return `https://arb-mainnet.g.alchemy.com/v2/${key}`;
+      return `arb-mainnet.g.alchemy.com/v2/${key}`;
     case arbitrumSepolia.id:
-      return `https://arb-sepolia.g.alchemy.com/v2/${key}`;
+      return `arb-sepolia.g.alchemy.com/v2/${key}`;
     case base.id:
-      return `https://base-mainnet.g.alchemy.com/v2/${key}`;
+      return `base-mainnet.g.alchemy.com/v2/${key}`;
     case baseSepolia.id:
-      return `https://base-sepolia.g.alchemy.com/v2/${key}`;
+      return `base-sepolia.g.alchemy.com/v2/${key}`;
     case optimism.id:
-      return `https://opt-mainnet.g.alchemy.com/v2/${key}`;
+      return `opt-mainnet.g.alchemy.com/v2/${key}`;
     case optimismSepolia.id:
-      return `https://opt-sepolia.g.alchemy.com/v2/${key}`;
+      return `opt-sepolia.g.alchemy.com/v2/${key}`;
     case linea.id:
-      return `https://linea-mainnet.g.alchemy.com/v2/${key}`;
+      return `linea-mainnet.g.alchemy.com/v2/${key}`;
     case lineaSepolia.id:
-      return `https://linea-sepolia.g.alchemy.com/v2/${key}`;
+      return `linea-sepolia.g.alchemy.com/v2/${key}`;
     case scroll.id:
-      return `https://scroll-mainnet.g.alchemy.com/v2/${key}`;
+      return `scroll-mainnet.g.alchemy.com/v2/${key}`;
     case scrollSepolia.id:
-      return `https://scroll-sepolia.g.alchemy.com/v2/${key}`;
+      return `scroll-sepolia.g.alchemy.com/v2/${key}`;
     default:
       return undefined;
   }
