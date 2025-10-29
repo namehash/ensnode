@@ -8,7 +8,4 @@ export default defineProject({
       "@": resolve(__dirname, "./src"),
     },
   },
-  test: {
-    environment: "node",
-  },
 });
