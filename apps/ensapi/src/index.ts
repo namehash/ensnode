@@ -8,6 +8,7 @@ import { cors } from "hono/cors";
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
 import { redactEnsApiConfig } from "@/config/redact";
+import { cacheService } from "@/lib/ensanalytics/cache";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
@@ -15,6 +16,7 @@ import { sdk } from "@/lib/tracing/instrumentation";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
+import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
@@ -45,6 +47,9 @@ app.route("/api", ensNodeApi);
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
+// use ENSAnalytics API at /ensanalytics
+app.route("/ensanalytics", ensanalyticsApi);
+
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
   return c.json({ ok: true });
@@ -58,6 +63,12 @@ app.onError((error, ctx) => {
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
+
+// initialize ENSAnalytics cache service
+cacheService.initialize().catch((error) => {
+  logger.error({ error }, "Failed to initialize ENSAnalytics cache service");
+  // Don't exit - let the service run without analytics
+});
 
 // start hono server
 const server = serve(
@@ -87,6 +98,7 @@ const closeServer = () =>
 // perform graceful shutdown
 const gracefulShutdown = async () => {
   try {
+    await cacheService.shutdown();
     await sdk.shutdown();
     await closeServer();
 
