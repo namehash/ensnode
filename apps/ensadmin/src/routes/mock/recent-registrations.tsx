@@ -1,5 +1,4 @@
-"use client";
-
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
 import {
@@ -15,8 +14,11 @@ import {
 } from "@/components/recent-registrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { indexingStatusResponseOkOmnichain } from "@/lib/mock/indexing-status-api.mock";
 
-import { indexingStatusResponseOkOmnichain } from "../indexing-status-api.mock";
+export const Route = createFileRoute("/mock/recent-registrations")({
+  component: MockRegistrationsPage,
+});
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ResponseVariant = "Response Error";
@@ -24,7 +26,7 @@ type RegistrationsVariant = OmnichainIndexingStatusId | LoadingVariant | Respons
 
 const DEFAULT_VARIANT = OmnichainIndexingStatusIds.Following;
 
-export default function MockRegistrationsPage() {
+function MockRegistrationsPage() {
   // TODO: Add a serialization error variant,
   //  once a custom API for querying registration data is implemented.
   const [selectedVariant, setSelectedVariant] = useState<RegistrationsVariant>(DEFAULT_VARIANT);

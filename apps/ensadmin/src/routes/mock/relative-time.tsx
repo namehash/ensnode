@@ -1,16 +1,19 @@
-"use client";
-
+import { createFileRoute } from "@tanstack/react-router";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-import mockDataJson from "@/app/mock/relative-time/data.json";
 import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import mockDataJson from "@/lib/mock/relative-time/data.json";
+
+export const Route = createFileRoute("/mock/relative-time")({
+  component: MockRelativeTimePage,
+});
 
 const mockRelativeTimestampData = mockDataJson as Record<
   string,
@@ -39,7 +42,7 @@ const relativeTimePropsDescriptions = new Map<boolean, Map<string, string>>([
   ],
 ]);
 
-export default function MockRelativeTimePage() {
+function MockRelativeTimePage() {
   const [selectedTime, setSelectedTime] = useState<TimeVariant>(DEFAULT_VARIANT);
   const variantProps: {
     timestamp: UnixTimestamp;

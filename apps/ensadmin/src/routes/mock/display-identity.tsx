@@ -1,5 +1,4 @@
-"use client";
-
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { type Address, isAddress } from "viem";
 
@@ -35,6 +34,10 @@ import {
 } from "@/components/ui/select";
 import { getChainName } from "@/lib/namespace-utils";
 
+export const Route = createFileRoute("/mock/display-identity")({
+  component: MockDisplayIdentityPage,
+});
+
 const DEFAULT_NAMESPACE_ID: ENSNamespaceId = ENSNamespaceIds.Mainnet;
 const DEFAULT_RESOLUTION_STATUS: ResolutionStatusId = ResolutionStatusIds.Named;
 const DEFAULT_ADDRESS: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
@@ -52,7 +55,7 @@ const getMockChainIds = (namespaceId: ENSNamespaceId): DefaultableChainId[] => {
 };
 
 // TODO: Add query params for all the inputs to enable deep linking.
-export default function MockDisplayIdentityPage() {
+function MockDisplayIdentityPage() {
   const [selectedNamespaceId, setSelectedNamespaceId] =
     useState<ENSNamespaceId>(DEFAULT_NAMESPACE_ID);
   const [selectedChainId, setSelectedChainId] = useState<DefaultableChainId>(

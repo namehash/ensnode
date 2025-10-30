@@ -1,28 +1,32 @@
-"use client";
-
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
-import {
-  deserializeENSIndexerPublicConfig,
-  SerializedENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import { deserializeENSIndexerPublicConfig, type ENSApiPublicConfig } from "@ensnode/ensnode-sdk";
 
-import {
-  ENSNodeConfigInfoView,
-  ENSNodeConfigInfoViewProps,
-} from "@/components/connection/config-info/config-info";
+import { ENSNodeConfigInfoView } from "@/components/connection/config-info/config-info";
+import type { ErrorInfoProps } from "@/components/error-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import mockDataJson from "./data.json";
+type ENSNodeConfigInfoViewProps =
+  | { ensApiPublicConfig: ENSApiPublicConfig; error?: never; isLoading?: never }
+  | { ensApiPublicConfig?: never; error: ErrorInfoProps; isLoading?: never }
+  | { ensApiPublicConfig?: never; error?: never; isLoading: true };
 
-const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
+import mockDataJson from "@/lib/mock/config-info/data.json";
+
+export const Route = createFileRoute("/mock/config-info")({
+  component: MockConfigPage,
+});
+
+const mockConfigData = mockDataJson as Record<string, any>;
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 
 const DEFAULT_VARIANT = "Alpha Mainnet";
-export default function MockConfigPage() {
+
+function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>(DEFAULT_VARIANT);
   const props: ENSNodeConfigInfoViewProps = useMemo(() => {
     switch (selectedConfig) {
@@ -39,8 +43,10 @@ export default function MockConfigPage() {
 
       default:
         try {
-          const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { ensIndexerConfig: config };
+          const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig(
+            mockConfigData[selectedConfig],
+          );
+          return { ensApiPublicConfig: { ensIndexerPublicConfig } };
         } catch (error) {
           const errorMessage =
             error instanceof Error

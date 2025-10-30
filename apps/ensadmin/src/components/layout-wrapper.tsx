@@ -6,18 +6,12 @@ import { RequireActiveConnection } from "@/components/connections/require-active
 import { RequireSelectedConnection } from "@/components/connections/require-selected-connection";
 import { Header, HeaderActions, HeaderBreadcrumbs, HeaderNav } from "@/components/header";
 import { SelectedENSNodeProvider } from "@/components/providers/selected-ensnode-provider";
+import { RouteActions } from "@/components/route-actions";
+import { RouteBreadcrumbs } from "@/components/route-breadcrumbs";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function LayoutWrapper({
-  children,
-  breadcrumbs,
-  actions,
-}: {
-  children: React.ReactNode;
-  breadcrumbs: React.ReactNode;
-  actions: React.ReactNode;
-}) {
+export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = useLocation({
     select: (location) => location.pathname,
   });
@@ -57,9 +51,13 @@ export function LayoutWrapper({
             <SelectedENSNodeProvider>
               <Header>
                 <HeaderNav>
-                  <HeaderBreadcrumbs>{breadcrumbs}</HeaderBreadcrumbs>
+                  <HeaderBreadcrumbs>
+                    <RouteBreadcrumbs />
+                  </HeaderBreadcrumbs>
                 </HeaderNav>
-                <HeaderActions>{actions}</HeaderActions>
+                <HeaderActions>
+                  <RouteActions />
+                </HeaderActions>
               </Header>
               <RequireActiveConnection>{children}</RequireActiveConnection>
             </SelectedENSNodeProvider>

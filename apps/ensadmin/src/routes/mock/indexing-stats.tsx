@@ -1,6 +1,5 @@
-"use client";
-
 import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
@@ -8,11 +7,14 @@ import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnod
 import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
   indexingStatusResponseError,
   indexingStatusResponseOkOmnichain,
-} from "../indexing-status-api.mock";
+} from "@/lib/mock/indexing-status-api.mock";
+
+export const Route = createFileRoute("/mock/indexing-stats")({
+  component: MockIndexingStatusPage,
+});
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ResponseOkVariant = keyof typeof indexingStatusResponseOkOmnichain;
@@ -57,7 +59,7 @@ async function fetchMockedIndexingStatus(
   }
 }
 
-export default function MockIndexingStatusPage() {
+function MockIndexingStatusPage() {
   const [selectedVariant, setSelectedVariant] = useState<Variant>(
     OmnichainIndexingStatusIds.Unstarted,
   );

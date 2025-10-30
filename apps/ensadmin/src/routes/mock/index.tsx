@@ -1,12 +1,14 @@
-"use client";
-
-import Link from "next/link";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
-export default function MockList() {
+export const Route = createFileRoute("/mock/")({
+  component: MockList,
+});
+
+function MockList() {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   return (
@@ -19,27 +21,27 @@ export default function MockList() {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
-              <Link href={retainCurrentRawConnectionUrlParam("/mock/config-info")}>
+              <Link to={retainCurrentRawConnectionUrlParam("/mock/config-info")}>
                 ENSNodeConfigInfo
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href={retainCurrentRawConnectionUrlParam("/mock/indexing-stats")}>
+              <Link to={retainCurrentRawConnectionUrlParam("/mock/indexing-stats")}>
                 IndexingStats
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href={retainCurrentRawConnectionUrlParam("/mock/recent-registrations")}>
+              <Link to={retainCurrentRawConnectionUrlParam("/mock/recent-registrations")}>
                 RecentRegistrations
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href={retainCurrentRawConnectionUrlParam("/mock/relative-time")}>
+              <Link to={retainCurrentRawConnectionUrlParam("/mock/relative-time")}>
                 RelativeTime
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href={retainCurrentRawConnectionUrlParam("/mock/display-identity")}>
+              <Link to={retainCurrentRawConnectionUrlParam("/mock/display-identity")}>
                 DisplayIdentity
               </Link>
             </Button>

@@ -18,7 +18,7 @@ function RootLayout() {
       <QueryClientProvider>
         <Suspense>
           <ConnectionsLibraryProvider>
-            <LayoutWrapper breadcrumbs={null} actions={null}>
+            <LayoutWrapper>
               <Outlet />
             </LayoutWrapper>
           </ConnectionsLibraryProvider>
