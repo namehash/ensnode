@@ -1,8 +1,12 @@
-import Link from "next/link";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 
-export default function SplashPage() {
+export const Route = createFileRoute("/")({
+  component: SplashPage,
+});
+
+function SplashPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-3">
       <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl border border-gray-300 shadow-sm max-w-lg">
@@ -21,7 +25,7 @@ export default function SplashPage() {
           </p>
 
           <Button asChild size="lg">
-            <Link href="/connection">View My Connection</Link>
+            <Link to="/connection">View My Connection</Link>
           </Button>
         </div>
       </div>

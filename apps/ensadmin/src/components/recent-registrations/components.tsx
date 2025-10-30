@@ -1,7 +1,5 @@
-"use client";
-
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 
 import {
@@ -218,7 +216,7 @@ function UnsupportedOmnichainIndexingStatusMessage({
           .
         </div>
         <Button asChild variant="default">
-          <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
+          <Link to={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
         </Button>
       </CardContent>
     </Card>

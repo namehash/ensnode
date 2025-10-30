@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
-import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
 interface LinkProps {
@@ -12,7 +12,7 @@ interface LinkProps {
  */
 export function InternalLink({ href, className, children }: PropsWithChildren<LinkProps>) {
   return (
-    <Link href={href} className={` text-blue-600 hover:underline ${className || ""}`}>
+    <Link to={href} className={` text-blue-600 hover:underline ${className || ""}`}>
       {children}
     </Link>
   );

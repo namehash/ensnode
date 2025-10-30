@@ -1,6 +1,4 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 
@@ -14,6 +12,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { DefaultRecordsSelection } from "@/lib/default-records-selection";
+
+type RecordsSearchParams = {
+  name?: string;
+};
+
+export const Route = createFileRoute("/inspect/records")({
+  component: ResolveRecordsInspector,
+  validateSearch: (search: Record<string, unknown>): RecordsSearchParams => {
+    return {
+      name: (search.name as string) || undefined,
+    };
+  },
+});
 
 const EXAMPLE_INPUT = [
   "vitalik.eth",
@@ -29,14 +40,11 @@ const EXAMPLE_INPUT = [
   "🔥🔥🔥🔥🔥.eth",
 ];
 
-// TODO: showcase current ENSNode configuration and viable acceleration pathways?
-// TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
-// TODO: sync form state to query params, currently just defaulting is supported
-export default function ResolveRecordsInspector() {
+function ResolveRecordsInspector() {
   const namespace = useActiveNamespace();
-  const searchParams = useSearchParams();
+  const searchParams = Route.useSearch();
 
-  const [name, setName] = useState(searchParams.get("name") || EXAMPLE_INPUT[0]);
+  const [name, setName] = useState(searchParams.name || EXAMPLE_INPUT[0]);
   const [debouncedName] = useDebouncedValue(name, 150);
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
@@ -107,7 +115,6 @@ export default function ResolveRecordsInspector() {
           </div>
           <div className="flex flex-col gap-2 justify-center">
             <span className="text-sm font-medium leading-none">Examples:</span>
-            {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {EXAMPLE_INPUT.map((name) => (
                 <Pill key={name} onClick={() => setName(name)} className="font-mono">

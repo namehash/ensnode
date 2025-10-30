@@ -39,7 +39,7 @@ const getRuntimeEnvVariable = (key: string): string | undefined => {
 };
 
 function localhostEnsAdminPublicUrl(): string {
-  const port = process.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
+  const port = import.meta.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
   return `http://localhost:${port}`;
 }
 
@@ -47,7 +47,7 @@ function localhostEnsAdminPublicUrl(): string {
  * Tells if the application runs on Vercel.
  */
 function isAppOnVercelPlatform(): boolean {
-  return process.env.VERCEL === "1";
+  return import.meta.env.VERCEL === "1";
 }
 
 /**
@@ -59,12 +59,12 @@ function isAppOnVercelPlatform(): boolean {
 function getVercelAppPublicUrl(): string | undefined {
   if (!isAppOnVercelPlatform()) return undefined;
 
-  switch (process.env.VERCEL_ENV) {
+  switch (import.meta.env.VERCEL_ENV) {
     case "production":
-      return process.env.VERCEL_PROJECT_PRODUCTION_URL;
+      return import.meta.env.VERCEL_PROJECT_PRODUCTION_URL;
     case "development":
     case "preview":
-      return process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
+      return import.meta.env.VERCEL_BRANCH_URL || import.meta.env.VERCEL_URL;
   }
 }
 
@@ -79,7 +79,7 @@ function getVercelAppPublicUrl(): string | undefined {
  */
 export function ensAdminPublicUrl(): HttpHostname {
   const envVarValue =
-    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
+    import.meta.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
 
   const result = buildHttpHostname(envVarValue);
   if (!result.isValid) {
@@ -97,10 +97,10 @@ export function ensAdminPublicUrl(): HttpHostname {
  * @throws when no `HttpHostname` could be returned.
  */
 export function getServerConnectionLibrary(): HttpHostname[] {
-  const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
+  const envVarName = "VITE_SERVER_CONNECTION_LIBRARY";
   const envVarValue =
-    getRuntimeEnvVariable("NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY") ||
-    process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY || // NOTE: must specify full key for nextjs to replace
+    getRuntimeEnvVariable("VITE_SERVER_CONNECTION_LIBRARY") ||
+    import.meta.env.VITE_SERVER_CONNECTION_LIBRARY ||
     DEFAULT_SERVER_CONNECTION_LIBRARY;
 
   const connections = buildHttpHostnames(envVarValue.split(","));

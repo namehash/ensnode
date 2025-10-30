@@ -1,6 +1,4 @@
-"use client";
-
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
@@ -20,7 +18,9 @@ export function LayoutWrapper({
   breadcrumbs: React.ReactNode;
   actions: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = useLocation({
+    select: (location) => location.pathname,
+  });
 
   if (pathname === "/") {
     return children;

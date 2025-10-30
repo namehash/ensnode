@@ -1,14 +1,11 @@
-"use client";
-
-import "graphiql/setup-workers/webpack";
 import "graphiql/style.css";
 import "@graphiql/plugin-explorer/style.css";
 
 // import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
+import { useSearch } from "@tanstack/react-router";
 import { GraphiQL, type GraphiQLProps, HISTORY_PLUGIN } from "graphiql";
-import { useSearchParams } from "next/navigation";
 
 const defaultQuery = `#
 # Welcome to this interactive playground for
@@ -27,10 +24,10 @@ const defaultQuery = `#
  * A GraphiQL editor for Ponder API page.
  */
 export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const searchParams = useSearchParams();
+  const search = useSearch({ strict: false }) as Record<string, string | undefined>;
 
-  const initialQuery = searchParams.get("query") || defaultQuery;
-  const initialVariables = searchParams.get("variables") || "";
+  const initialQuery = search.query || defaultQuery;
+  const initialVariables = search.variables || "";
 
   return (
     <section className="flex flex-col flex-1">
@@ -43,10 +40,10 @@ export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
  * A GraphiQL editor for Subgraph API page.
  */
 export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const searchParams = useSearchParams();
+  const search = useSearch({ strict: false }) as Record<string, string | undefined>;
 
-  const initialQuery = searchParams.get("query") || defaultQuery;
-  const initialVariables = searchParams.get("variables") || "";
+  const initialQuery = search.query || defaultQuery;
+  const initialVariables = search.variables || "";
 
   return (
     <section className="flex flex-col flex-1">

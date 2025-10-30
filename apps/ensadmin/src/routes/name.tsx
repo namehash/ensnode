@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { type ChangeEvent, useState } from "react";
 
 import type { Name } from "@ensnode/ensnode-sdk";
@@ -11,7 +9,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 
-import { NameDetailPageContent } from "./_components/NameDetailPageContent";
+import { NameDetailPageContent } from "../app/name/_components/NameDetailPageContent";
+
+// Define search params schema
+type NameSearchParams = {
+  name?: string;
+};
+
+export const Route = createFileRoute("/name")({
+  component: ExploreNamesPage,
+  validateSearch: (search: Record<string, unknown>): NameSearchParams => {
+    return {
+      name: (search.name as string) || undefined,
+    };
+  },
+});
 
 const EXAMPLE_NAMES = [
   "vitalik.eth",
@@ -28,10 +40,9 @@ const EXAMPLE_NAMES = [
   "lightwalker.eth",
 ];
 
-export default function ExploreNamesPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const nameFromQuery = searchParams.get("name");
+function ExploreNamesPage() {
+  const navigate = useNavigate();
+  const { name: nameFromQuery } = Route.useSearch();
   const [rawInputName, setRawInputName] = useState<Name>("");
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
@@ -44,7 +55,7 @@ export default function ExploreNamesPage() {
 
     const href = retainCurrentRawConnectionUrlParam(getNameDetailsRelativePath(rawInputName));
 
-    router.push(href);
+    navigate({ to: href as any });
   };
 
   const handleRawInputNameChange = (e: ChangeEvent<HTMLInputElement>) => {
