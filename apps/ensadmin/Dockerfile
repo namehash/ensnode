@@ -18,7 +18,7 @@ RUN pnpm --filter ensadmin build
 FROM nginx:alpine AS runner
 
 # Copy the static export output
-COPY --from=builder /app/apps/ensadmin/out /usr/share/nginx/html
+COPY --from=builder /app/apps/ensadmin/dist /usr/share/nginx/html
 
 # Replace default nginx configuration with our own
 RUN rm -f /etc/nginx/conf.d/default.conf.default

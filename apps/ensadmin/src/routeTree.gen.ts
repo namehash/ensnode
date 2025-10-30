@@ -8,230 +8,230 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as ApiSubgraphRouteImport } from "./routes/api/subgraph";
-import { Route as ConnectionRouteImport } from "./routes/connection";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as InspectPrimaryNameRouteImport } from "./routes/inspect/primary-name";
-import { Route as InspectPrimaryNamesRouteImport } from "./routes/inspect/primary-names";
-import { Route as InspectRecordsRouteImport } from "./routes/inspect/records";
-import { Route as InspectVisualizerRouteImport } from "./routes/inspect/visualizer";
-import { Route as NameRouteImport } from "./routes/name";
-import { Route as RegistrationRouteImport } from "./routes/registration";
-import { Route as StatusRouteImport } from "./routes/status";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatusRouteImport } from './routes/status'
+import { Route as RegistrationRouteImport } from './routes/registration'
+import { Route as NameRouteImport } from './routes/name'
+import { Route as ConnectionRouteImport } from './routes/connection'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as InspectVisualizerRouteImport } from './routes/inspect/visualizer'
+import { Route as InspectRecordsRouteImport } from './routes/inspect/records'
+import { Route as InspectPrimaryNamesRouteImport } from './routes/inspect/primary-names'
+import { Route as InspectPrimaryNameRouteImport } from './routes/inspect/primary-name'
+import { Route as ApiSubgraphRouteImport } from './routes/api/subgraph'
 
 const StatusRoute = StatusRouteImport.update({
-  id: "/status",
-  path: "/status",
+  id: '/status',
+  path: '/status',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const RegistrationRoute = RegistrationRouteImport.update({
-  id: "/registration",
-  path: "/registration",
+  id: '/registration',
+  path: '/registration',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const NameRoute = NameRouteImport.update({
-  id: "/name",
-  path: "/name",
+  id: '/name',
+  path: '/name',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ConnectionRoute = ConnectionRouteImport.update({
-  id: "/connection",
-  path: "/connection",
+  id: '/connection',
+  path: '/connection',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InspectVisualizerRoute = InspectVisualizerRouteImport.update({
-  id: "/inspect/visualizer",
-  path: "/inspect/visualizer",
+  id: '/inspect/visualizer',
+  path: '/inspect/visualizer',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InspectRecordsRoute = InspectRecordsRouteImport.update({
-  id: "/inspect/records",
-  path: "/inspect/records",
+  id: '/inspect/records',
+  path: '/inspect/records',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InspectPrimaryNamesRoute = InspectPrimaryNamesRouteImport.update({
-  id: "/inspect/primary-names",
-  path: "/inspect/primary-names",
+  id: '/inspect/primary-names',
+  path: '/inspect/primary-names',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InspectPrimaryNameRoute = InspectPrimaryNameRouteImport.update({
-  id: "/inspect/primary-name",
-  path: "/inspect/primary-name",
+  id: '/inspect/primary-name',
+  path: '/inspect/primary-name',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ApiSubgraphRoute = ApiSubgraphRouteImport.update({
-  id: "/api/subgraph",
-  path: "/api/subgraph",
+  id: '/api/subgraph',
+  path: '/api/subgraph',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/connection": typeof ConnectionRoute;
-  "/name": typeof NameRoute;
-  "/registration": typeof RegistrationRoute;
-  "/status": typeof StatusRoute;
-  "/api/subgraph": typeof ApiSubgraphRoute;
-  "/inspect/primary-name": typeof InspectPrimaryNameRoute;
-  "/inspect/primary-names": typeof InspectPrimaryNamesRoute;
-  "/inspect/records": typeof InspectRecordsRoute;
-  "/inspect/visualizer": typeof InspectVisualizerRoute;
+  '/': typeof IndexRoute
+  '/connection': typeof ConnectionRoute
+  '/name': typeof NameRoute
+  '/registration': typeof RegistrationRoute
+  '/status': typeof StatusRoute
+  '/api/subgraph': typeof ApiSubgraphRoute
+  '/inspect/primary-name': typeof InspectPrimaryNameRoute
+  '/inspect/primary-names': typeof InspectPrimaryNamesRoute
+  '/inspect/records': typeof InspectRecordsRoute
+  '/inspect/visualizer': typeof InspectVisualizerRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/connection": typeof ConnectionRoute;
-  "/name": typeof NameRoute;
-  "/registration": typeof RegistrationRoute;
-  "/status": typeof StatusRoute;
-  "/api/subgraph": typeof ApiSubgraphRoute;
-  "/inspect/primary-name": typeof InspectPrimaryNameRoute;
-  "/inspect/primary-names": typeof InspectPrimaryNamesRoute;
-  "/inspect/records": typeof InspectRecordsRoute;
-  "/inspect/visualizer": typeof InspectVisualizerRoute;
+  '/': typeof IndexRoute
+  '/connection': typeof ConnectionRoute
+  '/name': typeof NameRoute
+  '/registration': typeof RegistrationRoute
+  '/status': typeof StatusRoute
+  '/api/subgraph': typeof ApiSubgraphRoute
+  '/inspect/primary-name': typeof InspectPrimaryNameRoute
+  '/inspect/primary-names': typeof InspectPrimaryNamesRoute
+  '/inspect/records': typeof InspectRecordsRoute
+  '/inspect/visualizer': typeof InspectVisualizerRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/connection": typeof ConnectionRoute;
-  "/name": typeof NameRoute;
-  "/registration": typeof RegistrationRoute;
-  "/status": typeof StatusRoute;
-  "/api/subgraph": typeof ApiSubgraphRoute;
-  "/inspect/primary-name": typeof InspectPrimaryNameRoute;
-  "/inspect/primary-names": typeof InspectPrimaryNamesRoute;
-  "/inspect/records": typeof InspectRecordsRoute;
-  "/inspect/visualizer": typeof InspectVisualizerRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/connection': typeof ConnectionRoute
+  '/name': typeof NameRoute
+  '/registration': typeof RegistrationRoute
+  '/status': typeof StatusRoute
+  '/api/subgraph': typeof ApiSubgraphRoute
+  '/inspect/primary-name': typeof InspectPrimaryNameRoute
+  '/inspect/primary-names': typeof InspectPrimaryNamesRoute
+  '/inspect/records': typeof InspectRecordsRoute
+  '/inspect/visualizer': typeof InspectVisualizerRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/connection"
-    | "/name"
-    | "/registration"
-    | "/status"
-    | "/api/subgraph"
-    | "/inspect/primary-name"
-    | "/inspect/primary-names"
-    | "/inspect/records"
-    | "/inspect/visualizer";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/connection'
+    | '/name'
+    | '/registration'
+    | '/status'
+    | '/api/subgraph'
+    | '/inspect/primary-name'
+    | '/inspect/primary-names'
+    | '/inspect/records'
+    | '/inspect/visualizer'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/connection"
-    | "/name"
-    | "/registration"
-    | "/status"
-    | "/api/subgraph"
-    | "/inspect/primary-name"
-    | "/inspect/primary-names"
-    | "/inspect/records"
-    | "/inspect/visualizer";
+    | '/'
+    | '/connection'
+    | '/name'
+    | '/registration'
+    | '/status'
+    | '/api/subgraph'
+    | '/inspect/primary-name'
+    | '/inspect/primary-names'
+    | '/inspect/records'
+    | '/inspect/visualizer'
   id:
-    | "__root__"
-    | "/"
-    | "/connection"
-    | "/name"
-    | "/registration"
-    | "/status"
-    | "/api/subgraph"
-    | "/inspect/primary-name"
-    | "/inspect/primary-names"
-    | "/inspect/records"
-    | "/inspect/visualizer";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/connection'
+    | '/name'
+    | '/registration'
+    | '/status'
+    | '/api/subgraph'
+    | '/inspect/primary-name'
+    | '/inspect/primary-names'
+    | '/inspect/records'
+    | '/inspect/visualizer'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  ConnectionRoute: typeof ConnectionRoute;
-  NameRoute: typeof NameRoute;
-  RegistrationRoute: typeof RegistrationRoute;
-  StatusRoute: typeof StatusRoute;
-  ApiSubgraphRoute: typeof ApiSubgraphRoute;
-  InspectPrimaryNameRoute: typeof InspectPrimaryNameRoute;
-  InspectPrimaryNamesRoute: typeof InspectPrimaryNamesRoute;
-  InspectRecordsRoute: typeof InspectRecordsRoute;
-  InspectVisualizerRoute: typeof InspectVisualizerRoute;
+  IndexRoute: typeof IndexRoute
+  ConnectionRoute: typeof ConnectionRoute
+  NameRoute: typeof NameRoute
+  RegistrationRoute: typeof RegistrationRoute
+  StatusRoute: typeof StatusRoute
+  ApiSubgraphRoute: typeof ApiSubgraphRoute
+  InspectPrimaryNameRoute: typeof InspectPrimaryNameRoute
+  InspectPrimaryNamesRoute: typeof InspectPrimaryNamesRoute
+  InspectRecordsRoute: typeof InspectRecordsRoute
+  InspectVisualizerRoute: typeof InspectVisualizerRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/status": {
-      id: "/status";
-      path: "/status";
-      fullPath: "/status";
-      preLoaderRoute: typeof StatusRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/registration": {
-      id: "/registration";
-      path: "/registration";
-      fullPath: "/registration";
-      preLoaderRoute: typeof RegistrationRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/name": {
-      id: "/name";
-      path: "/name";
-      fullPath: "/name";
-      preLoaderRoute: typeof NameRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/connection": {
-      id: "/connection";
-      path: "/connection";
-      fullPath: "/connection";
-      preLoaderRoute: typeof ConnectionRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/inspect/visualizer": {
-      id: "/inspect/visualizer";
-      path: "/inspect/visualizer";
-      fullPath: "/inspect/visualizer";
-      preLoaderRoute: typeof InspectVisualizerRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/inspect/records": {
-      id: "/inspect/records";
-      path: "/inspect/records";
-      fullPath: "/inspect/records";
-      preLoaderRoute: typeof InspectRecordsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/inspect/primary-names": {
-      id: "/inspect/primary-names";
-      path: "/inspect/primary-names";
-      fullPath: "/inspect/primary-names";
-      preLoaderRoute: typeof InspectPrimaryNamesRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/inspect/primary-name": {
-      id: "/inspect/primary-name";
-      path: "/inspect/primary-name";
-      fullPath: "/inspect/primary-name";
-      preLoaderRoute: typeof InspectPrimaryNameRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/api/subgraph": {
-      id: "/api/subgraph";
-      path: "/api/subgraph";
-      fullPath: "/api/subgraph";
-      preLoaderRoute: typeof ApiSubgraphRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/registration': {
+      id: '/registration'
+      path: '/registration'
+      fullPath: '/registration'
+      preLoaderRoute: typeof RegistrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/name': {
+      id: '/name'
+      path: '/name'
+      fullPath: '/name'
+      preLoaderRoute: typeof NameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connection': {
+      id: '/connection'
+      path: '/connection'
+      fullPath: '/connection'
+      preLoaderRoute: typeof ConnectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspect/visualizer': {
+      id: '/inspect/visualizer'
+      path: '/inspect/visualizer'
+      fullPath: '/inspect/visualizer'
+      preLoaderRoute: typeof InspectVisualizerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspect/records': {
+      id: '/inspect/records'
+      path: '/inspect/records'
+      fullPath: '/inspect/records'
+      preLoaderRoute: typeof InspectRecordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspect/primary-names': {
+      id: '/inspect/primary-names'
+      path: '/inspect/primary-names'
+      fullPath: '/inspect/primary-names'
+      preLoaderRoute: typeof InspectPrimaryNamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inspect/primary-name': {
+      id: '/inspect/primary-name'
+      path: '/inspect/primary-name'
+      fullPath: '/inspect/primary-name'
+      preLoaderRoute: typeof InspectPrimaryNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/subgraph': {
+      id: '/api/subgraph'
+      path: '/api/subgraph'
+      fullPath: '/api/subgraph'
+      preLoaderRoute: typeof ApiSubgraphRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -246,7 +246,7 @@ const rootRouteChildren: RootRouteChildren = {
   InspectPrimaryNamesRoute: InspectPrimaryNamesRoute,
   InspectRecordsRoute: InspectRecordsRoute,
   InspectVisualizerRoute: InspectVisualizerRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

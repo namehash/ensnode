@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "vite --port 4173",
     "build": "vite build && tsc",
-    "start": "serve out -l 4173",
+    "start": "serve dist -l 4173",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "typecheck": "tsc --noEmit",
