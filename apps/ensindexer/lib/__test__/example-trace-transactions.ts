@@ -1,4 +1,4 @@
-import type { DebugTraceTransactionSchema } from "@/lib/trace-transaction-helpers";
+import type { DebugTraceTransactionSchema } from "../trace-transaction-helpers";
 
 /**
  * Get an example transaction trace that is compatible with the DebugTraceTransactionSchema.

@@ -5,7 +5,7 @@ import { getAddressesFromTrace } from "@/lib/trace-transaction-helpers";
 import {
   getExampleTransactionTrace,
   getExampleTransactionTraceSerializedAddress,
-} from "./utils/example-trace-transactions";
+} from "./__test__/example-trace-transactions";
 
 describe("transaction helpers", () => {
   describe("getAddressesFromTrace", () => {

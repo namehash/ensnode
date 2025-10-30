@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DatasourceNames, ENSNamespaceIds, getDatasource } from "@ensnode/datasources";
 
-import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
+import { getSupportedNFTIssuer } from "./nft-issuers";
 
 const {
   contracts: { NameWrapper },

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { addrReverseLabel } from "@ensnode/ensnode-sdk";
 
-import { maybeHealLabelByAddrReverseSubname } from "@/lib/maybe-heal-label-by-addr-reverse-subname";
+import { maybeHealLabelByAddrReverseSubname } from "./maybe-heal-label-by-addr-reverse-subname";
 
 describe("maybeHealLabelByAddrReverseSubname", () => {
   const address: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";

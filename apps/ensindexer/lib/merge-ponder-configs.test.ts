@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mergePonderConfigs } from "@/lib/merge-ponder-configs";
+import { mergePonderConfigs } from "./merge-ponder-configs";
 
 describe("mergePonderConfigs", () => {
   it("should deeply merge two objects", () => {

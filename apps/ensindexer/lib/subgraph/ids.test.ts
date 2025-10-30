@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { resetMockConfig, setupConfigMock, updateMockConfig } from "../utils/mockConfig";
+import { resetMockConfig, setupConfigMock, updateMockConfig } from "@/lib/__test__/mockConfig";
 
 setupConfigMock(); // setup config mock before importing dependent modules
 
 import { labelhash, namehash, zeroAddress } from "viem";
 
-import { makeEventId, makeRegistrationId, makeResolverId } from "@/lib/subgraph/ids";
+import { makeEventId, makeRegistrationId, makeResolverId } from "./ids";
 
 const CHAIN_ID = 1337;
 

@@ -10,14 +10,8 @@ import {
   type ChainIndexingStatusSnapshotQueued,
 } from "@ensnode/ensnode-sdk";
 
-import {
-  type ChainMetadata,
-  createChainIndexingSnapshot,
-} from "@/lib/indexing-status/ponder-metadata/chains";
-import {
-  getChainsBlockrange,
-  type PonderConfigType,
-} from "@/lib/indexing-status/ponder-metadata/config";
+import { type ChainMetadata, createChainIndexingSnapshot } from "./chains";
+import { getChainsBlockrange, type PonderConfigType } from "./config";
 
 // Minimal helpers to simulate BlockRef
 const blockRef = (number: number, timestamp: number = 0): BlockRef => ({ number, timestamp });

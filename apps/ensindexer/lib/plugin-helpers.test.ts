@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import { namespaceContract } from "@/lib/plugin-helpers";
+import { namespaceContract } from "./plugin-helpers";
 
 describe("plugin helpers", () => {
   describe("createPluginNamespace", () => {

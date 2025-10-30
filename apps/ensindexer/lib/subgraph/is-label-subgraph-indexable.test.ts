@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { LiteralLabel } from "@ensnode/ensnode-sdk";
 
-import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
+import { isLabelSubgraphIndexable } from "./is-label-subgraph-indexable";
 
 describe("isLabelSubgraphIndexable", () => {
   it("should return false for labels containing subgraph-unindexable characters", () => {

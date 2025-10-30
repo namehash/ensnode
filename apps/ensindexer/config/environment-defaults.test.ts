@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { DeepPartial } from "@ensnode/ensnode-sdk";
 
-import { applyDefaults } from "@/config/environment-defaults";
+import { applyDefaults } from "./environment-defaults";
 
 interface ExampleEnvironment {
   defined: string | undefined;

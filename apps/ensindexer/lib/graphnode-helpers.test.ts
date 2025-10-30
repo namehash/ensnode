@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LabelHash } from "@ensnode/ensnode-sdk";
 
-import { setupConfigMock } from "./utils/mockConfig";
+import { setupConfigMock } from "@/lib/__test__/mockConfig";
 
 setupConfigMock(); // setup config mock before importing dependent modules
 
 // Mock fetch globally to prevent real network calls
 global.fetch = vi.fn();
 
-import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import { labelByLabelHash } from "./graphnode-helpers";
 
 describe("labelByLabelHash", () => {
   beforeEach(() => {

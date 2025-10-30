@@ -11,7 +11,7 @@ import {
   parseDnsTxtRecordArgs,
   parseRRSet,
   subgraph_decodeDNSEncodedLiteralName,
-} from "@/lib/dns-helpers";
+} from "./dns-helpers";
 
 // Example TXT `record` representing key: 'com.twitter', value: '0xTko'
 // via: https://optimistic.etherscan.io/tx/0xf32db67e7bf2118ea2c3dd8f40fc48d18e83a4a2317fbbddce8f741e30a1e8d7#eventlog

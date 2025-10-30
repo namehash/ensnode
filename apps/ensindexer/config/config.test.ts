@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
-import type { ENSIndexerEnvironment } from "@/config/environment";
-import { EnvironmentDefaults } from "@/config/environment-defaults";
+import type { ENSIndexerEnvironment } from "./environment";
+import { EnvironmentDefaults } from "./environment-defaults";
 
 const VALID_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/1234";
 const VALID_RPC_URL_ALT = "https://lb.drpc.org/ethereum/987";

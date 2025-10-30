@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { bigintMax } from "@/lib/lib-helpers";
+import { bigintMax } from "./lib-helpers";
 
 describe("helpers", () => {
   describe("bigintMax", () => {
