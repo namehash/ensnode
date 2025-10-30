@@ -2,10 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import {
-  deserializeENSIndexerPublicConfig,
-  SerializedENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import { deserializeENSApiPublicConfig, SerializedENSApiPublicConfig } from "@ensnode/ensnode-sdk";
 
 import {
   ENSNodeConfigInfoView,
@@ -14,9 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import mockDataJson from "./data.json";
+import mockDataJson from "./data.json" with { type: "json" };
 
-const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
+const mockConfigData = mockDataJson as Record<string, SerializedENSApiPublicConfig>;
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
@@ -39,8 +36,8 @@ export default function MockConfigPage() {
 
       default:
         try {
-          const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { ensIndexerConfig: config };
+          const config = deserializeENSApiPublicConfig(mockConfigData[selectedConfig]);
+          return { ensApiPublicConfig: config };
         } catch (error) {
           const errorMessage =
             error instanceof Error

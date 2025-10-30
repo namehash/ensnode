@@ -218,6 +218,56 @@ function ENSNodeConfigCardContent({
 
   return (
     <>
+      {/*ENSApi*/}
+      <ConfigInfoAppCard
+        name="ENSApi"
+        icon={<ENSNodeIcon width={24} height={24} />}
+        items={[
+          {
+            label: "Database",
+            value: <p className={cardItemValueStyles}>Postgres</p>,
+          },
+          {
+            label: "Database Schema",
+            value: (
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+            ),
+            additionalInfo: (
+              <p>ENSApi reads indexed data from tables within this Postgres database schema.</p>
+            ),
+          },
+          {
+            label: "Namespace",
+            value: <p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>,
+            additionalInfo: <p>The ENS namespace that ENSApi is operating in the context of.</p>,
+          },
+          {
+            label: "RPC Config",
+            value: (
+              <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
+                <Tooltip>
+                  <TooltipTrigger className="cursor-default">
+                    <ChainIcon chainId={ensRootChainId} />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                  >
+                    {getChainName(ensRootChainId)}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ),
+          },
+        ]}
+        version={
+          <p className="text-sm leading-normal font-normal text-muted-foreground">
+            v{ensApiPublicConfig.version}
+          </p>
+        }
+        docsLink={new URL("https://ensnode.io/ensapi/")}
+      />
+
       {/*ENSDb*/}
       <ConfigInfoAppCard
         name="ENSDb"
@@ -338,7 +388,7 @@ function ENSNodeConfigCardContent({
                 {Array.from(ensIndexerPublicConfig.indexedChainIds).map((chainId) => (
                   <Tooltip key={`indexed-chain-#${chainId}`}>
                     <TooltipTrigger className="cursor-default">
-                      <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
+                      <ChainIcon chainId={chainId} />
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
