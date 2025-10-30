@@ -1,6 +1,10 @@
 import { uniq } from "@ensnode/ensnode-sdk";
 
-import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
+import {
+  buildHttpHostname,
+  buildHttpHostnames,
+  type HttpHostname,
+} from "./url-utils";
 
 const DEFAULT_ENSADMIN_PORT = 4173;
 const DEFAULT_SERVER_CONNECTION_LIBRARY = [
@@ -14,7 +18,9 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY = [
 /**
  * Determines whether `variables` is a non-null object and a valid Record<string, unknown>.
  */
-const isValidRuntimeEnvVariables = (value: unknown): value is Record<string, unknown> =>
+const isValidRuntimeEnvVariables = (
+  value: unknown
+): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 /**
@@ -26,7 +32,8 @@ const isValidRuntimeEnvVariables = (value: unknown): value is Record<string, unk
 const getRuntimeEnvVariable = (key: string): string | undefined => {
   if (typeof window == "undefined") return undefined;
 
-  const variables = (window as any).__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
+  const variables = (window as any)
+    .__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
   if (!isValidRuntimeEnvVariables(variables)) return undefined;
 
   const value = variables[key];
@@ -39,7 +46,7 @@ const getRuntimeEnvVariable = (key: string): string | undefined => {
 };
 
 function localhostEnsAdminPublicUrl(): string {
-  const port = process.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
+  const port = import.meta.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
   return `http://localhost:${port}`;
 }
 
@@ -47,7 +54,7 @@ function localhostEnsAdminPublicUrl(): string {
  * Tells if the application runs on Vercel.
  */
 function isAppOnVercelPlatform(): boolean {
-  return process.env.VERCEL === "1";
+  return import.meta.env.VERCEL === "1";
 }
 
 /**
@@ -59,12 +66,12 @@ function isAppOnVercelPlatform(): boolean {
 function getVercelAppPublicUrl(): string | undefined {
   if (!isAppOnVercelPlatform()) return undefined;
 
-  switch (process.env.VERCEL_ENV) {
+  switch (import.meta.env.VERCEL_ENV) {
     case "production":
-      return process.env.VERCEL_PROJECT_PRODUCTION_URL;
+      return import.meta.env.VERCEL_PROJECT_PRODUCTION_URL;
     case "development":
     case "preview":
-      return process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
+      return import.meta.env.VERCEL_BRANCH_URL || import.meta.env.VERCEL_URL;
   }
 }
 
@@ -79,12 +86,14 @@ function getVercelAppPublicUrl(): string | undefined {
  */
 export function ensAdminPublicUrl(): HttpHostname {
   const envVarValue =
-    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
+    import.meta.env.ENSADMIN_PUBLIC_URL ||
+    getVercelAppPublicUrl() ||
+    localhostEnsAdminPublicUrl();
 
   const result = buildHttpHostname(envVarValue);
   if (!result.isValid) {
     throw new Error(
-      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
+      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`
     );
   }
   return result.url;
@@ -97,17 +106,17 @@ export function ensAdminPublicUrl(): HttpHostname {
  * @throws when no `HttpHostname` could be returned.
  */
 export function getServerConnectionLibrary(): HttpHostname[] {
-  const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
+  const envVarName = "VITE_SERVER_CONNECTION_LIBRARY";
   const envVarValue =
-    getRuntimeEnvVariable("NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY") ||
-    process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY || // NOTE: must specify full key for nextjs to replace
+    getRuntimeEnvVariable("VITE_SERVER_CONNECTION_LIBRARY") ||
+    import.meta.env.VITE_SERVER_CONNECTION_LIBRARY ||
     DEFAULT_SERVER_CONNECTION_LIBRARY;
 
   const connections = buildHttpHostnames(envVarValue.split(","));
 
   if (connections.length === 0) {
     throw new Error(
-      `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`,
+      `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`
     );
   }
 

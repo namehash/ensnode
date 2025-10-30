@@ -1,10 +1,13 @@
-"use client";
-
+import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
 import { SubgraphGraphiQLEditor } from "@/components/graphiql-editor";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
+
+export const Route = createFileRoute("/api/subgraph")({
+  component: SubgraphGraphQLPage,
+});
 
 function SubgraphGraphQLContent() {
   const { validatedSelectedConnection } = useSelectedConnection();
@@ -26,7 +29,7 @@ function SubgraphGraphQLContent() {
   return <SubgraphGraphiQLEditor url={url} />;
 }
 
-export default function SubgraphGraphQLPage() {
+function SubgraphGraphQLPage() {
   return (
     <Suspense
       fallback={

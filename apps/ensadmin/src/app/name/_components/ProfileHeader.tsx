@@ -1,4 +1,3 @@
-"use client";
 
 import type { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 

@@ -1,6 +1,4 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 import { type Address, isAddress } from "viem";
@@ -28,6 +26,21 @@ import {
 } from "@/components/ui/select";
 import { getChainName } from "@/lib/namespace-utils";
 
+type PrimaryNameSearchParams = {
+  address?: string;
+  chainId?: string;
+};
+
+export const Route = createFileRoute("/inspect/primary-name")({
+  component: ResolvePrimaryNameInspector,
+  validateSearch: (search: Record<string, unknown>): PrimaryNameSearchParams => {
+    return {
+      address: (search.address as string) || undefined,
+      chainId: (search.chainId as string) || undefined,
+    };
+  },
+});
+
 const EXAMPLE_INPUT = [
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "8453" }, // greg base
@@ -45,14 +58,11 @@ const getENSIP19SupportedChainIds = (namespace: ENSNamespaceId) =>
     .filter((ds) => ds !== undefined)
     .map((ds) => ds.chain.id);
 
-// TODO: showcase current ENSNode configuration and viable acceleration pathways?
-// TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
-// TODO: sync form state to query params, current just defaulting is supported
-export default function ResolvePrimaryNameInspector() {
-  const searchParams = useSearchParams();
+function ResolvePrimaryNameInspector() {
+  const searchParams = Route.useSearch();
 
-  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0].address);
-  const [chainId, setChainId] = useState(searchParams.get("chainId") || EXAMPLE_INPUT[0].chainId);
+  const [address, setAddress] = useState(searchParams.address || EXAMPLE_INPUT[0].address);
+  const [chainId, setChainId] = useState(searchParams.chainId || EXAMPLE_INPUT[0].chainId);
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
   const additionalChainIds = getENSIP19SupportedChainIds(ENSNamespaceIds.Mainnet);
@@ -136,7 +146,6 @@ export default function ResolvePrimaryNameInspector() {
           </div>
           <div className="flex flex-col gap-2 justify-center">
             <span className="text-sm font-medium leading-none">Examples:</span>
-            {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {EXAMPLE_INPUT.map(({ address, chainId }) => (
                 <Pill

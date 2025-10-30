@@ -1,7 +1,5 @@
-"use client";
-
+import { Link } from "@tanstack/react-router";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import Link from "next/link";
 import { Fragment } from "react";
 
 import {
@@ -66,7 +64,9 @@ export interface RecentRegistrationsErrorProps {
  * Error -
  *      error: {@link ErrorInfoProps}
  */
-export type RecentRegistrationsProps = RecentRegistrationsOkProps | RecentRegistrationsErrorProps;
+export type RecentRegistrationsProps =
+  | RecentRegistrationsOkProps
+  | RecentRegistrationsErrorProps;
 /**
  * Displays a panel containing the list of the most recently indexed
  * registrations and the date of the most recently indexed block.
@@ -87,7 +87,11 @@ export function RecentRegistrations(props: RecentRegistrationsProps) {
 
   const { omnichainSnapshot } = realtimeProjection.snapshot;
 
-  if (!SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(omnichainSnapshot.omnichainStatus)) {
+  if (
+    !SUPPORTED_OMNICHAIN_INDEXING_STATUSES.includes(
+      omnichainSnapshot.omnichainStatus
+    )
+  ) {
     return (
       <UnsupportedOmnichainIndexingStatusMessage
         omnichainIndexingStatus={omnichainSnapshot.omnichainStatus}
@@ -183,7 +187,8 @@ function UnsupportedOmnichainIndexingStatusMessage({
   omnichainIndexingStatus,
 }: UnsupportedOmnichainIndexingStatusMessageProps) {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
-  const supportedOmnichainIndexingStatuses = SUPPORTED_OMNICHAIN_INDEXING_STATUSES;
+  const supportedOmnichainIndexingStatuses =
+    SUPPORTED_OMNICHAIN_INDEXING_STATUSES;
 
   return (
     <Card className="w-full">
@@ -196,29 +201,36 @@ function UnsupportedOmnichainIndexingStatusMessage({
           <Badge
             className="uppercase text-xs leading-none"
             title={`Current omnichain indexing status: ${formatOmnichainIndexingStatus(
-              omnichainIndexingStatus,
+              omnichainIndexingStatus
             )}`}
           >
             {formatOmnichainIndexingStatus(omnichainIndexingStatus)}
           </Badge>
         </div>
         <div>
-          The latest indexed registrations will be available once the omnichain indexing status is{" "}
-          {supportedOmnichainIndexingStatuses.map((supportedOmnichainIndexingStatus, idx) => (
-            <Fragment key={supportedOmnichainIndexingStatus}>
-              <Badge
-                className="uppercase text-xs leading-none"
-                title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
-              >
-                {formatOmnichainIndexingStatus(supportedOmnichainIndexingStatus)}
-              </Badge>
-              {idx < supportedOmnichainIndexingStatuses.length - 1 && " or "}
-            </Fragment>
-          ))}
+          The latest indexed registrations will be available once the omnichain
+          indexing status is{" "}
+          {supportedOmnichainIndexingStatuses.map(
+            (supportedOmnichainIndexingStatus, idx) => (
+              <Fragment key={supportedOmnichainIndexingStatus}>
+                <Badge
+                  className="uppercase text-xs leading-none"
+                  title={`Supported overall omnichain indexing status: ${supportedOmnichainIndexingStatus}`}
+                >
+                  {formatOmnichainIndexingStatus(
+                    supportedOmnichainIndexingStatus
+                  )}
+                </Badge>
+                {idx < supportedOmnichainIndexingStatuses.length - 1 && " or "}
+              </Fragment>
+            )
+          )}
           .
         </div>
         <Button asChild variant="default">
-          <Link href={retainCurrentRawConnectionUrlParam("/status")}>Check status</Link>
+          <Link to={retainCurrentRawConnectionUrlParam("/status")}>
+            Check status
+          </Link>
         </Button>
       </CardContent>
     </Card>

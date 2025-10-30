@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
-import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
 interface LinkProps {
@@ -10,9 +10,16 @@ interface LinkProps {
 /**
  * Renders an internal link.
  */
-export function InternalLink({ href, className, children }: PropsWithChildren<LinkProps>) {
+export function InternalLink({
+  href,
+  className,
+  children,
+}: PropsWithChildren<LinkProps>) {
   return (
-    <Link href={href} className={` text-blue-600 hover:underline ${className || ""}`}>
+    <Link
+      to={href}
+      className={` text-blue-600 hover:underline ${className || ""}`}
+    >
       {children}
     </Link>
   );
@@ -21,13 +28,19 @@ export function InternalLink({ href, className, children }: PropsWithChildren<Li
 /**
  * Renders an external link that opens in a new tab.
  */
-export function ExternalLink({ href, className, children }: PropsWithChildren<LinkProps>) {
+export function ExternalLink({
+  href,
+  className,
+  children,
+}: PropsWithChildren<LinkProps>) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={` inline-flex items-center gap-1 text-blue-600 hover:underline ${className || ""}`}
+      className={` inline-flex items-center gap-1 text-blue-600 hover:underline ${
+        className || ""
+      }`}
     >
       {children}
     </a>
@@ -37,7 +50,11 @@ export function ExternalLink({ href, className, children }: PropsWithChildren<Li
 /**
  * Renders an external link with an external link icon.
  */
-export function ExternalLinkWithIcon({ href, className, children }: PropsWithChildren<LinkProps>) {
+export function ExternalLinkWithIcon({
+  href,
+  className,
+  children,
+}: PropsWithChildren<LinkProps>) {
   return (
     <ExternalLink href={href} className={className}>
       {children}

@@ -1,4 +1,3 @@
-"use client";
 
 import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
 import { type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";

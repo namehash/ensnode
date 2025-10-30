@@ -1,12 +1,13 @@
-"use client";
-
+import { Link, useLocation } from "@tanstack/react-router";
 import { ChevronRight, type LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 
 import type { UrlString } from "@ensnode/ensnode-sdk";
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -32,8 +33,9 @@ export function NavMain({
     }[];
   }[];
 }) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const searchParams = new URLSearchParams(location.search);
 
   const appendQueryParams = (url: UrlString) => {
     if (pathname.startsWith("/inspector") && !url.startsWith("/inspector")) {
@@ -75,8 +77,12 @@ export function NavMain({
           if (!hasItems)
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive}>
-                  <Link href={itemUrl}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  isActive={isItemActive}
+                >
+                  <Link to={itemUrl}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                   </Link>
@@ -85,7 +91,8 @@ export function NavMain({
             );
 
           const anySubItemActive =
-            item.items?.some((subItem) => isActive(subItem.url)) || isItemActive;
+            item.items?.some((subItem) => isActive(subItem.url)) ||
+            isItemActive;
 
           return (
             <Collapsible
@@ -96,7 +103,10 @@ export function NavMain({
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title} isActive={isItemActive}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    isActive={isItemActive}
+                  >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -110,8 +120,11 @@ export function NavMain({
 
                       return (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild isActive={isSubItemActive}>
-                            <Link href={subItemUrl}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isSubItemActive}
+                          >
+                            <Link to={subItemUrl}>
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>

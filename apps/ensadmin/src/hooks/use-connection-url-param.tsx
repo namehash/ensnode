@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback } from "react";
 
 // The query param key for the raw selected connection
@@ -55,25 +53,30 @@ interface UseRawConnectionUrlParamResult {
  * ```
  */
 export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false });
 
   // Get the current raw connection URL param
-  const rawConnectionUrlParam = searchParams.get(RAW_CONNECTION_PARAM_KEY);
+  const rawConnectionUrlParam =
+    (search as Record<string, string>)[RAW_CONNECTION_PARAM_KEY] ?? null;
 
   // Build callback for setting the raw connection URL param
   const setRawConnectionUrlParam = useCallback(
     (rawUrl: string | null) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const newSearch = { ...search } as Record<string, string | undefined>;
+
       if (rawUrl === null) {
-        params.delete(RAW_CONNECTION_PARAM_KEY);
+        delete newSearch[RAW_CONNECTION_PARAM_KEY];
       } else {
-        params.set(RAW_CONNECTION_PARAM_KEY, rawUrl);
+        newSearch[RAW_CONNECTION_PARAM_KEY] = rawUrl;
       }
-      const paramString = params.toString();
-      router.replace(paramString ? `?${paramString}` : "");
+
+      navigate({
+        search: newSearch,
+        replace: true,
+      });
     },
-    [router, searchParams],
+    [navigate, search]
   );
 
   // Build callback for attaching the current raw connection URL param
@@ -99,7 +102,7 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
 
       return pathWithRetainedConnection;
     },
-    [rawConnectionUrlParam],
+    [rawConnectionUrlParam]
   );
 
   return {

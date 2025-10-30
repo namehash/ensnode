@@ -1,6 +1,4 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
 import type { Address } from "viem";
@@ -14,6 +12,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type PrimaryNamesSearchParams = {
+  address?: string;
+};
+
+export const Route = createFileRoute("/inspect/primary-names")({
+  component: ResolvePrimaryNamesInspector,
+  validateSearch: (search: Record<string, unknown>): PrimaryNamesSearchParams => {
+    return {
+      address: (search.address as string) || undefined,
+    };
+  },
+});
+
 const EXAMPLE_INPUT = [
   "0x179A862703a4adfb29896552DF9e307980D19285", // greg
   "0xe7a863d7cdC48Cc0CcB135c9c0B4c1fafA3a2e69", // katzman
@@ -21,13 +32,10 @@ const EXAMPLE_INPUT = [
   "0x2211d1D0020DAEA8039E46Cf1367962070d77DA9", // jesse
 ];
 
-// TODO: showcase current ENSNode configuration and viable acceleration pathways?
-// TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
-// TODO: sync form state to query params, current just defaulting is supported
-export default function ResolvePrimaryNameInspector() {
-  const searchParams = useSearchParams();
+function ResolvePrimaryNamesInspector() {
+  const searchParams = Route.useSearch();
 
-  const [address, setAddress] = useState(searchParams.get("address") || EXAMPLE_INPUT[0]);
+  const [address, setAddress] = useState(searchParams.address || EXAMPLE_INPUT[0]);
   const [debouncedAddress] = useDebouncedValue(address, 150);
 
   const canQuery =
@@ -91,7 +99,6 @@ export default function ResolvePrimaryNameInspector() {
           </div>
           <div className="flex flex-col gap-2 justify-center">
             <span className="text-sm font-medium leading-none">Examples:</span>
-            {/* -mx-6 px-6 insets the scroll container against card for prettier scrolling */}
             <div className="flex flex-row overflow-x-scroll gap-2 no-scrollbar -mx-6 px-6">
               {EXAMPLE_INPUT.map((address) => (
                 <Pill key={address} onClick={() => setAddress(address)} className="font-mono">
