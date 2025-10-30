@@ -48,16 +48,15 @@ const defaultSelectedConnection = serverConnectionLibrary[0];
 
 function _useConnectionsLibrary() {
   const hydrated = useHydrated();
-  const { rawConnectionUrlParam, setRawConnectionUrlParam } =
-    useRawConnectionUrlParam();
+  const { rawConnectionUrlParam, setRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   // get raw custom connection library URLs from localStorage
-  const [rawCustomConnectionUrls, storeRawCustomConnectionUrls] =
-    useLocalstorageState<string[]>(CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY, []);
+  const [rawCustomConnectionUrls, storeRawCustomConnectionUrls] = useLocalstorageState<string[]>(
+    CUSTOM_CONNECTIONS_LOCAL_STORAGE_KEY,
+    [],
+  );
 
-  const [rawExistingConnectionUrl, setRawExistingConnectionUrl] = useState<
-    string | null
-  >(null);
+  const [rawExistingConnectionUrl, setRawExistingConnectionUrl] = useState<string | null>(null);
 
   /**
    * Invariants:
@@ -75,19 +74,10 @@ function _useConnectionsLibrary() {
 
   // clean up custom connection library URLs in localStorage if validation changed anything
   useEffect(() => {
-    if (
-      JSON.stringify(customConnectionLibrary) !==
-      JSON.stringify(rawCustomConnectionUrls)
-    ) {
-      storeRawCustomConnectionUrls(
-        customConnectionLibrary.map((url) => url.toString())
-      );
+    if (JSON.stringify(customConnectionLibrary) !== JSON.stringify(rawCustomConnectionUrls)) {
+      storeRawCustomConnectionUrls(customConnectionLibrary.map((url) => url.toString()));
     }
-  }, [
-    customConnectionLibrary,
-    rawCustomConnectionUrls,
-    storeRawCustomConnectionUrls,
-  ]);
+  }, [customConnectionLibrary, rawCustomConnectionUrls, storeRawCustomConnectionUrls]);
 
   /**
    * Invariants:
@@ -112,7 +102,7 @@ function _useConnectionsLibrary() {
         .filter((url) => !serverConnectionLibrary.includes(url))
         .map((url) => ({ url, type: "custom" as const })),
     ],
-    [customConnectionLibrary]
+    [customConnectionLibrary],
   );
 
   const addCustomConnection = useCallback(
@@ -124,18 +114,18 @@ function _useConnectionsLibrary() {
 
       return url;
     },
-    [storeRawCustomConnectionUrls]
+    [storeRawCustomConnectionUrls],
   );
 
   const removeCustomConnection = useCallback(
     (url: HttpHostname) => {
       storeRawCustomConnectionUrls((customConnections) =>
-        customConnections.filter((rawUrl) => rawUrl !== url.toString())
+        customConnections.filter((rawUrl) => rawUrl !== url.toString()),
       );
 
       return url;
     },
-    [storeRawCustomConnectionUrls]
+    [storeRawCustomConnectionUrls],
   );
 
   const selectedConnection = useMemo<SelectedConnectionResult | null>(() => {
@@ -173,7 +163,7 @@ function _useConnectionsLibrary() {
     (url: HttpHostname) => {
       setRawConnectionUrlParam(url.toString());
     },
-    [setRawConnectionUrlParam]
+    [setRawConnectionUrlParam],
   );
 
   return {
@@ -185,9 +175,7 @@ function _useConnectionsLibrary() {
   };
 }
 
-const [ConnectionsLibraryProviderInner, useConnectionsLibrary] = constate(
-  _useConnectionsLibrary
-);
+const [ConnectionsLibraryProviderInner, useConnectionsLibrary] = constate(_useConnectionsLibrary);
 
 export { useConnectionsLibrary };
 
@@ -206,16 +194,10 @@ export { useConnectionsLibrary };
  * - removeCustomConnection: Callback for removing a custom connection
  * - selectConnection: Callback for selecting a connection
  */
-export function ConnectionsLibraryProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ConnectionsLibraryProvider({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={null}>
-      <ConnectionsLibraryProviderInner>
-        {children}
-      </ConnectionsLibraryProviderInner>
+      <ConnectionsLibraryProviderInner>{children}</ConnectionsLibraryProviderInner>
     </Suspense>
   );
 }

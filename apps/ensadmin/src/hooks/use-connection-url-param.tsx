@@ -76,7 +76,7 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
         replace: true,
       });
     },
-    [navigate, search]
+    [navigate, search],
   );
 
   // Build callback for attaching the current raw connection URL param
@@ -102,7 +102,7 @@ export function useRawConnectionUrlParam(): UseRawConnectionUrlParamResult {
 
       return pathWithRetainedConnection;
     },
-    [rawConnectionUrlParam]
+    [rawConnectionUrlParam],
   );
 
   return {

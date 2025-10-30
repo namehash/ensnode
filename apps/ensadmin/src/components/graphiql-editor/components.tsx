@@ -1,4 +1,3 @@
-import "graphiql/setup-workers/webpack";
 import "graphiql/style.css";
 import "@graphiql/plugin-explorer/style.css";
 
@@ -25,21 +24,14 @@ const defaultQuery = `#
  * A GraphiQL editor for Ponder API page.
  */
 export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const search = useSearch({ strict: false }) as Record<
-    string,
-    string | undefined
-  >;
+  const search = useSearch({ strict: false }) as Record<string, string | undefined>;
 
   const initialQuery = search.query || defaultQuery;
   const initialVariables = search.variables || "";
 
   return (
     <section className="flex flex-col flex-1">
-      <GraphiQLEditor
-        {...props}
-        initialQuery={initialQuery}
-        initialVariables={initialVariables}
-      />
+      <GraphiQLEditor {...props} initialQuery={initialQuery} initialVariables={initialVariables} />
     </section>
   );
 }
@@ -48,10 +40,7 @@ export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
  * A GraphiQL editor for Subgraph API page.
  */
 export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
-  const search = useSearch({ strict: false }) as Record<
-    string,
-    string | undefined
-  >;
+  const search = useSearch({ strict: false }) as Record<string, string | undefined>;
 
   const initialQuery = search.query || defaultQuery;
   const initialVariables = search.variables || "";
@@ -66,11 +55,7 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
         url={props.url}
       />*/}
 
-      <GraphiQLEditor
-        {...props}
-        initialQuery={initialQuery}
-        initialVariables={initialVariables}
-      />
+      <GraphiQLEditor {...props} initialQuery={initialQuery} initialVariables={initialVariables} />
     </section>
   );
 }

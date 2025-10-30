@@ -1,15 +1,25 @@
 {
-  "name": "ensadmin-vite",
+  "name": "ensadmin",
+  "version": "0.36.0",
   "private": true,
   "type": "module",
+  "description": "Explore the ENS Protocol like never before",
+  "license": "MIT",
+  "packageManager": "pnpm@10.20.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/ensadmin"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin",
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite --port 4173",
     "build": "vite build && tsc",
-    "serve": "vite preview",
-    "test": "vitest run",
-    "format": "biome format",
-    "lint": "biome lint",
-    "check": "biome check"
+    "start": "serve out -l 4173",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
@@ -32,12 +42,9 @@
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-separator": "^1.1.2",
-    "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.1.8",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@xyflow/react": "^12.4.4",
-    "boring-avatars": "^1.11.2",
     "@tailwindcss/vite": "^4.1.16",
     "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-query": "^5.90.5",
@@ -45,6 +52,8 @@
     "@tanstack/react-router": "^1.132.0",
     "@tanstack/react-router-devtools": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
+    "@xyflow/react": "^12.4.4",
+    "boring-avatars": "^1.11.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "constate": "^3.3.3",
@@ -60,7 +69,8 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.5",
     "tailwindcss-animate": "^1.0.7",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "vite-plugin-monaco-editor": "^1.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",

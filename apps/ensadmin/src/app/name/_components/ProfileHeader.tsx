@@ -1,4 +1,3 @@
-
 import type { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 
 import { EnsAvatar } from "@/components/ens-avatar";

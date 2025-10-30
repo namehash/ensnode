@@ -1,4 +1,3 @@
-
 import { SiFarcaster, SiGithub, SiReddit, SiTelegram, SiX } from "@icons-pack/react-simple-icons";
 import { useMemo } from "react";
 

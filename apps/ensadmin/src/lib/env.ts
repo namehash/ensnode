@@ -1,10 +1,6 @@
 import { uniq } from "@ensnode/ensnode-sdk";
 
-import {
-  buildHttpHostname,
-  buildHttpHostnames,
-  type HttpHostname,
-} from "./url-utils";
+import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
 
 const DEFAULT_ENSADMIN_PORT = 4173;
 const DEFAULT_SERVER_CONNECTION_LIBRARY = [
@@ -18,9 +14,7 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY = [
 /**
  * Determines whether `variables` is a non-null object and a valid Record<string, unknown>.
  */
-const isValidRuntimeEnvVariables = (
-  value: unknown
-): value is Record<string, unknown> =>
+const isValidRuntimeEnvVariables = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
 /**
@@ -32,8 +26,7 @@ const isValidRuntimeEnvVariables = (
 const getRuntimeEnvVariable = (key: string): string | undefined => {
   if (typeof window == "undefined") return undefined;
 
-  const variables = (window as any)
-    .__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
+  const variables = (window as any).__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
   if (!isValidRuntimeEnvVariables(variables)) return undefined;
 
   const value = variables[key];
@@ -86,14 +79,12 @@ function getVercelAppPublicUrl(): string | undefined {
  */
 export function ensAdminPublicUrl(): HttpHostname {
   const envVarValue =
-    import.meta.env.ENSADMIN_PUBLIC_URL ||
-    getVercelAppPublicUrl() ||
-    localhostEnsAdminPublicUrl();
+    import.meta.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
 
   const result = buildHttpHostname(envVarValue);
   if (!result.isValid) {
     throw new Error(
-      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`
+      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
     );
   }
   return result.url;
@@ -116,7 +107,7 @@ export function getServerConnectionLibrary(): HttpHostname[] {
 
   if (connections.length === 0) {
     throw new Error(
-      `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`
+      `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`,
     );
   }
 

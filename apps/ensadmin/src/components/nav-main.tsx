@@ -3,11 +3,7 @@ import { ChevronRight, type LucideIcon } from "lucide-react";
 
 import type { UrlString } from "@ensnode/ensnode-sdk";
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -77,11 +73,7 @@ export function NavMain({
           if (!hasItems)
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.title}
-                  isActive={isItemActive}
-                >
+                <SidebarMenuButton asChild tooltip={item.title} isActive={isItemActive}>
                   <Link to={itemUrl}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -91,8 +83,7 @@ export function NavMain({
             );
 
           const anySubItemActive =
-            item.items?.some((subItem) => isActive(subItem.url)) ||
-            isItemActive;
+            item.items?.some((subItem) => isActive(subItem.url)) || isItemActive;
 
           return (
             <Collapsible
@@ -103,10 +94,7 @@ export function NavMain({
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    isActive={isItemActive}
-                  >
+                  <SidebarMenuButton tooltip={item.title} isActive={isItemActive}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -120,10 +108,7 @@ export function NavMain({
 
                       return (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={isSubItemActive}
-                          >
+                          <SidebarMenuSubButton asChild isActive={isSubItemActive}>
                             <Link to={subItemUrl}>
                               <span>{subItem.title}</span>
                             </Link>
