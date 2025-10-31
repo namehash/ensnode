@@ -1,7 +1,8 @@
-import { Float } from "@headlessui-float/react";
 import { Popover } from "@headlessui/react";
+import { Float } from "@headlessui-float/react";
 import cc from "classcat";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 type Props = {
   trigger: React.ReactNode;

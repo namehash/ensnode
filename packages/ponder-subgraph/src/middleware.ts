@@ -10,17 +10,19 @@
 import { maxAliasesPlugin } from "@escape.tech/graphql-armor-max-aliases";
 import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
-import { GraphQLSchema } from "graphql";
+import type { GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
+
 import { buildDataLoaderCache } from "./graphql";
+import type { Drizzle } from "./types";
 
 export function subgraphGraphQLMiddleware(
   {
     drizzle,
     graphqlSchema,
   }: {
-    drizzle: any;
+    drizzle: Drizzle;
     graphqlSchema: GraphQLSchema;
   },
   {
@@ -51,9 +53,10 @@ export function subgraphGraphQLMiddleware(
       process.env.NODE_ENV === "production"
         ? true
         : {
-            maskError(error: any) {
-              console.error(error.originalError);
-              return error;
+            maskError(error: unknown) {
+              console.error(error);
+              if (error instanceof Error) return error;
+              return new Error(`Internal Server Error`);
             },
           },
     logging: false,
@@ -67,7 +70,8 @@ export function subgraphGraphQLMiddleware(
   });
 
   return createMiddleware(async (c) => {
-    const response = await yoga.handle(c.req.raw);
+    const response = await yoga.handle(c.req.raw, c.var);
+
     // TODO: Figure out why Yoga is returning 500 status codes for GraphQL errors.
     // @ts-expect-error
     response.status = 200;

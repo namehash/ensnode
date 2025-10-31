@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-metadata",
-  "version": "0.35.0",
+  "version": "0.36.0",
   "type": "module",
   "description": "A Hono middleware for making Ponder app metadata available to clients.",
   "license": "MIT",
@@ -45,7 +45,6 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "hono": "catalog:",

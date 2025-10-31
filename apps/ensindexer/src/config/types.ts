@@ -1,40 +1,12 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  type DatabaseSchemaName,
+  type DatabaseUrl,
+  RpcConfig,
+  type RpcConfigs,
+} from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
-
-/**
- * RPC configuration for indexing a single chain.
- *
- * Ponder automatically manages the use of RPC endpoints for each indexed chain.
- *
- * @see https://ponder.sh/docs/config/chains#rpc-endpoints
- * @see https://ponder.sh/docs/config/chains#websocket
- */
-export interface RpcConfig {
-  /**
-   * The HTTP protocol URLs for RPCs to the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
-   * For proper indexing behavior, each RPC must support high request rate limits (ex: 500+ requests a second).
-   *
-   * The order of RPC URLs matters. The first HTTP/HTTPS RPC for a given chain
-   * will be the RPC that is used for Resolution API request processing.
-   *
-   * Invariants:
-   * - Includes one or more URLs.
-   * - Each URL in the array is guaranteed to be distinct.
-   * - The protocol of each URL is guaranteed to be "http" or "https".
-   */
-  httpRPCs: [URL, ...URL[]];
-
-  /**
-   * The websocket RPC for the chain.
-   *
-   * If defined, it is used to accelerate discovery of new "realtime" blocks.
-   *
-   * Invariants:
-   * - If defined, the protocol of the URL is guaranteed to be "ws" or "wss".
-   */
-  websocketRPC?: URL;
-}
 
 /**
  * The complete runtime configuration for an ENSIndexer instance.
@@ -86,7 +58,7 @@ export interface ENSIndexerConfig {
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
    */
-  databaseSchemaName: string;
+  databaseSchemaName: DatabaseSchemaName;
 
   /**
    * A set of {@link PluginName}s indicating which plugins to activate.
@@ -109,7 +81,7 @@ export interface ENSIndexerConfig {
    *   chain IDs that are not included in {@link indexedChainIds}. In other words, the keys
    *   of {@link rpcConfigs} is a superset of {@link indexedChainIds}.
    */
-  rpcConfigs: Map<ChainId, RpcConfig>;
+  rpcConfigs: RpcConfigs;
 
   /**
    * Indexed Chain IDs
@@ -124,7 +96,7 @@ export interface ENSIndexerConfig {
    * Invariants:
    * - The URL must be a valid PostgreSQL connection string
    */
-  databaseUrl: string;
+  databaseUrl: DatabaseUrl;
 
   /**
    * The "primary" ENSIndexer service URL
@@ -199,36 +171,4 @@ export interface ENSIndexerConfig {
    *   composed of Interpreted Labels.
    */
   isSubgraphCompatible: boolean;
-}
-
-/**
- * Represents the raw unvalidated environment variable for the RPCs associated with a chain.
- *
- * May contain a comma separated list of one or more URLs.
- */
-export type RpcConfigEnvironment = string;
-
-/**
- * Represents the raw, unvalidated environment variables for the ENSIndexer application.
- *
- * Keys correspond to the environment variable names, and all values are optional strings, reflecting
- * their state in `process.env`. This interface is intended to be the source type which then gets
- * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
- */
-export interface ENSIndexerEnvironment {
-  DATABASE_SCHEMA?: string;
-  DATABASE_URL?: string;
-  NAMESPACE?: string;
-  PLUGINS?: string;
-  ENSRAINBOW_URL?: string;
-  LABEL_SET_ID?: string;
-  LABEL_SET_VERSION?: string;
-  ENSINDEXER_URL?: string;
-  START_BLOCK?: string;
-  END_BLOCK?: string;
-  SUBGRAPH_COMPAT?: string;
-
-  [x: `RPC_URL_${number}`]: string | undefined;
-  ALCHEMY_API_KEY?: string;
-  DRPC_API_KEY?: string;
 }

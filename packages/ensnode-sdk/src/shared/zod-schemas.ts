@@ -1,4 +1,4 @@
-import { type CoinType } from "@ensdomains/address-encoder";
+import type { CoinType } from "@ensdomains/address-encoder";
 import { type Address, isAddress } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -9,6 +9,7 @@ import { type Address, isAddress } from "viem";
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
+
 import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import type {
@@ -85,8 +86,14 @@ export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
  */
 export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") =>
   z
-    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
-    .pipe(z.coerce.number({ error: `${valueLabel} must represent a positive integer (>0).` }))
+    .string({
+      error: `${valueLabel} must be a string representing a chain ID.`,
+    })
+    .pipe(
+      z.coerce.number({
+        error: `${valueLabel} must represent a positive integer (>0).`,
+      }),
+    )
     .pipe(makeChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -104,8 +111,14 @@ export const makeDefaultableChainIdStringSchema = (
   valueLabel: string = "Defaultable Chain ID String",
 ) =>
   z
-    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
-    .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
+    .string({
+      error: `${valueLabel} must be a string representing a chain ID.`,
+    })
+    .pipe(
+      z.coerce.number({
+        error: `${valueLabel} must represent a non-negative integer (>=0).`,
+      }),
+    )
     .pipe(makeDefaultableChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -115,7 +128,9 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
   z
     .number({ error: `${valueLabel} must be a number.` })
     .int({ error: `${valueLabel} must be an integer.` })
-    .nonnegative({ error: `${valueLabel} must be a non-negative integer (>=0).` })
+    .nonnegative({
+      error: `${valueLabel} must be a non-negative integer (>=0).`,
+    })
     .transform((val) => val as CoinType);
 
 /**
@@ -123,8 +138,14 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
  */
 export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String") =>
   z
-    .string({ error: `${valueLabel} must be a string representing a coin type.` })
-    .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
+    .string({
+      error: `${valueLabel} must be a string representing a coin type.`,
+    })
+    .pipe(
+      z.coerce.number({
+        error: `${valueLabel} must represent a non-negative integer (>=0).`,
+      }),
+    )
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -165,6 +186,7 @@ export const makeUrlSchema = (valueLabel: string = "Value") =>
   z
     .url({
       error: `${valueLabel} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
+      abort: true,
     })
     .transform((v) => new URL(v));
 
@@ -207,7 +229,9 @@ export const makeBlockrangeSchema = (valueLabel: string = "Value") =>
 
         return true;
       },
-      { error: `${valueLabel}: startBlock must be before or equal to endBlock` },
+      {
+        error: `${valueLabel}: startBlock must be before or equal to endBlock`,
+      },
     );
 
 /**
@@ -232,12 +256,4 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     error() {
       return `Invalid ${valueLabel}. Supported ENS namespace IDs are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
-  });
-
-/**
- * Parses a numeric value as a port number.
- */
-export const makePortSchema = (valueLabel: string = "Port") =>
-  makePositiveIntegerSchema(valueLabel).max(65535, {
-    error: `${valueLabel} must be an integer between 1 and 65535.`,
   });

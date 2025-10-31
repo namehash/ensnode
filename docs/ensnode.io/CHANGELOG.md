@@ -1,5 +1,19 @@
 # @docs/ensnode
 
+## 0.36.0
+
+### Minor Changes
+
+- [#1015](https://github.com/namehash/ensnode/pull/1015) [`6b5bfd0`](https://github.com/namehash/ensnode/commit/6b5bfd00a8d8217a76da0bec9d8ee6685adc29e9) Thanks [@tk-o](https://github.com/tk-o)! - Rename chain indexing status from `Unstarted` to `Queued`.
+
+- [#1157](https://github.com/namehash/ensnode/pull/1157) [`ffb4103`](https://github.com/namehash/ensnode/commit/ffb4103aeb2ce3cb4c5a37885de62fa4f435362d) Thanks [@tk-o](https://github.com/tk-o)! - Update `Terminology` page to include information about ENS Normalize version.
+
+- [#1095](https://github.com/namehash/ensnode/pull/1095) [`16b4748`](https://github.com/namehash/ensnode/commit/16b474849386387141fe2534574f8b16defbcb09) Thanks [@tk-o](https://github.com/tk-o)! - Implement refined Indexing Status API data model.
+
+- [#1098](https://github.com/namehash/ensnode/pull/1098) [`d2e6647`](https://github.com/namehash/ensnode/commit/d2e66472cfb7962c3bfe355c9c1587e3e50f2c9d) Thanks [@notrab](https://github.com/notrab)! - use new connection url param name for ensnode direct links
+
+- [#1054](https://github.com/namehash/ensnode/pull/1054) [`4e7422a`](https://github.com/namehash/ensnode/commit/4e7422aed44239548dacf4eba8f2dd9dd1ecd245) Thanks [@Y3drk](https://github.com/Y3drk)! - Add a placeholder docs section for ENSDb
+
 ## 0.35.0
 
 ## 0.34.0

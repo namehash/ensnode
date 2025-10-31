@@ -1,26 +1,27 @@
+import config from "@/config";
+
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
-import config from "@/config";
 import { getENSRootChainId } from "@ensnode/datasources";
 import {
   ADDR_REVERSE_NODE,
-  InterpretedLabel,
-  InterpretedName,
-  type LabelHash,
-  LiteralLabel,
-  type Node,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
   encodeLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
+  type LabelHash,
+  type LiteralLabel,
   literalLabelToInterpretedLabel,
   makeSubdomainNode,
+  type Node,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
-import { type EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount, upsertResolver } from "@/lib/subgraph/db-helpers";
 import { makeResolverId } from "@/lib/subgraph/ids";
 import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
@@ -80,7 +81,9 @@ export const handleNewOwner =
 
     // if the domain doesn't yet have a name, attempt to construct it here
     if (domain.name === null) {
-      const parent = await context.db.find(schema.subgraph_domain, { id: parentNode });
+      const parent = await context.db.find(schema.subgraph_domain, {
+        id: parentNode,
+      });
 
       let healedLabel: LiteralLabel | null = null;
 

@@ -13,4 +13,4 @@ import { useActiveConnection } from "./use-active-connection";
  * @returns The namespace from the active ENSNode configuration
  * @throws Error if no active ENSNode Config is available
  */
-export const useActiveNamespace = () => useActiveConnection().namespace;
+export const useActiveNamespace = () => useActiveConnection().ensIndexerPublicConfig.namespace;

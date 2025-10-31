@@ -1,5 +1,4 @@
 import { BaseEdge, type EdgeProps, getSmoothStepPath } from "@xyflow/react";
-import React from "react";
 
 export function AnimatedSVGEdge({
   id,
@@ -20,7 +19,7 @@ export function AnimatedSVGEdge({
     targetPosition,
   });
 
-  const distance = Math.sqrt(Math.pow(targetX - sourceX, 2) + Math.pow(targetY - sourceY, 2));
+  const distance = Math.sqrt((targetX - sourceX) ** 2 + (targetY - sourceY) ** 2);
   const duration = Math.round(distance * 0.02 * 100) / 100;
 
   return (

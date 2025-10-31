@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "0.35.0",
+  "version": "0.36.0",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
@@ -44,17 +44,19 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
+    "pg-connection-string": "^2.9.0",
     "tsup": "^8.3.6",
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@adraffy/ens-normalize": "catalog:",
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",
+    "caip": "^1.1.1",
     "zod": "catalog:"
   }
 }

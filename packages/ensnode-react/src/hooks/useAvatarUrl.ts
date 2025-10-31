@@ -1,13 +1,13 @@
 "use client";
 
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+
 import {
   type BrowserSupportedAssetUrl,
+  type BrowserSupportedAssetUrlProxy,
+  buildBrowserSupportedAvatarUrl,
   type Name,
-  buildEnsMetadataServiceAvatarUrl,
-  isHttpProtocol,
-  toBrowserSupportedUrl,
 } from "@ensnode/ensnode-sdk";
-import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
 import { useENSIndexerConfig } from "./useENSIndexerConfig";
@@ -28,46 +28,48 @@ export interface UseAvatarUrlParameters extends QueryParameter<string | null>, C
    */
   name: Name | null;
   /**
-   * Optional custom fallback function to get avatar URL when the avatar text record
-   * uses a non-http/https protocol (e.g., ipfs://, ar://, eip155:/).
+   * Optional function to build a BrowserSupportedAssetUrl for a name's avatar image
+   *  when the avatar text record uses a non-browser-supported protocol (e.g., ipfs://, ar://, eip155:/).
    *
-   * If not provided, defaults to using the ENS Metadata Service as a fallback proxy for browser-supported avatar urls.
+   * If undefined, defaults to using the ENS Metadata Service as a proxy for browser-supported avatar urls.
    *
    * IMPORTANT: Custom implementations MUST use `toBrowserSupportedUrl()` to create BrowserSupportedAssetUrl values,
    * or return the result from `buildEnsMetadataServiceAvatarUrl()`. The returned URL is validated at runtime
-   * to ensure it passes the `isHttpProtocol` check.
+   * to ensure it passes the `isBrowserSupportedProtocol` check (http, https, or data protocols).
    *
-   * @param name - The ENS name to get the avatar URL for
-   * @returns Promise resolving to the browser supported avatar URL, or null if unavailable
+   * @param name - The ENS name to get the browser supported avatar URL for
+   * @param avatarUrl - The avatar URL parsed as a URL object, allowing protocol-specific logic (e.g., ipfs:// vs ar://)
+   * @param namespaceId - The ENS namespace identifier for the name
+   * @returns The browser supported avatar URL, or null if unavailable
    */
-  browserUnsupportedProtocolFallback?: (name: Name) => Promise<BrowserSupportedAssetUrl | null>;
+  browserSupportedAvatarUrlProxy?: BrowserSupportedAssetUrlProxy;
 }
 
 /**
  * Result returned by the useAvatarUrl hook.
  *
- * Invariant: If rawAvatarUrl is null, then browserSupportedAvatarUrl must also be null.
+ * Invariant: If rawAvatarTextRecord is null, then browserSupportedAvatarUrl must also be null.
  */
 export interface UseAvatarUrlResult {
   /**
-   * The original avatar text record value from ENS, before any normalization or fallback processing.
+   * The original avatar text record value from ENS, before any normalization or proxy processing.
    * Null if the avatar text record is not set for the ENS name.
    */
-  rawAvatarUrl: string | null;
+  rawAvatarTextRecord: string | null;
   /**
-   * A browser-supported (http/https) avatar URL ready for use in <img> tags.
-   * Populated when the avatar uses http/https protocol or when a fallback successfully resolves.
-   * Null if the avatar text record is not set, or if the avatar uses a non-http/https protocol
-   * and either no fallback is available or the fallback fails to resolve.
+   * A browser-supported (http/https/data) avatar URL ready for use in <img> tags.
+   * Populated when the rawAvatarTextRecord is a valid URL that uses a browser-supported protocol (http, https, or data) or when a url is available to load the avatar using a proxy.
+   * Null if the avatar text record is not set, if the avatar text record is malformed/invalid,
+   * or if the avatar uses a non-browser-supported protocol and no url is known for how to load the avatar using a proxy.
    */
   browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
   /**
-   * Indicates whether the browserSupportedAvatarUrl was obtained via the fallback mechanism.
-   * True if a fallback successfully resolved the URL.
-   * False if the URL was used directly from the avatar text record, or if there's no avatar,
-   * or if the fallback failed to resolve.
+   * Indicates whether the browserSupportedAvatarUrl uses a proxy service.
+   * True if the url uses a proxy (either the default ENS Metadata Service or a custom proxy).
+   * False if the URL comes directly from the avatar text record, or if there's no avatar text record,
+   * or if the avatar text record has an invalid format, or if no url is known for loading the avatar using a proxy.
    */
-  fromFallback: boolean;
+  usesProxy: boolean;
 }
 
 /**
@@ -76,9 +78,10 @@ export interface UseAvatarUrlResult {
  * This hook attempts to get the avatar URL by:
  * 1. Fetching the avatar text record using useRecords
  * 2. Normalizing the avatar text record as a URL
- * 3. Returning the URL if it uses http or https protocol
- * 4. Falling back to the ENS Metadata Service (which proxies decentralized storage protocols
- *    like IPFS/Arweave to browser-accessible URLs) or a custom fallback for other protocols
+ * 3. Returning the URL if it uses a browser-supported protocol (http, https, or data)
+ * 4. For valid URLs with non-browser-supported protocols (e.g., ipfs://, ar://), using the ENS Metadata Service
+ *    (or a custom proxy) to convert them to browser-accessible URLs
+ * 5. For malformed/invalid URLs, returning null without attempting proxy conversion
  *
  * @param parameters - Configuration for the avatar URL resolution
  * @returns Query result with the avatar URL, loading state, and error handling
@@ -108,15 +111,33 @@ export interface UseAvatarUrlResult {
  *
  * @example
  * ```typescript
- * // With custom fallback
- * import { useAvatarUrl, buildEnsMetadataServiceAvatarUrl } from "@ensnode/ensnode-react";
+ * // With custom IPFS gateway proxy
+ * import { useAvatarUrl, toBrowserSupportedUrl, defaultBrowserSupportedAssetUrlProxy } from "@ensnode/ensnode-sdk";
  *
- * function ProfileAvatar({ name, namespaceId }: { name: string; namespaceId: string }) {
+ * function ProfileAvatar({ name }: { name: string }) {
  *   const { data, isLoading } = useAvatarUrl({
  *     name,
- *     browserUnsupportedProtocolFallback: async (name) => {
- *       // Use the ENS Metadata Service for the current namespace
- *       return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+ *     browserSupportedAvatarUrlProxy: (name, avatarUrl, namespaceId) => {
+ *       // Handle IPFS protocol URLs with a custom gateway
+ *       if (avatarUrl.protocol === 'ipfs:') {
+ *         // Extract CID and optional path from ipfs://{CID}/{path}
+ *         const ipfsPath = avatarUrl.href.replace('ipfs://', '');
+ *
+ *         // Use ipfs.io public gateway (best-effort, not for production)
+ *         return toBrowserSupportedUrl(`https://ipfs.io/ipfs/${ipfsPath}`);
+ *
+ *         // Or use your own gateway:
+ *         // return toBrowserSupportedUrl(`https://my-gateway.example.com/ipfs/${ipfsPath}`);
+ *       }
+ *
+ *       // Handle Arweave protocol
+ *       if (avatarUrl.protocol === 'ar:') {
+ *         const arweaveId = avatarUrl.href.replace('ar://', '');
+ *         return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
+ *       }
+ *
+ *       // For other protocols, fall back to the ENS Metadata Service
+ *       return defaultBrowserSupportedAssetUrlProxy(name, avatarUrl, namespaceId);
  *     }
  *   });
  *
@@ -139,7 +160,7 @@ export interface UseAvatarUrlResult {
 export function useAvatarUrl(
   parameters: UseAvatarUrlParameters,
 ): UseQueryResult<UseAvatarUrlResult, Error> {
-  const { name, config, query: queryOptions, browserUnsupportedProtocolFallback } = parameters;
+  const { name, config, query: queryOptions, browserSupportedAvatarUrlProxy } = parameters;
   const _config = useENSNodeConfig(config);
 
   const canEnable = name !== null;
@@ -151,7 +172,6 @@ export function useAvatarUrl(
     query: { enabled: canEnable },
   });
 
-  // Get namespace from config
   const configQuery = useENSIndexerConfig({ config: _config });
 
   // Construct query options object
@@ -166,91 +186,41 @@ export function useAvatarUrl(
       name,
       _config.client.url.href,
       configQuery.data?.namespace,
-      !!browserUnsupportedProtocolFallback,
+      !!browserSupportedAvatarUrlProxy,
       recordsQuery.data?.records?.texts?.avatar ?? null,
     ] as const,
     queryFn: async (): Promise<UseAvatarUrlResult> => {
       if (!name || !recordsQuery.data || !configQuery.data) {
         return {
-          rawAvatarUrl: null,
+          rawAvatarTextRecord: null,
           browserSupportedAvatarUrl: null,
-          fromFallback: false,
+          usesProxy: false,
         };
       }
 
       // Invariant: configQuery.data.namespace is guaranteed to be defined when configQuery.data exists
       const namespaceId = configQuery.data.namespace;
 
-      const avatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
+      const rawAvatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
-      // If no avatar text record, return null values
-      if (!avatarTextRecord) {
-        return {
-          rawAvatarUrl: null,
-          browserSupportedAvatarUrl: null,
-          fromFallback: false,
-        };
-      }
+      const result = buildBrowserSupportedAvatarUrl(
+        rawAvatarTextRecord,
+        name,
+        namespaceId,
+        browserSupportedAvatarUrlProxy,
+      );
 
-      try {
-        const browserSupportedUrl = toBrowserSupportedUrl(avatarTextRecord);
-
-        return {
-          rawAvatarUrl: avatarTextRecord,
-          browserSupportedAvatarUrl: browserSupportedUrl,
-          fromFallback: false,
-        };
-      } catch {
-        // Continue to fallback handling below
-      }
-
-      // Create default fallback using ENS Metadata Service
-      const defaultFallback = async (name: Name): Promise<BrowserSupportedAssetUrl | null> => {
-        return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
-      };
-
-      // Use custom fallback if provided, otherwise use default
-      const activeFallback: (name: Name) => Promise<BrowserSupportedAssetUrl | null> =
-        browserUnsupportedProtocolFallback ?? defaultFallback;
-
-      // For other protocols (ipfs, data, NFT URIs, etc.), use fallback if available
-      if (activeFallback) {
-        try {
-          const fallbackUrl = await activeFallback(name);
-
-          // Invariant: BrowserSupportedAssetUrl must pass isHttpProtocol check
-          if (fallbackUrl !== null && !isHttpProtocol(fallbackUrl)) {
-            throw new Error(
-              `browserUnsupportedProtocolFallback returned a URL with unsupported protocol: ${fallbackUrl.protocol}. BrowserSupportedAssetUrl must use http or https protocol.`,
-            );
-          }
-
-          return {
-            rawAvatarUrl: avatarTextRecord,
-            browserSupportedAvatarUrl: fallbackUrl,
-            fromFallback: fallbackUrl !== null,
-          };
-        } catch {
-          return {
-            rawAvatarUrl: avatarTextRecord,
-            browserSupportedAvatarUrl: null,
-            fromFallback: false,
-          };
-        }
-      }
-
-      // No fallback available
       return {
-        rawAvatarUrl: avatarTextRecord,
-        browserSupportedAvatarUrl: null,
-        fromFallback: false,
+        rawAvatarTextRecord: result.rawAssetTextRecord,
+        browserSupportedAvatarUrl: result.browserSupportedAssetUrl,
+        usesProxy: result.usesProxy,
       };
     },
     retry: false,
     placeholderData: {
-      rawAvatarUrl: null,
+      rawAvatarTextRecord: null,
       browserSupportedAvatarUrl: null,
-      fromFallback: false,
+      usesProxy: false,
     } as const,
   };
 

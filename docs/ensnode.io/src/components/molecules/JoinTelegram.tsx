@@ -1,6 +1,7 @@
 import { Button, Link } from "@namehash/namekit-react";
 import { TelegramIcon } from "@workspace/docs/ensrainbow.io/src/components/atoms/icons/TelegramIcon.tsx";
 import { Balancer } from "react-wrap-balancer";
+
 import TelegramBanner from "../../assets/telegram_image.svg";
 import MobileTelegramBanner from "../../assets/telegram_mobile_image.svg";
 

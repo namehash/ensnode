@@ -64,5 +64,7 @@ export interface ProtocolSpan {
   events: SpanEvent[];
 }
 
-export type ProtocolSpanTreeNode = ProtocolSpan & { children: ProtocolSpanTreeNode[] };
+export type ProtocolSpanTreeNode = ProtocolSpan & {
+  children: ProtocolSpanTreeNode[];
+};
 export type ProtocolTrace = ProtocolSpanTreeNode[];

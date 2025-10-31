@@ -1,16 +1,15 @@
-import { PluginName } from "@ensnode/ensnode-sdk";
+import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import type { MergedTypes } from "@/lib/lib-helpers";
 
+// Core-Schema-Indepdendent Plugins
+import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
+import referralsPlugin from "./referrals/plugin";
 // Subgraph-Schema Core Plugins
 import basenamesPlugin from "./subgraph/plugins/basenames/plugin";
 import lineaNamesPlugin from "./subgraph/plugins/lineanames/plugin";
 import subgraphPlugin from "./subgraph/plugins/subgraph/plugin";
 import threednsPlugin from "./subgraph/plugins/threedns/plugin";
-
-// Core-Schema-Indepdendent Plugins
-import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
-import referralsPlugin from "./referrals/plugin";
 import tokenScopePlugin from "./tokenscope/plugin";
 
 export const ALL_PLUGINS = [

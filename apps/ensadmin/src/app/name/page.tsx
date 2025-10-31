@@ -1,13 +1,17 @@
 "use client";
 
-import { NameDisplay, NameLink, getNameDetailsRelativePath } from "@/components/identity/utils";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type ChangeEvent, useState } from "react";
+
+import type { Name } from "@ensnode/ensnode-sdk";
+
+import { getNameDetailsRelativePath, NameDisplay, NameLink } from "@/components/identity/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { Name } from "@ensnode/ensnode-sdk";
-import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+
+import { NameDetailPageContent } from "./_components/NameDetailPageContent";
 
 const EXAMPLE_NAMES = [
   "vitalik.eth",
@@ -26,6 +30,8 @@ const EXAMPLE_NAMES = [
 
 export default function ExploreNamesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nameFromQuery = searchParams.get("name");
   const [rawInputName, setRawInputName] = useState<Name>("");
 
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
@@ -46,6 +52,10 @@ export default function ExploreNamesPage() {
 
     setRawInputName(e.target.value);
   };
+
+  if (nameFromQuery) {
+    return <NameDetailPageContent name={nameFromQuery} />;
+  }
 
   return (
     <section className="flex flex-col gap-6 p-6">

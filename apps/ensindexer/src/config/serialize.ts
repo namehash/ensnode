@@ -1,10 +1,13 @@
 import {
-  UrlString,
   serializeChainId,
   serializeIndexedChainIds,
   serializeUrl,
+  type UrlString,
 } from "@ensnode/ensnode-sdk";
-import { SerializedENSIndexerConfig } from "./serialized-types";
+
+import { redactENSIndexerConfig } from "@/config/redact";
+
+import type { SerializedENSIndexerConfig } from "./serialized-types";
 import type { ENSIndexerConfig } from "./types";
 
 /**
@@ -28,39 +31,6 @@ function serializeRpcConfigs(
   }
 
   return serializedRpcConfigs;
-}
-
-/**
- * Redact sensitive values for {@link ENSIndexerConfig}.
- */
-function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
-  const REDACTED = "*****";
-
-  // redact database URL
-  const redactedDatabaseUrl = REDACTED;
-
-  // redact RPC configs (including RPC URLs)
-  const redactedRpcConfigs: ENSIndexerConfig["rpcConfigs"] = new Map();
-
-  for (const [chainId, rpcConfig] of config.rpcConfigs.entries()) {
-    const redactURL = (sourceURL: URL) => new URL(`/${REDACTED}`, sourceURL.href);
-
-    const redactedHttpRPCs = rpcConfig.httpRPCs.map(redactURL) as [URL, ...URL[]]; // guaranteed to include at least one URL
-    const redactedWebsocketRPC = rpcConfig.websocketRPC
-      ? redactURL(rpcConfig.websocketRPC)
-      : undefined;
-
-    redactedRpcConfigs.set(chainId, {
-      httpRPCs: redactedHttpRPCs,
-      websocketRPC: redactedWebsocketRPC,
-    });
-  }
-
-  return {
-    ...config,
-    databaseUrl: redactedDatabaseUrl,
-    rpcConfigs: redactedRpcConfigs,
-  };
 }
 
 /**

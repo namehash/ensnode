@@ -1,4 +1,4 @@
-import { QueryClient, defaultShouldDehydrateQuery, isServer } from "@tanstack/react-query";
+import { defaultShouldDehydrateQuery, isServer, QueryClient } from "@tanstack/react-query";
 
 /**
  * Create a query client to be used on the server and browser.
@@ -10,7 +10,6 @@ function makeQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 5 * 1000, // 5 seconds
-        refetchInterval: 10 * 1000, // 10 seconds
       },
       dehydrate: {
         // include pending queries in dehydration
@@ -21,7 +20,7 @@ function makeQueryClient() {
   });
 }
 
-let browserQueryClient: QueryClient | undefined = undefined;
+let browserQueryClient: QueryClient | undefined;
 
 /**
  * Get a query client.

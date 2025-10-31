@@ -1,10 +1,12 @@
 "use client";
 
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { useMemo } from "react";
+
 import { useProfile } from "@ensnode/ensnode-react";
 import type { Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { getCommonCoinTypes } from "@ensnode/ensnode-sdk";
-import { useMemo } from "react";
+
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 
 /**
  * Strongly-typed social link identifiers supported by ENSAdmin profiles.

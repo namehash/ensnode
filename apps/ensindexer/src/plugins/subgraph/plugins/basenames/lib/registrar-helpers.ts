@@ -1,5 +1,6 @@
-import type { RegistrarManagedName } from "@/lib/types";
 import type { ENSNamespaceId } from "@ensnode/datasources";
+
+import type { RegistrarManagedName } from "@/lib/types";
 
 /**
  * Get registrar managed name for `basenames` plugin for selected ENS namespace.

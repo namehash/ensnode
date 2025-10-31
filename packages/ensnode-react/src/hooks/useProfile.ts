@@ -1,12 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import type {
-  Name,
-  ResolverRecordsSelection,
-  ResolveRecordsResponse,
-} from "@ensnode/ensnode-sdk";
 import type { UseQueryResult } from "@tanstack/react-query";
+import { useMemo } from "react";
+
+import type { Name, ResolveRecordsResponse, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import type { ConfigParameter, QueryParameter } from "../types";
 import { useRecords } from "./useRecords";
@@ -16,9 +13,7 @@ import { useRecords } from "./useRecords";
  *
  * @template RECORDS_SELECTION - The resolver records selection type
  */
-export type UseProfileParameters<
-  RECORDS_SELECTION extends ResolverRecordsSelection
-> = {
+export type UseProfileParameters<RECORDS_SELECTION extends ResolverRecordsSelection> = {
   /**
    * The ENS name to resolve profile data for.
    * If null, the query will not be executed.
@@ -59,11 +54,8 @@ export type UseProfileParameters<
  */
 export type ProfileTransformFunction<
   RECORDS_SELECTION extends ResolverRecordsSelection,
-  TRANSFORMED_PROFILE
-> = (
-  name: Name,
-  recordsResponse: ResolveRecordsResponse<RECORDS_SELECTION>
-) => TRANSFORMED_PROFILE;
+  TRANSFORMED_PROFILE,
+> = (name: Name, recordsResponse: ResolveRecordsResponse<RECORDS_SELECTION>) => TRANSFORMED_PROFILE;
 
 /**
  * Hook for fetching ENS records with custom transformation logic.
@@ -199,12 +191,9 @@ export type ProfileTransformFunction<
  * }
  * ```
  */
-export function useProfile<
-  RECORDS_SELECTION extends ResolverRecordsSelection,
-  TRANSFORMED_PROFILE
->(
+export function useProfile<RECORDS_SELECTION extends ResolverRecordsSelection, TRANSFORMED_PROFILE>(
   parameters: UseProfileParameters<RECORDS_SELECTION>,
-  transform: ProfileTransformFunction<RECORDS_SELECTION, TRANSFORMED_PROFILE>
+  transform: ProfileTransformFunction<RECORDS_SELECTION, TRANSFORMED_PROFILE>,
 ): UseQueryResult<TRANSFORMED_PROFILE | undefined, Error> {
   const { name, selection, config, query } = parameters;
 
@@ -217,9 +206,7 @@ export function useProfile<
 
   // Memoize the transformed profile data
   // Only recompute when records data or transform function changes
-  const transformedProfileData = useMemo<
-    TRANSFORMED_PROFILE | undefined
-  >(() => {
+  const transformedProfileData = useMemo<TRANSFORMED_PROFILE | undefined>(() => {
     // Invariant: Only transform when we have successful data
     if (!recordsQueryResult.data || !name) {
       return undefined;

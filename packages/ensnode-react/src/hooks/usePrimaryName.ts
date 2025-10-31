@@ -1,9 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ConfigParameter, UsePrimaryNameParameters } from "../types";
+
+import type { UsePrimaryNameParameters, WithSDKConfigParameter } from "../types";
 import { createPrimaryNameQueryOptions } from "../utils/query";
-import { useENSNodeConfig } from "./useENSNodeConfig";
+import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
 /**
  * Resolves the primary name of a specified address (Reverse Resolution).
@@ -36,9 +37,9 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  * }
  * ```
  */
-export function usePrimaryName(parameters: UsePrimaryNameParameters & ConfigParameter) {
+export function usePrimaryName(parameters: UsePrimaryNameParameters & WithSDKConfigParameter) {
   const { config, query = {}, address, ...args } = parameters;
-  const _config = useENSNodeConfig(config);
+  const _config = useENSNodeSDKConfig(config);
 
   const canEnable = address !== null;
 

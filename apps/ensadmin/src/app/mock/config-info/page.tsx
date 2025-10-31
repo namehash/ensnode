@@ -1,17 +1,19 @@
 "use client";
 
-import { ENSNodeConfigInfo } from "@/components/connection/config-info";
-import { ENSNodeConfigProps } from "@/components/connection/config-info/config-info";
+import { useMemo, useState } from "react";
+
+import { deserializeENSApiPublicConfig, SerializedENSApiPublicConfig } from "@ensnode/ensnode-sdk";
+
+import {
+  ENSNodeConfigInfoView,
+  ENSNodeConfigInfoViewProps,
+} from "@/components/connection/config-info/config-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  SerializedENSIndexerPublicConfig,
-  deserializeENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
-import { useMemo, useState } from "react";
-import mockDataJson from "./data.json";
 
-const mockConfigData = mockDataJson as Record<string, SerializedENSIndexerPublicConfig>;
+import mockDataJson from "./data.json" with { type: "json" };
+
+const mockConfigData = mockDataJson as Record<string, SerializedENSApiPublicConfig>;
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
@@ -19,10 +21,10 @@ type ConfigVariant = keyof typeof mockConfigData | LoadingVariant;
 const DEFAULT_VARIANT = "Alpha Mainnet";
 export default function MockConfigPage() {
   const [selectedConfig, setSelectedConfig] = useState<ConfigVariant>(DEFAULT_VARIANT);
-  const props: ENSNodeConfigProps = useMemo(() => {
+  const props: ENSNodeConfigInfoViewProps = useMemo(() => {
     switch (selectedConfig) {
       case "Loading":
-        return {};
+        return { isLoading: true };
 
       case "Loading Error":
         return {
@@ -34,15 +36,18 @@ export default function MockConfigPage() {
 
       default:
         try {
-          const config = deserializeENSIndexerPublicConfig(mockConfigData[selectedConfig]);
-          return { ensIndexerConfig: config, ensAdminVersion: "0.35.0" };
+          const config = deserializeENSApiPublicConfig(mockConfigData[selectedConfig]);
+          return { ensApiPublicConfig: config };
         } catch (error) {
           const errorMessage =
             error instanceof Error
               ? error.message
               : "Unknown ENSIndexerPublicConfig deserialization error";
           return {
-            error: { title: "Deserialization Error", description: errorMessage },
+            error: {
+              title: "Deserialization Error",
+              description: errorMessage,
+            },
           };
         }
     }
@@ -52,7 +57,7 @@ export default function MockConfigPage() {
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle>Mock: ENSNodeConfigInfo</CardTitle>
+          <CardTitle className="text-2xl leading-normal">Mock: ENSNodeConfigInfo</CardTitle>
           <CardDescription>Select a mock ENSNodeConfigInfo variant</CardDescription>
         </CardHeader>
 
@@ -72,7 +77,7 @@ export default function MockConfigPage() {
         </CardContent>
       </Card>
 
-      <ENSNodeConfigInfo {...props} />
+      <ENSNodeConfigInfoView {...props} />
     </section>
   );
 }

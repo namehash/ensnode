@@ -1,7 +1,7 @@
-import { Address, Hex } from "viem";
+import type { Address, Hex } from "viem";
 
-import { Price } from "@/lib/currencies";
-import { SupportedNFT } from "@/lib/tokenscope/assets";
+import type { Price } from "@/lib/currencies";
+import type { SupportedNFT } from "@/lib/tokenscope/assets";
 
 export interface SupportedPayment {
   price: Price;

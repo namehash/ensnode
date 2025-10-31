@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { PrometheusMetrics, parsePrometheusText } from "./prometheus-metrics";
 
 describe("prom-parser", () => {
@@ -92,14 +93,18 @@ ponder_indexing_has_error 0
 
     it("should get network-specific metrics", () => {
       // Test network 1
-      expect(parser.getValue("ponder_historical_total_indexing_seconds", { network: "1" })).toBe(
-        251224935,
-      );
+      expect(
+        parser.getValue("ponder_historical_total_indexing_seconds", {
+          network: "1",
+        }),
+      ).toBe(251224935);
 
       // Test network 8453
-      expect(parser.getValue("ponder_historical_total_indexing_seconds", { network: "8453" })).toBe(
-        251224935,
-      );
+      expect(
+        parser.getValue("ponder_historical_total_indexing_seconds", {
+          network: "8453",
+        }),
+      ).toBe(251224935);
     });
 
     it("should get all network IDs", () => {

@@ -99,3 +99,99 @@ export class LruCache<KeyType extends string, ValueType> implements Cache<KeyTyp
     return this._capacity;
   }
 }
+
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
+
+/**
+ * Cache that maps from string -> ValueType with TTL (time-to-live) expiration.
+ *
+ * Items are automatically removed when they expire.
+ */
+export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyType, ValueType> {
+  private readonly _cache = new Map<string, CacheEntry<ValueType>>();
+  private readonly _ttlMs: number;
+
+  /**
+   * Create a new TTL cache with the given TTL.
+   *
+   * @param ttlMs Time-to-live in milliseconds. Items expire after this duration.
+   * @throws Error if ttlMs is not positive.
+   */
+  public constructor(ttlMs: number) {
+    if (!Number.isInteger(ttlMs) || ttlMs <= 0) {
+      throw new Error(
+        `TtlCache requires ttlMs to be a positive integer but a ttlMs of ${ttlMs} was requested.`,
+      );
+    }
+
+    this._ttlMs = ttlMs;
+  }
+
+  private _cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this._cache.entries()) {
+      if (entry.expiresAt <= now) {
+        this._cache.delete(key);
+      }
+    }
+  }
+
+  public set(key: string, value: ValueType): void {
+    this._cleanup();
+
+    const expiresAt = Date.now() + this._ttlMs;
+    this._cache.set(key, { value, expiresAt });
+  }
+
+  public get(key: string): ValueType | undefined {
+    this._cleanup();
+
+    const entry = this._cache.get(key);
+    if (!entry) {
+      return undefined;
+    }
+
+    if (entry.expiresAt <= Date.now()) {
+      this._cache.delete(key);
+      return undefined;
+    }
+
+    return entry.value;
+  }
+
+  public clear(): void {
+    this._cache.clear();
+  }
+
+  public get size(): number {
+    this._cleanup();
+    return this._cache.size;
+  }
+
+  public get capacity(): number {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  public has(key: string): boolean {
+    this._cleanup();
+
+    const entry = this._cache.get(key);
+    if (!entry) {
+      return false;
+    }
+
+    if (entry.expiresAt <= Date.now()) {
+      this._cache.delete(key);
+      return false;
+    }
+
+    return true;
+  }
+
+  public delete(key: string): boolean {
+    return this._cache.delete(key);
+  }
+}

@@ -1,4 +1,7 @@
-import type { ENSIndexerOverallIndexingStatus, ENSIndexerPublicConfig } from "../ensindexer";
+import type z from "zod/v4";
+
+import type { ENSApiPublicConfig } from "../ensapi";
+import type { RealtimeIndexingStatusProjection } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -8,16 +11,13 @@ import type {
   ReverseResolutionArgs,
   ReverseResolutionResult,
 } from "../resolution";
-import type { Duration } from "../shared";
 import type { ProtocolTrace } from "../tracing";
+import type { ErrorResponseSchema } from "./zod-schemas";
 
 /**
  * API Error Response Type
  */
-export interface ErrorResponse {
-  message: string;
-  details?: unknown; // subject to change
-}
+export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
 export interface TraceableRequest {
   trace?: boolean;
@@ -32,6 +32,7 @@ export interface AcceleratableRequest {
 }
 
 export interface AcceleratableResponse {
+  accelerationRequested: boolean;
   accelerationAttempted: boolean;
 }
 
@@ -79,38 +80,53 @@ export interface ResolvePrimaryNamesResponse extends AcceleratableResponse, Trac
 /**
  * ENSIndexer Public Config Response
  */
-export type ConfigResponse = ENSIndexerPublicConfig;
+export type ConfigResponse = ENSApiPublicConfig;
 
 /**
- * ENSIndexer Overall Indexing Status Request
+ * Represents a request to Indexing Status API.
  */
-export interface IndexingStatusRequest {
-  /**
-   * Max Realtime Distance (optional)
-   *
-   * A duration value in seconds, representing the max allowed distance
-   * between the latest indexed block of each chain and the “tip” of
-   * all indexed chains. Setting this parameter influences the HTTP response
-   * code as follows:
-   * - Success (200 OK): The latest indexed block of each chain
-   *   is within the requested distance from realtime.
-   * - Service Unavailable (503): The latest indexed block of each chain
-   *   is NOT within the requested distance from realtime.
-   */
-  maxRealtimeDistance?: Duration;
-}
+export type IndexingStatusRequest = {};
 
 /**
- * ENSIndexer Overall Indexing Status Response
- */
-export type IndexingStatusResponse = ENSIndexerOverallIndexingStatus;
-
-/**
- * ENSIndexer Overall Indexing Status Response Codes
- *
- * Define a custom response code for known responses.
+ * A status code for indexing status responses.
  */
 export const IndexingStatusResponseCodes = {
-  IndexerError: 512,
-  RequestedDistanceNotAchievedError: 513,
+  /**
+   * Represents that the indexing status is available.
+   */
+  Ok: "ok",
+
+  /**
+   * Represents that the indexing status is unavailable.
+   */
+  Error: "error",
 } as const;
+
+/**
+ * The derived string union of possible {@link IndexingStatusResponseCodes}.
+ */
+export type IndexingStatusResponseCode =
+  (typeof IndexingStatusResponseCodes)[keyof typeof IndexingStatusResponseCodes];
+
+/**
+ * An indexing status response when the indexing status is available.
+ */
+export type IndexingStatusResponseOk = {
+  responseCode: typeof IndexingStatusResponseCodes.Ok;
+  realtimeProjection: RealtimeIndexingStatusProjection;
+};
+
+/**
+ * An indexing status response when the indexing status is unavailable.
+ */
+export type IndexingStatusResponseError = {
+  responseCode: typeof IndexingStatusResponseCodes.Error;
+};
+
+/**
+ * Indexing status response.
+ *
+ * Use the `responseCode` field to determine the specific type interpretation
+ * at runtime.
+ */
+export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusResponseError;

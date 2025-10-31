@@ -7,18 +7,18 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
+
 import { uniq } from "../../shared";
 import {
-  ZodCheckFnInput,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  makeUrlSchema,
+  type ZodCheckFnInput,
 } from "../../shared/zod-schemas";
-import { isSubgraphCompatible } from "./helpers";
-import { PluginName } from "./types";
+import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import type { ENSIndexerPublicConfig } from "./types";
+import { PluginName } from "./types";
 import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
 /**
@@ -103,12 +103,12 @@ export const makeLabelSetVersionSchema = (valueLabel: string) => {
 export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") => {
   let valueLabelLabelSetId = valueLabel;
   let valueLabelLabelSetVersion = valueLabel;
-  if (valueLabel == "LABEL_SET") {
+  if (valueLabel === "LABEL_SET") {
     valueLabelLabelSetId = "LABEL_SET_ID";
     valueLabelLabelSetVersion = "LABEL_SET_VERSION";
   } else {
-    valueLabelLabelSetId = valueLabel + ".labelSetId";
-    valueLabelLabelSetVersion = valueLabel + ".labelSetVersion";
+    valueLabelLabelSetId = `${valueLabel}.labelSetId`;
+    valueLabelLabelSetVersion = `${valueLabel}.labelSetVersion`;
   }
   return z.object({
     labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),
@@ -165,7 +165,9 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
-      isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
+      isSubgraphCompatible: z.boolean({
+        error: `${valueLabel}.isSubgraphCompatible`,
+      }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),

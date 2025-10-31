@@ -1,10 +1,12 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
 
 import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
+
 import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
@@ -40,7 +42,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegistered({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -50,7 +55,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRenewed({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -60,7 +68,10 @@ export default function () {
       context,
       event: {
         ...event,
-        args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.tokenId) },
+        args: {
+          ...event.args,
+          labelHash: tokenIdToLabelHash(event.args.tokenId),
+        },
       },
     });
   });

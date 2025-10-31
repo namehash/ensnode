@@ -1,9 +1,10 @@
 import { ponder } from "ponder:registry";
+import { zeroHash } from "viem";
+
+import { ETH_NODE, makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { handleRegistrationReferral, handleRenewalReferral } from "@/lib/referrals-helpers";
-import { ETH_NODE, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-import { zeroHash } from "viem";
 
 /**
  * Registers event handlers with Ponder.

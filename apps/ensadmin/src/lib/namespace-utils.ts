@@ -1,12 +1,4 @@
-import {
-  DatasourceNames,
-  ENSNamespaceId,
-  ENSNamespaceIds,
-  ensTestEnvL1Chain,
-  getDatasource,
-} from "@ensnode/datasources";
-import { ChainId, Name } from "@ensnode/ensnode-sdk";
-import { Address } from "viem";
+import type { Address } from "viem";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -22,6 +14,15 @@ import {
   scrollSepolia,
   sepolia,
 } from "viem/chains";
+
+import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  ENSNamespaceIds,
+  ensTestEnvL1Chain,
+  getDatasource,
+} from "@ensnode/datasources";
+import type { ChainId, Name } from "@ensnode/ensnode-sdk";
 
 const SUPPORTED_CHAINS = [
   ensTestEnvL1Chain,
@@ -144,6 +145,19 @@ export const getBlockExplorerUrlForBlock = (chainId: ChainId, blockNumber: numbe
   if (!chainBlockExplorer) return null;
 
   return new URL(`block/${blockNumber}`, chainBlockExplorer.toString());
+};
+
+/**
+ * Gets the block explorer URL for a specific address on a specific chainId
+ *
+ * @returns complete block explorer URL for a specific address on a specific chainId,
+ * or null if the referenced chain doesn't have a known block explorer
+ */
+export const getBlockExplorerUrlForAddress = (chainId: ChainId, address: Address): URL | null => {
+  const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
+  if (!chainBlockExplorer) return null;
+
+  return new URL(`address/${address}`, chainBlockExplorer.toString());
 };
 
 /**

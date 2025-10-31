@@ -60,7 +60,7 @@ locals {
       ensnode_indexer_type     = "alpha-sepolia"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,protocol-acceleration,referrals"
+      plugins                  = "subgraph,basenames,lineanames,referrals"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
       subgraph_compat          = false
@@ -137,25 +137,7 @@ module "ensindexer" {
   render_region         = local.render_region
   render_environment_id = render_project.ensnode.environments["default"].id
   ensdb_url             = module.ensdb.internal_connection_string
-
-  # Mainnet RPC URLs
-  ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url
-  base_mainnet_rpc_url     = var.base_mainnet_rpc_url
-  linea_mainnet_rpc_url    = var.linea_mainnet_rpc_url
-  optimism_mainnet_rpc_url = var.optimism_mainnet_rpc_url
-  arbitrum_mainnet_rpc_url = var.arbitrum_mainnet_rpc_url
-  scroll_mainnet_rpc_url   = var.scroll_mainnet_rpc_url
-
-  # Sepolia RPC URLs
-  ethereum_sepolia_rpc_url = var.ethereum_sepolia_rpc_url
-  base_sepolia_rpc_url     = var.base_sepolia_rpc_url
-  linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
-  optimism_sepolia_rpc_url = var.optimism_sepolia_rpc_url
-  arbitrum_sepolia_rpc_url = var.arbitrum_sepolia_rpc_url
-  scroll_sepolia_rpc_url   = var.scroll_sepolia_rpc_url
-
-  # Holesky RPC URLs
-  ethereum_holesky_rpc_url = var.ethereum_holesky_rpc_url
+  alchemy_api_key       = var.alchemy_api_key
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
   ensindexer_label_set_id      = var.ensindexer_label_set_id

@@ -1,15 +1,17 @@
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: conditional hooks used correctly here */
 "use client";
 
-import { ENSNodeClient } from "@ensnode/ensnode-sdk";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { createElement, useMemo } from "react";
 
+import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+
 import { ENSNodeContext } from "./context";
-import type { ENSNodeConfig } from "./types";
+import type { ENSNodeSDKConfig } from "./types";
 
 export interface ENSNodeProviderProps {
   /** ENSNode configuration */
-  config: ENSNodeConfig;
+  config: ENSNodeSDKConfig;
 
   /**
    * Optional QueryClient instance. If provided, you must wrap your app with QueryClientProvider yourself.
@@ -28,8 +30,8 @@ function ENSNodeInternalProvider({
   children,
   config,
 }: {
-  children: React.ReactNode;
-  config: ENSNodeConfig;
+  children?: React.ReactNode;
+  config: ENSNodeSDKConfig;
 }) {
   // Memoize the config to prevent unnecessary re-renders
   const memoizedConfig = useMemo(() => config, [config]);
@@ -74,6 +76,7 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
             retry: 3,
             staleTime: 1000 * 60 * 5, // 5 minutes
             gcTime: 1000 * 60 * 30, // 30 minutes
+            refetchInterval: 1000 * 10, // 10 seconds
           },
         },
         ...queryClientOptions,
@@ -91,9 +94,7 @@ export function ENSNodeProvider(parameters: React.PropsWithChildren<ENSNodeProvi
 /**
  * Helper function to create ENSNode configuration
  */
-export function createConfig(options?: {
-  url?: string | URL;
-}): ENSNodeConfig {
+export function createConfig(options?: { url?: string | URL }): ENSNodeSDKConfig {
   const url = options?.url ? new URL(options.url) : ENSNodeClient.defaultOptions().url;
 
   return {

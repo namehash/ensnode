@@ -1,8 +1,8 @@
-import {
-  type EnsRainbowClientLabelSet,
-  type EnsRainbowServerLabelSet,
-  type LabelSetId,
-  type LabelSetVersion,
+import type {
+  EnsRainbowClientLabelSet,
+  EnsRainbowServerLabelSet,
+  LabelSetId,
+  LabelSetVersion,
 } from "../../ensrainbow";
 import { makeLabelSetIdSchema, makeLabelSetVersionSchema } from "./zod-schemas";
 

@@ -1,8 +1,9 @@
 import { ponder } from "ponder:registry";
 
+import { PluginName } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeNameWrapperHandlers } from "@/plugins/subgraph/shared-handlers/NameWrapper";
-import { PluginName } from "@ensnode/ensnode-sdk";
 
 /**
  * Registers event handlers with Ponder.

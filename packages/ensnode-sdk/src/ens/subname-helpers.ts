@@ -1,4 +1,4 @@
-import { Hex, concat, keccak256, toHex } from "viem";
+import { concat, type Hex, keccak256, toHex } from "viem";
 
 import type { LabelHash, Node } from "./types";
 
