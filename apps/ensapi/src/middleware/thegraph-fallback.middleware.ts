@@ -17,6 +17,10 @@ let prevShouldFallback = false;
  * Middleware that proxies Subgraph requests to thegraph if possible & necessary.
  */
 export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, next) => {
+  if (c.var.isRealtime === undefined) {
+    throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
+  }
+
   const { canFallback, reason: cannotfallbackReason } = canFallbackToTheGraph(
     config.namespace,
     config.theGraphApiKey,
