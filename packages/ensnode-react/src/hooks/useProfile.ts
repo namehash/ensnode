@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import type { Name, ResolveRecordsResponse, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
-import type { ConfigParameter, QueryParameter } from "../types";
+import type { QueryParameter, WithSDKConfigParameter } from "../types";
 import { useRecords } from "./useRecords";
 
 /**
@@ -24,7 +24,7 @@ export type UseProfileParameters<RECORDS_SELECTION extends ResolverRecordsSelect
    * The selection of records to fetch.
    */
   selection: RECORDS_SELECTION;
-} & ConfigParameter &
+} & WithSDKConfigParameter &
   QueryParameter<ResolveRecordsResponse<RECORDS_SELECTION>>;
 
 /**
