@@ -1,8 +1,10 @@
 import config from "@/config";
 
+import { proxy } from "hono/proxy";
+
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { canFallbackToTheGraph } from "@/lib/thegraph";
+import { canFallbackToTheGraph, makeTheGraphSubgraphUrl } from "@/lib/thegraph";
 
 const logger = makeLogger("thegraph-fallback.middleware");
 
@@ -69,5 +71,21 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   if (!shouldFallback) return await next();
 
   // otherwise, perform thegraph proxy
-  await next();
+  // biome-ignore lint/style/noNonNullAssertion: guaranteed due to `shouldFallback` above
+  const subgraphUrl = makeTheGraphSubgraphUrl(config.namespace, config.theGraphApiKey!)!;
+
+  try {
+    // https://hono.dev/docs/helpers/proxy
+    return proxy(subgraphUrl, {
+      // provide existing method/body
+      method: c.req.method,
+      body: await c.req.text(),
+      // override headers to just provide Content-Type
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    // if the request to thegraph fails for any reason, execute subgraph api as normal anyway
+    logger.warn(error, `thegraph request failed, resolving via Subgraph API anyway.`);
+    return await next();
+  }
 });
