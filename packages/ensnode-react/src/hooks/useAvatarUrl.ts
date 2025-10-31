@@ -6,12 +6,14 @@ import {
   type BrowserSupportedAssetUrl,
   type BrowserSupportedAssetUrlProxy,
   buildBrowserSupportedAvatarUrl,
+  type ENSNamespaceId,
+  ENSNamespaceIds,
   type Name,
 } from "@ensnode/ensnode-sdk";
 
-import type { ConfigParameter, QueryParameter } from "../types";
-import { useENSIndexerConfig } from "./useENSIndexerConfig";
+import type { QueryParameter, WithSDKConfigParameter } from "../types";
 import { useENSNodeConfig } from "./useENSNodeConfig";
+import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 import { useRecords } from "./useRecords";
 
 /**
@@ -22,7 +24,9 @@ const AVATAR_TEXT_RECORD_KEY = "avatar" as const;
 /**
  * Parameters for the useAvatarUrl hook.
  */
-export interface UseAvatarUrlParameters extends QueryParameter<string | null>, ConfigParameter {
+export interface UseAvatarUrlParameters
+  extends QueryParameter<string | null>,
+    WithSDKConfigParameter {
   /**
    * If null, the query will not be executed.
    */
@@ -161,7 +165,7 @@ export function useAvatarUrl(
   parameters: UseAvatarUrlParameters,
 ): UseQueryResult<UseAvatarUrlResult, Error> {
   const { name, config, query: queryOptions, browserSupportedAvatarUrlProxy } = parameters;
-  const _config = useENSNodeConfig(config);
+  const _config = useENSNodeSDKConfig(config);
 
   const canEnable = name !== null;
 
@@ -172,7 +176,7 @@ export function useAvatarUrl(
     query: { enabled: canEnable },
   });
 
-  const configQuery = useENSIndexerConfig({ config: _config });
+  const configQuery = useENSNodeConfig({ config: _config });
 
   // Construct query options object
   const baseQueryOptions: {
@@ -185,7 +189,7 @@ export function useAvatarUrl(
       "avatarUrl",
       name,
       _config.client.url.href,
-      configQuery.data?.namespace,
+      configQuery.data?.ensIndexerPublicConfig?.namespace,
       !!browserSupportedAvatarUrlProxy,
       recordsQuery.data?.records?.texts?.avatar ?? null,
     ] as const,
@@ -198,8 +202,8 @@ export function useAvatarUrl(
         };
       }
 
-      // Invariant: configQuery.data.namespace is guaranteed to be defined when configQuery.data exists
-      const namespaceId = configQuery.data.namespace;
+      const namespaceId: ENSNamespaceId =
+        configQuery.data.ensIndexerPublicConfig?.namespace ?? ENSNamespaceIds.Mainnet;
 
       const rawAvatarTextRecord = recordsQuery.data.records?.texts?.avatar ?? null;
 
