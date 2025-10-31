@@ -18,6 +18,6 @@ const logger = pino({
         },
 });
 
-export const makeLogger = (module: string) => logger.child({ module });
+export const makeLogger = (scope: string) => logger.child({ scope });
 
 export default logger;

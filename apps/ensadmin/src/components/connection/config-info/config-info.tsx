@@ -5,7 +5,7 @@
 
 "use client";
 
-import { Replace } from "lucide-react";
+import { BackpackIcon, Replace } from "lucide-react";
 import { ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
@@ -258,6 +258,33 @@ function ENSNodeConfigCardContent({
                 </Tooltip>
               </div>
             ),
+          },
+        ]}
+        features={[
+          {
+            label: "Subgraph API Fallback",
+            description: ensApiPublicConfig.theGraphFallback.canFallback ? (
+              <p>
+                ENSApi's Subgraph API (/subgraph) will fall back to thegraph if the connected
+                ENSIndexer is not realtime.
+              </p>
+            ) : (
+              <p>
+                ENSApi's Subgraph API (/subgraph) will NOT fall back to thegraph if the connected
+                ENSIndexer is not realtime. {(() => {
+                  switch (ensApiPublicConfig.theGraphFallback.reason) {
+                    case "no-api-key":
+                      return "A THEGRAPH_API_KEY environment variables was not provided.";
+                    case "no-subgraph-url":
+                      return "The configured namespace is unsupported by thegraph.";
+                    default:
+                      return null;
+                  }
+                })()}
+              </p>
+            ),
+            isActivated: ensApiPublicConfig.theGraphFallback.canFallback,
+            icon: <BackpackIcon width={15} height={15} className="flex-shrink-0" />,
           },
         ]}
         version={

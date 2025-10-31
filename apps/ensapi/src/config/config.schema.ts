@@ -14,6 +14,7 @@ import {
   makeENSIndexerPublicConfigSchema,
   PortSchema,
   RpcConfigsSchema,
+  TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
@@ -21,6 +22,7 @@ import type { EnsApiEnvironment } from "@/config/environment";
 import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
+import { canFallbackToTheGraph } from "@/lib/thegraph";
 
 const EnsApiConfigSchema = z
   .object({
@@ -28,6 +30,7 @@ const EnsApiConfigSchema = z
     databaseUrl: DatabaseUrlSchema,
     databaseSchemaName: DatabaseSchemaNameSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
+    theGraphApiKey: TheGraphApiKeySchema,
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
@@ -62,6 +65,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       port: env.PORT,
       databaseUrl: env.DATABASE_URL,
       ensIndexerUrl: env.ENSINDEXER_URL,
+      theGraphApiKey: env.THEGRAPH_API_KEY,
 
       ensIndexerPublicConfig: serializeENSIndexerPublicConfig(ensIndexerPublicConfig),
       namespace: ensIndexerPublicConfig.namespace,
@@ -93,6 +97,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 export function buildEnsApiPublicConfig(config: EnsApiConfig): ENSApiPublicConfig {
   return {
     version: packageJson.version,
+    theGraphFallback: canFallbackToTheGraph(config.namespace, config.theGraphApiKey),
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
   };
 }
