@@ -33,7 +33,7 @@ export const registrationReferral = onchainTable(
   }),
 );
 
-export const registrationReferral_relations = relations(registrationReferral, ({ one, many }) => ({
+export const registrationReferral_relations = relations(registrationReferral, ({ one }) => ({
   // RegistrationReferral belongs to Referrer
   referrer: one(referrer, {
     fields: [registrationReferral.referrer],
@@ -68,7 +68,7 @@ export const renewalReferral = onchainTable(
   }),
 );
 
-export const renewalReferral_relations = relations(renewalReferral, ({ one, many }) => ({
+export const renewalReferral_relations = relations(renewalReferral, ({ one }) => ({
   // RenewalReferral belongs to Referrer
   referrer: one(referrer, {
     fields: [renewalReferral.referrer],
@@ -88,10 +88,10 @@ export const referrer = onchainTable(
     id: t.hex().primaryKey(),
     valueWei: t.bigint().notNull(),
   }),
-  (t) => ({}),
+  (_t) => ({}),
 );
 
-export const referrer_relations = relations(referrer, ({ one, many }) => ({
+export const referrer_relations = relations(referrer, ({ many }) => ({
   // Referrer has many RegistrationReferrals
   registrationReferrals: many(registrationReferral),
 

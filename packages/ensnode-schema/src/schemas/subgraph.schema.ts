@@ -1,5 +1,6 @@
 import { index, onchainTable, relations } from "ponder";
 import type { Address } from "viem";
+
 import { monkeypatchCollate } from "../lib/collate";
 
 /**

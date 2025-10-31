@@ -61,8 +61,18 @@ export const UpgradeableRegistrarController = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "registrant", type: "address" },
-      { indexed: true, internalType: "bytes32", name: "discountKey", type: "bytes32" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "registrant",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "discountKey",
+        type: "bytes32",
+      },
     ],
     name: "DiscountApplied",
     type: "event",
@@ -70,11 +80,20 @@ export const UpgradeableRegistrarController = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "bytes32", name: "discountKey", type: "bytes32" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "discountKey",
+        type: "bytes32",
+      },
       {
         components: [
           { internalType: "bool", name: "active", type: "bool" },
-          { internalType: "address", name: "discountValidator", type: "address" },
+          {
+            internalType: "address",
+            name: "discountValidator",
+            type: "address",
+          },
           { internalType: "bytes32", name: "key", type: "bytes32" },
           { internalType: "uint256", name: "discount", type: "uint256" },
         ],
@@ -90,22 +109,44 @@ export const UpgradeableRegistrarController = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "payee", type: "address" },
-      { indexed: false, internalType: "uint256", name: "price", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "payee",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
     ],
     name: "ETHPaymentProcessed",
     type: "event",
   },
   {
     anonymous: false,
-    inputs: [{ indexed: false, internalType: "uint64", name: "version", type: "uint64" }],
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "version",
+        type: "uint64",
+      },
+    ],
     name: "Initialized",
     type: "event",
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "address", name: "newL2ReverseRegistrar", type: "address" },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newL2ReverseRegistrar",
+        type: "address",
+      },
     ],
     name: "L2ReverseRegistrarUpdated",
     type: "event",
@@ -114,9 +155,24 @@ export const UpgradeableRegistrarController = [
     anonymous: false,
     inputs: [
       { indexed: false, internalType: "string", name: "name", type: "string" },
-      { indexed: true, internalType: "bytes32", name: "label", type: "bytes32" },
-      { indexed: true, internalType: "address", name: "owner", type: "address" },
-      { indexed: false, internalType: "uint256", name: "expires", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "label",
+        type: "bytes32",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "expires",
+        type: "uint256",
+      },
     ],
     name: "NameRegistered",
     type: "event",
@@ -125,8 +181,18 @@ export const UpgradeableRegistrarController = [
     anonymous: false,
     inputs: [
       { indexed: false, internalType: "string", name: "name", type: "string" },
-      { indexed: true, internalType: "bytes32", name: "label", type: "bytes32" },
-      { indexed: false, internalType: "uint256", name: "expires", type: "uint256" },
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "label",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "expires",
+        type: "uint256",
+      },
     ],
     name: "NameRenewed",
     type: "event",
@@ -134,8 +200,18 @@ export const UpgradeableRegistrarController = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "previousOwner", type: "address" },
-      { indexed: true, internalType: "address", name: "newOwner", type: "address" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
     ],
     name: "OwnershipTransferStarted",
     type: "event",
@@ -143,8 +219,18 @@ export const UpgradeableRegistrarController = [
   {
     anonymous: false,
     inputs: [
-      { indexed: true, internalType: "address", name: "previousOwner", type: "address" },
-      { indexed: true, internalType: "address", name: "newOwner", type: "address" },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
     ],
     name: "OwnershipTransferred",
     type: "event",
@@ -152,21 +238,38 @@ export const UpgradeableRegistrarController = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "address", name: "newPaymentReceiver", type: "address" },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newPaymentReceiver",
+        type: "address",
+      },
     ],
     name: "PaymentReceiverUpdated",
     type: "event",
   },
   {
     anonymous: false,
-    inputs: [{ indexed: false, internalType: "address", name: "newPrices", type: "address" }],
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newPrices",
+        type: "address",
+      },
+    ],
     name: "PriceOracleUpdated",
     type: "event",
   },
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "address", name: "newReverseRegistrar", type: "address" },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newReverseRegistrar",
+        type: "address",
+      },
     ],
     name: "ReverseRegistrarUpdated",
     type: "event",
@@ -243,7 +346,11 @@ export const UpgradeableRegistrarController = [
       {
         components: [
           { internalType: "bool", name: "active", type: "bool" },
-          { internalType: "address", name: "discountValidator", type: "address" },
+          {
+            internalType: "address",
+            name: "discountValidator",
+            type: "address",
+          },
           { internalType: "bytes32", name: "key", type: "bytes32" },
           { internalType: "uint256", name: "discount", type: "uint256" },
         ],
@@ -262,7 +369,11 @@ export const UpgradeableRegistrarController = [
       {
         components: [
           { internalType: "bool", name: "active", type: "bool" },
-          { internalType: "address", name: "discountValidator", type: "address" },
+          {
+            internalType: "address",
+            name: "discountValidator",
+            type: "address",
+          },
           { internalType: "bytes32", name: "key", type: "bytes32" },
           { internalType: "uint256", name: "discount", type: "uint256" },
         ],
@@ -283,14 +394,30 @@ export const UpgradeableRegistrarController = [
   },
   {
     inputs: [
-      { internalType: "contract IBaseRegistrar", name: "base_", type: "address" },
-      { internalType: "contract IPriceOracle", name: "prices_", type: "address" },
-      { internalType: "contract IReverseRegistrar", name: "reverseRegistrar_", type: "address" },
+      {
+        internalType: "contract IBaseRegistrar",
+        name: "base_",
+        type: "address",
+      },
+      {
+        internalType: "contract IPriceOracle",
+        name: "prices_",
+        type: "address",
+      },
+      {
+        internalType: "contract IReverseRegistrar",
+        name: "reverseRegistrar_",
+        type: "address",
+      },
       { internalType: "address", name: "owner_", type: "address" },
       { internalType: "bytes32", name: "rootNode_", type: "bytes32" },
       { internalType: "string", name: "rootName_", type: "string" },
       { internalType: "address", name: "paymentReceiver_", type: "address" },
-      { internalType: "address", name: "legacyRegistrarController_", type: "address" },
+      {
+        internalType: "address",
+        name: "legacyRegistrarController_",
+        type: "address",
+      },
       { internalType: "address", name: "legacyL2Resolver_", type: "address" },
       { internalType: "address", name: "l2ReverseRegistrar_", type: "address" },
     ],
@@ -410,7 +537,11 @@ export const UpgradeableRegistrarController = [
       {
         components: [
           { internalType: "bool", name: "active", type: "bool" },
-          { internalType: "address", name: "discountValidator", type: "address" },
+          {
+            internalType: "address",
+            name: "discountValidator",
+            type: "address",
+          },
           { internalType: "bytes32", name: "key", type: "bytes32" },
           { internalType: "uint256", name: "discount", type: "uint256" },
         ],
@@ -439,7 +570,13 @@ export const UpgradeableRegistrarController = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "contract IPriceOracle", name: "prices_", type: "address" }],
+    inputs: [
+      {
+        internalType: "contract IPriceOracle",
+        name: "prices_",
+        type: "address",
+      },
+    ],
     name: "setPriceOracle",
     outputs: [],
     stateMutability: "nonpayable",
@@ -458,7 +595,13 @@ export const UpgradeableRegistrarController = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "contract IReverseRegistrar", name: "reverse_", type: "address" }],
+    inputs: [
+      {
+        internalType: "contract IReverseRegistrar",
+        name: "reverse_",
+        type: "address",
+      },
+    ],
     name: "setReverseRegistrar",
     outputs: [],
     stateMutability: "nonpayable",
@@ -478,5 +621,11 @@ export const UpgradeableRegistrarController = [
     stateMutability: "pure",
     type: "function",
   },
-  { inputs: [], name: "withdrawETH", outputs: [], stateMutability: "nonpayable", type: "function" },
+  {
+    inputs: [],
+    name: "withdrawETH",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;

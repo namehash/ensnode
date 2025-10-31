@@ -991,7 +991,12 @@ export const Resolver = [
     inputs: [
       { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
       { name: "name", type: "bytes", indexed: false, internalType: "bytes" },
-      { name: "resource", type: "uint16", indexed: false, internalType: "uint16" },
+      {
+        name: "resource",
+        type: "uint16",
+        indexed: false,
+        internalType: "uint16",
+      },
       { name: "ttl", type: "uint32", indexed: false, internalType: "uint32" },
       { name: "record", type: "bytes", indexed: false, internalType: "bytes" },
     ],
@@ -1003,7 +1008,12 @@ export const Resolver = [
     inputs: [
       { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
       { name: "name", type: "bytes", indexed: false, internalType: "bytes" },
-      { name: "resource", type: "uint16", indexed: false, internalType: "uint16" },
+      {
+        name: "resource",
+        type: "uint16",
+        indexed: false,
+        internalType: "uint16",
+      },
     ],
     anonymous: false,
   },
@@ -1012,7 +1022,12 @@ export const Resolver = [
     name: "DNSZoneUpdated",
     inputs: [
       { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
-      { name: "serial", type: "uint32", indexed: false, internalType: "uint32" },
+      {
+        name: "serial",
+        type: "uint32",
+        indexed: false,
+        internalType: "uint32",
+      },
     ],
     anonymous: false,
   },
@@ -1021,7 +1036,12 @@ export const Resolver = [
     name: "ZoneCreated",
     inputs: [
       { name: "node", type: "bytes32", indexed: true, internalType: "bytes32" },
-      { name: "version", type: "uint64", indexed: true, internalType: "uint64" },
+      {
+        name: "version",
+        type: "uint64",
+        indexed: true,
+        internalType: "uint64",
+      },
     ],
     anonymous: false,
   },

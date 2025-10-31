@@ -1,17 +1,19 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useDebouncedValue } from "rooks";
+
+import { useRecords } from "@ensnode/ensnode-react";
+
 import { RenderRequestsOutput } from "@/app/inspect/_components/render-requests-output";
 import { Pill } from "@/components/pill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRecords } from "@ensnode/ensnode-react";
-import { DefaultRecordsSelection } from "@ensnode/ensnode-sdk";
-
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { useDebouncedValue } from "rooks";
+import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { DefaultRecordsSelection } from "@/lib/default-records-selection";
 
 const EXAMPLE_INPUT = [
   "vitalik.eth",
@@ -29,8 +31,9 @@ const EXAMPLE_INPUT = [
 
 // TODO: showcase current ENSNode configuration and viable acceleration pathways?
 // TODO: use shadcn/form, react-hook-form, and zod to make all of this nicer aross the board
-// TODO: sync form state to query params, current just defaulting is supported
+// TODO: sync form state to query params, currently just defaulting is supported
 export default function ResolveRecordsInspector() {
+  const namespace = useActiveNamespace();
   const searchParams = useSearchParams();
 
   const [name, setName] = useState(searchParams.get("name") || EXAMPLE_INPUT[0]);
@@ -38,8 +41,7 @@ export default function ResolveRecordsInspector() {
 
   const canQuery = !!debouncedName && debouncedName.length > 0;
 
-  // TODO: switch on connected ensnode's configured namespace
-  const selection = DefaultRecordsSelection.mainnet;
+  const selection = DefaultRecordsSelection[namespace];
 
   const accelerated = useRecords({
     name: debouncedName,

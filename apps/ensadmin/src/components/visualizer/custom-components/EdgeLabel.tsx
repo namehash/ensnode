@@ -2,7 +2,11 @@ export default function EdgeLabel({
   transform,
   label,
   bgColor = "#F7F9FB",
-}: { transform: string; label: string; bgColor?: string }) {
+}: {
+  transform: string;
+  label: string;
+  bgColor?: string;
+}) {
   return (
     <div
       style={{

@@ -1,5 +1,6 @@
-import { ENSIndexerEnvironment } from "@/config/types";
-import { DeepPartial, PluginName } from "@ensnode/ensnode-sdk";
+import { type DeepPartial, PluginName } from "@ensnode/ensnode-sdk";
+
+import type { ENSIndexerEnvironment } from "@/config/environment";
 
 /**
  * Environment defaults applied based on SUBGRAPH_COMPAT mode selection.

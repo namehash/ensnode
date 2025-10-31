@@ -1,12 +1,13 @@
 "use client";
 
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+
 import {
   type BrowserSupportedAssetUrl,
   type BrowserSupportedAssetUrlProxy,
-  type Name,
   buildBrowserSupportedAvatarUrl,
+  type Name,
 } from "@ensnode/ensnode-sdk";
-import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 
 import type { ConfigParameter, QueryParameter } from "../types";
 import { useENSIndexerConfig } from "./useENSIndexerConfig";

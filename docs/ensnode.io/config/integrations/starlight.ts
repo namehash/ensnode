@@ -1,5 +1,5 @@
 import AstroStarlight from "@astrojs/starlight";
-import { type AstroIntegration } from "astro";
+import type { AstroIntegration } from "astro";
 import starlightLlmsTxt from "starlight-llms-txt";
 import starlightSidebarTopics from "starlight-sidebar-topics";
 
@@ -80,6 +80,48 @@ export function starlight(): AstroIntegration {
               label: "Reference",
               collapsed: true,
               autogenerate: { directory: "docs/reference" },
+            },
+          ],
+        },
+        {
+          label: "ENSApi",
+          link: "/ensapi",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "What is ENSApi?",
+                  link: "/ensapi",
+                },
+              ],
+            },
+            {
+              label: "Using ENSApi",
+              collapsed: false,
+              autogenerate: { directory: "ensapi/usage" },
+            },
+            {
+              label: "Contributing",
+              collapsed: false,
+              autogenerate: { directory: "ensapi/contributing" },
+            },
+          ],
+        },
+        {
+          label: "ENSDb",
+          link: "/ensdb",
+          icon: "star",
+          items: [
+            {
+              label: "Overview",
+              items: [
+                {
+                  label: "Coming soon",
+                  link: "/ensdb",
+                },
+              ],
             },
           ],
         },
@@ -171,22 +213,6 @@ export function starlight(): AstroIntegration {
               label: "Contributing",
               collapsed: true,
               autogenerate: { directory: "ensadmin/contributing" },
-            },
-          ],
-        },
-        {
-          label: "ENSDb",
-          link: "/ensdb",
-          icon: "star",
-          items: [
-            {
-              label: "Overview",
-              items: [
-                {
-                  label: "Coming soon",
-                  link: "/ensdb",
-                },
-              ],
             },
           ],
         },

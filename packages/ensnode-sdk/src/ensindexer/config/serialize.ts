@@ -1,6 +1,9 @@
-import { ChainId } from "../../shared";
-import { SerializedENSIndexerPublicConfig, SerializedIndexedChainIds } from "./serialized-types";
-import { ENSIndexerPublicConfig } from "./types";
+import type { ChainId } from "../../shared";
+import type {
+  SerializedENSIndexerPublicConfig,
+  SerializedIndexedChainIds,
+} from "./serialized-types";
+import type { ENSIndexerPublicConfig } from "./types";
 
 /**
  * Serializes a {@link ChainConfig} object.

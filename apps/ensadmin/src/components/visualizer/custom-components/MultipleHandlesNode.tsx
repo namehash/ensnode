@@ -1,6 +1,9 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: allow ! for handles */
+import { Handle, type NodeProps } from "@xyflow/react";
+
 import { cn } from "@/lib/utils";
-import { Handle, NodeProps } from "@xyflow/react";
-import { NodeHandle } from "../schema-elements/nodes";
+
+import type { NodeHandle } from "../schema-elements/nodes";
 
 export default function MultipleHandlesNode({ data }: NodeProps) {
   const nodeHandles = data.handles as NodeHandle[];

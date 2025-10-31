@@ -1,6 +1,19 @@
 "use client";
 
-import { ErrorInfo, ErrorInfoProps } from "@/components/error-info";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import Link from "next/link";
+import { Fragment } from "react";
+
+import {
+  type OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
+  type OmnichainIndexingStatusSnapshotCompleted,
+  type OmnichainIndexingStatusSnapshotFollowing,
+  type RealtimeIndexingStatusProjection,
+} from "@ensnode/ensnode-sdk";
+
+import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import {
   RegistrationCard,
   RegistrationCardLoading,
@@ -10,18 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
-import {
-  type ENSIndexerPublicConfig,
-  type OmnichainIndexingStatusId,
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
-  type OmnichainIndexingStatusSnapshotCompleted,
-  type OmnichainIndexingStatusSnapshotFollowing,
-  type RealtimeIndexingStatusProjection,
-} from "@ensnode/ensnode-sdk";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import Link from "next/link";
-import { Fragment } from "react";
+
 import { useRecentRegistrations } from "./hooks";
 
 /**
@@ -38,7 +40,6 @@ const SUPPORTED_OMNICHAIN_INDEXING_STATUSES: OmnichainIndexingStatusId[] = [
 ];
 
 export interface RecentRegistrationsOkProps {
-  ensIndexerConfig: ENSIndexerPublicConfig | undefined;
   realtimeProjection: RealtimeIndexingStatusProjection | undefined;
   maxRecords?: number;
 }
@@ -51,18 +52,15 @@ export interface RecentRegistrationsErrorProps {
  * RecentRegistrations display variations:
  *
  * Standard -
- *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
  *      indexingStatus: {@link OmnichainIndexingStatusSnapshotCompleted} |
  *          {@link OmnichainIndexingStatusSnapshotFollowing},
  *
  * UnsupportedOmnichainIndexingStatusMessage -
- *      ensIndexerConfig: {@link ENSIndexerPublicConfig},
  *      indexingStatus:  {@link OmnichainIndexingStatusSnapshot} other than
  *          {@link OmnichainIndexingStatusSnapshotCompleted} |
  *          {@link OmnichainIndexingStatusSnapshotFollowing},
  *
  * Loading -
- *      ensIndexerConfig: undefined,
  *      indexingStatus: undefined,
  *
  * Error -
@@ -81,9 +79,9 @@ export function RecentRegistrations(props: RecentRegistrationsProps) {
     return <ErrorInfo {...props.error} />;
   }
 
-  const { ensIndexerConfig, realtimeProjection, maxRecords = DEFAULT_MAX_RECORDS } = props;
+  const { realtimeProjection, maxRecords = DEFAULT_MAX_RECORDS } = props;
 
-  if (ensIndexerConfig === undefined || realtimeProjection === undefined) {
+  if (realtimeProjection === undefined) {
     return <RecentRegistrationsLoading recordCount={maxRecords} />;
   }
 
@@ -197,7 +195,9 @@ function UnsupportedOmnichainIndexingStatusMessage({
           <p>Current omnichain indexing status:</p>
           <Badge
             className="uppercase text-xs leading-none"
-            title={`Current omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainIndexingStatus)}`}
+            title={`Current omnichain indexing status: ${formatOmnichainIndexingStatus(
+              omnichainIndexingStatus,
+            )}`}
           >
             {formatOmnichainIndexingStatus(omnichainIndexingStatus)}
           </Badge>

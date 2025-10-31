@@ -1,4 +1,7 @@
-import type { ENSIndexerPublicConfig, RealtimeIndexingStatusProjection } from "../ensindexer";
+import type z from "zod/v4";
+
+import type { ENSApiPublicConfig } from "../ensapi";
+import type { RealtimeIndexingStatusProjection } from "../ensindexer";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -9,14 +12,12 @@ import type {
   ReverseResolutionResult,
 } from "../resolution";
 import type { ProtocolTrace } from "../tracing";
+import type { ErrorResponseSchema } from "./zod-schemas";
 
 /**
  * API Error Response Type
  */
-export interface ErrorResponse {
-  message: string;
-  details?: unknown; // subject to change
-}
+export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 
 export interface TraceableRequest {
   trace?: boolean;
@@ -31,6 +32,7 @@ export interface AcceleratableRequest {
 }
 
 export interface AcceleratableResponse {
+  accelerationRequested: boolean;
   accelerationAttempted: boolean;
 }
 
@@ -78,7 +80,7 @@ export interface ResolvePrimaryNamesResponse extends AcceleratableResponse, Trac
 /**
  * ENSIndexer Public Config Response
  */
-export type ConfigResponse = ENSIndexerPublicConfig;
+export type ConfigResponse = ENSApiPublicConfig;
 
 /**
  * Represents a request to Indexing Status API.

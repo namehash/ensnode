@@ -1,6 +1,9 @@
 "use client";
 
-import { SelectedConnectionResult, useConnectionsLibrary } from "@/hooks/use-connections-library";
+import {
+  type SelectedConnectionResult,
+  useConnectionsLibrary,
+} from "@/hooks/use-connections-library";
 
 /**
  * Hook to get the current `SelectedConnectionResult` synchronously.

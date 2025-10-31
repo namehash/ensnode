@@ -1,5 +1,6 @@
-import { Address } from "viem";
-import { type DEFAULT_EVM_CHAIN_ID } from "../ens";
+import type { Address } from "viem";
+
+import type { DEFAULT_EVM_CHAIN_ID } from "../ens";
 
 /**
  * Chain ID

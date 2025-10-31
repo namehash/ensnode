@@ -1,9 +1,9 @@
 import type { Hex } from "viem";
 
+export type { ENSNamespaceId } from "@ensnode/datasources";
 // re-export ENSNamespaceIds and ENSNamespaceId from @ensnode/datasources
 // so consumers don't need it as a dependency
 export { ENSNamespaceIds } from "@ensnode/datasources";
-export type { ENSNamespaceId } from "@ensnode/datasources";
 
 /**
  * A hash value that uniquely identifies a single ENS name.
@@ -154,7 +154,9 @@ export type InterpretedName = Name & { __brand: "InterpretedName" };
  * @see https://ensnode.io/docs/reference/terminology#subgraph-interpreted-label
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
-export type SubgraphInterpretedLabel = Label & { __brand: "SubgraphInterpretedLabel" };
+export type SubgraphInterpretedLabel = Label & {
+  __brand: "SubgraphInterpretedLabel";
+};
 
 /**
  * A Subgraph Interpreted Name is a name exclusively composed of 0 or more Subgraph Interpreted Labels.
@@ -162,7 +164,9 @@ export type SubgraphInterpretedLabel = Label & { __brand: "SubgraphInterpretedLa
  * @see https://ensnode.io/docs/reference/terminology#subgraph-interpreted-name
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
-export type SubgraphInterpretedName = Name & { __brand: "SubgraphInterpretedName" };
+export type SubgraphInterpretedName = Name & {
+  __brand: "SubgraphInterpretedName";
+};
 
 /**
  * A DNS-Encoded Name as a hex string, representing the binary DNS wire format encoding
@@ -227,7 +231,9 @@ export type DNSEncodedName = Hex;
  *
  * @dev nominally typed to enforce usage & enhance codebase clarity
  */
-export type DNSEncodedLiteralName = DNSEncodedName & { __brand: "DNSEncodedLiteralName" };
+export type DNSEncodedLiteralName = DNSEncodedName & {
+  __brand: "DNSEncodedLiteralName";
+};
 
 /**
  * A DNSEncodedName that encodes a name consisting of 0 or more labels that are either:

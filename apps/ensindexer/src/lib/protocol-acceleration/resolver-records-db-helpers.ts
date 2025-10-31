@@ -1,16 +1,16 @@
-import { Context } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address } from "viem";
+import type { Address } from "viem";
 
-import { Node } from "@ensnode/ensnode-sdk";
-
+import type { Node } from "@ensnode/ensnode-sdk";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
-} from "@/lib/interpret-record-values";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+} from "@ensnode/ensnode-sdk/internal";
+
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
  * Infer the type of the ResolverRecord entity's composite primary key.

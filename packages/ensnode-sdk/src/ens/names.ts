@@ -1,4 +1,5 @@
 import { ens_beautify } from "@adraffy/ens-normalize";
+
 import { isNormalizedLabel } from "./is-normalized";
 import type { Label, Name, NormalizedName } from "./types";
 

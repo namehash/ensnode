@@ -1,12 +1,14 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import { base, optimism } from "viem/chains";
 
-import config from "@/config";
+import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
+import { type ChainId, PluginName } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
+import type { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
-import { DatasourceName, DatasourceNames } from "@ensnode/datasources";
 
 import { handleERC1155Transfer } from "../lib/handle-nft-transfer";
 
@@ -73,8 +75,9 @@ export default function () {
       }
 
       for (let i = 0; i < event.args.ids.length; i++) {
-        // using ! as we know that ids and values have length > i
+        // biome-ignore lint/style/noNonNullAssertion: using ! as we know that ids and values have length > i
         const tokenId = event.args.ids[i]!;
+        // biome-ignore lint/style/noNonNullAssertion: using ! as we know that ids and values have length > i
         const value = event.args.values[i]!;
 
         const nft = buildSupportedNFT(

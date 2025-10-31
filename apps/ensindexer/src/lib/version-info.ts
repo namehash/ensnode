@@ -1,17 +1,15 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import packageJson from "@/../package.json" with { type: "json" };
+
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-import { type ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
-import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+
 import { prettifyError } from "zod/v4";
 
-/**
- * Get version of ENSIndexer application.
- */
-export async function getENSIndexerVersion(): Promise<string> {
-  return import("@/../package.json").then(({ version }) => version);
-}
+import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
+import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+
+import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 
 /**
  * Get NPM package version.
@@ -92,7 +90,7 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
     // Find entries that match the package name
     // They will be in format: packagename@version or @scope+packagename@version
     for (const entry of entries) {
-      if (entry.startsWith(normalizedName + "@")) {
+      if (entry.startsWith(`${normalizedName}@`)) {
         const pkgPath = join(pnpmDir, entry, "node_modules", packageName, "package.json");
         if (existsSync(pkgPath)) {
           const packageJson = JSON.parse(readFileSync(pkgPath, "utf8"));
@@ -100,7 +98,7 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
         }
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // Ignore errors in this helper
   }
 
@@ -118,7 +116,7 @@ export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo>
   const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
 
   // ENSIndexer version
-  const ensIndexerVersion = await getENSIndexerVersion();
+  const ensIndexerVersion = packageJson.version;
 
   // ENSDb version
   // ENSDb version is always the same as the ENSIndexer version number

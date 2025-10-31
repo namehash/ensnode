@@ -1,3 +1,17 @@
+import type { PropsWithChildren } from "react";
+import { type Address, getAddress } from "viem";
+
+import {
+  beautifyName,
+  DEFAULT_EVM_CHAIN_ID,
+  type ENSNamespaceId,
+  type Identity,
+  isResolvedIdentity,
+  type Name,
+  ResolutionStatusIds,
+  translateDefaultableChainIdToChainId,
+} from "@ensnode/ensnode-sdk";
+
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { CopyButton } from "@/components/copy-button";
 import { ChainExplorerIcon } from "@/components/icons/chain-explorer-icon";
@@ -10,18 +24,6 @@ import {
   getBlockExplorerUrlForAddress,
   getChainName,
 } from "@/lib/namespace-utils";
-import {
-  DEFAULT_EVM_CHAIN_ID,
-  ENSNamespaceId,
-  Identity,
-  Name,
-  ResolutionStatusIds,
-  beautifyName,
-  isResolvedIdentity,
-  translateDefaultableChainIdToChainId,
-} from "@ensnode/ensnode-sdk";
-import { PropsWithChildren } from "react";
-import { Address, getAddress } from "viem";
 
 interface NameDisplayProps {
   name: Name;
@@ -43,7 +45,7 @@ export function NameDisplay({ name, className = "font-medium" }: NameDisplayProp
  * Gets the relative path of the internal name details page for a given name.
  */
 export function getNameDetailsRelativePath(name: Name): string {
-  return `/name/${encodeURIComponent(name)}`;
+  return `/name?name=${encodeURIComponent(name)}`;
 }
 
 interface NameLinkProps {

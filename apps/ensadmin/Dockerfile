@@ -9,33 +9,25 @@ FROM base AS builder
 COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Set the environment variable for the server's library of ENSNode URLs
-ARG NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY
-ENV NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY=${NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY}
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Set the environment variable for next.config.ts
-# This will be used to determine if the build output should be standalone
-ENV NEXT_BUILD_OUTPUT_STANDALONE=true
-
-# build ensadmin
+# build ensadmin with static export
 RUN pnpm --filter ensadmin build
 
-# runner
-FROM base AS runner
+# runner - use nginx to serve static files
+FROM nginx:alpine AS runner
 
-ENV NODE_ENV=production
+# Copy the static export output
+COPY --from=builder /app/apps/ensadmin/out /usr/share/nginx/html
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Replace default nginx configuration with our own
+RUN rm -f /etc/nginx/conf.d/default.conf.default
+COPY --from=builder /app/apps/ensadmin/nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=builder /app/apps/ensadmin/public ./apps/ensadmin/public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/ensadmin/.next/static ./apps/ensadmin/.next/static
-
-USER nextjs
+# Include custom docker-entrypoint.sh for generating runtime-config
+COPY --from=builder /app/apps/ensadmin/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 4173
-ENV PORT=4173
-ENV HOSTNAME=0.0.0.0
-
-CMD ["node", "apps/ensadmin/server.js"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,7 +1,15 @@
-import { createReadStream } from "fs";
+import { createReadStream, createWriteStream } from "node:fs";
+
 import ProgressBar from "progress";
 import protobuf from "protobufjs";
-import { ByteArray } from "viem";
+import type { ByteArray } from "viem";
+
+import {
+  buildLabelSetId,
+  buildLabelSetVersion,
+  type LabelSetId,
+  type LabelSetVersion,
+} from "@ensnode/ensnode-sdk";
 
 import { ENSRainbowDB, IngestionStatus } from "@/lib/database";
 import { getErrorMessage } from "@/utils/error-utils";
@@ -10,12 +18,6 @@ import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
   createRainbowProtobufRoot,
 } from "@/utils/protobuf-schema";
-import {
-  type LabelSetId,
-  type LabelSetVersion,
-  buildLabelSetId,
-  buildLabelSetVersion,
-} from "@ensnode/ensnode-sdk";
 
 export interface IngestProtobufCommandOptions {
   inputFile: string;
@@ -37,7 +39,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
     let ingestionStatus: IngestionStatus;
     try {
       ingestionStatus = await db.getIngestionStatus();
-    } catch (e) {
+    } catch (_e) {
       const errorMessage =
         "Database is in an unknown state!\n" +
         "To fix this:\n" +
@@ -103,6 +105,10 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
         incomplete: " ",
         width: 40,
         total: 1000000000, // Placeholder total
+        stream:
+          logger.level === "silent" || logger.level === "fatal"
+            ? createWriteStream("/dev/null")
+            : undefined,
       },
     );
 
@@ -277,7 +283,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
             headerRead = true;
             bytesRead += headerLength;
             logger.info("Header processed successfully. Reading records...");
-          } catch (e) {
+          } catch (_e) {
             // If we can't decode the header yet, we need more data
             // Don't proceed to read records until header is done
             return;
@@ -332,7 +338,7 @@ export async function ingestProtobufCommand(options: IngestProtobufCommandOption
 
             // Move to the next message
             bytesRead += messageLength;
-          } catch (e) {
+          } catch (_e) {
             // If we can't decode a record message, we need more data
             break;
           }

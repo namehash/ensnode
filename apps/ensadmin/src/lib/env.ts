@@ -1,49 +1,46 @@
 import { uniq } from "@ensnode/ensnode-sdk";
-import { type HttpHostname, buildHttpHostname, buildHttpHostnames } from "./url-utils";
 
-/**
- * Get ENSAdmin service public HttpHostname.
- *
- * Note: a Vercel fallback HttpHostname will be used if application runs on Vercel platform.
- * If the Vercel fallback HttpHostname cannot be applied, then default HttpHostname will be used.
- *
- * @returns application public HttpHostname for ENSAdmin
- * @throws when Vercel platform was detected but could not determine HttpHostname
- */
-export function ensAdminPublicUrl(): HttpHostname {
-  const envVarName = "ENSADMIN_PUBLIC_URL";
-  let envVarValue = process.env[envVarName];
-
-  if (!envVarValue) {
-    const vercelAppPublicUrl = getVercelAppPublicUrl();
-    if (vercelAppPublicUrl) {
-      return vercelAppPublicUrl;
-    }
-
-    return defaultEnsAdminPublicUrl();
-  }
-
-  const result = buildHttpHostname(envVarValue);
-  if (!result.isValid) {
-    throw new Error(
-      `Invalid ${envVarName} value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
-    );
-  }
-  return result.url;
-}
+import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
 
 const DEFAULT_ENSADMIN_PORT = 4173;
+const DEFAULT_SERVER_CONNECTION_LIBRARY = [
+  "https://api.alpha.ensnode.io",
+  "https://api.alpha-sepolia.ensnode.io",
+  "https://api.mainnet.ensnode.io",
+  "https://api.sepolia.ensnode.io",
+  "https://api.holesky.ensnode.io",
+].join(",");
 
-function defaultEnsAdminPublicUrl(): HttpHostname {
-  const port = process.env.PORT || DEFAULT_ENSADMIN_PORT;
+/**
+ * Determines whether `variables` is a non-null object and a valid Record<string, unknown>.
+ */
+const isValidRuntimeEnvVariables = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-  const result = buildHttpHostname(`http://localhost:${port}`);
-  if (!result.isValid) {
-    throw new Error(
-      `Invalid port "${port}". Cannot build default ENSAdmin public HttpHostname: ${result.error}`,
-    );
-  }
-  return result.url;
+/**
+ * Retrieves an env variable from runtime variables, if specified.
+ *
+ * @param key The key of the environment variable
+ * @returns The value, if specified, or undefined.
+ */
+const getRuntimeEnvVariable = (key: string): string | undefined => {
+  if (typeof window == "undefined") return undefined;
+
+  const variables = (window as any).__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
+  if (!isValidRuntimeEnvVariables(variables)) return undefined;
+
+  const value = variables[key];
+  if (value === undefined) return undefined;
+  if (value === null) return undefined;
+  if (typeof value !== "string") return undefined;
+  if (value === "") return undefined; // empty-string to undefined
+
+  return value;
+};
+
+function localhostEnsAdminPublicUrl(): string {
+  const port = process.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
+  return `http://localhost:${port}`;
 }
 
 /**
@@ -59,39 +56,39 @@ function isAppOnVercelPlatform(): boolean {
  * @returns public URL of the app if it is running on Vercel, else `null`
  * @throws when app is on the Vercel platform but the `HttpHostname` could not be formed.
  */
-function getVercelAppPublicUrl(): HttpHostname | null {
-  if (!isAppOnVercelPlatform()) {
-    return null;
-  }
+function getVercelAppPublicUrl(): string | undefined {
+  if (!isAppOnVercelPlatform()) return undefined;
 
-  const vercelEnv = process.env.VERCEL_ENV;
-  let vercelAppHostname: string | undefined;
-
-  switch (vercelEnv) {
+  switch (process.env.VERCEL_ENV) {
     case "production":
-      vercelAppHostname = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+      return process.env.VERCEL_PROJECT_PRODUCTION_URL;
     case "development":
     case "preview":
-      vercelAppHostname = process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
+      return process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
   }
-
-  if (!vercelAppHostname) {
-    throw new Error(`Could not extract Vercel hostname for Vercel env "${vercelEnv}"`);
-  }
-
-  const result = buildHttpHostname(`https://${vercelAppHostname}`);
-
-  if (!result.isValid) {
-    throw new Error(
-      `Could not build Vercel app public URL for hostname "${vercelAppHostname}": ${result.error}`,
-    );
-  }
-
-  return result.url;
 }
 
-const DEFAULT_SERVER_CONNECTION_LIBRARY =
-  "https://api.alpha.ensnode.io,https://api.alpha-sepolia.ensnode.io,https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io,https://api.holesky.ensnode.io";
+/**
+ * Get ENSAdmin service public HttpHostname.
+ *
+ * Note: a Vercel fallback HttpHostname will be used if application runs on Vercel platform.
+ * If the Vercel fallback HttpHostname cannot be applied, then default HttpHostname will be used.
+ *
+ * @returns application public HttpHostname for ENSAdmin
+ * @throws when Vercel platform was detected but could not determine HttpHostname
+ */
+export function ensAdminPublicUrl(): HttpHostname {
+  const envVarValue =
+    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
+
+  const result = buildHttpHostname(envVarValue);
+  if (!result.isValid) {
+    throw new Error(
+      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
+    );
+  }
+  return result.url;
+}
 
 /**
  * Gets the server's ENSNode connection library.
@@ -101,15 +98,10 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY =
  */
 export function getServerConnectionLibrary(): HttpHostname[] {
   const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
-  let envVarValue = process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY;
-
-  if (!envVarValue) {
-    console.warn(
-      `No server connection library of ENSNode URLs provided in "${envVarName}". Using fallback: ${DEFAULT_SERVER_CONNECTION_LIBRARY}`,
-    );
-
-    envVarValue = DEFAULT_SERVER_CONNECTION_LIBRARY;
-  }
+  const envVarValue =
+    getRuntimeEnvVariable("NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY") ||
+    process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY || // NOTE: must specify full key for nextjs to replace
+    DEFAULT_SERVER_CONNECTION_LIBRARY;
 
   const connections = buildHttpHostnames(envVarValue.split(","));
 
@@ -123,10 +115,4 @@ export function getServerConnectionLibrary(): HttpHostname[] {
   const uniqueConnections = uniq(connections);
 
   return uniqueConnections;
-}
-
-export async function ensAdminVersion(): Promise<string> {
-  const packageJson = await import("@/../package.json");
-
-  return packageJson.version;
 }

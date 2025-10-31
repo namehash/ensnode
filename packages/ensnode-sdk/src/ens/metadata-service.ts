@@ -1,6 +1,7 @@
+import { AssetId } from "caip";
+
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds } from "@ensnode/datasources";
-import { AssetId } from "caip";
 
 import type { BrowserSupportedAssetUrl } from "../shared/url";
 import { buildUrl, isBrowserSupportedProtocol, toBrowserSupportedUrl } from "../shared/url";
@@ -95,7 +96,7 @@ export type BrowserSupportedAssetUrlProxy = (
  */
 export const defaultBrowserSupportedAssetUrlProxy: BrowserSupportedAssetUrlProxy = (
   name: Name,
-  assetUrl: URL,
+  _,
   namespaceId: ENSNamespaceId,
 ): BrowserSupportedAssetUrl | null => {
   return buildEnsMetadataServiceAvatarUrl(name, namespaceId);

@@ -26,59 +26,9 @@ variable "ensdb_disk_size_gb" {
   default = 250
 }
 
+# ENSNode Variables
 
-# Mainnet Variables
-variable "ethereum_mainnet_rpc_url" {
-  type = string
-}
-
-variable "base_mainnet_rpc_url" {
-  type = string
-}
-
-variable "linea_mainnet_rpc_url" {
-  type = string
-}
-
-variable "optimism_mainnet_rpc_url" {
-  type = string
-}
-
-variable "arbitrum_mainnet_rpc_url" {
-  type = string
-}
-
-variable "scroll_mainnet_rpc_url" {
-  type = string
-}
-
-# Sepolia Variables
-variable "ethereum_sepolia_rpc_url" {
-  type = string
-}
-
-variable "base_sepolia_rpc_url" {
-  type = string
-}
-
-variable "linea_sepolia_rpc_url" {
-  type = string
-}
-
-variable "optimism_sepolia_rpc_url" {
-  type = string
-}
-
-variable "arbitrum_sepolia_rpc_url" {
-  type = string
-}
-
-variable "scroll_sepolia_rpc_url" {
-  type = string
-}
-
-# Holesky Variables
-variable "ethereum_holesky_rpc_url" {
+variable "alchemy_api_key" {
   type = string
 }
 

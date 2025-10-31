@@ -1,4 +1,13 @@
 "use client";
+
+import { useMemo, useState } from "react";
+
+import {
+  IndexingStatusResponseCodes,
+  type OmnichainIndexingStatusId,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
+
 import {
   RecentRegistrations,
   type RecentRegistrationsErrorProps,
@@ -6,14 +15,7 @@ import {
 } from "@/components/recent-registrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  IndexingStatusResponseCodes,
-  type OmnichainIndexingStatusId,
-  OmnichainIndexingStatusIds,
-} from "@ensnode/ensnode-sdk";
-import { useMemo, useState } from "react";
 
-import { ensIndexerPublicConfig } from "../config-api.mock";
 import { indexingStatusResponseOkOmnichain } from "../indexing-status-api.mock";
 
 type LoadingVariant = "Loading" | "Loading Error";
@@ -36,7 +38,7 @@ export default function MockRegistrationsPage() {
         return {
           error: {
             title: "RecentRegistrations Error",
-            description: "Failed to fetch ENSIndexerConfig or IndexingStatus.",
+            description: "Failed to fetch IndexingStatus.",
           },
         } satisfies RecentRegistrationsErrorProps;
 
@@ -58,7 +60,6 @@ export default function MockRegistrationsPage() {
           }
 
           return {
-            ensIndexerConfig: ensIndexerPublicConfig,
             realtimeProjection: indexingStatus.realtimeProjection,
           } satisfies RecentRegistrationsOkProps;
         } catch (error) {
@@ -110,10 +111,7 @@ export default function MockRegistrationsPage() {
       {typeof props.error !== "undefined" ? (
         <RecentRegistrations error={props.error} />
       ) : (
-        <RecentRegistrations
-          ensIndexerConfig={props.ensIndexerConfig}
-          realtimeProjection={props.realtimeProjection}
-        />
+        <RecentRegistrations realtimeProjection={props.realtimeProjection} />
       )}
     </section>
   );

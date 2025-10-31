@@ -1,6 +1,7 @@
-import { AccountId, ChainId, Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 import { AssetId as CaipAssetId } from "caip";
-import { Address, Hex, isAddressEqual, zeroAddress } from "viem";
+import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
+
+import { type AccountId, type ChainId, type Node, uint256ToHex32 } from "@ensnode/ensnode-sdk";
 
 /**
  * An enum representing the possible CAIP-19 Asset Namespace values.

@@ -1,11 +1,12 @@
 "use client";
 
-import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
 
-import type { ConfigParameter, UseRecordsParameters } from "../types";
+import type { ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+
+import type { UseRecordsParameters, WithSDKConfigParameter } from "../types";
 import { createRecordsQueryOptions } from "../utils/query";
-import { useENSNodeConfig } from "./useENSNodeConfig";
+import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
 /**
  * Resolves records for an ENS name (Forward Resolution).
@@ -50,10 +51,10 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  * ```
  */
 export function useRecords<SELECTION extends ResolverRecordsSelection>(
-  parameters: UseRecordsParameters<SELECTION> & ConfigParameter,
+  parameters: UseRecordsParameters<SELECTION> & WithSDKConfigParameter,
 ) {
   const { config, query = {}, name, ...args } = parameters;
-  const _config = useENSNodeConfig(config);
+  const _config = useENSNodeSDKConfig(config);
 
   const canEnable = name !== null;
 

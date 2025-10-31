@@ -1,7 +1,8 @@
 import { hexToBigInt } from "viem";
 
-import { TokenId } from "@/lib/tokenscope/assets";
-import { Node } from "@ensnode/ensnode-sdk";
+import type { Node } from "@ensnode/ensnode-sdk";
+
+import type { TokenId } from "@/lib/tokenscope/assets";
 
 /**
  * ThreeDNSToken's tokenId is the bigint representation of a Domain's Node

@@ -7,7 +7,6 @@
     "paths": {
       "@workspace/*": ["../../*"]
     },
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsx": "react-jsx"
   }
 }

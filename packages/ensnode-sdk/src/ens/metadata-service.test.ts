@@ -1,5 +1,7 @@
-import { ENSNamespaceIds } from "@ensnode/datasources";
 import { describe, expect, it } from "vitest";
+
+import { ENSNamespaceIds } from "@ensnode/datasources";
+
 import type { BrowserSupportedAssetUrlProxy } from "./metadata-service";
 import { buildBrowserSupportedAvatarUrl } from "./metadata-service";
 

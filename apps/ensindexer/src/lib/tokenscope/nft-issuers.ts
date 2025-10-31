@@ -1,17 +1,23 @@
-import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
-import { AssetNamespace, AssetNamespaces, SupportedNFT, TokenId } from "@/lib/tokenscope/assets";
-import { DatasourceName, DatasourceNames, ENSNamespaceId } from "@ensnode/datasources";
+import { type DatasourceName, DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
-  AccountId,
+  type AccountId,
+  accountIdEqual,
   BASENAMES_NODE,
   ETH_NODE,
+  type LabelHash,
   LINEANAMES_NODE,
-  LabelHash,
-  type Node,
-  accountIdEqual,
   makeSubdomainNode,
+  type Node,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
+
+import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
+import {
+  type AssetNamespace,
+  AssetNamespaces,
+  type SupportedNFT,
+  type TokenId,
+} from "@/lib/tokenscope/assets";
 
 /**
  * A contract that issues tokenized ENS names in a manner that is supported by

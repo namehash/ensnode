@@ -1,13 +1,20 @@
-import { Context, ponder } from "ponder:registry";
-
-import { ChainId, LabelHash, Node, PluginName, makeSubdomainNode } from "@ensnode/ensnode-sdk";
-import { Address } from "viem";
-
 import config from "@/config";
-import { namespaceContract } from "@/lib/plugin-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { upsertNodeResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+
+import { type Context, ponder } from "ponder:registry";
+import type { Address } from "viem";
+
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import {
+  type ChainId,
+  type LabelHash,
+  makeSubdomainNode,
+  type Node,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
+
+import { namespaceContract } from "@/lib/plugin-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
+import { upsertNodeResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
 
 const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
   DatasourceNames.ThreeDNSBase,
@@ -19,7 +26,7 @@ const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
     (memo, datasource) => ({
       ...memo,
       // each ThreeDNS* Datasource defines a 'Resolver' ContractConfig with a single Address
-      [datasource.chain.id]: datasource.contracts.Resolver!.address as Address,
+      [datasource.chain.id]: datasource.contracts.Resolver?.address as Address,
     }),
     {},
   );

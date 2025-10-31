@@ -1,5 +1,12 @@
 "use client";
 
+import { AlertCircle, Check, X } from "lucide-react";
+import { useMemo, useState } from "react";
+
+import { ENSNamespaceIds } from "@ensnode/datasources";
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { buildBrowserSupportedAvatarUrl, ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
+
 import { EnsAvatar, EnsAvatarDisplay } from "@/components/ens-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,11 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { useAvatarUrl } from "@ensnode/ensnode-react";
-import { ENSNamespaceId, Name, buildBrowserSupportedAvatarUrl } from "@ensnode/ensnode-sdk";
-import { AlertCircle, Check, X } from "lucide-react";
-import { useMemo, useState } from "react";
 
 const TEST_NAMES: Name[] = [
   "lightwalker.eth",

@@ -1,26 +1,27 @@
-import { type Context } from "ponder:registry";
+import config from "@/config";
+
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { checkPccBurned } from "@ensdomains/ensjs/utils";
 import { type Address, namehash } from "viem";
 
 import {
-  DNSEncodedLiteralName,
-  DNSEncodedName,
-  InterpretedLabel,
-  InterpretedName,
-  type Node,
-  SubgraphInterpretedLabel,
-  SubgraphInterpretedName,
+  type DNSEncodedLiteralName,
+  type DNSEncodedName,
   decodeDNSEncodedLiteralName,
-  literalLabelToInterpretedLabel,
+  type InterpretedLabel,
+  type InterpretedName,
   literalLabelsToInterpretedName,
+  literalLabelToInterpretedLabel,
+  type Node,
+  type SubgraphInterpretedLabel,
+  type SubgraphInterpretedName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
 import { bigintMax } from "@/lib/lib-helpers";
-import { EventWithArgs } from "@/lib/ponder-helpers";
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount } from "@/lib/subgraph/db-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";
 import type { RegistrarManagedName } from "@/lib/types";
@@ -50,7 +51,8 @@ function decodeInterpretedNameWrapperName(
     }
 
     return {
-      label: literalLabelToInterpretedLabel(literalLabels[0]!), // ! ok due to length invariant above
+      // biome-ignore lint/style/noNonNullAssertion: ok due to length invariant above
+      label: literalLabelToInterpretedLabel(literalLabels[0]!),
       name: literalLabelsToInterpretedName(literalLabels),
     };
   } catch {
@@ -82,7 +84,9 @@ function decodeSubgraphInterpretedNameWrapperName(
 
 // if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
+  const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, {
+    id: node,
+  });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63)
@@ -181,7 +185,9 @@ export const makeNameWrapperHandlers = ({
         ? decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
         : decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
-      const domain = await context.db.find(schema.subgraph_domain, { id: node });
+      const domain = await context.db.find(schema.subgraph_domain, {
+        id: node,
+      });
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label

@@ -1,4 +1,4 @@
-import { SVGProps } from "react";
+import type { SVGProps } from "react";
 
 export const LinkedInIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 382 382" xmlns="http://www.w3.org/2000/svg" {...props}>

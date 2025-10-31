@@ -1,4 +1,4 @@
-import type { ENSIndexerEnvironment } from "@/config/types";
+import type { ENSIndexerEnvironment } from "@/config/environment";
 
 declare global {
   namespace NodeJS {

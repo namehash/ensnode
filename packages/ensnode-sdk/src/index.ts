@@ -1,14 +1,11 @@
+export * from "./api";
+export { type ClientOptions, ENSNodeClient } from "./client";
+export * from "./client-error";
 export * from "./ens";
+export * from "./ensapi";
 export * from "./ensindexer";
 export * from "./ensrainbow";
+export * from "./identity";
+export * from "./resolution";
 export * from "./shared";
 export * from "./tracing";
-export * from "./client";
-export * from "./client-error";
-export * from "./resolution";
-export * from "./api";
-
-export {
-  type ClientOptions,
-  ENSNodeClient,
-} from "./client";

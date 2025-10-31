@@ -1,9 +1,13 @@
-import { type Cache, Label, type LabelHash, LruCache } from "@ensnode/ensnode-sdk";
 import {
+  buildEnsRainbowClientLabelSet,
+  type Cache,
   type EnsRainbowClientLabelSet,
   type EnsRainbowServerLabelSet,
-  buildEnsRainbowClientLabelSet,
+  type Label,
+  type LabelHash,
+  LruCache,
 } from "@ensnode/ensnode-sdk";
+
 import { DEFAULT_ENSRAINBOW_URL, ErrorCode, StatusCode } from "./consts";
 
 export namespace EnsRainbow {

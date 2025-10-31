@@ -1,5 +1,6 @@
-import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 import { describe, expect, it } from "vitest";
+
+import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
 
 import type { VersionedRainbowRecord } from "./rainbow-record";
 import { ENSRainbowServer } from "./server";

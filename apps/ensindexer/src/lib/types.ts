@@ -1,4 +1,4 @@
-import { Name } from "@ensnode/ensnode-sdk";
+import type { Name } from "@ensnode/ensnode-sdk";
 
 /**
  * RegistrarManagedName is an explicit type representing this concept within the shared handlers:
@@ -23,16 +23,3 @@ import { Name } from "@ensnode/ensnode-sdk";
  * or custom cases in the future, which will be necessary for 3DNS and other specialized integrations.
  */
 export type RegistrarManagedName = Name;
-
-/**
- * Describes a ponder-compatible blockrange with optional start and end blocks, minus 'latest' support.
- * An undefined start block indicates indexing from block 0, and undefined end block indicates
- * indexing in perpetuity (realtime).
- *
- * @docs https://ponder.sh/docs/config/contracts#block-range
- * i.e. Pick<ContractConfig, 'startBlock' | 'endBlock'>
- */
-export type Blockrange = {
-  startBlock?: number;
-  endBlock?: number;
-};

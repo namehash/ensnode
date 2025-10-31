@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { isNormalizedLabel, isNormalizedName } from "./is-normalized";
 
 const NORMALIZED_LABELS = [

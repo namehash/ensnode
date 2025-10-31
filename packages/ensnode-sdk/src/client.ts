@@ -1,29 +1,22 @@
 import {
-  SerializedIndexingStatusResponse,
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
+  type SerializedIndexingStatusResponse,
 } from "./api";
-import {
-  type ConfigResponse,
-  type ErrorResponse,
-  type IndexingStatusResponse,
-  IndexingStatusResponseCodes,
-  type ResolvePrimaryNameRequest,
-  type ResolvePrimaryNameResponse,
-  type ResolvePrimaryNamesRequest,
-  type ResolvePrimaryNamesResponse,
-  type ResolveRecordsRequest,
-  type ResolveRecordsResponse,
+import type {
+  ConfigResponse,
+  ErrorResponse,
+  IndexingStatusResponse,
+  ResolvePrimaryNameRequest,
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesRequest,
+  ResolvePrimaryNamesResponse,
+  ResolveRecordsRequest,
+  ResolveRecordsResponse,
 } from "./api/types";
 import { ClientError } from "./client-error";
-import {
-  RealtimeIndexingStatusProjection,
-  type SerializedENSIndexerPublicConfig,
-  SerializedRealtimeIndexingStatusProjection,
-  deserializeENSIndexerPublicConfig,
-  deserializeRealtimeIndexingStatusProjection,
-} from "./ensindexer";
-import { ResolverRecordsSelection } from "./resolution";
+import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
+import type { ResolverRecordsSelection } from "./resolution";
 
 /**
  * Default ENSNode API endpoint URL
@@ -293,10 +286,9 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    let responseData: unknown;
-
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
     try {
       responseData = await response.json();
     } catch {
@@ -308,7 +300,7 @@ export class ENSNodeClient {
       throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
     }
 
-    return deserializeENSIndexerPublicConfig(responseData as SerializedENSIndexerPublicConfig);
+    return deserializeENSApiPublicConfig(responseData as SerializedENSApiPublicConfig);
   }
 
   /**
@@ -325,10 +317,9 @@ export class ENSNodeClient {
 
     const response = await fetch(url);
 
-    let responseData: unknown;
-
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
     try {
       responseData = await response.json();
     } catch {
@@ -337,9 +328,8 @@ export class ENSNodeClient {
 
     // handle response errors accordingly
     if (!response.ok) {
-      let errorResponse: ErrorResponse | undefined;
-
       // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {

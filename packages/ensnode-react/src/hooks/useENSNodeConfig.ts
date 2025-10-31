@@ -1,29 +1,27 @@
-"use client";
+import { useQuery } from "@tanstack/react-query";
 
-import { useContext } from "react";
-import { ENSNodeContext } from "../context";
-import type { ENSNodeConfig } from "../types";
+import type { ConfigResponse } from "@ensnode/ensnode-sdk";
 
-/**
- * Hook to access the ENSNode configuration from context or parameters
- *
- * @param parameters - Optional config parameter that overrides context
- * @returns The ENSNode configuration
- * @throws Error if no config is available in context or parameters
- */
-export function useENSNodeConfig<TConfig extends ENSNodeConfig = ENSNodeConfig>(
-  config: TConfig | undefined,
-): TConfig {
-  const contextConfig = useContext(ENSNodeContext);
+import type { QueryParameter, WithSDKConfigParameter } from "../types";
+import { ASSUME_IMMUTABLE_QUERY, createConfigQueryOptions } from "../utils/query";
+import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
-  // Use provided config or fall back to context
-  const resolvedConfig = config ?? contextConfig;
+type UseENSNodeConfigParameters = QueryParameter<ConfigResponse>;
 
-  if (!resolvedConfig) {
-    throw new Error(
-      "useENSNodeConfig must be used within an ENSNodeProvider or you must pass a config parameter",
-    );
-  }
+export function useENSNodeConfig(
+  parameters: WithSDKConfigParameter & UseENSNodeConfigParameters = {},
+) {
+  const { config, query = {} } = parameters;
+  const _config = useENSNodeSDKConfig(config);
 
-  return resolvedConfig as TConfig;
+  const queryOptions = createConfigQueryOptions(_config);
+
+  const options = {
+    ...queryOptions,
+    ...ASSUME_IMMUTABLE_QUERY,
+    ...query,
+    enabled: query.enabled ?? queryOptions.enabled,
+  };
+
+  return useQuery(options);
 }

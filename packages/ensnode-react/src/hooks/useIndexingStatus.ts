@@ -1,16 +1,20 @@
-import { IndexingStatusRequest, IndexingStatusResponse } from "@ensnode/ensnode-sdk";
 import { useQuery } from "@tanstack/react-query";
-import { ConfigParameter, QueryParameter } from "../types";
+
+import type { IndexingStatusRequest, IndexingStatusResponse } from "@ensnode/ensnode-sdk";
+
+import type { QueryParameter, WithSDKConfigParameter } from "../types";
 import { createIndexingStatusQueryOptions } from "../utils/query";
-import { useENSNodeConfig } from "./useENSNodeConfig";
+import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
 interface UseIndexingStatusParameters
   extends IndexingStatusRequest,
     QueryParameter<IndexingStatusResponse> {}
 
-export function useIndexingStatus(parameters: ConfigParameter & UseIndexingStatusParameters = {}) {
+export function useIndexingStatus(
+  parameters: WithSDKConfigParameter & UseIndexingStatusParameters = {},
+) {
   const { config, query = {} } = parameters;
-  const _config = useENSNodeConfig(config);
+  const _config = useENSNodeSDKConfig(config);
 
   const queryOptions = createIndexingStatusQueryOptions(_config);
 

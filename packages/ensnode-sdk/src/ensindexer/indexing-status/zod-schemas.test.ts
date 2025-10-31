@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { type ZodSafeParseResult, prettifyError } from "zod/v4";
+import { prettifyError, type ZodSafeParseResult } from "zod/v4";
+
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotBackfill,
-  ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotFollowing,
-  ChainIndexingStatusSnapshotQueued,
+  type ChainIndexingStatusSnapshot,
+  type ChainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotCompleted,
+  type ChainIndexingStatusSnapshotFollowing,
+  type ChainIndexingStatusSnapshotQueued,
 } from "./types";
 import { makeChainIndexingStatusSnapshotSchema } from "./zod-schemas";
 

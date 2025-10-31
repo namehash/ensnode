@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import Link from "next/link";
 
 export default function MockList() {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();

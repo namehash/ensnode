@@ -1,10 +1,11 @@
+import type { Address } from "viem";
+
 import {
-  LabelHash,
-  LiteralLabel,
   addrReverseLabel,
+  type LabelHash,
+  type LiteralLabel,
   labelhashLiteralLabel,
 } from "@ensnode/ensnode-sdk";
-import { Address } from "viem";
 
 /**
  * Attempt to heal the labelHash of an addr.reverse subname using an address.

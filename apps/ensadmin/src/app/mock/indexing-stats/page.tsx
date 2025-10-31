@@ -1,12 +1,14 @@
 "use client";
 
-import { IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
+import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
 
 import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+
 import {
   indexingStatusResponseError,
   indexingStatusResponseOkOmnichain,
@@ -47,7 +49,7 @@ async function fetchMockedIndexingStatus(
     case "Response Error":
       return indexingStatusResponseError;
     case "Loading":
-      return new Promise<IndexingStatusResponse>((resolve, reject) => {
+      return new Promise<IndexingStatusResponse>((_resolve, reject) => {
         loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
       });
     case "Loading Error":
@@ -68,7 +70,7 @@ export default function MockIndexingStatusPage() {
 
   useEffect(() => {
     mockedIndexingStatus.refetch();
-  }, [selectedVariant]);
+  }, [mockedIndexingStatus.refetch]);
 
   return (
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
