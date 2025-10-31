@@ -3,13 +3,15 @@
 import { Mail } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ENSAdminProfile } from "@/hooks/use-ensadmin-profile";
 
 interface ProfileInformationProps {
-  description?: string | null;
-  email?: string | null;
+  profile: ENSAdminProfile;
 }
 
-export function ProfileInformation({ description, email }: ProfileInformationProps) {
+export function ProfileInformation({ profile }: ProfileInformationProps) {
+  const { description, email } = profile.information;
+
   if (!description && !email) {
     return null;
   }

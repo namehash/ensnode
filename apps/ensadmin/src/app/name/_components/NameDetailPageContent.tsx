@@ -1,11 +1,9 @@
 "use client";
 
-import { ASSUME_IMMUTABLE_QUERY, useRecords } from "@ensnode/ensnode-react";
-import { type Name, type ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
+import { type Name } from "@ensnode/ensnode-sdk";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-import { getCommonCoinTypes } from "@/lib/default-records-selection";
+import { useENSAdminProfile } from "@/hooks/use-ensadmin-profile";
 
 import { AdditionalRecords } from "./AdditionalRecords";
 import { Addresses } from "./Addresses";
@@ -14,58 +12,12 @@ import { ProfileHeader } from "./ProfileHeader";
 import { ProfileInformation } from "./ProfileInformation";
 import { SocialLinks } from "./SocialLinks";
 
-const HeaderPanelTextRecords = ["url", "avatar", "header"];
-const ProfilePanelTextRecords = ["description", "email"];
-const SocialLinksTextRecords = [
-  "com.twitter",
-  "com.github",
-  "com.farcaster",
-  "org.telegram",
-  "com.linkedin",
-  "com.reddit",
-];
-// TODO: Instead of explicitly listing AdditionalTextRecords, we should update
-// `useRecords` so that we can ask it to return not only all the records we
-// explicitly requested, but also any other records that were found onchain,
-// no matter what their text record keys are. Below are two examples of
-// additional text records set for lightwalker.eth on mainnet as an example.
-// see: https://github.com/namehash/ensnode/issues/1083
-const AdditionalTextRecords = ["status", "eth.ens.delegate"];
-const AllRequestedTextRecords = [
-  ...HeaderPanelTextRecords,
-  ...ProfilePanelTextRecords,
-  ...SocialLinksTextRecords,
-  ...AdditionalTextRecords,
-];
-
 interface NameDetailPageContentProps {
   name: Name;
 }
 
 export function NameDetailPageContent({ name }: NameDetailPageContentProps) {
-  const namespace = useActiveNamespace();
-
-  const selection = {
-    addresses: getCommonCoinTypes(namespace),
-    texts: AllRequestedTextRecords,
-  } as const satisfies ResolverRecordsSelection;
-
-  // TODO: Each app (including ENSAdmin) should define their own "wrapper" data model around
-  // their `useRecords` queries that is specific to their use case. For example, ENSAdmin should
-  // define a nicely designed data model such as `ENSProfile` (based on the subjective definition
-  // of what an ENS profile is within the context of ENSAdmin). Then, a hook such as `useENSProfile`
-  // should be defined that internally calls `useRecords` and then performs the data transformations
-  // that might be required to return the nice, clean, and specialized `ENSProfile` data model.
-  // The code in `ProfileHeader`, `ProfileInformation`, `SocialLinks`, `Addresses`, and `AdditionalRecords`
-  // should then be updated so that it takes as input only the nice and clean `ENSProfile` data model.
-  // These UI components should not need to consider the nuances or complexities of the raw `useRecords`
-  // data model. All those nuances and complexities should be mananaged in a single place (ex: `useENSProfile`).
-  // see: https://github.com/namehash/ensnode/issues/1082
-  const { data, status } = useRecords({
-    name,
-    selection,
-    query: ASSUME_IMMUTABLE_QUERY,
-  });
+  const { data: profile, status } = useENSAdminProfile({ name });
 
   if (status === "pending") return <NameDetailPageSkeleton />;
 
@@ -78,25 +30,17 @@ export function NameDetailPageContent({ name }: NameDetailPageContentProps) {
       </Card>
     );
 
+  // TODO: Design and Implement Profile not found page
+  if (!profile) return null;
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <ProfileHeader
-        name={name}
-        namespaceId={namespace}
-        headerImage={data?.records?.texts?.header}
-        websiteUrl={data?.records?.texts?.url}
-      />
+      <ProfileHeader profile={profile} />
       <div className="grid gap-6">
-        <ProfileInformation
-          description={data.records.texts.description}
-          email={data.records.texts.email}
-        />
-
-        <SocialLinks.Texts texts={data.records.texts} />
-
-        <Addresses addresses={data.records.addresses} />
-
-        <AdditionalRecords texts={data.records.texts} />
+        <ProfileInformation profile={profile} />
+        <SocialLinks profile={profile} />
+        <Addresses profile={profile} />
+        <AdditionalRecords profile={profile} />
       </div>
     </div>
   );
