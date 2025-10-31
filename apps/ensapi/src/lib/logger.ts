@@ -4,7 +4,7 @@ import { getLogLevelFromEnv, type LogLevel } from "@ensnode/ensnode-sdk/internal
 
 const DEFAULT_LOG_LEVEL: LogLevel = "info";
 
-export default pino({
+const logger = pino({
   level: getLogLevelFromEnv(process.env, DEFAULT_LOG_LEVEL),
   transport:
     process.env.NODE_ENV === "production"
@@ -17,3 +17,7 @@ export default pino({
           },
         },
 });
+
+export const makeLogger = (module: string) => logger.child({ module });
+
+export default logger;

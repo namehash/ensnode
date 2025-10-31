@@ -13,7 +13,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
-import logger from "@/lib/logger";
+import { makeLogger } from "@/lib/logger";
+
+const logger = makeLogger("can-accelerate.middleware");
 
 export type CanAccelerateVariables = { canAccelerate: boolean };
 

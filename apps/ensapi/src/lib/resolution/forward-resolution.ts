@@ -19,7 +19,7 @@ import {
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
-import logger from "@/lib/logger";
+import { makeLogger } from "@/lib/logger";
 import { ENS_ROOT_REGISTRY } from "@/lib/protocol-acceleration/ens-root-registry";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
@@ -43,6 +43,7 @@ import { getPublicClient } from "@/lib/rpc/public-client";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
 
+const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
 // const metric = metrics.getMeter("forward-resolution");
 
