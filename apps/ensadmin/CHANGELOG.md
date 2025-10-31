@@ -1,5 +1,41 @@
 # ensadmin
 
+## 1.0.0
+
+### Minor Changes
+
+- [#1216](https://github.com/namehash/ensnode/pull/1216) [`c72919a`](https://github.com/namehash/ensnode/commit/c72919a9411a32486b40b34cc951af11d54b9fc9) Thanks [@notrab](https://github.com/notrab)! - Resolved stability issue that could cause the browser to crash when refreshing pages in ENSAdmin
+
+- [#1190](https://github.com/namehash/ensnode/pull/1190) [`b9a988c`](https://github.com/namehash/ensnode/commit/b9a988ced492bafe9845fd4524d137cfb0191d2a) Thanks [@notrab](https://github.com/notrab)! - Transitioned explore name detail page to use query param instead of path
+  Replace `useENSAppProfileUrl` hook with pure `buildExternalEnsAppProfileUrl` function for better testability and explicit dependency handling.
+
+- [#1207](https://github.com/namehash/ensnode/pull/1207) [`61b9472`](https://github.com/namehash/ensnode/commit/61b94721aee0d7050ebc3e384d5c8e2cd65cc08d) Thanks [@notrab](https://github.com/notrab)! - Transition ENSAdmin to a fast, modern Single Page App built with Next.js
+
+- [#1191](https://github.com/namehash/ensnode/pull/1191) [`0090558`](https://github.com/namehash/ensnode/commit/0090558074a585e5591427db54273438919e0216) Thanks [@notrab](https://github.com/notrab)! - Add initial splash screen and remove /connection root redirect
+
+- [#1201](https://github.com/namehash/ensnode/pull/1201) [`ceef81e`](https://github.com/namehash/ensnode/commit/ceef81e4a39125b238ab71bb4e0598a1a0771d15) Thanks [@notrab](https://github.com/notrab)! - - Improved ENSNode config info components with better reusability and maintainability (great for mocking too). Introduced `ENSNodeConfigCardDisplay` component that accepts props and extracted a reusable `ENSNodeCard` wrapper that provides consistent header and loading states.
+
+  - Added Suspense boundary around `ConnectionsLibraryProvider` in root layout to better handle hydration
+  - Added Suspense boundary with skeleton fallback in `LayoutWrapper` to show proper loading states
+  - Ensures all pages remain statically generated while respecting existing component loading states
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - ENSAdmin now supports ENSApi Version info.
+
+- [#1179](https://github.com/namehash/ensnode/pull/1179) [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2) Thanks [@tk-o](https://github.com/tk-o)! - Replcated `BlockRefViewModel` type with `BlockRef` type from ENSNode SDK package.
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - ENSAdmin now displays whether ENSNode attempted acceleration for an acceleratable endpoint in the Protocol Inspector.
+
+- [#1184](https://github.com/namehash/ensnode/pull/1184) [`dc468d1`](https://github.com/namehash/ensnode/commit/dc468d11056fe5b323d1345ce0d97011e8ddb838) Thanks [@notrab](https://github.com/notrab)! - Temporarily disable AI query generator inside GraphiQL until we transition it into the new ENSApi service.
+
+### Patch Changes
+
+- Updated dependencies [[`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2), [`61b9472`](https://github.com/namehash/ensnode/commit/61b94721aee0d7050ebc3e384d5c8e2cd65cc08d), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5)]:
+  - @ensnode/ensnode-sdk@1.0.0
+  - @ensnode/ensnode-react@1.0.0
+  - @ensnode/datasources@1.0.0
+  - @ensnode/ponder-metadata@1.0.0
+  - @ensnode/ensnode-schema@1.0.0
+
 ## 0.36.0
 
 ### Minor Changes

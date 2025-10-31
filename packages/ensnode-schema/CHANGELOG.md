@@ -1,5 +1,7 @@
 # @ensnode/ensnode-schema
 
+## 1.0.0
+
 ## 0.36.0
 
 ## 0.35.0

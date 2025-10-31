@@ -1,5 +1,18 @@
 # @ensnode/ensnode-react
 
+## 1.0.0
+
+### Minor Changes
+
+- [#1207](https://github.com/namehash/ensnode/pull/1207) [`61b9472`](https://github.com/namehash/ensnode/commit/61b94721aee0d7050ebc3e384d5c8e2cd65cc08d) Thanks [@notrab](https://github.com/notrab)! - Allow the latest version of React to be used with ENSNode React
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: `useENSNodeConfig` has been renamed to `useENSNodeSDKConfig`. `useENSIndexerConfig` has been renamed to `useENSNodeConfig`.
+
+### Patch Changes
+
+- Updated dependencies [[`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5)]:
+  - @ensnode/ensnode-sdk@1.0.0
+
 ## 0.36.0
 
 ### Minor Changes

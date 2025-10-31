@@ -1,5 +1,20 @@
 # @ensnode/ensnode-sdk
 
+## 1.0.0
+
+### Minor Changes
+
+- [#1179](https://github.com/namehash/ensnode/pull/1179) [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2) Thanks [@tk-o](https://github.com/tk-o)! - Removed `endBlock` field from `ChainIndexingConfigIndefinite` type.
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: Removed DefaultRecordsSelection export: integrating apps should define their own set of records to request when using useRecords().
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: client.config() now returns Promise<EnsApiPublicConfig> instead of ENSIndexerPublicConfig.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.0.0
+
 ## 0.36.0
 
 ### Minor Changes
