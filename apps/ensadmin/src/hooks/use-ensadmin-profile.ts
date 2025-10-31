@@ -4,9 +4,9 @@ import { useMemo } from "react";
 
 import { useProfile } from "@ensnode/ensnode-react";
 import type { Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
-import { getCommonCoinTypes } from "@ensnode/ensnode-sdk";
 
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
+import { getCommonCoinTypes } from "@/lib/default-records-selection";
 
 /**
  * Strongly-typed social link identifiers supported by ENSAdmin profiles.
