@@ -73,7 +73,7 @@ function DisplayNameRecords() {
 #### Primary Name Resolution — `usePrimaryName`
 
 ```tsx
-import { mainnet } from 'viem/chains';
+import { mainnet } from "viem/chains";
 import { usePrimaryName } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryName() {
@@ -88,7 +88,7 @@ function DisplayPrimaryName() {
   return (
     <div>
       <h3>Primary Name (for Mainnet)</h3>
-      <p>{data.name ?? 'No Primary Name'}</p>
+      <p>{data.name ?? "No Primary Name"}</p>
     </div>
   );
 }
@@ -97,7 +97,7 @@ function DisplayPrimaryName() {
 #### Primary Names Resolution — `usePrimaryNames`
 
 ```tsx
-import { mainnet } from 'viem/chains';
+import { mainnet } from "viem/chains";
 import { usePrimaryNames } from "@ensnode/ensnode-react";
 
 function DisplayPrimaryNames() {
@@ -116,6 +116,34 @@ function DisplayPrimaryNames() {
           <p>{name}</p>
         </div>
       ))}
+    </div>
+  );
+}
+```
+
+#### Avatar URL Resolution — `useAvatarUrl`
+
+```tsx
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
+
+function ProfileAvatar({ name }: { name: Name }) {
+  const { data, isLoading } = useAvatarUrl({ name });
+
+  if (isLoading || !data) {
+    return <div className="avatar-loading" />;
+  }
+
+  return (
+    <div className="avatar">
+      {!data.browserSupportedAvatarUrl ? (
+        <div className="avatar-fallback" />
+      ) : (
+        <img
+          src={data.browserSupportedAvatarUrl.toString()}
+          alt={`${name} avatar`}
+        />
+      )}
     </div>
   );
 }
@@ -224,6 +252,203 @@ const { data, isLoading, error, refetch } = usePrimaryNames({
 });
 ```
 
+### `useAvatarUrl`
+
+Hook that resolves the avatar URL for an ENS name. This hook automatically handles the avatar text record resolution and provides browser-compatible URLs (potentially using a proxy).
+
+#### Resolution Flow
+
+The hook follows this resolution process:
+
+1. **Fetches the avatar text record** using `useRecords` internally
+2. **Normalizes the avatar text record** as a URL
+3. **Returns the normalized URL directly** if it uses http or https protocol
+4. **Falls back to ENS Metadata Service** (or custom proxy) if the avatar text record is a valid url, but uses non-http/https protocols (e.g., `ipfs://`, `ar://`, `eip155://`)
+
+The ENS Metadata Service can be used as a proxy for loading avatar images when the related avatar text records use non-browser-supported protocols.
+
+#### Invariants
+
+- **If `rawAvatarTextRecord` is `null`, then `browserSupportedAvatarUrl` must also be `null`**
+- The `browserSupportedAvatarUrl` is guaranteed to use http or https protocol when non-null
+- The `usesProxy ` flag is `true` if `browserSupportedAvatarUrl` will use the configured proxy.
+
+#### Parameters
+
+- `name`: The ENS Name whose avatar URL to resolve (set to `null` to disable the query)
+- `browserSupportedAvatarUrlProxy `: (optional) Custom function to build a proxy URL for loading the avatar image for a name who's avatar text records that are formatted as valid URLs but use non-http/https protocols. Must return a `BrowserSupportedAssetUrl` created using `toBrowserSupportedUrl()` or from `buildEnsMetadataServiceAvatarUrl()`. Defaults to using the ENS Metadata Service.
+- `query`: (optional) TanStack Query options for customization
+
+#### Return Value
+
+```tsx
+interface UseAvatarUrlResult {
+  rawAvatarTextRecord: string | null;
+  browserSupportedAvatarUrl: BrowserSupportedAssetUrl | null;
+  usesProxy: boolean;
+}
+```
+
+- `rawAvatarTextRecord`: The original avatar text record value from ENS, before any normalization or proxy processing. `null` if no avatar text record is set.
+- `browserSupportedAvatarUrl`: A browser-supported (http/https/data) avatar URL ready for use in `<img>` tags. `null` if no avatar is set, if the avatar that is set is an invalid URL, or if the avatar uses a non-http/https/data protocol and no proxy url is available.
+- `usesProxy `: Indicates if the `browserSupportedAvatarUrl` uses the configured proxy.
+
+<details>
+<summary><strong>Basic Example</strong></summary>
+
+```tsx
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
+
+function ProfileAvatar({ name }: { name: Name }) {
+  const { data, isLoading } = useAvatarUrl({ name });
+
+  if (isLoading || !data) {
+    return <div className="avatar-loading" />;
+  }
+
+  return (
+    <div className="avatar">
+      {!data.browserSupportedAvatarUrl ? (
+        <div className="avatar-fallback" />
+      ) : (
+        <img
+          src={data.browserSupportedAvatarUrl.toString()}
+          alt={`${name} avatar`}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Advanced Example with Loading States</strong></summary>
+
+```tsx
+import { useAvatarUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
+import { useState } from "react";
+
+function EnsAvatar({ name }: { name: Name }) {
+  const [imageLoadingStatus, setImageLoadingStatus] = useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
+  const { data: avatarUrlData, isLoading: isAvatarUrlLoading } = useAvatarUrl({
+    name,
+  });
+
+  // Show loading state while fetching avatar URL
+  if (isAvatarUrlLoading || !avatarUrlData) {
+    return <div className="h-12 w-12 rounded-full animate-pulse bg-gray-200" />;
+  }
+
+  // No avatar available - show fallback
+  if (avatarUrlData.browserSupportedAvatarUrl === null) {
+    return (
+      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-600" />
+    );
+  }
+
+  const avatarUrl = avatarUrlData.browserSupportedAvatarUrl;
+
+  return (
+    <div className="relative h-12 w-12">
+      <img
+        src={avatarUrl.toString()}
+        alt={`${name} avatar`}
+        className="h-full w-full rounded-full object-cover"
+        onLoad={() => setImageLoadingStatus("loaded")}
+        onError={() => setImageLoadingStatus("error")}
+      />
+
+      {/* Show loading state while image is loading */}
+      {(imageLoadingStatus === "idle" || imageLoadingStatus === "loading") && (
+        <div className="absolute inset-0 rounded-full animate-pulse bg-gray-200" />
+      )}
+
+      {/* Show fallback if image fails to load */}
+      {imageLoadingStatus === "error" && (
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400 to-purple-600" />
+      )}
+    </div>
+  );
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Custom IPFS Gateway Proxy Example</strong></summary>
+
+When ENS avatars use the IPFS protocol (e.g., `ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco`), you can configure a custom IPFS gateway to load the images. This is useful for using your own infrastructure or a preferred public gateway.
+
+```tsx
+import { useAvatarUrl, toBrowserSupportedUrl } from "@ensnode/ensnode-react";
+import { Name } from "@ensnode/ensnode-sdk";
+
+function ProfileAvatar({ name }: { name: Name }) {
+  const { data, isLoading } = useAvatarUrl({
+    name,
+    browserSupportedAvatarUrlProxy: (name, avatarUrl) => {
+      // Handle IPFS protocol URLs
+      if (avatarUrl.protocol === "ipfs:") {
+        // Extract the CID (Content Identifier) from the IPFS URL
+        // Format: ipfs://{CID} or ipfs://{CID}/{path}
+        const ipfsPath = avatarUrl.href.replace("ipfs://", "");
+
+        // Option 1: Use ipfs.io public gateway (path-based)
+        // Note: Public gateways are best-effort and not for production
+        return toBrowserSupportedUrl(`https://ipfs.io/ipfs/${ipfsPath}`);
+
+        // Option 2: Use dweb.link public gateway (subdomain-based, better origin isolation)
+        // return toBrowserSupportedUrl(`https://dweb.link/ipfs/${ipfsPath}`);
+
+        // Option 3: Use your own IPFS gateway
+        // return toBrowserSupportedUrl(`https://my-gateway.example.com/ipfs/${ipfsPath}`);
+
+        // Option 4: Use Cloudflare's IPFS gateway
+        // return toBrowserSupportedUrl(`https://cloudflare-ipfs.com/ipfs/${ipfsPath}`);
+      }
+
+      // Handle Arweave protocol URLs (ar://)
+      if (avatarUrl.protocol === "ar:") {
+        const arweaveId = avatarUrl.href.replace("ar://", "");
+        return toBrowserSupportedUrl(`https://arweave.net/${arweaveId}`);
+      }
+
+      // For other protocols, fall back to ENS Metadata Service
+      // by returning null (the default behavior)
+      return null;
+    },
+  });
+
+  if (isLoading || !data) {
+    return <div className="avatar-loading" />;
+  }
+
+  return (
+    <div className="avatar">
+      {!data.browserSupportedAvatarUrl ? (
+        <div className="avatar-fallback" />
+      ) : (
+        <>
+          <img
+            src={data.browserSupportedAvatarUrl.toString()}
+            alt={`${name} avatar`}
+          />
+          {data.usesProxy && <span className="badge">Uses Proxy</span>}
+        </>
+      )}
+    </div>
+  );
+}
+```
+
+</details>
+
 ## Advanced Usage
 
 ### Custom Query Configuration
@@ -284,7 +509,7 @@ const [address, setAddress] = useState("");
 // only executes when address is not null
 const { data } = usePrimaryName({
   address: address || null,
-  chainId: 1
+  chainId: 1,
 });
 ```
 

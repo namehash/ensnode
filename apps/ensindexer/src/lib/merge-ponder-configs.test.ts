@@ -6,7 +6,11 @@ describe("mergePonderConfigs", () => {
   it("should deeply merge two objects", () => {
     const target = { a: 1, b: { c: 2 } };
     const source = { b: { d: 3 }, e: 4 };
-    expect(mergePonderConfigs(target, source)).toEqual({ a: 1, b: { c: 2, d: 3 }, e: 4 });
+    expect(mergePonderConfigs(target, source)).toEqual({
+      a: 1,
+      b: { c: 2, d: 3 },
+      e: 4,
+    });
   });
 
   it("should de-duplicate abis instead of concatenating them", () => {
@@ -30,7 +34,10 @@ describe("mergePonderConfigs", () => {
       type: "event",
     };
     const target = { abi: [EXAMPLE_ABI_ITEM], array: [{ key: "a" }] };
-    const source = { abi: [EXAMPLE_ABI_ITEM], array: [{ key: "a" }, { key: "b" }] };
+    const source = {
+      abi: [EXAMPLE_ABI_ITEM],
+      array: [{ key: "a" }, { key: "b" }],
+    };
     expect(mergePonderConfigs(target, source)).toEqual({
       abi: [EXAMPLE_ABI_ITEM], // de-duped
       array: [{ key: "a" }, { key: "a" }, { key: "b" }], // concatenated

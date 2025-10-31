@@ -157,7 +157,9 @@ export async function handleNewOwner({
   // always emit `RegistrationCreated`, including Domain's `name`, before this `NewOwner` event
   // is indexed.
   if (domain.name === null) {
-    const parent = await context.db.find(schema.subgraph_domain, { id: parentNode });
+    const parent = await context.db.find(schema.subgraph_domain, {
+      id: parentNode,
+    });
 
     // 1. attempt metadata retrieval
     const tokenId = getThreeDNSTokenId(node);

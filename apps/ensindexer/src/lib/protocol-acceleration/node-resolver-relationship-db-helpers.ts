@@ -7,7 +7,11 @@ import type { Node } from "@ensnode/ensnode-sdk";
 export async function removeNodeResolverRelation(context: Context, registry: Address, node: Node) {
   const chainId = context.chain.id;
 
-  await context.db.delete(schema.nodeResolverRelation, { chainId, registry, node });
+  await context.db.delete(schema.nodeResolverRelation, {
+    chainId,
+    registry,
+    node,
+  });
 }
 
 export async function upsertNodeResolverRelation(

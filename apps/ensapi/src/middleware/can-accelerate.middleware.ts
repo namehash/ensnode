@@ -36,8 +36,9 @@ let didInitialRealtime = false;
  */
 const isIndexingStatusOk = (
   result: PromiseResult<IndexingStatusResponse>,
-): result is PromiseResult<IndexingStatusResponse> & { value: IndexingStatusResponseOk } =>
-  result.status === "fulfilled" && result.value.responseCode === IndexingStatusResponseCodes.Ok;
+): result is PromiseResult<IndexingStatusResponse> & {
+  value: IndexingStatusResponseOk;
+} => result.status === "fulfilled" && result.value.responseCode === IndexingStatusResponseCodes.Ok;
 
 /**
  * Middleware that determines if protocol acceleration can be enabled for the current request.

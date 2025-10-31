@@ -2,9 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { Name } from "@ensnode/ensnode-sdk";
-
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
+import { buildEnsMetadataServiceAvatarUrl, type Name } from "@ensnode/ensnode-sdk";
 
 import { useNamespace } from "./use-namespace";
 

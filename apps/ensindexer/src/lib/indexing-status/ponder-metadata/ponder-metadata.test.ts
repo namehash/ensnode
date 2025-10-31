@@ -14,7 +14,10 @@ import { type ChainMetadata, createChainIndexingSnapshot } from "./chains";
 import { getChainsBlockrange, type PonderConfigType } from "./config";
 
 // Minimal helpers to simulate BlockRef
-const blockRef = (number: number, timestamp: number = 0): BlockRef => ({ number, timestamp });
+const blockRef = (number: number, timestamp: number = 0): BlockRef => ({
+  number,
+  timestamp,
+});
 
 describe("getChainsBlockrange", () => {
   it("allows endBlock if all datasources for a chain define their respective endBlock", () => {
@@ -30,17 +33,29 @@ describe("getChainsBlockrange", () => {
       contracts: {
         "subgraph/Registrar": {
           chain: {
-            mainnet: { address: "0x1", startBlock: 444_444_444, endBlock: 999_999_990 },
+            mainnet: {
+              address: "0x1",
+              startBlock: 444_444_444,
+              endBlock: 999_999_990,
+            },
           },
         },
         "subgraph/Registry": {
           chain: {
-            mainnet: { address: "0x2", startBlock: 444_444_333, endBlock: 999_999_991 },
+            mainnet: {
+              address: "0x2",
+              startBlock: 444_444_333,
+              endBlock: 999_999_991,
+            },
           },
         },
         "subgraph/UpgradableRegistry": {
           chain: {
-            mainnet: { address: "0x2", startBlock: 444_555_333, endBlock: 999_999_999 },
+            mainnet: {
+              address: "0x2",
+              startBlock: 444_555_333,
+              endBlock: 999_999_999,
+            },
           },
         },
       },
@@ -69,7 +84,11 @@ describe("getChainsBlockrange", () => {
       contracts: {
         "subgraph/Registrar": {
           chain: {
-            mainnet: { address: "0x1", startBlock: 444_444_444, endBlock: 999_999_990 },
+            mainnet: {
+              address: "0x1",
+              startBlock: 444_444_444,
+              endBlock: 999_999_990,
+            },
           },
         },
         "subgraph/Registry": {
@@ -79,7 +98,11 @@ describe("getChainsBlockrange", () => {
         },
         "subgraph/UpgradableRegistry": {
           chain: {
-            mainnet: { address: "0x2", startBlock: 444_555_333, endBlock: 999_999_999 },
+            mainnet: {
+              address: "0x2",
+              startBlock: 444_555_333,
+              endBlock: 999_999_999,
+            },
           },
         },
       },
@@ -105,8 +128,18 @@ describe("getChainsBlockrange", () => {
         },
       },
       accounts: {
-        "vitalik.eth": { chain: "mainnet", address: "0x1", startBlock: 100, endBlock: 200 },
-        "nick.eth": { chain: "mainnet", address: "0x2", startBlock: 50, endBlock: 300 },
+        "vitalik.eth": {
+          chain: "mainnet",
+          address: "0x1",
+          startBlock: 100,
+          endBlock: 200,
+        },
+        "nick.eth": {
+          chain: "mainnet",
+          address: "0x2",
+          startBlock: 50,
+          endBlock: 300,
+        },
       },
       contracts: {
         "subgraph/Registrar": {

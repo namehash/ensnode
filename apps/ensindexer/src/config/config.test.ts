@@ -46,7 +46,10 @@ describe("config (with base env)", () => {
     it("returns a valid config object using environment variables", async () => {
       const config = await getConfig();
       expect(config.namespace).toBe("mainnet");
-      expect(config.globalBlockrange).toEqual({ startBlock: undefined, endBlock: undefined });
+      expect(config.globalBlockrange).toEqual({
+        startBlock: undefined,
+        endBlock: undefined,
+      });
       expect(config.databaseSchemaName).toBe("ensnode");
       expect(config.plugins).toEqual(["subgraph"]);
       expect(config.ensRainbowUrl).toStrictEqual(new URL("http://localhost:3223"));
@@ -432,7 +435,9 @@ describe("config (with base env)", () => {
     });
 
     it("is true when compatible", async () => {
-      await expect(getConfig()).resolves.toMatchObject({ isSubgraphCompatible: true });
+      await expect(getConfig()).resolves.toMatchObject({
+        isSubgraphCompatible: true,
+      });
     });
 
     it("throws when PLUGINS does not include subgraph", async () => {
@@ -615,7 +620,9 @@ describe("config (minimal base env)", () => {
         RPC_URL_10: VALID_RPC_URL,
       });
 
-      await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
+      await expect(getConfig()).resolves.toMatchObject({
+        plugins: [PluginName.TokenScope],
+      });
     });
 
     describe("with ALCHEMY_API_KEY", async () => {

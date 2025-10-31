@@ -102,7 +102,9 @@ export function RenderRequestsOutput<KEY extends string>({
                     {
                       message: focused.error.message,
                       ...(focused.error instanceof ClientError &&
-                        !!focused.error.details && { details: focused.error.details }),
+                        !!focused.error.details && {
+                          details: focused.error.details,
+                        }),
                     },
                     null,
                     2,

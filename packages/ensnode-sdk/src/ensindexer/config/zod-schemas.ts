@@ -165,7 +165,9 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
-      isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
+      isSubgraphCompatible: z.boolean({
+        error: `${valueLabel}.isSubgraphCompatible`,
+      }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),

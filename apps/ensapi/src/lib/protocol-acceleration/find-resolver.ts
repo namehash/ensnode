@@ -31,7 +31,11 @@ type FindResolverResult =
       activeResolver: null;
       requiresWildcardSupport: undefined;
     }
-  | { activeName: Name; requiresWildcardSupport: boolean; activeResolver: Address };
+  | {
+      activeName: Name;
+      requiresWildcardSupport: boolean;
+      activeResolver: Address;
+    };
 
 const NULL_RESULT: FindResolverResult = {
   activeName: null,
@@ -119,7 +123,10 @@ async function findResolverWithUniversalResolver(
       // 3. Interpret results
 
       if (isAddressEqual(activeResolver, zeroAddress)) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: "activeResolver is zeroAddress" });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: "activeResolver is zeroAddress",
+        });
         return NULL_RESULT;
       }
 

@@ -56,6 +56,7 @@
     "@adraffy/ens-normalize": "catalog:",
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",
+    "caip": "^1.1.1",
     "zod": "catalog:"
   }
 }

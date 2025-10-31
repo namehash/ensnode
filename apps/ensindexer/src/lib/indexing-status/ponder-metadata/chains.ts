@@ -266,11 +266,17 @@ export function createSerializedChainSnapshots(
       historicalTotalBlocks: metrics.getValue("ponder_historical_total_blocks", {
         chain: chainName,
       }),
-      isSyncComplete: metrics.getValue("ponder_sync_is_complete", { chain: chainName }),
-      isSyncRealtime: metrics.getValue("ponder_sync_is_realtime", { chain: chainName }),
+      isSyncComplete: metrics.getValue("ponder_sync_is_complete", {
+        chain: chainName,
+      }),
+      isSyncRealtime: metrics.getValue("ponder_sync_is_realtime", {
+        chain: chainName,
+      }),
       syncBlock: {
         number: metrics.getValue("ponder_sync_block", { chain: chainName }),
-        timestamp: metrics.getValue("ponder_sync_block_timestamp", { chain: chainName }),
+        timestamp: metrics.getValue("ponder_sync_block_timestamp", {
+          chain: chainName,
+        }),
       },
       statusBlock: {
         number: status[chainName]?.block.number,
