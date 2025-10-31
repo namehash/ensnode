@@ -16,4 +16,4 @@ WORKDIR /app/apps/ensindexer
 ENV NODE_ENV=production
 EXPOSE 42069
 
-CMD ["pnpm", "exec", "ponder", "start"]
+CMD ["pnpm", "start"]

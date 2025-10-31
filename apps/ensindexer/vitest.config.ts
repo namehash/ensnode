@@ -5,7 +5,7 @@ import { defineProject } from "vitest/config";
 export default defineProject({
   resolve: {
     alias: {
-      "@": resolve(__dirname),
+      "@": resolve(__dirname, "./src"),
     },
   },
 });

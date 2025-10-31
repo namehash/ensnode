@@ -1,4 +1,4 @@
-import packageJson from "@/package.json" with { type: "json" };
+import packageJson from "@/../package.json" with { type: "json" };
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
