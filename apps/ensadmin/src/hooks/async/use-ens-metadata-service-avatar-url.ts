@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import type { Name } from "@ensnode/ensnode-sdk";
-
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
+import {
+  buildEnsMetadataServiceAvatarUrl,
+  type Name,
+} from "@ensnode/ensnode-sdk";
 
 import { useNamespace } from "./use-namespace";
 
@@ -39,13 +40,16 @@ export interface UseEnsMetadataServiceAvatarUrlParameters {
  * }
  * ```
  */
-export function useEnsMetadataServiceAvatarUrl({ name }: UseEnsMetadataServiceAvatarUrlParameters) {
+export function useEnsMetadataServiceAvatarUrl({
+  name,
+}: UseEnsMetadataServiceAvatarUrlParameters) {
   const { data: namespaceId } = useNamespace();
 
   return useQuery({
     queryKey: ["avatarUrl", name, namespaceId],
     queryFn: () => {
-      if (namespaceId === null) throw new Error("namespaceId required to execute this query");
+      if (namespaceId === null)
+        throw new Error("namespaceId required to execute this query");
       return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
     },
     enabled: namespaceId !== null,
