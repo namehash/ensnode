@@ -85,3 +85,5 @@ export const PortSchema = z.coerce
   .min(1, { error: "PORT must be greater than 1." })
   .max(65535, { error: "PORT must be less than 65535" })
   .optional();
+
+export const TheGraphApiKeySchema = z.string().optional();

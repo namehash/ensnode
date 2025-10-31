@@ -8,6 +8,10 @@ import type { ENSApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
   version: "0.36.0",
+  theGraphFallback: {
+    canFallback: false,
+    reason: "no-api-key",
+  },
   ensIndexerPublicConfig: {
     namespace: ENSNamespaceIds.Mainnet,
     databaseSchemaName: "ensapi",
@@ -36,6 +40,10 @@ describe("ENSApi Config Serialization/Deserialization", () => {
 
       expect(result).toEqual({
         version: "0.36.0",
+        theGraphFallback: {
+          canFallback: false,
+          reason: "no-api-key",
+        },
         ensIndexerPublicConfig: {
           namespace: ENSNamespaceIds.Mainnet,
           databaseSchemaName: "ensapi",

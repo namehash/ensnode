@@ -3,6 +3,7 @@ import config from "@/config";
 import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware";
 
 import * as schema from "@ensnode/ensnode-schema";
+import type { Duration } from "@ensnode/ensnode-sdk";
 import { buildGraphQLSchema, subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
 import { makeDrizzle } from "@/lib/handlers/drizzle";
@@ -10,8 +11,12 @@ import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
 import { fixContentLengthMiddleware } from "@/middleware/fix-content-length.middleware";
+import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 import { subgraphMetaMiddleware } from "@/middleware/subgraph-meta.middleware";
+import { thegraphFallbackMiddleware } from "@/middleware/thegraph-fallback.middleware";
+
+const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in seconds
 
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
@@ -27,6 +32,12 @@ const app = factory.createApp();
 
 // 404 if subgraph core plugin not enabled
 app.use(requireCorePluginMiddleware("subgraph"));
+
+// inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_RESOLVE
+app.use(makeIsRealtimeMiddleware("subgraph-api", MAX_REALTIME_DISTANCE_TO_RESOLVE));
+
+// fallback to the graph based on c.var.isRealtime
+app.use(thegraphFallbackMiddleware);
 
 // hotfix content length after documentation injection
 app.use(fixContentLengthMiddleware);

@@ -1,6 +1,10 @@
 {
   "Alpha Mainnet": {
     "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
+    },
     "ensIndexerPublicConfig": {
       "labelSet": {
         "labelSetId": "subgraph",
@@ -32,6 +36,10 @@
   },
   "Alpha Sepolia": {
     "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": true,
+      "reason": null
+    },
     "ensIndexerPublicConfig": {
       "labelSet": {
         "labelSetId": "subgraph",
@@ -62,6 +70,10 @@
   },
   "Subgraph Mainnet": {
     "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
+    },
     "ensIndexerPublicConfig": {
       "labelSet": {
         "labelSetId": "subgraph",
@@ -85,6 +97,10 @@
   },
   "Subgraph Sepolia": {
     "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
+    },
     "ensIndexerPublicConfig": {
       "labelSet": {
         "labelSetId": "subgraph",
@@ -108,6 +124,10 @@
   },
   "Subgraph Holesky": {
     "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
+    },
     "ensIndexerPublicConfig": {
       "labelSet": {
         "labelSetId": "subgraph",
@@ -131,6 +151,10 @@
   },
   "Serialization Error": {
     "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
+    },
     "ensIndexerPublicConfig": {
       "labelSet": {
         "labelSetId": "",

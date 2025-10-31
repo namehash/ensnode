@@ -5,6 +5,7 @@ import type {
   DatabaseSchemaNameSchema,
   DatabaseUrlSchema,
   EnsIndexerUrlSchema,
+  TheGraphApiKeySchema,
 } from "./zod-schemas";
 
 /**
@@ -46,3 +47,4 @@ export type RpcConfigs = Map<ChainId, RpcConfig>;
 export type DatabaseUrl = z.infer<typeof DatabaseUrlSchema>;
 export type DatabaseSchemaName = z.infer<typeof DatabaseSchemaNameSchema>;
 export type EnsIndexerUrl = z.infer<typeof EnsIndexerUrlSchema>;
+export type TheGraphApiKey = z.infer<typeof TheGraphApiKeySchema>;

@@ -57,6 +57,7 @@ describe("buildConfigFromEnvironment", () => {
       port: ENSApi_DEFAULT_PORT,
       databaseUrl: BASE_ENV.DATABASE_URL,
       ensIndexerUrl: new URL(BASE_ENV.ENSINDEXER_URL),
+      theGraphApiKey: undefined,
 
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
@@ -98,6 +99,10 @@ describe("buildEnsApiPublicConfig", () => {
 
     expect(result).toStrictEqual({
       version: packageJson.version,
+      theGraphFallback: {
+        canFallback: false,
+        reason: "no-api-key",
+      },
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
     });
   });
