@@ -1,5 +1,7 @@
 # @docs/ensnode
 
+## 1.0.0
+
 ## 0.36.0
 
 ### Minor Changes
