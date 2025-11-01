@@ -6,16 +6,16 @@ import type { Address } from "viem";
 
 import type {
   ChainId,
-  EventRef,
-  Node,
-  RegistrarEventNames,
-  UnixTimestamp,
+  RegistrarEventRefControllerAdded,
+  RegistrarEventRefControllerRemoved,
+  RegistrarEventRefNameRegistered,
+  RegistrarEventRefNameRenewed,
 } from "@ensnode/ensnode-sdk";
 
 import type { Registration } from "@/lib/registrars/registration";
 
 import { addControllerToRegistrar, removedControllerFromRegistrar } from "./registrar-controller";
-import { makeEventRef } from "./registrar-event-ref";
+import { makeRegistrarEventRef } from "./registrar-event-ref";
 import {
   getCurrentRegistration,
   makeFirstRegistration,
@@ -28,7 +28,7 @@ import {
  */
 export async function handleRegistration(
   context: Context,
-  event: EventRef<typeof RegistrarEventNames.NameRegistered>,
+  event: RegistrarEventRefNameRegistered,
   { node, parentNode, expiresAt }: Registration,
 ) {
   // 0. Handle possible subsequent registration.
@@ -52,7 +52,7 @@ export async function handleRegistration(
   }
 
   // 2. Insert the Registrar Event record.
-  await makeEventRef(context, event);
+  await makeRegistrarEventRef(context, event);
 }
 
 /**
@@ -60,14 +60,8 @@ export async function handleRegistration(
  */
 export async function handleRenewal(
   context: Context,
-  event: EventRef<typeof RegistrarEventNames.NameRenewed>,
-  {
-    node,
-    expiresAt,
-  }: {
-    node: Node;
-    expiresAt: UnixTimestamp;
-  },
+  event: RegistrarEventRefNameRenewed,
+  { node, expiresAt }: Pick<Registration, "node" | "expiresAt">,
 ) {
   // TODO: 0. enforce an invariant that for Renewal actions,
   // the registration must be in a "renewable" state.
@@ -78,7 +72,7 @@ export async function handleRenewal(
   await renewRegistration(context, { node, expiresAt });
 
   // 2. Insert the Registrar Event record.
-  await makeEventRef(context, event);
+  await makeRegistrarEventRef(context, event);
 }
 
 /**
@@ -86,7 +80,7 @@ export async function handleRenewal(
  */
 export async function handleControllerAddedToRegistrar(
   context: Context,
-  event: EventRef<typeof RegistrarEventNames.ControllerAdded>,
+  event: RegistrarEventRefControllerAdded,
   {
     chainId,
     controllerAddress,
@@ -105,7 +99,7 @@ export async function handleControllerAddedToRegistrar(
   });
 
   // 2. Insert the Registrar Event record.
-  await makeEventRef(context, event);
+  await makeRegistrarEventRef(context, event);
 }
 
 /**
@@ -113,7 +107,7 @@ export async function handleControllerAddedToRegistrar(
  */
 export async function handleControllerRemovedFromRegistrar(
   context: Context,
-  event: EventRef<typeof RegistrarEventNames.ControllerRemoved>,
+  event: RegistrarEventRefControllerRemoved,
   {
     chainId,
     controllerAddress,
@@ -129,5 +123,5 @@ export async function handleControllerRemovedFromRegistrar(
   });
 
   // 2. Insert the Registrar Event record.
-  await makeEventRef(context, event);
+  await makeRegistrarEventRef(context, event);
 }

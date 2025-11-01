@@ -91,14 +91,14 @@ const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registrar Acti
       `${valueLabel} Encoded Referrer`,
     ),
     decodedReferrer: makeLowercaseAddressSchema(`${valueLabel} Decoded Referrer`),
-
-    event: makeEventRefSchema({ eventNames: Object.values(RegistrarEventNames) }, valueLabel),
   });
 
 export const makeRegistrarActionRegistrationSchema = (valueLabel: string = "Registration ") =>
   makeBaseRegistrarActionSchema(valueLabel)
     .extend({
       type: z.literal(RegistrarActionTypes.Registration),
+
+      event: makeEventRefSchema({ eventNames: [RegistrarEventNames.NameRegistered] }, valueLabel),
     })
     .check(invariant_registrarActionTotalIsSumOfBaseCostAndPremium)
     .check(invariant_registrarActionDecodedReferrerBasedOnRawReferrer);
@@ -107,6 +107,8 @@ export const makeRegistrarActionRenewalSchema = (valueLabel: string = "Renewal")
   makeBaseRegistrarActionSchema(valueLabel)
     .extend({
       type: z.literal(RegistrarActionTypes.Renewal),
+
+      event: makeEventRefSchema({ eventNames: [RegistrarEventNames.NameRenewed] }, valueLabel),
 
       premium: makePriceEthSchema(`${valueLabel} Premium`).refine((v) => v.amount === 0n, {
         error: `Renewal Premium must always be '0'`,

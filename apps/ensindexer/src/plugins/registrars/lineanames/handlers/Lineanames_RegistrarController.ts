@@ -15,7 +15,7 @@ import {
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { buildEventRef } from "@/lib/registrars/event-ref";
 import {
-  buildSubregistryRegistrarAction,
+  buildRegistrarAction,
   getIncrementalDurationForRegistration,
   getIncrementalDurationForRenewal,
 } from "@/lib/registrars/registrar-action";
@@ -59,7 +59,7 @@ export default function () {
         Number(expiresAt),
       );
 
-      const registrarAction = buildSubregistryRegistrarAction(
+      const registrarAction = buildRegistrarAction(
         buildEventRef({
           chainId: context.chain.id,
           name: RegistrarEventNames.NameRegistered,
@@ -109,7 +109,7 @@ export default function () {
         Number(expiresAt),
       );
 
-      const registrarAction = buildSubregistryRegistrarAction(
+      const registrarAction = buildRegistrarAction(
         buildEventRef({
           chainId: context.chain.id,
           name: RegistrarEventNames.NameRenewed,
@@ -153,7 +153,7 @@ export default function () {
         Number(expiresAt),
       );
 
-      const registrarAction = buildSubregistryRegistrarAction(
+      const registrarAction = buildRegistrarAction(
         buildEventRef({
           chainId: context.chain.id,
           name: RegistrarEventNames.NameRegistered,
@@ -197,7 +197,7 @@ export default function () {
         Number(expiresAt),
       );
 
-      const registrarAction = buildSubregistryRegistrarAction(
+      const registrarAction = buildRegistrarAction(
         buildEventRef({
           chainId: context.chain.id,
           name: RegistrarEventNames.NameRegistered,

@@ -46,7 +46,7 @@ describe("ENSIndexer: Registrar Actions", () => {
 
               event: {
                 id: "123",
-                name: RegistrarEventNames.NameRegistered,
+                name: RegistrarEventNames.NameRenewed,
                 chainId: 1,
                 block: {
                   number: 123,
@@ -132,7 +132,7 @@ describe("ENSIndexer: Registrar Actions", () => {
 
               event: {
                 id: "123",
-                name: RegistrarEventNames.NameRegistered,
+                name: RegistrarEventNames.NameRenewed,
                 chainId: 1,
                 block: {
                   number: 123,

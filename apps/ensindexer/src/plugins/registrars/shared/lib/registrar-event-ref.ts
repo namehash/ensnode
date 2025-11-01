@@ -1,15 +1,15 @@
 /**
- * This file contains helpers for working with Registration records.
+ * This file contains helpers for working with Registrar Event records.
  */
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 
-import type { EventRef, RegistrarEventName } from "@ensnode/ensnode-sdk";
+import type { RegistrarEventRef } from "@ensnode/ensnode-sdk";
 
 /**
- * Make Event Ref record in database.
+ * Make Registrar Event Ref record in database.
  */
-export async function makeEventRef(context: Context, event: EventRef<RegistrarEventName>) {
+export async function makeRegistrarEventRef(context: Context, event: RegistrarEventRef) {
   const { block, ...remainingEventFields } = event;
 
   await context.db.insert(schema.registrarEvent).values({

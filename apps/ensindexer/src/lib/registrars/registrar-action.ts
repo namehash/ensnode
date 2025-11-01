@@ -10,11 +10,11 @@ import {
   type CurrencyIds,
   type Duration,
   deserializeDuration,
-  type EventRef,
   type Node,
   type RegistrarAction,
   type RegistrarActionType,
-  type RegistrarEventName,
+  type RegistrarEventRefNameRegistered,
+  type RegistrarEventRefNameRenewed,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
@@ -77,8 +77,8 @@ export function getIncrementalDurationForRenewal(
   return deserializeDuration(registrationWillExpireAt - currentRegistration.expiresAt);
 }
 
-export function buildSubregistryRegistrarAction(
-  event: EventRef<RegistrarEventName>,
+export function buildRegistrarAction(
+  event: RegistrarEventRefNameRegistered | RegistrarEventRefNameRenewed,
   {
     type,
     node,

@@ -101,7 +101,7 @@ export type EventId = string;
  *
  * References a distinct onchain event.
  */
-export interface EventRef<EventNameType extends string> {
+export interface EventRef<EventNameType extends string = string> {
   /**
    * Event ID
    *

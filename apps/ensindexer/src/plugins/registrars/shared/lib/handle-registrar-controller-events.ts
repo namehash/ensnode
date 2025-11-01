@@ -6,7 +6,7 @@ import type { Context } from "ponder:registry";
 import type { RegistrarAction, RegistrarActionType } from "@ensnode/ensnode-sdk";
 
 import { makeRegistrarAction } from "./registrar-action";
-import { makeEventRef } from "./registrar-event-ref";
+import { makeRegistrarEventRef } from "./registrar-event-ref";
 import { markRegistrationAsManagedByController } from "./registration";
 
 /**
@@ -32,7 +32,7 @@ export async function handleRegistrarAction(
   await markRegistrationAsManagedByController(context, { node });
 
   // 2. Insert the Registrar Event record.
-  await makeEventRef(context, event);
+  await makeRegistrarEventRef(context, event);
 
   // 3. Insert the Registrar Action record.
   await makeRegistrarAction(context, {

@@ -20,6 +20,22 @@ export const RegistrarEventNames = {
 
 export type RegistrarEventName = (typeof RegistrarEventNames)[keyof typeof RegistrarEventNames];
 
+export type RegistrarEventRefNameRegistered = EventRef<typeof RegistrarEventNames.NameRegistered>;
+
+export type RegistrarEventRefNameRenewed = EventRef<typeof RegistrarEventNames.NameRenewed>;
+
+export type RegistrarEventRefControllerAdded = EventRef<typeof RegistrarEventNames.ControllerAdded>;
+
+export type RegistrarEventRefControllerRemoved = EventRef<
+  typeof RegistrarEventNames.ControllerRemoved
+>;
+
+export type RegistrarEventRef =
+  | RegistrarEventRefNameRegistered
+  | RegistrarEventRefNameRenewed
+  | RegistrarEventRefControllerAdded
+  | RegistrarEventRefControllerRemoved;
+
 /**
  * Registrar Action
  */
@@ -138,5 +154,5 @@ export interface RegistrarAction {
    *
    * References the EVM event which was used to derive the Registrar Action.
    */
-  event: EventRef<RegistrarEventName>;
+  event: RegistrarEventRefNameRegistered | RegistrarEventRefNameRenewed;
 }
