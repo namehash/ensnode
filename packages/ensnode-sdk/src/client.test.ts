@@ -19,10 +19,8 @@ import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   CrossChainIndexingStrategyIds,
-  deserializeENSIndexerPublicConfig,
   OmnichainIndexingStatusIds,
   PluginName,
-  type SerializedENSIndexerPublicConfig,
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
 } from "./ensindexer";
 import type { ResolverRecordsSelection } from "./resolution";
@@ -74,7 +72,7 @@ const EXAMPLE_CONFIG_RESPONSE = {
       PluginName.Lineanames,
       PluginName.ThreeDNS,
       PluginName.ProtocolAcceleration,
-      PluginName.Referrals,
+      PluginName.Registrars,
     ],
     versionInfo: {
       nodejs: "22.18.0",

@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address, Hash } from "viem";
 
 import type { DEFAULT_EVM_CHAIN_ID } from "../ens";
 
@@ -87,6 +87,71 @@ export interface Blockrange<BlockType = BlockNumber> {
 
   /** End block number */
   endBlock?: BlockType;
+}
+
+/**
+ * Event ID
+ *
+ * A globally unique identifier of a single indexed event.
+ */
+export type EventId = string;
+
+/**
+ * EventRef
+ *
+ * References a distinct onchain event.
+ */
+export interface EventRef<EventNameType extends string = string> {
+  /**
+   * Event ID
+   *
+   * A globally unique identifier of the indexed event.
+   */
+  id: EventId;
+
+  /**
+   * Event Name
+   */
+  name: EventNameType;
+
+  /**
+   * Chain ID
+   *
+   * Chain ID where the event occurred.
+   */
+  chainId: ChainId;
+
+  /**
+   * Block
+   *
+   * Reference to the block which includes the event log on `chainId` chain.
+   */
+  block: BlockRef;
+
+  /**
+   * Contract address
+   *
+   * Address of the contract that emitted the event on `chainId` chain.
+   */
+  contractAddress: Address;
+
+  /**
+   * Transaction Hash
+   *
+   * Hash of the transaction on `chainId` chain where the event occurred.
+   *
+   * Guaranteed to be a hex string representation of 32-bytes.
+   */
+  transactionHash: Hash;
+
+  /**
+   * Log Index
+   *
+   * Index of the event log within the block on `chainId` where the event occurred.
+   *
+   * Guaranteed to be a non-negative integer.
+   */
+  logIndex: number;
 }
 
 /**

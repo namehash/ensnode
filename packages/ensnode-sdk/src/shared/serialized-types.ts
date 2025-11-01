@@ -1,3 +1,5 @@
+import type { ChainId } from "./types";
+
 /**
  * Serialized representation of {@link ChainId}.
  **/

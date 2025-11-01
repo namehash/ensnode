@@ -2,6 +2,7 @@ import { holesky } from "viem/chains";
 
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { BaseRegistrarOld as root_BaseRegistrarOld } from "./abis/root/BaseRegistrarOld";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
@@ -43,6 +44,19 @@ export default {
         abi: ResolverABI,
         filter: ResolverFilter,
         startBlock: 801536, // ignores any Resolver events prior to `startBlock` of RegistryOld on Holeksy
+      },
+      BaseRegistrarOld: {
+        // This is just a placeholder contract definition.
+        // Holesky namespace has only one BaseRegistrar contract.
+        // This BaseRegistrarOld contract definition is required to
+        // make type system work for plugin's handlers.
+        // We set `startBlock` and `endBlock` to be the `startBlock` of
+        // the BaseRegistrar contract, so no indexing will ever happen for
+        // the BaseRegistrarOld contract.
+        abi: root_BaseRegistrarOld,
+        address: "0xfac7bea255a6990f749363002136af6556b31e04",
+        startBlock: 801686,
+        endBlock: 801686,
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,

@@ -3,6 +3,7 @@ export * from "./account-id";
 export * from "./address";
 export * from "./cache";
 export * from "./collections";
+export * from "./currencies";
 export {
   deserializeBlockNumber,
   deserializeBlockRef,

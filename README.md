@@ -32,7 +32,7 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
 - Multichain ENS Namespace
   - flattened, unified, multichain and multiregistrar namespace via optional plugins
   - ✅ All names added to the ENS Registry and the ENS NameWrapper
-    - ✅ All direct subnames of .eth
+    - ✅ All direct subnames of Ethnames (`.eth`)
   - ✅ [Basenames](https://www.base.org/names) (`.base.eth`)
   - ✅ [Lineanames](https://names.linea.build/) (`.linea.eth`)
   - ✅ [3DNS](https://3dns.box) Support (`.box`, `.xyz`, +more)

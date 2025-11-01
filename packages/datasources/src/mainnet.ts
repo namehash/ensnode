@@ -13,6 +13,7 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { BaseRegistrarOld as root_BaseRegistrarOld } from "./abis/root/BaseRegistrarOld";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
@@ -54,6 +55,11 @@ export default {
         abi: ResolverABI,
         filter: ResolverFilter,
         startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
+      },
+      BaseRegistrarOld: {
+        abi: root_BaseRegistrarOld,
+        address: "0xfac7bea255a6990f749363002136af6556b31e04",
+        startBlock: 7666399,
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,

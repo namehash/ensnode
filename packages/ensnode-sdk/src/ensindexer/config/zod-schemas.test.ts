@@ -31,12 +31,12 @@ describe("ENSIndexer: Config", () => {
         expect(
           makePluginsListSchema().parse([
             `${PluginName.Subgraph}`,
-            `${PluginName.Referrals}`,
+            `${PluginName.Registrars}`,
             `${PluginName.ProtocolAcceleration}`,
           ]),
         ).toStrictEqual([
           PluginName.Subgraph,
-          PluginName.Referrals,
+          PluginName.Registrars,
           PluginName.ProtocolAcceleration,
         ]);
 
@@ -44,7 +44,7 @@ describe("ENSIndexer: Config", () => {
           formatParseError(
             makePluginsListSchema().safeParse([
               `${PluginName.Subgraph}`,
-              `${PluginName.Referrals}`,
+              `${PluginName.Registrars}`,
               `${PluginName.Subgraph}`,
             ]),
           ),
@@ -217,7 +217,7 @@ describe("ENSIndexer: Config", () => {
           formatParseError(
             makePluginsListSchema("PLUGINS env var").safeParse([
               `${PluginName.Subgraph}`,
-              `${PluginName.Referrals}`,
+              `${PluginName.Registrars}`,
               `${PluginName.Subgraph}`,
             ]),
           ),

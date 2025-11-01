@@ -1,5 +1,5 @@
 import type { CoinType } from "@ensdomains/address-encoder";
-import { type Address, isAddress } from "viem";
+import { type Address, type Hex, isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -12,12 +12,14 @@ import z from "zod/v4";
 
 import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
+import { CurrencyIds } from "./currencies";
 import type {
   BlockRef,
   ChainId,
   Datetime,
   DefaultableChainId,
   Duration,
+  EventRef,
   UnixTimestamp,
 } from "./types";
 
@@ -131,7 +133,7 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
 /**
  * Parses a serialized representation of an EVM address into a lowercase Address.
  */
-export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
+export const makeLowercaseAddressSchema = (valueLabel: string = "Value") =>
   z
     .string()
     .check((ctx) => {
@@ -227,6 +229,38 @@ export const makeBlockRefSchema = (valueLabel: string = "Value") =>
   );
 
 /**
+ * Parses an object value as the {@link EventRef} object.
+ *
+ * @param {string[]} options.eventNames A list of allowed event names for event ref.
+ */
+export const makeEventRefSchema = <const EventNames extends string[]>(
+  options: {
+    eventNames: EventNames;
+  },
+  valueLabel: string = "Value",
+) =>
+  z.strictObject(
+    {
+      id: z.string().nonempty(),
+
+      name: z.enum(options.eventNames),
+
+      chainId: makeChainIdSchema(valueLabel),
+
+      block: makeBlockRefSchema(valueLabel),
+
+      contractAddress: makeLowercaseAddressSchema(valueLabel),
+
+      transactionHash: makeHexStringSchema({ bytesCount: 32 }, valueLabel),
+
+      logIndex: makeNonNegativeIntegerSchema(valueLabel),
+    },
+    {
+      error: `${valueLabel} must be a valid EventRef object.`,
+    },
+  );
+
+/**
  * Parses a string value as ENSNamespaceId.
  */
 export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") =>
@@ -234,4 +268,56 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     error() {
       return `Invalid ${valueLabel}. Supported ENS namespace IDs are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
+  });
+
+/**
+ * Make a schema for {@link Hex} representation of bytes array.
+ *
+ * @param {number} options.bytesCount expected count of bytes to be hex-encoded
+ */
+export const makeHexStringSchema = (
+  options: { bytesCount: number },
+  valueLabel: string = "String representation of bytes array",
+) =>
+  z
+    .string()
+    .check(function invariant_isHexEncoded(ctx) {
+      if (!isHex(ctx.value)) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must start with '0x'.`,
+        });
+      }
+    })
+    .transform((v) => v as Hex)
+    .check(function invariant_encodesRequiredBytesCount(ctx) {
+      const expectedBytesCount = options.bytesCount;
+      const actualBytesCount = size(ctx.value);
+
+      if (actualBytesCount !== expectedBytesCount) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must represent exactly ${expectedBytesCount} bytes. Currently represented bytes count: ${actualBytesCount}.`,
+        });
+      }
+    });
+
+/**
+ * Schema for {@link PriceEth} type.
+ */
+export const makePriceEthSchema = (valueLabel: string = "Cost") =>
+  z.strictObject({
+    currency: z.literal(CurrencyIds.ETH, {
+      error: `${valueLabel} currency must be set to '${CurrencyIds.ETH}'.`,
+    }),
+
+    amount: z.coerce
+      .bigint({
+        error: `${valueLabel} must represent a bigint.`,
+      })
+      .nonnegative({
+        error: `${valueLabel} must not be negative.`,
+      }),
   });
