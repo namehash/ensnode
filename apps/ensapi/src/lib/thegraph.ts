@@ -5,15 +5,15 @@ export const canFallbackToTheGraph = (
   namespace: ENSNamespaceId,
   apiKey: string | undefined,
 ): TheGraphFallback => {
-  // must have api key
+  // must have api key for The Graph
   const hasApiKey = apiKey !== undefined;
   if (!hasApiKey) return { canFallback: false, reason: "no-api-key" };
 
-  // and must be supported by thegraph
+  // and namespace must be supported by The Graph
   const hasTheGraphSubgraphUrl = makeTheGraphSubgraphUrl(namespace, apiKey) !== null;
   if (!hasTheGraphSubgraphUrl) return { canFallback: false, reason: "no-subgraph-url" };
 
-  // otherwise able to fall back
+  // otherwise able to fallback
   return { canFallback: true, reason: null };
 };
 

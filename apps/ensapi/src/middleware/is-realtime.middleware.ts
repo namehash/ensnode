@@ -78,7 +78,7 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
     /// Is Within Realtime Check
     ////////////////////////////
 
-    // construct a new realtimeProjection with current time
+    // construct a new realtimeProjection relative to the current time
     const realtimeProjection = createRealtimeIndexingStatusProjection(
       c.var.indexingStatus.value.realtimeProjection.snapshot,
       getUnixTime(new Date()),
@@ -101,7 +101,7 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
       (didInitialRealtime && prevIsWithinMaxRealtime && !isWithinMaxRealtime) // future change in status
     ) {
       logger.warn(
-        `ENSIndexer is NOT realtime (Worst Case Lag: ${c.var.indexingStatus.value.realtimeProjection.worstCaseDistance} seconds > ${maxRealtimeDistance} seconds).`,
+        `ENSIndexer is NOT realtime (Worst Case distance: ${c.var.indexingStatus.value.realtimeProjection.worstCaseDistance} seconds > ${maxRealtimeDistance} seconds).`,
       );
     }
 

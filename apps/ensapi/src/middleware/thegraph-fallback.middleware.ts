@@ -14,7 +14,7 @@ let didInitialShouldFallback = false;
 let prevShouldFallback = false;
 
 /**
- * Middleware that proxies Subgraph requests to thegraph if possible & necessary.
+ * Middleware that proxies Subgraph requests to The Graph if possible & necessary.
  */
 export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, next) => {
   if (c.var.isRealtime === undefined) {
@@ -31,12 +31,12 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   if (!didWarnCanFallback && !canFallback) {
     switch (cannotfallbackReason) {
       case "no-api-key": {
-        logger.warn(`ENSApi can NOT fall back to thegraph: THEGRAPH_API_KEY was not provided.`);
+        logger.warn(`ENSApi can NOT fallback to The Graph: THEGRAPH_API_KEY was not provided.`);
         break;
       }
       case "no-subgraph-url": {
         logger.warn(
-          `ENSApi can NOT fall back to thegraph: the connected ENSIndexer's namespace ('${config.namespace}') is not supported by thegraph.`,
+          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer's namespace ('${config.namespace}') is not supported by The Graph.`,
         );
         break;
       }
@@ -46,9 +46,9 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   }
 
   ////////////////////////////////////////////////////////////
-  // the Subgraph API falls back to thegraph for resolution if:
+  // ENSApi's Subgraph API falls back to The Graph for generating results if:
   //  a) canFallback (see `canFallbackToTheGraph`), and
-  //  v) ENSIndexer is not realtime.
+  //  v) ENSIndexer is not sufficiently realtime.
   ////////////////////////////////////////////////////////////
   const shouldFallback = canFallback && !isRealtime;
 
@@ -57,7 +57,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
     (!didInitialShouldFallback && shouldFallback) || // first time
     (didInitialShouldFallback && !prevShouldFallback && shouldFallback) // future change in status
   ) {
-    logger.warn(`ENSApi is falling back to thegraph for Subgraph API queries.`);
+    logger.warn(`ENSApi is falling back to The Graph for Subgraph API queries.`);
   }
 
   // log notice when fallback ends
@@ -65,7 +65,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
     (!didInitialShouldFallback && !shouldFallback) || // first time
     (didInitialShouldFallback && prevShouldFallback && !shouldFallback) // future change in status
   ) {
-    logger.info(`ENSApi is resolving Subgraph API queries.`);
+    logger.info(`ENSApi is internally handling Subgraph API queries.`);
   }
 
   prevShouldFallback = shouldFallback;
@@ -74,7 +74,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   // if not falling back, proceed as normal
   if (!shouldFallback) return await next();
 
-  // otherwise, perform thegraph proxy
+  // otherwise, proxy request to The Graph
   // biome-ignore lint/style/noNonNullAssertion: guaranteed due to `shouldFallback` above
   const subgraphUrl = makeTheGraphSubgraphUrl(config.namespace, config.theGraphApiKey!)!;
 
@@ -88,8 +88,9 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    // if the request to thegraph fails for any reason, execute subgraph api as normal anyway
-    logger.warn(error, `thegraph request failed, resolving via Subgraph API anyway.`);
+    // if the request to The Graph fails for any reason, attempt to satisfy using ENSApi's
+    // internally implemented subgraph api even if it is not sufficiently realtime
+    logger.warn(error, `The Graph request failed, resolving via Subgraph API anyway.`);
     return await next();
   }
 });

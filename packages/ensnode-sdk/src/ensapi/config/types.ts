@@ -21,7 +21,7 @@ export interface ENSApiPublicConfig {
   version: string;
 
   /**
-   * TheGraph Fallback-related info.
+   * The Graph Fallback-related info.
    */
   theGraphFallback: TheGraphFallback;
 

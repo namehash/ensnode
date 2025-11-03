@@ -265,18 +265,18 @@ function ENSNodeConfigCardContent({
             label: "Subgraph API Fallback",
             description: ensApiPublicConfig.theGraphFallback.canFallback ? (
               <p>
-                ENSApi's Subgraph API (/subgraph) will fall back to thegraph if the connected
-                ENSIndexer is not realtime.
+                ENSApi's Subgraph API (/subgraph) will automatically fallback to The Graph if the
+                connected ENSIndexer is not sufficiently &quot;realtime&quot;.
               </p>
             ) : (
               <p>
-                ENSApi's Subgraph API (/subgraph) will NOT fall back to thegraph if the connected
-                ENSIndexer is not realtime. {(() => {
+                ENSApi's Subgraph API (/subgraph) will NOT fallback to The Graph if the connected
+                ENSIndexer is not sufficiently &quot;realtime&quot;. {(() => {
                   switch (ensApiPublicConfig.theGraphFallback.reason) {
                     case "no-api-key":
-                      return "A THEGRAPH_API_KEY environment variables was not provided.";
+                      return "No API key for The Graph is configured.";
                     case "no-subgraph-url":
-                      return "The configured namespace is unsupported by thegraph.";
+                      return "The Graph does not provide an ENS Subgraph for the configured ENS Namespace.";
                     default:
                       return null;
                   }

@@ -44,7 +44,7 @@ export type LogLevelEnvironment = {
 };
 
 /**
- * Environment variables for communicating with thegraph.
+ * Environment variables for communicating with The Graph.
  */
 export type TheGraphEnvironment = {
   THEGRAPH_API_KEY?: string;

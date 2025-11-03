@@ -36,7 +36,7 @@ app.use(requireCorePluginMiddleware("subgraph"));
 // inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_RESOLVE
 app.use(makeIsRealtimeMiddleware("subgraph-api", MAX_REALTIME_DISTANCE_TO_RESOLVE));
 
-// fallback to the graph based on c.var.isRealtime
+// fallback to The Graph based on c.var.isRealtime
 app.use(thegraphFallbackMiddleware);
 
 // hotfix content length after documentation injection
