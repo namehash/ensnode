@@ -97,7 +97,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 export function buildEnsApiPublicConfig(config: EnsApiConfig): ENSApiPublicConfig {
   return {
     version: packageJson.version,
-    theGraphFallback: canFallbackToTheGraph(config.namespace, config.theGraphApiKey),
+    theGraphFallback: canFallbackToTheGraph(config),
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
   };
 }

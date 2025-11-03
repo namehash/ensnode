@@ -21,15 +21,18 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
     throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
   }
 
-  const { canFallback, reason: cannotfallbackReason } = canFallbackToTheGraph(
-    config.namespace,
-    config.theGraphApiKey,
-  );
+  const { canFallback, reason: cannotfallbackReason } = canFallbackToTheGraph(config);
   const isRealtime = c.var.isRealtime;
 
   // log one warning to the console if !canFallback
   if (!didWarnCanFallback && !canFallback) {
     switch (cannotfallbackReason) {
+      case "not-subgraph-compatible": {
+        logger.warn(
+          `ENSApi can NOT fallback to The Graph: the connected ENSIndexer is not Subgraph Compatible and a fallback to The Graph would cause data inconsistency. ENSApi will continue internally handling Subgraph API queries regardless of realtime status.`,
+        );
+        break;
+      }
       case "no-api-key": {
         logger.warn(`ENSApi can NOT fallback to The Graph: THEGRAPH_API_KEY was not provided.`);
         break;
@@ -90,7 +93,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   } catch (error) {
     // if the request to The Graph fails for any reason, attempt to satisfy using ENSApi's
     // internally implemented subgraph api even if it is not sufficiently realtime
-    logger.warn(error, `The Graph request failed, resolving via Subgraph API anyway.`);
+    logger.warn(error, `The Graph request failed, handling via Subgraph API anyway.`);
     return await next();
   }
 });

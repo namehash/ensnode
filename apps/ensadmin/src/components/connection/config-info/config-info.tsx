@@ -273,6 +273,8 @@ function ENSNodeConfigCardContent({
                 ENSApi's Subgraph API (/subgraph) will NOT fallback to The Graph if the connected
                 ENSIndexer is not sufficiently &quot;realtime&quot;. {(() => {
                   switch (ensApiPublicConfig.theGraphFallback.reason) {
+                    case "not-subgraph-compatible":
+                      return "The connected ENSIndexer is not Subgraph Compatible.";
                     case "no-api-key":
                       return "No API key for The Graph is configured.";
                     case "no-subgraph-url":

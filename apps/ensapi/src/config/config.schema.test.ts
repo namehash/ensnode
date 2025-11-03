@@ -101,7 +101,7 @@ describe("buildEnsApiPublicConfig", () => {
       version: packageJson.version,
       theGraphFallback: {
         canFallback: false,
-        reason: "no-api-key",
+        reason: "not-subgraph-compatible",
       },
       ensIndexerPublicConfig: ENSINDEXER_PUBLIC_CONFIG,
     });

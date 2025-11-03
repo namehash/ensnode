@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 import { makeENSIndexerPublicConfigSchema } from "../../ensindexer/config/zod-schemas";
 
 export const TheGraphCannotFallbackReasonSchema = z.enum({
+  NotSubgraphCompatible: "not-subgraph-compatible",
   NoApiKey: "no-api-key",
   NoSubgraphUrl: "no-subgraph-url",
 });

@@ -1,16 +1,24 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { TheGraphFallback } from "@ensnode/ensnode-sdk";
 
-export const canFallbackToTheGraph = (
-  namespace: ENSNamespaceId,
-  apiKey: string | undefined,
-): TheGraphFallback => {
+import type { EnsApiConfig } from "@/config/config.schema";
+
+export const canFallbackToTheGraph = ({
+  namespace,
+  theGraphApiKey,
+  ensIndexerPublicConfig: { isSubgraphCompatible },
+}: Pick<EnsApiConfig, "namespace" | "theGraphApiKey"> & {
+  ensIndexerPublicConfig: Pick<EnsApiConfig["ensIndexerPublicConfig"], "isSubgraphCompatible">;
+}): TheGraphFallback => {
+  // must be subgraph-compatible
+  if (!isSubgraphCompatible) return { canFallback: false, reason: "not-subgraph-compatible" };
+
   // must have api key for The Graph
-  const hasApiKey = apiKey !== undefined;
+  const hasApiKey = theGraphApiKey !== undefined;
   if (!hasApiKey) return { canFallback: false, reason: "no-api-key" };
 
   // and namespace must be supported by The Graph
-  const hasTheGraphSubgraphUrl = makeTheGraphSubgraphUrl(namespace, apiKey) !== null;
+  const hasTheGraphSubgraphUrl = makeTheGraphSubgraphUrl(namespace, theGraphApiKey) !== null;
   if (!hasTheGraphSubgraphUrl) return { canFallback: false, reason: "no-subgraph-url" };
 
   // otherwise able to fallback
