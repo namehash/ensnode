@@ -5,7 +5,7 @@
 
 "use client";
 
-import { BackpackIcon, Replace } from "lucide-react";
+import { History, Replace } from "lucide-react";
 import { ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
@@ -284,7 +284,7 @@ function ENSNodeConfigCardContent({
               </p>
             ),
             isActivated: ensApiPublicConfig.theGraphFallback.canFallback,
-            icon: <BackpackIcon width={15} height={15} className="flex-shrink-0" />,
+            icon: <History width={15} height={15} className="flex-shrink-0" />,
           },
         ]}
         version={
