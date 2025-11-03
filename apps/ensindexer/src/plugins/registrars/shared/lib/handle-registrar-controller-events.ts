@@ -36,6 +36,7 @@ export async function handleRegistrarAction(
 
   // 3. Insert the Registrar Action record.
   await makeRegistrarAction(context, {
+    id: event.id,
     type,
     node,
     incrementalDuration,

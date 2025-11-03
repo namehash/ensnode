@@ -2,6 +2,7 @@ import type z from "zod/v4";
 
 import type { ENSApiPublicConfig } from "../ensapi";
 import type { RealtimeIndexingStatusProjection } from "../ensindexer";
+import type { RegistrarActionWithRegistration } from "../registrar-actions";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -130,3 +131,56 @@ export type IndexingStatusResponseError = {
  * at runtime.
  */
 export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusResponseError;
+
+/**
+ * Registrar Actions response
+ */
+
+/**
+ * Represents a request to Registrar Actions API.
+ */
+export type RegistrarActionsRequest = {};
+
+/**
+ * A status code for indexing status responses.
+ */
+export const RegistrarActionsResponseCodes = {
+  /**
+   * Represents that Registrar Actions are available.
+   */
+  Ok: "ok",
+
+  /**
+   * Represents that Registrar Actions are unavailable.
+   */
+  Error: "error",
+} as const;
+
+/**
+ * The derived string union of possible {@link RegistrarActionsResponseCodes}.
+ */
+export type RegistrarActionsResponseCode =
+  (typeof RegistrarActionsResponseCodes)[keyof typeof RegistrarActionsResponseCodes];
+
+/**
+ * A response when Registrar Actions are available.
+ */
+export type RegistrarActionsResponseOk = {
+  responseCode: typeof RegistrarActionsResponseCodes.Ok;
+  registrarActions: RegistrarActionWithRegistration[];
+};
+
+/**
+ * A response when Registrar Actions are unavailable.
+ */
+export type RegistrarActionsResponseError = {
+  responseCode: typeof IndexingStatusResponseCodes.Error;
+};
+
+/**
+ * Registrar Actions response.
+ *
+ * Use the `responseCode` field to determine the specific type interpretation
+ * at runtime.
+ */
+export type RegistrarActionsResponse = RegistrarActionsResponseOk | RegistrarActionsResponseError;

@@ -77,6 +77,8 @@ function invariant_registrarActionDecodedReferrerBasedOnRawReferrer(
 
 const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registrar Action") =>
   z.object({
+    id: z.string().nonempty(),
+
     node: makeHexStringSchema({ bytesCount: 32 }, `${valueLabel} Node`),
 
     baseCost: makePriceEthSchema(`${valueLabel} Base Cost`),

@@ -13,6 +13,7 @@ import type { RegistrarAction } from "@ensnode/ensnode-sdk";
 export async function makeRegistrarAction(
   context: Context,
   {
+    id,
     type,
     node,
     incrementalDuration,
@@ -22,11 +23,10 @@ export async function makeRegistrarAction(
     registrant,
     encodedReferrer,
     decodedReferrer,
-    event,
   }: RegistrarAction,
 ) {
   await context.db.insert(schema.registrarAction).values({
-    id: event.id,
+    id,
     type,
     node,
     baseCost: baseCost.amount,

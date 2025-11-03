@@ -1,8 +1,8 @@
 import type { EncodedReferrer, zeroEncodedReferrer } from "@namehash/ens-referrals";
 import type { Address } from "viem";
 
-import type { Node } from "../ens";
-import type { Duration, EventRef, PriceEth } from "../shared";
+import type { InterpretedLabel, InterpretedName, Node } from "../ens";
+import type { Duration, EventRef, PriceEth, UnixTimestamp } from "../shared";
 
 export const RegistrarActionTypes = {
   Registration: "registration",
@@ -40,6 +40,13 @@ export type RegistrarEventRef =
  * Registrar Action
  */
 export interface RegistrarAction {
+  /**
+   * Registrar Action ID
+   *
+   * A globally unique identifier of the Registrar Action.
+   */
+  id: string;
+
   /**
    * Type of registrar action
    */
@@ -155,4 +162,33 @@ export interface RegistrarAction {
    * References the EVM event which was used to derive the Registrar Action.
    */
   event: RegistrarEventRefNameRegistered | RegistrarEventRefNameRenewed;
+}
+
+/**
+ * Registration
+ *
+ * Describes a certain `node` and when its registration expires.
+ * Includes a reference to `parentNode` to allow data filtering.
+ */
+export interface Registration {
+  node: Node;
+
+  parentNode: Node;
+
+  expiresAt: UnixTimestamp;
+}
+
+/**
+ * Registration with Name Details
+ *
+ * Describes a view into Registration, including `label` and `name` the registration was made for.
+ */
+export interface RegistrationWithNameDetails extends Registration {
+  label: InterpretedLabel;
+
+  name: InterpretedName;
+}
+
+export interface RegistrarActionWithRegistration extends RegistrarAction {
+  registration: RegistrationWithNameDetails;
 }

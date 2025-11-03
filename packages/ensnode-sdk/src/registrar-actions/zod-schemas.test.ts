@@ -22,6 +22,7 @@ describe("ENSIndexer: Registrar Actions", () => {
         expect(
           formatParseError(
             makeRegistrarActionSchema().safeParse({
+              id: "123",
               type: RegistrarActionTypes.Renewal,
               node: namehash("vitalik.eth"),
 
@@ -66,6 +67,7 @@ describe("ENSIndexer: Registrar Actions", () => {
         expect(
           formatParseError(
             makeRegistrarActionSchema().safeParse({
+              id: "123",
               type: RegistrarActionTypes.Registration,
               node: namehash("vitalik.eth"),
 
@@ -108,6 +110,7 @@ describe("ENSIndexer: Registrar Actions", () => {
         expect(
           formatParseError(
             makeRegistrarActionSchema().safeParse({
+              id: "123",
               type: RegistrarActionTypes.Renewal,
               node: namehash("vitalik.eth"),
 
@@ -152,6 +155,7 @@ describe("ENSIndexer: Registrar Actions", () => {
         expect(
           formatParseError(
             makeRegistrarActionSchema().safeParse({
+              id: "123",
               type: RegistrarActionTypes.Registration,
               node: namehash("vitalik.eth"),
 
@@ -194,6 +198,7 @@ describe("ENSIndexer: Registrar Actions", () => {
 
       it("refuses to parse Registrar Action when decodedReferrer is not based on encodedReferrer", () => {
         const parsed = makeRegistrarActionSchema().safeParse({
+          id: "123",
           type: RegistrarActionTypes.Registration,
           node: namehash("vitalik.eth"),
 

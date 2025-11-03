@@ -107,6 +107,7 @@ export function buildRegistrarAction(
   const decodedReferrer = decodeEncodedReferrer(encodedReferrer).toLowerCase() as Address;
 
   return {
+    id: event.id,
     type,
     node,
     baseCost: {

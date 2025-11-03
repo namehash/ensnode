@@ -1,5 +1,9 @@
 import type { SerializedPrice } from "../shared";
-import type { RegistrarAction } from "./types";
+import type {
+  RegistrarAction,
+  RegistrarActionWithRegistration,
+  RegistrationWithNameDetails,
+} from "./types";
 
 /**
  * Serialized representation of {@link RegistrarAction}.
@@ -22,4 +26,11 @@ export interface SerializedRegistrarAction
    * Sum of `baseCost` and `premium`.
    */
   total: SerializedPrice;
+}
+
+/**
+ * Serialized representation of {@link RegistrarActionWithRegistration}.
+ */
+export interface SerializedRegistrarActionWithRegistration extends SerializedRegistrarAction {
+  registration: RegistrationWithNameDetails;
 }

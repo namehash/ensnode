@@ -14,6 +14,8 @@ const vb3Address: Address = "0x220866b1a2219f40e72f5c628b65d54268ca3a9d";
 describe("Registrar Actions", () => {
   it("can serialize and deserialize registrar action object", () => {
     const serialized = {
+      id: "0123",
+
       type: RegistrarActionTypes.Registration,
       node: namehash("vitalik.eth"),
 
@@ -53,6 +55,8 @@ describe("Registrar Actions", () => {
     const deserialized = deserializeRegistrarAction(serialized);
 
     expect(deserialized).toStrictEqual({
+      id: "0123",
+
       type: RegistrarActionTypes.Registration,
 
       node: namehash("vitalik.eth"),

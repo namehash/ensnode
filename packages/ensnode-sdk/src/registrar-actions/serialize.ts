@@ -1,11 +1,15 @@
 import { serializePrice } from "../shared";
-import type { SerializedRegistrarAction } from "./serialized-types";
-import type { RegistrarAction } from "./types";
+import type {
+  SerializedRegistrarAction,
+  SerializedRegistrarActionWithRegistration,
+} from "./serialized-types";
+import type { RegistrarAction, RegistrarActionWithRegistration } from "./types";
 
 export function serializeRegistrarAction(
   registrarAction: RegistrarAction,
 ): SerializedRegistrarAction {
   return {
+    id: registrarAction.id,
     type: registrarAction.type,
     node: registrarAction.node,
     baseCost: serializePrice(registrarAction.baseCost),
@@ -16,5 +20,16 @@ export function serializeRegistrarAction(
     registrant: registrarAction.registrant,
     incrementalDuration: registrarAction.incrementalDuration,
     event: registrarAction.event,
+  };
+}
+
+export function serializeRegistrarActionWithRegistration({
+  registration,
+  ...registrarAction
+}: RegistrarActionWithRegistration): SerializedRegistrarActionWithRegistration {
+  return {
+    ...serializeRegistrarAction(registrarAction),
+
+    registration,
   };
 }
