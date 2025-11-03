@@ -49,6 +49,11 @@ import type { RegistrarManagedName } from "@/lib/types";
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
+ * Determines whether the PCC fuse is SET in the provided `fuses`.
+ */
+const isPccFuseSet = (fuses: bigint): boolean => !isPccFuseUnset(fuses);
+
+/**
  * Decodes the NameWrapper's emitted DNS-Encoded Name `packet` into an Interpreted Name and its first
  * Interpreted Label.
  */
@@ -97,8 +102,8 @@ function decodeSubgraphInterpretedNameWrapperName(
 }
 
 /**
- * If the WrappedDomain entity has PCC set in fuses, materialize the relevant Domain entity's
- * expiryDate to the greater of the two.
+ * If the WrappedDomain fuses has PCC set ('the parent cannot control this subdomain'), then
+ * materialize the relevant Domain entity's expiryDate to the greater of the two.
  */
 async function materializeDomainExpiryDate(context: Context, node: Node) {
   const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
@@ -106,7 +111,7 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 
   // if PCC fuse is SET ('burned'), update the expiry
   // translated: if the parent CANNOT control the subname, update the subname's expiry
-  if (!isPccFuseUnset(BigInt(wrappedDomain.fuses))) {
+  if (isPccFuseSet(BigInt(wrappedDomain.fuses))) {
     // update the domain's expiry to the greater of the two
     await context.db.update(schema.subgraph_domain, { id: node }).set((domain) => ({
       expiryDate: bigintMax(domain.expiryDate ?? 0n, wrappedDomain.expiryDate),
