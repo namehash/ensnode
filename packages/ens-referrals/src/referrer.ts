@@ -6,14 +6,15 @@ import { type Address, getAddress, type Hex, pad, size, slice, zeroAddress } fro
  * Represents a "raw" ENS referrer value.
  *
  * Guaranteed to be a hex string representation of a 32-byte value.
- * Correctly encoded referrer is left-padded lowercase EVM address.
+ * For ENS Holiday Awards a correctly encoded referrer is
+ * a left-padded lowercase EVM address.
  */
 export type EncodedReferrer = Hex;
 
 /**
- * Encoded Referrer byte offset
+ * Encoded Referrer byte offset for ENS Holiday Awards.
  *
- * The count of left-padded bytes in an {@link EncodedReferrer} value.
+ * The count of left-padded bytes in an {@link EncodedReferrer} value for ENS Holiday Awards.
  */
 export const ENCODED_REFERRER_BYTE_OFFSET = 12;
 
@@ -25,9 +26,9 @@ export const ENCODED_REFERRER_BYTE_OFFSET = 12;
 export const ENCODED_REFERRER_BYTE_LENGTH = 32;
 
 /**
- * Encoded Referrer Padding
+ * Encoded Referrer Padding for ENS Holiday Awards
  *
- * The initial bytes of correctly encoded referrer value.
+ * The initial bytes of correctly encoded referrer value for ENS Holiday Awards.
  */
 export const encodedReferrerPadding = pad("0x", {
   size: ENCODED_REFERRER_BYTE_OFFSET,
@@ -60,18 +61,25 @@ export function buildEncodedReferrer(address: Address): EncodedReferrer {
  *
  * @param encodedReferrer - The "raw" {@link EncodedReferrer} value to decode.
  * @returns The decoded referrer checksummed address.
+ * @throws when encodedReferrer value is not represented by
+ *         {@link ENCODED_REFERRER_BYTE_LENGTH} bytes.
+ * @throws when encodedReferrer value is not padded with
+ *         {@link encodedReferrerPadding}.
+ * @throws when decodedReferrer is not a valid EVM address.
  */
-export function decodeEncodedReferrer(encodedReferrer: Hex): Address {
+export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address {
   // return zero address if encoded referrer is not of expected size
   if (size(encodedReferrer) !== ENCODED_REFERRER_BYTE_LENGTH) {
-    return zeroAddress;
+    throw new Error(
+      `Encoded referrer value must be represented by ${ENCODED_REFERRER_BYTE_LENGTH} bytes.`,
+    );
   }
 
   const padding = slice(encodedReferrer, 0, ENCODED_REFERRER_BYTE_OFFSET);
 
   // return zero address if the padding of encoded referrer is not correct
   if (padding !== encodedReferrerPadding) {
-    return zeroAddress;
+    throw new Error(`Encoded referrer value must be padded with ${encodedReferrerPadding}.`);
   }
 
   const decodedReferrer = slice(encodedReferrer, ENCODED_REFERRER_BYTE_OFFSET);
@@ -80,8 +88,7 @@ export function decodeEncodedReferrer(encodedReferrer: Hex): Address {
     // return checksummed address
     return getAddress(decodedReferrer);
   } catch {
-    // fallback to zero address in case decodedReferrer was not a correct address
-    return zeroAddress;
+    throw new Error(`Decoded referrer value must a valid EVM address.`);
   }
 }
 
