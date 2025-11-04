@@ -36,50 +36,19 @@ interface AvatarTestCardProps {
 function AvatarTestCard({ name }: AvatarTestCardProps) {
   const { data, isLoading, error } = useAvatarUrl({ name });
 
-  if (error) {
-    return (
-      <Card className="border-red-200">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-red-500" />
-            <span>{name}</span>
-          </CardTitle>
-          <CardDescription className="text-red-600">Error loading avatar</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-red-600">{error.message}</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading || !data) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{name}</CardTitle>
-          <CardDescription>Loading avatar information...</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-32 w-32 rounded-lg mx-auto" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const hasAvatar = data.browserSupportedAvatarUrl !== null;
-  const hasRawUrl = data.rawAvatarTextRecord !== null;
+  const hasAvatar = data?.browserSupportedAvatarUrl !== null;
+  const hasRawUrl = data?.rawAvatarTextRecord !== null;
+  const hasError = !!error;
 
   return (
-    <Card className={hasAvatar ? "border-green-200" : "border-gray-200"}>
+    <Card
+      className={hasError ? "border-red-200" : hasAvatar ? "border-green-200" : "border-gray-200"}
+    >
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
-          {hasAvatar ? (
+          {hasError ? (
+            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+          ) : hasAvatar ? (
             <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
           ) : (
             <X className="h-5 w-5 text-gray-400 flex-shrink-0" />
@@ -92,50 +61,68 @@ function AvatarTestCard({ name }: AvatarTestCardProps) {
           <EnsAvatar name={name} className="h-32 w-32" />
         </div>
 
+        {error && (
+          <div className="p-2 bg-red-50 border border-red-200 rounded">
+            <p className="text-sm text-red-600">{error.message}</p>
+          </div>
+        )}
+
         <div className="space-y-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Raw Avatar URL:</span>
-              {hasRawUrl ? (
+              {isLoading ? null : hasRawUrl ? (
                 <Check className="h-4 w-4 text-green-600" />
               ) : (
                 <X className="h-4 w-4 text-gray-400" />
               )}
             </div>
-            <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
-              {data.rawAvatarTextRecord || "Not set"}
-            </div>
+            {isLoading || !data ? (
+              <Skeleton className="h-8 w-full rounded" />
+            ) : (
+              <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
+                {data.rawAvatarTextRecord || "Not set"}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Browser-Supported URL:</span>
-              {hasAvatar ? (
+              {isLoading ? null : hasAvatar ? (
                 <Check className="h-4 w-4 text-green-600" />
               ) : (
                 <X className="h-4 w-4 text-gray-400" />
               )}
             </div>
-            <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
-              {data.browserSupportedAvatarUrl?.toString() || "Not available"}
-            </div>
+            {isLoading || !data ? (
+              <Skeleton className="h-8 w-full rounded" />
+            ) : (
+              <div className="text-xs text-muted-foreground break-all bg-muted p-2 rounded">
+                {data.browserSupportedAvatarUrl?.toString() || "Not available"}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between p-2 bg-muted rounded">
             <span className="text-sm font-medium">Uses Proxy:</span>
-            <div className="flex items-center gap-2">
-              {data.usesProxy ? (
-                <>
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-600">Yes</span>
-                </>
-              ) : (
-                <>
-                  <X className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">No</span>
-                </>
-              )}
-            </div>
+            {isLoading || !data ? (
+              <Skeleton className="h-4 w-12 rounded" />
+            ) : (
+              <div className="flex items-center gap-2">
+                {data.usesProxy ? (
+                  <>
+                    <Check className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-600">Yes</span>
+                  </>
+                ) : (
+                  <>
+                    <X className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">No</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
