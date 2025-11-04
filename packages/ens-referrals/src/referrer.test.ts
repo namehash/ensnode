@@ -27,16 +27,16 @@ describe("encoded referrer", () => {
       expect(result).toEqual(vitalikEthAddressChecksummed);
     });
 
-    it("throws an error when initial bytes were not all zeroes", () => {
+    it("returns a zeroAddress value when initial bytes were not all zeroes", () => {
       // arrange
       const initialBytes = pad("0x1", { size: ENCODED_REFERRER_BYTE_OFFSET, dir: "right" });
 
       const input = concat([initialBytes, vitalikEthAddressLowercase]);
 
-      // act & assert
-      expect(() => decodeEncodedReferrer(input)).toThrowError(
-        /Encoded referrer value must be padded with 0x000000000000000000000000/i,
-      );
+      // act
+      const result = decodeEncodedReferrer(input);
+      // & assert
+      expect(result).toStrictEqual(zeroAddress);
     });
 
     it("throws an error when trailing bytes were not referring a valid EVM address", () => {
@@ -45,7 +45,7 @@ describe("encoded referrer", () => {
 
       // act & assert
       expect(() => decodeEncodedReferrer(input)).toThrowError(
-        /Decoded referrer value must a valid EVM address/i,
+        /Decoded referrer value must be a valid EVM address/i,
       );
     });
   });
