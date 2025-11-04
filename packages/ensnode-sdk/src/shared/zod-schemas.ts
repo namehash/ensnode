@@ -86,8 +86,14 @@ export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
  */
 export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") =>
   z
-    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
-    .pipe(z.coerce.number({ error: `${valueLabel} must represent a positive integer (>0).` }))
+    .string({
+      error: `${valueLabel} must be a string representing a chain ID.`,
+    })
+    .pipe(
+      z.coerce.number({
+        error: `${valueLabel} must represent a positive integer (>0).`,
+      }),
+    )
     .pipe(makeChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -105,8 +111,14 @@ export const makeDefaultableChainIdStringSchema = (
   valueLabel: string = "Defaultable Chain ID String",
 ) =>
   z
-    .string({ error: `${valueLabel} must be a string representing a chain ID.` })
-    .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
+    .string({
+      error: `${valueLabel} must be a string representing a chain ID.`,
+    })
+    .pipe(
+      z.coerce.number({
+        error: `${valueLabel} must represent a non-negative integer (>=0).`,
+      }),
+    )
     .pipe(makeDefaultableChainIdSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -116,7 +128,9 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
   z
     .number({ error: `${valueLabel} must be a number.` })
     .int({ error: `${valueLabel} must be an integer.` })
-    .nonnegative({ error: `${valueLabel} must be a non-negative integer (>=0).` })
+    .nonnegative({
+      error: `${valueLabel} must be a non-negative integer (>=0).`,
+    })
     .transform((val) => val as CoinType);
 
 /**
@@ -124,8 +138,14 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
  */
 export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String") =>
   z
-    .string({ error: `${valueLabel} must be a string representing a coin type.` })
-    .pipe(z.coerce.number({ error: `${valueLabel} must represent a non-negative integer (>=0).` }))
+    .string({
+      error: `${valueLabel} must be a string representing a coin type.`,
+    })
+    .pipe(
+      z.coerce.number({
+        error: `${valueLabel} must represent a non-negative integer (>=0).`,
+      }),
+    )
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
@@ -209,7 +229,9 @@ export const makeBlockrangeSchema = (valueLabel: string = "Value") =>
 
         return true;
       },
-      { error: `${valueLabel}: startBlock must be before or equal to endBlock` },
+      {
+        error: `${valueLabel}: startBlock must be before or equal to endBlock`,
+      },
     );
 
 /**

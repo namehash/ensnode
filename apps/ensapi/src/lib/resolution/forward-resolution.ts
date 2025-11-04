@@ -87,7 +87,10 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 ): Promise<ForwardResolutionResult<SELECTION>> {
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
   // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, { ...options, registry: ENS_ROOT_REGISTRY });
+  return _resolveForward(name, selection, {
+    ...options,
+    registry: ENS_ROOT_REGISTRY,
+  });
 }
 
 /**
@@ -253,7 +256,9 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                   );
 
                   // NOTE: typecast is ok because of sanity checks above
-                  return { name: nameRecordValue } as ResolverRecordsResponse<SELECTION>;
+                  return {
+                    name: nameRecordValue,
+                  } as ResolverRecordsResponse<SELECTION>;
                 },
               );
             }
@@ -279,7 +284,11 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
                 {},
-                () => _resolveForward(name, selection, { ...options, registry: defersToRegistry }),
+                () =>
+                  _resolveForward(name, selection, {
+                    ...options,
+                    registry: defersToRegistry,
+                  }),
               );
             }
 
@@ -365,7 +374,11 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
                 tracer,
                 "supportsENSIP10Interface",
                 { chainId, address: activeResolver },
-                () => supportsENSIP10Interface({ address: activeResolver, publicClient }),
+                () =>
+                  supportsENSIP10Interface({
+                    address: activeResolver,
+                    publicClient,
+                  }),
               );
 
               span.setAttribute("isExtendedResolver", isExtendedResolver);

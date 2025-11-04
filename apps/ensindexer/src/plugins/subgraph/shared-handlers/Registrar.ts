@@ -81,7 +81,9 @@ export const makeRegistrarHandlers = ({
 
     // update the registration's labelName
     await context.db
-      .update(schema.subgraph_registration, { id: makeRegistrationId(labelHash, node) })
+      .update(schema.subgraph_registration, {
+        id: makeRegistrationId(labelHash, node),
+      })
       .set({ labelName: interpretedLabel, cost });
   }
 
@@ -127,7 +129,9 @@ export const makeRegistrarHandlers = ({
       // Therefore, if a Domain does not exist in Registrar#NameRegistered, it _must_ be a 'preminted'
       // name, tracked only in the Registrar. If/when these 'preminted' names are _actually_ registered
       // in the future, they will emit NewOwner as expected.
-      const domain = await context.db.find(schema.subgraph_domain, { id: node });
+      const domain = await context.db.find(schema.subgraph_domain, {
+        id: node,
+      });
       if (!domain) {
         // invariant: if the domain does not exist and the plugin does not support preminted names, panic
         if (!pluginSupportsPremintedNames(pluginName)) {
@@ -288,7 +292,11 @@ export const makeRegistrarHandlers = ({
       event,
     }: {
       context: Context;
-      event: EventWithArgs<{ labelHash: LabelHash; from: Address; to: Address }>;
+      event: EventWithArgs<{
+        labelHash: LabelHash;
+        from: Address;
+        to: Address;
+      }>;
     }) {
       const { labelHash, to } = event.args;
 
@@ -300,7 +308,9 @@ export const makeRegistrarHandlers = ({
 
       // if the Transfer event occurs before the Registration entity exists (i.e. the initial
       // registration, which is Transfer -> NewOwner -> NameRegistered), no-op
-      const registration = await context.db.find(schema.subgraph_registration, { id });
+      const registration = await context.db.find(schema.subgraph_registration, {
+        id,
+      });
       if (!registration) return;
 
       // update registration registrant

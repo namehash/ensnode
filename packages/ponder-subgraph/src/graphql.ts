@@ -422,7 +422,9 @@ export function buildGraphQLSchema({
               // key constraints, all `one` relations must be nullable.
               type: referencedEntityType,
               resolve: (parent, _args, context) => {
-                const loader = context.getDataLoader({ table: referencedTable });
+                const loader = context.getDataLoader({
+                  table: referencedTable,
+                });
 
                 const rowFragment: Record<string, unknown> = {};
                 for (let i = 0; i < references.length; i++) {

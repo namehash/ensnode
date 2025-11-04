@@ -84,7 +84,9 @@ function decodeSubgraphInterpretedNameWrapperName(
 
 // if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two
 async function materializeDomainExpiryDate(context: Context, node: Node) {
-  const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
+  const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, {
+    id: node,
+  });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
   // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63)
@@ -183,7 +185,9 @@ export const makeNameWrapperHandlers = ({
         ? decodeSubgraphInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName)
         : decodeInterpretedNameWrapperName(event.args.name as DNSEncodedLiteralName);
 
-      const domain = await context.db.find(schema.subgraph_domain, { id: node });
+      const domain = await context.db.find(schema.subgraph_domain, {
+        id: node,
+      });
       if (!domain) throw new Error("domain is guaranteed to already exist");
 
       // upsert the healed name iff !domain.labelName && label

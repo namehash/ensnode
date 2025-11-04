@@ -7,7 +7,9 @@ import {
   maybeGetDatasource,
 } from "@ensnode/datasources";
 
-type DatasourceWithResolverContract = Datasource & { contracts: { Resolver: ContractConfig } };
+type DatasourceWithResolverContract = Datasource & {
+  contracts: { Resolver: ContractConfig };
+};
 
 export const DATASOURCE_NAMES_WITH_RESOLVERS = [
   DatasourceNames.ENSRoot,

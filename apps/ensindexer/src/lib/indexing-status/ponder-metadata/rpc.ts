@@ -24,7 +24,9 @@ export async function fetchBlockRef(
   publicClient: PublicClient,
   blockNumber: BlockNumber,
 ): Promise<BlockRef> {
-  const block = await publicClient.getBlock({ blockNumber: BigInt(blockNumber) });
+  const block = await publicClient.getBlock({
+    blockNumber: BigInt(blockNumber),
+  });
   if (!block) {
     throw new Error(`Could not fetch block ${blockNumber}`);
   }

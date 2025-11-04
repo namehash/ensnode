@@ -17,7 +17,11 @@ export default function ParallelogramNode({ data }: NodeProps) {
       {nodeHandles.map((handle, idx) => (
         <Handle
           key={`${data.label}Handle#${idx}`}
-          style={{ left: `${handle.x}px`, top: `${handle.y}px`, transform: "skew(25deg)" }}
+          style={{
+            left: `${handle.x}px`,
+            top: `${handle.y}px`,
+            transform: "skew(25deg)",
+          }}
           type={handle.type!}
           position={handle.position!}
           id={handle.id!}

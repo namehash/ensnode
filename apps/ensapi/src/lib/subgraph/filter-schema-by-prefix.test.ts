@@ -43,7 +43,9 @@ describe("filterSchemaByPrefix", () => {
     expect(filtered.config).toEqual({ setting: "value" });
     expect(filtered.data).toEqual([1, 2, 3]);
 
-    expectTypeOf(filtered.config).toEqualTypeOf<{ readonly setting: "value" }>();
+    expectTypeOf(filtered.config).toEqualTypeOf<{
+      readonly setting: "value";
+    }>();
     expectTypeOf(filtered.data).toEqualTypeOf<readonly [1, 2, 3]>();
   });
 });

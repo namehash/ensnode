@@ -200,7 +200,11 @@ export const Seaport = [
     name: "NoSpecifiedOrdersAvailable",
     type: "error",
   },
-  { inputs: [], name: "OfferAndConsiderationRequiredOnFulfillment", type: "error" },
+  {
+    inputs: [],
+    name: "OfferAndConsiderationRequiredOnFulfillment",
+    type: "error",
+  },
   {
     inputs: [],
     name: "OfferCriteriaResolverOutOfRange",
@@ -278,7 +282,12 @@ export const Seaport = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "uint256", name: "newCounter", type: "uint256" },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newCounter",
+        type: "uint256",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -292,7 +301,12 @@ export const Seaport = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "bytes32", name: "orderHash", type: "bytes32" },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "orderHash",
+        type: "bytes32",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -307,7 +321,12 @@ export const Seaport = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "bytes32", name: "orderHash", type: "bytes32" },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "orderHash",
+        type: "bytes32",
+      },
       {
         indexed: true,
         internalType: "address",
@@ -373,7 +392,12 @@ export const Seaport = [
   {
     anonymous: false,
     inputs: [
-      { indexed: false, internalType: "bytes32", name: "orderHash", type: "bytes32" },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "orderHash",
+        type: "bytes32",
+      },
       {
         components: [
           { internalType: "address", name: "offerer", type: "address" },
@@ -425,7 +449,11 @@ export const Seaport = [
                 name: "endAmount",
                 type: "uint256",
               },
-              { internalType: "address payable", name: "recipient", type: "address" },
+              {
+                internalType: "address payable",
+                name: "recipient",
+                type: "address",
+              },
             ],
             internalType: "struct ConsiderationItem[]",
             name: "consideration",
@@ -449,7 +477,11 @@ export const Seaport = [
             name: "conduitKey",
             type: "bytes32",
           },
-          { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+          {
+            internalType: "uint256",
+            name: "totalOriginalConsiderationItems",
+            type: "uint256",
+          },
         ],
         indexed: false,
         internalType: "struct OrderParameters",
@@ -462,7 +494,14 @@ export const Seaport = [
   },
   {
     anonymous: false,
-    inputs: [{ indexed: false, internalType: "bytes32[]", name: "orderHashes", type: "bytes32[]" }],
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32[]",
+        name: "orderHashes",
+        type: "bytes32[]",
+      },
+    ],
     name: "OrdersMatched",
     type: "event",
   },
@@ -519,7 +558,11 @@ export const Seaport = [
                 name: "endAmount",
                 type: "uint256",
               },
-              { internalType: "address payable", name: "recipient", type: "address" },
+              {
+                internalType: "address payable",
+                name: "recipient",
+                type: "address",
+              },
             ],
             internalType: "struct ConsiderationItem[]",
             name: "consideration",
@@ -584,7 +627,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -608,19 +655,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -638,7 +697,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",
@@ -726,7 +789,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -750,19 +817,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -780,7 +859,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",
@@ -938,7 +1021,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -962,19 +1049,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -992,7 +1091,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",
@@ -1138,7 +1241,11 @@ export const Seaport = [
             name: "salt",
             type: "uint256",
           },
-          { internalType: "bytes32", name: "offererConduitKey", type: "bytes32" },
+          {
+            internalType: "bytes32",
+            name: "offererConduitKey",
+            type: "bytes32",
+          },
           {
             internalType: "bytes32",
             name: "fulfillerConduitKey",
@@ -1156,7 +1263,11 @@ export const Seaport = [
                 name: "amount",
                 type: "uint256",
               },
-              { internalType: "address payable", name: "recipient", type: "address" },
+              {
+                internalType: "address payable",
+                name: "recipient",
+                type: "address",
+              },
             ],
             internalType: "struct AdditionalRecipient[]",
             name: "additionalRecipients",
@@ -1227,7 +1338,11 @@ export const Seaport = [
             name: "salt",
             type: "uint256",
           },
-          { internalType: "bytes32", name: "offererConduitKey", type: "bytes32" },
+          {
+            internalType: "bytes32",
+            name: "offererConduitKey",
+            type: "bytes32",
+          },
           {
             internalType: "bytes32",
             name: "fulfillerConduitKey",
@@ -1245,7 +1360,11 @@ export const Seaport = [
                 name: "amount",
                 type: "uint256",
               },
-              { internalType: "address payable", name: "recipient", type: "address" },
+              {
+                internalType: "address payable",
+                name: "recipient",
+                type: "address",
+              },
             ],
             internalType: "struct AdditionalRecipient[]",
             name: "additionalRecipients",
@@ -1292,7 +1411,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -1316,19 +1439,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -1346,7 +1481,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",
@@ -1432,7 +1571,11 @@ export const Seaport = [
                 name: "endAmount",
                 type: "uint256",
               },
-              { internalType: "address payable", name: "recipient", type: "address" },
+              {
+                internalType: "address payable",
+                name: "recipient",
+                type: "address",
+              },
             ],
             internalType: "struct ConsiderationItem[]",
             name: "consideration",
@@ -1539,7 +1682,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -1563,19 +1710,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -1593,7 +1752,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",
@@ -1747,7 +1910,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -1771,19 +1938,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -1801,7 +1980,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",
@@ -1926,7 +2109,11 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
@@ -1950,19 +2137,31 @@ export const Seaport = [
                     name: "identifierOrCriteria",
                     type: "uint256",
                   },
-                  { internalType: "uint256", name: "startAmount", type: "uint256" },
+                  {
+                    internalType: "uint256",
+                    name: "startAmount",
+                    type: "uint256",
+                  },
                   {
                     internalType: "uint256",
                     name: "endAmount",
                     type: "uint256",
                   },
-                  { internalType: "address payable", name: "recipient", type: "address" },
+                  {
+                    internalType: "address payable",
+                    name: "recipient",
+                    type: "address",
+                  },
                 ],
                 internalType: "struct ConsiderationItem[]",
                 name: "consideration",
                 type: "tuple[]",
               },
-              { internalType: "enum OrderType", name: "orderType", type: "uint8" },
+              {
+                internalType: "enum OrderType",
+                name: "orderType",
+                type: "uint8",
+              },
               {
                 internalType: "uint256",
                 name: "startTime",
@@ -1980,7 +2179,11 @@ export const Seaport = [
                 name: "conduitKey",
                 type: "bytes32",
               },
-              { internalType: "uint256", name: "totalOriginalConsiderationItems", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "totalOriginalConsiderationItems",
+                type: "uint256",
+              },
             ],
             internalType: "struct OrderParameters",
             name: "parameters",

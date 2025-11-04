@@ -23,7 +23,9 @@ export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
   if (selectedConnection.validatedSelectedConnection.isValid) {
     return (
       <ENSNodeProvider
-        config={{ client: { url: selectedConnection.validatedSelectedConnection.url } }}
+        config={{
+          client: { url: selectedConnection.validatedSelectedConnection.url },
+        }}
       >
         {children}
       </ENSNodeProvider>

@@ -43,7 +43,11 @@ app.use(thegraphFallbackMiddleware);
 app.use(fixContentLengthMiddleware);
 
 // inject api documentation into graphql introspection requests
-app.use(createDocumentationMiddleware(makeSubgraphApiDocumentation(), { path: "/subgraph" }));
+app.use(
+  createDocumentationMiddleware(makeSubgraphApiDocumentation(), {
+    path: "/subgraph",
+  }),
+);
 
 // inject _meta into the hono (and yoga) context for the subgraph middleware
 app.use(subgraphMetaMiddleware);

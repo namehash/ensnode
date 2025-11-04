@@ -42,7 +42,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegistered({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -52,7 +55,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRenewed({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -62,7 +68,10 @@ export default function () {
       context,
       event: {
         ...event,
-        args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.tokenId) },
+        args: {
+          ...event.args,
+          labelHash: tokenIdToLabelHash(event.args.tokenId),
+        },
       },
     });
   });

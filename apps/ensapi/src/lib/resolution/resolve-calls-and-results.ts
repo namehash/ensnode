@@ -115,7 +115,10 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   publicClient: PublicClient;
 }): Promise<ResolveCallsAndRawResults<SELECTION>> {
   return withActiveSpanAsync(tracer, "executeResolveCalls", { name }, async (span) => {
-    const ResolverContract = { abi: ResolverABI, address: resolverAddress } as const;
+    const ResolverContract = {
+      abi: ResolverABI,
+      address: resolverAddress,
+    } as const;
 
     return await Promise.all(
       calls.map(async (call) => {
@@ -128,7 +131,10 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
               {},
               async (span) => {
                 const encodedName = toHex(packetToBytes(name)); // DNS-encode `name` for resolve()
-                const encodedMethod = encodeFunctionData({ abi: ResolverABI, ...call });
+                const encodedMethod = encodeFunctionData({
+                  abi: ResolverABI,
+                  ...call,
+                });
 
                 span.setAttribute("encodedName", encodedName);
                 span.setAttribute("encodedMethod", encodedMethod);
@@ -142,13 +148,20 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
                 // if resolve() returned empty bytes or reverted, coalece to null
                 if (size(value) === 0) {
                   span.setAttribute("result", "null");
-                  return { call, result: null, reason: "returned empty response" };
+                  return {
+                    call,
+                    result: null,
+                    reason: "returned empty response",
+                  };
                 }
 
                 // ENSIP-10 — resolve() always returns bytes that need to be decoded
                 const results = decodeAbiParameters(
-                  getAbiItem({ abi: ResolverABI, name: call.functionName, args: call.args })
-                    .outputs,
+                  getAbiItem({
+                    abi: ResolverABI,
+                    name: call.functionName,
+                    args: call.args,
+                  }).outputs,
                   value,
                 );
 
@@ -175,19 +188,28 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
               case "name":
                 return {
                   call,
-                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
+                  result: await publicClient.readContract({
+                    ...ResolverContract,
+                    ...call,
+                  }),
                   reason: `.name(${call.args})`,
                 };
               case "addr":
                 return {
                   call,
-                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
+                  result: await publicClient.readContract({
+                    ...ResolverContract,
+                    ...call,
+                  }),
                   reason: `.addr(${call.args})`,
                 };
               case "text":
                 return {
                   call,
-                  result: await publicClient.readContract({ ...ResolverContract, ...call }),
+                  result: await publicClient.readContract({
+                    ...ResolverContract,
+                    ...call,
+                  }),
                   reason: `.text(${call.args})`,
                 };
             }

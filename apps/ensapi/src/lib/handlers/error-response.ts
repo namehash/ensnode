@@ -17,7 +17,10 @@ import type { ErrorResponse } from "@ensnode/ensnode-sdk";
 export const errorResponse = (c: Context, input: ZodError | Error | string | unknown) => {
   if (input instanceof ZodError) {
     return c.json(
-      { message: "Invalid Input", details: treeifyError(input) } satisfies ErrorResponse,
+      {
+        message: "Invalid Input",
+        details: treeifyError(input),
+      } satisfies ErrorResponse,
       400,
     );
   }

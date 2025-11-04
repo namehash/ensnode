@@ -43,6 +43,9 @@ export default function MockList() {
                 DisplayIdentity
               </Link>
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={retainCurrentRawConnectionUrlParam("/mock/ens-avatar")}>ENS Avatar</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

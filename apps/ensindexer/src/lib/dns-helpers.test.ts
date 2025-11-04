@@ -136,7 +136,10 @@ describe("dns-helpers", () => {
     });
 
     it("should parse args correctly", () => {
-      expect(parseDnsTxtRecordArgs(args)).toEqual({ key: PARSED_KEY, value: PARSED_VALUE });
+      expect(parseDnsTxtRecordArgs(args)).toEqual({
+        key: PARSED_KEY,
+        value: PARSED_VALUE,
+      });
     });
   });
 });

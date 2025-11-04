@@ -39,7 +39,9 @@ describe("lib-resolution", () => {
     });
 
     it("should return text records when requested", () => {
-      const selection: ResolverRecordsSelection = { texts: ["com.twitter", "avatar"] };
+      const selection: ResolverRecordsSelection = {
+        texts: ["com.twitter", "avatar"],
+      };
       const result = makeRecordsResponseFromIndexedRecords(selection, mockRecords);
       expect(result).toEqual({
         texts: {

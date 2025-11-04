@@ -197,7 +197,10 @@ describe("ENSIndexer: Config", () => {
           formatParseError(
             makeENSIndexerPublicConfigSchema().safeParse({
               ...validConfig,
-              labelSet: { ...validConfig.labelSet, labelSetVersion: "not-a-number" },
+              labelSet: {
+                ...validConfig.labelSet,
+                labelSetVersion: "not-a-number",
+              },
             }),
           ),
         ).toContain("labelSet.labelSetVersion must be an integer");

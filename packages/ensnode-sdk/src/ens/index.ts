@@ -5,6 +5,7 @@ export * from "./constants";
 export * from "./dns-encoded-name";
 export * from "./encode-labelhash";
 export * from "./is-normalized";
+export * from "./metadata-service";
 export * from "./names";
 export * from "./parse-reverse-name";
 export * from "./reverse-name";

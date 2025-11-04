@@ -233,7 +233,10 @@ describe("ENSNodeClient", () => {
     // TODO: integrate with default-case expectations from resolution api and test behavior
     it("should handle address and text selections", async () => {
       const mockResponse = { records: EXAMPLE_RECORDS_RESPONSE };
-      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
 
       const client = new ENSNodeClient();
       const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION);
@@ -248,7 +251,10 @@ describe("ENSNodeClient", () => {
 
     it("should include trace if specified", async () => {
       const mockResponse = { records: EXAMPLE_RECORDS_RESPONSE, trace: [] };
-      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
 
       const client = new ENSNodeClient();
       const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION, {
@@ -265,7 +271,10 @@ describe("ENSNodeClient", () => {
     });
 
     it("should throw error when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => EXAMPLE_ERROR_RESPONSE,
+      });
 
       const client = new ENSNodeClient();
       await expect(client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION)).rejects.toThrowError(
@@ -295,10 +304,15 @@ describe("ENSNodeClient", () => {
 
     it("should include trace if specified", async () => {
       const mockResponse = { name: EXAMPLE_NAME, trace: [] };
-      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
 
       const client = new ENSNodeClient();
-      const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, { trace: true });
+      const response = await client.resolvePrimaryName(EXAMPLE_ADDRESS, 1, {
+        trace: true,
+      });
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
@@ -329,7 +343,10 @@ describe("ENSNodeClient", () => {
     });
 
     it("should throw error when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => EXAMPLE_ERROR_RESPONSE,
+      });
 
       const client = new ENSNodeClient();
       await expect(client.resolvePrimaryName(EXAMPLE_ADDRESS, 1)).rejects.toThrowError(ClientError);
@@ -375,10 +392,15 @@ describe("ENSNodeClient", () => {
 
     it("should include trace if specified", async () => {
       const mockResponse = { ...EXAMPLE_PRIMARY_NAMES_RESPONSE, trace: [] };
-      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => mockResponse });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
 
       const client = new ENSNodeClient();
-      const response = await client.resolvePrimaryNames(EXAMPLE_ADDRESS, { trace: true });
+      const response = await client.resolvePrimaryNames(EXAMPLE_ADDRESS, {
+        trace: true,
+      });
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
@@ -409,7 +431,10 @@ describe("ENSNodeClient", () => {
     });
 
     it("should throw error when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => EXAMPLE_ERROR_RESPONSE,
+      });
 
       const client = new ENSNodeClient();
       await expect(client.resolvePrimaryNames(EXAMPLE_ADDRESS)).rejects.toThrowError(ClientError);
@@ -435,7 +460,10 @@ describe("ENSNodeClient", () => {
     });
 
     it("should throw error when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => EXAMPLE_ERROR_RESPONSE,
+      });
 
       const client = new ENSNodeClient();
 
@@ -465,7 +493,10 @@ describe("ENSNodeClient", () => {
       // arrange
       const client = new ENSNodeClient();
 
-      mockFetch.mockResolvedValueOnce({ ok: false, json: async () => EXAMPLE_ERROR_RESPONSE });
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => EXAMPLE_ERROR_RESPONSE,
+      });
 
       // act & assert
       await expect(client.indexingStatus()).rejects.toThrow(

@@ -58,7 +58,9 @@ describe("environment-defaults", () => {
       const PROVIDED: any = { labelSet: { labelSetVersion: "1" } };
 
       // full default set
-      const DEFAULTS: any = { labelSet: { labelSetId: "subgraph", labelSetVersion: "0" } };
+      const DEFAULTS: any = {
+        labelSet: { labelSetId: "subgraph", labelSetVersion: "0" },
+      };
 
       // applyDefaults correctly provides the nested value without clobbering user-provided nested value
       expect(applyDefaults(PROVIDED, DEFAULTS)).toStrictEqual({

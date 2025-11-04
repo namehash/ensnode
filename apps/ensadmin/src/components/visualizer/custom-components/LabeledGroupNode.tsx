@@ -62,7 +62,11 @@ export const GroupNode = forwardRef<HTMLDivElement, GroupNodeProps>(
       >
         <Panel
           className="p-0 h-full"
-          style={{ margin: "0", writingMode: "sideways-lr", textOrientation: "mixed" }}
+          style={{
+            margin: "0",
+            writingMode: "sideways-lr",
+            textOrientation: "mixed",
+          }}
         >
           {label && <GroupNodeLabel>{label}</GroupNodeLabel>}
         </Panel>

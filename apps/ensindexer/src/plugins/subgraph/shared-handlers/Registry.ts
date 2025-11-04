@@ -81,7 +81,9 @@ export const handleNewOwner =
 
     // if the domain doesn't yet have a name, attempt to construct it here
     if (domain.name === null) {
-      const parent = await context.db.find(schema.subgraph_domain, { id: parentNode });
+      const parent = await context.db.find(schema.subgraph_domain, {
+        id: parentNode,
+      });
 
       let healedLabel: LiteralLabel | null = null;
 
