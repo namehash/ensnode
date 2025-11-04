@@ -183,7 +183,6 @@ export function useAvatarUrl(
     queryKey: readonly unknown[];
     queryFn: () => Promise<UseAvatarUrlResult>;
     retry: boolean;
-    placeholderData: UseAvatarUrlResult;
   } = {
     queryKey: [
       "avatarUrl",
@@ -221,11 +220,6 @@ export function useAvatarUrl(
       };
     },
     retry: false,
-    placeholderData: {
-      rawAvatarTextRecord: null,
-      browserSupportedAvatarUrl: null,
-      usesProxy: false,
-    } as const,
   };
 
   const options = {
