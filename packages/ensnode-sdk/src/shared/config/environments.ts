@@ -42,3 +42,10 @@ export type ChainIdSpecificRpcEnvironmentVariable = string;
 export type LogLevelEnvironment = {
   LOG_LEVEL?: string;
 };
+
+/**
+ * Environment variables for communicating with The Graph.
+ */
+export type TheGraphEnvironment = {
+  THEGRAPH_API_KEY?: string;
+};

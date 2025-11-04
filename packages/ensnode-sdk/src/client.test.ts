@@ -57,6 +57,10 @@ const EXAMPLE_ERROR_RESPONSE: ErrorResponse = { message: "error" };
 
 const EXAMPLE_CONFIG_RESPONSE = {
   version: "0.32.0",
+  theGraphFallback: {
+    canFallback: false,
+    reason: "no-api-key",
+  },
   ensIndexerPublicConfig: {
     labelSet: {
       labelSetId: "subgraph",

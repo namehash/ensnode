@@ -1,4 +1,10 @@
+import type { z } from "zod/v4";
+
 import type { ENSIndexerPublicConfig } from "../../ensindexer";
+import type { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema } from "./zod-schemas";
+
+export type TheGraphCannotFallbackReason = z.infer<typeof TheGraphCannotFallbackReasonSchema>;
+export type TheGraphFallback = z.infer<typeof TheGraphFallbackSchema>;
 
 /**
  * Complete public configuration object for ENSApi.
@@ -13,6 +19,11 @@ export interface ENSApiPublicConfig {
    * @see https://ghcr.io/namehash/ensnode/ensapi
    */
   version: string;
+
+  /**
+   * The Graph Fallback-related info.
+   */
+  theGraphFallback: TheGraphFallback;
 
   /**
    * Complete ENSIndexer public configuration
