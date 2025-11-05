@@ -17,6 +17,7 @@ export {
 export * from "./interpretation";
 export * from "./labelhash";
 export * from "./null-bytes";
+export * from "./numbers";
 export * from "./serialize";
 export * from "./serialized-types";
 export * from "./types";
