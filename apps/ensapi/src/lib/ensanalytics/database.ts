@@ -1,15 +1,15 @@
-import config from "@/config";
+import { and, count, desc, gte, lt, sql } from "drizzle-orm";
 
-import { sql } from "drizzle-orm";
+import * as schema from "@ensnode/ensnode-schema";
 
 import { db } from "@/lib/db";
 import logger from "@/lib/logger";
 
 import type { ReferrerData } from "./types";
+import { getUnixTime } from "date-fns";
 
-// Date range for filtering referrals (2025-01-01 to 2026-01-01)
-const START_DATE = new Date("2025-01-01T00:00:00.000Z");
-const END_DATE = new Date("2026-01-01T00:00:00.000Z");
+const START_DATE = getUnixTime(new Date("2025-01-01T00:00:00.000Z"));
+const END_DATE = getUnixTime(new Date("2026-01-01T00:00:00.000Z"));
 
 /**
  * Fetches the top referrers from the registration_referral table.
@@ -21,28 +21,22 @@ const END_DATE = new Date("2026-01-01T00:00:00.000Z");
  */
 export async function getTopReferrers(): Promise<ReferrerData[]> {
   try {
-    // Convert dates to Unix timestamps (in seconds)
-    const startTimestamp = Math.floor(START_DATE.getTime() / 1000);
-    const endTimestamp = Math.floor(END_DATE.getTime() / 1000);
+    const result = await db
+      .select({
+        referrer: schema.registrationReferral.referrer,
+        totalReferrals: count().as("total_referrals"),
+      })
+      .from(schema.registrationReferral)
+      .where(
+        and(
+          gte(schema.registrationReferral.timestamp, BigInt(START_DATE)),
+          lt(schema.registrationReferral.timestamp, BigInt(END_DATE)),
+        ),
+      )
+      .groupBy(schema.registrationReferral.referrer)
+      .orderBy(desc(sql`total_referrals`));
 
-    // Build query with fixed date range filter
-    const query = sql`
-      SELECT
-        referrer,
-        COUNT(*) AS total_referrals
-      FROM
-        ${sql.identifier(config.databaseSchemaName)}.registration_referral
-      WHERE
-        timestamp >= ${startTimestamp}
-        AND timestamp < ${endTimestamp}
-      GROUP BY
-        referrer
-      ORDER BY
-        total_referrals DESC
-    `;
-
-    const result = await db.execute(query);
-    return result.rows as ReferrerData[];
+    return result as ReferrerData[];
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     logger.error({ error }, "Failed to fetch top referrers from database");

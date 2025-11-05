@@ -37,11 +37,11 @@ vi.mock("@/lib/logger", () => ({
 describe("CacheService", () => {
   let cacheService: CacheService;
   const mockReferrers: ReferrerData[] = [
-    { referrer: "0x1111111111111111111111111111111111111111", total_referrals: 100 },
-    { referrer: "0x2222222222222222222222222222222222222222", total_referrals: 75 },
-    { referrer: "0x3333333333333333333333333333333333333333", total_referrals: 50 },
-    { referrer: "0x4444444444444444444444444444444444444444", total_referrals: 25 },
-    { referrer: "0x5555555555555555555555555555555555555555", total_referrals: 10 },
+    { referrer: "0x1111111111111111111111111111111111111111", totalReferrals: 100 },
+    { referrer: "0x2222222222222222222222222222222222222222", totalReferrals: 75 },
+    { referrer: "0x3333333333333333333333333333333333333333", totalReferrals: 50 },
+    { referrer: "0x4444444444444444444444444444444444444444", totalReferrals: 25 },
+    { referrer: "0x5555555555555555555555555555555555555555", totalReferrals: 10 },
   ];
 
   beforeEach(() => {
@@ -69,11 +69,10 @@ describe("CacheService", () => {
       // Initialize should not throw - it catches errors to avoid breaking the service
       await expect(cacheService.initialize()).resolves.not.toThrow();
 
-      // Cache should be marked as initialized but not ready (no data)
+      // Cache should not be initialized or ready since data load failed
       expect(cacheService.isCacheReady()).toBe(false);
-      const stats = cacheService.getCacheStats();
-      expect(stats.isInitialized).toBe(true);
-      expect(stats.totalReferrers).toBe(0);
+      const cache = cacheService.getCache();
+      expect(cache).toBe(null);
     });
   });
 
@@ -93,6 +92,7 @@ describe("CacheService", () => {
         limit: 2,
         hasNext: true,
         hasPrev: false,
+        updatedAt: expect.any(Number),
       });
     });
 
@@ -106,6 +106,7 @@ describe("CacheService", () => {
         limit: 2,
         hasNext: true,
         hasPrev: true,
+        updatedAt: expect.any(Number),
       });
     });
 
@@ -119,20 +120,14 @@ describe("CacheService", () => {
         limit: 2,
         hasNext: false,
         hasPrev: true,
+        updatedAt: expect.any(Number),
       });
     });
 
-    it("should return empty array when page is beyond available data", () => {
-      const result = cacheService.getTopReferrers(10, 2);
-
-      expect(result).toEqual({
-        referrers: [],
-        total: 5,
-        page: 10,
-        limit: 2,
-        hasNext: false,
-        hasPrev: true,
-      });
+    it("should throw error when page is beyond available data", () => {
+      expect(() => cacheService.getTopReferrers(10, 2)).toThrow(
+        "Page number 10 exceeds available data. Maximum page is 3 for limit 2",
+      );
     });
 
     it("should return all items when limit is larger than total", () => {
@@ -145,6 +140,7 @@ describe("CacheService", () => {
         limit: 100,
         hasNext: false,
         hasPrev: false,
+        updatedAt: expect.any(Number),
       });
     });
 
@@ -179,29 +175,23 @@ describe("CacheService", () => {
     });
   });
 
-  describe("getCacheStats", () => {
-    it("should return correct stats before initialization", () => {
-      const stats = cacheService.getCacheStats();
+  describe("getCache", () => {
+    it("should return null before initialization", () => {
+      const cache = cacheService.getCache();
 
-      expect(stats).toEqual({
-        totalReferrers: 0,
-        isInitialized: false,
-        lastRefresh: expect.any(Date),
-      });
+      expect(cache).toBe(null);
     });
 
-    it("should return correct stats after initialization", async () => {
+    it("should return cache data after initialization", async () => {
       vi.mocked(database.getTopReferrers).mockResolvedValue(mockReferrers);
 
       await cacheService.initialize();
 
-      const stats = cacheService.getCacheStats();
+      const cache = cacheService.getCache();
 
-      expect(stats).toEqual({
-        totalReferrers: 5,
-        isInitialized: true,
-        lastRefresh: expect.any(Date),
-      });
+      expect(cache).not.toBe(null);
+      expect(cache?.referrers).toEqual(mockReferrers);
+      expect(cache?.updatedAt).toEqual(expect.any(Number));
     });
   });
 

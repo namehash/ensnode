@@ -1,4 +1,7 @@
+import { z } from "zod/v4";
+
 import { cacheService } from "@/lib/ensanalytics/cache";
+import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 
@@ -7,38 +10,32 @@ const MAX_PAGINATION_LIMIT = 100;
 
 const app = factory.createApp();
 
-// Health check endpoint for ENSAnalytics cache status
-app.get("/health", (c) => {
-  const stats = cacheService.getCacheStats();
-  return c.json({
-    status: cacheService.isCacheReady() ? "healthy" : "unhealthy",
-    cache: stats,
-  });
+// Pagination query parameters schema
+const paginationQuerySchema = z.object({
+  page: z
+    .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
+    .default(1),
+  limit: z
+    .optional(
+      z.coerce
+        .number()
+        .int()
+        .min(1, "Limit must be at least 1")
+        .max(MAX_PAGINATION_LIMIT, `Limit must not exceed ${MAX_PAGINATION_LIMIT}`),
+    )
+    .default(DEFAULT_PAGINATION_LIMIT),
 });
 
 // Get top referrers with pagination
-app.get("/top-referrers", (c) => {
+app.get("/top-referrers", validate("query", paginationQuerySchema), (c) => {
   try {
     // Check if cache is ready
     if (!cacheService.isCacheReady()) {
       return c.json({ error: "Cache not ready. Service is still initializing." }, 500);
     }
 
-    // Parse and validate query parameters
-    const pageParam = c.req.query("page");
-    const limitParam = c.req.query("limit");
-
-    const page = pageParam ? Number.parseInt(pageParam, 10) : 1;
-    const limit = limitParam ? Number.parseInt(limitParam, 10) : DEFAULT_PAGINATION_LIMIT;
-
-    // Validate pagination parameters
-    if (Number.isNaN(page) || page < 1) {
-      return c.json({ error: "Page must be a positive integer" }, 400);
-    }
-
-    if (Number.isNaN(limit) || limit < 1 || limit > MAX_PAGINATION_LIMIT) {
-      return c.json({ error: `Limit must be between 1 and ${MAX_PAGINATION_LIMIT}` }, 400);
-    }
+    // Get validated query parameters
+    const { page, limit } = c.req.valid("query");
 
     // Get paginated results from cache
     const result = cacheService.getTopReferrers(page, limit);
@@ -50,6 +47,7 @@ app.get("/top-referrers", (c) => {
       limit: result.limit,
       hasNext: result.hasNext,
       hasPrev: result.hasPrev,
+      updatedAt: result.updatedAt,
     });
   } catch (error) {
     logger.error({ error }, "Error in /ensanalytics/top-referrers endpoint");

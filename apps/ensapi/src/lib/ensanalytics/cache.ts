@@ -1,9 +1,11 @@
 import * as cron from "node-cron";
 
+import { getUnixTime } from "date-fns";
+
 import logger from "@/lib/logger";
 
 import { getTopReferrers } from "./database";
-import type { CacheStats, PaginatedReferrers, ReferrerData } from "./types";
+import type { PaginatedReferrers, ReferrerCache } from "./types";
 
 const CACHE_REFRESH_INTERVAL_MINUTES = 5;
 
@@ -12,10 +14,8 @@ const CACHE_REFRESH_INTERVAL_MINUTES = 5;
  * Automatically refreshes data from the database at regular intervals.
  */
 export class CacheService {
-  private referrers: ReferrerData[] = [];
-  private isInitialized = false;
+  private cache: ReferrerCache | null = null;
   private refreshTask: cron.ScheduledTask | null = null;
-  private lastRefreshTime: Date = new Date();
 
   /**
    * Initializes the cache service by loading initial data and setting up automatic refresh.
@@ -33,9 +33,9 @@ export class CacheService {
       await this.refreshData();
     });
 
-    this.isInitialized = true;
+    const referrerCount = this.cache?.referrers.length ?? 0;
     logger.info(
-      `ENSAnalytics cache service initialized successfully with ${this.referrers.length} referrers`,
+      `ENSAnalytics cache service initialized successfully with ${referrerCount} referrers`,
     );
   }
 
@@ -46,8 +46,11 @@ export class CacheService {
   private async refreshData(): Promise<void> {
     try {
       const newReferrers = await getTopReferrers();
-      this.referrers = newReferrers;
-      this.lastRefreshTime = new Date();
+      // Atomic update: create a new cache object with all fields updated together
+      this.cache = {
+        referrers: newReferrers,
+        updatedAt: getUnixTime(new Date()),
+      };
       logger.info(`Cache refreshed with ${newReferrers.length} referrers`);
     } catch (error) {
       logger.error({ error }, "Failed to refresh cache - continuing with stale data");
@@ -62,24 +65,43 @@ export class CacheService {
    * @param page - Page number (1-indexed)
    * @param limit - Number of items per page
    * @returns Paginated referrers data with navigation metadata
-   * @throws Error if cache is not initialized or empty
+   * @throws Error if cache is not initialized, empty, or invalid pagination parameters
    */
   getTopReferrers(page: number, limit: number): PaginatedReferrers {
-    if (!this.isInitialized || this.referrers.length === 0) {
+    if (!this.cache || this.cache.referrers.length === 0) {
       throw new Error("Cache not initialized or empty");
     }
 
+    // Validate pagination parameters
+    if (page < 1) {
+      throw new Error("Page number must be greater than or equal to 1");
+    }
+
+    if (limit <= 0) {
+      throw new Error("Limit must be greater than 0");
+    }
+
     const startIndex = (page - 1) * limit;
+
+    // Check if the requested page is beyond available data
+    if (startIndex >= this.cache.referrers.length) {
+      const maxPage = Math.ceil(this.cache.referrers.length / limit);
+      throw new Error(
+        `Page number ${page} exceeds available data. Maximum page is ${maxPage} for limit ${limit}`,
+      );
+    }
+
     const endIndex = startIndex + limit;
-    const paginatedReferrers = this.referrers.slice(startIndex, endIndex);
+    const paginatedReferrers = this.cache.referrers.slice(startIndex, endIndex);
 
     return {
       referrers: paginatedReferrers,
-      total: this.referrers.length,
+      total: this.cache.referrers.length,
       page,
       limit,
-      hasNext: endIndex < this.referrers.length,
+      hasNext: endIndex < this.cache.referrers.length,
       hasPrev: page > 1,
+      updatedAt: this.cache.updatedAt,
     };
   }
 
@@ -88,19 +110,15 @@ export class CacheService {
    * @returns True if cache is initialized and has data
    */
   isCacheReady(): boolean {
-    return this.isInitialized && this.referrers.length > 0;
+    return this.cache !== null && this.cache.referrers.length > 0;
   }
 
   /**
-   * Gets current cache statistics.
-   * @returns Cache statistics including total referrers count and last refresh time
+   * Gets the current cache data.
+   * @returns The cache object if initialized, null otherwise
    */
-  getCacheStats(): CacheStats {
-    return {
-      totalReferrers: this.referrers.length,
-      isInitialized: this.isInitialized,
-      lastRefresh: this.lastRefreshTime,
-    };
+  getCache(): ReferrerCache | null {
+    return this.cache;
   }
 
   /**

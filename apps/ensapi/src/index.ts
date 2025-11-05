@@ -52,7 +52,24 @@ app.route("/ensanalytics", ensanalyticsApi);
 
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ ok: true });
+  const cache = cacheService.getCache();
+  const ensanalyticsOk = cacheService.isCacheReady();
+
+  // overall health is ok only if all subservices are healthy
+  const allOk = ensanalyticsOk;
+
+  return c.json({
+    ok: allOk,
+    ensanalytics: {
+      ok: ensanalyticsOk,
+      cache: cache
+        ? {
+            totalReferrers: cache.referrers.length,
+            updatedAt: cache.updatedAt,
+          }
+        : null,
+    },
+  });
 });
 
 // log hono errors to console
