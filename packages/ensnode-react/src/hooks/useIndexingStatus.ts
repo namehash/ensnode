@@ -36,23 +36,18 @@ export function useIndexingStatus(
 
   const queryResult = useQuery(options);
 
+  // Update cached snapshot whenever we get a successful response
   if (queryResult.data && queryResult.data.responseCode === IndexingStatusResponseCodes.Ok) {
     cachedSnapshotRef.current = queryResult.data.realtimeProjection.snapshot;
   }
 
-  // If we have a cached snapshot and either:
-  // 1. The query resulted in a network/fetch error, or
-  // 2. The API returned an Error responseCode
-  // Then generate a fresh realtime projection from the cached snapshot
-  // instead of exposing the error to the UI.
-  const shouldUseCachedSnapshot =
-    cachedSnapshotRef.current &&
-    (queryResult.isError || queryResult.data?.responseCode === IndexingStatusResponseCodes.Error);
-
-  if (shouldUseCachedSnapshot) {
+  // If we have a cached snapshot, always build a fresh projection from it
+  // using the current time. This allows the client to rebuild projections
+  // as frequently as needed without waiting for API responses.
+  if (cachedSnapshotRef.current) {
     const now = Math.floor(Date.now() / 1000);
     const syntheticRealtimeProjection = createRealtimeIndexingStatusProjection(
-      cachedSnapshotRef.current!,
+      cachedSnapshotRef.current,
       now,
     );
 
