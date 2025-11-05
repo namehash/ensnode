@@ -13,14 +13,14 @@ export const subregistry = onchainTable(
     /**
      * Subregistry ID
      *
-     * Guaranteed to follow the CAIP-10 standard.
+     * Guaranteed to be a string formatted according to the CAIP-10 standard.
      *
      * @see https://chainagnostic.org/CAIPs/caip-10
      */
     subregistryId: t.text().primaryKey(),
 
     /**
-     * The node of a name the subregistry manager. Example managed names:
+     * The node of a name the subregistry manages. Example managed names:
      * - `eth`
      * - `base.eth`
      * - `linea.eth`
@@ -52,7 +52,7 @@ export const registrationLifecycle = onchainTable(
     /**
      * Subregistry ID
      *
-     * Guaranteed to follow the CAIP-10 standard.
+     * Guaranteed to be a string formatted according to the CAIP-10 standard.
      *
      * @see https://chainagnostic.org/CAIPs/caip-10
      */
@@ -69,32 +69,35 @@ export const registrationLifecycle = onchainTable(
 );
 
 /**
- * Logical Registrar Action Type Enum
+ * "Logical" Registrar Action Type Enum
  *
- * Types of Logical Registrar Actions.
+ * Types of "logical" Registrar Actions.
  */
-export const logicalRegistrarActionType = onchainEnum("logical_registrar_action_type", [
+export const registrarActionType = onchainEnum("registrar_action_type", [
   "registration",
   "renewal",
 ]);
 
 /**
- * Logical Registrar Action
+ * "Logical" Registrar Action
  *
- * Records information indexed from multiple EVM events that happened in
+ * Represents a "logical" RegistrarAction, but the state recorded for
+ * a "logical" RegistrarAction may be an aggregate across multiple onchain
+ * events that may be distributed across multiple contracts (such as
+ * a RegistrarController and its associated BaseRegistrar) within
  * a single transaction.
  *
  * Consider the following situation:
  * 1) When someone makes a new registration, multiple contracts take part in
  *    the registration process.
- * 2) In order to build a single Logical Registrar Action record,
+ * 2) In order to build a single "logical" Registrar Action record,
  *    we may need information from one or more events. For example,
  *    the `NameRegistered` event from the BaseRegistrar contract includes
  *    information for fields like:
  *    - `node`
  *    - `incrementalDuration`
  *    - `registrant`
- *    We use this event to initiate the Logical Registrar Action record.
+ *    We use this event to initiate the "logical" Registrar Action record.
  *
  *    Another event we may index (and in most cases we do) is
  *    `NameRegistered` from RegistrarController contract, which may include:
@@ -102,37 +105,36 @@ export const logicalRegistrarActionType = onchainEnum("logical_registrar_action_
  *    - `premium`
  *    - `total`
  *    - `encodedReferrer`
- *    We use this event to update the Logical Registrar Action record.
+ *    We use this event to update the "logical" Registrar Action record.
  *
- * Both of those events contribute to a single Logical Registrar Action record.
+ * Both of those events contribute to a single "logical" Registrar Action record.
  */
-export const logicalRegistrarAction = onchainTable(
-  "logical_registrar_action",
+export const registrarAction = onchainTable(
+  "registrar_action",
   (t) => ({
     /**
-     * Logical Registrar Action ID
+     * "Logical" Registrar Action ID
      *
      * The `id` value is a deterministic identifier for the initial onchain event
-     * associated with the "logical" RegistrarAction, but the state recorded for
-     * a "logical" RegistrarAction may be an aggregate across multiple onchain
-     * events that may be distributed across multiple contracts (such as
-     * a RegistrarController and its associated BaseRegistrar).
+     * associated with the "logical" RegistrarAction.
+     *
+     * Guaranteed to be the very first element in `eventIds` array.
      */
     id: t.text().primaryKey(),
 
     /**
      * Subregistry ID
      *
-     * The ID of the subregistry which executed the Logical Registrar Action.
+     * The ID of the subregistry which executed the "logical" Registrar Action.
      *
-     * Guaranteed to follow the CAIP-10 standard.
+     * Guaranteed to be a string formatted according to the CAIP-10 standard.
      *
      * @see https://chainagnostic.org/CAIPs/caip-10
      */
     subregistryId: t.text().notNull(),
 
     /**
-     * The node  (namehash) of the name associated with the Logical Registrar
+     * The node  (namehash) of the name associated with the "logical" Registrar
      * Action.
      *
      * Guaranteed to be a hex string representation of 32-bytes.
@@ -140,9 +142,9 @@ export const logicalRegistrarAction = onchainTable(
     node: t.hex().notNull(),
 
     /**
-     * Type of the Logical Registrar Action.
+     * Type of the "logical" Registrar Action.
      */
-    type: logicalRegistrarActionType().notNull(),
+    type: registrarActionType().notNull(),
 
     /**
      * Incremental Duration
@@ -178,7 +180,7 @@ export const logicalRegistrarAction = onchainTable(
     incrementalDuration: t.bigint().notNull(),
 
     /**
-     * Base cost of the Logical Registrar Action.
+     * Base cost of the "logical" Registrar Action.
      *
      * Guaranteed to be:
      * 1) null if and only if `total` is null.
@@ -187,7 +189,7 @@ export const logicalRegistrarAction = onchainTable(
     baseCost: t.bigint(),
 
     /**
-     * Premium of the Logical Registrar Action.
+     * Premium of the "logical" Registrar Action.
      *
      * Guaranteed to be:
      * 1) null if and only if `total` is null.
@@ -197,7 +199,7 @@ export const logicalRegistrarAction = onchainTable(
     premium: t.bigint(),
 
     /**
-     * Total cost of performing Logical Registrar Action.
+     * Total cost of performing the "logical" Registrar Action.
      *
      * Guaranteed to be:
      * 1) null if and only if both `baseCost` and `premium` are null.
@@ -207,7 +209,7 @@ export const logicalRegistrarAction = onchainTable(
     total: t.bigint(),
 
     /**
-     * Account that initiated the Logical Registrar Action and
+     * Account that initiated the "logical" Registrar Action and
      * is paying the `total` cost.
      */
     registrant: t.hex().notNull(),
@@ -238,14 +240,14 @@ export const logicalRegistrarAction = onchainTable(
     decodedReferrer: t.hex(),
 
     /**
-     * Number of the block that includes the Logical Registrar Action.
+     * Number of the block that includes the "logical" Registrar Action.
      *
      * Guaranteed to be a non-negative bigint value.
      */
     blockNumber: t.bigint().notNull(),
 
     /**
-     * Timestamp of the block that includes the Logical Registrar Action.
+     * Timestamp of the block that includes the "logical" Registrar Action.
      *
      * Guaranteed to be a non-negative bigint value.
      */
@@ -253,7 +255,7 @@ export const logicalRegistrarAction = onchainTable(
 
     /**
      * Transaction hash of the transaction on `chainId` chain associated with
-     * the Logical Registrar Action.
+     * the "logical" Registrar Action.
      *
      * Guaranteed to be a string representation of 32-bytes.
      */
@@ -263,7 +265,7 @@ export const logicalRegistrarAction = onchainTable(
      * Event IDs
      *
      * An array of IDs referencing all onchain events, ordered by logIndex
-     * that have ever contributed to the state of the Logical Registrar Action.
+     * that have ever contributed to the state of the "logical" Registrar Action.
      *
      * For example, the IDs will:
      * 1) Always reference event emitted by BaseRegistrar contract.
@@ -273,8 +275,11 @@ export const logicalRegistrarAction = onchainTable(
      * Note: Some Registrar Controller contracts that are not indexed
      *.      as they remain unknown to ENSIndexer at the moment.
      *
-     * Logical Registrar Action ID value is guaranteed to be the initial
-     * element of that array.
+     * The `id` value is guaranteed to be the initial element of that array.
+     *
+     * Guaranteed to:
+     * - Reference at least one event.
+     * - Keep event references ordered chronologically, by event log index.
      */
     eventIds: t.text().array().notNull(),
   }),
@@ -286,39 +291,38 @@ export const logicalRegistrarAction = onchainTable(
 );
 
 /**
- * Logical Subregistry Action Metadata
+ * "Logical" Subregistry Action Metadata
  *
- * Building a single Logical Subregistry Action requires data from multiple
+ * Building a single "logical" Subregistry Action requires data from multiple
  * onchain events. While handling the first event, we create a temporary
- * Logical Subregistry Action Metadata record where we store `logicalEventId`.
+ * "Logical" Subregistry Action Metadata record where we store `logicalEventId`.
  *
  * The `logicalEventId` is used by subsequent event handlers to update
- * the Logical Subregistry Action record. In order to get `logicalEventId`,
+ * the "logical" Subregistry Action record. In order to get `logicalEventId`,
  * an event handler creates `logicalEventKey` from the currently handled
  * onchain event.
  *
  * The very last event handler must remove the record referenced with
  * `logicalEventKey` value.
  */
-export const tempLogicalSubregistryAction = onchainTable(
-  "logical_subregistry_action_metadata",
-  (t) => ({
-    /**
-     * Logical Event Key
-     *
-     * A string formatted as: (chainId, subregistryAddress, node, transactionHash).
-     */
-    logicalEventKey: t.text().primaryKey(),
+export const tempLogicalSubregistryAction = onchainTable("_subregistry_action_metadata", (t) => ({
+  /**
+   * Logical Event Key
+   *
+   * A string formatted as:
+   * `{chainId}:{subregistryAddress}:{node}:{transactionHash}`
+   */
+  logicalEventKey: t.text().primaryKey(),
 
-    /**
-     * Logical Event ID
-     *
-     * A string holding the ID value to an existing Logical Registrar Action
-     * record that was inserted while e use this event to initiate the Logical Registrar Action record.
-     */
-    logicalEventId: t.text().notNull(),
-  }),
-);
+  /**
+   * Logical Event ID
+   *
+   * A string holding the ID value to an existing "logical" Registrar Action
+   * record that was inserted while e use this event to initiate
+   * the "logical" Registrar Action record.
+   */
+  logicalEventId: t.text().notNull(),
+}));
 
 /// Relations
 
@@ -335,6 +339,7 @@ export const subregistryRelations = relations(subregistry, ({ many }) => ({
  * Registration Lifecycle Relations
  *
  * - exactly one Subregistry
+ * - many "logical" RegistrarActions
  */
 export const registrationLifecycleRelations = relations(registrationLifecycle, ({ one, many }) => ({
   subregistry: one(subregistry, {
@@ -342,17 +347,17 @@ export const registrationLifecycleRelations = relations(registrationLifecycle, (
     references: [subregistry.subregistryId],
   }),
 
-  logicalRegistrarAction: many(logicalRegistrarAction),
+  registrarAction: many(registrarAction),
 }));
 
 /**
- * Logical Registrar Action Relations
+ * "Logical" Registrar Action Relations
  *
  * - exactly one Registration Lifecycle
  */
-export const logicalRegistrarActionRelations = relations(logicalRegistrarAction, ({ one }) => ({
+export const logicalRegistrarActionRelations = relations(registrarAction, ({ one }) => ({
   registrationLifecycle: one(registrationLifecycle, {
-    fields: [logicalRegistrarAction.node],
+    fields: [registrarAction.node],
     references: [registrationLifecycle.node],
   }),
 }));
