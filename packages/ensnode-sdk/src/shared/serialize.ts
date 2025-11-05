@@ -1,6 +1,13 @@
+import { AccountId as CaipAccountId } from "caip";
+
 import type { Price, SerializedPrice } from "./currencies";
-import type { ChainIdString, DatetimeISO8601, UrlString } from "./serialized-types";
-import type { ChainId, Datetime } from "./types";
+import type {
+  ChainIdString,
+  DatetimeISO8601,
+  SerializedAccountId,
+  UrlString,
+} from "./serialized-types";
+import type { AccountId, ChainId, Datetime } from "./types";
 
 /**
  * Serializes a {@link ChainId} value into its string representation.
@@ -31,4 +38,16 @@ export function serializePrice(price: Price): SerializedPrice {
     currency: price.currency,
     amount: price.amount.toString(),
   };
+}
+
+/**
+ * Serializes {@link AccountId} object.
+ *
+ * Formatted as a fully lowercase CAIP-10 AccountId.
+ */
+export function serializeAccountId(accountId: AccountId): SerializedAccountId {
+  return CaipAccountId.format({
+    chainId: { namespace: "eip155", reference: accountId.chainId.toString() },
+    address: accountId.address,
+  }).toLowerCase();
 }
