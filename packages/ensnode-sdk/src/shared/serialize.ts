@@ -1,3 +1,4 @@
+import type { Price, SerializedPrice } from "./currencies";
 import type { ChainIdString, DatetimeISO8601, UrlString } from "./serialized-types";
 import type { ChainId, Datetime } from "./types";
 
@@ -20,4 +21,14 @@ export function serializeDatetime(datetime: Datetime): DatetimeISO8601 {
  */
 export function serializeUrl(url: URL): UrlString {
   return url.toString();
+}
+
+/**
+ * Serializes a {@link Price} object.
+ */
+export function serializePrice(price: Price): SerializedPrice {
+  return {
+    currency: price.currency,
+    amount: price.amount.toString(),
+  };
 }
