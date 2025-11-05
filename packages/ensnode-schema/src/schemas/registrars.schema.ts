@@ -355,7 +355,7 @@ export const registrationLifecycleRelations = relations(registrationLifecycle, (
  *
  * - exactly one Registration Lifecycle
  */
-export const logicalRegistrarActionRelations = relations(registrarAction, ({ one }) => ({
+export const registrarActionRelations = relations(registrarAction, ({ one }) => ({
   registrationLifecycle: one(registrationLifecycle, {
     fields: [registrarAction.node],
     references: [registrationLifecycle.node],
