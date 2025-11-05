@@ -117,7 +117,7 @@ export function isPriceCurrencyEqual(priceA: Price, priceB: Price): boolean {
 }
 
 /**
- * Check if two {@link Price} values are equal.
+ * Check if two {@link Price} values have the same currency and amount.
  */
 export function isPriceEqual(priceA: Price, priceB: Price): boolean {
   return isPriceCurrencyEqual(priceA, priceB) && priceA.amount === priceB.amount;
