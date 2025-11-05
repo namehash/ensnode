@@ -1,5 +1,6 @@
-import { type UnixTimestamp } from "@ensnode/ensnode-sdk";
-import { type Address } from "viem";
+import type { Address } from "viem";
+
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 /**
  * Represents data for a single referrer and their referral count

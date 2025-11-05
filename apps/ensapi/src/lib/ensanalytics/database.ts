@@ -1,3 +1,4 @@
+import { getUnixTime } from "date-fns";
 import { and, count, desc, gte, lt, sql } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -6,7 +7,6 @@ import { db } from "@/lib/db";
 import logger from "@/lib/logger";
 
 import type { ReferrerData } from "./types";
-import { getUnixTime } from "date-fns";
 
 const START_DATE = getUnixTime(new Date("2025-01-01T00:00:00.000Z"));
 const END_DATE = getUnixTime(new Date("2026-01-01T00:00:00.000Z"));

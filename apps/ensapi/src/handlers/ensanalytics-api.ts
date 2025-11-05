@@ -12,9 +12,7 @@ const app = factory.createApp();
 
 // Pagination query parameters schema
 const paginationQuerySchema = z.object({
-  page: z
-    .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
-    .default(1),
+  page: z.optional(z.coerce.number().int().min(1, "Page must be a positive integer")).default(1),
   limit: z
     .optional(
       z.coerce
