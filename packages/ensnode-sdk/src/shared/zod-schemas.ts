@@ -12,6 +12,7 @@ import z from "zod/v4";
 
 import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
+import { type CurrencyId, CurrencyIds, Price } from "./currencies";
 import type {
   BlockRef,
   ChainId,
@@ -235,3 +236,35 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
       return `Invalid ${valueLabel}. Supported ENS namespace IDs are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
   });
+
+const makePriceAmountSchema = (valueLabel: string = "Amount") =>
+  z.coerce
+    .bigint({
+      error: `${valueLabel} must represent a bigint.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must not be negative.`,
+    });
+
+const makePriceCurrencySchema = (currency: CurrencyId, valueLabel: string = "Price Currency") =>
+  z.strictObject({
+    amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+/**
+ * Schema for {@link Price} type.
+ */
+export const makePriceSchema = (valueLabel: string = "Price") =>
+  z.discriminatedUnion(
+    "currency",
+    [
+      makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+    ],
+    { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
+  );

@@ -10,58 +10,7 @@ import {
   sepolia,
 } from "viem/chains";
 
-import type { AccountId, ChainId } from "@ensnode/ensnode-sdk";
-
-/**
- * Identifiers for supported currencies.
- *
- * TODO: Add support for WETH
- */
-export const CurrencyIds = {
-  ETH: "ETH",
-  USDC: "USDC",
-  DAI: "DAI",
-} as const;
-
-export type CurrencyId = (typeof CurrencyIds)[keyof typeof CurrencyIds];
-
-export interface Price {
-  currency: CurrencyId;
-
-  /**
-   * The amount of the currency in the smallest unit of the currency. (see
-   * decimals of the CurrencyConfig for the currency).
-   *
-   * Guaranteed to be non-negative.
-   */
-  amount: bigint;
-}
-
-export interface CurrencyInfo {
-  id: CurrencyId;
-  name: string;
-  decimals: number;
-}
-
-const currencyInfo: Record<CurrencyId, CurrencyInfo> = {
-  [CurrencyIds.ETH]: {
-    id: CurrencyIds.ETH,
-    name: "Ethereum",
-    decimals: 18,
-  },
-  [CurrencyIds.USDC]: {
-    id: CurrencyIds.USDC,
-    name: "USDC",
-    decimals: 6,
-  },
-  [CurrencyIds.DAI]: {
-    id: CurrencyIds.DAI,
-    name: "Dai Stablecoin",
-    decimals: 18,
-  },
-};
-
-export const getCurrencyInfo = (currencyId: CurrencyId): CurrencyInfo => currencyInfo[currencyId];
+import { type AccountId, type ChainId, type CurrencyId, CurrencyIds } from "@ensnode/ensnode-sdk";
 
 // NOTE: this mapping currently only considers the subset of chains where we have
 // supported token issuing contracts.
