@@ -44,6 +44,8 @@ export function serializePrice(price: Price): SerializedPrice {
  * Serializes {@link AccountId} object.
  *
  * Formatted as a fully lowercase CAIP-10 AccountId.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-10
  */
 export function serializeAccountId(accountId: AccountId): SerializedAccountId {
   return CaipAccountId.format({

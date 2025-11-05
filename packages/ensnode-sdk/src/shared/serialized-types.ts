@@ -21,5 +21,7 @@ export type UrlString = string;
  * Serialized representation of {@link AccountId}.
  *
  * Formatted as a fully lowercase CAIP-10 AccountId.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-10
  */
 export type SerializedAccountId = string;
