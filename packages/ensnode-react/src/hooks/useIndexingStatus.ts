@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getUnixTime } from "date-fns";
 import { useRef } from "react";
 
 import {
@@ -45,10 +46,10 @@ export function useIndexingStatus(
   // using the current time. This allows the client to rebuild projections
   // as frequently as needed without waiting for API responses.
   if (cachedSnapshotRef.current) {
-    const now = Math.floor(Date.now() / 1000);
+    const projectedAt = getUnixTime(new Date());
     const syntheticRealtimeProjection = createRealtimeIndexingStatusProjection(
       cachedSnapshotRef.current,
-      now,
+      projectedAt,
     );
 
     return {
