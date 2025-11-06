@@ -29,13 +29,21 @@ export default createPlugin({
     return ponder.createConfig({
       chains: chainsConnectionConfig(config.rpcConfigs, chain.id),
       contracts: {
-        [namespaceContract(pluginName, "RegistryOld")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.RegistryOld),
-          abi: contracts.Registry.abi,
+        [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.ENSv1RegistryOld,
+          ),
+          abi: contracts.ENSv1RegistryOld.abi,
         },
-        [namespaceContract(pluginName, "Registry")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
-          abi: contracts.Registry.abi,
+        [namespaceContract(pluginName, "ENSv1Registry")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.ENSv1RegistryOld,
+          ),
+          abi: contracts.ENSv1Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),

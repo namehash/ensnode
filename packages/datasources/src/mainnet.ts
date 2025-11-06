@@ -11,6 +11,9 @@ import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegi
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
+// ABIs for Namechain
+import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
+import { Registry } from "./abis/namechain/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
@@ -23,7 +26,7 @@ import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/resolver";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -40,20 +43,19 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: mainnet,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x314159265dd8dbb310642f98f50c066173c1259b",
         startBlock: 3327417,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 9380380,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
-        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
+        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld on Mainnet
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
@@ -95,6 +97,35 @@ export default {
         address: "0xde16ee87b0c019499cebdde29c9f7686560f679a",
         startBlock: 20410692,
       },
+
+      //
+      RootRegistry: {
+        abi: Registry,
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        startBlock: 0,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.Namechain]: {
+    chain: mainnet,
+    contracts: {
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
     },
   },
 
@@ -129,7 +160,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -209,7 +239,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {

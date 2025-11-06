@@ -9,7 +9,7 @@ import { UniversalResolver as root_UniversalResolver } from "./abis/root/Univers
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 // Shared ABIs
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/resolver";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -29,20 +29,19 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: holesky,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x94f523b8261b815b87effcf4d18e6abef18d6e4b",
         startBlock: 801536,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 801613,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
-        startBlock: 801536, // ignores any Resolver events prior to `startBlock` of RegistryOld on Holeksy
+        startBlock: 801536, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld on Holeksy
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,

@@ -64,6 +64,7 @@ export const DatasourceNames = {
   ReverseResolverOptimism: "reverse-resolver-optimism",
   ReverseResolverArbitrum: "reverse-resolver-arbitrum",
   ReverseResolverScroll: "reverse-resolver-scroll",
+  Namechain: "namechain",
 } as const;
 
 export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];
@@ -78,42 +79,25 @@ export interface EventFilter {
 }
 
 /**
- * Defines the abi, address, filter, and startBlock of a contract relevant to a Datasource.
+ * Defines the abi, address, and startBlock of a contract relevant to a Datasource.
  *
  * A contract is located onchain either by
  *  1. a single Address in `address`,
  *  2. a set of Address[] in `address`,
- *  3. or a set of event signatures in `filter`.
+ *  3. or any contract that emits events as defined in `abi`.
  *
  * This type is intentionally a subset of Ponder's ContractConfig.
  *
  * @param abi - the ABI of the contract
  * @param address - (optional) Address of the contract or Address[] of each contract to be indexed
- * @param filter - (optional) array of event signatures to filter the log by
  * @param startBlock - block number the contract was deployed in
  */
-export type ContractConfig =
-  | {
-      readonly abi: Abi;
-      readonly address: Address;
-      readonly filter?: never;
-      readonly startBlock: number;
-      readonly endBlock?: number;
-    }
-  | {
-      readonly abi: Abi;
-      readonly address: Address[];
-      readonly filter?: never;
-      readonly startBlock: number;
-      readonly endBlock?: number;
-    }
-  | {
-      readonly abi: Abi;
-      readonly address?: never;
-      readonly filter: EventFilter[];
-      readonly startBlock: number;
-      readonly endBlock?: number;
-    };
+export type ContractConfig = {
+  readonly abi: Abi;
+  readonly address?: Address | Address[];
+  readonly startBlock: number;
+  readonly endBlock?: number;
+};
 
 /**
  * ENSNamespace encodes a set of known Datasources associated with the same ENS namespace.

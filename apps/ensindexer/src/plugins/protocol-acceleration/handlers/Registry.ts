@@ -47,7 +47,7 @@ export default function () {
    * - ENS Root Chain's (new) Registry
    */
   ponder.on(
-    namespaceContract(PluginName.ProtocolAcceleration, "Registry:NewOwner"),
+    namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewOwner"),
     async ({
       context,
       event,
@@ -72,10 +72,10 @@ export default function () {
 
   /**
    * Handles Registry#NewResolver for:
-   * - ENS Root Chain's RegistryOld
+   * - ENS Root Chain's ENSv1RegistryOld
    */
   ponder.on(
-    namespaceContract(PluginName.ProtocolAcceleration, "RegistryOld:NewResolver"),
+    namespaceContract(PluginName.ProtocolAcceleration, "ENSv1RegistryOld:NewResolver"),
     async ({
       context,
       event,
@@ -83,7 +83,7 @@ export default function () {
       context: Context;
       event: EventWithArgs<{ node: Node; resolver: Address }>;
     }) => {
-      // ignore the event on RegistryOld if node is migrated to new Registry
+      // ignore the event on ENSv1RegistryOld if node is migrated to new Registry
       const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
       if (shouldIgnoreEvent) return;
 
@@ -98,7 +98,7 @@ export default function () {
    * - Lineanames's (shadow) Registry
    */
   ponder.on(
-    namespaceContract(PluginName.ProtocolAcceleration, "Registry:NewResolver"),
+    namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewResolver"),
     async ({
       context,
       event,

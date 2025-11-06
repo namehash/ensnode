@@ -9,7 +9,7 @@ import type { ChainConfig } from "ponder";
 import type { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
-import type { ContractConfig } from "@ensnode/datasources";
+import { type ContractConfig, ensTestEnvL1Chain, ensTestEnvL2Chain } from "@ensnode/datasources";
 import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
@@ -280,7 +280,10 @@ export function chainsConnectionConfig(
       rpc: rpcConfig.httpRPCs.map((httpRPC) => httpRPC.toString()),
       ws: rpcConfig.websocketRPC?.toString(),
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
-      ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
+      ...((chainId === 31337 ||
+        chainId === 1337 ||
+        chainId === ensTestEnvL1Chain.id ||
+        chainId === ensTestEnvL2Chain.id) && { disableCache: true }),
     } satisfies ChainConfig,
   };
 }

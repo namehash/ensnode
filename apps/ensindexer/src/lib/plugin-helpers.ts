@@ -4,6 +4,7 @@ import { type DatasourceName, type ENSNamespaceId, getENSNamespace } from "@ensn
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
+import type { MergedTypes } from "@/lib/lib-helpers";
 
 /**
  * Creates a namespaced contract name for Ponder handlers.

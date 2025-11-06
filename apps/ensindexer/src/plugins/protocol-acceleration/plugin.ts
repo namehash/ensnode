@@ -131,27 +131,27 @@ export default createPlugin({
           ),
         },
 
-        // index the RegistryOld on ENS Root Chain
-        [namespaceContract(pluginName, "RegistryOld")]: {
-          abi: ensroot.contracts.RegistryOld.abi,
+        // index the ENSv1RegistryOld on ENS Root Chain
+        [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
+          abi: ensroot.contracts.ENSv1RegistryOld.abi,
           chain: {
             ...chainConfigForContract(
               config.globalBlockrange,
               ensroot.chain.id,
-              ensroot.contracts.RegistryOld,
+              ensroot.contracts.ENSv1RegistryOld,
             ),
           },
         },
 
         // a multi-chain Registry ContractConfig
-        [namespaceContract(pluginName, "Registry")]: {
-          abi: ensroot.contracts.Registry.abi,
+        [namespaceContract(pluginName, "ENSv1Registry")]: {
+          abi: ensroot.contracts.ENSv1Registry.abi,
           chain: {
             // ENS Root Chain Registry
             ...chainConfigForContract(
               config.globalBlockrange,
               ensroot.chain.id,
-              ensroot.contracts.Registry,
+              ensroot.contracts.ENSv1Registry,
             ),
             // Basenames (shadow)Registry
             ...(basenames &&

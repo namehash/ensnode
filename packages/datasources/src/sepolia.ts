@@ -29,7 +29,7 @@ import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } f
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/resolver";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -48,20 +48,19 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: sepolia,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x94f523b8261b815b87effcf4d18e6abef18d6e4b",
         startBlock: 3702721,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 3702728,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
-        startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of RegistryOld on Sepolia
+        startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld on Sepolia
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
@@ -127,7 +126,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 13012458,
       },
       BaseRegistrar: {
@@ -189,7 +187,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 2395094, // based on startBlock of Registry on Linea Sepolia
       },
       BaseRegistrar: {

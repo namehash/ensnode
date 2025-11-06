@@ -5,7 +5,7 @@ import { ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import {
-  ensureResolverRecords,
+  ensureResolverAndResolverRecords,
   handleResolverAddressRecordUpdate,
   handleResolverNameUpdate,
   handleResolverTextRecordUpdate,
@@ -23,7 +23,7 @@ export default function () {
       const { a: address } = event.args;
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
 
       // the Resolver#AddrChanged event is just Resolver#AddressChanged with implicit coinType of ETH
       await handleResolverAddressRecordUpdate(context, id, BigInt(ETH_COIN_TYPE), address);
@@ -36,7 +36,7 @@ export default function () {
       const { coinType, newAddress } = event.args;
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverAddressRecordUpdate(context, id, coinType, newAddress);
     },
   );
@@ -47,7 +47,7 @@ export default function () {
       const { name } = event.args;
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverNameUpdate(context, id, name);
     },
   );
@@ -75,7 +75,7 @@ export default function () {
       } catch {} // no-op if readContract throws for whatever reason
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -89,7 +89,7 @@ export default function () {
       const { key, value } = event.args;
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -106,7 +106,7 @@ export default function () {
       if (key === null) return; // no key to operate over? args were malformed, ignore event
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -122,7 +122,7 @@ export default function () {
       if (key === null) return; // no key to operate over? args were malformed, ignore event
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, value);
     },
   );
@@ -134,7 +134,7 @@ export default function () {
       if (key === null) return; // no key to operate over? args were malformed, ignore event
 
       const id = makeResolverRecordsId(context, event);
-      await ensureResolverRecords(context, id);
+      await ensureResolverAndResolverRecords(context, id);
       await handleResolverTextRecordUpdate(context, id, key, null);
     },
   );

@@ -31,20 +31,7 @@ export const registry = onchainTable(
     parentDomainNode: t.hex(),
   }),
   (t) => ({
-    // TODO: enforce that it is RegistryContract | ImplicitRegistry with associated property constraints
-    // registryType: check(
-    //   "registry_type_check",
-    //   sql`
-    //     (type = 'RegistryContract' AND
-    //       ${t.chainId} IS NOT NULL AND
-    //       ${t.address} IS NOT NULL AND
-    //       ${t.parentDomainNode} IS NULL) OR
-    //     (type = 'ImplicitRegistry' AND
-    //       ${t.chainId} ISNULL AND
-    //       ${t.address} ISNULL AND
-    //       ${t.parentDomainNode} IS NOT NULL)
-    //   `,
-    // ),
+    //
   }),
 );
 
@@ -69,20 +56,26 @@ export const relations_registry = relations(registry, ({ one, many }) => ({
 export const domain = onchainTable(
   "domains",
   (t) => ({
-    // belongs to registry
+    // belongs to registry by (registryId)
     registryId: t.text().notNull(),
-    tokenId: t.bigint().notNull(),
+    canonicalId: t.bigint().notNull(),
 
     labelHash: t.hex().notNull(),
     label: t.text().notNull(),
 
-    // may have one subregistry
+    // may have one subregistry by (id)
     subregistryId: t.text(),
 
+    // may have one resolver by (chainId, address)
+    resolverChainId: t.integer(),
+    resolverAddress: t.hex(),
+
+    // internals
     _hasAttemptedLabelHeal: t.boolean().notNull().default(false),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.registryId, t.tokenId] }),
+    // unique by (registryId, canonicalId)
+    pk: primaryKey({ columns: [t.registryId, t.canonicalId] }),
   }),
 );
 
@@ -115,8 +108,63 @@ export const permissions = onchainTable(
 );
 
 export const relations_permissions = relations(permissions, ({ one, many }) => ({
-  registry: one(registry),
+  resources: many(permissionsResource),
+  users: many(permissionsUser),
 }));
+
+export const permissionsResource = onchainTable(
+  "permissions_resources",
+  (t) => ({
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+    resource: t.bigint().notNull(),
+  }),
+  (t) => ({
+    pk: primaryKey({ columns: [t.chainId, t.address, t.resource] }),
+  }),
+);
+
+export const relations_permissionsResource = relations(permissionsResource, ({ one, many }) => ({
+  permissions: one(permissions, {
+    fields: [permissionsResource.chainId, permissionsResource.address],
+    references: [permissions.chainId, permissions.address],
+  }),
+}));
+
+export const permissionsUser = onchainTable(
+  "permissions_users",
+  (t) => ({
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+    resource: t.bigint().notNull(),
+    user: t.hex().notNull(),
+
+    // has one roles bitmap
+    // TODO: can materialize into more semantic (polymorphic) interpretation of roles based on source
+    // contract, but not now
+    roles: t.bigint().notNull(),
+  }),
+  (t) => ({
+    pk: primaryKey({ columns: [t.chainId, t.address, t.resource, t.user] }),
+  }),
+);
+
+export const relations_permissionsUser = relations(permissionsUser, ({ one, many }) => ({
+  permissions: one(permissions, {
+    fields: [permissionsUser.chainId, permissionsUser.address],
+    references: [permissions.chainId, permissions.address],
+  }),
+  resource: one(permissionsResource, {
+    fields: [permissionsUser.chainId, permissionsUser.address, permissionsUser.resource],
+    references: [
+      permissionsResource.chainId,
+      permissionsResource.address,
+      permissionsResource.resource,
+    ],
+  }),
+}));
+
+// TODO: Permissions USer — should it just be Account?
 
 // export const namespaceEntry = onchainTable(
 //   "namespace_entries",

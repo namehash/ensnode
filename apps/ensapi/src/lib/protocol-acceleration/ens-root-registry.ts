@@ -10,7 +10,7 @@ const ensRoot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
  */
 export const ENS_ROOT_REGISTRY: AccountId = {
   chainId: ensRoot.chain.id,
-  address: ensRoot.contracts.Registry.address,
+  address: ensRoot.contracts.ENSv1Registry.address,
 };
 
 export function isENSRootRegistry(accountId: AccountId) {

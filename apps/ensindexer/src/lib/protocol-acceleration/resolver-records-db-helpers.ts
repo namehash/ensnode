@@ -37,9 +37,16 @@ export function makeResolverRecordsId(
 }
 
 /**
- * Ensures that the ResolverRecords entity described by `id` exists.
+ * Ensures that the Resolver and ResolverRecords entities described by `id` exists.
  */
-export async function ensureResolverRecords(context: Context, id: ResolverRecordsId) {
+export async function ensureResolverAndResolverRecords(context: Context, id: ResolverRecordsId) {
+  // ensure Resolver
+  await context.db
+    .insert(schema.resolver)
+    .values({ chainId: id.chainId, address: id.resolver })
+    .onConflictDoNothing();
+
+  // ensure ResolverRecords
   await context.db.insert(schema.resolverRecords).values(id).onConflictDoNothing();
 }
 

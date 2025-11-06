@@ -1,3 +1,5 @@
+import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
+import { Registry } from "./abis/namechain/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
@@ -6,9 +8,9 @@ import { Registry as root_Registry } from "./abis/root/Registry";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-import { ensTestEnvL1Chain } from "./lib/chains";
+import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "./lib/chains";
 // Shared ABIs
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/resolver";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -34,19 +36,18 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: ensTestEnvL1Chain,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x610178da211fef7d417bc0e6fed39f05609ad788",
         startBlock: 0,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e",
         startBlock: 0,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 0,
       },
       BaseRegistrar: {
@@ -71,12 +72,41 @@ export default {
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x2e2ed0cfd3ad2f1d34481277b3204d807ca2f8c2",
+        address: "0x162a433068f51e18b7d13932f27e66a3f99e6890",
         startBlock: 0,
       },
       UniversalResolver: {
         abi: root_UniversalResolver,
-        address: "0xd84379ceae14aa33c123af12424a37803f885889",
+        address: "0x7a9ec1d04904907de0ed7b6839ccdd59c3716ac9",
+        startBlock: 0,
+      },
+
+      //
+
+      RootRegistry: {
+        abi: Registry,
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        startBlock: 0,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
+    },
+  },
+  [DatasourceNames.Namechain]: {
+    chain: ensTestEnvL2Chain,
+    contracts: {
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
         startBlock: 0,
       },
     },

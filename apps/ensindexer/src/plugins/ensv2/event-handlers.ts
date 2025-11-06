@@ -1,9 +1,7 @@
-import { ponder } from "ponder:registry";
+import attach_EnhancedAccessControlHandlers from "./handlers/EnhancedAccessControl";
+import attach_RegistryHandlers from "./handlers/Registry";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
-
-import { namespaceContract } from "@/lib/plugin-helpers";
-
-ponder.on(namespaceContract(PluginName.ENSv2, "RegistryOld:setup"), async ({ context }) => {
-  console.log("hello world");
-});
+export default function () {
+  attach_RegistryHandlers();
+  attach_EnhancedAccessControlHandlers();
+}

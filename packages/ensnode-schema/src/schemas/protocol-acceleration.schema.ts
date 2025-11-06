@@ -71,6 +71,22 @@ export const nodeResolverRelation = onchainTable(
   }),
 );
 
+export const resolver = onchainTable(
+  "resolvers",
+  (t) => ({
+    // keyed by (chainId, address)
+    chainId: t.integer().notNull(),
+    address: t.hex().notNull(),
+  }),
+  (t) => ({
+    pk: primaryKey({ columns: [t.chainId, t.address] }),
+  }),
+);
+
+export const resolver_relations = relations(resolver, ({ one, many }) => ({
+  records: many(resolverRecords),
+}));
+
 /**
  * Tracks a set of records for a specified `node` within a `resolver` contract on `chainId`.
  *
@@ -110,7 +126,13 @@ export const resolverRecords = onchainTable(
   }),
 );
 
-export const resolverRecords_relations = relations(resolverRecords, ({ many }) => ({
+export const resolverRecords_relations = relations(resolverRecords, ({ one, many }) => ({
+  // belongs to resolver
+  resolver: one(resolver, {
+    fields: [resolverRecords.chainId, resolverRecords.resolver],
+    references: [resolver.chainId, resolver.address],
+  }),
+
   // resolverRecord has many address records
   addressRecords: many(resolverAddressRecord),
 
@@ -167,7 +189,7 @@ export const resolverAddressRecordRelations = relations(resolverAddressRecord, (
  * then additionally keyed by (key).
  */
 export const resolverTextRecord = onchainTable(
-  "resolver_trecords",
+  "resolver_text_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), key)
     chainId: t.integer().notNull(),

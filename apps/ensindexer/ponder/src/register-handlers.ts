@@ -7,6 +7,7 @@ import config from "@/config";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import attach_ENSv2Handlers from "@/plugins/ensv2/event-handlers";
 import attach_protocolAccelerationHandlers from "@/plugins/protocol-acceleration/event-handlers";
 import attach_RegistrarsHandlers from "@/plugins/registrars/event-handlers";
 import attach_BasenamesHandlers from "@/plugins/subgraph/plugins/basenames/event-handlers";
@@ -48,4 +49,9 @@ if (config.plugins.includes(PluginName.Registrars)) {
 // TokenScope Plugin
 if (config.plugins.includes(PluginName.TokenScope)) {
   attach_TokenscopeHandlers();
+}
+
+// ENSv2 Plugin
+if (config.plugins.includes(PluginName.ENSv2)) {
+  attach_ENSv2Handlers();
 }
