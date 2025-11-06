@@ -13,7 +13,6 @@ export enum PluginName {
   Lineanames = "lineanames",
   ThreeDNS = "threedns",
   ProtocolAcceleration = "protocol-acceleration",
-  Referrals = "referrals",
   Registrars = "registrars",
   TokenScope = "tokenscope",
 }
