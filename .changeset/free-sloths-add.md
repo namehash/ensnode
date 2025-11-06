@@ -3,4 +3,4 @@
 "ensindexer": minor
 ---
 
-Drop `referrals` plugin and its related functionalities.
+Replace `referrals` plugin with new `registrars` plugin.

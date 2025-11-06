@@ -2,4 +2,4 @@
 "@ensnode/ensnode-schema": minor
 ---
 
-Drop `referrals` schema.
+Replace `referrals` schema with new `registrarActions` schema.
