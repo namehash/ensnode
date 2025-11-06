@@ -22,8 +22,8 @@ const footerProducts = [
     href: "https://ensadmin.io",
   },
   {
-    name: "ENSv2 Referral Programs",
-    href: "https://namehashlabs.org/ens-v2-referral-programs",
+    name: "ENS Referral Program",
+    href: "https://ensawards.org/ens-referral-awards",
   },
   {
     name: "ENSAwards",
