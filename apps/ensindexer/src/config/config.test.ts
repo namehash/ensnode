@@ -620,8 +620,7 @@ describe("config (minimal base env)", () => {
 
     describe("with ALCHEMY_API_KEY", async () => {
       beforeEach(() => {
-        stubEnv({ ALCHEMY_API_KEY: "anything" });
-        vi.stubEnv("RPC_URL_1", undefined);
+        stubEnv({ ALCHEMY_API_KEY: "anything", RPC_URL_1: undefined });
       });
 
       it("should provide rpcConfigs for all mainnet chains", async () => {
@@ -639,12 +638,16 @@ describe("config (minimal base env)", () => {
           "must have ws rpc url",
         ).toBe(true);
       });
+
+      it("does not provide alchemy if chain id is not supported", async () => {
+        stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
+        await expect(getConfig()).rejects.toThrow(/RPC Config/);
+      });
     });
 
     describe("with DRPC_API_KEY", async () => {
       beforeEach(() => {
-        stubEnv({ DRPC_API_KEY: "anything" });
-        vi.stubEnv("RPC_URL_1", undefined);
+        stubEnv({ DRPC_API_KEY: "anything", RPC_URL_1: undefined });
       });
 
       it("should provide rpcConfigs for all mainnet chains", async () => {
@@ -663,6 +666,11 @@ describe("config (minimal base env)", () => {
           rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
           "must not have ws rpc url",
         ).toBe(true);
+      });
+
+      it("does not provide drpc if chain id is not supported", async () => {
+        stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
+        await expect(getConfig()).rejects.toThrow(/RPC Config/);
       });
     });
 

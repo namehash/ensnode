@@ -107,3 +107,11 @@ export function buildDRPCUrl(chainId: ChainId, key: string): string | undefined 
       return undefined;
   }
 }
+
+export function alchemySupportsChain(chainId: ChainId) {
+  return buildAlchemyBaseUrl(chainId, "") !== undefined;
+}
+
+export function drpcSupportsChain(chainId: ChainId) {
+  return buildDRPCUrl(chainId, "") !== undefined;
+}
