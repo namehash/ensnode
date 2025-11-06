@@ -7,11 +7,15 @@ import type { AccountId } from "../shared";
 export interface Subregistry {
   /**
    * Subregistry Account ID
+   *
+   * Identifies the account of the smart contract associated
+   * with the subregistry.
    */
   subregistryId: AccountId;
 
   /**
-   *  The node of a name the subregistry manages. Example managed names:
+   * The node (namehash) of the name the subregistry manages subnames of.
+   * Example subregistry managed names:
    * - `eth`
    * - `base.eth`
    * - `linea.eth`
