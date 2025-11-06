@@ -3,7 +3,7 @@ import config from "@/config";
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 /**
- * NOTE: the subgraph has a helper function called `checkPccBurned` whcih checks if the bit is SET:
+ * NOTE: the subgraph has a helper function called `checkPccBurned` which checks if the bit is SET:
  * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63
  *
  * which is the exact INVERSE of the ensjs util of the _same_ name which checks if the bit is UNSET:
