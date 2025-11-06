@@ -6,17 +6,10 @@ import { PlugZap } from "lucide-react";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
+import { ConnectionLine } from "@/components/connection-line";
 import { CopyButton } from "@/components/copy-button";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
-
-function ConnectionLine() {
-  return (
-    <div className="relative h-10 pl-[38px]">
-      <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
-    </div>
-  );
-}
 
 export default function ConnectionInfo() {
   const { rawSelectedConnection } = useSelectedConnection();

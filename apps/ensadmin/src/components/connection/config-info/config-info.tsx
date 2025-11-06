@@ -13,7 +13,9 @@ import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ConfigInfoAppCard } from "@/components/connection/config-info/app-card";
+import { ConnectionLine } from "@/components/connection-line";
 import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
+import { ENSApiIcon } from "@/components/icons/ensnode-apps/ensapi-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
 import { ENSIndexerIcon } from "@/components/icons/ensnode-apps/ensindexer-icon";
 import { ENSNodeIcon } from "@/components/icons/ensnode-apps/ensnode-icon";
@@ -58,23 +60,27 @@ function ENSNodeCardLoadingSkeleton() {
   const cardContentStyles = "flex flex-col gap-4 max-sm:p-3";
 
   return (
-    <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0")}>
-      {["ENSDb", "ENSIndexer", "ENSRainbow"].map((app) => (
-        <Card key={`${app}-loading`} className="animate-pulse">
-          <CardHeader className="max-sm:p-3">
-            <div className="h-6 bg-muted rounded w-1/3" />
-          </CardHeader>
-          <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          </CardContent>
-        </Card>
+    <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0 gap-0")}>
+      {["ENSApi", "ENSDb", "ENSIndexer", "ENSRainbow"].map((app, index) => (
+        <>
+          {index !== 0 && <ConnectionLine />}
+
+          <Card key={`${app}-loading`} className="animate-pulse">
+            <CardHeader className="max-sm:p-3">
+              <div className="h-6 bg-muted rounded w-1/3" />
+            </CardHeader>
+            <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </CardContent>
+          </Card>
+        </>
       ))}
     </div>
   );
@@ -217,11 +223,11 @@ function ENSNodeConfigCardContent({
   const ensRootChainId = getENSRootChainId(ensIndexerPublicConfig.namespace);
 
   return (
-    <>
+    <div className="relative">
       {/*ENSApi*/}
       <ConfigInfoAppCard
         name="ENSApi"
-        icon={<ENSNodeIcon width={24} height={24} />}
+        icon={<ENSApiIcon width={24} height={24} />}
         items={[
           {
             label: "Database",
@@ -237,7 +243,7 @@ function ENSNodeConfigCardContent({
             ),
           },
           {
-            label: "Namespace",
+            label: "ENS Namespace",
             value: <p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>,
             additionalInfo: <p>The ENS namespace that ENSApi is operating in the context of.</p>,
           },
@@ -257,6 +263,12 @@ function ENSNodeConfigCardContent({
                   </TooltipContent>
                 </Tooltip>
               </div>
+            ),
+            additionalInfo: (
+              <p>
+                This ENS Root Chain RPC is used to power the Resolution API, in situations where
+                Protocol Acceleration is not possible.
+              </p>
             ),
           },
         ]}
@@ -297,6 +309,8 @@ function ENSNodeConfigCardContent({
         docsLink={new URL("https://ensnode.io/ensapi/")}
       />
 
+      <ConnectionLine />
+
       {/*ENSDb*/}
       <ConfigInfoAppCard
         name="ENSDb"
@@ -324,11 +338,26 @@ function ENSNodeConfigCardContent({
         docsLink={new URL("https://ensnode.io/ensdb/")}
       />
 
+      <ConnectionLine />
+
       {/*ENSIndexer*/}
       <ConfigInfoAppCard
         name="ENSIndexer"
         icon={<ENSIndexerIcon width={24} height={24} />}
         items={[
+          {
+            label: "Database",
+            value: <p className={cardItemValueStyles}>Postgres</p>,
+          },
+          {
+            label: "Database Schema",
+            value: (
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+            ),
+            additionalInfo: (
+              <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
+            ),
+          },
           {
             label: "Node.js",
             value: (
@@ -408,7 +437,9 @@ function ENSNodeConfigCardContent({
           {
             label: "ENS Namespace",
             value: <p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>,
-            additionalInfo: <p>The ENS namespace that ENSNode operates in the context of.</p>,
+            additionalInfo: (
+              <p>The ENS namespace that ENSIndexer is operating in the context of.</p>
+            ),
           },
           {
             label: "Indexed Chains",
@@ -482,6 +513,8 @@ function ENSNodeConfigCardContent({
         docsLink={new URL("https://ensnode.io/ensindexer/")}
       />
 
+      <ConnectionLine />
+
       {/*ENSRainbow*/}
       <ConfigInfoAppCard
         name="ENSRainbow"
@@ -514,6 +547,6 @@ function ENSNodeConfigCardContent({
         }
         docsLink={new URL("https://ensnode.io/ensrainbow/")}
       />
-    </>
+    </div>
   );
 }
