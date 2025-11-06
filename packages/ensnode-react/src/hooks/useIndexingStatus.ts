@@ -18,6 +18,30 @@ interface UseIndexingStatusParameters
   extends IndexingStatusRequest,
     QueryParameter<IndexingStatusResponse> {}
 
+/**
+ * Hook for fetching and tracking indexing status with client-side projection updates.
+ *
+ * Clients often need frequently updated worst-case distance for their logic,
+ * but calling the API every second would be inefficient. Instead, we fetch an
+ * updated snapshot every 10 seconds and keep it in memory.
+ *
+ * From that cached snapshot, we continuously generate new projections —
+ * entirely in memory — that stay up to date as time moves forward. Each
+ * projection recalculates worst-case distance based on:
+ *   • The current time
+ *   • The snapshot's absolute timestamps and recorded indexing progress
+ *
+ * This works reliably because indexing progress is always non-decreasing over
+ * time (never goes backward). Clients can safely assume that a snapshot from a
+ * few seconds ago is still valid for building new projections. Since snapshots
+ * use absolute timestamps, we can compute accurate projections and worst-case
+ * distances without additional API calls.
+ *
+ * @param parameters - Configuration options
+ * @param parameters.config - ENSNode SDK configuration (optional, uses context if not provided)
+ * @param parameters.query - TanStack Query options for customizing query behavior (refetchInterval, enabled, etc.)
+ * @returns TanStack Query result containing indexing status data with real-time projections
+ */
 export function useIndexingStatus(
   parameters: WithSDKConfigParameter & UseIndexingStatusParameters = {},
 ) {
@@ -43,23 +67,8 @@ export function useIndexingStatus(
     cachedSnapshotRef.current = queryResult.data.realtimeProjection.snapshot;
   }
 
-  // If we have a cached snapshot, always build a fresh projection from it.
-  //
-  // Clients often need frequently updated worst-case distance for their logic,
-  // but calling the API every second would be inefficient. Instead, we fetch an
-  // updated snapshot every X seconds (here X=10) and keep it in memory.
-  //
-  // From that cached snapshot, we can continuously generate new projections —
-  // entirely in memory — that stay up to date as time moves forward. Each
-  // projection recalculates worst-case distance based on:
-  //   The current time
-  //   The snapshot's absolute timestamps and recorded indexing progress
-  //
-  // This works reliably because indexing progress is always non-decreasing over
-  // time (never goes backward). Clients can safely assume that a snapshot from a
-  // few seconds ago is still valid for building new projections. Since snapshots
-  // use absolute timestamps, we can compute accurate projections and worst-case
-  // distances without additional API calls.
+  // If we have a cached snapshot, always build a fresh projection from it
+  // using the current time. This happens on every render.
   if (cachedSnapshotRef.current) {
     const projectedAt = getUnixTime(new Date());
     const realtimeProjection = createRealtimeIndexingStatusProjection(
