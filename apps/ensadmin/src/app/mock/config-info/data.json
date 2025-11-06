@@ -20,7 +20,7 @@
         "lineanames",
         "threedns",
         "protocol-acceleration",
-        "referrals",
+        "registrars",
         "tokenscope"
       ],
       "versionInfo": {
@@ -62,7 +62,7 @@
         "lineanames",
         "threedns",
         "protocol-acceleration",
-        "referrals"
+        "registrars"
       ],
       "databaseSchemaName": "alphaSepoliaSchema0.34.0",
       "isSubgraphCompatible": false

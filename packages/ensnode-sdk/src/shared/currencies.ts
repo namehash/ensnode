@@ -130,7 +130,9 @@ export function isPriceEqual(priceA: Price, priceB: Price): boolean {
  * @returns total of all prices.
  * @throws if not all prices have the same currency.
  */
-export function addPrices(...prices: [Price, Price, ...Price[]]): Price {
+export function addPrices<const PriceType extends Price = Price>(
+  ...prices: [PriceType, PriceType, ...PriceType[]]
+): PriceType {
   const firstPrice = prices[0];
   const allPricesInSameCurrency = prices.every((price) => isPriceCurrencyEqual(firstPrice, price));
 
@@ -148,6 +150,6 @@ export function addPrices(...prices: [Price, Price, ...Price[]]): Price {
     {
       amount: 0n,
       currency: firstPrice.currency,
-    } satisfies Price,
-  );
+    },
+  ) as PriceType;
 }

@@ -21,7 +21,7 @@ resource "render_web_service" "ensindexer" {
     }
   }
 
-  env_vars = merge(locals.common_variables, {
+  env_vars = merge(local.common_variables, {
     "DATABASE_SCHEMA"   = { value = var.database_schema },
     "ENSRAINBOW_URL"    = { value = var.ensrainbow_url },
     "LABEL_SET_ID"      = { value = var.ensindexer_label_set_id },
@@ -54,7 +54,7 @@ resource "render_web_service" "ensapi" {
     }
   }
 
-  env_vars = merge(locals.common_variables, {
+  env_vars = merge(local.common_variables, {
     "ENSINDEXER_URL" = { value = "http://ensindexer-${var.ensnode_indexer_type}:10000" }
   })
 

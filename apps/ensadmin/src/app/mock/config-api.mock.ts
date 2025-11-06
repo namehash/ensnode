@@ -15,7 +15,7 @@ export const ensIndexerPublicConfig = deserializeENSIndexerPublicConfig({
     "lineanames",
     "threedns",
     "protocol-acceleration",
-    "referrals",
+    "registrars",
     "tokenscope",
   ],
   versionInfo: {
