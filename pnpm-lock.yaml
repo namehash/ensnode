@@ -37,7 +37,7 @@ catalogs:
       specifier: 4.1.0
       version: 4.1.0
     drizzle-orm:
-      specifier: '=0.41.0'
+      specifier: 0.41.0
       version: 0.41.0
     hono:
       specifier: ^4.10.2
@@ -49,8 +49,8 @@ catalogs:
       specifier: 10.1.0
       version: 10.1.0
     ponder:
-      specifier: 0.13.14
-      version: 0.13.14
+      specifier: 0.14.13
+      version: 0.14.13
     tsup:
       specifier: ^8.3.6
       version: 8.5.0
@@ -346,7 +346,7 @@ importers:
         version: 10.1.0
       ponder:
         specifier: 'catalog:'
-        version: 0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.14.13(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       ponder-enrich-gql-docs-middleware:
         specifier: ^0.1.3
         version: 0.1.3(graphql@16.11.0)(hono@4.10.3)
@@ -416,7 +416,7 @@ importers:
         version: 2.9.1
       ponder:
         specifier: 'catalog:'
-        version: 0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.14.13(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -731,7 +731,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.14.13(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -831,7 +831,7 @@ importers:
         version: 4.10.3
       ponder:
         specifier: 'catalog:'
-        version: 0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.14.13(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -1671,12 +1671,6 @@ packages:
     peerDependencies:
       react: '>= 16 || ^19.0.0-rc'
 
-  '@hono/node-server@1.13.3':
-    resolution: {integrity: sha512-tEo3hcyQ6chvSnJ3tKzfX4z2sd7Q+ZkBwwBdW1Ya8Mz29dukxC2xcWiB/lAMwGJrYMW8QTgknIsLu1AsnMBe7A==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
-
   '@hono/node-server@1.19.5':
     resolution: {integrity: sha512-iBuhh+uaaggeAuf+TftcjZyWh2GEgZcVGXkNtskLVoWaXhnJtC5HLHrU8W1KHDoucqO1MswwglmkWLFyiDn4WQ==}
     engines: {node: '>=18.14.1'}
@@ -2396,6 +2390,15 @@ packages:
 
   '@ponder/utils@0.2.14':
     resolution: {integrity: sha512-O4t14Hb6/tVcD0WoS13ghFnDntP6x33/DDvA+sd0tRjemzS+Cne4YTkXl9TKW3AawBIEwMjGrGbAn82C8gXQWQ==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+      viem: '>=2'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@ponder/utils@0.2.15':
+    resolution: {integrity: sha512-3qb7FvCIJuabBvLUfh89pL1w/kcKmvQr6bdlg3LbCZGipfhphqmBwN+eZcgy8aiceHStc4ebLFe79bZitREopA==}
     peerDependencies:
       typescript: '>=5.0.4'
       viem: '>=2'
@@ -6214,8 +6217,8 @@ packages:
       graphql: ^16.10.0
       hono: ^4.6.19
 
-  ponder@0.13.14:
-    resolution: {integrity: sha512-TGQ7vH75iHasWUyCSNEgtKOzs0YbllxC+rA838jCjCarbkBvFSOD1eXU9QtzF91P0R+0MIecZkmwlYJwz9ZmEw==}
+  ponder@0.14.13:
+    resolution: {integrity: sha512-NrOm76TB7ppHyZpfWdrfDX7A4B0DYFn4Ycgs5ipm4QT9yE0PUNvT0aZNSiZx2cniQCZAbh0kDczZmeFNRUZoCg==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -8881,10 +8884,6 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@hono/node-server@1.13.3(hono@4.10.3)':
-    dependencies:
-      hono: 4.10.3
-
   '@hono/node-server@1.19.5(hono@4.10.3)':
     dependencies:
       hono: 4.10.3
@@ -9664,6 +9663,12 @@ snapshots:
     optional: true
 
   '@ponder/utils@0.2.14(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))':
+    dependencies:
+      viem: 2.38.5(typescript@5.9.3)(zod@3.25.76)
+    optionalDependencies:
+      typescript: 5.9.3
+
+  '@ponder/utils@0.2.15(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       viem: 2.38.5(typescript@5.9.3)(zod@3.25.76)
     optionalDependencies:
@@ -13997,7 +14002,7 @@ snapshots:
       graphql: 16.11.0
       hono: 4.10.3
 
-  ponder@0.13.14(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
+  ponder@0.14.13(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -14005,8 +14010,8 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.2
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
-      '@hono/node-server': 1.13.3(hono@4.10.3)
-      '@ponder/utils': 0.2.14(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))
+      '@hono/node-server': 1.19.5(hono@4.10.3)
+      '@ponder/utils': 0.2.15(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))
       abitype: 0.10.3(typescript@5.9.3)(zod@3.25.76)
       ansi-escapes: 7.1.1
       commander: 12.1.0
