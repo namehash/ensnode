@@ -5,7 +5,7 @@
 
 "use client";
 
-import { Replace } from "lucide-react";
+import { History, Replace } from "lucide-react";
 import { ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
@@ -258,6 +258,35 @@ function ENSNodeConfigCardContent({
                 </Tooltip>
               </div>
             ),
+          },
+        ]}
+        features={[
+          {
+            label: "Subgraph API Fallback",
+            description: ensApiPublicConfig.theGraphFallback.canFallback ? (
+              <p>
+                ENSApi's Subgraph API (/subgraph) will automatically fallback to The Graph if the
+                connected ENSIndexer is not sufficiently &quot;realtime&quot;.
+              </p>
+            ) : (
+              <p>
+                ENSApi's Subgraph API (/subgraph) will NOT fallback to The Graph if the connected
+                ENSIndexer is not sufficiently &quot;realtime&quot;. {(() => {
+                  switch (ensApiPublicConfig.theGraphFallback.reason) {
+                    case "not-subgraph-compatible":
+                      return "The connected ENSIndexer is not Subgraph Compatible.";
+                    case "no-api-key":
+                      return "No API key for The Graph is configured.";
+                    case "no-subgraph-url":
+                      return "The Graph does not provide an ENS Subgraph for the configured ENS Namespace.";
+                    default:
+                      return null;
+                  }
+                })()}
+              </p>
+            ),
+            isActivated: ensApiPublicConfig.theGraphFallback.canFallback,
+            icon: <History width={15} height={15} className="flex-shrink-0" />,
           },
         ]}
         version={

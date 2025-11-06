@@ -1,6 +1,7 @@
 import { z } from "zod/v4";
 
 import type {
+  Duration,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
@@ -13,8 +14,21 @@ import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { captureTrace } from "@/lib/tracing/protocol-tracing";
+import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
+import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
+
+/**
+ * The effective distance for acceleration is indexing status cache time plus
+ * MAX_REALTIME_DISTANCE_TO_ACCELERATE.
+ */
+const MAX_REALTIME_DISTANCE_TO_ACCELERATE: Duration = 60; // 1 minute in seconds
 
 const app = factory.createApp();
+
+// inject c.var.isRealtime derived from MAX_REALTIME_DISTANCE_TO_ACCELERATE
+app.use(makeIsRealtimeMiddleware("resolution-api", MAX_REALTIME_DISTANCE_TO_ACCELERATE));
+// inject c.var.canAccelerate derived from that c.var.isRealtime
+app.use(canAccelerateMiddleware);
 
 /**
  * Example queries for /records:

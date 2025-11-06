@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
+import { CurrencyIds, priceDai, priceEth, priceUsdc, type SerializedPrice } from "./currencies";
 import {
   makeBooleanStringSchema,
   makeChainIdSchema,
@@ -9,6 +10,7 @@ import {
   makeIntegerSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
+  makePriceSchema,
   makeUnixTimestampSchema,
   makeUrlSchema,
 } from "./zod-schemas";
@@ -120,6 +122,48 @@ describe("ENSIndexer: Shared", () => {
         expect(formatParseError(makeUrlSchema().safeParse("https://"))).toContain(errorMessage);
         expect(formatParseError(makeUrlSchema().safeParse("example.com"))).toContain(errorMessage);
       });
+    });
+
+    it("can parse price objects for each supported currency", () => {
+      expect(
+        makePriceSchema().parse({
+          amount: "12",
+          currency: CurrencyIds.ETH,
+        } satisfies SerializedPrice),
+      ).toStrictEqual(priceEth(12n));
+
+      expect(
+        makePriceSchema().parse({
+          amount: "102",
+          currency: CurrencyIds.USDC,
+        } satisfies SerializedPrice),
+      ).toStrictEqual(priceUsdc(102n));
+
+      expect(
+        makePriceSchema().parse({
+          amount: "123",
+          currency: CurrencyIds.DAI,
+        } satisfies SerializedPrice),
+      ).toStrictEqual(priceDai(123n));
+
+      expect(
+        formatParseError(
+          makePriceSchema().safeParse({
+            amount: "-123",
+            currency: CurrencyIds.ETH,
+          } satisfies SerializedPrice),
+        ),
+      ).toMatch(/Price amount must not be negative/i);
+
+      expect(
+        formatParseError(
+          makePriceSchema().safeParse({
+            amount: "-123",
+            // @ts-expect-error
+            currency: "BTC",
+          } satisfies SerializedPrice),
+        ),
+      ).toMatch(/Price currency must be one of ETH, USDC, DAI/i);
     });
 
     describe("Useful error messages", () => {

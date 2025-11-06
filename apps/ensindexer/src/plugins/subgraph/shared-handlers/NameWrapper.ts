@@ -2,7 +2,21 @@ import config from "@/config";
 
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { checkPccBurned } from "@ensdomains/ensjs/utils";
+/**
+ * NOTE: the subgraph has a helper function called `checkPccBurned` which checks if the bit is SET:
+ * https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63
+ *
+ * which is the exact INVERSE of the ensjs util of the _same_ name which checks if the bit is UNSET:
+ * https://github.com/ensdomains/ensjs/blob/45686830/packages/ensjs/src/utils/fuses.ts#L384-L385
+ *
+ * In the context of the NameWrapper, a SET fuse is a BURNT fuse. This inverse-meaning is the source
+ * of much confusion. The subgraph's util is named correctly, and the ensjs util is named incorrectly.
+ *
+ * As such, we import the `ensjs#checkPccBurned` util as `isPccFuseUnset`, correcting its name.
+ *
+ * Related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
+ */
+import { checkPccBurned as isPccFuseUnset } from "@ensdomains/ensjs/utils";
 import { type Address, namehash } from "viem";
 
 import {
@@ -33,6 +47,11 @@ import type { RegistrarManagedName } from "@/lib/types";
  * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/wrapper/ERC1155Fuse.sol#L262
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
+
+/**
+ * Determines whether the PCC fuse is SET in the provided `fuses`.
+ */
+const isPccFuseSet = (fuses: bigint): boolean => !isPccFuseUnset(fuses);
 
 /**
  * Decodes the NameWrapper's emitted DNS-Encoded Name `packet` into an Interpreted Name and its first
@@ -82,24 +101,22 @@ function decodeSubgraphInterpretedNameWrapperName(
   }
 }
 
-// if the WrappedDomain entity has PCC set in fuses, set Domain entity's expiryDate to the greater of the two
+/**
+ * If the WrappedDomain fuses has PCC set ('the parent cannot control this subdomain'), then
+ * materialize the relevant Domain entity's expiryDate to the greater of the two.
+ */
 async function materializeDomainExpiryDate(context: Context, node: Node) {
   const wrappedDomain = await context.db.find(schema.subgraph_wrappedDomain, { id: node });
   if (!wrappedDomain) throw new Error(`Expected WrappedDomain(${node})`);
 
-  // NOTE: the subgraph has a helper function called [checkPccBurned](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L63)
-  // which is the exact INVERSE of the ensjs util of the same name. the subgraph's name is _incorrect_
-  // because it returns true if the PCC is SET _not_ burned
-  // make sure to remember that if you compare the logic in this function to the original subgraph logic [here](https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L87)
-  // related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
-
-  // if PCC is burned (not set), we do not update expiry
-  if (checkPccBurned(BigInt(wrappedDomain.fuses))) return;
-
-  // update the domain's expiry to the greater of the two
-  await context.db.update(schema.subgraph_domain, { id: node }).set((domain) => ({
-    expiryDate: bigintMax(domain.expiryDate ?? 0n, wrappedDomain.expiryDate),
-  }));
+  // if PCC fuse is SET ('burned'), update the expiry
+  // translated: if the parent CANNOT control the subname, update the subname's expiry
+  if (isPccFuseSet(BigInt(wrappedDomain.fuses))) {
+    // update the domain's expiry to the greater of the two
+    await context.db.update(schema.subgraph_domain, { id: node }).set((domain) => ({
+      expiryDate: bigintMax(domain.expiryDate ?? 0n, wrappedDomain.expiryDate),
+    }));
+  }
 }
 
 /**

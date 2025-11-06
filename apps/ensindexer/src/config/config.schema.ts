@@ -1,10 +1,10 @@
+import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   DatabaseSchemaNameSchema,
-  DatabaseUrlSchema,
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
   invariant_isSubgraphCompatibleRequirements,
@@ -26,6 +26,24 @@ import {
   invariant_rpcConfigsSpecifiedForIndexedChains,
   invariant_validContractConfigs,
 } from "./validations";
+
+export const DatabaseUrlSchema = z.string().refine(
+  (url) => {
+    try {
+      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
+        return false;
+      }
+      const config = parseConnectionString(url);
+      return !!(config.host && config.port && config.database);
+    } catch {
+      return false;
+    }
+  },
+  {
+    error:
+      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+  },
+);
 
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
