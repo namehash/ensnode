@@ -41,6 +41,7 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
 
@@ -66,11 +67,15 @@ export default function () {
         decodedReferrer: null,
       } satisfies RegistrarActionReferralNotApplicable;
 
-      await handleRegistrarControllerEvent(context, event, {
+      const transactionHash = event.transaction.hash;
+
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -78,6 +83,7 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
 
@@ -105,11 +111,15 @@ export default function () {
         decodedReferrer: null,
       } satisfies RegistrarActionReferralNotApplicable;
 
-      await handleRegistrarControllerEvent(context, event, {
+      const transactionHash = event.transaction.hash;
+
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -121,8 +131,10 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
       /**
        * Ethnames_WrappedEthRegistrarController implements premiums, and base cost.
@@ -145,11 +157,13 @@ export default function () {
         decodedReferrer: null,
       } satisfies RegistrarActionReferralNotApplicable;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -157,8 +171,10 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
       /**
        * Ethnames_WrappedEthRegistrarController implements premiums, and base cost.
@@ -183,11 +199,13 @@ export default function () {
         decodedReferrer: null,
       } satisfies RegistrarActionReferralNotApplicable;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -199,8 +217,10 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.labelhash;
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
       /**
        * Ethnames_UnwrappedEthRegistrarController implements premiums, and base cost.
@@ -226,11 +246,13 @@ export default function () {
         decodedReferrer,
       } satisfies RegistrarActionReferralAvailable;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -238,8 +260,10 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.labelhash;
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
       /**
        * Ethnames_UnwrappedEthRegistrarController implements premiums, and base cost.
@@ -267,11 +291,13 @@ export default function () {
         decodedReferrer,
       } satisfies RegistrarActionReferralAvailable;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );

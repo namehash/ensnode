@@ -4,7 +4,7 @@ import { ponder } from "ponder:registry";
 import { namehash } from "viem/ens";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { bigIntToNumber, makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
+import { type BlockRef, bigIntToNumber, makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
 
 import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -33,18 +33,27 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = tokenIdToLabelHash(event.args.id);
       const node = makeSubdomainNode(labelHash, parentNode);
-      const expiresAt = bigIntToNumber(event.args.expires);
       const registrant = event.transaction.from;
+      const expiresAt = bigIntToNumber(event.args.expires);
+      const block = {
+        number: bigIntToNumber(event.block.number),
+        timestamp: bigIntToNumber(event.block.timestamp),
+      } satisfies BlockRef;
+      const transactionHash = event.transaction.hash;
 
       await upsertSubregistry(context, subregistry);
 
-      await handleRegistration(context, event, {
+      await handleRegistration(context, {
+        id,
         subregistryId,
         node,
-        expiresAt,
         registrant,
+        expiresAt,
+        block,
+        transactionHash,
       });
     },
   );
@@ -52,16 +61,25 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_BaseRegistrar:NameRenewed"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = tokenIdToLabelHash(event.args.id);
       const node = makeSubdomainNode(labelHash, parentNode);
-      const expiresAt = bigIntToNumber(event.args.expires);
       const registrant = event.transaction.from;
+      const expiresAt = bigIntToNumber(event.args.expires);
+      const block = {
+        number: bigIntToNumber(event.block.number),
+        timestamp: bigIntToNumber(event.block.timestamp),
+      } satisfies BlockRef;
+      const transactionHash = event.transaction.hash;
 
-      await handleRenewal(context, event, {
+      await handleRenewal(context, {
+        id,
         subregistryId,
         node,
-        expiresAt,
         registrant,
+        expiresAt,
+        block,
+        transactionHash,
       });
     },
   );

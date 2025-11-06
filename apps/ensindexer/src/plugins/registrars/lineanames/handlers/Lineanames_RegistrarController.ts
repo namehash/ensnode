@@ -57,14 +57,18 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:OwnerNameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -72,14 +76,18 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:PohNameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -87,14 +95,18 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );
@@ -102,14 +114,18 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
+      const id = event.id;
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
+      const transactionHash = event.transaction.hash;
 
-      await handleRegistrarControllerEvent(context, event, {
+      await handleRegistrarControllerEvent(context, {
+        id,
         subregistryId,
         node,
         pricing,
         referral,
+        transactionHash,
       });
     },
   );

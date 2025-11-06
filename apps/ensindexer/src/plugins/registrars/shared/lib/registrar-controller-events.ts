@@ -1,6 +1,6 @@
 import type { Context, Event } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Address } from "viem";
+import type { Address, Hash } from "viem";
 
 import {
   type AccountId,
@@ -12,40 +12,7 @@ import {
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
 
-import { type LogicalEventKey, makeLogicalEventKey } from "../../shared/lib/registrar-events";
-
-/**
- * Get "logical" Registrar Action record by logical event key.
- *
- * @throws if the record cannot be found.
- */
-async function getLogicalRegistrarAction(context: Context, logicalEventKey: LogicalEventKey) {
-  const tempRecord = await context.db.find(schema.tempLogicalSubregistryAction, {
-    logicalEventKey,
-  });
-
-  // Invariant: the "logical" Registrar Action ID must be available
-  if (!tempRecord) {
-    throw new Error(
-      `Handling Registrar Controller Registration action requires the "logical" Registrar Action ID, which could not be found for the following logical event key: '${logicalEventKey}'.`,
-    );
-  }
-
-  const { logicalEventId } = tempRecord;
-
-  const logicalRegistrarAction = await context.db.find(schema.registrarAction, {
-    id: logicalEventId,
-  });
-
-  // Invariant: the "logical" Registrar Action record must be available
-  if (!logicalRegistrarAction) {
-    throw new Error(
-      `Handling Registrar Controller Registration action requires the "logical" Registrar Action record, which could not be found for the following logical event ID: '${logicalEventId}'.`,
-    );
-  }
-
-  return logicalRegistrarAction;
-}
+import { getLogicalRegistrarActionByEventKey, makeLogicalEventKey } from "./registrar-action";
 
 /**
  * Update the "logical" Registrar Action:
@@ -55,29 +22,37 @@ async function getLogicalRegistrarAction(context: Context, logicalEventKey: Logi
  */
 export async function handleRegistrarControllerEvent(
   context: Context,
-  event: Event,
   {
+    id,
     subregistryId,
     node,
     pricing,
     referral,
+    transactionHash,
   }: {
+    id: Event["id"];
     subregistryId: AccountId;
     node: Node;
     pricing: RegistrarActionPricing;
     referral: RegistrarActionReferral;
+    transactionHash: Hash;
   },
 ) {
+  // 1. Make Logical Event Key
   const logicalEventKey = makeLogicalEventKey({
     subregistryId,
     node,
-    transactionHash: event.transaction.hash,
+    transactionHash,
   });
 
-  // get the "logical" Registrar Action to update
-  const { id } = await getLogicalRegistrarAction(context, logicalEventKey);
+  // 2. Use the Logical Event Key to get the "logical" Registrar Action record
+  //    which needs to be updated.
+  const logicalRegistrarAction = await getLogicalRegistrarActionByEventKey(
+    context,
+    logicalEventKey,
+  );
 
-  // get pricing info
+  // 3. Prepare pricing info
   let baseCost: bigint | null;
   let premium: bigint | null;
   let total: bigint | null;
@@ -92,7 +67,7 @@ export async function handleRegistrarControllerEvent(
     total = null;
   }
 
-  // get referral info
+  // 4. Prepare referral info
   let encodedReferrer: EncodedReferrer | null;
   let decodedReferrer: Address | null;
 
@@ -104,14 +79,18 @@ export async function handleRegistrarControllerEvent(
     decodedReferrer = null;
   }
 
-  // update pricing data & referral data accordingly
-  // plus, append new event id to `eventIds`
-  await context.db.update(schema.registrarAction, { id }).set((logicalRegistrarAction) => ({
-    baseCost,
-    premium,
-    total,
-    encodedReferrer,
-    decodedReferrer,
-    eventIds: [...logicalRegistrarAction.eventIds, event.id],
-  }));
+  // 5. Update the "logical" Registrar Action record with
+  //    - pricing data,
+  //    - referral data
+  //    - new event ID appended to `eventIds`
+  await context.db
+    .update(schema.registrarActions, { id: logicalRegistrarAction.id })
+    .set(({ eventIds }) => ({
+      baseCost,
+      premium,
+      total,
+      encodedReferrer,
+      decodedReferrer,
+      eventIds: [...eventIds, id],
+    }));
 }
