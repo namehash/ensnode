@@ -60,9 +60,9 @@ export interface RegistrarActionPricingAvailable {
 
 /**
  * Pricing information for a "logical registrar action" when
- * registrar controller does not implement pricing.
+ * there is no known pricing data.
  */
-export interface RegistrarActionPricingNotApplicable {
+export interface RegistrarActionPricingUnknown {
   /**
    * Base cost
    *
@@ -90,7 +90,7 @@ export interface RegistrarActionPricingNotApplicable {
 
 export type RegistrarActionPricing =
   | RegistrarActionPricingAvailable
-  | RegistrarActionPricingNotApplicable;
+  | RegistrarActionPricingUnknown;
 
 export function isRegistrarActionPricingAvailable(
   registrarActionPricing: RegistrarActionPricing,

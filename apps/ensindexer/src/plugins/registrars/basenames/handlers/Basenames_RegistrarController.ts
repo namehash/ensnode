@@ -7,7 +7,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import {
   makeSubdomainNode,
   PluginName,
-  type RegistrarActionPricingNotApplicable,
+  type RegistrarActionPricingUnknown,
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
@@ -34,12 +34,14 @@ export default function () {
    * No Registrar Controller for Basenames implements premiums or
    * emits distinct baseCost or premium (as opposed to just a simple price)
    * in events.
+   *
+   * TODO: [Index the pricing data for "logical registrar actions" for Basenames.](https://github.com/namehash/ensnode/issues/1256)
    */
   const pricing = {
     baseCost: null,
     premium: null,
     total: null,
-  } satisfies RegistrarActionPricingNotApplicable;
+  } satisfies RegistrarActionPricingUnknown;
 
   /**
    * No Registrar Controller for Basenames implements referrals or
