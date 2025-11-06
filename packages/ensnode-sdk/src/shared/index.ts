@@ -4,6 +4,7 @@ export * from "./address";
 export * from "./cache";
 export * from "./collections";
 export * from "./currencies";
+export * from "./datetime";
 export {
   deserializeBlockNumber,
   deserializeBlockRef,
