@@ -102,7 +102,7 @@ export function deserializeBlockRef(
   return parsed.data;
 }
 
-export function deserializeDuration(maybeDuration: string, valueLabel?: string): Duration {
+export function deserializeDuration(maybeDuration: unknown, valueLabel?: string): Duration {
   const schema = makeDurationSchema(valueLabel);
   const parsed = schema.safeParse(maybeDuration);
 

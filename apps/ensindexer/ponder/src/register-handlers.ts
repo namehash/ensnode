@@ -8,7 +8,7 @@ import config from "@/config";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import attach_protocolAccelerationHandlers from "@/plugins/protocol-acceleration/event-handlers";
-import attach_ReferralHandlers from "@/plugins/referrals/event-handlers";
+import attach_RegistrarsHandlers from "@/plugins/registrars/event-handlers";
 import attach_BasenamesHandlers from "@/plugins/subgraph/plugins/basenames/event-handlers";
 import attach_LineanamesHandlers from "@/plugins/subgraph/plugins/lineanames/event-handlers";
 import attach_SubgraphHandlers from "@/plugins/subgraph/plugins/subgraph/event-handlers";
@@ -40,9 +40,9 @@ if (config.plugins.includes(PluginName.ProtocolAcceleration)) {
   attach_protocolAccelerationHandlers();
 }
 
-// Referrals Plugin
-if (config.plugins.includes(PluginName.Referrals)) {
-  attach_ReferralHandlers();
+// Registrars Plugin
+if (config.plugins.includes(PluginName.Registrars)) {
+  attach_RegistrarsHandlers();
 }
 
 // TokenScope Plugin
