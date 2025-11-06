@@ -1,5 +1,5 @@
 /**
- * Schema Definitions for tracking of ENS subregistries.
+ * Schema Definitions for tracking of ENS registrars.
  */
 
 import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
@@ -18,7 +18,8 @@ export const subregistries = onchainTable(
      * Identifies the chainId and address of the smart contract associated
      * with the subregistry.
      *
-     * Guaranteed to be a string formatted according to the CAIP-10 standard.
+     * Guaranteed to be a fully lowercase string formatted according to
+     * the CAIP-10 standard.
      *
      * @see https://chainagnostic.org/CAIPs/caip-10
      */
@@ -31,7 +32,7 @@ export const subregistries = onchainTable(
      * - `base.eth`
      * - `linea.eth`
      *
-     * Guaranteed to be a hex string representation of 32-bytes.
+     * Guaranteed to be a fully lowercase hex string representation of 32-bytes.
      */
     node: t.hex().notNull(),
   }),
@@ -77,7 +78,7 @@ export const registrationLifecycles = onchainTable(
      * Guaranteed to be a subname of the node (namehash) of the subregistry
      * identified by `subregistryId`.
      *
-     * Guaranteed to be a hex string representation of 32-bytes.
+     * Guaranteed to be a fully lowercase hex string representation of 32-bytes.
      */
     node: t.hex().primaryKey(),
 
@@ -87,7 +88,8 @@ export const registrationLifecycles = onchainTable(
      * Identifies the chainId and address of the subregistry smart contract
      * that manages the registration lifecycle.
      *
-     * Guaranteed to be a string formatted according to the CAIP-10 standard.
+     * Guaranteed to be a fully lowercase string formatted according to
+     * the CAIP-10 standard.
      *
      * @see https://chainagnostic.org/CAIPs/caip-10
      */
@@ -106,9 +108,9 @@ export const registrationLifecycles = onchainTable(
 );
 
 /**
- * "Logical" Registrar Action Type Enum
+ * "Logical registrar action type" enum
  *
- * Types of "logical" Registrar Actions.
+ * Types of "logical registrar action".
  */
 export const registrarActionType = onchainEnum("registrar_action_type", [
   "registration",
@@ -116,7 +118,7 @@ export const registrarActionType = onchainEnum("registrar_action_type", [
 ]);
 
 /**
- * Logical Registrar Actions
+ * "Logical registrar actions"
  *
  * This table models "logical actions" rather than "events" because a single
  * "logical action", such as a single registration or renewal, may emit
@@ -140,7 +142,7 @@ export const registrarActionType = onchainEnum("registrar_action_type", [
  *    - `incrementalDuration`
  *    - `registrant`
  * 2. A "RegistrarController" contract emits its own `NameRegistered` event
- *    enabling the tracking of data including:
+ *    enabling the tracking of data that may include:
  *    - `baseCost`
  *    - `premium`
  *    - `total`
@@ -153,7 +155,7 @@ export const registrarActions = onchainTable(
   "registrar_actions",
   (t) => ({
     /**
-     * "Logical" Registrar Action ID
+     * "Logical registrar action" ID
      *
      * The `id` value is a deterministic and globally unique identifier for
      * the "logical registrar action".
@@ -180,7 +182,8 @@ export const registrarActions = onchainTable(
      * Identifies the chainId and address of the associated subregistry smart
      * contract.
      *
-     * Guaranteed to be a string formatted according to the CAIP-10 standard.
+     * Guaranteed to be a fully lowercase string formatted according to
+     * the CAIP-10 standard.
      *
      * @see https://chainagnostic.org/CAIPs/caip-10
      */
@@ -190,7 +193,7 @@ export const registrarActions = onchainTable(
      * The node (namehash) of the FQDN of the domain associated with
      * the "logical registrar action".
      *
-     * Guaranteed to be a hex string representation of 32-bytes.
+     * Guaranteed to be a fully lowercase hex string representation of 32-bytes.
      */
     node: t.hex().notNull(),
 
@@ -287,11 +290,20 @@ export const registrarActions = onchainTable(
     /**
      * Registrant
      *
-     * Refers to address on the same `chainId` as referred by `subregistryId`
-     * that initiated the "logical" Registrar Action and is paying
-     * the `total` cost.
+     * Identifies the address that initiated the "logical registrar action" and
+     * is paying the `total` cost (if applicable).
      *
-     * Guaranteed to be a string formatted according to the CAIP-10 standard.
+     * It may not be the owner of the name:
+     * 1. When a name is registered, the initial owner of the name may be
+     *    distinct from the registrant.
+     * 2. There are no restrictions on who may renew a name.
+     *    Therefore the owner of the name may be distinct from the registrant.
+     *
+     *
+     * The "chainId" of this address is the same as is referenced in `subregistryId`.
+     *
+     * Guaranteed to be a fully lowercase string formatted according to
+     * the CAIP-10 standard.
      */
     registrant: t.text().notNull(),
 
@@ -303,7 +315,7 @@ export const registrarActions = onchainTable(
      *
      * Guaranteed to be:
      * 1) null if the emitted `eventIds` contain no information about a referrer.
-     * 2) Otherwise, a hex string representation of 32-bytes.
+     * 2) Otherwise, a fully lowercase hex string representation of 32-bytes.
      */
     encodedReferrer: t.hex(),
 
@@ -313,34 +325,45 @@ export const registrarActions = onchainTable(
      * Decoded referrer according to the subjective interpretation of
      * `encodedReferrer` defined for ENS Holiday Awards.
      *
-     * Refers to address on the same `chainId` as referred by `subregistryId`.
+     * Identifies the interpreted address of the referrer.
+     * The "chainId" of this address is the same as is referenced in
+     * `subregistryId`.
      *
      * Guaranteed to be:
      * 1) null if `encodedReferrer` is null.
-     * 2) Otherwise, a valid EVM address (including zero address).
+     * 2) Otherwise, a fully lowercase address.
+     * 3) May be the "zero address" to represent that an `encodedReferrer` is
+     *    defined but that it is interpreted as no referrer.
      */
     decodedReferrer: t.hex(),
 
     /**
-     * Number of the block that includes the "logical" Registrar Action.
+     * Number of the block that includes the "logical registrar action".
+     *
+     * The "chainId" of this block is the same as is referenced in
+     * `subregistryId`.
      *
      * Guaranteed to be a non-negative bigint value.
      */
     blockNumber: t.bigint().notNull(),
 
     /**
-     * Timestamp of the block that includes the "logical" Registrar Action.
+     * Unix timestamp of the block referenced by `blockNumber` that includes
+     * the "logical registrar action".
      */
     timestamp: t.bigint().notNull(),
 
     /**
-     * Transaction hash of the transaction on `chainId` chain associated with
-     * the Logical Registrar Action.
+     * Transaction hash of the transaction associated with
+     * the "logical registrar action".
+     *
+     * The "chainId" of this transaction is the same as is referenced in
+     * `subregistryId`.
      *
      * Note that a single transaction may be associated with any number of
-     * "Logical" Registrar Actions.
+     * "logical registrar actions".
      *
-     * Guaranteed to be a string representation of 32-bytes.
+     * Guaranteed to be a fully lowercase hex string representation of 32-bytes.
      */
     transactionHash: t.hex().notNull(),
 
@@ -348,19 +371,18 @@ export const registrarActions = onchainTable(
      * Event IDs
      *
      * Array of the eventIds that have contributed to the state of
-     * the Logical Registrar Action.
+     * the "logical registrar action" record.
      *
      * Each eventId is a deterministic and globally unique onchain event
      * identifier.
      *
      * Guarantees:
-     * - Each eventId is of events that occurred on `chainId` within
-     *  `blockNumber`.
+     * - Each eventId is of events that occurred within the block
+     *   referenced by `blockNumber`.
      * - At least 1 eventId.
-     * - Ordered chronologically (ascending) by logIndex within `blockNumber`
-     *   on `chainId`.
+     * - Ordered chronologically (ascending) by logIndex within `blockNumber`.
      * - The first element in the array is equal to the `id` of
-     *   the "logical registrar action".
+     *   the overall "logical registrar action" record.
      *
      * The following ideas are not generalized for ENS overall but happen to
      * be a characteristic of the scope of our current indexing logic:
@@ -370,10 +392,6 @@ export const registrarActions = onchainTable(
      *    a related "Registrar Controller" contract. This is because our
      *    current indexing logic doesn't guarantee to index
      *    all "Registrar Controller" contracts.
-     *
-     * Guaranteed to:
-     * - Reference at least one event.
-     * - Keep event references ordered chronologically, by event log index.
      */
     eventIds: t.text().array().notNull(),
   }),
@@ -384,31 +402,31 @@ export const registrarActions = onchainTable(
 );
 
 /**
- * Logical Subregistry Action Metadata
+ * Logical Registrar Action Metadata
  *
  * NOTE: This table is an internal implementation detail of ENSIndexer and
  * should not be queried outside of ENSIndexer.
  *
- * Building a "logical subregistry action" record may require data from
+ * Building a "logical registrar action" record may require data from
  * multiple onchain events. To help aggregate data from multiple events into
- * a single "logical subregistry action" ENSIndexer may temporarily store data
+ * a single "logical registrar action" ENSIndexer may temporarily store data
  * here to achieve this data aggregation.
  *
- * Note how multiple "logical subregistry actions" may be taken on
+ * Note how multiple "logical registrar actions" may be taken on
  * the same `node` in the same `transactionHash`. For example, consider
  * a case of a single transaction registering a name and subsequently renewing
  * it twice. While this may be silly it is technically possible and therefore
  * such cases must be considered. To support such cases, when
- * the last event handler for a "logical subregistry action" has completed its
+ * the last event handler for a "logical registrar action" has completed its
  * processing the record referenced by the `logicalEventKey` must be removed.
  */
-export const internal_subregistryActionMetadata = onchainTable(
-  "_ensindexer_subregistry_action_metadata",
+export const internal_registrarActionMetadata = onchainTable(
+  "_ensindexer_registrar_action_metadata",
   (t) => ({
     /**
      * Logical Event Key
      *
-     * A string formatted as:
+     * A fully lowercase string formatted as:
      * `{chainId}:{subregistryAddress}:{node}:{transactionHash}`
      */
     logicalEventKey: t.text().primaryKey(),
@@ -443,7 +461,7 @@ export const subregistryRelations = relations(subregistries, ({ many }) => ({
  *
  * Each Registration Lifecycle is related to:
  * - exactly one Subregistry
- * - 0 or more "logical" RegistrarActions
+ * - 0 or more "logical registrar action"
  */
 export const registrationLifecycleRelations = relations(
   registrationLifecycles,
@@ -458,9 +476,9 @@ export const registrationLifecycleRelations = relations(
 );
 
 /**
- * "Logical" Registrar Action Relations
+ * "Logical registrar action" Relations
  *
- * Each "logical" Registrar Action is related to:
+ * Each "logical registrar action" is related to:
  * - exactly one Registration Lifecycle (note the docs on
  *   Registration Lifecycle explaining how these records may
  *   be recycled across time).

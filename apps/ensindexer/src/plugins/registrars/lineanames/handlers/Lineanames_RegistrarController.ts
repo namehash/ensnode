@@ -5,9 +5,11 @@ import { namehash } from "viem/ens";
 
 import { DatasourceNames } from "@ensnode/datasources";
 import {
+  addPrices,
   makeSubdomainNode,
   PluginName,
-  type RegistrarActionPricingNotApplicable,
+  priceEth,
+  type RegistrarActionPricingAvailable,
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
@@ -31,17 +33,6 @@ export default function () {
   );
 
   /**
-   * No Registrar Controller for Lineanames implements premiums or
-   * emits distinct baseCost or premium (as opposed to just a simple price)
-   * in events.
-   */
-  const pricing = {
-    baseCost: null,
-    premium: null,
-    total: null,
-  } satisfies RegistrarActionPricingNotApplicable;
-
-  /**
    * No Registrar Controller for Lineanames implements referrals or
    * emits a referrer in events.
    */
@@ -62,6 +53,17 @@ export default function () {
       const node = makeSubdomainNode(labelHash, parentNode);
       const transactionHash = event.transaction.hash;
 
+      /**
+       * The `OwnerNameRegistered` event emitted by
+       * `Lineanames_EthRegistrarController` contract is akin to
+       * the `NameRegistered` event with `baseCost` of `0` and `premium` of `0`.
+       */
+      const pricing = {
+        baseCost: priceEth(0n),
+        premium: priceEth(0n),
+        total: priceEth(0n),
+      } satisfies RegistrarActionPricingAvailable;
+
       await handleRegistrarControllerEvent(context, {
         id,
         subregistryId,
@@ -80,6 +82,17 @@ export default function () {
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
       const transactionHash = event.transaction.hash;
+
+      /**
+       * The `PohNameRegistered` event emitted by
+       * `Lineanames_EthRegistrarController` contract is akin to
+       * the `NameRegistered` event with `baseCost` of `0` and `premium` of `0`.
+       */
+      const pricing = {
+        baseCost: priceEth(0n),
+        premium: priceEth(0n),
+        total: priceEth(0n),
+      } satisfies RegistrarActionPricingAvailable;
 
       await handleRegistrarControllerEvent(context, {
         id,
@@ -100,6 +113,15 @@ export default function () {
       const node = makeSubdomainNode(labelHash, parentNode);
       const transactionHash = event.transaction.hash;
 
+      const baseCost = priceEth(event.args.baseCost);
+      const premium = priceEth(event.args.premium);
+      const total = addPrices(baseCost, premium);
+      const pricing = {
+        baseCost,
+        premium,
+        total,
+      } satisfies RegistrarActionPricingAvailable;
+
       await handleRegistrarControllerEvent(context, {
         id,
         subregistryId,
@@ -118,6 +140,15 @@ export default function () {
       const labelHash = event.args.label; // this field is the labelhash, not the label
       const node = makeSubdomainNode(labelHash, parentNode);
       const transactionHash = event.transaction.hash;
+
+      const baseCost = priceEth(event.args.cost);
+      const premium = priceEth(0n); // premium for renewals is always 0
+      const total = baseCost;
+      const pricing = {
+        baseCost,
+        premium,
+        total,
+      } satisfies RegistrarActionPricingAvailable;
 
       await handleRegistrarControllerEvent(context, {
         id,

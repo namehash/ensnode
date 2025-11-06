@@ -12,10 +12,10 @@ import {
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
 
-import { getLogicalRegistrarActionByEventKey, makeLogicalEventKey } from "./registrar-action";
+import { makeLogicalEventKey } from "./registrar-action";
 
 /**
- * Update the "logical" Registrar Action:
+ * Update the "logical registrar action":
  * - set pricing data (if available)
  * - set referral data (if available)
  * - append new event ID to `eventIds`
@@ -37,7 +37,7 @@ export async function handleRegistrarControllerEvent(
     referral: RegistrarActionReferral;
     transactionHash: Hash;
   },
-) {
+): Promise<void> {
   // 1. Make Logical Event Key
   const logicalEventKey = makeLogicalEventKey({
     subregistryId,
@@ -45,12 +45,37 @@ export async function handleRegistrarControllerEvent(
     transactionHash,
   });
 
-  // 2. Use the Logical Event Key to get the "logical" Registrar Action record
+  // 2. Use the Logical Event Key to get the "logical registrar action" record
   //    which needs to be updated.
-  const logicalRegistrarAction = await getLogicalRegistrarActionByEventKey(
-    context,
+
+  // 2. a) Find subregistryActionMetadata record by logical event key.
+  const subregistryActionMetadata = await context.db.find(schema.internal_registrarActionMetadata, {
     logicalEventKey,
-  );
+  });
+
+  // Invariant: the subregistryActionMetadata record must be available for `logicalEventKey`
+  if (!subregistryActionMetadata) {
+    throw new Error(
+      `The required "logical registrar action" ID could not be found for the following logical event key: '${logicalEventKey}'.`,
+    );
+  }
+
+  const { logicalEventId } = subregistryActionMetadata;
+
+  // 2. b) Find "logical registrar action" record by `logicalEventId`.
+  const logicalRegistrarAction = await context.db.find(schema.registrarActions, {
+    id: logicalEventId,
+  });
+
+  // Invariant: the "logical registrar action" record must be available for `logicalEventId`
+  if (!logicalRegistrarAction) {
+    throw new Error(
+      `The "logical registrar action" record, which could not be found for the following logical event ID: '${logicalEventId}'.`,
+    );
+  }
+
+  // 2. c) Drop the subregistryActionMetadata record, as it won't be needed anymore.
+  await context.db.delete(schema.internal_registrarActionMetadata, { logicalEventKey });
 
   // 3. Prepare pricing info
   let baseCost: bigint | null;
@@ -79,7 +104,7 @@ export async function handleRegistrarControllerEvent(
     decodedReferrer = null;
   }
 
-  // 5. Update the "logical" Registrar Action record with
+  // 5. Update the "logical registrar action" record with
   //    - pricing data,
   //    - referral data
   //    - new event ID appended to `eventIds`

@@ -1,8 +1,8 @@
 /**
  * Converts a bigint value into a number value.
  *
- * @throws when value is too low.
- * @throws when value is too high .
+ * @throws when value is outside the range of `Number.MIN_SAFE_INTEGER` and
+ * `Number.MAX_SAFE_INTEGER`.
  */
 export function bigIntToNumber(n: bigint): number {
   if (n < Number.MIN_SAFE_INTEGER) {

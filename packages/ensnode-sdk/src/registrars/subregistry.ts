@@ -6,10 +6,12 @@ import type { AccountId } from "../shared";
  */
 export interface Subregistry {
   /**
-   * Subregistry Account ID
+   * Subregistry ID
    *
-   * Identifies the account of the smart contract associated
-   * with the subregistry.
+   * The ID of the subregistry the "logical registrar action" was taken on.
+   *
+   * Identifies the chainId and address of the associated subregistry smart
+   * contract.
    */
   subregistryId: AccountId;
 

@@ -11,17 +11,20 @@ import {
 /**
  * Get RegistrationLifecycle by node value.
  */
-export async function getRegistrationLifecycle(context: Context, { node }: { node: Node }) {
+export async function getRegistrationLifecycle(
+  context: Context,
+  { node }: { node: Node },
+): Promise<typeof schema.registrationLifecycles.$inferSelect | null> {
   return context.db.find(schema.registrationLifecycles, { node });
 }
 
 /**
- * Make first registration
+ * Insert Registration Lifecycle
  *
  * Inserts a new record to track the current state of
  * the Registration Lifecycle by node value.
  */
-export async function makeFirstRegistration(
+export async function insertRegistrationLifecycle(
   context: Context,
   {
     subregistryId,
@@ -32,8 +35,8 @@ export async function makeFirstRegistration(
     node: Node;
     expiresAt: UnixTimestamp;
   },
-) {
-  return context.db.insert(schema.registrationLifecycles).values({
+): Promise<void> {
+  await context.db.insert(schema.registrationLifecycles).values({
     subregistryId: serializeAccountId(subregistryId),
     node,
     expiresAt: BigInt(expiresAt),
@@ -41,18 +44,11 @@ export async function makeFirstRegistration(
 }
 
 /**
- * Make subsequent registration
+ * Upsert Registration Lifecycle
  *
  * Updates the current state of the Registration Lifecycle by node value.
- *
- * Note: this is a simplified approach where we override the expiry date of
- * the registration lifecycle record for the node value.
- * We took the simplified option to cut the scope. However, the ideal approach
- * would create another Registration Lifecycle record for the subsequent
- * registration, as it means the previous registration for the node went
- * through all possible {@link RegistrationLifecycleStages}.
  */
-export async function makeSubsequentRegistration(
+export async function updateRegistrationLifecycle(
   context: Context,
   {
     node,
@@ -61,28 +57,8 @@ export async function makeSubsequentRegistration(
     node: Node;
     expiresAt: UnixTimestamp;
   },
-) {
-  return context.db
-    .update(schema.registrationLifecycles, { node })
-    .set({ expiresAt: BigInt(expiresAt) });
-}
-
-/**
- * Extend Registration Lifecycle
- *
- * Updates the current state of the Registration Lifecycle by node value.
- */
-export async function extendRegistrationLifecycle(
-  context: Context,
-  {
-    node,
-    expiresAt,
-  }: {
-    node: Node;
-    expiresAt: UnixTimestamp;
-  },
-) {
-  return context.db
+): Promise<void> {
+  await context.db
     .update(schema.registrationLifecycles, { node })
     .set({ expiresAt: BigInt(expiresAt) });
 }

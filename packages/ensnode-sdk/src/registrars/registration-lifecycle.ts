@@ -2,7 +2,13 @@ import type { Node } from "../ens";
 import type { UnixTimestamp } from "../shared";
 import type { Subregistry } from "./subregistry";
 
-export const RegistrationLifecycleStages = {
+/**
+ * Registration Lifecycle Stages
+ *
+ * Important: this definition should not be used anywhere.
+ * It's only here to capture some ideas that were shared in the team.
+ */
+const RegistrationLifecycleStages = {
   /**
    * Active
    *
@@ -44,23 +50,23 @@ export type RegistrationLifecycleStage =
  */
 export interface RegistrationLifecycle {
   /**
-   * Subregistry account that this Registration Lifecycle belongs to.
+   * Subregistry that manages this Registration Lifecycle.
    */
   subregistry: Subregistry;
 
   /**
-   * The node of the FQDN of the domain this is associated with,
-   * guaranteed to be a subname of the associated subregistry
-   * for which the registration was executed.
+   * The node (namehash) of the FQDN of the domain the registration lifecycle
+   * is associated with.
+   *
+   * Guaranteed to be a subname of the node (namehash) of the subregistry
+   * identified by `subregistryId.subregistryId`.
    */
   node: Node;
 
   /**
    * Expires at
    *
-   * The moment when the RegistrationLifecycle will transition
-   * from {@link RegistrationLifecycleStages.Active}
-   * to  {@link RegistrationLifecycleStages.GracePeriod}.
+   * Identifies when the Registration Lifecycle is scheduled to expire.
    */
   expiresAt: UnixTimestamp;
 }

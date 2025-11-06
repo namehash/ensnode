@@ -14,7 +14,7 @@ import type { RegistrationLifecycle } from "./registration-lifecycle";
 type RegistrarActionEventId = string;
 
 /**
- * Types of "logical" Registrar Action.
+ * Types of "logical registrar action".
  */
 export const RegistrarActionTypes = {
   Registration: "registration",
@@ -24,55 +24,66 @@ export const RegistrarActionTypes = {
 export type RegistrarActionType = (typeof RegistrarActionTypes)[keyof typeof RegistrarActionTypes];
 
 /**
- * Prices information for performing the "logical" registrar action.
+ * Pricing information for a "logical registrar action".
  */
 export interface RegistrarActionPricingAvailable {
   /**
    * Base cost
    *
-   * Note: the "baseCost.amount" may be`0` or more.
+   * Base cost (before any `premium`) of Ether measured in units of Wei
+   * paid to execute the "logical registrar action".
+   *
+   * May be 0.
    */
   baseCost: PriceEth;
 
   /**
    * Premium
    *
-   * Note: the "premium.amount" may be`0` or more.
+   * "premium" cost (in excesses of the `baseCost`) of Ether measured in
+   * units of Wei paid to execute the "logical registrar action".
+   *
+   * May be 0.
    */
   premium: PriceEth;
 
   /**
-   * Total cost for performing the registrar action.
+   * Total
    *
-   * Sum of `baseCost.amount` and `premium.amount`.
+   * Total cost of Ether measured in units of Wei paid to execute
+   * the "logical registrar action".
    *
-   * Note: the "total.amount" may be`0` or more.
+   * May be 0.
    */
   total: PriceEth;
 }
 
 /**
- * Prices information for performing the "logical" registrar action.
+ * Pricing information for a "logical registrar action" when
+ * registrar controller does not implement pricing.
  */
 export interface RegistrarActionPricingNotApplicable {
   /**
    * Base cost
    *
-   * Always null, as `total` is null.
+   * Base cost (before any `premium`) of Ether measured in units of Wei
+   * paid to execute the "logical registrar action".
    */
   baseCost: null;
 
   /**
    * Premium
    *
-   * Always null, as `total` is null.
+   * "premium" cost (in excesses of the `baseCost`) of Ether measured in
+   * units of Wei paid to execute the "logical registrar action".
    */
   premium: null;
 
   /**
-   * Total cost for performing the registrar action.
+   * Total
    *
-   * Always null, as `baseCost` and `premium` are both null.
+   * Total cost of Ether measured in units of Wei paid to execute
+   * the "logical registrar action".
    */
   total: null;
 }
@@ -90,7 +101,7 @@ export function isRegistrarActionPricingAvailable(
 }
 
 /**
- * Referrals information for performing the "logical" registrar action.
+ * * Referral information for performing a "logical registrar action".
  */
 export interface RegistrarActionReferralAvailable {
   /**
@@ -98,43 +109,44 @@ export interface RegistrarActionReferralAvailable {
    *
    * Represents the "raw" 32-byte "referrer" value emitted onchain in
    * association with the registrar action.
-   *
-   * If a registrar / registrar controller supports the concept of
-   * referrers then this field is set (non-null).
    */
   encodedReferrer: EncodedReferrer;
 
   /**
    * Decoded Referrer
    *
-   * Represents ENSNode's subjective interpretation of
-   * {@link RegistrarAction.encodedReferrer}.
+   * Decoded referrer according to the subjective interpretation of
+   * `encodedReferrer` defined for ENS Holiday Awards.
    *
-   * Invariants:
-   * - If the first `12`-bytes of "encodedReferrer" are all `0`,
-   *   then "decodedReferrer" is the last `20`-bytes of "encodedReferrer",
-   *   else: "decodedReferrer" is the zero address.
+   * Identifies the interpreted address of the referrer.
+   * The "chainId" of this address is the same as is referenced in
+   * `subregistryId`.
+   *
+   * May be the "zero address" to represent that an `encodedReferrer` is
+   * defined but that it is interpreted as no referrer.
    */
   decodedReferrer: Address;
 }
 
 /**
- * Referrals information for performing the "logical" registrar action.
+ * Referral information for performing a "logical registrar action" when
+ * registrar controller does not implement referrals.
  */
 export interface RegistrarActionReferralNotApplicable {
   /**
    * Encoded Referrer
    *
-   * Always null, as registrar / registrar controller doesn't support the concept of
-   * referrers.
+   * Represents the "raw" 32-byte "referrer" value emitted onchain in
+   * association with the registrar action.
    */
   encodedReferrer: null;
 
   /**
    * Decoded Referrer
    *
+   * Decoded referrer according to the subjective interpretation of
+   * `encodedReferrer` defined for ENS Holiday Awards.
    *
-   * Always null, as `encodedReferrer` is null.
    */
   decodedReferrer: null;
 }
@@ -152,117 +164,161 @@ export function isRegistrarActionReferralAvailable(
 }
 
 /**
- * "Logical" Registrar Action
+ * "Logical registrar action"
  *
- * Represents a state of "logical" Registrar Action. May be built using data
+ * Represents a state of "logical registrar action". May be built using data
  * from multiple events within the same "logical" registration / renewal action.
  */
 export interface RegistrarAction {
   /**
-   * Registrar Action ID
+   * "Logical registrar action" ID
    *
-   * This is ID of the event which initiated the "logical" Registrar Action.
+   * The `id` value is a deterministic and globally unique identifier for
+   * the "logical registrar action".
+   *
+   * The `id` value represents the *initial* onchain event associated with
+   * the "logical registrar action", but the full state of
+   * the "logical registrar action" is an aggregate across each of
+   * the onchain events referenced in the `eventIds` field.
+   *
+   * Guaranteed to be the very first element in `eventIds` array.
    */
   id: RegistrarActionEventId;
 
   /**
-   * Registrar Action Type
-   *
-   * The type of the Registrar Action.
+   * The type of the "logical registrar action".
    */
   type: RegistrarActionType;
 
   /**
+   *
    * Incremental Duration
    *
-   * Represents the incremental increase in the duration of the lifespan of
-   * the registration for `node` that was active as of `timestamp`.
-   * Measured in seconds.
+   * If `type` is "registration":
+   *   - Represents the duration between `block.timestamp` and
+   *     the initial `registrationLifecycle.expiresAt` value that the associated
+   *     "registration lifecycle" will be initialized with.
+   * If `type` is "renewal":
+   *   - Represents the incremental increase in duration made to
+   *     the `registrationLifecycle.expiresAt` value in the associated
+   *     "registration lifecycle".
    *
-   * A name with an active registration can be renewed at any time.
+   * A "registration lifecycle" may be extended via renewal even after it
+   * expires if it is still within its grace period.
    *
-   * Names that have expired may still be renewable.
+   * Consider the following scenario:
    *
-   * For example: assume the registration of a direct subname of Ethnames is
-   * scheduled to expire on Jan 1, midnight UTC. It is currently 30 days after
-   * this expiration time. Therefore, there are currently another 60 days of
-   * grace period remaining for this name. Anyone can still make
-   * a renewal of this name.
+   * The "registration lifecycle" of a direct subname of .eth is scheduled to
+   * expire on Jan 1, midnight UTC. It is currently 30 days after this
+   * expiration time. Therefore, there are currently another 60 days of grace
+   * period remaining for this name. Anyone can still make a renewal to
+   * extend the "registration lifecycle" of this name.
    *
-   * Consider the following scenarios for renewals of a name that
-   * has expired but is still within its grace period:
+   * Given this scenario, consider the following examples:
    *
-   * 1) Expired (in grace period) -> Expired (in grace period):
-   *    If a renewal is made for 10 days incremental duration,
-   *    this name remains in an "expired" (in grace period) state, but it now
-   *    has 70 days of grace period remaining instead of only 60.
+   * 1. If a renewal is made with 10 days incremental duration,
+   *    the "registration lifecycle" for this name will remain in
+   *    an "expired" state, but it will now have another 70 days of
+   *    grace period remaining.
    *
-   * 2) Expired (in grace period) -> Active:
-   *    If a renewal is made for 50 days incremental duration,
-   *    this name is no longer "expired" (in grace period) and is active, but it now
-   *    expires and begins a new grace period in 20 days.
+   * 2. If a renewal is made with 50 days incremental duration,
+   *    the "registration lifecycle" for this name will no longer be
+   *    "expired" and will become "active", but the "registration lifecycle"
+   *    will now be scheduled to expire again in 20 days.
    *
-   * After the latest registration of a direct subname becomes expired by
-   * more than the grace period, it can no longer be renewed by anyone.
-   * It must first be registered again, starting a new registration lifecycle of
-   * active / expiry / grace period / etc.
+   * After the "registration lifecycle" for a name becomes expired by more
+   * than its grace period, it can no longer be renewed by anyone and is
+   * considered "released". The name must first be registered again, starting
+   * a new "registration lifecycle" of
+   * active / expired / grace period / released.
+   *
+   * May be 0.
+   *
+   * Guaranteed to be a non-negative bigint value.
    */
   incrementalDuration: Duration;
 
   /**
    * Registrant
    *
-   * Account that initiated the registrarAction and is paying the "total".
-   * It may not be the owner of the name:
+   * Identifies the address that initiated the "logical registrar action" and
+   * is paying the `pricing.total` cost (if applicable).
    *
+   * It may not be the owner of the name:
    * 1. When a name is registered, the initial owner of the name may be
    *    distinct from the registrant.
    * 2. There are no restrictions on who may renew a name.
    *    Therefore the owner of the name may be distinct from the registrant.
+   *
+   * The "chainId" of this address is the same as is referenced in
+   * `registrationLifecycle.subregistry.subregistryId`.
    */
   registrant: Address;
 
   /**
-   * Registration Lifecycle that this "logical" Registrar Action was
-   * executed for.
+   * Registration Lifecycle associated with this "logical registrar action".
    */
   registrationLifecycle: RegistrationLifecycle;
 
   /**
-   * Pricing information for performing this "logical" Registrar Action.
+   * Pricing information associated with this "logical registrar action".
    */
   pricing: RegistrarActionPricing;
 
   /**
-   * Referral information related to performing this "logical" Registrar Action.
+   * Referral information associated with this "logical registrar action".
    */
   referral: RegistrarActionReferral;
 
   /**
    * Block ref
    *
-   * References the block where "logical" Registrar Action was executed.
+   * References the block where the "logical registrar action" was executed.
+   *
+   * The "chainId" of this block is the same as is referenced in
+   * `registrationLifecycle.subregistry.subregistryId`.
    */
   block: BlockRef;
 
   /**
    * Transaction hash
    *
-   * References the transaction within the `block` where
-   * the "logical" Registrar Action was executed.
+   * Transaction hash of the transaction associated with
+   * the "logical registrar action".
+   *
+   * The "chainId" of this transaction is the same as is referenced in
+   * `registrationLifecycle.subregistry.subregistryId`.
+   *
+   * Note that a single transaction may be associated with any number of
+   * "logical registrar actions".
    */
   transactionHash: Hash;
 
   /**
    * Event IDs
    *
-   * An array of IDs referencing events which while being handled,
-   * contributed to the state of the "logical" Registrar Action.
+   * Array of the eventIds that have contributed to the state of
+   * the "logical registrar action" record.
    *
-   * Guaranteed to:
-   * - Be ordered chronologically by event log index.
-   * - Have at least one element.
-   * - Reference the same value as `id` with its very first element.
+   * Each eventId is a deterministic and globally unique onchain event
+   * identifier.
+   *
+   * Guarantees:
+   * - Each eventId is of events that occurred within the block
+   *   referenced by `block.number`.
+   * - At least 1 eventId.
+   * - Ordered chronologically (ascending) by logIndex within `block.number`.
+   * - The first element in the array is equal to the `id` of
+   *   the overall "logical registrar action" record.
+   *
+   * The following ideas are not generalized for ENS overall but happen to
+   * be a characteristic of the scope of our current indexing logic:
+   * 1. These id's always reference events emitted by
+   *    a related "BaseRegistrar" contract.
+   * 2. These id's optionally reference events emitted by
+   *    a related "Registrar Controller" contract. This is because our
+   *    current indexing logic doesn't guarantee to index
+   *    all "Registrar Controller" contracts.
    */
   eventIds: [RegistrarActionEventId, ...RegistrarActionEventId[]];
 }

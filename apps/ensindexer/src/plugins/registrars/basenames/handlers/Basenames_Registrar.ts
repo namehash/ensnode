@@ -4,7 +4,13 @@ import { ponder } from "ponder:registry";
 import { namehash } from "viem/ens";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { type BlockRef, bigIntToNumber, makeSubdomainNode, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  type BlockRef,
+  bigIntToNumber,
+  makeSubdomainNode,
+  PluginName,
+  type Subregistry,
+} from "@ensnode/ensnode-sdk";
 
 import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -31,7 +37,7 @@ export default function () {
   const subregistry = {
     subregistryId,
     node: parentNode,
-  };
+  } satisfies Subregistry;
 
   // support NameRegisteredWithRecord for BaseRegistrar as it used by Base's RegistrarControllers
   ponder.on(

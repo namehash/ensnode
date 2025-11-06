@@ -6,5 +6,4 @@ This plugin enables tracking all registrations and renewals that ever happened f
 - direct subnames of the Lineanames registrar managed name (ex: for mainnet `linea.eth` but varies for other namespaces).
 
 Additionally indexes:
-- All Registrar Controllers ever associated with a known Registrar contract.
 - All ENS Referrals (for Registrar Controllers supporting ENS Referral Programs).

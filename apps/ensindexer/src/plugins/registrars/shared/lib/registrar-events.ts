@@ -16,12 +16,11 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { initializeRegistrarAction } from "./registrar-action";
+import { insertRegistrarAction } from "./registrar-action";
 import {
-  extendRegistrationLifecycle,
   getRegistrationLifecycle,
-  makeFirstRegistration,
-  makeSubsequentRegistration,
+  insertRegistrationLifecycle,
+  updateRegistrationLifecycle,
 } from "./registration-lifecycle";
 import { getSubregistry } from "./subregistry";
 
@@ -47,7 +46,7 @@ export async function handleRegistrarEventRegistration(
     block: BlockRef;
     transactionHash: Hash;
   },
-) {
+): Promise<void> {
   // 0. Handle possible subsequent registration.
   //    Get the state of a possibly indexed registration record for this node
   //    before this registration occurred.
@@ -57,10 +56,10 @@ export async function handleRegistrarEventRegistration(
     // 1. If a RegistrationLifecycle for the `node` has been already indexed,
     // it means that  another RegistrationLifecycle was made for the `node` after
     // the previously indexed RegistrationLifecycle expired and its grace period ended.
-    await makeSubsequentRegistration(context, { node, expiresAt });
+    await updateRegistrationLifecycle(context, { node, expiresAt });
   } else {
     // 1. It's a first-time registration made for the `node` value.
-    await makeFirstRegistration(context, {
+    await insertRegistrationLifecycle(context, {
       subregistryId,
       node,
       expiresAt,
@@ -81,8 +80,8 @@ export async function handleRegistrarEventRegistration(
     expiresAt, // registrations lifecycle expiry date
   );
 
-  // 4. Initialize the "logical" Registrar Action record for Registration
-  await initializeRegistrarAction(context, {
+  // 4. Initialize the "logical registrar action" record for Registration
+  await insertRegistrarAction(context, {
     id,
     type: RegistrarActionTypes.Registration,
     registrationLifecycle: {
@@ -123,7 +122,7 @@ export async function handleRegistrarEventRenewal(
     block: BlockRef;
     transactionHash: Hash;
   },
-) {
+): Promise<void> {
   // TODO: 0. enforce an invariant that for Renewal actions,
   // the registration must be in a "renewable" state.
   // We can't add the state invariant about name renewals yet, because
@@ -153,8 +152,8 @@ export async function handleRegistrarEventRenewal(
     expiresAt, // new expiry date
   );
 
-  // 4. Initialize the "logical" Registrar Action record for Renewal
-  await initializeRegistrarAction(context, {
+  // 4. Initialize the "logical registrar action" record for Renewal
+  await insertRegistrarAction(context, {
     id,
     type: RegistrarActionTypes.Renewal,
     registrationLifecycle: {
@@ -173,5 +172,5 @@ export async function handleRegistrarEventRenewal(
   });
 
   // 5. Extend Registration Lifecycle's expiry.
-  await extendRegistrationLifecycle(context, { node, expiresAt });
+  await updateRegistrationLifecycle(context, { node, expiresAt });
 }
