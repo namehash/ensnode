@@ -26,9 +26,9 @@ import {
 import { getSubregistry } from "./subregistry";
 
 /**
- * Handle registration event
+ * Handle Registrar Event: Registration
  */
-export async function handleRegistration(
+export async function handleRegistrarEventRegistration(
   context: Context,
   {
     id,
@@ -102,9 +102,9 @@ export async function handleRegistration(
 }
 
 /**
- * Handle Renewal
+ * Handle Registrar Event: Renewal
  */
-export async function handleRenewal(
+export async function handleRegistrarEventRenewal(
   context: Context,
   {
     id,

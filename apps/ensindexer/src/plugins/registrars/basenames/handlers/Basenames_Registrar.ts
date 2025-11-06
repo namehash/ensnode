@@ -9,7 +9,10 @@ import { type BlockRef, bigIntToNumber, makeSubdomainNode, PluginName } from "@e
 import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
-import { handleRegistration, handleRenewal } from "../../shared/lib/registrar-events";
+import {
+  handleRegistrarEventRegistration,
+  handleRegistrarEventRenewal,
+} from "../../shared/lib/registrar-events";
 import { upsertSubregistry } from "../../shared/lib/subregistry";
 import { getRegistrarManagedName, tokenIdToLabelHash } from "../lib/registrar-helpers";
 
@@ -47,7 +50,7 @@ export default function () {
 
       await upsertSubregistry(context, subregistry);
 
-      await handleRegistration(context, {
+      await handleRegistrarEventRegistration(context, {
         id,
         subregistryId,
         node,
@@ -75,7 +78,7 @@ export default function () {
 
       await upsertSubregistry(context, subregistry);
 
-      await handleRegistration(context, {
+      await handleRegistrarEventRegistration(context, {
         id,
         subregistryId,
         node,
@@ -101,7 +104,7 @@ export default function () {
       } satisfies BlockRef;
       const transactionHash = event.transaction.hash;
 
-      await handleRenewal(context, {
+      await handleRegistrarEventRenewal(context, {
         id,
         subregistryId,
         node,

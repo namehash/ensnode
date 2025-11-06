@@ -44,7 +44,7 @@ export async function getLogicalRegistrarActionByEventKey(
   context: Context,
   logicalEventKey: LogicalEventKey,
 ) {
-  const tempRecord = await context.db.find(schema.tempLogicalSubregistryAction, {
+  const tempRecord = await context.db.find(schema.internal_subregistryActionMetadata, {
     logicalEventKey,
   });
 
@@ -67,6 +67,9 @@ export async function getLogicalRegistrarActionByEventKey(
       `The "logical" Registrar Action record, which could not be found for the following logical event ID: '${logicalEventId}'.`,
     );
   }
+
+  // Drop the temp record, as it won't be needed anymore.
+  await context.db.delete(schema.internal_subregistryActionMetadata, { logicalEventKey });
 
   return logicalRegistrarAction;
 }
@@ -98,7 +101,7 @@ export async function initializeRegistrarAction(
   });
 
   // 2. Store mapping between logical event key and logical event id
-  await context.db.insert(schema.tempLogicalSubregistryAction).values({
+  await context.db.insert(schema.internal_subregistryActionMetadata).values({
     logicalEventKey,
     logicalEventId: id,
   });
@@ -106,8 +109,8 @@ export async function initializeRegistrarAction(
   // 4. Store initial record for the "logical" Registrar Action
   await context.db.insert(schema.registrarActions).values({
     id,
-    subregistryId: serializeAccountId(subregistryId),
     type,
+    subregistryId: serializeAccountId(subregistryId),
     node,
     incrementalDuration: BigInt(incrementalDuration),
     registrant,

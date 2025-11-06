@@ -402,26 +402,29 @@ export const registrarActions = onchainTable(
  * the last event handler for a "logical subregistry action" has completed its
  * processing the record referenced by the `logicalEventKey` must be removed.
  */
-export const tempLogicalSubregistryAction = onchainTable("_subregistry_action_metadata", (t) => ({
-  /**
-   * Logical Event Key
-   *
-   * A string formatted as:
-   * `{chainId}:{subregistryAddress}:{node}:{transactionHash}`
-   */
-  logicalEventKey: t.text().primaryKey(),
+export const internal_subregistryActionMetadata = onchainTable(
+  "_ensindexer_subregistry_action_metadata",
+  (t) => ({
+    /**
+     * Logical Event Key
+     *
+     * A string formatted as:
+     * `{chainId}:{subregistryAddress}:{node}:{transactionHash}`
+     */
+    logicalEventKey: t.text().primaryKey(),
 
-  /**
-   * Logical Event ID
-   *
-   * A string holding the `id` value of the existing "logical registrar action"
-   * record that is currently being built as an aggregation of onchain events.
-   *
-   * May be used by subsequent event handlers to identify which
-   * "logical registrar action" to aggregate additional indexed state into.
-   */
-  logicalEventId: t.text().notNull(),
-}));
+    /**
+     * Logical Event ID
+     *
+     * A string holding the `id` value of the existing "logical registrar action"
+     * record that is currently being built as an aggregation of onchain events.
+     *
+     * May be used by subsequent event handlers to identify which
+     * "logical registrar action" to aggregate additional indexed state into.
+     */
+    logicalEventId: t.text().notNull(),
+  }),
+);
 
 /// Relations
 
