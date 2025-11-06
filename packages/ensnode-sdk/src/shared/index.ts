@@ -4,6 +4,7 @@ export * from "./address";
 export * from "./cache";
 export * from "./collections";
 export * from "./currencies";
+export * from "./datetime";
 export {
   deserializeBlockNumber,
   deserializeBlockRef,
@@ -17,6 +18,7 @@ export {
 export * from "./interpretation";
 export * from "./labelhash";
 export * from "./null-bytes";
+export * from "./numbers";
 export * from "./serialize";
 export * from "./serialized-types";
 export * from "./types";

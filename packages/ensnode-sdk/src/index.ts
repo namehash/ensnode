@@ -6,6 +6,7 @@ export * from "./ensapi";
 export * from "./ensindexer";
 export * from "./ensrainbow";
 export * from "./identity";
+export * from "./registrars";
 export * from "./resolution";
 export * from "./shared";
 export * from "./tracing";

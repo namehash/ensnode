@@ -108,6 +108,7 @@ describe("Currencies", () => {
       expect(addPrices(priceEth(1n), priceEth(2n), priceEth(3n))).toEqual(priceEth(6n));
     });
     it("throws an error if all prices do not have the same currency", () => {
+      // @ts-expect-error
       expect(() => addPrices(priceEth(1n), priceDai(2n), priceEth(3n))).toThrowError(
         /All prices must have the same currency to be added together/i,
       );

@@ -6,7 +6,7 @@ import type { MergedTypes } from "@/lib/lib-helpers";
 import ensv2Plugin from "./ensv2/plugin";
 // Core-Schema-Indepdendent Plugins
 import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
-import referralsPlugin from "./referrals/plugin";
+import registrarsPlugin from "./registrars/plugin";
 // Subgraph-Schema Core Plugins
 import basenamesPlugin from "./subgraph/plugins/basenames/plugin";
 import lineaNamesPlugin from "./subgraph/plugins/lineanames/plugin";
@@ -21,7 +21,7 @@ export const ALL_PLUGINS = [
   threednsPlugin,
   tokenScopePlugin,
   protocolAccelerationPlugin,
-  referralsPlugin,
+  registrarsPlugin,
   ensv2Plugin,
 ] as const;
 
