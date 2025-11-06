@@ -378,7 +378,6 @@ export const registrarActions = onchainTable(
     eventIds: t.text().array().notNull(),
   }),
   (t) => ({
-    byRegistrant: index().on(t.registrant),
     byDecodedReferrer: index().on(t.decodedReferrer),
     byTimestamp: index().on(t.timestamp),
   }),
