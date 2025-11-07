@@ -1,6 +1,6 @@
-import type { Node } from "../ens";
+import type { InterpretedLabel, InterpretedName, Node } from "../ens";
 import type { UnixTimestamp } from "../shared";
-import type { Subregistry } from "./subregistry";
+import { type SerializedSubregistry, type Subregistry, serializeSubregistry } from "./subregistry";
 
 /**
  * Registration Lifecycle Stages
@@ -69,4 +69,69 @@ export interface RegistrationLifecycle {
    * Identifies when the Registration Lifecycle is scheduled to expire.
    */
   expiresAt: UnixTimestamp;
+}
+
+/**
+ * Registration Lifecycle with Domain details.
+ */
+export interface RegistrationLifecycleWithDomain extends RegistrationLifecycle {
+  /**
+   * Domain
+   *
+   * Domain associated with the Registration Lifecycle.
+   */
+  domain: {
+    /**
+     * Subname
+     *
+     * A child name like `sub.name.eth`, whose parent is `name.eth`.
+     */
+    subname: InterpretedLabel;
+
+    /**
+     * Name
+     *
+     * FQDN on the domain associated with the Registration Lifecycle.
+     *
+     * Guarantees:
+     * 1) `domain.name` is always `domain.subname` + `subregistry.name`.
+     * 2) `namehash(domain.name)` is always `node`.
+     */
+    name: InterpretedName;
+  };
+}
+
+/**
+ * Serialized representation of {@link RegistrationLifecycle}.
+ */
+export interface SerializedRegistrationLifecycle
+  extends Omit<RegistrationLifecycle, "subregistry"> {
+  subregistry: SerializedSubregistry;
+}
+
+/**
+ * Serialized representation of {@link RegistrationLifecycleWithDomain}.
+ */
+export interface SerializedRegistrationLifecycleWithDomain
+  extends Omit<RegistrationLifecycleWithDomain, "subregistry"> {
+  subregistry: SerializedSubregistry;
+}
+
+export function serializeRegistrationLifecycle(
+  registrationLifecycle: RegistrationLifecycle,
+): SerializedRegistrationLifecycle {
+  return {
+    subregistry: serializeSubregistry(registrationLifecycle.subregistry),
+    node: registrationLifecycle.node,
+    expiresAt: registrationLifecycle.expiresAt,
+  };
+}
+
+export function serializeRegistrationLifecycleWithDomain(
+  registrationLifecycle: RegistrationLifecycleWithDomain,
+): SerializedRegistrationLifecycleWithDomain {
+  return {
+    ...serializeRegistrationLifecycle(registrationLifecycle),
+    domain: registrationLifecycle.domain,
+  };
 }
