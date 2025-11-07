@@ -1,7 +1,7 @@
 import { setDatabaseSchema } from "@ponder/client";
 import { drizzle } from "drizzle-orm/node-postgres";
 
-type Schema = { [name: string]: unknown };
+import type { Schema } from "./types";
 
 /**
  * Makes a Drizzle DB object.

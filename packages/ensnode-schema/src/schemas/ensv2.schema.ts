@@ -1,4 +1,4 @@
-import { onchainEnum, onchainTable, primaryKey, relations } from "ponder";
+import { onchainEnum, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 
 // Registry<->Domain is 1:1
 // Registry->Doimains is 1:many
@@ -11,6 +11,21 @@ import { onchainEnum, onchainTable, primaryKey, relations } from "ponder";
  * In the future, when Ponder supports `check` constraints, we can include them for additional
  * guarantees.
  */
+
+///////////
+// Account
+///////////
+
+export const account = onchainTable("accounts", (t) => ({
+  address: t.hex().primaryKey(),
+}));
+
+export const account_relations = relations(account, ({ many }) => ({
+  // registrations,
+  // dedicatedResolvers,
+  domains: many(domain),
+  permissions: many(permissionsUser),
+}));
 
 ////////////
 // Registry
@@ -59,9 +74,9 @@ export const domain = onchainTable(
     // belongs to registry by (registryId)
     registryId: t.text().notNull(),
     canonicalId: t.bigint().notNull(),
-
     labelHash: t.hex().notNull(),
-    label: t.text().notNull(),
+
+    ownerId: t.hex(),
 
     // may have one subregistry by (id)
     subregistryId: t.text(),
@@ -69,9 +84,6 @@ export const domain = onchainTable(
     // may have one resolver by (chainId, address)
     resolverChainId: t.integer(),
     resolverAddress: t.hex(),
-
-    // internals
-    _hasAttemptedLabelHeal: t.boolean().notNull().default(false),
   }),
   (t) => ({
     // unique by (registryId, canonicalId)
@@ -80,6 +92,11 @@ export const domain = onchainTable(
 );
 
 export const relations_domain = relations(domain, ({ one }) => ({
+  owner: one(account, {
+    relationName: "owner",
+    fields: [domain.ownerId],
+    references: [account.address],
+  }),
   registry: one(registry, {
     relationName: "registry",
     fields: [domain.registryId],
@@ -90,6 +107,12 @@ export const relations_domain = relations(domain, ({ one }) => ({
     fields: [domain.subregistryId],
     references: [registry.id],
   }),
+  label: one(labelInNamespace, {
+    relationName: "label",
+    fields: [domain.labelHash],
+    references: [labelInNamespace.labelHash],
+  }),
+  name: one(nameInNamespace),
 }));
 
 ///////////////
@@ -150,6 +173,10 @@ export const permissionsUser = onchainTable(
 );
 
 export const relations_permissionsUser = relations(permissionsUser, ({ one, many }) => ({
+  account: one(account, {
+    fields: [permissionsUser.user],
+    references: [account.address],
+  }),
   permissions: one(permissions, {
     fields: [permissionsUser.chainId, permissionsUser.address],
     references: [permissions.chainId, permissions.address],
@@ -164,10 +191,44 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one, many
   }),
 }));
 
-// TODO: Permissions USer — should it just be Account?
+//////////
+// Labels
+//////////
 
-// export const namespaceEntry = onchainTable(
-//   "namespace_entries",
-//   (t) => ({}),
-//   (t) => ({}),
-// );
+export const labelInNamespace = onchainTable("labels_in_namespace", (t) => ({
+  labelHash: t.hex().primaryKey(),
+  value: t.text().notNull(),
+
+  // internals
+  hasAttemptedHeal: t.boolean().notNull().default(false),
+}));
+
+export const labelInNamespace_relations = relations(labelInNamespace, ({ many }) => ({
+  domains: many(domain),
+}));
+
+/////////
+// Names
+/////////
+
+export const nameInNamespace = onchainTable(
+  "names_in_namespace",
+  (t) => ({
+    node: t.hex().primaryKey(),
+    fqdn: t.text().notNull(),
+
+    domainRegistryId: t.text().notNull(),
+    domainCanonicalId: t.bigint().notNull(),
+  }),
+  (t) => ({
+    byFqdn: uniqueIndex().on(t.fqdn),
+  }),
+);
+
+export const nameInNamespace_relations = relations(nameInNamespace, ({ one }) => ({
+  domain: one(domain, {
+    relationName: "name",
+    fields: [nameInNamespace.domainRegistryId, nameInNamespace.domainCanonicalId],
+    references: [domain.registryId, domain.canonicalId],
+  }),
+}));
