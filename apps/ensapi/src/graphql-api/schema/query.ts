@@ -8,6 +8,7 @@ import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import { serializeAccountId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { NameInNamespaceRef, NameOrNodeInput } from "@/graphql-api/schema/name-in-namespace";
 import {
   type RegistryContract,
@@ -38,6 +39,26 @@ builder.queryType({
         });
 
         return name;
+      },
+    }),
+
+    /////////////////////////////////////////
+    // Get Account by address
+    /////////////////////////////////////////
+    account: t.field({
+      description: "TODO",
+      type: AccountRef,
+      args: {
+        address: t.arg({ type: "Address", required: true }),
+      },
+      resolve: async (parent, args, ctx, info) => {
+        // TODO(dataloader): just return address
+
+        const account = await db.query.account.findFirst({
+          where: (t, { eq }) => eq(t.address, args.address),
+        });
+
+        return account;
       },
     }),
 

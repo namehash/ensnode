@@ -194,5 +194,34 @@ export default function () {
     },
   );
 
-  // TODO: ERC1155 transfer handlers for ownership
+  async function handleTransferSingle({
+    context,
+    event,
+  }: {
+    context: Context;
+    event: EventWithArgs<{ id: bigint; to: Address }>;
+  }) {
+    const { id: tokenId, to: owner } = event.args;
+
+    const canonicalId = getCanonicalId(tokenId);
+    const registryAccountId = makeAccountId(context, event);
+    const registryId = serializeAccountId(registryAccountId);
+    const domainId: DomainId = { registryId, canonicalId };
+
+    // just update the owner, NameBurned handles existence
+    await context.db.update(schema.domain, domainId).set({ ownerId: owner });
+  }
+
+  ponder.on(namespaceContract(PluginName.ENSv2, "Registry:TransferSingle"), handleTransferSingle);
+  ponder.on(
+    namespaceContract(PluginName.ENSv2, "Registry:TransferBatch"),
+    async ({ context, event }) => {
+      for (const id of event.args.ids) {
+        await handleTransferSingle({
+          context,
+          event: { ...event, args: { ...event.args, id } },
+        });
+      }
+    },
+  );
 }
