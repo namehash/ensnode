@@ -6,7 +6,7 @@
 "use client";
 
 import { History, Replace } from "lucide-react";
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
@@ -68,10 +68,10 @@ function ENSNodeCardLoadingSkeleton() {
   return (
     <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0 gap-0")}>
       {["ENSApi", "ENSDb", "ENSIndexer", "ENSRainbow"].map((app, index) => (
-        <>
+        <Fragment key={`${app}-loading`}>
           {index !== 0 && <ConnectionLine />}
 
-          <Card key={`${app}-loading`} className="animate-pulse">
+          <Card className="animate-pulse">
             <CardHeader className="max-sm:p-3">
               <div className="h-6 bg-muted rounded w-1/3" />
             </CardHeader>
@@ -86,7 +86,7 @@ function ENSNodeCardLoadingSkeleton() {
               </div>
             </CardContent>
           </Card>
-        </>
+        </Fragment>
       ))}
     </div>
   );
