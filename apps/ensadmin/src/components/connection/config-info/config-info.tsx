@@ -359,6 +359,33 @@ function ENSNodeConfigCardContent({
             ),
           },
           {
+            label: "ENS Namespace",
+            value: <p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>,
+            additionalInfo: (
+              <p>The ENS namespace that ENSIndexer is operating in the context of.</p>
+            ),
+          },
+          {
+            label: "Indexed Chains",
+            value: (
+              <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
+                {Array.from(ensIndexerPublicConfig.indexedChainIds).map((chainId) => (
+                  <Tooltip key={`indexed-chain-#${chainId}`}>
+                    <TooltipTrigger className="cursor-default">
+                      <ChainIcon chainId={chainId} />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                    >
+                      {getChainName(chainId)}
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            ),
+          },
+          {
             label: "Node.js",
             value: (
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.nodejs}</p>
@@ -412,6 +439,21 @@ function ENSNodeConfigCardContent({
             ),
           },
           {
+            label: "Plugins",
+            value: (
+              <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
+                {ensIndexerPublicConfig.plugins.map((plugin) => (
+                  <span
+                    key={`${plugin}-plugin-badge`}
+                    className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
+                  >
+                    {plugin}
+                  </span>
+                ))}
+              </div>
+            ),
+          },
+          {
             label: "Client LabelSet",
             value: (
               <ul className={cardItemValueStyles}>
@@ -432,48 +474,6 @@ function ENSNodeConfigCardContent({
                   Learn more.
                 </ExternalLinkWithIcon>
               </p>
-            ),
-          },
-          {
-            label: "ENS Namespace",
-            value: <p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>,
-            additionalInfo: (
-              <p>The ENS namespace that ENSIndexer is operating in the context of.</p>
-            ),
-          },
-          {
-            label: "Indexed Chains",
-            value: (
-              <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
-                {Array.from(ensIndexerPublicConfig.indexedChainIds).map((chainId) => (
-                  <Tooltip key={`indexed-chain-#${chainId}`}>
-                    <TooltipTrigger className="cursor-default">
-                      <ChainIcon chainId={chainId} />
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
-                    >
-                      {getChainName(chainId)}
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            ),
-          },
-          {
-            label: "Plugins",
-            value: (
-              <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
-                {ensIndexerPublicConfig.plugins.map((plugin) => (
-                  <span
-                    key={`${plugin}-plugin-badge`}
-                    className="flex justify-start items-start py-[2px] px-[10px] rounded-full bg-secondary text-sm leading-normal font-semibold text-black cursor-default whitespace-nowrap"
-                  >
-                    {plugin}
-                  </span>
-                ))}
-              </div>
             ),
           },
         ]}
