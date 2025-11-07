@@ -1,4 +1,3 @@
-import { parse as parseConnectionString } from "pg-connection-string";
 import { z } from "zod/v4";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
@@ -12,24 +11,6 @@ import {
   invariant_rpcEndpointConfigIncludesAtLeastOneHTTPProtocolURL,
   invariant_rpcEndpointConfigIncludesAtMostOneWebSocketsProtocolURL,
 } from "./validatons";
-
-export const DatabaseUrlSchema = z.string().refine(
-  (url) => {
-    try {
-      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-        return false;
-      }
-      const config = parseConnectionString(url);
-      return !!(config.host && config.port && config.database);
-    } catch {
-      return false;
-    }
-  },
-  {
-    error:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-  },
-);
 
 export const DatabaseSchemaNameSchema = z
   .string({
@@ -85,3 +66,5 @@ export const PortSchema = z.coerce
   .min(1, { error: "PORT must be greater than 1." })
   .max(65535, { error: "PORT must be less than 65535" })
   .optional();
+
+export const TheGraphApiKeySchema = z.string().optional();

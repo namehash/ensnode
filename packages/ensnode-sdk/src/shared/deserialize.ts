@@ -1,7 +1,15 @@
 import { prettifyError } from "zod/v4";
 
 import type { ChainIdString, UrlString } from "./serialized-types";
-import type { BlockNumber, BlockRef, Blockrange, ChainId, Datetime, Duration } from "./types";
+import type {
+  AccountId,
+  BlockNumber,
+  BlockRef,
+  Blockrange,
+  ChainId,
+  Datetime,
+  Duration,
+} from "./types";
 import {
   makeBlockNumberSchema,
   makeBlockRefSchema,
@@ -9,6 +17,7 @@ import {
   makeChainIdStringSchema,
   makeDatetimeSchema,
   makeDurationSchema,
+  makeSerializedAccountIdSchema,
   makeUnixTimestampSchema,
   makeUrlSchema,
 } from "./zod-schemas";
@@ -93,12 +102,23 @@ export function deserializeBlockRef(
   return parsed.data;
 }
 
-export function deserializeDuration(maybeDuration: string, valueLabel?: string): Duration {
+export function deserializeDuration(maybeDuration: unknown, valueLabel?: string): Duration {
   const schema = makeDurationSchema(valueLabel);
   const parsed = schema.safeParse(maybeDuration);
 
   if (parsed.error) {
     throw new RangeError(`Cannot deserialize Duration:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializeAccountId(maybeAccountId: unknown, valueLabel?: string): AccountId {
+  const schema = makeSerializedAccountIdSchema(valueLabel);
+  const parsed = schema.safeParse(maybeAccountId);
+
+  if (parsed.error) {
+    throw new RangeError(`Cannot deserialize AccountId:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;

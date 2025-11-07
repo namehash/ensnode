@@ -109,7 +109,7 @@ jobs:
           NAMESPACE: mainnet
           DATABASE_URL: postgresql://postgres:password@localhost:5432/postgres
           DATABASE_SCHEMA: public
-          PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,referrals,tokenscope
+          PLUGINS: subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSINDEXER_URL: http://localhost:42069
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}

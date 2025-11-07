@@ -1,3 +1,5 @@
+import packageJson from "@/../package.json" with { type: "json" };
+
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,13 +10,6 @@ import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@en
 import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
-
-/**
- * Get version of ENSIndexer application.
- */
-export async function getENSIndexerVersion(): Promise<string> {
-  return import("@/../package.json").then(({ version }) => version);
-}
 
 /**
  * Get NPM package version.
@@ -121,7 +116,7 @@ export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo>
   const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;
 
   // ENSIndexer version
-  const ensIndexerVersion = await getENSIndexerVersion();
+  const ensIndexerVersion = packageJson.version;
 
   // ENSDb version
   // ENSDb version is always the same as the ENSIndexer version number

@@ -13,9 +13,11 @@ catalog:
   astro: ^5.15.2
   astro-font: ^1.1.0
   astro-seo: ^0.8.4
+  caip: 1.1.1
   date-fns: 4.1.0
   drizzle-orm: "=0.41.0"
   hono: ^4.10.2
+  pg-connection-string: ^2.9.1
   pino: 10.1.0
   ponder: 0.13.14
   tsup: ^8.3.6

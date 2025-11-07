@@ -5,7 +5,7 @@
 
 "use client";
 
-import { Replace } from "lucide-react";
+import { History, Replace } from "lucide-react";
 import { ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
@@ -218,6 +218,85 @@ function ENSNodeConfigCardContent({
 
   return (
     <>
+      {/*ENSApi*/}
+      <ConfigInfoAppCard
+        name="ENSApi"
+        icon={<ENSNodeIcon width={24} height={24} />}
+        items={[
+          {
+            label: "Database",
+            value: <p className={cardItemValueStyles}>Postgres</p>,
+          },
+          {
+            label: "Database Schema",
+            value: (
+              <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
+            ),
+            additionalInfo: (
+              <p>ENSApi reads indexed data from tables within this Postgres database schema.</p>
+            ),
+          },
+          {
+            label: "Namespace",
+            value: <p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>,
+            additionalInfo: <p>The ENS namespace that ENSApi is operating in the context of.</p>,
+          },
+          {
+            label: "RPC Config",
+            value: (
+              <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
+                <Tooltip>
+                  <TooltipTrigger className="cursor-default">
+                    <ChainIcon chainId={ensRootChainId} />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                  >
+                    {getChainName(ensRootChainId)}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ),
+          },
+        ]}
+        features={[
+          {
+            label: "Subgraph API Fallback",
+            description: ensApiPublicConfig.theGraphFallback.canFallback ? (
+              <p>
+                ENSApi's Subgraph API (/subgraph) will automatically fallback to The Graph if the
+                connected ENSIndexer is not sufficiently &quot;realtime&quot;.
+              </p>
+            ) : (
+              <p>
+                ENSApi's Subgraph API (/subgraph) will NOT fallback to The Graph if the connected
+                ENSIndexer is not sufficiently &quot;realtime&quot;. {(() => {
+                  switch (ensApiPublicConfig.theGraphFallback.reason) {
+                    case "not-subgraph-compatible":
+                      return "The connected ENSIndexer is not Subgraph Compatible.";
+                    case "no-api-key":
+                      return "No API key for The Graph is configured.";
+                    case "no-subgraph-url":
+                      return "The Graph does not provide an ENS Subgraph for the configured ENS Namespace.";
+                    default:
+                      return null;
+                  }
+                })()}
+              </p>
+            ),
+            isActivated: ensApiPublicConfig.theGraphFallback.canFallback,
+            icon: <History width={15} height={15} className="flex-shrink-0" />,
+          },
+        ]}
+        version={
+          <p className="text-sm leading-normal font-normal text-muted-foreground">
+            v{ensApiPublicConfig.version}
+          </p>
+        }
+        docsLink={new URL("https://ensnode.io/ensapi/")}
+      />
+
       {/*ENSDb*/}
       <ConfigInfoAppCard
         name="ENSDb"
@@ -338,7 +417,7 @@ function ENSNodeConfigCardContent({
                 {Array.from(ensIndexerPublicConfig.indexedChainIds).map((chainId) => (
                   <Tooltip key={`indexed-chain-#${chainId}`}>
                     <TooltipTrigger className="cursor-default">
-                      <ChainIcon key={`indexed-chain-${chainId}-icon`} chainId={chainId} />
+                      <ChainIcon chainId={chainId} />
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"

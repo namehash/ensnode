@@ -1,4 +1,5 @@
 import type { CoinType } from "@ensdomains/address-encoder";
+import { AccountId as CaipAccountId } from "caip";
 import { type Address, isAddress } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
@@ -12,7 +13,10 @@ import z from "zod/v4";
 
 import { ENSNamespaceIds } from "../ens";
 import { asLowerCaseAddress } from "./address";
+import { type CurrencyId, CurrencyIds, Price } from "./currencies";
+import type { SerializedAccountId } from "./serialized-types";
 import type {
+  AccountId,
   BlockRef,
   ChainId,
   Datetime,
@@ -235,3 +239,60 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
       return `Invalid ${valueLabel}. Supported ENS namespace IDs are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
     },
   });
+
+const makePriceAmountSchema = (valueLabel: string = "Amount") =>
+  z.coerce
+    .bigint({
+      error: `${valueLabel} must represent a bigint.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must not be negative.`,
+    });
+
+const makePriceCurrencySchema = (currency: CurrencyId, valueLabel: string = "Price Currency") =>
+  z.strictObject({
+    amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+/**
+ * Schema for {@link Price} type.
+ */
+export const makePriceSchema = (valueLabel: string = "Price") =>
+  z.discriminatedUnion(
+    "currency",
+    [
+      makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+    ],
+    { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
+  );
+
+/**
+ * Schema for {@link AccountId} type.
+ */
+export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
+  z.strictObject({
+    chainId: makeChainIdStringSchema(`${valueLabel} chain ID`),
+    address: makeLowercaseAddressSchema(`${valueLabel} address`),
+  });
+
+/**
+ * Schema for {@link SerializedAccountSchema} type.
+ */
+export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = "Account ID") =>
+  z.coerce
+    .string()
+    .transform((v) => {
+      const result = new CaipAccountId(v);
+
+      return {
+        chainId: result.chainId.reference,
+        address: result.address,
+      };
+    })
+    .pipe(makeAccountIdSchema(valueLabel));

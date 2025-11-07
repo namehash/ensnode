@@ -21,7 +21,7 @@ export default function SplashPage() {
           </p>
 
           <Button asChild size="lg">
-            <Link href="/connection">View My Connection</Link>
+            <Link href="/connection">Connect</Link>
           </Button>
         </div>
       </div>

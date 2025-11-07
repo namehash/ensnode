@@ -13,7 +13,6 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
-import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -35,11 +34,8 @@ app.use(cors({ origin: "*" }));
 // NOTE: required for protocol tracing
 app.use(otel());
 
-// add ENSApi Middlewares to all routes for convenience
-// NOTE: must mirror Variables type in apps/ensapi/src/lib/hono-factory.ts or c.var.* will not be
-// available at runtime
+// add ENSIndexer Indexing Status Middleware to all routes for convenience
 app.use(indexingStatusMiddleware);
-app.use(canAccelerateMiddleware);
 
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);

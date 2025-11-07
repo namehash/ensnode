@@ -1,137 +1,179 @@
 {
   "Alpha Mainnet": {
-    "labelSet": {
-      "labelSetId": "subgraph",
-      "labelSetVersion": 0
+    "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
     },
-    "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352, 567],
-    "databaseSchemaName": "alphaSchema0.34.0",
-    "isSubgraphCompatible": false,
-    "namespace": "mainnet",
-    "plugins": [
-      "subgraph",
-      "basenames",
-      "lineanames",
-      "threedns",
-      "protocol-acceleration",
-      "referrals",
-      "tokenscope"
-    ],
-    "versionInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensDb": "0.35.0",
-      "ensIndexer": "0.35.0",
-      "ensNormalize": "1.11.1",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
+    "ensIndexerPublicConfig": {
+      "labelSet": {
+        "labelSetId": "subgraph",
+        "labelSetVersion": 0
+      },
+      "indexedChainIds": [1, 8453, 59144, 10, 42161, 534352, 567],
+      "databaseSchemaName": "alphaSchema0.34.0",
+      "isSubgraphCompatible": false,
+      "namespace": "mainnet",
+      "plugins": [
+        "subgraph",
+        "basenames",
+        "lineanames",
+        "threedns",
+        "protocol-acceleration",
+        "registrars",
+        "tokenscope"
+      ],
+      "versionInfo": {
+        "nodejs": "22.18.0",
+        "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
+        "ensRainbow": "0.34.0",
+        "ensRainbowSchema": 3
+      }
     }
   },
   "Alpha Sepolia": {
-    "labelSet": {
-      "labelSetId": "subgraph",
-      "labelSetVersion": 0
+    "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": true,
+      "reason": null
     },
-    "versionInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensDb": "0.35.0",
-      "ensIndexer": "0.35.0",
-      "ensNormalize": "1.11.1",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
-    },
-    "indexedChainIds": [11155111, 84532, 59141, 11155420, 421614, 534351],
-    "namespace": "sepolia",
-    "plugins": [
-      "subgraph",
-      "basenames",
-      "lineanames",
-      "threedns",
-      "protocol-acceleration",
-      "referrals"
-    ],
-    "databaseSchemaName": "alphaSepoliaSchema0.34.0",
-    "isSubgraphCompatible": false
+    "ensIndexerPublicConfig": {
+      "labelSet": {
+        "labelSetId": "subgraph",
+        "labelSetVersion": 0
+      },
+      "versionInfo": {
+        "nodejs": "22.18.0",
+        "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
+        "ensRainbow": "0.34.0",
+        "ensRainbowSchema": 3
+      },
+      "indexedChainIds": [11155111, 84532, 59141, 11155420, 421614, 534351],
+      "namespace": "sepolia",
+      "plugins": [
+        "subgraph",
+        "basenames",
+        "lineanames",
+        "threedns",
+        "protocol-acceleration",
+        "registrars"
+      ],
+      "databaseSchemaName": "alphaSepoliaSchema0.34.0",
+      "isSubgraphCompatible": false
+    }
   },
   "Subgraph Mainnet": {
-    "labelSet": {
-      "labelSetId": "subgraph",
-      "labelSetVersion": 0
+    "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
     },
-    "versionInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensDb": "0.35.0",
-      "ensIndexer": "0.35.0",
-      "ensNormalize": "1.11.1",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
-    },
-    "indexedChainIds": [1],
-    "namespace": "mainnet",
-    "plugins": ["subgraph"],
-    "databaseSchemaName": "mainnetSchema0.34.0",
-    "isSubgraphCompatible": true
+    "ensIndexerPublicConfig": {
+      "labelSet": {
+        "labelSetId": "subgraph",
+        "labelSetVersion": 0
+      },
+      "versionInfo": {
+        "nodejs": "22.18.0",
+        "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
+        "ensRainbow": "0.34.0",
+        "ensRainbowSchema": 3
+      },
+      "indexedChainIds": [1],
+      "namespace": "mainnet",
+      "plugins": ["subgraph"],
+      "databaseSchemaName": "mainnetSchema0.34.0",
+      "isSubgraphCompatible": true
+    }
   },
   "Subgraph Sepolia": {
-    "labelSet": {
-      "labelSetId": "subgraph",
-      "labelSetVersion": 0
+    "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
     },
-    "versionInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensDb": "0.35.0",
-      "ensIndexer": "0.35.0",
-      "ensNormalize": "1.11.1",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
-    },
-    "indexedChainIds": [11155111],
-    "namespace": "sepolia",
-    "plugins": ["subgraph"],
-    "databaseSchemaName": "sepoliaSchema0.34.0",
-    "isSubgraphCompatible": true
+    "ensIndexerPublicConfig": {
+      "labelSet": {
+        "labelSetId": "subgraph",
+        "labelSetVersion": 0
+      },
+      "versionInfo": {
+        "nodejs": "22.18.0",
+        "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
+        "ensRainbow": "0.34.0",
+        "ensRainbowSchema": 3
+      },
+      "indexedChainIds": [11155111],
+      "namespace": "sepolia",
+      "plugins": ["subgraph"],
+      "databaseSchemaName": "sepoliaSchema0.34.0",
+      "isSubgraphCompatible": true
+    }
   },
   "Subgraph Holesky": {
-    "labelSet": {
-      "labelSetId": "subgraph",
-      "labelSetVersion": 0
+    "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
     },
-    "versionInfo": {
-      "nodejs": "22.18.0",
-      "ponder": "0.11.43",
-      "ensDb": "0.35.0",
-      "ensIndexer": "0.35.0",
-      "ensNormalize": "1.11.1",
-      "ensRainbow": "0.34.0",
-      "ensRainbowSchema": 3
-    },
-    "indexedChainIds": [17000],
-    "namespace": "holesky",
-    "plugins": ["subgraph"],
-    "databaseSchemaName": "holeskySchema0.34.0",
-    "isSubgraphCompatible": true
+    "ensIndexerPublicConfig": {
+      "labelSet": {
+        "labelSetId": "subgraph",
+        "labelSetVersion": 0
+      },
+      "versionInfo": {
+        "nodejs": "22.18.0",
+        "ponder": "0.11.43",
+        "ensDb": "0.35.0",
+        "ensIndexer": "0.35.0",
+        "ensNormalize": "1.11.1",
+        "ensRainbow": "0.34.0",
+        "ensRainbowSchema": 3
+      },
+      "indexedChainIds": [17000],
+      "namespace": "holesky",
+      "plugins": ["subgraph"],
+      "databaseSchemaName": "holeskySchema0.34.0",
+      "isSubgraphCompatible": true
+    }
   },
   "Serialization Error": {
-    "labelSet": {
-      "labelSetId": "",
-      "labelSetVersion": 0
+    "version": "0.35.0",
+    "theGraphFallback": {
+      "canFallback": false,
+      "reason": "no-api-key"
     },
-    "versionInfo": {
-      "nodejs": "",
-      "ponder": "",
-      "ensDb": "",
-      "ensIndexer": "",
-      "ensNormalize": "",
-      "ensRainbow": "",
-      "ensRainbowSchema": -1
-    },
-    "indexedChainIds": [17000],
-    "namespace": "holesky",
-    "plugins": ["subgraph"],
-    "databaseSchemaName": "DeserializationSchema0.34.0",
-    "isSubgraphCompatible": true
+    "ensIndexerPublicConfig": {
+      "labelSet": {
+        "labelSetId": "",
+        "labelSetVersion": 0
+      },
+      "versionInfo": {
+        "nodejs": "",
+        "ponder": "",
+        "ensDb": "",
+        "ensIndexer": "",
+        "ensNormalize": "",
+        "ensRainbow": "",
+        "ensRainbowSchema": -1
+      },
+      "indexedChainIds": [17000],
+      "namespace": "holesky",
+      "plugins": ["subgraph"],
+      "databaseSchemaName": "DeserializationSchema0.34.0",
+      "isSubgraphCompatible": true
+    }
   }
 }
