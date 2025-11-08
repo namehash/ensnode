@@ -70,35 +70,29 @@ export interface RegistrationLifecycle {
    */
   expiresAt: UnixTimestamp;
 }
-
 /**
- * Registration Lifecycle with Domain details.
+ * Registration Lifecycle Domain
+ *
+ * Domain associated with the Registration Lifecycle.
  */
-export interface RegistrationLifecycleWithDomain extends RegistrationLifecycle {
+export interface RegistrationLifecycleDomain {
   /**
-   * Domain
+   * Subname
    *
-   * Domain associated with the Registration Lifecycle.
+   * A child name like `sub.name.eth`, whose parent is `name.eth`.
    */
-  domain: {
-    /**
-     * Subname
-     *
-     * A child name like `sub.name.eth`, whose parent is `name.eth`.
-     */
-    subname: InterpretedLabel;
+  subname: InterpretedLabel;
 
-    /**
-     * Name
-     *
-     * FQDN on the domain associated with the Registration Lifecycle.
-     *
-     * Guarantees:
-     * 1) `domain.name` is always `domain.subname` + `subregistry.name`.
-     * 2) `namehash(domain.name)` is always `node`.
-     */
-    name: InterpretedName;
-  };
+  /**
+   * Name
+   *
+   * FQDN on the domain associated with the Registration Lifecycle.
+   *
+   * Guarantees:
+   * 1) Always starts with `subname`, followed by the "name" of the subregistry associated with the Registration Lifecycle.
+   * 2) `namehash(domain.name)` is always `node` of the Registration Lifecycle.
+   */
+  name: InterpretedName;
 }
 
 /**
@@ -109,14 +103,6 @@ export interface SerializedRegistrationLifecycle
   subregistry: SerializedSubregistry;
 }
 
-/**
- * Serialized representation of {@link RegistrationLifecycleWithDomain}.
- */
-export interface SerializedRegistrationLifecycleWithDomain
-  extends Omit<RegistrationLifecycleWithDomain, "subregistry"> {
-  subregistry: SerializedSubregistry;
-}
-
 export function serializeRegistrationLifecycle(
   registrationLifecycle: RegistrationLifecycle,
 ): SerializedRegistrationLifecycle {
@@ -124,14 +110,5 @@ export function serializeRegistrationLifecycle(
     subregistry: serializeSubregistry(registrationLifecycle.subregistry),
     node: registrationLifecycle.node,
     expiresAt: registrationLifecycle.expiresAt,
-  };
-}
-
-export function serializeRegistrationLifecycleWithDomain(
-  registrationLifecycle: RegistrationLifecycleWithDomain,
-): SerializedRegistrationLifecycleWithDomain {
-  return {
-    ...serializeRegistrationLifecycle(registrationLifecycle),
-    domain: registrationLifecycle.domain,
   };
 }

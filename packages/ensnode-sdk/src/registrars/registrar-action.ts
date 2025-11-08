@@ -14,11 +14,8 @@ import {
 } from "../shared";
 import {
   type RegistrationLifecycle,
-  type RegistrationLifecycleWithDomain,
   type SerializedRegistrationLifecycle,
-  type SerializedRegistrationLifecycleWithDomain,
   serializeRegistrationLifecycle,
-  serializeRegistrationLifecycleWithDomain,
 } from "./registration-lifecycle";
 
 /**
@@ -336,15 +333,6 @@ export interface RegistrarAction {
   eventIds: [RegistrarActionEventId, ...RegistrarActionEventId[]];
 }
 
-export interface RegistrarActionWithDomain extends Omit<RegistrarAction, "registrationLifecycle"> {
-  /**
-   * Registration Lifecycle associated with this "logical registrar action".
-   *
-   * Includes information about related domain.
-   */
-  registrationLifecycle: RegistrationLifecycleWithDomain;
-}
-
 /**
  * Serialized representation of {@link RegistrarActionPricingUnknown}.
  */
@@ -378,13 +366,6 @@ export interface SerializedRegistrarAction
   pricing: SerializedRegistrarActionPricing;
 }
 
-export interface SerializedRegistrarActionWithDomain
-  extends Omit<RegistrarAction, "registrationLifecycle" | "pricing"> {
-  registrationLifecycle: SerializedRegistrationLifecycleWithDomain;
-
-  pricing: SerializedRegistrarActionPricing;
-}
-
 export function serializeRegistrarActionPricing(
   pricing: RegistrarActionPricing,
 ): SerializedRegistrarActionPricing {
@@ -413,16 +394,5 @@ export function serializeRegistrarAction(
     block: registrarAction.block,
     transactionHash: registrarAction.transactionHash,
     eventIds: registrarAction.eventIds,
-  };
-}
-
-export function serializeRegistrarActionWithDomain(
-  registrarAction: RegistrarActionWithDomain,
-): SerializedRegistrarActionWithDomain {
-  return {
-    ...serializeRegistrarAction(registrarAction),
-    registrationLifecycle: serializeRegistrationLifecycleWithDomain(
-      registrarAction.registrationLifecycle,
-    ),
   };
 }

@@ -1,5 +1,5 @@
 import { serializeRealtimeIndexingStatusProjection } from "../ensindexer";
-import { serializeRegistrarActionWithDomain } from "../registrars";
+import { serializeRegistrarAction } from "../registrars";
 import type {
   SerializedIndexingStatusResponse,
   SerializedIndexingStatusResponseOk,
@@ -35,7 +35,8 @@ export function serializeRegistrarActionsResponse(
     case RegistrarActionsResponseCodes.Ok:
       return {
         responseCode: response.responseCode,
-        registrarActions: response.registrarActions.map(serializeRegistrarActionWithDomain),
+        registrarActions: response.registrarActions.map(serializeRegistrarAction),
+        registrationLifecycleDomains: response.registrationLifecycleDomains,
       } satisfies SerializedRegistrarActionsResponseOk;
 
     case RegistrarActionsResponseCodes.Error:

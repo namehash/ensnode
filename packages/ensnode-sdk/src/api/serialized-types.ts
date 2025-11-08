@@ -1,5 +1,5 @@
 import type { SerializedRealtimeIndexingStatusProjection } from "../ensindexer";
-import type { SerializedRegistrarActionWithDomain } from "../registrars";
+import type { SerializedRegistrarAction } from "../registrars";
 import {
   IndexingStatusResponse,
   type IndexingStatusResponseError,
@@ -38,7 +38,7 @@ export type SerializedRegistrarActionsResponseError = RegistrarActionsResponseEr
  */
 export interface SerializedRegistrarActionsResponseOk
   extends Omit<RegistrarActionsResponseOk, "registrarActions"> {
-  registrarActions: SerializedRegistrarActionWithDomain[];
+  registrarActions: SerializedRegistrarAction[];
 }
 
 /**

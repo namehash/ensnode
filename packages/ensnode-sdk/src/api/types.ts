@@ -1,8 +1,9 @@
 import type z from "zod/v4";
 
+import type { Node } from "../ens";
 import type { ENSApiPublicConfig } from "../ensapi";
 import type { RealtimeIndexingStatusProjection } from "../ensindexer";
-import type { RegistrarActionWithDomain } from "../registrars";
+import type { RegistrarAction, RegistrationLifecycleDomain } from "../registrars";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -167,7 +168,8 @@ export type RegistrarActionsResponseCode =
  */
 export type RegistrarActionsResponseOk = {
   responseCode: typeof RegistrarActionsResponseCodes.Ok;
-  registrarActions: RegistrarActionWithDomain[];
+  registrarActions: RegistrarAction[];
+  registrationLifecycleDomains: Record<Node, RegistrationLifecycleDomain>;
 };
 
 /**
