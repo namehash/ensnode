@@ -296,6 +296,10 @@ a[href*="ensdb"] .starlight-sidebar-topics-icon {
   background-image: url("../assets/ensdb.svg");
 }
 
+a[href*="ensapi"] .starlight-sidebar-topics-icon {
+  background-image: url("../assets/ensapi.svg");
+}
+
 /* Enhance hover and selected states for sidebar items */
 #starlight__sidebar a {
   transition:
