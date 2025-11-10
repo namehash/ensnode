@@ -215,3 +215,41 @@ the latest indexed block of each chain and the "tip" of all indexed chains.
 This allows your client to programmatically determine whether the ENSNode
 instance is sufficiently synchronized for your use case before proceeding with
 operations that depend on the latest onchain data.
+
+## Registrar Actions API
+
+Track all "logical registrar actions" performed by users across multiple
+subregistries with the Registrar Actions API. This endpoint returns a list
+of "logical registrar actions", such as "registration" or "renewal".
+
+Each "logical registrar action" refers to:
+- ID of the action,
+- type of the action,
+- incremental duration,
+- registrant address,
+- one registration lifecycle record,
+- pricing details (optionally),
+- referral details (optionally),
+- onchain transaction details (block number, timestamp, transaction hash),
+- event IDs that have ever contributed to the "logical registrar action" record.
+
+Each registration lifecycle record refers to:
+- subregistry that manages this Registration Lifecycle,
+- node (namehash) of the FQDN of the domain the registration lifecycle is
+  associated with,
+- expiry date which identifies when the Registration Lifecycle is scheduled
+  to expire.
+
+Each subregistry includes:
+- subregistry account ID which identifies the chainId and address of
+  the associated subregistry smart contract,
+- node (namehash) of the name the subregistry manages subnames of.
+
+
+**Endpoint:** `GET /api/registrar-actions`
+**Endpoint with custom results count limit:** `GET /api/registrar-actions?limit=5`
+**Endpoint with results sourced for the `eth` parent name:** `GET /api/registrar-actions/eth`
+
+### Example response
+
+TDB
