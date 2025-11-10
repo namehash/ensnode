@@ -33,6 +33,17 @@ export interface AccountId {
 }
 
 /**
+ * Represents an ERC1155 asset by `tokenId` at `address` on chain `chainId`.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export interface AssetId {
+  chainId: ChainId;
+  address: Address;
+  tokenId: bigint;
+}
+
+/**
  * Block Number
  *
  * Guaranteed to be a non-negative integer.
@@ -134,4 +145,11 @@ export type DeepPartial<T> = {
     : T[P] extends object
       ? DeepPartial<T[P]>
       : T[P];
+};
+
+/**
+ * Marks keys in K as required (not undefined) and not null.
+ */
+export type RequiredAndNotNull<T, K extends keyof T> = T & {
+  [P in K]-?: NonNullable<T[P]>;
 };

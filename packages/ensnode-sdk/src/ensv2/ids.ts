@@ -1,0 +1,38 @@
+import type { Hex } from "viem";
+
+import type { Node } from "@ensnode/ensnode-sdk";
+
+/**
+ * Serialized CAIP-10 Asset ID that uniquely identifies a Registry contract.
+ */
+export type RegistryContractId = string & { __brand: "RegistryContractId" };
+
+/**
+ * Parent Node that uniquely identifies an Implicit Registry.
+ */
+export type ImplicitRegistryId = Hex & { __brand: "ImplicitRegistryId" };
+
+/**
+ * A RegistryId is one of RegistryContractId or ImplicitRegistryId.
+ */
+export type RegistryId = RegistryContractId | ImplicitRegistryId;
+
+/**
+ * A Domain's Canonical Id is uint256(labelHash) with lower (right-most) 32 bits zero'd.
+ */
+export type CanonicalId = bigint;
+
+/**
+ * The node that uniquely identifies an ENSv1 name.
+ */
+export type ENSv1DomainId = Node & { __brand: "ENSv1DomainId" };
+
+/**
+ * The Serialized CAIP-19 Asset ID that uniquely identifies an ENSv2 name.
+ */
+export type ENSv2DomainId = string & { __brand: "ENSv2DomainId" };
+
+/**
+ * A DomainId is one of ENSv1DomainId or ENSv2DomainId.
+ */
+export type DomainId = ENSv1DomainId | ENSv2DomainId;

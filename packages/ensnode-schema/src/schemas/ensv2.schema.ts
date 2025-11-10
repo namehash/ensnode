@@ -1,4 +1,15 @@
-import { onchainEnum, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
+import { onchainEnum, onchainTable, primaryKey, relations } from "ponder";
+import type { Address } from "viem";
+
+import type {
+  CanonicalId,
+  ChainId,
+  DomainId,
+  InterpretedLabel,
+  LabelHash,
+  Node,
+  RegistryId,
+} from "@ensnode/ensnode-sdk";
 
 // Registry<->Domain is 1:1
 // Registry->Doimains is 1:many
@@ -17,7 +28,7 @@ import { onchainEnum, onchainTable, primaryKey, relations, uniqueIndex } from "p
 ///////////
 
 export const account = onchainTable("accounts", (t) => ({
-  address: t.hex().primaryKey(),
+  address: t.hex().primaryKey().$type<Address>(),
 }));
 
 export const account_relations = relations(account, ({ many }) => ({
@@ -36,14 +47,13 @@ export const registryType = onchainEnum("RegistryType", ["RegistryContract", "Im
 export const registry = onchainTable(
   "registries",
   (t) => ({
-    // If RegistryContract: CAIP-10 Account ID
-    // If ImplicitRegistry: parentDomainNode
-    id: t.text().primaryKey(),
+    // see RegistryId for guarantees
+    id: t.text().primaryKey().$type<RegistryId>(),
     type: registryType().notNull(),
 
-    chainId: t.integer(),
-    address: t.hex(),
-    parentDomainNode: t.hex(),
+    chainId: t.integer().$type<ChainId>(),
+    address: t.hex().$type<Address>(),
+    parentDomainNode: t.hex().$type<Node>(),
   }),
   (t) => ({
     //
@@ -71,23 +81,27 @@ export const relations_registry = relations(registry, ({ one, many }) => ({
 export const domain = onchainTable(
   "domains",
   (t) => ({
-    // belongs to registry by (registryId)
-    registryId: t.text().notNull(),
-    canonicalId: t.bigint().notNull(),
-    labelHash: t.hex().notNull(),
+    // see DomainId for guarantees
+    id: t.text().primaryKey().$type<DomainId>(),
 
-    ownerId: t.hex(),
+    // belongs to registry by (registryId)
+    registryId: t.text().notNull().$type<RegistryId>(),
+
+    // TODO: we could probably avoid storing this at all and compute it on-demand
+    canonicalId: t.bigint().notNull().$type<CanonicalId>(),
+    labelHash: t.hex().notNull().$type<LabelHash>(),
+
+    ownerId: t.hex().$type<Address>(),
 
     // may have one subregistry by (id)
-    subregistryId: t.text(),
+    subregistryId: t.text().$type<RegistryId>(),
 
     // may have one resolver by (chainId, address)
-    resolverChainId: t.integer(),
-    resolverAddress: t.hex(),
+    resolverChainId: t.integer().$type<ChainId>(),
+    resolverAddress: t.hex().$type<Address>(),
   }),
   (t) => ({
-    // unique by (registryId, canonicalId)
-    pk: primaryKey({ columns: [t.registryId, t.canonicalId] }),
+    //
   }),
 );
 
@@ -107,13 +121,18 @@ export const relations_domain = relations(domain, ({ one }) => ({
     fields: [domain.subregistryId],
     references: [registry.id],
   }),
-  label: one(labelInNamespace, {
+  label: one(label, {
     relationName: "label",
     fields: [domain.labelHash],
-    references: [labelInNamespace.labelHash],
+    references: [label.labelHash],
   }),
-  name: one(nameInNamespace),
 }));
+
+/////////////////
+// Registrations
+/////////////////
+
+// TODO: derive from registries plugin
 
 ///////////////
 // Permissions
@@ -122,8 +141,8 @@ export const relations_domain = relations(domain, ({ one }) => ({
 export const permissions = onchainTable(
   "permissions",
   (t) => ({
-    chainId: t.integer().notNull(),
-    address: t.hex().notNull(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address] }),
@@ -138,8 +157,8 @@ export const relations_permissions = relations(permissions, ({ one, many }) => (
 export const permissionsResource = onchainTable(
   "permissions_resources",
   (t) => ({
-    chainId: t.integer().notNull(),
-    address: t.hex().notNull(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
     resource: t.bigint().notNull(),
   }),
   (t) => ({
@@ -157,10 +176,10 @@ export const relations_permissionsResource = relations(permissionsResource, ({ o
 export const permissionsUser = onchainTable(
   "permissions_users",
   (t) => ({
-    chainId: t.integer().notNull(),
-    address: t.hex().notNull(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
     resource: t.bigint().notNull(),
-    user: t.hex().notNull(),
+    user: t.hex().notNull().$type<Address>(),
 
     // has one roles bitmap
     // TODO: can materialize into more semantic (polymorphic) interpretation of roles based on source
@@ -195,40 +214,14 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one, many
 // Labels
 //////////
 
-export const labelInNamespace = onchainTable("labels_in_namespace", (t) => ({
-  labelHash: t.hex().primaryKey(),
-  value: t.text().notNull(),
+export const label = onchainTable("labels", (t) => ({
+  labelHash: t.hex().primaryKey().$type<LabelHash>(),
+  value: t.text().notNull().$type<InterpretedLabel>(),
 
   // internals
   hasAttemptedHeal: t.boolean().notNull().default(false),
 }));
 
-export const labelInNamespace_relations = relations(labelInNamespace, ({ many }) => ({
+export const label_relations = relations(label, ({ many }) => ({
   domains: many(domain),
-}));
-
-/////////
-// Names
-/////////
-
-export const nameInNamespace = onchainTable(
-  "names_in_namespace",
-  (t) => ({
-    node: t.hex().primaryKey(),
-    fqdn: t.text().notNull(),
-
-    domainRegistryId: t.text().notNull(),
-    domainCanonicalId: t.bigint().notNull(),
-  }),
-  (t) => ({
-    byFqdn: uniqueIndex().on(t.fqdn),
-  }),
-);
-
-export const nameInNamespace_relations = relations(nameInNamespace, ({ one }) => ({
-  domain: one(domain, {
-    relationName: "name",
-    fields: [nameInNamespace.domainRegistryId, nameInNamespace.domainCanonicalId],
-    references: [domain.registryId, domain.canonicalId],
-  }),
 }));

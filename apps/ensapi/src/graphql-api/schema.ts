@@ -2,7 +2,6 @@ import { builder } from "@/graphql-api/builder";
 
 import "./schema/account-id";
 import "./schema/domain";
-import "./schema/name-in-namespace";
 import "./schema/permissions";
 import "./schema/query";
 import "./schema/registry";

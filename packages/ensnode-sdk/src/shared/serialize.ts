@@ -1,13 +1,14 @@
-import { AccountId as CaipAccountId } from "caip";
+import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
 
 import type { Price, SerializedPrice } from "./currencies";
 import type {
   ChainIdString,
   DatetimeISO8601,
   SerializedAccountId,
+  SerializedAssetId,
   UrlString,
 } from "./serialized-types";
-import type { AccountId, ChainId, Datetime } from "./types";
+import type { AccountId, AssetId, ChainId, Datetime } from "./types";
 
 /**
  * Serializes a {@link ChainId} value into its string representation.
@@ -51,5 +52,20 @@ export function serializeAccountId(accountId: AccountId): SerializedAccountId {
   return CaipAccountId.format({
     chainId: { namespace: "eip155", reference: accountId.chainId.toString() },
     address: accountId.address,
+  }).toLowerCase();
+}
+
+/**
+ * Serializes {@link AssetId} object.
+ *
+ * Formatted as a fully lowercase CAIP-19 AssetId.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export function serializeAssetId({ chainId, address, tokenId }: AssetId): SerializedAssetId {
+  return CaipAssetId.format({
+    chainId: { namespace: "eip155", reference: chainId.toString() },
+    assetName: { namespace: "erc1155", reference: address },
+    tokenId: tokenId.toString(),
   }).toLowerCase();
 }

@@ -1,7 +1,13 @@
 import { type Address, isHex, size } from "viem";
 import { z } from "zod/v4";
 
-import type { ChainId, Name, Node } from "@ensnode/ensnode-sdk";
+import {
+  type ChainId,
+  type InterpretedName,
+  isInterpretedName,
+  type Name,
+  type Node,
+} from "@ensnode/ensnode-sdk";
 import { makeChainIdSchema, makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/graphql-api/builder";
@@ -44,11 +50,20 @@ builder.scalarType("Node", {
 });
 
 builder.scalarType("Name", {
-  description: "Name represents a @ensnode/ensnode-sdk#Name.",
+  description: "Name represents a @ensnode/ensnode-sdk#InterpretedName.",
   serialize: (value: Name) => value,
   parseValue: (value) =>
-    z
-      .string() // TODO: additional validation, check with `isInterpretedName`
-      .transform((val) => val as Name)
+    z.coerce
+      .string()
+      .check((ctx) => {
+        if (!isInterpretedName(ctx.value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "Name must consist exclusively of Encoded LabelHashes or normalized labels.",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => val as InterpretedName)
       .parse(value),
 });

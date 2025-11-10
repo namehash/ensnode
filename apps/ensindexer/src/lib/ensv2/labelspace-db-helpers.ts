@@ -10,10 +10,10 @@ export async function ensureLabel(context: Context, label: LiteralLabel) {
   const labelHash = labelhash(label);
   const interpretedLabel = literalLabelToInterpretedLabel(label);
 
-  const existing = await context.db.find(schema.labelInNamespace, { labelHash });
+  const existing = await context.db.find(schema.label, { labelHash });
 
   await context.db
-    .insert(schema.labelInNamespace)
+    .insert(schema.label)
     .values({ labelHash, value: interpretedLabel })
     .onConflictDoUpdate({ value: interpretedLabel });
 

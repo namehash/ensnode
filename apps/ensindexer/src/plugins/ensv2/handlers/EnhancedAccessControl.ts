@@ -4,7 +4,7 @@ import type { Address } from "viem";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import { makeAccountId } from "@/lib/make-account-id";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -60,7 +60,7 @@ export default function () {
     }) => {
       const { resource, roleBitmap: roles, account: user } = event.args;
 
-      const accountId = makeAccountId(context, event);
+      const accountId = getThisAccountId(context, event);
       await ensurePermissionsResource(context, accountId, resource);
 
       const permissionsUserId: PermissionsUsersId = { ...accountId, resource, user };
@@ -87,7 +87,7 @@ export default function () {
     }) => {
       const { resource, roleBitmap: roles, account: user } = event.args;
 
-      const accountId = makeAccountId(context, event);
+      const accountId = getThisAccountId(context, event);
       await ensurePermissionsResource(context, accountId, resource);
 
       const permissionsUserId: PermissionsUsersId = { ...accountId, resource, user };
@@ -113,7 +113,7 @@ export default function () {
     }) => {
       const { resource, account: user } = event.args;
 
-      const accountId = makeAccountId(context, event);
+      const accountId = getThisAccountId(context, event);
       await ensurePermissionsResource(context, accountId, resource);
 
       const permissionsUserId: PermissionsUsersId = { ...accountId, resource, user };

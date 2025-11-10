@@ -1,44 +1,42 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: ignore unused resolve arguments */
 
-import config from "@/config";
-
-import { namehash } from "viem";
-
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
-import { serializeAccountId } from "@ensnode/ensnode-sdk";
+import { type ImplicitRegistryId, makeRegistryContractId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import type { RegistryContract } from "@/graphql-api/lib/db-types";
+import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
-import { NameInNamespaceRef, NameOrNodeInput } from "@/graphql-api/schema/name-in-namespace";
+import { DomainRef } from "@/graphql-api/schema/domain";
 import {
-  type RegistryContract,
   RegistryContractRef,
   RegistryIdInput,
-  RegistryInterface,
+  RegistryInterfaceRef,
 } from "@/graphql-api/schema/registry";
 import { db } from "@/lib/db";
+import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
 
 builder.queryType({
   fields: (t) => ({
-    /////////////////////////////////////////
-    // Get Name in Namespace by Node or FQDN
-    /////////////////////////////////////////
+    //////////////////////
+    // Get Domain by FQDN
+    //////////////////////
     name: t.field({
       description: "TODO",
-      type: NameInNamespaceRef,
+      type: DomainRef,
       args: {
-        id: t.arg({ type: NameOrNodeInput, required: true }),
+        fqdn: t.arg({ type: "Name", required: true }),
       },
+      nullable: true,
       resolve: async (parent, args, ctx, info) => {
-        // TODO(dataloader): just return node
-        // TODO: make sure `namehash` is encoded-label-hash-aware
-        const node = args.id.node ? args.id.node : namehash(args.id.name);
+        const domainId = await getDomainIdByInterpretedName(args.fqdn);
+        // TODO: traverse the namegraph to identify the addressed Domain
+        // TODO(dataloader): just return domainId
 
-        const name = await db.query.nameInNamespace.findFirst({
-          where: (t, { eq }) => eq(t.node, node),
+        if (!domainId) return null;
+
+        return await db.query.domain.findFirst({
+          where: (t, { eq }) => eq(t.id, domainId),
         });
-
-        return name;
       },
     }),
 
@@ -67,15 +65,15 @@ builder.queryType({
     //////////////////////
     registry: t.field({
       description: "TODO",
-      type: RegistryInterface,
+      type: RegistryInterfaceRef,
       args: {
         id: t.arg({ type: RegistryIdInput, required: true }),
       },
       resolve: async (parent, args, ctx, info) => {
         // TODO(dataloader): just return registryId
         const registryId = args.id.contract
-          ? serializeAccountId(args.id.contract)
-          : args.id.implicit.parent;
+          ? makeRegistryContractId(args.id.contract)
+          : (args.id.implicit.parent as ImplicitRegistryId); // TODO: move this case into scalar
 
         const registry = await db.query.registry.findFirst({
           where: (t, { eq }) => eq(t.id, registryId),
@@ -93,22 +91,9 @@ builder.queryType({
       description: "TODO",
       nullable: false,
       resolve: async () => {
-        // TODO: remove, helps types while implementing
-        if (config.ensIndexerPublicConfig.namespace !== "ens-test-env") throw new Error("nope");
-
         // TODO(dataloader): just return rootRegistry id
-        const datasource = getDatasource(
-          config.ensIndexerPublicConfig.namespace,
-          DatasourceNames.ENSRoot,
-        );
-
-        const registryId = serializeAccountId({
-          chainId: datasource.chain.id,
-          address: datasource.contracts.RootRegistry.address,
-        });
-
         const rootRegistry = await db.query.registry.findFirst({
-          where: (t, { eq }) => eq(t.id, registryId),
+          where: (t, { eq }) => eq(t.id, ROOT_REGISTRY_ID),
         });
 
         if (!rootRegistry) throw new Error(`Invariant: Root Registry expected.`);

@@ -20,7 +20,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { makeLogger } from "@/lib/logger";
-import { ENS_ROOT_REGISTRY } from "@/lib/protocol-acceleration/ens-root-registry";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
 import { getENSIP19ReverseNameRecordFromIndex } from "@/lib/protocol-acceleration/get-primary-name-from-index";
 import { getRecordsFromIndex } from "@/lib/protocol-acceleration/get-records-from-index";
@@ -38,6 +37,7 @@ import {
   interpretRawCallsAndResults,
   makeResolveCalls,
 } from "@/lib/resolution/resolve-calls-and-results";
+import { ROOT_REGISTRY } from "@/lib/root-registry";
 import { supportsENSIP10Interface } from "@/lib/rpc/ensip-10";
 import { getPublicClient } from "@/lib/rpc/public-client";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
@@ -87,7 +87,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 ): Promise<ForwardResolutionResult<SELECTION>> {
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
   // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, { ...options, registry: ENS_ROOT_REGISTRY });
+  return _resolveForward(name, selection, { ...options, registry: ROOT_REGISTRY });
 }
 
 /**

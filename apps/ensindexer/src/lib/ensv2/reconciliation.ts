@@ -1,9 +1,6 @@
 import type { Context } from "ponder:registry";
-import type schema from "ponder:schema";
 
-import type { LabelHash } from "@ensnode/ensnode-sdk";
-
-export type DomainId = Pick<typeof schema.domain.$inferSelect, "registryId" | "canonicalId">;
+import type { DomainId, LabelHash } from "@ensnode/ensnode-sdk";
 
 // for claude: context.db.sql is the Drizzle object
 // https://ponder.sh/docs/indexing/write#query-builder

@@ -1,31 +1,34 @@
-import type * as schema from "@ensnode/ensnode-schema";
-
 import { builder } from "@/graphql-api/builder";
+import type {
+  ImplicitRegistry,
+  Registry,
+  RegistryContract,
+  RegistryInterface,
+} from "@/graphql-api/lib/db-types";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DomainRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
-type RequiredAndNotNull<T, K extends keyof T> = T & {
-  [P in K]-?: NonNullable<T[P]>;
-};
-
-type _Registry = typeof schema.registry.$inferSelect;
-
-type Registry = Pick<_Registry, "type" | "id">;
-
-export type RegistryContract = Registry & RequiredAndNotNull<_Registry, "chainId" | "address">;
-export type ImplicitRegistry = Registry & RequiredAndNotNull<_Registry, "parentDomainNode">;
-
-export const RegistryInterface = builder.interfaceRef<Registry>("Registry");
-RegistryInterface.implement({
+export const RegistryInterfaceRef = builder.interfaceRef<Registry>("Registry");
+RegistryInterfaceRef.implement({
   description: "TODO",
   fields: (t) => ({
+    //////////////////////
+    // Registry.id
+    //////////////////////
+    id: t.field({
+      type: "ID",
+      description: "TODO",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
+
     //////////////////////
     // Registry.domain
     //////////////////////
     domain: t.field({
-      type: DomainRef,
+      type: [DomainRef],
       description: "TODO",
       nullable: true,
       resolve: (parent) => null,
@@ -48,8 +51,8 @@ RegistryInterface.implement({
 export const RegistryContractRef = builder.objectRef<RegistryContract>("RegistryContract");
 RegistryContractRef.implement({
   description: "A Registry Contract",
-  interfaces: [RegistryInterface],
-  isTypeOf: (value) => (value as _Registry).type === "RegistryContract",
+  interfaces: [RegistryInterfaceRef],
+  isTypeOf: (value) => (value as RegistryInterface).type === "RegistryContract",
   fields: (t) => ({
     ////////////////////////////////
     // RegistryContract.permissions
@@ -57,6 +60,7 @@ RegistryContractRef.implement({
     permissions: t.field({
       type: PermissionsRef,
       description: "TODO",
+      // TODO: render a RegistryPermissions model that parses the backing permissions into registry-semantic roles
       resolve: ({ chainId, address }) => null,
     }),
 
@@ -75,8 +79,8 @@ RegistryContractRef.implement({
 export const ImplicitRegistryRef = builder.objectRef<ImplicitRegistry>("ImplicitRegistry");
 ImplicitRegistryRef.implement({
   description: "An Implicit Registry",
-  interfaces: [RegistryInterface],
-  isTypeOf: (value) => (value as _Registry).type === "ImplicitRegistry",
+  interfaces: [RegistryInterfaceRef],
+  isTypeOf: (value) => (value as RegistryInterface).type === "ImplicitRegistry",
   fields: (t) => ({}),
 });
 

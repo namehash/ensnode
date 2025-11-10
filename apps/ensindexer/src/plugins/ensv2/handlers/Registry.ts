@@ -5,32 +5,24 @@ import { type Address, hexToBigInt, isAddressEqual, labelhash, zeroAddress } fro
 
 import {
   type AccountId,
+  getCanonicalId,
   type LiteralLabel,
+  makeENSv2DomainId,
   PluginName,
   serializeAccountId,
 } from "@ensnode/ensnode-sdk";
 
-import { ensureAccount } from "@/lib/ensv2/db-helpers";
+import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/labelspace-db-helpers";
 import {
-  type DomainId,
   reconcileDomainAddition,
   reconcileDomainRemoval,
   reconcileRegistryAddition,
   reconcileRegistryRemoval,
 } from "@/lib/ensv2/reconciliation";
-import { makeAccountId } from "@/lib/make-account-id";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-
-// will need to filter all ERC1155 events by whether a Registry entity exists already or not, to
-// avoid indexing literally all ERC1155 contracts on every chain. we still filter for those, which
-// is awful performance.. hmm...
-
-/**
- * A Domain's canonical ID is uint256(labelHash) with right-most 32 bits zero'd.
- */
-const getCanonicalId = (tokenId: bigint) => tokenId ^ (tokenId & 0xffffffffn);
 
 export default function () {
   ponder.on(
@@ -50,11 +42,11 @@ export default function () {
       const { tokenId, label: _label, expiration, registeredBy: registrant } = event.args;
       const label = _label as LiteralLabel;
 
-      const registryAccountId = makeAccountId(context, event);
+      const registryAccountId = getThisAccountId(context, event);
       const registryId = serializeAccountId(registryAccountId);
       const canonicalId = getCanonicalId(tokenId);
       const labelHash = labelhash(label);
-      const domainId: DomainId = { registryId, canonicalId };
+      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
       // Sanity Check: Canonical Id must match emitted label
       if (canonicalId !== getCanonicalId(hexToBigInt(labelhash(label)))) {
@@ -74,6 +66,7 @@ export default function () {
         );
       }
 
+      // upsert Registry
       await context.db
         .insert(schema.registry)
         .values({
@@ -83,11 +76,19 @@ export default function () {
         })
         .onConflictDoNothing();
 
+      // ensure discovered Label
       await ensureLabel(context, label);
-      await context.db.insert(schema.domain).values({ ...domainId, labelHash });
+
+      // insert Domain
+      await context.db
+        .insert(schema.domain)
+        .values({ id: domainId, registryId, labelHash, canonicalId });
+
+      // reconcile Domain addition
       await reconcileDomainAddition(context, domainId);
 
       // TODO: insert Registration entity for this domain as well: expiration, registrant
+      // ensure Registrant
       await ensureAccount(context, registrant);
     },
   );
@@ -106,17 +107,16 @@ export default function () {
     }) => {
       const { id: tokenId, subregistry } = event.args;
 
+      const registryAccountId = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
-      const registryAccountId = makeAccountId(context, event);
-      const registryId = serializeAccountId(registryAccountId);
-      const domainId: DomainId = { registryId, canonicalId };
+      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      const existing = await context.db.find(schema.domain, domainId);
+      const existing = await context.db.find(schema.domain, { id: domainId });
 
       // update domain's subregistry
       const isDeletion = isAddressEqual(subregistry, zeroAddress);
       if (isDeletion) {
-        await context.db.update(schema.domain, domainId).set({ subregistryId: null });
+        await context.db.update(schema.domain, { id: domainId }).set({ subregistryId: null });
 
         // reconcile the removal of this registry from the canonical nametree
         if (existing && existing.subregistryId !== null) {
@@ -126,7 +126,7 @@ export default function () {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
         const subregistryId = serializeAccountId(subregistryAccountId);
 
-        await context.db.update(schema.domain, domainId).set({ subregistryId });
+        await context.db.update(schema.domain, { id: domainId }).set({ subregistryId });
 
         // reconcile the addition of this registry to the canonical nametree
         if (existing?.subregistryId !== subregistryId) {
@@ -151,19 +151,18 @@ export default function () {
       const { id: tokenId, resolver } = event.args;
 
       const canonicalId = getCanonicalId(tokenId);
-      const registryAccountId = makeAccountId(context, event);
-      const registryId = serializeAccountId(registryAccountId);
-      const domainId: DomainId = { registryId, canonicalId };
+      const registryAccountId = getThisAccountId(context, event);
+      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
       // update domain's resolver
       const isDeletion = isAddressEqual(resolver, zeroAddress);
       if (isDeletion) {
         await context.db
-          .update(schema.domain, domainId)
+          .update(schema.domain, { id: domainId })
           .set({ resolverChainId: null, resolverAddress: null });
       } else {
         await context.db
-          .update(schema.domain, domainId)
+          .update(schema.domain, { id: domainId })
           .set({ resolverChainId: context.chain.id, resolverAddress: resolver });
       }
     },
@@ -184,11 +183,10 @@ export default function () {
       const { tokenId } = event.args;
 
       const canonicalId = getCanonicalId(tokenId);
-      const registryAccountId = makeAccountId(context, event);
-      const registryId = serializeAccountId(registryAccountId);
-      const domainId: DomainId = { registryId, canonicalId };
+      const registryAccountId = getThisAccountId(context, event);
+      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      await context.db.delete(schema.domain, domainId);
+      await context.db.delete(schema.domain, { id: domainId });
       // TODO: delete registration (?)
       await reconcileDomainRemoval(context, domainId);
     },
@@ -204,18 +202,36 @@ export default function () {
     const { id: tokenId, to: owner } = event.args;
 
     const canonicalId = getCanonicalId(tokenId);
-    const registryAccountId = makeAccountId(context, event);
-    const registryId = serializeAccountId(registryAccountId);
-    const domainId: DomainId = { registryId, canonicalId };
+    const registryAccountId = getThisAccountId(context, event);
+    const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
     // just update the owner, NameBurned handles existence
-    await context.db.update(schema.domain, domainId).set({ ownerId: owner });
+    await context.db.update(schema.domain, { id: domainId }).set({ ownerId: owner });
   }
 
-  ponder.on(namespaceContract(PluginName.ENSv2, "Registry:TransferSingle"), handleTransferSingle);
+  ponder.on(
+    namespaceContract(PluginName.ENSv2, "Registry:TransferSingle"),
+    async ({ context, event }) => {
+      const registryAccountId = getThisAccountId(context, event);
+      const registryId = serializeAccountId(registryAccountId);
+
+      // TODO(registry-announcement): ideally remove this
+      const registry = await context.db.find(schema.registry, { id: registryId });
+      if (registry === null) return; // no-op non-Registry ERC1155 Transfers
+
+      await handleTransferSingle({ context, event });
+    },
+  );
   ponder.on(
     namespaceContract(PluginName.ENSv2, "Registry:TransferBatch"),
     async ({ context, event }) => {
+      const registryAccountId = getThisAccountId(context, event);
+      const registryId = serializeAccountId(registryAccountId);
+
+      // TODO(registry-announcement): ideally remove this
+      const registry = await context.db.find(schema.registry, { id: registryId });
+      if (registry === null) return; // no-op non-Registry ERC1155 Transfers
+
       for (const id of event.args.ids) {
         await handleTransferSingle({
           context,

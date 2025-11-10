@@ -1,11 +1,17 @@
+import { isHex } from "viem";
+import { labelhash } from "viem/ens";
+
 import {
   encodeLabelHash,
   type InterpretedLabel,
   type InterpretedName,
   isNormalizedLabel,
   type Label,
+  type LabelHash,
+  type LabelPath,
   type LiteralLabel,
   type LiteralName,
+  type Name,
 } from "../ens";
 import { labelhashLiteralLabel } from "./labelhash";
 
@@ -65,4 +71,58 @@ export function interpretedLabelsToInterpretedName(labels: InterpretedLabel[]): 
  */
 export function literalLabelsToLiteralName(labels: LiteralLabel[]): LiteralName {
   return labels.join(".") as LiteralName;
+}
+
+/**
+ * Converts an Interpreted Name into a list of Interpreted Labels.
+ */
+export function interpretedNameToInterpretedLabels(name: InterpretedName): InterpretedLabel[] {
+  return name.split(".") as InterpretedLabel[];
+}
+
+// https://github.com/wevm/viem/blob/main/src/utils/ens/encodedLabelToLabelhash.ts
+export function encodedLabelToLabelhash(label: string): LabelHash | null {
+  if (label.length !== 66) return null;
+  if (label.indexOf("[") !== 0) return null;
+  if (label.indexOf("]") !== 65) return null;
+  const hash = `0x${label.slice(1, 65)}`;
+  if (!isHex(hash)) return null;
+  return hash;
+}
+
+export function isInterpetedLabel(label: Label): label is InterpretedLabel {
+  // if it looks like an encoded labelhash, it must be one
+  if (label.startsWith("[")) {
+    const labelHash = encodedLabelToLabelhash(label);
+    if (labelHash === null) return false;
+  }
+
+  // otherwise label must be normalized
+  return isNormalizedLabel(label);
+}
+
+export function isInterpretedName(name: Name): name is InterpretedName {
+  return name.split(".").every(isInterpetedLabel);
+}
+
+/**
+ * Converts an InterpretedName into a LabelPath.
+ */
+export function interpretedNameToLabelPath(name: InterpretedName): LabelPath {
+  return interpretedNameToInterpretedLabels(name)
+    .map((label) => {
+      if (!isInterpetedLabel) {
+        throw new Error(
+          `Invariant(interpretedNameToLabelPath): Expected InterpretedLabel, received '${label}'.`,
+        );
+      }
+
+      // if it looks like an encoded labelhash, return it
+      const maybeLabelHash = encodedLabelToLabelhash(label);
+      if (maybeLabelHash !== null) return maybeLabelHash;
+
+      // otherwise, labelhash it
+      return labelhash(label);
+    })
+    .toReversed();
 }

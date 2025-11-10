@@ -21,8 +21,9 @@ import {
   type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
+import { sortByArrayOrder } from "@/graphql-api/lib/sort-by-array-order";
 import { db } from "@/lib/db";
-import { isENSRootRegistry } from "@/lib/protocol-acceleration/ens-root-registry";
+import { isRootRegistry } from "@/lib/root-registry";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 type FindResolverResult =
@@ -72,7 +73,7 @@ export async function findResolver({
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isENSRootRegistry(registry)) {
+  if (!isRootRegistry(registry)) {
     throw new Error(
       `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
@@ -208,9 +209,7 @@ async function findResolverWithIndex(
       );
 
       // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
-      nodeResolverRelations.sort((a, b) =>
-        nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1,
-      );
+      nodeResolverRelations.sort(sortByArrayOrder(nodes, (nrr) => nrr.node));
 
       // 4. iterate up the hierarchy and return the first valid resolver
       for (const { node, resolver } of nodeResolverRelations) {

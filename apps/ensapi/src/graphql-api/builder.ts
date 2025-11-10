@@ -1,7 +1,7 @@
 import SchemaBuilder from "@pothos/core";
 import type { Address } from "viem";
 
-import type { ChainId, Name, Node } from "@ensnode/ensnode-sdk";
+import type { ChainId, InterpretedName, Node } from "@ensnode/ensnode-sdk";
 
 export const builder = new SchemaBuilder<{
   Scalars: {
@@ -9,6 +9,6 @@ export const builder = new SchemaBuilder<{
     Address: { Input: Address; Output: Address };
     ChainId: { Input: ChainId; Output: ChainId };
     Node: { Input: Node; Output: Node };
-    Name: { Input: Name; Output: Name };
+    Name: { Input: InterpretedName; Output: InterpretedName };
   };
 }>({});

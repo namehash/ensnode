@@ -5,6 +5,7 @@ export * from "./ens";
 export * from "./ensapi";
 export * from "./ensindexer";
 export * from "./ensrainbow";
+export * from "./ensv2";
 export * from "./identity";
 export * from "./registrars";
 export * from "./resolution";
