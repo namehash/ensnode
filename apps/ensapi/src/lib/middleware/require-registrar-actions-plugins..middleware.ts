@@ -1,6 +1,12 @@
 import config from "@/config";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
+import {
+  IndexingStatusResponseCodes,
+  OmnichainIndexingStatusIds,
+  PluginName,
+  RegistrarActionsResponseCodes,
+  serializeRegistrarActionsResponse,
+} from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
 
@@ -28,20 +34,67 @@ const requiredPlugins = [
  */
 export const requireRegistrarActionsPluginMiddleware = () =>
   factory.createMiddleware(async (c, next) => {
-    if (c.var.isRealtime === undefined) {
-      throw new Error(
-        `Invariant(requireRegistrarActionsPluginMiddleware): isRealtimeMiddleware expected`,
-      );
-    }
-
     const allRequiredPluginsActive = requiredPlugins.every((plugin) =>
       config.ensIndexerPublicConfig.plugins.includes(plugin),
     );
 
-    if (!allRequiredPluginsActive || !c.var.isRealtime) {
-      // Otherwise, return a not found response.
-      return c.notFound();
+    if (!allRequiredPluginsActive) {
+      return c.json(
+        serializeRegistrarActionsResponse({
+          responseCode: RegistrarActionsResponseCodes.Error,
+          error: {
+            message: `Registrar Actions API is not available`,
+            details: `Connected ENSIndexer must have all following plugins active: ${requiredPlugins.join(", ")}`,
+          },
+        }),
+      );
     }
+
+    if (c.var.indexingStatus.isRejected) {
+      return c.json(
+        serializeRegistrarActionsResponse({
+          responseCode: RegistrarActionsResponseCodes.Error,
+          error: {
+            message: `Registrar Actions API is not available`,
+            details: `Connected ENSIndexer must make its Indexing Status API ready for connections.`,
+          },
+        }),
+      );
+    }
+
+    const indexingStatusResponse = c.var.indexingStatus.value;
+
+    if (indexingStatusResponse.responseCode === IndexingStatusResponseCodes.Error) {
+      return c.json(
+        serializeRegistrarActionsResponse({
+          responseCode: RegistrarActionsResponseCodes.Error,
+          error: {
+            message: `Registrar Actions API is not available`,
+            details: `Connected ENSIndexer must serve its Indexing Status`,
+          },
+        }),
+      );
+    }
+
+    const { omnichainStatus } =
+      indexingStatusResponse.realtimeProjection.snapshot.omnichainSnapshot;
+
+    // Database indexes are created by the time the omnichain indexing status
+    // is either `completed` or `following`.
+    const ensIndexerDatabaseIndexesCreated =
+      omnichainStatus === OmnichainIndexingStatusIds.Completed ||
+      omnichainStatus === OmnichainIndexingStatusIds.Following;
+
+    if (!ensIndexerDatabaseIndexesCreated)
+      return c.json(
+        serializeRegistrarActionsResponse({
+          responseCode: RegistrarActionsResponseCodes.Error,
+          error: {
+            message: `Registrar Actions API is not available`,
+            details: `Connected ENSIndexer must have database indexes created.`,
+          },
+        }),
+      );
 
     await next();
   });

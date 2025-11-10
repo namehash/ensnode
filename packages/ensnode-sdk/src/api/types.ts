@@ -3,7 +3,11 @@ import type z from "zod/v4";
 import type { Node } from "../ens";
 import type { ENSApiPublicConfig } from "../ensapi";
 import type { RealtimeIndexingStatusProjection } from "../ensindexer";
-import type { RegistrarAction, RegistrationLifecycleDomain } from "../registrars";
+import type {
+  RegistrarAction,
+  RegistrationLifecycle,
+  RegistrationLifecycleDomain,
+} from "../registrars";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -138,9 +142,57 @@ export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusRe
  */
 
 /**
+ * Records Filters: Comparators
+ */
+export const RegistrarActionsFilterComparators = {
+  EqualsTo: "eq",
+} as const;
+
+export type RegistrarActionsFilterComparator =
+  (typeof RegistrarActionsFilterComparators)[keyof typeof RegistrarActionsFilterComparators];
+
+/**
+ * Records Filters: Fields
+ */
+export const RegistrarActionsFilterFields = {
+  SubregistryNode: "registrationLifecycle.subregistry.node",
+} as const;
+
+export type RegistrarActionsFilterField =
+  (typeof RegistrarActionsFilterFields)[keyof typeof RegistrarActionsFilterFields];
+
+export type RegistrarActionsFilter = {
+  field: typeof RegistrarActionsFilterFields.SubregistryNode;
+  comparator: typeof RegistrarActionsFilterComparators.EqualsTo;
+  value: Node;
+};
+
+/**
+ * Records Orders
+ */
+export const RegistrarActionsOrders = {
+  LatestRegistrarActions: "orderBy[timestamp]=desc",
+} as const;
+
+export type RegistrarActionsOrder =
+  (typeof RegistrarActionsOrders)[keyof typeof RegistrarActionsOrders];
+
+/**
  * Represents a request to Registrar Actions API.
  */
-export type RegistrarActionsRequest = {};
+export type RegistrarActionsRequest = {
+  filter?: RegistrarActionsFilter;
+
+  /**
+   * Order applied while generating results.
+   */
+  order?: RegistrarActionsOrder;
+
+  /**
+   * Limit results to selected count of records.
+   */
+  limit?: number;
+};
 
 /**
  * A status code for indexing status responses.
@@ -164,20 +216,44 @@ export type RegistrarActionsResponseCode =
   (typeof RegistrarActionsResponseCodes)[keyof typeof RegistrarActionsResponseCodes];
 
 /**
+ * Registration Lifecycle with Domain
+ */
+export interface RegistrationLifecycleWithDomain extends RegistrationLifecycle {
+  /**
+   * Domain
+   *
+   * Represents Domain details associated with the Registration Lifecycle.
+   */
+  domain: RegistrationLifecycleDomain;
+}
+
+/**
+ * "Logical registrar action" with domain details.
+ */
+export interface RegistrarActionWithDomain extends RegistrarAction {
+  /**
+   * Registration Lifecycle
+   *
+   * Represents the associated registration lifecycle, including domain details.
+   */
+  registrationLifecycle: RegistrationLifecycleWithDomain;
+}
+
+/**
  * A response when Registrar Actions are available.
  */
 export type RegistrarActionsResponseOk = {
   responseCode: typeof RegistrarActionsResponseCodes.Ok;
-  registrarActions: RegistrarAction[];
-  registrationLifecycleDomains: Record<Node, RegistrationLifecycleDomain>;
+  registrarActions: RegistrarActionWithDomain[];
 };
 
 /**
  * A response when Registrar Actions are unavailable.
  */
-export type RegistrarActionsResponseError = {
+export interface RegistrarActionsResponseError {
   responseCode: typeof IndexingStatusResponseCodes.Error;
-};
+  error: ErrorResponse;
+}
 
 /**
  * Registrar Actions response.

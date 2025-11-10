@@ -1,11 +1,17 @@
 import type { SerializedRealtimeIndexingStatusProjection } from "../ensindexer";
-import type { SerializedRegistrarAction } from "../registrars";
+import type {
+  RegistrationLifecycleDomain,
+  SerializedRegistrarAction,
+  SerializedRegistrationLifecycle,
+} from "../registrars";
 import {
   IndexingStatusResponse,
   type IndexingStatusResponseError,
   type IndexingStatusResponseOk,
   type RegistrarActionsResponseError,
   type RegistrarActionsResponseOk,
+  RegistrarActionWithDomain,
+  RegistrationLifecycleWithDomain,
 } from "./types";
 
 /**
@@ -34,11 +40,25 @@ export type SerializedIndexingStatusResponse =
 export type SerializedRegistrarActionsResponseError = RegistrarActionsResponseError;
 
 /**
+ * Serialized representation of {@link RegistrationLifecycleWithDomain}.
+ */
+export interface SerializedRegistrationLifecycleWithDomain extends SerializedRegistrationLifecycle {
+  domain: RegistrationLifecycleDomain;
+}
+
+/**
+ * Serialized representation of {@link RegistrarActionWithDomain}.
+ */
+export interface SerializedRegistrarActionWithDomain extends SerializedRegistrarAction {
+  registrationLifecycle: SerializedRegistrationLifecycleWithDomain;
+}
+
+/**
  * Serialized representation of {@link RegistrarActionsResponseOk}.
  */
 export interface SerializedRegistrarActionsResponseOk
   extends Omit<RegistrarActionsResponseOk, "registrarActions"> {
-  registrarActions: SerializedRegistrarAction[];
+  registrarActions: SerializedRegistrarActionWithDomain[];
 }
 
 /**
