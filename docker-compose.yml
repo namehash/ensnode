@@ -27,32 +27,32 @@ services:
       postgres:
         condition: service_started
 
-  # ensapi:
-  #   container_name: ensapi
-  #   image: ghcr.io/namehash/ensnode/ensapi:latest
-  #   ports:
-  #     - "4334:4334"
-  #   environment:
-  #     # Override environment variables to point to docker instances
-  #     DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
-  #     ENSINDEXER_URL: http://ensindexer:42069
-  #   env_file:
-  #     # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
-  #     # Copy .env.local.example to .env.local and configure all required values
-  #     - path: ./apps/ensapi/.env.local
-  #       required: true
-  #   healthcheck:
-  #     test: ["CMD", "curl", "--fail", "-s", "http://localhost:4334/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 1m
-  #     start_interval: 1s
-  #   depends_on:
-  #     ensindexer:
-  #       condition: service_healthy
-  #     postgres:
-  #       condition: service_started
+  ensapi:
+    container_name: ensapi
+    image: ghcr.io/namehash/ensnode/ensapi:latest
+    ports:
+      - "4334:4334"
+    environment:
+      # Override environment variables to point to docker instances
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
+      ENSINDEXER_URL: http://ensindexer:42069
+    env_file:
+      # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
+      # Copy .env.local.example to .env.local and configure all required values
+      - path: ./apps/ensapi/.env.local
+        required: true
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-s", "http://localhost:4334/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+      start_interval: 1s
+    depends_on:
+      ensindexer:
+        condition: service_healthy
+      postgres:
+        condition: service_started
 
   ensrainbow:
     container_name: ensrainbow
@@ -74,24 +74,24 @@ services:
       start_period: 20m
       start_interval: 1s
 
-  # ensadmin:
-  #   container_name: ensadmin
-  #   image: ghcr.io/namehash/ensnode/ensadmin:latest
-  #   ports:
-  #     - "4173:4173"
-  #   environment:
-  #     # Override environment variables to point to docker instances
-  #     # NOTE: must be host-accessible (i.e. http://localhost)
-  #     ENSADMIN_PUBLIC_URL: http://localhost:4173
-  #     # NOTE: must be host-accessible (i.e. http://localhost)
-  #     NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY: http://localhost:4334
-  #   env_file:
-  #     # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
-  #     - path: ./apps/ensadmin/.env.local
-  #       required: false
-  #   depends_on:
-  #     ensapi:
-  #       condition: service_started
+  ensadmin:
+    container_name: ensadmin
+    image: ghcr.io/namehash/ensnode/ensadmin:latest
+    ports:
+      - "4173:4173"
+    environment:
+      # Override environment variables to point to docker instances
+      # NOTE: must be host-accessible (i.e. http://localhost)
+      ENSADMIN_PUBLIC_URL: http://localhost:4173
+      # NOTE: must be host-accessible (i.e. http://localhost)
+      NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY: http://localhost:4334
+    env_file:
+      # NOTE: can define apps/ensadmin/.env.local (see apps/ensadmin/.env.local.example)
+      - path: ./apps/ensadmin/.env.local
+        required: false
+    depends_on:
+      ensapi:
+        condition: service_started
 
   postgres:
     container_name: postgres
