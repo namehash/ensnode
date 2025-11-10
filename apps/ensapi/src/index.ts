@@ -8,12 +8,12 @@ import { cors } from "hono/cors";
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
 import { redactEnsApiConfig } from "@/config/redact";
-import { cacheService } from "@/lib/ensanalytics/cache";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { fetcher as referrersCacheFetcher } from "@/middleware/referrers-cache.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
@@ -48,24 +48,7 @@ app.route("/ensanalytics", ensanalyticsApi);
 
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  const cache = cacheService.getCache();
-  const ensanalyticsOk = cacheService.isCacheReady();
-
-  // overall health is ok only if all subservices are healthy
-  const allOk = ensanalyticsOk;
-
-  return c.json({
-    ok: allOk,
-    ensanalytics: {
-      ok: ensanalyticsOk,
-      cache: cache
-        ? {
-            totalReferrers: cache.referrers.length,
-            updatedAt: cache.updatedAt,
-          }
-        : null,
-    },
-  });
+  return c.json({ ok: true });
 });
 
 // log hono errors to console
@@ -76,12 +59,6 @@ app.onError((error, ctx) => {
 
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
-
-// initialize ENSAnalytics cache service
-cacheService.initialize().catch((error) => {
-  logger.error({ error }, "Failed to initialize ENSAnalytics cache service");
-  // Don't exit - let the service run without analytics
-});
 
 // start hono server
 const server = serve(
@@ -96,6 +73,16 @@ const server = serve(
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
+
+    // warm start ENSAnalytics referrers cache
+    logger.info("Warming up ENSAnalytics referrers cache...");
+    try {
+      const cache = await referrersCacheFetcher();
+      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.length} referrers`);
+    } catch (error) {
+      logger.error({ error }, "Failed to warm up ENSAnalytics cache");
+      // Don't exit - let the service run without pre-warmed analytics
+    }
   },
 );
 
@@ -111,7 +98,6 @@ const closeServer = () =>
 // perform graceful shutdown
 const gracefulShutdown = async () => {
   try {
-    await cacheService.shutdown();
     await sdk.shutdown();
     await closeServer();
 

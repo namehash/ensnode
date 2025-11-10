@@ -1,14 +1,17 @@
 import { z } from "zod/v4";
 
-import { cacheService } from "@/lib/ensanalytics/cache";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
+import { referrersCacheMiddleware } from "@/middleware/referrers-cache.middleware";
 
 const DEFAULT_PAGINATION_LIMIT = 25;
 const MAX_PAGINATION_LIMIT = 100;
 
 const app = factory.createApp();
+
+// Apply referrers cache middleware to all routes in this handler
+app.use(referrersCacheMiddleware);
 
 // Pagination query parameters schema
 const paginationQuerySchema = z.object({
@@ -27,25 +30,37 @@ const paginationQuerySchema = z.object({
 // Get top referrers with pagination
 app.get("/top-referrers", validate("query", paginationQuerySchema), (c) => {
   try {
-    // Check if cache is ready
-    if (!cacheService.isCacheReady()) {
-      return c.json({ error: "Cache not ready. Service is still initializing." }, 500);
-    }
-
-    // Get validated query parameters
+    const cache = c.var.referrersCache;
     const { page, limit } = c.req.valid("query");
 
-    // Get paginated results from cache
-    const result = cacheService.getTopReferrers(page, limit);
+    // Calculate total pages
+    const totalPages = Math.ceil(cache.referrers.length / limit);
+    
+    // Check if requested page exceeds available pages
+    if (page > totalPages && cache.referrers.length > 0) {
+      return c.json(
+        { 
+          error: "Page out of range", 
+          message: `Requested page ${page} exceeds total pages ${totalPages}`,
+          totalPages,
+        }, 
+        400
+      );
+    }
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedReferrers = cache.referrers.slice(startIndex, endIndex);
 
     return c.json({
-      referrers: result.referrers,
-      total: result.total,
-      page: result.page,
-      limit: result.limit,
-      hasNext: result.hasNext,
-      hasPrev: result.hasPrev,
-      updatedAt: result.updatedAt,
+      referrers: paginatedReferrers,
+      total: cache.referrers.length,
+      page,
+      limit,
+      totalPages,
+      hasNext: endIndex < cache.referrers.length,
+      hasPrev: page > 1,
+      updatedAt: cache.updatedAt,
     });
   } catch (error) {
     logger.error({ error }, "Error in /ensanalytics/top-referrers endpoint");
