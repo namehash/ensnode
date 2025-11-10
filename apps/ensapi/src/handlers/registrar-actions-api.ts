@@ -10,7 +10,6 @@ import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { requireRegistrarActionsPluginMiddleware } from "@/lib/middleware/require-registrar-actions-plugins..middleware";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
-import { findRegistrationLifecycleDomains } from "@/lib/registrar-actions/find-registration-lifecycle-domians";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
 const app = factory.createApp();
@@ -25,39 +24,18 @@ app.use(makeIsRealtimeMiddleware("registrar-actions-api", MAX_REALTIME_DISTANCE)
 app.use(requireRegistrarActionsPluginMiddleware());
 
 /**
- * Latest Registrar Actions
+ * Get Registrar Actions
  */
-app.get("/latest", async (c) => {
+app.get("/", async (c) => {
   try {
-    // 1. Find the latest "logical registrar actions".
+    // Find the latest "logical registrar actions".
     const registrarActions = await findRegistrarActions();
-
-    // 2. a) For each "logical registrar action"
-    const registrarActionNodes = registrarActions.map(
-      ({ registrationLifecycle }) => registrationLifecycle.node,
-    );
-    // 2. b) Find the associated Registrar Lifecycle Domain info.
-    const registrationLifecycleDomains =
-      await findRegistrationLifecycleDomains(registrarActionNodes);
-
-    // Invariant: each "logical registrar action" must have its
-    // own Registrar Lifecycle Domain counterpart.
-    const eachRegistrarActionHasItsOwnDomain = registrarActionNodes.every(
-      (node) => typeof registrationLifecycleDomains[node] !== "undefined",
-    );
-
-    if (!eachRegistrarActionHasItsOwnDomain) {
-      throw new Error(
-        `Each "logical registrar action" must have its own Registrar Lifecycle Domain counterpart.`,
-      );
-    }
 
     // respond with success response
     return c.json(
       serializeRegistrarActionsResponse({
         responseCode: RegistrarActionsResponseCodes.Ok,
         registrarActions,
-        registrationLifecycleDomains,
       } satisfies RegistrarActionsResponseOk),
     );
   } catch (error) {

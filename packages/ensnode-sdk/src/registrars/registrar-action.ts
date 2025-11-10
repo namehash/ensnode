@@ -19,7 +19,8 @@ import {
 } from "./registration-lifecycle";
 
 /**
- * Globally unique, deterministic ID of an indexed onchain event.
+ * Globally unique, deterministic ID of an indexed onchain event
+ * associated with the "logical registrar action".
  */
 export type RegistrarActionEventId = string;
 

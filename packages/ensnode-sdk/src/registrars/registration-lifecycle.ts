@@ -79,7 +79,7 @@ export interface RegistrationLifecycleDomain {
   /**
    * Subname
    *
-   * A child name like `sub.name.eth`, whose parent is `name.eth`.
+   * Subname of the domain associated with the Registration Lifecycle.
    */
   subname: InterpretedLabel;
 

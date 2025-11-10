@@ -5,13 +5,15 @@ import {
   type BlockRef,
   bigIntToNumber,
   deserializeAccountId,
+  type InterpretedLabel,
+  type InterpretedName,
   priceEth,
-  type RegistrarAction,
   type RegistrarActionPricingAvailable,
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralAvailable,
   type RegistrarActionReferralNotApplicable,
-  type RegistrationLifecycle,
+  type RegistrarActionWithDomain,
+  type RegistrationLifecycleWithDomain,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
@@ -28,14 +30,14 @@ const findRegistrarActionsDefaultOptions = {
 } satisfies FindRegistrarActionsOptions;
 
 /**
- * Find Registrar Actions.
+ * Find Registrar Actions, including Domain info
  *
  * @param {SQL} options.orderBy configures which column and order apply to results.
  * @param {number} options.limit configures how many items to include in results.
  */
 export async function findRegistrarActions(
   options: FindRegistrarActionsOptions = findRegistrarActionsDefaultOptions,
-): Promise<RegistrarAction[]> {
+): Promise<RegistrarActionWithDomain[]> {
   const {
     orderBy = findRegistrarActionsDefaultOptions.orderBy,
     limit = findRegistrarActionsDefaultOptions.limit,
@@ -46,12 +48,23 @@ export async function findRegistrarActions(
       registrarActions: schema.registrarActions,
       registrationLifecycles: schema.registrationLifecycles,
       subregistries: schema.subregistries,
+      domain: {
+        labelName: schema.subgraph_domain.labelName,
+        name: schema.subgraph_domain.name,
+      },
     })
     .from(schema.registrarActions)
+    // join Registration Lifecycles associated with Registrar Actions
     .innerJoin(
       schema.registrationLifecycles,
       eq(schema.registrarActions.node, schema.registrationLifecycles.node),
     )
+    // join Domains associated with Registration Lifecycles
+    .innerJoin(
+      schema.subgraph_domain,
+      eq(schema.registrationLifecycles.node, schema.subgraph_domain.id),
+    )
+    // join Subregistries associated with Registration Lifecycles
     .innerJoin(
       schema.subregistries,
       eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
@@ -59,9 +72,23 @@ export async function findRegistrarActions(
     .orderBy(orderBy)
     .limit(limit);
 
-  const registrarActions: RegistrarAction[] = [];
+  const registrarActions: RegistrarActionWithDomain[] = [];
 
   for (const record of records) {
+    // Invariant: The `label` of the Domain associated with the `node` must exist.
+    if (record.domain.labelName === null) {
+      throw new Error(
+        `Domain 'label' must exists for '${record.registrationLifecycles.node}' node.`,
+      );
+    }
+
+    // Invariant: The FQDN `name` of the Domain associated with the `node` must exist.
+    if (!record.domain.name === null) {
+      throw new Error(
+        `Domain 'name' must exists for '${record.registrationLifecycles.node}' node.`,
+      );
+    }
+
     // build Registration Lifecycle object
     const registrationLifecycle = {
       subregistry: {
@@ -70,7 +97,11 @@ export async function findRegistrarActions(
       },
       node: record.registrationLifecycles.node,
       expiresAt: bigIntToNumber(record.registrationLifecycles.expiresAt),
-    } satisfies RegistrationLifecycle;
+      domain: {
+        subname: record.domain.labelName as InterpretedLabel,
+        name: record.domain.name as InterpretedName,
+      },
+    } satisfies RegistrationLifecycleWithDomain;
 
     // build pricing object
     const { baseCost, premium, total } = record.registrarActions;
@@ -120,7 +151,7 @@ export async function findRegistrarActions(
       block,
       transactionHash: record.registrarActions.transactionHash,
       eventIds: record.registrarActions.eventIds as [string, ...string[]],
-    } satisfies RegistrarAction;
+    } satisfies RegistrarActionWithDomain;
 
     registrarActions.push(registrarAction);
   }
