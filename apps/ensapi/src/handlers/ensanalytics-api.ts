@@ -35,16 +35,16 @@ app.get("/top-referrers", validate("query", paginationQuerySchema), (c) => {
 
     // Calculate total pages
     const totalPages = Math.ceil(cache.referrers.length / limit);
-    
+
     // Check if requested page exceeds available pages
     if (page > totalPages && cache.referrers.length > 0) {
       return c.json(
-        { 
-          error: "Page out of range", 
+        {
+          error: "Page out of range",
           message: `Requested page ${page} exceeds total pages ${totalPages}`,
           totalPages,
-        }, 
-        400
+        },
+        400,
       );
     }
 

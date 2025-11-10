@@ -6,5 +6,8 @@ import type { IsRealtimeVariables } from "@/middleware/is-realtime.middleware";
 import type { ReferrersCacheVariables } from "@/middleware/referrers-cache.middleware";
 
 export const factory = createFactory<{
-  Variables: IndexingStatusVariables & IsRealtimeVariables & CanAccelerateVariables & ReferrersCacheVariables;
+  Variables: IndexingStatusVariables &
+    IsRealtimeVariables &
+    CanAccelerateVariables &
+    ReferrersCacheVariables;
 }>();

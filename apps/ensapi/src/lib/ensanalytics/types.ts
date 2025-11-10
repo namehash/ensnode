@@ -1,15 +1,17 @@
 import type { Address } from "viem";
 
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 /**
- * Represents data for a single referrer and their referral count
+ * Represents data for a single referrer and their referral metrics
  */
 export interface ReferrerData {
   /** The Ethereum address of the referrer */
   referrer: Address;
-  /** The total number of referrals made by this referrer */
+  /** The total number of qualified referrals made by this referrer */
   totalReferrals: number;
+  /** The total incremental duration (in seconds) of all referrals made by this referrer */
+  totalIncrementalDuration: Duration;
 }
 
 /**
@@ -37,7 +39,7 @@ export interface PaginatedReferrers {
  * All fields are updated atomically when the cache is refreshed.
  */
 export interface ReferrerCache {
-  /** Array of all referrer data sorted by total referrals */
+  /** Array of all referrer data sorted by total incremental duration (descending) */
   referrers: ReferrerData[];
   /** Unix timestamp of when the cache was last updated */
   updatedAt: UnixTimestamp;
