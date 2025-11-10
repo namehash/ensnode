@@ -1,5 +1,6 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
+import { getUnixTime } from "date-fns";
 import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
@@ -12,6 +13,7 @@ import {
   EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeENSIndexerPublicConfigSchema,
+  makeUnixTimestampSchema,
   PortSchema,
   RpcConfigsSchema,
   TheGraphApiKeySchema,
@@ -42,6 +44,26 @@ export const DatabaseUrlSchema = z.string().refine(
   },
 );
 
+const DateStringToUnixTimestampSchema = z
+  .string()
+  .refine(
+    (dateStr) => {
+      try {
+        const date = new Date(dateStr);
+        return !Number.isNaN(date.getTime());
+      } catch {
+        return false;
+      }
+    },
+    {
+      error: "Invalid date string. Expected a valid date format (e.g., 'Dec 1, 2025 00:00:00 UTC')",
+    },
+  )
+  .transform((dateStr) => {
+    const timestamp = getUnixTime(new Date(dateStr));
+    return makeUnixTimestampSchema().parse(timestamp);
+  });
+
 const EnsApiConfigSchema = z
   .object({
     port: PortSchema.default(ENSApi_DEFAULT_PORT),
@@ -52,6 +74,12 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
+    ensAwardsStart: DateStringToUnixTimestampSchema.default(() =>
+      getUnixTime(new Date("Dec 1, 2025 00:00:00 UTC")),
+    ),
+    ensAwardsEnd: DateStringToUnixTimestampSchema.default(() =>
+      getUnixTime(new Date("Dec 31, 2025 23:59:59 UTC")),
+    ),
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);
@@ -89,6 +117,8 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
+      ensAwardsStart: env.ENSAWARDS_START,
+      ensAwardsEnd: env.ENSAWARDS_END,
     });
   } catch (error) {
     if (error instanceof ZodError) {

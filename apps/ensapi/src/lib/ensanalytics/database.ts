@@ -1,7 +1,6 @@
 import config from "@/config";
 
-import { getUnixTime } from "date-fns";
-import { and, count, desc, eq, gte, isNotNull, lt, ne, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { type Address, zeroAddress } from "viem";
 
 import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
@@ -11,9 +10,6 @@ import { type AccountId, deserializeDuration, serializeAccountId } from "@ensnod
 import { db } from "@/lib/db";
 import type { ReferrerData } from "@/lib/ensanalytics/types";
 import logger from "@/lib/logger";
-
-const START_DATE = getUnixTime(new Date("2025-01-01T00:00:00.000Z"));
-const END_DATE = getUnixTime(new Date("2026-01-01T00:00:00.000Z"));
 
 /**
  * Gets the BaseRegistrar contract AccountId for the configured namespace.
@@ -73,8 +69,8 @@ export async function getTopReferrers(): Promise<ReferrerData[]> {
       .where(
         and(
           // Filter by timestamp range
-          gte(schema.registrarActions.timestamp, BigInt(START_DATE)),
-          lt(schema.registrarActions.timestamp, BigInt(END_DATE)),
+          gte(schema.registrarActions.timestamp, BigInt(config.ensAwardsStart)),
+          lte(schema.registrarActions.timestamp, BigInt(config.ensAwardsEnd)),
           // Filter by decodedReferrer not null
           isNotNull(schema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address

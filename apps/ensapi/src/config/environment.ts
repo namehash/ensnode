@@ -1,5 +1,6 @@
 import type {
   DatabaseEnvironment,
+  EnsAwardsEnvironment,
   EnsIndexerUrlEnvironment,
   LogLevelEnvironment,
   PortEnvironment,
@@ -19,4 +20,5 @@ export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   RpcEnvironment &
   PortEnvironment &
   LogLevelEnvironment &
-  TheGraphEnvironment;
+  TheGraphEnvironment &
+  EnsAwardsEnvironment;

@@ -36,6 +36,9 @@ services:
       # Override environment variables to point to docker instances
       DATABASE_URL: postgresql://postgres:password@postgres:5432/postgres
       ENSINDEXER_URL: http://ensindexer:42069
+      # Optional: Define ENSAnalytics date range for ENS Holiday Awards
+      # ENSAWARDS_START: "Dec 1, 2025 00:00:00 UTC"
+      # ENSAWARDS_END: "Dec 31, 2025 23:59:59 UTC"
     env_file:
       # NOTE: must define apps/ensapi/.env.local (see apps/ensapi/.env.local.example)
       # Copy .env.local.example to .env.local and configure all required values

@@ -49,3 +49,11 @@ export type LogLevelEnvironment = {
 export type TheGraphEnvironment = {
   THEGRAPH_API_KEY?: string;
 };
+
+/**
+ * Environment variables for ENS Holiday Awards date range configuration.
+ */
+export interface EnsAwardsEnvironment {
+  ENSAWARDS_START?: string;
+  ENSAWARDS_END?: string;
+}
