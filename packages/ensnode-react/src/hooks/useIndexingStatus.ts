@@ -53,6 +53,10 @@ class IndexingStatusStore {
     return this.currentProjection;
   };
 
+  /**
+   * Update the cached snapshot with new data from the API.
+   * Each incremental snapshot will have >= indexing progress than previous snapshots.
+   */
   updateSnapshot(snapshot: CrossChainIndexingStatusSnapshotOmnichain): void {
     this.snapshot = snapshot;
     this.regenerateProjection();
