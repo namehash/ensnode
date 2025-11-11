@@ -31,8 +31,8 @@ interface UseIndexingStatusParameters
  *   • The current time (when the projection was generated)
  *   • The snapshot's absolute timestamps of recorded indexing progress
  *
- * This works reliably because indexing progress is always non-decreasing over
- * time (never goes backward). Clients can safely assume that a snapshot from a
+ * This works reliably because indexing progress is virtually always non-decreasing over
+ * time (virtually never goes backward). Clients can safely assume that a snapshot from a
  * few seconds ago is still valid for building new projections. Since snapshots
  * use absolute timestamps, we can compute accurate projections and worst-case
  * distances without additional API calls.
