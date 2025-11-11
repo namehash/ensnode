@@ -25,7 +25,7 @@ interface UseIndexingStatusParameters
  * but calling the API every second would be inefficient. Instead, we fetch a
  * snapshot and keep it in memory. We then asynchronously attempt to update it every 10 seconds.
  *
- * From that cached snapshot, we continuously generate new projections —
+ * From the most recently cached snapshot, this hook instantly generates new projections —
  * entirely in memory — that stay up to date as time moves forward. Each
  * projection recalculates worst-case distance based on:
  *   • The current time
