@@ -8,7 +8,7 @@ import {
   isNormalizedLabel,
   type Label,
   type LabelHash,
-  type LabelPath,
+  type LabelHashPath,
   type LiteralLabel,
   type LiteralName,
   type Name,
@@ -106,14 +106,14 @@ export function isInterpretedName(name: Name): name is InterpretedName {
 }
 
 /**
- * Converts an InterpretedName into a LabelPath.
+ * Converts an InterpretedName into a LabelHashPath.
  */
-export function interpretedNameToLabelPath(name: InterpretedName): LabelPath {
+export function interpretedNameToLabelHashPath(name: InterpretedName): LabelHashPath {
   return interpretedNameToInterpretedLabels(name)
     .map((label) => {
       if (!isInterpetedLabel) {
         throw new Error(
-          `Invariant(interpretedNameToLabelPath): Expected InterpretedLabel, received '${label}'.`,
+          `Invariant(interpretedNameToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
         );
       }
 

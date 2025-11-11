@@ -53,16 +53,16 @@ export type NormalizedName = Name & { __brand: "NormalizedName" };
 export type LabelHash = Hex;
 
 /**
- * A LabelPath is an ordered list of LabelHashes that uniquely identify an ENS Name.
+ * A LabelHashPath is an ordered list of LabelHashes that uniquely identify an ENS Name.
  * It is ordered in namegraph TRAVERSAL order (i.e. the opposite order of an ENS Name's labels).
  *
- * ex: example.eth's LabelPath is
+ * ex: example.eth's LabelHashPath is
  * [
  *   '0x4f5b812789fc606be1b3b16908db13fc7a9adf7ca72641f84d75b47069d3d7f0', // 'eth'
  *   '0x6fd43e7cffc31bb581d7421c8698e29aa2bd8e7186a394b85299908b4eb9b175', // 'example'
  * ]
  */
-export type LabelPath = LabelHash[];
+export type LabelHashPath = LabelHash[];
 
 /**
  * CanonicalPath is an ordered list of DomainIds describing the canonical path to a Domain.

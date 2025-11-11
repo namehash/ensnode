@@ -216,6 +216,7 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one, many
 
 export const label = onchainTable("labels", (t) => ({
   labelHash: t.hex().primaryKey().$type<LabelHash>(),
+  // TODO: store literal/interpeted values as well or only interpreted?
   value: t.text().notNull().$type<InterpretedLabel>(),
 
   // internals

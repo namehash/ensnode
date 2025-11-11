@@ -8,8 +8,8 @@ import {
   getCanonicalId,
   type LiteralLabel,
   makeENSv2DomainId,
+  makeRegistryContractId,
   PluginName,
-  serializeAccountId,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -43,7 +43,7 @@ export default function () {
       const label = _label as LiteralLabel;
 
       const registryAccountId = getThisAccountId(context, event);
-      const registryId = serializeAccountId(registryAccountId);
+      const registryId = makeRegistryContractId(registryAccountId);
       const canonicalId = getCanonicalId(tokenId);
       const labelHash = labelhash(label);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
@@ -124,7 +124,7 @@ export default function () {
         }
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
-        const subregistryId = serializeAccountId(subregistryAccountId);
+        const subregistryId = makeRegistryContractId(subregistryAccountId);
 
         await context.db.update(schema.domain, { id: domainId }).set({ subregistryId });
 
@@ -213,7 +213,7 @@ export default function () {
     namespaceContract(PluginName.ENSv2, "Registry:TransferSingle"),
     async ({ context, event }) => {
       const registryAccountId = getThisAccountId(context, event);
-      const registryId = serializeAccountId(registryAccountId);
+      const registryId = makeRegistryContractId(registryAccountId);
 
       // TODO(registry-announcement): ideally remove this
       const registry = await context.db.find(schema.registry, { id: registryId });
@@ -226,7 +226,7 @@ export default function () {
     namespaceContract(PluginName.ENSv2, "Registry:TransferBatch"),
     async ({ context, event }) => {
       const registryAccountId = getThisAccountId(context, event);
-      const registryId = serializeAccountId(registryAccountId);
+      const registryId = makeRegistryContractId(registryAccountId);
 
       // TODO(registry-announcement): ideally remove this
       const registry = await context.db.find(schema.registry, { id: registryId });
