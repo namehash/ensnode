@@ -9,6 +9,7 @@ import {
   type LiteralLabel,
   makeENSv2DomainId,
   makeRegistryContractId,
+  makeResolverId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
@@ -136,13 +137,10 @@ export default function () {
       // update domain's resolver
       const isDeletion = isAddressEqual(resolver, zeroAddress);
       if (isDeletion) {
-        await context.db
-          .update(schema.domain, { id: domainId })
-          .set({ resolverChainId: null, resolverAddress: null });
+        await context.db.update(schema.domain, { id: domainId }).set({ resolverId: null });
       } else {
-        await context.db
-          .update(schema.domain, { id: domainId })
-          .set({ resolverChainId: context.chain.id, resolverAddress: resolver });
+        const resolverId = makeResolverId({ chainId: context.chain.id, address: resolver });
+        await context.db.update(schema.domain, { id: domainId }).set({ resolverId });
       }
     },
   );

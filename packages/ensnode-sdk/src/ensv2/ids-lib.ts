@@ -1,4 +1,4 @@
-import { hexToBigInt } from "viem";
+import { type Address, hexToBigInt } from "viem";
 
 import {
   type AccountId,
@@ -7,7 +7,15 @@ import {
   serializeAssetId,
 } from "@ensnode/ensnode-sdk";
 
-import type { CanonicalId, ENSv2DomainId, RegistryContractId } from "./ids";
+import type {
+  CanonicalId,
+  ENSv2DomainId,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
+  RegistryContractId,
+  ResolverId,
+} from "./ids";
 
 /**
  * Serializes and brands an AccountId as a RegistryId.
@@ -36,3 +44,26 @@ export const getCanonicalId = (input: bigint | LabelHash): CanonicalId => {
   if (typeof input === "bigint") return maskLower32Bits(input);
   return getCanonicalId(hexToBigInt(input));
 };
+
+/**
+ * Serializes and brands an AccountId as a PermissionsId.
+ */
+export const makePermissionsId = (contract: AccountId) =>
+  serializeAccountId(contract) as PermissionsId;
+
+/**
+ *
+ */
+export const makePermissionsResourceId = (contract: AccountId, resource: bigint) =>
+  `${serializeAccountId(contract)}/${resource}` as PermissionsResourceId;
+
+/**
+ *
+ */
+export const makePermissionsUserId = (contract: AccountId, resource: bigint, user: Address) =>
+  `${serializeAccountId(contract)}/${resource}/${user}` as PermissionsUserId;
+
+/**
+ * Serializes and brands an AccountId as a ResolverId.
+ */
+export const makeResolverId = (contract: AccountId) => serializeAccountId(contract) as ResolverId;

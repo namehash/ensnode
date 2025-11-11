@@ -7,7 +7,6 @@ import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fq
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
-import { db } from "@/lib/db";
 import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
 
 // TODO: maybe should still implement query/return by id, exposing the db's primary key?
@@ -37,15 +36,7 @@ builder.queryType({
       description: "TODO",
       type: AccountRef,
       args: { address: t.arg({ type: "Address", required: true }) },
-      resolve: async (parent, args, ctx, info) => {
-        // TODO(dataloader): just return address
-
-        const account = await db.query.account.findFirst({
-          where: (t, { eq }) => eq(t.address, args.address),
-        });
-
-        return account;
-      },
+      resolve: async (parent, args, ctx, info) => args.address,
     }),
 
     //////////////////////

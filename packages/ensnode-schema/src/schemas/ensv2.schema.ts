@@ -1,4 +1,4 @@
-import { onchainEnum, onchainTable, primaryKey, relations } from "ponder";
+import { onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
 import type {
@@ -8,7 +8,11 @@ import type {
   InterpretedLabel,
   LabelHash,
   Node,
+  PermissionsId,
+  PermissionsResourceId,
+  PermissionsUserId,
   RegistryId,
+  ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 // Registry<->Domain is 1:1
@@ -28,7 +32,7 @@ import type {
 ///////////
 
 export const account = onchainTable("accounts", (t) => ({
-  address: t.hex().primaryKey().$type<Address>(),
+  id: t.hex().primaryKey().$type<Address>(),
 }));
 
 export const account_relations = relations(account, ({ many }) => ({
@@ -84,21 +88,21 @@ export const domain = onchainTable(
     // see DomainId for guarantees
     id: t.text().primaryKey().$type<DomainId>(),
 
-    // belongs to registry by (registryId)
+    // belongs to registry
     registryId: t.text().notNull().$type<RegistryId>(),
 
     // TODO: we could probably avoid storing this at all and compute it on-demand
     canonicalId: t.bigint().notNull().$type<CanonicalId>(),
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
+    // may have an owner
     ownerId: t.hex().$type<Address>(),
 
-    // may have one subregistry by (id)
+    // may have one subregistry
     subregistryId: t.text().$type<RegistryId>(),
 
-    // may have one resolver by (chainId, address)
-    resolverChainId: t.integer().$type<ChainId>(),
-    resolverAddress: t.hex().$type<Address>(),
+    // may have one resolver
+    resolverId: t.text().$type<ResolverId>(),
   }),
   (t) => ({
     //
@@ -109,7 +113,7 @@ export const relations_domain = relations(domain, ({ one }) => ({
   owner: one(account, {
     relationName: "owner",
     fields: [domain.ownerId],
-    references: [account.address],
+    references: [account.id],
   }),
   registry: one(registry, {
     relationName: "registry",
@@ -141,11 +145,13 @@ export const relations_domain = relations(domain, ({ one }) => ({
 export const permissions = onchainTable(
   "permissions",
   (t) => ({
+    id: t.text().primaryKey().$type<PermissionsId>(),
+
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.address] }),
+    byId: uniqueIndex().on(t.chainId, t.address),
   }),
 );
 
@@ -157,12 +163,14 @@ export const relations_permissions = relations(permissions, ({ one, many }) => (
 export const permissionsResource = onchainTable(
   "permissions_resources",
   (t) => ({
+    id: t.text().primaryKey().$type<PermissionsResourceId>(),
+
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     resource: t.bigint().notNull(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.address, t.resource] }),
+    byId: uniqueIndex().on(t.chainId, t.address, t.resource),
   }),
 );
 
@@ -176,25 +184,25 @@ export const relations_permissionsResource = relations(permissionsResource, ({ o
 export const permissionsUser = onchainTable(
   "permissions_users",
   (t) => ({
+    id: t.text().primaryKey().$type<PermissionsUserId>(),
+
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     resource: t.bigint().notNull(),
     user: t.hex().notNull().$type<Address>(),
 
     // has one roles bitmap
-    // TODO: can materialize into more semantic (polymorphic) interpretation of roles based on source
-    // contract, but not now
     roles: t.bigint().notNull(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.address, t.resource, t.user] }),
+    byId: uniqueIndex().on(t.chainId, t.address, t.resource, t.user),
   }),
 );
 
 export const relations_permissionsUser = relations(permissionsUser, ({ one, many }) => ({
   account: one(account, {
     fields: [permissionsUser.user],
-    references: [account.address],
+    references: [account.id],
   }),
   permissions: one(permissions, {
     fields: [permissionsUser.chainId, permissionsUser.address],

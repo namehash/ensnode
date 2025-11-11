@@ -5,6 +5,7 @@ import { type DomainId, interpretedLabelsToInterpretedName } from "@ensnode/ensn
 
 import { builder } from "@/graphql-api/builder";
 import { getCanonicalPath } from "@/graphql-api/lib/get-canonical-path";
+import { getModelId } from "@/graphql-api/lib/get-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { RegistryInterfaceRef } from "@/graphql-api/schema/registry";
@@ -16,7 +17,7 @@ export const DomainRef = builder.loadableObjectRef("Domain", {
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { label: true },
     }),
-  toKey: (domain) => domain.id,
+  toKey: getModelId,
   cacheResolved: true,
   sort: true,
 });
@@ -124,33 +125,18 @@ DomainRef.implement({
     owner: t.field({
       type: AccountRef,
       description: "TODO",
-      nullable: false,
-      resolve: async ({ ownerId }) => {
-        // TODO(dataloader): just id
-        if (ownerId === null) throw new Error(`Invariant: ownerId null`);
-        const owner = await db.query.account.findFirst({
-          where: (t, { eq }) => eq(t.address, ownerId),
-        });
-
-        if (!owner) throw new Error(`Invariant: owner expected`);
-        return owner;
-      },
+      nullable: true,
+      resolve: (parent) => parent.ownerId,
     }),
 
     //////////////////////
     // Domain.registry
     //////////////////////
     registry: t.field({
-      type: RegistryInterfaceRef,
       description: "TODO",
+      type: RegistryInterfaceRef,
       nullable: false,
-      resolve: async ({ registryId }, args, ctx, info) => {
-        const registry = await db.query.registry.findFirst({
-          where: (t, { eq }) => eq(t.id, registryId),
-        });
-        if (!registry) throw new Error(`Invariant: Domain does not have parent Registry (???)`);
-        return registry;
-      },
+      resolve: (parent) => parent.registryId,
     }),
 
     //////////////////////
@@ -159,15 +145,8 @@ DomainRef.implement({
     subregistry: t.field({
       type: RegistryInterfaceRef,
       description: "TODO",
-      resolve: async ({ subregistryId }, args, ctx, info) => {
-        if (subregistryId === null) return null;
-
-        const subregistry = await db.query.registry.findFirst({
-          where: (t, { eq }) => eq(t.id, subregistryId),
-        });
-
-        return subregistry ?? null;
-      },
+      nullable: true,
+      resolve: (parent) => parent.subregistryId,
     }),
   }),
 });

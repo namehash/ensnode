@@ -1,6 +1,7 @@
 import type { RegistryId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
@@ -11,7 +12,7 @@ export const RegistryInterfaceRef = builder.loadableInterfaceRef("Registry", {
     db.query.registry.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
     }),
-  toKey: (registry) => registry.id,
+  toKey: getModelId,
   cacheResolved: true,
   sort: true,
 });
@@ -27,11 +28,10 @@ RegistryInterfaceRef.implement({
     //////////////////////
     // Registry.id
     //////////////////////
-    id: t.field({
+    id: t.expose("id", {
       description: "TODO",
       type: "ID",
       nullable: false,
-      resolve: (parent) => parent.id,
     }),
 
     ////////////////////
@@ -47,7 +47,7 @@ RegistryInterfaceRef.implement({
         }),
       // biome-ignore lint/style/noNonNullAssertion: subregistryId guaranteed to exist via inArray
       group: (domain) => (domain as Domain).subregistryId!,
-      resolve: (registry) => registry.id,
+      resolve: getModelId,
     }),
 
     //////////////////////
@@ -62,7 +62,7 @@ RegistryInterfaceRef.implement({
           with: { label: true },
         }),
       group: (domain) => (domain as Domain).registryId,
-      resolve: (registry) => registry.id,
+      resolve: getModelId,
     }),
   }),
 });

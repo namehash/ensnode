@@ -1,11 +1,22 @@
-import type * as schema from "@ensnode/ensnode-schema";
+import type { PermissionsId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
+import { db } from "@/lib/db";
 
-type Permissions = typeof schema.permissions.$inferSelect;
+export const PermissionsRef = builder.loadableObjectRef("Permissions", {
+  load: (ids: PermissionsId[]) =>
+    db.query.permissions.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+    }),
+  toKey: getModelId,
+  cacheResolved: true,
+  sort: true,
+});
 
-export const PermissionsRef = builder.objectRef<Permissions>("Permissions");
+export type Permissions = Exclude<typeof PermissionsRef.$inferType, PermissionsId>;
+
 PermissionsRef.implement({
   description: "Permissions",
   fields: (t) => ({
@@ -15,5 +26,7 @@ PermissionsRef.implement({
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
+
+    // resources...
   }),
 });
