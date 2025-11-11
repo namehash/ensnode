@@ -14,12 +14,6 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/labelspace-db-helpers";
-import {
-  reconcileDomainAddition,
-  reconcileDomainRemoval,
-  reconcileRegistryAddition,
-  reconcileRegistryRemoval,
-} from "@/lib/ensv2/reconciliation";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -84,9 +78,6 @@ export default function () {
         .insert(schema.domain)
         .values({ id: domainId, registryId, labelHash, canonicalId });
 
-      // reconcile Domain addition
-      await reconcileDomainAddition(context, domainId);
-
       // TODO: insert Registration entity for this domain as well: expiration, registrant
       // ensure Registrant
       await ensureAccount(context, registrant);
@@ -111,27 +102,15 @@ export default function () {
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      const existing = await context.db.find(schema.domain, { id: domainId });
-
       // update domain's subregistry
       const isDeletion = isAddressEqual(subregistry, zeroAddress);
       if (isDeletion) {
         await context.db.update(schema.domain, { id: domainId }).set({ subregistryId: null });
-
-        // reconcile the removal of this registry from the canonical nametree
-        if (existing && existing.subregistryId !== null) {
-          await reconcileRegistryRemoval(context, existing.subregistryId);
-        }
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
         const subregistryId = makeRegistryContractId(subregistryAccountId);
 
         await context.db.update(schema.domain, { id: domainId }).set({ subregistryId });
-
-        // reconcile the addition of this registry to the canonical nametree
-        if (existing?.subregistryId !== subregistryId) {
-          await reconcileRegistryAddition(context, subregistryId);
-        }
       }
     },
   );
@@ -188,7 +167,6 @@ export default function () {
 
       await context.db.delete(schema.domain, { id: domainId });
       // TODO: delete registration (?)
-      await reconcileDomainRemoval(context, domainId);
     },
   );
 
