@@ -40,7 +40,7 @@ interface UseIndexingStatusParameters
  * @param parameters - Configuration options
  * @param parameters.config - ENSNode SDK configuration (optional, uses context if not provided)
  * @param parameters.query - TanStack Query options for customizing query behavior (refetchInterval, enabled, etc.)
- * @returns TanStack Query result containing indexing status data with real-time projections
+ * @returns TanStack Query result containing a new indexing status projection based on the current time
  */
 export function useIndexingStatus(
   parameters: WithSDKConfigParameter & UseIndexingStatusParameters = {},
