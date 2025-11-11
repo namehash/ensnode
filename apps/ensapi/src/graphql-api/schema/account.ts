@@ -29,6 +29,7 @@ AccountRef.implement({
       resolve: ({ address }) =>
         db.query.domain.findMany({
           where: (t, { eq }) => eq(t.ownerId, address),
+          with: { label: true },
         }),
     }),
   }),

@@ -1,17 +1,12 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: ignore unused resolve arguments */
 
-import { type ImplicitRegistryId, makeRegistryContractId } from "@ensnode/ensnode-sdk";
+import { makeRegistryContractId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import type { RegistryContract } from "@/graphql-api/lib/db-types";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
-import {
-  RegistryContractRef,
-  RegistryIdInput,
-  RegistryInterfaceRef,
-} from "@/graphql-api/schema/registry";
+import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
 import { db } from "@/lib/db";
 import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
 
@@ -30,16 +25,8 @@ builder.queryType({
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
       resolve: async (parent, args, ctx, info) => {
-        const domainId = args.by.name
-          ? await getDomainIdByInterpretedName(args.by.name)
-          : args.by.id;
-        // TODO(dataloader): just return domainId
-
-        if (!domainId) return null;
-
-        return await db.query.domain.findFirst({
-          where: (t, { eq }) => eq(t.id, domainId),
-        });
+        if (args.by.id !== undefined) return args.by.id;
+        return getDomainIdByInterpretedName(args.by.name);
       },
     }),
 
@@ -67,18 +54,11 @@ builder.queryType({
     registry: t.field({
       description: "TODO",
       type: RegistryInterfaceRef,
-      args: { id: t.arg({ type: RegistryIdInput, required: true }) },
+      args: { by: t.arg({ type: RegistryIdInput, required: true }) },
       resolve: async (parent, args, ctx, info) => {
-        // TODO(dataloader): just return registryId
-        const registryId = args.id.contract
-          ? makeRegistryContractId(args.id.contract)
-          : (args.id.implicit.parent as ImplicitRegistryId); // TODO: move this case into scalar
-
-        const registry = await db.query.registry.findFirst({
-          where: (t, { eq }) => eq(t.id, registryId),
-        });
-
-        return registry;
+        if (args.by.id !== undefined) return args.by.id;
+        if (args.by.implicit !== undefined) return args.by.implicit.parent;
+        return makeRegistryContractId(args.by.contract);
       },
     }),
 
@@ -86,19 +66,10 @@ builder.queryType({
     // Get Root Registry
     /////////////////////
     root: t.field({
-      type: RegistryContractRef,
       description: "TODO",
+      type: RegistryInterfaceRef,
       nullable: false,
-      resolve: async () => {
-        // TODO(dataloader): just return rootRegistry id
-        const rootRegistry = await db.query.registry.findFirst({
-          where: (t, { eq }) => eq(t.id, ROOT_REGISTRY_ID),
-        });
-
-        if (!rootRegistry) throw new Error(`Invariant: Root Registry expected.`);
-
-        return rootRegistry as RegistryContract;
-      },
+      resolve: () => ROOT_REGISTRY_ID,
     }),
   }),
 });

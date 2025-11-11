@@ -1,14 +1,30 @@
-import { interpretedLabelsToInterpretedName } from "@ensnode/ensnode-sdk";
+/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: graphql resolve pattern */
+import { rejectErrors } from "@pothos/plugin-dataloader";
+
+import { type DomainId, interpretedLabelsToInterpretedName } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import type { Domain } from "@/graphql-api/lib/db-types";
 import { getCanonicalPath } from "@/graphql-api/lib/get-canonical-path";
-import { sortByArrayOrder } from "@/graphql-api/lib/sort-by-array-order";
+import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { RegistryInterfaceRef } from "@/graphql-api/schema/registry";
 import { db } from "@/lib/db";
 
-export const DomainRef = builder.objectRef<Domain>("Domain");
+export const DomainRef = builder.loadableObjectRef("Domain", {
+  load: (ids: DomainId[]) =>
+    db.query.domain.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+      with: { label: true },
+    }),
+  toKey: (domain) => domain.id,
+  cacheResolved: true,
+  sort: true,
+});
+
+export type Domain = Exclude<typeof DomainRef.$inferType, DomainId>;
+
+// we want to dataloader labels by labelhash
+// we want to dataloader a domain's canonical path, but without exposing it
 
 DomainRef.implement({
   description: "a Domain",
@@ -38,14 +54,7 @@ DomainRef.implement({
       type: "String",
       description: "TODO",
       nullable: false,
-      resolve: async ({ labelHash }) => {
-        const label = await db.query.label.findFirst({
-          where: (t, { eq }) => eq(t.labelHash, labelHash),
-        });
-
-        if (!label) throw new Error(`Invariant: label expected`);
-        return label.value;
-      },
+      resolve: async ({ label }) => label.value,
     }),
 
     ////////////////////
@@ -55,20 +64,18 @@ DomainRef.implement({
       description: "TODO",
       type: "Name",
       nullable: true,
-      resolve: async ({ id }) => {
+      resolve: async ({ id }, args, context) => {
         // TODO: dataloader the getCanonicalPath(domainId) function
         const canonicalPath = await getCanonicalPath(id);
         if (!canonicalPath) return null;
 
-        // TODO: use the dataloaded version of this findMany w/ labels
-        const domainsAndLabels = await db.query.domain.findMany({
-          where: (t, { inArray }) => inArray(t.id, canonicalPath),
-          with: { label: true },
-        });
+        const domains = await rejectAnyErrors(
+          DomainRef.getDataloader(context).loadMany(canonicalPath),
+        );
 
         return interpretedLabelsToInterpretedName(
           canonicalPath.map((domainId) => {
-            const found = domainsAndLabels.find((d) => d.id === domainId);
+            const found = domains.find((d) => d.id === domainId);
             if (!found) throw new Error(`Invariant`);
             return found.label.value;
           }),
@@ -83,16 +90,16 @@ DomainRef.implement({
       description: "TODO",
       type: [DomainRef],
       nullable: true,
-      resolve: async ({ id }) => {
+      resolve: async ({ id }, args, context) => {
         // TODO: dataloader the getCanonicalPath(domainId) function
         const canonicalPath = await getCanonicalPath(id);
         if (!canonicalPath) return null;
 
-        const domains = await db.query.domain.findMany({
-          where: (t, { inArray }) => inArray(t.id, canonicalPath),
-        });
+        const domains = await rejectErrors(
+          DomainRef.getDataloader(context).loadMany(canonicalPath),
+        );
 
-        return domains.sort(sortByArrayOrder(canonicalPath, (domain) => domain.id)).slice(1);
+        return domains.slice(1);
       },
     }),
 

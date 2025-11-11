@@ -40,6 +40,8 @@
     "@opentelemetry/semantic-conventions": "^1.34.0",
     "@ponder/client": "^0.14.13",
     "@pothos/core": "^4.10.0",
+    "@pothos/plugin-dataloader": "^4.4.3",
+    "dataloader": "^2.2.3",
     "date-fns": "catalog:",
     "drizzle-orm": "catalog:",
     "graphql": "^16.11.0",

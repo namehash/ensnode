@@ -1,16 +1,26 @@
+import type { RegistryId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+
 import { builder } from "@/graphql-api/builder";
-import type {
-  ImplicitRegistry,
-  Registry,
-  RegistryContract,
-  RegistryInterface,
-} from "@/graphql-api/lib/db-types";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DomainRef } from "@/graphql-api/schema/domain";
+import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
-export const RegistryInterfaceRef = builder.interfaceRef<Registry>("Registry");
+export const RegistryInterfaceRef = builder.loadableInterfaceRef("Registry", {
+  load: (ids: RegistryId[]) =>
+    db.query.registry.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+    }),
+  toKey: (registry) => registry.id,
+  cacheResolved: true,
+  sort: true,
+});
+
+export type Registry = Exclude<typeof RegistryInterfaceRef.$inferType, RegistryId>;
+export type RegistryInterface = Pick<Registry, "type" | "id">;
+export type RegistryContract = RequiredAndNotNull<Registry, "chainId" | "address">;
+export type ImplicitRegistry = RequiredAndNotNull<Registry, "parentDomainNode">;
+
 RegistryInterfaceRef.implement({
   description: "TODO",
   fields: (t) => ({
@@ -18,32 +28,41 @@ RegistryInterfaceRef.implement({
     // Registry.id
     //////////////////////
     id: t.field({
-      type: "ID",
       description: "TODO",
+      type: "ID",
       nullable: false,
       resolve: (parent) => parent.id,
     }),
 
-    //////////////////////
-    // Registry.domain
-    //////////////////////
-    domain: t.field({
-      type: [DomainRef],
+    ////////////////////
+    // Registry.parents
+    ////////////////////
+    parents: t.loadableGroup({
       description: "TODO",
-      nullable: true,
-      resolve: (parent) => null,
+      type: DomainRef,
+      load: (ids: RegistryId[]) =>
+        db.query.domain.findMany({
+          where: (t, { inArray }) => inArray(t.subregistryId, ids),
+          with: { label: true },
+        }),
+      // biome-ignore lint/style/noNonNullAssertion: subregistryId guaranteed to exist via inArray
+      group: (domain) => (domain as Domain).subregistryId!,
+      resolve: (registry) => registry.id,
     }),
 
     //////////////////////
     // Registry.domains
     //////////////////////
-    domains: t.field({
-      type: [DomainRef],
+    domains: t.loadableGroup({
       description: "TODO",
-      resolve: ({ id }) =>
+      type: DomainRef,
+      load: (ids: RegistryId[]) =>
         db.query.domain.findMany({
-          where: (t, { eq }) => eq(t.registryId, id),
+          where: (t, { inArray }) => inArray(t.registryId, ids),
+          with: { label: true },
         }),
+      group: (domain) => (domain as Domain).registryId,
+      resolve: (registry) => registry.id,
     }),
   }),
 });
@@ -58,8 +77,8 @@ RegistryContractRef.implement({
     // RegistryContract.permissions
     ////////////////////////////////
     permissions: t.field({
-      type: PermissionsRef,
       description: "TODO",
+      type: PermissionsRef,
       // TODO: render a RegistryPermissions model that parses the backing permissions into registry-semantic roles
       resolve: ({ chainId, address }) => null,
     }),
@@ -68,8 +87,8 @@ RegistryContractRef.implement({
     // RegistryContract.contract
     /////////////////////////////
     contract: t.field({
-      type: AccountIdRef,
       description: "TODO",
+      type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
@@ -87,11 +106,7 @@ ImplicitRegistryRef.implement({
 export const ImplicitRegistryIdInput = builder.inputType("ImplicitRegistryIdInput", {
   description: "TODO",
   fields: (t) => ({
-    parent: t.field({
-      type: "Node",
-      description: "TODO",
-      required: true,
-    }),
+    parent: t.field({ type: "ImplicitRegistryId", required: true }),
   }),
 });
 
@@ -99,7 +114,8 @@ export const RegistryIdInput = builder.inputType("RegistryIdInput", {
   description: "TODO",
   isOneOf: true,
   fields: (t) => ({
-    contract: t.field({ type: AccountIdInput, required: false }),
-    implicit: t.field({ type: ImplicitRegistryIdInput, required: false }),
+    id: t.field({ type: "RegistryId" }),
+    contract: t.field({ type: AccountIdInput }),
+    implicit: t.field({ type: ImplicitRegistryIdInput }),
   }),
 });

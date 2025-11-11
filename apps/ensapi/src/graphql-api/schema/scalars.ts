@@ -4,10 +4,12 @@ import { z } from "zod/v4";
 import {
   type ChainId,
   type DomainId,
+  type ImplicitRegistryId,
   type InterpretedName,
   isInterpretedName,
   type Name,
   type Node,
+  type RegistryId,
 } from "@ensnode/ensnode-sdk";
 import { makeChainIdSchema, makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -71,10 +73,30 @@ builder.scalarType("Name", {
 
 builder.scalarType("DomainId", {
   description: "DomainId represents a @ensnode/ensnode-sdk#DomainId.",
-  serialize: (value: Name) => value,
+  serialize: (value: DomainId) => value,
   parseValue: (value) =>
     z.coerce
       .string()
       .transform((val) => val as DomainId)
+      .parse(value),
+});
+
+builder.scalarType("RegistryId", {
+  description: "RegistryId represents a @ensnode/ensnode-sdk#RegistryId.",
+  serialize: (value: RegistryId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as RegistryId)
+      .parse(value),
+});
+
+builder.scalarType("ImplicitRegistryId", {
+  description: "ImplicitRegistryId represents a @ensnode/ensnode-sdk#ImplicitRegistryId.",
+  serialize: (value: ImplicitRegistryId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as ImplicitRegistryId)
       .parse(value),
 });
