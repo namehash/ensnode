@@ -34,8 +34,7 @@ interface UseIndexingStatusParameters
  * This works reliably because indexing progress is virtually always non-decreasing over
  * time (virtually never goes backward). Clients can safely assume that a snapshot from a
  * few seconds ago is still valid for building new projections. Since snapshots
- * use absolute timestamps, we can compute accurate projections and worst-case
- * distances without additional API calls.
+ * exclusively contain absolute timestamps, we can reuse a snapshot across time to continuously compute updated worst-case projections without additional API calls.
  *
  * @param parameters - Configuration options
  * @param parameters.config - ENSNode SDK configuration (optional, uses context if not provided)
