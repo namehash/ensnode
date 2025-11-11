@@ -5,6 +5,8 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
 
+import { IndexingStatusProvider } from "@ensnode/ensnode-react";
+
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { Toaster } from "@/components/ui/sonner";
@@ -60,13 +62,15 @@ export default function Layout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider>
-          <Suspense>
-            <ConnectionsLibraryProvider>
-              <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
-                {children}
-              </LayoutWrapper>
-            </ConnectionsLibraryProvider>
-          </Suspense>
+          <IndexingStatusProvider>
+            <Suspense>
+              <ConnectionsLibraryProvider>
+                <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
+                  {children}
+                </LayoutWrapper>
+              </ConnectionsLibraryProvider>
+            </Suspense>
+          </IndexingStatusProvider>
         </QueryClientProvider>
         <Toaster />
 

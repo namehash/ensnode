@@ -1,6 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUnixTime } from "date-fns";
-import { useEffect, useSyncExternalStore } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 
 import {
   type CrossChainIndexingStatusSnapshotOmnichain,
@@ -20,7 +27,7 @@ interface UseIndexingStatusParameters
     QueryParameter<IndexingStatusResponse> {}
 
 /**
- * Singleton store for managing shared projection state across all hook instances.
+ * Store for managing shared projection state across hook instances.
  * This ensures all components using the hook see the exact same projection object
  * and timestamp, preventing unnecessary re-renders from distinct but equivalent objects.
  */
@@ -101,11 +108,33 @@ class IndexingStatusStore {
   }
 }
 
-// Singleton instance shared across all hook usages
-const store = new IndexingStatusStore();
+// Context for the store
+const IndexingStatusStoreContext = createContext<IndexingStatusStore | null>(null);
+
+/**
+ * Provider component for IndexingStatusStore. Required for useIndexingStatus to work.
+ *
+ * @example
+ * ```tsx
+ * <IndexingStatusProvider>
+ *   <YourApp />
+ * </IndexingStatusProvider>
+ * ```
+ */
+export function IndexingStatusProvider({ children }: { children: ReactNode }) {
+  const store = useMemo(() => new IndexingStatusStore(), []);
+
+  return (
+    <IndexingStatusStoreContext.Provider value={store}>
+      {children}
+    </IndexingStatusStoreContext.Provider>
+  );
+}
 
 /**
  * Hook for fetching and tracking indexing status with client-side projection updates.
+ *
+ * **Requires IndexingStatusProvider** to be present in the component tree.
  *
  * Clients often need frequently updated worst-case distance for their logic,
  * but calling the API every second would be inefficient. Instead, we fetch a
@@ -136,6 +165,7 @@ const store = new IndexingStatusStore();
  * @param parameters.config - ENSNode SDK configuration (optional, uses context if not provided)
  * @param parameters.query - TanStack Query options for customizing query behavior (refetchInterval, enabled, etc.)
  * @returns TanStack Query result containing the current indexing status projection
+ * @throws Error if IndexingStatusProvider is not present in the component tree
  */
 export function useIndexingStatus(
   parameters: WithSDKConfigParameter & UseIndexingStatusParameters = {},
@@ -154,12 +184,21 @@ export function useIndexingStatus(
 
   const queryResult = useQuery(options);
 
+  const store = useContext(IndexingStatusStoreContext);
+
+  if (!store) {
+    throw new Error(
+      "useIndexingStatus must be used within IndexingStatusProvider. " +
+        "Wrap your component tree with <IndexingStatusProvider>.",
+    );
+  }
+
   // Update the shared store whenever we get a new snapshot from the API
   useEffect(() => {
     if (queryResult.data && queryResult.data.responseCode === IndexingStatusResponseCodes.Ok) {
       store.updateSnapshot(queryResult.data.realtimeProjection.snapshot);
     }
-  }, [queryResult.data]);
+  }, [queryResult.data, store]);
 
   // Subscribe to the shared projection store.
   // This ensures all components see the exact same projection object at the same time.
@@ -169,7 +208,6 @@ export function useIndexingStatus(
     store.getSnapshot,
   );
 
-  // If we have a projection, return it wrapped in the response format
   if (realtimeProjection) {
     return {
       ...queryResult,
@@ -182,6 +220,5 @@ export function useIndexingStatus(
     };
   }
 
-  // Otherwise return the raw query result (loading, error, or no data yet)
   return queryResult;
 }
