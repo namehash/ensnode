@@ -29,7 +29,7 @@ interface UseIndexingStatusParameters
  * entirely in memory — that stay up to date as time moves forward. Each
  * projection provides a recalculation of worst-case distance based on:
  *   • The current time
- *   • The snapshot's absolute timestamps and recorded indexing progress
+ *   • The snapshot's absolute timestamps of recorded indexing progress
  *
  * This works reliably because indexing progress is always non-decreasing over
  * time (never goes backward). Clients can safely assume that a snapshot from a
