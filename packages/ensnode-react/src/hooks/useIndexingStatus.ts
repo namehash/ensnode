@@ -27,7 +27,7 @@ interface UseIndexingStatusParameters
  *
  * From the most recently cached snapshot, this hook instantly generates new projections —
  * entirely in memory — that stay up to date as time moves forward. Each
- * projection recalculates worst-case distance based on:
+ * projection provides a recalculation of worst-case distance based on:
  *   • The current time
  *   • The snapshot's absolute timestamps and recorded indexing progress
  *
