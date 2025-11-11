@@ -1,52 +1,27 @@
-import config from "@/config";
-
 import { getUnixTime } from "date-fns";
 import { and, count, desc, eq, gte, isNotNull, lt, ne, sql, sum } from "drizzle-orm";
-import { type Address, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import * as schema from "@ensnode/ensnode-schema";
-import { type AccountId, deserializeDuration, serializeAccountId } from "@ensnode/ensnode-sdk";
+import {
+  deserializeDuration,
+  serializeAccountId,
+  type AccountId,
+  type UnixTimestamp,
+} from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import type { ReferrerData } from "@/lib/ensanalytics/types";
+import type { TopReferrersSnapshot } from "@/lib/ensanalytics/types";
 import logger from "@/lib/logger";
 
-const START_DATE = getUnixTime(new Date("2025-01-01T00:00:00.000Z"));
-const END_DATE = getUnixTime(new Date("2026-01-01T00:00:00.000Z"));
 
 /**
- * Gets the BaseRegistrar contract AccountId for the configured namespace.
- *
- * @returns The AccountId for the BaseRegistrar contract
- * @throws Error if the contract is not found
- */
-function getBaseRegistrarSubregistryId(): AccountId {
-  const datasource = maybeGetDatasource(config.namespace, DatasourceNames.ENSRoot);
-  if (!datasource) {
-    throw new Error(`Datasource not found for ${config.namespace} ${DatasourceNames.ENSRoot}`);
-  }
-
-  const address = datasource.contracts.BaseRegistrar?.address;
-  if (address === undefined || Array.isArray(address)) {
-    throw new Error(
-      `BaseRegistrar contract not found or has multiple addresses for ${config.namespace}`,
-    );
-  }
-
-  return {
-    chainId: datasource.chain.id,
-    address,
-  };
-}
-
-/**
- * Fetches the top referrers from the registrar_actions table.
+ * Fetches the top referrers from the registrar_actions table and builds a snapshot.
  *
  * Step 1: Filter for "qualified" registrar actions where:
- * - timestamp is between START_DATE and END_DATE
+ * - timestamp is between startDate and endDate
  * - decodedReferrer is not null and not the zero address
- * - subregistryId matches the .eth BaseRegistrar contract
+ * - subregistryId matches the provided subregistryId
  *
  * Step 2: Group by decodedReferrer and calculate:
  * - Sum total incrementalDuration for each decodedReferrer
@@ -54,13 +29,20 @@ function getBaseRegistrarSubregistryId(): AccountId {
  *
  * Step 3: Sort by sum total incrementalDuration from highest to lowest
  *
- * @returns Array of referrer data sorted by total incremental duration (descending)
+ * Step 4: Calculate grand totals and build the snapshot object
+ *
+ * @param startDate - The start date (Unix timestamp) for filtering registrar actions
+ * @param endDate - The end date (Unix timestamp) for filtering registrar actions
+ * @param subregistryId - The account ID of the subregistry to filter by
+ * @returns TopReferrersSnapshot containing referrer data, grand totals, and updatedAt timestamp
  * @throws Error if the database query fails
  */
-export async function getTopReferrers(): Promise<ReferrerData[]> {
+export async function getTopReferrers(
+  startDate: UnixTimestamp,
+  endDate: UnixTimestamp,
+  subregistryId: AccountId,
+): Promise<TopReferrersSnapshot> {
   try {
-    const subregistryId = getBaseRegistrarSubregistryId();
-
     const result = await db
       .select({
         referrer: schema.registrarActions.decodedReferrer,
@@ -73,26 +55,47 @@ export async function getTopReferrers(): Promise<ReferrerData[]> {
       .where(
         and(
           // Filter by timestamp range
-          gte(schema.registrarActions.timestamp, BigInt(START_DATE)),
-          lt(schema.registrarActions.timestamp, BigInt(END_DATE)),
+          gte(schema.registrarActions.timestamp, BigInt(startDate)),
+          lt(schema.registrarActions.timestamp, BigInt(endDate)),
           // Filter by decodedReferrer not null
           isNotNull(schema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
           ne(schema.registrarActions.decodedReferrer, zeroAddress),
-          // Filter by subregistryId matching .eth BaseRegistrar
+          // Filter by subregistryId matching the provided subregistryId
           eq(schema.registrarActions.subregistryId, serializeAccountId(subregistryId)),
         ),
       )
       .groupBy(schema.registrarActions.decodedReferrer)
       .orderBy(desc(sql`total_incremental_duration`));
 
-    // Transform the result to match ReferrerData interface
-    // Note: referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
-    return result.map((row) => ({
-      referrer: row.referrer as Address,
-      totalReferrals: Number(row.totalReferrals),
-      totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration ?? 0),
+    // Transform the result to match AggregatedReferrerMetrics interface
+    const topReferrers = result.map((row) => ({
+      // biome-ignore lint/style/noNonNullAssertion:
+      // referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
+      referrer: row.referrer!,
+      totalReferrals: row.totalReferrals,
+      // biome-ignore lint/style/noNonNullAssertion:
+      // totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values.
+      totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
     }));
+
+    // Calculate grand totals across all referrers
+    const grandTotalReferrals = topReferrers.reduce(
+      (sum, referrer) => sum + referrer.totalReferrals,
+      0,
+    );
+    const grandTotalIncrementalDuration = topReferrers.reduce(
+      (sum, referrer) => sum + referrer.totalIncrementalDuration,
+      0,
+    );
+
+    // Build and return the complete snapshot
+    return {
+      topReferrers,
+      updatedAt: getUnixTime(new Date()),
+      grandTotalReferrals,
+      grandTotalIncrementalDuration,
+    };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     logger.error({ error }, "Failed to fetch top referrers from database");

@@ -1,9 +1,14 @@
+import {
+  type PaginatedTopReferrersRequest,
+  PaginatedTopReferrersResponseCodes,
+  type PaginatedTopReferrersResponse,
+} from "@ensnode/ensnode-sdk";
 import { z } from "zod/v4";
 
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
-import { referrersCacheMiddleware } from "@/middleware/referrers-cache.middleware";
+import { topReferrersCacheMiddleware } from "@/middleware/top-referrers-cache.middleware";
 
 const DEFAULT_PAGINATION_LIMIT = 25;
 const MAX_PAGINATION_LIMIT = 100;
@@ -11,9 +16,9 @@ const MAX_PAGINATION_LIMIT = 100;
 const app = factory.createApp();
 
 // Apply referrers cache middleware to all routes in this handler
-app.use(referrersCacheMiddleware);
+app.use(topReferrersCacheMiddleware);
 
-// Pagination query parameters schema
+// Pagination query parameters schema (mirrors PaginatedTopReferrersRequest)
 const paginationQuerySchema = z.object({
   page: z.optional(z.coerce.number().int().min(1, "Page must be a positive integer")).default(1),
   limit: z
@@ -25,46 +30,59 @@ const paginationQuerySchema = z.object({
         .max(MAX_PAGINATION_LIMIT, `Limit must not exceed ${MAX_PAGINATION_LIMIT}`),
     )
     .default(DEFAULT_PAGINATION_LIMIT),
-});
+}) satisfies z.ZodType<Required<PaginatedTopReferrersRequest>>;
 
 // Get top referrers with pagination
-app.get("/top-referrers", validate("query", paginationQuerySchema), (c) => {
+app.get("/top-referrers", validate("query", paginationQuerySchema), async (c) => {
   try {
-    const cache = c.var.referrersCache;
+    const topReferrersCache = c.var.topReferrersCache;
     const { page, limit } = c.req.valid("query");
 
     // Calculate total pages
-    const totalPages = Math.ceil(cache.referrers.length / limit);
+    const totalPages = Math.ceil(topReferrersCache.topReferrers.length / limit);
 
     // Check if requested page exceeds available pages
-    if (page > totalPages && cache.referrers.length > 0) {
+    if (page > totalPages && topReferrersCache.topReferrers.length > 0) {
       return c.json(
         {
+          responseCode: PaginatedTopReferrersResponseCodes.PageOutOfRange,
           error: "Page out of range",
-          message: `Requested page ${page} exceeds total pages ${totalPages}`,
+          errorMessage: `Requested page ${page} exceeds total pages ${totalPages}`,
           totalPages,
-        },
+        } satisfies PaginatedTopReferrersResponse,
         400,
       );
     }
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    const paginatedReferrers = cache.referrers.slice(startIndex, endIndex);
+    const paginatedReferrers = topReferrersCache.topReferrers.slice(startIndex, endIndex);
 
     return c.json({
-      referrers: paginatedReferrers,
-      total: cache.referrers.length,
-      page,
-      limit,
-      totalPages,
-      hasNext: endIndex < cache.referrers.length,
-      hasPrev: page > 1,
-      updatedAt: cache.updatedAt,
-    });
+      responseCode: PaginatedTopReferrersResponseCodes.Ok,
+      data: {
+        topReferrers: paginatedReferrers,
+        total: topReferrersCache.topReferrers.length,
+        page,
+        limit,
+        hasNext: endIndex < topReferrersCache.topReferrers.length,
+        hasPrev: page > 1,
+        updatedAt: topReferrersCache.updatedAt,
+      },
+    } satisfies PaginatedTopReferrersResponse);
   } catch (error) {
     logger.error({ error }, "Error in /ensanalytics/top-referrers endpoint");
-    return c.json({ error: "Internal server error" }, 500);
+    const errorMessage = error instanceof Error
+      ? error.message
+      : "An unexpected error occurred while processing your request";
+    return c.json(
+      {
+        responseCode: PaginatedTopReferrersResponseCodes.Error,
+        error: "Internal server error",
+        errorMessage,
+      } satisfies PaginatedTopReferrersResponse,
+      500,
+    );
   }
 });
 

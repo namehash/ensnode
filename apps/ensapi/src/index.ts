@@ -13,7 +13,7 @@ import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
-import { fetcher as referrersCacheFetcher } from "@/middleware/referrers-cache.middleware";
+import { fetcher as referrersCacheFetcher } from "@/middleware/top-referrers-cache.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
@@ -78,7 +78,7 @@ const server = serve(
     logger.info("Warming up ENSAnalytics referrers cache...");
     try {
       const cache = await referrersCacheFetcher();
-      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.length} referrers`);
+      logger.info(`ENSAnalytics cache warmed up with ${cache.topReferrers.length} referrers`);
     } catch (error) {
       logger.error({ error }, "Failed to warm up ENSAnalytics cache");
       // Don't exit - let the service run without pre-warmed analytics
