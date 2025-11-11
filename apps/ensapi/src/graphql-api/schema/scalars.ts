@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 
 import {
   type ChainId,
+  type CoinType,
   type DomainId,
   type ImplicitRegistryId,
   type InterpretedName,
@@ -10,8 +11,13 @@ import {
   type Name,
   type Node,
   type RegistryId,
+  type ResolverId,
 } from "@ensnode/ensnode-sdk";
-import { makeChainIdSchema, makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  makeChainIdSchema,
+  makeCoinTypeSchema,
+  makeLowercaseAddressSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/graphql-api/builder";
 
@@ -31,6 +37,12 @@ builder.scalarType("ChainId", {
   description: "ChainId represents a @ensnode/ensnode-sdk#ChainId.",
   serialize: (value: ChainId) => value,
   parseValue: (value) => makeChainIdSchema("ChainId").parse(value),
+});
+
+builder.scalarType("CoinType", {
+  description: "CoinType represents a @ensnode/ensnode-sdk#CoinType.",
+  serialize: (value: CoinType) => value,
+  parseValue: (value) => makeCoinTypeSchema("CoinType").parse(value),
 });
 
 builder.scalarType("Node", {
@@ -98,5 +110,15 @@ builder.scalarType("ImplicitRegistryId", {
     z.coerce
       .string()
       .transform((val) => val as ImplicitRegistryId)
+      .parse(value),
+});
+
+builder.scalarType("ResolverId", {
+  description: "ResolverId represents a @ensnode/ensnode-sdk#ResolverId.",
+  serialize: (value: ResolverId) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as ResolverId)
       .parse(value),
 });

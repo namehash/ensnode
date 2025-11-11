@@ -2,7 +2,12 @@
  * Schema Definitions that power Protocol Acceleration in the Resolution API.
  */
 
-import { onchainTable, primaryKey, relations } from "ponder";
+import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
+import type { Address } from "viem";
+
+import type { ChainId, CoinType, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
+
+// TODO: implement resolverType & polymorphic field availability
 
 /**
  * Tracks an Account's ENSIP-19 Reverse Name Records by CoinType.
@@ -21,8 +26,8 @@ export const reverseNameRecord = onchainTable(
   "reverse_name_records",
   (t) => ({
     // keyed by (address, coinType)
-    address: t.hex().notNull(),
-    coinType: t.bigint().notNull(),
+    address: t.hex().notNull().$type<Address>(),
+    coinType: t.integer().notNull().$type<CoinType>(),
 
     /**
      * Represents the ENSIP-19 Reverse Name Record for a given (address, coinType).
@@ -56,15 +61,15 @@ export const nodeResolverRelation = onchainTable(
   "node_resolver_relations",
   (t) => ({
     // keyed by (chainId, registry, node)
-    chainId: t.integer().notNull(),
-    registry: t.hex().notNull(),
-    node: t.hex().notNull(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    registry: t.hex().notNull().$type<Address>(),
+    node: t.hex().notNull().$type<Node>(),
 
     /**
      * The Address of the Resolver contract this `node` has set (via Registry#NewResolver) within
      * the Registry on `chainId`.
      */
-    resolver: t.hex().notNull(),
+    resolver: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.registry, t.node] }),
@@ -75,11 +80,13 @@ export const resolver = onchainTable(
   "resolvers",
   (t) => ({
     // keyed by (chainId, address)
-    chainId: t.integer().notNull(),
-    address: t.hex().notNull(),
+    id: t.text().primaryKey().$type<ResolverId>(),
+
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.address] }),
+    byId: uniqueIndex().on(t.chainId, t.address),
   }),
 );
 
@@ -105,9 +112,11 @@ export const resolverRecords = onchainTable(
   "resolver_records",
   (t) => ({
     // keyed by (chainId, resolver, node)
-    chainId: t.integer().notNull(),
-    resolver: t.hex().notNull(),
-    node: t.hex().notNull(),
+    id: t.text().primaryKey().$type<ResolverRecordsId>(),
+
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
+    node: t.hex().notNull().$type<Node>(),
 
     /**
      * Represents the value of the reverse-resolution (ENSIP-3) name() record, used for Reverse Resolution.
@@ -122,14 +131,14 @@ export const resolverRecords = onchainTable(
     name: t.text(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.resolver, t.node] }),
+    byId: uniqueIndex().on(t.chainId, t.address, t.node),
   }),
 );
 
 export const resolverRecords_relations = relations(resolverRecords, ({ one, many }) => ({
   // belongs to resolver
   resolver: one(resolver, {
-    fields: [resolverRecords.chainId, resolverRecords.resolver],
+    fields: [resolverRecords.chainId, resolverRecords.address],
     references: [resolver.chainId, resolver.address],
   }),
 
@@ -151,10 +160,10 @@ export const resolverAddressRecord = onchainTable(
   "resolver_address_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), coinType)
-    chainId: t.integer().notNull(),
-    resolver: t.hex().notNull(),
-    node: t.hex().notNull(),
-    coinType: t.bigint().notNull(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
+    node: t.hex().notNull().$type<Node>(),
+    coinType: t.integer().notNull().$type<CoinType>(),
 
     /**
      * Represents the value of the Addresss Record specified by ((chainId, resolver, node), coinType).
@@ -162,10 +171,10 @@ export const resolverAddressRecord = onchainTable(
      * The value of this field is interpreted by `interpretAddressRecordValue` — see its implementation
      * for additional context and specific guarantees.
      */
-    address: t.text().notNull(),
+    value: t.text().notNull(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.resolver, t.node, t.coinType] }),
+    pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.coinType] }),
   }),
 );
 
@@ -174,10 +183,10 @@ export const resolverAddressRecordRelations = relations(resolverAddressRecord, (
   resolver: one(resolverRecords, {
     fields: [
       resolverAddressRecord.chainId,
-      resolverAddressRecord.resolver,
+      resolverAddressRecord.address,
       resolverAddressRecord.node,
     ],
-    references: [resolverRecords.chainId, resolverRecords.resolver, resolverRecords.node],
+    references: [resolverRecords.chainId, resolverRecords.address, resolverRecords.node],
   }),
 }));
 
@@ -192,9 +201,9 @@ export const resolverTextRecord = onchainTable(
   "resolver_text_records",
   (t) => ({
     // keyed by ((chainId, resolver, node), key)
-    chainId: t.integer().notNull(),
-    resolver: t.hex().notNull(),
-    node: t.hex().notNull(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
+    node: t.hex().notNull().$type<Node>(),
     key: t.text().notNull(),
 
     /**
@@ -206,15 +215,15 @@ export const resolverTextRecord = onchainTable(
     value: t.text().notNull(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.resolver, t.node, t.key] }),
+    pk: primaryKey({ columns: [t.chainId, t.address, t.node, t.key] }),
   }),
 );
 
 export const resolverTextRecordRelations = relations(resolverTextRecord, ({ one }) => ({
   // belongs to resolverRecord
   resolver: one(resolverRecords, {
-    fields: [resolverTextRecord.chainId, resolverTextRecord.resolver, resolverTextRecord.node],
-    references: [resolverRecords.chainId, resolverRecords.resolver, resolverRecords.node],
+    fields: [resolverTextRecord.chainId, resolverTextRecord.address, resolverTextRecord.node],
+    references: [resolverRecords.chainId, resolverRecords.address, resolverRecords.node],
   }),
 }));
 

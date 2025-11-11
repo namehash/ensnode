@@ -9,6 +9,7 @@ import { getModelId } from "@/graphql-api/lib/get-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { RegistryInterfaceRef } from "@/graphql-api/schema/registry";
+import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
 export const DomainRef = builder.loadableObjectRef("Domain", {
@@ -147,6 +148,16 @@ DomainRef.implement({
       description: "TODO",
       nullable: true,
       resolve: (parent) => parent.subregistryId,
+    }),
+
+    //////////////////////
+    // Domain.resolver
+    //////////////////////
+    resolver: t.field({
+      description: "TODO",
+      type: ResolverRef,
+      nullable: true,
+      resolve: (parent) => parent.resolverId,
     }),
   }),
 });

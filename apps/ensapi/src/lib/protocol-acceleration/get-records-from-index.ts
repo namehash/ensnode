@@ -34,7 +34,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
       where: (resolver, { and, eq }) =>
         and(
           eq(resolver.chainId, chainId),
-          eq(resolver.resolver, resolverAddress),
+          eq(resolver.address, resolverAddress),
           eq(resolver.node, node),
         ),
       columns: { name: true },
@@ -61,7 +61,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
         );
         if (!existing && defaultRecord) {
           resolverRecords.addressRecords.push({
-            address: defaultRecord.address,
+            value: defaultRecord.value,
             coinType: _coinType,
           });
         }

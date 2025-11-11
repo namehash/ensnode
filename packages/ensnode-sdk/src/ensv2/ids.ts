@@ -56,3 +56,8 @@ export type PermissionsUserId = string & { __brand: "PermissionsUserId" };
  *
  */
 export type ResolverId = SerializedAccountId & { __brand: "ResolverId" };
+
+/**
+ *
+ */
+export type ResolverRecordsId = string & { __brand: "ResolverRecordsId" };

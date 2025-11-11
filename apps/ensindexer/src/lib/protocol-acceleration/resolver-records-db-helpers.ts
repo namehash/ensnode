@@ -2,7 +2,12 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
 
-import type { Node } from "@ensnode/ensnode-sdk";
+import {
+  type CoinType,
+  makeResolverId,
+  makeResolverRecordsId,
+  type Node,
+} from "@ensnode/ensnode-sdk";
 import {
   interpretAddressRecordValue,
   interpretNameRecordValue,
@@ -13,25 +18,30 @@ import {
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
- * Infer the type of the ResolverRecord entity's composite primary key.
+ * Infer the type of the Resolver entity's composite key.
  */
-type ResolverRecordsId = Pick<
+type ResolverCompositeKey = Pick<typeof schema.resolver.$inferInsert, "chainId" | "address">;
+
+/**
+ * Infer the type of the ResolverRecord entity's composite key.
+ */
+type ResolverRecordsCompositeKey = Pick<
   typeof schema.resolverRecords.$inferInsert,
-  "chainId" | "resolver" | "node"
+  "chainId" | "address" | "node"
 >;
 
 /**
- * Constructs a ResolverRecordsId from a provided Resolver event.
+ * Constructs a ResolverRecordsCompositeKey from a provided Resolver event.
  *
- * @returns ResolverRecordsId
+ * @returns ResolverRecordsCompositeKey
  */
-export function makeResolverRecordsId(
+export function makeResolverRecordsCompositeKey(
   context: Context,
   event: EventWithArgs<{ node: Node }>,
-): ResolverRecordsId {
+): ResolverRecordsCompositeKey {
   return {
     chainId: context.chain.id,
-    resolver: event.log.address,
+    address: event.log.address,
     node: event.args.node,
   };
 }
@@ -39,15 +49,31 @@ export function makeResolverRecordsId(
 /**
  * Ensures that the Resolver and ResolverRecords entities described by `id` exists.
  */
-export async function ensureResolverAndResolverRecords(context: Context, id: ResolverRecordsId) {
+export async function ensureResolverAndResolverRecords(
+  context: Context,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
+) {
+  const resolverKey: ResolverCompositeKey = {
+    chainId: resolverRecordsKey.chainId,
+    address: resolverRecordsKey.address,
+  };
+  const resolverId = makeResolverId(resolverKey);
+  const resolverRecordsId = makeResolverRecordsId(resolverKey, resolverRecordsKey.node);
+
   // ensure Resolver
   await context.db
     .insert(schema.resolver)
-    .values({ chainId: id.chainId, address: id.resolver })
+    .values({ id: resolverId, ...resolverKey })
     .onConflictDoNothing();
 
   // ensure ResolverRecords
-  await context.db.insert(schema.resolverRecords).values(id).onConflictDoNothing();
+  await context.db
+    .insert(schema.resolverRecords)
+    .values({
+      id: resolverRecordsId,
+      ...resolverRecordsKey,
+    })
+    .onConflictDoNothing();
 }
 
 /**
@@ -55,10 +81,17 @@ export async function ensureResolverAndResolverRecords(context: Context, id: Res
  */
 export async function handleResolverNameUpdate(
   context: Context,
-  id: ResolverRecordsId,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
   name: string,
 ) {
-  await context.db.update(schema.resolverRecords, id).set({ name: interpretNameRecordValue(name) });
+  const resolverRecordsId = makeResolverRecordsId(
+    { chainId: resolverRecordsKey.chainId, address: resolverRecordsKey.address },
+    resolverRecordsKey.node,
+  );
+
+  await context.db
+    .update(schema.resolverRecords, { id: resolverRecordsId })
+    .set({ name: interpretNameRecordValue(name) });
 }
 
 /**
@@ -66,12 +99,12 @@ export async function handleResolverNameUpdate(
  */
 export async function handleResolverAddressRecordUpdate(
   context: Context,
-  resolverRecordsId: ResolverRecordsId,
-  coinType: bigint,
+  resolverRecordsKey: ResolverRecordsCompositeKey,
+  coinType: CoinType,
   address: Address,
 ) {
   // construct the ResolverAddressRecord's Composite Key
-  const id = { ...resolverRecordsId, coinType };
+  const id = { ...resolverRecordsKey, coinType };
 
   // interpret the incoming address record value
   const interpretedValue = interpretAddressRecordValue(address);
@@ -85,8 +118,8 @@ export async function handleResolverAddressRecordUpdate(
     // upsert
     await context.db
       .insert(schema.resolverAddressRecord)
-      .values({ ...id, address: interpretedValue })
-      .onConflictDoUpdate({ address: interpretedValue });
+      .values({ ...id, value: interpretedValue })
+      .onConflictDoUpdate({ value: interpretedValue });
   }
 }
 
@@ -97,7 +130,7 @@ export async function handleResolverAddressRecordUpdate(
  */
 export async function handleResolverTextRecordUpdate(
   context: Context,
-  resolverRecordsId: ResolverRecordsId,
+  resolverRecordsId: ResolverRecordsCompositeKey,
   key: string,
   value: string | null,
 ) {

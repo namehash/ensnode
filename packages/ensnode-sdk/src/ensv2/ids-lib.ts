@@ -3,6 +3,7 @@ import { type Address, hexToBigInt } from "viem";
 import {
   type AccountId,
   type LabelHash,
+  type Node,
   serializeAccountId,
   serializeAssetId,
 } from "@ensnode/ensnode-sdk";
@@ -15,6 +16,7 @@ import type {
   PermissionsUserId,
   RegistryContractId,
   ResolverId,
+  ResolverRecordsId,
 } from "./ids";
 
 /**
@@ -55,15 +57,21 @@ export const makePermissionsId = (contract: AccountId) =>
  *
  */
 export const makePermissionsResourceId = (contract: AccountId, resource: bigint) =>
-  `${serializeAccountId(contract)}/${resource}` as PermissionsResourceId;
+  `${makePermissionsId(contract)}/${resource}` as PermissionsResourceId;
 
 /**
  *
  */
 export const makePermissionsUserId = (contract: AccountId, resource: bigint, user: Address) =>
-  `${serializeAccountId(contract)}/${resource}/${user}` as PermissionsUserId;
+  `${makePermissionsId(contract)}/${resource}/${user}` as PermissionsUserId;
 
 /**
  * Serializes and brands an AccountId as a ResolverId.
  */
 export const makeResolverId = (contract: AccountId) => serializeAccountId(contract) as ResolverId;
+
+/**
+ *
+ */
+export const makeResolverRecordsId = (contract: AccountId, node: Node) =>
+  `${makeResolverId(contract)}/${node}` as ResolverRecordsId;
