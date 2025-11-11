@@ -107,7 +107,7 @@ export function ConfigInfoFeatures({ activated = true, children }: ConfigInfoFea
         <p className="text-sm leading-6 font-semibold text-gray-500">
           {activated ? "Activated Features" : "Deactivated Features"}
         </p>
-        <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
+        <div className="w-full flex flex-row flex-wrap justify-start items-start gap-1 pt-1">
           {children}
         </div>
       </div>
