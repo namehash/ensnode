@@ -4,16 +4,15 @@ import { zeroAddress } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
+  type AccountId,
   deserializeDuration,
   serializeAccountId,
-  type AccountId,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 import type { TopReferrersSnapshot } from "@/lib/ensanalytics/types";
 import logger from "@/lib/logger";
-
 
 /**
  * Fetches the top referrers from the registrar_actions table and builds a snapshot.
@@ -70,12 +69,10 @@ export async function getTopReferrers(
 
     // Transform the result to match AggregatedReferrerMetrics interface
     const topReferrers = result.map((row) => ({
-      // biome-ignore lint/style/noNonNullAssertion:
-      // referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
+      // biome-ignore lint/style/noNonNullAssertion: referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
       referrer: row.referrer!,
       totalReferrals: row.totalReferrals,
-      // biome-ignore lint/style/noNonNullAssertion:
-      // totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values.
+      // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
       totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
     }));
 

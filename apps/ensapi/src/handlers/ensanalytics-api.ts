@@ -1,9 +1,10 @@
+import { z } from "zod/v4";
+
 import {
   type PaginatedTopReferrersRequest,
-  PaginatedTopReferrersResponseCodes,
   type PaginatedTopReferrersResponse,
+  PaginatedTopReferrersResponseCodes,
 } from "@ensnode/ensnode-sdk";
-import { z } from "zod/v4";
 
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
@@ -72,9 +73,10 @@ app.get("/top-referrers", validate("query", paginationQuerySchema), async (c) =>
     } satisfies PaginatedTopReferrersResponse);
   } catch (error) {
     logger.error({ error }, "Error in /ensanalytics/top-referrers endpoint");
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "An unexpected error occurred while processing your request";
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "An unexpected error occurred while processing your request";
     return c.json(
       {
         responseCode: PaginatedTopReferrersResponseCodes.Error,

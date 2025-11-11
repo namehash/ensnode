@@ -1,9 +1,10 @@
+import config from "@/config";
+
+import { ENSAWARDS_END_DATE, ENSAWARDS_START_DATE } from "@namehash/ens-referrals";
 import pMemoize from "p-memoize";
 
-import { TtlCache, getEthnamesSubregistryId } from "@ensnode/ensnode-sdk";
-import { ENSAWARDS_START_DATE, ENSAWARDS_END_DATE } from "@namehash/ens-referrals";
+import { getEthnamesSubregistryId, TtlCache } from "@ensnode/ensnode-sdk";
 
-import config from "@/config";
 import { getTopReferrers } from "@/lib/ensanalytics/database";
 import { factory } from "@/lib/hono-factory";
 

@@ -18,9 +18,7 @@ export function getEthnamesSubregistryId(namespace: ENSNamespaceId): AccountId {
 
   const address = datasource.contracts.BaseRegistrar?.address;
   if (address === undefined || Array.isArray(address)) {
-    throw new Error(
-      `BaseRegistrar contract not found or has multiple addresses for ${namespace}`,
-    );
+    throw new Error(`BaseRegistrar contract not found or has multiple addresses for ${namespace}`);
   }
 
   return {
@@ -28,4 +26,3 @@ export function getEthnamesSubregistryId(namespace: ENSNamespaceId): AccountId {
     address,
   };
 }
-

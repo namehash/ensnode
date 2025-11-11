@@ -1,8 +1,4 @@
-import type {
-  AggregatedReferrerMetrics,
-  Duration,
-  UnixTimestamp,
-} from "@ensnode/ensnode-sdk";
+import type { AggregatedReferrerMetrics, Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 /**
  * Represents a snapshot of top referrers.

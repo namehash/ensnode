@@ -142,4 +142,3 @@ export type PaginatedTopReferrersResponse =
   | PaginatedTopReferrersResponseOk
   | PaginatedTopReferrersResponsePageOutOfRange
   | PaginatedTopReferrersResponseError;
-
