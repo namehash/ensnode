@@ -3,6 +3,7 @@ import { z } from "zod/v4";
 
 import {
   type ChainId,
+  type DomainId,
   type InterpretedName,
   isInterpretedName,
   type Name,
@@ -65,5 +66,15 @@ builder.scalarType("Name", {
         }
       })
       .transform((val) => val as InterpretedName)
+      .parse(value),
+});
+
+builder.scalarType("DomainId", {
+  description: "DomainId represents a @ensnode/ensnode-sdk#DomainId.",
+  serialize: (value: Name) => value,
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .transform((val) => val as DomainId)
       .parse(value),
 });

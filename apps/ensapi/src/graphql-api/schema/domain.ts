@@ -164,3 +164,12 @@ DomainRef.implement({
     }),
   }),
 });
+
+export const DomainIdInput = builder.inputType("DomainIdInput", {
+  description: "TODO",
+  isOneOf: true,
+  fields: (t) => ({
+    name: t.field({ type: "Name" }),
+    id: t.field({ type: "DomainId" }),
+  }),
+});

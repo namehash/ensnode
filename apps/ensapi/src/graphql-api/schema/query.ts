@@ -6,7 +6,7 @@ import { builder } from "@/graphql-api/builder";
 import type { RegistryContract } from "@/graphql-api/lib/db-types";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
-import { DomainRef } from "@/graphql-api/schema/domain";
+import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
 import {
   RegistryContractRef,
   RegistryIdInput,
@@ -15,21 +15,24 @@ import {
 import { db } from "@/lib/db";
 import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
 
+// TODO: maybe should still implement query/return by id, exposing the db's primary key?
+// maybe necessary for connections pattern...
+// if leaning into opaque ids, then probably prefer that, and avoid exposing semantic searches? unclear
+
 builder.queryType({
   fields: (t) => ({
-    //////////////////////
-    // Get Domain by FQDN
-    //////////////////////
-    name: t.field({
+    //////////////////////////////////
+    // Get Domain by Name or DomainId
+    //////////////////////////////////
+    domain: t.field({
       description: "TODO",
       type: DomainRef,
-      args: {
-        fqdn: t.arg({ type: "Name", required: true }),
-      },
+      args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
       resolve: async (parent, args, ctx, info) => {
-        const domainId = await getDomainIdByInterpretedName(args.fqdn);
-        // TODO: traverse the namegraph to identify the addressed Domain
+        const domainId = args.by.name
+          ? await getDomainIdByInterpretedName(args.by.name)
+          : args.by.id;
         // TODO(dataloader): just return domainId
 
         if (!domainId) return null;
@@ -40,15 +43,13 @@ builder.queryType({
       },
     }),
 
-    /////////////////////////////////////////
+    //////////////////////////
     // Get Account by address
-    /////////////////////////////////////////
+    //////////////////////////
     account: t.field({
       description: "TODO",
       type: AccountRef,
-      args: {
-        address: t.arg({ type: "Address", required: true }),
-      },
+      args: { address: t.arg({ type: "Address", required: true }) },
       resolve: async (parent, args, ctx, info) => {
         // TODO(dataloader): just return address
 
@@ -66,9 +67,7 @@ builder.queryType({
     registry: t.field({
       description: "TODO",
       type: RegistryInterfaceRef,
-      args: {
-        id: t.arg({ type: RegistryIdInput, required: true }),
-      },
+      args: { id: t.arg({ type: RegistryIdInput, required: true }) },
       resolve: async (parent, args, ctx, info) => {
         // TODO(dataloader): just return registryId
         const registryId = args.id.contract
@@ -83,9 +82,9 @@ builder.queryType({
       },
     }),
 
-    /////////////////
+    /////////////////////
     // Get Root Registry
-    /////////////////
+    /////////////////////
     root: t.field({
       type: RegistryContractRef,
       description: "TODO",
