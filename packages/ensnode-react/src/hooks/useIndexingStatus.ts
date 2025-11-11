@@ -22,8 +22,8 @@ interface UseIndexingStatusParameters
  * Hook for fetching and tracking indexing status with client-side projection updates.
  *
  * Clients often need frequently updated worst-case distance for their logic,
- * but calling the API every second would be inefficient. Instead, we fetch an
- * updated snapshot every 10 seconds and keep it in memory.
+ * but calling the API every second would be inefficient. Instead, we fetch a
+ * snapshot and keep it in memory. We then asynchronously attempt to update it every 10 seconds.
  *
  * From that cached snapshot, we continuously generate new projections —
  * entirely in memory — that stay up to date as time moves forward. Each
