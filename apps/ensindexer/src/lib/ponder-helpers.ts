@@ -9,8 +9,14 @@ import type { ChainConfig } from "ponder";
 import type { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
-import { type ContractConfig, ensTestEnvL1Chain, ensTestEnvL2Chain } from "@ensnode/datasources";
-import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
+import {
+  type ContractConfig,
+  type DatasourceName,
+  ensTestEnvL1Chain,
+  ensTestEnvL2Chain,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
+import type { Blockrange, ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import type { ENSIndexerConfig } from "@/config/types";
@@ -318,6 +324,75 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
       endBlock,
     },
   };
+}
+
+/**
+ * TODO
+ */
+export function chainsConnectionConfigForDatasources(
+  namespace: ENSNamespaceId,
+  rpcConfigs: ENSIndexerConfig["rpcConfigs"],
+  datasourceNames: DatasourceName[],
+) {
+  return datasourceNames
+    .map((datasourceName) => maybeGetDatasource(namespace, datasourceName))
+    .filter((ds) => !!ds)
+    .map((datasource) => datasource.chain)
+    .reduce<Record<string, ChainConfig>>(
+      (memo, chain) => ({
+        ...memo,
+        ...chainsConnectionConfig(rpcConfigs, chain.id),
+      }),
+      {},
+    );
+}
+
+type MapOfRequiredDatasources<
+  N extends ENSNamespaceId,
+  DATASOURCE_NAMES extends readonly DatasourceName[],
+> = {
+  [K in DATASOURCE_NAMES[number]]: Exclude<ReturnType<typeof maybeGetDatasource<N, K>>, undefined>;
+};
+
+type MapOfMaybeDatasources<
+  N extends ENSNamespaceId,
+  DATASOURCE_NAMES extends readonly DatasourceName[],
+> = {
+  [K in DATASOURCE_NAMES[number]]: ReturnType<typeof maybeGetDatasource<N, K>>;
+};
+
+/**
+ * TODO
+ */
+export function getRequiredDatasources<
+  N extends ENSNamespaceId,
+  DATASOURCE_NAMES extends DatasourceName[],
+>(namespace: N, datasourceNames: DATASOURCE_NAMES) {
+  return Object.fromEntries(
+    datasourceNames.map((datasourceName) => {
+      const datasource = maybeGetDatasource(namespace, datasourceName);
+      if (!datasource) {
+        throw new Error(
+          `Required datasource "${datasourceName}" not found for namespace "${namespace}"`,
+        );
+      }
+      return [datasourceName, datasource] as const;
+    }),
+  ) as MapOfRequiredDatasources<N, DATASOURCE_NAMES>;
+}
+
+/**
+ * TODO
+ */
+export function maybeGetDatasources<
+  N extends ENSNamespaceId,
+  DATASOURCE_NAMES extends DatasourceName[],
+>(namespace: N, datasourceNames: DATASOURCE_NAMES) {
+  return Object.fromEntries(
+    datasourceNames.map(
+      (datasourceName) => [datasourceName, maybeGetDatasource(namespace, datasourceName)] as const,
+    ),
+  ) as MapOfMaybeDatasources<N, DATASOURCE_NAMES>;
 }
 
 /**

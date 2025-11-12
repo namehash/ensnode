@@ -1,10 +1,14 @@
 import { type Address, isAddress } from "viem";
 import type { z } from "zod/v4";
 
-import type { DatasourceName } from "@ensnode/datasources";
+import {
+  type DatasourceName,
+  type ENSNamespace,
+  getENSNamespace,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
 import { asLowerCaseAddress, PluginName, uniq } from "@ensnode/ensnode-sdk";
 
-import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
 
 import type { ENSIndexerConfig } from "./types";
@@ -18,7 +22,7 @@ export function invariant_requiredDatasources(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
+  const datasources = getENSNamespace(config.namespace);
   const availableDatasourceNames = Object.keys(datasources) as DatasourceName[];
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
@@ -50,19 +54,18 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
-
   for (const pluginName of config.plugins) {
     const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
 
     for (const datasourceName of datasourceNames) {
-      const { chain } = datasources[datasourceName];
+      const datasource = maybeGetDatasource(config.namespace, datasourceName);
+      if (!datasource) continue; // ignore undefined datasources, caught by requiredDatasources invariant
 
-      if (!config.rpcConfigs.has(chain.id)) {
+      if (!config.rpcConfigs.has(datasource.chain.id)) {
         ctx.issues.push({
           code: "custom",
           input: config,
-          message: `Plugin '${pluginName}' indexes chain with id ${chain.id} but RPC_URL_${chain.id} is not specified.`,
+          message: `Plugin '${pluginName}' indexes chain with id ${datasource.chain.id} but RPC_URL_${datasource.chain.id} is not specified.`,
         });
       }
     }
@@ -77,11 +80,12 @@ export function invariant_globalBlockrange(
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
+    const datasources = getENSNamespace(config.namespace) as ENSNamespace;
     const indexedChainIds = uniq(
       config.plugins
         .flatMap((pluginName) => getPlugin(pluginName).requiredDatasourceNames)
         .map((datasourceName) => datasources[datasourceName])
+        .filter((ds) => !!ds) // ignore undefined datasources, caught by requiredDatasources invariant
         .map((datasource) => datasource.chain.id),
     );
 
@@ -112,12 +116,14 @@ export function invariant_validContractConfigs(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
-  for (const datasourceName of Object.keys(datasources) as DatasourceName[]) {
-    const { contracts } = datasources[datasourceName];
+  const datasources = getENSNamespace(config.namespace) as ENSNamespace;
+  const datasourceNames = Object.keys(datasources) as DatasourceName[];
+  for (const datasourceName of datasourceNames) {
+    const datasource = datasources[datasourceName];
+    if (!datasource) continue; // ignore undefined datasources, caught by requiredDatasources invariant
 
     // Invariant: `contracts` must provide valid addresses if a filter is not provided
-    for (const [contractName, contractConfig] of Object.entries(contracts)) {
+    for (const [contractName, contractConfig] of Object.entries(datasource.contracts)) {
       if ("address" in contractConfig && typeof contractConfig.address === "string") {
         // only ContractConfigs with `address` defined
         const isValidAddress =

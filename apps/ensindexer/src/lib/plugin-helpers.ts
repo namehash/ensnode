@@ -1,10 +1,9 @@
 import type { createConfig as createPonderConfig } from "ponder";
 
-import { type DatasourceName, type ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+import type { DatasourceName } from "@ensnode/datasources";
 import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
-import type { MergedTypes } from "@/lib/lib-helpers";
 
 /**
  * Creates a namespaced contract name for Ponder handlers.
@@ -83,50 +82,6 @@ type PonderConfigResult<
   ACCOUNTS extends object = {},
   BLOCKS extends object = {},
 > = ReturnType<typeof createPonderConfig<CHAINS, CONTRACTS, ACCOUNTS, BLOCKS>>;
-
-/**
- * ENSNamespaceFullyDefinedAtCompileTime is a helper type necessary to support runtime-conditional
- * Ponder plugins.
- *
- * 1. ENSNode can be configured to index in the context of different ENS namespaces,
- *   (currently: mainnet, sepolia, holesky, ens-test-env), using a user-specified set of plugins.
- * 2. Ponder's inferred type-checking requires const-typed values, and so those plugins must be able
- *   to define their Ponder config statically so the types can be inferred at compile-time, regardless
- *   of whether the plugin's config and handler logic is loaded/executed at runtime.
- * 3. To make this work, we provide a ENSNamespaceFullyDefinedAtCompileTime, set to the typeof mainnet's
- *   ENSNamespace, which fully defines all known Datasources (if this is ever not the case, a merged
- *   type can be used to ensure that this type has the full set of possible Datasources). Plugins
- *   can use the runtime value returned from {@link getENSNamespaceAsFullyDefinedAtCompileTime} and
- *   by casting it to ENSNamespaceFullyDefinedAtCompileTime we ensure that the values expected by
- *   those plugins pass the typechecker. ENSNode ensures that non-active plugins are not executed,
- *   so the issue of type/value mismatch does not occur during execution.
- */
-type ENSNamespaceFullyDefinedAtCompileTime = ReturnType<typeof getENSNamespace<"mainnet">>;
-
-/**
- * Returns the ENSNamespace for the provided `namespaceId`, cast to ENSNamespaceFullyDefinedAtCompileTime.
- *
- * See {@link ENSNamespaceFullyDefinedAtCompileTime} for more info.
- *
- * @param namespaceId - The ENS namespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
- * @returns the ENSNamespace
- */
-export const getENSNamespaceAsFullyDefinedAtCompileTime = (namespaceId: ENSNamespaceId) =>
-  getENSNamespace(namespaceId) as ENSNamespaceFullyDefinedAtCompileTime;
-
-/**
- * Returns the `datasourceName` Datasource within the `namespaceId` namespace, cast as ENSNamespaceFullyDefinedAtCompileTime.
- *
- * NOTE: the typescript typechecker will _not_ enforce validity. i.e. using an invalid `datasourceName`
- * within the specified `namespaceId` will have a valid return type but be undefined at runtime.
- */
-export const getDatasourceAsFullyDefinedAtCompileTime = <
-  N extends ENSNamespaceId,
-  D extends keyof ENSNamespaceFullyDefinedAtCompileTime,
->(
-  namespaceId: N,
-  datasourceName: D,
-) => getENSNamespaceAsFullyDefinedAtCompileTime(namespaceId)[datasourceName];
 
 /**
  * Options type for `buildPlugin` function input.

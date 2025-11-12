@@ -1,27 +1,32 @@
-import { type ChainConfig, createConfig } from "ponder";
+/**
+ * TODO
+ */
 
-import {
-  type DatasourceName,
-  DatasourceNames,
-  EnhancedAccessControlABI,
-  getDatasource,
-  maybeGetDatasource,
-  RegistryABI,
-} from "@ensnode/datasources";
+import { createConfig } from "ponder";
+
+import { DatasourceNames, EnhancedAccessControlABI, RegistryABI } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
+import {
+  chainConfigForContract,
+  chainsConnectionConfigForDatasources,
+  getRequiredDatasources,
+  maybeGetDatasources,
+} from "@/lib/ponder-helpers";
 
-/**
-
- */
 export const pluginName = PluginName.ENSv2;
 
 const REQUIRED_DATASOURCE_NAMES = [
-  DatasourceNames.ENSRoot,
+  DatasourceNames.ENSRoot, //
   DatasourceNames.Namechain,
-] as const satisfies DatasourceName[];
+];
+
+const ALL_DATASOURCE_NAMES = [
+  ...REQUIRED_DATASOURCE_NAMES,
+  DatasourceNames.Basenames,
+  DatasourceNames.Lineanames,
+];
 
 export default createPlugin({
   name: pluginName,
@@ -32,24 +37,22 @@ export default createPlugin({
       throw new Error("only ens-test-env and mainnet");
     }
 
-    const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
-    const namechain = maybeGetDatasource(config.namespace, DatasourceNames.Namechain);
-    const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames);
-    const lineanames = maybeGetDatasource(config.namespace, DatasourceNames.Lineanames);
+    const {
+      ensroot, //
+      namechain,
+    } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
-    if (!("Registry" in ensroot.contracts)) throw new Error("");
+    const {
+      basenames, //
+      lineanames,
+    } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
 
     return createConfig({
-      chains: [ensroot, namechain, basenames, lineanames]
-        .filter((ds) => !!ds)
-        .map((datasource) => datasource.chain)
-        .reduce<Record<string, ChainConfig>>(
-          (memo, chain) => ({
-            ...memo,
-            ...chainsConnectionConfig(config.rpcConfigs, chain.id),
-          }),
-          {},
-        ),
+      chains: chainsConnectionConfigForDatasources(
+        config.namespace,
+        config.rpcConfigs,
+        ALL_DATASOURCE_NAMES,
+      ),
 
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
