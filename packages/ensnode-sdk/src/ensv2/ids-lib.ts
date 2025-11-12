@@ -10,7 +10,9 @@ import {
 
 import type {
   CanonicalId,
+  ENSv1DomainId,
   ENSv2DomainId,
+  ImplicitRegistryId,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
@@ -24,6 +26,16 @@ import type {
  */
 export const makeRegistryContractId = (accountId: AccountId) =>
   serializeAccountId(accountId) as RegistryContractId;
+
+/**
+ * Brands a node as an ImplicitRegistryId.
+ */
+export const makeImplicitRegistryId = (node: Node) => node as ImplicitRegistryId;
+
+/**
+ * Makes an ENSv1 Domain Id given the ENSv1 Domain's `node`
+ */
+export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
 
 /**
  * Makes an ENSv2 Domain Id given the parent `registry` and the domain's `canonicalId`.

@@ -2,7 +2,6 @@ import { onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
 import type {
-  CanonicalId,
   ChainId,
   DomainId,
   InterpretedLabel,
@@ -90,9 +89,6 @@ export const domain = onchainTable(
 
     // belongs to registry
     registryId: t.text().notNull().$type<RegistryId>(),
-
-    // TODO: we could probably avoid storing this at all and compute it on-demand
-    canonicalId: t.bigint().notNull().$type<CanonicalId>(),
     labelHash: t.hex().notNull().$type<LabelHash>(),
 
     // may have an owner

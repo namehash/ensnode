@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: ignore unused resolve arguments */
-
 import config from "@/config";
 
 import { getRootRegistryId, makeRegistryContractId } from "@ensnode/ensnode-sdk";

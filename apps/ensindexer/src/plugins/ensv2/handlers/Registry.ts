@@ -9,12 +9,12 @@ import {
   type LiteralLabel,
   makeENSv2DomainId,
   makeRegistryContractId,
+  makeResolverId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
-import { ensureResolver } from "@/lib/ensv2/resolver-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -75,9 +75,7 @@ export default function () {
       await ensureLabel(context, label);
 
       // insert Domain
-      await context.db
-        .insert(schema.domain)
-        .values({ id: domainId, registryId, labelHash, canonicalId });
+      await context.db.insert(schema.domain).values({ id: domainId, registryId, labelHash });
 
       // TODO: insert Registration entity for this domain as well: expiration, registrant
       // ensure Registrant
@@ -139,11 +137,7 @@ export default function () {
       if (isDeletion) {
         await context.db.update(schema.domain, { id: domainId }).set({ resolverId: null });
       } else {
-        const resolverId = await ensureResolver(context, {
-          chainId: context.chain.id,
-          address: address,
-        });
-
+        const resolverId = makeResolverId({ chainId: context.chain.id, address: address });
         await context.db.update(schema.domain, { id: domainId }).set({ resolverId });
       }
     },

@@ -18,6 +18,9 @@ import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegi
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
+// ABIs for Namechain
+import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
+import { Registry } from "./abis/namechain/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
@@ -91,6 +94,34 @@ export default {
         abi: root_UniversalResolver,
         address: "0xb7b7dadf4d42a08b3ec1d3a1079959dfbc8cffcc",
         startBlock: 8515717,
+      },
+
+      RootRegistry: {
+        abi: Registry,
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        startBlock: 0,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.Namechain]: {
+    chain: sepolia,
+    contracts: {
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
       },
     },
   },

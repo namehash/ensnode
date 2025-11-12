@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: graphql resolve pattern */
-
 import {
   makeResolverRecordsId,
   type ResolverId,

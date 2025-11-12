@@ -26,29 +26,29 @@ const basenames = maybeGetDatasource(config.namespace, DatasourceNames.Basenames
 export function isKnownOnchainStaticResolver(chainId: ChainId, resolverAddress: Address): boolean {
   // on the ENS Deployment Chain
   if (chainId === rrRoot?.chain.id) {
-    return [
-      // the Root LegacyDefaultResolver is an Onchain Static Resolver
-      rrRoot.contracts.DefaultPublicResolver1?.address,
+    return (
+      [
+        // the Root LegacyDefaultResolver is an Onchain Static Resolver
+        rrRoot.contracts.DefaultPublicResolver1.address,
 
-      // NOTE: this is _also_ the ENSIP-11 ReverseResolver (aka DefaultReverseResolver2)
-      rrRoot.contracts.DefaultPublicResolver2?.address,
+        // NOTE: this is _also_ the ENSIP-11 ReverseResolver (aka DefaultReverseResolver2)
+        rrRoot.contracts.DefaultPublicResolver2.address,
 
-      // the ENSIP-19 default PublicResolver is an Onchain Static Resolver
-      rrRoot.contracts.DefaultPublicResolver3?.address,
-    ]
-      .filter((address): address is Address => !!address)
-      .includes(resolverAddress);
+        // the ENSIP-19 default PublicResolver is an Onchain Static Resolver
+        rrRoot.contracts.DefaultPublicResolver3.address,
+      ] as Address[]
+    ).includes(resolverAddress);
   }
 
   // on Base Chain
   if (chainId === basenames?.chain.id) {
-    return [
-      // the Basenames Default Resolvers are Onchain Static Resolvers
-      basenames.contracts.L2Resolver1?.address,
-      basenames.contracts.L2Resolver2?.address,
-    ]
-      .filter((address): address is Address => !!address)
-      .includes(resolverAddress);
+    return (
+      [
+        // the Basenames Default Resolvers are Onchain Static Resolvers
+        "L2Resolver1" in basenames.contracts && basenames.contracts.L2Resolver1.address,
+        "L2Resolver2" in basenames.contracts && basenames.contracts.L2Resolver2.address,
+      ] as Address[]
+    ).includes(resolverAddress);
   }
 
   return false;
@@ -65,22 +65,22 @@ export function onchainStaticResolverImplementsDefaultAddress(
 ): boolean {
   // on ENS Root Chain
   if (chainId === rrRoot?.chain.id) {
-    return [
-      // the DefaultPublicResolver3 (ENSIP-19 default PublicResolver) implements address defaulting
-      rrRoot.contracts.DefaultPublicResolver3?.address,
-    ]
-      .filter((address): address is Address => !!address)
-      .includes(resolverAddress);
+    return (
+      [
+        // the DefaultPublicResolver3 (ENSIP-19 default PublicResolver) implements address defaulting
+        rrRoot.contracts.DefaultPublicResolver3.address,
+      ] as Address[]
+    ).includes(resolverAddress);
   }
 
   // on Base Chain
   if (chainId === basenames?.chain.id) {
-    return [
-      // the Basenames L2Resolver2 implements address defaulting
-      basenames.contracts.L2Resolver2?.address,
-    ]
-      .filter((address): address is Address => !!address)
-      .includes(resolverAddress);
+    return (
+      [
+        // the Basenames L2Resolver2 implements address defaulting
+        "L2Resolver2" in basenames.contracts && basenames.contracts.L2Resolver2.address,
+      ] as Address[]
+    ).includes(resolverAddress);
   }
 
   return false;

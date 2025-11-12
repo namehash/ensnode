@@ -122,7 +122,7 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 /**
  * makes a set of shared handlers for the NameWrapper contract
  *
- * @param registrarManagedName the name that the Registrar that NameWrapper interacts with registers subnames of
+ * @param registrarManagedName the name of the Registrar that NameWrapper interacts with registers subnames of
  */
 export const makeNameWrapperHandlers = ({
   registrarManagedName,

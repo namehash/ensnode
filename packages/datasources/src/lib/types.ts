@@ -108,3 +108,31 @@ export type ContractConfig = {
 export type ENSNamespace = {
   [DatasourceNames.ENSRoot]: Datasource;
 } & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;
+
+/**
+ * Helper type to merge multiple types into one.
+ */
+type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
+  ? R
+  : never;
+
+/**
+ * Preserves the chain union while merging contracts from multiple objects
+ */
+export type MergeNamespaces<T extends ENSNamespace> = T extends ENSNamespace
+  ? {
+      chain: T extends { chain: infer C } ? C : never;
+      contracts: T extends { [DatasourceNames.ENSRoot]: { contracts: infer C } }
+        ? MergedTypes<C>
+        : never;
+    }
+  : never;
+
+/**
+ * Helper type to extract the datasource type for a specific datasource name across all namespaces.
+ * Returns the union of all possible datasource types for that datasource name, or never if not found.
+ */
+export type ExtractDatasourceType<
+  Namespaces extends ENSNamespace,
+  D extends DatasourceName,
+> = Namespaces extends any ? (D extends keyof Namespaces ? Namespaces[D] : never) : never;

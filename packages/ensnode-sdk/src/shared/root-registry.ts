@@ -5,10 +5,11 @@ import { type AccountId, accountIdEqual, makeRegistryContractId } from "@ensnode
  * TODO
  */
 export const getRootRegistry = (namespace: ENSNamespaceId) => {
-  // TODO: remove, helps types while implementing
-  if (namespace !== "ens-test-env") throw new Error("nope");
-
   const ensroot = getDatasource(namespace, DatasourceNames.ENSRoot);
+
+  // TODO: remove when all defined
+  if (!("RootRegistry" in ensroot.contracts))
+    throw new Error(`Namespace ${namespace} does not define ENSv2 Root Registry.`);
 
   return {
     chainId: ensroot.chain.id,

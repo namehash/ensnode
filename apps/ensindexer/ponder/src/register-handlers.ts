@@ -52,6 +52,10 @@ if (config.plugins.includes(PluginName.TokenScope)) {
 }
 
 // ENSv2 Plugin
+// NOTE: Because the ENSv2 plugin depends on node migration logic in the ProtocolAcceleration plugin,
+// it's important that ENSv2 handlers are registered _after_ Protocol Acceleration handlers. This
+// ensures that the Protocol Acceleration handlers are executed first and the results of their node
+// migration indexing is available for the identical handlers in the ENSv2 plugin.
 if (config.plugins.includes(PluginName.ENSv2)) {
   attach_ENSv2Handlers();
 }

@@ -1,7 +1,10 @@
-/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: graphql resolve pattern */
 import { rejectErrors } from "@pothos/plugin-dataloader";
 
-import { type DomainId, interpretedLabelsToInterpretedName } from "@ensnode/ensnode-sdk";
+import {
+  type DomainId,
+  getCanonicalId,
+  interpretedLabelsToInterpretedName,
+} from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getCanonicalPath } from "@/graphql-api/lib/get-canonical-path";
@@ -43,10 +46,11 @@ DomainRef.implement({
     //////////////////////
     // Domain.canonicalId
     //////////////////////
-    canonicalId: t.expose("canonicalId", {
+    canonicalId: t.field({
       type: "BigInt",
       description: "TODO",
       nullable: false,
+      resolve: (parent) => getCanonicalId(parent.labelHash),
     }),
 
     //////////////////////
@@ -112,7 +116,7 @@ DomainRef.implement({
       description: "TODO",
       type: ["Name"],
       nullable: false,
-      resolve: async ({ registryId, canonicalId }) => {
+      resolve: async (parent) => {
         // a domain's aliases are all of the paths from root to this domain for which it can be
         // resolved. naively reverse-traverse the namegaph until the root is reached... yikes.
         // if materializing namespace: simply lookup namesInNamespace by domainId

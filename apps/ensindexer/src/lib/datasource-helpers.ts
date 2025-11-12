@@ -1,4 +1,9 @@
-import { type DatasourceName, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
+import {
+  type Datasource,
+  type DatasourceName,
+  type ENSNamespaceId,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
 import type { AccountId } from "@ensnode/ensnode-sdk";
 
 /**
@@ -15,12 +20,16 @@ import type { AccountId } from "@ensnode/ensnode-sdk";
  * @returns The AccountId of the contract with the given namespace, datasource,
  *          and contract name, or undefined if it is not found or is not a single AccountId
  */
-export const maybeGetDatasourceContract = (
-  namespaceId: ENSNamespaceId,
-  datasourceName: DatasourceName,
-  contractName: string,
+export const maybeGetDatasourceContract = <
+  N extends ENSNamespaceId,
+  D extends DatasourceName,
+  C extends string,
+>(
+  namespaceId: N,
+  datasourceName: D,
+  contractName: C,
 ): AccountId | undefined => {
-  const datasource = maybeGetDatasource(namespaceId, datasourceName);
+  const datasource = maybeGetDatasource(namespaceId, datasourceName) as Datasource | undefined;
   if (!datasource) return undefined;
 
   const address = datasource.contracts[contractName]?.address;
