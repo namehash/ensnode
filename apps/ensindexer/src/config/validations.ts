@@ -2,7 +2,7 @@ import { type Address, isAddress } from "viem";
 import type { z } from "zod/v4";
 
 import type { DatasourceName } from "@ensnode/datasources";
-import { asLowerCaseAddress, uniq } from "@ensnode/ensnode-sdk";
+import { asLowerCaseAddress, PluginName, uniq } from "@ensnode/ensnode-sdk";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
@@ -131,5 +131,22 @@ export function invariant_validContractConfigs(
         }
       }
     }
+  }
+}
+
+// Invariant: ensv2 core plugin requires protocol acceleration
+export function invariant_ensv2RequiresProtocolAcceleration(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
+) {
+  const { value: config } = ctx;
+
+  // TODO: getCorePlugin(config.plugins)
+  if (
+    config.plugins.includes(PluginName.ENSv2) &&
+    !config.plugins.includes(PluginName.ProtocolAcceleration)
+  ) {
+    throw new Error(
+      `Core Plugin '${PluginName.ENSv2}' requires inclusion of '${PluginName.ProtocolAcceleration}' plugin.`,
+    );
   }
 }

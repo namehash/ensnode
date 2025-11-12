@@ -16,6 +16,7 @@ import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   type AccountId,
   getNameHierarchy,
+  isRootRegistry,
   type Name,
   type Node,
   type NormalizedName,
@@ -23,7 +24,6 @@ import {
 
 import { sortByArrayOrder } from "@/graphql-api/lib/sort-by-array-order";
 import { db } from "@/lib/db";
-import { isRootRegistry } from "@/lib/root-registry";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 type FindResolverResult =
@@ -73,7 +73,7 @@ export async function findResolver({
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isRootRegistry(registry)) {
+  if (!isRootRegistry(config.namespace, registry)) {
     throw new Error(
       `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );

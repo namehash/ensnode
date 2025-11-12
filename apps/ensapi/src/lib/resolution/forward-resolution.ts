@@ -10,6 +10,7 @@ import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
+  getRootRegistry,
   isNormalizedName,
   isSelectionEmpty,
   type Node,
@@ -37,7 +38,6 @@ import {
   interpretRawCallsAndResults,
   makeResolveCalls,
 } from "@/lib/resolution/resolve-calls-and-results";
-import { ROOT_REGISTRY } from "@/lib/root-registry";
 import { supportsENSIP10Interface } from "@/lib/rpc/ensip-10";
 import { getPublicClient } from "@/lib/rpc/public-client";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
@@ -87,7 +87,10 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 ): Promise<ForwardResolutionResult<SELECTION>> {
   // NOTE: `resolveForward` is just `_resolveForward` with the enforcement that `registry` must
   // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
-  return _resolveForward(name, selection, { ...options, registry: ROOT_REGISTRY });
+  return _resolveForward(name, selection, {
+    ...options,
+    registry: getRootRegistry(config.namespace),
+  });
 }
 
 /**

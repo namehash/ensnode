@@ -1,13 +1,14 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: ignore unused resolve arguments */
 
-import { makeRegistryContractId } from "@ensnode/ensnode-sdk";
+import config from "@/config";
+
+import { getRootRegistryId, makeRegistryContractId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
-import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
 
 // TODO: maybe should still implement query/return by id, exposing the db's primary key?
 // maybe necessary for connections pattern...
@@ -60,7 +61,7 @@ builder.queryType({
       description: "TODO",
       type: RegistryInterfaceRef,
       nullable: false,
-      resolve: () => ROOT_REGISTRY_ID,
+      resolve: () => getRootRegistryId(config.namespace),
     }),
   }),
 });

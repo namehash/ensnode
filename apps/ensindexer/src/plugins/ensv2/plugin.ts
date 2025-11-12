@@ -11,7 +11,11 @@ import {
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
-import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
+import {
+  createPlugin,
+  getDatasourceAsFullyDefinedAtCompileTime,
+  namespaceContract,
+} from "@/lib/plugin-helpers";
 import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
 
 /**
@@ -19,21 +23,37 @@ import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-hel
  */
 export const pluginName = PluginName.ENSv2;
 
-const ALL_DATASOURCE_NAMES = [
+const REQUIRED_DATASOURCE_NAMES = [
   DatasourceNames.ENSRoot,
   DatasourceNames.Namechain,
 ] as const satisfies DatasourceName[];
 
+const ALL_DATASOURCE_NAMES = [
+  ...REQUIRED_DATASOURCE_NAMES,
+  DatasourceNames.Basenames,
+  DatasourceNames.Lineanames,
+] as const satisfies DatasourceName[];
+
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: ALL_DATASOURCE_NAMES,
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
     // TODO: remove this, helps with types while only targeting ens-test-env
-    if (config.namespace !== ENSNamespaceIds.EnsTestEnv) process.exit(1);
+    if (config.namespace !== ENSNamespaceIds.EnsTestEnv) throw new Error("only ens-test-env");
 
     const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
-    // biome-ignore lint/style/noNonNullAssertion: allowed for now
-    const namechain = maybeGetDatasource(config.namespace, DatasourceNames.Namechain)!;
+    const namechain = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.Namechain,
+    );
+    const basenames = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.Basenames,
+    );
+    const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
+      config.namespace,
+      DatasourceNames.Lineanames,
+    );
 
     const allDatasources = ALL_DATASOURCE_NAMES.map((datasourceName) =>
       maybeGetDatasource(config.namespace, datasourceName),
@@ -78,6 +98,45 @@ export default createPlugin({
             }),
             {},
           ),
+        },
+
+        // index the ENSv1RegistryOld on ENS Root Chain
+        [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
+          abi: ensroot.contracts.ENSv1RegistryOld.abi,
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.ENSv1RegistryOld,
+            ),
+          },
+        },
+
+        // index ENSv1Registry on ENS Root Chain, Basenames, Lineanames
+        [namespaceContract(pluginName, "ENSv1Registry")]: {
+          abi: ensroot.contracts.ENSv1Registry.abi,
+          chain: {
+            // ENS Root Chain Registry
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.ENSv1Registry,
+            ),
+            // Basenames (shadow)Registry if defined
+            ...(basenames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                basenames.chain.id,
+                basenames.contracts.Registry,
+              )),
+            // Lineanames (shadow)Registry if defined
+            ...(lineanames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                lineanames.chain.id,
+                lineanames.contracts.Registry,
+              )),
+          },
         },
       },
     });

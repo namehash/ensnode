@@ -1,8 +1,11 @@
+import config from "@/config";
+
 import { Param, sql } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
+  getRootRegistryId,
   type InterpretedName,
   interpretedNameToLabelHashPath,
   type LabelHash,
@@ -10,7 +13,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
+
+const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
 
 /**
  * Gets the Domain addressed by `name`.

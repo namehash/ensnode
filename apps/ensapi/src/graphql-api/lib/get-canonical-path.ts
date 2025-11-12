@@ -1,12 +1,19 @@
+import config from "@/config";
+
 import { sql } from "drizzle-orm";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type { CanonicalPath, DomainId, RegistryId } from "@ensnode/ensnode-sdk";
+import {
+  type CanonicalPath,
+  type DomainId,
+  getRootRegistryId,
+  type RegistryId,
+} from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import { ROOT_REGISTRY_ID } from "@/lib/root-registry";
 
 const MAX_DEPTH = 16;
+const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
 
 /**
  * Provide the canonical parents from the Root Registry to `domainId`.

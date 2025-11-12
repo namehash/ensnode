@@ -56,11 +56,15 @@ ResolverRef.implement({
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
+    ////////////////////
+    // Resolver.records
+    ////////////////////
+    // TODO: connection to all ResolverRecords by (address, chainId)
+
     ////////////////////////////
-    // Resolver.records by Node
+    // Resolver.recordsFor node
     ////////////////////////////
-    // TODO: make node optional and allow connection to all records
-    records: t.field({
+    recordsFor: t.field({
       description: "TODO",
       type: ResolverRecordsRef,
       args: { node: t.arg({ type: "Node", required: true }) },
