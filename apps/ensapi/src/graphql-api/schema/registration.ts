@@ -1,0 +1,129 @@
+import type { RegistrationId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+
+import { builder } from "@/graphql-api/builder";
+import { getModelId } from "@/graphql-api/lib/get-id";
+import { AccountIdRef } from "@/graphql-api/schema/account-id";
+import { DomainRef } from "@/graphql-api/schema/domain";
+import { db } from "@/lib/db";
+
+export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
+  load: (ids: RegistrationId[]) =>
+    db.query.registration.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+    }),
+  toKey: getModelId,
+  cacheResolved: true,
+  sort: true,
+});
+
+export type Registration = Exclude<typeof RegistrationInterfaceRef.$inferType, RegistrationId>;
+export type RegistrationInterface = Pick<
+  Registration,
+  | "id"
+  | "type"
+  | "index"
+  | "domainId"
+  | "start"
+  | "expiration"
+  | "registrarChainId"
+  | "registrarAddress"
+  | "referrer"
+>;
+export type NameWrapperRegistration = RequiredAndNotNull<Registration, "fuses">;
+export type BaseRegistrarRegistration = RequiredAndNotNull<Registration, "fuses">;
+
+RegistrationInterfaceRef.implement({
+  description: "TODO",
+  fields: (t) => ({
+    //////////////////////
+    // Registration.id
+    //////////////////////
+    id: t.expose("id", {
+      description: "TODO",
+      type: "ID",
+      nullable: false,
+    }),
+
+    ///////////////////////
+    // Registration.domain
+    ///////////////////////
+    domain: t.field({
+      description: "TODO",
+      type: DomainRef,
+      nullable: false,
+      resolve: (parent) => parent.domainId,
+    }),
+
+    //////////////////////////
+    // Registration.registrar
+    //////////////////////////
+    registrar: t.field({
+      description: "TODO",
+      type: AccountIdRef,
+      nullable: false,
+      resolve: (parent) => ({ chainId: parent.registrarChainId, address: parent.registrarAddress }),
+    }),
+
+    //////////////////////
+    // Registration.start
+    //////////////////////
+    start: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.start,
+    }),
+
+    ///////////////////////////
+    // Registration.expiration
+    ///////////////////////////
+    expiration: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: true,
+      resolve: (parent) => parent.expiration,
+    }),
+
+    /////////////////////////
+    // Registration.referrer
+    /////////////////////////
+    referrer: t.field({
+      description: "TODO",
+      type: "Hex",
+      nullable: true,
+      resolve: (parent) => parent.referrer,
+    }),
+  }),
+});
+
+export const NameWrapperRegistrationRef =
+  builder.objectRef<NameWrapperRegistration>("NameWrapperRegistration");
+NameWrapperRegistrationRef.implement({
+  description: "TODO",
+  interfaces: [RegistrationInterfaceRef],
+  isTypeOf: (value) => (value as RegistrationInterface).type === "NameWrapper",
+  fields: (t) => ({
+    /////////////////////////////////
+    // NameWrapperRegistration.fuses
+    /////////////////////////////////
+    fuses: t.field({
+      description: "TODO",
+      type: "Int",
+      nullable: false,
+      // TODO: decode/render Fuses enum
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed in NameWrapperRegistration
+      resolve: (parent) => parent.fuses!,
+    }),
+  }),
+});
+
+export const BaseRegistrarRegistrationRef = builder.objectRef<BaseRegistrarRegistration>(
+  "BaseRegistrarRegistration",
+);
+
+BaseRegistrarRegistrationRef.implement({
+  description: "TODO",
+  interfaces: [RegistrationInterfaceRef],
+  isTypeOf: (value) => (value as RegistrationInterface).type === "BaseRegistrar",
+  fields: (t) => ({}),
+});

@@ -19,9 +19,11 @@ import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
+const pluginName = PluginName.ENSv2;
+
 export default function () {
   ponder.on(
-    namespaceContract(PluginName.ENSv2, "Registry:NameRegistered"),
+    namespaceContract(pluginName, "Registry:NameRegistered"),
     async ({
       context,
       event,
@@ -84,7 +86,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(PluginName.ENSv2, "Registry:SubregistryUpdate"),
+    namespaceContract(pluginName, "Registry:SubregistryUpdate"),
     async ({
       context,
       event,
@@ -115,7 +117,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(PluginName.ENSv2, "Registry:ResolverUpdate"),
+    namespaceContract(pluginName, "Registry:ResolverUpdate"),
     async ({
       context,
       event,
@@ -144,7 +146,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(PluginName.ENSv2, "Registry:NameBurned"),
+    namespaceContract(pluginName, "Registry:NameBurned"),
     async ({
       context,
       event,
@@ -184,7 +186,7 @@ export default function () {
   }
 
   ponder.on(
-    namespaceContract(PluginName.ENSv2, "Registry:TransferSingle"),
+    namespaceContract(pluginName, "Registry:TransferSingle"),
     async ({ context, event }) => {
       const registryAccountId = getThisAccountId(context, event);
       const registryId = makeRegistryContractId(registryAccountId);
@@ -196,22 +198,19 @@ export default function () {
       await handleTransferSingle({ context, event });
     },
   );
-  ponder.on(
-    namespaceContract(PluginName.ENSv2, "Registry:TransferBatch"),
-    async ({ context, event }) => {
-      const registryAccountId = getThisAccountId(context, event);
-      const registryId = makeRegistryContractId(registryAccountId);
+  ponder.on(namespaceContract(pluginName, "Registry:TransferBatch"), async ({ context, event }) => {
+    const registryAccountId = getThisAccountId(context, event);
+    const registryId = makeRegistryContractId(registryAccountId);
 
-      // TODO(registry-announcement): ideally remove this
-      const registry = await context.db.find(schema.registry, { id: registryId });
-      if (registry === null) return; // no-op non-Registry ERC1155 Transfers
+    // TODO(registry-announcement): ideally remove this
+    const registry = await context.db.find(schema.registry, { id: registryId });
+    if (registry === null) return; // no-op non-Registry ERC1155 Transfers
 
-      for (const id of event.args.ids) {
-        await handleTransferSingle({
-          context,
-          event: { ...event, args: { ...event.args, id } },
-        });
-      }
-    },
-  );
+    for (const id of event.args.ids) {
+      await handleTransferSingle({
+        context,
+        event: { ...event, args: { ...event.args, id } },
+      });
+    }
+  });
 }

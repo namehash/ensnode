@@ -1,6 +1,6 @@
 import SchemaBuilder from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
-import type { Address } from "viem";
+import type { Address, Hex } from "viem";
 
 import type {
   ChainId,
@@ -17,6 +17,7 @@ export const builder = new SchemaBuilder<{
   Scalars: {
     BigInt: { Input: bigint; Output: bigint };
     Address: { Input: Address; Output: Address };
+    Hex: { Input: Hex; Output: Hex };
     ChainId: { Input: ChainId; Output: ChainId };
     CoinType: { Input: CoinType; Output: CoinType };
     Node: { Input: Node; Output: Node };

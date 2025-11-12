@@ -38,12 +38,12 @@ export default {
     contracts: {
       ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x610178da211fef7d417bc0e6fed39f05609ad788",
+        address: "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
         startBlock: 0,
       },
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e",
+        address: "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
         startBlock: 0,
       },
       Resolver: {
@@ -52,12 +52,12 @@ export default {
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0xa82ff9afd8f496c3d6ac40e2a0f282e47488cfc9",
+        address: "0x851356ae760d987e095750cceb3bc6014560891c",
         startBlock: 0,
       },
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
+        address: "0x172076e0166d1f9cc711c77adf8488051744980c",
         startBlock: 0,
       },
       WrappedEthRegistrarController: {
@@ -67,7 +67,7 @@ export default {
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
+        address: "0xd84379ceae14aa33c123af12424a37803f885889",
         startBlock: 0,
       },
       NameWrapper: {

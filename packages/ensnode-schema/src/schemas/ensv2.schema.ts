@@ -1,17 +1,20 @@
 import { onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
-import type { Address } from "viem";
+import type { Address, Hex } from "viem";
 
 import type {
   ChainId,
   DomainId,
+  EncodedReferrer,
   InterpretedLabel,
   LabelHash,
   Node,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
+  RegistrationId,
   RegistryId,
   ResolverId,
+  UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 // Registry<->Domain is 1:1
@@ -105,7 +108,7 @@ export const domain = onchainTable(
   }),
 );
 
-export const relations_domain = relations(domain, ({ one }) => ({
+export const relations_domain = relations(domain, ({ one, many }) => ({
   owner: one(account, {
     relationName: "owner",
     fields: [domain.ownerId],
@@ -126,13 +129,62 @@ export const relations_domain = relations(domain, ({ one }) => ({
     fields: [domain.labelHash],
     references: [label.labelHash],
   }),
+  registrations: many(registration),
 }));
 
 /////////////////
 // Registrations
 /////////////////
 
-// TODO: derive from registries plugin
+export const registrationType = onchainEnum("RegistrationType", [
+  "NameWrapper",
+  "BaseRegistrar",
+  "ThreeDNS",
+]);
+
+export const registration = onchainTable(
+  "registrations",
+  (t) => ({
+    // keyed by (domainId, index)
+    id: t.text().primaryKey().$type<RegistrationId>(),
+    type: registrationType().notNull(),
+
+    domainId: t.text().notNull().$type<DomainId>(),
+    index: t.integer().notNull().default(0),
+
+    // must have a start timestamp
+    start: t.bigint().notNull(),
+    // may have an expiration
+    expiration: t.bigint(),
+
+    // registrar AccountId
+    registrarChainId: t.integer().notNull().$type<ChainId>(),
+    registrarAddress: t.hex().notNull().$type<Address>(),
+
+    // references registrant
+    registrantId: t.hex().$type<Address>(),
+
+    // references referrer
+    referrer: t.hex().$type<EncodedReferrer>(),
+
+    // may have fuses
+    fuses: t.integer(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.domainId, t.index),
+  }),
+);
+
+export const registration_relations = relations(registration, ({ one, many }) => ({
+  domain: one(domain, {
+    fields: [registration.domainId],
+    references: [domain.id],
+  }),
+  registrant: one(account, {
+    fields: [registration.registrantId],
+    references: [account.id],
+  }),
+}));
 
 ///////////////
 // Permissions

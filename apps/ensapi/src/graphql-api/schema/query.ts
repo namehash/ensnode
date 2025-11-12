@@ -7,6 +7,7 @@ import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fq
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
+import { db } from "@/lib/db";
 
 // TODO: maybe should still implement query/return by id, exposing the db's primary key?
 // maybe necessary for connections pattern...
@@ -14,6 +15,13 @@ import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/regi
 
 builder.queryType({
   fields: (t) => ({
+    domains: t.field({
+      description: "DELETE ME",
+      type: [DomainRef],
+      nullable: false,
+      resolve: () => db.query.domain.findMany({ with: { label: true } }),
+    }),
+
     //////////////////////////////////
     // Get Domain by Name or DomainId
     //////////////////////////////////
@@ -24,6 +32,7 @@ builder.queryType({
       nullable: true,
       resolve: async (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
+        console.log(await getDomainIdByInterpretedName(args.by.name));
         return getDomainIdByInterpretedName(args.by.name);
       },
     }),

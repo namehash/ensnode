@@ -10,12 +10,14 @@ import {
 
 import type {
   CanonicalId,
+  DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
   ImplicitRegistryId,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
+  RegistrationId,
   RegistryContractId,
   ResolverId,
   ResolverRecordsId,
@@ -87,3 +89,9 @@ export const makeResolverId = (contract: AccountId) => serializeAccountId(contra
  */
 export const makeResolverRecordsId = (contract: AccountId, node: Node) =>
   `${makeResolverId(contract)}/${node}` as ResolverRecordsId;
+
+/**
+ *
+ */
+export const makeRegistrationId = (domainId: DomainId, index: number = 0) =>
+  `${domainId}/${index}` as RegistrationId;

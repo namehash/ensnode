@@ -1,4 +1,4 @@
-import { type Address, isHex, size } from "viem";
+import { type Address, type Hex, isHex, size } from "viem";
 import { z } from "zod/v4";
 
 import {
@@ -31,6 +31,25 @@ builder.scalarType("Address", {
   description: "Address represents a lowercase (unchecksummed) viem#Address.",
   serialize: (value: Address) => value.toString(),
   parseValue: (value) => makeLowercaseAddressSchema("Address").parse(value),
+});
+
+builder.scalarType("Hex", {
+  description: "Hex represents viem#Hex.",
+  serialize: (value: Hex) => value.toString(),
+  parseValue: (value) =>
+    z.coerce
+      .string()
+      .check((ctx) => {
+        if (!isHex(value)) {
+          ctx.issues.push({
+            code: "custom",
+            message: "Must be a valid Hex",
+            input: ctx.value,
+          });
+        }
+      })
+      .transform((val) => val as Hex)
+      .parse(value),
 });
 
 builder.scalarType("ChainId", {
