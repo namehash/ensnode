@@ -218,7 +218,7 @@ operations that depend on the latest onchain data.
 
 ## Registrar Actions API
 
-Track all "logical registrar actions" performed by users across multiple
+Query the "logical registrar actions" performed on indexed
 subregistries with the Registrar Actions API. This endpoint returns a list
 of "logical registrar actions", such as "registration" or "renewal".
 
@@ -248,7 +248,7 @@ Each subregistry includes:
 
 **Endpoint:** `GET /api/registrar-actions`
 **Endpoint with custom results count limit:** `GET /api/registrar-actions?limit=5`
-**Endpoint with results sourced for the `eth` parent name:** `GET /api/registrar-actions/eth`
+**Endpoint with results sourced for the `namehash('eth')` parent node:** `GET /api/registrar-actions/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
 
 ### Example response
 

@@ -1,21 +1,19 @@
-import { namehash, normalize } from "viem/ens";
-
 import { type RegistrarActionsFilter, RegistrarActionsFilterFields } from "../api";
-import { isNormalizedName, type Name, type NormalizedName } from "../ens";
+import type { Node } from "../ens";
 
-/**
- * Builds a filter object for requested parent name.
- */
-export function buildRegistrarActionsFilterForParentName(parentName: Name): RegistrarActionsFilter {
-  const parentNameNormalized = isNormalizedName(parentName)
-    ? parentName
-    : (normalize(parentName) as NormalizedName);
+export const registrarActionsFilter = {
+  /**
+   * Build a "parent node" filter object for Registrar Actions query.
+   */
+  byParentNode(parentNode: Node | undefined): RegistrarActionsFilter | undefined {
+    if (typeof parentNode === "undefined") {
+      return undefined;
+    }
 
-  const parentNode = namehash(parentNameNormalized);
-
-  return {
-    field: RegistrarActionsFilterFields.SubregistryNode,
-    comparator: "eq",
-    value: parentNode,
-  };
-}
+    return {
+      field: RegistrarActionsFilterFields.SubregistryNode,
+      comparator: "eq",
+      value: parentNode,
+    };
+  },
+};

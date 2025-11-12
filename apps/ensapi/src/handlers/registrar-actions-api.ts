@@ -1,17 +1,14 @@
-import { namehash } from "viem";
 import z from "zod/v4";
 
 import {
-  type NormalizedName,
-  type RegistrarActionsFilter,
-  RegistrarActionsFilterFields,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
   type RegistrarActionsResponseError,
   type RegistrarActionsResponseOk,
+  registrarActionsFilter,
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
-import { makePositiveIntegerSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeNodeSchema, makePositiveIntegerSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -24,47 +21,35 @@ const app = factory.createApp();
 
 const logger = makeLogger("registrar-actions");
 
-// Server error if Registrar Actions API routes cannot be served over HTTP
+// Middleware managing access to Registrar Actions API routes.
+// It makes the routes available if all prerequisites are met.
 app.use(requireRegistrarActionsPluginMiddleware());
 
 const DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT = 25;
-
-/**
- * Build a "parent name" filter object for Registrar Actions query.
- */
-function buildFilterForParentName(
-  parentName: NormalizedName | undefined,
-): RegistrarActionsFilter | undefined {
-  if (typeof parentName === "undefined") {
-    return undefined;
-  }
-
-  const subregistryNode = namehash(parentName);
-
-  return {
-    field: RegistrarActionsFilterFields.SubregistryNode,
-    comparator: "eq",
-    value: subregistryNode,
-  };
-}
+const MAX_RESPONSE_ITEMS_COUNT_LIMIT = 1000;
 
 /**
  * Get Registrar Actions
  *
  * Examples of use:
  * - all records: `GET /api/registrar-actions`
- * - all records associated with `eth` parent name: `GET /api/registrar-actions/eth`
- * - all records associated with `base.eth` parent name: `GET /api/registrar-actions/base.eth`
- * - all records associated with `linea.eth` parent name: `GET /api/registrar-actions/linea.eth`
+ * - all records associated with `namehash('eth')` parent node:
+ *   `GET /api/registrar-actions/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
+ * - all records associated with `namehash('base.eth')` parent node:
+ *   `GET /api/registrar-actions/0xff1e3c0eb00ec714e34b6114125fbde1dea2f24a72fbf672e7b7fd5690328e10`
+ * - all records associated with `namehash('linea.eth')` parent node:
+ *   `GET /api/registrar-actions/0x527aac89ac1d1de5dd84cff89ec92c69b028ce9ce3fa3d654882474ab4402ec3`
  *
- * Examples of use with testnest:
- * - all records associated with `linea-sepolia.eth` `GET /api/registrar-actions/linea-sepolia.eth`
- * - all records associated with `linea-sepolia.eth` `GET /api/registrar-actions/basetest.eth`
+ * Examples of use with testnets:
+ * - all records associated with `namehash('linea-sepolia.eth')` parent node:
+ *   `GET /api/registrar-actions/0x1944d8f922dbda424d5bb8181be5344d513cd0210312d2dcccd37d54c11a17de`
+ * - all records associated with `namehash('basetest.eth')` parent node:
+ *   `GET /api/registrar-actions/0x646204f07e7fcd394a508306bf1148a1e13d14287fa33839bf9ad63755f547c6`
  *
  * Responds with:
  * - 400 error response for bad input, such as:
- *   - (if provided) `parentName` path param points to a name not associated with any indexed subregistries.
- *   - (if provided) `limit` search param is not a positive integer.
+ *   - (if provided) `limit` search param is not
+ *     a positive integer <= {@link MAX_RESPONSE_ITEMS_COUNT_LIMIT}.
  *   - (if provided) `orderBy` search param is not part of {@link RegistrarActionsOrders}.
  * - 500 error response for cases such as:
  *   - Connected ENSNode has not all required plugins set to active.
@@ -74,13 +59,11 @@ function buildFilterForParentName(
  *   - unknown server error occurs.
  */
 app.get(
-  "/:parentName?",
+  "/:parentNode?",
   validate(
     "param",
     z.object({
-      parentName: params.name
-        .optional()
-        .transform((v) => (typeof v !== "undefined" ? (v as NormalizedName) : v)),
+      parentNode: makeNodeSchema("parentNode param").optional(),
     }),
   ),
   validate(
@@ -94,14 +77,14 @@ app.get(
         .optional()
         .default(DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT)
         .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema()),
+        .pipe(makePositiveIntegerSchema().max(MAX_RESPONSE_ITEMS_COUNT_LIMIT)),
     }),
   ),
   async (c) => {
     try {
-      const { parentName } = c.req.valid("param");
+      const { parentNode } = c.req.valid("param");
       const { orderBy, limit } = c.req.valid("query");
-      const filter = buildFilterForParentName(parentName);
+      const filter = registrarActionsFilter.byParentNode(parentNode);
 
       // Find the latest "logical registrar actions".
       const registrarActions = await findRegistrarActions({
@@ -109,22 +92,6 @@ app.get(
         orderBy,
         limit,
       });
-
-      const noRecordsForParentName =
-        typeof parentName !== "undefined" && registrarActions.length === 0;
-
-      if (noRecordsForParentName) {
-        // respond with bad request error
-        return c.json(
-          serializeRegistrarActionsResponse({
-            responseCode: RegistrarActionsResponseCodes.Error,
-            error: {
-              message: `Registrar Actions API Bad request: no records were found for requested '${parentName}' parent name.`,
-            },
-          } satisfies RegistrarActionsResponseError),
-          400,
-        );
-      }
 
       // respond with success response
       return c.json(

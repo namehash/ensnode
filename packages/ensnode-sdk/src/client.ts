@@ -341,7 +341,7 @@ export class ENSNodeClient {
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {
-        // if errorResponse is could not be determined,
+        // if errorResponse could not be determined,
         // it means the response includes indexing status data
         console.log("Indexing Status API: handling a known indexing status server error.");
       }
@@ -366,37 +366,42 @@ export class ENSNodeClient {
    *        results in the response by field and direction.
    * @returns {RegistrarActionsResponse}
    *
-   * @throws if request object is incorrect
    * @throws if the ENSNode request fails
    * @throws if the ENSNode API returns an error response
    * @throws if the ENSNode response breaks required invariants
    *
    * @example
    * ```ts
-   *
    * import {
-   *   buildRegistrarActionsFilterForParentName,
+   *   registrarActionsFilter,,
    *   ENSNodeClient,
    * } from "@ensnode/ensnode-sdk";
+   * import { namehash } from "viem/ens";
    *
    * const client: ENSNodeClient;
    *
-   * // get latest 25 registrar action records across all indexed subregistries
+   * // get latest registrar action records across all indexed subregistries
+   * // NOTE: when no `limit` value is passed,
+   * //       the default DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT applies.
    * const registrarActions = await client.registrarActions();
    *
    * // get latest 5 registrar action records across all indexed subregistries
+   * // NOTE: when a `limit` value is passed, it must be lower than or equal to
+   * //       the MAX_RESPONSE_ITEMS_COUNT_LIMIT value.
    * const registrarActions = await client.registrarActions({
    *   limit: 5,
    * });
    *
-   * // get latest 25 registrar action records associated with subregistry managing `eth` name
+   * // get latest registrar action records associated with
+   * // subregistry managing `eth` name
    * await client.registrarActions({
-   *   filter: buildRegistrarActionsFilterForParentName('eth'),
+   *   filter: registrarActionsFilter.byParentNode(namehash('eth')),
    * });
    *
-   * // get latest 10 registrar action records associated with subregistry managing `base.eth` name
+   * // get latest 10 registrar action records associated with
+   * // subregistry managing `base.eth` name
    * await client.registrarActions({
-   *   filter: buildRegistrarActionsFilterForParentName('base.eth'),
+   *   filter: registrarActionsFilter.byParentNode(namehash('base.eth')),
    *   limit: 10
    * });
    * ```
@@ -450,7 +455,7 @@ export class ENSNodeClient {
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {
-        // if errorResponse is could not be determined,
+        // if errorResponse could not be determined,
         // it means the response includes data
         console.log("Registrar Actions API: handling a known server error.");
       }
