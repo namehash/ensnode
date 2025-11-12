@@ -11,6 +11,7 @@ import {
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
   makePriceSchema,
+  makeReinterpretedNameSchema,
   makeUnixTimestampSchema,
   makeUrlSchema,
 } from "./zod-schemas";
@@ -164,6 +165,41 @@ describe("ENSIndexer: Shared", () => {
           } satisfies SerializedPrice),
         ),
       ).toMatch(/Price currency must be one of ETH, USDC, DAI/i);
+    });
+
+    describe("ReinterpretedName", () => {
+      const nameWithNormalizedLabels = "tko.basetest.eth";
+      const nameWithEncodedLabelHashes =
+        "[a3c3339682cdbc115729a7f3442922226bd09554a0e7791cf1d3d1f4b69aacd4].basetest.eth";
+      const nameWithLabelHashes =
+        "0xa3c3339682cdbc115729a7f3442922226bd09554a0e7791cf1d3d1f4b69aacd4.basetest.eth";
+      const nameWithUnnormalizedLables = "TKO.basetest.eth";
+
+      it("can reinterpret a name which includes normalized labels", () => {
+        expect(makeReinterpretedNameSchema().parse(nameWithNormalizedLabels)).toBe(
+          nameWithNormalizedLabels,
+        );
+      });
+
+      it("can reinterpret a name including encoded label hashes", () => {
+        expect(makeReinterpretedNameSchema().parse(nameWithEncodedLabelHashes)).toBe(
+          nameWithEncodedLabelHashes,
+        );
+      });
+
+      it("can reinterpret a name including label hashes", () => {
+        expect(makeReinterpretedNameSchema().parse(nameWithLabelHashes)).toBe(
+          nameWithEncodedLabelHashes,
+        );
+      });
+
+      it("refuses to reinterpret a name including unnormalized labels", () => {
+        expect(
+          formatParseError(makeReinterpretedNameSchema().safeParse(nameWithUnnormalizedLables)),
+        ).toMatch(
+          /'TKO' label must be either a NormalizedLabel, EncodedLabelHash, or LabelHash to be reinterpreted./,
+        );
+      });
     });
 
     describe("Useful error messages", () => {

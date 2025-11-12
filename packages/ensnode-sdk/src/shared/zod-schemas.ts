@@ -14,6 +14,7 @@ import z from "zod/v4";
 import { ENSNamespaceIds, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
+import { ReinterpretedName, reinterpretName } from "./reinterpretation";
 import type { SerializedAccountId } from "./serialized-types";
 import type {
   AccountId,
@@ -351,3 +352,24 @@ export const makeNodeSchema = (valueLabel: string = "Node") =>
  */
 export const makeTransactionHashSchema = (valueLabel: string = "Transaction hash") =>
   makeHexStringSchema({ bytesCount: 32 }, valueLabel);
+
+/**
+ * Make schema for {@link ReinterpretedName}.
+ */
+export const makeReinterpretedNameSchema = (valueLabel: string = "Reinterpreted Name") =>
+  z
+    .string()
+    .check((ctx) => {
+      try {
+        reinterpretName(ctx.value);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} cannot be reinterpreted: ${errorMessage}`,
+        });
+      }
+    })
+    .transform(reinterpretName);

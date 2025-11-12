@@ -2,8 +2,8 @@ import { namehash } from "viem";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import type { InterpretedName } from "../ens";
 import { makeRealtimeIndexingStatusProjectionSchema } from "../ensindexer/indexing-status/zod-schemas";
+import { makeReinterpretedNameSchema } from "../internal";
 import { makeRegistrarActionSchema } from "../registrars/zod-schemas";
 import {
   type IndexingStatusResponse,
@@ -77,7 +77,7 @@ export const makeNamedRegistrarActionSchema = (valueLabel: string = "Named Regis
   z
     .object({
       action: makeRegistrarActionSchema(valueLabel),
-      name: z.string().transform((v) => v as InterpretedName),
+      name: makeReinterpretedNameSchema(valueLabel),
     })
     .check(invariant_registrationLifecycleNodeMatchesName);
 

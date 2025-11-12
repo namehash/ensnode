@@ -4,13 +4,13 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import {
-  makeAccountIdSchema,
   makeBlockRefSchema,
   makeDurationSchema,
   makeHexStringSchema,
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePriceEthSchema,
+  makeSerializedAccountIdSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
 } from "../internal";
@@ -32,7 +32,7 @@ import { Subregistry } from "./subregistry";
  */
 const makeSubregistrySchema = (valueLabel: string = "Subregistry") =>
   z.object({
-    subregistryId: makeAccountIdSchema(`${valueLabel} Subregistry ID`),
+    subregistryId: makeSerializedAccountIdSchema(`${valueLabel} Subregistry ID`),
     node: makeNodeSchema(`${valueLabel} Node`),
   });
 
