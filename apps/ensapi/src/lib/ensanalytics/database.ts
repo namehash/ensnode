@@ -11,11 +11,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import type { TopReferrersSnapshot } from "@/lib/ensanalytics/types";
+import type { AggregatedReferrerSnapshot } from "@/lib/ensanalytics/types";
+import { ireduce } from "@/lib/itertools";
 import logger from "@/lib/logger";
 
 /**
- * Fetches the top referrers from the registrar_actions table and builds a snapshot.
+ * Fetches all referrers with 1 or more qualified referrals from the `registrar_actions` table and builds an `AggregatedReferrerSnapshot`.
  *
  * Step 1: Filter for "qualified" registrar actions where:
  * - timestamp is between startDate and endDate
@@ -33,15 +34,17 @@ import logger from "@/lib/logger";
  * @param startDate - The start date (Unix timestamp) for filtering registrar actions
  * @param endDate - The end date (Unix timestamp) for filtering registrar actions
  * @param subregistryId - The account ID of the subregistry to filter by
- * @returns TopReferrersSnapshot containing referrer data, grand totals, and updatedAt timestamp
+ * @returns `AggregatedReferrerSnapshot` containing all referrers with at least one qualified referral, grand totals, and updatedAt timestamp
  * @throws Error if the database query fails
  */
-export async function getTopReferrers(
+export async function getAggregatedReferrerSnapshot(
   startDate: UnixTimestamp,
   endDate: UnixTimestamp,
   subregistryId: AccountId,
-): Promise<TopReferrersSnapshot> {
+): Promise<AggregatedReferrerSnapshot> {
   try {
+    const updatedAt = getUnixTime(new Date());
+
     const result = await db
       .select({
         referrer: schema.registrarActions.decodedReferrer,
@@ -67,35 +70,43 @@ export async function getTopReferrers(
       .groupBy(schema.registrarActions.decodedReferrer)
       .orderBy(desc(sql`total_incremental_duration`));
 
-    // Transform the result to match AggregatedReferrerMetrics interface
-    const topReferrers = result.map((row) => ({
-      // biome-ignore lint/style/noNonNullAssertion: referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
-      referrer: row.referrer!,
-      totalReferrals: row.totalReferrals,
-      // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
-      totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
-    }));
+    // Transform the result to an ordered map (preserves SQL sort order)
+    const referrers = new Map(
+      result.map((row) => {
+        // biome-ignore lint/style/noNonNullAssertion: referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
+        const address = row.referrer!;
+        const metrics = {
+          referrer: address,
+          totalReferrals: row.totalReferrals,
+          // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
+          totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
+        };
+        return [address, metrics];
+      }),
+    );
 
     // Calculate grand totals across all referrers
-    const grandTotalReferrals = topReferrers.reduce(
-      (sum, referrer) => sum + referrer.totalReferrals,
+    const grandTotalReferrals = ireduce(
+      referrers.values(),
+      (sum, metrics) => sum + metrics.totalReferrals,
       0,
     );
-    const grandTotalIncrementalDuration = topReferrers.reduce(
-      (sum, referrer) => sum + referrer.totalIncrementalDuration,
+    const grandTotalIncrementalDuration = ireduce(
+      referrers.values(),
+      (sum, metrics) => sum + metrics.totalIncrementalDuration,
       0,
     );
 
     // Build and return the complete snapshot
     return {
-      topReferrers,
-      updatedAt: getUnixTime(new Date()),
+      referrers,
+      updatedAt,
       grandTotalReferrals,
       grandTotalIncrementalDuration,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error({ error }, "Failed to fetch top referrers from database");
-    throw new Error(`Failed to fetch top referrers: ${errorMessage}`);
+    logger.error({ error }, "Failed to fetch aggregated referrer snapshot from database");
+    throw new Error(`Failed to fetch aggregated referrer snapshot: ${errorMessage}`);
   }
 }

@@ -1,88 +1,131 @@
 import { z } from "zod/v4";
 
 import {
-  type PaginatedTopReferrersRequest,
-  type PaginatedTopReferrersResponse,
-  PaginatedTopReferrersResponseCodes,
+  type AggregatedReferrerMetrics,
+  type AggregatedReferrerMetricsContribution,
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_MAX_LIMIT,
+  type PaginatedAggregatedReferrersRequest,
+  type PaginatedAggregatedReferrersResponse,
+  PaginatedAggregatedReferrersResponseCodes,
 } from "@ensnode/ensnode-sdk";
 
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
+import { islice } from "@/lib/itertools";
 import logger from "@/lib/logger";
-import { topReferrersCacheMiddleware } from "@/middleware/top-referrers-cache.middleware";
-
-const DEFAULT_PAGINATION_LIMIT = 25;
-const MAX_PAGINATION_LIMIT = 100;
+import { aggregatedReferrerSnapshotCacheMiddleware } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
 
 const app = factory.createApp();
 
-// Apply referrers cache middleware to all routes in this handler
-app.use(topReferrersCacheMiddleware);
+// Apply aggregated referrer snapshot cache middleware to all routes in this handler
+app.use(aggregatedReferrerSnapshotCacheMiddleware);
 
-// Pagination query parameters schema (mirrors PaginatedTopReferrersRequest)
+// Pagination query parameters schema (mirrors PaginatedAggregatedReferrersRequest)
 const paginationQuerySchema = z.object({
   page: z.optional(z.coerce.number().int().min(1, "Page must be a positive integer")).default(1),
-  limit: z
+  itemsPerPage: z
     .optional(
       z.coerce
         .number()
         .int()
-        .min(1, "Limit must be at least 1")
-        .max(MAX_PAGINATION_LIMIT, `Limit must not exceed ${MAX_PAGINATION_LIMIT}`),
+        .min(1, "Items per page must be at least 1")
+        .max(PAGINATION_MAX_LIMIT, `Items per page must not exceed ${PAGINATION_MAX_LIMIT}`),
     )
-    .default(DEFAULT_PAGINATION_LIMIT),
-}) satisfies z.ZodType<Required<PaginatedTopReferrersRequest>>;
+    .default(PAGINATION_DEFAULT_LIMIT),
+}) satisfies z.ZodType<Required<PaginatedAggregatedReferrersRequest>>;
 
-// Get top referrers with pagination
-app.get("/top-referrers", validate("query", paginationQuerySchema), async (c) => {
+/**
+ * Converts an AggregatedReferrerMetrics object to AggregatedReferrerMetricsContribution
+ * by calculating contribution percentages based on grand totals.
+ *
+ * @param referrer - The referrer metrics to convert
+ * @param grandTotalReferrals - The sum of all referrals across all referrers
+ * @param grandTotalIncrementalDuration - The sum of all incremental duration across all referrers
+ * @returns The referrer metrics with contribution percentages
+ */
+function calculateContribution(
+  referrer: AggregatedReferrerMetrics,
+  grandTotalReferrals: number,
+  grandTotalIncrementalDuration: number,
+): AggregatedReferrerMetricsContribution {
+  return {
+    ...referrer,
+    totalReferralsContribution:
+      grandTotalReferrals > 0 ? referrer.totalReferrals / grandTotalReferrals : 0,
+    totalIncrementalDurationContribution:
+      grandTotalIncrementalDuration > 0
+        ? referrer.totalIncrementalDuration / grandTotalIncrementalDuration
+        : 0,
+  };
+}
+
+// Get all aggregated referrers with pagination
+app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async (c) => {
   try {
-    const topReferrersCache = c.var.topReferrersCache;
-    const { page, limit } = c.req.valid("query");
+    const aggregatedReferrerSnapshotCache = c.var.aggregatedReferrerSnapshotCache;
+    const { page, itemsPerPage } = c.req.valid("query");
+
+    const totalAggregatedReferrers = aggregatedReferrerSnapshotCache.referrers.size;
 
     // Calculate total pages
-    const totalPages = Math.ceil(topReferrersCache.topReferrers.length / limit);
+    const totalPages = Math.ceil(totalAggregatedReferrers / itemsPerPage);
 
     // Check if requested page exceeds available pages
-    if (page > totalPages && topReferrersCache.topReferrers.length > 0) {
+    if (page > totalPages && totalAggregatedReferrers > 0) {
       return c.json(
         {
-          responseCode: PaginatedTopReferrersResponseCodes.PageOutOfRange,
+          responseCode: PaginatedAggregatedReferrersResponseCodes.PageOutOfRange,
           error: "Page out of range",
           errorMessage: `Requested page ${page} exceeds total pages ${totalPages}`,
           totalPages,
-        } satisfies PaginatedTopReferrersResponse,
+        } satisfies PaginatedAggregatedReferrersResponse,
         400,
       );
     }
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedReferrers = topReferrersCache.topReferrers.slice(startIndex, endIndex);
+    // Use iterator slice to extract paginated results
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedReferrers = islice(
+      aggregatedReferrerSnapshotCache.referrers.values(),
+      startIndex,
+      endIndex,
+    );
+
+    // Convert AggregatedReferrerMetrics to AggregatedReferrerMetricsContribution
+    const referrersWithContribution = Array.from(paginatedReferrers).map((referrer) =>
+      calculateContribution(
+        referrer,
+        aggregatedReferrerSnapshotCache.grandTotalReferrals,
+        aggregatedReferrerSnapshotCache.grandTotalIncrementalDuration,
+      ),
+    );
 
     return c.json({
-      responseCode: PaginatedTopReferrersResponseCodes.Ok,
+      responseCode: PaginatedAggregatedReferrersResponseCodes.Ok,
       data: {
-        topReferrers: paginatedReferrers,
-        total: topReferrersCache.topReferrers.length,
+        referrers: referrersWithContribution,
+        total: totalAggregatedReferrers,
         page,
-        limit,
-        hasNext: endIndex < topReferrersCache.topReferrers.length,
+        itemsPerPage,
+        hasNext: endIndex < totalAggregatedReferrers,
         hasPrev: page > 1,
-        updatedAt: topReferrersCache.updatedAt,
+        updatedAt: aggregatedReferrerSnapshotCache.updatedAt,
       },
-    } satisfies PaginatedTopReferrersResponse);
+    } satisfies PaginatedAggregatedReferrersResponse);
   } catch (error) {
-    logger.error({ error }, "Error in /ensanalytics/top-referrers endpoint");
+    logger.error({ error }, "Error in /ensanalytics/aggregated-referrers endpoint");
     const errorMessage =
       error instanceof Error
         ? error.message
         : "An unexpected error occurred while processing your request";
     return c.json(
       {
-        responseCode: PaginatedTopReferrersResponseCodes.Error,
+        responseCode: PaginatedAggregatedReferrersResponseCodes.Error,
         error: "Internal server error",
         errorMessage,
-      } satisfies PaginatedTopReferrersResponse,
+      } satisfies PaginatedAggregatedReferrersResponse,
       500,
     );
   }
