@@ -1,13 +1,9 @@
 import type z from "zod/v4";
 
-import type { Node } from "../ens";
+import type { InterpretedName, Node } from "../ens";
 import type { ENSApiPublicConfig } from "../ensapi";
 import type { RealtimeIndexingStatusProjection } from "../ensindexer";
-import type {
-  RegistrarAction,
-  RegistrationLifecycle,
-  RegistrationLifecycleDomain,
-} from "../registrars";
+import type { RegistrarAction } from "../registrars";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -190,12 +186,14 @@ export type RegistrarActionsRequest = {
 
   /**
    * Limit results to selected count of records.
+   *
+   * Guaranteed to be a positive integer (if defined).
    */
   limit?: number;
 };
 
 /**
- * A status code for indexing status responses.
+ * A status code for Registrar Actions API responses.
  */
 export const RegistrarActionsResponseCodes = {
   /**
@@ -216,27 +214,20 @@ export type RegistrarActionsResponseCode =
   (typeof RegistrarActionsResponseCodes)[keyof typeof RegistrarActionsResponseCodes];
 
 /**
- * Registration Lifecycle with Domain
- */
-export interface RegistrationLifecycleWithDomain extends RegistrationLifecycle {
-  /**
-   * Domain
-   *
-   * Represents Domain details associated with the Registration Lifecycle.
-   */
-  domain: RegistrationLifecycleDomain;
-}
-
-/**
  * "Logical registrar action" with domain details.
  */
-export interface RegistrarActionWithDomain extends RegistrarAction {
+export interface NamedRegistrarAction {
+  action: RegistrarAction;
+
   /**
-   * Registration Lifecycle
+   * Name
    *
-   * Represents the associated registration lifecycle, including domain details.
+   * FQDN on the domain associated with the Registration Lifecycle.
+   *
+   * Guarantees:
+   * - `namehash(name)` is always `action.registrationLifecycle.node`.
    */
-  registrationLifecycle: RegistrationLifecycleWithDomain;
+  name: InterpretedName;
 }
 
 /**
@@ -244,7 +235,7 @@ export interface RegistrarActionWithDomain extends RegistrarAction {
  */
 export type RegistrarActionsResponseOk = {
   responseCode: typeof RegistrarActionsResponseCodes.Ok;
-  registrarActions: RegistrarActionWithDomain[];
+  registrarActions: NamedRegistrarAction[];
 };
 
 /**

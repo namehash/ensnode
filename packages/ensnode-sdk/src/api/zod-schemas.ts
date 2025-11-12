@@ -1,22 +1,20 @@
+import { namehash } from "viem";
 import z from "zod/v4";
+import type { ParsePayload } from "zod/v4/core";
 
+import type { InterpretedName } from "../ens";
 import { makeRealtimeIndexingStatusProjectionSchema } from "../ensindexer/indexing-status/zod-schemas";
-import { RegistrarActionTypes } from "../registrars";
-import {
-  makeBaseRegistrarActionSchema,
-  makeRegistrationLifecycleDomainSchema,
-  makeRegistrationLifecycleSchema,
-} from "../registrars/zod-schemas";
+import { makeRegistrarActionSchema } from "../registrars/zod-schemas";
 import {
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
   type IndexingStatusResponseOk,
+  type NamedRegistrarAction,
   RegistrarActionsResponse,
   RegistrarActionsResponseCodes,
   RegistrarActionsResponseError,
   RegistrarActionsResponseOk,
-  RegistrarActionWithDomain,
 } from "./types";
 
 export const ErrorResponseSchema = z.object({
@@ -58,39 +56,30 @@ export const makeIndexingStatusResponseSchema = (valueLabel: string = "Indexing 
 
 // Registrar Action API
 
-export const makeRegistrationLifecycleWithDomainSchema = (
-  valueLabel: string = "Registration Lifecycle with Domain",
-) =>
-  makeRegistrationLifecycleSchema(valueLabel).extend({
-    domain: makeRegistrationLifecycleDomainSchema(),
-  });
+function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedRegistrarAction>) {
+  const { name, action } = ctx.value;
+  const expectedNode = action.registrationLifecycle.node;
+  const actualNode = namehash(name);
 
-export const makeRegistrarActionWithDomainRegistrationSchema = (
-  valueLabel: string = "Registration",
-) =>
-  makeBaseRegistrarActionSchema(valueLabel).extend({
-    type: z.literal(RegistrarActionTypes.Registration),
-
-    registrationLifecycle: makeRegistrationLifecycleWithDomainSchema(valueLabel),
-  });
-
-export const makeRegistrarActionWithDomainRenewalSchema = (valueLabel: string = "Renewal") =>
-  makeBaseRegistrarActionSchema(valueLabel).extend({
-    type: z.literal(RegistrarActionTypes.Renewal),
-
-    registrationLifecycle: makeRegistrationLifecycleWithDomainSchema(valueLabel),
-  });
+  if (actualNode !== expectedNode) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `The 'action.registrationLifecycle.node' must match namehash of 'name'`,
+    });
+  }
+}
 
 /**
- * Schema for {@link RegistrarActionWithDomain}.
+ * Schema for {@link NamedRegistrarAction}.
  */
-export const makeRegistrarActionWithDomainSchema = (
-  valueLabel: string = "Registrar Action with Domain",
-) =>
-  z.discriminatedUnion("type", [
-    makeRegistrarActionWithDomainRegistrationSchema(`${valueLabel} Registration`),
-    makeRegistrarActionWithDomainRenewalSchema(`${valueLabel} Renewal`),
-  ]);
+export const makeNamedRegistrarActionSchema = (valueLabel: string = "Named Registrar Action") =>
+  z
+    .object({
+      action: makeRegistrarActionSchema(valueLabel),
+      name: z.string().transform((v) => v as InterpretedName),
+    })
+    .check(invariant_registrationLifecycleNodeMatchesName);
 
 /**
  * Schema for {@link RegistrarActionsResponseOk}
@@ -100,7 +89,7 @@ export const makeRegistrarActionsResponseOkSchema = (
 ) =>
   z.strictObject({
     responseCode: z.literal(RegistrarActionsResponseCodes.Ok),
-    registrarActions: z.array(makeRegistrarActionWithDomainSchema(valueLabel)),
+    registrarActions: z.array(makeNamedRegistrarActionSchema(valueLabel)),
   });
 
 /**

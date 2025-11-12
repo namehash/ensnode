@@ -3,16 +3,16 @@ import { serializeRegistrarAction } from "../registrars";
 import type {
   SerializedIndexingStatusResponse,
   SerializedIndexingStatusResponseOk,
+  SerializedNamedRegistrarAction,
   SerializedRegistrarActionsResponse,
   SerializedRegistrarActionsResponseOk,
-  SerializedRegistrarActionWithDomain,
 } from "./serialized-types";
 import {
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,
+  type NamedRegistrarAction,
   type RegistrarActionsResponse,
   RegistrarActionsResponseCodes,
-  type RegistrarActionWithDomain,
 } from "./types";
 
 export function serializeIndexingStatusResponse(
@@ -30,16 +30,13 @@ export function serializeIndexingStatusResponse(
   }
 }
 
-export function serializeRegistrarActionWithDomain(
-  registrarAction: RegistrarActionWithDomain,
-): SerializedRegistrarActionWithDomain {
-  const serializedRegistrarAction = serializeRegistrarAction(registrarAction);
+export function serializeNamedRegistrarAction({
+  action,
+  name,
+}: NamedRegistrarAction): SerializedNamedRegistrarAction {
   return {
-    ...serializedRegistrarAction,
-    registrationLifecycle: {
-      ...serializedRegistrarAction.registrationLifecycle,
-      domain: registrarAction.registrationLifecycle.domain,
-    },
+    action: serializeRegistrarAction(action),
+    name,
   };
 }
 
@@ -50,7 +47,7 @@ export function serializeRegistrarActionsResponse(
     case RegistrarActionsResponseCodes.Ok:
       return {
         responseCode: response.responseCode,
-        registrarActions: response.registrarActions.map(serializeRegistrarActionWithDomain),
+        registrarActions: response.registrarActions.map(serializeNamedRegistrarAction),
       } satisfies SerializedRegistrarActionsResponseOk;
 
     case RegistrarActionsResponseCodes.Error:

@@ -1,4 +1,4 @@
-import type { InterpretedLabel, InterpretedName, Node } from "../ens";
+import type { Node } from "../ens";
 import type { UnixTimestamp } from "../shared";
 import { type SerializedSubregistry, type Subregistry, serializeSubregistry } from "./subregistry";
 
@@ -69,30 +69,6 @@ export interface RegistrationLifecycle {
    * Identifies when the Registration Lifecycle is scheduled to expire.
    */
   expiresAt: UnixTimestamp;
-}
-/**
- * Registration Lifecycle Domain
- *
- * Domain associated with the Registration Lifecycle.
- */
-export interface RegistrationLifecycleDomain {
-  /**
-   * Subname
-   *
-   * Subname of the domain associated with the Registration Lifecycle.
-   */
-  subname: InterpretedLabel;
-
-  /**
-   * Name
-   *
-   * FQDN on the domain associated with the Registration Lifecycle.
-   *
-   * Guarantees:
-   * 1) Always starts with `subname`, followed by the "name" of the subregistry associated with the Registration Lifecycle.
-   * 2) `namehash(domain.name)` is always `node` of the Registration Lifecycle.
-   */
-  name: InterpretedName;
 }
 
 /**

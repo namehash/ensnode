@@ -3,7 +3,6 @@ import type { Address } from "viem";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import type { InterpretedLabel, InterpretedName } from "../ens";
 import {
   makeAccountIdSchema,
   makeBlockRefSchema,
@@ -25,7 +24,7 @@ import {
   type RegistrarActionReferralAvailable,
   RegistrarActionTypes,
 } from "./registrar-action";
-import type { RegistrationLifecycle, RegistrationLifecycleDomain } from "./registration-lifecycle";
+import type { RegistrationLifecycle } from "./registration-lifecycle";
 import { Subregistry } from "./subregistry";
 
 /**
@@ -36,39 +35,6 @@ const makeSubregistrySchema = (valueLabel: string = "Subregistry") =>
     subregistryId: makeAccountIdSchema(`${valueLabel} Subregistry ID`),
     node: makeNodeSchema(`${valueLabel} Node`),
   });
-
-/**
- * Invariant: name of the registration lifecycle domain starts with domain's subname.
- */
-function invariant_domainNameStartsWithDomainSubname(
-  ctx: ParsePayload<RegistrationLifecycleDomain>,
-) {
-  const { subname, name } = ctx.value;
-
-  if (!name.startsWith(subname)) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: `Domain 'name' must start with Domain 'subname'`,
-    });
-  }
-}
-
-export const makeRegistrationLifecycleDomainSchema = () =>
-  z
-    .object({
-      // TODO: how to ensure subname is InterpretedLabel?
-      subname: z
-        .string()
-        .nonempty()
-        .transform((v) => v as InterpretedLabel),
-      // TODO: how to ensure name is InterpretedName?
-      name: z
-        .string()
-        .nonempty()
-        .transform((v) => v as InterpretedName),
-    })
-    .check(invariant_domainNameStartsWithDomainSubname);
 
 /**
  * Schema for parsing objects into {@link RegistrationLifecycle}.

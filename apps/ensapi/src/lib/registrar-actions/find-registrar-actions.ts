@@ -5,9 +5,10 @@ import {
   type BlockRef,
   bigIntToNumber,
   deserializeAccountId,
-  type InterpretedLabel,
   type InterpretedName,
+  type NamedRegistrarAction,
   priceEth,
+  type RegistrarAction,
   type RegistrarActionPricingAvailable,
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralAvailable,
@@ -16,8 +17,7 @@ import {
   RegistrarActionsFilterFields,
   type RegistrarActionsOrder,
   RegistrarActionsOrders,
-  type RegistrarActionWithDomain,
-  type RegistrationLifecycleWithDomain,
+  type RegistrationLifecycle,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
@@ -56,7 +56,7 @@ interface FindRegistrarActionsOptions {
 
 /**
  * Internal function which executes a single query to get all data required to
- * build a list of {@link RegistrarActionWithDomain} objects.
+ * build a list of {@link NamedRegistrarAction} objects.
  */
 export async function _findRegistrarActions(options: FindRegistrarActionsOptions) {
   const query = db
@@ -94,21 +94,14 @@ export async function _findRegistrarActions(options: FindRegistrarActionsOptions
   return records;
 }
 
-type MapToRegistrarActionWithDomainArgs = Awaited<ReturnType<typeof _findRegistrarActions>>[0];
+type MapToNamedRegistrarActionArgs = Awaited<ReturnType<typeof _findRegistrarActions>>[0];
 
 /**
  * Internal function to map a record returned
  * from {@link _findRegistrarActions}
- * into the {@link RegistrarActionWithDomain} object.
+ * into the {@link NamedRegistrarAction} object.
  */
-function _mapToRegistrarActionWithDomain(
-  record: MapToRegistrarActionWithDomainArgs,
-): RegistrarActionWithDomain {
-  // Invariant: The `label` of the Domain associated with the `node` must exist.
-  if (record.domain.labelName === null) {
-    throw new Error(`Domain 'label' must exists for '${record.registrationLifecycles.node}' node.`);
-  }
-
+function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): NamedRegistrarAction {
   // Invariant: The FQDN `name` of the Domain associated with the `node` must exist.
   if (!record.domain.name === null) {
     throw new Error(`Domain 'name' must exists for '${record.registrationLifecycles.node}' node.`);
@@ -122,11 +115,7 @@ function _mapToRegistrarActionWithDomain(
     },
     node: record.registrationLifecycles.node,
     expiresAt: bigIntToNumber(record.registrationLifecycles.expiresAt),
-    domain: {
-      subname: record.domain.labelName as InterpretedLabel,
-      name: record.domain.name as InterpretedName,
-    },
-  } satisfies RegistrationLifecycleWithDomain;
+  } satisfies RegistrationLifecycle;
 
   // build pricing object
   const { baseCost, premium, total } = record.registrarActions;
@@ -164,8 +153,8 @@ function _mapToRegistrarActionWithDomain(
     timestamp: bigIntToNumber(record.registrarActions.timestamp),
   } satisfies BlockRef;
 
-  // build the result referencing the "logical registrar action"
-  return {
+  // build the resulting "logical registrar action"
+  const action = {
     id: record.registrarActions.id,
     type: record.registrarActions.type,
     incrementalDuration: bigIntToNumber(record.registrarActions.incrementalDuration),
@@ -176,7 +165,14 @@ function _mapToRegistrarActionWithDomain(
     block,
     transactionHash: record.registrarActions.transactionHash,
     eventIds: record.registrarActions.eventIds as [string, ...string[]],
-  } satisfies RegistrarActionWithDomain;
+  } satisfies RegistrarAction;
+
+  const name = record.domain.name as InterpretedName;
+
+  return {
+    action,
+    name,
+  };
 }
 
 /**
@@ -187,8 +183,8 @@ function _mapToRegistrarActionWithDomain(
  */
 export async function findRegistrarActions(
   options: FindRegistrarActionsOptions,
-): Promise<RegistrarActionWithDomain[]> {
+): Promise<NamedRegistrarAction[]> {
   const records = await _findRegistrarActions(options);
 
-  return records.map((record) => _mapToRegistrarActionWithDomain(record));
+  return records.map((record) => _mapToNamedRegistrarAction(record));
 }
