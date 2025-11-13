@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUnixTime } from "date-fns";
-import { useRef } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 import {
-  type CrossChainIndexingStatusSnapshotOmnichain,
   createRealtimeIndexingStatusProjection,
   type IndexingStatusRequest,
   type IndexingStatusResponse,
@@ -11,6 +9,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { QueryParameter, WithSDKConfigParameter } from "../types";
+import { projectionSync } from "../utils/projectionSync";
 import { createIndexingStatusQueryOptions } from "../utils/query";
 import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
@@ -26,8 +25,7 @@ interface UseIndexingStatusParameters
  * snapshot and keep it in memory. We then asynchronously attempt to update it every 10 seconds.
  *
  * From the most recently cached snapshot, this hook instantly generates new projections —
- * entirely in memory. Each
- * projection provides a recalculation of worst-case distance based on:
+ * entirely in memory. Each projection provides a recalculation of worst-case distance based on:
  *   • The current time (when the projection was generated)
  *   • The snapshot's absolute timestamps of recorded indexing progress
  *
@@ -49,8 +47,6 @@ export function useIndexingStatus(
 
   const queryOptions = createIndexingStatusQueryOptions(_config);
 
-  const cachedSnapshotRef = useRef<CrossChainIndexingStatusSnapshotOmnichain | null>(null);
-
   const options = {
     ...queryOptions,
     refetchInterval: 10 * 1000, // 10 seconds - indexing status changes frequently
@@ -60,27 +56,40 @@ export function useIndexingStatus(
 
   const queryResult = useQuery(options);
 
-  // Store the latest snapshot in memory whenever we get a successful response.
-  // Each incremental snapshot will have >= indexing progress than previous snapshots.
-  if (queryResult.data && queryResult.data.responseCode === IndexingStatusResponseCodes.Ok) {
-    cachedSnapshotRef.current = queryResult.data.realtimeProjection.snapshot;
-  }
+  // Extract the current snapshot from the query result.
+  // This will be null until we get a successful response.
+  const currentSnapshot =
+    queryResult.data?.responseCode === IndexingStatusResponseCodes.Ok
+      ? queryResult.data.realtimeProjection.snapshot
+      : null;
 
-  // If we have a cached snapshot, always build a fresh projection from it
-  // using the current time. This happens on every render.
-  if (cachedSnapshotRef.current) {
-    const projectedAt = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeIndexingStatusProjection(
-      cachedSnapshotRef.current,
-      projectedAt,
-    );
+  // Subscribe to synchronized timestamp updates (ticks every second).
+  // All components using this hook will receive the same timestamp value,
+  // ensuring consistent projections across the entire UI.
+  const projectedAt = useSyncExternalStore(
+    projectionSync.subscribe.bind(projectionSync),
+    projectionSync.getTimestamp.bind(projectionSync),
+    projectionSync.getTimestamp.bind(projectionSync), // Server-side snapshot
+  );
+
+  // Generate projection from cached snapshot using the synchronized timestamp.
+  // useMemo ensures we only create a new projection object when values actually change,
+  // maintaining referential equality for unchanged data (prevents unnecessary re-renders).
+  const projectedData = useMemo(() => {
+    if (!currentSnapshot) return null;
+
+    const realtimeProjection = createRealtimeIndexingStatusProjection(currentSnapshot, projectedAt);
 
     return {
+      responseCode: IndexingStatusResponseCodes.Ok,
+      realtimeProjection,
+    } as IndexingStatusResponse;
+  }, [currentSnapshot, projectedAt]);
+
+  if (projectedData) {
+    return {
       ...queryResult,
-      data: {
-        responseCode: IndexingStatusResponseCodes.Ok,
-        realtimeProjection,
-      } as IndexingStatusResponse,
+      data: projectedData,
       isError: false,
       error: null,
     };
