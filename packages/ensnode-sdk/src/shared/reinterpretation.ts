@@ -39,7 +39,7 @@ export function reinterpretLabel(label: InterpretedLabel): InterpretedLabel {
   if (isNormalizedLabel(label)) return label;
 
   // the provided `label` is unnormalized,
-  // turn in into EncodedLabelHash
+  // turn into an EncodedLabelHash
   return encodeLabelHash(labelToLabelHash(label)) as InterpretedLabel;
 }
 
