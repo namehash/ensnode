@@ -17,6 +17,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -42,16 +43,17 @@ async function handleNewOwner({
   // if someone mints a node to the zero address, nothing happens in the Registry, so no-op
   if (isAddressEqual(zeroAddress, owner)) return;
 
+  // this is either a NEW Domain OR the owner of the parent changing the owner of the child
+
   const node = makeSubdomainNode(labelHash, parentNode);
+  const domainId = makeENSv1DomainId(node);
   const registryId =
     parentNode === zeroHash
       ? getRootRegistryId(config.namespace)
       : makeImplicitRegistryId(parentNode);
-  const domainId = makeENSv1DomainId(node);
-
-  // this is either a NEW Domain OR the owner of the parent changing the owner of the child
 
   // TODO: import label healing logic from subgraph plugin
+
   await ensureUnknownLabel(context, labelHash);
   await context.db
     .insert(schema.domain)
@@ -62,13 +64,13 @@ async function handleNewOwner({
     })
     .onConflictDoNothing();
 
-  // TODO: if owner is special registrar, ignore
-
-  // ensure owner account
-  await ensureAccount(context, owner);
-
-  // update owner
-  await context.db.update(schema.domain, { id: domainId }).set({ ownerId: owner });
+  // materialize domain owner
+  // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
+  // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
+  // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
+  // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
+  // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+  await materializeDomainOwner(context, domainId, owner);
 }
 
 async function handleNewResolver({

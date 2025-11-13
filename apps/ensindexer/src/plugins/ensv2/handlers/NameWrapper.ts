@@ -5,18 +5,19 @@ import { type Address, isAddressEqual, zeroAddress } from "viem";
 import {
   type DNSEncodedLiteralName,
   type DNSEncodedName,
-  type DomainId,
   decodeDNSEncodedLiteralName,
   makeENSv1DomainId,
   makeRegistrationId,
   type Node,
   PluginName,
-  RegistrationId,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
+import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -32,6 +33,13 @@ const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 // registrar is source of truth for expiry if eth 2LD
 // otherwise namewrapper is registrar and source of truth for expiry
+// maybe should more or less ignore .eth 2LD (and other registrar-managed names) in the namewrapper?
+
+// for non-.eth-2ld names is infinite expiration represented as 0 or max int? probably max int. if so
+// need to interpret that into null to indicate that it doesn't expire
+// for .eth 2lds we need any namewrapper events to be, like, ignored, basically. maybe a BaseRegistrar
+// Registration can include a `wrappedTokenId` field to indicate that it exists in the namewrapper
+// but NameWrapper Registrations are exclusively for non-.eth-2lds
 
 // namewrapper registration does not have a registrant
 // probably need an isSubnameOfRegistrarManagedName helper to identify .eth 2lds (and linea 2lds)
@@ -39,11 +47,6 @@ const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 // one managed by the namewrapper.
 // so if it's wrapped in the namewrapper, much like the chain, changes are materialized back to the
 // source
-
-async function getLatestRegistration(context: Context, domainId: DomainId) {
-  const registrationId = makeRegistrationId(domainId, 0);
-  return await context.db.find(schema.registration, { id: registrationId });
-}
 
 export default function () {
   async function handleTransfer({
@@ -58,25 +61,28 @@ export default function () {
       id: bigint;
     }>;
   }) {
-    const { id: tokenId, to } = event.args;
+    const { from, to, id: tokenId } = event.args;
 
+    const isMint = isAddressEqual(zeroAddress, from);
     const isBurn = isAddressEqual(zeroAddress, to);
-    // burning is always followed by NameWrapper#NameUnwrapped
+
+    // minting is always followed by NameWrapper#NameWrapped, safe to ignore
+    if (isMint) return;
+
+    // burning is always followed by NameWrapper#NameUnwrapped, safe to ignore
     if (isBurn) return;
 
     const domainId = makeENSv1DomainId(tokenIdToNode(tokenId));
     const registration = await getLatestRegistration(context, domainId);
 
-    // ignore NameWrapper#Transfer* events if there's no Registration for the Domain in question
-    // this allows us to ignore the first Transfer event that occurs when wrapping a token
-    // TODO: if !registration || !isActive(registration)
-    if (!registration) return;
+    // TODO: || !isActive(registration) ?
+    // TODO: specifically check that there are no NameWrapper Registrations?
+    if (!registration) {
+      throw new Error(`Invariant(NameWrapper:Transfer): Expected registration.`);
+    }
 
-    // 1. the domain derived from token id definitely exists
-    // 2. its definitely in the namewrapper
-    // 3. therefore materialize Domain.ownerId
-    await ensureAccount(context, to);
-    await context.db.update(schema.domain, { id: domainId }).set({ ownerId: to });
+    // materialize domain owner
+    await materializeDomainOwner(context, domainId, to);
   }
 
   ponder.on(
@@ -96,12 +102,13 @@ export default function () {
     }) => {
       const { node, name, owner, fuses, expiry: expiration } = event.args;
 
+      const registrar = getThisAccountId(context, event);
       const domainId = makeENSv1DomainId(node);
 
-      const latest = await getLatestRegistration(context, domainId);
+      const registration = await getLatestRegistration(context, domainId);
 
       // TODO: latest && isActive(latest)
-      if (latest) {
+      if (registration) {
         throw new Error(
           `Invariant(NameWrapper:NameWrapped): NameWrapped emitted but an active registration already exists.`,
         );
@@ -113,8 +120,8 @@ export default function () {
       await context.db.insert(schema.registration).values({
         id: registrationId,
         type: "NameWrapper",
-        registrarChainId: context.chain.id,
-        registrarAddress: event.log.address,
+        registrarChainId: registrar.chainId,
+        registrarAddress: registrar.address,
         domainId,
         start: event.block.timestamp,
         fuses,
@@ -122,8 +129,7 @@ export default function () {
       });
 
       // materialize domain owner
-      await ensureAccount(context, owner);
-      await context.db.update(schema.domain, { id: domainId }).set({ ownerId: owner });
+      await materializeDomainOwner(context, domainId, owner);
 
       // decode name and discover labels
       try {
@@ -147,7 +153,7 @@ export default function () {
       context: Context;
       event: EventWithArgs<{ node: Node; owner: Address }>;
     }) => {
-      const { node, owner } = event.args;
+      const { node } = event.args;
 
       const domainId = makeENSv1DomainId(node);
       const latest = await getLatestRegistration(context, domainId);
@@ -159,7 +165,7 @@ export default function () {
       // TODO: instead of deleting, mark it as inactive perhaps by setting its expiry to block.timestamp
       await context.db.delete(schema.registration, { id: latest.id });
 
-      // NOTE: we don't need to adjust Domain.ownerId because NameWrapper calls ens.setOwner
+      // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
   );
 

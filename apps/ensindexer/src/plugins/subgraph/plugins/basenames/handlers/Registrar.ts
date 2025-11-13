@@ -71,7 +71,10 @@ export default function () {
   ponder.on(namespaceContract(pluginName, "BaseRegistrar:Transfer"), async ({ context, event }) => {
     await handleNameTransferred({
       context,
-      event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+      event: {
+        ...event,
+        args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.tokenId) },
+      },
     });
   });
 

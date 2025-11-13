@@ -1,97 +1,174 @@
-import config from "@/config";
-
 import { type Context, ponder } from "ponder:registry";
-import type { Address } from "viem";
+import schema from "ponder:schema";
+import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
+import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
 
-import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, accountIdEqual, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  makeENSv1DomainId,
+  makeRegistrationId,
+  makeSubdomainNode,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
+import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
+import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
-const ethnamesRegistrar = getDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSRoot,
-  "BaseRegistrar",
-);
-const basenamesRegistar = maybeGetDatasourceContract(
-  config.namespace,
-  DatasourceNames.Basenames,
-  "BaseRegistrar",
-);
-const lineanamesRegistar = maybeGetDatasourceContract(
-  config.namespace,
-  DatasourceNames.Lineanames,
-  "BaseRegistrar",
-);
+// legacy always updates registry so domain is guaranteed to exist
+// wrapped always updates registry so domain is guaranteed to exist
+// unwrapped always updates registry so domain is guaranteed to exist
 
-const getRegistrarManagedName = (registrar: AccountId) => {
-  if (accountIdEqual(ethnamesRegistrar, registrar)) return "eth";
-  if (basenamesRegistar && accountIdEqual(basenamesRegistar, registrar)) return "base.eth";
-  if (lineanamesRegistar && accountIdEqual(lineanamesRegistar, registrar)) return "linea.eth";
-  throw new Error("never");
-};
+// technically all BaseRegistry-derived contracts have the ability to `registerOnly` and therefore
+// don't represent a valid ENS name. then they can be re-registered
+// renewals work on registered names because that's obvious
+// and in this model it's valid for a registration to reference a domain that does not exist
+// and we _don't_ update owner
+// that's why registrars manage their own set of owners (registrants), which can be desynced from a domain's owner
+// so in the registrar handlers we should never touch schema.domain, only reference them.
+
+// ok so in Registrar handlers we can reference domains that may or may not exist
+
+// ok yeah owner of the registration can desync from the registry, because they don't publish changes
+// in ownership when transferring tokens. so the owner of a domain probably should be materialized
+// to the domain in question (if exists) and
 
 export default function () {
-  //////////////
-  // Registrars
-  //////////////
   ponder.on(
-    namespaceContract(pluginName, "Registrar:NameRegistered"),
-    async ({ context, event }) => {
-      // upsert relevant registration for domain
+    namespaceContract(pluginName, "Registrar:Transfer"),
+    async ({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: EventWithArgs<{
+        from: Address;
+        to: Address;
+        tokenId: bigint;
+      }>;
+    }) => {
+      const { from, to, tokenId } = event.args;
+
+      const labelHash = registrarTokenIdToLabelHash(tokenId);
+      const registrar = getThisAccountId(context, event);
+      const managedNode = namehash(getRegistrarManagedName(registrar));
+      const node = makeSubdomainNode(labelHash, managedNode);
+
+      const domainId = makeENSv1DomainId(node);
+      const registration = await getLatestRegistration(context, domainId);
+
+      const isMint = isAddressEqual(zeroAddress, from);
+      const isBurn = isAddressEqual(zeroAddress, to);
+
+      // minting is always followed by Registrar#NameRegistered, safe to ignore
+      if (isMint) return;
+
+      if (isBurn) {
+        // requires an existing registration
+        if (!registration) {
+          throw new Error(`Invariant(Registrar:Transfer): _burn expected existing Registration`);
+        }
+
+        // for now, just delete the registration
+        // TODO: mark Registration as inactive or something instead of burning it
+        await context.db.delete(schema.registration, { id: registration.id });
+      } else {
+        if (!registration) {
+          throw new Error(`Invariant(Registrar:Transfer): expected existing Registration`);
+        }
+
+        // materialize Domain owner
+        await materializeDomainOwner(context, domainId, to);
+      }
     },
   );
 
-  ponder.on(
-    namespaceContract(pluginName, "Registrar:NameRegisteredWithRecord"),
-    async ({ context, event }) => {
-      // upsert relevant registration for domain
-    },
-  );
-
-  ponder.on(namespaceContract(pluginName, "Registrar:NameRenewed"), async ({ context, event }) => {
-    // update registration expiration, add renewal log
-  });
-
-  ponder.on(namespaceContract(pluginName, "Registrar:NameMigrated"), async ({ context, event }) => {
-    // TODO: what does this mean and from where?
-  });
-
-  async function handleTransfer({
+  async function handleNameRegistered({
     context,
     event,
   }: {
     context: Context;
     event: EventWithArgs<{
-      from: Address;
-      to: Address;
-      tokenId: bigint;
+      id: bigint;
+      owner: Address;
+      expires: bigint;
     }>;
   }) {
-    //
+    const { id: tokenId, owner, expires: expiration } = event.args;
+
+    const labelHash = registrarTokenIdToLabelHash(tokenId);
+    const registrar = getThisAccountId(context, event);
+    const managedNode = namehash(getRegistrarManagedName(registrar));
+    const node = makeSubdomainNode(labelHash, managedNode);
+
+    const domainId = makeENSv1DomainId(node);
+    const registration = await getLatestRegistration(context, domainId);
+
+    // TODO: && isActive(registration)
+    if (registration) {
+      throw new Error(
+        `Invariant(Registrar:NameRegistered): Existing registration found in NameRegistered, expected none.`,
+      );
+    }
+
+    const registrationId = makeRegistrationId(domainId, 0);
+
+    // upsert relevant registration for domain
+    await context.db.insert(schema.registration).values({
+      id: registrationId,
+      type: "BaseRegistrar",
+      registrarChainId: registrar.chainId,
+      registrarAddress: registrar.address,
+      registrantId: owner,
+      domainId,
+      start: event.block.timestamp,
+      expiration,
+      // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
+      gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
+    });
+
+    // materialize Domain owner
+    await materializeDomainOwner(context, domainId, owner);
   }
 
+  ponder.on(namespaceContract(pluginName, "Registrar:NameRegistered"), handleNameRegistered);
   ponder.on(
-    namespaceContract(
-      pluginName,
-      "Registrar:Transfer(address indexed from, address indexed to, uint256 indexed id)",
-    ),
-    ({ context, event }) =>
-      handleTransfer({
-        context,
-        event: { ...event, args: { ...event.args, tokenId: event.args.id } },
-      }),
+    namespaceContract(pluginName, "Registrar:NameRegisteredWithRecord"),
+    handleNameRegistered,
   );
 
   ponder.on(
-    namespaceContract(
-      pluginName,
-      "Registrar:Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
-    ),
-    handleTransfer,
+    namespaceContract(pluginName, "Registrar:NameRenewed"),
+    async ({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: EventWithArgs<{ id: bigint; expires: bigint }>;
+    }) => {
+      const { id: tokenId, expires: expiration } = event.args;
+
+      const labelHash = registrarTokenIdToLabelHash(tokenId);
+      const registrar = getThisAccountId(context, event);
+      const managedNode = namehash(getRegistrarManagedName(registrar));
+      const node = makeSubdomainNode(labelHash, managedNode);
+      const domainId = makeENSv1DomainId(node);
+      const registration = await getLatestRegistration(context, domainId);
+
+      // TODO: || !isActive(registration)
+      if (!registration) {
+        throw new Error(
+          `Invariant(Registrar:NameRenewed): NameRenewed emitted but no active registration.`,
+        );
+      }
+
+      await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
+
+      // TODO: insert renewal & reference registration
+    },
   );
 }

@@ -1,5 +1,5 @@
 import { onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
-import type { Address, Hex } from "viem";
+import type { Address } from "viem";
 
 import type {
   ChainId,
@@ -14,7 +14,6 @@ import type {
   RegistrationId,
   RegistryId,
   ResolverId,
-  UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 // Registry<->Domain is 1:1
@@ -156,6 +155,8 @@ export const registration = onchainTable(
     start: t.bigint().notNull(),
     // may have an expiration
     expiration: t.bigint(),
+    // maybe have a grace period (BaseRegistrar)
+    gracePeriod: t.bigint(),
 
     // registrar AccountId
     registrarChainId: t.integer().notNull().$type<ChainId>(),
@@ -169,6 +170,10 @@ export const registration = onchainTable(
 
     // may have fuses
     fuses: t.integer(),
+
+    // may have baseCost/premium
+    baseCost: t.bigint(),
+    premium: t.bigint(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.domainId, t.index),
