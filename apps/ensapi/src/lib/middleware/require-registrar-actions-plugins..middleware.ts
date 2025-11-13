@@ -38,8 +38,9 @@ const requiredPlugins = [
  * Returns a 500 response for any of the following cases:
  * 1) Not all required plugins are active in the connected ENSIndexer
  *    configuration.
- * 2) The connected ENSIndexer cannot serve Indexing Status.
- * 3) The omnichain indexing status of the connected ENSIndexer is other than
+ * 2) ENSApi has not yet successfully cached the Indexing Status in memory from
+ *    the connected ENSIndexer.
+ * 3) The omnichain indexing status of the connected ENSIndexer is not
  *    "completed" or "following".
  *
  * @returns Hono middleware that validates the plugin's HTTP API availability.

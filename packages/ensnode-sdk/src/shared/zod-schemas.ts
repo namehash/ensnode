@@ -11,10 +11,10 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
  */
 import z from "zod/v4";
 
-import { ENSNamespaceIds, Node } from "../ens";
+import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
-import { ReinterpretedName, reinterpretName } from "./reinterpretation";
+import { reinterpretName } from "./reinterpretation";
 import type { SerializedAccountId } from "./serialized-types";
 import type {
   AccountId,
@@ -359,6 +359,7 @@ export const makeTransactionHashSchema = (valueLabel: string = "Transaction hash
 export const makeReinterpretedNameSchema = (valueLabel: string = "Reinterpreted Name") =>
   z
     .string()
+    .transform((v) => v as InterpretedName)
     .check((ctx) => {
       try {
         reinterpretName(ctx.value);

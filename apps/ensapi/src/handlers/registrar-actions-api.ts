@@ -26,7 +26,7 @@ const logger = makeLogger("registrar-actions");
 app.use(requireRegistrarActionsPluginMiddleware());
 
 const DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT = 25;
-const MAX_RESPONSE_ITEMS_COUNT_LIMIT = 1000;
+const MAX_RESPONSE_ITEMS_COUNT_LIMIT = 100;
 
 /**
  * Get Registrar Actions

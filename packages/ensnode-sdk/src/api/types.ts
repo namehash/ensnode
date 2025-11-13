@@ -1,6 +1,6 @@
 import type z from "zod/v4";
 
-import type { Node } from "../ens";
+import type { InterpretedName, Node } from "../ens";
 import type { ENSApiPublicConfig } from "../ensapi";
 import type { RealtimeIndexingStatusProjection } from "../ensindexer";
 import type { RegistrarAction } from "../registrars";
@@ -13,7 +13,6 @@ import type {
   ReverseResolutionArgs,
   ReverseResolutionResult,
 } from "../resolution";
-import type { ReinterpretedName } from "../shared/reinterpretation";
 import type { ProtocolTrace } from "../tracing";
 import type { ErrorResponseSchema } from "./zod-schemas";
 
@@ -215,7 +214,7 @@ export type RegistrarActionsResponseCode =
   (typeof RegistrarActionsResponseCodes)[keyof typeof RegistrarActionsResponseCodes];
 
 /**
- * "Logical registrar action" with domain details.
+ * "Logical registrar action" with its associated name.
  */
 export interface NamedRegistrarAction {
   action: RegistrarAction;
@@ -223,12 +222,12 @@ export interface NamedRegistrarAction {
   /**
    * Name
    *
-   * FQDN on the domain associated with the Registration Lifecycle.
+   * FQDN of the name associated with `action`.
    *
    * Guarantees:
    * - `namehash(name)` is always `action.registrationLifecycle.node`.
    */
-  name: ReinterpretedName;
+  name: InterpretedName;
 }
 
 /**

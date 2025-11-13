@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  RegistrarActionsResponseCodes,
-  type SerializedNamedRegistrarAction,
-  type SerializedRegistrarActionsResponseError,
-  type SerializedRegistrarActionsResponseOk,
-} from "..";
+import type { InterpretedName } from "../ens";
 import { makeRegistrarActionsResponseSchema } from "../internal";
+import type {
+  SerializedNamedRegistrarAction,
+  SerializedRegistrarActionsResponseError,
+  SerializedRegistrarActionsResponseOk,
+} from "./serialized-types";
+import { RegistrarActionsResponseCodes } from "./types";
 
 describe("ENSNode API Schema", () => {
   describe("Registrar Actions API", () => {
@@ -52,7 +53,7 @@ describe("ENSNode API Schema", () => {
           "176209761600000000111551110000000009545322000000000000006750000000000000071",
         ],
       },
-      name: "nh35.eth",
+      name: "nh35.eth" as InterpretedName,
     } satisfies SerializedNamedRegistrarAction;
 
     const validNamedRegistrarActionEncodedLabelHash = {
@@ -85,7 +86,7 @@ describe("ENSNode API Schema", () => {
         transactionHash: "0xa71cf08102ae1f634b22349dac8dc158fe96ae74008b5e24cfcda8587e056d53",
         eventIds: ["176234701200000000111551110000000009566045000000000000014150000000000000198"],
       },
-      name: "[e4310bf4547cb18b16b5348881d24a66d61fa94a013e5636b730b86ee64a3923].eth",
+      name: "[e4310bf4547cb18b16b5348881d24a66d61fa94a013e5636b730b86ee64a3923].eth" as InterpretedName,
     } satisfies SerializedNamedRegistrarAction;
 
     const validResponseOk = {

@@ -1,6 +1,8 @@
+import { labelhash } from "viem";
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
+import { encodeLabelHash } from "../ens";
 import { CurrencyIds, priceDai, priceEth, priceUsdc, type SerializedPrice } from "./currencies";
 import {
   makeBooleanStringSchema,
@@ -169,11 +171,8 @@ describe("ENSIndexer: Shared", () => {
 
     describe("ReinterpretedName", () => {
       const nameWithNormalizedLabels = "tko.basetest.eth";
-      const nameWithEncodedLabelHashes =
-        "[a3c3339682cdbc115729a7f3442922226bd09554a0e7791cf1d3d1f4b69aacd4].basetest.eth";
-      const nameWithLabelHashes =
-        "0xa3c3339682cdbc115729a7f3442922226bd09554a0e7791cf1d3d1f4b69aacd4.basetest.eth";
-      const nameWithUnnormalizedLables = "TKO.basetest.eth";
+      const nameWithUnnormalizedLabels = "TKO.basetest.eth";
+      const reinterpretedNameFromUnnormalizedLabels = `${encodeLabelHash(labelhash("TKO"))}.basetest.eth`;
 
       it("can reinterpret a name which includes normalized labels", () => {
         expect(makeReinterpretedNameSchema().parse(nameWithNormalizedLabels)).toBe(
@@ -182,22 +181,14 @@ describe("ENSIndexer: Shared", () => {
       });
 
       it("can reinterpret a name including encoded label hashes", () => {
-        expect(makeReinterpretedNameSchema().parse(nameWithEncodedLabelHashes)).toBe(
-          nameWithEncodedLabelHashes,
+        expect(makeReinterpretedNameSchema().parse(nameWithUnnormalizedLabels)).toBe(
+          reinterpretedNameFromUnnormalizedLabels,
         );
       });
 
-      it("can reinterpret a name including label hashes", () => {
-        expect(makeReinterpretedNameSchema().parse(nameWithLabelHashes)).toBe(
-          nameWithEncodedLabelHashes,
-        );
-      });
-
-      it("refuses to reinterpret a name including unnormalized labels", () => {
-        expect(
-          formatParseError(makeReinterpretedNameSchema().safeParse(nameWithUnnormalizedLables)),
-        ).toMatch(
-          /'TKO' label must be either a NormalizedLabel, EncodedLabelHash, or LabelHash to be reinterpreted./,
+      it("refuses to reinterpret a name including empty labels", () => {
+        expect(formatParseError(makeReinterpretedNameSchema().safeParse("no..way.eth"))).toMatch(
+          /Name cannot be reinterpreted: The label must not be an empty string to be reinterpreted./i,
         );
       });
     });

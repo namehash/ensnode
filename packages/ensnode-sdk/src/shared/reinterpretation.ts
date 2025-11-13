@@ -1,64 +1,51 @@
+import { labelhash as labelToLabelHash } from "viem";
+
 import {
-  type EncodedLabelHash,
   encodeLabelHash,
-  isEncodedLabelHash,
-  isLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
   isNormalizedLabel,
   type Label,
-  type LabelHash,
-  LiteralLabel,
-  type Name,
 } from "../ens";
 
 /**
- * Reinterpreted Label
- *
- * Guarantees:
- * - Non empty
- * - If label is a {@link LiteralLabel}, then it was mapped into
- *   {@link EncodedLabelHash}.
- */
-export type ReinterpretedLabel = Label | EncodedLabelHash;
-
-/**
- * Reinterpreted Name
- *
- * A Name built only from {@link ReinterpretedLabel}s.
- */
-export type ReinterpretedName = Name;
-
-/**
  * Reinterpret Label
+ *
+ * @returns reinterpreted label.
+ * @throws an error when the provided label must never be an empty label.
  */
-export function reinterpretLabel(label: Label | LabelHash): Label | LabelHash {
-  // a LabelHash must be encoded
-  if (isLabelHash(label)) return encodeLabelHash(label);
-
-  // no change required for EncodedLabelHash
-  if (isEncodedLabelHash(label)) return label;
+export function reinterpretLabel(label: Label): InterpretedLabel {
+  // Invariant: the provided label must never be an empty label.
+  if (label === "") {
+    throw new Error(`The label must not be an empty string to be reinterpreted.`);
+  }
 
   // no change required for NormalizedLabel
-  if (isNormalizedLabel(label)) return label;
+  if (isNormalizedLabel(label)) return label as InterpretedLabel;
 
-  // otherwise, label cannot be reinterpreted
-  throw new Error(
-    `The '${label}' label must be either a NormalizedLabel, EncodedLabelHash, or LabelHash to be reinterpreted.`,
-  );
+  // the provided `label` is unnormalized,
+  // turn in into EncodedLabelHash
+  return encodeLabelHash(labelToLabelHash(label)) as InterpretedLabel;
 }
 
 /**
  * Reinterpret Name
  *
- * Allows the ENSNode Client to reinterpret Names returned from ENSApi.
+ * Reinterprets {@link InterpretedName} values received by "External System"
+ * into  {@link InterpretedName} values in "Internal System" where:
+ * 1. "External System" is not guaranteed to be using the same ENSNormalize
+ *    version as "Internal System", and therefore the `Name` passed into
+ *    this function (from "External System") is not guaranteed to 100% align
+ *    with the invariants of an `InterpretedName` in "Internal System".
+ * 2. The `InterpretedName` returned by this function is guaranteed to match
+ *    the invariants of `InterpretedName` in "Internal System".
  */
-export function reinterpretName(name: Name): ReinterpretedName {
-  if (name === "") return name;
+export function reinterpretName(name: InterpretedName): InterpretedName {
+  if (name === "") return name as InterpretedName;
 
   const labels = name.split(".");
+  const reinterpretedLabels = labels.map(reinterpretLabel);
+  const reinterpretedName = reinterpretedLabels.join(".") as InterpretedName;
 
-  if (labels.some((l) => l === "")) {
-    throw new Error("Name must not include empty labels.");
-  }
-
-  return labels.map(reinterpretLabel).join(".");
+  return reinterpretedName;
 }
