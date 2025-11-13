@@ -4,7 +4,13 @@
 
 import { createConfig } from "ponder";
 
-import { DatasourceNames, EnhancedAccessControlABI, RegistryABI } from "@ensnode/datasources";
+import {
+  AnyRegistrarABI,
+  AnyRegistrarControllerABI,
+  DatasourceNames,
+  EnhancedAccessControlABI,
+  RegistryABI,
+} from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
@@ -143,6 +149,93 @@ export default createPlugin({
                 config.globalBlockrange,
                 lineanames.chain.id,
                 lineanames.contracts.NameWrapper,
+              )),
+          },
+        },
+
+        //////////////
+        // Registrars
+        //////////////
+        [namespaceContract(pluginName, "Registrar")]: {
+          abi: AnyRegistrarABI,
+          chain: {
+            // Ethnames BaseRegistrar
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.BaseRegistrar,
+            ),
+            // Basenames BaseRegistrar, if exists
+            ...(basenames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                basenames.chain.id,
+                basenames.contracts.BaseRegistrar,
+              )),
+            // Lineanames BaseRegistrar, if exists
+            ...(lineanames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                lineanames.chain.id,
+                lineanames.contracts.BaseRegistrar,
+              )),
+          },
+        },
+
+        /////////////////////////
+        // Registrar Controllers
+        /////////////////////////
+        [namespaceContract(pluginName, "RegistrarController")]: {
+          abi: AnyRegistrarControllerABI,
+          chain: {
+            ///////////////////////////////////
+            // Ethnames Registrar Controllers
+            ///////////////////////////////////
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.LegacyEthRegistrarController,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.WrappedEthRegistrarController,
+            ),
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.UnwrappedEthRegistrarController,
+            ),
+
+            ///////////////////////////////////
+            // Basenames Registrar Controllers
+            ///////////////////////////////////
+            ...(basenames && {
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                basenames.chain.id,
+                basenames.contracts.EARegistrarController,
+              ),
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                basenames.chain.id,
+                basenames.contracts.RegistrarController,
+              ),
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                basenames.chain.id,
+                basenames.contracts.UpgradeableRegistrarController,
+              ),
+            }),
+
+            ////////////////////////////////////
+            // Lineanames Registrar Controllers
+            ////////////////////////////////////
+            ...(lineanames &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                lineanames.chain.id,
+                lineanames.contracts.EthRegistrarController,
               )),
           },
         },

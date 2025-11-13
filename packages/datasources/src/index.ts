@@ -1,5 +1,7 @@
 export { EnhancedAccessControl as EnhancedAccessControlABI } from "./abis/namechain/EnhancedAccessControl";
 export { Registry as RegistryABI } from "./abis/namechain/Registry";
+export { AnyRegistrarABI } from "./abis/shared/AnyRegistrar";
+export { AnyRegistrarControllerABI } from "./abis/shared/AnyRegistrarController";
 export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
 export { ThreeDNSToken as ThreeDNSTokenABI } from "./abis/threedns/ThreeDNSToken";
 export * from "./lib/chains";
