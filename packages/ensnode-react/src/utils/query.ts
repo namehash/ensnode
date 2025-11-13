@@ -4,6 +4,7 @@ import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 
 import {
   ENSNodeClient,
+  IndexingStatusResponseCodes,
   type ResolvePrimaryNameRequest,
   type ResolvePrimaryNamesRequest,
   type ResolveRecordsRequest,
@@ -124,6 +125,9 @@ export function createConfigQueryOptions(config: ENSNodeSDKConfig) {
 
 /**
  * Creates query options for ENSNode Indexing Status API
+ *
+ * Note: This query throws when the response indicates an error status,
+ * ensuring React Query treats it as a failed fetch and maintains previous data.
  */
 export function createIndexingStatusQueryOptions(config: ENSNodeSDKConfig) {
   return {
@@ -131,7 +135,14 @@ export function createIndexingStatusQueryOptions(config: ENSNodeSDKConfig) {
     queryKey: queryKeys.indexingStatus(config.client.url.href),
     queryFn: async () => {
       const client = new ENSNodeClient(config.client);
-      return client.indexingStatus();
+      const response = await client.indexingStatus();
+
+      // debug: use placeholderData to keep showing the last valid data
+      if (response.responseCode === IndexingStatusResponseCodes.Error) {
+        throw new Error("Indexing status is currently unavailable");
+      }
+
+      return response;
     },
   };
 }

@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useSyncExternalStore } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import {
   createRealtimeIndexingStatusProjection,
@@ -9,9 +9,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import type { QueryParameter, WithSDKConfigParameter } from "../types";
-import { projectionSync } from "../utils/projectionSync";
 import { createIndexingStatusQueryOptions } from "../utils/query";
 import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
+import { useNow } from "./useNow";
 
 interface UseIndexingStatusParameters
   extends IndexingStatusRequest,
@@ -34,6 +34,12 @@ interface UseIndexingStatusParameters
  * few seconds ago is still valid for building new projections. Since snapshots
  * exclusively contain absolute timestamps, we can reuse a snapshot across time to continuously compute updated worst-case projections without additional API calls.
  *
+ * **Error Handling:**
+ * When the indexing status API returns an error response, this hook continues to display
+ * the last successful snapshot while projecting forward in time. This provides a graceful
+ * degradation experience - the UI shows slightly stale but still useful data rather than
+ * breaking completely.
+ *
  * @param parameters - Configuration options
  * @param parameters.config - ENSNode SDK configuration (optional, uses context if not provided)
  * @param parameters.query - TanStack Query options for customizing query behavior (refetchInterval, enabled, etc.)
@@ -50,6 +56,7 @@ export function useIndexingStatus(
   const options = {
     ...queryOptions,
     refetchInterval: 10 * 1000, // 10 seconds - indexing status changes frequently
+    placeholderData: keepPreviousData, // Keep showing previous data during refetch and on error
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
   };
@@ -57,20 +64,21 @@ export function useIndexingStatus(
   const queryResult = useQuery(options);
 
   // Extract the current snapshot from the query result.
-  // This will be null until we get a successful response.
+  // Thanks to placeholderData: keepPreviousData, this will continue showing
+  // the last successful snapshot even when subsequent fetches fail.
+  // Note: queryFn now throws on error responses, so data will only contain valid responses
+
+  // debug
   const currentSnapshot =
     queryResult.data?.responseCode === IndexingStatusResponseCodes.Ok
       ? queryResult.data.realtimeProjection.snapshot
       : null;
 
-  // Subscribe to synchronized timestamp updates (ticks every second).
-  // All components using this hook will receive the same timestamp value,
-  // ensuring consistent projections across the entire UI.
-  const projectedAt = useSyncExternalStore(
-    projectionSync.subscribe.bind(projectionSync),
-    projectionSync.getTimestamp.bind(projectionSync),
-    projectionSync.getTimestamp.bind(projectionSync), // Server-side snapshot
-  );
+  // / worstCaseDistance is measured in seconds
+
+  // Get current timestamp that updates every second.
+  // Each component instance gets its own timestamp
+  const projectedAt = useNow(1000);
 
   // Generate projection from cached snapshot using the synchronized timestamp.
   // useMemo ensures we only create a new projection object when values actually change,
@@ -81,17 +89,16 @@ export function useIndexingStatus(
     const realtimeProjection = createRealtimeIndexingStatusProjection(currentSnapshot, projectedAt);
 
     return {
-      responseCode: IndexingStatusResponseCodes.Ok,
+      // debugging
+      responseCode: "ok" as const,
       realtimeProjection,
-    } as IndexingStatusResponse;
+    } satisfies IndexingStatusResponse;
   }, [currentSnapshot, projectedAt]);
 
   if (projectedData) {
     return {
       ...queryResult,
       data: projectedData,
-      isError: false,
-      error: null,
     };
   }
 
