@@ -65,11 +65,6 @@ export async function getDomainIdByInterpretedName(
     depth: number;
   }[];
 
-  console.log({
-    labelHashPath,
-    rows,
-  });
-
   const exists = rows.length > 0 && rows.length === labelHashPath.length;
   if (!exists) return null;
 

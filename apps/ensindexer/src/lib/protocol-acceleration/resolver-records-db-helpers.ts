@@ -104,7 +104,7 @@ export async function handleResolverAddressRecordUpdate(
   address: Address,
 ) {
   // construct the ResolverAddressRecord's Composite Key
-  const id = { ...resolverRecordsKey, coinType };
+  const id = { ...resolverRecordsKey, coinType: BigInt(coinType) };
 
   // interpret the incoming address record value
   const interpretedValue = interpretAddressRecordValue(address);

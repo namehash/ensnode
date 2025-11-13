@@ -5,7 +5,7 @@
 import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
-import type { ChainId, CoinType, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
+import type { ChainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 // TODO: implement resolverType & polymorphic field availability
 
@@ -27,7 +27,7 @@ export const reverseNameRecord = onchainTable(
   (t) => ({
     // keyed by (address, coinType)
     address: t.hex().notNull().$type<Address>(),
-    coinType: t.integer().notNull().$type<CoinType>(),
+    coinType: t.bigint().notNull(),
 
     /**
      * Represents the ENSIP-19 Reverse Name Record for a given (address, coinType).
@@ -163,7 +163,7 @@ export const resolverAddressRecord = onchainTable(
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
-    coinType: t.integer().notNull().$type<CoinType>(),
+    coinType: t.bigint().notNull(),
 
     /**
      * Represents the value of the Addresss Record specified by ((chainId, resolver, node), coinType).

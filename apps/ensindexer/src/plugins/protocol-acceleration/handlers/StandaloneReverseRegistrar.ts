@@ -31,7 +31,7 @@ export default function () {
           : evmChainIdToCoinType(context.chain.id);
 
       // construct the ReverseNameRecord entity's Composite Primary Key
-      const id = { address, coinType };
+      const id = { address, coinType: BigInt(coinType) };
 
       // interpret the emitted name record value (see `interpretNameRecordValue` for guarantees)
       const interpretedValue = interpretNameRecordValue(name);

@@ -1,4 +1,5 @@
 import {
+  bigintToCoinType,
   makeResolverRecordsId,
   type ResolverId,
   type ResolverRecordsId,
@@ -113,7 +114,11 @@ ResolverRecordsRef.implement({
       description: "TODO",
       type: ["CoinType"],
       nullable: false,
-      resolve: (parent) => parent.addressRecords.map((r) => r.coinType).toSorted(),
+      resolve: (parent) =>
+        parent.addressRecords
+          .map((r) => r.coinType)
+          .map(bigintToCoinType)
+          .toSorted(),
     }),
   }),
 });
