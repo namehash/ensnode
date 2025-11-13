@@ -102,7 +102,7 @@ describe("ENSNode API Schema", () => {
       error: {
         message: "Registrar Actions API is not available",
         details:
-          'The omnichain indexing status of the Connected ENSIndexer must be either "completed" or "following".',
+          'The cached omnichain indexing status of the Connected ENSIndexer must be either "completed" or "following".',
       },
     } satisfies SerializedRegistrarActionsResponseError;
 

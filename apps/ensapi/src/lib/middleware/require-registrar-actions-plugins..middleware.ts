@@ -40,8 +40,8 @@ const requiredPlugins = [
  *    configuration.
  * 2) ENSApi has not yet successfully cached the Indexing Status in memory from
  *    the connected ENSIndexer.
- * 3) The omnichain indexing status of the connected ENSIndexer is not
- *    "completed" or "following".
+ * 3) The omnichain indexing status of the connected ENSIndexer that is cached
+ *    in memory is not "completed" or "following".
  *
  * @returns Hono middleware that validates the plugin's HTTP API availability.
  */
@@ -107,7 +107,7 @@ export const requireRegistrarActionsPluginMiddleware = () =>
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `The omnichain indexing status of the Connected ENSIndexer must be either "completed" or "following".`,
+            details: `The cached omnichain indexing status of the Connected ENSIndexer must be either "completed" or "following".`,
           },
         }),
         500,

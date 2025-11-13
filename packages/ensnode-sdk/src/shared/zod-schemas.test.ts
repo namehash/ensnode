@@ -188,7 +188,7 @@ describe("ENSIndexer: Shared", () => {
 
       it("refuses to reinterpret a name including empty labels", () => {
         expect(formatParseError(makeReinterpretedNameSchema().safeParse("no..way.eth"))).toMatch(
-          /Name cannot be reinterpreted: The label must not be an empty string to be reinterpreted./i,
+          /Name cannot be reinterpreted: Cannot reinterpret an empty label that violates the invariants of an InterpretedLabel/i,
         );
       });
     });
