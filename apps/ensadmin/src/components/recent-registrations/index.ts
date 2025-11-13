@@ -1,1 +1,2 @@
-export * from "./components";
+export * from "./display-recent-registrations";
+export * from "./resolution";
