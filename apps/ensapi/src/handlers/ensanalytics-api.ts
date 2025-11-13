@@ -3,8 +3,8 @@ import { z } from "zod/v4";
 import {
   type AggregatedReferrerMetrics,
   type AggregatedReferrerMetricsContribution,
-  PAGINATION_DEFAULT_LIMIT,
-  PAGINATION_MAX_LIMIT,
+  ITEMS_PER_PAGE_DEFAULT,
+  ITEMS_PER_PAGE_MAX,
   type PaginatedAggregatedReferrersRequest,
   type PaginatedAggregatedReferrersResponse,
   PaginatedAggregatedReferrersResponseCodes,
@@ -31,9 +31,9 @@ const paginationQuerySchema = z.object({
         .number()
         .int()
         .min(1, "Items per page must be at least 1")
-        .max(PAGINATION_MAX_LIMIT, `Items per page must not exceed ${PAGINATION_MAX_LIMIT}`),
+        .max(ITEMS_PER_PAGE_MAX, `Items per page must not exceed ${ITEMS_PER_PAGE_MAX}`),
     )
-    .default(PAGINATION_DEFAULT_LIMIT),
+    .default(ITEMS_PER_PAGE_DEFAULT),
 }) satisfies z.ZodType<Required<PaginatedAggregatedReferrersRequest>>;
 
 /**

@@ -1,5 +1,5 @@
 import { getUnixTime } from "date-fns";
-import { and, count, desc, eq, gte, isNotNull, lt, ne, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { zeroAddress } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -16,25 +16,27 @@ import { ireduce } from "@/lib/itertools";
 import logger from "@/lib/logger";
 
 /**
- * Fetches all referrers with 1 or more qualified referrals from the `registrar_actions` table and builds an `AggregatedReferrerSnapshot`.
+ * Fetches all referrers with 1 or more qualified referrals from the `registrar_actions` table
+ * and builds an `AggregatedReferrerSnapshot`.
  *
- * Step 1: Filter for "qualified" registrar actions where:
+ * Step 1: Filter for "qualified" referrals where:
  * - timestamp is between startDate and endDate
  * - decodedReferrer is not null and not the zero address
  * - subregistryId matches the provided subregistryId
  *
  * Step 2: Group by decodedReferrer and calculate:
  * - Sum total incrementalDuration for each decodedReferrer
- * - Count of qualified registrar actions
+ * - Count of qualified referrals for each decodedReferrer
  *
  * Step 3: Sort by sum total incrementalDuration from highest to lowest
  *
  * Step 4: Calculate grand totals and build the snapshot object
  *
- * @param startDate - The start date (Unix timestamp) for filtering registrar actions
- * @param endDate - The end date (Unix timestamp) for filtering registrar actions
+ * @param startDate - The start date (Unix timestamp, inclusive) for filtering registrar actions
+ * @param endDate - The end date (Unix timestamp, inclusive) for filtering registrar actions
  * @param subregistryId - The account ID of the subregistry to filter by
  * @returns `AggregatedReferrerSnapshot` containing all referrers with at least one qualified referral, grand totals, and updatedAt timestamp
+ * @throws Error if startDate > endDate (invalid date range)
  * @throws Error if the database query fails
  */
 export async function getAggregatedReferrerSnapshot(
@@ -42,6 +44,12 @@ export async function getAggregatedReferrerSnapshot(
   endDate: UnixTimestamp,
   subregistryId: AccountId,
 ): Promise<AggregatedReferrerSnapshot> {
+  if (startDate > endDate) {
+    throw new Error(
+      `Invalid date range: startDate (${startDate}) must be less than or equal to endDate (${endDate})`,
+    );
+  }
+
   try {
     const updatedAt = getUnixTime(new Date());
 
@@ -58,7 +66,7 @@ export async function getAggregatedReferrerSnapshot(
         and(
           // Filter by timestamp range
           gte(schema.registrarActions.timestamp, BigInt(startDate)),
-          lt(schema.registrarActions.timestamp, BigInt(endDate)),
+          lte(schema.registrarActions.timestamp, BigInt(endDate)),
           // Filter by decodedReferrer not null
           isNotNull(schema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address

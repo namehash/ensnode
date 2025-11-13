@@ -5,12 +5,12 @@ import type { Duration, UnixTimestamp } from "../shared";
 /**
  * The default number of items per page for paginated aggregated referrer queries.
  */
-export const PAGINATION_DEFAULT_LIMIT = 25;
+export const ITEMS_PER_PAGE_DEFAULT = 25;
 
 /**
  * The maximum number of items per page for paginated aggregated referrer queries.
  */
-export const PAGINATION_MAX_LIMIT = 100;
+export const ITEMS_PER_PAGE_MAX = 100;
 
 /**
  * Represents the aggregated metrics for a single referrer.
@@ -66,8 +66,8 @@ export interface PaginationParams {
 
   /**
    * Maximum number of items per page
-   * @invariant Must be a positive integer (>= 1) and less than or equal to {@link PAGINATION_MAX_LIMIT}
-   * @default {@link PAGINATION_DEFAULT_LIMIT}
+   * @invariant Must be a positive integer (>= 1) and less than or equal to {@link ITEMS_PER_PAGE_MAX}
+   * @default {@link ITEMS_PER_PAGE_DEFAULT}
    */
   itemsPerPage?: number;
 }
