@@ -195,3 +195,95 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
     return this._cache.delete(key);
   }
 }
+
+interface SWRCache<T> {
+  value: T;
+  timestamp: number;
+  revalidating?: Promise<T>;
+}
+
+/**
+ * Stale-While-Revalidate (SWR) cache wrapper for async functions.
+ *
+ * This caching strategy serves cached data immediately (even if stale) while
+ * asynchronously revalidating the cache in the background. This provides:
+ * - Sub-millisecond response times (after first fetch)
+ * - Always available data (serves stale data during revalidation)
+ * - Automatic background updates
+ *
+ * @example
+ * ```typescript
+ * const fetchExpensiveData = async () => {
+ *   const response = await fetch('/api/data');
+ *   return response.json();
+ * };
+ *
+ * const cachedFetch = staleWhileRevalidate(fetchExpensiveData, 60000); // 1 minute TTL
+ *
+ * // First call: fetches data (slow)
+ * const data1 = await cachedFetch();
+ *
+ * // Within TTL: returns cached data (fast)
+ * const data2 = await cachedFetch();
+ *
+ * // After TTL: returns stale data immediately, revalidates in background
+ * const data3 = await cachedFetch(); // Still fast!
+ * ```
+ *
+ * @param fn The async function to wrap with SWR caching
+ * @param ttl Time-to-live in milliseconds. After this duration, data is considered stale
+ * @returns A cached version of the function with SWR semantics
+ *
+ * @link https://web.dev/stale-while-revalidate/
+ * @link https://datatracker.ietf.org/doc/html/rfc5861
+ */
+export function staleWhileRevalidate<T>(fn: () => Promise<T>, ttl: number): () => Promise<T> {
+  if (!Number.isInteger(ttl) || ttl <= 0) {
+    throw new Error(
+      `staleWhileRevalidate requires ttl to be a positive integer but a ttl of ${ttl} was provided.`,
+    );
+  }
+
+  let cache: SWRCache<T> | null = null;
+
+  return async (): Promise<T> => {
+    const now = Date.now();
+
+    // No cache, fetch for the first time
+    if (!cache) {
+      const value = await fn();
+      cache = { value, timestamp: now };
+      return value;
+    }
+
+    const isStale = now - cache.timestamp > ttl;
+
+    // Fresh cache, return immediately
+    if (!isStale) return cache.value;
+
+    // Stale cache, but revalidation already in progress
+    if (cache.revalidating) return cache.value;
+
+    // Stale cache, kick off revalidation in background
+    const revalidationPromise = fn()
+      .then((value) => {
+        cache = { value, timestamp: Date.now() };
+        return value;
+      })
+      .catch(() => {
+        // On error, clear revalidating flag so next request can retry
+        // Keep serving stale data, swallow error (background revalidation)
+        if (cache) {
+          cache.revalidating = undefined;
+        }
+        // Don't re-throw - this is background revalidation
+        // Caller can add their own error handling in the wrapped function
+        return cache?.value as T;
+      });
+
+    cache.revalidating = revalidationPromise;
+
+    // Return stale value immediately
+    return cache.value;
+  };
+}

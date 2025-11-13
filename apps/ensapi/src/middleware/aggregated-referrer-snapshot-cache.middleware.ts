@@ -4,9 +4,8 @@ import {
   ENS_HOLIDAY_AWARDS_END_DATE,
   ENS_HOLIDAY_AWARDS_START_DATE,
 } from "@namehash/ens-referrals";
-import pMemoize from "p-memoize";
 
-import { getEthnamesSubregistryId, TtlCache } from "@ensnode/ensnode-sdk";
+import { getEthnamesSubregistryId, staleWhileRevalidate } from "@ensnode/ensnode-sdk";
 
 import { getAggregatedReferrerSnapshot } from "@/lib/ensanalytics/database";
 import { factory } from "@/lib/hono-factory";
@@ -14,31 +13,26 @@ import logger from "@/lib/logger";
 
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-// memoizes the getAggregatedReferrerSnapshot promise across TTL_MS
-export const fetcher = pMemoize(
-  () => {
-    logger.info("Building aggregated referrer snapshot...");
-    const subregistryId = getEthnamesSubregistryId(config.namespace);
-    const promise = getAggregatedReferrerSnapshot(
-      ENS_HOLIDAY_AWARDS_START_DATE,
-      ENS_HOLIDAY_AWARDS_END_DATE,
-      subregistryId,
-    );
+// SWR-cached fetcher for aggregated referrer snapshot
+export const fetcher = staleWhileRevalidate(() => {
+  logger.info("Building aggregated referrer snapshot...");
+  const subregistryId = getEthnamesSubregistryId(config.namespace);
+  const promise = getAggregatedReferrerSnapshot(
+    ENS_HOLIDAY_AWARDS_START_DATE,
+    ENS_HOLIDAY_AWARDS_END_DATE,
+    subregistryId,
+  );
 
-    promise
-      .then(() => {
-        logger.info("Successfully built aggregated referrer snapshot");
-      })
-      .catch((error) => {
-        logger.error({ error }, "Failed to build aggregated referrer snapshot");
-      });
+  promise
+    .then(() => {
+      logger.info("Successfully built aggregated referrer snapshot");
+    })
+    .catch((error) => {
+      logger.error({ error }, "Failed to build aggregated referrer snapshot");
+    });
 
-    return promise;
-  },
-  {
-    cache: new TtlCache(TTL_MS),
-  },
-);
+  return promise;
+}, TTL_MS);
 
 export type AggregatedReferrerSnapshotCacheVariables = {
   aggregatedReferrerSnapshotCache: Awaited<ReturnType<typeof fetcher>>;

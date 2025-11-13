@@ -10,6 +10,7 @@ import {
   PaginatedAggregatedReferrersResponseCodes,
 } from "@ensnode/ensnode-sdk";
 
+import { errorResponse } from "@/lib/handlers/error-response";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { islice } from "@/lib/itertools";
@@ -72,16 +73,15 @@ app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async
     const totalPages = Math.ceil(totalAggregatedReferrers / itemsPerPage);
 
     // Check if requested page exceeds available pages
-    if (page > totalPages && totalAggregatedReferrers > 0) {
-      return c.json(
-        {
-          responseCode: PaginatedAggregatedReferrersResponseCodes.PageOutOfRange,
-          error: "Page out of range",
-          errorMessage: `Requested page ${page} exceeds total pages ${totalPages}`,
-          totalPages,
-        } satisfies PaginatedAggregatedReferrersResponse,
-        400,
-      );
+    if (totalAggregatedReferrers > 0) {
+      const pageValidationSchema = z
+        .number()
+        .max(totalPages, `Page ${page} exceeds total pages ${totalPages}`);
+
+      const pageValidation = pageValidationSchema.safeParse(page);
+      if (!pageValidation.success) {
+        return errorResponse(c, pageValidation.error);
+      }
     }
 
     // Use iterator slice to extract paginated results
@@ -107,8 +107,10 @@ app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async
       data: {
         referrers: referrersWithContribution,
         total: totalAggregatedReferrers,
-        page,
-        itemsPerPage,
+        paginationParams: {
+          page,
+          itemsPerPage,
+        },
         hasNext: endIndex < totalAggregatedReferrers,
         hasPrev: page > 1,
         updatedAt: aggregatedReferrerSnapshotCache.updatedAt,

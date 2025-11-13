@@ -54,9 +54,9 @@ export interface AggregatedReferrerMetricsContribution extends AggregatedReferre
 }
 
 /**
- * Request parameters for paginated aggregated referrers query.
+ * Base pagination parameters for paginated queries.
  */
-export interface PaginatedAggregatedReferrersRequest {
+export interface PaginationParams {
   /**
    * Requested page number (1-indexed)
    * @invariant Must be a positive integer (>= 1)
@@ -71,6 +71,11 @@ export interface PaginatedAggregatedReferrersRequest {
    */
   itemsPerPage?: number;
 }
+
+/**
+ * Request parameters for paginated aggregated referrers query.
+ */
+export interface PaginatedAggregatedReferrersRequest extends PaginationParams {}
 
 /**
  * Paginated aggregated referrers data with metadata.
@@ -89,16 +94,10 @@ export interface PaginatedAggregatedReferrers {
   total: number;
 
   /**
-   * Current page number (1-indexed)
-   * @invariant Guaranteed to be a positive integer (>= 1)
+   * Pagination parameters
+   * @invariant Stores the pagination parameters from the request
    */
-  page: number;
-
-  /**
-   * Maximum number of items per page
-   * @invariant Guaranteed to be a positive integer (>= 1)
-   */
-  itemsPerPage: number;
+  paginationParams: PaginationParams;
 
   /**
    * Indicates whether there is a next page available
@@ -128,12 +127,6 @@ export const PaginatedAggregatedReferrersResponseCodes = {
   Ok: "ok",
 
   /**
-   * Represents that the request failed due to pagination parameters being out of range.
-   * @note This error is only returned when there is data available but the requested page exceeds the total pages.
-   */
-  PageOutOfRange: "page_out_of_range",
-
-  /**
    * Represents that the aggregated referrers data is not available.
    */
   Error: "error",
@@ -154,16 +147,6 @@ export type PaginatedAggregatedReferrersResponseOk = {
 };
 
 /**
- * A paginated aggregated referrers response when pagination parameters are out of range.
- */
-export type PaginatedAggregatedReferrersResponsePageOutOfRange = {
-  responseCode: typeof PaginatedAggregatedReferrersResponseCodes.PageOutOfRange;
-  error: string;
-  errorMessage: string;
-  totalPages: number;
-};
-
-/**
  * A paginated aggregated referrers response when the data is not available.
  */
 export type PaginatedAggregatedReferrersResponseError = {
@@ -180,5 +163,4 @@ export type PaginatedAggregatedReferrersResponseError = {
  */
 export type PaginatedAggregatedReferrersResponse =
   | PaginatedAggregatedReferrersResponseOk
-  | PaginatedAggregatedReferrersResponsePageOutOfRange
   | PaginatedAggregatedReferrersResponseError;

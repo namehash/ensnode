@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { LruCache, TtlCache } from "./cache";
+import { LruCache, staleWhileRevalidate, TtlCache } from "./cache";
 
 describe("LruCache", () => {
   it("throws Error if capacity is not an integer", () => {
@@ -220,5 +220,224 @@ describe("TtlCache", () => {
 
     expect(ttl.get("key1")).toBeUndefined();
     expect(ttl.has("key1")).toBe(false);
+  });
+});
+
+describe("staleWhileRevalidate", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("throws Error if ttl is not a positive integer", () => {
+    expect(() => {
+      staleWhileRevalidate(async () => "test", 0);
+    }).toThrow();
+
+    expect(() => {
+      staleWhileRevalidate(async () => "test", -1);
+    }).toThrow();
+
+    expect(() => {
+      staleWhileRevalidate(async () => "test", 1.5);
+    }).toThrow();
+  });
+
+  it("fetches data on first call", async () => {
+    const fn = vi.fn(async () => "value1");
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    const result = await cached();
+
+    expect(result).toBe("value1");
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns cached data within TTL without refetching", async () => {
+    const fn = vi.fn(async () => "value1");
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    await cached();
+    vi.advanceTimersByTime(500);
+    const result = await cached();
+
+    expect(result).toBe("value1");
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns stale data immediately after TTL expires", async () => {
+    const fn = vi.fn(async () => "value1");
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    await cached();
+    vi.advanceTimersByTime(1001);
+    const result = await cached();
+
+    expect(result).toBe("value1");
+  });
+
+  it("triggers background revalidation after TTL expires", async () => {
+    let value = "value1";
+    const fn = vi.fn(async () => value);
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    await cached();
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(1001);
+    value = "value2";
+
+    // This should return stale data but trigger revalidation
+    const result1 = await cached();
+    expect(result1).toBe("value1");
+    expect(fn).toHaveBeenCalledTimes(2);
+
+    // Wait for revalidation to complete
+    await vi.runAllTimersAsync();
+
+    // Next call should have fresh data
+    const result2 = await cached();
+    expect(result2).toBe("value2");
+  });
+
+  it("does not trigger multiple revalidations concurrently", async () => {
+    let resolveRevalidation: () => void;
+    const revalidationPromise = new Promise<string>((resolve) => {
+      resolveRevalidation = () => resolve("value2");
+    });
+
+    let callCount = 0;
+    const fn = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) return "value1";
+      return revalidationPromise;
+    });
+
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    await cached();
+    vi.advanceTimersByTime(1001);
+
+    // Multiple calls after stale should not trigger multiple revalidations
+    const promise1 = cached();
+    const promise2 = cached();
+    const promise3 = cached();
+
+    const results = await Promise.all([promise1, promise2, promise3]);
+
+    // All should return stale value
+    expect(results).toEqual(["value1", "value1", "value1"]);
+
+    // Should only call fn twice: once for initial, once for revalidation
+    expect(fn).toHaveBeenCalledTimes(2);
+
+    // Complete revalidation
+    resolveRevalidation!();
+    await vi.runAllTimersAsync();
+  });
+
+  it("serves stale data while revalidation is in progress", async () => {
+    let resolveRevalidation: (value: string) => void;
+    const revalidationPromise = new Promise<string>((resolve) => {
+      resolveRevalidation = resolve;
+    });
+
+    let callCount = 0;
+    const fn = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) return "value1";
+      return revalidationPromise;
+    });
+
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    await cached();
+    vi.advanceTimersByTime(1001);
+
+    // First call after TTL triggers revalidation
+    const result1 = await cached();
+    expect(result1).toBe("value1");
+
+    // Additional calls while revalidating should still return stale
+    const result2 = await cached();
+    const result3 = await cached();
+
+    expect(result2).toBe("value1");
+    expect(result3).toBe("value1");
+    expect(fn).toHaveBeenCalledTimes(2);
+
+    // Complete revalidation
+    resolveRevalidation!("value2");
+    await vi.runAllTimersAsync();
+
+    // Now should have fresh data
+    const result4 = await cached();
+    expect(result4).toBe("value2");
+  });
+
+  it("handles revalidation errors gracefully by keeping stale data", async () => {
+    let shouldError = false;
+    const fn = vi.fn(async () => {
+      if (shouldError) {
+        throw new Error("Revalidation failed");
+      }
+      return "value1";
+    });
+
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    await cached();
+    vi.advanceTimersByTime(1001);
+
+    shouldError = true;
+
+    // Should return stale data even though revalidation will fail
+    const result1 = await cached();
+    expect(result1).toBe("value1");
+
+    // Wait for failed revalidation
+    await vi.runAllTimersAsync();
+
+    // Should still serve stale data
+    const result2 = await cached();
+    expect(result2).toBe("value1");
+
+    // Should have attempted revalidation twice (once for each call after stale)
+    expect(fn).toHaveBeenCalledTimes(3);
+  });
+
+  it("allows retry after failed revalidation", async () => {
+    let shouldError = true;
+    const fn = vi.fn(async () => {
+      if (shouldError) {
+        throw new Error("Revalidation failed");
+      }
+      return "value2";
+    });
+
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    // Initial fetch
+    shouldError = false;
+    await cached();
+
+    vi.advanceTimersByTime(1001);
+    shouldError = true;
+
+    // First revalidation attempt fails
+    await cached();
+    await vi.runAllTimersAsync();
+
+    // Subsequent call should retry revalidation
+    shouldError = false;
+    await cached();
+    await vi.runAllTimersAsync();
+
+    // Should now have fresh data
+    const result = await cached();
+    expect(result).toBe("value2");
   });
 });
