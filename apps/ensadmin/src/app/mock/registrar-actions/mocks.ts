@@ -1,4 +1,5 @@
 import {
+  Duration,
   InterpretedName,
   NamedRegistrarAction,
   OmnichainIndexingStatusIds,
@@ -15,7 +16,7 @@ import {
   ResolutionStatusId,
   ResolutionStatusIds,
   ResolvedRegistrarActions,
-} from "@/components/recent-registrations";
+} from "@/components/registrar-actions";
 
 export const registrationWithReferral = {
   action: {
@@ -219,6 +220,17 @@ export const registrationWithReferrerNotMatchingENSHolidayAwardsFormat = {
   name: "sonu100.eth" as InterpretedName,
 } satisfies NamedRegistrarAction;
 
+function registrarActionWithUpdatedIncrementalDuration(
+  registrarAction: NamedRegistrarAction,
+  incrementalDuration: Duration,
+): NamedRegistrarAction {
+  return {
+    ...registrarAction,
+    action: { ...registrarAction.action, incrementalDuration },
+    name: `incrementalDuration-${incrementalDuration}.${registrarAction.name}` as InterpretedName,
+  } satisfies NamedRegistrarAction;
+}
+
 export const variants: Map<ResolutionStatusId, ResolvedRegistrarActions> = new Map([
   [
     ResolutionStatusIds.Initial,
@@ -268,18 +280,9 @@ export const variants: Map<ResolutionStatusId, ResolvedRegistrarActions> = new M
       resolutionStatus: ResolutionStatusIds.Available,
       registrarActions: [
         renewalWithNoReferral,
-        {
-          ...renewalWithNoReferral,
-          action: { ...renewalWithNoReferral.action, incrementalDuration: 0 },
-        } satisfies NamedRegistrarAction,
-        {
-          ...renewalWithNoReferral,
-          action: { ...renewalWithNoReferral.action, incrementalDuration: 1 },
-        } satisfies NamedRegistrarAction,
-        {
-          ...renewalWithNoReferral,
-          action: { ...renewalWithNoReferral.action, incrementalDuration: 2 },
-        } satisfies NamedRegistrarAction,
+        registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 0),
+        registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 1),
+        registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 2),
         registrationWithReferral,
         registrationWithNoReferralAndEncodedLabelHashes,
         registrationWithZeroEncodedReferrer,

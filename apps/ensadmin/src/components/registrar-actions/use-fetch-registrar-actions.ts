@@ -6,9 +6,6 @@ import {
   registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
 
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
-
-import { DisplayRegistrarActionsPanel } from "./display-recent-registrations";
 import {
   RegistrarActionsAvailable,
   RegistrarActionsIndexingStatusNotReady,
@@ -133,31 +130,4 @@ export function useFetchRegistrarActions({
     resolutionStatus: ResolutionStatusIds.Available,
     registrarActions: registrarActionsQuery.data.registrarActions,
   } satisfies RegistrarActionsAvailable;
-}
-
-interface ResolveAndDisplayRegistrarActionsPanelProps {
-  maxItems: number;
-
-  title: string;
-}
-
-/**
- * Resolves Registrar Actions through ENSNode and displays the Registrar Actions Panel.
- */
-export function ResolveAndDisplayRegistrarActionsPanel({
-  maxItems,
-  title,
-}: ResolveAndDisplayRegistrarActionsPanelProps) {
-  const namespaceId = useActiveNamespace();
-  const resolvedRegistrarActions = useFetchRegistrarActions({
-    maxItems,
-  });
-
-  return (
-    <DisplayRegistrarActionsPanel
-      namespaceId={namespaceId}
-      title={title}
-      resolvedRegistrarActions={resolvedRegistrarActions}
-    />
-  );
 }

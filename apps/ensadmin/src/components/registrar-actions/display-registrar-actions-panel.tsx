@@ -15,7 +15,7 @@ import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 import {
   DisplayRegistrarActionCard,
   DisplayRegistrarActionCardPlaceholder,
-} from "./registration-card";
+} from "./display-registrar-action-card";
 import { ResolutionStatusIds, type ResolvedRegistrarActions } from "./types";
 
 interface DisplayRegistrarActionsListProps {
@@ -143,7 +143,7 @@ export function DisplayRegistrarActionsPanel({
 
             <ul>
               {resolvedRegistrarActions.supportedIndexingStatusIds.map((supportedStatusId) => (
-                <li className="inline">
+                <li className="inline" key={supportedStatusId}>
                   <Badge variant="secondary">
                     {formatOmnichainIndexingStatus(supportedStatusId)}
                   </Badge>{" "}

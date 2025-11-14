@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-import { DisplayRegistrarActionsPanel } from "@/components/recent-registrations/display-recent-registrations";
+import { DisplayRegistrarActionsPanel } from "@/components/registrar-actions/display-registrar-actions-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 

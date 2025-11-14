@@ -1,6 +1,6 @@
 "use client";
 
-import { ResolveAndDisplayRegistrarActionsPanel } from "@/components/recent-registrations/resolution";
+import { ResolveAndDisplayRegistrarActionsPanel } from "@/components/registrar-actions";
 
 export default function ExploreRegistrarActions() {
   return (
