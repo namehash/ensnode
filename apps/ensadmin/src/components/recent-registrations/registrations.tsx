@@ -14,7 +14,12 @@ export function Registrations() {
 
   if (status === "error") {
     return (
-      <RecentRegistrations error={{ title: "IndexingStatus error", description: error.message }} />
+      <RecentRegistrations
+        error={{
+          title: "IndexingStatus error",
+          description: error?.message || "An unknown error occurred",
+        }}
+      />
     );
   }
 

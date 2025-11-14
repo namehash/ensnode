@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { BackfillStatus } from "./backfill-status";
 import { BlockStats } from "./block-refs";
 import { IndexingStatusLoading } from "./indexing-status-loading";
+import { ProjectionInfo } from "./projection-info";
 
 interface IndexingStatsForOmnichainStatusSnapshotProps<
   OmnichainIndexingStatusSnapshotType extends
@@ -323,22 +324,32 @@ export function IndexingStatsForSnapshotFollowing({
  */
 export function IndexingStatsShell({
   omnichainStatus,
+  realtimeProjection,
   children,
-}: PropsWithChildren<{ omnichainStatus?: OmnichainIndexingStatusId }>) {
+}: PropsWithChildren<{
+  omnichainStatus?: OmnichainIndexingStatusId;
+  realtimeProjection?: RealtimeIndexingStatusProjection;
+}>) {
   return (
     <Card className="w-full flex flex-col gap-2">
       <CardHeader>
-        <CardTitle className="flex gap-2 items-center">
-          <span>Indexing Status</span>
+        <CardTitle className="flex gap-2 items-center justify-between">
+          <div className="flex gap-2 items-center">
+            <span>Indexing Status</span>
 
-          {omnichainStatus && (
-            <Badge
-              className={cn("uppercase text-xs leading-none")}
-              title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainStatus)}`}
-            >
-              {formatOmnichainIndexingStatus(omnichainStatus)}
-            </Badge>
-          )}
+            {omnichainStatus && (
+              <Badge
+                className={cn("uppercase text-xs leading-none")}
+                title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(
+                  omnichainStatus,
+                )}`}
+              >
+                {formatOmnichainIndexingStatus(omnichainStatus)}
+              </Badge>
+            )}
+          </div>
+
+          {realtimeProjection && <ProjectionInfo realtimeProjection={realtimeProjection} />}
         </CardTitle>
       </CardHeader>
 
@@ -422,7 +433,10 @@ export function IndexingStatsForRealtimeStatusProjection({
     <section className="flex flex-col gap-6">
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
+      <IndexingStatsShell
+        omnichainStatus={omnichainStatusSnapshot.omnichainStatus}
+        realtimeProjection={realtimeProjection}
+      >
         {indexingStats}
       </IndexingStatsShell>
     </section>
