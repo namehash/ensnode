@@ -20,7 +20,7 @@ export const RegistryInterfaceRef = builder.loadableInterfaceRef("Registry", {
 export type Registry = Exclude<typeof RegistryInterfaceRef.$inferType, RegistryId>;
 export type RegistryInterface = Pick<Registry, "type" | "id">;
 export type RegistryContract = RequiredAndNotNull<Registry, "chainId" | "address">;
-export type ImplicitRegistry = RequiredAndNotNull<Registry, "parentDomainNode">;
+export type ImplicitRegistry = Registry;
 
 RegistryInterfaceRef.implement({
   description: "TODO",

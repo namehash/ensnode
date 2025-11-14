@@ -34,7 +34,7 @@ export type RegistrationInterface = Pick<
 export type NameWrapperRegistration = RequiredAndNotNull<Registration, "fuses">;
 export type BaseRegistrarRegistration = RequiredAndNotNull<
   Registration,
-  "gracePeriod" | "wrapped" | "wrappedExpiration" | "wrappedFuses"
+  "gracePeriod" | "wrapped" | "wrappedExpiration" | "wrappedFuses" | "wrappedOwnerId"
 > & {
   baseCost: bigint | null;
   premium: bigint | null;
@@ -123,8 +123,7 @@ NameWrapperRegistrationRef.implement({
       type: "Int",
       nullable: false,
       // TODO: decode/render Fuses enum
-      // biome-ignore lint/style/noNonNullAssertion: guaranteed in NameWrapperRegistration
-      resolve: (parent) => parent.fuses!,
+      resolve: (parent) => parent.fuses,
     }),
   }),
 });

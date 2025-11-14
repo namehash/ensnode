@@ -56,9 +56,9 @@ export const registry = onchainTable(
     id: t.text().primaryKey().$type<RegistryId>(),
     type: registryType().notNull(),
 
+    // has contract AccountId (RegistryContract)
     chainId: t.integer().$type<ChainId>(),
     address: t.hex().$type<Address>(),
-    parentDomainNode: t.hex().$type<Node>(),
   }),
   (t) => ({
     //

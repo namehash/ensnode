@@ -4,6 +4,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
   accountIdEqual,
+  type InterpretedName,
   type LabelHash,
   type Name,
   uint256ToHex32,
@@ -83,7 +84,7 @@ const REGISTRAR_CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
 export const getRegistrarManagedName = (contract: AccountId) => {
   for (const [managedName, contracts] of Object.entries(REGISTRAR_CONTRACTS_BY_MANAGED_NAME)) {
     const isAnyOfTheContracts = contracts.some((_contract) => accountIdEqual(_contract, contract));
-    if (isAnyOfTheContracts) return managedName;
+    if (isAnyOfTheContracts) return managedName as InterpretedName;
   }
 
   throw new Error("never");

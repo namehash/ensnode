@@ -32,6 +32,8 @@ export type Domain = Exclude<typeof DomainRef.$inferType, DomainId>;
 
 // we want to dataloader labels by labelhash
 // we want to dataloader a domain's canonical path, but without exposing it
+// TODO: consider interface with ... on ENSv2Domain { canonicalId } etc
+// ... on ENSv1Domain { node } etc
 
 DomainRef.implement({
   description: "a Domain",

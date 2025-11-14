@@ -1,21 +1,20 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
+import { type Address, isAddressEqual, labelhash, namehash, zeroAddress } from "viem";
 
 import {
-  type AccountId,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
-  LiteralLabel,
+  type LiteralLabel,
   makeENSv1DomainId,
   makeRegistrationId,
+  makeSubdomainNode,
   type Node,
   PluginName,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
-import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
@@ -51,8 +50,31 @@ const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 // so if it's wrapped in the namewrapper, much like the chain, changes are materialized back to the
 // source
 
-const isSubnameOfRegistrarManagedName = (contract: AccountId, name: DNSEncodedLiteralName) => {
-  const managedName = getRegistrarManagedName(contract);
+const isDirectSubnameOfRegistrarManagedName = (
+  managedNode: Node,
+  name: DNSEncodedLiteralName,
+  node: Node,
+) => {
+  let labels: LiteralLabel[];
+  try {
+    labels = decodeDNSEncodedLiteralName(name);
+
+    // extra runtime assertion of valid decode
+    if (labels.length === 0) throw new Error("never");
+  } catch {
+    // must be decodable
+    throw new Error(
+      `Invariant(isSubnameOfRegistrarManagedName): NameWrapper emitted DNSEncodedNames for direct-subnames-of-registrar-managed-names MUST be decodable`,
+    );
+  }
+
+  // construct the expected node using emitted name's leaf label and the registrarManagedNode
+  // biome-ignore lint/style/noNonNullAssertion: length check above
+  const leaf = labelhash(labels[0]!);
+  const expectedNode = makeSubdomainNode(leaf, managedNode);
+
+  // Nodes must exactly match
+  return node === expectedNode;
 };
 
 export default function () {
@@ -81,11 +103,11 @@ export default function () {
 
     const domainId = makeENSv1DomainId(tokenIdToNode(tokenId));
     const registration = await getLatestRegistration(context, domainId);
+    const isActive = isRegistrationActive(registration, event.block.timestamp);
 
-    // TODO: || !isActive(registration) ?
-    // TODO: specifically check that there are no NameWrapper Registrations?
-    if (!registration) {
-      throw new Error(`Invariant(NameWrapper:Transfer): Expected registration.`);
+    // Invariant: must have active Registration
+    if (!registration || !isActive) {
+      throw new Error(`Invariant(NameWrapper:Transfer): Active Registration expected.`);
     }
 
     // materialize domain owner
@@ -107,14 +129,15 @@ export default function () {
         expiry: bigint;
       }>;
     }) => {
-      const { node, name, owner, fuses, expiry: expiration } = event.args;
+      const { node, name: _name, owner, fuses, expiry: expiration } = event.args;
+      const name = _name as DNSEncodedLiteralName;
 
       const registrar = getThisAccountId(context, event);
       const domainId = makeENSv1DomainId(node);
 
       // decode name and discover labels
       try {
-        const labels = decodeDNSEncodedLiteralName(name as DNSEncodedLiteralName);
+        const labels = decodeDNSEncodedLiteralName(name);
         for (const label of labels) {
           await ensureLabel(context, label);
         }
@@ -126,32 +149,49 @@ export default function () {
       const registration = await getLatestRegistration(context, domainId);
       const isActive = isRegistrationActive(registration, event.block.timestamp);
 
-      if (registration && isActive && !isSubnameOfRegistrarManagedName()) {
-        throw new Error(`Invariant()`);
-      }
-
       // materialize domain owner
       await materializeDomainOwner(context, domainId, owner);
 
-      if (registration && registration.type === "BaseRegistrar") {
-        // if there's an existing active registration, this this must be the wrap of a
+      if (registration && isActive && registration.type === "BaseRegistrar") {
+        // if there's an existing active BaseRegistrar registration, this this must be the wrap of a
         // direct-subname-of-registrar-managed-name
-        // const managed
-      } else if (!registration) {
-        const registrationId = makeRegistrationId(domainId, 0); // TODO: (latest?.index + 1) ?? 0
-        await context.db.insert(schema.registration).values({
-          id: registrationId,
-          type: "NameWrapper",
-          registrarChainId: registrar.chainId,
-          registrarAddress: registrar.address,
-          domainId,
-          start: event.block.timestamp,
-          fuses,
-          expiration,
+
+        const managedNode = namehash(getRegistrarManagedName(getThisAccountId(context, event)));
+
+        // Invariant: emitted Name is decodable and is a direct subname of the RegistrarManagedName
+        if (!isDirectSubnameOfRegistrarManagedName(managedNode, name, node)) {
+          throw new Error(
+            `Invariant(NameWrapper:NameWrapped): An active BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's RegistrarManagedName — wtf?`,
+          );
+        }
+
+        await context.db.update(schema.registration, { id: registration.id }).set({
+          wrapped: true,
+          wrappedFuses: fuses,
+          // expiration, // TODO: NameWrapper expiration logic
         });
-      } else {
-        throw new Error(`NameWrapped but `);
       }
+
+      // Invariant: there shouldn't be an active registration
+      if (registration && isActive) {
+        throw new Error(
+          `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing active non-BaseRegistrar Registration.`,
+        );
+      }
+
+      // create a new NameWrapper Registration
+      const nextIndex = registration ? registration.index + 1 : 0;
+      const registrationId = makeRegistrationId(domainId, nextIndex);
+      await context.db.insert(schema.registration).values({
+        id: registrationId,
+        type: "NameWrapper",
+        registrarChainId: registrar.chainId,
+        registrarAddress: registrar.address,
+        domainId,
+        start: event.block.timestamp,
+        fuses,
+        expiration,
+      });
     },
   );
 
@@ -167,14 +207,24 @@ export default function () {
       const { node } = event.args;
 
       const domainId = makeENSv1DomainId(node);
-      const latest = await getLatestRegistration(context, domainId);
+      const registration = await getLatestRegistration(context, domainId);
 
-      if (!latest) {
+      if (!registration) {
         throw new Error(`Invariant(NameWrapper:NameUnwrapped): Registration expected`);
       }
 
-      // TODO: instead of deleting, mark it as inactive perhaps by setting its expiry to block.timestamp
-      await context.db.delete(schema.registration, { id: latest.id });
+      if (registration.type === "BaseRegistrar") {
+        // if this is a wrapped BaseRegisrar Registration, unwrap it
+        await context.db.update(schema.registration, { id: registration.id }).set({
+          wrapped: false,
+          wrappedFuses: null,
+          // expiration: null // TODO: NameWrapper expiration logic
+        });
+      } else {
+        // otherwise, deactivate the NameWrapper Registrations
+        // TODO: instead of deleting, mark it as inactive perhaps by setting its expiry to block.timestamp
+        await context.db.delete(schema.registration, { id: registration.id });
+      }
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
@@ -193,16 +243,22 @@ export default function () {
 
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
+      const isActive = isRegistrationActive(registration, event.block.timestamp);
 
-      // TODO: || !isActive(registration)
-      if (!registration) {
-        throw new Error(`Invariant(NameWrapper:FusesSet): Registration expected.`);
+      // Invariant: must have active Registration
+      if (!registration || !isActive) {
+        throw new Error(`Invariant(NameWrapper:FusesSet): Active Registration expected.`);
       }
 
       // upsert fuses
-      await context.db.update(schema.registration, { id: registration.id }).set({ fuses });
-
-      // TODO: expiration-related logic?
+      if (registration.type === "BaseRegistrar") {
+        await context.db.update(schema.registration, { id: registration.id }).set({
+          wrappedFuses: fuses,
+          // expiration: // TODO: NameWrapper expiration logic
+        });
+      } else {
+        await context.db.update(schema.registration, { id: registration.id }).set({ fuses });
+      }
     },
   );
 
@@ -219,10 +275,11 @@ export default function () {
 
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
+      const isActive = isRegistrationActive(registration, event.block.timestamp);
 
-      // TODO: || !isActive(registration)
-      if (!registration) {
-        throw new Error(`Invariant(NameWrapper:FusesSet): Registration expected.`);
+      // Invariant: must have active Registration
+      if (!registration || !isActive) {
+        throw new Error(`Invariant(NameWrapper:ExpiryExtended): Active Registration expected.`);
       }
 
       await context.db.update(schema.registration, { id: registration.id }).set({ expiration });

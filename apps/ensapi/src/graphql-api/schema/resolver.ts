@@ -63,9 +63,9 @@ ResolverRef.implement({
     ////////////////////
     // TODO: connection to all ResolverRecords by (address, chainId)?
 
-    /////////////////////////////////
+    ////////////////////////////////////
     // Resolver.records by Name or Node
-    /////////////////////////////////
+    ////////////////////////////////////
     records: t.field({
       description: "TODO",
       type: ResolverRecordsRef,

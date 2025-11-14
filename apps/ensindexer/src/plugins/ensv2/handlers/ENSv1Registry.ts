@@ -59,6 +59,7 @@ export default function () {
       parentNode === zeroHash
         ? getRootRegistryId(config.namespace)
         : makeImplicitRegistryId(parentNode);
+    const subregistryId = makeImplicitRegistryId(node);
 
     // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
     //
@@ -85,7 +86,14 @@ export default function () {
         id: domainId,
         labelHash,
         registryId,
+        subregistryId,
       })
+      .onConflictDoNothing();
+
+    // upsert the domain's own ImplicitRegistry
+    await context.db
+      .insert(schema.registry)
+      .values({ id: subregistryId, type: "ImplicitRegistry" })
       .onConflictDoNothing();
 
     // materialize domain owner
