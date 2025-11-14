@@ -34,7 +34,7 @@ export type RegistrationInterface = Pick<
 export type NameWrapperRegistration = RequiredAndNotNull<Registration, "fuses">;
 export type BaseRegistrarRegistration = RequiredAndNotNull<
   Registration,
-  "gracePeriod" | "wrapped" | "wrappedExpiration" | "wrappedFuses" | "wrappedOwnerId"
+  "gracePeriod" | "wrapped" | "wrappedFuses"
 > & {
   baseCost: bigint | null;
   premium: bigint | null;

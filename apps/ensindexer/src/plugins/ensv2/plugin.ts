@@ -40,11 +40,6 @@ export default createPlugin({
   name: pluginName,
   requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
-    // TODO: remove this, helps with types while only targeting ens-test-env
-    if (config.namespace !== "ens-test-env" && config.namespace !== "mainnet") {
-      throw new Error("only ens-test-env and mainnet");
-    }
-
     const {
       ensroot, //
       namechain,
