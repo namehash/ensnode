@@ -1,5 +1,33 @@
 # @ensnode/ensnode-sdk
 
+## 1.0.0
+
+### Minor Changes
+
+- [#1265](https://github.com/namehash/ensnode/pull/1265) [`df1cf8c`](https://github.com/namehash/ensnode/commit/df1cf8c4a0d4fe0db4750b46f721416c72ba86d2) Thanks [@tk-o](https://github.com/tk-o)! - Implement Registrar Actions API module.
+
+- [#1179](https://github.com/namehash/ensnode/pull/1179) [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2) Thanks [@tk-o](https://github.com/tk-o)! - Removed `endBlock` field from `ChainIndexingConfigIndefinite` type.
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: Removed DefaultRecordsSelection export: integrating apps should define their own set of records to request when using useRecords().
+
+- [#1257](https://github.com/namehash/ensnode/pull/1257) [`d7b2e23`](https://github.com/namehash/ensnode/commit/d7b2e23e856ffb1d7ce004f9d4277842fa6cf1d5) Thanks [@tk-o](https://github.com/tk-o)! - Replace `referrals` plugin with new `registrars` plugin.
+
+- [#1249](https://github.com/namehash/ensnode/pull/1249) [`617ab00`](https://github.com/namehash/ensnode/commit/617ab00cc57c2dc9df5af90eeaf3896f8864145d) Thanks [@tk-o](https://github.com/tk-o)! - Introduces a new `registrars` plugin for tracking all registrations and renewals for direct subnames of `eth`, `base.eth`, and `linea.eth`.
+
+- [#1250](https://github.com/namehash/ensnode/pull/1250) [`63376ad`](https://github.com/namehash/ensnode/commit/63376ad8a4f1fe72b7ad5a9368496d235411bc28) Thanks [@tk-o](https://github.com/tk-o)! - Create `currencies` module in SDK.
+
+- [#1265](https://github.com/namehash/ensnode/pull/1265) [`df1cf8c`](https://github.com/namehash/ensnode/commit/df1cf8c4a0d4fe0db4750b46f721416c72ba86d2) Thanks [@tk-o](https://github.com/tk-o)! - Implement `registrarActions()` method on ENSNodeClient.
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: client.config() now returns Promise<EnsApiPublicConfig> instead of ENSIndexerPublicConfig.
+
+- [#1253](https://github.com/namehash/ensnode/pull/1253) [`40658a7`](https://github.com/namehash/ensnode/commit/40658a70d591d972150f69cb18fbd3dd390b4114) Thanks [@tk-o](https://github.com/tk-o)! - Create serialization and deserialization helpers for `AccountId` type.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.0.0
+  - @namehash/ens-referrals@1.0.0
+
 ## 0.36.0
 
 ### Minor Changes
