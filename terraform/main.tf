@@ -19,15 +19,6 @@ locals {
   # See https://render.com/docs/blueprint-spec#region
   render_region = "ohio"
   ensindexer_instances = {
-    holesky = {
-      ensnode_indexer_type     = "holesky"
-      ensnode_environment_name = var.render_environment
-      database_schema          = "holeskySchema-${var.ensnode_version}"
-      plugins                  = "subgraph"
-      namespace                = "holesky"
-      render_instance_plan     = "starter"
-      subgraph_compat          = true
-    }
     sepolia = {
       ensnode_indexer_type     = "sepolia"
       ensnode_environment_name = var.render_environment

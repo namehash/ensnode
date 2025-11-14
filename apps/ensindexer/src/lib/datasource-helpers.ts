@@ -13,8 +13,7 @@ import type { AccountId } from "@ensnode/ensnode-sdk";
  * This is useful when you want to retrieve the AccountId for a contract by its name
  * where it may or may not actually be defined for the given namespace and datasource.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *                      'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
  * @param contractName - The name of the contract to retrieve
  * @returns The AccountId of the contract with the given namespace, datasource,
@@ -45,8 +44,7 @@ export const maybeGetDatasourceContract = <
  * Gets the AccountId for the contract in the specified namespace, datasource, and
  * contract name, or throws an error if it is not defined or is not a single AccountId.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *                      'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
  * @param contractName - The name of the contract to retrieve
  * @returns The AccountId of the contract with the given namespace, datasource,

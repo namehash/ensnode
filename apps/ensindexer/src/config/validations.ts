@@ -101,7 +101,7 @@ export function invariant_globalBlockrange(
   END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
   The usage you're most likely interested in is:
-    NAMESPACE=(mainnet|sepolia|holesky) PLUGINS=subgraph END_BLOCK=x pnpm run start
+    NAMESPACE=(mainnet|sepolia) PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
   In the future, indexing multiple chains with chain-specific blockrange constraints may be possible.`,

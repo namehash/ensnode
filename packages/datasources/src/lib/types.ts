@@ -17,8 +17,8 @@ import type { Abi, Address, Chain } from "viem";
  * - Etc..
  *
  * Each ENS namespace is logically independent of & isolated from the others, and not exclusively
- * correlated with a specific L1 chain. For example, the Sepolia and Holesky testnet ENS namepaces
- * are independent of the canonical ENS namespace on mainnet, and there could be an additional
+ * correlated with a specific L1 chain. For example, the Sepolia testnet ENS namepace
+ * is independent of the canonical ENS namespace on mainnet, and there could be an additional
  * deployment of the ENS protocol to mainnet, configured with different Datasources, resulting in a
  * logically isolated set of ENS names.
  *
@@ -29,7 +29,6 @@ import type { Abi, Address, Chain } from "viem";
 export const ENSNamespaceIds = {
   Mainnet: "mainnet",
   Sepolia: "sepolia",
-  Holesky: "holesky",
   EnsTestEnv: "ens-test-env",
 } as const;
 

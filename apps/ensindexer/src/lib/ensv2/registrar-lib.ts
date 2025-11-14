@@ -24,6 +24,7 @@ const lineanamesNameWrapper = maybeGetDatasourceContract(
   "NameWrapper",
 );
 
+// TODO: need to handle namespace-specific remap
 const REGISTRAR_CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
   eth: [
     getDatasourceContract(

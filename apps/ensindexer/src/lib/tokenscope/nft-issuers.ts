@@ -73,7 +73,7 @@ const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): No
 /**
  * Gets all the SupportedNFTIssuer for the specified namespace.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @returns an array of 0 or more SupportedNFTIssuer for the specified namespace
  */
 const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer[] => {
@@ -176,8 +176,7 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
 /**
  * Gets the SupportedNFTIssuer for the given contract in the specified namespace.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param contract - The AccountId of the contract to get the SupportedNFTIssuer for
  * @returns the SupportedNFTIssuer for the given contract, or null
  *          if the contract is not a SupportedNFTIssuer in the specified namespace

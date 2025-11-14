@@ -26,7 +26,6 @@ export function getRegistrarManagedName(namespaceId: ENSNamespaceId): RegistrarM
   switch (namespaceId) {
     case "mainnet":
     case "sepolia":
-    case "holesky":
     case "ens-test-env":
       return "eth";
   }

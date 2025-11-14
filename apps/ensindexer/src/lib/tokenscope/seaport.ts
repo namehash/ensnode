@@ -35,8 +35,7 @@ const getAssetNamespace = (itemType: ItemType): AssetNamespace | null => {
 /**
  * Gets the supported NFT from a given Seaport item.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param chainId - The chain ID of the Seaport item
  * @param item - The Seaport item to get the supported NFT from
  * @returns the supported NFT from the given Seaport item, or `null` if the Seaport item is

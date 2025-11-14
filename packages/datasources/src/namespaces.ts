@@ -1,5 +1,4 @@
 import ensTestEnv from "./ens-test-env";
-import holesky from "./holesky";
 import {
   type DatasourceName,
   DatasourceNames,
@@ -13,19 +12,17 @@ import sepolia from "./sepolia";
 const ENSNamespacesById: {
   readonly mainnet: typeof mainnet;
   readonly sepolia: typeof sepolia;
-  readonly holesky: typeof holesky;
   readonly "ens-test-env": typeof ensTestEnv;
 } = {
   mainnet,
   sepolia,
-  holesky,
   "ens-test-env": ensTestEnv,
 } as const;
 
 /**
  * Returns the ENSNamespace for a specified `namespaceId`.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @returns the ENSNamespace
  */
 export const getENSNamespace = <N extends ENSNamespaceId>(
@@ -38,7 +35,7 @@ export const getENSNamespace = <N extends ENSNamespaceId>(
  * NOTE: the typescript typechecker _will_ enforce validity. i.e. using an invalid `datasourceName`
  * within the specified `namespaceId` will be a type error.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to retrieve
  * @returns The Datasource object for the given name within the specified namespace
  */
@@ -60,7 +57,7 @@ export const getDatasource = <
  * is ENSRoot (the only Datasource present in all namespaces). This method allows you to receive
  * the const Datasource or undefined for a specified `datasourceName`.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to retrieve
  * @returns The Datasource object for the given name within the specified namespace, or undefined if it does not exist
  */

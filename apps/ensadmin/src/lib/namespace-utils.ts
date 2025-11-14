@@ -4,7 +4,6 @@ import {
   arbitrumSepolia,
   base,
   baseSepolia,
-  holesky,
   linea,
   lineaSepolia,
   mainnet,
@@ -28,7 +27,6 @@ const SUPPORTED_CHAINS = [
   ensTestEnvL1Chain,
   mainnet,
   sepolia,
-  holesky,
   base,
   baseSepolia,
   linea,
@@ -50,7 +48,6 @@ const CUSTOM_CHAIN_NAMES = new Map<number, string>([
   [ensTestEnvL1Chain.id, "Ethereum Local (ens-test-env)"],
   [mainnet.id, "Ethereum"],
   [sepolia.id, "Ethereum Sepolia"],
-  [holesky.id, "Ethereum Holesky"],
   [base.id, "Base"],
   [baseSepolia.id, "Base Sepolia"],
   [linea.id, "Linea"],
@@ -84,8 +81,6 @@ export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
       return new URL(`https://app.ens.domains/`);
     case ENSNamespaceIds.Sepolia:
       return new URL(`https://sepolia.app.ens.domains/`);
-    case ENSNamespaceIds.Holesky:
-      return new URL(`https://holesky.app.ens.domains/`);
     case ENSNamespaceIds.EnsTestEnv:
       // ens-test-env runs on a local chain and is not supported by app.ens.domains
       return null;
@@ -115,9 +110,6 @@ export function buildEnsMetadataServiceAvatarUrl(
       return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
     case ENSNamespaceIds.Sepolia:
       return new URL(name, `https://metadata.ens.domains/sepolia/avatar/`);
-    case ENSNamespaceIds.Holesky:
-      // metadata.ens.domains doesn't currently support holesky
-      return null;
     case ENSNamespaceIds.EnsTestEnv:
       // ens-test-env runs on a local chain and is not supported by metadata.ens.domains
       // TODO: Above comment is not true. Details at https://github.com/namehash/ensnode/issues/1078
