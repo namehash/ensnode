@@ -2,10 +2,15 @@
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
-import { NamedRegistrarAction } from "@ensnode/ensnode-sdk";
+import { NamedRegistrarAction, OmnichainIndexingStatusIds, PluginName } from "@ensnode/ensnode-sdk";
 
 import { ErrorInfo } from "@/components/error-info";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InternalLink } from "@/components/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 
 import { DisplayRegistrationCard, DisplayRegistrationCardPlaceholder } from "./registration-card";
 import { ResolutionStatusIds, type ResolvedRecentRegistrations } from "./types";
@@ -63,9 +68,53 @@ export function DisplayRecentRegistrations({
   resolvedRecentRegistrations,
   title,
 }: DisplayRecentRegistrationProps) {
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
+
   switch (resolvedRecentRegistrations.resolutionStatus) {
     case ResolutionStatusIds.Disabled:
-      return <>{title} cannot be loaded at the moment.</>;
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex justify-between items-center">
+              <span>{title}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="max-sm:p-3 max-sm:pt-0">
+            <p>
+              Registrar Action API on the connected ENSNode instance is not currently available.
+            </p>
+            <p>
+              Please ensure that all required ENSIndexer plugins (
+              <Badge variant="secondary">{PluginName.Subgraph}</Badge>,{" "}
+              <Badge variant="secondary">{PluginName.Basenames}</Badge>,{" "}
+              <Badge variant="secondary">{PluginName.Lineanames}</Badge>,{" "}
+              <Badge variant="secondary">{PluginName.Registrars}</Badge>) are active, and that the
+              Indexing Status is either{" "}
+              <Badge variant="secondary">
+                {formatOmnichainIndexingStatus(OmnichainIndexingStatusIds.Completed)}
+              </Badge>{" "}
+              or{" "}
+              <Badge variant="secondary">
+                {formatOmnichainIndexingStatus(OmnichainIndexingStatusIds.Following)}
+              </Badge>
+              .
+            </p>
+          </CardContent>
+          <CardFooter className="gap-6">
+            <Button asChild>
+              <InternalLink href={retainCurrentRawConnectionUrlParam("/connection")}>
+                Check ENSIndexer plugins
+              </InternalLink>
+            </Button>
+
+            <Button asChild>
+              <InternalLink href={retainCurrentRawConnectionUrlParam("/status")}>
+                Check status
+              </InternalLink>
+            </Button>
+          </CardFooter>
+        </Card>
+      );
 
     case ResolutionStatusIds.Unresolved:
       return (

@@ -80,6 +80,7 @@ export function RelativeTime({
   tooltipPosition = "top",
   relativeTo,
   prefix,
+  render,
 }: {
   timestamp: UnixTimestamp;
   enforcePast?: boolean;
@@ -88,6 +89,7 @@ export function RelativeTime({
   tooltipPosition?: React.ComponentProps<typeof TooltipContent>["side"];
   relativeTo?: UnixTimestamp;
   prefix?: string;
+  render?: ({ children }: React.PropsWithChildren) => React.ReactNode;
 }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
@@ -97,11 +99,19 @@ export function RelativeTime({
     );
   }, [timestamp, conciseFormatting, enforcePast, includeSeconds, relativeTo]);
 
+  const tooltipTriggerContent = (
+    <>
+      {prefix}
+      {relativeTime}
+    </>
+  );
+
   return (
     <Tooltip delayDuration={1000}>
       <TooltipTrigger className="cursor-text">
-        {prefix}
-        {relativeTime}
+        {typeof render === "function"
+          ? render({ children: tooltipTriggerContent })
+          : tooltipTriggerContent}
       </TooltipTrigger>
       <TooltipContent
         side={tooltipPosition}
