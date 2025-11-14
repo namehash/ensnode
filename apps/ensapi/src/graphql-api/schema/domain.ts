@@ -9,8 +9,10 @@ import {
 import { builder } from "@/graphql-api/builder";
 import { getCanonicalPath } from "@/graphql-api/lib/get-canonical-path";
 import { getModelId } from "@/graphql-api/lib/get-id";
+import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
+import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryInterfaceRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
@@ -162,6 +164,16 @@ DomainRef.implement({
       type: ResolverRef,
       nullable: true,
       resolve: (parent) => parent.resolverId,
+    }),
+
+    ///////////////////////
+    // Domain.registration
+    ///////////////////////
+    registration: t.field({
+      description: "TODO",
+      type: RegistrationInterfaceRef,
+      nullable: true,
+      resolve: (parent) => getLatestRegistration(parent.id),
     }),
   }),
 });

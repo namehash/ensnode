@@ -1,5 +1,7 @@
 /**
  * TODO
+ * - ThreeDNS
+ * - Registration Renewals
  */
 
 import { createConfig } from "ponder";

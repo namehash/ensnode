@@ -1,3 +1,5 @@
+import { namehash } from "viem";
+
 import {
   bigintToCoinType,
   makeResolverRecordsId,
@@ -8,6 +10,7 @@ import {
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
+import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
 import { db } from "@/lib/db";
 
 export const ResolverRef = builder.loadableObjectRef("Resolver", {
@@ -58,18 +61,20 @@ ResolverRef.implement({
     ////////////////////
     // Resolver.records
     ////////////////////
-    // TODO: connection to all ResolverRecords by (address, chainId)
+    // TODO: connection to all ResolverRecords by (address, chainId)?
 
-    ////////////////////////////
-    // Resolver.recordsFor node
-    ////////////////////////////
-    recordsFor: t.field({
+    /////////////////////////////////
+    // Resolver.records by Name or Node
+    /////////////////////////////////
+    records: t.field({
       description: "TODO",
       type: ResolverRecordsRef,
-      args: { node: t.arg({ type: "Node", required: true }) },
-      nullable: false,
-      resolve: async ({ chainId, address }, { node }) =>
-        makeResolverRecordsId({ chainId, address }, node),
+      args: { for: t.arg({ type: NameOrNodeInput, required: true }) },
+      nullable: true,
+      resolve: async ({ chainId, address }, args) => {
+        const node = args.for.node ?? namehash(args.for.name);
+        return makeResolverRecordsId({ chainId, address }, node);
+      },
     }),
   }),
 });

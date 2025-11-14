@@ -27,10 +27,15 @@ export type RegistrationInterface = Pick<
   | "expiration"
   | "registrarChainId"
   | "registrarAddress"
+  | "registrantId"
   | "referrer"
 >;
 export type NameWrapperRegistration = RequiredAndNotNull<Registration, "fuses">;
-export type BaseRegistrarRegistration = RequiredAndNotNull<Registration, "fuses">;
+export type BaseRegistrarRegistration = RequiredAndNotNull<Registration, "gracePeriod"> & {
+  baseCost: bigint | null;
+  premium: bigint | null;
+};
+export type ThreeDNSRegistration = Registration;
 
 RegistrationInterfaceRef.implement({
   description: "TODO",
@@ -96,6 +101,9 @@ RegistrationInterfaceRef.implement({
   }),
 });
 
+///////////////////////////
+// NameWrapperRegistration
+///////////////////////////
 export const NameWrapperRegistrationRef =
   builder.objectRef<NameWrapperRegistration>("NameWrapperRegistration");
 NameWrapperRegistrationRef.implement({
@@ -117,13 +125,49 @@ NameWrapperRegistrationRef.implement({
   }),
 });
 
+/////////////////////////////
+// BaseRegistrarRegistration
+/////////////////////////////
 export const BaseRegistrarRegistrationRef = builder.objectRef<BaseRegistrarRegistration>(
   "BaseRegistrarRegistration",
 );
-
 BaseRegistrarRegistrationRef.implement({
   description: "TODO",
   interfaces: [RegistrationInterfaceRef],
   isTypeOf: (value) => (value as RegistrationInterface).type === "BaseRegistrar",
-  fields: (t) => ({}),
+  fields: (t) => ({
+    //////////////////////////////////////
+    // BaseRegistrarRegistration.baseCost
+    //////////////////////////////////////
+    baseCost: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: true,
+      resolve: (parent) => parent.baseCost,
+    }),
+
+    /////////////////////////////////////
+    // BaseRegistrarRegistration.premium
+    /////////////////////////////////////
+    premium: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: true,
+      resolve: (parent) => parent.premium,
+    }),
+  }),
+});
+
+////////////////////////
+// ThreeDNSRegistration
+////////////////////////
+export const ThreeDNSRegistrationRef =
+  builder.objectRef<ThreeDNSRegistration>("ThreeDNSRegistration");
+ThreeDNSRegistrationRef.implement({
+  description: "TODO",
+  interfaces: [RegistrationInterfaceRef],
+  isTypeOf: (value) => (value as RegistrationInterface).type === "ThreeDNS",
+  fields: (t) => ({
+    //
+  }),
 });

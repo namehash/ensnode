@@ -32,7 +32,6 @@ builder.queryType({
       nullable: true,
       resolve: async (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
-        console.log(await getDomainIdByInterpretedName(args.by.name));
         return getDomainIdByInterpretedName(args.by.name);
       },
     }),
