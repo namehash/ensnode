@@ -62,15 +62,6 @@ export default createPlugin({
         ALL_DATASOURCE_NAMES,
       ),
 
-      blocks: {
-        // trigger ENSRainbowBatchHeal every ENS Root Chain block
-        [namespaceContract(pluginName, "ENSRainbowBatchHeal")]: {
-          chain: ensroot.chain.id.toString(),
-          interval: 1,
-          startBlock: ensroot.contracts.ENSv1RegistryOld.startBlock,
-        },
-      },
-
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
           abi: RegistryABI,
