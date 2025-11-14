@@ -4,6 +4,7 @@ import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DomainRef } from "@/graphql-api/schema/domain";
+import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";
 import { db } from "@/lib/db";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
@@ -31,7 +32,10 @@ export type RegistrationInterface = Pick<
   | "referrer"
 >;
 export type NameWrapperRegistration = RequiredAndNotNull<Registration, "fuses">;
-export type BaseRegistrarRegistration = RequiredAndNotNull<Registration, "gracePeriod"> & {
+export type BaseRegistrarRegistration = RequiredAndNotNull<
+  Registration,
+  "gracePeriod" | "wrapped" | "wrappedExpiration" | "wrappedFuses"
+> & {
   baseCost: bigint | null;
   premium: bigint | null;
 };
@@ -154,6 +158,16 @@ BaseRegistrarRegistrationRef.implement({
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.premium,
+    }),
+
+    /////////////////////////////////////
+    // BaseRegistrarRegistration.wrapped
+    /////////////////////////////////////
+    wrapped: t.field({
+      description: "TODO",
+      type: WrappedBaseRegistrarRegistrationRef,
+      nullable: true,
+      resolve: (parent) => (parent.wrapped ? parent : null),
     }),
   }),
 });

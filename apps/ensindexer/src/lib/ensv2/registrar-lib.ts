@@ -45,6 +45,7 @@ const REGISTRAR_CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
       DatasourceNames.ENSRoot,
       "UnwrappedEthRegistrarController",
     ),
+    ethnamesNameWrapper,
   ],
   "base.eth": [
     maybeGetDatasourceContract(
@@ -75,6 +76,7 @@ const REGISTRAR_CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
       DatasourceNames.Lineanames,
       "EthRegistrarController",
     ),
+    lineanamesNameWrapper,
   ].filter((c) => !!c),
 };
 

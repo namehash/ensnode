@@ -3,9 +3,11 @@ import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
+  type AccountId,
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
+  LiteralLabel,
   makeENSv1DomainId,
   makeRegistrationId,
   type Node,
@@ -16,7 +18,8 @@ import {
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
-import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
+import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
+import { getLatestRegistration, isRegistrationActive } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -47,6 +50,10 @@ const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 // one managed by the namewrapper.
 // so if it's wrapped in the namewrapper, much like the chain, changes are materialized back to the
 // source
+
+const isSubnameOfRegistrarManagedName = (contract: AccountId, name: DNSEncodedLiteralName) => {
+  const managedName = getRegistrarManagedName(contract);
+};
 
 export default function () {
   async function handleTransfer({
@@ -105,32 +112,6 @@ export default function () {
       const registrar = getThisAccountId(context, event);
       const domainId = makeENSv1DomainId(node);
 
-      const registration = await getLatestRegistration(context, domainId);
-
-      // TODO: latest && isActive(latest)
-      if (registration) {
-        throw new Error(
-          `Invariant(NameWrapper:NameWrapped): NameWrapped emitted but an active registration already exists.`,
-        );
-      }
-
-      const registrationId = makeRegistrationId(domainId, 0); // TODO: (latest?.index + 1) ?? 0
-
-      await ensureAccount(context, owner);
-      await context.db.insert(schema.registration).values({
-        id: registrationId,
-        type: "NameWrapper",
-        registrarChainId: registrar.chainId,
-        registrarAddress: registrar.address,
-        domainId,
-        start: event.block.timestamp,
-        fuses,
-        expiration,
-      });
-
-      // materialize domain owner
-      await materializeDomainOwner(context, domainId, owner);
-
       // decode name and discover labels
       try {
         const labels = decodeDNSEncodedLiteralName(name as DNSEncodedLiteralName);
@@ -138,8 +119,38 @@ export default function () {
           await ensureLabel(context, label);
         }
       } catch {
-        // NameWrapper name decoding failed, no-op
+        // NameWrapper emitted malformed name? just warn
         console.warn(`NameWrapper emitted malformed DNSEncoded Name: '${name}'`);
+      }
+
+      const registration = await getLatestRegistration(context, domainId);
+      const isActive = isRegistrationActive(registration, event.block.timestamp);
+
+      if (registration && isActive && !isSubnameOfRegistrarManagedName()) {
+        throw new Error(`Invariant()`);
+      }
+
+      // materialize domain owner
+      await materializeDomainOwner(context, domainId, owner);
+
+      if (registration && registration.type === "BaseRegistrar") {
+        // if there's an existing active registration, this this must be the wrap of a
+        // direct-subname-of-registrar-managed-name
+        // const managed
+      } else if (!registration) {
+        const registrationId = makeRegistrationId(domainId, 0); // TODO: (latest?.index + 1) ?? 0
+        await context.db.insert(schema.registration).values({
+          id: registrationId,
+          type: "NameWrapper",
+          registrarChainId: registrar.chainId,
+          registrarAddress: registrar.address,
+          domainId,
+          start: event.block.timestamp,
+          fuses,
+          expiration,
+        });
+      } else {
+        throw new Error(`NameWrapped but `);
       }
     },
   );

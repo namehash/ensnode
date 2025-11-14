@@ -174,6 +174,11 @@ export const registration = onchainTable(
     // may have baseCost/premium
     baseCost: t.bigint(),
     premium: t.bigint(),
+
+    // may be Wrapped (BaseRegistrar)
+    wrapped: t.boolean().default(false),
+    wrappedFuses: t.integer(),
+    wrappedExpiration: t.bigint(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.domainId, t.index),
