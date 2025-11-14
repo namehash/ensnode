@@ -164,6 +164,7 @@ export function DisplayRegistrationCard({ registrarAction, name }: DisplayRegist
         <RelativeTime
           timestamp={registrarAction.block.timestamp}
           tooltipPosition="top"
+          conciseFormatting={true}
           render={maybeRenderAsChainExplorerLink}
         />
       </DisplayRegistrationFeature>
