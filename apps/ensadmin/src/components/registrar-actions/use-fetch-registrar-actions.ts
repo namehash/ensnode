@@ -21,6 +21,13 @@ interface UseFetchRegistrarActionsProps {
   maxItems: number;
 }
 
+const {
+  hasEnsIndexerConfigSupport,
+  hasIndexingStatusSupport,
+  requiredPlugins,
+  supportedIndexingStatusIds,
+} = registrarActionsPrerequisites;
+
 /**
  * Use Fetch Registrar Actions
  *
@@ -32,21 +39,24 @@ export function useFetchRegistrarActions({
 }: UseFetchRegistrarActionsProps): ResolvedRegistrarActions {
   const ensNodeConfigQuery = useENSNodeConfig();
   const indexingStatusQuery = useIndexingStatus();
-  const isRegistrarActionsApiSupported =
+
+  let isRegistrarActionsApiSupported = false;
+
+  if (
     ensNodeConfigQuery.isSuccess &&
     indexingStatusQuery.isSuccess &&
     indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Ok
-      ? registrarActionsPrerequisites.hasEnsIndexerConfigSupport(
-          ensNodeConfigQuery.data.ensIndexerPublicConfig,
-        ) &&
-        registrarActionsPrerequisites.hasIndexingStatusSupport(
-          indexingStatusQuery.data.realtimeProjection.snapshot.omnichainSnapshot.omnichainStatus,
-        )
-      : false;
+  ) {
+    const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
+    const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+
+    isRegistrarActionsApiSupported =
+      hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
+      hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus);
+  }
 
   // Note: ENSNode Registrar Actions API is available only in certain cases.
-  //       We use `canQueryRegistrarActions` function to enable query in those
-  //        cases.
+  //       We use `isRegistrarActionsApiSupported` to enable query in those cases.
   const registrarActionsQuery = useRegistrarActions({
     order: RegistrarActionsOrders.LatestRegistrarActions,
     limit: maxItems,
@@ -84,20 +94,20 @@ export function useFetchRegistrarActions({
   const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
 
   // resolution is permanently not possible due to unsupported ENSNode config
-  if (!registrarActionsPrerequisites.hasEnsIndexerConfigSupport(ensIndexerPublicConfig)) {
+  if (!hasEnsIndexerConfigSupport(ensIndexerPublicConfig)) {
     return {
       resolutionStatus: ResolutionStatusIds.UnsupportedConfig,
-      requiredPlugins: registrarActionsPrerequisites.requiredPlugins,
+      requiredPlugins,
     } satisfies RegistrarActionsUnsupportedConfig;
   }
 
   const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
 
   // resolution is temporarily not possible due to indexing status being not advanced enough
-  if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
+  if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
     return {
       resolutionStatus: ResolutionStatusIds.IndexingStatusNotReady,
-      supportedIndexingStatusIds: registrarActionsPrerequisites.supportedIndexingStatusIds,
+      supportedIndexingStatusIds,
     } satisfies RegistrarActionsIndexingStatusNotReady;
   }
 

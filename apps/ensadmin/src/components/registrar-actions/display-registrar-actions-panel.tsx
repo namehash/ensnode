@@ -74,7 +74,7 @@ export interface DisplayRegistrarActionsPanelProps {
 }
 
 /**
- * Display {@link NamedRegistrarAction}s.
+ * Display {@link NamedRegistrarAction}s Panel.
  */
 export function DisplayRegistrarActionsPanel({
   namespaceId,

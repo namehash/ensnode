@@ -264,7 +264,7 @@ export const variants: Map<ResolutionStatusId, ResolvedRegistrarActions> = new M
     ResolutionStatusIds.Unresolved,
     {
       resolutionStatus: ResolutionStatusIds.Unresolved,
-      placeholderCount: 7,
+      placeholderCount: 8,
     } satisfies RegistrarActionsUnresolved,
   ],
   [
