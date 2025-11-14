@@ -25,6 +25,6 @@ export async function ensureUnknownLabel(context: Context, labelHash: LabelHash)
 
   await context.db
     .insert(schema.label)
-    .values({ labelHash, value: interpretedLabel })
+    .values({ labelHash, value: interpretedLabel, needsHeal: true })
     .onConflictDoNothing();
 }

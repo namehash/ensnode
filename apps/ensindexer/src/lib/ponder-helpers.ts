@@ -4,7 +4,7 @@
  * as the config object will not be ready yet.
  */
 
-import type { Event } from "ponder:registry";
+import type { Event, EventNames } from "ponder:registry";
 import type { ChainConfig } from "ponder";
 import type { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
@@ -21,10 +21,35 @@ import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
 import type { ENSIndexerConfig } from "@/config/types";
 
-export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
+/**
+ * A type that represents only log events (case 6 in the Event conditional type).
+ * This filters out block events, transaction events, transfer events, call trace events, and setup events.
+ *
+ * Valid event names have the pattern: `${ContractName}:${EventName}` where EventName is not "setup".
+ * Invalid patterns that are excluded:
+ * - `${string}:block` (block events)
+ * - `${string}:transaction:${"from" | "to"}` (transaction events)
+ * - `${string}:transfer:${"from" | "to"}` (transfer events)
+ * - `${string}.${string}` (call trace events)
+ * - `${ContractName}:setup` (setup events)
+ */
+export type LogEvent<T extends EventNames = EventNames> = T extends `${string}:block`
+  ? never
+  : T extends `${string}:transaction:${"from" | "to"}`
+    ? never
+    : T extends `${string}:transfer:${"from" | "to"}`
+      ? never
+      : T extends `${string}.${string}`
+        ? never
+        : T extends `${string}:setup`
+          ? never
+          : T extends `${string}:${string}`
+            ? Event<T>
+            : never;
+
+export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<LogEvent, "args"> & {
   args: ARGS;
 };
-
 /**
  * Given a contract's block range, returns a block range describing a start and end block
  * that maintains validity within the global blockrange. The returned start block will always be
