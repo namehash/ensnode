@@ -6,6 +6,7 @@ import {
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
+  isPccFuseSet,
   type LiteralLabel,
   makeENSv1DomainId,
   makeRegistrationId,
@@ -18,8 +19,14 @@ import {
 import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
-import { getLatestRegistration, isRegistrationActive } from "@/lib/ensv2/registration-db-helpers";
+import {
+  getLatestRegistration,
+  isRegistrationExpired,
+  isRegistrationFullyExpired,
+  isRegistrationInGracePeriod,
+} from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -33,22 +40,23 @@ const pluginName = PluginName.ENSv2;
  */
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
+/**
+ * NameWrapper emits expiration but 0 means 'doesn't expire', we represent as null.
+ */
+const interpretExpiration = (expiration: bigint): bigint | null =>
+  expiration === 0n ? null : expiration;
+
 // registrar is source of truth for expiry if eth 2LD
 // otherwise namewrapper is registrar and source of truth for expiry
-// maybe should more or less ignore .eth 2LD (and other registrar-managed names) in the namewrapper?
 
-// for non-.eth-2ld names is infinite expiration represented as 0 or max int? probably max int. if so
-// need to interpret that into null to indicate that it doesn't expire
-// for .eth 2lds we need any namewrapper events to be, like, ignored, basically. maybe a BaseRegistrar
-// Registration can include a `wrappedTokenId` field to indicate that it exists in the namewrapper
-// but NameWrapper Registrations are exclusively for non-.eth-2lds
+//
+// The FusesSet event indicates that fuses were written to storage, but:
+// Does not guarantee the name is not expired
+// Does not guarantee the fuses are actually active (they could be cleared by _clearOwnerAndFuses on read)
+// Simply records the fuse value that was stored, regardless of expiration status
+// For indexers, this means you need to track both the FusesSet event AND the expiry to determine the actual active fuses at any point in time.
 
-// namewrapper registration does not have a registrant
-// probably need an isSubnameOfRegistrarManagedName helper to identify .eth 2lds (and linea 2lds)
-// in the namewrapper and then affect the registration managed by those contracts instead of the
-// one managed by the namewrapper.
-// so if it's wrapped in the namewrapper, much like the chain, changes are materialized back to the
-// source
+// .eth 2LDs always have PARENT_CANNOT_CONTROL set ('burned'), they cannot be transferred during grace period
 
 const isDirectSubnameOfRegistrarManagedName = (
   managedNode: Node,
@@ -78,6 +86,9 @@ const isDirectSubnameOfRegistrarManagedName = (
 };
 
 export default function () {
+  /**
+   * Transfer* events can occur for both expired and unexpired names.
+   */
   async function handleTransfer({
     context,
     event,
@@ -101,16 +112,29 @@ export default function () {
     // burning is always followed by NameWrapper#NameUnwrapped, safe to ignore
     if (isBurn) return;
 
+    // otherwise is transfer of existing registration
+
     const domainId = makeENSv1DomainId(tokenIdToNode(tokenId));
     const registration = await getLatestRegistration(context, domainId);
-    const isActive = isRegistrationActive(registration, event.block.timestamp);
+    const isExpired = registration && isRegistrationExpired(registration, event.block.timestamp);
 
-    // Invariant: must have active Registration
-    if (!registration || !isActive) {
-      throw new Error(`Invariant(NameWrapper:Transfer): Active Registration expected.`);
+    // Invariant: must have Registration
+    if (!registration) {
+      throw new Error(
+        `Invariant(NameWrapper:Transfer): Registration expected:\n${toJson(registration)}`,
+      );
     }
 
-    // materialize domain owner
+    // Expired Registrations are non-transferrable if PCC is set
+    const cannotTransferWhileExpired = registration.fuses && isPccFuseSet(registration.fuses);
+    if (isExpired && cannotTransferWhileExpired) {
+      throw new Error(
+        `Invariant(NameWrapper:Transfer): Transfer of expired Registration with PARENT_CANNOT_CONTROL set:\n${toJson(registration)} ${JSON.stringify({ isPccFuseSet: isPccFuseSet(registration.fuses ?? 0) })}`,
+      );
+    }
+
+    // now guaranteed to be an unexpired transferrable Registration
+    // so materialize domain owner
     await materializeDomainOwner(context, domainId, to);
   }
 
@@ -129,7 +153,8 @@ export default function () {
         expiry: bigint;
       }>;
     }) => {
-      const { node, name: _name, owner, fuses, expiry: expiration } = event.args;
+      const { node, name: _name, owner, fuses, expiry: _expiration } = event.args;
+      const expiration = interpretExpiration(_expiration);
       const name = _name as DNSEncodedLiteralName;
 
       const registrar = getThisAccountId(context, event);
@@ -147,51 +172,87 @@ export default function () {
       }
 
       const registration = await getLatestRegistration(context, domainId);
-      const isActive = isRegistrationActive(registration, event.block.timestamp);
+      const isFullyExpired =
+        registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
       // materialize domain owner
       await materializeDomainOwner(context, domainId, owner);
 
-      if (registration && isActive && registration.type === "BaseRegistrar") {
-        // if there's an existing active BaseRegistrar registration, this this must be the wrap of a
-        // direct-subname-of-registrar-managed-name
-
+      // handle wraps of direct-subname-of-registrar-managed-names
+      if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
         const managedNode = namehash(getRegistrarManagedName(getThisAccountId(context, event)));
 
-        // Invariant: emitted Name is decodable and is a direct subname of the RegistrarManagedName
+        // Invariant: Emitted name is a direct subname of the RegistrarManagedName
         if (!isDirectSubnameOfRegistrarManagedName(managedNode, name, node)) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): An active BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's RegistrarManagedName — wtf?`,
+            `Invariant(NameWrapper:NameWrapped): An unexpired BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's RegistrarManagedName — wtf?`,
           );
+        }
+
+        // Invariant: Cannot wrap grace period names
+        if (isRegistrationInGracePeriod(registration, event.block.timestamp)) {
+          throw new Error(
+            `Invariant(NameWrapper:NameWrapped): Cannot wrap direct-subname-of-registrar-managed-names in GRACE_PERIOD \n${toJson(registration)}`,
+          );
+        }
+
+        // Invariant: cannot re-wrap, right? NameWrapped -> NameUnwrapped -> NameWrapped
+        if (registration.wrapped) {
+          throw new Error(
+            `Invariant(NameWrapper:NameWrapped): Re-wrapping already wrapped BaseRegistrar registration\n${toJson(registration)}`,
+          );
+        }
+
+        // Invariant: BaseRegistrar always provides Expiration
+        if (expiration === null) {
+          throw new Error(
+            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiration!\n${toJson(registration)}`,
+          );
+        }
+
+        // Invariant: Expiration Alignment
+        if (
+          // If BaseRegistrar Registration has an expiration,
+          registration.expiration &&
+          // The NameWrapper epiration must be greater than that (+ grace period).
+          expiration > registration.expiration + (registration.gracePeriod ?? 0n)
+        ) {
+          throw new Error("Wrapper expiry exceeds registrar expiry + grace period");
         }
 
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: true,
-          wrappedFuses: fuses,
+          fuses,
           // expiration, // TODO: NameWrapper expiration logic
         });
-      }
+      } else {
+        // Invariant: If there's an existing Registration, it should be expired
+        if (registration && !isFullyExpired) {
+          throw new Error(
+            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson(registration)}`,
+          );
+        }
 
-      // Invariant: there shouldn't be an active registration
-      if (registration && isActive) {
-        throw new Error(
-          `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing active non-BaseRegistrar Registration.`,
-        );
-      }
+        const isAlreadyExpired = expiration && expiration <= event.block.timestamp;
+        if (isAlreadyExpired) {
+          console.warn(`Creating NameWrapper registration for already-expired name: ${node}`);
+        }
 
-      // create a new NameWrapper Registration
-      const nextIndex = registration ? registration.index + 1 : 0;
-      const registrationId = makeRegistrationId(domainId, nextIndex);
-      await context.db.insert(schema.registration).values({
-        id: registrationId,
-        type: "NameWrapper",
-        registrarChainId: registrar.chainId,
-        registrarAddress: registrar.address,
-        domainId,
-        start: event.block.timestamp,
-        fuses,
-        expiration,
-      });
+        // create a new NameWrapper Registration
+        const nextIndex = registration ? registration.index + 1 : 0;
+        const registrationId = makeRegistrationId(domainId, nextIndex);
+        await context.db.insert(schema.registration).values({
+          id: registrationId,
+          type: "NameWrapper",
+          index: nextIndex,
+          registrarChainId: registrar.chainId,
+          registrarAddress: registrar.address,
+          domainId,
+          start: event.block.timestamp,
+          fuses,
+          expiration,
+        });
+      }
     },
   );
 
@@ -217,19 +278,23 @@ export default function () {
         // if this is a wrapped BaseRegisrar Registration, unwrap it
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: false,
-          wrappedFuses: null,
-          // expiration: null // TODO: NameWrapper expiration logic
+          fuses: null,
+          // expiration: null // TODO: NameWrapper expiration logic? maybe nothing to do here
         });
       } else {
-        // otherwise, deactivate the NameWrapper Registrations
-        // TODO: instead of deleting, mark it as inactive perhaps by setting its expiry to block.timestamp
-        await context.db.delete(schema.registration, { id: registration.id });
+        // otherwise, deactivate the current registration by setting its expiry to this block
+        await context.db.update(schema.registration, { id: registration.id }).set({
+          expiration: event.block.timestamp,
+        });
       }
 
       // NOTE: we don't need to adjust Domain.ownerId because NameWrapper always calls ens.setOwner
     },
   );
 
+  /**
+   * FusesSet can occur for expired or unexpired Registrations.
+   */
   ponder.on(
     namespaceContract(pluginName, "NameWrapper:FusesSet"),
     async ({
@@ -243,25 +308,25 @@ export default function () {
 
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
-      const isActive = isRegistrationActive(registration, event.block.timestamp);
 
-      // Invariant: must have active Registration
-      if (!registration || !isActive) {
-        throw new Error(`Invariant(NameWrapper:FusesSet): Active Registration expected.`);
+      // Invariant: must have a Registration
+      if (!registration) {
+        throw new Error(
+          `Invariant(NameWrapper:FusesSet): Registration expected:\n${toJson(registration)}`,
+        );
       }
 
       // upsert fuses
-      if (registration.type === "BaseRegistrar") {
-        await context.db.update(schema.registration, { id: registration.id }).set({
-          wrappedFuses: fuses,
-          // expiration: // TODO: NameWrapper expiration logic
-        });
-      } else {
-        await context.db.update(schema.registration, { id: registration.id }).set({ fuses });
-      }
+      await context.db.update(schema.registration, { id: registration.id }).set({
+        fuses,
+        // expiration: // TODO: NameWrapper expiration logic ?
+      });
     },
   );
 
+  /**
+   * ExpiryExtended can occur for expired or unexpired Registrations.
+   */
   ponder.on(
     namespaceContract(pluginName, "NameWrapper:ExpiryExtended"),
     async ({
@@ -271,15 +336,17 @@ export default function () {
       context: Context;
       event: EventWithArgs<{ node: Node; expiry: bigint }>;
     }) => {
-      const { node, expiry: expiration } = event.args;
+      const { node, expiry: _expiration } = event.args;
+      const expiration = interpretExpiration(_expiration);
 
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
-      const isActive = isRegistrationActive(registration, event.block.timestamp);
 
-      // Invariant: must have active Registration
-      if (!registration || !isActive) {
-        throw new Error(`Invariant(NameWrapper:ExpiryExtended): Active Registration expected.`);
+      // Invariant: must have Registration
+      if (!registration) {
+        throw new Error(
+          `Invariant(NameWrapper:ExpiryExtended): Registration expected\n${toJson(registration)}`,
+        );
       }
 
       await context.db.update(schema.registration, { id: registration.id }).set({ expiration });

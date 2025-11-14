@@ -9,7 +9,6 @@ import {
   type LiteralLabel,
   makeENSv2DomainId,
   makeRegistryContractId,
-  makeResolverId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
@@ -116,34 +115,35 @@ export default function () {
     },
   );
 
-  ponder.on(
-    namespaceContract(pluginName, "Registry:ResolverUpdate"),
-    async ({
-      context,
-      event,
-    }: {
-      context: Context;
-      event: EventWithArgs<{
-        id: bigint;
-        resolver: Address;
-      }>;
-    }) => {
-      const { id: tokenId, resolver: address } = event.args;
+  // TODO: add this logic to Protocol Acceleration plugin
+  // ponder.on(
+  //   namespaceContract(pluginName, "Registry:ResolverUpdate"),
+  //   async ({
+  //     context,
+  //     event,
+  //   }: {
+  //     context: Context;
+  //     event: EventWithArgs<{
+  //       id: bigint;
+  //       resolver: Address;
+  //     }>;
+  //   }) => {
+  //     const { id: tokenId, resolver: address } = event.args;
 
-      const canonicalId = getCanonicalId(tokenId);
-      const registryAccountId = getThisAccountId(context, event);
-      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
+  //     const canonicalId = getCanonicalId(tokenId);
+  //     const registryAccountId = getThisAccountId(context, event);
+  //     const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      // update domain's resolver
-      const isDeletion = isAddressEqual(address, zeroAddress);
-      if (isDeletion) {
-        await context.db.update(schema.domain, { id: domainId }).set({ resolverId: null });
-      } else {
-        const resolverId = makeResolverId({ chainId: context.chain.id, address: address });
-        await context.db.update(schema.domain, { id: domainId }).set({ resolverId });
-      }
-    },
-  );
+  //     // update domain's resolver
+  //     const isDeletion = isAddressEqual(address, zeroAddress);
+  //     if (isDeletion) {
+  //       await context.db.update(schema.domain, { id: domainId }).set({ resolverId: null });
+  //     } else {
+  //       const resolverId = makeResolverId({ chainId: context.chain.id, address: address });
+  //       await context.db.update(schema.domain, { id: domainId }).set({ resolverId });
+  //     }
+  //   },
+  // );
 
   ponder.on(
     namespaceContract(pluginName, "Registry:NameBurned"),

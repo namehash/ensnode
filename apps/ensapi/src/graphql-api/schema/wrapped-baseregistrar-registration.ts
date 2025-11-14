@@ -31,7 +31,7 @@ WrappedBaseRegistrarRegistrationRef.implement({
       type: "Int",
       nullable: false,
       // TODO: decode/render Fuses enum
-      resolve: (parent) => parent.wrappedFuses,
+      resolve: (parent) => parent.fuses,
     }),
   }),
 });

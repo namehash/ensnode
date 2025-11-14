@@ -1,4 +1,3 @@
-import attach_BlockHandlers from "./handlers/Block";
 import attach_ENSv1RegistryHandlers from "./handlers/ENSv1Registry";
 import attach_EnhancedAccessControlHandlers from "./handlers/EnhancedAccessControl";
 import attach_NameWrapperHandlers from "./handlers/NameWrapper";
@@ -7,7 +6,6 @@ import attach_RegistrarControllerHandlers from "./handlers/RegistrarController";
 import attach_RegistryHandlers from "./handlers/Registry";
 
 export default function () {
-  attach_BlockHandlers();
   attach_ENSv1RegistryHandlers();
   attach_EnhancedAccessControlHandlers();
   attach_NameWrapperHandlers();

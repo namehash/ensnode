@@ -7,13 +7,11 @@ import type {
   EncodedReferrer,
   InterpretedLabel,
   LabelHash,
-  Node,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
   RegistrationId,
   RegistryId,
-  ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 // Registry<->Domain is 1:1
@@ -99,8 +97,7 @@ export const domain = onchainTable(
     // may have one subregistry
     subregistryId: t.text().$type<RegistryId>(),
 
-    // may have one resolver
-    resolverId: t.text().$type<ResolverId>(),
+    // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
   (t) => ({
     //
@@ -168,17 +165,15 @@ export const registration = onchainTable(
     // references referrer
     referrer: t.hex().$type<EncodedReferrer>(),
 
-    // may have fuses
+    // may have fuses (NameWrapper, Wrapped BaseRegistrar)
     fuses: t.integer(),
 
-    // may have baseCost/premium
+    // may have baseCost/premium (BaseRegistrar)
     baseCost: t.bigint(),
     premium: t.bigint(),
 
     // may be Wrapped (BaseRegistrar)
     wrapped: t.boolean().default(false),
-    wrappedFuses: t.integer(),
-    wrappedExpiration: t.bigint(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.domainId, t.index),
@@ -283,7 +278,6 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one, many
 export const label = onchainTable("labels", (t) => ({
   labelHash: t.hex().primaryKey().$type<LabelHash>(),
   value: t.text().notNull().$type<InterpretedLabel>(),
-  needsHeal: t.boolean().default(false),
 }));
 
 export const label_relations = relations(label, ({ many }) => ({

@@ -12,10 +12,10 @@ import {
   type LabelHash,
   makeENSv1DomainId,
   makeImplicitRegistryId,
-  makeResolverId,
   makeSubdomainNode,
   type Node,
   PluginName,
+  ROOT_NODE,
 } from "@ensnode/ensnode-sdk";
 
 import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
@@ -32,6 +32,22 @@ const pluginName = PluginName.ENSv2;
  * - piggybacks Protocol Resolution plugin's Node Migration status
  */
 export default function () {
+  /**
+   * Sets up the ENSv2 Root Registry
+   */
+  ponder.on(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), async ({ context }) => {
+    // ensures that the Root Registry (which is eventually backed by the ENSv2 Root Registry) is
+    // populated in the database
+    await context.db
+      .insert(schema.registry)
+      .values({
+        id: getRootRegistryId(config.namespace),
+        type: "RegistryContract",
+        ...getRootRegistry(config.namespace),
+      })
+      .onConflictDoNothing();
+  });
+
   /**
    * Registry#NewOwner is either a new Domain OR the owner of the parent changing the owner of the child.
    */
@@ -90,7 +106,7 @@ export default function () {
       })
       .onConflictDoNothing();
 
-    // upsert the domain's own ImplicitRegistry
+    // and its ImplicitRegistry
     await context.db
       .insert(schema.registry)
       .values({ id: subregistryId, type: "ImplicitRegistry" })
@@ -105,27 +121,6 @@ export default function () {
     await materializeDomainOwner(context, domainId, owner);
   }
 
-  async function handleNewResolver({
-    context,
-    event,
-  }: {
-    context: Context;
-    event: EventWithArgs<{ node: Node; resolver: Address }>;
-  }) {
-    const { node, resolver: address } = event.args;
-
-    const domainId = makeENSv1DomainId(node);
-
-    // update domain's resolver
-    const isDeletion = isAddressEqual(address, zeroAddress);
-    if (isDeletion) {
-      await context.db.update(schema.domain, { id: domainId }).set({ resolverId: null });
-    } else {
-      const resolverId = makeResolverId({ chainId: context.chain.id, address: address });
-      await context.db.update(schema.domain, { id: domainId }).set({ resolverId });
-    }
-  }
-
   async function handleTransfer({
     context,
     event,
@@ -136,7 +131,7 @@ export default function () {
     const { node, owner } = event.args;
 
     // ENSv2 model does not include root node, no-op
-    if (node === zeroHash) return;
+    if (node === ROOT_NODE) return;
 
     const domainId = makeENSv1DomainId(node);
 
@@ -156,22 +151,6 @@ export default function () {
   }
 
   /**
-   * Sets up the ENSv2 Root Registry
-   */
-  ponder.on(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), async ({ context }) => {
-    // ensures that the Root Registry (which is eventually backed by the ENSv2 Root Registry) is
-    // populated in the database
-    await context.db
-      .insert(schema.registry)
-      .values({
-        id: getRootRegistryId(config.namespace),
-        type: "RegistryContract",
-        ...getRootRegistry(config.namespace),
-      })
-      .onConflictDoNothing();
-  });
-
-  /**
    * Handles Registry#NewOwner for:
    * - ENS Root Chain's ENSv1RegistryOld
    */
@@ -186,21 +165,6 @@ export default function () {
       if (shouldIgnoreEvent) return;
 
       return handleNewOwner({ context, event });
-    },
-  );
-
-  /**
-   * Handles Registry#NewResolver for:
-   * - ENS Root Chain's ENSv1RegistryOld
-   */
-  ponder.on(
-    namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
-    async ({ context, event }) => {
-      // ignore the event on ENSv1RegistryOld if node is migrated to new Registry
-      const shouldIgnoreEvent = await nodeIsMigrated(context, event.args.node);
-      if (shouldIgnoreEvent) return;
-
-      return handleNewResolver({ context, event });
     },
   );
 
@@ -225,6 +189,5 @@ export default function () {
    * - Lineanames Registry
    */
   ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner);
-  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewResolver"), handleNewResolver);
   ponder.on(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
 }

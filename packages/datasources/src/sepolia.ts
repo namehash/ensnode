@@ -99,15 +99,15 @@ export default {
       RootRegistry: {
         abi: Registry,
         address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
-        startBlock: 0,
+        startBlock: 9629999,
       },
       Registry: {
         abi: Registry,
-        startBlock: 0,
+        startBlock: 9629999,
       },
       EnhancedAccessControl: {
         abi: EnhancedAccessControl,
-        startBlock: 0,
+        startBlock: 9629999,
       },
     },
   },
@@ -117,11 +117,11 @@ export default {
     contracts: {
       Registry: {
         abi: Registry,
-        startBlock: 0,
+        startBlock: 9629999,
       },
       EnhancedAccessControl: {
         abi: EnhancedAccessControl,
-        startBlock: 0,
+        startBlock: 9629999,
       },
     },
   },
