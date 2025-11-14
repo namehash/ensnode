@@ -283,6 +283,7 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one, many
 export const label = onchainTable("labels", (t) => ({
   labelHash: t.hex().primaryKey().$type<LabelHash>(),
   value: t.text().notNull().$type<InterpretedLabel>(),
+  needsHeal: t.boolean().default(false),
 }));
 
 export const label_relations = relations(label, ({ many }) => ({
