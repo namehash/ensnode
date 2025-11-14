@@ -8,6 +8,7 @@ import {
   type PaginatedAggregatedReferrersRequest,
   type PaginatedAggregatedReferrersResponse,
   PaginatedAggregatedReferrersResponseCodes,
+  serializePaginatedAggregatedReferrersResponse,
 } from "@ensnode/ensnode-sdk";
 
 import { errorResponse } from "@/lib/handlers/error-response";
@@ -65,6 +66,19 @@ function calculateContribution(
 app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async (c) => {
   try {
     const aggregatedReferrerSnapshotCache = c.var.aggregatedReferrerSnapshotCache;
+
+    // Check if cache failed to load
+    if (aggregatedReferrerSnapshotCache === null) {
+      return c.json(
+        serializePaginatedAggregatedReferrersResponse({
+          responseCode: PaginatedAggregatedReferrersResponseCodes.Error,
+          error: "Internal Server Error",
+          errorMessage: "Failed to load aggregated referrer data.",
+        } satisfies PaginatedAggregatedReferrersResponse),
+        500,
+      );
+    }
+
     const { page, itemsPerPage } = c.req.valid("query");
 
     const totalAggregatedReferrers = aggregatedReferrerSnapshotCache.referrers.size;
@@ -102,20 +116,22 @@ app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async
       ),
     );
 
-    return c.json({
-      responseCode: PaginatedAggregatedReferrersResponseCodes.Ok,
-      data: {
-        referrers: referrersWithContribution,
-        total: totalAggregatedReferrers,
-        paginationParams: {
-          page,
-          itemsPerPage,
+    return c.json(
+      serializePaginatedAggregatedReferrersResponse({
+        responseCode: PaginatedAggregatedReferrersResponseCodes.Ok,
+        data: {
+          referrers: referrersWithContribution,
+          total: totalAggregatedReferrers,
+          paginationParams: {
+            page,
+            itemsPerPage,
+          },
+          hasNext: endIndex < totalAggregatedReferrers,
+          hasPrev: page > 1,
+          updatedAt: aggregatedReferrerSnapshotCache.updatedAt,
         },
-        hasNext: endIndex < totalAggregatedReferrers,
-        hasPrev: page > 1,
-        updatedAt: aggregatedReferrerSnapshotCache.updatedAt,
-      },
-    } satisfies PaginatedAggregatedReferrersResponse);
+      } satisfies PaginatedAggregatedReferrersResponse),
+    );
   } catch (error) {
     logger.error({ error }, "Error in /ensanalytics/aggregated-referrers endpoint");
     const errorMessage =
@@ -123,11 +139,11 @@ app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async
         ? error.message
         : "An unexpected error occurred while processing your request";
     return c.json(
-      {
+      serializePaginatedAggregatedReferrersResponse({
         responseCode: PaginatedAggregatedReferrersResponseCodes.Error,
         error: "Internal server error",
         errorMessage,
-      } satisfies PaginatedAggregatedReferrersResponse,
+      } satisfies PaginatedAggregatedReferrersResponse),
       500,
     );
   }

@@ -196,9 +196,27 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
   }
 }
 
+/**
+ * Internal cache entry structure for the Stale-While-Revalidate (SWR) caching strategy.
+ *
+ * This interface represents a single cache entry that stores the cached value,
+ * metadata about when it was last updated, and tracks any in-progress revalidation.
+ *
+ * @internal
+ */
 interface SWRCache<T> {
+  /**
+   * The cached value of type T
+   */
   value: T;
-  timestamp: number;
+  /**
+   * Timestamp (from `Date.now()`) indicating when the value was last successfully updated
+   */
+  updatedAt: number;
+  /**
+   * Optional promise tracking an in-progress revalidation request.
+   * Used to deduplicate concurrent revalidation attempts.
+   */
   revalidating?: Promise<T>;
 }
 
@@ -210,6 +228,11 @@ interface SWRCache<T> {
  * - Sub-millisecond response times (after first fetch)
  * - Always available data (serves stale data during revalidation)
  * - Automatic background updates
+ *
+ * Error Handling:
+ * - If the function throws an error and a cached value exists, the stale cached value is returned.
+ * - If the function throws an error and no cached value exists, null is returned.
+ * - Background revalidation errors are handled gracefully and don't interrupt serving stale data.
  *
  * @example
  * ```typescript
@@ -232,12 +255,15 @@ interface SWRCache<T> {
  *
  * @param fn The async function to wrap with SWR caching
  * @param ttl Time-to-live in milliseconds. After this duration, data is considered stale
- * @returns A cached version of the function with SWR semantics
+ * @returns A cached version of the function with SWR semantics. Returns null if fn throws an error and no cached value is available.
  *
  * @link https://web.dev/stale-while-revalidate/
  * @link https://datatracker.ietf.org/doc/html/rfc5861
  */
-export function staleWhileRevalidate<T>(fn: () => Promise<T>, ttl: number): () => Promise<T> {
+export function staleWhileRevalidate<T>(
+  fn: () => Promise<T>,
+  ttl: number,
+): () => Promise<T | null> {
   if (!Number.isInteger(ttl) || ttl <= 0) {
     throw new Error(
       `staleWhileRevalidate requires ttl to be a positive integer but a ttl of ${ttl} was provided.`,
@@ -245,18 +271,35 @@ export function staleWhileRevalidate<T>(fn: () => Promise<T>, ttl: number): () =
   }
 
   let cache: SWRCache<T> | null = null;
+  let initialBuild: Promise<T | null> | null = null;
 
-  return async (): Promise<T> => {
+  return async (): Promise<T | null> => {
     const now = Date.now();
 
-    // No cache, fetch for the first time
+    // No cache, attempt to successfully build the first cache (any number of attempts to build the cache may have been attempted and failed previously)
     if (!cache) {
-      const value = await fn();
-      cache = { value, timestamp: now };
-      return value;
+      // If initial build already in progress, wait for it
+      if (initialBuild) {
+        return initialBuild;
+      }
+
+      // Start initial build
+      initialBuild = fn()
+        .then((value) => {
+          cache = { value, updatedAt: now };
+          initialBuild = null;
+          return value;
+        })
+        .catch((_error) => {
+          initialBuild = null;
+          // No cached value available, return null
+          return null;
+        });
+
+      return initialBuild;
     }
 
-    const isStale = now - cache.timestamp > ttl;
+    const isStale = now - cache.updatedAt > ttl;
 
     // Fresh cache, return immediately
     if (!isStale) return cache.value;
@@ -267,7 +310,7 @@ export function staleWhileRevalidate<T>(fn: () => Promise<T>, ttl: number): () =
     // Stale cache, kick off revalidation in background
     const revalidationPromise = fn()
       .then((value) => {
-        cache = { value, timestamp: Date.now() };
+        cache = { value, updatedAt: Date.now() };
         return value;
       })
       .catch(() => {

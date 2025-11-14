@@ -440,4 +440,40 @@ describe("staleWhileRevalidate", () => {
     const result = await cached();
     expect(result).toBe("value2");
   });
+
+  it("returns null when initial fetch fails with no cache", async () => {
+    const fn = vi.fn(async () => {
+      throw new Error("Initial fetch failed");
+    });
+
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    // Initial fetch should fail and return null
+    const result = await cached();
+    expect(result).toBeNull();
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("succeeds on retry after initial fetch failure", async () => {
+    let shouldError = true;
+    const fn = vi.fn(async () => {
+      if (shouldError) {
+        throw new Error("Initial fetch failed");
+      }
+      return "value1";
+    });
+
+    const cached = staleWhileRevalidate(fn, 1000);
+
+    // Initial fetch fails and returns null
+    const result1 = await cached();
+    expect(result1).toBeNull();
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    // Retry should succeed
+    shouldError = false;
+    const result2 = await cached();
+    expect(result2).toBe("value1");
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
 });

@@ -78,7 +78,11 @@ const server = serve(
     logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
     try {
       const cache = await referrersCacheFetcher();
-      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
+      if (cache) {
+        logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
+      } else {
+        logger.warn("ENSAnalytics cache returned null - no cached data available yet");
+      }
     } catch (error) {
       logger.error({ error }, "Failed to warm up ENSAnalytics cache");
       // Don't exit - let the service run without pre-warmed analytics

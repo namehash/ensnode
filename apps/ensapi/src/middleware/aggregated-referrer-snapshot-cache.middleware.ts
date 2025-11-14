@@ -13,25 +13,22 @@ import logger from "@/lib/logger";
 
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-// SWR-cached fetcher for aggregated referrer snapshot
-export const fetcher = staleWhileRevalidate(() => {
+export const fetcher = staleWhileRevalidate(async () => {
   logger.info("Building aggregated referrer snapshot...");
   const subregistryId = getEthnamesSubregistryId(config.namespace);
-  const promise = getAggregatedReferrerSnapshot(
-    ENS_HOLIDAY_AWARDS_START_DATE,
-    ENS_HOLIDAY_AWARDS_END_DATE,
-    subregistryId,
-  );
 
-  promise
-    .then(() => {
-      logger.info("Successfully built aggregated referrer snapshot");
-    })
-    .catch((error) => {
-      logger.error({ error }, "Failed to build aggregated referrer snapshot");
-    });
-
-  return promise;
+  try {
+    const result = await getAggregatedReferrerSnapshot(
+      ENS_HOLIDAY_AWARDS_START_DATE,
+      ENS_HOLIDAY_AWARDS_END_DATE,
+      subregistryId,
+    );
+    logger.info("Successfully built aggregated referrer snapshot");
+    return result;
+  } catch (error) {
+    logger.error({ error }, "Failed to build aggregated referrer snapshot");
+    throw error;
+  }
 }, TTL_MS);
 
 export type AggregatedReferrerSnapshotCacheVariables = {
@@ -39,11 +36,18 @@ export type AggregatedReferrerSnapshotCacheVariables = {
 };
 
 /**
- * Middleware that fetches and caches aggregated referrer snapshot data.
+ * Middleware that fetches and caches aggregated referrer snapshot data using Stale-While-Revalidate (SWR) caching.
  *
- * Retrieves all referrers with at least one qualified referral from the database and caches them for TTL_MS
- * duration to avoid excessive / slow database queries. Sets the `aggregatedReferrerSnapshotCache`
- * variable on the context for use by other middleware and handlers.
+ * This middleware uses the SWR caching strategy to serve cached data immediately (even if stale) while
+ * asynchronously revalidating in the background. This provides:
+ * - Sub-millisecond response times (after first fetch)
+ * - Always available data (serves stale data during revalidation)
+ * - Automatic background updates every TTL_MS (5 minutes)
+ *
+ * Retrieves all referrers with at least one qualified referral from the database and caches them.
+ * Sets the `aggregatedReferrerSnapshotCache` variable on the context for use by other middleware and handlers.
+ *
+ * @see {@link staleWhileRevalidate} for detailed documentation on the SWR caching strategy and error handling.
  */
 export const aggregatedReferrerSnapshotCacheMiddleware = factory.createMiddleware(
   async (c, next) => {
