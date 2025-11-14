@@ -30,7 +30,7 @@ export default function MockList() {
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href={retainCurrentRawConnectionUrlParam("/mock/recent-registrations")}>
-                RecentRegistrations
+                RegistrarActions
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">

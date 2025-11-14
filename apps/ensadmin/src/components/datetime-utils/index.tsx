@@ -80,7 +80,7 @@ export function RelativeTime({
   tooltipPosition = "top",
   relativeTo,
   prefix,
-  render,
+  contentWrapper,
 }: {
   timestamp: UnixTimestamp;
   enforcePast?: boolean;
@@ -89,7 +89,10 @@ export function RelativeTime({
   tooltipPosition?: React.ComponentProps<typeof TooltipContent>["side"];
   relativeTo?: UnixTimestamp;
   prefix?: string;
-  render?: ({ children }: React.PropsWithChildren) => React.ReactNode;
+  /**
+   * A component to be rendered as a wrapper for the Relative Time component content.
+   */
+  contentWrapper?: ({ children }: React.PropsWithChildren) => React.ReactNode;
 }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
@@ -109,8 +112,8 @@ export function RelativeTime({
   return (
     <Tooltip delayDuration={1000}>
       <TooltipTrigger className="cursor-text">
-        {typeof render === "function"
-          ? render({ children: tooltipTriggerContent })
+        {typeof contentWrapper === "function"
+          ? contentWrapper({ children: tooltipTriggerContent })
           : tooltipTriggerContent}
       </TooltipTrigger>
       <TooltipContent
@@ -135,16 +138,22 @@ export function RelativeTime({
 }
 
 /**
- * Client-only duration component
+ * Client-only Time Distance component
  */
-export function Duration({ beginsAt, endsAt }: { beginsAt: UnixTimestamp; endsAt: UnixTimestamp }) {
-  const [duration, setDuration] = useState<string>("");
+export function TimeDistance({
+  beginsAt,
+  endsAt,
+}: {
+  beginsAt: UnixTimestamp;
+  endsAt: UnixTimestamp;
+}) {
+  const [timeDistance, setTimeDistance] = useState<string>("");
   const beginsAtDate = fromUnixTime(beginsAt);
   const endsAtDate = fromUnixTime(endsAt);
 
   useEffect(() => {
-    setDuration(formatDistanceStrict(endsAtDate, beginsAtDate));
+    setTimeDistance(formatDistanceStrict(endsAtDate, beginsAtDate));
   }, [beginsAtDate, endsAtDate]);
 
-  return <>{duration}</>;
+  return timeDistance;
 }

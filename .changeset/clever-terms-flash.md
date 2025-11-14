@@ -2,4 +2,4 @@
 "ensadmin": minor
 ---
 
-Integrated Registrar Actions API for the Recent Registrations and Renewals UI.
+Integrated Registrar Actions API for the Registrar Actions UI.

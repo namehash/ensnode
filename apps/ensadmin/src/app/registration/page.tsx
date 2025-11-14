@@ -1,12 +1,12 @@
 "use client";
 
-import { ResolveAndDisplayRecentRegistrations } from "@/components/recent-registrations/resolution";
+import { ResolveAndDisplayRegistrarActionsPanel } from "@/components/recent-registrations/resolution";
 
-export default function ExploreRegistrations() {
+export default function ExploreRegistrarActions() {
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ResolveAndDisplayRecentRegistrations
-        title="Latest indexed registrations and renewals"
+      <ResolveAndDisplayRegistrarActionsPanel
+        title="Latest indexed registrar actions"
         maxItems={25}
       />
     </section>

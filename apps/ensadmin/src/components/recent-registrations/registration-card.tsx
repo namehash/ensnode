@@ -5,75 +5,85 @@ import {
   buildUnresolvedIdentity,
   DefaultableChainId,
   ENSNamespaceId,
-  InterpretedName,
   isRegistrarActionReferralAvailable,
-  RegistrarAction,
+  NamedRegistrarAction,
   RegistrarActionReferral,
   RegistrarActionTypes,
   zeroEncodedReferrer,
 } from "@ensnode/ensnode-sdk";
 
-import { Duration, RelativeTime } from "@/components/datetime-utils";
+import { RelativeTime, TimeDistance } from "@/components/datetime-utils";
+import { InfoIcon } from "@/components/icons/InfoIcon";
 import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
-import { InternalLink } from "@/components/link";
+import { ExternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 import { getBlockExplorerUrlForTransactionHash } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
-interface DisplayRegistrationFeatureProps {
-  featureName: string;
+interface LabeledFieldProps {
+  fieldLabel: string;
   className?: string;
 }
 
 /**
- * Display an individual feature of a Registration or Renewal.
+ * Display a labeled field.
  */
-function DisplayRegistrationFeature({
-  featureName,
-  className,
-  children,
-}: PropsWithChildren<DisplayRegistrationFeatureProps>) {
+function LabeledField({ fieldLabel, className, children }: PropsWithChildren<LabeledFieldProps>) {
   return (
     <div className={cn("flex flex-col flex-nowrap justify-start items-start", className)}>
-      <p className="text-muted-foreground text-sm leading-normal font-normal">{featureName}</p>
+      <p className="text-muted-foreground text-sm leading-normal font-normal">{fieldLabel}</p>
       {children}
     </div>
   );
 }
 
-interface DisplayReferrerIdentityProps {
+interface ResolveAndDisplayReferrerIdentityProps {
   namespaceId: ENSNamespaceId;
   chainId: DefaultableChainId;
   referral: RegistrarActionReferral;
 }
 
 /**
- * Display Referrer Identity
+ * Resolve and Display Referrer Identity
  *
- * Displays Identity view for decoded referrer, or a fallback UI.
+ * Resolves and displays the identity of the decoded referrer, or a fallback UI.
  */
-function DisplayReferrerIdentity({ namespaceId, chainId, referral }: DisplayReferrerIdentityProps) {
+function ResolveAndDisplayReferrerIdentity({
+  namespaceId,
+  chainId,
+  referral,
+}: ResolveAndDisplayReferrerIdentityProps) {
   // display a hyphen
   // if encoded referrer is not available or is the zero encoded referrer
-  if (!referral.encodedReferrer || referral.encodedReferrer === zeroEncodedReferrer) {
+  if (
+    !isRegistrarActionReferralAvailable(referral) ||
+    referral.encodedReferrer === zeroEncodedReferrer
+  ) {
     return <>-</>;
   }
 
-  // display a tooltip with the encoded referrer value
-  // if it was available but couldn't be decoded
+  // if the encoded referrer was not the zeroEncodedReferrer but couldn't be
+  // decoded according to the subjective interpretation rules of
+  // ENS Holiday Awards then display a tooltip with details
   if (referral.decodedReferrer === zeroAddress) {
     return (
-      <Tooltip delayDuration={1000}>
-        <TooltipTrigger>Unknown</TooltipTrigger>
-        <TooltipContent
-          side="top"
-          className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
-        >
-          Encoded referrer {referral.encodedReferrer}
-        </TooltipContent>
-      </Tooltip>
+      <span className="inline-flex align-middle gap-1">
+        Unknown
+        <Tooltip delayDuration={1000}>
+          <TooltipTrigger>
+            <InfoIcon className="flex-shrink-0" />
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
+          >
+            Encoded referrer
+            <code className="block">{referral.encodedReferrer}</code> does not follow the formatting
+            requirements of ENS Holiday Awards.
+          </TooltipContent>
+        </Tooltip>
+      </span>
     );
   }
 
@@ -90,106 +100,110 @@ function DisplayReferrerIdentity({ namespaceId, chainId, referral }: DisplayRefe
 }
 
 /**
- * Display Registration Card Placeholder
+ * Display Registrar Action Card Placeholder
  */
-export function DisplayRegistrationCardPlaceholder() {
+export function DisplayRegistrarActionCardPlaceholder() {
   return (
     <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
-      <DisplayRegistrationFeature featureName="Name" className="w-[30%] min-w-[200px]">
+      <LabeledField fieldLabel="Name" className="w-[30%] min-w-[200px]">
         <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5" />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature featureName="Registered" className="w-[15%] min-w-[100px]">
+      <LabeledField fieldLabel="Registered" className="w-[15%] min-w-[100px]">
         <div className="animate-pulse mt-1 h-6 bg-muted rounded w-full" />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature featureName="Duration" className="w-[10%]  min-w-[100px]">
+      <LabeledField fieldLabel="Duration" className="w-[10%]  min-w-[100px]">
         <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-full" />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature
-        featureName="Registrant"
-        className="w-1/5 overflow-x-auto min-w-[150px]"
-      >
+      <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[150px]">
         <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5" />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature featureName="Referrer" className="w-[15%]  min-w-[100px]">
+      <LabeledField fieldLabel="Referrer" className="w-[15%]  min-w-[100px]">
         <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-full" />
-      </DisplayRegistrationFeature>
+      </LabeledField>
     </div>
   );
 }
 
-export interface DisplayRegistrationCardProps {
-  registrarAction: RegistrarAction;
-  name: InterpretedName;
+export interface DisplayRegistrarActionCardProps {
+  namespaceId: ENSNamespaceId;
+  namedRegistrarAction: NamedRegistrarAction;
 }
 
 /**
- * Displays the data of a single Registration Action
+ * Display a single Registrar Action
  */
-export function DisplayRegistrationCard({ registrarAction, name }: DisplayRegistrationCardProps) {
-  const namespaceId = useActiveNamespace();
-
-  const { registrant, registrationLifecycle, type, referral, transactionHash } = registrarAction;
+export function DisplayRegistrarActionCard({
+  namespaceId,
+  namedRegistrarAction,
+}: DisplayRegistrarActionCardProps) {
+  const { registrant, registrationLifecycle, type, referral, transactionHash } =
+    namedRegistrarAction.action;
   const { chainId } = registrationLifecycle.subregistry.subregistryId;
 
-  const chainExplorerUrl = getBlockExplorerUrlForTransactionHash(chainId, transactionHash);
-  const maybeRenderAsChainExplorerLink = chainExplorerUrl
-    ? ({ children }: PropsWithChildren) => (
-        <InternalLink href={chainExplorerUrl.toString()}>{children}</InternalLink>
-      )
-    : undefined;
+  const transactionDetailUrl = getBlockExplorerUrlForTransactionHash(chainId, transactionHash);
+  const withTransactionLink = ({ children }: PropsWithChildren) =>
+    // wrap `children` content with a transaction link only if the URL is defined
+    transactionDetailUrl ? (
+      <ExternalLink href={transactionDetailUrl.toString()}>{children}</ExternalLink>
+    ) : (
+      children
+    );
 
   const registrantIdentity = buildUnresolvedIdentity(registrant, namespaceId, chainId);
 
   return (
     <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
-      <DisplayRegistrationFeature featureName="Name" className="w-[30%] min-w-[200px]">
+      <LabeledField fieldLabel="Name" className="w-[30%] min-w-[200px]">
         <div className="w-full overflow-x-auto">
           <NameLink
-            name={name}
+            name={namedRegistrarAction.name}
             className="inline-flex items-center gap-2 text-blue-600 hover:underline"
           >
-            <NameDisplay name={name} />
+            <NameDisplay name={namedRegistrarAction.name} />
           </NameLink>
         </div>
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature
-        featureName={type === RegistrarActionTypes.Registration ? "Registered" : "Renewed"}
+      <LabeledField
+        fieldLabel={type === RegistrarActionTypes.Registration ? "Registered" : "Renewed"}
         className="w-[15%] min-w-[100px]"
       >
         <RelativeTime
-          timestamp={registrarAction.block.timestamp}
+          timestamp={namedRegistrarAction.action.block.timestamp}
           tooltipPosition="top"
           conciseFormatting={true}
-          render={maybeRenderAsChainExplorerLink}
+          contentWrapper={withTransactionLink}
         />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature featureName="Duration" className="w-[10%]  min-w-[100px]">
-        <Duration
-          beginsAt={registrationLifecycle.expiresAt - registrarAction.incrementalDuration}
+      <LabeledField fieldLabel="Duration" className="w-[10%]  min-w-[100px]">
+        <TimeDistance
+          beginsAt={
+            registrationLifecycle.expiresAt - namedRegistrarAction.action.incrementalDuration
+          }
           endsAt={registrationLifecycle.expiresAt}
         />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature
-        featureName="Registrant"
-        className="w-1/5 overflow-x-auto min-w-[150px]"
-      >
+      <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[150px]">
         <ResolveAndDisplayIdentity
           identity={registrantIdentity}
           withAvatar={true}
           className="font-medium"
         />
-      </DisplayRegistrationFeature>
+      </LabeledField>
 
-      <DisplayRegistrationFeature featureName="Referrer" className="w-[15%]  min-w-[100px]">
-        <DisplayReferrerIdentity chainId={chainId} namespaceId={namespaceId} referral={referral} />
-      </DisplayRegistrationFeature>
+      <LabeledField fieldLabel="Referrer" className="w-[15%]  min-w-[100px]">
+        <ResolveAndDisplayReferrerIdentity
+          chainId={chainId}
+          namespaceId={namespaceId}
+          referral={referral}
+        />
+      </LabeledField>
     </div>
   );
 }

@@ -1,3 +1,3 @@
-export default function ActionsExploreRegistrationsPage() {
+export default function ActionsExploreRegistrarActionsPage() {
   return null;
 }

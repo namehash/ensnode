@@ -1,13 +1,20 @@
-import { InterpretedName, NamedRegistrarAction } from "@ensnode/ensnode-sdk";
+import {
+  InterpretedName,
+  NamedRegistrarAction,
+  OmnichainIndexingStatusIds,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
 
 import {
-  RecentRegistrationsAvailable,
-  RecentRegistrationsDisabled,
-  RecentRegistrationsUnavailable,
-  RecentRegistrationsUnresolved,
+  RegistrarActionsAvailable,
+  RegistrarActionsIndexingStatusNotReady,
+  RegistrarActionsInitial,
+  RegistrarActionsUnavailable,
+  RegistrarActionsUnresolved,
+  RegistrarActionsUnsupportedConfig,
   ResolutionStatusId,
   ResolutionStatusIds,
-  ResolvedRecentRegistrations,
+  ResolvedRegistrarActions,
 } from "@/components/recent-registrations";
 
 export const registrationWithReferral = {
@@ -212,26 +219,48 @@ export const registrationWithReferrerNotMatchingENSHolidayAwardsFormat = {
   name: "sonu100.eth" as InterpretedName,
 } satisfies NamedRegistrarAction;
 
-export const variants: Map<ResolutionStatusId, ResolvedRecentRegistrations> = new Map([
+export const variants: Map<ResolutionStatusId, ResolvedRegistrarActions> = new Map([
   [
-    ResolutionStatusIds.Disabled,
+    ResolutionStatusIds.Initial,
     {
-      resolutionStatus: ResolutionStatusIds.Disabled,
-    } satisfies RecentRegistrationsDisabled,
+      resolutionStatus: ResolutionStatusIds.Initial,
+    } satisfies RegistrarActionsInitial,
+  ],
+  [
+    ResolutionStatusIds.UnsupportedConfig,
+    {
+      resolutionStatus: ResolutionStatusIds.UnsupportedConfig,
+      requiredPlugins: [
+        PluginName.Subgraph,
+        PluginName.Basenames,
+        PluginName.Lineanames,
+        PluginName.Registrars,
+      ],
+    } satisfies RegistrarActionsUnsupportedConfig,
+  ],
+  [
+    ResolutionStatusIds.IndexingStatusNotReady,
+    {
+      resolutionStatus: ResolutionStatusIds.IndexingStatusNotReady,
+      supportedIndexingStatusIds: [
+        OmnichainIndexingStatusIds.Completed,
+        OmnichainIndexingStatusIds.Following,
+      ],
+    } satisfies RegistrarActionsIndexingStatusNotReady,
   ],
   [
     ResolutionStatusIds.Unresolved,
     {
       resolutionStatus: ResolutionStatusIds.Unresolved,
       placeholderCount: 7,
-    } satisfies RecentRegistrationsUnresolved,
+    } satisfies RegistrarActionsUnresolved,
   ],
   [
     ResolutionStatusIds.Unavailable,
     {
       resolutionStatus: ResolutionStatusIds.Unavailable,
       reason: "ENSNode connection error. Please check your selected connection.",
-    } satisfies RecentRegistrationsUnavailable,
+    } satisfies RegistrarActionsUnavailable,
   ],
   [
     ResolutionStatusIds.Available,
@@ -239,11 +268,23 @@ export const variants: Map<ResolutionStatusId, ResolvedRecentRegistrations> = ne
       resolutionStatus: ResolutionStatusIds.Available,
       registrarActions: [
         renewalWithNoReferral,
+        {
+          ...renewalWithNoReferral,
+          action: { ...renewalWithNoReferral.action, incrementalDuration: 0 },
+        } satisfies NamedRegistrarAction,
+        {
+          ...renewalWithNoReferral,
+          action: { ...renewalWithNoReferral.action, incrementalDuration: 1 },
+        } satisfies NamedRegistrarAction,
+        {
+          ...renewalWithNoReferral,
+          action: { ...renewalWithNoReferral.action, incrementalDuration: 2 },
+        } satisfies NamedRegistrarAction,
         registrationWithReferral,
         registrationWithNoReferralAndEncodedLabelHashes,
         registrationWithZeroEncodedReferrer,
         registrationWithReferrerNotMatchingENSHolidayAwardsFormat,
       ],
-    } satisfies RecentRegistrationsAvailable,
+    } satisfies RegistrarActionsAvailable,
   ],
 ]);

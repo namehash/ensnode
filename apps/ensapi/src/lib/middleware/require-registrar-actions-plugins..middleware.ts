@@ -2,34 +2,12 @@ import config from "@/config";
 
 import {
   IndexingStatusResponseCodes,
-  OmnichainIndexingStatusIds,
-  PluginName,
   RegistrarActionsResponseCodes,
+  registrarActionsPrerequisites,
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
-
-/**
- * Required plugins to enable Registrar Actions API routes.
- *
- * 1. `registrars` plugin is required so that data in the `registrarActions`
- *    table is populated.
- * 2. `subgraph`, `basenames`, and `lineanames` are required to get the data
- *    for the name associated with each registrar action.
- * 3. In theory not all of `subgraph`, `basenames`, and `lineanames` plugins
- *    might be required. Ex: At least one, but the current logic in
- *    the `registrars` plugin always indexes registrar actions across
- *    Ethnames (subgraph), Basenames, and Lineanames and therefore we need to
- *    ensure each value in the registrar actions table has
- *    an associated record in the domains table.
- */
-const requiredPlugins = [
-  PluginName.Subgraph,
-  PluginName.Basenames,
-  PluginName.Lineanames,
-  PluginName.Registrars,
-] as const;
 
 /**
  * Creates middleware that ensures that all prerequisites of
@@ -47,17 +25,13 @@ const requiredPlugins = [
  */
 export const requireRegistrarActionsPluginMiddleware = () =>
   factory.createMiddleware(async (c, next) => {
-    const allRequiredPluginsActive = requiredPlugins.every((plugin) =>
-      config.ensIndexerPublicConfig.plugins.includes(plugin),
-    );
-
-    if (!allRequiredPluginsActive) {
+    if (!registrarActionsPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `Connected ENSIndexer must have all following plugins active: ${requiredPlugins.join(", ")}`,
+            details: `Connected ENSIndexer must have all following plugins active: ${registrarActionsPrerequisites.requiredPlugins.join(", ")}`,
           },
         }),
         500,
@@ -92,22 +66,15 @@ export const requireRegistrarActionsPluginMiddleware = () =>
       );
     }
 
-    const { omnichainStatus } =
-      indexingStatusResponse.realtimeProjection.snapshot.omnichainSnapshot;
+    const { omnichainSnapshot } = indexingStatusResponse.realtimeProjection.snapshot;
 
-    // Database indexes are created by the time the omnichain indexing status
-    // is either `completed` or `following`.
-    const ensIndexerDatabaseIndexesCreated =
-      omnichainStatus === OmnichainIndexingStatusIds.Completed ||
-      omnichainStatus === OmnichainIndexingStatusIds.Following;
-
-    if (!ensIndexerDatabaseIndexesCreated)
+    if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be either "completed" or "following".`,
+            details: `The cached omnichain indexing status of the Connected ENSIndexer must be either of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
           },
         }),
         500,

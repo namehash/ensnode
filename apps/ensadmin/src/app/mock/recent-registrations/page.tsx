@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
-import { DisplayRecentRegistrations } from "@/components/recent-registrations/display-recent-registrations";
+import { ENSNamespaceIds } from "@ensnode/datasources";
+
+import { DisplayRegistrarActionsPanel } from "@/components/recent-registrations/display-recent-registrations";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -10,22 +12,23 @@ import { variants } from "./mocks";
 
 const variantIds = [...variants.keys()];
 
-export default function MockRegistrationsPage() {
-  const title = "Recent registrations and renewals";
+export default function MockRegistrarActionsPage() {
+  const namespaceId = ENSNamespaceIds.Sepolia;
+  const title = "Recent registrar actions";
 
-  const [selectedVariant, setSelectedVariant] = useState(variantIds[0]);
-  const resolvedRecentRegistrations = variants.get(selectedVariant);
+  const [selectedVariantId, setSelectedVariantId] = useState(variantIds[0]);
+  const selectedVariant = variants.get(selectedVariantId);
 
-  if (!resolvedRecentRegistrations) {
-    return <>Could not resolve mocked recent registrations for "{selectedVariant}" variant.</>;
+  if (!selectedVariant) {
+    return <>No variant defined for variant id "{selectedVariantId}".</>;
   }
 
   return (
     <section className="flex flex-col gap-6 p-6 max-sm:p-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl leading-normal">Mock: RecentRegistrations</CardTitle>
-          <CardDescription>Select a mock RecentRegistrations variant</CardDescription>
+          <CardTitle className="text-2xl leading-normal">Mock: RegistrarActions</CardTitle>
+          <CardDescription>Select a mock RegistrarActions variant</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -33,9 +36,9 @@ export default function MockRegistrationsPage() {
             {variantIds.map((variantId) => (
               <Button
                 key={variantId}
-                variant={selectedVariant === variantId ? "default" : "outline"}
+                variant={selectedVariantId === variantId ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedVariant(variantId)}
+                onClick={() => setSelectedVariantId(variantId)}
               >
                 {variantId}
               </Button>
@@ -48,9 +51,10 @@ export default function MockRegistrationsPage() {
           <CardTitle>Output</CardTitle>
         </CardHeader>
         <CardContent>
-          <DisplayRecentRegistrations
+          <DisplayRegistrarActionsPanel
+            namespaceId={namespaceId}
             title={title}
-            resolvedRecentRegistrations={resolvedRecentRegistrations}
+            resolvedRegistrarActions={selectedVariant}
           />
         </CardContent>
       </Card>{" "}
