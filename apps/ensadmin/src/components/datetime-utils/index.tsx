@@ -153,8 +153,8 @@ export function DisplayDuration({ duration }: { duration: Duration }) {
   // formatDistanceStrict needs two UnixTimestamp values
   // so we create `beginsAt` and `endsAt` timestamps
   // where `beginsAt = endsAt - duration`
-  const endsAt = new Date();
-  const beginsAt = subSeconds(endsAt, duration);
+  const beginsAt = fromUnixTime(0);
+  const endsAt = fromUnixTime(duration);
 
   useEffect(() => {
     setTimeDistance(formatDistanceStrict(beginsAt, endsAt));
