@@ -5,7 +5,9 @@ import {
   type AccountId,
   accountIdEqual,
   type InterpretedName,
+  type LabelHash,
   type Name,
+  uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
@@ -106,3 +108,11 @@ export function isNameWrapper(contract: AccountId) {
   if (lineanamesNameWrapper && accountIdEqual(lineanamesNameWrapper, contract)) return true;
   return false;
 }
+
+/**
+ * BaseRegistrar-derived Registrars register direct subnames of a RegistrarManagedName. As such, the
+ * tokens issued by them are keyed by the direct subname's label's labelHash.
+ *
+ * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
+ */
+export const registrarTokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
