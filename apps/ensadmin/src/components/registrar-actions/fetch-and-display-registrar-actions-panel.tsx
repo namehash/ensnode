@@ -1,7 +1,7 @@
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 
 import { DisplayRegistrarActionsPanel } from "./display-registrar-actions-panel";
-import { useStatefulRegistrarActions } from "./use-fetch-registrar-actions";
+import { useStatefulRegistrarActions } from "./use-stateful-fetch-registrar-actions";
 
 interface FetchAndDisplayRegistrarActionsPanelProps {
   itemsPerPage: number;
