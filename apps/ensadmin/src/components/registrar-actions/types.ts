@@ -7,12 +7,12 @@ export const StatefulFetchStatusIds = {
   Connecting: "connecting",
 
   /**
-   * Fetching is indefinitely disabled as the config of the stateful ENSNode connection doesn't support use of the registrar actions API.
+   * Fetching is indefinitely disabled as the config of the stateful ENSNode connection doesn't support use of the Registrar Actions API.
    */
   Unsupported: "unsupported",
 
   /**
-   * Fetching is temporarily disabled as the current Indexing Status doesn't support use of the registrar actions API yet.
+   * Fetching is temporarily disabled as the current Indexing Status doesn't support use of the Registrar Actions API yet.
    */
   NotReady: "notReady",
 
@@ -47,7 +47,7 @@ export interface StatefulFetchRegistrarActionsConnecting {
 /**
  * Stateful Fetch Registrar Actions Unsupported
  *
- * Fetching is indefinitely disabled as the config of the stateful ENSNode connection doesn't support use of the registrar actions API.
+ * Fetching is indefinitely disabled as the config of the stateful ENSNode connection doesn't support use of the Registrar Actions API.
  */
 export interface StatefulFetchRegistrarActionsUnsupported {
   fetchStatus: typeof StatefulFetchStatusIds.Unsupported;
@@ -57,7 +57,7 @@ export interface StatefulFetchRegistrarActionsUnsupported {
 /**
  * Stateful Fetch Registrar Actions Not Ready
  *
- * Fetching is temporarily disabled as the current Indexing Status doesn't support use of the registrar actions API yet.
+ * Fetching is temporarily disabled as the current Indexing Status doesn't support use of the Registrar Actions API yet.
  */
 export interface StatefulFetchRegistrarActionsNotReady {
   fetchStatus: typeof StatefulFetchStatusIds.NotReady;
