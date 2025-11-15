@@ -1,19 +1,12 @@
-import {
-  type DomainId,
-  type ENSv1DomainId,
-  makeResolverId,
-  type ResolverId,
-} from "@ensnode/ensnode-sdk";
+import type { DomainId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 
-export async function getDomainResolver(domainId: DomainId): Promise<ResolverId | undefined> {
-  // TODO: refactor nodeResolverRelation to be domainResolverRelation using DomainId
-  const nrr = await db.query.nodeResolverRelation.findFirst({
-    where: (t, { eq }) => eq(t.node, domainId as ENSv1DomainId),
+export async function getDomainResolver(domainId: DomainId) {
+  const drr = await db.query.domainResolverRelation.findFirst({
+    where: (t, { eq }) => eq(t.domainId, domainId),
+    with: { resolver: true },
   });
 
-  if (!nrr) return undefined;
-
-  return makeResolverId({ chainId: nrr.chainId, address: nrr.resolver });
+  return drr?.resolver;
 }

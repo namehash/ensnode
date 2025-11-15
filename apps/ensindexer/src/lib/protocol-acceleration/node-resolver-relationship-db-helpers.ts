@@ -1,25 +1,24 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Address } from "viem";
 
-import type { Node } from "@ensnode/ensnode-sdk";
+import type { AccountId, DomainId, ResolverId } from "@ensnode/ensnode-sdk";
 
-export async function removeNodeResolverRelation(context: Context, registry: Address, node: Node) {
-  const chainId = context.chain.id;
-
-  await context.db.delete(schema.nodeResolverRelation, { chainId, registry, node });
+export async function removedomainResolverRelation(
+  context: Context,
+  registry: AccountId,
+  domainId: DomainId,
+) {
+  await context.db.delete(schema.domainResolverRelation, { ...registry, domainId });
 }
 
-export async function upsertNodeResolverRelation(
+export async function upsertdomainResolverRelation(
   context: Context,
-  registry: Address,
-  node: Node,
-  resolver: Address,
+  registry: AccountId,
+  domainId: DomainId,
+  resolverId: ResolverId,
 ) {
-  const chainId = context.chain.id;
-
-  return context.db
-    .insert(schema.nodeResolverRelation)
-    .values({ chainId, registry, node, resolver })
-    .onConflictDoUpdate({ resolver });
+  await context.db
+    .insert(schema.domainResolverRelation)
+    .values({ ...registry, domainId, resolverId })
+    .onConflictDoUpdate({ resolverId });
 }

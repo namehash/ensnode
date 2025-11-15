@@ -4,35 +4,26 @@ import { type Context, ponder } from "ponder:registry";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
-import { type LabelHash, makeSubdomainNode, type Node, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  type ENSv1DomainId,
+  type LabelHash,
+  makeENSv1DomainId,
+  makeResolverId,
+  makeSubdomainNode,
+  type Node,
+  PluginName,
+} from "@ensnode/ensnode-sdk";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import {
-  removeNodeResolverRelation,
-  upsertNodeResolverRelation,
+  removedomainResolverRelation,
+  upsertdomainResolverRelation,
 } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
 import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
-
-async function handleNewResolver({
-  context,
-  event,
-}: {
-  context: Context;
-  event: EventWithArgs<{ node: Node; resolver: Address }>;
-}) {
-  const { node, resolver: resolverAddress } = event.args;
-  const registry = event.log.address;
-  const isZeroResolver = isAddressEqual(zeroAddress, resolverAddress);
-
-  if (isZeroResolver) {
-    await removeNodeResolverRelation(context, registry, node);
-  } else {
-    await upsertNodeResolverRelation(context, registry, node, resolverAddress);
-  }
-}
 
 /**
  * Handler functions for Regsitry contracts in the Protocol Acceleration plugin.
@@ -42,6 +33,27 @@ async function handleNewResolver({
  * Note that this registry migration status tracking is isolated to the protocol
  */
 export default function () {
+  async function handleNewResolver({
+    context,
+    event,
+  }: {
+    context: Context;
+    event: EventWithArgs<{ node: Node; resolver: Address }>;
+  }) {
+    const { node, resolver } = event.args;
+
+    const registry = getThisAccountId(context, event);
+    const domainId = makeENSv1DomainId(node);
+
+    const isZeroResolver = isAddressEqual(zeroAddress, resolver);
+    if (isZeroResolver) {
+      await removedomainResolverRelation(context, registry, domainId);
+    } else {
+      const resolverId = makeResolverId({ chainId: registry.chainId, address: resolver });
+      await upsertdomainResolverRelation(context, registry, domainId, resolverId);
+    }
+  }
+
   /**
    * Handles Registry#NewOwner for:
    * - ENS Root Chain's (new) Registry
@@ -99,14 +111,6 @@ export default function () {
    */
   ponder.on(
     namespaceContract(PluginName.ProtocolAcceleration, "ENSv1Registry:NewResolver"),
-    async ({
-      context,
-      event,
-    }: {
-      context: Context;
-      event: EventWithArgs<{ node: Node; resolver: Address }>;
-    }) => {
-      await handleNewResolver({ context, event });
-    },
+    handleNewResolver,
   );
 }

@@ -7,14 +7,17 @@ import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import {
   type ChainId,
   type LabelHash,
+  makeENSv1DomainId,
+  makeResolverId,
   makeSubdomainNode,
   type Node,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { upsertNodeResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+import { upsertdomainResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
 
 const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
   DatasourceNames.ThreeDNSBase,
@@ -52,8 +55,9 @@ export default function () {
       }>;
     }) => {
       const { label: labelHash, node: parentNode } = event.args;
-      const registry = event.log.address;
+      const registry = getThisAccountId(context, event);
       const node = makeSubdomainNode(labelHash, parentNode);
+      const domainId = makeENSv1DomainId(node);
 
       const resolverAddress = ThreeDNSResolverByChainId[context.chain.id];
       if (!resolverAddress) {
@@ -62,8 +66,10 @@ export default function () {
         );
       }
 
+      const resolverId = makeResolverId({ chainId: registry.chainId, address: resolverAddress });
+
       // all ThreeDNSToken nodes have a hardcoded resolver at that address
-      await upsertNodeResolverRelation(context, registry, node, resolverAddress);
+      await upsertdomainResolverRelation(context, registry, domainId, resolverId);
     },
   );
 }

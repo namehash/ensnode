@@ -5,7 +5,7 @@
 import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
-import type { ChainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
+import type { ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 // TODO: implement resolverType & polymorphic field availability
 
@@ -46,35 +46,39 @@ export const reverseNameRecord = onchainTable(
 );
 
 /**
- * Tracks Node-Resolver relationships to accelerate the identification of a node's active resolver
- * in a specific (shadow)Registry.
+ * Tracks Domain-Resolver Relationships. This powers:
+ *  1. Domain-Resolver Realtionships within the GraphQL API, and
+ *  2. Accelerated lookups of a Domain's Resolver within the Resolution API.
  *
- * Note that this model supports the indexing of Node-Resolver relationships across any Registry on
- * on any chain, in particular to support the acceleration of ForwardResolution#findResolver for the
- * ENS Root Chain's Registry which can have any number of (shadow)Registries (like Basenames' and
- * Lineanames') on any chain.
- *
- * It is keyed by (chainId, registry, node) to match the on-chain datamodel of Registry/(shadow)Registry
- * Node-Resolver relationships.
+ * It is keyed by (chainId, address, domainId) to match the on-chain datamodel of
+ * Registry/(shadow)Registry Domain-Resolver relationships.
  */
-export const nodeResolverRelation = onchainTable(
-  "node_resolver_relations",
+export const domainResolverRelation = onchainTable(
+  "domain_resolver_relations",
   (t) => ({
     // keyed by (chainId, registry, node)
     chainId: t.integer().notNull().$type<ChainId>(),
-    registry: t.hex().notNull().$type<Address>(),
-    node: t.hex().notNull().$type<Node>(),
+
+    // The Registry (ENSv1Registry or ENSv2Registry)'s AccountId.
+    address: t.hex().notNull().$type<Address>(),
+    domainId: t.hex().notNull().$type<DomainId>(),
 
     /**
-     * The Address of the Resolver contract this `node` has set (via Registry#NewResolver) within
-     * the Registry on `chainId`.
+     * The Domain's assigned Resolver address within the Registry identified by (chainId, address).
      */
-    resolver: t.hex().notNull().$type<Address>(),
+    resolverId: t.hex().notNull().$type<ResolverId>(),
   }),
   (t) => ({
-    pk: primaryKey({ columns: [t.chainId, t.registry, t.node] }),
+    pk: primaryKey({ columns: [t.chainId, t.address, t.domainId] }),
   }),
 );
+
+export const domainResolverRelation_relations = relations(domainResolverRelation, ({ one }) => ({
+  resolver: one(resolver, {
+    fields: [domainResolverRelation.resolverId],
+    references: [resolver.id],
+  }),
+}));
 
 export const resolver = onchainTable(
   "resolvers",

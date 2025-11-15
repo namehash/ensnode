@@ -166,6 +166,7 @@ DomainRef.implement({
       description: "TODO",
       type: ResolverRef,
       nullable: true,
+      // TODO: dataloader this
       resolve: (parent) => getDomainResolver(parent.id),
     }),
 

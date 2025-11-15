@@ -2,6 +2,8 @@
  * TODO
  * - ThreeDNS
  * - Registration Renewals
+ *
+ * move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so many just for domains and registries?
  */
 
 import { createConfig } from "ponder";
