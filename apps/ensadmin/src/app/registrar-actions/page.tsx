@@ -1,13 +1,13 @@
 "use client";
 
-import { ResolveAndDisplayRegistrarActionsPanel } from "@/components/registrar-actions";
+import { FetchAndDisplayRegistrarActionsPanel } from "@/components/registrar-actions";
 
 export default function ExploreRegistrarActions() {
   return (
     <section className="flex flex-col gap-6 p-6">
-      <ResolveAndDisplayRegistrarActionsPanel
+      <FetchAndDisplayRegistrarActionsPanel
         title="Latest indexed registrar actions"
-        maxItems={25}
+        itemsPerPage={25}
       />
     </section>
   );

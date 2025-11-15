@@ -12,7 +12,7 @@ import {
   zeroEncodedReferrer,
 } from "@ensnode/ensnode-sdk";
 
-import { RelativeTime, TimeDistance } from "@/components/datetime-utils";
+import { DisplayDuration, RelativeTime } from "@/components/datetime-utils";
 import { InfoIcon } from "@/components/icons/InfoIcon";
 import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
@@ -54,8 +54,8 @@ function ResolveAndDisplayReferrerIdentity({
   chainId,
   referral,
 }: ResolveAndDisplayReferrerIdentityProps) {
+  // if encoded referrer is not available or is the zero encoded referrer then
   // display a hyphen
-  // if encoded referrer is not available or is the zero encoded referrer
   if (
     !isRegistrarActionReferralAvailable(referral) ||
     referral.encodedReferrer === zeroEncodedReferrer
@@ -181,12 +181,7 @@ export function DisplayRegistrarActionCard({
       </LabeledField>
 
       <LabeledField fieldLabel="Duration" className="w-[10%]  min-w-[100px]">
-        <TimeDistance
-          beginsAt={
-            registrationLifecycle.expiresAt - namedRegistrarAction.action.incrementalDuration
-          }
-          endsAt={registrationLifecycle.expiresAt}
-        />
+        <DisplayDuration duration={namedRegistrarAction.action.incrementalDuration} />
       </LabeledField>
 
       <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[150px]">

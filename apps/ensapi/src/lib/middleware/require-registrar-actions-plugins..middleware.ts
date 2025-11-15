@@ -74,7 +74,7 @@ export const requireRegistrarActionsPluginMiddleware = () =>
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be either of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
           },
         }),
         500,

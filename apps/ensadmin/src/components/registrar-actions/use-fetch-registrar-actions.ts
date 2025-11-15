@@ -7,18 +7,18 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import {
-  RegistrarActionsAvailable,
-  RegistrarActionsIndexingStatusNotReady,
-  RegistrarActionsInitial,
-  RegistrarActionsUnavailable,
-  RegistrarActionsUnresolved,
-  RegistrarActionsUnsupportedConfig,
-  ResolutionStatusIds,
-  ResolvedRegistrarActions,
+  StatefulFetchRegistrarActions,
+  StatefulFetchRegistrarActionsConnecting,
+  StatefulFetchRegistrarActionsError,
+  StatefulFetchRegistrarActionsLoaded,
+  StatefulFetchRegistrarActionsLoading,
+  StatefulFetchRegistrarActionsNotReady,
+  StatefulFetchRegistrarActionsUnsupported,
+  StatefulFetchStatusIds,
 } from "./types";
 
-interface UseFetchRegistrarActionsProps {
-  maxItems: number;
+interface UseStatefulRegistrarActionsProps {
+  itemsPerPage: number;
 }
 
 const {
@@ -29,14 +29,14 @@ const {
 } = registrarActionsPrerequisites;
 
 /**
- * Use Fetch Registrar Actions
+ * Use Stateful Registrar Actions
  *
  * This hook uses other hooks to interact with ENSNode APIs and build
- * a simple data model around fetching Registrar Actions.
+ * a "stateful" data model around fetching Registrar Actions in relation to the state of the connected ENSNode instance.
  */
-export function useFetchRegistrarActions({
-  maxItems,
-}: UseFetchRegistrarActionsProps): ResolvedRegistrarActions {
+export function useStatefulRegistrarActions({
+  itemsPerPage,
+}: UseStatefulRegistrarActionsProps): StatefulFetchRegistrarActions {
   const ensNodeConfigQuery = useENSNodeConfig();
   const indexingStatusQuery = useIndexingStatus();
 
@@ -59,7 +59,7 @@ export function useFetchRegistrarActions({
   //       We use `isRegistrarActionsApiSupported` to enable query in those cases.
   const registrarActionsQuery = useRegistrarActions({
     order: RegistrarActionsOrders.LatestRegistrarActions,
-    limit: maxItems,
+    itemsPerPage,
     query: {
       enabled: isRegistrarActionsApiSupported,
     },
@@ -68,16 +68,16 @@ export function useFetchRegistrarActions({
   // ENSNode config is not fetched yet, so wait in the initial status
   if (!ensNodeConfigQuery.isFetched || !indexingStatusQuery.isFetched) {
     return {
-      resolutionStatus: ResolutionStatusIds.Initial,
-    } satisfies RegistrarActionsInitial;
+      fetchStatus: StatefulFetchStatusIds.Connecting,
+    } satisfies StatefulFetchRegistrarActionsConnecting;
   }
 
   // ENSNode config fetched as error
   if (!ensNodeConfigQuery.isSuccess) {
     return {
-      resolutionStatus: ResolutionStatusIds.Unavailable,
+      fetchStatus: StatefulFetchStatusIds.Error,
       reason: "ENSNode config could not be fetched successfully",
-    } satisfies RegistrarActionsUnavailable;
+    } satisfies StatefulFetchRegistrarActionsError;
   }
 
   // Indexing Status fetched as error
@@ -86,58 +86,58 @@ export function useFetchRegistrarActions({
     indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Error
   ) {
     return {
-      resolutionStatus: ResolutionStatusIds.Unavailable,
+      fetchStatus: StatefulFetchStatusIds.Error,
       reason: "Indexing Status could not be fetched successfully",
-    } satisfies RegistrarActionsUnavailable;
+    } satisfies StatefulFetchRegistrarActionsError;
   }
 
   const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
 
-  // resolution is permanently not possible due to unsupported ENSNode config
+  // fetching is indefinitely not possible due to unsupported ENSNode config
   if (!hasEnsIndexerConfigSupport(ensIndexerPublicConfig)) {
     return {
-      resolutionStatus: ResolutionStatusIds.UnsupportedConfig,
+      fetchStatus: StatefulFetchStatusIds.Unsupported,
       requiredPlugins,
-    } satisfies RegistrarActionsUnsupportedConfig;
+    } satisfies StatefulFetchRegistrarActionsUnsupported;
   }
 
   const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
 
-  // resolution is temporarily not possible due to indexing status being not advanced enough
+  // fetching is temporarily not possible due to indexing status being not advanced enough
   if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
     return {
-      resolutionStatus: ResolutionStatusIds.IndexingStatusNotReady,
+      fetchStatus: StatefulFetchStatusIds.NotReady,
       supportedIndexingStatusIds,
-    } satisfies RegistrarActionsIndexingStatusNotReady;
+    } satisfies StatefulFetchRegistrarActionsNotReady;
   }
 
-  // resolution has not been completed
+  // fetching has not been completed
   if (registrarActionsQuery.isPending || registrarActionsQuery.isLoading) {
     return {
-      resolutionStatus: ResolutionStatusIds.Unresolved,
-      placeholderCount: maxItems,
-    } satisfies RegistrarActionsUnresolved;
+      fetchStatus: StatefulFetchStatusIds.Loading,
+      itemsPerPage,
+    } satisfies StatefulFetchRegistrarActionsLoading;
   }
 
-  // resolution has been completed with an error
+  // fetching has been completed with an error
   if (registrarActionsQuery.isLoadingError || registrarActionsQuery.isError) {
     return {
-      resolutionStatus: ResolutionStatusIds.Unavailable,
+      fetchStatus: StatefulFetchStatusIds.Error,
       reason: registrarActionsQuery.error.message,
-    } satisfies RegistrarActionsUnavailable;
+    } satisfies StatefulFetchRegistrarActionsError;
   }
 
-  // resolution has been completed successfully but server returned error response
+  // fetching has been completed successfully but server returned error response
   if (registrarActionsQuery.data.responseCode === RegistrarActionsResponseCodes.Error) {
     return {
-      resolutionStatus: ResolutionStatusIds.Unavailable,
+      fetchStatus: StatefulFetchStatusIds.Error,
       reason: registrarActionsQuery.data.error.message,
-    } satisfies RegistrarActionsUnavailable;
+    } satisfies StatefulFetchRegistrarActionsError;
   }
 
-  // resolution has been completed successfully, server returned OK response
+  // fetching has been completed successfully, server returned OK response
   return {
-    resolutionStatus: ResolutionStatusIds.Available,
+    fetchStatus: StatefulFetchStatusIds.Loaded,
     registrarActions: registrarActionsQuery.data.registrarActions,
-  } satisfies RegistrarActionsAvailable;
+  } satisfies StatefulFetchRegistrarActionsLoaded;
 }

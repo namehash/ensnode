@@ -1,109 +1,103 @@
 import { NamedRegistrarAction, OmnichainIndexingStatusId } from "@ensnode/ensnode-sdk";
 
-export const ResolutionStatusIds = {
+export const StatefulFetchStatusIds = {
   /**
-   * Resolution hasn't been started yet, and the state of ENSNode is not known yet.
+   * Fetching hasn't started yet because a stateful ENSNode connection hasn't been created yet.
    */
-  Initial: "initial",
+  Connecting: "connecting",
 
   /**
-   * Resolution cannot be started due to unsupported ENSNode Public Config.
+   * Fetching is indefinitely disabled as the config of the stateful ENSNode connection doesn't support use of the registrar actions API.
    */
-  UnsupportedConfig: "unsupportedConfig",
+  Unsupported: "unsupported",
 
   /**
-   * Resolution cannot be started due to Indexing Status not being ready yet.
+   * Fetching is temporarily disabled as the current Indexing Status doesn't support use of the registrar actions API yet.
    */
-  IndexingStatusNotReady: "indexingStatusNotReady",
+  NotReady: "notReady",
 
   /**
-   * Resolution has not been completed.
+   * A fetch operation has been initiated that hasn't completed yet.
    */
-  Unresolved: "unresolved",
+  Loading: "loading",
 
   /**
-   * Resolution has been completed and results are unavailable due to an error.
+   * Fetch completed with an error.
    */
-  Unavailable: "unavailable",
+  Error: "error",
 
   /**
-   * Resolution has been completed and results are available.
+   * Fetch successfully completed.
    */
-  Available: "available",
+  Loaded: "loaded",
 } as const;
 
-export type ResolutionStatusId = (typeof ResolutionStatusIds)[keyof typeof ResolutionStatusIds];
+export type StatefulFetchStatusId =
+  (typeof StatefulFetchStatusIds)[keyof typeof StatefulFetchStatusIds];
 
 /**
- * Registrar Actions Initial
+ * Stateful Fetch Registrar Actions Connecting
  *
- * Resolution hasn't been started yet, and the state of ENSNode is not known yet.
- *
- * Please note how this is a temporary and very brief status.
+ * Fetching hasn't started yet because a stateful ENSNode connection hasn't been created yet.
  */
-export interface RegistrarActionsInitial {
-  resolutionStatus: typeof ResolutionStatusIds.Initial;
+export interface StatefulFetchRegistrarActionsConnecting {
+  fetchStatus: typeof StatefulFetchStatusIds.Connecting;
 }
 
 /**
- * Registrar Actions Unsupported Config
+ * Stateful Fetch Registrar Actions Unsupported
  *
- * The ENSNode Public Config doesn't support use of the Registrar Action API.
- *
- * Please note how this is a permanent unavailability, not a temporary one.
+ * Fetching is indefinitely disabled as the config of the stateful ENSNode connection doesn't support use of the registrar actions API.
  */
-export interface RegistrarActionsUnsupportedConfig {
-  resolutionStatus: typeof ResolutionStatusIds.UnsupportedConfig;
+export interface StatefulFetchRegistrarActionsUnsupported {
+  fetchStatus: typeof StatefulFetchStatusIds.Unsupported;
   requiredPlugins: ReadonlyArray<string>;
 }
 
 /**
- * Registrar Actions Indexing Status not ready
+ * Stateful Fetch Registrar Actions Not Ready
  *
- * The ENSNode Public Config supports use of the Registrar Action API,
- * but the Indexing Status is not progressed enough yet.
- *
- * Please note how this is a temporary unavailability, not a permanent one.
+ * Fetching is temporarily disabled as the current Indexing Status doesn't support use of the registrar actions API yet.
  */
-export interface RegistrarActionsIndexingStatusNotReady {
-  resolutionStatus: typeof ResolutionStatusIds.IndexingStatusNotReady;
+export interface StatefulFetchRegistrarActionsNotReady {
+  fetchStatus: typeof StatefulFetchStatusIds.NotReady;
   supportedIndexingStatusIds: ReadonlyArray<OmnichainIndexingStatusId>;
 }
 
 /**
- * Registrar Actions Unresolved
+ * Stateful Fetch Registrar Actions Loading
  *
- * Resolution has not completed yet.
+ * A fetch operation has been initiated that hasn't completed yet.
  */
-export interface RegistrarActionsUnresolved {
-  resolutionStatus: typeof ResolutionStatusIds.Unresolved;
-  placeholderCount: number;
+export interface StatefulFetchRegistrarActionsLoading {
+  fetchStatus: typeof StatefulFetchStatusIds.Loading;
+  itemsPerPage: number;
 }
 
 /**
- * Registrar Actions Unavailable
+ * Stateful Fetch Registrar Actions Error
  *
- * Resolution has ended with an error.
+ * Fetch completed with an error.
  */
-export interface RegistrarActionsUnavailable {
-  resolutionStatus: typeof ResolutionStatusIds.Unavailable;
+export interface StatefulFetchRegistrarActionsError {
+  fetchStatus: typeof StatefulFetchStatusIds.Error;
   reason: string;
 }
 
 /**
- * Registrar Actions Available
+ * Stateful Fetch Registrar Actions Loaded
  *
- * Resolution has ended successfully with, resolved data is available.
+ * Fetch successfully completed.
  */
-export interface RegistrarActionsAvailable {
-  resolutionStatus: typeof ResolutionStatusIds.Available;
+export interface StatefulFetchRegistrarActionsLoaded {
+  fetchStatus: typeof StatefulFetchStatusIds.Loaded;
   registrarActions: NamedRegistrarAction[];
 }
 
-export type ResolvedRegistrarActions =
-  | RegistrarActionsInitial
-  | RegistrarActionsUnsupportedConfig
-  | RegistrarActionsIndexingStatusNotReady
-  | RegistrarActionsUnresolved
-  | RegistrarActionsUnavailable
-  | RegistrarActionsAvailable;
+export type StatefulFetchRegistrarActions =
+  | StatefulFetchRegistrarActionsConnecting
+  | StatefulFetchRegistrarActionsUnsupported
+  | StatefulFetchRegistrarActionsNotReady
+  | StatefulFetchRegistrarActionsLoading
+  | StatefulFetchRegistrarActionsError
+  | StatefulFetchRegistrarActionsLoaded;

@@ -1,9 +1,16 @@
-import { formatDistance, formatDistanceStrict, fromUnixTime, intlFormat } from "date-fns";
+import {
+  formatDistance,
+  formatDistanceStrict,
+  fromUnixTime,
+  getUnixTime,
+  intlFormat,
+  subSeconds,
+} from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import type * as React from "react";
 import { useEffect, useState } from "react";
 
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -138,22 +145,20 @@ export function RelativeTime({
 }
 
 /**
- * Client-only Time Distance component
+ * Display Duration component
  */
-export function TimeDistance({
-  beginsAt,
-  endsAt,
-}: {
-  beginsAt: UnixTimestamp;
-  endsAt: UnixTimestamp;
-}) {
+export function DisplayDuration({ duration }: { duration: Duration }) {
   const [timeDistance, setTimeDistance] = useState<string>("");
-  const beginsAtDate = fromUnixTime(beginsAt);
-  const endsAtDate = fromUnixTime(endsAt);
+
+  // formatDistanceStrict needs two UnixTimestamp values
+  // so we create `beginsAt` and `endsAt` timestamps
+  // where `beginsAt = endsAt - duration`
+  const endsAt = new Date();
+  const beginsAt = subSeconds(endsAt, duration);
 
   useEffect(() => {
-    setTimeDistance(formatDistanceStrict(endsAtDate, beginsAtDate));
-  }, [beginsAtDate, endsAtDate]);
+    setTimeDistance(formatDistanceStrict(beginsAt, endsAt));
+  }, [beginsAt, endsAt]);
 
   return timeDistance;
 }

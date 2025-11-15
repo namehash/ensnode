@@ -1,31 +1,31 @@
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";
 
 import { DisplayRegistrarActionsPanel } from "./display-registrar-actions-panel";
-import { useFetchRegistrarActions } from "./use-fetch-registrar-actions";
+import { useStatefulRegistrarActions } from "./use-fetch-registrar-actions";
 
-interface ResolveAndDisplayRegistrarActionsPanelProps {
-  maxItems: number;
+interface FetchAndDisplayRegistrarActionsPanelProps {
+  itemsPerPage: number;
 
   title: string;
 }
 
 /**
- * Resolves Registrar Actions through ENSNode and displays the Registrar Actions Panel.
+ * Fetches Registrar Actions through ENSNode and displays the Registrar Actions Panel.
  */
-export function ResolveAndDisplayRegistrarActionsPanel({
-  maxItems,
+export function FetchAndDisplayRegistrarActionsPanel({
+  itemsPerPage,
   title,
-}: ResolveAndDisplayRegistrarActionsPanelProps) {
+}: FetchAndDisplayRegistrarActionsPanelProps) {
   const namespaceId = useActiveNamespace();
-  const resolvedRegistrarActions = useFetchRegistrarActions({
-    maxItems,
+  const registrarActions = useStatefulRegistrarActions({
+    itemsPerPage,
   });
 
   return (
     <DisplayRegistrarActionsPanel
       namespaceId={namespaceId}
       title={title}
-      resolvedRegistrarActions={resolvedRegistrarActions}
+      registrarActions={registrarActions}
     />
   );
 }

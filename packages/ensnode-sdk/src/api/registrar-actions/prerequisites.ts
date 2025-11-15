@@ -3,7 +3,7 @@ import {
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   PluginName,
-} from "../ensindexer";
+} from "../../ensindexer";
 
 export const registrarActionsPrerequisites = Object.freeze({
   /**

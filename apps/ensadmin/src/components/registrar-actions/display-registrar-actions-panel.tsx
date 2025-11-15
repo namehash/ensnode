@@ -16,7 +16,7 @@ import {
   DisplayRegistrarActionCard,
   DisplayRegistrarActionCardPlaceholder,
 } from "./display-registrar-action-card";
-import { ResolutionStatusIds, type ResolvedRegistrarActions } from "./types";
+import { type StatefulFetchRegistrarActions, StatefulFetchStatusIds } from "./types";
 
 interface DisplayRegistrarActionsListProps {
   namespaceId: ENSNamespaceId;
@@ -49,18 +49,18 @@ function DisplayRegistrarActionsList({
 }
 
 interface DisplayRegistrarActionsListPlaceholderProps {
-  recordCount: number;
+  itemsPerPage: number;
 }
 
 /**
  * Displays a placeholder for a list of {@link NamedRegistrarAction}s.
  */
 function DisplayRegistrarActionsListPlaceholder({
-  recordCount,
+  itemsPerPage,
 }: DisplayRegistrarActionsListPlaceholderProps) {
   return (
     <div className="space-y-4">
-      {[...Array(recordCount)].map((_, idx) => (
+      {[...Array(itemsPerPage)].map((_, idx) => (
         <DisplayRegistrarActionCardPlaceholder key={idx} />
       ))}
     </div>
@@ -69,7 +69,7 @@ function DisplayRegistrarActionsListPlaceholder({
 
 export interface DisplayRegistrarActionsPanelProps {
   namespaceId: ENSNamespaceId;
-  resolvedRegistrarActions: ResolvedRegistrarActions;
+  registrarActions: StatefulFetchRegistrarActions;
   title: string;
 }
 
@@ -78,17 +78,17 @@ export interface DisplayRegistrarActionsPanelProps {
  */
 export function DisplayRegistrarActionsPanel({
   namespaceId,
-  resolvedRegistrarActions,
+  registrarActions,
   title,
 }: DisplayRegistrarActionsPanelProps) {
   const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
-  switch (resolvedRegistrarActions.resolutionStatus) {
-    case ResolutionStatusIds.Initial:
+  switch (registrarActions.fetchStatus) {
+    case StatefulFetchStatusIds.Connecting:
       // we show nothing to avoid a flash of not essential content
       return null;
 
-    case ResolutionStatusIds.UnsupportedConfig:
+    case StatefulFetchStatusIds.Unsupported:
       return (
         <Card>
           <CardHeader>
@@ -97,17 +97,11 @@ export function DisplayRegistrarActionsPanel({
             </CardTitle>
           </CardHeader>
           <CardContent className="max-sm:p-3 max-sm:pt-0 flex flex-col gap-4">
-            <p>
-              Registrar Actions API on the connected ENSNode instance will not be available due to
-              unsupported ENSNode config.
-            </p>
-            <p>
-              Registrar Actions API is only available when ENSNode config supports all of the
-              following plugins:
-            </p>
+            <p>The Registrar Actions API is unavailable on the connected ENSNode instance.</p>
+            <p>The Registrar Actions API requires all of the following plugins to be activated:</p>
 
             <ul>
-              {resolvedRegistrarActions.requiredPlugins.map((requiredPluginName) => (
+              {registrarActions.requiredPlugins.map((requiredPluginName) => (
                 <li className="inline" key={requiredPluginName}>
                   <Badge variant="secondary">{requiredPluginName}</Badge>{" "}
                 </li>
@@ -124,7 +118,7 @@ export function DisplayRegistrarActionsPanel({
         </Card>
       );
 
-    case ResolutionStatusIds.IndexingStatusNotReady:
+    case StatefulFetchStatusIds.NotReady:
       return (
         <Card>
           <CardHeader>
@@ -133,16 +127,14 @@ export function DisplayRegistrarActionsPanel({
             </CardTitle>
           </CardHeader>
           <CardContent className="max-sm:p-3 max-sm:pt-0 flex flex-col gap-4">
+            <p>The Registrar Actions API on the connected ENSNode instance is not available yet.</p>
             <p>
-              Registrar Actions API on the connected ENSNode instance is not currently available.
-            </p>
-            <p>
-              The latest indexed registrations will be available once the omnichain indexing status
-              is either of the following:
+              The Registrar Actions API will be available once the omnichain indexing status reaches
+              one of the following:
             </p>
 
             <ul>
-              {resolvedRegistrarActions.supportedIndexingStatusIds.map((supportedStatusId) => (
+              {registrarActions.supportedIndexingStatusIds.map((supportedStatusId) => (
                 <li className="inline" key={supportedStatusId}>
                   <Badge variant="secondary">
                     {formatOmnichainIndexingStatus(supportedStatusId)}
@@ -161,7 +153,7 @@ export function DisplayRegistrarActionsPanel({
         </Card>
       );
 
-    case ResolutionStatusIds.Unresolved:
+    case StatefulFetchStatusIds.Loading:
       return (
         <Card>
           <CardHeader>
@@ -170,17 +162,15 @@ export function DisplayRegistrarActionsPanel({
             </CardTitle>
           </CardHeader>
           <CardContent className="max-sm:p-3 max-sm:pt-0">
-            <DisplayRegistrarActionsListPlaceholder
-              recordCount={resolvedRegistrarActions.placeholderCount}
-            />
+            <DisplayRegistrarActionsListPlaceholder itemsPerPage={registrarActions.itemsPerPage} />
           </CardContent>
         </Card>
       );
 
-    case ResolutionStatusIds.Unavailable:
-      return <ErrorInfo title={title} description={resolvedRegistrarActions.reason} />;
+    case StatefulFetchStatusIds.Error:
+      return <ErrorInfo title={title} description={registrarActions.reason} />;
 
-    case ResolutionStatusIds.Available:
+    case StatefulFetchStatusIds.Loaded:
       return (
         <Card className="w-full">
           <CardHeader>
@@ -191,7 +181,7 @@ export function DisplayRegistrarActionsPanel({
           <CardContent>
             <DisplayRegistrarActionsList
               namespaceId={namespaceId}
-              registrarActions={resolvedRegistrarActions.registrarActions}
+              registrarActions={registrarActions.registrarActions}
             />
           </CardContent>
         </Card>

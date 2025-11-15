@@ -54,7 +54,7 @@ export default function MockRegistrarActionsPage() {
           <DisplayRegistrarActionsPanel
             namespaceId={namespaceId}
             title={title}
-            resolvedRegistrarActions={selectedVariant}
+            registrarActions={selectedVariant}
           />
         </CardContent>
       </Card>{" "}

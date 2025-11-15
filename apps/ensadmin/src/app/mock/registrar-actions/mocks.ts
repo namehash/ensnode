@@ -2,20 +2,19 @@ import {
   Duration,
   InterpretedName,
   NamedRegistrarAction,
-  OmnichainIndexingStatusIds,
-  PluginName,
+  registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
 
 import {
-  RegistrarActionsAvailable,
-  RegistrarActionsIndexingStatusNotReady,
-  RegistrarActionsInitial,
-  RegistrarActionsUnavailable,
-  RegistrarActionsUnresolved,
-  RegistrarActionsUnsupportedConfig,
-  ResolutionStatusId,
-  ResolutionStatusIds,
-  ResolvedRegistrarActions,
+  StatefulFetchRegistrarActions,
+  StatefulFetchRegistrarActionsConnecting,
+  StatefulFetchRegistrarActionsError,
+  StatefulFetchRegistrarActionsLoaded,
+  StatefulFetchRegistrarActionsLoading,
+  StatefulFetchRegistrarActionsNotReady,
+  StatefulFetchRegistrarActionsUnsupported,
+  StatefulFetchStatusId,
+  StatefulFetchStatusIds,
 } from "@/components/registrar-actions";
 
 export const registrationWithReferral = {
@@ -231,53 +230,45 @@ function registrarActionWithUpdatedIncrementalDuration(
   } satisfies NamedRegistrarAction;
 }
 
-export const variants: Map<ResolutionStatusId, ResolvedRegistrarActions> = new Map([
+export const variants: Map<StatefulFetchStatusId, StatefulFetchRegistrarActions> = new Map([
   [
-    ResolutionStatusIds.Initial,
+    StatefulFetchStatusIds.Connecting,
     {
-      resolutionStatus: ResolutionStatusIds.Initial,
-    } satisfies RegistrarActionsInitial,
+      fetchStatus: StatefulFetchStatusIds.Connecting,
+    } satisfies StatefulFetchRegistrarActionsConnecting,
   ],
   [
-    ResolutionStatusIds.UnsupportedConfig,
+    StatefulFetchStatusIds.Unsupported,
     {
-      resolutionStatus: ResolutionStatusIds.UnsupportedConfig,
-      requiredPlugins: [
-        PluginName.Subgraph,
-        PluginName.Basenames,
-        PluginName.Lineanames,
-        PluginName.Registrars,
-      ],
-    } satisfies RegistrarActionsUnsupportedConfig,
+      fetchStatus: StatefulFetchStatusIds.Unsupported,
+      requiredPlugins: registrarActionsPrerequisites.requiredPlugins,
+    } satisfies StatefulFetchRegistrarActionsUnsupported,
   ],
   [
-    ResolutionStatusIds.IndexingStatusNotReady,
+    StatefulFetchStatusIds.NotReady,
     {
-      resolutionStatus: ResolutionStatusIds.IndexingStatusNotReady,
-      supportedIndexingStatusIds: [
-        OmnichainIndexingStatusIds.Completed,
-        OmnichainIndexingStatusIds.Following,
-      ],
-    } satisfies RegistrarActionsIndexingStatusNotReady,
+      fetchStatus: StatefulFetchStatusIds.NotReady,
+      supportedIndexingStatusIds: registrarActionsPrerequisites.supportedIndexingStatusIds,
+    } satisfies StatefulFetchRegistrarActionsNotReady,
   ],
   [
-    ResolutionStatusIds.Unresolved,
+    StatefulFetchStatusIds.Loading,
     {
-      resolutionStatus: ResolutionStatusIds.Unresolved,
-      placeholderCount: 8,
-    } satisfies RegistrarActionsUnresolved,
+      fetchStatus: StatefulFetchStatusIds.Loading,
+      itemsPerPage: 8,
+    } satisfies StatefulFetchRegistrarActionsLoading,
   ],
   [
-    ResolutionStatusIds.Unavailable,
+    StatefulFetchStatusIds.Error,
     {
-      resolutionStatus: ResolutionStatusIds.Unavailable,
+      fetchStatus: StatefulFetchStatusIds.Error,
       reason: "ENSNode connection error. Please check your selected connection.",
-    } satisfies RegistrarActionsUnavailable,
+    } satisfies StatefulFetchRegistrarActionsError,
   ],
   [
-    ResolutionStatusIds.Available,
+    StatefulFetchStatusIds.Loaded,
     {
-      resolutionStatus: ResolutionStatusIds.Available,
+      fetchStatus: StatefulFetchStatusIds.Loaded,
       registrarActions: [
         renewalWithNoReferral,
         registrarActionWithUpdatedIncrementalDuration(renewalWithNoReferral, 0),
@@ -288,6 +279,6 @@ export const variants: Map<ResolutionStatusId, ResolvedRegistrarActions> = new M
         registrationWithZeroEncodedReferrer,
         registrationWithReferrerNotMatchingENSHolidayAwardsFormat,
       ],
-    } satisfies RegistrarActionsAvailable,
+    } satisfies StatefulFetchRegistrarActionsLoaded,
   ],
 ]);
