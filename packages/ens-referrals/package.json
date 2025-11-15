@@ -38,6 +38,9 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "date-fns": "catalog:"
+  },
   "peerDependencies": {
     "viem": "catalog:"
   },
