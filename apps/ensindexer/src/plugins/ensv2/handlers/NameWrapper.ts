@@ -229,7 +229,7 @@ export default function () {
         // Invariant: If there's an existing Registration, it should be expired
         if (registration && !isFullyExpired) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): NameWrapped but there's an existing unexpired non-BaseRegistrar Registration:\n${toJson({ registration, timestamp: event.block.timestamp })}`,
           );
         }
 

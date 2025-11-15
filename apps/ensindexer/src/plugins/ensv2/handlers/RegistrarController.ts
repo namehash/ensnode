@@ -4,6 +4,8 @@ import { labelhash, namehash } from "viem";
 
 import {
   type EncodedReferrer,
+  type Label,
+  type LabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
@@ -11,7 +13,7 @@ import {
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
-import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
+import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -27,18 +29,25 @@ export default function () {
   }: {
     context: Context;
     event: EventWithArgs<{
-      label: string;
+      label?: Label;
+      labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, baseCost, premium, referrer } = event.args;
-    const label = _label as LiteralLabel;
+    const { label: _label, labelHash, baseCost, premium, referrer } = event.args;
+    const label = _label as LiteralLabel | undefined;
+
+    // Invariant: If emitted, label must align with labelHash
+    if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
+      throw new Error(
+        `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
+      );
+    }
 
     const controller = getThisAccountId(context, event);
     const managedNode = namehash(getRegistrarManagedName(controller));
-    const labelHash = labelhashLiteralLabel(label);
 
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);
@@ -51,7 +60,11 @@ export default function () {
     }
 
     // ensure label
-    await ensureLabel(context, label);
+    if (label !== undefined) {
+      await ensureLabel(context, label);
+    } else {
+      await ensureUnknownLabel(context, labelHash);
+    }
 
     // update registration's baseCost/premium
     await context.db
@@ -83,7 +96,7 @@ export default function () {
 
     if (!registration) {
       throw new Error(
-        `Invariant(RegistrarController:NameRenewed): NameRegistered but no Registration.`,
+        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Registration.`,
       );
     }
 
@@ -101,28 +114,56 @@ export default function () {
       pluginName,
       "RegistrarController:NameRegistered(string label, bytes32 indexed labelhash, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires, bytes32 referrer)",
     ),
-    handleNameRegisteredByController,
+    ({ context, event }) =>
+      handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: event.args.labelhash },
+        },
+      }),
   );
   ponder.on(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 baseCost, uint256 premium, uint256 expires)",
     ),
-    handleNameRegisteredByController,
+    ({ context, event }) =>
+      handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: { ...event.args, label: event.args.name, labelHash: event.args.label },
+        },
+      }),
   );
   ponder.on(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 cost, uint256 expires)",
     ),
-    handleNameRegisteredByController,
+    ({ context, event }) =>
+      handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: { ...event.args, label: event.args.name, labelHash: event.args.label },
+        },
+      }),
   );
   ponder.on(
     namespaceContract(
       pluginName,
       "RegistrarController:NameRegistered(string name, bytes32 indexed label, address indexed owner, uint256 expires)",
     ),
-    handleNameRegisteredByController,
+    ({ context, event }) =>
+      handleNameRegisteredByController({
+        context,
+        event: {
+          ...event,
+          args: { ...event.args, label: event.args.name, labelHash: event.args.label },
+        },
+      }),
   );
 
   ///////////////////////////////////

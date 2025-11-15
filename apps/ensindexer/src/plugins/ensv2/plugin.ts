@@ -1,9 +1,13 @@
 /**
  * TODO
  * - ThreeDNS
- * - Registration Renewals
+ * - Renewals
+ * - indexes
+ * - https://pothos-graphql.dev/docs/plugins/tracing
+ * - connections w/ limits & cursors
  *
  * move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so many just for domains and registries?
+ * test alpha sepolia + protocol accelerateion index time vs ensv2
  */
 
 import { createConfig } from "ponder";
@@ -152,10 +156,10 @@ export default createPlugin({
           },
         },
 
-        //////////////
-        // Registrars
-        //////////////
-        [namespaceContract(pluginName, "Registrar")]: {
+        ///////////////////
+        // Base Registrars
+        ///////////////////
+        [namespaceContract(pluginName, "BaseRegistrar")]: {
           abi: AnyRegistrarABI,
           chain: {
             // Ethnames BaseRegistrar

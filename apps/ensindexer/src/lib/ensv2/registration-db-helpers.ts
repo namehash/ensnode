@@ -40,8 +40,8 @@ export function isRegistrationFullyExpired(
   // no expiration, never expired
   if (registration.expiration === null) return false;
 
-  // otherwise check against now
-  return registration.expiration + (registration.gracePeriod ?? 0n) <= now;
+  // otherwise it is expired if now >= expiration + grace
+  return now >= registration.expiration + (registration.gracePeriod ?? 0n);
 }
 
 /**

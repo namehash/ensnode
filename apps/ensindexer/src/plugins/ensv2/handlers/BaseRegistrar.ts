@@ -43,7 +43,7 @@ const pluginName = PluginName.ENSv2;
 
 export default function () {
   ponder.on(
-    namespaceContract(pluginName, "Registrar:Transfer"),
+    namespaceContract(pluginName, "BaseRegistrar:Transfer"),
     async ({
       context,
       event,
@@ -74,7 +74,9 @@ export default function () {
       if (isBurn) {
         // requires an existing registration
         if (!registration) {
-          throw new Error(`Invariant(Registrar:Transfer): _burn expected existing Registration`);
+          throw new Error(
+            `Invariant(BaseRegistrar:Transfer): _burn expected existing Registration`,
+          );
         }
 
         // for now, just delete the registration
@@ -82,7 +84,7 @@ export default function () {
         await context.db.delete(schema.registration, { id: registration.id });
       } else {
         if (!registration) {
-          throw new Error(`Invariant(Registrar:Transfer): expected existing Registration`);
+          throw new Error(`Invariant(BaseRegistrar:Transfer): expected existing Registration`);
         }
 
         // materialize Domain owner
@@ -117,7 +119,7 @@ export default function () {
     // Invariant: If there is an existing Registration, it must be fully expired.
     if (registration && !isFullyExpired) {
       throw new Error(
-        `Invariant(Registrar:NameRegistered): Existing registration found in NameRegistered, expected none.`,
+        `Invariant(BaseRegistrar:NameRegistered): Existing registration found in NameRegistered, expected none.`,
       );
     }
 
@@ -143,14 +145,14 @@ export default function () {
     await materializeDomainOwner(context, domainId, owner);
   }
 
-  ponder.on(namespaceContract(pluginName, "Registrar:NameRegistered"), handleNameRegistered);
+  ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);
   ponder.on(
-    namespaceContract(pluginName, "Registrar:NameRegisteredWithRecord"),
+    namespaceContract(pluginName, "BaseRegistrar:NameRegisteredWithRecord"),
     handleNameRegistered,
   );
 
   ponder.on(
-    namespaceContract(pluginName, "Registrar:NameRenewed"),
+    namespaceContract(pluginName, "BaseRegistrar:NameRenewed"),
     async ({
       context,
       event,
@@ -166,16 +168,23 @@ export default function () {
       const node = makeSubdomainNode(labelHash, managedNode);
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
-      const isFullyExpired =
-        registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
-      // Invariant: There must be an unexired Registration to renew.
-      if (!registration || !isFullyExpired) {
+      // Invariant: There must be a Registration to renew.
+      if (!registration) {
         throw new Error(
-          `Invariant(Registrar:NameRenewed): NameRenewed emitted but no unexpired registration\n${toJson(registration)}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no Registration to renew.`,
         );
       }
 
+      // Invariant: The Registation must not be fully expired.
+      // https://github.com/ensdomains/ens-contracts/blob/b6cb0e26/contracts/ethregistrar/BaseRegistrarImplementation.sol#L161
+      if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
+        throw new Error(
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no unexpired registration\n${toJson({ registration, timestamp: event.block.timestamp })}`,
+        );
+      }
+
+      // update the registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
 
       // TODO: insert renewal & reference registration
