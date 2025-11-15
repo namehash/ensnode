@@ -9,7 +9,7 @@ import {
   isPccFuseSet,
   type LiteralLabel,
   makeENSv1DomainId,
-  makeRegistrationId,
+  makeLatestRegistrationId,
   makeSubdomainNode,
   type Node,
   PluginName,
@@ -24,6 +24,7 @@ import {
   isRegistrationExpired,
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
+  supercedeLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -125,7 +126,7 @@ export default function () {
       );
     }
 
-    // Expired Registrations are non-transferrable if PCC is set
+    // Invariant: Expired Registrations are non-transferrable if PCC is set
     const cannotTransferWhileExpired = registration.fuses && isPccFuseSet(registration.fuses);
     if (isExpired && cannotTransferWhileExpired) {
       throw new Error(
@@ -167,8 +168,8 @@ export default function () {
           await ensureLabel(context, label);
         }
       } catch {
-        // NameWrapper emitted malformed name? just warn
-        console.warn(`NameWrapper emitted malformed DNSEncoded Name: '${name}'`);
+        // NameWrapper emitted malformed name? just warn and move on
+        console.warn(`NameWrapper emitted malformed DNSEncodedName: '${name}'`);
       }
 
       const registration = await getLatestRegistration(context, domainId);
@@ -238,13 +239,19 @@ export default function () {
           console.warn(`Creating NameWrapper registration for already-expired name: ${node}`);
         }
 
-        // create a new NameWrapper Registration
+        // supercede the latest Registration if exists
+        if (registration) {
+          await supercedeLatestRegistration(context, registration);
+        }
+
         const nextIndex = registration ? registration.index + 1 : 0;
-        const registrationId = makeRegistrationId(domainId, nextIndex);
+        const registrationId = makeLatestRegistrationId(domainId);
+
+        // insert NameWrapper Registration
         await context.db.insert(schema.registration).values({
           id: registrationId,
-          type: "NameWrapper",
           index: nextIndex,
+          type: "NameWrapper",
           registrarChainId: registrar.chainId,
           registrarAddress: registrar.address,
           domainId,
@@ -282,7 +289,7 @@ export default function () {
           // expiration: null // TODO: NameWrapper expiration logic? maybe nothing to do here
         });
       } else {
-        // otherwise, deactivate the current registration by setting its expiry to this block
+        // otherwise, deactivate the latest registration by setting its expiry to this block
         await context.db.update(schema.registration, { id: registration.id }).set({
           expiration: event.block.timestamp,
         });

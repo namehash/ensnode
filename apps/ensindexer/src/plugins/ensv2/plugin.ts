@@ -1,10 +1,22 @@
 /**
  * TODO
+ * - mainnet sync is really really slow probably because of the getLatestRegistration
+ *   - can we have two parallel tables, one of which always holds the `latestRegistration` which can be looked up exactly by domainId?
+ *   - alternatively maybe the latest registration's id can always be domainId/latest and when it gets superceded by another one we can
+ *     clone the data in /latest to /latest.index and then delete the latest and then insert a new latest with the new registration data
+ *      - simpler than having to maintain parallel tables and sort by index always works for api layer
+ *
  * - ThreeDNS
  * - Renewals
  * - indexes
  * - https://pothos-graphql.dev/docs/plugins/tracing
  * - connections w/ limits & cursors
+ * - Resolver polymorphism & Bridged Resolver materialization
+ *   - Account.dedicatedResolvers
+ * - Registry.canonicalName
+ *   - then update canonical traversal to use canonicalName
+ * - Account.permissions -> PermissionsUser[]
+ *
  *
  * move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so many just for domains and registries?
  * test alpha sepolia + protocol accelerateion index time vs ensv2

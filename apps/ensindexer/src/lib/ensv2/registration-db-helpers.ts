@@ -1,15 +1,38 @@
 import type { Context } from "ponder:registry";
-import type schema from "ponder:schema";
+import schema from "ponder:schema";
 
-import type { DomainId } from "@ensnode/ensnode-sdk";
+import { type DomainId, makeLatestRegistrationId, makeRegistrationId } from "@ensnode/ensnode-sdk";
+
+import { toJson } from "@/lib/json-stringify-with-bigints";
 
 /**
  * TODO: find the most recent registration, active or otherwise
  */
 export async function getLatestRegistration(context: Context, domainId: DomainId) {
-  return await context.db.sql.query.registration.findFirst({
-    where: (t, { eq }) => eq(t.domainId, domainId),
-    orderBy: (t, { desc }) => desc(t.index),
+  return context.db.find(schema.registration, { id: makeLatestRegistrationId(domainId) });
+}
+
+/**
+ * TODO
+ */
+export async function supercedeLatestRegistration(
+  context: Context,
+  registration: typeof schema.registration.$inferSelect,
+) {
+  // Invariant: Must be the latest Registration
+  if (registration.id !== makeLatestRegistrationId(registration.domainId)) {
+    throw new Error(
+      `Invariant(supercedeRegistration): Attempted to supercede non-latest Registration:\n${toJson(registration)}`,
+    );
+  }
+
+  // delete latest
+  await context.db.delete(schema.registration, { id: registration.id });
+
+  // insert existing data into new Registration w/ indexed id
+  await context.db.insert(schema.registration).values({
+    ...registration,
+    id: makeRegistrationId(registration.domainId, registration.index),
   });
 }
 

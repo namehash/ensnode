@@ -95,3 +95,9 @@ export const makeResolverRecordsId = (contract: AccountId, node: Node) =>
  */
 export const makeRegistrationId = (domainId: DomainId, index: number = 0) =>
   `${domainId}/${index}` as RegistrationId;
+
+/**
+ *
+ */
+export const makeLatestRegistrationId = (domainId: DomainId) =>
+  `${domainId}/latest` as RegistrationId;

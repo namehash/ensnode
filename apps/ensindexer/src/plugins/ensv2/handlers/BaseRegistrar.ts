@@ -5,6 +5,7 @@ import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
 
 import {
   makeENSv1DomainId,
+  makeLatestRegistrationId,
   makeRegistrationId,
   makeSubdomainNode,
   PluginName,
@@ -15,6 +16,7 @@ import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv
 import {
   getLatestRegistration,
   isRegistrationFullyExpired,
+  supercedeLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -123,10 +125,15 @@ export default function () {
       );
     }
 
-    const nextIndex = registration ? registration.index + 1 : 0;
-    const registrationId = makeRegistrationId(domainId, nextIndex);
+    // supercede the latest Registration if exists
+    if (registration) {
+      await supercedeLatestRegistration(context, registration);
+    }
 
-    // upsert relevant registration for domain
+    const nextIndex = registration ? registration.index + 1 : 0;
+    const registrationId = makeLatestRegistrationId(domainId);
+
+    // insert BaseRegistrar Registration
     await context.db.insert(schema.registration).values({
       id: registrationId,
       index: nextIndex,
