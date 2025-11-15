@@ -164,14 +164,14 @@ export default createPlugin({
               ensroot.chain.id,
               ensroot.contracts.BaseRegistrar,
             ),
-            // Basenames BaseRegistrar, if exists
+            // Basenames BaseRegistrar, if defined
             ...(basenames &&
               chainConfigForContract(
                 config.globalBlockrange,
                 basenames.chain.id,
                 basenames.contracts.BaseRegistrar,
               )),
-            // Lineanames BaseRegistrar, if exists
+            // Lineanames BaseRegistrar, if defined
             ...(lineanames &&
               chainConfigForContract(
                 config.globalBlockrange,

@@ -12,8 +12,12 @@ import {
 
 import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
-import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
+import {
+  getLatestRegistration,
+  isRegistrationFullyExpired,
+} from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -107,19 +111,23 @@ export default function () {
 
     const domainId = makeENSv1DomainId(node);
     const registration = await getLatestRegistration(context, domainId);
+    const isFullyExpired =
+      registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
-    // TODO: && isActive(registration)
-    if (registration) {
+    // Invariant: If there is an existing Registration, it must be fully expired.
+    if (registration && !isFullyExpired) {
       throw new Error(
         `Invariant(Registrar:NameRegistered): Existing registration found in NameRegistered, expected none.`,
       );
     }
 
-    const registrationId = makeRegistrationId(domainId, 0);
+    const nextIndex = registration ? registration.index + 1 : 0;
+    const registrationId = makeRegistrationId(domainId, nextIndex);
 
     // upsert relevant registration for domain
     await context.db.insert(schema.registration).values({
       id: registrationId,
+      index: nextIndex,
       type: "BaseRegistrar",
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,
@@ -158,11 +166,13 @@ export default function () {
       const node = makeSubdomainNode(labelHash, managedNode);
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
+      const isFullyExpired =
+        registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
-      // TODO: || !isActive(registration)
-      if (!registration) {
+      // Invariant: There must be an unexired Registration to renew.
+      if (!registration || !isFullyExpired) {
         throw new Error(
-          `Invariant(Registrar:NameRenewed): NameRenewed emitted but no active registration.`,
+          `Invariant(Registrar:NameRenewed): NameRenewed emitted but no unexpired registration\n${toJson(registration)}`,
         );
       }
 
