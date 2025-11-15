@@ -2,7 +2,12 @@ import { type Datasource, type ENSNamespaceId, getENSNamespace } from "@ensnode/
 
 import { serializeChainId } from "../serialize";
 import type { ChainIdString } from "../serialized-types";
-import { buildAlchemyBaseUrl, buildDRPCUrl } from "./build-rpc-urls";
+import {
+  alchemySupportsChain,
+  buildAlchemyBaseUrl,
+  buildDRPCUrl,
+  drpcSupportsChain,
+} from "./build-rpc-urls";
 import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./environments";
 
 /**
@@ -40,13 +45,21 @@ export function buildRpcConfigsFromEnv(
     }
 
     const httpUrls = [
-      // alchemy, if specified
-      alchemyApiKey && `https://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`,
-      // drpc, if specified
-      drpcKey && buildDRPCUrl(chain.id, drpcKey),
+      // alchemy, if specified and available
+      alchemyApiKey &&
+        alchemySupportsChain(chain.id) && //
+        `https://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`,
+
+      // drpc, if specified and available
+      drpcKey &&
+        drpcSupportsChain(chain.id) && //
+        buildDRPCUrl(chain.id, drpcKey),
     ];
 
-    const wsUrl = alchemyApiKey && `wss://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`;
+    const wsUrl =
+      alchemyApiKey &&
+      alchemySupportsChain(chain.id) && //
+      `wss://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`;
 
     const urls = [...httpUrls, wsUrl]
       // filter out false/undefined values from the set of urls

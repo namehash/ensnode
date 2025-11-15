@@ -302,10 +302,9 @@ export const registrarActions = onchainTable(
      *
      * The "chainId" of this address is the same as is referenced in `subregistryId`.
      *
-     * Guaranteed to be a fully lowercase string formatted according to
-     * the CAIP-10 standard.
+     * Guaranteed to be a fully lowercase address
      */
-    registrant: t.text().notNull(),
+    registrant: t.hex().notNull(),
 
     /**
      * Encoded Referrer

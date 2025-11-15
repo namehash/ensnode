@@ -1,6 +1,6 @@
 import type { CoinType } from "@ensdomains/address-encoder";
 import { AccountId as CaipAccountId } from "caip";
-import { type Address, isAddress } from "viem";
+import { type Address, type Hex, isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -9,11 +9,12 @@ import { type Address, isAddress } from "viem";
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
-import z from "zod/v4";
+import { z } from "zod/v4";
 
-import { ENSNamespaceIds } from "../ens";
+import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
-import { type CurrencyId, CurrencyIds, Price } from "./currencies";
+import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
+import { reinterpretName } from "./reinterpretation";
 import type { SerializedAccountId } from "./serialized-types";
 import type {
   AccountId,
@@ -249,7 +250,10 @@ const makePriceAmountSchema = (valueLabel: string = "Amount") =>
       error: `${valueLabel} must not be negative.`,
     });
 
-const makePriceCurrencySchema = (currency: CurrencyId, valueLabel: string = "Price Currency") =>
+export const makePriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
   z.strictObject({
     amount: makePriceAmountSchema(`${valueLabel} amount`),
 
@@ -271,6 +275,12 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
     ],
     { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
   );
+
+/**
+ * Schema for {@link PriceEth} type.
+ */
+export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
+  makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
 
 /**
  * Schema for {@link AccountId} type.
@@ -296,3 +306,71 @@ export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = 
       };
     })
     .pipe(makeAccountIdSchema(valueLabel));
+
+/**
+ * Make a schema for {@link Hex} representation of bytes array.
+ *
+ * @param {number} options.bytesCount expected count of bytes to be hex-encoded
+ */
+export const makeHexStringSchema = (
+  options: { bytesCount: number },
+  valueLabel: string = "String representation of bytes array",
+) =>
+  z
+    .string()
+    .check(function invariant_isHexEncoded(ctx) {
+      if (!isHex(ctx.value)) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must start with '0x'.`,
+        });
+      }
+    })
+    .transform((v) => v as Hex)
+    .check(function invariant_encodesRequiredBytesCount(ctx) {
+      const expectedBytesCount = options.bytesCount;
+      const actualBytesCount = size(ctx.value);
+
+      if (actualBytesCount !== expectedBytesCount) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must represent exactly ${expectedBytesCount} bytes. Currently represented bytes count: ${actualBytesCount}.`,
+        });
+      }
+    });
+
+/**
+ * Make schema for {@link Node}.
+ */
+export const makeNodeSchema = (valueLabel: string = "Node") =>
+  makeHexStringSchema({ bytesCount: 32 }, valueLabel);
+
+/**
+ * Make schema for Transaction Hash
+ */
+export const makeTransactionHashSchema = (valueLabel: string = "Transaction hash") =>
+  makeHexStringSchema({ bytesCount: 32 }, valueLabel);
+
+/**
+ * Make schema for {@link ReinterpretedName}.
+ */
+export const makeReinterpretedNameSchema = (valueLabel: string = "Reinterpreted Name") =>
+  z
+    .string()
+    .transform((v) => v as InterpretedName)
+    .check((ctx) => {
+      try {
+        reinterpretName(ctx.value);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} cannot be reinterpreted: ${errorMessage}`,
+        });
+      }
+    })
+    .transform(reinterpretName);

@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 
-import type { LogLevelEnvironment } from "../internal";
+import type { LogLevelEnvironment } from "./config/environments";
 
 /**
  * Set of valid log levels, mirroring pino#LogLevelWithSilent.

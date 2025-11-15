@@ -1,8 +1,15 @@
 import { prettifyError } from "zod/v4";
 
-import type { SerializedIndexingStatusResponse } from "./serialized-types";
-import type { ErrorResponse, IndexingStatusResponse } from "./types";
-import { ErrorResponseSchema, makeIndexingStatusResponseSchema } from "./zod-schemas";
+import type {
+  SerializedIndexingStatusResponse,
+  SerializedRegistrarActionsResponse,
+} from "./serialized-types";
+import type { ErrorResponse, IndexingStatusResponse, RegistrarActionsResponse } from "./types";
+import {
+  ErrorResponseSchema,
+  makeIndexingStatusResponseSchema,
+  makeRegistrarActionsResponseSchema,
+} from "./zod-schemas";
 
 export function deserializeErrorResponse(maybeErrorResponse: unknown): ErrorResponse {
   const parsed = ErrorResponseSchema.safeParse(maybeErrorResponse);
@@ -21,6 +28,20 @@ export function deserializeIndexingStatusResponse(
 
   if (parsed.error) {
     throw new Error(`Cannot deserialize IndexingStatusResponse:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializeRegistrarActionsResponse(
+  maybeResponse: SerializedRegistrarActionsResponse,
+): RegistrarActionsResponse {
+  const parsed = makeRegistrarActionsResponseSchema().safeParse(maybeResponse);
+
+  if (parsed.error) {
+    throw new Error(
+      `Cannot deserialize RegistrarActionsResponse:\n${prettifyError(parsed.error)}\n`,
+    );
   }
 
   return parsed.data;

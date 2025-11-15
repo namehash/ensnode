@@ -6,7 +6,7 @@
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import { uniq } from "../../shared";
 import {

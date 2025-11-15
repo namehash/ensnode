@@ -1,12 +1,20 @@
 import {
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
+  deserializeRegistrarActionsResponse,
+  RegistrarActionsFilterFields,
+  RegistrarActionsOrders,
   type SerializedIndexingStatusResponse,
+  type SerializedRegistrarActionsResponse,
 } from "./api";
 import type {
   ConfigResponse,
   ErrorResponse,
   IndexingStatusResponse,
+  RegistrarActionsFilter,
+  RegistrarActionsOrder,
+  RegistrarActionsRequest,
+  RegistrarActionsResponse,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesRequest,
@@ -333,7 +341,7 @@ export class ENSNodeClient {
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {
-        // if errorResponse is could not be determined,
+        // if errorResponse could not be determined,
         // it means the response includes indexing status data
         console.log("Indexing Status API: handling a known indexing status server error.");
       }
@@ -346,5 +354,119 @@ export class ENSNodeClient {
     }
 
     return deserializeIndexingStatusResponse(responseData as SerializedIndexingStatusResponse);
+  }
+
+  /**
+   * Fetch ENSNode Registrar Actions
+   *
+   * @param {RegistrarActionsRequestFilter} request.filter is
+   *        an optional request filter configuration.
+   * @param {number} request.limit sets the maximum count of results in the response.
+   * @param {RegistrarActionsRequestOrder} request.order sets the order of
+   *        results in the response by field and direction.
+   * @returns {RegistrarActionsResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   *
+   * @example
+   * ```ts
+   * import {
+   *   registrarActionsFilter,,
+   *   ENSNodeClient,
+   * } from "@ensnode/ensnode-sdk";
+   * import { namehash } from "viem/ens";
+   *
+   * const client: ENSNodeClient;
+   *
+   * // get latest registrar action records across all indexed subregistries
+   * // NOTE: when no `limit` value is passed,
+   * //       the default DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT applies.
+   * const registrarActions = await client.registrarActions();
+   *
+   * // get latest 5 registrar action records across all indexed subregistries
+   * // NOTE: when a `limit` value is passed, it must be lower than or equal to
+   * //       the MAX_RESPONSE_ITEMS_COUNT_LIMIT value.
+   * const registrarActions = await client.registrarActions({
+   *   limit: 5,
+   * });
+   *
+   * // get latest registrar action records associated with
+   * // subregistry managing `eth` name
+   * await client.registrarActions({
+   *   filter: registrarActionsFilter.byParentNode(namehash('eth')),
+   * });
+   *
+   * // get latest 10 registrar action records associated with
+   * // subregistry managing `base.eth` name
+   * await client.registrarActions({
+   *   filter: registrarActionsFilter.byParentNode(namehash('base.eth')),
+   *   limit: 10
+   * });
+   * ```
+   */
+  async registrarActions(request: RegistrarActionsRequest = {}): Promise<RegistrarActionsResponse> {
+    const buildUrlPath = (filter: RegistrarActionsFilter | undefined) => {
+      return filter?.field === RegistrarActionsFilterFields.SubregistryNode
+        ? new URL(`/api/registrar-actions/${filter.value}`, this.options.url)
+        : new URL(`/api/registrar-actions`, this.options.url);
+    };
+
+    const buildOrderArg = (order: RegistrarActionsOrder) => {
+      switch (order) {
+        case RegistrarActionsOrders.LatestRegistrarActions: {
+          const [field, direction] = order.split("=");
+          return {
+            key: `sort[${field}]`,
+            value: `${direction}`,
+          };
+        }
+      }
+    };
+
+    const url = buildUrlPath(request.filter);
+
+    if (request.order) {
+      const orderArgs = buildOrderArg(request.order);
+
+      url.searchParams.set(orderArgs.key, orderArgs.value);
+    }
+
+    if (request.limit) {
+      url.searchParams.set("limit", request.limit.toString());
+    }
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // handle response errors accordingly
+    if (!response.ok) {
+      // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
+      try {
+        errorResponse = deserializeErrorResponse(responseData);
+      } catch {
+        // if errorResponse could not be determined,
+        // it means the response includes data
+        console.log("Registrar Actions API: handling a known server error.");
+      }
+
+      // however, if errorResponse was defined,
+      // throw an error with the generic server error message
+      if (typeof errorResponse !== "undefined") {
+        throw new Error(`Fetching ENSNode Registrar Actions Failed: ${errorResponse.message}`);
+      }
+    }
+
+    return deserializeRegistrarActionsResponse(responseData as SerializedRegistrarActionsResponse);
   }
 }

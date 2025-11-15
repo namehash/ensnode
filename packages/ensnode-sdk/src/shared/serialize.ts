@@ -1,6 +1,6 @@
 import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
 
-import type { Price, SerializedPrice } from "./currencies";
+import type { Price, PriceEth, SerializedPrice, SerializedPriceEth } from "./currencies";
 import type {
   ChainIdString,
   DatetimeISO8601,
@@ -39,6 +39,13 @@ export function serializePrice(price: Price): SerializedPrice {
     currency: price.currency,
     amount: price.amount.toString(),
   };
+}
+
+/**
+ * Serializes a {@link PriceEth} object.
+ */
+export function serializePriceEth(price: PriceEth): SerializedPriceEth {
+  return serializePrice(price) as SerializedPriceEth;
 }
 
 /**

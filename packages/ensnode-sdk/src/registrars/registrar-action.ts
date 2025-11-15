@@ -5,13 +5,24 @@ export { decodeEncodedReferrer, zeroEncodedReferrer } from "@namehash/ens-referr
 
 import type { Address, Hash } from "viem";
 
-import type { BlockRef, Duration, PriceEth } from "../shared";
-import type { RegistrationLifecycle } from "./registration-lifecycle";
+import {
+  type BlockRef,
+  type Duration,
+  type PriceEth,
+  type SerializedPriceEth,
+  serializePriceEth,
+} from "../shared";
+import {
+  type RegistrationLifecycle,
+  type SerializedRegistrationLifecycle,
+  serializeRegistrationLifecycle,
+} from "./registration-lifecycle";
 
 /**
- * Globally unique, deterministic ID of an indexed onchain event.
+ * Globally unique, deterministic ID of an indexed onchain event
+ * associated with the "logical registrar action".
  */
-type RegistrarActionEventId = string;
+export type RegistrarActionEventId = string;
 
 /**
  * Types of "logical registrar action".
@@ -321,4 +332,68 @@ export interface RegistrarAction {
    *    all "Registrar Controller" contracts.
    */
   eventIds: [RegistrarActionEventId, ...RegistrarActionEventId[]];
+}
+
+/**
+ * Serialized representation of {@link RegistrarActionPricingUnknown}.
+ */
+export type SerializedRegistrarActionPricingUnknown = RegistrarActionPricingUnknown;
+
+/**
+ * Serialized representation of {@link RegistrarActionPricingAvailable}.
+ */
+export interface SerializedRegistrarActionPricingAvailable {
+  baseCost: SerializedPriceEth;
+
+  premium: SerializedPriceEth;
+
+  total: SerializedPriceEth;
+}
+
+/**
+ * Serialized representation of {@link RegistrarActionPricing}.
+ */
+export type SerializedRegistrarActionPricing =
+  | SerializedRegistrarActionPricingAvailable
+  | SerializedRegistrarActionPricingUnknown;
+
+/**
+ * Serialized representation of {@link RegistrarAction}.
+ */
+export interface SerializedRegistrarAction
+  extends Omit<RegistrarAction, "registrationLifecycle" | "pricing"> {
+  registrationLifecycle: SerializedRegistrationLifecycle;
+
+  pricing: SerializedRegistrarActionPricing;
+}
+
+export function serializeRegistrarActionPricing(
+  pricing: RegistrarActionPricing,
+): SerializedRegistrarActionPricing {
+  if (isRegistrarActionPricingAvailable(pricing)) {
+    return {
+      baseCost: serializePriceEth(pricing.baseCost),
+      premium: serializePriceEth(pricing.premium),
+      total: serializePriceEth(pricing.total),
+    } satisfies SerializedRegistrarActionPricingAvailable;
+  }
+
+  return pricing satisfies SerializedRegistrarActionPricingUnknown;
+}
+
+export function serializeRegistrarAction(
+  registrarAction: RegistrarAction,
+): SerializedRegistrarAction {
+  return {
+    id: registrarAction.id,
+    type: registrarAction.type,
+    incrementalDuration: registrarAction.incrementalDuration,
+    registrant: registrarAction.registrant,
+    registrationLifecycle: serializeRegistrationLifecycle(registrarAction.registrationLifecycle),
+    pricing: serializeRegistrarActionPricing(registrarAction.pricing),
+    referral: registrarAction.referral,
+    block: registrarAction.block,
+    transactionHash: registrarAction.transactionHash,
+    eventIds: registrarAction.eventIds,
+  };
 }

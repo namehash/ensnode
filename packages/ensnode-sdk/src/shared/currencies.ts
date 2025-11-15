@@ -19,6 +19,11 @@ export type CurrencyId = (typeof CurrencyIds)[keyof typeof CurrencyIds];
  */
 export type CurrencyAmount = bigint;
 
+/**
+ * Serialized representation of {@link CurrencyAmount}.
+ */
+export type SerializedCurrencyAmount = string;
+
 export interface PriceEth {
   currency: typeof CurrencyIds.ETH;
 
@@ -40,13 +45,30 @@ export interface PriceUsdc {
 export type Price = PriceEth | PriceDai | PriceUsdc;
 
 /**
+ * Serialized representation of {@link PriceEth}.
+ */
+export interface SerializedPriceEth extends Omit<PriceEth, "amount"> {
+  amount: SerializedCurrencyAmount;
+}
+
+/**
+ * Serialized representation of {@link PriceDai}.
+ */
+export interface SerializedPriceDai extends Omit<PriceDai, "amount"> {
+  amount: SerializedCurrencyAmount;
+}
+
+/**
+ * Serialized representation of {@link PriceUsdc}.
+ */
+export interface SerializedPriceUsdc extends Omit<PriceUsdc, "amount"> {
+  amount: SerializedCurrencyAmount;
+}
+
+/**
  * Serialized representation of {@link Price}.
  */
-export interface SerializedPrice extends Omit<Price, "amount"> {
-  currency: CurrencyId;
-
-  amount: string;
-}
+export type SerializedPrice = SerializedPriceEth | SerializedPriceDai | SerializedPriceUsdc;
 
 export interface CurrencyInfo {
   id: CurrencyId;
