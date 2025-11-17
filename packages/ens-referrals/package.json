@@ -39,7 +39,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "date-fns": "catalog:"
+    "@ensnode/ensnode-sdk": "workspace:*"
   },
   "peerDependencies": {
     "viem": "catalog:"

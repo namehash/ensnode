@@ -87,22 +87,8 @@ describe("TtlCache", () => {
     vi.useRealTimers();
   });
 
-  it("throws Error if ttlMs is not a positive integer", () => {
-    expect(() => {
-      new TtlCache<string, string>(0);
-    }).toThrow();
-
-    expect(() => {
-      new TtlCache<string, string>(-1);
-    }).toThrow();
-
-    expect(() => {
-      new TtlCache<string, string>(1.5);
-    }).toThrow();
-  });
-
   it("stores and retrieves values within TTL", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     ttl.set("key1", "value1");
     expect(ttl.get("key1")).toBe("value1");
@@ -110,44 +96,44 @@ describe("TtlCache", () => {
   });
 
   it("expires values after TTL", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     ttl.set("key1", "value1");
     expect(ttl.get("key1")).toBe("value1");
 
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(1001); // Advance by 1001ms (1 second + 1ms)
 
     expect(ttl.get("key1")).toBeUndefined();
     expect(ttl.size).toBe(0);
   });
 
   it("has method returns true for existing non-expired values", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     ttl.set("key1", "value1");
     expect(ttl.has("key1")).toBe(true);
   });
 
   it("has method returns false for non-existent keys", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     expect(ttl.has("nonexistent")).toBe(false);
   });
 
   it("has method returns false for expired values", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     ttl.set("key1", "value1");
     expect(ttl.has("key1")).toBe(true);
 
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(1001); // Advance by 1001ms (1 second + 1ms)
 
     expect(ttl.has("key1")).toBe(false);
     expect(ttl.size).toBe(0);
   });
 
   it("delete method removes values and returns true if key existed", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     ttl.set("key1", "value1");
     expect(ttl.has("key1")).toBe(true);
@@ -160,14 +146,14 @@ describe("TtlCache", () => {
   });
 
   it("delete method returns false if key does not exist", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     const deleted = ttl.delete("nonexistent");
     expect(deleted).toBe(false);
   });
 
   it("clears all cached values", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
 
     ttl.set("key1", "value1");
     ttl.set("key2", "value2");
@@ -180,22 +166,22 @@ describe("TtlCache", () => {
   });
 
   it("capacity returns MAX_SAFE_INTEGER", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(1); // 1 second
     expect(ttl.capacity).toBe(Number.MAX_SAFE_INTEGER);
   });
 
   it("automatically cleans up expired entries on size access", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(2); // 2 seconds
 
     ttl.set("key1", "value1");
     ttl.set("key2", "value2");
     expect(ttl.size).toBe(2);
 
-    vi.advanceTimersByTime(500);
+    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
     ttl.set("key3", "value3");
     expect(ttl.size).toBe(3);
 
-    vi.advanceTimersByTime(600);
+    vi.advanceTimersByTime(1100); // Advance by 1100ms (1.1 seconds) - total 2.1 seconds
 
     expect(ttl.size).toBe(1);
     expect(ttl.get("key1")).toBeUndefined();
@@ -204,19 +190,19 @@ describe("TtlCache", () => {
   });
 
   it("refreshes TTL on each set operation", () => {
-    const ttl = new TtlCache<string, string>(1000);
+    const ttl = new TtlCache<string, string>(2); // 2 seconds
 
     ttl.set("key1", "value1");
 
-    vi.advanceTimersByTime(500);
+    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
     ttl.set("key1", "value1-updated");
 
-    vi.advanceTimersByTime(600);
+    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second) - total 2 seconds from first set, 1 second from second set
 
     expect(ttl.get("key1")).toBe("value1-updated");
     expect(ttl.has("key1")).toBe(true);
 
-    vi.advanceTimersByTime(500);
+    vi.advanceTimersByTime(1100); // Advance by 1100ms (1.1 seconds) - total 2.1 seconds from second set
 
     expect(ttl.get("key1")).toBeUndefined();
     expect(ttl.has("key1")).toBe(false);
@@ -232,23 +218,9 @@ describe("staleWhileRevalidate", () => {
     vi.useRealTimers();
   });
 
-  it("throws Error if ttl is not a positive integer", () => {
-    expect(() => {
-      staleWhileRevalidate(async () => "test", 0);
-    }).toThrow();
-
-    expect(() => {
-      staleWhileRevalidate(async () => "test", -1);
-    }).toThrow();
-
-    expect(() => {
-      staleWhileRevalidate(async () => "test", 1.5);
-    }).toThrow();
-  });
-
   it("fetches data on first call", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 1); // 1 second
 
     const result = await cached();
 
@@ -258,10 +230,10 @@ describe("staleWhileRevalidate", () => {
 
   it("returns cached data within TTL without refetching", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     await cached();
-    vi.advanceTimersByTime(500);
+    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
     const result = await cached();
 
     expect(result).toBe("value1");
@@ -270,10 +242,10 @@ describe("staleWhileRevalidate", () => {
 
   it("returns stale data immediately after TTL expires", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     await cached();
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
     const result = await cached();
 
     expect(result).toBe("value1");
@@ -282,12 +254,12 @@ describe("staleWhileRevalidate", () => {
   it("triggers background revalidation after TTL expires", async () => {
     let value = "value1";
     const fn = vi.fn(async () => value);
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     await cached();
     expect(fn).toHaveBeenCalledTimes(1);
 
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
     value = "value2";
 
     // This should return stale data but trigger revalidation
@@ -316,10 +288,10 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     await cached();
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
 
     // Multiple calls after stale should not trigger multiple revalidations
     const promise1 = cached();
@@ -352,10 +324,10 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     await cached();
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
 
     // First call after TTL triggers revalidation
     const result1 = await cached();
@@ -387,10 +359,10 @@ describe("staleWhileRevalidate", () => {
       return "value1";
     });
 
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     await cached();
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
 
     shouldError = true;
 
@@ -418,13 +390,13 @@ describe("staleWhileRevalidate", () => {
       return "value2";
     });
 
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
 
     // Initial fetch
     shouldError = false;
     await cached();
 
-    vi.advanceTimersByTime(1001);
+    vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
     shouldError = true;
 
     // First revalidation attempt fails
@@ -446,7 +418,7 @@ describe("staleWhileRevalidate", () => {
       throw new Error("Initial fetch failed");
     });
 
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 1); // 1 second
 
     // Initial fetch should fail and return null
     const result = await cached();
@@ -463,7 +435,7 @@ describe("staleWhileRevalidate", () => {
       return "value1";
     });
 
-    const cached = staleWhileRevalidate(fn, 1000);
+    const cached = staleWhileRevalidate(fn, 1); // 1 second
 
     // Initial fetch fails and returns null
     const result1 = await cached();

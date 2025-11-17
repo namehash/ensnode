@@ -671,9 +671,9 @@ importers:
 
   packages/ens-referrals:
     dependencies:
-      date-fns:
-        specifier: 'catalog:'
-        version: 4.1.0
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../ensnode-sdk
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
@@ -770,6 +770,9 @@ importers:
       caip:
         specifier: 'catalog:'
         version: 1.1.1
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
       zod:
         specifier: 'catalog:'
         version: 3.25.76

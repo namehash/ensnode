@@ -5,13 +5,17 @@ import {
   ENS_HOLIDAY_AWARDS_START_DATE,
 } from "@namehash/ens-referrals";
 
-import { getEthnamesSubregistryId, staleWhileRevalidate } from "@ensnode/ensnode-sdk";
+import {
+  type Duration,
+  getEthnamesSubregistryId,
+  staleWhileRevalidate,
+} from "@ensnode/ensnode-sdk";
 
 import { getAggregatedReferrerSnapshot } from "@/lib/ensanalytics/database";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 
-const TTL_MS = 5 * 60 * 1000; // 5 minutes
+const TTL: Duration = 5 * 60; // 5 minutes
 
 export const fetcher = staleWhileRevalidate(async () => {
   logger.info("Building aggregated referrer snapshot...");
@@ -29,7 +33,7 @@ export const fetcher = staleWhileRevalidate(async () => {
     logger.error({ error }, "Failed to build aggregated referrer snapshot");
     throw error;
   }
-}, TTL_MS);
+}, TTL);
 
 export type AggregatedReferrerSnapshotCacheVariables = {
   aggregatedReferrerSnapshotCache: Awaited<ReturnType<typeof fetcher>>;
@@ -42,7 +46,7 @@ export type AggregatedReferrerSnapshotCacheVariables = {
  * asynchronously revalidating in the background. This provides:
  * - Sub-millisecond response times (after first fetch)
  * - Always available data (serves stale data during revalidation)
- * - Automatic background updates every TTL_MS (5 minutes)
+ * - Automatic background updates every TTL (5 minutes)
  *
  * Retrieves all referrers with at least one qualified referral from the database and caches them.
  * Sets the `aggregatedReferrerSnapshotCache` variable on the context for use by other middleware and handlers.

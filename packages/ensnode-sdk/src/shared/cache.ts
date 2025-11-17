@@ -1,3 +1,8 @@
+import { getUnixTime } from "date-fns";
+
+import { addDuration, durationBetween } from "./datetime";
+import type { Duration, UnixTimestamp } from "./types";
+
 /**
  * Cache that maps from string -> ValueType.
  */
@@ -102,7 +107,7 @@ export class LruCache<KeyType extends string, ValueType> implements Cache<KeyTyp
 
 interface CacheEntry<T> {
   value: T;
-  expiresAt: number;
+  expiresAt: UnixTimestamp;
 }
 
 /**
@@ -112,26 +117,19 @@ interface CacheEntry<T> {
  */
 export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyType, ValueType> {
   private readonly _cache = new Map<string, CacheEntry<ValueType>>();
-  private readonly _ttlMs: number;
+  private readonly _ttl: Duration;
 
   /**
    * Create a new TTL cache with the given TTL.
    *
-   * @param ttlMs Time-to-live in milliseconds. Items expire after this duration.
-   * @throws Error if ttlMs is not positive.
+   * @param ttl Time-to-live duration in seconds. Items expire after this duration.
    */
-  public constructor(ttlMs: number) {
-    if (!Number.isInteger(ttlMs) || ttlMs <= 0) {
-      throw new Error(
-        `TtlCache requires ttlMs to be a positive integer but a ttlMs of ${ttlMs} was requested.`,
-      );
-    }
-
-    this._ttlMs = ttlMs;
+  public constructor(ttl: Duration) {
+    this._ttl = ttl;
   }
 
   private _cleanup(): void {
-    const now = Date.now();
+    const now = getUnixTime(new Date());
     for (const [key, entry] of this._cache.entries()) {
       if (entry.expiresAt <= now) {
         this._cache.delete(key);
@@ -142,7 +140,7 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
   public set(key: string, value: ValueType): void {
     this._cleanup();
 
-    const expiresAt = Date.now() + this._ttlMs;
+    const expiresAt = addDuration(getUnixTime(new Date()), this._ttl);
     this._cache.set(key, { value, expiresAt });
   }
 
@@ -154,7 +152,7 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
       return undefined;
     }
 
-    if (entry.expiresAt <= Date.now()) {
+    if (entry.expiresAt <= getUnixTime(new Date())) {
       this._cache.delete(key);
       return undefined;
     }
@@ -183,7 +181,7 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
       return false;
     }
 
-    if (entry.expiresAt <= Date.now()) {
+    if (entry.expiresAt <= getUnixTime(new Date())) {
       this._cache.delete(key);
       return false;
     }
@@ -209,13 +207,17 @@ interface SWRCache<T> {
    * The cached value of type T
    */
   value: T;
+
   /**
-   * Timestamp (from `Date.now()`) indicating when the value was last successfully updated
+   * Unix timestamp indicating when the value was last successfully updated
    */
-  updatedAt: number;
+  updatedAt: UnixTimestamp;
+
   /**
-   * Optional promise tracking an in-progress revalidation request.
-   * Used to deduplicate concurrent revalidation attempts.
+   * Optional promise of the in-progress revalidation attempt.
+   * If undefined, no revalidation attempt is in-progress.
+   * If defined, a revalidation attempt is already in-progress.
+   * Used to enforce no concurrent revalidation attempts.
    */
   revalidating?: Promise<T>;
 }
@@ -241,7 +243,7 @@ interface SWRCache<T> {
  *   return response.json();
  * };
  *
- * const cachedFetch = staleWhileRevalidate(fetchExpensiveData, 60000); // 1 minute TTL
+ * const cachedFetch = staleWhileRevalidate(fetchExpensiveData, 60); // 60 second TTL
  *
  * // First call: fetches data (slow)
  * const data1 = await cachedFetch();
@@ -254,7 +256,7 @@ interface SWRCache<T> {
  * ```
  *
  * @param fn The async function to wrap with SWR caching
- * @param ttl Time-to-live in milliseconds. After this duration, data is considered stale
+ * @param ttl Time-to-live duration in seconds. After this duration, data is considered stale
  * @returns A cached version of the function with SWR semantics. Returns null if fn throws an error and no cached value is available.
  *
  * @link https://web.dev/stale-while-revalidate/
@@ -262,20 +264,12 @@ interface SWRCache<T> {
  */
 export function staleWhileRevalidate<T>(
   fn: () => Promise<T>,
-  ttl: number,
+  ttl: Duration,
 ): () => Promise<T | null> {
-  if (!Number.isInteger(ttl) || ttl <= 0) {
-    throw new Error(
-      `staleWhileRevalidate requires ttl to be a positive integer but a ttl of ${ttl} was provided.`,
-    );
-  }
-
   let cache: SWRCache<T> | null = null;
   let initialBuild: Promise<T | null> | null = null;
 
   return async (): Promise<T | null> => {
-    const now = Date.now();
-
     // No cache, attempt to successfully build the first cache (any number of attempts to build the cache may have been attempted and failed previously)
     if (!cache) {
       // If initial build already in progress, wait for it
@@ -286,7 +280,7 @@ export function staleWhileRevalidate<T>(
       // Start initial build
       initialBuild = fn()
         .then((value) => {
-          cache = { value, updatedAt: now };
+          cache = { value, updatedAt: getUnixTime(new Date()) };
           initialBuild = null;
           return value;
         })
@@ -299,7 +293,7 @@ export function staleWhileRevalidate<T>(
       return initialBuild;
     }
 
-    const isStale = now - cache.updatedAt > ttl;
+    const isStale = durationBetween(cache.updatedAt, getUnixTime(new Date())) > ttl;
 
     // Fresh cache, return immediately
     if (!isStale) return cache.value;
@@ -310,7 +304,7 @@ export function staleWhileRevalidate<T>(
     // Stale cache, kick off revalidation in background
     const revalidationPromise = fn()
       .then((value) => {
-        cache = { value, updatedAt: Date.now() };
+        cache = { value, updatedAt: getUnixTime(new Date()) };
         return value;
       })
       .catch(() => {

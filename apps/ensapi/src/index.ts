@@ -76,15 +76,11 @@ const server = serve(
 
     // warm start ENSAnalytics aggregated referrer snapshot cache
     logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
-    try {
-      const cache = await referrersCacheFetcher();
-      if (cache) {
-        logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
-      } else {
-        logger.warn("ENSAnalytics cache returned null - no cached data available yet");
-      }
-    } catch (error) {
-      logger.error({ error }, "Failed to warm up ENSAnalytics cache");
+    const cache = await referrersCacheFetcher();
+    if (cache) {
+      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
+    } else {
+      logger.error("Failed to warm up ENSAnalytics cache - no cached data available yet");
       // Don't exit - let the service run without pre-warmed analytics
     }
   },
