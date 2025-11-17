@@ -1,6 +1,6 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, isAddressEqual, labelhash, namehash, zeroAddress } from "viem";
+import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
 
 import {
   type DNSEncodedLiteralName,
@@ -8,6 +8,7 @@ import {
   decodeDNSEncodedLiteralName,
   isPccFuseSet,
   type LiteralLabel,
+  labelhashLiteralLabel,
   makeENSv1DomainId,
   makeLatestRegistrationId,
   makeSubdomainNode,
@@ -79,7 +80,7 @@ const isDirectSubnameOfRegistrarManagedName = (
 
   // construct the expected node using emitted name's leaf label and the registrarManagedNode
   // biome-ignore lint/style/noNonNullAssertion: length check above
-  const leaf = labelhash(labels[0]!);
+  const leaf = labelhashLiteralLabel(labels[0]!);
   const expectedNode = makeSubdomainNode(leaf, managedNode);
 
   // Nodes must exactly match
