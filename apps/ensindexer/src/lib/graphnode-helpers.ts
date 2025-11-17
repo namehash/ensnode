@@ -14,7 +14,16 @@ const ensRainbowApiClient = getENSRainbowApiClient();
  * @throws if the labelHash is not correctly formatted, or server error occurs, or connection error occurs.
  **/
 export async function labelByLabelHash(labelHash: LabelHash): Promise<LiteralLabel | null> {
-  const response = await ensRainbowApiClient.heal(labelHash);
+  let response: Awaited<ReturnType<typeof ensRainbowApiClient.heal>>;
+  try {
+    response = await ensRainbowApiClient.heal(labelHash);
+  } catch (error) {
+    if (error instanceof Error) {
+      error.message = `ENSRainbow Heal Request Failed: ENSRainbow unavailable at '${ensRainbowApiClient.getOptions().endpointUrl}'.`;
+    }
+
+    throw error;
+  }
 
   if (isHealError(response)) {
     // no original label found for the labelHash
