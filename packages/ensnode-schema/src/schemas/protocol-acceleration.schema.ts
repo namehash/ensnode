@@ -131,9 +131,10 @@ export const resolver = onchainTable(
     implementsAddressRecordDefaulting: t.boolean(),
 
     /**
-     * If set, the Resolver is a Bridged Resolver that bridges to the RegistryId indicated.
+     * If set, the Resolver is a Bridged Resolver that bridges to the AccountId indicated.
      */
-    bridgesToRegistryId: t.text().$type<RegistryId>(),
+    bridgesToRegistryChainId: t.text().$type<ChainId>(),
+    bridgesToRegistryAddress: t.hex().$type<Address>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),

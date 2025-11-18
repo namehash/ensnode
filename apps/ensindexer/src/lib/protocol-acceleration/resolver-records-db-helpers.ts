@@ -101,7 +101,8 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     isStatic,
     isENSIP19ReverseResolver,
     implementsAddressRecordDefaulting,
-    bridgesToRegistryId: bridgesToRegistry ? makeRegistryContractId(bridgesToRegistry) : null,
+    bridgesToRegistryChainId: bridgesToRegistry?.chainId ?? null,
+    bridgesToRegistryAddress: bridgesToRegistry?.address ?? null,
   });
 }
 

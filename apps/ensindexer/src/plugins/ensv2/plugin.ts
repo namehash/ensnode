@@ -1,6 +1,6 @@
 /**
  * TODO
- * - polymorphic resolver metadata
+ * - polymorphic resolver metadata in drizzle schema
  * - polymorphic resolver in graphql, add owner to DedicatedResolver schema
  *
  * Migration

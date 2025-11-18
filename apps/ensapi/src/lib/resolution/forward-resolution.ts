@@ -268,18 +268,26 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               //   If the activeResolver is a CCIP-Read Shadow Registry Resolver,
               //   then we can short-circuit the CCIP-Read and defer resolution to the indicated (shadow)Registry.
               //////////////////////////////////////////////////
-              // if (resolver.bridgesToRegistryId) {
-              //   return withProtocolStepAsync(
-              //     TraceableENSProtocol.ForwardResolution,
-              //     ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
-              //     {},
-              //     () =>
-              //       _resolveForward(name, selection, {
-              //         ...options,
-              //         registry: resolver.bridgesToRegistryId, // TODO: refactor to pass id? or fetch registry and pass (address, chainId)
-              //       }),
-              //   );
-              // }
+              if (
+                resolver.bridgesToRegistryChainId !== null &&
+                resolver.bridgesToRegistryAddress !== null
+              ) {
+                return withProtocolStepAsync(
+                  TraceableENSProtocol.ForwardResolution,
+                  ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
+                  {},
+                  () =>
+                    _resolveForward(name, selection, {
+                      ...options,
+                      registry: {
+                        // biome-ignore lint/style/noNonNullAssertion: null check above
+                        chainId: resolver.bridgesToRegistryChainId!,
+                        // biome-ignore lint/style/noNonNullAssertion: null check above
+                        address: resolver.bridgesToRegistryAddress!,
+                      },
+                    }),
+                );
+              }
 
               addProtocolStepEvent(
                 protocolTracingSpan,

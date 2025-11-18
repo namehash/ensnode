@@ -1,17 +1,25 @@
 import { namehash } from "viem";
 
 import {
-  bigintToCoinType,
   makeResolverRecordsId,
+  NODE_ANY,
+  type RequiredAndNotNull,
   type ResolverId,
-  type ResolverRecordsId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
+import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { db } from "@/lib/db";
+
+const isDedicatedResolver = (resolver: Resolver): resolver is DedicatedResolver =>
+  resolver.isDedicated === true;
+
+const isBridgedResolver = (resolver: Resolver): resolver is BridgedResolver =>
+  resolver.bridgesToRegistryChainId !== null && resolver.bridgesToRegistryAddress !== null;
 
 export const ResolverRef = builder.loadableObjectRef("Resolver", {
   load: (ids: ResolverId[]) =>
@@ -24,18 +32,15 @@ export const ResolverRef = builder.loadableObjectRef("Resolver", {
 });
 
 export type Resolver = Exclude<typeof ResolverRef.$inferType, ResolverId>;
+export type DedicatedResolver = Omit<Resolver, "isDedicated"> & { isDedicated: true };
+export type BridgedResolver = RequiredAndNotNull<
+  Resolver,
+  "bridgesToRegistryChainId" | "bridgesToRegistryAddress"
+>;
 
-export const ResolverRecordsRef = builder.loadableObjectRef("ResolverRecords", {
-  load: (ids: ResolverRecordsId[]) =>
-    db.query.resolverRecords.findMany({
-      where: (t, { inArray }) => inArray(t.id, ids),
-      with: { textRecords: true, addressRecords: true },
-    }),
-  toKey: getModelId,
-  cacheResolved: true,
-  sort: true,
-});
-
+////////////
+// Resolver
+////////////
 ResolverRef.implement({
   description: "A Resolver Contract",
   fields: (t) => ({
@@ -58,11 +63,6 @@ ResolverRef.implement({
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
-    ////////////////////
-    // Resolver.records
-    ////////////////////
-    // TODO: connection to all ResolverRecords by (address, chainId)?
-
     ////////////////////////////////////
     // Resolver.records by Name or Node
     ////////////////////////////////////
@@ -76,57 +76,71 @@ ResolverRef.implement({
         return makeResolverRecordsId({ chainId, address }, node);
       },
     }),
+
+    //////////////////////
+    // Resolver.dedicated
+    //////////////////////
+    dedicated: t.field({
+      description: "TODO",
+      type: DedicatedResolverMetadataRef,
+      nullable: true,
+      resolve: (parent) => (isDedicatedResolver(parent) ? parent : null),
+    }),
+
+    ////////////////////
+    // Resolver.bridged
+    ////////////////////
+    bridged: t.field({
+      description: "TODO",
+      type: AccountIdRef,
+      nullable: true,
+      resolve: (parent) => {
+        if (!isBridgedResolver(parent)) return null;
+        return {
+          chainId: parent.bridgesToRegistryChainId,
+          address: parent.bridgesToRegistryAddress,
+        };
+      },
+    }),
   }),
 });
 
-export type ResolverRecords = Exclude<typeof ResolverRecordsRef.$inferType, ResolverRecordsId>;
-
-ResolverRecordsRef.implement({
+/////////////////////////////
+// DedicatedResolverMetadata
+/////////////////////////////
+export const DedicatedResolverMetadataRef = builder.objectRef<Resolver>(
+  "DedicatedResolverMetadataRef",
+);
+DedicatedResolverMetadataRef.implement({
   description: "TODO",
   fields: (t) => ({
-    //////////////////////
-    // ResolverRecords.id
-    //////////////////////
-    id: t.expose("id", {
+    ///////////////////////////
+    // DedicatedResolver.owner
+    ///////////////////////////
+    owner: t.field({
       description: "TODO",
-      type: "ID",
-      nullable: false,
-    }),
-
-    ////////////////////////
-    // ResolverRecords.name
-    ////////////////////////
-    name: t.expose("name", {
-      description: "TODO",
-      type: "String",
+      type: AccountRef,
       nullable: true,
-    }),
-
-    ////////////////////////
-    // ResolverRecords.keys
-    ////////////////////////
-    keys: t.field({
-      description: "TODO",
-      type: ["String"],
-      nullable: false,
-      resolve: (parent) => parent.textRecords.map((r) => r.key).toSorted(),
+      // TODO: resolve via EAC
+      resolve: (parent) => parent.ownerId,
     }),
 
     /////////////////////////////
-    // ResolverRecords.coinTypes
+    // Resolver.dedicatedRecords
     /////////////////////////////
-    coinTypes: t.field({
+    records: t.field({
       description: "TODO",
-      type: ["CoinType"],
-      nullable: false,
-      resolve: (parent) =>
-        parent.addressRecords
-          .map((r) => r.coinType)
-          .map(bigintToCoinType)
-          .toSorted(),
+      type: ResolverRecordsRef,
+      nullable: true,
+      resolve: ({ chainId, address }, args) =>
+        makeResolverRecordsId({ chainId, address }, NODE_ANY),
     }),
   }),
 });
+
+/////////////////////
+// Inputs
+/////////////////////
 
 export const ResolverIdInput = builder.inputType("ResolverIdInput", {
   description: "TODO",
