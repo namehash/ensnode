@@ -38,9 +38,6 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*"
-  },
   "peerDependencies": {
     "viem": "catalog:"
   },
