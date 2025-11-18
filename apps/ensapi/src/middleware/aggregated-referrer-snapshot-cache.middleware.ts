@@ -18,8 +18,8 @@ export const fetcher = staleWhileRevalidate(async () => {
 
   try {
     const result = await getAggregatedReferrerSnapshot(
-      config.ensAwardsStart,
-      config.ensAwardsEnd,
+      config.ensHolidayAwardsStart,
+      config.ensHolidayAwardsEnd,
       subregistryId,
     );
     logger.info("Successfully built aggregated referrer snapshot");

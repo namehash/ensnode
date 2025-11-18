@@ -1,6 +1,6 @@
 import type {
   DatabaseEnvironment,
-  EnsAwardsEnvironment,
+  EnsHolidayAwardsEnvironment,
   EnsIndexerUrlEnvironment,
   LogLevelEnvironment,
   PortEnvironment,
@@ -21,4 +21,4 @@ export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   PortEnvironment &
   LogLevelEnvironment &
   TheGraphEnvironment &
-  EnsAwardsEnvironment;
+  EnsHolidayAwardsEnvironment;

@@ -75,8 +75,8 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      ensAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
+      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
     });
   });
 });
@@ -99,8 +99,8 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      ensAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
+      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -124,8 +124,8 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      ensAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
+      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);

@@ -25,7 +25,10 @@ import {
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
-import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
+import {
+  invariant_ensHolidayAwardsEndAfterStart,
+  invariant_ensIndexerPublicConfigVersionInfo,
+} from "@/config/validations";
 import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
 import { canFallbackToTheGraph } from "@/lib/thegraph";
@@ -78,11 +81,12 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    ensAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
-    ensAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
+    ensHolidayAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
+    ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_ensIndexerPublicConfigVersionInfo);
+  .check(invariant_ensIndexerPublicConfigVersionInfo)
+  .check(invariant_ensHolidayAwardsEndAfterStart);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
@@ -117,8 +121,8 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
-      ensAwardsStart: env.ENSAWARDS_START,
-      ensAwardsEnd: env.ENSAWARDS_END,
+      ensHolidayAwardsStart: env.ENS_HOLIDAY_AWARDS_START,
+      ensHolidayAwardsEnd: env.ENS_HOLIDAY_AWARDS_END,
     });
   } catch (error) {
     if (error instanceof ZodError) {

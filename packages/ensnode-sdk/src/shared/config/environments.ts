@@ -53,7 +53,7 @@ export type TheGraphEnvironment = {
 /**
  * Environment variables for ENS Holiday Awards date range configuration.
  */
-export interface EnsAwardsEnvironment {
-  ENSAWARDS_START?: string;
-  ENSAWARDS_END?: string;
+export interface EnsHolidayAwardsEnvironment {
+  ENS_HOLIDAY_AWARDS_START?: string;
+  ENS_HOLIDAY_AWARDS_END?: string;
 }
