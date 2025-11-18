@@ -5,10 +5,8 @@ import type { Address, Hash } from "viem";
 import {
   type AccountId,
   type EncodedReferrer,
-  isRegistrarActionPricingAvailable,
   isRegistrarActionReferralAvailable,
   type Node,
-  type RegistrarActionPricing,
   type RegistrarActionReferral,
 } from "@ensnode/ensnode-sdk";
 
@@ -16,24 +14,21 @@ import { makeLogicalEventKey } from "./registrar-action";
 
 /**
  * Update the "logical registrar action":
- * - set pricing data (if available)
- * - set referral data (if available)
+ * - set referral data
  * - append new event ID to `eventIds`
  */
-export async function handleRegistrarControllerEvent(
+export async function handleUniversalRegistrarRenewalEvent(
   context: Context,
   {
     id,
     subregistryId,
     node,
-    pricing,
     referral,
     transactionHash,
   }: {
     id: Event["id"];
     subregistryId: AccountId;
     node: Node;
-    pricing: RegistrarActionPricing;
     referral: RegistrarActionReferral;
     transactionHash: Hash;
   },
@@ -74,22 +69,7 @@ export async function handleRegistrarControllerEvent(
     );
   }
 
-  // 3. Prepare pricing info
-  let baseCost: bigint | null;
-  let premium: bigint | null;
-  let total: bigint | null;
-
-  if (isRegistrarActionPricingAvailable(pricing)) {
-    baseCost = pricing.baseCost.amount;
-    premium = pricing.premium.amount;
-    total = pricing.total.amount;
-  } else {
-    baseCost = null;
-    premium = null;
-    total = null;
-  }
-
-  // 4. Prepare referral info
+  // 3. Prepare referral info
   let encodedReferrer: EncodedReferrer | null;
   let decodedReferrer: Address | null;
 
@@ -101,16 +81,12 @@ export async function handleRegistrarControllerEvent(
     decodedReferrer = null;
   }
 
-  // 5. Update the "logical registrar action" record with
-  //    - pricing data,
+  // 4. Update the "logical registrar action" record with
   //    - referral data
   //    - new event ID appended to `eventIds`
   await context.db
     .update(schema.registrarActions, { id: logicalRegistrarAction.id })
     .set(({ eventIds }) => ({
-      baseCost,
-      premium,
-      total,
       encodedReferrer,
       decodedReferrer,
       eventIds: [...eventIds, id],

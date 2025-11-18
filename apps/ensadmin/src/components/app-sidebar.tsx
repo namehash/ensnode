@@ -27,7 +27,7 @@ const navItems = [
     isActive: true,
     items: [
       { title: "Names", url: "/name" },
-      { title: "Registrations", url: "/registration" },
+      { title: "Registrar Actions", url: "/registrar-actions" },
     ],
   },
   {

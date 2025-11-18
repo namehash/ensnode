@@ -71,6 +71,14 @@ export default createPlugin({
         ),
         abi: ethnamesDatasource.contracts.UnwrappedEthRegistrarController.abi,
       },
+      [namespaceContract(pluginName, "Ethnames_UniversalRegistrarRenewalWithReferrer")]: {
+        chain: chainConfigForContract(
+          config.globalBlockrange,
+          ethnamesDatasource.chain.id,
+          ethnamesDatasource.contracts.UniversalRegistrarRenewalWithReferrer,
+        ),
+        abi: ethnamesDatasource.contracts.UniversalRegistrarRenewalWithReferrer.abi,
+      },
     };
 
     // configure Basenames dependencies

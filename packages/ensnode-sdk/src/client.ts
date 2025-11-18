@@ -450,12 +450,12 @@ export class ENSNodeClient {
    *
    * // get latest registrar action records across all indexed subregistries
    * // NOTE: when no `limit` value is passed,
-   * //       the default DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT applies.
+   * //       the default RESPONSE_ITEMS_PER_PAGE_DEFAULT applies.
    * const registrarActions = await client.registrarActions();
    *
    * // get latest 5 registrar action records across all indexed subregistries
    * // NOTE: when a `limit` value is passed, it must be lower than or equal to
-   * //       the MAX_RESPONSE_ITEMS_COUNT_LIMIT value.
+   * //       the RESPONSE_ITEMS_PER_PAGE_MAX value.
    * const registrarActions = await client.registrarActions({
    *   limit: 5,
    * });
@@ -501,8 +501,8 @@ export class ENSNodeClient {
       url.searchParams.set(orderArgs.key, orderArgs.value);
     }
 
-    if (request.limit) {
-      url.searchParams.set("limit", request.limit.toString());
+    if (request.itemsPerPage) {
+      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
     }
 
     const response = await fetch(url);

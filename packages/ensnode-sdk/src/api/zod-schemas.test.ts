@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import type { InterpretedName } from "../ens";
 import { makeRegistrarActionsResponseSchema } from "../internal";
+import { registrarActionsPrerequisites } from "./registrar-actions";
 import type {
   SerializedNamedRegistrarAction,
   SerializedRegistrarActionsResponseError,
   SerializedRegistrarActionsResponseOk,
 } from "./serialized-types";
-import { RegistrarActionsResponseCodes } from "./types";
+import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./types";
 
 describe("ENSNode API Schema", () => {
   describe("Registrar Actions API", () => {
@@ -101,8 +102,7 @@ describe("ENSNode API Schema", () => {
       responseCode: RegistrarActionsResponseCodes.Error,
       error: {
         message: "Registrar Actions API is not available",
-        details:
-          'The cached omnichain indexing status of the Connected ENSIndexer must be either "completed" or "following".',
+        details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
       },
     } satisfies SerializedRegistrarActionsResponseError;
 
@@ -111,9 +111,12 @@ describe("ENSNode API Schema", () => {
     });
 
     it("can parse valid ResponseError object", () => {
-      expect(() =>
-        makeRegistrarActionsResponseSchema().parse(validResponseError),
-      ).not.toThrowError();
+      const parsed = makeRegistrarActionsResponseSchema().parse(validResponseError);
+
+      expect(parsed).toStrictEqual({
+        responseCode: RegistrarActionsResponseCodes.Error,
+        error: validResponseError.error,
+      } satisfies RegistrarActionsResponseError);
     });
   });
 });

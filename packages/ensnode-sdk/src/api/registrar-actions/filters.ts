@@ -1,5 +1,5 @@
-import { type RegistrarActionsFilter, RegistrarActionsFilterFields } from "../api";
-import type { Node } from "../ens";
+import type { Node } from "../../ens";
+import { type RegistrarActionsFilter, RegistrarActionsFilterFields } from "..";
 
 export const registrarActionsFilter = {
   /**
