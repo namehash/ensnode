@@ -3,6 +3,7 @@ import type { Address } from "viem";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
+import { addPrices, isPriceEqual } from "../shared";
 import {
   makeBlockRefSchema,
   makeDurationSchema,
@@ -14,7 +15,6 @@ import {
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
-import { addPrices, isPriceEqual } from "../shared";
 import {
   type RegistrarAction,
   type RegistrarActionEventId,

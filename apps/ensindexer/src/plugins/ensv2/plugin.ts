@@ -12,7 +12,7 @@
  * v2 .eth registry will have a special fallback resolver that resolvers via namechain state
  * - fuck me, there can be multiple registrations in v2 world. sub.example.xyz, if not emancipated, cannot be migrated, but sub.example.xyz can still be created in v2 registry in the example.xyz registry.
  *   - if a v2 name is registered but there's an active namewrapper registration for that same name, we should perhaps ignore all future namewrapper events, as the v2 name overrides it in resolution and the namewrapper is never more consulted for that name (and i guess any subnames under it?)
- *  - shadow-registering an existing name in v2 also shadows every name under it
+ *  - shadow-registering an existing name in v2 also shadows every name under it so we kind of need to do a recursive deletion of all of a shadowed name's subnames, right? cause resolution terminates at the first v2-registered name.
  *
  *
  * - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names

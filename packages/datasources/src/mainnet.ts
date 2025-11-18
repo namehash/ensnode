@@ -26,7 +26,7 @@ import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
-import { ResolverABI } from "./lib/resolver";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 

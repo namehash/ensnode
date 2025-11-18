@@ -1,9 +1,9 @@
 import config from "@/config";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
+import type { AccountId } from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
+import { getDatasourceContract, makeContractMatcher } from "@/lib/datasource-helpers";
 
 /**
  * For a given `resolver`, if it is a known Bridged Resolver, return the
@@ -29,25 +29,15 @@ import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasou
  * TODO: these relationships could/should be encoded in an ENSIP
  */
 export function isBridgedResolver(resolver: AccountId): AccountId | null {
-  const basenamesL1Resolver = maybeGetDatasourceContract(
-    config.namespace,
-    DatasourceNames.ENSRoot,
-    "BasenamesL1Resolver",
-  );
+  const resolverEq = makeContractMatcher(config.namespace, resolver);
 
   // the ENSRoot's BasenamesL1Resolver bridges to the Basenames (shadow)Registry
-  if (basenamesL1Resolver && accountIdEqual(basenamesL1Resolver, resolver)) {
+  if (resolverEq(DatasourceNames.ENSRoot, "BasenamesL1Resolver")) {
     return getDatasourceContract(config.namespace, DatasourceNames.Basenames, "Registry");
   }
 
-  const lineanamesL1Resolver = maybeGetDatasourceContract(
-    config.namespace,
-    DatasourceNames.ENSRoot,
-    "LineanamesL1Resolver",
-  );
-
   // the ENSRoot's LineanamesL1Resolver bridges to the Lineanames (shadow)Registry
-  if (lineanamesL1Resolver && accountIdEqual(lineanamesL1Resolver, resolver)) {
+  if (resolverEq(DatasourceNames.ENSRoot, "LineanamesL1Resolver")) {
     return getDatasourceContract(config.namespace, DatasourceNames.Lineanames, "Registry");
   }
 

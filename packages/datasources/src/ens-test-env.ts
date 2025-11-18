@@ -10,7 +10,7 @@ import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "./lib/chains";
 // Shared ABIs
-import { ResolverABI } from "./lib/resolver";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 

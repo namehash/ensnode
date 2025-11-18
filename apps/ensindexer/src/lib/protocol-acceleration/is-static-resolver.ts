@@ -1,14 +1,9 @@
 import config from "@/config";
 
-import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
+import { DatasourceNames } from "@ensnode/datasources";
+import type { AccountId } from "@ensnode/ensnode-sdk";
 
-import { maybeGetDatasourceContract } from "@/lib/datasource-helpers";
-
-const makeEq = (b: AccountId) => (datasourceName: DatasourceName, contractName: string) => {
-  const a = maybeGetDatasourceContract(config.namespace, datasourceName, contractName);
-  return a && accountIdEqual(a, b);
-};
+import { makeContractMatcher } from "@/lib/datasource-helpers";
 
 /**
  * Returns whether `resolver` is an Static Resolver.
@@ -24,17 +19,17 @@ const makeEq = (b: AccountId) => (datasourceName: DatasourceName, contractName: 
  * TODO: these relationships could be encoded in an ENSIP
  */
 export function isStaticResolver(resolver: AccountId): boolean {
-  const isResolver = makeEq(resolver);
+  const resolverEq = makeContractMatcher(config.namespace, resolver);
 
   return [
     // ENS Root Chain
-    isResolver(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver1"),
-    isResolver(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver2"),
-    isResolver(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver1"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver2"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
 
     // Base Chain
-    isResolver(DatasourceNames.Basenames, "L2Resolver1"),
-    isResolver(DatasourceNames.Basenames, "L2Resolver2"),
+    resolverEq(DatasourceNames.Basenames, "L2Resolver1"),
+    resolverEq(DatasourceNames.Basenames, "L2Resolver2"),
   ].some(Boolean);
 }
 
@@ -44,13 +39,13 @@ export function isStaticResolver(resolver: AccountId): boolean {
  * @see https://docs.ens.domains/ensip/19/#default-address
  */
 export function staticResolverImplementsAddressRecordDefaulting(resolver: AccountId): boolean {
-  const isResolver = makeEq(resolver);
+  const resolverEq = makeContractMatcher(config.namespace, resolver);
 
   return [
     // ENS Root Chain
-    isResolver(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
 
     // Base Chain
-    isResolver(DatasourceNames.Basenames, "L2Resolver2"),
+    resolverEq(DatasourceNames.Basenames, "L2Resolver2"),
   ].some(Boolean);
 }

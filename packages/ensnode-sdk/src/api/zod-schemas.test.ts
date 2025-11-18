@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { InterpretedName } from "../ens";
-import { makeRegistrarActionsResponseSchema } from "./zod-schemas";
 import type {
   SerializedNamedRegistrarAction,
   SerializedRegistrarActionsResponseError,
   SerializedRegistrarActionsResponseOk,
 } from "./serialized-types";
 import { RegistrarActionsResponseCodes } from "./types";
+import { makeRegistrarActionsResponseSchema } from "./zod-schemas";
 
 describe("ENSNode API Schema", () => {
   describe("Registrar Actions API", () => {

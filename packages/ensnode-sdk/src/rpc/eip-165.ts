@@ -1,12 +1,4 @@
-import type {
-  Abi,
-  Address,
-  ContractFunctionArgs,
-  ContractFunctionName,
-  Hex,
-  ReadContractParameters,
-  ReadContractReturnType,
-} from "viem";
+import type { Address, Hex } from "viem";
 
 /**
  * EIP-165 ABI
@@ -34,26 +26,28 @@ const EIP_165_ABI = [
   },
 ] as const;
 
-// construct a restricted publicClient type that matches both viem#PublicClient and Ponder's Context['client']
-type ReadContract = <
-  const abi extends Abi | readonly unknown[],
-  functionName extends ContractFunctionName<abi, "pure" | "view">,
-  const args extends ContractFunctionArgs<abi, "pure" | "view", functionName>,
->(
-  args: Omit<ReadContractParameters<abi, functionName, args>, "blockNumber" | "blockTag">,
-) => Promise<ReadContractReturnType<abi, functionName, args>>;
-
 /**
  * Determines whether a Contract at `address` supports a specific EIP-165 `interfaceId`.
+ *
+ * Accepts both viem PublicClient and Ponder Context client types.
  */
-async function supportsInterface({
+async function supportsInterface<
+  TClient extends {
+    readContract: (params: {
+      abi: typeof EIP_165_ABI;
+      functionName: "supportsInterface";
+      address: Address;
+      args: readonly [Hex];
+    }) => Promise<boolean>;
+  },
+>({
   publicClient,
   interfaceId: selector,
   address,
 }: {
   address: Address;
   interfaceId: Hex;
-  publicClient: { readContract: ReadContract };
+  publicClient: TClient;
 }) {
   try {
     return await publicClient.readContract({

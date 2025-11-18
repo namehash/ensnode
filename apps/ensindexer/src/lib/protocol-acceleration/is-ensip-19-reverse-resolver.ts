@@ -1,11 +1,9 @@
 import config from "@/config";
 
-import type { Address } from "viem";
+import { DatasourceNames } from "@ensnode/datasources";
+import type { AccountId } from "@ensnode/ensnode-sdk";
 
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
-import type { ChainId } from "@ensnode/ensnode-sdk";
-
-const rrRoot = maybeGetDatasource(config.namespace, DatasourceNames.ReverseResolverRoot);
+import { makeContractMatcher } from "@/lib/datasource-helpers";
 
 /**
  * ENSIP-19 Reverse Resolvers (i.e. DefaultReverseResolver or ChainReverseResolver) simply:
@@ -14,20 +12,18 @@ const rrRoot = maybeGetDatasource(config.namespace, DatasourceNames.ReverseResol
  *
  * We encode this behavior here, for the purposes of Protocol Acceleration.
  */
-export function isKnownENSIP19ReverseResolver(chainId: ChainId, resolverAddress: Address): boolean {
-  // NOTE: ENSIP-19 Reverse Resolvers are only valid in the context of the ENS Root chain
-  if (chainId !== rrRoot?.chain.id) return false;
+export function isKnownENSIP19ReverseResolver(resolver: AccountId): boolean {
+  const resolverEq = makeContractMatcher(config.namespace, resolver);
 
-  return (
-    [
-      // DefaultReverseResolver (default.reverse)
-      rrRoot.contracts.DefaultReverseResolver3.address,
-      // the following are each ChainReverseResolver ([coinType].reverse)
-      rrRoot.contracts.BaseReverseResolver.address,
-      rrRoot.contracts.LineaReverseResolver.address,
-      rrRoot.contracts.OptimismReverseResolver.address,
-      rrRoot.contracts.ArbitrumReverseResolver.address,
-      rrRoot.contracts.ScrollReverseResolver.address,
-    ] as Address[]
-  ).includes(resolverAddress);
+  return [
+    // DefaultReverseResolver (default.reverse)
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultReverseResolver3"),
+
+    // the following are each ChainReverseResolver ([coinType].reverse)
+    resolverEq(DatasourceNames.ReverseResolverRoot, "BaseReverseResolver"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "LineaReverseResolver"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "OptimismReverseResolver"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "ArbitrumReverseResolver"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "ScrollReverseResolver"),
+  ].some(Boolean);
 }

@@ -1,5 +1,6 @@
 import { mergeAbis } from "@ponder/utils";
 
+// import { EnhancedAccessControl } from "../abis/namechain/EnhancedAccessControl";
 import { LegacyPublicResolver } from "../abis/shared/LegacyPublicResolver";
 import { Ownable } from "../abis/shared/Ownable";
 import { Resolver } from "../abis/shared/Resolver";
@@ -9,11 +10,16 @@ import { Resolver } from "../abis/shared/Resolver";
  * - LegacyPublicResolver
  *   - TextChanged event without value
  * - IResolver
- *   - modern Resolver ABI
- * - Dedicated Resolver
- *   - Ownable
+ *   - modern Resolver ABI, TextChanged with value
+ * - DedicatedResolver
+ *   - EnhancedAccessControl
  *
  * A Resolver contract is a contract that emits _any_ (not _all_) of the events specified here and
  * may or may not support any number of the methods available in this ABI.
  */
-export const ResolverABI = mergeAbis([LegacyPublicResolver, Resolver, Ownable]);
+export const ResolverABI = mergeAbis([
+  LegacyPublicResolver,
+  Resolver,
+  Ownable,
+  // EnhancedAccessControl, // TODO: mmove this to EAC
+]);

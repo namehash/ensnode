@@ -4,7 +4,7 @@ import {
   type ENSNamespaceId,
   maybeGetDatasource,
 } from "@ensnode/datasources";
-import type { AccountId } from "@ensnode/ensnode-sdk";
+import { type AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
 
 /**
  * Gets the AccountId for the contract in the specified namespace, datasource, and
@@ -64,3 +64,13 @@ export const getDatasourceContract = (
   }
   return contract;
 };
+
+/**
+ * Makes a comparator fn for `b` against the contract described by `namespace`, `datasourceName`, and `contractName`.
+ */
+export const makeContractMatcher =
+  (namespace: ENSNamespaceId, b: AccountId) =>
+  (datasourceName: DatasourceName, contractName: string) => {
+    const a = maybeGetDatasourceContract(namespace, datasourceName, contractName);
+    return a && accountIdEqual(a, b);
+  };

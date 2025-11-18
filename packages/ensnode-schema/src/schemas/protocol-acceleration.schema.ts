@@ -99,6 +99,8 @@ export const resolver = onchainTable(
     /**
      * A Resolver may have an `owner` via Ownable.
      *
+     * TODO: move this to EAC
+     *
      * Mainly relevant for DedicatedResolvers.
      */
     ownerId: t.hex().$type<Address>(),

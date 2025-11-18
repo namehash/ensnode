@@ -72,10 +72,7 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     publicClient: context.client,
   });
 
-  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
-    resolver.chainId, // TODO: pass AccountId
-    resolver.address,
-  );
+  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(resolver);
   const bridgesToRegistry = isBridgedResolver(resolver);
   const isStatic = isStaticResolver(resolver);
 
@@ -83,6 +80,7 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     ? staticResolverImplementsAddressRecordDefaulting(resolver)
     : null;
 
+  // TODO: remove this in favor of EAC
   let ownerId: Address | null = null;
   try {
     const rawOwner = await context.client.readContract({
