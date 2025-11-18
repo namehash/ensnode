@@ -1,6 +1,6 @@
 import type { Node } from "../ens";
 import type { UnixTimestamp } from "../shared";
-import type { Subregistry } from "./subregistry";
+import { type SerializedSubregistry, type Subregistry, serializeSubregistry } from "./subregistry";
 
 /**
  * Registration Lifecycle Stages
@@ -69,4 +69,22 @@ export interface RegistrationLifecycle {
    * Identifies when the Registration Lifecycle is scheduled to expire.
    */
   expiresAt: UnixTimestamp;
+}
+
+/**
+ * Serialized representation of {@link RegistrationLifecycle}.
+ */
+export interface SerializedRegistrationLifecycle
+  extends Omit<RegistrationLifecycle, "subregistry"> {
+  subregistry: SerializedSubregistry;
+}
+
+export function serializeRegistrationLifecycle(
+  registrationLifecycle: RegistrationLifecycle,
+): SerializedRegistrationLifecycle {
+  return {
+    subregistry: serializeSubregistry(registrationLifecycle.subregistry),
+    node: registrationLifecycle.node,
+    expiresAt: registrationLifecycle.expiresAt,
+  };
 }

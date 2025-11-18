@@ -5,4 +5,5 @@ export * from "./useNow";
 export * from "./usePrimaryName";
 export * from "./usePrimaryNames";
 export * from "./useRecords";
+export * from "./useRegistrarActions";
 export * from "./useResolvedIdentity";

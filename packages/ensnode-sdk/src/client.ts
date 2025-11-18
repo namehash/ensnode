@@ -1,12 +1,20 @@
 import {
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
+  deserializeRegistrarActionsResponse,
+  RegistrarActionsFilterFields,
+  RegistrarActionsOrders,
   type SerializedIndexingStatusResponse,
+  type SerializedRegistrarActionsResponse,
 } from "./api";
 import type {
   ConfigResponse,
   ErrorResponse,
   IndexingStatusResponse,
+  RegistrarActionsFilter,
+  RegistrarActionsOrder,
+  RegistrarActionsRequest,
+  RegistrarActionsResponse,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
   ResolvePrimaryNamesRequest,
@@ -15,6 +23,12 @@ import type {
   ResolveRecordsResponse,
 } from "./api/types";
 import { ClientError } from "./client-error";
+import {
+  deserializePaginatedAggregatedReferrersResponse,
+  type PaginatedAggregatedReferrersRequest,
+  type PaginatedAggregatedReferrersResponse,
+  type SerializedPaginatedAggregatedReferrersResponse,
+} from "./ensanalytics";
 import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
 
@@ -36,6 +50,7 @@ export interface ClientOptions {
  *
  * Provides access to the following ENSNode APIs:
  * - Resolution API
+ * - ENSAnalytics API
  * - 🚧 Configuration API
  * - 🚧 Indexing Status API
  *
@@ -333,7 +348,7 @@ export class ENSNodeClient {
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {
-        // if errorResponse is could not be determined,
+        // if errorResponse could not be determined,
         // it means the response includes indexing status data
         console.log("Indexing Status API: handling a known indexing status server error.");
       }
@@ -346,5 +361,180 @@ export class ENSNodeClient {
     }
 
     return deserializeIndexingStatusResponse(responseData as SerializedIndexingStatusResponse);
+  }
+
+  /**
+   * Fetch Paginated Aggregated Referrers
+   *
+   * Retrieves a paginated list of aggregated referrer metrics with contribution percentages.
+   * Each referrer's contribution is calculated as a percentage of the grand totals across all referrers.
+   *
+   * @param request - Pagination parameters
+   * @param request.page - The page number to retrieve (1-indexed, default: 1)
+   * @param request.itemsPerPage - Number of items per page (default: 25, max: 100)
+   * @returns {PaginatedAggregatedReferrersResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   *
+   * @example
+   * ```typescript
+   * // Get first page with default page size (25 items)
+   * const response = await client.getAggregatedReferrers();
+   * if (response.responseCode === 'ok') {
+   *   console.log(response.data.referrers);
+   *   console.log(`Page ${response.data.paginationParams.page} of ${Math.ceil(response.data.total / response.data.paginationParams.itemsPerPage)}`);
+   * }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Get second page with 50 items per page
+   * const response = await client.getAggregatedReferrers({ page: 2, itemsPerPage: 50 });
+   * ```
+   */
+  async getAggregatedReferrers(
+    request?: PaginatedAggregatedReferrersRequest,
+  ): Promise<PaginatedAggregatedReferrersResponse> {
+    const url = new URL(`/api/ensanalytics/aggregated-referrers`, this.options.url);
+
+    if (request?.page) url.searchParams.set("page", request.page.toString());
+    if (request?.itemsPerPage)
+      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // The API can return errors with 500 status, but they're still in the
+    // PaginatedAggregatedReferrersResponse format with responseCode: 'error'
+    // So we don't need to check response.ok here, just deserialize and let
+    // the caller handle the responseCode
+
+    return deserializePaginatedAggregatedReferrersResponse(
+      responseData as SerializedPaginatedAggregatedReferrersResponse,
+    );
+  }
+
+  /**
+   * Fetch ENSNode Registrar Actions
+   *
+   * @param {RegistrarActionsRequestFilter} request.filter is
+   *        an optional request filter configuration.
+   * @param {number} request.limit sets the maximum count of results in the response.
+   * @param {RegistrarActionsRequestOrder} request.order sets the order of
+   *        results in the response by field and direction.
+   * @returns {RegistrarActionsResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   *
+   * @example
+   * ```ts
+   * import {
+   *   registrarActionsFilter,,
+   *   ENSNodeClient,
+   * } from "@ensnode/ensnode-sdk";
+   * import { namehash } from "viem/ens";
+   *
+   * const client: ENSNodeClient;
+   *
+   * // get latest registrar action records across all indexed subregistries
+   * // NOTE: when no `limit` value is passed,
+   * //       the default RESPONSE_ITEMS_PER_PAGE_DEFAULT applies.
+   * const registrarActions = await client.registrarActions();
+   *
+   * // get latest 5 registrar action records across all indexed subregistries
+   * // NOTE: when a `limit` value is passed, it must be lower than or equal to
+   * //       the RESPONSE_ITEMS_PER_PAGE_MAX value.
+   * const registrarActions = await client.registrarActions({
+   *   limit: 5,
+   * });
+   *
+   * // get latest registrar action records associated with
+   * // subregistry managing `eth` name
+   * await client.registrarActions({
+   *   filter: registrarActionsFilter.byParentNode(namehash('eth')),
+   * });
+   *
+   * // get latest 10 registrar action records associated with
+   * // subregistry managing `base.eth` name
+   * await client.registrarActions({
+   *   filter: registrarActionsFilter.byParentNode(namehash('base.eth')),
+   *   limit: 10
+   * });
+   * ```
+   */
+  async registrarActions(request: RegistrarActionsRequest = {}): Promise<RegistrarActionsResponse> {
+    const buildUrlPath = (filter: RegistrarActionsFilter | undefined) => {
+      return filter?.field === RegistrarActionsFilterFields.SubregistryNode
+        ? new URL(`/api/registrar-actions/${filter.value}`, this.options.url)
+        : new URL(`/api/registrar-actions`, this.options.url);
+    };
+
+    const buildOrderArg = (order: RegistrarActionsOrder) => {
+      switch (order) {
+        case RegistrarActionsOrders.LatestRegistrarActions: {
+          const [field, direction] = order.split("=");
+          return {
+            key: `sort[${field}]`,
+            value: `${direction}`,
+          };
+        }
+      }
+    };
+
+    const url = buildUrlPath(request.filter);
+
+    if (request.order) {
+      const orderArgs = buildOrderArg(request.order);
+
+      url.searchParams.set(orderArgs.key, orderArgs.value);
+    }
+
+    if (request.itemsPerPage) {
+      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    }
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // handle response errors accordingly
+    if (!response.ok) {
+      // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
+      try {
+        errorResponse = deserializeErrorResponse(responseData);
+      } catch {
+        // if errorResponse could not be determined,
+        // it means the response includes data
+        console.log("Registrar Actions API: handling a known server error.");
+      }
+
+      // however, if errorResponse was defined,
+      // throw an error with the generic server error message
+      if (typeof errorResponse !== "undefined") {
+        throw new Error(`Fetching ENSNode Registrar Actions Failed: ${errorResponse.message}`);
+      }
+    }
+
+    return deserializeRegistrarActionsResponse(responseData as SerializedRegistrarActionsResponse);
   }
 }

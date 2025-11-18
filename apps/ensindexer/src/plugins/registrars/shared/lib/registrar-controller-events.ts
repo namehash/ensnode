@@ -74,9 +74,6 @@ export async function handleRegistrarControllerEvent(
     );
   }
 
-  // 2. c) Drop the subregistryActionMetadata record, as it won't be needed anymore.
-  await context.db.delete(schema.internal_registrarActionMetadata, { logicalEventKey });
-
   // 3. Prepare pricing info
   let baseCost: bigint | null;
   let premium: bigint | null;

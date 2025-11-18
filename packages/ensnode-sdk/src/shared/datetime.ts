@@ -1,4 +1,4 @@
-import { deserializeDuration } from "./deserialize";
+import { deserializeDuration, deserializeUnixTimestamp } from "./deserialize";
 import type { Duration, UnixTimestamp } from "./types";
 
 /**
@@ -6,4 +6,11 @@ import type { Duration, UnixTimestamp } from "./types";
  */
 export function durationBetween(start: UnixTimestamp, end: UnixTimestamp): Duration {
   return deserializeDuration(end - start, "Duration");
+}
+
+/**
+ * Add a duration to a timestamp.
+ */
+export function addDuration(timestamp: UnixTimestamp, duration: Duration): UnixTimestamp {
+  return deserializeUnixTimestamp(timestamp + duration, "UnixTimestamp");
 }

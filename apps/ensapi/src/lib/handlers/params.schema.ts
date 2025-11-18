@@ -80,6 +80,26 @@ const selection = z
     return selection;
   });
 
+/**
+ * Query Param Schema
+ *
+ * Allows treating a query param with no value as if the query param
+ * value was 'undefined'.
+ *
+ * Note: This overrides a default behavior when the default value for
+ * a query param is an empty string. Empty string causes an edge case
+ * for query param value coercion into numbers:
+ * ```ts
+ * // empty string coercion into Number type
+ * Number('') === 0;
+ * ```
+ *
+ * The `preprocess` method replaces an empty string with `undefined` value,
+ * and the output type is set to `unknown` to allow easy composition with
+ * other specialized Zod schemas.
+ */
+const queryParam = z.preprocess((v) => (v === "" ? undefined : v), z.unknown());
+
 export const params = {
   boolstring,
   stringarray,
@@ -92,4 +112,5 @@ export const params = {
   selectionParams: rawSelectionParams,
   selection,
   chainIdsWithoutDefaultChainId,
+  queryParam,
 };

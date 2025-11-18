@@ -10,6 +10,7 @@ import {
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
 
+import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
@@ -34,6 +35,9 @@ app.get("/indexing-status", async (c) => {
 
   return c.json(serializeIndexingStatusResponse(c.var.indexingStatus.value));
 });
+
+// Registrar Actions API
+app.route("/registrar-actions", registrarActionsApi);
 
 // Resolution API
 app.route("/resolve", resolutionApi);

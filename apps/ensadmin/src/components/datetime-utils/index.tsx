@@ -1,9 +1,16 @@
-import { formatDistance, formatDistanceStrict, fromUnixTime, intlFormat } from "date-fns";
+import {
+  formatDistance,
+  formatDistanceStrict,
+  fromUnixTime,
+  getUnixTime,
+  intlFormat,
+  subSeconds,
+} from "date-fns";
 import { millisecondsInSecond } from "date-fns/constants";
 import type * as React from "react";
 import { useEffect, useState } from "react";
 
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -80,6 +87,7 @@ export function RelativeTime({
   tooltipPosition = "top",
   relativeTo,
   prefix,
+  contentWrapper,
 }: {
   timestamp: UnixTimestamp;
   enforcePast?: boolean;
@@ -88,6 +96,10 @@ export function RelativeTime({
   tooltipPosition?: React.ComponentProps<typeof TooltipContent>["side"];
   relativeTo?: UnixTimestamp;
   prefix?: string;
+  /**
+   * A component to be rendered as a wrapper for the Relative Time component content.
+   */
+  contentWrapper?: ({ children }: React.PropsWithChildren) => React.ReactNode;
 }) {
   const [relativeTime, setRelativeTime] = useState<string>("");
 
@@ -106,11 +118,19 @@ export function RelativeTime({
     }
   }, [timestamp, conciseFormatting, enforcePast, includeSeconds, relativeTo]);
 
+  const tooltipTriggerContent = (
+    <>
+      {prefix}
+      {relativeTime}
+    </>
+  );
+
   return (
     <Tooltip delayDuration={1000}>
       <TooltipTrigger className="cursor-text">
-        {prefix}
-        {relativeTime}
+        {typeof contentWrapper === "function"
+          ? contentWrapper({ children: tooltipTriggerContent })
+          : tooltipTriggerContent}
       </TooltipTrigger>
       <TooltipContent
         side={tooltipPosition}
@@ -134,16 +154,20 @@ export function RelativeTime({
 }
 
 /**
- * Client-only duration component
+ * Display Duration component
  */
-export function Duration({ beginsAt, endsAt }: { beginsAt: UnixTimestamp; endsAt: UnixTimestamp }) {
-  const [duration, setDuration] = useState<string>("");
-  const beginsAtDate = fromUnixTime(beginsAt);
-  const endsAtDate = fromUnixTime(endsAt);
+export function DisplayDuration({ duration }: { duration: Duration }) {
+  const [timeDistance, setTimeDistance] = useState<string>("");
+
+  // formatDistanceStrict needs two UnixTimestamp values
+  // so we create `beginsAt` and `endsAt` timestamps
+  // where `beginsAt = endsAt - duration`
+  const beginsAt = fromUnixTime(0);
+  const endsAt = fromUnixTime(duration);
 
   useEffect(() => {
-    setDuration(formatDistanceStrict(endsAtDate, beginsAtDate));
-  }, [beginsAtDate, endsAtDate]);
+    setTimeDistance(formatDistanceStrict(beginsAt, endsAt));
+  }, [beginsAt, endsAt]);
 
-  return <>{duration}</>;
+  return timeDistance;
 }
