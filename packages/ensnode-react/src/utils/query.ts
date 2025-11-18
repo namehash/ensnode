@@ -4,6 +4,7 @@ import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 
 import {
   ENSNodeClient,
+  type RegistrarActionsRequest,
   type ResolvePrimaryNameRequest,
   type ResolvePrimaryNamesRequest,
   type ResolveRecordsRequest,
@@ -55,6 +56,9 @@ export const queryKeys = {
   config: (url: string) => [...queryKeys.base(url), "config"] as const,
 
   indexingStatus: (url: string) => [...queryKeys.base(url), "indexing-status"] as const,
+
+  registrarActions: (url: string, args: RegistrarActionsRequest) =>
+    [...queryKeys.base(url), "registrar-actions", args] as const,
 };
 
 /**
@@ -132,6 +136,24 @@ export function createIndexingStatusQueryOptions(config: ENSNodeSDKConfig) {
     queryFn: async () => {
       const client = new ENSNodeClient(config.client);
       return client.indexingStatus();
+    },
+  };
+}
+
+/**
+ * Creates query options for ENSNode Registrar Actions API
+ */
+export function createRegistrarActionsQueryOptions(
+  config: ENSNodeSDKConfig,
+  args: RegistrarActionsRequest,
+) {
+  return {
+    enabled: true,
+    queryKey: queryKeys.registrarActions(config.client.url.href, args),
+    queryFn: async () => {
+      const client = new ENSNodeClient(config.client);
+
+      return client.registrarActions(args);
     },
   };
 }

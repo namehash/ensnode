@@ -23,6 +23,7 @@ import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
@@ -82,6 +83,11 @@ export default {
         abi: root_UnwrappedEthRegistrarController,
         address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
         startBlock: 8579988,
+      },
+      UniversalRegistrarRenewalWithReferrer: {
+        abi: root_UniversalRegistrarRenewalWithReferrer,
+        address: "0x7ab2947592c280542e680ba8f08a589009da8644",
+        startBlock: 9447519,
       },
       NameWrapper: {
         abi: root_NameWrapper,

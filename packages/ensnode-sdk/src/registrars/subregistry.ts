@@ -1,5 +1,5 @@
 import type { Node } from "../ens";
-import type { AccountId } from "../shared";
+import { type AccountId, type SerializedAccountId, serializeAccountId } from "../shared";
 
 /**
  * Subregistry
@@ -23,4 +23,18 @@ export interface Subregistry {
    * - `linea.eth`
    */
   node: Node;
+}
+
+/**
+ * Serialized representation of {@link Subregistry}.
+ */
+export interface SerializedSubregistry extends Omit<Subregistry, "subregistryId"> {
+  subregistryId: SerializedAccountId;
+}
+
+export function serializeSubregistry(subregistry: Subregistry): SerializedSubregistry {
+  return {
+    subregistryId: serializeAccountId(subregistry.subregistryId),
+    node: subregistry.node,
+  };
 }

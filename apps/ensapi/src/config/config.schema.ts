@@ -1,5 +1,9 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
+import {
+  ENS_HOLIDAY_AWARDS_END_DATE,
+  ENS_HOLIDAY_AWARDS_START_DATE,
+} from "@namehash/ens-referrals";
 import { getUnixTime } from "date-fns";
 import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
@@ -74,12 +78,8 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    ensAwardsStart: DateStringToUnixTimestampSchema.default(() =>
-      getUnixTime(new Date("Dec 1, 2025 00:00:00 UTC")),
-    ),
-    ensAwardsEnd: DateStringToUnixTimestampSchema.default(() =>
-      getUnixTime(new Date("Dec 31, 2025 23:59:59 UTC")),
-    ),
+    ensAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
+    ensAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);

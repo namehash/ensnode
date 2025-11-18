@@ -4,4 +4,5 @@ export * from "./useIndexingStatus";
 export * from "./usePrimaryName";
 export * from "./usePrimaryNames";
 export * from "./useRecords";
+export * from "./useRegistrarActions";
 export * from "./useResolvedIdentity";

@@ -1,3 +1,4 @@
+import { isLabelHash } from "./labelhash";
 import type { EncodedLabelHash, LabelHash } from "./types";
 
 /**
@@ -10,3 +11,16 @@ import type { EncodedLabelHash, LabelHash } from "./types";
  */
 export const encodeLabelHash = (labelHash: LabelHash): EncodedLabelHash =>
   `[${labelHash.slice(2)}]`;
+
+/**
+ * Checks if the input value is an {@link EncodedLabelHash}.
+ */
+export function isEncodedLabelHash(
+  maybeEncodedLabelHash: string,
+): maybeEncodedLabelHash is EncodedLabelHash {
+  const expectedFormatting =
+    maybeEncodedLabelHash.startsWith("[") && maybeEncodedLabelHash.endsWith("]");
+  const includesLabelHash = isLabelHash(`0x${maybeEncodedLabelHash.slice(1, -1)}`);
+
+  return expectedFormatting && includesLabelHash;
+}

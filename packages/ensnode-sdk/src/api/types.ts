@@ -1,7 +1,9 @@
 import type z from "zod/v4";
 
+import type { InterpretedName, Node } from "../ens";
 import type { ENSApiPublicConfig } from "../ensapi";
 import type { RealtimeIndexingStatusProjection } from "../ensindexer";
+import type { RegistrarAction } from "../registrars";
 import type {
   ForwardResolutionArgs,
   MultichainPrimaryNameResolutionArgs,
@@ -130,3 +132,124 @@ export type IndexingStatusResponseError = {
  * at runtime.
  */
 export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusResponseError;
+
+/**
+ * Registrar Actions response
+ */
+
+/**
+ * Records Filters: Comparators
+ */
+export const RegistrarActionsFilterComparators = {
+  EqualsTo: "eq",
+} as const;
+
+export type RegistrarActionsFilterComparator =
+  (typeof RegistrarActionsFilterComparators)[keyof typeof RegistrarActionsFilterComparators];
+
+/**
+ * Records Filters: Fields
+ */
+export const RegistrarActionsFilterFields = {
+  SubregistryNode: "registrationLifecycle.subregistry.node",
+} as const;
+
+export type RegistrarActionsFilterField =
+  (typeof RegistrarActionsFilterFields)[keyof typeof RegistrarActionsFilterFields];
+
+export type RegistrarActionsFilter = {
+  field: typeof RegistrarActionsFilterFields.SubregistryNode;
+  comparator: typeof RegistrarActionsFilterComparators.EqualsTo;
+  value: Node;
+};
+
+/**
+ * Records Orders
+ */
+export const RegistrarActionsOrders = {
+  LatestRegistrarActions: "orderBy[timestamp]=desc",
+} as const;
+
+export type RegistrarActionsOrder =
+  (typeof RegistrarActionsOrders)[keyof typeof RegistrarActionsOrders];
+
+/**
+ * Represents a request to Registrar Actions API.
+ */
+export type RegistrarActionsRequest = {
+  filter?: RegistrarActionsFilter;
+
+  /**
+   * Order applied while generating results.
+   */
+  order?: RegistrarActionsOrder;
+
+  /**
+   * Limit the count of items per page to selected count of records.
+   *
+   * Guaranteed to be a positive integer (if defined).
+   */
+  itemsPerPage?: number;
+};
+
+/**
+ * A status code for Registrar Actions API responses.
+ */
+export const RegistrarActionsResponseCodes = {
+  /**
+   * Represents that Registrar Actions are available.
+   */
+  Ok: "ok",
+
+  /**
+   * Represents that Registrar Actions are unavailable.
+   */
+  Error: "error",
+} as const;
+
+/**
+ * The derived string union of possible {@link RegistrarActionsResponseCodes}.
+ */
+export type RegistrarActionsResponseCode =
+  (typeof RegistrarActionsResponseCodes)[keyof typeof RegistrarActionsResponseCodes];
+
+/**
+ * "Logical registrar action" with its associated name.
+ */
+export interface NamedRegistrarAction {
+  action: RegistrarAction;
+
+  /**
+   * Name
+   *
+   * FQDN of the name associated with `action`.
+   *
+   * Guarantees:
+   * - `namehash(name)` is always `action.registrationLifecycle.node`.
+   */
+  name: InterpretedName;
+}
+
+/**
+ * A response when Registrar Actions are available.
+ */
+export type RegistrarActionsResponseOk = {
+  responseCode: typeof RegistrarActionsResponseCodes.Ok;
+  registrarActions: NamedRegistrarAction[];
+};
+
+/**
+ * A response when Registrar Actions are unavailable.
+ */
+export interface RegistrarActionsResponseError {
+  responseCode: typeof IndexingStatusResponseCodes.Error;
+  error: ErrorResponse;
+}
+
+/**
+ * Registrar Actions response.
+ *
+ * Use the `responseCode` field to determine the specific type interpretation
+ * at runtime.
+ */
+export type RegistrarActionsResponse = RegistrarActionsResponseOk | RegistrarActionsResponseError;
