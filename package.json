@@ -21,7 +21,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.1",
     "@changesets/changelog-github": "^0.5.1",
-    "@changesets/cli": "^2.29.6",
+    "@changesets/cli": "^2.29.7",
     "jsdom": "^27.0.1",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -37,9 +37,10 @@
       "esbuild@<=0.24.2": ">=0.25.0",
       "tmp@<=0.2.3": ">=0.2.4",
       "ponder>vite": "6.4.1",
-      "@tailwindcss/vite>vite": "7.1.11",
+      "@tailwindcss/vite>vite@<7.1.11": ">=7.1.11",
       "axios@<1.12.0": ">=1.12.0",
-      "js-yaml@<4.1.1": ">=4.1.1"
+      "glob@<11.1.0": ">=11.1.0",
+      "js-yaml": "3.14.2"
     },
     "ignoredBuiltDependencies": [
       "bun"
