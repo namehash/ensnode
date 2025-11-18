@@ -3,7 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import {
+  type IndexingStatusResponse,
+  IndexingStatusResponseCodes,
+  IndexingStatusResponseOk,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
 
 import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
@@ -33,7 +38,7 @@ let loadingTimeoutId: number;
 
 async function fetchMockedIndexingStatus(
   selectedVariant: Variant,
-): Promise<IndexingStatusResponse> {
+): Promise<IndexingStatusResponseOk> {
   // always try clearing loading timeout when performing a mocked fetch
   // this way we get a fresh and very long request to observe the loading state
   if (loadingTimeoutId) {
@@ -45,11 +50,11 @@ async function fetchMockedIndexingStatus(
     case OmnichainIndexingStatusIds.Backfill:
     case OmnichainIndexingStatusIds.Following:
     case OmnichainIndexingStatusIds.Completed:
-      return indexingStatusResponseOkOmnichain[selectedVariant];
+      return indexingStatusResponseOkOmnichain[selectedVariant] as IndexingStatusResponseOk;
     case "Response Error":
-      return indexingStatusResponseError;
+      throw new Error("Indexing Status API: Internal Server Error");
     case "Loading":
-      return new Promise<IndexingStatusResponse>((_resolve, reject) => {
+      return new Promise<IndexingStatusResponseOk>((_resolve, reject) => {
         loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
       });
     case "Loading Error":

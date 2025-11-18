@@ -1,11 +1,15 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  type QueryObserverSuccessResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import {
   createRealtimeIndexingStatusProjection,
-  type IndexingStatusRequest,
-  type IndexingStatusResponse,
   IndexingStatusResponseCodes,
+  type IndexingStatusResponseOk,
 } from "@ensnode/ensnode-sdk";
 
 import type { QueryParameter, WithSDKConfigParameter } from "../types";
@@ -13,9 +17,7 @@ import { createIndexingStatusQueryOptions } from "../utils/query";
 import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 import { useNow } from "./useNow";
 
-interface UseIndexingStatusParameters
-  extends IndexingStatusRequest,
-    QueryParameter<IndexingStatusResponse> {}
+interface UseIndexingStatusParameters extends QueryParameter<IndexingStatusResponseOk> {}
 
 /**
  * Hook for fetching and tracking indexing status with client-side projection updates.
@@ -51,56 +53,66 @@ export function useIndexingStatus(
   const { config, query = {} } = parameters;
   const _config = useENSNodeSDKConfig(config);
 
+  const queryClient = useQueryClient();
   const queryOptions = createIndexingStatusQueryOptions(_config);
+  // cacheResult, if available, is always IndexingStatusResponseOk (thanks to
+  // queryFn throwing error for IndexingStatusResponseError)
+  const cachedResult = queryClient.getQueryData<IndexingStatusResponseOk>(queryOptions.queryKey);
 
-  const options = {
+  const queryResult = useQuery({
     ...queryOptions,
-    refetchInterval: 10 * 1000, // 10 seconds - indexing status changes frequently
-    placeholderData: keepPreviousData, // Keep showing previous data during refetch and on error
     ...query,
+    // cached result can never be stale
+    staleTime: cachedResult ? Infinity : undefined,
+    // cached result can never be removed by garbage collector
+    gcTime: cachedResult ? Infinity : undefined,
+    refetchInterval: 3 * 1000, // 3 seconds - indexing status changes frequently
+    placeholderData: keepPreviousData, // Keep showing previous data during refetch (does not work for errors)
     enabled: query.enabled ?? queryOptions.enabled,
-  };
-
-  const queryResult = useQuery(options);
-
-  // Extract the current snapshot from the query result.
-  // Thanks to placeholderData: keepPreviousData, this will continue showing
-  // the last successful snapshot even when subsequent fetches fail.
-  // Note: queryFn now throws on error responses, so data will only contain valid responses
-
-  // debug
-  const currentSnapshot =
-    queryResult.data?.responseCode === IndexingStatusResponseCodes.Ok
-      ? queryResult.data.realtimeProjection.snapshot
-      : null;
-
-  // / worstCaseDistance is measured in seconds
+  });
 
   // Get current timestamp that updates every second.
   // Each component instance gets its own timestamp
   const projectedAt = useNow(1000);
 
-  // Generate projection from cached snapshot using the synchronized timestamp.
   // useMemo ensures we only create a new projection object when values actually change,
   // maintaining referential equality for unchanged data (prevents unnecessary re-renders).
-  const projectedData = useMemo(() => {
-    if (!currentSnapshot) return null;
+  const memoizedQueryResult = useMemo(() => {
+    // If the query result is error
+    // and the cachedResult is available
+    // override the query result to be success, including cachedResult data
+    if (queryResult.isError && cachedResult) {
+      return {
+        ...queryResult,
+        isError: false,
+        error: null,
+        isRefetchError: false,
+        isLoadingError: false,
+        isSuccess: true,
+        status: "success",
+        data: cachedResult,
+      } satisfies QueryObserverSuccessResult<IndexingStatusResponseOk, Error>;
+    }
 
-    const realtimeProjection = createRealtimeIndexingStatusProjection(currentSnapshot, projectedAt);
+    // if queryResult is not success, just return it without any updates
+    if (!queryResult.isSuccess) {
+      return queryResult;
+    }
 
-    return {
-      // debugging
-      responseCode: "ok" as const,
-      realtimeProjection,
-    } satisfies IndexingStatusResponse;
-  }, [currentSnapshot, projectedAt]);
+    // Extract the current snapshot from the query result.
+    const { snapshot } = queryResult.data.realtimeProjection;
 
-  if (projectedData) {
+    // Generate projection from current snapshot using the synchronized timestamp.
+    const realtimeProjection = createRealtimeIndexingStatusProjection(snapshot, projectedAt);
     return {
       ...queryResult,
-      data: projectedData,
-    };
-  }
+      isPlaceholderData: false,
+      data: {
+        responseCode: IndexingStatusResponseCodes.Ok,
+        realtimeProjection,
+      },
+    } satisfies QueryObserverSuccessResult<IndexingStatusResponseOk, Error>;
+  }, [queryResult, cachedResult, projectedAt]);
 
-  return queryResult;
+  return memoizedQueryResult;
 }

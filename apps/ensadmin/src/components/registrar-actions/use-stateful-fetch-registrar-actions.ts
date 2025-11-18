@@ -81,10 +81,7 @@ export function useStatefulRegistrarActions({
   }
 
   // Indexing Status fetched as error
-  if (
-    !indexingStatusQuery.isSuccess ||
-    indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Error
-  ) {
+  if (!indexingStatusQuery.isSuccess) {
     return {
       fetchStatus: StatefulFetchStatusIds.Error,
       reason: "Indexing Status could not be fetched successfully",

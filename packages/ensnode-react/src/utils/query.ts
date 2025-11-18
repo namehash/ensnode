@@ -5,6 +5,7 @@ import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 import {
   ENSNodeClient,
   IndexingStatusResponseCodes,
+  type IndexingStatusResponseOk,
   type RegistrarActionsRequest,
   type ResolvePrimaryNameRequest,
   type ResolvePrimaryNamesRequest,
@@ -137,7 +138,7 @@ export function createIndexingStatusQueryOptions(config: ENSNodeSDKConfig) {
   return {
     enabled: true,
     queryKey: queryKeys.indexingStatus(config.client.url.href),
-    queryFn: async () => {
+    queryFn: async (): Promise<IndexingStatusResponseOk> => {
       const client = new ENSNodeClient(config.client);
       const response = await client.indexingStatus();
 

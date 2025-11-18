@@ -4,6 +4,7 @@
  * Each omnichain status can present different indexing stats.
  */
 
+import { QueryObserverResult } from "@tanstack/react-query";
 import type { PropsWithChildren, ReactElement } from "react";
 
 import type { useIndexingStatus } from "@ensnode/ensnode-react";
@@ -12,6 +13,7 @@ import {
   ChainIndexingStatusIds,
   type CrossChainIndexingStatusSnapshotOmnichain,
   IndexingStatusResponseCodes,
+  IndexingStatusResponseOk,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
@@ -443,7 +445,7 @@ export function IndexingStatsForRealtimeStatusProjection({
   );
 }
 
-type IndexingStatsProps = ReturnType<typeof useIndexingStatus>;
+type IndexingStatsProps = QueryObserverResult<IndexingStatusResponseOk>;
 
 /**
  * Display indexing stats based on query results from {@link useIndexingStatus}.
@@ -460,14 +462,6 @@ export function IndexingStats(props: IndexingStatsProps) {
   }
 
   const indexingStatus = indexingStatusQuery.data;
-
-  if (indexingStatus.responseCode === IndexingStatusResponseCodes.Error) {
-    return (
-      <IndexingStatsShell>
-        <IndexingStatsForUnavailableSnapshot />
-      </IndexingStatsShell>
-    );
-  }
 
   return (
     <IndexingStatsForRealtimeStatusProjection
