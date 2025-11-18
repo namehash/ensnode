@@ -104,24 +104,24 @@ function ResolveAndDisplayReferrerIdentity({
  */
 export function DisplayRegistrarActionCardPlaceholder() {
   return (
-    <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
+    <div className="w-full min-h-[80px] box-border flex flex-row flex-wrap justify-between items-center max-lg:gap-3 gap-y-3 rounded-xl border p-3 text-sm">
       <LabeledField fieldLabel="Name" className="w-[30%] min-w-[200px]">
         <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5" />
       </LabeledField>
 
-      <LabeledField fieldLabel="Registered" className="w-[15%] min-w-[100px]">
-        <div className="animate-pulse mt-1 h-6 bg-muted rounded w-full" />
+      <LabeledField fieldLabel="Registered" className="w-[15%] min-w-[140px]">
+        <div className="animate-pulse mt-1 h-6 bg-muted rounded w-4/5" />
       </LabeledField>
 
-      <LabeledField fieldLabel="Duration" className="w-[10%]  min-w-[100px]">
-        <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-full" />
+      <LabeledField fieldLabel="Duration" className="w-[10%] min-w-[140px]">
+        <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-4/5" />
       </LabeledField>
 
-      <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[150px]">
+      <LabeledField fieldLabel="Registrant" className="w-1/5 min-w-[140px]">
         <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5" />
       </LabeledField>
 
-      <LabeledField fieldLabel="Referrer" className="w-[15%]  min-w-[100px]">
+      <LabeledField fieldLabel="Referrer" className="w-[15%]  min-w-[140px]">
         <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-full" />
       </LabeledField>
     </div>
@@ -156,7 +156,7 @@ export function DisplayRegistrarActionCard({
   const registrantIdentity = buildUnresolvedIdentity(registrant, namespaceId, chainId);
 
   return (
-    <div className="w-full min-h-[80px] box-border flex flex-row max-lg:flex-wrap flex-nowrap justify-between items-center max-lg:gap-3 rounded-xl border p-3 text-sm">
+    <div className="w-full min-h-[80px] box-border flex flex-row flex-wrap justify-between items-center max-lg:gap-3 gap-y-3 rounded-xl border p-3 text-sm">
       <LabeledField fieldLabel="Name" className="w-[30%] min-w-[200px]">
         <div className="w-full overflow-x-auto">
           <NameLink
@@ -170,7 +170,7 @@ export function DisplayRegistrarActionCard({
 
       <LabeledField
         fieldLabel={type === RegistrarActionTypes.Registration ? "Registered" : "Renewed"}
-        className="w-[15%] min-w-[100px]"
+        className="w-[15%] min-w-[140px]"
       >
         <RelativeTime
           timestamp={namedRegistrarAction.action.block.timestamp}
@@ -180,11 +180,11 @@ export function DisplayRegistrarActionCard({
         />
       </LabeledField>
 
-      <LabeledField fieldLabel="Duration" className="w-[10%]  min-w-[100px]">
+      <LabeledField fieldLabel="Duration" className="w-[10%]  min-w-[140px]">
         <DisplayDuration duration={namedRegistrarAction.action.incrementalDuration} />
       </LabeledField>
 
-      <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[150px]">
+      <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[140px]">
         <ResolveAndDisplayIdentity
           identity={registrantIdentity}
           withAvatar={true}
@@ -192,7 +192,7 @@ export function DisplayRegistrarActionCard({
         />
       </LabeledField>
 
-      <LabeledField fieldLabel="Referrer" className="w-[15%]  min-w-[100px]">
+      <LabeledField fieldLabel="Referrer" className="w-[15%] min-w-[140px]">
         <ResolveAndDisplayReferrerIdentity
           chainId={chainId}
           namespaceId={namespaceId}
