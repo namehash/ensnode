@@ -2,10 +2,17 @@
  * Schema Definitions that power Protocol Acceleration in the Resolution API.
  */
 
-import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
+import { onchainEnum, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
-import type { ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
+import type {
+  ChainId,
+  DomainId,
+  Node,
+  RegistryId,
+  ResolverId,
+  ResolverRecordsId,
+} from "@ensnode/ensnode-sdk";
 
 // TODO: implement resolverType & polymorphic field availability
 
@@ -88,6 +95,43 @@ export const resolver = onchainTable(
 
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
+
+    /**
+     * A Resolver may have an `owner` via Ownable.
+     *
+     * Mainly relevant for DedicatedResolvers.
+     */
+    ownerId: t.hex().$type<Address>(),
+
+    /**
+     * Whether the Resolver implements IExtendedResolver.
+     */
+    isExtended: t.boolean().default(false),
+
+    /**
+     * Whether the Resolver implements IDedicatedResolver.
+     */
+    isDedicated: t.boolean().default(false),
+
+    /**
+     * Whether the Resolver is an Onchain Static Resolver.
+     */
+    isStatic: t.boolean().default(false),
+
+    /**
+     * Whether the Resolver is an ENSIP19ReverseResolver.
+     */
+    isENSIP19ReverseResolver: t.boolean().default(false),
+
+    /**
+     * If dedicated or static, whether the Resolver implements Address Record Defaulting.
+     */
+    implementsAddressRecordDefaulting: t.boolean(),
+
+    /**
+     * If set, the Resolver is a Bridged Resolver that bridges to the RegistryId indicated.
+     */
+    bridgesToRegistryId: t.text().$type<RegistryId>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),
@@ -167,6 +211,8 @@ export const resolverAddressRecord = onchainTable(
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
     node: t.hex().notNull().$type<Node>(),
+    // NOTE: all well-known CoinTypes fit into javascript number but NOT postgres .integer, must be
+    // stored as BigInt
     coinType: t.bigint().notNull(),
 
     /**

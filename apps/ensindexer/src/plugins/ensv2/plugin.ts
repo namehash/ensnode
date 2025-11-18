@@ -1,10 +1,21 @@
 /**
  * TODO
- * - mainnet sync is really really slow probably because of the getLatestRegistration
- *   - can we have two parallel tables, one of which always holds the `latestRegistration` which can be looked up exactly by domainId?
- *   - alternatively maybe the latest registration's id can always be domainId/latest and when it gets superceded by another one we can
- *     clone the data in /latest to /latest.index and then delete the latest and then insert a new latest with the new registration data
- *      - simpler than having to maintain parallel tables and sort by index always works for api layer
+ * - polymorphic resolver metadata
+ * - polymorphic resolver in graphql, add owner to DedicatedResolver schema
+ *
+ * Migration
+ * - individual names are migrated to v2 and can choose to move to an ENSv2 Registry on L1 or L2
+ * - locked names (wrapped and not unwrappable) are 'frozen' by having their fuses burned
+ *   - will need to observe the correct event and then override the existing domain/registratioon info
+ * - need to know migration status of every domain in order to to construct canonical namegraph at index-time.
+ * - maybe instead of constructing canonical namegraph we keep it all separate? when addressing domains by name we'd have to more or less perform traversals, including bridgedresolvers. but that's fine? we're going to have to mix forward resolution logic into the api anyway, either at the canonical namegraph construction or while traversing the namegraph
+ * v2 .eth registry will have a special fallback resolver that resolvers via namechain state
+ * - fuck me, there can be multiple registrations in v2 world. sub.example.xyz, if not emancipated, cannot be migrated, but sub.example.xyz can still be created in v2 registry in the example.xyz registry.
+ *   - if a v2 name is registered but there's an active namewrapper registration for that same name, we should perhaps ignore all future namewrapper events, as the v2 name overrides it in resolution and the namewrapper is never more consulted for that name (and i guess any subnames under it?)
+ *  - shadow-registering an existing name in v2 also shadows every name under it
+ *
+ *
+ * - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
  *
  * - ThreeDNS
  * - Renewals

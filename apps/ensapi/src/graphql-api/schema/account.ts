@@ -3,6 +3,7 @@ import type { Address } from "viem";
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
+import { type Resolver, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -52,6 +53,26 @@ AccountRef.implement({
         }),
       // biome-ignore lint/style/noNonNullAssertion: guaranteed due to inArray
       group: (domain) => (domain as Domain).ownerId!,
+      resolve: getModelId,
+    }),
+
+    //////////////////////////////
+    // Account.dedicatedResolvers
+    //////////////////////////////
+    dedicatedResolvers: t.loadableGroup({
+      description: "TODO",
+      // TODO: resolver polymorphism, return DedicatedResolverRef
+      type: ResolverRef,
+      load: (ids: Address[]) =>
+        db.query.resolver.findMany({
+          where: (t, { inArray, and, eq }) =>
+            and(
+              inArray(t.ownerId, ids), // owned by id
+              eq(t.isDedicated, true), // must be dedicated resolver
+            ),
+        }),
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed due to inArray
+      group: (resolver) => (resolver as Resolver).ownerId!,
       resolve: getModelId,
     }),
   }),

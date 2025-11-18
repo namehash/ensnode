@@ -1,12 +1,13 @@
 import config from "@/config";
 
-import { getRootRegistryId, makeRegistryContractId } from "@ensnode/ensnode-sdk";
+import { getRootRegistryId, makeRegistryContractId, makeResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
+import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
 // TODO: maybe should still implement query/return by id, exposing the db's primary key?
@@ -57,6 +58,19 @@ builder.queryType({
         if (args.by.id !== undefined) return args.by.id;
         if (args.by.implicit !== undefined) return args.by.implicit.parent;
         return makeRegistryContractId(args.by.contract);
+      },
+    }),
+
+    //////////////////////
+    // Get Resolver by Id
+    //////////////////////
+    resolver: t.field({
+      description: "TODO",
+      type: ResolverRef,
+      args: { by: t.arg({ type: ResolverIdInput, required: true }) },
+      resolve: async (parent, args, ctx, info) => {
+        if (args.by.id !== undefined) return args.by.id;
+        return makeResolverId(args.by.contract);
       },
     }),
 

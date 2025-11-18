@@ -14,6 +14,7 @@
 
 export * from "./api/zod-schemas";
 export * from "./ensindexer/config/zod-schemas";
+export * from "./rpc";
 export * from "./shared/config/build-rpc-urls";
 export * from "./shared/config/environments";
 export * from "./shared/config/pretty-printing";

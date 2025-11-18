@@ -1,9 +1,12 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Address } from "viem";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
+import { ResolverABI } from "@ensnode/datasources";
 import {
+  type AccountId,
   type CoinType,
+  makeRegistryContractId,
   makeResolverId,
   makeResolverRecordsId,
   type Node,
@@ -13,14 +16,17 @@ import {
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
+  isDedicatedResolver,
+  isExtendedResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-
-/**
- * Infer the type of the Resolver entity's composite key.
- */
-type ResolverCompositeKey = Pick<typeof schema.resolver.$inferInsert, "chainId" | "address">;
+import { isBridgedResolver } from "@/lib/protocol-acceleration/is-bridged-resolver";
+import { isKnownENSIP19ReverseResolver } from "@/lib/protocol-acceleration/is-ensip-19-reverse-resolver";
+import {
+  isStaticResolver,
+  staticResolverImplementsAddressRecordDefaulting,
+} from "@/lib/protocol-acceleration/is-static-resolver";
 
 /**
  * Infer the type of the ResolverRecord entity's composite key.
@@ -30,41 +36,89 @@ type ResolverRecordsCompositeKey = Pick<
   "chainId" | "address" | "node"
 >;
 
+const interpretOwner = (owner: Address) => (isAddressEqual(zeroAddress, owner) ? null : owner);
+
 /**
  * Constructs a ResolverRecordsCompositeKey from a provided Resolver event.
  *
  * @returns ResolverRecordsCompositeKey
  */
 export function makeResolverRecordsCompositeKey(
-  context: Context,
+  resolver: AccountId,
   event: EventWithArgs<{ node: Node }>,
 ): ResolverRecordsCompositeKey {
   return {
-    chainId: context.chain.id,
-    address: event.log.address,
+    ...resolver,
     node: event.args.node,
   };
 }
 
 /**
- * Ensures that the Resolver and ResolverRecords entities described by `id` exists.
+ * Ensures that the Resolver contract described by `resolver` exists, including behavioral metadata
+ * on initial insert.
  */
-export async function ensureResolverAndResolverRecords(
+export async function ensureResolver(context: Context, resolver: AccountId) {
+  const resolverId = makeResolverId(resolver);
+  const existing = await context.db.find(schema.resolver, { id: resolverId });
+  if (existing) return;
+
+  const isExtended = await isExtendedResolver({
+    address: resolver.address,
+    publicClient: context.client,
+  });
+
+  const isDedicated = await isDedicatedResolver({
+    address: resolver.address,
+    publicClient: context.client,
+  });
+
+  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(
+    resolver.chainId, // TODO: pass AccountId
+    resolver.address,
+  );
+  const bridgesToRegistry = isBridgedResolver(resolver);
+  const isStatic = isStaticResolver(resolver);
+
+  const implementsAddressRecordDefaulting = isStatic
+    ? staticResolverImplementsAddressRecordDefaulting(resolver)
+    : null;
+
+  let ownerId: Address | null = null;
+  try {
+    const rawOwner = await context.client.readContract({
+      address: resolver.address,
+      abi: ResolverABI,
+      functionName: "owner",
+    });
+    ownerId = interpretOwner(rawOwner);
+  } catch {}
+
+  // ensure Resolver
+  await context.db.insert(schema.resolver).values({
+    id: resolverId,
+    ...resolver,
+    ownerId,
+    isExtended,
+    isDedicated,
+    isStatic,
+    isENSIP19ReverseResolver,
+    implementsAddressRecordDefaulting,
+    bridgesToRegistryId: bridgesToRegistry ? makeRegistryContractId(bridgesToRegistry) : null,
+  });
+}
+
+/**
+ * Ensures that the ResolverRecords entity described by `resolverRecordsKey` exists.
+ */
+export async function ensureResolverRecords(
   context: Context,
   resolverRecordsKey: ResolverRecordsCompositeKey,
 ) {
-  const resolverKey: ResolverCompositeKey = {
+  const resolver: AccountId = {
     chainId: resolverRecordsKey.chainId,
     address: resolverRecordsKey.address,
   };
-  const resolverId = makeResolverId(resolverKey);
-  const resolverRecordsId = makeResolverRecordsId(resolverKey, resolverRecordsKey.node);
-
-  // ensure Resolver
-  await context.db
-    .insert(schema.resolver)
-    .values({ id: resolverId, ...resolverKey })
-    .onConflictDoNothing();
+  const resolverRecordsId = makeResolverRecordsId(resolver, resolverRecordsKey.node);
 
   // ensure ResolverRecords
   await context.db
@@ -157,4 +211,18 @@ export async function handleResolverTextRecordUpdate(
       .values({ ...id, value: interpretedValue })
       .onConflictDoUpdate({ value: interpretedValue });
   }
+}
+
+/**
+ * Updates the resolver's `owner`, interpreting zeroAddress as null.
+ */
+export async function handleResolverOwnerUpdate(
+  context: Context,
+  resolver: AccountId,
+  owner: Address,
+) {
+  // upsert owner, interpreting zeroAddress as null
+  await context.db
+    .update(schema.resolver, { id: makeResolverId(resolver) })
+    .set({ ownerId: interpretOwner(owner) });
 }
