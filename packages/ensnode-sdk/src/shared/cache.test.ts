@@ -80,7 +80,7 @@ describe("LruCache", () => {
 
 describe("TtlCache", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2024, 0, 1) });
   });
 
   afterEach(() => {
@@ -211,7 +211,7 @@ describe("TtlCache", () => {
 
 describe("staleWhileRevalidate", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2024, 0, 1) });
   });
 
   afterEach(() => {
