@@ -11,6 +11,7 @@ import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewal
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
+import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "./lib/chains";
 // Shared ABIs
 import { ResolverABI } from "./lib/ResolverABI";
@@ -91,6 +92,12 @@ export default {
 
       //
 
+      ETHTLDResolver: {
+        abi: ResolverABI,
+        address: "0x99bba657f2bbc93c02d617f8ba121cb8fc104acf",
+        startBlock: 0,
+      },
+
       RootRegistry: {
         abi: Registry,
         address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
@@ -106,6 +113,7 @@ export default {
       },
     },
   },
+
   [DatasourceNames.Namechain]: {
     chain: ensTestEnvL2Chain,
     contracts: {
@@ -115,6 +123,35 @@ export default {
       },
       EnhancedAccessControl: {
         abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.ReverseResolverRoot]: {
+    chain: ensTestEnvL1Chain,
+    contracts: {
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x8f86403a4de0bb5791fa46b8e795c547942fe4cf",
+        startBlock: 0,
+      },
+
+      DefaultReverseResolver3: {
+        abi: ResolverABI,
+        address: "0x5eb3bc0a489c5a8288765d2336659ebca68fcd00",
+        startBlock: 0,
+      },
+
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x367761085bf3c12e5da2df99ac6e1a824612b8fb",
+        startBlock: 0,
+      },
+
+      DefaultPublicResolver3: {
+        abi: ResolverABI,
+        address: "0x4c2f7092c2ae51d986befee378e50bd4db99c901",
         startBlock: 0,
       },
     },

@@ -1,6 +1,5 @@
 /**
  * TODO
- * - connections w/ limits & cursors
  * - Renewals
  * - indexes
  * - ? https://pothos-graphql.dev/docs/plugins/tracing
@@ -12,6 +11,15 @@
  *   - the scripts never mint reverse and addr.reverse into the ENSv1 Registry so that's annoying
  *   - the new .addr.reverse resolver does some fallback bullshit
  *   - https://github.com/ensdomains/ens-contracts/blob/staging/contracts/reverseResolver/ETHReverseResolver.sol
+ *
+ * - we either need to keep the indexed model 1:1 with the on-chain model and stitch things together at the api layer
+ *   OR go hard with materialization, and we need to reparent Domains based on individual v2 registry's fallback mechanisms
+ *   which seems really flimsy and annoying and reparenting is not good for cache behavior.
+ * - maybe better to have ENSv1Domain and ENSv2Domain models. then all polymorphism is applied at the api layer
+ *   - forward traversal (accessing Domain by name) would follow forward resolution, including the fallback logics
+ *     - yeah we'd have to literally do forward resolution
+ *     - anything that returns Domains would need to join against v1 and v2 domains
+ *     - the v1 model need not include implicit registries
  *
  * Pending
  * - DedicatedResolver moving to EAC
