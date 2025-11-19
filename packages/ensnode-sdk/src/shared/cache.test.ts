@@ -171,17 +171,17 @@ describe("TtlCache", () => {
   });
 
   it("automatically cleans up expired entries on size access", () => {
-    const ttl = new TtlCache<string, string>(2); // 2 seconds
+    const ttl = new TtlCache<string, string>(20); // 20 seconds
 
     ttl.set("key1", "value1");
     ttl.set("key2", "value2");
     expect(ttl.size).toBe(2);
 
-    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
+    vi.advanceTimersByTime(10000); // Advance by 10000ms (10 seconds)
     ttl.set("key3", "value3");
     expect(ttl.size).toBe(3);
 
-    vi.advanceTimersByTime(1100); // Advance by 1100ms (1.1 seconds) - total 2.1 seconds
+    vi.advanceTimersByTime(11000); // Advance by 11000ms (11 seconds) - total 21 seconds
 
     expect(ttl.size).toBe(1);
     expect(ttl.get("key1")).toBeUndefined();
@@ -190,19 +190,19 @@ describe("TtlCache", () => {
   });
 
   it("refreshes TTL on each set operation", () => {
-    const ttl = new TtlCache<string, string>(2); // 2 seconds
+    const ttl = new TtlCache<string, string>(20); // 20 seconds
 
     ttl.set("key1", "value1");
 
-    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
+    vi.advanceTimersByTime(10000); // Advance by 10000ms (10 seconds)
     ttl.set("key1", "value1-updated");
 
-    vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second) - total 2 seconds from first set, 1 second from second set
+    vi.advanceTimersByTime(10000); // Advance by 10000ms (10 seconds) - total 20 seconds from first set, 10 seconds from second set
 
     expect(ttl.get("key1")).toBe("value1-updated");
     expect(ttl.has("key1")).toBe(true);
 
-    vi.advanceTimersByTime(1100); // Advance by 1100ms (1.1 seconds) - total 2.1 seconds from second set
+    vi.advanceTimersByTime(11000); // Advance by 11000ms (11 seconds) - total 21 seconds from second set
 
     expect(ttl.get("key1")).toBeUndefined();
     expect(ttl.has("key1")).toBe(false);
