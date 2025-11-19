@@ -1,8 +1,12 @@
-import type { RegistryId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+
+import type { DomainId, RegistryId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
@@ -53,16 +57,27 @@ RegistryInterfaceRef.implement({
     //////////////////////
     // Registry.domains
     //////////////////////
-    domains: t.loadableGroup({
+    domains: t.connection({
       description: "TODO",
       type: DomainRef,
-      load: (ids: RegistryId[]) =>
-        db.query.domain.findMany({
-          where: (t, { inArray }) => inArray(t.registryId, ids),
-          with: { label: true },
-        }),
-      group: (domain) => (domain as Domain).registryId,
-      resolve: getModelId,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.domain.findMany({
+              where: (t, { lt, gt, eq, and }) =>
+                and(
+                  ...[
+                    eq(t.registryId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
     }),
   }),
 });

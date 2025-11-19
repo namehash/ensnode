@@ -2,7 +2,7 @@ import config from "@/config";
 
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, isAddressEqual, zeroAddress, zeroHash } from "viem";
+import { type Address, isAddressEqual, namehash, zeroAddress, zeroHash } from "viem";
 
 import {
   ADDR_REVERSE_NODE,

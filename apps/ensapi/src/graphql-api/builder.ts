@@ -1,5 +1,6 @@
 import SchemaBuilder from "@pothos/core";
 import DataloaderPlugin from "@pothos/plugin-dataloader";
+import RelayPlugin from "@pothos/plugin-relay";
 import type { Address, Hex } from "viem";
 
 import type {
@@ -29,5 +30,10 @@ export const builder = new SchemaBuilder<{
     // PermissionsId: { Input: PermissionsId; Output: PermissionsId };
   };
 }>({
-  plugins: [DataloaderPlugin],
+  plugins: [DataloaderPlugin, RelayPlugin],
+  relay: {
+    // disable the Query.node & Query.nodes methods
+    nodeQueryOptions: false,
+    nodesQueryOptions: false,
+  },
 });

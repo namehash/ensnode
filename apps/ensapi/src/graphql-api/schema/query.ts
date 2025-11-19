@@ -1,26 +1,54 @@
 import config from "@/config";
 
-import { getRootRegistryId, makeRegistryContractId, makeResolverId } from "@ensnode/ensnode-sdk";
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+
+import {
+  type DomainId,
+  getRootRegistryId,
+  makePermissionsId,
+  makeRegistryContractId,
+  makeResolverId,
+} from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
+import { AccountIdInput } from "@/graphql-api/schema/account-id";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
+import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
-// TODO: maybe should still implement query/return by id, exposing the db's primary key?
-// maybe necessary for connections pattern...
-// if leaning into opaque ids, then probably prefer that, and avoid exposing semantic searches? unclear
-
 builder.queryType({
   fields: (t) => ({
-    domains: t.field({
-      description: "DELETE ME",
-      type: [DomainRef],
-      nullable: false,
-      resolve: () => db.query.domain.findMany({ with: { label: true } }),
+    // testing, delete this
+    domains: t.connection({
+      description: "TODO",
+      type: DomainRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          {
+            args,
+            toCursor: (domain) => cursors.encode(domain.id),
+            defaultSize: 100,
+            maxSize: 1000,
+          },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.domain.findMany({
+              where: (t, { lt, gt, and }) =>
+                and(
+                  ...[
+                    before !== undefined && lt(t.id, cursors.decode<DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
     }),
 
     //////////////////////////////////
@@ -72,6 +100,16 @@ builder.queryType({
         if (args.by.id !== undefined) return args.by.id;
         return makeResolverId(args.by.contract);
       },
+    }),
+
+    ///////////////////////////////
+    // Get Permissions by Contract
+    ///////////////////////////////
+    permissions: t.field({
+      description: "TODO",
+      type: PermissionsRef,
+      args: { for: t.arg({ type: AccountIdInput, required: true }) },
+      resolve: (parent, args, ctx, info) => makePermissionsId(args.for),
     }),
 
     /////////////////////

@@ -1,7 +1,12 @@
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import type { Address } from "viem";
+
+import type { DomainId, ResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
 import { type Resolver, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
@@ -21,9 +26,9 @@ export type Account = Exclude<typeof AccountRef.$inferType, Address>;
 AccountRef.implement({
   description: "TODO",
   fields: (t) => ({
-    ///////////////////
+    //////////////
     // Account.id
-    ///////////////////
+    //////////////
     id: t.expose("id", {
       description: "TODO",
       type: "Address",
@@ -43,37 +48,61 @@ AccountRef.implement({
     ///////////////////
     // Account.domains
     ///////////////////
-    domains: t.loadableGroup({
+    domains: t.connection({
       description: "TODO",
       type: DomainRef,
-      load: (ids: Address[]) =>
-        db.query.domain.findMany({
-          where: (t, { inArray }) => inArray(t.ownerId, ids),
-          with: { label: true },
-        }),
-      // biome-ignore lint/style/noNonNullAssertion: guaranteed due to inArray
-      group: (domain) => (domain as Domain).ownerId!,
-      resolve: getModelId,
+      resolve: (parent, args) =>
+        // TODO(dataloader) — confirm this is dataloaded?
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.domain.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.ownerId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
     }),
+
+    //////////////////////
+    // Account.registries
+    //////////////////////
+    // TODO: account's registries via EAC
+    // similar logic for dedicatedResolvers
 
     //////////////////////////////
     // Account.dedicatedResolvers
     //////////////////////////////
-    dedicatedResolvers: t.loadableGroup({
+    dedicatedResolvers: t.connection({
       description: "TODO",
-      // TODO: resolver polymorphism, return DedicatedResolverRef
       type: ResolverRef,
-      load: (ids: Address[]) =>
-        db.query.resolver.findMany({
-          where: (t, { inArray, and, eq }) =>
-            and(
-              inArray(t.ownerId, ids), // owned by id
-              eq(t.isDedicated, true), // must be dedicated resolver
-            ),
-        }),
-      // biome-ignore lint/style/noNonNullAssertion: guaranteed due to inArray
-      group: (resolver) => (resolver as Resolver).ownerId!,
-      resolve: getModelId,
+      resolve: (parent, args) =>
+        // TODO(dataloader) — confirm this is dataloaded?
+        // TODO(EAC) — migrate to Permissions lookup
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.resolver.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.ownerId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<ResolverId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ResolverId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+            }),
+        ),
     }),
   }),
 });

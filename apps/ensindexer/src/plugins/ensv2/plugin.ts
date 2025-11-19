@@ -1,7 +1,21 @@
 /**
  * TODO
- * - polymorphic resolver metadata in drizzle schema
- * - polymorphic resolver in graphql, add owner to DedicatedResolver schema
+ * - connections w/ limits & cursors
+ * - Renewals
+ * - indexes
+ * - ? https://pothos-graphql.dev/docs/plugins/tracing
+ * - ThreeDNS
+ * - ? polymorphic resolver metadata in drizzle schema for better typechecking
+ * - ? move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so many just for domains and registries?
+ *
+ * - *.addr.reverse subnames in ENSv1Registry aren't correctly connected to the ENSv2 Domain that represents addr.reverse
+ *   - the scripts never mint reverse and addr.reverse into the ENSv1 Registry so that's annoying
+ *   - the new .addr.reverse resolver does some fallback bullshit
+ *   - https://github.com/ensdomains/ens-contracts/blob/staging/contracts/reverseResolver/ETHReverseResolver.sol
+ *
+ * Pending
+ * - DedicatedResolver moving to EAC
+ * - Registry.canonicalName indexing + adjust Domain.canonical reverse traversal logic
  *
  * Migration
  * - individual names are migrated to v2 and can choose to move to an ENSv2 Registry on L1 or L2
@@ -13,24 +27,8 @@
  * - fuck me, there can be multiple registrations in v2 world. sub.example.xyz, if not emancipated, cannot be migrated, but sub.example.xyz can still be created in v2 registry in the example.xyz registry.
  *   - if a v2 name is registered but there's an active namewrapper registration for that same name, we should perhaps ignore all future namewrapper events, as the v2 name overrides it in resolution and the namewrapper is never more consulted for that name (and i guess any subnames under it?)
  *  - shadow-registering an existing name in v2 also shadows every name under it so we kind of need to do a recursive deletion of all of a shadowed name's subnames, right? cause resolution terminates at the first v2-registered name.
- *
- *
  * - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
  *
- * - ThreeDNS
- * - Renewals
- * - indexes
- * - https://pothos-graphql.dev/docs/plugins/tracing
- * - connections w/ limits & cursors
- * - Resolver polymorphism & Bridged Resolver materialization
- *   - Account.dedicatedResolvers
- * - Registry.canonicalName
- *   - then update canonical traversal to use canonicalName
- * - Account.permissions -> PermissionsUser[]
- *
- *
- * move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so many just for domains and registries?
- * test alpha sepolia + protocol accelerateion index time vs ensv2
  */
 
 import { createConfig } from "ponder";

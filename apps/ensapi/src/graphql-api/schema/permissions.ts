@@ -1,25 +1,58 @@
-import type { PermissionsId } from "@ensnode/ensnode-sdk";
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+
+import type { PermissionsId, PermissionsResourceId, PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { db } from "@/lib/db";
 
 export const PermissionsRef = builder.loadableObjectRef("Permissions", {
   load: (ids: PermissionsId[]) =>
-    db.query.permissions.findMany({
-      where: (t, { inArray }) => inArray(t.id, ids),
-    }),
+    db.query.permissions.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+  toKey: getModelId,
+  cacheResolved: true,
+  sort: true,
+});
+
+export const PermissionsResourceRef = builder.loadableObjectRef("PermissionsResource", {
+  load: (ids: PermissionsResourceId[]) =>
+    db.query.permissionsResource.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
+  toKey: getModelId,
+  cacheResolved: true,
+  sort: true,
+});
+
+export const PermissionsUserRef = builder.loadableObjectRef("PermissionsUser", {
+  load: (ids: PermissionsUserId[]) =>
+    db.query.permissionsUser.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
 });
 
 export type Permissions = Exclude<typeof PermissionsRef.$inferType, PermissionsId>;
+export type PermissionsResource = Exclude<
+  typeof PermissionsResourceRef.$inferType,
+  PermissionsResourceId
+>;
+export type PermissionsUserResource = Exclude<
+  typeof PermissionsUserRef.$inferType,
+  PermissionsUserId
+>;
 
+///////////////
+// Permissions
+///////////////
 PermissionsRef.implement({
   description: "Permissions",
   fields: (t) => ({
+    ////////////////////////
+    // Permissions.contract
+    ////////////////////////
     contract: t.field({
       type: AccountIdRef,
       description: "TODO",
@@ -27,6 +60,103 @@ PermissionsRef.implement({
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
-    // resources...
+    /////////////////////////
+    // Permissions.resources
+    /////////////////////////
+    resources: t.connection({
+      description: "TODO",
+      type: PermissionsResourceRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.permissionsResource.findMany({
+              where: (t, { lt, gt, eq, and }) =>
+                and(
+                  ...[
+                    eq(t.chainId, parent.chainId),
+                    eq(t.address, parent.address),
+                    before !== undefined && lt(t.id, cursors.decode<PermissionsResourceId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<PermissionsResourceId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+            }),
+        ),
+    }),
+  }),
+});
+
+///////////////////////
+// PermissionsResource
+///////////////////////
+PermissionsResourceRef.implement({
+  description: "PermissionsResource",
+  fields: (t) => ({
+    ////////////////////////////////
+    // PermissionsResource.resource
+    ////////////////////////////////
+    resource: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.resource,
+    }),
+
+    /////////////////////////////
+    // PermissionsResource.users
+    /////////////////////////////
+    users: t.connection({
+      description: "TODO",
+      type: PermissionsUserRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.permissionsUser.findMany({
+              where: (t, { lt, gt, eq, and }) =>
+                and(
+                  ...[
+                    eq(t.chainId, parent.chainId),
+                    eq(t.address, parent.address),
+                    eq(t.resource, parent.resource),
+                    before !== undefined && lt(t.id, cursors.decode<PermissionsUserId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<PermissionsUserId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+            }),
+        ),
+    }),
+  }),
+});
+
+///////////////////
+// PermissionsUser
+///////////////////
+PermissionsUserRef.implement({
+  description: "PermissionsUser",
+  fields: (t) => ({
+    ////////////////////////
+    // PermissionsUser.user
+    ////////////////////////
+    user: t.field({
+      description: "TODO",
+      type: AccountRef,
+      nullable: false,
+      resolve: (parent) => parent.user,
+    }),
+
+    /////////////////////////
+    // PermissionsUser.roles
+    /////////////////////////
+    roles: t.field({
+      description: "TODO",
+      type: "BigInt",
+      nullable: false,
+      resolve: (parent) => parent.roles,
+    }),
   }),
 });

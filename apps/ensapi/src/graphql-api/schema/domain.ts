@@ -71,6 +71,13 @@ DomainRef.implement({
     ////////////////////
     // Domain.canonical
     ////////////////////
+    // canonical: t.loadable({
+    //   description: "TODO",
+    //   type: "Name",
+    //   nullable: true,
+    //   load: (ids: DomainId[], context) => context.loadPosts(ids),
+    //   resolve: (user, args) => user.lastPostID,
+    // }),
     canonical: t.field({
       description: "TODO",
       type: "Name",
