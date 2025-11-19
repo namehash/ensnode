@@ -2,7 +2,7 @@ import config from "@/config";
 
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, isAddressEqual, namehash, zeroAddress, zeroHash } from "viem";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
   ADDR_REVERSE_NODE,
@@ -11,14 +11,13 @@ import {
   getRootRegistryId,
   type LabelHash,
   makeENSv1DomainId,
-  makeImplicitRegistryId,
   makeSubdomainNode,
   type Node,
   PluginName,
   ROOT_NODE,
 } from "@ensnode/ensnode-sdk";
 
-import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { materializeENSv1DomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -38,14 +37,11 @@ export default function () {
   ponder.on(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), async ({ context }) => {
     // ensures that the Root Registry (which is eventually backed by the ENSv2 Root Registry) is
     // populated in the database
-    await context.db
-      .insert(schema.registry)
-      .values({
-        id: getRootRegistryId(config.namespace),
-        type: "RegistryContract",
-        ...getRootRegistry(config.namespace),
-      })
-      .onConflictDoNothing();
+    await context.db.insert(schema.registry).values({
+      id: getRootRegistryId(config.namespace),
+      type: "RegistryContract",
+      ...getRootRegistry(config.namespace),
+    });
   });
 
   /**
@@ -71,11 +67,7 @@ export default function () {
 
     const node = makeSubdomainNode(labelHash, parentNode);
     const domainId = makeENSv1DomainId(node);
-    const registryId =
-      parentNode === zeroHash
-        ? getRootRegistryId(config.namespace)
-        : makeImplicitRegistryId(parentNode);
-    const subregistryId = makeImplicitRegistryId(node);
+    const parentId = makeENSv1DomainId(parentNode);
 
     // If this is a direct subname of addr.reverse, we have 100% on-chain label discovery.
     //
@@ -97,19 +89,12 @@ export default function () {
 
     // upsert domain
     await context.db
-      .insert(schema.domain)
+      .insert(schema.v1Domain)
       .values({
         id: domainId,
+        parentId,
         labelHash,
-        registryId,
-        subregistryId,
       })
-      .onConflictDoNothing();
-
-    // and its ImplicitRegistry
-    await context.db
-      .insert(schema.registry)
-      .values({ id: subregistryId, type: "ImplicitRegistry" })
       .onConflictDoNothing();
 
     // materialize domain owner
@@ -118,7 +103,7 @@ export default function () {
     // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeDomainOwner(context, domainId, owner);
+    await materializeENSv1DomainOwner(context, domainId, owner);
   }
 
   async function handleTransfer({
@@ -137,7 +122,7 @@ export default function () {
 
     const isDeletion = isAddressEqual(zeroAddress, owner);
     if (isDeletion) {
-      await context.db.delete(schema.domain, { id: domainId });
+      await context.db.delete(schema.v1Domain, { id: domainId });
       return;
     }
 
@@ -147,7 +132,7 @@ export default function () {
     // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeDomainOwner(context, domainId, owner);
+    await materializeENSv1DomainOwner(context, domainId, owner);
   }
 
   /**

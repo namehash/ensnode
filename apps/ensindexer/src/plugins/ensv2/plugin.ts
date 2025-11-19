@@ -93,7 +93,10 @@ export default createPlugin({
       ),
 
       contracts: {
-        [namespaceContract(pluginName, "Registry")]: {
+        ////////////////////////////
+        // ENSv2 Registry Contracts
+        ////////////////////////////
+        [namespaceContract(pluginName, "ENSv2Registry")]: {
           abi: RegistryABI,
           chain: [ensroot, namechain]
             .filter((ds) => !!ds)
@@ -109,6 +112,10 @@ export default createPlugin({
               {},
             ),
         },
+
+        ///////////////////////////////////
+        // EnhancedAccessControl Contracts
+        ///////////////////////////////////
         [namespaceContract(pluginName, "EnhancedAccessControl")]: {
           abi: EnhancedAccessControlABI,
           chain: [ensroot, namechain]
@@ -126,7 +133,9 @@ export default createPlugin({
             ),
         },
 
-        // index the ENSv1RegistryOld on ENS Root Chain
+        //////////////////////////////////////
+        // ENSv1RegistryOld on ENS Root Chain
+        //////////////////////////////////////
         [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
           abi: ensroot.contracts.ENSv1RegistryOld.abi,
           chain: {
@@ -138,7 +147,12 @@ export default createPlugin({
           },
         },
 
-        // index ENSv1Registry on ENS Root Chain, Basenames, Lineanames
+        //////////////////////////////////////
+        // ENSv1Registry on
+        //   - ENS Root Chain
+        //   - Basenames
+        //   - Lineanames
+        //////////////////////////////////////
         [namespaceContract(pluginName, "ENSv1Registry")]: {
           abi: ensroot.contracts.ENSv1Registry.abi,
           chain: {
@@ -165,7 +179,11 @@ export default createPlugin({
           },
         },
 
-        // index NameWrapper on ENS Root Chain, Lineanames
+        //////////////////////////////////////
+        // NameWrapper on
+        //   - ENS Root Chain
+        //   - Lineanames
+        //////////////////////////////////////
         [namespaceContract(pluginName, "NameWrapper")]: {
           abi: ensroot.contracts.NameWrapper.abi,
           chain: {

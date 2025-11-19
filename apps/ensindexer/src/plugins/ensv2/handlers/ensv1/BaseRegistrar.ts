@@ -6,12 +6,11 @@ import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
 import {
   makeENSv1DomainId,
   makeLatestRegistrationId,
-  makeRegistrationId,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
-import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { materializeENSv1DomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
@@ -90,7 +89,7 @@ export default function () {
         }
 
         // materialize Domain owner
-        await materializeDomainOwner(context, domainId, to);
+        await materializeENSv1DomainOwner(context, domainId, to);
       }
     },
   );
@@ -149,7 +148,7 @@ export default function () {
     });
 
     // materialize Domain owner
-    await materializeDomainOwner(context, domainId, owner);
+    await materializeENSv1DomainOwner(context, domainId, owner);
   }
 
   ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);

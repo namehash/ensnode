@@ -13,12 +13,11 @@ import type {
   DomainId,
   ENSv1DomainId,
   ENSv2DomainId,
-  ImplicitRegistryId,
   PermissionsId,
   PermissionsResourceId,
   PermissionsUserId,
   RegistrationId,
-  RegistryContractId,
+  RegistryId,
   ResolverId,
   ResolverRecordsId,
 } from "./ids";
@@ -26,13 +25,7 @@ import type {
 /**
  * Serializes and brands an AccountId as a RegistryId.
  */
-export const makeRegistryContractId = (accountId: AccountId) =>
-  serializeAccountId(accountId) as RegistryContractId;
-
-/**
- * Brands a node as an ImplicitRegistryId.
- */
-export const makeImplicitRegistryId = (node: Node) => node as ImplicitRegistryId;
+export const makeRegistryId = (accountId: AccountId) => serializeAccountId(accountId) as RegistryId;
 
 /**
  * Makes an ENSv1 Domain Id given the ENSv1 Domain's `node`

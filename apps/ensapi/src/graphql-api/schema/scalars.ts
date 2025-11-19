@@ -5,7 +5,6 @@ import {
   type ChainId,
   type CoinType,
   type DomainId,
-  type ImplicitRegistryId,
   type InterpretedName,
   isInterpretedName,
   type Name,
@@ -119,16 +118,6 @@ builder.scalarType("RegistryId", {
     z.coerce
       .string()
       .transform((val) => val as RegistryId)
-      .parse(value),
-});
-
-builder.scalarType("ImplicitRegistryId", {
-  description: "ImplicitRegistryId represents a @ensnode/ensnode-sdk#ImplicitRegistryId.",
-  serialize: (value: ImplicitRegistryId) => value,
-  parseValue: (value) =>
-    z.coerce
-      .string()
-      .transform((val) => val as ImplicitRegistryId)
       .parse(value),
 });
 

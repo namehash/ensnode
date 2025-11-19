@@ -7,8 +7,8 @@ import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
-import { type Resolver, ResolverRef } from "@/graphql-api/schema/resolver";
+import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
@@ -50,7 +50,7 @@ AccountRef.implement({
     ///////////////////
     domains: t.connection({
       description: "TODO",
-      type: DomainRef,
+      type: DomainInterfaceRef,
       resolve: (parent, args) =>
         // TODO(dataloader) — confirm this is dataloaded?
         resolveCursorConnection(

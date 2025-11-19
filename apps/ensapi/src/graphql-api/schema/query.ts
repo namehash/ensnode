@@ -6,7 +6,7 @@ import {
   type DomainId,
   getRootRegistryId,
   makePermissionsId,
-  makeRegistryContractId,
+  makeRegistryId,
   makeResolverId,
 } from "@ensnode/ensnode-sdk";
 
@@ -15,7 +15,7 @@ import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fq
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { DomainIdInput, DomainRef } from "@/graphql-api/schema/domain";
+import { DomainIdInput, DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { RegistryIdInput, RegistryInterfaceRef } from "@/graphql-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
@@ -26,7 +26,7 @@ builder.queryType({
     // testing, delete this
     domains: t.connection({
       description: "TODO",
-      type: DomainRef,
+      type: DomainInterfaceRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
           {
@@ -56,7 +56,7 @@ builder.queryType({
     //////////////////////////////////
     domain: t.field({
       description: "TODO",
-      type: DomainRef,
+      type: DomainInterfaceRef,
       args: { by: t.arg({ type: DomainIdInput, required: true }) },
       nullable: true,
       resolve: async (parent, args, ctx, info) => {
@@ -85,7 +85,7 @@ builder.queryType({
       resolve: async (parent, args, ctx, info) => {
         if (args.by.id !== undefined) return args.by.id;
         if (args.by.implicit !== undefined) return args.by.implicit.parent;
-        return makeRegistryContractId(args.by.contract);
+        return makeRegistryId(args.by.contract);
       },
     }),
 

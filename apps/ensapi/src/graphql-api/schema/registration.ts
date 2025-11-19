@@ -3,7 +3,7 @@ import type { RegistrationId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
-import { DomainRef } from "@/graphql-api/schema/domain";
+import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";
 import { db } from "@/lib/db";
 
@@ -58,7 +58,7 @@ RegistrationInterfaceRef.implement({
     ///////////////////////
     domain: t.field({
       description: "TODO",
-      type: DomainRef,
+      type: DomainInterfaceRef,
       nullable: false,
       resolve: (parent) => parent.domainId,
     }),

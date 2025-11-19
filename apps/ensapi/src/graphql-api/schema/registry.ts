@@ -1,32 +1,27 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
-import type { DomainId, RegistryId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+import type { ENSv2DomainId, RegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { type Domain, DomainRef } from "@/graphql-api/schema/domain";
+import { type ENSv2Domain, ENSv2DomainRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
-export const RegistryInterfaceRef = builder.loadableInterfaceRef("Registry", {
+export const RegistryRef = builder.loadableObjectRef("Registry", {
   load: (ids: RegistryId[]) =>
-    db.query.registry.findMany({
-      where: (t, { inArray }) => inArray(t.id, ids),
-    }),
+    db.query.registry.findMany({ where: (t, { inArray }) => inArray(t.id, ids) }),
   toKey: getModelId,
   cacheResolved: true,
   sort: true,
 });
 
-export type Registry = Exclude<typeof RegistryInterfaceRef.$inferType, RegistryId>;
-export type RegistryInterface = Pick<Registry, "type" | "id">;
-export type RegistryContract = RequiredAndNotNull<Registry, "chainId" | "address">;
-export type ImplicitRegistry = Registry;
+export type Registry = Exclude<typeof RegistryRef.$inferType, RegistryId>;
 
-RegistryInterfaceRef.implement({
+RegistryRef.implement({
   description: "TODO",
   fields: (t) => ({
     //////////////////////
@@ -38,19 +33,19 @@ RegistryInterfaceRef.implement({
       nullable: false,
     }),
 
-    ////////////////////
-    // Registry.parents
-    ////////////////////
+    // ////////////////////
+    // // Registry.parents
+    // ////////////////////
     parents: t.loadableGroup({
       description: "TODO",
-      type: DomainRef,
+      type: ENSv2DomainRef,
       load: (ids: RegistryId[]) =>
-        db.query.domain.findMany({
+        db.query.v2Domain.findMany({
           where: (t, { inArray }) => inArray(t.subregistryId, ids),
           with: { label: true },
         }),
       // biome-ignore lint/style/noNonNullAssertion: subregistryId guaranteed to exist via inArray
-      group: (domain) => (domain as Domain).subregistryId!,
+      group: (domain) => (domain as ENSv2Domain).subregistryId!,
       resolve: getModelId,
     }),
 
@@ -59,18 +54,18 @@ RegistryInterfaceRef.implement({
     //////////////////////
     domains: t.connection({
       description: "TODO",
-      type: DomainRef,
+      type: ENSv2DomainRef,
       resolve: (parent, args, context) =>
         resolveCursorConnection(
           { ...DEFAULT_CONNECTION_ARGS, args },
           ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.domain.findMany({
+            db.query.v2Domain.findMany({
               where: (t, { lt, gt, eq, and }) =>
                 and(
                   ...[
                     eq(t.registryId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<DomainId>(after)),
+                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
                   ].filter((c) => !!c),
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
@@ -79,18 +74,10 @@ RegistryInterfaceRef.implement({
             }),
         ),
     }),
-  }),
-});
 
-export const RegistryContractRef = builder.objectRef<RegistryContract>("RegistryContract");
-RegistryContractRef.implement({
-  description: "A Registry Contract",
-  interfaces: [RegistryInterfaceRef],
-  isTypeOf: (value) => (value as RegistryInterface).type === "RegistryContract",
-  fields: (t) => ({
-    ////////////////////////////////
-    // RegistryContract.permissions
-    ////////////////////////////////
+    ////////////////////////
+    // Registry.permissions
+    ////////////////////////
     permissions: t.field({
       description: "TODO",
       type: PermissionsRef,
@@ -98,9 +85,9 @@ RegistryContractRef.implement({
       resolve: ({ chainId, address }) => null,
     }),
 
-    /////////////////////////////
-    // RegistryContract.contract
-    /////////////////////////////
+    /////////////////////
+    // Registry.contract
+    /////////////////////
     contract: t.field({
       description: "TODO",
       type: AccountIdRef,
@@ -110,20 +97,9 @@ RegistryContractRef.implement({
   }),
 });
 
-export const ImplicitRegistryRef = builder.objectRef<ImplicitRegistry>("ImplicitRegistry");
-ImplicitRegistryRef.implement({
-  description: "An Implicit Registry",
-  interfaces: [RegistryInterfaceRef],
-  isTypeOf: (value) => (value as RegistryInterface).type === "ImplicitRegistry",
-  fields: (t) => ({}),
-});
-
-export const ImplicitRegistryIdInput = builder.inputType("ImplicitRegistryIdInput", {
-  description: "TODO",
-  fields: (t) => ({
-    parent: t.field({ type: "ImplicitRegistryId", required: true }),
-  }),
-});
+//////////
+// Inputs
+//////////
 
 export const RegistryIdInput = builder.inputType("RegistryIdInput", {
   description: "TODO",
@@ -131,6 +107,5 @@ export const RegistryIdInput = builder.inputType("RegistryIdInput", {
   fields: (t) => ({
     id: t.field({ type: "RegistryId" }),
     contract: t.field({ type: AccountIdInput }),
-    implicit: t.field({ type: ImplicitRegistryIdInput }),
   }),
 });

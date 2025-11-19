@@ -6,7 +6,7 @@ import { ResolverABI } from "@ensnode/datasources";
 import {
   type AccountId,
   type CoinType,
-  makeRegistryContractId,
+  makeRegistryId,
   makeResolverId,
   makeResolverRecordsId,
   type Node,

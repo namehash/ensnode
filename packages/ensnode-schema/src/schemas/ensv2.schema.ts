@@ -1,9 +1,11 @@
-import { onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
+import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
 import type {
   ChainId,
   DomainId,
+  ENSv1DomainId,
+  ENSv2DomainId,
   EncodedReferrer,
   InterpretedLabel,
   LabelHash,
@@ -14,18 +16,6 @@ import type {
   RegistryId,
 } from "@ensnode/ensnode-sdk";
 
-// Registry<->Domain is 1:1
-// Registry->Doimains is 1:many
-
-/**
- * Polymorphism in this Drizzle v1 schema is acomplished with _Type and _Id columns. In the future,
- * when ponder supports it, we can/should move to Drizzle v2 conditional relations to support
- * polymorphism.
- *
- * In the future, when Ponder supports `check` constraints, we can include them for additional
- * guarantees.
- */
-
 ///////////
 // Account
 ///////////
@@ -35,9 +25,8 @@ export const account = onchainTable("accounts", (t) => ({
 }));
 
 export const account_relations = relations(account, ({ many }) => ({
-  // registrations,
-  // dedicatedResolvers,
-  domains: many(domain),
+  registrations: many(registration, { relationName: "registrant" }),
+  domains: many(v2Domain),
   permissions: many(permissionsUser),
 }));
 
@@ -45,31 +34,27 @@ export const account_relations = relations(account, ({ many }) => ({
 // Registry
 ////////////
 
-export const registryType = onchainEnum("RegistryType", ["RegistryContract", "ImplicitRegistry"]);
-
 export const registry = onchainTable(
   "registries",
   (t) => ({
     // see RegistryId for guarantees
     id: t.text().primaryKey().$type<RegistryId>(),
-    type: registryType().notNull(),
 
-    // has contract AccountId (RegistryContract)
-    chainId: t.integer().$type<ChainId>(),
-    address: t.hex().$type<Address>(),
+    chainId: t.integer().notNull().$type<ChainId>(),
+    address: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
-    //
+    byId: uniqueIndex().on(t.chainId, t.address),
   }),
 );
 
 export const relations_registry = relations(registry, ({ one, many }) => ({
-  domain: one(domain, {
+  domain: one(v2Domain, {
     relationName: "subregistry",
     fields: [registry.id],
-    references: [domain.registryId],
+    references: [v2Domain.registryId],
   }),
-  domains: many(domain, { relationName: "registry" }),
+  domains: many(v2Domain, { relationName: "registry" }),
   permissions: one(permissions, {
     relationName: "permissions",
     fields: [registry.chainId, registry.address],
@@ -77,52 +62,103 @@ export const relations_registry = relations(registry, ({ one, many }) => ({
   }),
 }));
 
-//////////
-// Domain
-//////////
+///////////
+// Domains
+///////////
 
-export const domain = onchainTable(
-  "domains",
+export const v1Domain = onchainTable(
+  "v1_domains",
   (t) => ({
-    // see DomainId for guarantees
-    id: t.text().primaryKey().$type<DomainId>(),
+    // keyed by node, see ENSv1DomainId for guarantees.
+    id: t.text().primaryKey().$type<ENSv1DomainId>(),
 
-    // belongs to registry
-    registryId: t.text().notNull().$type<RegistryId>(),
-    labelHash: t.hex().notNull().$type<LabelHash>(),
+    // must have a parent v1Domain (note: root node does not exist in index)
+    parentId: t.text().notNull().$type<ENSv1DomainId>(),
 
     // may have an owner
     ownerId: t.hex().$type<Address>(),
 
-    // may have one subregistry
-    subregistryId: t.text().$type<RegistryId>(),
+    // represents a labelHash
+    labelHash: t.hex().notNull().$type<LabelHash>(),
 
     // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
   }),
   (t) => ({
-    //
+    byParent: index().on(t.parentId),
+    byOwner: index().on(t.ownerId),
   }),
 );
 
-export const relations_domain = relations(domain, ({ one, many }) => ({
+export const relations_v1Domain = relations(v1Domain, ({ one, many }) => ({
+  // v1Domain
+  parent: one(v1Domain, {
+    fields: [v1Domain.parentId],
+    references: [v1Domain.id],
+  }),
+  children: many(v1Domain, { relationName: "parent" }),
+
+  // shared
   owner: one(account, {
     relationName: "owner",
-    fields: [domain.ownerId],
+    fields: [v1Domain.ownerId],
     references: [account.id],
   }),
+  label: one(label, {
+    relationName: "label",
+    fields: [v1Domain.labelHash],
+    references: [label.labelHash],
+  }),
+  registrations: many(registration),
+}));
+
+export const v2Domain = onchainTable(
+  "v2_domains",
+  (t) => ({
+    // see ENSv2DomainId for guarantees
+    id: t.text().primaryKey().$type<ENSv2DomainId>(),
+
+    // belongs to registry
+    registryId: t.text().notNull().$type<RegistryId>(),
+
+    // may have one subregistry
+    subregistryId: t.text().$type<RegistryId>(),
+
+    // may have an owner
+    ownerId: t.hex().$type<Address>(),
+
+    // represents a labelHash
+    labelHash: t.hex().notNull().$type<LabelHash>(),
+
+    // NOTE: Domain-Resolver Relations tracked via Protocol Acceleration plugin
+  }),
+  (t) => ({
+    byRegistry: index().on(t.registryId),
+    byOwner: index().on(t.ownerId),
+  }),
+);
+
+export const relations_v2Domain = relations(v2Domain, ({ one, many }) => ({
+  // v2Domain
   registry: one(registry, {
     relationName: "registry",
-    fields: [domain.registryId],
+    fields: [v2Domain.registryId],
     references: [registry.id],
   }),
   subregistry: one(registry, {
     relationName: "subregistry",
-    fields: [domain.subregistryId],
+    fields: [v2Domain.subregistryId],
     references: [registry.id],
+  }),
+
+  // shared
+  owner: one(account, {
+    relationName: "owner",
+    fields: [v2Domain.ownerId],
+    references: [account.id],
   }),
   label: one(label, {
     relationName: "label",
-    fields: [domain.labelHash],
+    fields: [v2Domain.labelHash],
     references: [label.labelHash],
   }),
   registrations: many(registration),
@@ -162,7 +198,7 @@ export const registration = onchainTable(
     // references registrant
     registrantId: t.hex().$type<Address>(),
 
-    // references referrer
+    // may have a referrer
     referrer: t.hex().$type<EncodedReferrer>(),
 
     // may have fuses (NameWrapper, Wrapped BaseRegistrar)
@@ -181,13 +217,21 @@ export const registration = onchainTable(
 );
 
 export const registration_relations = relations(registration, ({ one, many }) => ({
-  domain: one(domain, {
+  // belongs to either v1Domain or v2Domain
+  v1Domain: one(v1Domain, {
     fields: [registration.domainId],
-    references: [domain.id],
+    references: [v1Domain.id],
   }),
+  v2Domain: one(v2Domain, {
+    fields: [registration.domainId],
+    references: [v2Domain.id],
+  }),
+
+  // has one registrant
   registrant: one(account, {
     fields: [registration.registrantId],
     references: [account.id],
+    relationName: "registrant",
   }),
 }));
 
@@ -281,5 +325,5 @@ export const label = onchainTable("labels", (t) => ({
 }));
 
 export const label_relations = relations(label, ({ many }) => ({
-  domains: many(domain),
+  domains: many(v2Domain),
 }));

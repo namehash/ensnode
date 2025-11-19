@@ -19,7 +19,8 @@ const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
  * Provide the canonical parents from the Root Registry to `domainId`.
  * i.e. reverse traversal of the namegraph
  *
- * TODO: this implementation is more or less first-write-wins, need to updated based on proposed reverse mapping
+ * TODO: this implementation has undefined canonical name behavior, need to updated based on proposed
+ * reverse mapping
  */
 export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPath | null> {
   const result = await db.execute(sql`
@@ -30,7 +31,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
         d.registry_id,
         d.label_hash,
         1 AS depth
-      FROM ${schema.domain} d
+      FROM ${schema.v2Domain} d
       WHERE d.id = ${domainId}
 
       UNION ALL
@@ -44,7 +45,7 @@ export async function getCanonicalPath(domainId: DomainId): Promise<CanonicalPat
       FROM upward
       JOIN ${schema.registry} r
         ON r.id = upward.registry_id
-      JOIN ${schema.domain} pd
+      JOIN ${schema.v2Domain} pd
         ON pd.subregistry_id = r.id
       WHERE r.id != ${ROOT_REGISTRY_ID}
         AND upward.depth < ${MAX_DEPTH}

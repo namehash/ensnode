@@ -19,6 +19,8 @@ const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
 /**
  * Gets the Domain addressed by `name`.
  * i.e. forward traversal of the namegraph
+ *
+ * TODO
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
@@ -46,7 +48,7 @@ export async function getDomainIdByInterpretedName(
         d.label_hash,
         path.depth + 1
       FROM path
-      JOIN ${schema.domain} d
+      JOIN ${schema.v2Domain} d
         ON d.registry_id = path.registry_id
       WHERE d.label_hash = (${rawLabelHashPathArray})[path.depth + 1]
         AND path.depth + 1 <= array_length(${rawLabelHashPathArray}, 1)

@@ -8,7 +8,7 @@ import {
   getCanonicalId,
   type LiteralLabel,
   makeENSv2DomainId,
-  makeRegistryContractId,
+  makeRegistryId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
@@ -22,7 +22,7 @@ const pluginName = PluginName.ENSv2;
 
 export default function () {
   ponder.on(
-    namespaceContract(pluginName, "Registry:NameRegistered"),
+    namespaceContract(pluginName, "ENSv2Registry:NameRegistered"),
     async ({
       context,
       event,
@@ -39,7 +39,7 @@ export default function () {
       const label = _label as LiteralLabel;
 
       const registryAccountId = getThisAccountId(context, event);
-      const registryId = makeRegistryContractId(registryAccountId);
+      const registryId = makeRegistryId(registryAccountId);
       const canonicalId = getCanonicalId(tokenId);
       const labelHash = labelhash(label);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
@@ -76,7 +76,7 @@ export default function () {
       await ensureLabel(context, label);
 
       // insert Domain
-      await context.db.insert(schema.domain).values({ id: domainId, registryId, labelHash });
+      await context.db.insert(schema.v2Domain).values({ id: domainId, registryId, labelHash });
 
       // TODO: insert Registration entity for this domain as well: expiration, registrant
       // ensure Registrant
@@ -85,7 +85,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "Registry:SubregistryUpdate"),
+    namespaceContract(pluginName, "ENSv2Registry:SubregistryUpdate"),
     async ({
       context,
       event,
@@ -105,19 +105,19 @@ export default function () {
       // update domain's subregistry
       const isDeletion = isAddressEqual(subregistry, zeroAddress);
       if (isDeletion) {
-        await context.db.update(schema.domain, { id: domainId }).set({ subregistryId: null });
+        await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
-        const subregistryId = makeRegistryContractId(subregistryAccountId);
+        const subregistryId = makeRegistryId(subregistryAccountId);
 
-        await context.db.update(schema.domain, { id: domainId }).set({ subregistryId });
+        await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
       }
     },
   );
 
   // TODO: add this logic to Protocol Acceleration plugin
   // ponder.on(
-  //   namespaceContract(pluginName, "Registry:ResolverUpdate"),
+  //   namespaceContract(pluginName, "ENSv2Registry:ResolverUpdate"),
   //   async ({
   //     context,
   //     event,
@@ -137,16 +137,16 @@ export default function () {
   //     // update domain's resolver
   //     const isDeletion = isAddressEqual(address, zeroAddress);
   //     if (isDeletion) {
-  //       await context.db.update(schema.domain, { id: domainId }).set({ resolverId: null });
+  //       await context.db.update(schema.v2Domain, { id: domainId }).set({ resolverId: null });
   //     } else {
   //       const resolverId = makeResolverId({ chainId: context.chain.id, address: address });
-  //       await context.db.update(schema.domain, { id: domainId }).set({ resolverId });
+  //       await context.db.update(schema.v2Domain, { id: domainId }).set({ resolverId });
   //     }
   //   },
   // );
 
   ponder.on(
-    namespaceContract(pluginName, "Registry:NameBurned"),
+    namespaceContract(pluginName, "ENSv2Registry:NameBurned"),
     async ({
       context,
       event,
@@ -163,8 +163,8 @@ export default function () {
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      await context.db.delete(schema.domain, { id: domainId });
-      // TODO: delete registration (?)
+      await context.db.delete(schema.v2Domain, { id: domainId });
+      // TODO: delete registrations (?)
     },
   );
 
@@ -182,14 +182,14 @@ export default function () {
     const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
     // just update the owner, NameBurned handles existence
-    await context.db.update(schema.domain, { id: domainId }).set({ ownerId: owner });
+    await context.db.update(schema.v2Domain, { id: domainId }).set({ ownerId: owner });
   }
 
   ponder.on(
-    namespaceContract(pluginName, "Registry:TransferSingle"),
+    namespaceContract(pluginName, "ENSv2Registry:TransferSingle"),
     async ({ context, event }) => {
       const registryAccountId = getThisAccountId(context, event);
-      const registryId = makeRegistryContractId(registryAccountId);
+      const registryId = makeRegistryId(registryAccountId);
 
       // TODO(registry-announcement): ideally remove this
       const registry = await context.db.find(schema.registry, { id: registryId });
@@ -198,19 +198,15 @@ export default function () {
       await handleTransferSingle({ context, event });
     },
   );
-  ponder.on(namespaceContract(pluginName, "Registry:TransferBatch"), async ({ context, event }) => {
-    const registryAccountId = getThisAccountId(context, event);
-    const registryId = makeRegistryContractId(registryAccountId);
-
-    // TODO(registry-announcement): ideally remove this
-    const registry = await context.db.find(schema.registry, { id: registryId });
-    if (registry === null) return; // no-op non-Registry ERC1155 Transfers
-
-    for (const id of event.args.ids) {
-      await handleTransferSingle({
-        context,
-        event: { ...event, args: { ...event.args, id } },
-      });
-    }
-  });
+  ponder.on(
+    namespaceContract(pluginName, "ENSv2Registry:TransferBatch"),
+    async ({ context, event }) => {
+      for (const id of event.args.ids) {
+        await handleTransferSingle({
+          context,
+          event: { ...event, args: { ...event.args, id } },
+        });
+      }
+    },
+  );
 }

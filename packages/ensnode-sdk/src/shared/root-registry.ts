@@ -1,5 +1,5 @@
 import { DatasourceNames, type ENSNamespaceId, getDatasource } from "@ensnode/datasources";
-import { type AccountId, accountIdEqual, makeRegistryContractId } from "@ensnode/ensnode-sdk";
+import { type AccountId, accountIdEqual, makeRegistryId } from "@ensnode/ensnode-sdk";
 
 /**
  * TODO
@@ -21,7 +21,7 @@ export const getRootRegistry = (namespace: ENSNamespaceId) => {
  * TODO
  */
 export const getRootRegistryId = (namespace: ENSNamespaceId) =>
-  makeRegistryContractId(getRootRegistry(namespace));
+  makeRegistryId(getRootRegistry(namespace));
 
 /**
  * TODO

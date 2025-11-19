@@ -1,9 +1,8 @@
-import { rejectErrors } from "@pothos/plugin-dataloader";
-
 import {
   type DomainId,
+  type ENSv1DomainId,
+  type ENSv2DomainId,
   getCanonicalId,
-  interpretedLabelsToInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
@@ -14,13 +13,19 @@ import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { type Registration, RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
-import { RegistryInterfaceRef } from "@/graphql-api/schema/registry";
+import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
-export const DomainRef = builder.loadableObjectRef("Domain", {
-  load: (ids: DomainId[]) =>
-    db.query.domain.findMany({
+const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in domain;
+
+//////////////////////
+// Refs
+//////////////////////
+
+export const ENSv1DomainRef = builder.loadableObjectRef("v1Domain", {
+  load: (ids: ENSv1DomainId[]) =>
+    db.query.v1Domain.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
       with: { label: true },
     }),
@@ -28,15 +33,27 @@ export const DomainRef = builder.loadableObjectRef("Domain", {
   cacheResolved: true,
   sort: true,
 });
+export const ENSv2DomainRef = builder.loadableObjectRef("v2Domain", {
+  load: (ids: ENSv2DomainId[]) =>
+    db.query.v2Domain.findMany({
+      where: (t, { inArray }) => inArray(t.id, ids),
+      with: { label: true },
+    }),
+  toKey: getModelId,
+  cacheResolved: true,
+  sort: true,
+});
+export const DomainInterfaceRef = builder.interfaceRef<ENSv1Domain | ENSv2Domain>("Domain");
 
-export type Domain = Exclude<typeof DomainRef.$inferType, DomainId>;
+export type ENSv1Domain = Exclude<typeof ENSv1DomainRef.$inferType, ENSv1DomainId>;
+export type ENSv2Domain = Exclude<typeof ENSv2DomainRef.$inferType, ENSv2DomainId>;
+export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
 
-// we want to dataloader labels by labelhash
-// we want to dataloader a domain's canonical path, but without exposing it
-// TODO: consider interface with ... on ENSv2Domain { canonicalId } etc
-// ... on ENSv1Domain { node } etc
+//////////////////////////////
+// DomainInterface Implementation
+//////////////////////////////
 
-DomainRef.implement({
+DomainInterfaceRef.implement({
   description: "a Domain",
   fields: (t) => ({
     //////////////////////
@@ -46,16 +63,6 @@ DomainRef.implement({
       type: "ID",
       description: "TODO",
       nullable: false,
-    }),
-
-    //////////////////////
-    // Domain.canonicalId
-    //////////////////////
-    canonicalId: t.field({
-      type: "BigInt",
-      description: "TODO",
-      nullable: false,
-      resolve: (parent) => getCanonicalId(parent.labelHash),
     }),
 
     //////////////////////
@@ -78,63 +85,63 @@ DomainRef.implement({
     //   load: (ids: DomainId[], context) => context.loadPosts(ids),
     //   resolve: (user, args) => user.lastPostID,
     // }),
-    canonical: t.field({
-      description: "TODO",
-      type: "Name",
-      nullable: true,
-      resolve: async ({ id }, args, context) => {
-        // TODO: dataloader the getCanonicalPath(domainId) function
-        const canonicalPath = await getCanonicalPath(id);
-        if (!canonicalPath) return null;
+    // canonical: t.field({
+    //   description: "TODO",
+    //   type: "Name",
+    //   nullable: true,
+    //   resolve: async ({ id }, args, context) => {
+    //     // TODO: dataloader the getCanonicalPath(domainId) function
+    //     const canonicalPath = await getCanonicalPath(id);
+    //     if (!canonicalPath) return null;
 
-        const domains = await rejectAnyErrors(
-          DomainRef.getDataloader(context).loadMany(canonicalPath),
-        );
+    //     const domains = await rejectAnyErrors(
+    //       DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+    //     );
 
-        return interpretedLabelsToInterpretedName(
-          canonicalPath.map((domainId) => {
-            const found = domains.find((d) => d.id === domainId);
-            if (!found) throw new Error(`Invariant`);
-            return found.label.value;
-          }),
-        );
-      },
-    }),
+    //     return interpretedLabelsToInterpretedName(
+    //       canonicalPath.map((domainId) => {
+    //         const found = domains.find((d) => d.id === domainId);
+    //         if (!found) throw new Error(`Invariant`);
+    //         return found.label.value;
+    //       }),
+    //     );
+    //   },
+    // }),
 
     //////////////////
     // Domain.parents
     //////////////////
-    parents: t.field({
-      description: "TODO",
-      type: [DomainRef],
-      nullable: true,
-      resolve: async ({ id }, args, context) => {
-        // TODO: dataloader the getCanonicalPath(domainId) function
-        const canonicalPath = await getCanonicalPath(id);
-        if (!canonicalPath) return null;
+    // parents: t.field({
+    //   description: "TODO",
+    //   type: [DomainInterfaceRef],
+    //   nullable: true,
+    //   resolve: async ({ id }, args, context) => {
+    //     // TODO: dataloader the getCanonicalPath(domainId) function
+    //     const canonicalPath = await getCanonicalPath(id);
+    //     if (!canonicalPath) return null;
 
-        const domains = await rejectErrors(
-          DomainRef.getDataloader(context).loadMany(canonicalPath),
-        );
+    //     const domains = await rejectErrors(
+    //       DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+    //     );
 
-        return domains.slice(1);
-      },
-    }),
+    //     return domains.slice(1);
+    //   },
+    // }),
 
     //////////////////
     // Domain.aliases
     //////////////////
-    aliases: t.field({
-      description: "TODO",
-      type: ["Name"],
-      nullable: false,
-      resolve: async (parent) => {
-        // a domain's aliases are all of the paths from root to this domain for which it can be
-        // resolved. naively reverse-traverse the namegaph until the root is reached... yikes.
-        // if materializing namespace: simply lookup namesInNamespace by domainId
-        return [];
-      },
-    }),
+    // aliases: t.field({
+    //   description: "TODO",
+    //   type: ["Name"],
+    //   nullable: false,
+    //   resolve: async (parent) => {
+    //     // a domain's aliases are all of the paths from root to this domain for which it can be
+    //     // resolved. naively reverse-traverse the namegaph until the root is reached... yikes.
+    //     // if materializing namespace: simply lookup namesInNamespace by domainId
+    //     return [];
+    //   },
+    // }),
 
     //////////////////////
     // Domain.owner
@@ -147,33 +154,12 @@ DomainRef.implement({
     }),
 
     //////////////////////
-    // Domain.registry
-    //////////////////////
-    registry: t.field({
-      description: "TODO",
-      type: RegistryInterfaceRef,
-      nullable: false,
-      resolve: (parent) => parent.registryId,
-    }),
-
-    //////////////////////
-    // Domain.subregistry
-    //////////////////////
-    subregistry: t.field({
-      type: RegistryInterfaceRef,
-      description: "TODO",
-      nullable: true,
-      resolve: (parent) => parent.subregistryId,
-    }),
-
-    //////////////////////
     // Domain.resolver
     //////////////////////
     resolver: t.field({
       description: "TODO",
       type: ResolverRef,
       nullable: true,
-      // TODO: dataloader this
       resolve: (parent) => getDomainResolver(parent.id),
     }),
 
@@ -203,6 +189,64 @@ DomainRef.implement({
     }),
   }),
 });
+
+//////////////////////////////
+// ENSv1Domain Implementation
+//////////////////////////////
+
+ENSv1DomainRef.implement({
+  description: "TODO",
+  interfaces: [DomainInterfaceRef],
+  isTypeOf: (domain) => isENSv1Domain(domain as Domain),
+  fields: (t) => ({
+    //
+  }),
+});
+
+//////////////////////////////
+// ENSv2Domain Implementation
+//////////////////////////////
+
+ENSv2DomainRef.implement({
+  description: "TODO",
+  interfaces: [DomainInterfaceRef],
+  isTypeOf: (domain) => !isENSv1Domain(domain as Domain),
+  fields: (t) => ({
+    //////////////////////
+    // Domain.canonicalId
+    //////////////////////
+    canonicalId: t.field({
+      type: "BigInt",
+      description: "TODO",
+      nullable: false,
+      resolve: (parent) => getCanonicalId(parent.labelHash),
+    }),
+
+    //////////////////////
+    // Domain.registry
+    //////////////////////
+    registry: t.field({
+      description: "TODO",
+      type: RegistryRef,
+      nullable: false,
+      resolve: (parent) => parent.registryId,
+    }),
+
+    //////////////////////
+    // Domain.subregistry
+    //////////////////////
+    subregistry: t.field({
+      type: RegistryRef,
+      description: "TODO",
+      nullable: true,
+      resolve: (parent) => parent.subregistryId,
+    }),
+  }),
+});
+
+//////////////////////
+// Inputs
+//////////////////////
 
 export const DomainIdInput = builder.inputType("DomainIdInput", {
   description: "TODO",

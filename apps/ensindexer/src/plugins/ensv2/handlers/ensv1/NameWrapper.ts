@@ -17,7 +17,7 @@ import {
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
-import { materializeDomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { materializeENSv1DomainOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import {
@@ -137,7 +137,7 @@ export default function () {
 
     // now guaranteed to be an unexpired transferrable Registration
     // so materialize domain owner
-    await materializeDomainOwner(context, domainId, to);
+    await materializeENSv1DomainOwner(context, domainId, to);
   }
 
   ponder.on(
@@ -178,7 +178,7 @@ export default function () {
         registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
       // materialize domain owner
-      await materializeDomainOwner(context, domainId, owner);
+      await materializeENSv1DomainOwner(context, domainId, owner);
 
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {

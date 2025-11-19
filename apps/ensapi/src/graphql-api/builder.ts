@@ -7,7 +7,6 @@ import type {
   ChainId,
   CoinType,
   DomainId,
-  ImplicitRegistryId,
   InterpretedName,
   Node,
   RegistryId,
@@ -25,7 +24,6 @@ export const builder = new SchemaBuilder<{
     Name: { Input: InterpretedName; Output: InterpretedName };
     DomainId: { Input: DomainId; Output: DomainId };
     RegistryId: { Input: RegistryId; Output: RegistryId };
-    ImplicitRegistryId: { Input: ImplicitRegistryId; Output: ImplicitRegistryId };
     ResolverId: { Input: ResolverId; Output: ResolverId };
     // PermissionsId: { Input: PermissionsId; Output: PermissionsId };
   };
