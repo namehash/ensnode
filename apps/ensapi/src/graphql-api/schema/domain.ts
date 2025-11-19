@@ -1,3 +1,5 @@
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+
 import {
   type DomainId,
   type ENSv1DomainId,
@@ -12,6 +14,8 @@ import { getModelId } from "@/graphql-api/lib/get-id";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { type Registration, RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
@@ -33,6 +37,7 @@ export const ENSv1DomainRef = builder.loadableObjectRef("v1Domain", {
   cacheResolved: true,
   sort: true,
 });
+
 export const ENSv2DomainRef = builder.loadableObjectRef("v2Domain", {
   load: (ids: ENSv2DomainId[]) =>
     db.query.v2Domain.findMany({
@@ -43,7 +48,26 @@ export const ENSv2DomainRef = builder.loadableObjectRef("v2Domain", {
   cacheResolved: true,
   sort: true,
 });
-export const DomainInterfaceRef = builder.interfaceRef<ENSv1Domain | ENSv2Domain>("Domain");
+
+export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
+  load: async (ids: DomainId[]) => {
+    const [v1Domains, v2Domains] = await Promise.all([
+      db.query.v1Domain.findMany({
+        where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv1DomainId
+        with: { label: true },
+      }),
+      db.query.v2Domain.findMany({
+        where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv2DomainId
+        with: { label: true },
+      }),
+    ]);
+
+    return [...v1Domains, ...v2Domains];
+  },
+  toKey: getModelId,
+  cacheResolved: true,
+  sort: true,
+});
 
 export type ENSv1Domain = Exclude<typeof ENSv1DomainRef.$inferType, ENSv1DomainId>;
 export type ENSv2Domain = Exclude<typeof ENSv2DomainRef.$inferType, ENSv2DomainId>;
@@ -193,20 +217,52 @@ DomainInterfaceRef.implement({
 //////////////////////////////
 // ENSv1Domain Implementation
 //////////////////////////////
-
 ENSv1DomainRef.implement({
   description: "TODO",
   interfaces: [DomainInterfaceRef],
   isTypeOf: (domain) => isENSv1Domain(domain as Domain),
   fields: (t) => ({
-    //
+    //////////////////////
+    // ENSv1Domain.parent
+    //////////////////////
+    parent: t.field({
+      description: "TODO",
+      type: ENSv1DomainRef,
+      nullable: true,
+      resolve: (parent) => parent.parentId,
+    }),
+
+    ////////////////////////
+    // ENSv1Domain.children
+    ////////////////////////
+    children: t.connection({
+      description: "TODO",
+      type: ENSv1DomainRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.v1Domain.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.parentId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
+    }),
   }),
 });
 
 //////////////////////////////
 // ENSv2Domain Implementation
 //////////////////////////////
-
 ENSv2DomainRef.implement({
   description: "TODO",
   interfaces: [DomainInterfaceRef],

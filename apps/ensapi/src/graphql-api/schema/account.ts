@@ -1,13 +1,13 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import type { Address } from "viem";
 
-import type { DomainId, ResolverId } from "@ensnode/ensnode-sdk";
+import type { ENSv1DomainId, ENSv2DomainId, ResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import { ENSv1DomainRef, ENSv2DomainRef } from "@/graphql-api/schema/domain";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
@@ -48,21 +48,97 @@ AccountRef.implement({
     ///////////////////
     // Account.domains
     ///////////////////
-    domains: t.connection({
+    // domains: t.connection({
+    //   description: "TODO",
+    //   type: DomainInterfaceRef,
+    //   resolve: (parent, args, context) =>
+    //     // TODO(dataloader) — confirm this is dataloaded?
+    //     resolveCursorConnection(
+    //       { ...DEFAULT_CONNECTION_ARGS, args },
+    //       async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+    //         const v1Domains = db
+    //           .select({ id: schema.v1Domain.id })
+    //           .from(schema.v1Domain)
+    //           .where(eq(schema.v1Domain.ownerId, parent.id))
+    //           .leftJoin(schema.label, eq(schema.v1Domain.labelHash, schema.label.labelHash));
+
+    //         const v2Domains = db
+    //           .select({ id: schema.v2Domain.id })
+    //           .from(schema.v2Domain)
+    //           .where(eq(schema.v2Domain.ownerId, parent.id))
+    //           .leftJoin(schema.label, eq(schema.v2Domain.labelHash, schema.label.labelHash));
+
+    //         // @ts-expect-error ignore that id column types differ
+    //         const domains = db.$with("domains").as(unionAll(v1Domains, v2Domains));
+
+    //         const results = await db
+    //           .with(domains)
+    //           .select()
+    //           .from(domains)
+    //           .where(
+    //             and(
+    //               ...[
+    //                 // TODO: using any because drizzle infers id as ENSv1DomainId
+    //                 before && lt(domains.id, cursors.decode<any>(before)),
+    //                 after && gt(domains.id, cursors.decode<any>(after)),
+    //               ].filter((c) => !!c),
+    //             ),
+    //           )
+    //           .orderBy(inverted ? desc(domains.id) : asc(domains.id))
+    //           .limit(limit);
+
+    //         return rejectAnyErrors(
+    //           DomainInterfaceRef.getDataloader(context).loadMany(
+    //             results.map((result) => result.id),
+    //           ),
+    //         );
+    //       },
+    //     ),
+    // }),
+
+    /////////////////////
+    // Account.v1Domains
+    /////////////////////
+    v1Domains: t.connection({
       description: "TODO",
-      type: DomainInterfaceRef,
-      resolve: (parent, args) =>
-        // TODO(dataloader) — confirm this is dataloaded?
+      type: ENSv1DomainRef,
+      resolve: (parent, args, context) =>
         resolveCursorConnection(
           { ...DEFAULT_CONNECTION_ARGS, args },
           ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.domain.findMany({
+            db.query.v1Domain.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
                   ...[
                     eq(t.ownerId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<DomainId>(after)),
+                    before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
+    }),
+
+    /////////////////////
+    // Account.v2Domains
+    /////////////////////
+    v2Domains: t.connection({
+      description: "TODO",
+      type: ENSv2DomainRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.v2Domain.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.ownerId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
                   ].filter((c) => !!c),
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
