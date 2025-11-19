@@ -13,7 +13,11 @@ import logger from "@/lib/logger";
 const TTL: Duration = 5 * 60; // 5 minutes
 
 export const fetcher = staleWhileRevalidate(async () => {
-  logger.info("Building aggregated referrer snapshot...");
+  logger.info(
+    `Building aggregated referrer snapshot\n` +
+      `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
+      `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
+  );
   const subregistryId = getEthnamesSubregistryId(config.namespace);
 
   try {

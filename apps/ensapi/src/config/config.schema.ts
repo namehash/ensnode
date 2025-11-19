@@ -16,8 +16,8 @@ import {
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
+  makeDatetimeSchema,
   makeENSIndexerPublicConfigSchema,
-  makeUnixTimestampSchema,
   PortSchema,
   RpcConfigsSchema,
   TheGraphApiKeySchema,
@@ -51,25 +51,11 @@ export const DatabaseUrlSchema = z.string().refine(
   },
 );
 
-const DateStringToUnixTimestampSchema = z
+// Use ISO 8601 format for defining datetime values (e.g., '2025-12-01T00:00:00Z')
+const DateStringToUnixTimestampSchema = z.coerce
   .string()
-  .refine(
-    (dateStr) => {
-      try {
-        const date = new Date(dateStr);
-        return !Number.isNaN(date.getTime());
-      } catch {
-        return false;
-      }
-    },
-    {
-      error: "Invalid date string. Expected a valid date format (e.g., 'Dec 1, 2025 00:00:00 UTC')",
-    },
-  )
-  .transform((dateStr) => {
-    const timestamp = getUnixTime(new Date(dateStr));
-    return makeUnixTimestampSchema().parse(timestamp);
-  });
+  .pipe(makeDatetimeSchema())
+  .transform((date) => getUnixTime(date));
 
 const EnsApiConfigSchema = z
   .object({

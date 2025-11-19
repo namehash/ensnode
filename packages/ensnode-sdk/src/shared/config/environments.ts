@@ -52,6 +52,8 @@ export type TheGraphEnvironment = {
 
 /**
  * Environment variables for ENS Holiday Awards date range configuration.
+ *
+ * Dates must be specified in ISO 8601 format (e.g., '2025-12-01T00:00:00Z').
  */
 export interface EnsHolidayAwardsEnvironment {
   ENS_HOLIDAY_AWARDS_START?: string;
