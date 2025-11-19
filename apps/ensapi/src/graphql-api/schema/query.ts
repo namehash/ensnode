@@ -3,7 +3,6 @@ import config from "@/config";
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
 import {
-  type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
   getRootRegistryId,
@@ -16,6 +15,7 @@ import { builder } from "@/graphql-api/builder";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import {
   DomainIdInput,
@@ -30,33 +30,55 @@ import { db } from "@/lib/db";
 
 builder.queryType({
   fields: (t) => ({
-    // testing, delete this
-    // domains: t.connection({
-    //   description: "TODO",
-    //   type: DomainInterfaceRef,
-    //   resolve: (parent, args, context) =>
-    //     resolveCursorConnection(
-    //       {
-    //         args,
-    //         toCursor: (domain) => cursors.encode(domain.id),
-    //         defaultSize: 100,
-    //         maxSize: 1000,
-    //       },
-    //       ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-    //         db.query.domain.findMany({
-    //           where: (t, { lt, gt, and }) =>
-    //             and(
-    //               ...[
-    //                 before !== undefined && lt(t.id, cursors.decode<DomainId>(before)),
-    //                 after !== undefined && gt(t.id, cursors.decode<DomainId>(after)),
-    //               ].filter((c) => !!c),
-    //             ),
-    //           orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-    //           limit,
-    //           with: { label: true },
-    //         }),
-    //     ),
-    // }),
+    /////////////////////
+    // Query.v1Domains (Testing)
+    /////////////////////
+    v1Domains: t.connection({
+      description: "TODO",
+      type: ENSv1DomainRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.v1Domain.findMany({
+              where: (t, { lt, gt, and }) =>
+                and(
+                  ...[
+                    before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
+    }),
+
+    /////////////////////
+    // Query.v2Domains (Testing)
+    /////////////////////
+    v2Domains: t.connection({
+      description: "TODO",
+      type: ENSv2DomainRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.v2Domain.findMany({
+              where: (t, { lt, gt, and }) =>
+                and(
+                  ...[
+                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
+    }),
 
     //////////////////////////////////
     // Get Domain by Name or DomainId

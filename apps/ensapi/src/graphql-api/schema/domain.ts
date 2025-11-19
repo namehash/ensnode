@@ -27,7 +27,7 @@ const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in d
 // Refs
 //////////////////////
 
-export const ENSv1DomainRef = builder.loadableObjectRef("v1Domain", {
+export const ENSv1DomainRef = builder.loadableObjectRef("ENSv1Domain", {
   load: (ids: ENSv1DomainId[]) =>
     db.query.v1Domain.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
@@ -38,7 +38,7 @@ export const ENSv1DomainRef = builder.loadableObjectRef("v1Domain", {
   sort: true,
 });
 
-export const ENSv2DomainRef = builder.loadableObjectRef("v2Domain", {
+export const ENSv2DomainRef = builder.loadableObjectRef("ENSv2Domain", {
   load: (ids: ENSv2DomainId[]) =>
     db.query.v2Domain.findMany({
       where: (t, { inArray }) => inArray(t.id, ids),
@@ -50,7 +50,7 @@ export const ENSv2DomainRef = builder.loadableObjectRef("v2Domain", {
 });
 
 export const DomainInterfaceRef = builder.loadableInterfaceRef("Domain", {
-  load: async (ids: DomainId[]) => {
+  load: async (ids: DomainId[]): Promise<(ENSv1Domain | ENSv2Domain)[]> => {
     const [v1Domains, v2Domains] = await Promise.all([
       db.query.v1Domain.findMany({
         where: (t, { inArray }) => inArray(t.id, ids as any), // ignore downcast to ENSv1DomainId
@@ -76,7 +76,6 @@ export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
 //////////////////////////////
 // DomainInterface Implementation
 //////////////////////////////
-
 DomainInterfaceRef.implement({
   description: "a Domain",
   fields: (t) => ({
