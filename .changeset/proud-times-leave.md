@@ -1,5 +1,5 @@
 ---
-"@ensnode/ensapi": minor
+"ensapi": minor
 "@ensnode/ensnode-sdk": minor
 ---
 
