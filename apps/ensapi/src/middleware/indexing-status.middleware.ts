@@ -1,23 +1,27 @@
 import config from "@/config";
 
-import pMemoize from "p-memoize";
-import pReflect from "p-reflect";
+import pReflect, { type PromiseResult } from "p-reflect";
 
-import { type Duration, ENSNodeClient, TtlCache } from "@ensnode/ensnode-sdk";
+import {
+  type Duration,
+  ENSNodeClient,
+  type ErrorResponse,
+  type IndexingStatusResponse,
+  staleWhileRevalidate,
+} from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
+import { makeLogger } from "@/lib/logger";
 
+const logger = makeLogger("indexing-status.middleware");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 const TTL: Duration = 5; // 5 seconds
 
-// memoizes the reflected indexing-status-with-retries promise across TTL
-const fetcher = pMemoize(async () => pReflect(client.indexingStatus()), {
-  cache: new TtlCache(TTL),
-});
+export const fetcher = staleWhileRevalidate(async () => pReflect(client.indexingStatus()), TTL);
 
 export type IndexingStatusVariables = {
-  indexingStatus: Awaited<ReturnType<typeof fetcher>>;
+  indexingStatus: PromiseResult<IndexingStatusResponse>;
 };
 
 /**
@@ -28,6 +32,19 @@ export type IndexingStatusVariables = {
  * `indexingStatus` variable on the context for use by other middleware and handlers.
  */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  c.set("indexingStatus", await fetcher());
+  const indexingStatus = await fetcher();
+
+  if (indexingStatus === null) {
+    logger.error("Could not fetch Indexing Status API response");
+
+    return c.json(
+      {
+        message: "Internal Server Error",
+      } satisfies ErrorResponse,
+      500,
+    );
+  }
+
+  c.set("indexingStatus", indexingStatus);
   await next();
 });
