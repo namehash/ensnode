@@ -1,3 +1,8 @@
+import { getUnixTime } from "date-fns";
+
+import { addDuration, durationBetween } from "./datetime";
+import type { Duration, UnixTimestamp } from "./types";
+
 /**
  * Cache that maps from string -> ValueType.
  */
@@ -102,7 +107,7 @@ export class LruCache<KeyType extends string, ValueType> implements Cache<KeyTyp
 
 interface CacheEntry<T> {
   value: T;
-  expiresAt: number;
+  expiresAt: UnixTimestamp;
 }
 
 /**
@@ -112,26 +117,19 @@ interface CacheEntry<T> {
  */
 export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyType, ValueType> {
   private readonly _cache = new Map<string, CacheEntry<ValueType>>();
-  private readonly _ttlMs: number;
+  private readonly _ttl: Duration;
 
   /**
    * Create a new TTL cache with the given TTL.
    *
-   * @param ttlMs Time-to-live in milliseconds. Items expire after this duration.
-   * @throws Error if ttlMs is not positive.
+   * @param ttl Time-to-live duration in seconds. Items expire after this duration.
    */
-  public constructor(ttlMs: number) {
-    if (!Number.isInteger(ttlMs) || ttlMs <= 0) {
-      throw new Error(
-        `TtlCache requires ttlMs to be a positive integer but a ttlMs of ${ttlMs} was requested.`,
-      );
-    }
-
-    this._ttlMs = ttlMs;
+  public constructor(ttl: Duration) {
+    this._ttl = ttl;
   }
 
   private _cleanup(): void {
-    const now = Date.now();
+    const now = getUnixTime(new Date());
     for (const [key, entry] of this._cache.entries()) {
       if (entry.expiresAt <= now) {
         this._cache.delete(key);
@@ -142,7 +140,7 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
   public set(key: string, value: ValueType): void {
     this._cleanup();
 
-    const expiresAt = Date.now() + this._ttlMs;
+    const expiresAt = addDuration(getUnixTime(new Date()), this._ttl);
     this._cache.set(key, { value, expiresAt });
   }
 
@@ -154,7 +152,7 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
       return undefined;
     }
 
-    if (entry.expiresAt <= Date.now()) {
+    if (entry.expiresAt <= getUnixTime(new Date())) {
       this._cache.delete(key);
       return undefined;
     }
@@ -183,7 +181,7 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
       return false;
     }
 
-    if (entry.expiresAt <= Date.now()) {
+    if (entry.expiresAt <= getUnixTime(new Date())) {
       this._cache.delete(key);
       return false;
     }
@@ -194,4 +192,135 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
   public delete(key: string): boolean {
     return this._cache.delete(key);
   }
+}
+
+/**
+ * Internal cache entry structure for the Stale-While-Revalidate (SWR) caching strategy.
+ *
+ * This interface represents a single cache entry that stores the cached value,
+ * metadata about when it was last updated, and tracks any in-progress revalidation.
+ *
+ * @internal
+ */
+interface SWRCache<T> {
+  /**
+   * The cached value of type T
+   */
+  value: T;
+
+  /**
+   * Unix timestamp indicating when the value was last successfully updated
+   */
+  updatedAt: UnixTimestamp;
+
+  /**
+   * Optional promise of the in-progress revalidation attempt.
+   * If undefined, no revalidation attempt is in-progress.
+   * If defined, a revalidation attempt is already in-progress.
+   * Used to enforce no concurrent revalidation attempts.
+   */
+  revalidating?: Promise<T>;
+}
+
+/**
+ * Stale-While-Revalidate (SWR) cache wrapper for async functions.
+ *
+ * This caching strategy serves cached data immediately (even if stale) while
+ * asynchronously revalidating the cache in the background. This provides:
+ * - Sub-millisecond response times (after first fetch)
+ * - Always available data (serves stale data during revalidation)
+ * - Automatic background updates
+ *
+ * Error Handling:
+ * - If the function throws an error and a cached value exists, the stale cached value is returned.
+ * - If the function throws an error and no cached value exists, null is returned.
+ * - Background revalidation errors are handled gracefully and don't interrupt serving stale data.
+ *
+ * @example
+ * ```typescript
+ * const fetchExpensiveData = async () => {
+ *   const response = await fetch('/api/data');
+ *   return response.json();
+ * };
+ *
+ * const cachedFetch = staleWhileRevalidate(fetchExpensiveData, 60); // 60 second TTL
+ *
+ * // First call: fetches data (slow)
+ * const data1 = await cachedFetch();
+ *
+ * // Within TTL: returns cached data (fast)
+ * const data2 = await cachedFetch();
+ *
+ * // After TTL: returns stale data immediately, revalidates in background
+ * const data3 = await cachedFetch(); // Still fast!
+ * ```
+ *
+ * @param fn The async function to wrap with SWR caching
+ * @param ttl Time-to-live duration in seconds. After this duration, data is considered stale
+ * @returns A cached version of the function with SWR semantics. Returns null if fn throws an error and no cached value is available.
+ *
+ * @link https://web.dev/stale-while-revalidate/
+ * @link https://datatracker.ietf.org/doc/html/rfc5861
+ */
+export function staleWhileRevalidate<T>(
+  fn: () => Promise<T>,
+  ttl: Duration,
+): () => Promise<T | null> {
+  let cache: SWRCache<T> | null = null;
+  let initialBuild: Promise<T | null> | null = null;
+
+  return async (): Promise<T | null> => {
+    // No cache, attempt to successfully build the first cache (any number of attempts to build the cache may have been attempted and failed previously)
+    if (!cache) {
+      // If initial build already in progress, wait for it
+      if (initialBuild) {
+        return initialBuild;
+      }
+
+      // Start initial build
+      initialBuild = fn()
+        .then((value) => {
+          cache = { value, updatedAt: getUnixTime(new Date()) };
+          initialBuild = null;
+          return value;
+        })
+        .catch((_error) => {
+          initialBuild = null;
+          // No cached value available, return null
+          return null;
+        });
+
+      return initialBuild;
+    }
+
+    const isStale = durationBetween(cache.updatedAt, getUnixTime(new Date())) > ttl;
+
+    // Fresh cache, return immediately
+    if (!isStale) return cache.value;
+
+    // Stale cache, but revalidation already in progress
+    if (cache.revalidating) return cache.value;
+
+    // Stale cache, kick off revalidation in background
+    const revalidationPromise = fn()
+      .then((value) => {
+        cache = { value, updatedAt: getUnixTime(new Date()) };
+        return value;
+      })
+      .catch(() => {
+        // On error, clear revalidating flag so next request can retry
+        // Keep serving stale data, swallow error (background revalidation)
+        if (cache) {
+          cache.revalidating = undefined;
+        }
+        // Don't re-throw - this is background revalidation
+        // Caller can add their own error handling in the wrapped function
+        return cache?.value as T;
+      });
+
+    cache.revalidating = revalidationPromise;
+
+    // Return stale value immediately
+    return cache.value;
+  };
 }

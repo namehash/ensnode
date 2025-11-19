@@ -25,8 +25,8 @@ const logger = makeLogger("registrar-actions");
 // It makes the routes available if all prerequisites are met.
 app.use(requireRegistrarActionsPluginMiddleware());
 
-const DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT = 25;
-const MAX_RESPONSE_ITEMS_COUNT_LIMIT = 100;
+const RESPONSE_ITEMS_PER_PAGE_DEFAULT = 25;
+const RESPONSE_ITEMS_PER_PAGE_MAX = 100;
 
 /**
  * Get Registrar Actions
@@ -49,7 +49,7 @@ const MAX_RESPONSE_ITEMS_COUNT_LIMIT = 100;
  * Responds with:
  * - 400 error response for bad input, such as:
  *   - (if provided) `limit` search param is not
- *     a positive integer <= {@link MAX_RESPONSE_ITEMS_COUNT_LIMIT}.
+ *     a positive integer <= {@link RESPONSE_ITEMS_PER_PAGE_MAX}.
  *   - (if provided) `orderBy` search param is not part of {@link RegistrarActionsOrders}.
  * - 500 error response for cases such as:
  *   - Connected ENSNode has not all required plugins set to active.
@@ -73,24 +73,24 @@ app.get(
         .enum(RegistrarActionsOrders)
         .default(RegistrarActionsOrders.LatestRegistrarActions),
 
-      limit: params.queryParam
+      itemsPerPage: params.queryParam
         .optional()
-        .default(DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT)
+        .default(RESPONSE_ITEMS_PER_PAGE_DEFAULT)
         .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema().max(MAX_RESPONSE_ITEMS_COUNT_LIMIT)),
+        .pipe(makePositiveIntegerSchema().max(RESPONSE_ITEMS_PER_PAGE_MAX)),
     }),
   ),
   async (c) => {
     try {
       const { parentNode } = c.req.valid("param");
-      const { orderBy, limit } = c.req.valid("query");
+      const { orderBy, itemsPerPage } = c.req.valid("query");
       const filter = registrarActionsFilter.byParentNode(parentNode);
 
       // Find the latest "logical registrar actions".
       const registrarActions = await findRegistrarActions({
         filter,
         orderBy,
-        limit,
+        limit: itemsPerPage,
       });
 
       // respond with success response

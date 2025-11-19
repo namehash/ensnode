@@ -57,6 +57,7 @@
     "@ensnode/datasources": "workspace:*",
     "@namehash/ens-referrals": "workspace:*",
     "caip": "catalog:",
+    "date-fns": "catalog:",
     "zod": "catalog:"
   }
 }

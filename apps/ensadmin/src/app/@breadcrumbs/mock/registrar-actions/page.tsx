@@ -19,7 +19,7 @@ export default function Page() {
       </BreadcrumbLink>
       <BreadcrumbSeparator className="hidden md:block" />
       <BreadcrumbItem>
-        <BreadcrumbPage>RecentRegistrations</BreadcrumbPage>
+        <BreadcrumbPage>Registrar Actions</BreadcrumbPage>
       </BreadcrumbItem>
     </>
   );

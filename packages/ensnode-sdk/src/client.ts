@@ -23,6 +23,12 @@ import type {
   ResolveRecordsResponse,
 } from "./api/types";
 import { ClientError } from "./client-error";
+import {
+  deserializePaginatedAggregatedReferrersResponse,
+  type PaginatedAggregatedReferrersRequest,
+  type PaginatedAggregatedReferrersResponse,
+  type SerializedPaginatedAggregatedReferrersResponse,
+} from "./ensanalytics";
 import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
 
@@ -44,6 +50,7 @@ export interface ClientOptions {
  *
  * Provides access to the following ENSNode APIs:
  * - Resolution API
+ * - ENSAnalytics API
  * - 🚧 Configuration API
  * - 🚧 Indexing Status API
  *
@@ -357,6 +364,67 @@ export class ENSNodeClient {
   }
 
   /**
+   * Fetch Paginated Aggregated Referrers
+   *
+   * Retrieves a paginated list of aggregated referrer metrics with contribution percentages.
+   * Each referrer's contribution is calculated as a percentage of the grand totals across all referrers.
+   *
+   * @param request - Pagination parameters
+   * @param request.page - The page number to retrieve (1-indexed, default: 1)
+   * @param request.itemsPerPage - Number of items per page (default: 25, max: 100)
+   * @returns {PaginatedAggregatedReferrersResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   *
+   * @example
+   * ```typescript
+   * // Get first page with default page size (25 items)
+   * const response = await client.getAggregatedReferrers();
+   * if (response.responseCode === 'ok') {
+   *   console.log(response.data.referrers);
+   *   console.log(`Page ${response.data.paginationParams.page} of ${Math.ceil(response.data.total / response.data.paginationParams.itemsPerPage)}`);
+   * }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Get second page with 50 items per page
+   * const response = await client.getAggregatedReferrers({ page: 2, itemsPerPage: 50 });
+   * ```
+   */
+  async getAggregatedReferrers(
+    request?: PaginatedAggregatedReferrersRequest,
+  ): Promise<PaginatedAggregatedReferrersResponse> {
+    const url = new URL(`/api/ensanalytics/aggregated-referrers`, this.options.url);
+
+    if (request?.page) url.searchParams.set("page", request.page.toString());
+    if (request?.itemsPerPage)
+      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // The API can return errors with 500 status, but they're still in the
+    // PaginatedAggregatedReferrersResponse format with responseCode: 'error'
+    // So we don't need to check response.ok here, just deserialize and let
+    // the caller handle the responseCode
+
+    return deserializePaginatedAggregatedReferrersResponse(
+      responseData as SerializedPaginatedAggregatedReferrersResponse,
+    );
+  }
+
+  /**
    * Fetch ENSNode Registrar Actions
    *
    * @param {RegistrarActionsRequestFilter} request.filter is
@@ -382,12 +450,12 @@ export class ENSNodeClient {
    *
    * // get latest registrar action records across all indexed subregistries
    * // NOTE: when no `limit` value is passed,
-   * //       the default DEFAULT_RESPONSE_ITEMS_COUNT_LIMIT applies.
+   * //       the default RESPONSE_ITEMS_PER_PAGE_DEFAULT applies.
    * const registrarActions = await client.registrarActions();
    *
    * // get latest 5 registrar action records across all indexed subregistries
    * // NOTE: when a `limit` value is passed, it must be lower than or equal to
-   * //       the MAX_RESPONSE_ITEMS_COUNT_LIMIT value.
+   * //       the RESPONSE_ITEMS_PER_PAGE_MAX value.
    * const registrarActions = await client.registrarActions({
    *   limit: 5,
    * });
@@ -433,8 +501,8 @@ export class ENSNodeClient {
       url.searchParams.set(orderArgs.key, orderArgs.value);
     }
 
-    if (request.limit) {
-      url.searchParams.set("limit", request.limit.toString());
+    if (request.itemsPerPage) {
+      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
     }
 
     const response = await fetch(url);

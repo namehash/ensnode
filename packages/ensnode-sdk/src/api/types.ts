@@ -185,11 +185,11 @@ export type RegistrarActionsRequest = {
   order?: RegistrarActionsOrder;
 
   /**
-   * Limit results to selected count of records.
+   * Limit the count of items per page to selected count of records.
    *
    * Guaranteed to be a positive integer (if defined).
    */
-  limit?: number;
+  itemsPerPage?: number;
 };
 
 /**

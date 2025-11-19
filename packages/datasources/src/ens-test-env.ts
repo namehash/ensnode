@@ -1,3 +1,5 @@
+import { zeroAddress } from "viem";
+
 import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
 import { Registry } from "./abis/namechain/Registry";
 // ABIs for ENSRoot Datasource
@@ -5,6 +7,7 @@ import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
@@ -68,6 +71,11 @@ export default {
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
         address: "0xd84379ceae14aa33c123af12424a37803f885889",
+        startBlock: 0,
+      },
+      UniversalRegistrarRenewalWithReferrer: {
+        abi: root_UniversalRegistrarRenewalWithReferrer,
+        address: zeroAddress,
         startBlock: 0,
       },
       NameWrapper: {
