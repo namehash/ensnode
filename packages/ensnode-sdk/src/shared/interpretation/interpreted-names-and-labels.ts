@@ -12,8 +12,8 @@ import {
   type LiteralLabel,
   type LiteralName,
   type Name,
-} from "../ens";
-import { labelhashLiteralLabel } from "./labelhash";
+} from "../../ens";
+import { labelhashLiteralLabel } from "../labelhash";
 
 /**
  * Interprets a Literal Label, producing an Interpreted Label.
