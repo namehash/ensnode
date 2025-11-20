@@ -35,11 +35,14 @@ export const indexingStatusMiddleware = factory.createMiddleware(async (c, next)
   const indexingStatus = await fetcher();
 
   if (indexingStatus === null) {
-    logger.error("Could not fetch Indexing Status API response");
+    logger.error(
+      "Unable to fetch current indexing status. All fetch attempts have failed since service startup and no cached status is available. This may indicate the ENSIndexer service is unreachable or not responding.",
+    );
 
     return c.json(
       {
         message: "Internal Server Error",
+        details: "Unable to fetch current indexing status.",
       } satisfies ErrorResponse,
       500,
     );
