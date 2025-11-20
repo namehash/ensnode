@@ -104,9 +104,18 @@ export function RelativeTime({
   const [relativeTime, setRelativeTime] = useState<string>("");
 
   useEffect(() => {
-    setRelativeTime(
-      formatRelativeTime(timestamp, enforcePast, includeSeconds, conciseFormatting, relativeTo),
-    );
+    const updateTime = () => {
+      setRelativeTime(
+        formatRelativeTime(timestamp, enforcePast, includeSeconds, conciseFormatting, relativeTo),
+      );
+    };
+
+    updateTime();
+
+    if (includeSeconds) {
+      const interval = setInterval(updateTime, 1000);
+      return () => clearInterval(interval);
+    }
   }, [timestamp, conciseFormatting, enforcePast, includeSeconds, relativeTo]);
 
   const tooltipTriggerContent = (

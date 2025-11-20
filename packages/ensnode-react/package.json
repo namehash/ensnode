@@ -57,6 +57,7 @@
     "vitest": "catalog:"
   },
   "dependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*"
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "date-fns": "catalog:"
   }
 }
