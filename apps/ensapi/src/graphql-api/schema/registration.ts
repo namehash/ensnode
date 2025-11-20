@@ -40,6 +40,7 @@ export type BaseRegistrarRegistration = RequiredAndNotNull<
   premium: bigint | null;
 };
 export type ThreeDNSRegistration = Registration;
+export type ENSv2RegistryRegistration = Registration;
 
 RegistrationInterfaceRef.implement({
   description: "TODO",
@@ -183,4 +184,17 @@ ThreeDNSRegistrationRef.implement({
   fields: (t) => ({
     //
   }),
+});
+
+///////////////////////////
+// ENSv2RegistryRegistration
+///////////////////////////
+export const ENSv2RegistryRegistrationRef = builder.objectRef<ENSv2RegistryRegistration>(
+  "ENSv2RegistryRegistration",
+);
+ENSv2RegistryRegistrationRef.implement({
+  description: "TODO",
+  interfaces: [RegistrationInterfaceRef],
+  isTypeOf: (value) => (value as RegistrationInterface).type === "ENSv2Registry",
+  fields: (t) => ({}),
 });

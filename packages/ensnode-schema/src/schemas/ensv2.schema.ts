@@ -172,6 +172,7 @@ export const registrationType = onchainEnum("RegistrationType", [
   "NameWrapper",
   "BaseRegistrar",
   "ThreeDNS",
+  "ENSv2Registry",
 ]);
 
 export const registration = onchainTable(
@@ -179,10 +180,12 @@ export const registration = onchainTable(
   (t) => ({
     // keyed by (domainId, index)
     id: t.text().primaryKey().$type<RegistrationId>(),
-    type: registrationType().notNull(),
 
     domainId: t.text().notNull().$type<DomainId>(),
     index: t.integer().notNull().default(0),
+
+    // has a type
+    type: registrationType().notNull(),
 
     // must have a start timestamp
     start: t.bigint().notNull(),

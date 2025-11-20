@@ -6,6 +6,7 @@ import {
   type DNSEncodedLiteralName,
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
+  interpretAddress,
   isPccFuseSet,
   type LiteralLabel,
   labelhashLiteralLabel,
@@ -17,7 +18,8 @@ import {
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
-import { materializeENSv1DomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import {
@@ -137,7 +139,7 @@ export default function () {
 
     // now guaranteed to be an unexpired transferrable Registration
     // so materialize domain owner
-    await materializeENSv1DomainOwner(context, domainId, to);
+    await materializeENSv1DomainEffectiveOwner(context, domainId, to);
   }
 
   ponder.on(
@@ -178,7 +180,7 @@ export default function () {
         registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
       // materialize domain owner
-      await materializeENSv1DomainOwner(context, domainId, owner);
+      await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
 
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
@@ -241,20 +243,21 @@ export default function () {
         }
 
         // supercede the latest Registration if exists
-        if (registration) {
-          await supercedeLatestRegistration(context, registration);
-        }
+        if (registration) await supercedeLatestRegistration(context, registration);
 
         const nextIndex = registration ? registration.index + 1 : 0;
         const registrationId = makeLatestRegistrationId(domainId);
+        const registrant = owner;
 
         // insert NameWrapper Registration
+        await ensureAccount(context, registrant);
         await context.db.insert(schema.registration).values({
           id: registrationId,
           index: nextIndex,
           type: "NameWrapper",
           registrarChainId: registrar.chainId,
           registrarAddress: registrar.address,
+          registrantId: interpretAddress(registrant),
           domainId,
           start: event.block.timestamp,
           fuses,

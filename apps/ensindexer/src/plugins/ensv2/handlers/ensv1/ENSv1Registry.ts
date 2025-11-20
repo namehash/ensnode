@@ -17,7 +17,7 @@ import {
   ROOT_NODE,
 } from "@ensnode/ensnode-sdk";
 
-import { materializeENSv1DomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { healAddrReverseSubnameLabel } from "@/lib/heal-addr-reverse-subname-label";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -103,7 +103,7 @@ export default function () {
     // events occur _after_ the Registry events. So when a name is registered, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainOwner(context, domainId, owner);
+    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
   }
 
   async function handleTransfer({
@@ -132,7 +132,7 @@ export default function () {
     // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
     // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
     // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainOwner(context, domainId, owner);
+    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
   }
 
   /**

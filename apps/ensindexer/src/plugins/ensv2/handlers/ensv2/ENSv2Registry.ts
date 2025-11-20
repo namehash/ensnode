@@ -6,15 +6,23 @@ import { type Address, hexToBigInt, isAddressEqual, labelhash, zeroAddress } fro
 import {
   type AccountId,
   getCanonicalId,
+  interpretAddress,
   type LiteralLabel,
   makeENSv2DomainId,
+  makeLatestRegistrationId,
   makeRegistryId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
+import {
+  getLatestRegistration,
+  isRegistrationExpired,
+  supercedeLatestRegistration,
+} from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -38,11 +46,11 @@ export default function () {
       const { tokenId, label: _label, expiration, registeredBy: registrant } = event.args;
       const label = _label as LiteralLabel;
 
-      const registryAccountId = getThisAccountId(context, event);
-      const registryId = makeRegistryId(registryAccountId);
+      const registry = getThisAccountId(context, event);
+      const registryId = makeRegistryId(registry);
       const canonicalId = getCanonicalId(tokenId);
       const labelHash = labelhash(label);
-      const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
+      const domainId = makeENSv2DomainId(registry, canonicalId);
 
       // Sanity Check: Canonical Id must match emitted label
       if (canonicalId !== getCanonicalId(hexToBigInt(labelhash(label)))) {
@@ -63,24 +71,98 @@ export default function () {
       }
 
       // upsert Registry
+      // TODO(signals) — move to NewRegistry and add invariant here
       await context.db
         .insert(schema.registry)
         .values({
           id: registryId,
           type: "RegistryContract",
-          ...registryAccountId,
+          ...registry,
         })
         .onConflictDoNothing();
 
       // ensure discovered Label
       await ensureLabel(context, label);
 
-      // insert Domain
-      await context.db.insert(schema.v2Domain).values({ id: domainId, registryId, labelHash });
+      // insert v2Domain
+      await context.db.insert(schema.v2Domain).values({
+        id: domainId,
+        registryId,
+        labelHash,
+        // NOTE: ownerId omitted, Tranfer* events are sole source of ownership
+      });
 
-      // TODO: insert Registration entity for this domain as well: expiration, registrant
-      // ensure Registrant
+      const registration = await getLatestRegistration(context, domainId);
+      const isExpired = registration && isRegistrationExpired(registration, event.block.timestamp);
+
+      // Invariant: If there is an existing Registration, it must be expired.
+      if (registration && !isExpired) {
+        throw new Error(
+          `Invariant(ENSv2Registry:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
+        );
+      }
+
+      // supercede the latest Registration if exists
+      if (registration) await supercedeLatestRegistration(context, registration);
+
+      const nextIndex = registration ? registration.index + 1 : 0;
+      const registrationId = makeLatestRegistrationId(domainId);
+
+      // insert ENSv2Registry Registration
       await ensureAccount(context, registrant);
+      await context.db.insert(schema.registration).values({
+        id: registrationId,
+        index: nextIndex,
+        type: "ENSv2Registry",
+        registrarChainId: registry.chainId,
+        registrarAddress: registry.address,
+        registrantId: interpretAddress(registrant),
+        domainId,
+        start: event.block.timestamp,
+        expiration,
+      });
+    },
+  );
+
+  ponder.on(
+    namespaceContract(pluginName, "ENSv2Registry:NameRenewed"),
+    async ({
+      context,
+      event,
+    }: {
+      context: Context;
+      event: EventWithArgs<{
+        tokenId: bigint;
+        newExpiration: bigint;
+        renewedBy: Address;
+      }>;
+    }) => {
+      const { tokenId, newExpiration: expiration, renewedBy: renewer } = event.args;
+
+      const registry = getThisAccountId(context, event);
+      const canonicalId = getCanonicalId(tokenId);
+      const domainId = makeENSv2DomainId(registry, canonicalId);
+
+      const registration = await getLatestRegistration(context, domainId);
+
+      // Invariant: Registration must exist
+      if (!registration) {
+        throw new Error(`Invariant(ENSv2Registry:NameRenewed): Registration expected none found.`);
+      }
+
+      // Invariant: Registration must not be expired
+      if (isRegistrationExpired(registration, event.block.timestamp)) {
+        throw new Error(
+          `Invariant(ENSv2Registry:NameRenewed): Registration found but it is expired:\n${toJson(registration)}`,
+        );
+      }
+
+      // TODO: optional invariant, v2Domain must also exist? implied by expiry check
+
+      // update Registration
+      await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
+
+      // TODO: insert Renewal
     },
   );
 
@@ -164,7 +246,8 @@ export default function () {
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
       await context.db.delete(schema.v2Domain, { id: domainId });
-      // TODO: delete registrations (?)
+
+      // NOTE: we explicitly keep the Registration/Renewal entities around
     },
   );
 

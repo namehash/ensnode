@@ -4,13 +4,15 @@ import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
 import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
 
 import {
+  interpretAddress,
   makeENSv1DomainId,
   makeLatestRegistrationId,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
-import { materializeENSv1DomainOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
@@ -77,7 +79,7 @@ export default function () {
 
       // materialize Domain owner if exists
       const domain = await context.db.find(schema.v1Domain, { id: domainId });
-      if (domain) await materializeENSv1DomainOwner(context, domainId, to);
+      if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, to);
     },
   );
 
@@ -107,26 +109,26 @@ export default function () {
     // Invariant: If there is an existing Registration, it must be fully expired.
     if (registration && !isFullyExpired) {
       throw new Error(
-        `Invariant(BaseRegistrar:NameRegistered): Existing registration found in NameRegistered, expected none.`,
+        `Invariant(BaseRegistrar:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
       );
     }
 
     // supercede the latest Registration if exists
-    if (registration) {
-      await supercedeLatestRegistration(context, registration);
-    }
+    if (registration) await supercedeLatestRegistration(context, registration);
 
     const nextIndex = registration ? registration.index + 1 : 0;
     const registrationId = makeLatestRegistrationId(domainId);
+    const registrant = owner;
 
     // insert BaseRegistrar Registration
+    await ensureAccount(context, registrant);
     await context.db.insert(schema.registration).values({
       id: registrationId,
       index: nextIndex,
       type: "BaseRegistrar",
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,
-      registrantId: owner,
+      registrantId: interpretAddress(registrant),
       domainId,
       start: event.block.timestamp,
       expiration,
@@ -136,7 +138,7 @@ export default function () {
 
     // materialize Domain owner if exists
     const domain = await context.db.find(schema.v1Domain, { id: domainId });
-    if (domain) await materializeENSv1DomainOwner(context, domainId, owner);
+    if (domain) await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
   }
 
   ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);
