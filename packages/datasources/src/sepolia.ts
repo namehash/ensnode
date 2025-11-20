@@ -121,6 +121,11 @@ export default {
   [DatasourceNames.Namechain]: {
     chain: sepolia,
     contracts: {
+      Resolver: {
+        abi: ResolverABI,
+        startBlock: 9629999,
+      },
+
       Registry: {
         abi: Registry,
         startBlock: 9629999,

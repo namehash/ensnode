@@ -15,6 +15,7 @@ export const DATASOURCE_NAMES_WITH_RESOLVERS = [
   DatasourceNames.Lineanames,
   DatasourceNames.ThreeDNSOptimism,
   DatasourceNames.ThreeDNSBase,
+  DatasourceNames.Namechain,
 ] as const satisfies DatasourceName[];
 
 /**

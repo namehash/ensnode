@@ -124,6 +124,10 @@ export default {
   [DatasourceNames.Namechain]: {
     chain: mainnet,
     contracts: {
+      Resolver: {
+        abi: ResolverABI,
+        startBlock: 23794084,
+      },
       Registry: {
         abi: Registry,
         startBlock: 23794084,

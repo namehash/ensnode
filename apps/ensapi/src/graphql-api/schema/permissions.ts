@@ -1,6 +1,13 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
-import type { PermissionsId, PermissionsResourceId, PermissionsUserId } from "@ensnode/ensnode-sdk";
+import {
+  makePermissionsId,
+  makePermissionsResourceId,
+  type PermissionsId,
+  type PermissionsResourceId,
+  type PermissionsUserId,
+  ROOT_RESOURCE,
+} from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
@@ -50,14 +57,35 @@ export type PermissionsUserResource = Exclude<
 PermissionsRef.implement({
   description: "Permissions",
   fields: (t) => ({
+    ////////////////////////////
+    // Permissions.id
+    ////////////////////////////
+    id: t.field({
+      description: "TODO",
+      type: "ID",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
+
     ////////////////////////
     // Permissions.contract
     ////////////////////////
     contract: t.field({
-      type: AccountIdRef,
       description: "TODO",
+      type: AccountIdRef,
       nullable: false,
       resolve: ({ chainId, address }) => ({ chainId, address }),
+    }),
+
+    ////////////////////
+    // Permissions.root
+    ////////////////////
+    root: t.field({
+      description: "TODO",
+      type: PermissionsResourceRef,
+      nullable: false,
+      resolve: ({ chainId, address }) =>
+        makePermissionsResourceId({ chainId, address }, ROOT_RESOURCE),
     }),
 
     /////////////////////////
@@ -94,6 +122,26 @@ PermissionsRef.implement({
 PermissionsResourceRef.implement({
   description: "PermissionsResource",
   fields: (t) => ({
+    ////////////////////////////
+    // PermissionsResource.id
+    ////////////////////////////
+    id: t.field({
+      description: "TODO",
+      type: "ID",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
+
+    ///////////////////////////////////
+    // PermissionsResource.permissions
+    ///////////////////////////////////
+    permissions: t.field({
+      description: "TODO",
+      type: PermissionsRef,
+      nullable: false,
+      resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
+    }),
+
     ////////////////////////////////
     // PermissionsResource.resource
     ////////////////////////////////
@@ -139,6 +187,27 @@ PermissionsResourceRef.implement({
 PermissionsUserRef.implement({
   description: "PermissionsUser",
   fields: (t) => ({
+    ////////////////////////////
+    // PermissionsUser.id
+    ////////////////////////////
+    id: t.field({
+      description: "TODO",
+      type: "ID",
+      nullable: false,
+      resolve: (parent) => parent.id,
+    }),
+
+    ////////////////////////////
+    // PermissionsUser.resource
+    ////////////////////////////
+    resource: t.field({
+      description: "TODO",
+      type: PermissionsResourceRef,
+      nullable: false,
+      resolve: ({ chainId, address, resource }) =>
+        makePermissionsResourceId({ chainId, address }, resource),
+    }),
+
     ////////////////////////
     // PermissionsUser.user
     ////////////////////////

@@ -14,3 +14,8 @@ export const ADDR_REVERSE_NODE: Node = namehash("addr.reverse");
  * returns those records regardless of the name used for record resolution.
  */
 export const NODE_ANY: Node = zeroHash;
+
+/**
+ * ROOT_RESOURCE represents the 'root' resource in an EnhancedAccessControl contract.
+ */
+export const ROOT_RESOURCE = 0n;

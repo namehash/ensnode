@@ -1,6 +1,6 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
-import type { ENSv2DomainId, RegistryId } from "@ensnode/ensnode-sdk";
+import { type ENSv2DomainId, makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
@@ -82,7 +82,7 @@ RegistryRef.implement({
       description: "TODO",
       type: PermissionsRef,
       // TODO: render a RegistryPermissions model that parses the backing permissions into registry-semantic roles
-      resolve: ({ chainId, address }) => null,
+      resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
     }),
 
     /////////////////////

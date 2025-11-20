@@ -15,6 +15,7 @@ import {
 import { db } from "@/lib/db";
 
 const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
+// const ENSV1_REGISTRY =
 
 /**
  * Gets the Domain addressed by `name`.

@@ -9,6 +9,7 @@ import {
   PluginName,
 } from "@ensnode/ensnode-sdk";
 
+import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -84,6 +85,8 @@ export default function () {
     }) => {
       const { resource, roleBitmap: roles, account: user } = event.args;
 
+      await ensureAccount(context, user);
+
       const accountId = getThisAccountId(context, event);
       const permissionsUserId = makePermissionsUserId(accountId, resource, user);
 
@@ -111,6 +114,8 @@ export default function () {
     }) => {
       const { resource, roleBitmap: roles, account: user } = event.args;
 
+      await ensureAccount(context, user);
+
       const accountId = getThisAccountId(context, event);
       const permissionsUserId = makePermissionsUserId(accountId, resource, user);
 
@@ -136,6 +141,8 @@ export default function () {
       }>;
     }) => {
       const { resource, account: user } = event.args;
+
+      await ensureAccount(context, user);
 
       const accountId = getThisAccountId(context, event);
       await ensurePermissionsResource(context, accountId, resource);

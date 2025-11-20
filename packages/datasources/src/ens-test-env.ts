@@ -117,6 +117,10 @@ export default {
   [DatasourceNames.Namechain]: {
     chain: ensTestEnvL2Chain,
     contracts: {
+      Resolver: {
+        abi: ResolverABI,
+        startBlock: 0,
+      },
       Registry: {
         abi: Registry,
         startBlock: 0,

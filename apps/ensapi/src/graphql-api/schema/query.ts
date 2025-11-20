@@ -9,6 +9,7 @@ import {
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
+  type ResolverId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
@@ -28,56 +29,85 @@ import { RegistryIdInput, RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
+// don't want them to get familiar/accustom to these methods until their necessity is certain
+const INCLUDE_DEV_METHODS = process.env.NODE_ENV === "development";
+
 builder.queryType({
   fields: (t) => ({
-    /////////////////////
-    // Query.v1Domains (Testing)
-    /////////////////////
-    v1Domains: t.connection({
-      description: "TODO",
-      type: ENSv1DomainRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.v1Domain.findMany({
-              where: (t, { lt, gt, and }) =>
-                and(
-                  ...[
-                    before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
-                  ].filter((c) => !!c),
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-              with: { label: true },
-            }),
-        ),
-    }),
+    ...(INCLUDE_DEV_METHODS && {
+      /////////////////////////////
+      // Query.v1Domains (Testing)
+      /////////////////////////////
+      v1Domains: t.connection({
+        description: "TODO",
+        type: ENSv1DomainRef,
+        resolve: (parent, args, context) =>
+          resolveCursorConnection(
+            { ...DEFAULT_CONNECTION_ARGS, args },
+            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+              db.query.v1Domain.findMany({
+                where: (t, { lt, gt, and }) =>
+                  and(
+                    ...[
+                      before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
+                      after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
+                    ].filter((c) => !!c),
+                  ),
+                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+                limit,
+                with: { label: true },
+              }),
+          ),
+      }),
 
-    /////////////////////
-    // Query.v2Domains (Testing)
-    /////////////////////
-    v2Domains: t.connection({
-      description: "TODO",
-      type: ENSv2DomainRef,
-      resolve: (parent, args, context) =>
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.v2Domain.findMany({
-              where: (t, { lt, gt, and }) =>
-                and(
-                  ...[
-                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
-                  ].filter((c) => !!c),
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-              with: { label: true },
-            }),
-        ),
+      /////////////////////////////
+      // Query.v2Domains (Testing)
+      /////////////////////////////
+      v2Domains: t.connection({
+        description: "TODO",
+        type: ENSv2DomainRef,
+        resolve: (parent, args, context) =>
+          resolveCursorConnection(
+            { ...DEFAULT_CONNECTION_ARGS, args },
+            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+              db.query.v2Domain.findMany({
+                where: (t, { lt, gt, and }) =>
+                  and(
+                    ...[
+                      before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
+                      after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
+                    ].filter((c) => !!c),
+                  ),
+                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+                limit,
+                with: { label: true },
+              }),
+          ),
+      }),
+
+      /////////////////////////////
+      // Query.resolvers (Testing)
+      /////////////////////////////
+      resolvers: t.connection({
+        description: "TODO",
+        type: ResolverRef,
+        resolve: (parent, args, context) =>
+          resolveCursorConnection(
+            { ...DEFAULT_CONNECTION_ARGS, args },
+            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+              db.query.resolver.findMany({
+                where: (t, { lt, gt, and }) =>
+                  and(
+                    ...[
+                      before !== undefined && lt(t.id, cursors.decode<ResolverId>(before)),
+                      after !== undefined && gt(t.id, cursors.decode<ResolverId>(after)),
+                    ].filter((c) => !!c),
+                  ),
+                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+                limit,
+              }),
+          ),
+      }),
     }),
 
     //////////////////////////////////
@@ -104,9 +134,9 @@ builder.queryType({
       resolve: async (parent, args, context, info) => args.address,
     }),
 
-    //////////////////////
-    // Get Registry by Id
-    //////////////////////
+    ///////////////////////////////////
+    // Get Registry by Id or AccountId
+    ///////////////////////////////////
     registry: t.field({
       description: "TODO",
       type: RegistryRef,
@@ -117,9 +147,9 @@ builder.queryType({
       },
     }),
 
-    //////////////////////
-    // Get Resolver by Id
-    //////////////////////
+    ///////////////////////////////////
+    // Get Resolver by Id or AccountId
+    ///////////////////////////////////
     resolver: t.field({
       description: "TODO",
       type: ResolverRef,

@@ -1,17 +1,23 @@
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { namehash } from "viem";
 
 import {
+  makePermissionsId,
   makeResolverRecordsId,
   NODE_ANY,
   type RequiredAndNotNull,
   type ResolverId,
+  type ResolverRecordsId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
+import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { db } from "@/lib/db";
 
@@ -63,10 +69,37 @@ ResolverRef.implement({
       resolve: ({ chainId, address }) => ({ chainId, address }),
     }),
 
+    ////////////////////
+    // Resolver.records
+    ////////////////////
+    records: t.connection({
+      description: "TODO",
+      type: ResolverRecordsRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.resolverRecords.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.chainId, parent.chainId),
+                    eq(t.address, parent.address),
+                    before !== undefined && lt(t.id, cursors.decode<ResolverRecordsId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ResolverRecordsId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { textRecords: true, addressRecords: true },
+            }),
+        ),
+    }),
+
     ////////////////////////////////////
     // Resolver.records by Name or Node
     ////////////////////////////////////
-    records: t.field({
+    records_: t.field({
       description: "TODO",
       type: ResolverRecordsRef,
       args: { for: t.arg({ type: NameOrNodeInput, required: true }) },
@@ -124,6 +157,18 @@ DedicatedResolverMetadataRef.implement({
       // TODO: resolve via EAC
       resolve: (parent) => parent.ownerId,
     }),
+
+    /////////////////////////////////
+    // DedicatedResolver.permissions
+    /////////////////////////////////
+    // TODO(EAC) — support DedicatedResolver.permissions after EAC change
+    // permissions: t.field({
+    //   description: "TODO",
+    //   type: PermissionsRef,
+    //   nullable: false,
+    //   // TODO: render a DedicatedResolverPermissions model that parses the backing permissions into dedicated-resolver-semantic roles?
+    //   resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
+    // }),
 
     /////////////////////////////
     // Resolver.dedicatedRecords

@@ -30,6 +30,16 @@ ResolverRecordsRef.implement({
     }),
 
     ////////////////////////
+    // ResolverRecords.node
+    ////////////////////////
+    node: t.field({
+      description: "TODO",
+      type: "Node",
+      nullable: false,
+      resolve: (parent) => parent.node,
+    }),
+
+    ////////////////////////
     // ResolverRecords.name
     ////////////////////////
     name: t.expose("name", {
