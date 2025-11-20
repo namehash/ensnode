@@ -2,7 +2,6 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { namehash } from "viem";
 
 import {
-  makePermissionsId,
   makeResolverRecordsId,
   NODE_ANY,
   type RequiredAndNotNull,
@@ -17,7 +16,6 @@ import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
-import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { db } from "@/lib/db";
 

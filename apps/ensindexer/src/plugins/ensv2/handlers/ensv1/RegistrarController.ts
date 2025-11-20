@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { labelhash, namehash } from "viem";

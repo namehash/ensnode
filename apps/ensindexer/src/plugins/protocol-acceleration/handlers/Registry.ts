@@ -5,7 +5,6 @@ import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import {
-  type ENSv1DomainId,
   type LabelHash,
   makeENSv1DomainId,
   makeResolverId,

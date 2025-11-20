@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { replaceBigInts } from "ponder";
@@ -183,13 +184,6 @@ export default function () {
       const registryAccountId = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
-
-      if (
-        domainId ===
-        "eip155:15658734/erc1155:0x5fc8d32690cc91d4c39d9d3abcbd16989f875707/115467421361047454831865845388833304924993579272809100258442734802450801229824"
-      ) {
-        console.log("parent.eth subregistry update!", event.args);
-      }
 
       // update domain's subregistry
       const isDeletion = isAddressEqual(zeroAddress, subregistry);

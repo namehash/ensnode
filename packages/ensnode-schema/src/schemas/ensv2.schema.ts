@@ -219,7 +219,7 @@ export const registration = onchainTable(
   }),
 );
 
-export const registration_relations = relations(registration, ({ one, many }) => ({
+export const registration_relations = relations(registration, ({ one }) => ({
   // belongs to either v1Domain or v2Domain
   v1Domain: one(v1Domain, {
     fields: [registration.domainId],
@@ -255,7 +255,7 @@ export const permissions = onchainTable(
   }),
 );
 
-export const relations_permissions = relations(permissions, ({ one, many }) => ({
+export const relations_permissions = relations(permissions, ({ many }) => ({
   resources: many(permissionsResource),
   users: many(permissionsUser),
 }));
@@ -274,7 +274,7 @@ export const permissionsResource = onchainTable(
   }),
 );
 
-export const relations_permissionsResource = relations(permissionsResource, ({ one, many }) => ({
+export const relations_permissionsResource = relations(permissionsResource, ({ one }) => ({
   permissions: one(permissions, {
     fields: [permissionsResource.chainId, permissionsResource.address],
     references: [permissions.chainId, permissions.address],
@@ -299,7 +299,7 @@ export const permissionsUser = onchainTable(
   }),
 );
 
-export const relations_permissionsUser = relations(permissionsUser, ({ one, many }) => ({
+export const relations_permissionsUser = relations(permissionsUser, ({ one }) => ({
   account: one(account, {
     fields: [permissionsUser.user],
     references: [account.id],

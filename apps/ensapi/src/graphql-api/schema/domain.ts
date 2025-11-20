@@ -8,11 +8,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getCanonicalPath } from "@/graphql-api/lib/get-canonical-path";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getModelId } from "@/graphql-api/lib/get-id";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
-import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";

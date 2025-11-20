@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: ignore for now */
 import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";

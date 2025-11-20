@@ -2,17 +2,10 @@
  * Schema Definitions that power Protocol Acceleration in the Resolution API.
  */
 
-import { onchainEnum, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
+import { onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 import type { Address } from "viem";
 
-import type {
-  ChainId,
-  DomainId,
-  Node,
-  RegistryId,
-  ResolverId,
-  ResolverRecordsId,
-} from "@ensnode/ensnode-sdk";
+import type { ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 // TODO: implement resolverType & polymorphic field availability
 
@@ -141,7 +134,7 @@ export const resolver = onchainTable(
   }),
 );
 
-export const resolver_relations = relations(resolver, ({ one, many }) => ({
+export const resolver_relations = relations(resolver, ({ many }) => ({
   records: many(resolverRecords),
 }));
 
