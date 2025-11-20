@@ -1,12 +1,12 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
+import type { Address } from "viem";
 
 import { ResolverABI } from "@ensnode/datasources";
 import {
   type AccountId,
   type CoinType,
-  makeRegistryId,
+  interpretAddress,
   makeResolverId,
   makeResolverRecordsId,
   type Node,
@@ -35,8 +35,6 @@ type ResolverRecordsCompositeKey = Pick<
   typeof schema.resolverRecords.$inferInsert,
   "chainId" | "address" | "node"
 >;
-
-const interpretOwner = (owner: Address) => (isAddressEqual(zeroAddress, owner) ? null : owner);
 
 /**
  * Constructs a ResolverRecordsCompositeKey from a provided Resolver event.
@@ -88,7 +86,7 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
       abi: ResolverABI,
       functionName: "owner",
     });
-    ownerId = interpretOwner(rawOwner);
+    ownerId = interpretAddress(rawOwner);
   } catch {}
 
   // ensure Resolver
@@ -223,5 +221,5 @@ export async function handleResolverOwnerUpdate(
   // upsert owner, interpreting zeroAddress as null
   await context.db
     .update(schema.resolver, { id: makeResolverId(resolver) })
-    .set({ ownerId: interpretOwner(owner) });
+    .set({ ownerId: interpretAddress(owner) });
 }

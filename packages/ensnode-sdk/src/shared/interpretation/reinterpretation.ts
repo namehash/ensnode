@@ -6,7 +6,7 @@ import {
   type InterpretedName,
   isEncodedLabelHash,
   isNormalizedLabel,
-} from "../ens";
+} from "../../ens";
 
 /**
  * Reinterpret Label

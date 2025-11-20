@@ -36,12 +36,6 @@ const pluginName = PluginName.ENSv2;
 // that's why registrars manage their own set of owners (registrants), which can be desynced from a domain's owner
 // so in the registrar handlers we should never touch schema.domain, only reference them.
 
-// ok so in Registrar handlers we can reference domains that may or may not exist
-
-// ok yeah owner of the registration can desync from the registry, because they don't publish changes
-// in ownership when transferring tokens. so the owner of a domain probably should be materialized
-// to the domain in question (if exists) and
-
 export default function () {
   ponder.on(
     namespaceContract(pluginName, "BaseRegistrar:Transfer"),
@@ -58,39 +52,32 @@ export default function () {
     }) => {
       const { from, to, tokenId } = event.args;
 
-      const labelHash = registrarTokenIdToLabelHash(tokenId);
-      const registrar = getThisAccountId(context, event);
-      const managedNode = namehash(getRegistrarManagedName(registrar));
-      const node = makeSubdomainNode(labelHash, managedNode);
-
-      const domainId = makeENSv1DomainId(node);
-      const registration = await getLatestRegistration(context, domainId);
-
       const isMint = isAddressEqual(zeroAddress, from);
-      const isBurn = isAddressEqual(zeroAddress, to);
 
       // minting is always followed by Registrar#NameRegistered, safe to ignore
       if (isMint) return;
 
-      if (isBurn) {
-        // requires an existing registration
-        if (!registration) {
-          throw new Error(
-            `Invariant(BaseRegistrar:Transfer): _burn expected existing Registration`,
-          );
-        }
+      // this is either:
+      // a) a user transfering their registration token, or
+      // b) re-registering a name that has expired, and it will emit NameRegistered directly afterwards, or
+      // c) user intentionally burning their registration token by transferring to zeroAddress.
+      //
+      // in all such cases, a Registration is expected and we can
 
-        // for now, just delete the registration
-        // TODO: mark Registration as inactive or something instead of burning it
-        await context.db.delete(schema.registration, { id: registration.id });
-      } else {
-        if (!registration) {
-          throw new Error(`Invariant(BaseRegistrar:Transfer): expected existing Registration`);
-        }
+      const labelHash = registrarTokenIdToLabelHash(tokenId);
+      const registrar = getThisAccountId(context, event);
+      const managedNode = namehash(getRegistrarManagedName(registrar));
+      const node = makeSubdomainNode(labelHash, managedNode);
+      const domainId = makeENSv1DomainId(node);
 
-        // materialize Domain owner
-        await materializeENSv1DomainOwner(context, domainId, to);
+      const registration = await getLatestRegistration(context, domainId);
+      if (!registration) {
+        throw new Error(`Invariant(BaseRegistrar:Transfer): expected existing Registration`);
       }
+
+      // materialize Domain owner if exists
+      const domain = await context.db.find(schema.v1Domain, { id: domainId });
+      if (domain) await materializeENSv1DomainOwner(context, domainId, to);
     },
   );
 
@@ -147,8 +134,9 @@ export default function () {
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
     });
 
-    // materialize Domain owner
-    await materializeENSv1DomainOwner(context, domainId, owner);
+    // materialize Domain owner if exists
+    const domain = await context.db.find(schema.v1Domain, { id: domainId });
+    if (domain) await materializeENSv1DomainOwner(context, domainId, owner);
   }
 
   ponder.on(namespaceContract(pluginName, "BaseRegistrar:NameRegistered"), handleNameRegistered);

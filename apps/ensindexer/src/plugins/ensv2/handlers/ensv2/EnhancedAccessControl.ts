@@ -1,6 +1,6 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import type { Address } from "viem";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
   makePermissionsId,
@@ -85,6 +85,9 @@ export default function () {
     }) => {
       const { resource, roleBitmap: roles, account: user } = event.args;
 
+      // ignore roles for zeroAddress
+      if (isAddressEqual(zeroAddress, user)) return;
+
       await ensureAccount(context, user);
 
       const accountId = getThisAccountId(context, event);
@@ -114,6 +117,9 @@ export default function () {
     }) => {
       const { resource, roleBitmap: roles, account: user } = event.args;
 
+      // ignore roles for zeroAddress
+      if (isAddressEqual(zeroAddress, user)) return;
+
       await ensureAccount(context, user);
 
       const accountId = getThisAccountId(context, event);
@@ -141,6 +147,9 @@ export default function () {
       }>;
     }) => {
       const { resource, account: user } = event.args;
+
+      // ignore roles for zeroAddress
+      if (isAddressEqual(zeroAddress, user)) return;
 
       await ensureAccount(context, user);
 

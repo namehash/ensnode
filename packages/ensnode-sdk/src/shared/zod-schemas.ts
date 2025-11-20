@@ -14,7 +14,7 @@ import { z } from "zod/v4";
 import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
-import { reinterpretName } from "./reinterpretation";
+import { reinterpretName } from "./interpretation/reinterpretation";
 import type { SerializedAccountId } from "./serialized-types";
 import type {
   AccountId,

@@ -1,35 +1,50 @@
 import config from "@/config";
 
 import { Param, sql } from "drizzle-orm";
+import { namehash } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
+  type ENSv1DomainId,
+  type ENSv2DomainId,
   getRootRegistryId,
   type InterpretedName,
   interpretedNameToLabelHashPath,
   type LabelHash,
+  makeENSv1DomainId,
   type RegistryId,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 
 const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
-// const ENSV1_REGISTRY =
 
 /**
- * Gets the Domain addressed by `name`.
- * i.e. forward traversal of the namegraph
- *
- * TODO
+ * Gets the DomainId of the Domain addressed by `name`.
  */
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
+  const [v1DomainId, v2DomainId] = await Promise.all([
+    getENSv1DomainIdByFqdn(name),
+    getENSv2DomainIdByFqdn(name),
+  ]);
+
+  // prefer v2DomainId
+  return v2DomainId || v1DomainId || null;
+}
+
+/**
+ * Forward-traverses the ENSv2 namegraph in order to identify the Domain addressed by `name`.
+ */
+async function getENSv2DomainIdByFqdn(name: InterpretedName): Promise<ENSv2DomainId | null> {
   const labelHashPath = interpretedNameToLabelHashPath(name);
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
+
+  // TODO: need to join latest registration and confirm that it's not expired, otherwise should treat the domain as not existing
 
   const result = await db.execute(sql`
     WITH RECURSIVE path AS (
@@ -63,7 +78,7 @@ export async function getDomainIdByInterpretedName(
   // couldn't for the life of me figure out how to drizzle this correctly...
   const rows = result.rows as {
     registry_id: RegistryId;
-    domain_id: DomainId;
+    domain_id: ENSv2DomainId;
     label_hash: LabelHash;
     depth: number;
   }[];
@@ -75,4 +90,18 @@ export async function getDomainIdByInterpretedName(
   const leaf = rows[rows.length - 1]!;
 
   return leaf.domain_id;
+}
+
+/**
+ * Retrieves the ENSv1DomainId for the provided `name`, if exists.
+ */
+async function getENSv1DomainIdByFqdn(name: InterpretedName): Promise<ENSv1DomainId | null> {
+  const node = namehash(name);
+  const domainId = makeENSv1DomainId(node);
+
+  const domain = await db.query.v1Domain.findFirst({
+    where: (t, { eq }) => eq(t.id, domainId),
+  });
+
+  return domain?.id ?? null;
 }

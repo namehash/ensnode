@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { encodeLabelHash, type InterpretedLabel, type LiteralLabel } from "../ens";
+import { encodeLabelHash, type InterpretedLabel, type LiteralLabel } from "../../ens";
+import { labelhashLiteralLabel } from "../labelhash";
 import {
   interpretedLabelsToInterpretedName,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
-} from "./interpretation";
-import { labelhashLiteralLabel } from "./labelhash";
+} from "./interpreted-names-and-labels";
 
 const ENCODED_LABELHASH_LABEL = /^\[[\da-f]{64}\]$/;
 
