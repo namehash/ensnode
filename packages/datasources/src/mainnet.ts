@@ -13,6 +13,7 @@ import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper"
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 // ABIs for Namechain
 import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/namechain/ETHRegistrar";
 import { Registry } from "./abis/namechain/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
@@ -105,6 +106,12 @@ export default {
       },
 
       //
+
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x1291be112d480055dafd8a610b7d1e203891c274",
+        startBlock: 23794084,
+      },
       RootRegistry: {
         abi: Registry,
         address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
@@ -134,6 +141,16 @@ export default {
       },
       EnhancedAccessControl: {
         abi: EnhancedAccessControl,
+        startBlock: 23794084,
+      },
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        startBlock: 23794084,
+      },
+      ETHRegistrar: {
+        abi: ETHRegistrar,
+        address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
         startBlock: 23794084,
       },
     },

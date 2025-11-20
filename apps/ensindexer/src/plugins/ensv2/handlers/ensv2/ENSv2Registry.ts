@@ -46,10 +46,10 @@ export default function () {
       const { tokenId, label: _label, expiration, registeredBy: registrant } = event.args;
       const label = _label as LiteralLabel;
 
+      const labelHash = labelhash(label);
       const registry = getThisAccountId(context, event);
       const registryId = makeRegistryId(registry);
       const canonicalId = getCanonicalId(tokenId);
-      const labelHash = labelhash(label);
       const domainId = makeENSv2DomainId(registry, canonicalId);
 
       // Sanity Check: Canonical Id must match emitted label
@@ -184,8 +184,15 @@ export default function () {
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
+      if (
+        domainId ===
+        "eip155:15658734/erc1155:0x5fc8d32690cc91d4c39d9d3abcbd16989f875707/115467421361047454831865845388833304924993579272809100258442734802450801229824"
+      ) {
+        console.log("parent.eth subregistry update!", event.args);
+      }
+
       // update domain's subregistry
-      const isDeletion = isAddressEqual(subregistry, zeroAddress);
+      const isDeletion = isAddressEqual(zeroAddress, subregistry);
       if (isDeletion) {
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
       } else {
@@ -217,7 +224,7 @@ export default function () {
   //     const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
   //     // update domain's resolver
-  //     const isDeletion = isAddressEqual(address, zeroAddress);
+  //     const isDeletion = isAddressEqual(zeroAddress, address);
   //     if (isDeletion) {
   //       await context.db.update(schema.v2Domain, { id: domainId }).set({ resolverId: null });
   //     } else {

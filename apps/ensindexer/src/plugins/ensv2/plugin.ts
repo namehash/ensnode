@@ -133,6 +133,18 @@ export default createPlugin({
             ),
         },
 
+        //////////////////////////
+        // Namechain ETHRegistrar
+        //////////////////////////
+        [namespaceContract(pluginName, "ETHRegistrar")]: {
+          abi: namechain.contracts.ETHRegistrar.abi,
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            namechain.chain.id,
+            namechain.contracts.ETHRegistrar,
+          ),
+        },
+
         //////////////////////////////////////
         // ENSv1RegistryOld on ENS Root Chain
         //////////////////////////////////////

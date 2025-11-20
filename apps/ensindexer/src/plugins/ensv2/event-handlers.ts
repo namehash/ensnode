@@ -4,6 +4,7 @@ import attach_NameWrapperHandlers from "./handlers/ensv1/NameWrapper";
 import attach_RegistrarControllerHandlers from "./handlers/ensv1/RegistrarController";
 import attach_RegistryHandlers from "./handlers/ensv2/ENSv2Registry";
 import attach_EnhancedAccessControlHandlers from "./handlers/ensv2/EnhancedAccessControl";
+import attach_ETHRegistrarHandlers from "./handlers/ensv2/ETHRegistrar";
 
 export default function () {
   attach_BaseRegistrarHandlers();
@@ -12,4 +13,5 @@ export default function () {
   attach_RegistrarControllerHandlers();
   attach_EnhancedAccessControlHandlers();
   attach_RegistryHandlers();
+  attach_ETHRegistrarHandlers();
 }
