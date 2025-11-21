@@ -25,7 +25,9 @@ export const fetcher = staleWhileRevalidate(
       client.indexingStatus().then((response) => {
         // reject response with 'error' responseCode
         if (response.responseCode === IndexingStatusResponseCodes.Error) {
-          throw new Error("Cannot cache Indexing Status response with 'error' responseCode.");
+          throw new Error(
+            "Received Indexing Status response with 'error' responseCode which will not be cached.",
+          );
         }
 
         // resolve response to be cached
