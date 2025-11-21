@@ -1,13 +1,12 @@
 import config from "@/config";
 
 import { type Context, ponder } from "ponder:registry";
-import { type Address, isAddressEqual, zeroAddress } from "viem";
+import type { Address } from "viem";
 
 import { getENSRootChainId } from "@ensnode/datasources";
 import {
   type LabelHash,
   makeENSv1DomainId,
-  makeResolverId,
   makeSubdomainNode,
   type Node,
   PluginName,
@@ -16,10 +15,7 @@ import {
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import {
-  removedomainResolverRelation,
-  upsertdomainResolverRelation,
-} from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+import { handleResolverForDomain } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
 import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
@@ -44,13 +40,7 @@ export default function () {
     const registry = getThisAccountId(context, event);
     const domainId = makeENSv1DomainId(node);
 
-    const isZeroResolver = isAddressEqual(zeroAddress, resolver);
-    if (isZeroResolver) {
-      await removedomainResolverRelation(context, registry, domainId);
-    } else {
-      const resolverId = makeResolverId({ chainId: registry.chainId, address: resolver });
-      await upsertdomainResolverRelation(context, registry, domainId, resolverId);
-    }
+    await handleResolverForDomain(context, registry, domainId, resolver);
   }
 
   /**

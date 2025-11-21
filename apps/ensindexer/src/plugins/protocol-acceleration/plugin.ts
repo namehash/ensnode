@@ -2,6 +2,7 @@ import { createConfig } from "ponder";
 
 import {
   DatasourceNames,
+  RegistryABI,
   ResolverABI,
   StandaloneReverseRegistrarABI,
   ThreeDNSTokenABI,
@@ -57,6 +58,7 @@ export default createPlugin({
   createPonderConfig(config) {
     const { ensroot } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
     const {
+      namechain,
       basenames,
       lineanames,
       threednsOptimism,
@@ -76,7 +78,9 @@ export default createPlugin({
         ALL_DATASOURCE_NAMES,
       ),
       contracts: {
-        // a multi-chain Resolver ContractConfig
+        //////////////////////
+        // Resolver Contracts
+        //////////////////////
         [namespaceContract(pluginName, "Resolver")]: {
           abi: ResolverABI,
           chain: getDatasourcesWithResolvers(config.namespace).reduce(
@@ -91,7 +95,9 @@ export default createPlugin({
           ),
         },
 
-        // index the ENSv1RegistryOld on ENS Root Chain
+        /////////////////////
+        // ENSv1 RegistryOld
+        /////////////////////
         [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
           abi: ensroot.contracts.ENSv1RegistryOld.abi,
           chain: {
@@ -103,7 +109,9 @@ export default createPlugin({
           },
         },
 
-        // a multi-chain Registry ContractConfig
+        ////////////////////////////
+        // ENSv1 Registry Contracts
+        ////////////////////////////
         [namespaceContract(pluginName, "ENSv1Registry")]: {
           abi: ensroot.contracts.ENSv1Registry.abi,
           chain: {
@@ -130,7 +138,29 @@ export default createPlugin({
           },
         },
 
-        // a multi-chain ThreeDNSToken ContractConfig
+        ////////////////////////////
+        // ENSv2 Registry Contracts
+        ////////////////////////////
+        [namespaceContract(pluginName, "ENSv2Registry")]: {
+          abi: RegistryABI,
+          chain: {
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.Registry,
+            ),
+            ...(namechain &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                namechain.chain.id,
+                namechain.contracts.Registry,
+              )),
+          },
+        },
+
+        /////////////////
+        // ThreeDNSToken
+        /////////////////
         [namespaceContract(pluginName, "ThreeDNSToken")]: {
           abi: ThreeDNSTokenABI,
           chain: {
@@ -149,7 +179,9 @@ export default createPlugin({
           },
         },
 
-        // a multi-chain StandaloneReverseRegistrar ContractConfig
+        ///////////////////////////////
+        // StandaloneReverseRegistrars
+        ///////////////////////////////
         [namespaceContract(pluginName, "StandaloneReverseRegistrar")]: {
           abi: StandaloneReverseRegistrarABI,
           chain: {

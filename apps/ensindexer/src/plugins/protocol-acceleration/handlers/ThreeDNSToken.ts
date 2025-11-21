@@ -17,7 +17,7 @@ import {
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { upsertdomainResolverRelation } from "@/lib/protocol-acceleration/node-resolver-relationship-db-helpers";
+import { upsertdomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
 
 const ThreeDNSResolverByChainId: Record<ChainId, Address> = [
   DatasourceNames.ThreeDNSBase,

@@ -9,8 +9,6 @@
  * - self-review and document where needed
  *
  * - indexes
- * - move all list methods to collections
- *  - Registry.parents
  * - update protocol acceleration plugin to track v2 drr
  *
  * TODO LATER
