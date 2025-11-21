@@ -1,10 +1,12 @@
-import { useENSNodeConfig, useIndexingStatus, useRegistrarActions } from "@ensnode/ensnode-react";
+import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
 import {
   IndexingStatusResponseCodes,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
   registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
+
+import { useIndexingStatusWithSwr } from "@/components/indexing-status";
 
 import {
   StatefulFetchRegistrarActions,
@@ -38,7 +40,7 @@ export function useStatefulRegistrarActions({
   itemsPerPage,
 }: UseStatefulRegistrarActionsProps): StatefulFetchRegistrarActions {
   const ensNodeConfigQuery = useENSNodeConfig();
-  const indexingStatusQuery = useIndexingStatus();
+  const indexingStatusQuery = useIndexingStatusWithSwr();
 
   let isRegistrarActionsApiSupported = false;
 
@@ -81,10 +83,7 @@ export function useStatefulRegistrarActions({
   }
 
   // Indexing Status fetched as error
-  if (
-    !indexingStatusQuery.isSuccess ||
-    indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Error
-  ) {
+  if (!indexingStatusQuery.isSuccess) {
     return {
       fetchStatus: StatefulFetchStatusIds.Error,
       reason: "Indexing Status could not be fetched successfully",

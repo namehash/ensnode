@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { memo, type PropsWithChildren } from "react";
 import { zeroAddress } from "viem";
 
 import {
@@ -202,3 +202,5 @@ export function DisplayRegistrarActionCard({
     </div>
   );
 }
+
+export const DisplayRegistrarActionCardMemo = memo(DisplayRegistrarActionCard);
