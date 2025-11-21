@@ -4,7 +4,7 @@ import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { type AccountId, type DomainId, makeResolverId } from "@ensnode/ensnode-sdk";
 
-export async function handleResolverForDomain(
+export async function ensureDomainResolverRelation(
   context: Context,
   registry: AccountId,
   domainId: DomainId,

@@ -6,7 +6,7 @@ import { getCanonicalId, makeENSv2DomainId, PluginName } from "@ensnode/ensnode-
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { handleResolverForDomain } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
+import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
 
 const pluginName = PluginName.ProtocolAcceleration;
 
@@ -29,7 +29,7 @@ export default function () {
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registry, canonicalId);
 
-      await handleResolverForDomain(context, registry, domainId, resolver);
+      await ensureDomainResolverRelation(context, registry, domainId, resolver);
     },
   );
 }

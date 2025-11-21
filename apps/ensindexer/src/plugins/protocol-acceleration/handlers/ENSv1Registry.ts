@@ -15,7 +15,7 @@ import {
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { handleResolverForDomain } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
+import { ensureDomainResolverRelation } from "@/lib/protocol-acceleration/domain-resolver-relationship-db-helpers";
 import { migrateNode, nodeIsMigrated } from "@/lib/protocol-acceleration/registry-migration-status";
 
 const ensRootChainId = getENSRootChainId(config.namespace);
@@ -40,7 +40,7 @@ export default function () {
     const registry = getThisAccountId(context, event);
     const domainId = makeENSv1DomainId(node);
 
-    await handleResolverForDomain(context, registry, domainId, resolver);
+    await ensureDomainResolverRelation(context, registry, domainId, resolver);
   }
 
   /**
