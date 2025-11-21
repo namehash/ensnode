@@ -4,12 +4,11 @@
  */
 "use client";
 
-import { useIndexingStatus } from "@ensnode/ensnode-react";
-
 import { IndexingStats } from "./indexing-stats";
+import { useIndexingStatusWithSwr } from "./use-indexing-status-with-swr";
 
 export function IndexingStatus() {
-  const indexingStatusQuery = useIndexingStatus();
+  const indexingStatusQuery = useIndexingStatusWithSwr();
 
   return (
     <section className="flex flex-col gap-6 p-6">

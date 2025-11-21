@@ -13,7 +13,7 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 
 import {
-  DisplayRegistrarActionCard,
+  DisplayRegistrarActionCardMemo,
   DisplayRegistrarActionCardPlaceholder,
 } from "./display-registrar-action-card";
 import { type StatefulFetchRegistrarActions, StatefulFetchStatusIds } from "./types";
@@ -38,8 +38,8 @@ function DisplayRegistrarActionsList({
       className="w-full h-fit box-border flex flex-col justify-start items-center gap-3"
     >
       {registrarActions.map((namedRegistrarAction) => (
-        <DisplayRegistrarActionCard
-          key={namedRegistrarAction.name}
+        <DisplayRegistrarActionCardMemo
+          key={namedRegistrarAction.action.id}
           namespaceId={namespaceId}
           namedRegistrarAction={namedRegistrarAction}
         />

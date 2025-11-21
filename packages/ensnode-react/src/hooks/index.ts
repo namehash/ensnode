@@ -6,3 +6,4 @@ export * from "./usePrimaryNames";
 export * from "./useRecords";
 export * from "./useRegistrarActions";
 export * from "./useResolvedIdentity";
+export * from "./useSwrQuery";
