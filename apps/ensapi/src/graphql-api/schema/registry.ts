@@ -7,7 +7,7 @@ import { getModelId } from "@/graphql-api/lib/get-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { type ENSv2Domain, ENSv2DomainRef } from "@/graphql-api/schema/domain";
+import { ENSv2DomainRef } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -33,20 +33,30 @@ RegistryRef.implement({
       nullable: false,
     }),
 
-    // ////////////////////
-    // // Registry.parents
-    // ////////////////////
-    parents: t.loadableGroup({
+    ////////////////////
+    // Registry.parents
+    ////////////////////
+    parents: t.connection({
       description: "TODO",
       type: ENSv2DomainRef,
-      load: (ids: RegistryId[]) =>
-        db.query.v2Domain.findMany({
-          where: (t, { inArray }) => inArray(t.subregistryId, ids),
-          with: { label: true },
-        }),
-      // biome-ignore lint/style/noNonNullAssertion: subregistryId guaranteed to exist via inArray
-      group: (domain) => (domain as ENSv2Domain).subregistryId!,
-      resolve: getModelId,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.v2Domain.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.subregistryId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+              with: { label: true },
+            }),
+        ),
     }),
 
     //////////////////////

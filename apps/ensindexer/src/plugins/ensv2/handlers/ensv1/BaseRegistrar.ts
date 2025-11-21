@@ -95,6 +95,7 @@ export default function () {
     }>;
   }) {
     const { id: tokenId, owner, expires: expiration } = event.args;
+    const registrant = owner;
 
     const labelHash = registrarTokenIdToLabelHash(tokenId);
     const registrar = getThisAccountId(context, event);
@@ -116,15 +117,11 @@ export default function () {
     // supercede the latest Registration if exists
     if (registration) await supercedeLatestRegistration(context, registration);
 
-    const nextIndex = registration ? registration.index + 1 : 0;
-    const registrationId = makeLatestRegistrationId(domainId);
-    const registrant = owner;
-
     // insert BaseRegistrar Registration
     await ensureAccount(context, registrant);
     await context.db.insert(schema.registration).values({
-      id: registrationId,
-      index: nextIndex,
+      id: makeLatestRegistrationId(domainId),
+      index: registration ? registration.index + 1 : 0,
       type: "BaseRegistrar",
       registrarChainId: registrar.chainId,
       registrarAddress: registrar.address,

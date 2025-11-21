@@ -37,9 +37,8 @@ export async function supercedeLatestRegistration(
 }
 
 /**
- * Returns whether Registration is expired.
- *
- * @dev Grace Period is considered 'expired'.
+ * Returns whether Registration is expired. If the Registration includes a Grace Period, the
+ * Grace Period window is considered expired.
  */
 export function isRegistrationExpired(
   registration: typeof schema.registration.$inferSelect,
@@ -53,8 +52,8 @@ export function isRegistrationExpired(
 }
 
 /**
- * Returns whether Registration is fully expired.
- * @dev Grace Period is considered 'unexpired'.
+ * Returns whether Registration is fully expired. If the Registration includes a Grace Period, the
+ * Grace Period window is considered NOT fully-expired.
  */
 export function isRegistrationFullyExpired(
   registration: typeof schema.registration.$inferSelect,

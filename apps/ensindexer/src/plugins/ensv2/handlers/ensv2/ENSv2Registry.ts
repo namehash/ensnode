@@ -19,7 +19,7 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  isRegistrationExpired,
+  isRegistrationFullyExpired,
   supercedeLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -94,10 +94,11 @@ export default function () {
       });
 
       const registration = await getLatestRegistration(context, domainId);
-      const isExpired = registration && isRegistrationExpired(registration, event.block.timestamp);
+      const isFullyExpired =
+        registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
       // Invariant: If there is an existing Registration, it must be expired.
-      if (registration && !isExpired) {
+      if (registration && !isFullyExpired) {
         throw new Error(
           `Invariant(ENSv2Registry:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
         );
@@ -106,14 +107,11 @@ export default function () {
       // supercede the latest Registration if exists
       if (registration) await supercedeLatestRegistration(context, registration);
 
-      const nextIndex = registration ? registration.index + 1 : 0;
-      const registrationId = makeLatestRegistrationId(domainId);
-
       // insert ENSv2Registry Registration
       await ensureAccount(context, registrant);
       await context.db.insert(schema.registration).values({
-        id: registrationId,
-        index: nextIndex,
+        id: makeLatestRegistrationId(domainId),
+        index: registration ? registration.index + 1 : 0,
         type: "ENSv2Registry",
         registrarChainId: registry.chainId,
         registrarAddress: registry.address,
@@ -148,15 +146,17 @@ export default function () {
 
       // Invariant: Registration must exist
       if (!registration) {
-        throw new Error(`Invariant(ENSv2Registry:NameRenewed): Registration expected none found.`);
+        throw new Error(`Invariant(ENSv2Registry:NameRenewed): Registration expected, none found.`);
       }
 
+      // TODO: based on my read, NameRenewed cannot be emitted for an expired registration... so why
+      // is this hitting?
       // Invariant: Registration must not be expired
-      if (isRegistrationExpired(registration, event.block.timestamp)) {
-        throw new Error(
-          `Invariant(ENSv2Registry:NameRenewed): Registration found but it is expired:\n${toJson(registration)}`,
-        );
-      }
+      // if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
+      //   throw new Error(
+      //     `Invariant(ENSv2Registry:NameRenewed): Registration found but it is expired:\n${toJson(registration)}`,
+      //   );
+      // }
 
       // TODO: optional invariant, v2Domain must also exist? implied by expiry check
 

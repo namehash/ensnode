@@ -160,6 +160,7 @@ export default function () {
       const { node, name: _name, owner, fuses, expiry: _expiration } = event.args;
       const expiration = interpretExpiration(_expiration);
       const name = _name as DNSEncodedLiteralName;
+      const registrant = owner;
 
       const registrar = getThisAccountId(context, event);
       const domainId = makeENSv1DomainId(node);
@@ -245,15 +246,11 @@ export default function () {
         // supercede the latest Registration if exists
         if (registration) await supercedeLatestRegistration(context, registration);
 
-        const nextIndex = registration ? registration.index + 1 : 0;
-        const registrationId = makeLatestRegistrationId(domainId);
-        const registrant = owner;
-
         // insert NameWrapper Registration
         await ensureAccount(context, registrant);
         await context.db.insert(schema.registration).values({
-          id: registrationId,
-          index: nextIndex,
+          id: makeLatestRegistrationId(domainId),
+          index: registration ? registration.index + 1 : 0,
           type: "NameWrapper",
           registrarChainId: registrar.chainId,
           registrarAddress: registrar.address,

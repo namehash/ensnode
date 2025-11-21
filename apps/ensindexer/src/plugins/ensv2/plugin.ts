@@ -1,41 +1,47 @@
 /**
- * TODO
- * - Renewals
+ * TODO TODAY
+ * - document schema approach, only materialization is v1 effective token owner into v1Domain.owner
+ *   - all polymorphism is done at graphql layer
+ *   - materialization of the canonical namegraph within ponder becomes really complex really quickly
+ *     - this absoutely nukes performance
+ *     - some state (i.e. registration expirations) are only knowable at Forward-Resolution-time and both the on-chain and indexed state need to check that at resolve-time to be compliant. we _could_ implement garbage collection to mark registrations as expired, but again that defeats all of ponder's cache heuristics and isn't even that helpful.
+ *     - the absolutely least-likely-to-cause-horrible-logic approach is to mirror on-chain state 1:1 and perform at query time all of the resolution-time logic that ens applies — this forces the implementations to match as closely as possible. obvious exception for needing to materialize certain aspects of the state (like v1Domain.owner) because actually performing that filter at runtime is abominable. i.e. we have to realize that the performance tradeoffs of evm code and typescript code against postgres are different. ex: trivial to batch-load the full labelhashpath in v2, but more extensive to recursively loop the query (like evm code does) because our individual loads from the db are relatively more expensive.
+ * - self-review and document where needed
+ *
  * - indexes
- * - ? https://pothos-graphql.dev/docs/plugins/tracing
+ * - move all list methods to collections
+ *  - Registry.parents
+ * - update protocol acceleration plugin to track v2 drr
+ *
+ * TODO LATER
+ * - modify Registration schema to more closely match ENSv2, map v1 into it
+ * - Renewals (v1, v2)
+ *  - include similar /latest / superceding logic, need to be able to reference latest renewal to upsert referrers
  * - ThreeDNS
- * - ? polymorphic resolver metadata in drizzle schema for better typechecking
- * - ? move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so many just for domains and registries?
+ * - Migration
+ *   - need to understand migration pattern better
+ *   - individual names are migrated to v2 and can choose to move to an ENSv2 Registry on L1 or L2
+ *   - locked names (wrapped and not unwrappable) are 'frozen' by having their fuses burned
+ *     - will need to observe the correct event and then override the existing domain/registratioon info
+ *   - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
  *
- * - *.addr.reverse subnames in ENSv1Registry aren't correctly connected to the ENSv2 Domain that represents addr.reverse
- *   - the scripts never mint reverse and addr.reverse into the ENSv1 Registry so that's annoying
- *   - the new .addr.reverse resolver does some fallback bullshit
- *   - https://github.com/ensdomains/ens-contracts/blob/staging/contracts/reverseResolver/ETHReverseResolver.sol
- *
- * - we either need to keep the indexed model 1:1 with the on-chain model and stitch things together at the api layer
- *   OR go hard with materialization, and we need to reparent Domains based on individual v2 registry's fallback mechanisms
- *   which seems really flimsy and annoying and reparenting is not good for cache behavior.
- * - maybe better to have ENSv1Domain and ENSv2Domain models. then all polymorphism is applied at the api layer
- *   - forward traversal (accessing Domain by name) would follow forward resolution, including the fallback logics
- *     - yeah we'd have to literally do forward resolution
- *     - anything that returns Domains would need to join against v1 and v2 domains
- *     - the v1 model need not include implicit registries
- *
- * Pending
+ * PENDING ENS TEAM
  * - DedicatedResolver moving to EAC
- * - Registry.canonicalName indexing + adjust Domain.canonical reverse traversal logic
+ *  - depends on: namechain --testNames script not crashing in commit >= 803a940
+ * - Domain.canonical/Domain.canonicalPath/Domain.fqdn depends on:
+ *  - depends on: Registry.canonicalName implementation + indexing
+ * - Signal Pattern for Registry contracts
+ *  - depends on: ens team implementing in namechain contracts
  *
- * Migration
- * - individual names are migrated to v2 and can choose to move to an ENSv2 Registry on L1 or L2
- * - locked names (wrapped and not unwrappable) are 'frozen' by having their fuses burned
- *   - will need to observe the correct event and then override the existing domain/registratioon info
- * - need to know migration status of every domain in order to to construct canonical namegraph at index-time.
- * - maybe instead of constructing canonical namegraph we keep it all separate? when addressing domains by name we'd have to more or less perform traversals, including bridgedresolvers. but that's fine? we're going to have to mix forward resolution logic into the api anyway, either at the canonical namegraph construction or while traversing the namegraph
- * v2 .eth registry will have a special fallback resolver that resolvers via namechain state
- * - fuck me, there can be multiple registrations in v2 world. sub.example.xyz, if not emancipated, cannot be migrated, but sub.example.xyz can still be created in v2 registry in the example.xyz registry.
- *   - if a v2 name is registered but there's an active namewrapper registration for that same name, we should perhaps ignore all future namewrapper events, as the v2 name overrides it in resolution and the namewrapper is never more consulted for that name (and i guess any subnames under it?)
- *  - shadow-registering an existing name in v2 also shadows every name under it so we kind of need to do a recursive deletion of all of a shadowed name's subnames, right? cause resolution terminates at the first v2-registered name.
- * - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
+ * MAYBE DO LATER?
+ * - ? better typechecking for polymorphic entities in drizzle schema
+ *   - could do polymorphic resolver/registration metadata
+ *   - would map well to resolver extensions in graphql
+ * - ? move all entity ids to opaque base58 encoded IDs? kinda nice since they're just supposed to be opaque, useful for relay purposes, allows the scalar types to all be ID and then casted. but nice to use CAIP identifiers for resolvers and permissions etc. so just for domains and registries?
+ *
+ * TODO MUCH LATER
+ * - after moving protocol-tracing away from otel we can use otel for ourselves
+ *  https://pothos-graphql.dev/docs/plugins/tracing
  *
  */
 

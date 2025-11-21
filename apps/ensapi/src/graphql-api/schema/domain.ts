@@ -5,6 +5,7 @@ import {
   type ENSv1DomainId,
   type ENSv2DomainId,
   getCanonicalId,
+  type RegistrationId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
@@ -197,16 +198,26 @@ DomainInterfaceRef.implement({
     ////////////////////////
     // Domain.registrations
     ////////////////////////
-    registrations: t.loadableGroup({
+    registrations: t.connection({
       description: "TODO",
       type: RegistrationInterfaceRef,
-      load: (ids: DomainId[]) =>
-        db.query.registration.findMany({
-          where: (t, { inArray }) => inArray(t.domainId, ids),
-          orderBy: (t, { desc }) => desc(t.index),
-        }),
-      group: (registration) => (registration as Registration).domainId,
-      resolve: getModelId,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.registration.findMany({
+              where: (t, { lt, gt, and, eq }) =>
+                and(
+                  ...[
+                    eq(t.domainId, parent.id),
+                    before !== undefined && lt(t.id, cursors.decode<RegistrationId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<RegistrationId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? asc(t.index) : desc(t.index)),
+              limit,
+            }),
+        ),
     }),
   }),
 });
