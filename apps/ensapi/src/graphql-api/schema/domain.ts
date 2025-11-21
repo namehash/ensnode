@@ -10,12 +10,12 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
-import { getModelId } from "@/graphql-api/lib/get-id";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
+import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { type Registration, RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
+import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
@@ -72,9 +72,9 @@ export type ENSv1Domain = Exclude<typeof ENSv1DomainRef.$inferType, ENSv1DomainI
 export type ENSv2Domain = Exclude<typeof ENSv2DomainRef.$inferType, ENSv2DomainId>;
 export type Domain = Exclude<typeof DomainInterfaceRef.$inferType, DomainId>;
 
-//////////////////////////////
+//////////////////////////////////
 // DomainInterface Implementation
-//////////////////////////////
+//////////////////////////////////
 DomainInterfaceRef.implement({
   description: "a Domain",
   fields: (t) => ({
@@ -160,7 +160,6 @@ DomainInterfaceRef.implement({
     //   resolve: async (parent) => {
     //     // a domain's aliases are all of the paths from root to this domain for which it can be
     //     // resolved. naively reverse-traverse the namegaph until the root is reached... yikes.
-    //     // if materializing namespace: simply lookup namesInNamespace by domainId
     //     return [];
     //   },
     // }),

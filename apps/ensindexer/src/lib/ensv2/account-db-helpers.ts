@@ -5,7 +5,8 @@ import type { Address } from "viem";
 import { interpretAddress } from "@ensnode/ensnode-sdk";
 
 /**
- * TODO
+ * Ensures that the account identified by `address` exists.
+ * If `address` is the zeroAddress, no-op.
  */
 export async function ensureAccount(context: Context, address: Address) {
   const interpreted = interpretAddress(address);

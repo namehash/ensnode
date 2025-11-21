@@ -3,7 +3,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { type ENSv2DomainId, makePermissionsId, type RegistryId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-id";
+import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";

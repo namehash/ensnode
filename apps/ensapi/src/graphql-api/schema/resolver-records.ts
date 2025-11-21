@@ -1,7 +1,7 @@
 import { bigintToCoinType, type ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-id";
+import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { db } from "@/lib/db";
 
 export const ResolverRecordsRef = builder.loadableObjectRef("ResolverRecords", {

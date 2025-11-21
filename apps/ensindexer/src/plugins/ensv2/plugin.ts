@@ -1,5 +1,6 @@
 /**
  * TODO TODAY
+ * - move registration expiration shared logic to sdk/ens
  * - self-review and document where needed
  *
  * TODO LATER
@@ -15,6 +16,9 @@
  *     - will need to observe the correct event and then override the existing domain/registratioon info
  *   - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
  * - autocomplete api
+ * - Query.permissions(by: { contract: {  } })
+ * - custom wrapper for resolveCursorConnection with typesafety that applies defaults and auto-decodes cursors to the indicated type
+ * - Pothos envelop plugins (aliases, depth, tokens, whatever)
  *
  * PENDING ENS TEAM
  * - DedicatedResolver moving to EAC

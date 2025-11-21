@@ -24,7 +24,9 @@ const lineanamesNameWrapper = maybeGetDatasourceContract(
   "NameWrapper",
 );
 
-// TODO: need to handle namespace-specific remap
+/**
+ * Mapping of RegistrarManagedName to its related Registrar and Registrar-adjacent contracts.
+ */
 const REGISTRAR_CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
   eth: [
     getDatasourceContract(
@@ -82,6 +84,10 @@ const REGISTRAR_CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
   ].filter((c) => !!c),
 };
 
+/**
+ * Certain RegistrarManagedNames are different depending on the ENSNamespace — this encodes that
+ * relationship.
+ */
 const RMN_NAMESPACE_OVERRIDE: Partial<Record<ENSNamespaceId, Record<Name, Name>>> = {
   sepolia: {
     "base.eth": "basetest.eth",
@@ -89,6 +95,9 @@ const RMN_NAMESPACE_OVERRIDE: Partial<Record<ENSNamespaceId, Record<Name, Name>>
   },
 };
 
+/**
+ * Given a `contract`, identify its RegistrarManagedName.
+ */
 export const getRegistrarManagedName = (contract: AccountId) => {
   for (const [managedName, contracts] of Object.entries(REGISTRAR_CONTRACTS_BY_MANAGED_NAME)) {
     const isAnyOfTheContracts = contracts.some((_contract) => accountIdEqual(_contract, contract));
@@ -103,6 +112,9 @@ export const getRegistrarManagedName = (contract: AccountId) => {
   throw new Error("never");
 };
 
+/**
+ * Determines whether `contract` is the NameWrapper.
+ */
 export function isNameWrapper(contract: AccountId) {
   if (accountIdEqual(ethnamesNameWrapper, contract)) return true;
   if (lineanamesNameWrapper && accountIdEqual(lineanamesNameWrapper, contract)) return true;

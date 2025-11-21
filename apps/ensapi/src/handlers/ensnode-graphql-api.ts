@@ -7,6 +7,7 @@ import { createYoga } from "graphql-yoga";
 import { schema } from "@/graphql-api/schema";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 
 const logger = makeLogger("ensnode-graphql");
 
@@ -14,18 +15,21 @@ const yoga = createYoga({
   graphqlEndpoint: "*",
   schema,
   graphiql: {
-    defaultQuery: `query GetCanonicalNametree {
-  root {
-    domain { label }
+    defaultQuery: `query DomainsByOwner {
+  account(address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266") {
     domains {
-      label
-      subregistry {
-        domains {
+      edges {
+        node {
+          id
           label
-          subregistry {
-            domains {
-              label
-            }
+          owner { address }
+          registration { expiry }
+          ... on ENSv1Domain {
+            parent { label }
+          }
+          ... on ENSv2Domain {
+            canonicalId
+            registry { contract {chainId address}}
           }
         }
       }
@@ -47,6 +51,7 @@ const yoga = createYoga({
 
 const app = factory.createApp();
 
+app.use(requireCorePluginMiddleware("ensv2"));
 app.use(async (c) => {
   const response = await yoga.fetch(c.req.raw, c.var);
   return response;

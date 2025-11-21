@@ -6,7 +6,7 @@ import { type DomainId, makeLatestRegistrationId, makeRegistrationId } from "@en
 import { toJson } from "@/lib/json-stringify-with-bigints";
 
 /**
- * TODO: find the most recent registration, active or otherwise
+ * Gets the latest Regsitration for the provided `domainId`.
  */
 export async function getLatestRegistration(context: Context, domainId: DomainId) {
   return context.db.find(schema.registration, { id: makeLatestRegistrationId(domainId) });

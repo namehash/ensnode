@@ -1,7 +1,7 @@
 import type { RegistrationId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-id";
+import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";

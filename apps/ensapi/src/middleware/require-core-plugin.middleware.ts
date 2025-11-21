@@ -22,7 +22,6 @@ export const requireCorePluginMiddleware = (core: "subgraph" | "ensv2") =>
       return c.notFound();
     }
 
-    // TODO: enable ensv2 checking
     if (
       core === "ensv2" && //
       !config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)

@@ -10,7 +10,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-id";
+import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";

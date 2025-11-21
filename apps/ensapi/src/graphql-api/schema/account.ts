@@ -7,7 +7,7 @@ import * as schema from "@ensnode/ensnode-schema";
 import type { PermissionsUserId, ResolverId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getModelId } from "@/graphql-api/lib/get-id";
+import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
@@ -28,6 +28,9 @@ export const AccountRef = builder.loadableObjectRef("Account", {
 
 export type Account = Exclude<typeof AccountRef.$inferType, Address>;
 
+///////////
+// Account
+///////////
 AccountRef.implement({
   description: "TODO",
   fields: (t) => ({
@@ -143,7 +146,6 @@ AccountRef.implement({
       description: "TODO",
       type: ResolverRef,
       resolve: (parent, args) =>
-        // TODO(dataloader) — confirm this is dataloaded?
         // TODO(EAC) — migrate to Permissions lookup
         resolveCursorConnection(
           { ...DEFAULT_CONNECTION_ARGS, args },
