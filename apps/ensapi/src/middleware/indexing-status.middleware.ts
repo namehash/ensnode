@@ -7,6 +7,7 @@ import {
   ENSNodeClient,
   type ErrorResponse,
   type IndexingStatusResponse,
+  IndexingStatusResponseCodes,
   staleWhileRevalidate,
 } from "@ensnode/ensnode-sdk";
 
@@ -18,7 +19,21 @@ const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 const TTL: Duration = 5; // 5 seconds
 
-export const fetcher = staleWhileRevalidate(async () => pReflect(client.indexingStatus()), TTL);
+export const fetcher = staleWhileRevalidate(
+  async () =>
+    pReflect(
+      client.indexingStatus().then((response) => {
+        // reject response with 'error' responseCode
+        if (response.responseCode === IndexingStatusResponseCodes.Error) {
+          throw new Error("Cannot cache Indexing Status response with 'error' responseCode.");
+        }
+
+        // resolve response to be cached
+        return response;
+      }),
+    ),
+  TTL,
+);
 
 export type IndexingStatusVariables = {
   indexingStatus: PromiseResult<IndexingStatusResponse>;
