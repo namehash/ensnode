@@ -49,6 +49,8 @@ const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId({
 export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
+  // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
+  // TODO: when v2 names are the majority, we can unroll this into a v2 then v1 lookup.
   const [v1DomainId, v2DomainId] = await Promise.all([
     v1_getDomainIdByFqdn(name),
     v2_getDomainIdByFqdn(ROOT_REGISTRY_ID, name),

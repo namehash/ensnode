@@ -30,7 +30,7 @@ import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
 // don't want them to get familiar/accustom to these methods until their necessity is certain
-const INCLUDE_DEV_METHODS = process.env.NODE_ENV === "development";
+const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
 
 builder.queryType({
   fields: (t) => ({
