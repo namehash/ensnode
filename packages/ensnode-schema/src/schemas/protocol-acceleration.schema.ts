@@ -7,8 +7,6 @@ import type { Address } from "viem";
 
 import type { ChainId, DomainId, Node, ResolverId, ResolverRecordsId } from "@ensnode/ensnode-sdk";
 
-// TODO: implement resolverType & polymorphic field availability
-
 /**
  * Tracks an Account's ENSIP-19 Reverse Name Records by CoinType.
  *
@@ -80,6 +78,10 @@ export const domainResolverRelation_relations = relations(domainResolverRelation
   }),
 }));
 
+/**
+ * Resolver represents an individual IResolver contract. It tracks metadata about the Resolver as well,
+ * for example whether it is an IExtendedResolver, IDedicatedResolver, a BridgedResolver, etc).
+ */
 export const resolver = onchainTable(
   "resolvers",
   (t) => ({

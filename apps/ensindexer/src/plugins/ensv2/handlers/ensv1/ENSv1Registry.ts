@@ -7,8 +7,7 @@ import { type Address, isAddressEqual, zeroAddress } from "viem";
 import {
   ADDR_REVERSE_NODE,
   getENSRootChainId,
-  getRootRegistry,
-  getRootRegistryId,
+  interpretAddress,
   type LabelHash,
   makeENSv1DomainId,
   makeSubdomainNode,
@@ -31,19 +30,6 @@ const pluginName = PluginName.ENSv2;
  * - piggybacks Protocol Resolution plugin's Node Migration status
  */
 export default function () {
-  /**
-   * Sets up the ENSv2 Root Registry
-   */
-  ponder.on(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), async ({ context }) => {
-    // ensures that the Root Registry (which is eventually backed by the ENSv2 Root Registry) is
-    // populated in the database
-    await context.db.insert(schema.registry).values({
-      id: getRootRegistryId(config.namespace),
-      type: "RegistryContract",
-      ...getRootRegistry(config.namespace),
-    });
-  });
-
   /**
    * Registry#NewOwner is either a new Domain OR the owner of the parent changing the owner of the child.
    */
@@ -113,26 +99,25 @@ export default function () {
     context: Context;
     event: EventWithArgs<{ node: Node; owner: Address }>;
   }) {
-    const { node, owner } = event.args;
+    const { node, owner: _owner } = event.args;
+    const owner = interpretAddress(_owner);
 
     // ENSv2 model does not include root node, no-op
     if (node === ROOT_NODE) return;
 
     const domainId = makeENSv1DomainId(node);
 
-    const isDeletion = isAddressEqual(zeroAddress, owner);
-    if (isDeletion) {
+    if (owner === null) {
       await context.db.delete(schema.v1Domain, { id: domainId });
-      return;
+    } else {
+      // materialize domain owner
+      // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
+      // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
+      // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
+      // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
+      // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
+      await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
     }
-
-    // materialize domain owner
-    // NOTE: despite Domain.ownerId being materialized from other sources of truth (i.e. Registrars
-    // like BaseRegistrars & NameWrapper) it's ok to always set it here because the Registrar-emitted
-    // events occur _after_ the Registry events. So when a name is wrapped, for example, the Registry's
-    // owner changes to that of the NameWrapper but then the NameWrapper emits NameWrapped, and this
-    // indexing code re-materializes the Domain.ownerId to the NameWraper-emitted value.
-    await materializeENSv1DomainEffectiveOwner(context, domainId, owner);
   }
 
   /**

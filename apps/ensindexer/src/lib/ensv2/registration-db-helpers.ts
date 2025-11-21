@@ -6,6 +6,27 @@ import { type DomainId, makeLatestRegistrationId, makeRegistrationId } from "@en
 import { toJson } from "@/lib/json-stringify-with-bigints";
 
 /**
+ * Latest Registration & Renewals
+ *
+ * We store a one-to-many relationship of Domain -> Registration and a one-to-many relationship of
+ * Registration -> Renewal, but must frequently access the latest Registration or Renewal in our
+ * indexing logic. If we were to access these entities via a custom sql query like "SELECT * from
+ * registrations WHERE domainId= $domainId ORDER BY index DESC", ponder's in-memory cache would have
+ * to be flushed to postgres every time we access the latest Registration/Renewal, which is pretty
+ * frequent. To avoid this, we use the special key path /latest (instead of /:index) to access the
+ * latest Registration/Renewal, turning the operation into an O(1) lookup compatible with Ponder's
+ * in-memory cacheable db api.
+ *
+ * Then, when a new Registration/Renewal is to be created, the current latest is 'superceded': its id
+ * that is currently /latest is replaced by /:index and the new /latest is inserted. To make this
+ * compatible with Ponder's cacheable api, instead of updating the id, we delete the /latest entity
+ * and insert a new entity (with all of the same columns) under the new id. See `supercedeLatestRegistration`
+ * for implementation.
+ *
+ * This same logic applies to Renewals.
+ */
+
+/**
  * Gets the latest Regsitration for the provided `domainId`.
  */
 export async function getLatestRegistration(context: Context, domainId: DomainId) {
@@ -13,7 +34,8 @@ export async function getLatestRegistration(context: Context, domainId: DomainId
 }
 
 /**
- * TODO
+ * Supercedes the latest Registration, changing its id to be indexed, making room in the set for
+ * a new latest Registration.
  */
 export async function supercedeLatestRegistration(
   context: Context,

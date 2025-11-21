@@ -45,7 +45,7 @@ const pluginName = PluginName.ENSv2;
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
- * NameWrapper emits expiry but 0 means 'doesn't expire', we represent as null.
+ * NameWrapper emits expiry as 0 to mean 'doesn't expire', so we interpret as null.
  */
 const interpretExpiry = (expiry: bigint): bigint | null => (expiry === 0n ? null : expiry);
 
@@ -358,6 +358,8 @@ export default function () {
       }
 
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
+
+      // TODO(renewals): insert Renewal if NameWrapper Registration, otherwise handled by BaseRegistrar
     },
   );
 

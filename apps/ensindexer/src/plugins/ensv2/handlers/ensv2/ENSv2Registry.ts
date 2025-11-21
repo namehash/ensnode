@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
+
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { replaceBigInts } from "ponder";
-import { type Address, hexToBigInt, isAddressEqual, labelhash, zeroAddress } from "viem";
+import { type Address, hexToBigInt, labelhash } from "viem";
 
 import {
   type AccountId,
@@ -56,17 +56,14 @@ export default function () {
       // Sanity Check: Canonical Id must match emitted label
       if (canonicalId !== getCanonicalId(hexToBigInt(labelhash(label)))) {
         throw new Error(
-          `Sanity Check: Domain's Canonical Id !== getCanonicalId(uint256(labelhash(label)))\n${JSON.stringify(
-            replaceBigInts(
-              {
-                tokenId,
-                canonicalId,
-                label,
-                labelHash,
-                hexToBigInt: hexToBigInt(labelhash(label)),
-              },
-              String,
-            ),
+          `Sanity Check: Domain's Canonical Id !== getCanonicalId(uint256(labelhash(label)))\n${toJson(
+            {
+              tokenId,
+              canonicalId,
+              label,
+              labelHash,
+              hexToBigInt: hexToBigInt(labelhash(label)),
+            },
           )}`,
         );
       }
@@ -160,7 +157,7 @@ export default function () {
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // TODO: insert Renewal
+      // TODO(renewals): insert Renewal
     },
   );
 
@@ -176,15 +173,15 @@ export default function () {
         subregistry: Address;
       }>;
     }) => {
-      const { tokenId, subregistry } = event.args;
+      const { tokenId, subregistry: _subregistry } = event.args;
+      const subregistry = interpretAddress(_subregistry);
 
       const registryAccountId = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
       // update domain's subregistry
-      const isDeletion = isAddressEqual(zeroAddress, subregistry);
-      if (isDeletion) {
+      if (subregistry === null) {
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
@@ -210,7 +207,7 @@ export default function () {
     }) => {
       const { oldTokenId, newTokenId, resource } = event.args;
 
-      // Invariant: CanonicalIds match
+      // Invariant: CanonicalIds must match
       if (getCanonicalId(oldTokenId) !== getCanonicalId(newTokenId)) {
         throw new Error(`Invariant(ENSv2Registry:TokenRegenerated): Canonical ID Malformed.`);
       }
@@ -236,8 +233,13 @@ export default function () {
     const { id: tokenId, to: owner } = event.args;
 
     const canonicalId = getCanonicalId(tokenId);
-    const registryAccountId = getThisAccountId(context, event);
-    const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
+    const registry = getThisAccountId(context, event);
+    const domainId = makeENSv2DomainId(registry, canonicalId);
+
+    // TODO(signals): remove this
+    const registryId = makeRegistryId(registry);
+    const exists = await context.db.find(schema.registry, { id: registryId });
+    if (!exists) return; // no-op non-Registry ERC1155 Transfers
 
     // just update the owner
     // any _burns are always followed by a _mint, which would set the owner correctly
@@ -246,19 +248,7 @@ export default function () {
       .set({ ownerId: interpretAddress(owner) });
   }
 
-  ponder.on(
-    namespaceContract(pluginName, "ENSv2Registry:TransferSingle"),
-    async ({ context, event }) => {
-      const registryAccountId = getThisAccountId(context, event);
-      const registryId = makeRegistryId(registryAccountId);
-
-      // TODO(registry-announcement): ideally remove this
-      const registry = await context.db.find(schema.registry, { id: registryId });
-      if (registry === null) return; // no-op non-Registry ERC1155 Transfers
-
-      await handleTransferSingle({ context, event });
-    },
-  );
+  ponder.on(namespaceContract(pluginName, "ENSv2Registry:TransferSingle"), handleTransferSingle);
   ponder.on(
     namespaceContract(pluginName, "ENSv2Registry:TransferBatch"),
     async ({ context, event }) => {

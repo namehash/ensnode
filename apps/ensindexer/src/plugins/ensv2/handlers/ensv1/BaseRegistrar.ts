@@ -26,18 +26,19 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
-// legacy always updates registry so domain is guaranteed to exist
-// wrapped always updates registry so domain is guaranteed to exist
-// unwrapped always updates registry so domain is guaranteed to exist
-
-// technically all BaseRegistry-derived contracts have the ability to `registerOnly` and therefore
-// don't represent a valid ENS name. then they can be re-registered
-// renewals work on registered names because that's obvious
-// and in this model it's valid for a registration to reference a domain that does not exist
-// and we _don't_ update owner
-// that's why registrars manage their own set of owners (registrants), which can be desynced from a domain's owner
-// so in the registrar handlers we should never touch schema.domain, only reference them.
-
+/**
+ * In ENSv1, all BaseRegistrar-derived Registrar contracts (& their controllers) have the ability to
+ * `registerOnly`, creating a 'preminted' name (a label with a Registration but no Domain in the
+ * ENSv1 Registry). The .eth Registrar doesn't do this, but Basenames and Lineanames do.
+ *
+ * Because they all technically have this ability, this logic avoids the invariant that an associated
+ * v1Domain must exist and the v1Domain.owner is conditionally materialized.
+ *
+ * Technically each BaseRegistrar Registration also has an associated owner that we could keep track
+ * of, but because we're materializing the v1Domain's effective owner, we need not explicitly track
+ * it. When a preminted name is actually registered, the indexing logic will see that the v1Domain
+ * exists and materialize its effective owner correctly.
+ */
 export default function () {
   ponder.on(
     namespaceContract(pluginName, "BaseRegistrar:Transfer"),
@@ -64,7 +65,7 @@ export default function () {
       // b) re-registering a name that has expired, and it will emit NameRegistered directly afterwards, or
       // c) user intentionally burning their registration token by transferring to zeroAddress.
       //
-      // in all such cases, a Registration is expected and we can
+      // in all such cases, a Registration is expected and we can conditionally materialize Domain owner
 
       const labelHash = registrarTokenIdToLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
@@ -180,7 +181,7 @@ export default function () {
       // update the registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // TODO: insert renewal & reference registration
+      // TODO(renewals): insert renewal & reference registration
     },
   );
 }

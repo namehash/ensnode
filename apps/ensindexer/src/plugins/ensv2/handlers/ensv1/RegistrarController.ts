@@ -101,7 +101,7 @@ export default function () {
       );
     }
 
-    // TODO: update renewal with base/premium
+    // TODO(renewals): update renewal with base/premium
     // const renewal = await getLatestRenewal(context, registration.id);
     // if (!renewal) invariant
     // await context.db.update(schema.renewal, { id: renewal.id }).set({ baseCost, premium, referrer })

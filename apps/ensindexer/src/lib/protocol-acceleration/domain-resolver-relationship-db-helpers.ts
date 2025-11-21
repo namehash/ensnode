@@ -4,6 +4,11 @@ import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import { type AccountId, type DomainId, makeResolverId } from "@ensnode/ensnode-sdk";
 
+/**
+ * Ensures that the Domain-Resolver Relationship for the provided `domainId` in `registry` is set
+ * to `resolver`. If `resolver` is zeroAddress, it is interpreted as a deletion, and the relationship
+ * is removed.
+ */
 export async function ensureDomainResolverRelation(
   context: Context,
   registry: AccountId,
