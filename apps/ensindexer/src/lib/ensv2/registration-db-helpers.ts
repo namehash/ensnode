@@ -44,11 +44,11 @@ export function isRegistrationExpired(
   registration: typeof schema.registration.$inferSelect,
   now: bigint,
 ) {
-  // no expiration, never expired
-  if (registration.expiration === null) return false;
+  // no expiry, never expired
+  if (registration.expiry === null) return false;
 
   // otherwise check against now
-  return registration.expiration <= now;
+  return registration.expiry <= now;
 }
 
 /**
@@ -59,11 +59,11 @@ export function isRegistrationFullyExpired(
   registration: typeof schema.registration.$inferSelect,
   now: bigint,
 ) {
-  // no expiration, never expired
-  if (registration.expiration === null) return false;
+  // no expiry, never expired
+  if (registration.expiry === null) return false;
 
-  // otherwise it is expired if now >= expiration + grace
-  return now >= registration.expiration + (registration.gracePeriod ?? 0n);
+  // otherwise it is expired if now >= expiry + grace
+  return now >= registration.expiry + (registration.gracePeriod ?? 0n);
 }
 
 /**
@@ -73,9 +73,9 @@ export function isRegistrationInGracePeriod(
   registration: typeof schema.registration.$inferSelect,
   now: bigint,
 ) {
-  if (registration.expiration === null) return false;
+  if (registration.expiry === null) return false;
   if (registration.gracePeriod === null) return false;
 
   //
-  return registration.expiration <= now && registration.expiration + registration.gracePeriod > now;
+  return registration.expiry <= now && registration.expiry + registration.gracePeriod > now;
 }

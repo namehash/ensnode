@@ -45,10 +45,9 @@ const pluginName = PluginName.ENSv2;
 const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
- * NameWrapper emits expiration but 0 means 'doesn't expire', we represent as null.
+ * NameWrapper emits expiry but 0 means 'doesn't expire', we represent as null.
  */
-const interpretExpiration = (expiration: bigint): bigint | null =>
-  expiration === 0n ? null : expiration;
+const interpretExpiry = (expiry: bigint): bigint | null => (expiry === 0n ? null : expiry);
 
 // registrar is source of truth for expiry if eth 2LD
 // otherwise namewrapper is registrar and source of truth for expiry
@@ -57,7 +56,7 @@ const interpretExpiration = (expiration: bigint): bigint | null =>
 // The FusesSet event indicates that fuses were written to storage, but:
 // Does not guarantee the name is not expired
 // Does not guarantee the fuses are actually active (they could be cleared by _clearOwnerAndFuses on read)
-// Simply records the fuse value that was stored, regardless of expiration status
+// Simply records the fuse value that was stored, regardless of expiry status
 // For indexers, this means you need to track both the FusesSet event AND the expiry to determine the actual active fuses at any point in time.
 
 // .eth 2LDs always have PARENT_CANNOT_CONTROL set ('burned'), they cannot be transferred during grace period
@@ -157,8 +156,8 @@ export default function () {
         expiry: bigint;
       }>;
     }) => {
-      const { node, name: _name, owner, fuses, expiry: _expiration } = event.args;
-      const expiration = interpretExpiration(_expiration);
+      const { node, name: _name, owner, fuses, expiry: _expiry } = event.args;
+      const expiry = interpretExpiry(_expiry);
       const name = _name as DNSEncodedLiteralName;
       const registrant = owner;
 
@@ -208,19 +207,19 @@ export default function () {
           );
         }
 
-        // Invariant: BaseRegistrar always provides Expiration
-        if (expiration === null) {
+        // Invariant: BaseRegistrar always provides expiry
+        if (expiry === null) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiration!\n${toJson(registration)}`,
+            `Invariant(NameWrapper:NameWrapped): Wrap of BaseRegistrar Registration does not include expiry!\n${toJson(registration)}`,
           );
         }
 
-        // Invariant: Expiration Alignment
+        // Invariant: Expiry Alignment
         if (
-          // If BaseRegistrar Registration has an expiration,
-          registration.expiration &&
+          // If BaseRegistrar Registration has an expiry,
+          registration.expiry &&
           // The NameWrapper epiration must be greater than that (+ grace period).
-          expiration > registration.expiration + (registration.gracePeriod ?? 0n)
+          expiry > registration.expiry + (registration.gracePeriod ?? 0n)
         ) {
           throw new Error("Wrapper expiry exceeds registrar expiry + grace period");
         }
@@ -228,7 +227,7 @@ export default function () {
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: true,
           fuses,
-          // expiration, // TODO: NameWrapper expiration logic
+          // expiry, // TODO: NameWrapper expiry logic
         });
       } else {
         // Invariant: If there's an existing Registration, it should be expired
@@ -238,8 +237,9 @@ export default function () {
           );
         }
 
-        const isAlreadyExpired = expiration && expiration <= event.block.timestamp;
+        const isAlreadyExpired = expiry && expiry <= event.block.timestamp;
         if (isAlreadyExpired) {
+          // technically this is allowed... may as well just remove the warning
           console.warn(`Creating NameWrapper registration for already-expired name: ${node}`);
         }
 
@@ -258,7 +258,7 @@ export default function () {
           domainId,
           start: event.block.timestamp,
           fuses,
-          expiration,
+          expiry,
         });
       }
     },
@@ -287,12 +287,12 @@ export default function () {
         await context.db.update(schema.registration, { id: registration.id }).set({
           wrapped: false,
           fuses: null,
-          // expiration: null // TODO: NameWrapper expiration logic? maybe nothing to do here
+          // expiry: null // TODO: NameWrapper expiry logic? maybe nothing to do here
         });
       } else {
         // otherwise, deactivate the latest registration by setting its expiry to this block
         await context.db.update(schema.registration, { id: registration.id }).set({
-          expiration: event.block.timestamp,
+          expiry: event.block.timestamp,
         });
       }
 
@@ -327,7 +327,7 @@ export default function () {
       // upsert fuses
       await context.db.update(schema.registration, { id: registration.id }).set({
         fuses,
-        // expiration: // TODO: NameWrapper expiration logic ?
+        // expiry: // TODO: NameWrapper expiry logic ?
       });
     },
   );
@@ -344,8 +344,8 @@ export default function () {
       context: Context;
       event: EventWithArgs<{ node: Node; expiry: bigint }>;
     }) => {
-      const { node, expiry: _expiration } = event.args;
-      const expiration = interpretExpiration(_expiration);
+      const { node, expiry: _expiry } = event.args;
+      const expiry = interpretExpiry(_expiry);
 
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);
@@ -357,7 +357,7 @@ export default function () {
         );
       }
 
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
+      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
     },
   );
 

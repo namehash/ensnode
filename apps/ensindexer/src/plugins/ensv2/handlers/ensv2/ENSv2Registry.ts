@@ -44,7 +44,7 @@ export default function () {
         registeredBy: Address;
       }>;
     }) => {
-      const { tokenId, label: _label, expiry: expiration, registeredBy: registrant } = event.args;
+      const { tokenId, label: _label, expiry, registeredBy: registrant } = event.args;
       const label = _label as LiteralLabel;
 
       const labelHash = labelhash(label);
@@ -119,7 +119,7 @@ export default function () {
         registrantId: interpretAddress(registrant),
         domainId,
         start: event.block.timestamp,
-        expiration,
+        expiry,
       });
     },
   );
@@ -137,7 +137,7 @@ export default function () {
         changedBy: Address;
       }>;
     }) => {
-      const { tokenId, newExpiry: expiration, changedBy: renewer } = event.args;
+      const { tokenId, newExpiry: expiry, changedBy: renewer } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -158,7 +158,7 @@ export default function () {
       }
 
       // update Registration
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
+      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
       // TODO: insert Renewal
     },

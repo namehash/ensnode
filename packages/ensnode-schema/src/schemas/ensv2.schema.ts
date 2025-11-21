@@ -16,6 +16,73 @@ import type {
   RegistryId,
 } from "@ensnode/ensnode-sdk";
 
+/**
+ * The ENSv2 Schema
+ *
+ * While the initial approach was a highly materialized view of the ENS protocol, abstracting away
+ * as many on-chain details as possible, in practice—due to the sheer complexity of the protocol at
+ * resolution-time—it becomes more or less impossible to appropriately materialize the canonical
+ * namegraph.
+ *
+ * As a result, this schema takes a balanced approach. It mimics on-chain state as closely as possible,
+ * with the obvious exception of materializing specific state that must trivially filterable. Then,
+ * resolution-time logic is applied on _top_ of this index, at query-time, mimicking ENS's own resolution-time
+ * behavior. This forces our implementation to match the protocol as closely as possible, with the
+ * obvious note that the performance tradeoffs of evm code and our app are different. For example,
+ * it's more expensive for us to recursively traverse the namegraph (like evm code does) because our
+ * individual roundtrips from the db are relatively more expensive.
+ *
+ * For the datamodel, this means that instead of a polymorphic Domain entity, representing both v1
+ * and v2 Domains, this schema employs separate (but overlapping) v1Domains and v2Domains entities.
+ * This avoids resolution-time complications and more accurately represents the on-chain state.
+ * Domain polymorphism is applied at the API later, via GraphQL Interfaces, to simplify queries.
+ *
+ * In general: the indexed schema should match on-chain state as closely as possible, and
+ * resolution-time behavior within the ENS protocol should _also_ be implemented at resolution time
+ * in ENSApi. The current obvious exception to this is that v1Domain.owner is the _materialized_
+ * _effective_ owner of the v1Domain. ENSv1 includes a mind-boggling number of ways to 'own' a v1Domain,
+ * including the ENSv1 Registry, various Registrars, and the NameWrapper. The ENSv1 indexing logic
+ * within this ENSv2 plugin materialize the v1Domain's effective owner to simplify this aspect of ENS,
+ * and enable efficient queries against v1Domain.owner.
+ *
+ * Many datamodels are sharable between ENSv1 and ENSv2, including Registrations, Renewals, and Resolvers.
+ *
+ * Resolvers implement 'extensions' more so than polymorphism — a Resovler can abide by many
+ * permutations of behavior (IExtendedResolver, IDedicatedResolver, BridgedResolver, ...etc), that are
+ * not technically mutually exclusive, as they'd be with a truly polymorphic entity.
+ *
+ * Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
+ * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
+ * Registry Registrations do not).
+ *
+ * Instead of materializing a Domain's name at any point, we maintain an internal rainbow table of
+ * labelHash -> InterpretedLabel (the Label entity). This ensures that regardless of how or when a
+ * new label is encountered onchain, all Domains that use that label are automatically healed at
+ * resolution-time.
+ *
+ * v1Domains exist in a flat namespace and are absolutely addressed by `node`. As such, they inhabit
+ * a simple tree datamodel of:
+ *   v1Domain -> v1Domain(s) -> v1Domain(s) -> ...etc
+ *
+ * v2Domains exist in a set of namegraphs. Each namegraph is a possibly cicular directed graph of
+ *   (Root)Registry -> v2Domain(s) -> (sub)Regsitry -> v2Domain(s) -> ...etc
+ * with exactly one RootRegistry on the ENS Root Chain establishing the beginning of the _canonical_
+ * namegraph. As discussed above, the canonical namegraph is never materialized, only _navigated_
+ * at resolution-time, in order to correctly implement the complexities of the ENS protocol.
+ *
+ * Note also that the Protocol Acceleration plugin is a hard requirement for the ENSv2 plugin. This
+ * allows us to rely on the shared logic for indexing:
+ *   a) ENSv1RegistryOld -> ENSv1Registry migration status
+ *   b) Domain-Resolver Relations for both v1Domains and v2Domains
+ * As such, none of that information is present in this ensv2.schema.ts file.
+ *
+ * In general, entities are keyed by a nominally-typed `id` that uniquely references them. This
+ * allows us to trivially implement cursor-based pagination and allow consumers to reference these
+ * deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
+ * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
+ * then that information is, as well, included in the entity.
+ */
+
 ///////////
 // Account
 ///////////
@@ -192,8 +259,8 @@ export const registration = onchainTable(
 
     // must have a start timestamp
     start: t.bigint().notNull(),
-    // may have an expiration
-    expiration: t.bigint(),
+    // may have an expiry
+    expiry: t.bigint(),
     // maybe have a grace period (BaseRegistrar)
     gracePeriod: t.bigint(),
 

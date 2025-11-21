@@ -25,7 +25,7 @@ export type RegistrationInterface = Pick<
   | "index"
   | "domainId"
   | "start"
-  | "expiration"
+  | "expiry"
   | "registrarChainId"
   | "registrarAddress"
   | "registrantId"
@@ -85,13 +85,13 @@ RegistrationInterfaceRef.implement({
     }),
 
     ///////////////////////////
-    // Registration.expiration
+    // Registration.expiry
     ///////////////////////////
-    expiration: t.field({
+    expiry: t.field({
       description: "TODO",
       type: "BigInt",
       nullable: true,
-      resolve: (parent) => parent.expiration,
+      resolve: (parent) => parent.expiry,
     }),
 
     /////////////////////////

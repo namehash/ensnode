@@ -94,7 +94,7 @@ export default function () {
       expires: bigint;
     }>;
   }) {
-    const { id: tokenId, owner, expires: expiration } = event.args;
+    const { id: tokenId, owner, expires: expiry } = event.args;
     const registrant = owner;
 
     const labelHash = registrarTokenIdToLabelHash(tokenId);
@@ -128,7 +128,7 @@ export default function () {
       registrantId: interpretAddress(registrant),
       domainId,
       start: event.block.timestamp,
-      expiration,
+      expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
     });
@@ -153,7 +153,7 @@ export default function () {
       context: Context;
       event: EventWithArgs<{ id: bigint; expires: bigint }>;
     }) => {
-      const { id: tokenId, expires: expiration } = event.args;
+      const { id: tokenId, expires: expiry } = event.args;
 
       const labelHash = registrarTokenIdToLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
@@ -178,7 +178,7 @@ export default function () {
       }
 
       // update the registration
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
+      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
       // TODO: insert renewal & reference registration
     },

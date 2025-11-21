@@ -1,16 +1,9 @@
 /**
  * TODO TODAY
- * - document schema approach, only materialization is v1 effective token owner into v1Domain.owner
- *   - all polymorphism is done at graphql layer
- *   - materialization of the canonical namegraph within ponder becomes really complex really quickly
- *     - this absoutely nukes performance
- *     - some state (i.e. registration expirations) are only knowable at Forward-Resolution-time and both the on-chain and indexed state need to check that at resolve-time to be compliant. we _could_ implement garbage collection to mark registrations as expired, but again that defeats all of ponder's cache heuristics and isn't even that helpful.
- *     - the absolutely least-likely-to-cause-horrible-logic approach is to mirror on-chain state 1:1 and perform at query time all of the resolution-time logic that ens applies — this forces the implementations to match as closely as possible. obvious exception for needing to materialize certain aspects of the state (like v1Domain.owner) because actually performing that filter at runtime is abominable. i.e. we have to realize that the performance tradeoffs of evm code and typescript code against postgres are different. ex: trivial to batch-load the full labelhashpath in v2, but more extensive to recursively loop the query (like evm code does) because our individual loads from the db are relatively more expensive.
- *
  * - self-review and document where needed
- * - indexes
  *
  * TODO LATER
+ * - indexes based on graphql queries, ask claude to compile recommendations
  * - modify Registration schema to more closely match ENSv2, map v1 into it
  * - Renewals (v1, v2)
  *  - include similar /latest / superceding logic, need to be able to reference latest renewal to upsert referrers
@@ -21,6 +14,7 @@
  *   - locked names (wrapped and not unwrappable) are 'frozen' by having their fuses burned
  *     - will need to observe the correct event and then override the existing domain/registratioon info
  *   - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
+ * - autocomplete api
  *
  * PENDING ENS TEAM
  * - DedicatedResolver moving to EAC
