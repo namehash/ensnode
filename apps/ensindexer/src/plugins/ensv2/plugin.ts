@@ -9,7 +9,6 @@
  * - self-review and document where needed
  *
  * - indexes
- * - update protocol acceleration plugin to track v2 drr
  *
  * TODO LATER
  * - modify Registration schema to more closely match ENSv2, map v1 into it

@@ -12,18 +12,18 @@ const pluginName = PluginName.ProtocolAcceleration;
 
 export default function () {
   ponder.on(
-    namespaceContract(pluginName, "ENSv2Registry:ResolverUpdate"),
+    namespaceContract(pluginName, "ENSv2Registry:ResolverUpdated"),
     async ({
       context,
       event,
     }: {
       context: Context;
       event: EventWithArgs<{
-        id: bigint;
+        tokenId: bigint;
         resolver: Address;
       }>;
     }) => {
-      const { id: tokenId, resolver } = event.args;
+      const { tokenId, resolver } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);

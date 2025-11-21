@@ -13,15 +13,15 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for Namechain
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
+import { Registry } from "./abis/ensv2/Registry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-// ABIs for Namechain
-import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
-import { ETHRegistrar } from "./abis/namechain/ETHRegistrar";
-import { Registry } from "./abis/namechain/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";

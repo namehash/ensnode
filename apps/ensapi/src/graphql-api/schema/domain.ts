@@ -283,7 +283,17 @@ ENSv2DomainRef.implement({
       type: "BigInt",
       description: "TODO",
       nullable: false,
-      resolve: (parent) => getCanonicalId(parent.labelHash),
+      resolve: (parent) => getCanonicalId(parent.tokenId),
+    }),
+
+    //////////////////////
+    // Domain.tokenId
+    //////////////////////
+    tokenId: t.field({
+      type: "BigInt",
+      description: "TODO",
+      nullable: false,
+      resolve: (parent) => parent.tokenId,
     }),
 
     //////////////////////

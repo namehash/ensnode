@@ -1,8 +1,8 @@
 import { zeroAddress } from "viem";
 
-import { EnhancedAccessControl } from "./abis/namechain/EnhancedAccessControl";
-import { ETHRegistrar } from "./abis/namechain/ETHRegistrar";
-import { Registry } from "./abis/namechain/Registry";
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
+import { Registry } from "./abis/ensv2/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";

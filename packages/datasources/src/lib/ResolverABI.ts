@@ -1,6 +1,6 @@
 import { mergeAbis } from "@ponder/utils";
 
-// import { EnhancedAccessControl } from "../abis/namechain/EnhancedAccessControl";
+// import { EnhancedAccessControl } from "../abis/ensv2/EnhancedAccessControl";
 import { LegacyPublicResolver } from "../abis/shared/LegacyPublicResolver";
 import { Ownable } from "../abis/shared/Ownable";
 import { Resolver } from "../abis/shared/Resolver";

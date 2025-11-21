@@ -117,6 +117,9 @@ export const v2Domain = onchainTable(
     // see ENSv2DomainId for guarantees
     id: t.text().primaryKey().$type<ENSv2DomainId>(),
 
+    // has a tokenId
+    tokenId: t.bigint().notNull(),
+
     // belongs to registry
     registryId: t.text().notNull().$type<RegistryId>(),
 

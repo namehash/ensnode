@@ -40,11 +40,11 @@ export default function () {
       event: EventWithArgs<{
         tokenId: bigint;
         label: string;
-        expiration: bigint;
+        expiry: bigint;
         registeredBy: Address;
       }>;
     }) => {
-      const { tokenId, label: _label, expiration, registeredBy: registrant } = event.args;
+      const { tokenId, label: _label, expiry: expiration, registeredBy: registrant } = event.args;
       const label = _label as LiteralLabel;
 
       const labelHash = labelhash(label);
@@ -88,9 +88,10 @@ export default function () {
       // insert v2Domain
       await context.db.insert(schema.v2Domain).values({
         id: domainId,
+        tokenId,
         registryId,
         labelHash,
-        // NOTE: ownerId omitted, Tranfer* events are sole source of ownership
+        // NOTE: ownerId omitted, Transfer* events are sole source of ownership
       });
 
       const registration = await getLatestRegistration(context, domainId);
@@ -124,7 +125,7 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "ENSv2Registry:NameRenewed"),
+    namespaceContract(pluginName, "ENSv2Registry:ExpiryUpdated"),
     async ({
       context,
       event,
@@ -132,11 +133,11 @@ export default function () {
       context: Context;
       event: EventWithArgs<{
         tokenId: bigint;
-        newExpiration: bigint;
-        renewedBy: Address;
+        newExpiry: bigint;
+        changedBy: Address;
       }>;
     }) => {
-      const { tokenId, newExpiration: expiration, renewedBy: renewer } = event.args;
+      const { tokenId, newExpiry: expiration, changedBy: renewer } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -149,16 +150,12 @@ export default function () {
         throw new Error(`Invariant(ENSv2Registry:NameRenewed): Registration expected, none found.`);
       }
 
-      // TODO: based on my read, NameRenewed cannot be emitted for an expired registration... so why
-      // is this hitting?
       // Invariant: Registration must not be expired
-      // if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
-      //   throw new Error(
-      //     `Invariant(ENSv2Registry:NameRenewed): Registration found but it is expired:\n${toJson(registration)}`,
-      //   );
-      // }
-
-      // TODO: optional invariant, v2Domain must also exist? implied by expiry check
+      if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
+        throw new Error(
+          `Invariant(ENSv2Registry:NameRenewed): Registration found but it is expired:\n${toJson(registration)}`,
+        );
+      }
 
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiration });
@@ -168,18 +165,18 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "ENSv2Registry:SubregistryUpdate"),
+    namespaceContract(pluginName, "ENSv2Registry:SubregistryUpdated"),
     async ({
       context,
       event,
     }: {
       context: Context;
       event: EventWithArgs<{
-        id: bigint;
+        tokenId: bigint;
         subregistry: Address;
       }>;
     }) => {
-      const { id: tokenId, subregistry } = event.args;
+      const { tokenId, subregistry } = event.args;
 
       const registryAccountId = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -199,26 +196,33 @@ export default function () {
   );
 
   ponder.on(
-    namespaceContract(pluginName, "ENSv2Registry:NameBurned"),
+    namespaceContract(pluginName, "ENSv2Registry:TokenRegenerated"),
     async ({
       context,
       event,
     }: {
       context: Context;
       event: EventWithArgs<{
-        tokenId: bigint;
-        burnedBy: Address;
+        oldTokenId: bigint;
+        newTokenId: bigint;
+        resource: bigint;
       }>;
     }) => {
-      const { tokenId } = event.args;
+      const { oldTokenId, newTokenId, resource } = event.args;
 
-      const canonicalId = getCanonicalId(tokenId);
+      // Invariant: CanonicalIds match
+      if (getCanonicalId(oldTokenId) !== getCanonicalId(newTokenId)) {
+        throw new Error(`Invariant(ENSv2Registry:TokenRegenerated): Canonical ID Malformed.`);
+      }
+
+      const canonicalId = getCanonicalId(oldTokenId);
       const registryAccountId = getThisAccountId(context, event);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      await context.db.delete(schema.v2Domain, { id: domainId });
+      // TODO: likely need to track resource as well, since it depends on eacVersion
+      // then we can likely provide a Domain.resource -> PermissionsResource resolver in the api
 
-      // NOTE: we explicitly keep the Registration/Renewal entities around
+      await context.db.update(schema.v2Domain, { id: domainId }).set({ tokenId: newTokenId });
     },
   );
 
@@ -235,8 +239,11 @@ export default function () {
     const registryAccountId = getThisAccountId(context, event);
     const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-    // just update the owner, NameBurned handles existence
-    await context.db.update(schema.v2Domain, { id: domainId }).set({ ownerId: owner });
+    // just update the owner
+    // any _burns are always followed by a _mint, which would set the owner correctly
+    await context.db
+      .update(schema.v2Domain, { id: domainId })
+      .set({ ownerId: interpretAddress(owner) });
   }
 
   ponder.on(
