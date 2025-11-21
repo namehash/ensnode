@@ -349,7 +349,7 @@ export function IndexingStatsShell({
   );
 }
 
-function buildIndexingStatsProps<
+export function buildIndexingStatsProps<
   const OmnichainIndexingStatusSnapshotType extends OmnichainIndexingStatusSnapshot,
 >(
   realtimeProjection: RealtimeIndexingStatusProjection,

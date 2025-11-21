@@ -6,6 +6,8 @@ import {
   registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
 
+import { useStatefulFetchIndexingStatus } from "@/components/indexing-status/use-fetch-stateful-indexing-status";
+
 import {
   StatefulFetchRegistrarActions,
   StatefulFetchRegistrarActionsConnecting,
@@ -38,17 +40,13 @@ export function useStatefulRegistrarActions({
   itemsPerPage,
 }: UseStatefulRegistrarActionsProps): StatefulFetchRegistrarActions {
   const ensNodeConfigQuery = useENSNodeConfig();
-  const indexingStatusQuery = useIndexingStatus();
+  const indexingStatusQuery = useStatefulFetchIndexingStatus();
 
   let isRegistrarActionsApiSupported = false;
 
-  if (
-    ensNodeConfigQuery.isSuccess &&
-    indexingStatusQuery.isSuccess &&
-    indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Ok
-  ) {
+  if (ensNodeConfigQuery.isSuccess && indexingStatusQuery.fetchStatus === "loaded") {
     const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
-    const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+    const { omnichainSnapshot } = indexingStatusQuery.realtimeProjection.snapshot;
 
     isRegistrarActionsApiSupported =
       hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
@@ -66,7 +64,11 @@ export function useStatefulRegistrarActions({
   });
 
   // ENSNode config is not fetched yet, so wait in the initial status
-  if (!ensNodeConfigQuery.isFetched || !indexingStatusQuery.isFetched) {
+  if (
+    !ensNodeConfigQuery.isFetched ||
+    indexingStatusQuery.fetchStatus === "connecting" ||
+    indexingStatusQuery.fetchStatus === "loading"
+  ) {
     return {
       fetchStatus: StatefulFetchStatusIds.Connecting,
     } satisfies StatefulFetchRegistrarActionsConnecting;
@@ -81,10 +83,7 @@ export function useStatefulRegistrarActions({
   }
 
   // Indexing Status fetched as error
-  if (
-    !indexingStatusQuery.isSuccess ||
-    indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Error
-  ) {
+  if (indexingStatusQuery.fetchStatus === "error") {
     return {
       fetchStatus: StatefulFetchStatusIds.Error,
       reason: "Indexing Status could not be fetched successfully",
@@ -101,7 +100,7 @@ export function useStatefulRegistrarActions({
     } satisfies StatefulFetchRegistrarActionsUnsupported;
   }
 
-  const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+  const { omnichainSnapshot } = indexingStatusQuery.realtimeProjection.snapshot;
 
   // fetching is temporarily not possible due to indexing status being not advanced enough
   if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
