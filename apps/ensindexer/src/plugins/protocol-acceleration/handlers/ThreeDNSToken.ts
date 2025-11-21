@@ -8,7 +8,6 @@ import {
   type ChainId,
   type LabelHash,
   makeENSv1DomainId,
-  makeResolverId,
   makeSubdomainNode,
   type Node,
   PluginName,
