@@ -61,13 +61,13 @@ export const makePermissionsId = (contract: AccountId) =>
   serializeAccountId(contract) as PermissionsId;
 
 /**
- *
+ * Constructs a PermissionsResourceId for a given `contract`'s `resource`.
  */
 export const makePermissionsResourceId = (contract: AccountId, resource: bigint) =>
   `${makePermissionsId(contract)}/${resource}` as PermissionsResourceId;
 
 /**
- *
+ * Constructs a PermissionsUserId for a given `contract`'s `resource`'s `user`.
  */
 export const makePermissionsUserId = (contract: AccountId, resource: bigint, user: Address) =>
   `${makePermissionsId(contract)}/${resource}/${user}` as PermissionsUserId;
@@ -78,19 +78,19 @@ export const makePermissionsUserId = (contract: AccountId, resource: bigint, use
 export const makeResolverId = (contract: AccountId) => serializeAccountId(contract) as ResolverId;
 
 /**
- *
+ * Constructs a ResolverRecordsId for a given `node` under `resolver`.
  */
-export const makeResolverRecordsId = (contract: AccountId, node: Node) =>
-  `${makeResolverId(contract)}/${node}` as ResolverRecordsId;
+export const makeResolverRecordsId = (resolver: AccountId, node: Node) =>
+  `${makeResolverId(resolver)}/${node}` as ResolverRecordsId;
 
 /**
- *
+ * Constructs a RegistrationId for a `domainId`'s `index`'thd Registration.
  */
 export const makeRegistrationId = (domainId: DomainId, index: number = 0) =>
   `${domainId}/${index}` as RegistrationId;
 
 /**
- *
+ * Constructs a RegistrationId denoting the latest Registration using the /latest keypath.
  */
 export const makeLatestRegistrationId = (domainId: DomainId) =>
   `${domainId}/latest` as RegistrationId;

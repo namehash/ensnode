@@ -2,7 +2,7 @@ import { DatasourceNames, type ENSNamespaceId, getDatasource } from "@ensnode/da
 import { type AccountId, accountIdEqual, makeRegistryId } from "@ensnode/ensnode-sdk";
 
 /**
- * TODO
+ * Gets the AccountId representing the ENSv2 Root Registry in the selected `namespace`.
  */
 export const getRootRegistry = (namespace: ENSNamespaceId) => {
   const ensroot = getDatasource(namespace, DatasourceNames.ENSRoot);
@@ -14,13 +14,13 @@ export const getRootRegistry = (namespace: ENSNamespaceId) => {
 };
 
 /**
- * TODO
+ * Gets the RegistryId representing the ENSv2 Root Registry in the selected `namespace`.
  */
 export const getRootRegistryId = (namespace: ENSNamespaceId) =>
   makeRegistryId(getRootRegistry(namespace));
 
 /**
- * TODO
+ * Determines whether `contract` is the ENSv2 Root Registry in `namespace`.
  */
-export const isRootRegistry = (namespace: ENSNamespaceId, accountId: AccountId) =>
-  accountIdEqual(getRootRegistry(namespace), accountId);
+export const isRootRegistry = (namespace: ENSNamespaceId, contract: AccountId) =>
+  accountIdEqual(getRootRegistry(namespace), contract);

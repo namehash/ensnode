@@ -26,31 +26,31 @@ export type ENSv2DomainId = string & { __brand: "ENSv2DomainId" };
 export type DomainId = ENSv1DomainId | ENSv2DomainId;
 
 /**
- *
+ * Uniquely identifies a Permissions entity.
  */
 export type PermissionsId = SerializedAccountId & { __brand: "PermissionsId" };
 
 /**
- *
+ * Uniquely identifies a PermissionsResource entity.
  */
 export type PermissionsResourceId = string & { __brand: "PermissionsResourceId" };
 
 /**
- *
+ * Uniquely identifies a PermissionsUser entity.
  */
 export type PermissionsUserId = string & { __brand: "PermissionsUserId" };
 
 /**
- *
+ * Uniquely identifies a Resolver entity.
  */
 export type ResolverId = SerializedAccountId & { __brand: "ResolverId" };
 
 /**
- *
+ * Uniquely identifies a ResolverRecords entity.
  */
 export type ResolverRecordsId = string & { __brand: "ResolverRecordsId" };
 
 /**
- *
+ * Uniquely identifies a Registration entity.
  */
 export type RegistrationId = string & { __brand: "RegistrationId" };

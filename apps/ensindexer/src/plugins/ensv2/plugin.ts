@@ -1,9 +1,8 @@
 /**
- * TODO TODAY
+ * TODO
  * - move registration expiration shared logic to sdk/ens
- * - self-review and document where needed
- *
- * TODO LATER
+ *   - update isRegistrationFullyExpired todo in ensapi somewhere
+ * - RequiredAndNotNull opposite type: RequiredToBeNull<T, keys> for constraining polymorphic entities in graphql schema
  * - re-asses NameWrapper expiry logic — compare to subgraph implementation & see if we can simplify
  * - indexes based on graphql queries, ask claude to compile recommendations
  * - modify Registration schema to more closely match ENSv2, map v1 into it
