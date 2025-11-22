@@ -1,11 +1,6 @@
 import config from "@/config";
 
 import {
-  ENS_HOLIDAY_AWARDS_END_DATE,
-  ENS_HOLIDAY_AWARDS_START_DATE,
-} from "@namehash/ens-referrals";
-
-import {
   type Duration,
   getEthnamesSubregistryId,
   staleWhileRevalidate,
@@ -18,13 +13,17 @@ import logger from "@/lib/logger";
 const TTL: Duration = 5 * 60; // 5 minutes
 
 export const fetcher = staleWhileRevalidate(async () => {
-  logger.info("Building aggregated referrer snapshot...");
+  logger.info(
+    `Building aggregated referrer snapshot\n` +
+      `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
+      `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
+  );
   const subregistryId = getEthnamesSubregistryId(config.namespace);
 
   try {
     const result = await getAggregatedReferrerSnapshot(
-      ENS_HOLIDAY_AWARDS_START_DATE,
-      ENS_HOLIDAY_AWARDS_END_DATE,
+      config.ensHolidayAwardsStart,
+      config.ensHolidayAwardsEnd,
       subregistryId,
     );
     logger.info("Successfully built aggregated referrer snapshot");
