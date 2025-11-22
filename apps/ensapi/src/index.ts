@@ -67,9 +67,7 @@ const server = serve(
     port: config.port,
   },
   async (info) => {
-    logger.info(
-      `ENSApi listening on port ${info.port} with config:\n${prettyPrintJson(redactEnsApiConfig(config))}`,
-    );
+    logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
