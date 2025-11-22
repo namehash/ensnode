@@ -1,7 +1,7 @@
+import { type ENSNamespace, getENSNamespace } from "@ensnode/datasources";
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
-import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
 
 /**
@@ -18,15 +18,14 @@ export const derive_indexedChainIds = <
 ): CONFIG & { indexedChainIds: ENSIndexerConfig["indexedChainIds"] } => {
   const indexedChainIds = new Set<ChainId>();
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
+  const datasources = getENSNamespace(config.namespace) as ENSNamespace;
 
   for (const pluginName of config.plugins) {
     const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
 
     for (const datasourceName of datasourceNames) {
-      const { chain } = datasources[datasourceName];
-
-      indexedChainIds.add(chain.id);
+      const datasource = datasources[datasourceName];
+      if (datasource) indexedChainIds.add(datasource.chain.id);
     }
   }
 

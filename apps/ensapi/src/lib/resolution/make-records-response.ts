@@ -9,7 +9,7 @@ import type { ResolveCallsAndResults } from "./resolve-calls-and-results";
 
 export interface IndexedResolverRecords {
   name: string | null;
-  addressRecords: { coinType: bigint; address: string }[];
+  addressRecords: { coinType: bigint; value: string }[];
   textRecords: { key: string; value: string }[];
 }
 
@@ -34,7 +34,7 @@ export function makeRecordsResponseFromIndexedRecords<SELECTION extends Resolver
     response.addresses = selection.addresses.reduce(
       (memo, coinType) => {
         memo[coinType] =
-          records.addressRecords.find((r) => bigintToCoinType(r.coinType) === coinType)?.address ||
+          records.addressRecords.find((r) => bigintToCoinType(r.coinType) === coinType)?.value ||
           null;
         return memo;
       },

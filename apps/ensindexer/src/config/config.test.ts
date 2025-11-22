@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "@ensnode/datasources";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
@@ -618,7 +619,17 @@ describe("config (minimal base env)", () => {
       await expect(getConfig()).resolves.toMatchObject({ plugins: [PluginName.TokenScope] });
     });
 
-    describe("with ALCHEMY_API_KEY", async () => {
+    describe("ens-test-env rpcs", () => {
+      it("should provide ens-test-env rpc defaults", async () => {
+        stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
+
+        const config = await getConfig();
+        expect(config.rpcConfigs.has(ensTestEnvL1Chain.id)).toBe(true);
+        expect(config.rpcConfigs.has(ensTestEnvL2Chain.id)).toBe(true);
+      });
+    });
+
+    describe("with ALCHEMY_API_KEY", () => {
       beforeEach(() => {
         stubEnv({ ALCHEMY_API_KEY: "anything", RPC_URL_1: undefined });
       });
@@ -638,11 +649,6 @@ describe("config (minimal base env)", () => {
           "must have ws rpc url",
         ).toBe(true);
       });
-
-      it("does not provide alchemy if chain id is not supported", async () => {
-        stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
-        await expect(getConfig()).rejects.toThrow(/RPC Config/);
-      });
     });
 
     describe("with DRPC_API_KEY", async () => {
@@ -661,16 +667,10 @@ describe("config (minimal base env)", () => {
           "must have http rpc url",
         ).toBe(true);
 
-        // TODO: update this when auto-generated ws:// urls are added, this test will have failed
         expect(
           rpcConfigs.every((rpcConfig) => rpcConfig.websocketRPC === undefined),
           "must not have ws rpc url",
         ).toBe(true);
-      });
-
-      it("does not provide drpc if chain id is not supported", async () => {
-        stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
-        await expect(getConfig()).rejects.toThrow(/RPC Config/);
       });
     });
 

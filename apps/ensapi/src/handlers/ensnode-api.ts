@@ -10,6 +10,7 @@ import {
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
 
+import ensnodeGraphQLApi from "./ensnode-graphql-api";
 import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
@@ -41,5 +42,8 @@ app.route("/registrar-actions", registrarActionsApi);
 
 // Resolution API
 app.route("/resolve", resolutionApi);
+
+// ENSNode GraphQL API
+app.route("/graphql", ensnodeGraphQLApi);
 
 export default app;

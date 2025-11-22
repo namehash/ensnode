@@ -1,4 +1,4 @@
-import type z from "zod/v4";
+import type { z } from "zod/v4";
 
 import type { InterpretedName, Node } from "../ens";
 import type { ENSApiPublicConfig } from "../ensapi";

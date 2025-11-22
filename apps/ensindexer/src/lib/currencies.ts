@@ -1,14 +1,5 @@
 import { type Address, zeroAddress } from "viem";
-import {
-  base,
-  baseSepolia,
-  holesky,
-  linea,
-  lineaSepolia,
-  mainnet,
-  optimism,
-  sepolia,
-} from "viem/chains";
+import { base, baseSepolia, linea, lineaSepolia, mainnet, optimism, sepolia } from "viem/chains";
 
 import { type AccountId, type ChainId, type CurrencyId, CurrencyIds } from "@ensnode/ensnode-sdk";
 
@@ -52,13 +43,6 @@ const SUPPORTED_CURRENCY_CONTRACTS: Record<ChainId, Record<Address, CurrencyId>>
     [zeroAddress]: CurrencyIds.ETH,
     "0x176211869ca2b568f2a7d4ee941e073a821ee1ff": CurrencyIds.USDC,
     "0x4af15ec2a0bd43db75dd04e62faa3b8ef36b00d5": CurrencyIds.DAI,
-  },
-
-  /** holesky namespace */
-  [holesky.id]: {
-    [zeroAddress]: CurrencyIds.ETH,
-    "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": CurrencyIds.USDC,
-    "0x3e622317f8c93f7328350cf0b56d9ed4c620c5d6": CurrencyIds.DAI,
   },
 };
 

@@ -1,10 +1,10 @@
 import { namehash } from "viem";
-import z from "zod/v4";
+import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeRealtimeIndexingStatusProjectionSchema } from "../ensindexer/indexing-status/zod-schemas";
-import { makeReinterpretedNameSchema } from "../internal";
 import { makeRegistrarActionSchema } from "../registrars/zod-schemas";
+import { makeReinterpretedNameSchema } from "../shared/zod-schemas";
 import {
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,

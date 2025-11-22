@@ -41,6 +41,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@ensnode/ensnode-sdk": "workspace:",
     "@ensnode/shared-configs": "workspace:*",
     "tsup": "catalog:",
     "typescript": "catalog:"
