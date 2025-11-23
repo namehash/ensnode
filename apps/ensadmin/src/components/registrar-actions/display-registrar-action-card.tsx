@@ -93,6 +93,7 @@ function ResolveAndDisplayReferrerIdentity({
   return (
     <ResolveAndDisplayIdentity
       identity={referrerIdentity}
+      accelerate={true}
       withAvatar={true}
       className="font-medium"
     />
@@ -187,6 +188,7 @@ export function DisplayRegistrarActionCard({
       <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[140px]">
         <ResolveAndDisplayIdentity
           identity={registrantIdentity}
+          accelerate={true}
           withAvatar={true}
           className="font-medium"
         />
