@@ -7,6 +7,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
+import { makeLogger } from "@/lib/logger";
+
+const logger = makeLogger("indexing-status.middleware");
 
 /**
  * Creates middleware that ensures that all prerequisites of
@@ -37,7 +40,17 @@ export const requireRegistrarActionsPluginMiddleware = () =>
       );
     }
 
-    if (c.var.indexingStatus.isRejected) {
+    const cachedIndexingStatus = c.var.indexingStatus;
+
+    // return error response if indexing status has never been cached successfully
+    if (cachedIndexingStatus.isRejected) {
+      logger.error(
+        {
+          error: cachedIndexingStatus.reason,
+        },
+        "Failed to load Indexing Status from cache.",
+      );
+
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
@@ -50,8 +63,7 @@ export const requireRegistrarActionsPluginMiddleware = () =>
       );
     }
 
-    const indexingStatusResponse = c.var.indexingStatus.value;
-    const { omnichainSnapshot } = indexingStatusResponse.realtimeProjection.snapshot;
+    const { omnichainSnapshot } = cachedIndexingStatus.value.realtimeProjection.snapshot;
 
     if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
       return c.json(

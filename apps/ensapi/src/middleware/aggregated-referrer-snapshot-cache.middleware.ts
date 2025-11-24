@@ -8,7 +8,9 @@ import {
 
 import { getAggregatedReferrerSnapshot } from "@/lib/ensanalytics/database";
 import { factory } from "@/lib/hono-factory";
-import logger from "@/lib/logger";
+import { makeLogger } from "@/lib/logger";
+
+const logger = makeLogger("aggregated-referrer-snapshot-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
@@ -21,19 +23,23 @@ export const fetcher = staleWhileRevalidate({
     );
     const subregistryId = getEthnamesSubregistryId(config.namespace);
 
-    return getAggregatedReferrerSnapshot(
-      config.ensHolidayAwardsStart,
-      config.ensHolidayAwardsEnd,
-      subregistryId,
-    );
+    try {
+      const result = await getAggregatedReferrerSnapshot(
+        config.ensHolidayAwardsStart,
+        config.ensHolidayAwardsEnd,
+        subregistryId,
+      );
+      logger.info(
+        { grandTotalReferrals: result.referrers.size },
+        "Successfully built aggregated referrer snapshot",
+      );
+      return result;
+    } catch (error) {
+      logger.error({ error }, "Failed to build aggregated referrer snapshot");
+      throw error;
+    }
   },
   ttl: TTL,
-  onResolved() {
-    logger.info("Successfully built aggregated referrer snapshot");
-  },
-  onRejected(error) {
-    logger.error({ error }, "Failed to build aggregated referrer snapshot");
-  },
 });
 
 export type AggregatedReferrerSnapshotCacheVariables = {
