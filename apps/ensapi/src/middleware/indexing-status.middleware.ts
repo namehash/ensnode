@@ -31,7 +31,6 @@ export const fetcher = staleWhileRevalidate({
       // resolve response to be cached
       return response;
     }),
-
   ttl: TTL,
   onRejected(reason) {
     logger.error(
