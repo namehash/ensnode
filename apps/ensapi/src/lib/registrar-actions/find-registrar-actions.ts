@@ -44,7 +44,7 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
           // apply subregistry node equality filter
           return eq(schema.subregistries.node, filter.value);
 
-        case RegistrarActionsFilterTypes.WithReferralIncluded: {
+        case RegistrarActionsFilterTypes.WithEncodedReferral: {
           // apply referral encoded referrer inclusion filter
           const filterSql = and(
             isNotNull(schema.registrarActions.encodedReferrer),
@@ -54,7 +54,7 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
           // Invariant: filterSql is `SQL` object - should never occur
           if (typeof filterSql === "undefined") {
             throw new Error(
-              `Filter SQL must be built successfully for 'WithReferralIncluded' filter on Registrar Actions.`,
+              `Filter SQL must be built successfully for 'WithEncodedReferral' filter on Registrar Actions.`,
             );
           }
 

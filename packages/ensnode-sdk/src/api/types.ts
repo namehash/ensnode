@@ -142,7 +142,7 @@ export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusRe
  */
 export const RegistrarActionsFilterTypes = {
   BySubregistryNode: "bySubregistryNode",
-  WithReferralIncluded: "withReferralIncluded",
+  WithEncodedReferral: "withEncodedReferral",
 } as const;
 
 export type RegistrarActionsFilterType =
@@ -153,13 +153,13 @@ export type RegistrarActionsFilterBySubregistryNode = {
   value: Node;
 };
 
-export type RegistrarActionsFilterWithReferralIncluded = {
-  filterType: typeof RegistrarActionsFilterTypes.WithReferralIncluded;
+export type RegistrarActionsFilterWithEncodedReferral = {
+  filterType: typeof RegistrarActionsFilterTypes.WithEncodedReferral;
 };
 
 export type RegistrarActionsFilter =
   | RegistrarActionsFilterBySubregistryNode
-  | RegistrarActionsFilterWithReferralIncluded;
+  | RegistrarActionsFilterWithEncodedReferral;
 
 /**
  * Records Orders

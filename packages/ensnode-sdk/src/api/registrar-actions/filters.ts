@@ -2,7 +2,7 @@ import type { Node } from "../../ens";
 import {
   type RegistrarActionsFilter,
   RegistrarActionsFilterTypes,
-  type RegistrarActionsFilterWithReferralIncluded,
+  type RegistrarActionsFilterWithEncodedReferral,
 } from "../types";
 
 /**
@@ -32,8 +32,8 @@ function withReferral(withReferral: boolean | undefined): RegistrarActionsFilter
   }
 
   return {
-    filterType: RegistrarActionsFilterTypes.WithReferralIncluded,
-  } satisfies RegistrarActionsFilterWithReferralIncluded;
+    filterType: RegistrarActionsFilterTypes.WithEncodedReferral,
+  } satisfies RegistrarActionsFilterWithEncodedReferral;
 }
 
 export const registrarActionsFilter = {

@@ -492,7 +492,7 @@ export class ENSNodeClient {
 
     const buildWithReferralArg = (filters: RegistrarActionsFilter[] | undefined) => {
       const withReferralFilter = filters?.find(
-        (f) => f.filterType === RegistrarActionsFilterTypes.WithReferralIncluded,
+        (f) => f.filterType === RegistrarActionsFilterTypes.WithEncodedReferral,
       );
 
       return withReferralFilter ? { key: "withReferral", value: "true" } : null;
