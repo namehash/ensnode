@@ -5,10 +5,15 @@
  * Supports 1-column (label only) and 2-column (label,labelhash) formats
  */
 
-import { createReadStream, createWriteStream } from "fs";
+import { createReadStream, createWriteStream, statSync } from "fs";
+import { rmSync } from "fs";
+import { join } from "path";
 import { type LabelHash, labelHashToBytes } from "@ensnode/ensnode-sdk";
 import { parse } from "@fast-csv/parse";
 import { labelhash } from "viem";
+import { ClassicLevel } from "classic-level";
+import ProgressBar from "progress";
+import bloomFilters from "bloom-filters";
 import { ENSRainbowDB } from "../lib/database.js";
 import { logger } from "../utils/logger.js";
 import {
@@ -16,6 +21,129 @@ import {
   createRainbowProtobufRoot,
 } from "../utils/protobuf-schema.js";
 
+/**
+ * Simple deduplication database using ClassicLevel directly
+ */
+class DeduplicationDB {
+  private pendingWrites: Map<string, string> = new Map();
+  private cache: Map<string, boolean> = new Map();
+  private cacheSize: number;
+  private bloomFilter: typeof bloomFilters.BloomFilter | null = null;
+
+  constructor(private db: ClassicLevel<string, string>, cacheSize: number = 10000, useBloomFilter: boolean = false, expectedItems: number = 10000000) {
+    this.cacheSize = cacheSize;
+    
+    if (useBloomFilter) {
+      // Create Bloom filter with 0.1% false positive rate
+      this.bloomFilter = bloomFilters.BloomFilter.create(expectedItems, 0.01);
+      logger.info(`Created Bloom filter for ${expectedItems} items (~${(this.bloomFilter.size / 8 / 1024 / 1024).toFixed(2)} MB)`);
+    }
+  }
+
+  async has(key: string): Promise<boolean> {
+    // Check cache first
+    if (this.cache.has(key)) {
+      return this.cache.get(key)!;
+    }
+
+    // Check pending writes
+    if (this.pendingWrites.has(key)) {
+      this.cache.set(key, true);
+      return true;
+    }
+
+    // Use Bloom filter if available
+    if (this.bloomFilter) {
+      // If Bloom filter says "not present", we can skip LevelDB check
+      if (!this.bloomFilter.has(key)) {
+        this.cache.set(key, false);
+        return false;
+      }
+      // Bloom filter says "maybe present" - need to check LevelDB
+    }
+
+    // Check database
+    try {
+      await this.db.get(key);
+      this.cache.set(key, true);
+      return true;
+    } catch (error) {
+      this.cache.set(key, false);
+      return false;
+    }
+  }
+
+  async add(key: string, value: string): Promise<void> {
+    this.pendingWrites.set(key, value);
+    this.cache.set(key, true); // Cache the fact that this key exists
+    
+    // Add to Bloom filter if available
+    if (this.bloomFilter) {
+      this.bloomFilter.add(key);
+    }
+    
+    // Check cache size periodically (not on every add)
+    this.evictCacheIfNeeded();
+    
+    // Flush to database periodically (smaller batch to reduce memory usage)
+    if (this.pendingWrites.size >= 5000) {
+      await this.flush();
+    }
+  }
+
+  private evictCacheIfNeeded(): void {
+    // Limit cache size - only evict when significantly exceeded
+    if (this.cache.size > this.cacheSize * 1.2) {
+      // Remove oldest 20% of entries
+      let toRemove = Math.floor(this.cacheSize * 0.2);
+      for (const key of this.cache.keys()) {
+        if (toRemove-- <= 0) break;
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  async flush(): Promise<void> {
+    if (this.pendingWrites.size === 0) return;
+
+    const batch = this.db.batch();
+    for (const [key, value] of this.pendingWrites) {
+      batch.put(key, value);
+    }
+    await batch.write();
+    this.pendingWrites.clear();
+    
+    // Hint to garbage collector after large batch
+    if (global.gc) {
+      global.gc();
+    }
+  }
+
+  async close(): Promise<void> {
+    await this.flush();
+    await this.db.close();
+  }
+}
+
+
+/**
+ * Sets up a simple progress bar that shows speed without total count.
+ */
+function setupProgressBar(): ProgressBar {
+  return new ProgressBar(
+    "Processing CSV [:bar] :current lines - :rate lines/sec",
+    {
+      complete: "=",
+      incomplete: " ",
+      width: 40,
+      total: 200000000, // Very large total for big files
+    },
+  );
+}
+
+/**
+ * Options for CSV conversion command
+ */
 export interface ConvertCsvCommandOptions {
   inputFile: string;
   outputFile: string;
@@ -23,6 +151,11 @@ export interface ConvertCsvCommandOptions {
   labelSetVersion: number;
   progressInterval?: number;
   existingDbPath?: string; // Path to existing ENSRainbow database to check for existing labels
+  silent?: boolean; // Disable progress bar for tests
+  noDedup?: boolean; // Disable deduplication within CSV file
+  cacheSize?: number; // Cache size for deduplication (default: 10000)
+  useBloomFilter?: boolean; // Use Bloom filter for faster deduplication (default: false)
+  bloomFilterSize?: number; // Expected number of items for Bloom filter (default: 10000000)
 }
 
 // Configuration constants
@@ -106,6 +239,20 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
   logger.info(`Label set id: ${options.labelSetId}`);
   logger.info(`Label set version: ${options.labelSetVersion}`);
 
+  // Check file size and warn for very large files
+  try {
+    const stats = statSync(options.inputFile);
+    const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+    logger.info(`Input file size: ${fileSizeMB} MB`);
+    
+    if (stats.size > 1024 * 1024 * 1024) { // > 1GB
+      logger.warn("⚠️  Processing a very large file. This may take significant time and memory.");
+      logger.warn("💡 Consider using --existing-db-path to filter out existing labels for better performance.");
+    }
+  } catch (error) {
+    logger.warn(`Could not determine file size: ${error}`);
+  }
+
   // Open existing database if path is provided
   let existingDb: ENSRainbowDB | null = null;
   if (options.existingDbPath) {
@@ -143,7 +290,6 @@ function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string 
   if (row.length === 1) {
     // Single column: compute labelhash using labelhash function
     const labelHashBytes = labelHashToBytes(labelhash(label));
-    console.log(label);
     return {
       labelhash: Buffer.from(labelHashBytes),
       label: label,
@@ -161,7 +307,7 @@ function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string 
 }
 
 /**
- * Process a single CSV record
+ * Process a single CSV record with LevelDB-based deduplication
  */
 async function processRecord(
   row: string[],
@@ -170,7 +316,7 @@ async function processRecord(
   outputStream: NodeJS.WritableStream,
   lineNumber: number,
   existingDb: ENSRainbowDB | null,
-  writtenLabels: Set<string>,
+  dedupDb: DeduplicationDB | null,
   stats: ConversionStats,
 ): Promise<boolean> {
   // Validate column count
@@ -184,7 +330,7 @@ async function processRecord(
   const label = rainbowRecord.label;
   const labelHashBytes = rainbowRecord.labelhash;
 
-  // Check if labelhash already exists in the database
+  // Check if labelhash already exists in the existing database
   if (existingDb) {
     const existsInDb = await checkLabelHashExists(existingDb, labelHashBytes);
     if (existsInDb) {
@@ -193,14 +339,17 @@ async function processRecord(
     }
   }
 
-  // Check if label is a duplicate within this conversion
-  if (writtenLabels.has(label)) {
-    stats.filteredDuplicates++;
-    return false; // Skip this record
-  }
+  // Check if label is a duplicate within this conversion using LevelDB (if enabled)
+  if (dedupDb) {
+    const existsInDedupDb = await dedupDb.has(label);
+    if (existsInDedupDb) {
+      stats.filteredDuplicates++;
+      return false; // Skip this record
+    }
 
-  // Add label to written set to track duplicates
-  writtenLabels.add(label);
+    // Add label to deduplication database
+    await dedupDb.add(label, "");
+  }
 
   // Create protobuf message and write immediately
   const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
@@ -218,49 +367,89 @@ async function processCSVFile(
   outputStream: NodeJS.WritableStream,
   progressInterval: number,
   existingDb: ENSRainbowDB | null,
+  dedupDb: DeduplicationDB | null,
   stats: ConversionStats,
+  progressBar: ProgressBar | null,
 ): Promise<{ totalLines: number; processedRecords: number }> {
-  return new Promise((resolve, reject) => {
-    let expectedColumns: number | null = null;
-    let lineNumber = 0;
-    let processedRecords = 0;
-    const writtenLabels = new Set<string>(); // Track labels written in this conversion
+  let expectedColumns: number | null = null;
+  let lineNumber = 0;
+  let processedRecords = 0;
+  let lastLoggedLine = 0; // Track last logged line to avoid duplicate logs
+  const startTime = Date.now(); // Track start time for overall processing
+  let lastLogTime = Date.now(); // Track time of last log for chunk timing
+  
+  // LevelDB-based deduplication: Uses temporary database to avoid RAM limits
 
-    const fileStream = createReadStream(inputFile, { encoding: "utf8" });
+  const fileStream = createReadStream(inputFile, { encoding: "utf8" });
+
+  return new Promise((resolve, reject) => {
+    let pendingCount = 0;
+    const MAX_PENDING = 100; // Smaller limit to reduce memory
 
     const csvStream = parse()
-      .on("data", async (row: string[]) => {
+      .on("data", (row: string[]) => {
         lineNumber++;
 
-        try {
-          // For the first row, detect column count
-          if (expectedColumns === null) {
-            expectedColumns = row.length;
-            logger.info(`Detected ${expectedColumns} columns using fast-csv`);
-          }
+        // For the first row, detect column count
+        if (expectedColumns === null) {
+          expectedColumns = row.length;
+          logger.info(`Detected ${expectedColumns} columns using fast-csv`);
+        }
 
-          const wasProcessed = await processRecord(
-            row,
-            expectedColumns,
-            RainbowRecordType,
-            outputStream,
-            lineNumber,
-            existingDb,
-            writtenLabels,
-            stats,
+        // Log progress synchronously when line is read (not in async callback)
+        // This ensures logs appear at the correct intervals
+        if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
+          const currentTime = Date.now();
+          const chunkTime = currentTime - lastLogTime; // Time for this 10k chunk
+          const totalElapsed = currentTime - startTime; // Total time since start
+          const chunkTimeSeconds = (chunkTime / 1000).toFixed(2);
+          const totalTimeSeconds = (totalElapsed / 1000).toFixed(2);
+          const linesPerSecond = ((progressInterval / chunkTime) * 1000).toFixed(0);
+          
+          lastLoggedLine = lineNumber;
+          lastLogTime = currentTime;
+          
+          // Note: processedRecords may be slightly behind due to async processing
+          logger.info(
+            `Processed ${lineNumber} lines, written ${processedRecords} records | ` +
+            `Chunk: ${chunkTimeSeconds}s (${linesPerSecond} lines/sec) | ` +
+            `Total: ${totalTimeSeconds}s`
           );
+        }
 
+        // Backpressure: pause if too many pending
+        if (pendingCount >= MAX_PENDING) {
+          csvStream.pause();
+        }
+
+        pendingCount++;
+        processRecord(
+          row,
+          expectedColumns,
+          RainbowRecordType,
+          outputStream,
+          lineNumber,
+          existingDb,
+          dedupDb,
+          stats,
+        ).then((wasProcessed) => {
           if (wasProcessed) {
             processedRecords++;
           }
-
-          // Log progress for large files
-          if (lineNumber % progressInterval === 0) {
-            logger.info(
-              `Processed ${lineNumber} lines, written ${processedRecords} records so far...`,
-            );
+          
+          // Update progress bar every 1000 lines
+          if (lineNumber % 1000 === 0 && progressBar) {
+            progressBar.tick(1000);
+            progressBar.curr = lineNumber;
           }
-        } catch (error) {
+          
+          pendingCount--;
+          
+          // Resume when under threshold
+          if (csvStream.isPaused() && pendingCount < MAX_PENDING / 2) {
+            csvStream.resume();
+          }
+        }).catch((error) => {
           const errorMessage = error instanceof Error ? error.message : String(error);
           csvStream.destroy();
           fileStream.destroy();
@@ -269,12 +458,18 @@ async function processCSVFile(
               `CSV conversion failed due to invalid data on line ${lineNumber}: ${errorMessage}`,
             ),
           );
-        }
+        });
       })
       .on("error", (error: Error) => {
         reject(new Error(`CSV parsing error: ${error.message}`));
       })
-      .on("end", () => {
+      .on("end", async () => {
+        // Wait for all pending to complete
+        while (pendingCount > 0) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        const dedupStatus = dedupDb ? "LevelDB deduplication completed" : "Deduplication disabled";
+        logger.info(dedupStatus);
         resolve({ totalLines: lineNumber, processedRecords });
       });
 
@@ -299,12 +494,37 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
   };
 
   let existingDb: ENSRainbowDB | null = null;
+  let dedupDb: DeduplicationDB | null = null;
+  let tempDedupDir: string | null = null;
 
   try {
     const { RainbowRecordType, outputStream, existingDb: db } = await initializeConversion(options);
     existingDb = db;
 
+    // Create temporary deduplication database (if not disabled)
+    if (!options.noDedup) {
+      tempDedupDir = join(process.cwd(), 'temp-dedup-' + Date.now());
+      logger.info(`Creating temporary deduplication database at: ${tempDedupDir}`);
+      const tempDb = new ClassicLevel<string, string>(tempDedupDir, {
+        keyEncoding: 'utf8',
+        valueEncoding: 'utf8',
+        createIfMissing: true,
+      });
+      await tempDb.open();
+      dedupDb = new DeduplicationDB(
+        tempDb, 
+        options.cacheSize ?? 10000,
+        options.useBloomFilter ?? false,
+        options.bloomFilterSize ?? 10000000
+      );
+    } else {
+      logger.info("Deduplication disabled - processing all records");
+    }
+
     const progressInterval = options.progressInterval ?? DEFAULT_PROGRESS_INTERVAL;
+
+    // Set up progress bar (only if not silent)
+    const progressBar = options.silent ? null : setupProgressBar();
 
     // Process the CSV file
     const { totalLines, processedRecords } = await processCSVFile(
@@ -313,11 +533,21 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
       outputStream,
       progressInterval,
       existingDb,
+      dedupDb,
       stats,
+      progressBar,
     );
 
-    stats.totalLines = totalLines;
-    stats.processedRecords = processedRecords;
+            stats.totalLines = totalLines;
+            stats.processedRecords = processedRecords;
+
+            // Log final progress for large files
+            if (totalLines > 10_000) {
+              const dedupStatus = options.noDedup ? "dedup disabled" : "LevelDB dedup active";
+              logger.info(
+                `✅ Completed processing ${totalLines.toLocaleString()} lines, wrote ${processedRecords.toLocaleString()} records (${dedupStatus})`,
+              );
+            }
 
     // Close output stream
     outputStream.end();
@@ -330,13 +560,33 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     logger.error("❌ CSV conversion failed:", errorMessage);
     throw error;
   } finally {
-    // Clean up database connection
+    // Clean up deduplication database
+    if (dedupDb) {
+      try {
+        await dedupDb.close();
+        logger.info("Closed deduplication database");
+      } catch (error) {
+        logger.warn(`Failed to close deduplication database: ${error}`);
+      }
+    }
+
+    // Clean up existing database connection
     if (existingDb) {
       try {
         await existingDb.close();
         logger.info("Closed existing database connection");
       } catch (error) {
         logger.warn(`Failed to close existing database: ${error}`);
+      }
+    }
+
+    // Remove temporary deduplication database directory
+    if (tempDedupDir) {
+      try {
+        rmSync(tempDedupDir, { recursive: true, force: true });
+        logger.info(`Removed temporary deduplication database: ${tempDedupDir}`);
+      } catch (error) {
+        logger.warn(`Failed to remove temporary deduplication database: ${error}`);
       }
     }
   }
