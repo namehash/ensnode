@@ -1,7 +1,6 @@
 import config from "@/config";
 
 import {
-  IndexingStatusResponseCodes,
   RegistrarActionsResponseCodes,
   registrarActionsPrerequisites,
   serializeRegistrarActionsResponse,
@@ -52,20 +51,6 @@ export const requireRegistrarActionsPluginMiddleware = () =>
     }
 
     const indexingStatusResponse = c.var.indexingStatus.value;
-
-    if (indexingStatusResponse.responseCode === IndexingStatusResponseCodes.Error) {
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API is not available`,
-            details: `Connected ENSIndexer must serve its Indexing Status`,
-          },
-        }),
-        500,
-      );
-    }
-
     const { omnichainSnapshot } = indexingStatusResponse.realtimeProjection.snapshot;
 
     if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))

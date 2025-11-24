@@ -12,27 +12,29 @@ import logger from "@/lib/logger";
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
-export const fetcher = staleWhileRevalidate(async () => {
-  logger.info(
-    `Building aggregated referrer snapshot\n` +
-      `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
-      `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
-  );
-  const subregistryId = getEthnamesSubregistryId(config.namespace);
+export const fetcher = staleWhileRevalidate({
+  fn: async () => {
+    logger.info(
+      `Building aggregated referrer snapshot\n` +
+        `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
+        `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
+    );
+    const subregistryId = getEthnamesSubregistryId(config.namespace);
 
-  try {
-    const result = await getAggregatedReferrerSnapshot(
+    return getAggregatedReferrerSnapshot(
       config.ensHolidayAwardsStart,
       config.ensHolidayAwardsEnd,
       subregistryId,
     );
+  },
+  ttl: TTL,
+  onResolved() {
     logger.info("Successfully built aggregated referrer snapshot");
-    return result;
-  } catch (error) {
+  },
+  onRejected(error) {
     logger.error({ error }, "Failed to build aggregated referrer snapshot");
-    throw error;
-  }
-}, TTL);
+  },
+});
 
 export type AggregatedReferrerSnapshotCacheVariables = {
   aggregatedReferrerSnapshotCache: Awaited<ReturnType<typeof fetcher>>;

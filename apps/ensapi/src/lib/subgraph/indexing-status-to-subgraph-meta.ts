@@ -1,10 +1,6 @@
 import config from "@/config";
 
-import {
-  ChainIndexingStatusIds,
-  getENSRootChainId,
-  IndexingStatusResponseCodes,
-} from "@ensnode/ensnode-sdk";
+import { ChainIndexingStatusIds, getENSRootChainId } from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
 
 import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
@@ -27,36 +23,29 @@ export function indexingStatusToSubgraphMeta(
       return null;
     }
     case "fulfilled": {
-      switch (indexingStatus.value.responseCode) {
-        case IndexingStatusResponseCodes.Error: {
+      const rootChain =
+        indexingStatus.value.realtimeProjection.snapshot.omnichainSnapshot.chains.get(
+          getENSRootChainId(config.namespace),
+        );
+      if (!rootChain) return null;
+
+      switch (rootChain.chainStatus) {
+        case ChainIndexingStatusIds.Queued: {
           return null;
         }
-        case IndexingStatusResponseCodes.Ok: {
-          const rootChain =
-            indexingStatus.value.realtimeProjection.snapshot.omnichainSnapshot.chains.get(
-              getENSRootChainId(config.namespace),
-            );
-          if (!rootChain) return null;
-
-          switch (rootChain.chainStatus) {
-            case ChainIndexingStatusIds.Queued: {
-              return null;
-            }
-            case ChainIndexingStatusIds.Completed:
-            case ChainIndexingStatusIds.Backfill:
-            case ChainIndexingStatusIds.Following: {
-              return {
-                deployment: config.ensIndexerPublicConfig.versionInfo.ensIndexer,
-                hasIndexingErrors: false,
-                block: {
-                  hash: null,
-                  parentHash: null,
-                  number: rootChain.latestIndexedBlock.number,
-                  timestamp: rootChain.latestIndexedBlock.timestamp,
-                },
-              };
-            }
-          }
+        case ChainIndexingStatusIds.Completed:
+        case ChainIndexingStatusIds.Backfill:
+        case ChainIndexingStatusIds.Following: {
+          return {
+            deployment: config.ensIndexerPublicConfig.versionInfo.ensIndexer,
+            hasIndexingErrors: false,
+            block: {
+              hash: null,
+              parentHash: null,
+              number: rootChain.latestIndexedBlock.number,
+              timestamp: rootChain.latestIndexedBlock.timestamp,
+            },
+          };
         }
       }
     }

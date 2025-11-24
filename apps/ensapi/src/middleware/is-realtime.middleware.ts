@@ -61,10 +61,6 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
         logger.warn(
           `ENSIndexer Indexing Status: UNAVAILABLE. ENSApi was unable to fetch the current ENSIndexer Indexing Status: ${c.var.indexingStatus.reason}`,
         );
-      } else if (c.var.indexingStatus.value.responseCode === IndexingStatusResponseCodes.Error) {
-        logger.warn(
-          `ENSIndexer Indexing Status: UNAVAILABLE. ENSIndexer is reporting an Indexing Status Error.`,
-        );
       }
     }
 

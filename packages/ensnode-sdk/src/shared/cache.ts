@@ -222,6 +222,28 @@ interface SWRCache<T> {
   revalidating?: Promise<T>;
 }
 
+interface StaleWhileRevalidateOptions<T> {
+  /**
+   * The async function to wrap with SWR caching
+   */
+  fn: () => Promise<T>;
+
+  /**
+   * Time-to-live duration in seconds. After this duration, data is considered stale
+   */
+  ttl: Duration;
+
+  /**
+   * Optional callback invoked when the wrapped function resolves successfully
+   */
+  onResolved?: (value: T) => void;
+
+  /**
+   * Optional callback invoked when the wrapped function throws an error
+   */
+  onRejected?: (reason: unknown) => void;
+}
+
 /**
  * Stale-While-Revalidate (SWR) cache wrapper for async functions.
  *
@@ -257,15 +279,17 @@ interface SWRCache<T> {
  *
  * @param fn The async function to wrap with SWR caching
  * @param ttl Time-to-live duration in seconds. After this duration, data is considered stale
+ * @param onResolved Optional callback invoked when the wrapped function resolves successfully
+ * @param onRejected Optional callback invoked when the wrapped function throws an error
  * @returns A cached version of the function with SWR semantics. Returns null if fn throws an error and no cached value is available.
  *
  * @link https://web.dev/stale-while-revalidate/
  * @link https://datatracker.ietf.org/doc/html/rfc5861
  */
 export function staleWhileRevalidate<T>(
-  fn: () => Promise<T>,
-  ttl: Duration,
+  options: StaleWhileRevalidateOptions<T>,
 ): () => Promise<T | null> {
+  const { fn, ttl, onResolved, onRejected } = options;
   let cache: SWRCache<T> | null = null;
   let initialBuild: Promise<T | null> | null = null;
 
@@ -280,11 +304,13 @@ export function staleWhileRevalidate<T>(
       // Start initial build
       initialBuild = fn()
         .then((value) => {
+          onResolved?.(value);
           cache = { value, updatedAt: getUnixTime(new Date()) };
           initialBuild = null;
           return value;
         })
-        .catch((_error) => {
+        .catch((error) => {
+          onRejected?.(error);
           initialBuild = null;
           // No cached value available, return null
           return null;
@@ -304,10 +330,12 @@ export function staleWhileRevalidate<T>(
     // Stale cache, kick off revalidation in background
     const revalidationPromise = fn()
       .then((value) => {
+        onResolved?.(value);
         cache = { value, updatedAt: getUnixTime(new Date()) };
         return value;
       })
-      .catch(() => {
+      .catch((error) => {
+        onRejected?.(error);
         // On error, clear revalidating flag so next request can retry
         // Keep serving stale data, swallow error (background revalidation)
         if (cache) {

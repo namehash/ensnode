@@ -220,7 +220,7 @@ describe("staleWhileRevalidate", () => {
 
   it("fetches data on first call", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate(fn, 1); // 1 second
+    const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second
 
     const result = await cached();
 
@@ -230,7 +230,7 @@ describe("staleWhileRevalidate", () => {
 
   it("returns cached data within TTL without refetching", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     await cached();
     vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
@@ -242,7 +242,7 @@ describe("staleWhileRevalidate", () => {
 
   it("returns stale data immediately after TTL expires", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     await cached();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
@@ -254,7 +254,7 @@ describe("staleWhileRevalidate", () => {
   it("triggers background revalidation after TTL expires", async () => {
     let value = "value1";
     const fn = vi.fn(async () => value);
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     await cached();
     expect(fn).toHaveBeenCalledTimes(1);
@@ -288,7 +288,7 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     await cached();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
@@ -324,7 +324,7 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     await cached();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
@@ -359,7 +359,7 @@ describe("staleWhileRevalidate", () => {
       return "value1";
     });
 
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     await cached();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
@@ -390,7 +390,7 @@ describe("staleWhileRevalidate", () => {
       return "value2";
     });
 
-    const cached = staleWhileRevalidate(fn, 2); // 2 seconds
+    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
 
     // Initial fetch
     shouldError = false;
@@ -413,39 +413,103 @@ describe("staleWhileRevalidate", () => {
     expect(result).toBe("value2");
   });
 
-  it("returns null when initial fetch fails with no cache", async () => {
-    const fn = vi.fn(async () => {
-      throw new Error("Initial fetch failed");
-    });
-
-    const cached = staleWhileRevalidate(fn, 1); // 1 second
-
-    // Initial fetch should fail and return null
-    const result = await cached();
-    expect(result).toBeNull();
-    expect(fn).toHaveBeenCalledTimes(1);
-  });
-
-  it("succeeds on retry after initial fetch failure", async () => {
-    let shouldError = true;
-    const fn = vi.fn(async () => {
-      if (shouldError) {
+  describe("on fetched callbacks", () => {
+    it("returns null when initial fetch fails with no cache", async () => {
+      const fn = vi.fn(async () => {
         throw new Error("Initial fetch failed");
-      }
-      return "value1";
+      });
+
+      const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second
+
+      // Initial fetch should fail and return null
+      const result = await cached();
+      expect(result).toBeNull();
+      expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    const cached = staleWhileRevalidate(fn, 1); // 1 second
+    it("succeeds on retry after initial fetch failure", async () => {
+      let shouldError = true;
+      const fn = vi.fn(async () => {
+        if (shouldError) {
+          throw new Error("Initial fetch failed");
+        }
+        return "value1";
+      });
 
-    // Initial fetch fails and returns null
-    const result1 = await cached();
-    expect(result1).toBeNull();
-    expect(fn).toHaveBeenCalledTimes(1);
+      const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second
 
-    // Retry should succeed
-    shouldError = false;
-    const result2 = await cached();
-    expect(result2).toBe("value1");
-    expect(fn).toHaveBeenCalledTimes(2);
+      // Initial fetch fails and returns null
+      const result1 = await cached();
+      expect(result1).toBeNull();
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Retry should succeed
+      shouldError = false;
+      const result2 = await cached();
+      expect(result2).toBe("value1");
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it("calls onResolved callback when fetch succeeds", async () => {
+      const fn = vi.fn().mockResolvedValue("ok");
+      const onResolved = vi.fn();
+      const cached = staleWhileRevalidate({ fn, ttl: 1, onResolved }); // 1 second
+
+      const result = await cached();
+      expect(result).toBe("ok");
+      expect(onResolved).toHaveBeenCalledTimes(1);
+      expect(onResolved).toHaveBeenCalledWith("ok");
+    });
+
+    it("calls onRejected callback when fetch fails", async () => {
+      const fn = vi.fn().mockRejectedValue(new Error("Fetch failed"));
+      const onRejected = vi.fn();
+      const cached = staleWhileRevalidate({ fn, ttl: 1, onRejected }); // 1 second
+
+      const result = await cached();
+      expect(result).toBeNull();
+      expect(onRejected).toHaveBeenCalledTimes(1);
+      expect(onRejected).toHaveBeenCalledWith(new Error("Fetch failed"));
+    });
+
+    it("calls onResolved and onRejected appropriately over multiple stale re-validations", async () => {
+      vi.useFakeTimers();
+
+      const fn = vi
+        .fn()
+        .mockResolvedValueOnce("first")
+        .mockRejectedValueOnce(new Error("boom"))
+        .mockResolvedValueOnce("third");
+
+      const onResolved = vi.fn();
+      const onRejected = vi.fn();
+
+      const cached = staleWhileRevalidate({ fn, ttl: 1, onResolved, onRejected });
+
+      // First fetch
+      expect(await cached()).toBe("first");
+      expect(onResolved).toHaveBeenCalledTimes(1);
+      expect(onRejected).not.toHaveBeenCalled();
+
+      // Make stale + trigger revalidation (fails)
+      vi.advanceTimersByTime(2000);
+      expect(await cached()).toBe("first"); // stale, but returned fast
+
+      // Let background revalidation fail
+      await vi.runAllTimersAsync();
+      expect(onRejected).toHaveBeenCalledTimes(1);
+      expect(onRejected).toHaveBeenCalledWith(new Error("boom"));
+
+      // Make stale again + trigger revalidation (succeeds)
+      vi.advanceTimersByTime(2000);
+      expect(await cached()).toBe("first"); // still old value (returned immediately)
+
+      // Let background revalidation succeed
+      await vi.runAllTimersAsync();
+      expect(onResolved).toHaveBeenCalledTimes(2);
+      expect(onResolved).toHaveBeenNthCalledWith(2, "third");
+
+      vi.useRealTimers();
+    });
   });
 });
