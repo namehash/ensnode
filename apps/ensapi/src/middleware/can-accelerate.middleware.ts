@@ -7,7 +7,7 @@ import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("can-accelerate.middleware");
 
-export type CanAccelerateVariables = { canAccelerate: boolean };
+export type CanAccelerateMiddlewareContext = { canAccelerate: boolean };
 
 // TODO: expand this datamodel to include 'reasons' acceleration was disabled to drive ui
 

@@ -42,7 +42,7 @@ export const fetcher = staleWhileRevalidate({
   ttl: TTL,
 });
 
-export type AggregatedReferrerSnapshotCacheVariables = {
+export type AggregatedReferrerSnapshotCacheMiddlewareContext = {
   aggregatedReferrerSnapshotCache: Awaited<ReturnType<typeof fetcher>>;
 };
 

@@ -3,6 +3,7 @@ import config from "@/config";
 import {
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
+  type IndexingStatusResponseOk,
   serializeENSApiPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
@@ -26,15 +27,15 @@ app.get("/config", async (c) => {
 
 // include ENSIndexer Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
-  const cachedIndexingStatus = c.var.indexingStatus;
+  const indexingStatusContext = c.var.indexingStatus;
 
-  // return error response if indexing status has never been cached successfully
-  if (cachedIndexingStatus.isRejected) {
+  if (indexingStatusContext.isRejected) {
+    // no indexing status available in context
     logger.error(
       {
-        error: cachedIndexingStatus.reason,
+        error: indexingStatusContext.reason,
       },
-      "Failed to load Indexing Status from cache.",
+      "Indexing status requested but is not available in context.",
     );
 
     return c.json(
@@ -45,7 +46,13 @@ app.get("/indexing-status", async (c) => {
     );
   }
 
-  return c.json(serializeIndexingStatusResponse(cachedIndexingStatus.value));
+  // return successful response using the indexing status projection from the context
+  return c.json(
+    serializeIndexingStatusResponse({
+      responseCode: IndexingStatusResponseCodes.Ok,
+      realtimeProjection: indexingStatusContext.value,
+    } satisfies IndexingStatusResponseOk),
+  );
 });
 
 // Registrar Actions API

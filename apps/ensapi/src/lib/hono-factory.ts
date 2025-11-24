@@ -1,13 +1,13 @@
 import { createFactory } from "hono/factory";
 
-import type { AggregatedReferrerSnapshotCacheVariables } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
-import type { CanAccelerateVariables } from "@/middleware/can-accelerate.middleware";
-import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
-import type { IsRealtimeVariables } from "@/middleware/is-realtime.middleware";
+import type { AggregatedReferrerSnapshotCacheMiddlewareContext } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
+import type { CanAccelerateMiddlewareContext } from "@/middleware/can-accelerate.middleware";
+import type { IndexingStatusMiddlewareContext } from "@/middleware/indexing-status.middleware";
+import type { IsRealtimeMiddlewareContext } from "@/middleware/is-realtime.middleware";
 
 export const factory = createFactory<{
-  Variables: IndexingStatusVariables &
-    IsRealtimeVariables &
-    CanAccelerateVariables &
-    AggregatedReferrerSnapshotCacheVariables;
+  Variables: IndexingStatusMiddlewareContext &
+    IsRealtimeMiddlewareContext &
+    CanAccelerateMiddlewareContext &
+    AggregatedReferrerSnapshotCacheMiddlewareContext;
 }>();

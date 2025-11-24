@@ -3,31 +3,31 @@ import config from "@/config";
 import { ChainIndexingStatusIds, getENSRootChainId } from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
 
-import type { IndexingStatusVariables } from "@/middleware/indexing-status.middleware";
+import type { IndexingStatusMiddlewareContext } from "@/middleware/indexing-status.middleware";
 
 /**
  * Converts ENSIndexer indexing status to GraphQL subgraph metadata format.
  *
- * Transforms the cached indexing status response from ENSIndexer into
+ * Transforms the indexing context from the indexing status middleware into
  * the `_meta` format expected by legacy subgraph GraphQL APIs.
- * Returns null if the indexing status indicates an error state or
- * the root chain is not available.
+ * Returns null if the indexing context indicates an error state or
+ * indexing status for the ENS root chain is not available.
  *
- * @param cachedIndexingStatus - The cached indexing status result from ENSIndexer
+ * @param indexingStatus - The indexing context from the indexing status middleware
  * @returns SubgraphMeta object or null if conversion is not possible
  */
-export function indexingStatusToSubgraphMeta(
-  cachedIndexingStatus: IndexingStatusVariables["indexingStatus"],
+export function indexingContextToSubgraphMeta(
+  indexingStatus: IndexingStatusMiddlewareContext["indexingStatus"],
 ): SubgraphMeta {
-  // return null if indexing status has never been cached successfully
-  if (cachedIndexingStatus.isRejected) {
+  if (indexingStatus.isRejected) {
+    // indexing status middleware has never successfully fetched (and cached) an indexing status snapshot
+    // for the lifetime of this service instance.
     return null;
   }
 
-  const rootChain =
-    cachedIndexingStatus.value.realtimeProjection.snapshot.omnichainSnapshot.chains.get(
-      getENSRootChainId(config.namespace),
-    );
+  const rootChain = indexingStatus.value.snapshot.omnichainSnapshot.chains.get(
+    getENSRootChainId(config.namespace),
+  );
   if (!rootChain) return null;
 
   switch (rootChain.chainStatus) {

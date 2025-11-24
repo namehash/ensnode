@@ -42,13 +42,13 @@ export const requireRegistrarActionsPluginMiddleware = () =>
 
     const cachedIndexingStatus = c.var.indexingStatus;
 
-    // return error response if indexing status has never been cached successfully
     if (cachedIndexingStatus.isRejected) {
+      // no indexing status available in context
       logger.error(
         {
           error: cachedIndexingStatus.reason,
         },
-        "Failed to load Indexing Status from cache.",
+        `Registrar Actions API requested but indexing status is not available in context because: ${cachedIndexingStatus.reason}.`,
       );
 
       return c.json(
@@ -56,14 +56,14 @@ export const requireRegistrarActionsPluginMiddleware = () =>
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `Connected ENSIndexer must make its Indexing Status API ready for connections.`,
+            details: `Indexing status is currently unavailable to this ENSApi instance because: ${cachedIndexingStatus.reason}.`,
           },
         }),
         500,
       );
     }
 
-    const { omnichainSnapshot } = cachedIndexingStatus.value.realtimeProjection.snapshot;
+    const { omnichainSnapshot } = cachedIndexingStatus.value.snapshot;
 
     if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
       return c.json(
