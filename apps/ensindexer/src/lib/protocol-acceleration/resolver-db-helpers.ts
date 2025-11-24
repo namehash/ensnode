@@ -79,15 +79,15 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     : null;
 
   // TODO: remove this in favor of EAC
-  let ownerId: Address | null = null;
-  try {
-    const rawOwner = await context.client.readContract({
-      address: resolver.address,
-      abi: ResolverABI,
-      functionName: "owner",
-    });
-    ownerId = interpretAddress(rawOwner);
-  } catch {}
+  const ownerId: Address | null = null;
+  // try {
+  //   const rawOwner = await context.client.readContract({
+  //     address: resolver.address,
+  //     abi: ResolverABI,
+  //     functionName: "owner",
+  //   });
+  //   ownerId = interpretAddress(rawOwner);
+  // } catch {}
 
   // ensure Resolver
   await context.db.insert(schema.resolver).values({

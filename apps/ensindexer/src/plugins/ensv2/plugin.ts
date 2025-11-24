@@ -1,5 +1,7 @@
 /**
  * TODO
+ * - root can be inserted on setup or could be discovered naturally — see how that affects traversal/graphql api
+ *   - probably easier to just insert it ahead of time like previously
  * - move registration expiration shared logic to sdk/ens
  *   - update isRegistrationFullyExpired todo in ensapi somewhere
  * - RequiredAndNotNull opposite type: RequiredToBeNull<T, keys> for constraining polymorphic entities in graphql schema
@@ -19,6 +21,7 @@
  * - Query.permissions(by: { contract: {  } })
  * - custom wrapper for resolveCursorConnection with typesafety that applies defaults and auto-decodes cursors to the indicated type
  * - Pothos envelop plugins (aliases, depth, tokens, whatever)
+ * - BEFORE MERGE: revert sepolia.ts namespace back to original, including ensv2 stubs
  *
  * PENDING ENS TEAM
  * - DedicatedResolver moving to EAC

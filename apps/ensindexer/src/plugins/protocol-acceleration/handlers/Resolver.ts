@@ -20,7 +20,7 @@ import {
   handleResolverOwnerUpdate,
   handleResolverTextRecordUpdate,
   makeResolverRecordsCompositeKey,
-} from "@/lib/protocol-acceleration/resolver-records-db-helpers";
+} from "@/lib/protocol-acceleration/resolver-db-helpers";
 
 const pluginName = PluginName.ProtocolAcceleration;
 
