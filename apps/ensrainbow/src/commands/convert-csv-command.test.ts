@@ -38,6 +38,7 @@ describe("convert-csv-command", () => {
         outputFile,
         labelSetId: "test-csv-one-col" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
       });
 
       // Verify the output file was created
@@ -71,6 +72,7 @@ describe("convert-csv-command", () => {
         outputFile,
         labelSetId: "test-csv-two-col" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
       });
 
       // Verify the output file was created
@@ -119,6 +121,7 @@ describe("convert-csv-command", () => {
         outputFile,
         labelSetId: "test-csv-special" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
       });
 
       // Verify output file was created
@@ -229,6 +232,7 @@ describe("convert-csv-command", () => {
         outputFile: initialOutputFile,
         labelSetId: "test-filtering" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
       });
 
       // Ingest the initial file
@@ -255,6 +259,7 @@ describe("convert-csv-command", () => {
         labelSetId: "test-filtering" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion, // Use same version as initial
         existingDbPath: dataDir,
+        silent: true,
       });
 
       // Verify the filtered output file was created
@@ -296,6 +301,7 @@ describe("convert-csv-command", () => {
         outputFile,
         labelSetId: "test-duplicates" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
       });
 
       // Verify the output file was created
@@ -400,10 +406,10 @@ describe("convert-csv-command", () => {
 
       // Verify file was created
       const stats = await stat(outputFile);
-      expect(stats.isFile()).toBe(true);
-      expect(stats.size).toBeGreaterThan(0);
-    });
+    expect(stats.isFile()).toBe(true);
+    expect(stats.size).toBeGreaterThan(0);
   });
+});
 
   describe("Streaming performance", () => {
     it("should handle small CSV files efficiently", async () => {
@@ -426,6 +432,7 @@ describe("convert-csv-command", () => {
         outputFile,
         labelSetId: "test-small" as LabelSetId,
         labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
       });
 
       const conversionTime = Date.now() - startTime;
@@ -453,5 +460,31 @@ describe("convert-csv-command", () => {
       const dbStats = await stat(dataDir);
       expect(dbStats.isDirectory()).toBe(true);
     });
+
+    it("should handle CSV files with many unique labels", async () => {
+      const inputFile = join(tempDir, "many_labels.csv");
+      const outputFile = join(tempDir, "output_many_labels.ensrainbow");
+
+      // Create a CSV with 50,000 unique labels (tests deduplication with increased memory limit)
+      const records = [];
+      for (let i = 0; i < 50_000; i++) {
+        records.push(`label${i}`);
+      }
+      await writeFile(inputFile, records.join("\n"));
+
+      // This should work without memory issues
+      await convertCsvCommand({
+        inputFile,
+        outputFile,
+        labelSetId: "test-many-labels" as LabelSetId,
+        labelSetVersion: 0 as LabelSetVersion,
+        silent: true,
+      });
+
+      // Verify file was created
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+    }, 60000); // 60 second timeout for large file test
   });
 });
