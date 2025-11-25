@@ -138,30 +138,28 @@ export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusRe
  */
 
 /**
- * Records Filters: Comparators
+ * Records Filters: Filter Types
  */
-export const RegistrarActionsFilterComparators = {
-  EqualsTo: "eq",
+export const RegistrarActionsFilterTypes = {
+  BySubregistryNode: "bySubregistryNode",
+  WithEncodedReferral: "withEncodedReferral",
 } as const;
 
-export type RegistrarActionsFilterComparator =
-  (typeof RegistrarActionsFilterComparators)[keyof typeof RegistrarActionsFilterComparators];
+export type RegistrarActionsFilterType =
+  (typeof RegistrarActionsFilterTypes)[keyof typeof RegistrarActionsFilterTypes];
 
-/**
- * Records Filters: Fields
- */
-export const RegistrarActionsFilterFields = {
-  SubregistryNode: "registrationLifecycle.subregistry.node",
-} as const;
-
-export type RegistrarActionsFilterField =
-  (typeof RegistrarActionsFilterFields)[keyof typeof RegistrarActionsFilterFields];
-
-export type RegistrarActionsFilter = {
-  field: typeof RegistrarActionsFilterFields.SubregistryNode;
-  comparator: typeof RegistrarActionsFilterComparators.EqualsTo;
+export type RegistrarActionsFilterBySubregistryNode = {
+  filterType: typeof RegistrarActionsFilterTypes.BySubregistryNode;
   value: Node;
 };
+
+export type RegistrarActionsFilterWithEncodedReferral = {
+  filterType: typeof RegistrarActionsFilterTypes.WithEncodedReferral;
+};
+
+export type RegistrarActionsFilter =
+  | RegistrarActionsFilterBySubregistryNode
+  | RegistrarActionsFilterWithEncodedReferral;
 
 /**
  * Records Orders
@@ -177,7 +175,10 @@ export type RegistrarActionsOrder =
  * Represents a request to Registrar Actions API.
  */
 export type RegistrarActionsRequest = {
-  filter?: RegistrarActionsFilter;
+  /**
+   * Filters to be applied while generating results.
+   */
+  filters?: RegistrarActionsFilter[];
 
   /**
    * Order applied while generating results.

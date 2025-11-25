@@ -1,6 +1,7 @@
 import z from "zod/v4";
 
 import {
+  type RegistrarActionsFilter,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
   type RegistrarActionsResponseError,
@@ -78,17 +79,28 @@ app.get(
         .default(RESPONSE_ITEMS_PER_PAGE_DEFAULT)
         .pipe(z.coerce.number())
         .pipe(makePositiveIntegerSchema().max(RESPONSE_ITEMS_PER_PAGE_MAX)),
+
+      withReferral: params.boolstring.optional().default(false),
     }),
   ),
   async (c) => {
     try {
       const { parentNode } = c.req.valid("param");
-      const { orderBy, itemsPerPage } = c.req.valid("query");
-      const filter = registrarActionsFilter.byParentNode(parentNode);
+      const { orderBy, itemsPerPage, withReferral } = c.req.valid("query");
+
+      const filters: RegistrarActionsFilter[] = [];
+
+      if (parentNode) {
+        filters.push(registrarActionsFilter.byParentNode(parentNode));
+      }
+
+      if (withReferral) {
+        filters.push(registrarActionsFilter.withReferral(true));
+      }
 
       // Find the latest "logical registrar actions".
       const registrarActions = await findRegistrarActions({
-        filter,
+        filters,
         orderBy,
         limit: itemsPerPage,
       });

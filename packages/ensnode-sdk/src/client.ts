@@ -2,7 +2,7 @@ import {
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
   deserializeRegistrarActionsResponse,
-  RegistrarActionsFilterFields,
+  RegistrarActionsFilterTypes,
   RegistrarActionsOrders,
   type SerializedIndexingStatusResponse,
   type SerializedRegistrarActionsResponse,
@@ -463,22 +463,39 @@ export class ENSNodeClient {
    * // get latest registrar action records associated with
    * // subregistry managing `eth` name
    * await client.registrarActions({
-   *   filter: registrarActionsFilter.byParentNode(namehash('eth')),
+   *   filters: [registrarActionsFilter.byParentNode(namehash('eth'))],
+   * });
+   *
+   * // get latest registrar action records which include referral info
+   * await client.registrarActions({
+   *   filters: [registrarActionsFilter.withReferral(true)],
    * });
    *
    * // get latest 10 registrar action records associated with
    * // subregistry managing `base.eth` name
    * await client.registrarActions({
-   *   filter: registrarActionsFilter.byParentNode(namehash('base.eth')),
+   *   filters: [registrarActionsFilter.byParentNode(namehash('base.eth'))],
    *   limit: 10
    * });
    * ```
    */
   async registrarActions(request: RegistrarActionsRequest = {}): Promise<RegistrarActionsResponse> {
-    const buildUrlPath = (filter: RegistrarActionsFilter | undefined) => {
-      return filter?.field === RegistrarActionsFilterFields.SubregistryNode
-        ? new URL(`/api/registrar-actions/${filter.value}`, this.options.url)
+    const buildUrlPath = (filters: RegistrarActionsFilter[] | undefined) => {
+      const bySubregistryNodeFilter = filters?.find(
+        (f) => f.filterType === RegistrarActionsFilterTypes.BySubregistryNode,
+      );
+
+      return bySubregistryNodeFilter
+        ? new URL(`/api/registrar-actions/${bySubregistryNodeFilter.value}`, this.options.url)
         : new URL(`/api/registrar-actions`, this.options.url);
+    };
+
+    const buildWithReferralArg = (filters: RegistrarActionsFilter[] | undefined) => {
+      const withReferralFilter = filters?.find(
+        (f) => f.filterType === RegistrarActionsFilterTypes.WithEncodedReferral,
+      );
+
+      return withReferralFilter ? { key: "withReferral", value: "true" } : null;
     };
 
     const buildOrderArg = (order: RegistrarActionsOrder) => {
@@ -493,7 +510,7 @@ export class ENSNodeClient {
       }
     };
 
-    const url = buildUrlPath(request.filter);
+    const url = buildUrlPath(request.filters);
 
     if (request.order) {
       const orderArgs = buildOrderArg(request.order);
@@ -503,6 +520,12 @@ export class ENSNodeClient {
 
     if (request.itemsPerPage) {
       url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    }
+
+    const referralArg = buildWithReferralArg(request.filters);
+
+    if (referralArg) {
+      url.searchParams.set(referralArg.key, referralArg.value);
     }
 
     const response = await fetch(url);
