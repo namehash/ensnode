@@ -2,4 +2,4 @@
 "ensapi": minor
 ---
 
-Indexing Status cache can store only responses with `responseCode: IndexingStatusResponseCodes.Ok`.
+Indexing Status cache only stores responses with `responseCode: IndexingStatusResponseCodes.Ok`.
