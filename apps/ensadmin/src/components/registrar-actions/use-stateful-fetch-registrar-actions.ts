@@ -68,7 +68,7 @@ export function useStatefulRegistrarActions({
   });
 
   // ENSNode config is not fetched yet, so wait in the initial status
-  if (!ensNodeConfigQuery.isFetched || !indexingStatusQuery.isFetched) {
+  if (ensNodeConfigQuery.isPending || indexingStatusQuery.isPending) {
     return {
       fetchStatus: StatefulFetchStatusIds.Connecting,
     } satisfies StatefulFetchRegistrarActionsConnecting;
@@ -111,7 +111,7 @@ export function useStatefulRegistrarActions({
   }
 
   // fetching has not been completed
-  if (registrarActionsQuery.isPending || registrarActionsQuery.isLoading) {
+  if (registrarActionsQuery.isPending) {
     return {
       fetchStatus: StatefulFetchStatusIds.Loading,
       itemsPerPage,
@@ -119,7 +119,7 @@ export function useStatefulRegistrarActions({
   }
 
   // fetching has been completed with an error
-  if (registrarActionsQuery.isLoadingError || registrarActionsQuery.isError) {
+  if (registrarActionsQuery.isError) {
     return {
       fetchStatus: StatefulFetchStatusIds.Error,
       reason: registrarActionsQuery.error.message,

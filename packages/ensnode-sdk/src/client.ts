@@ -397,7 +397,7 @@ export class ENSNodeClient {
   async getAggregatedReferrers(
     request?: PaginatedAggregatedReferrersRequest,
   ): Promise<PaginatedAggregatedReferrersResponse> {
-    const url = new URL(`/api/ensanalytics/aggregated-referrers`, this.options.url);
+    const url = new URL(`/ensanalytics/aggregated-referrers`, this.options.url);
 
     if (request?.page) url.searchParams.set("page", request.page.toString());
     if (request?.itemsPerPage)

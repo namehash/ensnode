@@ -2,7 +2,6 @@ import {
   type DefaultError,
   type DefinedInitialDataOptions,
   type DefinedUseQueryResult,
-  keepPreviousData,
   type QueryClient,
   type QueryKey,
   type QueryObserverSuccessResult,
@@ -26,6 +25,34 @@ import { useMemo } from "react";
  * - the cached result can be only overridden by the current result when
  *   the query is successfully re-fetched (in other words,
  *   the `options.queryFn` returns a resolved promise).
+ *
+ * Please note how there can be any number of failed queries before one
+ * succeeds. In such case, no successful result has ever been cached and
+ * the query fails (`isError: true`, `error` is available) until
+ * the first successful resolution (`isSuccess: true`, `data` is available).
+ *
+ * @example
+ * ```tsx
+ * const swrQuery = useSwrQuery({
+ *   queryKey: ['data'],
+ *   queryFn: fetchData,
+ * });
+ *
+ * if (swrQuery.isPending) {
+ *   // Show loading state while there's no cached successful result and
+ *   // no query attempt was finished yet.
+ *   return <>Loading...</>;
+ * }
+ *
+ * if (swrQuery.isError) {
+ *   // Show error state when query attempt fails and
+ *   // no cached successful result is available.
+ *   return <>Error: {swrQuery.error.message}</>;
+ * }
+ *
+ * // Otherwise, show data when the cached successful result is available.
+ * return <>Data: {JSON.stringify(swrQuery.data)}</>;
+ * ```
  */
 export function useSwrQuery<
   TQueryFnData = unknown,
@@ -67,16 +94,15 @@ export function useSwrQuery<
   const derivedQueryClient = queryClient ?? queryClientFromContext;
 
   // cacheResult, if available, is always the last successfully resolved query data
-  const cachedResult = derivedQueryClient.getQueryData<TData>(options.queryKey);
+  const cachedSuccessfulResult = derivedQueryClient.getQueryData<TData>(options.queryKey);
 
   const queryResult = useQuery(
     {
       ...options,
       // cached result can never be stale
-      staleTime: cachedResult ? Infinity : undefined,
+      staleTime: cachedSuccessfulResult ? Infinity : undefined,
       // cached result can never be removed by garbage collector
-      gcTime: cachedResult ? Infinity : undefined,
-      placeholderData: keepPreviousData, // Keep showing previous data during refetch (does not work for errors)
+      gcTime: cachedSuccessfulResult ? Infinity : undefined,
     },
     queryClient,
   );
@@ -84,9 +110,10 @@ export function useSwrQuery<
   // memoize query results to avoid unnecessary UI re-rendering
   const memoizedQueryResult = useMemo(() => {
     // If the query result is error
-    // and the cachedResult is available
-    // override the query result to be success, including cachedResult data
-    if (queryResult.isError && cachedResult) {
+    // and the cachedSuccessfulResult is available
+    // override the query result to be success, replacing the unsuccessful
+    // result with the most recent cachedSuccessfulResult
+    if (queryResult.isError && cachedSuccessfulResult) {
       return {
         ...queryResult,
         // set error props
@@ -97,12 +124,12 @@ export function useSwrQuery<
         // st success props
         isSuccess: true,
         status: "success",
-        data: cachedResult,
+        data: cachedSuccessfulResult,
       } satisfies QueryObserverSuccessResult<TData, TError>;
     }
 
     return queryResult;
-  }, [queryResult, cachedResult]);
+  }, [queryResult, cachedSuccessfulResult]);
 
   return memoizedQueryResult;
 }
