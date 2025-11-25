@@ -54,7 +54,7 @@ const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
 /**
  * Type definition for the indexing status middleware context passed to downstream middleware and handlers.
  */
-export type IndexingStatusMiddlewareContext = {
+export type IndexingStatusMiddlewareVariables = {
   /**
    * A {@link PromiseResult} identifying the current indexing context.
    *
@@ -77,7 +77,7 @@ export type IndexingStatusMiddlewareContext = {
 };
 
 /**
- * Middleware that provides {@link IndexingStatusMiddlewareContext}
+ * Middleware that provides {@link IndexingStatusMiddlewareVariables}
  * to downstream middleware and handlers.
  *
  * Optimizes for low-latency and high-availability by:
@@ -93,7 +93,7 @@ export type IndexingStatusMiddlewareContext = {
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
   const cachedSnapshot = await swrIndexingStatusSnapshotFetcher();
 
-  let indexingStatus: IndexingStatusMiddlewareContext["indexingStatus"];
+  let indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"];
 
   if (cachedSnapshot === null) {
     // An indexing status snapshot has never been cached successfully.

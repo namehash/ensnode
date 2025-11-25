@@ -10,7 +10,7 @@ let lastLoggedIsRealtime: boolean | null = null;
 /**
  * Type definition for the is realtime middleware context passed to downstream middleware and handlers.
  */
-export type IsRealtimeMiddlewareContext = { isRealtime: boolean };
+export type IsRealtimeMiddlewareVariables = { isRealtime: boolean };
 
 export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Duration) => {
   const logger = makeLogger(scope);

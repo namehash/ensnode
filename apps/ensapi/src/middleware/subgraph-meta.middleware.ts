@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 import type { SubgraphMetaVariables } from "@ensnode/ponder-subgraph";
 
 import { indexingContextToSubgraphMeta } from "@/lib/subgraph/indexing-status-to-subgraph-meta";
-import type { IndexingStatusMiddlewareContext } from "@/middleware/indexing-status.middleware";
+import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 
 /**
  * Middleware that converts indexing status to subgraph metadata format.
@@ -13,7 +13,7 @@ import type { IndexingStatusMiddlewareContext } from "@/middleware/indexing-stat
  * the context for use by subgraph handlers.
  */
 export const subgraphMetaMiddleware = createMiddleware<{
-  Variables: IndexingStatusMiddlewareContext & SubgraphMetaVariables;
+  Variables: IndexingStatusMiddlewareVariables & SubgraphMetaVariables;
 }>(async (c, next) => {
   c.set("_meta", indexingContextToSubgraphMeta(c.var.indexingStatus));
   await next();

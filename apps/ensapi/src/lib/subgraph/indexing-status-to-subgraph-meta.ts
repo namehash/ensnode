@@ -3,7 +3,7 @@ import config from "@/config";
 import { ChainIndexingStatusIds, getENSRootChainId } from "@ensnode/ensnode-sdk";
 import type { SubgraphMeta } from "@ensnode/ponder-subgraph";
 
-import type { IndexingStatusMiddlewareContext } from "@/middleware/indexing-status.middleware";
+import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 
 /**
  * Converts ENSIndexer indexing status to GraphQL subgraph metadata format.
@@ -17,7 +17,7 @@ import type { IndexingStatusMiddlewareContext } from "@/middleware/indexing-stat
  * @returns SubgraphMeta object or null if conversion is not possible
  */
 export function indexingContextToSubgraphMeta(
-  indexingStatus: IndexingStatusMiddlewareContext["indexingStatus"],
+  indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"],
 ): SubgraphMeta {
   if (indexingStatus.isRejected) {
     // indexing status middleware has never successfully fetched (and cached) an indexing status snapshot
