@@ -14,16 +14,16 @@ import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { requireRegistrarActionsPluginMiddleware } from "@/lib/middleware/require-registrar-actions-plugins..middleware";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
+import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 const app = factory.createApp();
 
-const logger = makeLogger("registrar-actions");
+const logger = makeLogger("registrar-actions-api");
 
 // Middleware managing access to Registrar Actions API routes.
 // It makes the routes available if all prerequisites are met.
-app.use(requireRegistrarActionsPluginMiddleware());
+app.use(registrarActionsApiMiddleware);
 
 const RESPONSE_ITEMS_PER_PAGE_DEFAULT = 25;
 const RESPONSE_ITEMS_PER_PAGE_MAX = 100;

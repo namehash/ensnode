@@ -15,6 +15,11 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
 export const subgraphMetaMiddleware = createMiddleware<{
   Variables: IndexingStatusMiddlewareVariables & SubgraphMetaVariables;
 }>(async (c, next) => {
+  // context must be set by the required middleware
+  if (c.var.indexingStatus === undefined) {
+    throw new Error(`Invariant(subgraphMetaMiddleware): indexingStatusMiddleware required`);
+  }
+
   c.set("_meta", indexingContextToSubgraphMeta(c.var.indexingStatus));
   await next();
 });

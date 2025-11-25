@@ -23,6 +23,7 @@ let prevCanAccelerate = false;
  * resolution handlers.
  */
 export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) => {
+  // context must be set by the required middleware
   if (c.var.isRealtime === undefined) {
     throw new Error(`Invariant(canAccelerateMiddleware): isRealtime middleware required`);
   }

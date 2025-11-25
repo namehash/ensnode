@@ -17,7 +17,7 @@ import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
 
-const logger = makeLogger("ensnode");
+const logger = makeLogger("ensnode-api");
 
 // include ENSApi Public Config endpoint
 app.get("/config", async (c) => {
@@ -27,13 +27,16 @@ app.get("/config", async (c) => {
 
 // include ENSIndexer Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
-  const indexingStatusContext = c.var.indexingStatus;
+  // context must be set by the required middleware
+  if (c.var.indexingStatus === undefined) {
+    throw new Error(`Invariant(ensnode-api): indexingStatusMiddleware required`);
+  }
 
-  if (indexingStatusContext.isRejected) {
+  if (c.var.indexingStatus.isRejected) {
     // no indexing status available in context
     logger.error(
       {
-        error: indexingStatusContext.reason,
+        error: c.var.indexingStatus.reason,
       },
       "Indexing status requested but is not available in context.",
     );
@@ -50,7 +53,7 @@ app.get("/indexing-status", async (c) => {
   return c.json(
     serializeIndexingStatusResponse({
       responseCode: IndexingStatusResponseCodes.Ok,
-      realtimeProjection: indexingStatusContext.value,
+      realtimeProjection: c.var.indexingStatus.value,
     } satisfies IndexingStatusResponseOk),
   );
 });

@@ -15,12 +15,14 @@ export type IsRealtimeMiddlewareVariables = { isRealtime: boolean };
 export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Duration) => {
   const logger = makeLogger(scope);
 
-  return factory.createMiddleware(async (c, next) => {
+  return factory.createMiddleware(async function isRealtimeMiddleware(c, next) {
+    // context must be set by the required middleware
     if (c.var.indexingStatus === undefined) {
       throw new Error(`Invariant(isRealtimeMiddleware): indexingStatusMiddleware required`);
     }
 
     if (c.var.indexingStatus.isRejected) {
+      // no indexing status available in context
       if (!loggedIsRejected) {
         logger.warn(
           `ENSIndexer is NOT guaranteed to be within ${maxRealtimeDistance} seconds of realtime. Current indexing status has not been successfully fetched by this ENSApi instance yet and is therefore unknown to this ENSApi instance because: ${c.var.indexingStatus.reason}.`,
