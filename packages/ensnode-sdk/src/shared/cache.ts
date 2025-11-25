@@ -105,8 +105,8 @@ export class LruCache<KeyType extends string, ValueType> implements Cache<KeyTyp
   }
 }
 
-interface CacheEntry<T> {
-  value: T;
+interface CacheEntry<ValueType> {
+  value: ValueType;
   expiresAt: UnixTimestamp;
 }
 
@@ -202,34 +202,39 @@ export class TtlCache<KeyType extends string, ValueType> implements Cache<KeyTyp
  *
  * @internal
  */
-interface SWRCache<T> {
+interface SWRCache<ValueType> {
   /**
-   * The cached value of type T
+   * The cached value of type ValueType.
    */
-  value: T;
+  value: ValueType;
 
   /**
-   * Unix timestamp indicating when the value was last successfully updated
+   * Unix timestamp indicating when the cached `value` was last successfully updated.
    */
   updatedAt: UnixTimestamp;
 
   /**
-   * Optional promise of the in-progress revalidation attempt.
-   * If undefined, no revalidation attempt is in-progress.
-   * If defined, a revalidation attempt is already in-progress.
-   * Used to enforce no concurrent revalidation attempts.
+   * Optional promise of the current in-progress attempt to revalidate the cached `value`.
+   *
+   * If undefined, no revalidation attempt is currently in progress.
+   * If defined, a revalidation attempt is currently in progress.
+   *
+   * Helps to enforce no concurrent revalidation attempts.
    */
-  revalidating?: Promise<T>;
+  inProgressRevalidation?: Promise<void>;
 }
 
-interface StaleWhileRevalidateOptions<T> {
+interface StaleWhileRevalidateOptions<ValueType> {
   /**
-   * The async function to wrap with SWR caching
+   * The async function to wrap with SWR caching.
+   * On success this function returns a value of type `ValueType` to store in the `SWRCache`.
+   * On error, this function throws an error and no changes will be made to the `SWRCache`.
    */
-  fn: () => Promise<T>;
+  fn: () => Promise<ValueType>;
 
   /**
-   * Time-to-live duration in seconds. After this duration, data is considered stale
+   * Time-to-live duration in seconds. After this duration, data in the `SWRCache` is
+   * considered stale but is still retained in the cache until replaced with a new value.
    */
   ttl: Duration;
 }
@@ -241,12 +246,17 @@ interface StaleWhileRevalidateOptions<T> {
  * asynchronously revalidating the cache in the background. This provides:
  * - Sub-millisecond response times (after first fetch)
  * - Always available data (serves stale data during revalidation)
- * - Automatic background updates
+ * - Automatic background updates (currently only triggered lazily when new requests
+ *   are made for the cached data after it becomes stale)
  *
  * Error Handling:
- * - If the function throws an error and a cached value exists, the stale cached value is returned.
- * - If the function throws an error and no cached value exists, null is returned.
- * - Background revalidation errors are handled gracefully and don't interrupt serving stale data.
+ * - If a new invocation of the provided `fn` throws an error and a cached value exists
+ *   from a previous successfully invocation of the provided `fn`, the stale cached value is returned.
+ * - If a new invocation of the provided `fn` throws an error and NO cached value exists,
+ *   from any prior invocations of the provided `fn`, such that the provided `fn` has never
+ *   successfully returned a value for the lifetime of the `SWRCache`, then `null` is returned.
+ * - Therefore, errors occuring within the provided `fn` are handled internally within
+ *   `staleWhileRevalidate` and do not propagate to the caller.
  *
  * @example
  * ```typescript
@@ -263,46 +273,54 @@ interface StaleWhileRevalidateOptions<T> {
  * // Within TTL: returns cached data (fast)
  * const data2 = await cachedFetch();
  *
- * // After TTL: returns stale data immediately, revalidates in background
+ * // After TTL: returns stale data immediately, revalidates asynchronously in the background
  * const data3 = await cachedFetch(); // Still fast!
  * ```
  *
  * @param fn The async function to wrap with SWR caching
  * @param ttl Time-to-live duration in seconds. After this duration, data is considered stale
- * @returns A cached version of the function with SWR semantics. Returns null if fn throws an error and no cached value is available.
+ * @returns a value of `ValueType` that was most recently successfully returned by `fn`
+ *          or `null` if `fn` has never successfully returned and has always thrown an error.
  *
  * @link https://web.dev/stale-while-revalidate/
  * @link https://datatracker.ietf.org/doc/html/rfc5861
  */
-export function staleWhileRevalidate<T>(
-  options: StaleWhileRevalidateOptions<T>,
-): () => Promise<T | null> {
+export function staleWhileRevalidate<ValueType>(
+  options: StaleWhileRevalidateOptions<ValueType>,
+): () => Promise<ValueType | null> {
   const { fn, ttl } = options;
-  let cache: SWRCache<T> | null = null;
-  let initialBuild: Promise<T | null> | null = null;
+  let cache: SWRCache<ValueType> | null = null;
+  let cacheInitializer: Promise<ValueType | null> | null = null;
 
-  return async (): Promise<T | null> => {
-    // No cache, attempt to successfully build the first cache (any number of attempts to build the cache may have been attempted and failed previously)
+  return async (): Promise<ValueType | null> => {
     if (!cache) {
-      // If initial build already in progress, wait for it
-      if (initialBuild) {
-        return initialBuild;
+      // No cache. Attempt to successfully initialize the cache.
+      // Note that any number of attempts to initiailze the cache may
+      // have been attempted and failed previously.
+      if (cacheInitializer) {
+        // Initialization is already in progress. Therefore, return the existing
+        // intialization attempt to enforce no concurrent invocations of `fn` by the
+        // `staleWhileRevalidate` wrapper.
+        return cacheInitializer;
       }
 
-      // Start initial build
-      initialBuild = fn()
+      // Attempt initialization of the cache.
+      cacheInitializer = fn()
         .then((value) => {
+          // successfully initialize the `SWRCache`
           cache = { value, updatedAt: getUnixTime(new Date()) };
-          initialBuild = null;
+          cacheInitializer = null;
           return value;
         })
         .catch(() => {
-          initialBuild = null;
-          // No cached value available, return null
+          // initialization failed
+          cacheInitializer = null;
+          // all attempts at cache intialization have failed and therefore
+          // no cached value is available to return, so return null.
           return null;
         });
 
-      return initialBuild;
+      return cacheInitializer;
     }
 
     const isStale = durationBetween(cache.updatedAt, getUnixTime(new Date())) > ttl;
@@ -311,26 +329,26 @@ export function staleWhileRevalidate<T>(
     if (!isStale) return cache.value;
 
     // Stale cache, but revalidation already in progress
-    if (cache.revalidating) return cache.value;
+    if (cache.inProgressRevalidation) return cache.value;
 
-    // Stale cache, kick off revalidation in background
+    // Stale cache, kick off revalidation asynchronously in the background.
     const revalidationPromise = fn()
       .then((value) => {
+        // successfully updated the `SWRCache`
         cache = { value, updatedAt: getUnixTime(new Date()) };
-        return value;
       })
-      .catch((_error) => {
-        // On error, clear revalidating flag so next request can retry
-        // Keep serving stale data, swallow error (background revalidation)
+      .catch(() => {
+        // this attempt to update the cached value failed with an error.
         if (cache) {
-          cache.revalidating = undefined;
+          // Clear the `revalidating` promise so that the next request to read from
+          // the `staleWhileRevalidate` wrapper will retry.
+          cache.inProgressRevalidation = undefined;
         }
-        // Don't re-throw - this is background revalidation
-        // Caller can add their own error handling in the wrapped function
-        return cache?.value as T;
+
+        // swallow the error
       });
 
-    cache.revalidating = revalidationPromise;
+    cache.inProgressRevalidation = revalidationPromise;
 
     // Return stale value immediately
     return cache.value;
