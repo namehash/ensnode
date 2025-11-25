@@ -16,14 +16,16 @@ import { factory } from "@/lib/hono-factory";
 export const requireCorePluginMiddleware = (core: "subgraph" | "ensv2") =>
   factory.createMiddleware(async (c, next) => {
     if (
-      core === "subgraph" &&
+      core === "subgraph" && //
       !config.ensIndexerPublicConfig.plugins.includes(PluginName.Subgraph)
     ) {
       return c.notFound();
     }
 
-    // TODO: enable ensv2 checking
-    if (core === "ensv2") {
+    if (
+      core === "ensv2" && //
+      !config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)
+    ) {
       return c.notFound();
     }
 

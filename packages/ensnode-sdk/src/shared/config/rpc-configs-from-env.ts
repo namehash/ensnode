@@ -1,4 +1,10 @@
-import { type Datasource, type ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
+import {
+  type Datasource,
+  type ENSNamespaceId,
+  ensTestEnvL1Chain,
+  ensTestEnvL2Chain,
+  getENSNamespace,
+} from "@ensnode/datasources";
 
 import { serializeChainId } from "../serialize";
 import type { ChainIdString } from "../serialized-types";
@@ -19,7 +25,7 @@ import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./en
  * 2. Alchemy, if ALCHEMY_API_KEY is available in the env
  * 3. DRPC, if DRPC_API_KEY is available in the env
  *
- * TODO: also inject wss:// urls for alchemy, drpc keys
+ * It also provides a single Alchemy wss:// url if ALCHEMY_API_KEY is available in the env.
  *
  * NOTE: This function returns raw RpcConfigEnvironment values which are not yet parsed or validated.
  */
@@ -41,6 +47,20 @@ export function buildRpcConfigsFromEnv(
     const specificValue = env[`RPC_URL_${chain.id}`];
     if (specificValue) {
       rpcConfigs[serializeChainId(chain.id)] = specificValue;
+      continue;
+    }
+
+    // ens-test-env L1 Chain
+    if (chain.id === ensTestEnvL1Chain.id) {
+      rpcConfigs[serializeChainId(ensTestEnvL1Chain.id)] =
+        ensTestEnvL1Chain.rpcUrls.default.http[0];
+      continue;
+    }
+
+    // ens-test-env L2 Chain
+    if (chain.id === ensTestEnvL2Chain.id) {
+      rpcConfigs[serializeChainId(ensTestEnvL2Chain.id)] =
+        ensTestEnvL2Chain.rpcUrls.default.http[0];
       continue;
     }
 

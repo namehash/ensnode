@@ -29,7 +29,6 @@ export function getRegistrarManagedName(namespaceId: ENSNamespaceId): RegistrarM
       return "linea.eth";
     case "sepolia":
       return "linea-sepolia.eth";
-    case "holesky":
     case "ens-test-env":
       throw new Error(
         `No registrar managed name is known for the 'lineanames' subregistry within the "${namespaceId}" namespace.`,

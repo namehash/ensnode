@@ -24,7 +24,7 @@ These Terraform scripts are currently specific to ENSNode instances hosted by Na
 - [Terraform](https://www.terraform.io/downloads.html) installed
 - [Render](https://https://render.com/) account
 - Render API token (generate from https://render.com/docs/api#1-create-an-api-key)
-- RPC URLs for the chains you want to support (Mainnet, Sepolia, Holesky, Base, Linea)
+- RPC URLs for the chains you want to support (Mainnet, Sepolia, Base, Linea)
 - AWS account (for DNS management)
 - AWS S3 bucket defined inside AWS account - `ensnode-terraform` (for Terraform state)
 
@@ -60,9 +60,6 @@ linea_sepolia_rpc_url     = "your_linea_sepolia_rpc_url"
 optimism_sepolia_rpc_url  = "your_optimism_sepolia_rpc_url"
 arbitrum_sepolia_rpc_url  = "your_arbitrum_sepolia_rpc_url"
 scroll_sepolia_rpc_url    = "your_scroll_sepolia_rpc_url"
-
-# Holesky RPC URLs
-ethereum_holesky_rpc_url   = "your_ethereum_holesky_rpc_url"
 ```
 
 ## Infrastructure Components

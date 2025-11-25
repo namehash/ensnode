@@ -31,22 +31,25 @@ async function shouldIgnoreRegistryOldEvents(context: Context, node: Node) {
 export default function () {
   const pluginName = PluginName.Subgraph;
 
-  ponder.on(namespaceContract(pluginName, "RegistryOld:setup"), setupRootNode);
+  ponder.on(namespaceContract(pluginName, "ENSv1RegistryOld:setup"), setupRootNode);
 
   // old registry functions are proxied to the current handlers
   // iff the domain has not yet been migrated
-  ponder.on(namespaceContract(pluginName, "RegistryOld:NewOwner"), async ({ context, event }) => {
-    const { label: labelHash, node: parentNode } = event.args;
+  ponder.on(
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewOwner"),
+    async ({ context, event }) => {
+      const { label: labelHash, node: parentNode } = event.args;
 
-    const node = makeSubdomainNode(labelHash, parentNode);
-    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
-    if (shouldIgnoreEvent) return;
+      const node = makeSubdomainNode(labelHash, parentNode);
+      const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, node);
+      if (shouldIgnoreEvent) return;
 
-    return handleNewOwner(false)({ context, event });
-  });
+      return handleNewOwner(false)({ context, event });
+    },
+  );
 
   ponder.on(
-    namespaceContract(pluginName, "RegistryOld:NewResolver"),
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewResolver"),
     async ({ context, event }) => {
       const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
       const isRootNode = event.args.node === ROOT_NODE;
@@ -60,28 +63,34 @@ export default function () {
     },
   );
 
-  ponder.on(namespaceContract(pluginName, "RegistryOld:NewTTL"), async ({ context, event }) => {
-    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
-    if (shouldIgnoreEvent) return;
+  ponder.on(
+    namespaceContract(pluginName, "ENSv1RegistryOld:NewTTL"),
+    async ({ context, event }) => {
+      const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
+      if (shouldIgnoreEvent) return;
 
-    return handleNewTTL({ context, event });
-  });
+      return handleNewTTL({ context, event });
+    },
+  );
 
-  ponder.on(namespaceContract(pluginName, "RegistryOld:Transfer"), async ({ context, event }) => {
-    // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
-    // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
-    // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
-    // Registry events are picked up. for backwards compatibility this beahvior is re-implemented
-    // here.
+  ponder.on(
+    namespaceContract(pluginName, "ENSv1RegistryOld:Transfer"),
+    async ({ context, event }) => {
+      // NOTE: this logic derived from the subgraph introduces a bug for queries with a blockheight
+      // below 9380380, when the new Registry was deployed, as it implicitly ignores Transfer events
+      // of the ROOT_NODE. as a result, the root node's owner is always zeroAddress until the new
+      // Registry events are picked up. for backwards compatibility this beahvior is re-implemented
+      // here.
 
-    const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
-    if (shouldIgnoreEvent) return;
+      const shouldIgnoreEvent = await shouldIgnoreRegistryOldEvents(context, event.args.node);
+      if (shouldIgnoreEvent) return;
 
-    return handleTransfer({ context, event });
-  });
+      return handleTransfer({ context, event });
+    },
+  );
 
-  ponder.on(namespaceContract(pluginName, "Registry:NewOwner"), handleNewOwner(true));
-  ponder.on(namespaceContract(pluginName, "Registry:NewResolver"), handleNewResolver);
-  ponder.on(namespaceContract(pluginName, "Registry:NewTTL"), handleNewTTL);
-  ponder.on(namespaceContract(pluginName, "Registry:Transfer"), handleTransfer);
+  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewOwner"), handleNewOwner(true));
+  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewResolver"), handleNewResolver);
+  ponder.on(namespaceContract(pluginName, "ENSv1Registry:NewTTL"), handleNewTTL);
+  ponder.on(namespaceContract(pluginName, "ENSv1Registry:Transfer"), handleTransfer);
 }

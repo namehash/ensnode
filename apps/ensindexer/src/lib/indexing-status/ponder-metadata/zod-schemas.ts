@@ -27,9 +27,9 @@ const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChain
 
 const PonderBlockRefSchema = makeBlockRefSchema();
 
-const PonderCommandSchema = z.enum(["dev", "start"]);
+const PonderCommandSchema = z.enum(["dev", "start", "serve"]);
 
-const PonderOrderingSchema = z.literal("omnichain");
+const PonderOrderingSchema = z.literal("omnichain").prefault("omnichain");
 
 export const PonderAppSettingsSchema = z.strictObject({
   command: PonderCommandSchema,

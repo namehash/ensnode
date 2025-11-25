@@ -7,6 +7,7 @@ import config from "@/config";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import attach_ENSv2Handlers from "@/plugins/ensv2/event-handlers";
 import attach_protocolAccelerationHandlers from "@/plugins/protocol-acceleration/event-handlers";
 import attach_RegistrarsHandlers from "@/plugins/registrars/event-handlers";
 import attach_BasenamesHandlers from "@/plugins/subgraph/plugins/basenames/event-handlers";
@@ -48,4 +49,13 @@ if (config.plugins.includes(PluginName.Registrars)) {
 // TokenScope Plugin
 if (config.plugins.includes(PluginName.TokenScope)) {
   attach_TokenscopeHandlers();
+}
+
+// ENSv2 Plugin
+// NOTE: Because the ENSv2 plugin depends on node migration logic in the ProtocolAcceleration plugin,
+// it's important that ENSv2 handlers are registered _after_ Protocol Acceleration handlers. This
+// ensures that the Protocol Acceleration handlers are executed first and the results of their node
+// migration indexing is available for the identical handlers in the ENSv2 plugin.
+if (config.plugins.includes(PluginName.ENSv2)) {
+  attach_ENSv2Handlers();
 }
