@@ -44,7 +44,7 @@ export async function getAggregatedReferrerSnapshot(
   startDate: UnixTimestamp,
   endDate: UnixTimestamp,
   subregistryId: AccountId,
-  topN: number
+  topN: number,
 ): Promise<AggregatedReferrerSnapshot> {
   if (startDate > endDate) {
     throw new Error(
@@ -90,7 +90,7 @@ export async function getAggregatedReferrerSnapshot(
           totalReferrals: row.totalReferrals,
           // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
           totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
-          isTopReferrer: idx < topN
+          isTopReferrer: idx < topN,
         };
         return [address, metrics];
       }),
@@ -105,7 +105,7 @@ export async function getAggregatedReferrerSnapshot(
 
     // Calculate grand total of only the top N referrers
     const grandTotalQualifiedIncrementalDuration = ireduce(
-      referrers.values().filter(referrer => referrer.isTopReferrer),
+      referrers.values().filter((referrer) => referrer.isTopReferrer),
       (sum, metrics) => sum + metrics.totalIncrementalDuration,
       0,
     );

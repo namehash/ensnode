@@ -54,7 +54,7 @@ function calculateContribution(
     ...referrer,
     qualifiedReferrerContribution: referrer.isTopReferrer
       ? referrer.totalIncrementalDuration / grandTotalQualifiedIncrementalDuration
-      : 0
+      : 0,
   };
 }
 

@@ -14,7 +14,7 @@ const logger = makeLogger("aggregated-referrer-snapshot-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
 // The count of referrers in the top N.
-const TOP_N_REFERRERS= 50;
+const TOP_N_REFERRERS = 50;
 
 export const fetcher = staleWhileRevalidate({
   fn: async () => {
