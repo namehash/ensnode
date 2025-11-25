@@ -28,3 +28,20 @@ The `changesets/bot` will automatically comment on your PR to either remind you 
 ## Upon a New Release
 
 Upon the publishing of a new release, your change will be included in the produced packages/images and your contributions will be referenced in the GitHub Release notes.
+
+## Publishing Release Candidates (RC) of packages to NPM
+
+Publishing release candidates (RCs) of packages to NPM supports apps outside of the ENSNode monorepo to make use of prerelease packages for testing new ENSNode versions before making a full ENSNode release. Package RCs are published to NPM with the `rc` dist-tag:
+
+1. Ensure your changesets are committed to `main`
+2. Navigate to [Actions > Release NPM RC](https://github.com/namehash/ensnode/actions/workflows/npm-release-rc.yml)
+3. Click "Run workflow" and select the `main` branch
+4. RC packages are published to NPM with the `rc` tag (e.g., `1.0.0-rc.0`)
+5. Install RCs with: `npm install @ensnode/package-name@rc`
+
+**Important notes:**
+- NPM Package RC versions are ephemeral - they don't create commits or modify the repository
+- Each workflow run increments the RC version (rc.0, rc.1, rc.2, etc.)
+- Docker images are NOT built for RCs
+- No GitHub releases or tags are created for RCs
+- The `main` branch remains unchanged with regular versions
