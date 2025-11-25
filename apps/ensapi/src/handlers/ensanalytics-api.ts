@@ -43,23 +43,18 @@ const paginationQuerySchema = z.object({
  * by calculating contribution percentages based on grand totals.
  *
  * @param referrer - The referrer metrics to convert
- * @param grandTotalReferrals - The sum of all referrals across all referrers
- * @param grandTotalIncrementalDuration - The sum of all incremental duration across all referrers
+ * @param grandTotalQualifiedIncrementalDuration - The sum of all incremental duration across all referrers
  * @returns The referrer metrics with contribution percentages
  */
 function calculateContribution(
   referrer: AggregatedReferrerMetrics,
-  grandTotalReferrals: number,
-  grandTotalIncrementalDuration: number,
+  grandTotalQualifiedIncrementalDuration: number,
 ): AggregatedReferrerMetricsContribution {
   return {
     ...referrer,
-    totalReferralsContribution:
-      grandTotalReferrals > 0 ? referrer.totalReferrals / grandTotalReferrals : 0,
-    totalIncrementalDurationContribution:
-      grandTotalIncrementalDuration > 0
-        ? referrer.totalIncrementalDuration / grandTotalIncrementalDuration
-        : 0,
+    qualifiedReferrerContribution: referrer.isTopReferrer
+      ? referrer.totalIncrementalDuration / grandTotalQualifiedIncrementalDuration
+      : 0
   };
 }
 
@@ -119,8 +114,7 @@ app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async
     const referrersWithContribution = Array.from(paginatedReferrers).map((referrer) =>
       calculateContribution(
         referrer,
-        aggregatedReferrerSnapshotCache.grandTotalReferrals,
-        aggregatedReferrerSnapshotCache.grandTotalIncrementalDuration,
+        aggregatedReferrerSnapshotCache.grandTotalQualifiedIncrementalDuration,
       ),
     );
 

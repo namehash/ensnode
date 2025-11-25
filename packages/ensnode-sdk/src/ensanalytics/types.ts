@@ -20,6 +20,11 @@ export interface AggregatedReferrerMetrics {
   referrer: Address;
 
   /**
+   * Is the referrer one of the top referrers?
+   */
+  isTopReferrer: boolean;
+
+  /**
    * The total number of qualified referrals made by this referrer
    * @invariant Guaranteed to be a positive integer (> 0)
    */
@@ -39,18 +44,11 @@ export interface AggregatedReferrerMetrics {
  */
 export interface AggregatedReferrerMetricsContribution extends AggregatedReferrerMetrics {
   /**
-   * The referrer's contribution to the grand total referrals as a decimal between 0 and 1 (inclusive).
-   * Calculated as: totalReferrals / grandTotalReferrals
-   * @invariant 0 <= totalReferralsContribution <= 1
+   * The referrer's contribution to the grand total qualified incremental duration as a decimal between 0 and 1 (inclusive).
+   * Calculated as: totalIncrementalDuration / grandTotalQualifiedIncrementalDuration
+   * @invariant 0 <= qualifiedReferrerContribution <= 1
    */
-  totalReferralsContribution: number;
-
-  /**
-   * The referrer's contribution to the grand total incremental duration as a decimal between 0 and 1 (inclusive).
-   * Calculated as: totalIncrementalDuration / grandTotalIncrementalDuration
-   * @invariant 0 <= totalIncrementalDurationContribution <= 1
-   */
-  totalIncrementalDurationContribution: number;
+  qualifiedReferrerContribution: number;
 }
 
 /**

@@ -35,6 +35,7 @@ import logger from "@/lib/logger";
  * @param startDate - The start date (Unix timestamp, inclusive) for filtering registrar actions
  * @param endDate - The end date (Unix timestamp, inclusive) for filtering registrar actions
  * @param subregistryId - The account ID of the subregistry to filter by
+ * @param topN - The count of referrers considered as Top N.
  * @returns `AggregatedReferrerSnapshot` containing all referrers with at least one qualified referral, grand totals, and updatedAt timestamp
  * @throws Error if startDate > endDate (invalid date range)
  * @throws Error if the database query fails
@@ -43,6 +44,7 @@ export async function getAggregatedReferrerSnapshot(
   startDate: UnixTimestamp,
   endDate: UnixTimestamp,
   subregistryId: AccountId,
+  topN: number
 ): Promise<AggregatedReferrerSnapshot> {
   if (startDate > endDate) {
     throw new Error(
@@ -80,7 +82,7 @@ export async function getAggregatedReferrerSnapshot(
 
     // Transform the result to an ordered map (preserves SQL sort order)
     const referrers = new Map(
-      result.map((row) => {
+      result.map((row, idx) => {
         // biome-ignore lint/style/noNonNullAssertion: referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
         const address = row.referrer!;
         const metrics = {
@@ -88,19 +90,22 @@ export async function getAggregatedReferrerSnapshot(
           totalReferrals: row.totalReferrals,
           // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
           totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
+          isTopReferrer: idx < topN
         };
         return [address, metrics];
       }),
     );
 
-    // Calculate grand totals across all referrers
+    // Calculate grand total across all referrers
     const grandTotalReferrals = ireduce(
       referrers.values(),
       (sum, metrics) => sum + metrics.totalReferrals,
       0,
     );
-    const grandTotalIncrementalDuration = ireduce(
-      referrers.values(),
+
+    // Calculate grand total of only the top N referrers
+    const grandTotalQualifiedIncrementalDuration = ireduce(
+      referrers.values().filter(referrer => referrer.isTopReferrer),
       (sum, metrics) => sum + metrics.totalIncrementalDuration,
       0,
     );
@@ -110,7 +115,7 @@ export async function getAggregatedReferrerSnapshot(
       referrers,
       updatedAt,
       grandTotalReferrals,
-      grandTotalIncrementalDuration,
+      grandTotalQualifiedIncrementalDuration,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

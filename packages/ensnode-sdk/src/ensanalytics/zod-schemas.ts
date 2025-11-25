@@ -29,6 +29,7 @@ export const makeAggregatedReferrerMetricsSchema = (
 ) =>
   z.object({
     referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    isTopReferrer: z.boolean(),
     totalReferrals: makePositiveIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
   });
@@ -46,12 +47,12 @@ export const makeAggregatedReferrerMetricsContributionSchema = (
       })
       .min(0, `${valueLabel}.totalReferralsContribution must be >= 0`)
       .max(1, `${valueLabel}.totalReferralsContribution must be <= 1`),
-    totalIncrementalDurationContribution: z
+    qualifiedReferrerContribution: z
       .number({
-        error: `${valueLabel}.totalIncrementalDurationContribution must be a number`,
+        error: `${valueLabel}.qualifiedReferrerContribution must be a number`,
       })
-      .min(0, `${valueLabel}.totalIncrementalDurationContribution must be >= 0`)
-      .max(1, `${valueLabel}.totalIncrementalDurationContribution must be <= 1`),
+      .min(0, `${valueLabel}.qualifiedReferrerContribution must be >= 0`)
+      .max(1, `${valueLabel}.qualifiedReferrerContribution must be <= 1`),
   });
 
 /**

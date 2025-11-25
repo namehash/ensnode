@@ -25,8 +25,8 @@ export interface AggregatedReferrerSnapshot {
   grandTotalReferrals: number;
 
   /**
-   * @invariant The sum of `totalIncrementalDuration` across all `referrers`.
+   * @invariant The sum of `totalIncrementalDuration` across only the top N `referrers`.
    * @invariant Guaranteed to be a non-negative integer (>= 0), measured in seconds
    */
-  grandTotalIncrementalDuration: Duration;
+  grandTotalQualifiedIncrementalDuration: Duration;
 }

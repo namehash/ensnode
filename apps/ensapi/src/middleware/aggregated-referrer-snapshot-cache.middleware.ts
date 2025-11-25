@@ -13,6 +13,8 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("aggregated-referrer-snapshot-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
+// The count of referrers in the top N.
+const TOP_N_REFERRERS= 50;
 
 export const fetcher = staleWhileRevalidate({
   fn: async () => {
@@ -28,9 +30,10 @@ export const fetcher = staleWhileRevalidate({
         config.ensHolidayAwardsStart,
         config.ensHolidayAwardsEnd,
         subregistryId,
+        TOP_N_REFERRERS,
       );
       logger.info(
-        { grandTotalReferrals: result.referrers.size },
+        { grandTotalReferrals: result.referrers.size, topN: TOP_N_REFERRERS },
         "Successfully built aggregated referrer snapshot",
       );
       return result;
