@@ -22,6 +22,7 @@ import { AddressDisplay, IdentityLink, IdentityTooltip, NameDisplay } from "./ut
 
 interface ResolveAndDisplayIdentityProps {
   identity: UnresolvedIdentity;
+  accelerate?: boolean;
   withLink?: boolean;
   withTooltip?: boolean;
   withAvatar?: boolean;
@@ -32,6 +33,8 @@ interface ResolveAndDisplayIdentityProps {
  * Resolves the provided `UnresolvedIdentity` through ENSNode and displays the result.
  *
  * @param identity - The `UnresolvedIdentity` to resolve and display.
+ * @param accelerate - Whether to attempt Protocol Acceleration (default: false)
+ *                      when resolving the primary name.
  * @param withLink - Whether to wrap the displayed identity in an `IdentityLink` component.
  * @param withTooltip - Whether to wrap the displayed identity in an `IdentityInfoTooltip` component.
  * @param withAvatar - Whether to display an avatar image.
@@ -39,6 +42,7 @@ interface ResolveAndDisplayIdentityProps {
  */
 export function ResolveAndDisplayIdentity({
   identity,
+  accelerate = false,
   withLink = true,
   withTooltip = true,
   withAvatar = false,
@@ -49,7 +53,11 @@ export function ResolveAndDisplayIdentity({
   // resolve the primary name for `identity` using ENSNode
   // TODO: extract out the concept of resolving an `Identity` into a provider that child
   //       components can then hook into.
-  const { identity: identityResult } = useResolvedIdentity({ identity, namespaceId });
+  const { identity: identityResult } = useResolvedIdentity({
+    identity,
+    namespaceId,
+    accelerate,
+  });
 
   return (
     <DisplayIdentity

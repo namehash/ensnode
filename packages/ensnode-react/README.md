@@ -80,6 +80,7 @@ function DisplayPrimaryName() {
   const { data, isLoading, error } = usePrimaryName({
     address: "0x179A862703a4adfb29896552DF9e307980D19285",
     chainId: mainnet.id,
+    accelerate: true, // Attempt Protocol Acceleration
   });
 
   if (isLoading) return <div>Loading...</div>;
@@ -199,6 +200,7 @@ The returned Primary Name, if set, is guaranteed to be a [Normalized Name](https
 const { data, isLoading, error, refetch } = usePrimaryName({
   address: "0x179A862703a4adfb29896552DF9e307980D19285",
   chainId: 10, // Optimism
+  accelerate: true, // Attempt Protocol Acceleration
 });
 ```
 
@@ -284,7 +286,8 @@ const [address, setAddress] = useState("");
 // only executes when address is not null
 const { data } = usePrimaryName({
   address: address || null,
-  chainId: 1
+  chainId: 1,
+  accelerate: true, // Attempt Protocol Acceleration
 });
 ```
 
@@ -297,6 +300,7 @@ const [showPrimaryName, setShowPrimaryName] = useState(false);
 const { data } = usePrimaryName({
   address: "0x179A862703a4adfb29896552DF9e307980D19285",
   chainId: 1,
+  accelerate: true, // Attempt Protocol Acceleration
   query: { enabled: showPrimaryName },
 });
 ```
