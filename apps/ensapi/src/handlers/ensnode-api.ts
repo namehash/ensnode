@@ -3,6 +3,7 @@ import config from "@/config";
 import {
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
+  type IndexingStatusResponseOk,
   serializeENSApiPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
@@ -16,7 +17,7 @@ import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
 
-const logger = makeLogger("ensnode");
+const logger = makeLogger("ensnode-api");
 
 // include ENSApi Public Config endpoint
 app.get("/config", async (c) => {
@@ -26,15 +27,18 @@ app.get("/config", async (c) => {
 
 // include ENSIndexer Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
-  const cachedIndexingStatus = c.var.indexingStatus;
+  // context must be set by the required middleware
+  if (c.var.indexingStatus === undefined) {
+    throw new Error(`Invariant(ensnode-api): indexingStatusMiddleware required`);
+  }
 
-  // return error response if indexing status has never been cached successfully
-  if (cachedIndexingStatus.isRejected) {
+  if (c.var.indexingStatus.isRejected) {
+    // no indexing status available in context
     logger.error(
       {
-        error: cachedIndexingStatus.reason,
+        error: c.var.indexingStatus.reason,
       },
-      "Failed to load Indexing Status from cache.",
+      "Indexing status requested but is not available in context.",
     );
 
     return c.json(
@@ -45,7 +49,13 @@ app.get("/indexing-status", async (c) => {
     );
   }
 
-  return c.json(serializeIndexingStatusResponse(cachedIndexingStatus.value));
+  // return successful response using the indexing status projection from the context
+  return c.json(
+    serializeIndexingStatusResponse({
+      responseCode: IndexingStatusResponseCodes.Ok,
+      realtimeProjection: c.var.indexingStatus.value,
+    } satisfies IndexingStatusResponseOk),
+  );
 });
 
 // Registrar Actions API
