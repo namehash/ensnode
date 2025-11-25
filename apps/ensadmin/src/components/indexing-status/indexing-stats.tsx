@@ -439,7 +439,11 @@ export function IndexingStats(props: IndexingStatsProps) {
   const indexingStatusQuery = props;
 
   if (indexingStatusQuery.isError) {
-    return <p>Failed to fetch Indexing Status.</p>;
+    return (
+      <IndexingStatsShell>
+        <IndexingStatsForUnavailableSnapshot />
+      </IndexingStatsShell>
+    );
   }
 
   if (indexingStatusQuery.isPending) {

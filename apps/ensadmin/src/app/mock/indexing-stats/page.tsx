@@ -20,7 +20,7 @@ import {
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ResponseOkVariant = keyof typeof indexingStatusResponseOkOmnichain;
-type ResponseErrorVariant = "Response Error";
+type ResponseErrorVariant = "Error ResponseCode";
 type Variant = ResponseOkVariant | ResponseErrorVariant | LoadingVariant;
 
 const variants = [
@@ -30,7 +30,7 @@ const variants = [
   OmnichainIndexingStatusIds.Completed,
   "Loading",
   "Loading Error",
-  "Response Error",
+  "Error ResponseCode",
 ] as const;
 
 let loadingTimeoutId: number;
@@ -50,7 +50,7 @@ async function fetchMockedIndexingStatus(
     case OmnichainIndexingStatusIds.Following:
     case OmnichainIndexingStatusIds.Completed:
       return indexingStatusResponseOkOmnichain[selectedVariant] as IndexingStatusResponseOk;
-    case "Response Error":
+    case "Error ResponseCode":
       throw new Error(
         "Received Indexing Status response with responseCode other than 'ok' which will not be cached.",
       );
