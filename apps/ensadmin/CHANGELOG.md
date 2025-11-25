@@ -1,5 +1,49 @@
 # ensadmin
 
+## 1.0.0
+
+### Minor Changes
+
+- [#1216](https://github.com/namehash/ensnode/pull/1216) [`c72919a`](https://github.com/namehash/ensnode/commit/c72919a9411a32486b40b34cc951af11d54b9fc9) Thanks [@notrab](https://github.com/notrab)! - Resolved stability issue that could cause the browser to crash when refreshing pages in ENSAdmin
+
+- [#1190](https://github.com/namehash/ensnode/pull/1190) [`b9a988c`](https://github.com/namehash/ensnode/commit/b9a988ced492bafe9845fd4524d137cfb0191d2a) Thanks [@notrab](https://github.com/notrab)! - Transitioned explore name detail page to use query param instead of path
+  Replace `useENSAppProfileUrl` hook with pure `buildExternalEnsAppProfileUrl` function for better testability and explicit dependency handling.
+
+- [#1207](https://github.com/namehash/ensnode/pull/1207) [`61b9472`](https://github.com/namehash/ensnode/commit/61b94721aee0d7050ebc3e384d5c8e2cd65cc08d) Thanks [@notrab](https://github.com/notrab)! - Transition ENSAdmin to a fast, modern Single Page App built with Next.js
+
+- [#1272](https://github.com/namehash/ensnode/pull/1272) [`25a40ba`](https://github.com/namehash/ensnode/commit/25a40ba8517681ac09e3c823f63c197e8758fe41) Thanks [@tk-o](https://github.com/tk-o)! - Integrated Registrar Actions API for the Registrar Actions UI.
+
+- [#1191](https://github.com/namehash/ensnode/pull/1191) [`0090558`](https://github.com/namehash/ensnode/commit/0090558074a585e5591427db54273438919e0216) Thanks [@notrab](https://github.com/notrab)! - Add initial splash screen and remove /connection root redirect
+
+- [#1282](https://github.com/namehash/ensnode/pull/1282) [`4611fed`](https://github.com/namehash/ensnode/commit/4611fedfff6c7fb67c286887a1e909b0f0d7ec12) Thanks [@tk-o](https://github.com/tk-o)! - Applies `useIndexingStatusWithSwr` hook to present a cached Indexing Status with response code OK.
+
+- [#1261](https://github.com/namehash/ensnode/pull/1261) [`703a12e`](https://github.com/namehash/ensnode/commit/703a12ed307e98ec1c1ce5911b45905ebcad58d8) Thanks [@notrab](https://github.com/notrab)! - Refactored `ConfigInfoAppCard` to use a composable children-based API, converting all components (ENSApi, ENSDb, ENSIndexer, ENSRainbow, and Connection) to use the new `<ConfigInfoItems>`, `<ConfigInfoItem>`, `<ConfigInfoFeatures>`, and `<ConfigInfoFeature>` components for better flexibility and styling control.
+
+- [#1201](https://github.com/namehash/ensnode/pull/1201) [`ceef81e`](https://github.com/namehash/ensnode/commit/ceef81e4a39125b238ab71bb4e0598a1a0771d15) Thanks [@notrab](https://github.com/notrab)! - - Improved ENSNode config info components with better reusability and maintainability (great for mocking too). Introduced `ENSNodeConfigCardDisplay` component that accepts props and extracted a reusable `ENSNodeCard` wrapper that provides consistent header and loading states.
+
+  - Added Suspense boundary around `ConnectionsLibraryProvider` in root layout to better handle hydration
+  - Added Suspense boundary with skeleton fallback in `LayoutWrapper` to show proper loading states
+  - Ensures all pages remain statically generated while respecting existing component loading states
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - ENSAdmin now supports ENSApi Version info.
+
+- [#1291](https://github.com/namehash/ensnode/pull/1291) [`485b373`](https://github.com/namehash/ensnode/commit/485b3732be1fddfb817c7a847984c4c71bb3fe6a) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Accelerate identity lookups within the "Latest indexed registrar actions"
+
+- [#1179](https://github.com/namehash/ensnode/pull/1179) [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2) Thanks [@tk-o](https://github.com/tk-o)! - Replaced `BlockRefViewModel` type with `BlockRef` type from ENSNode SDK package.
+
+- [#1211](https://github.com/namehash/ensnode/pull/1211) [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5) Thanks [@shrugs](https://github.com/shrugs)! - ENSAdmin now displays whether ENSNode attempted acceleration for an acceleratable endpoint in the Protocol Inspector.
+
+- [#1184](https://github.com/namehash/ensnode/pull/1184) [`dc468d1`](https://github.com/namehash/ensnode/commit/dc468d11056fe5b323d1345ce0d97011e8ddb838) Thanks [@notrab](https://github.com/notrab)! - Temporarily disable AI query generator inside GraphiQL until we transition it into the new ENSApi service.
+
+### Patch Changes
+
+- Updated dependencies [[`df1cf8c`](https://github.com/namehash/ensnode/commit/df1cf8c4a0d4fe0db4750b46f721416c72ba86d2), [`bbf0d3b`](https://github.com/namehash/ensnode/commit/bbf0d3b6e328f5c18017bd7660b1ff93e7214ce2), [`61b9472`](https://github.com/namehash/ensnode/commit/61b94721aee0d7050ebc3e384d5c8e2cd65cc08d), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5), [`965707d`](https://github.com/namehash/ensnode/commit/965707d409d1e8917adebd869ec5deee695e7893), [`d7b2e23`](https://github.com/namehash/ensnode/commit/d7b2e23e856ffb1d7ce004f9d4277842fa6cf1d5), [`4611fed`](https://github.com/namehash/ensnode/commit/4611fedfff6c7fb67c286887a1e909b0f0d7ec12), [`d7b2e23`](https://github.com/namehash/ensnode/commit/d7b2e23e856ffb1d7ce004f9d4277842fa6cf1d5), [`965707d`](https://github.com/namehash/ensnode/commit/965707d409d1e8917adebd869ec5deee695e7893), [`965707d`](https://github.com/namehash/ensnode/commit/965707d409d1e8917adebd869ec5deee695e7893), [`11b8372`](https://github.com/namehash/ensnode/commit/11b8372ccb2456f2e71d9195f6e50b2fbbeb405a), [`617ab00`](https://github.com/namehash/ensnode/commit/617ab00cc57c2dc9df5af90eeaf3896f8864145d), [`63376ad`](https://github.com/namehash/ensnode/commit/63376ad8a4f1fe72b7ad5a9368496d235411bc28), [`df1cf8c`](https://github.com/namehash/ensnode/commit/df1cf8c4a0d4fe0db4750b46f721416c72ba86d2), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5), [`df1cf8c`](https://github.com/namehash/ensnode/commit/df1cf8c4a0d4fe0db4750b46f721416c72ba86d2), [`965707d`](https://github.com/namehash/ensnode/commit/965707d409d1e8917adebd869ec5deee695e7893), [`25a40ba`](https://github.com/namehash/ensnode/commit/25a40ba8517681ac09e3c823f63c197e8758fe41), [`6659c57`](https://github.com/namehash/ensnode/commit/6659c57e487938761d642a5f46ff0e86baeac286), [`40658a7`](https://github.com/namehash/ensnode/commit/40658a70d591d972150f69cb18fbd3dd390b4114), [`6be7a18`](https://github.com/namehash/ensnode/commit/6be7a189d0f9ac21d89c01941eb6b5a3cd13f88f), [`554e598`](https://github.com/namehash/ensnode/commit/554e59868105c5f26ca2bdf8924c6b48a95696e5)]:
+  - @ensnode/ensnode-sdk@1.0.0
+  - @ensnode/ensnode-react@1.0.0
+  - @ensnode/ensnode-schema@1.0.0
+  - @ensnode/datasources@1.0.0
+  - @ensnode/ponder-metadata@1.0.0
+
 ## 0.36.0
 
 ### Minor Changes
