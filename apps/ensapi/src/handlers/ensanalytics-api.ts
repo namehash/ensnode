@@ -15,10 +15,11 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { islice } from "@/lib/itertools";
-import logger from "@/lib/logger";
+import { makeLogger } from "@/lib/logger";
 import { aggregatedReferrerSnapshotCacheMiddleware } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
 
 const app = factory.createApp();
+const logger = makeLogger("ensanalytics-api");
 
 // Apply aggregated referrer snapshot cache middleware to all routes in this handler
 app.use(aggregatedReferrerSnapshotCacheMiddleware);
@@ -64,6 +65,13 @@ function calculateContribution(
 
 // Get all aggregated referrers with pagination
 app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async (c) => {
+  // context must be set by the required middleware
+  if (c.var.aggregatedReferrerSnapshotCache === undefined) {
+    throw new Error(
+      `Invariant(ensanalytics-api): aggregatedReferrerSnapshotCacheMiddleware required`,
+    );
+  }
+
   try {
     const aggregatedReferrerSnapshotCache = c.var.aggregatedReferrerSnapshotCache;
 

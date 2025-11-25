@@ -3,17 +3,21 @@ import config from "@/config";
 import {
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
+  type IndexingStatusResponseOk,
   serializeENSApiPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
+import { makeLogger } from "@/lib/logger";
 
 import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
+
+const logger = makeLogger("ensnode-api");
 
 // include ENSApi Public Config endpoint
 app.get("/config", async (c) => {
@@ -23,8 +27,20 @@ app.get("/config", async (c) => {
 
 // include ENSIndexer Indexing Status endpoint
 app.get("/indexing-status", async (c) => {
-  // generic error
+  // context must be set by the required middleware
+  if (c.var.indexingStatus === undefined) {
+    throw new Error(`Invariant(ensnode-api): indexingStatusMiddleware required`);
+  }
+
   if (c.var.indexingStatus.isRejected) {
+    // no indexing status available in context
+    logger.error(
+      {
+        error: c.var.indexingStatus.reason,
+      },
+      "Indexing status requested but is not available in context.",
+    );
+
     return c.json(
       serializeIndexingStatusResponse({
         responseCode: IndexingStatusResponseCodes.Error,
@@ -33,7 +49,13 @@ app.get("/indexing-status", async (c) => {
     );
   }
 
-  return c.json(serializeIndexingStatusResponse(c.var.indexingStatus.value));
+  // return successful response using the indexing status projection from the context
+  return c.json(
+    serializeIndexingStatusResponse({
+      responseCode: IndexingStatusResponseCodes.Ok,
+      realtimeProjection: c.var.indexingStatus.value,
+    } satisfies IndexingStatusResponseOk),
+  );
 });
 
 // Registrar Actions API

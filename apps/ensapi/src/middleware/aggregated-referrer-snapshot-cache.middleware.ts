@@ -8,33 +8,41 @@ import {
 
 import { getAggregatedReferrerSnapshot } from "@/lib/ensanalytics/database";
 import { factory } from "@/lib/hono-factory";
-import logger from "@/lib/logger";
+import { makeLogger } from "@/lib/logger";
+
+const logger = makeLogger("aggregated-referrer-snapshot-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
-export const fetcher = staleWhileRevalidate(async () => {
-  logger.info(
-    `Building aggregated referrer snapshot\n` +
-      `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
-      `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
-  );
-  const subregistryId = getEthnamesSubregistryId(config.namespace);
-
-  try {
-    const result = await getAggregatedReferrerSnapshot(
-      config.ensHolidayAwardsStart,
-      config.ensHolidayAwardsEnd,
-      subregistryId,
+export const fetcher = staleWhileRevalidate({
+  fn: async () => {
+    logger.info(
+      `Building aggregated referrer snapshot\n` +
+        `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
+        `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
     );
-    logger.info("Successfully built aggregated referrer snapshot");
-    return result;
-  } catch (error) {
-    logger.error({ error }, "Failed to build aggregated referrer snapshot");
-    throw error;
-  }
-}, TTL);
+    const subregistryId = getEthnamesSubregistryId(config.namespace);
 
-export type AggregatedReferrerSnapshotCacheVariables = {
+    try {
+      const result = await getAggregatedReferrerSnapshot(
+        config.ensHolidayAwardsStart,
+        config.ensHolidayAwardsEnd,
+        subregistryId,
+      );
+      logger.info(
+        { grandTotalReferrals: result.referrers.size },
+        "Successfully built aggregated referrer snapshot",
+      );
+      return result;
+    } catch (error) {
+      logger.error({ error }, "Failed to build aggregated referrer snapshot");
+      throw error;
+    }
+  },
+  ttl: TTL,
+});
+
+export type AggregatedReferrerSnapshotCacheMiddlewareVariables = {
   aggregatedReferrerSnapshotCache: Awaited<ReturnType<typeof fetcher>>;
 };
 
