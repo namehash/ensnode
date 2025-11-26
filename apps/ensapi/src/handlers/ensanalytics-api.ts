@@ -3,13 +3,20 @@ import { z } from "zod/v4";
 import {
   type AggregatedReferrerMetrics,
   type AggregatedReferrerMetricsContribution,
+  ENS_HOLIDAY_AWARDS_POOL_USD,
   ITEMS_PER_PAGE_DEFAULT,
   ITEMS_PER_PAGE_MAX,
   type PaginatedAggregatedReferrersRequest,
   type PaginatedAggregatedReferrersResponse,
   PaginatedAggregatedReferrersResponseCodes,
+  priceUsdc,
+  type ReferrerDetailResponse,
+  ReferrerDetailResponseCodes,
+  SECONDS_PER_YEAR,
   serializePaginatedAggregatedReferrersResponse,
+  serializeReferrerDetailResponse,
 } from "@ensnode/ensnode-sdk";
+import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { errorResponse } from "@/lib/handlers/error-response";
 import { validate } from "@/lib/handlers/validate";
@@ -144,6 +151,94 @@ app.get("/aggregated-referrers", validate("query", paginationQuerySchema), async
         error: "Internal server error",
         errorMessage,
       } satisfies PaginatedAggregatedReferrersResponse),
+      500,
+    );
+  }
+});
+
+// Referrer address parameter schema
+const referrerAddressSchema = z.object({
+  referrer: makeLowercaseAddressSchema("Referrer address"),
+});
+
+// Get referrer detail for a specific address
+app.get("/referrer/:referrer", validate("param", referrerAddressSchema), async (c) => {
+  try {
+    const aggregatedReferrerSnapshotCache = c.var.aggregatedReferrerSnapshotCache;
+
+    // Check if cache failed to load
+    if (aggregatedReferrerSnapshotCache === null) {
+      return c.json(
+        serializeReferrerDetailResponse({
+          responseCode: ReferrerDetailResponseCodes.Error,
+          error: "Internal Server Error",
+          errorMessage: "Failed to load aggregated referrer data.",
+        } satisfies ReferrerDetailResponse),
+        500,
+      );
+    }
+
+    const { referrer } = c.req.valid("param");
+
+    // Lookup the referrer in the cache
+    const referrerMetrics = aggregatedReferrerSnapshotCache.referrers.get(referrer);
+
+    // If referrer not found, return 404 Not Found
+    if (!referrerMetrics) {
+      return c.notFound();
+    }
+
+    // Calculate referrer score (in Qualifying Referral Years)
+    const referrerScore = referrerMetrics.totalIncrementalDuration / SECONDS_PER_YEAR;
+
+    // Grand total referrer score (in Qualifying Referral Years) is the sum of all incremental durations converted to years
+    const grandTotalReferrerScore =
+      aggregatedReferrerSnapshotCache.grandTotalIncrementalDuration / SECONDS_PER_YEAR;
+
+    // Calculate referrer contribution (as a percentage from 0 to 1)
+    const referrerContribution =
+      grandTotalReferrerScore > 0 ? referrerScore / grandTotalReferrerScore : 0;
+
+    // Calculate award pool share (ENS Holiday Awards Pool in USDC)
+    // USDC has 6 decimals
+    const USDC_DECIMALS = 6;
+    const awardPoolTotalAmount = BigInt(ENS_HOLIDAY_AWARDS_POOL_USD) * BigInt(10 ** USDC_DECIMALS);
+    // Calculate share using the already-computed contribution percentage
+    // Scale contribution (0-1) by 1e18 to convert to fixed-point for BigInt math
+    const PRECISION_SCALE = 1e18;
+    const awardPoolShareAmount =
+      referrerContribution > 0
+        ? (awardPoolTotalAmount * BigInt(Math.floor(referrerContribution * PRECISION_SCALE))) /
+          BigInt(PRECISION_SCALE)
+        : 0n;
+
+    return c.json(
+      serializeReferrerDetailResponse({
+        responseCode: ReferrerDetailResponseCodes.Ok,
+        data: {
+          referrer: referrerMetrics.referrer,
+          totalReferrals: referrerMetrics.totalReferrals,
+          totalIncrementalDuration: referrerMetrics.totalIncrementalDuration,
+          referrerScore,
+          grandTotalReferrerScore,
+          referrerContribution,
+          awardPoolShare: priceUsdc(awardPoolShareAmount),
+          updatedAt: aggregatedReferrerSnapshotCache.updatedAt,
+        },
+      } satisfies ReferrerDetailResponse),
+    );
+  } catch (error) {
+    logger.error({ error }, "Error in /ensanalytics/referrer/:referrer endpoint");
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "An unexpected error occurred while processing your request";
+    return c.json(
+      serializeReferrerDetailResponse({
+        responseCode: ReferrerDetailResponseCodes.Error,
+        error: "Internal server error",
+        errorMessage,
+      } satisfies ReferrerDetailResponse),
       500,
     );
   }

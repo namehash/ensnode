@@ -8,17 +8,20 @@
  */
 import z from "zod/v4";
 
+import { CurrencyIds } from "../shared/currencies";
 import {
   makeDurationSchema,
   makeLowercaseAddressSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
+  makePriceCurrencySchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
 import {
   ITEMS_PER_PAGE_DEFAULT,
   ITEMS_PER_PAGE_MAX,
   PaginatedAggregatedReferrersResponseCodes,
+  ReferrerDetailResponseCodes,
 } from "./types";
 
 /**
@@ -139,4 +142,84 @@ export const makePaginatedAggregatedReferrersResponseSchema = (
   z.union([
     makePaginatedAggregatedReferrersResponseOkSchema(valueLabel),
     makePaginatedAggregatedReferrersResponseErrorSchema(valueLabel),
+  ]);
+
+/**
+ * Schema for ReferrerDetail
+ */
+export const makeReferrerDetailSchema = (valueLabel: string = "ReferrerDetail") =>
+  z
+    .object({
+      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      totalReferrals: makePositiveIntegerSchema(`${valueLabel}.totalReferrals`),
+      totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+      referrerScore: z
+        .number({
+          error: `${valueLabel}.referrerScore must be a number`,
+        })
+        .min(0, `${valueLabel}.referrerScore must be >= 0`),
+      grandTotalReferrerScore: z
+        .number({
+          error: `${valueLabel}.grandTotalReferrerScore must be a number`,
+        })
+        .min(0, `${valueLabel}.grandTotalReferrerScore must be >= 0`),
+      referrerContribution: z
+        .number({
+          error: `${valueLabel}.referrerContribution must be a number`,
+        })
+        .min(0, `${valueLabel}.referrerContribution must be >= 0`)
+        .max(1, `${valueLabel}.referrerContribution must be <= 1`),
+      awardPoolShare: makePriceCurrencySchema(CurrencyIds.USDC, `${valueLabel}.awardPoolShare`),
+      updatedAt: makeUnixTimestampSchema(`${valueLabel}.updatedAt`),
+    })
+    .check((ctx) => {
+      // Validate that referrerContribution is calculated correctly
+      const { referrerScore, referrerContribution, grandTotalReferrerScore } = ctx.value;
+      if (grandTotalReferrerScore > 0) {
+        const expectedContribution = referrerScore / grandTotalReferrerScore;
+        // Allow for small floating point differences
+        if (Math.abs(referrerContribution - expectedContribution) > 1e-6) {
+          ctx.issues.push({
+            code: "custom",
+            message: `${valueLabel}.referrerContribution (${referrerContribution}) must equal referrerScore / grandTotalReferrerScore (${expectedContribution})`,
+            input: ctx.value,
+          });
+        }
+      } else if (referrerContribution !== 0) {
+        ctx.issues.push({
+          code: "custom",
+          message: `${valueLabel}.referrerContribution must be 0 when grandTotalReferrerScore is 0`,
+          input: ctx.value,
+        });
+      }
+    });
+
+/**
+ * Schema for {@link ReferrerDetailResponseOk}
+ */
+export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+  z.object({
+    responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
+    data: makeReferrerDetailSchema(`${valueLabel}.data`),
+  });
+
+/**
+ * Schema for {@link ReferrerDetailResponseError}
+ */
+export const makeReferrerDetailResponseErrorSchema = (
+  _valueLabel: string = "ReferrerDetailResponse",
+) =>
+  z.object({
+    responseCode: z.literal(ReferrerDetailResponseCodes.Error),
+    error: z.string(),
+    errorMessage: z.string(),
+  });
+
+/**
+ * Schema for {@link ReferrerDetailResponse}
+ */
+export const makeReferrerDetailResponseSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+  z.union([
+    makeReferrerDetailResponseOkSchema(valueLabel),
+    makeReferrerDetailResponseErrorSchema(valueLabel),
   ]);

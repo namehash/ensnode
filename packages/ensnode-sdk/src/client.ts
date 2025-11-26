@@ -25,9 +25,13 @@ import type {
 import { ClientError } from "./client-error";
 import {
   deserializePaginatedAggregatedReferrersResponse,
+  deserializeReferrerDetailResponse,
   type PaginatedAggregatedReferrersRequest,
   type PaginatedAggregatedReferrersResponse,
+  type ReferrerDetailRequest,
+  type ReferrerDetailResponse,
   type SerializedPaginatedAggregatedReferrersResponse,
+  type SerializedReferrerDetailResponse,
 } from "./ensanalytics";
 import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
@@ -422,6 +426,70 @@ export class ENSNodeClient {
     return deserializePaginatedAggregatedReferrersResponse(
       responseData as SerializedPaginatedAggregatedReferrersResponse,
     );
+  }
+
+  /**
+   * Fetch Referrer Detail
+   *
+   * Retrieves detailed information about a specific referrer, including:
+   * - Total number of referrals
+   * - Total incremental duration (in seconds)
+   * - Referrer score (in Qualifying Referral Years: total incremental duration / {@link SECONDS_PER_YEAR})
+   * - Grand total referrer score across all referrers (in Qualifying Referral Years)
+   * - Referrer contribution (percentage from 0 to 1)
+   * - Award pool share in USD (USDC) from the {@link ENS_HOLIDAY_AWARDS_POOL_USD}
+   *
+   * @param request The referrer address to query
+   * @returns {ReferrerDetailResponse | null} Returns the referrer detail response, or `null` if the referrer is not found (404)
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the response data is malformed
+   *
+   * @example
+   * ```ts
+   * import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+   *
+   * const client = new ENSNodeClient();
+   *
+   * const response = await client.referrerDetail({
+   *   referrer: "0x1234567890123456789012345678901234567890"
+   * });
+   *
+   * if (response === null) {
+   *   console.log("Referrer not found");
+   * } else if (response.responseCode === "ok") {
+   *   console.log(`Total Referrals: ${response.data.totalReferrals}`);
+   *   console.log(`Award Pool Share: ${response.data.awardPoolShare.amount}`);
+   * }
+   * ```
+   */
+  async referrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse | null> {
+    const url = new URL(
+      `/api/ensanalytics/referrer/${encodeURIComponent(request.referrer)}`,
+      this.options.url,
+    );
+
+    const response = await fetch(url);
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // The API can return errors with 500 status, but they're still in the
+    // ReferrerDetailResponse format with responseCode: 'error'
+    // So we don't need to check response.ok here, just deserialize and let
+    // the caller handle the responseCode
+
+    return deserializeReferrerDetailResponse(responseData as SerializedReferrerDetailResponse);
   }
 
   /**

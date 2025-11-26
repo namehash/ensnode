@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { Duration, UnixTimestamp } from "../shared";
+import type { Duration, PriceUsdc, UnixTimestamp } from "../shared";
 
 /**
  * The default number of items per page for paginated aggregated referrer queries.
@@ -11,6 +11,20 @@ export const ITEMS_PER_PAGE_DEFAULT = 25;
  * The maximum number of items per page for paginated aggregated referrer queries.
  */
 export const ITEMS_PER_PAGE_MAX = 100;
+
+/**
+ * Number of seconds in one year (365.2425 days on average).
+ * Used to convert totalIncrementalDuration (seconds) to Qualifying Referral Years.
+ *
+ * Calculation: 60 seconds * 60 minutes * 24 hours * 365.2425 days
+ */
+export const SECONDS_PER_YEAR = 31_556_952;
+
+/**
+ * The ENS Holiday Awards Pool amount in USD for the referral program.
+ * This is the total pool that gets distributed among referrers based on their contribution.
+ */
+export const ENS_HOLIDAY_AWARDS_POOL_USD = 10_000;
 
 /**
  * Represents the aggregated metrics for a single referrer.
@@ -164,3 +178,102 @@ export type PaginatedAggregatedReferrersResponseError = {
 export type PaginatedAggregatedReferrersResponse =
   | PaginatedAggregatedReferrersResponseOk
   | PaginatedAggregatedReferrersResponseError;
+
+/**
+ * Referrer detail information for a specific referrer address.
+ *
+ * Extends {@link AggregatedReferrerMetrics} with additional fields including
+ * referrer score, contribution percentage, and award pool share in USD.
+ */
+export interface ReferrerDetail extends AggregatedReferrerMetrics {
+  /**
+   * The referrer's score measured in "Qualifying Referral Years".
+   *
+   * 1 Referrer Point is awarded for each Qualifying Referral Year.
+   * Referrer Score is the sum of Referrer Points (i.e., sum of Qualifying Referral Years).
+   *
+   * Calculated as: totalIncrementalDuration / {@link SECONDS_PER_YEAR}
+   *
+   * Supports fractional values (e.g., 0.5 represents half a year of referrals).
+   *
+   * @invariant Guaranteed to be a non-negative number (>= 0)
+   */
+  referrerScore: number;
+
+  /**
+   * The grand total referrer score across ALL referrers (sum of all Qualifying Referral Years).
+   * @invariant Guaranteed to be a non-negative number (>= 0)
+   */
+  grandTotalReferrerScore: number;
+
+  /**
+   * The referrer's contribution as a decimal between 0 and 1 (both inclusive).
+   * Calculated as: referrerScore / grandTotalReferrerScore
+   * @invariant 0 <= referrerContribution <= 1
+   */
+  referrerContribution: number;
+
+  /**
+   * The referrer's award pool share in USD (USDC)
+   * Calculated as: referrerContribution * {@link ENS_HOLIDAY_AWARDS_POOL_USD}
+   * Amount is in the smallest unit of USDC (6 decimals)
+   */
+  awardPoolShare: PriceUsdc;
+
+  /** Unix timestamp of when the data was last updated */
+  updatedAt: UnixTimestamp;
+}
+
+/**
+ * Request parameters for referrer detail query.
+ */
+export interface ReferrerDetailRequest {
+  /** The Ethereum address of the referrer to query */
+  referrer: Address;
+}
+
+/**
+ * A status code for referrer detail API responses.
+ */
+export const ReferrerDetailResponseCodes = {
+  /**
+   * Represents that the referrer detail data is available.
+   */
+  Ok: "ok",
+
+  /**
+   * Represents that an error occurred while fetching the data.
+   */
+  Error: "error",
+} as const;
+
+/**
+ * The derived string union of possible {@link ReferrerDetailResponseCodes}.
+ */
+export type ReferrerDetailResponseCode =
+  (typeof ReferrerDetailResponseCodes)[keyof typeof ReferrerDetailResponseCodes];
+
+/**
+ * A referrer detail response when the data is available.
+ */
+export type ReferrerDetailResponseOk = {
+  responseCode: typeof ReferrerDetailResponseCodes.Ok;
+  data: ReferrerDetail;
+};
+
+/**
+ * A referrer detail response when an error occurs.
+ */
+export type ReferrerDetailResponseError = {
+  responseCode: typeof ReferrerDetailResponseCodes.Error;
+  error: string;
+  errorMessage: string;
+};
+
+/**
+ * A referrer detail API response.
+ *
+ * Use the `responseCode` field to determine the specific type interpretation
+ * at runtime.
+ */
+export type ReferrerDetailResponse = ReferrerDetailResponseOk | ReferrerDetailResponseError;
