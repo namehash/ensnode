@@ -1,4 +1,10 @@
-import { getUnixTime } from "date-fns";
+import {
+  buildReferralProgramRules,
+  buildReferrerLeaderboard,
+  buildReferrerMetrics,
+  type ReferrerLeaderboard,
+  type USDQuantity,
+} from "@namehash/ens-referrals";
 import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { zeroAddress } from "viem";
 
@@ -11,50 +17,52 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import type { AggregatedReferrerSnapshot } from "@/lib/ensanalytics/types";
-import { ireduce } from "@/lib/itertools";
 import logger from "@/lib/logger";
 
 /**
- * Fetches all referrers with 1 or more qualified referrals from the `registrar_actions` table
- * and builds an `AggregatedReferrerSnapshot`.
+ * Builds a `ReferralLeaderboard` from all database records in the `registrar_actions` table
+ * matching the provided filters.
  *
- * Step 1: Filter for "qualified" referrals where:
- * - timestamp is between startDate and endDate
- * - decodedReferrer is not null and not the zero address
- * - subregistryId matches the provided subregistryId
- *
- * Step 2: Group by decodedReferrer and calculate:
- * - Sum total incrementalDuration for each decodedReferrer
- * - Count of qualified referrals for each decodedReferrer
- *
- * Step 3: Sort by sum total incrementalDuration from highest to lowest
- *
- * Step 4: Calculate grand totals and build the snapshot object
- *
- * @param startDate - The start date (Unix timestamp, inclusive) for filtering registrar actions
- * @param endDate - The end date (Unix timestamp, inclusive) for filtering registrar actions
- * @param subregistryId - The account ID of the subregistry to filter by
- * @param topN - The count of referrers considered as Top N.
- * @returns `AggregatedReferrerSnapshot` containing all referrers with at least one qualified referral, grand totals, and updatedAt timestamp
- * @throws Error if startDate > endDate (invalid date range)
+ * @param startTime - The start time (inclusive) for filtering registrar actions
+ * @param endTime - The end time (inclusive) for filtering registrar actions
+ * @param subregistryId - The account ID of the subregistry for filtering registrar actions
+ * @param chainIndexingStatusCursor - the current chain indexing status cursor for the chain that
+ *                                    that is the source of referrer actions associated with subregistryId.
+ * @returns A promise that resolves to a {@link ReferrerLeaderboard}
+ * @throws Error if startTime > endTime (invalid time range)
  * @throws Error if the database query fails
  */
-export async function getAggregatedReferrerSnapshot(
-  startDate: UnixTimestamp,
-  endDate: UnixTimestamp,
+export async function getReferrerLeaderboard(
+  totalAwardPoolValue: USDQuantity,
+  maxQualifiedReferrers: number,
+  startTime: UnixTimestamp,
+  endTime: UnixTimestamp,
   subregistryId: AccountId,
-  topN: number,
-): Promise<AggregatedReferrerSnapshot> {
-  if (startDate > endDate) {
-    throw new Error(
-      `Invalid date range: startDate (${startDate}) must be less than or equal to endDate (${endDate})`,
-    );
-  }
+  chainIndexingStatusCursor: UnixTimestamp,
+): Promise<ReferrerLeaderboard> {
+  /**
+   * Step 1: Build referral program rules.
+   */
+  const rules = buildReferralProgramRules(
+    totalAwardPoolValue,
+    maxQualifiedReferrers,
+    startTime,
+    endTime,
+  );
 
   try {
-    const updatedAt = getUnixTime(new Date());
-
+    /**
+     * Step 2: Filter for qualified referrals where:
+     * - timestamp is between startDate and endDate
+     * - decodedReferrer is not null and not the zero address
+     * - subregistryId matches the provided subregistryId
+     *
+     * Step 3: Group by decodedReferrer and calculate:
+     * - Sum total incrementalDuration for each decodedReferrer
+     * - Count of qualified referrals for each decodedReferrer
+     *
+     * Step 4: Sort by sum total incrementalDuration from highest to lowest
+     */
     const result = await db
       .select({
         referrer: schema.registrarActions.decodedReferrer,
@@ -67,8 +75,8 @@ export async function getAggregatedReferrerSnapshot(
       .where(
         and(
           // Filter by timestamp range
-          gte(schema.registrarActions.timestamp, BigInt(startDate)),
-          lte(schema.registrarActions.timestamp, BigInt(endDate)),
+          gte(schema.registrarActions.timestamp, BigInt(startTime)),
+          lte(schema.registrarActions.timestamp, BigInt(endTime)),
           // Filter by decodedReferrer not null
           isNotNull(schema.registrarActions.decodedReferrer),
           // Filter by decodedReferrer not zero address
@@ -80,46 +88,26 @@ export async function getAggregatedReferrerSnapshot(
       .groupBy(schema.registrarActions.decodedReferrer)
       .orderBy(desc(sql`total_incremental_duration`));
 
-    // Transform the result to an ordered map (preserves SQL sort order)
-    const referrers = new Map(
-      result.map((row, idx) => {
+    /**
+     * Step 5: Build referrer metrics from database response.
+     */
+    const allReferrers = result.map((row) => {
+      return buildReferrerMetrics(
         // biome-ignore lint/style/noNonNullAssertion: referrer is guaranteed to be non-null due to isNotNull filter in WHERE clause
-        const address = row.referrer!;
-        const metrics = {
-          referrer: address,
-          totalReferrals: row.totalReferrals,
-          // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
-          totalIncrementalDuration: deserializeDuration(row.totalIncrementalDuration!),
-          isTopReferrer: idx < topN,
-        };
-        return [address, metrics];
-      }),
-    );
+        row.referrer!,
+        row.totalReferrals,
+        // biome-ignore lint/style/noNonNullAssertion: totalIncrementalDuration is guaranteed to be non-null as it is the sum of non-null bigint values
+        deserializeDuration(row.totalIncrementalDuration!),
+      );
+    });
 
-    // Calculate grand total across all referrers
-    const grandTotalReferrals = ireduce(
-      referrers.values(),
-      (sum, metrics) => sum + metrics.totalReferrals,
-      0,
-    );
-
-    // Calculate grand total of only the top N referrers
-    const grandTotalQualifiedIncrementalDuration = ireduce(
-      referrers.values().filter((referrer) => referrer.isTopReferrer),
-      (sum, metrics) => sum + metrics.totalIncrementalDuration,
-      0,
-    );
-
-    // Build and return the complete snapshot
-    return {
-      referrers,
-      updatedAt,
-      grandTotalReferrals,
-      grandTotalQualifiedIncrementalDuration,
-    };
+    /**
+     * Step 6: Build leaderboard from all referrer metrics.
+     */
+    return buildReferrerLeaderboard(allReferrers, rules, chainIndexingStatusCursor);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    logger.error({ error }, "Failed to fetch aggregated referrer snapshot from database");
-    throw new Error(`Failed to fetch aggregated referrer snapshot: ${errorMessage}`);
+    logger.error({ error }, "Failed to fetch referrers from database");
+    throw new Error(`Failed to fetch referrers from database: ${errorMessage}`);
   }
 }

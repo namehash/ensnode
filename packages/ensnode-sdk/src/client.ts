@@ -24,10 +24,10 @@ import type {
 } from "./api/types";
 import { ClientError } from "./client-error";
 import {
-  deserializePaginatedAggregatedReferrersResponse,
-  type PaginatedAggregatedReferrersRequest,
-  type PaginatedAggregatedReferrersResponse,
-  type SerializedPaginatedAggregatedReferrersResponse,
+  deserializeReferrerLeaderboardPageResponse,
+  type ReferrerLeaderboardPageResponse,
+  type ReferrerLeaderboardPaginationRequest,
+  type SerializedReferrerLeaderboardPageResponse,
 } from "./ensanalytics";
 import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
@@ -372,7 +372,7 @@ export class ENSNodeClient {
    * @param request - Pagination parameters
    * @param request.page - The page number to retrieve (1-indexed, default: 1)
    * @param request.itemsPerPage - Number of items per page (default: 25, max: 100)
-   * @returns {PaginatedAggregatedReferrersResponse}
+   * @returns {ReferrerLeaderboardPageResponse}
    *
    * @throws if the ENSNode request fails
    * @throws if the ENSNode API returns an error response
@@ -395,8 +395,8 @@ export class ENSNodeClient {
    * ```
    */
   async getAggregatedReferrers(
-    request?: PaginatedAggregatedReferrersRequest,
-  ): Promise<PaginatedAggregatedReferrersResponse> {
+    request?: ReferrerLeaderboardPaginationRequest,
+  ): Promise<ReferrerLeaderboardPageResponse> {
     const url = new URL(`/ensanalytics/aggregated-referrers`, this.options.url);
 
     if (request?.page) url.searchParams.set("page", request.page.toString());
@@ -419,8 +419,8 @@ export class ENSNodeClient {
     // So we don't need to check response.ok here, just deserialize and let
     // the caller handle the responseCode
 
-    return deserializePaginatedAggregatedReferrersResponse(
-      responseData as SerializedPaginatedAggregatedReferrersResponse,
+    return deserializeReferrerLeaderboardPageResponse(
+      responseData as SerializedReferrerLeaderboardPageResponse,
     );
   }
 

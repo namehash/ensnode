@@ -9,7 +9,7 @@ import {
   NamedRegistrarAction,
   RegistrarActionReferral,
   RegistrarActionTypes,
-  zeroEncodedReferrer,
+  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { DisplayDuration, RelativeTime } from "@/components/datetime-utils";
@@ -58,7 +58,7 @@ function ResolveAndDisplayReferrerIdentity({
   // display a hyphen
   if (
     !isRegistrarActionReferralAvailable(referral) ||
-    referral.encodedReferrer === zeroEncodedReferrer
+    referral.encodedReferrer === ZERO_ENCODED_REFERRER
   ) {
     return <>-</>;
   }

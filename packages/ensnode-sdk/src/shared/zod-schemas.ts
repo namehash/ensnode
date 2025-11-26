@@ -45,6 +45,20 @@ export const makeBooleanStringSchema = (valueLabel: string = "Value") =>
     .transform((val) => val === "true");
 
 /**
+ * Parses a numeric value as a finite non-negative number.
+ */
+export const makeFiniteNonNegativeNumberSchema = (valueLabel: string = "Value") =>
+  z
+    .number({
+      // NOTE: Zod's implementation of `number` automatically rejects NaN and Infinity values.
+      // and therefore the finite check is implicit.
+      error: `${valueLabel} must be a finite number.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must be a non-negative number (>=0).`,
+    });
+
+/**
  * Parses a numeric value as an integer.
  */
 export const makeIntegerSchema = (valueLabel: string = "Value") =>

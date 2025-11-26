@@ -30,7 +30,7 @@ export const ENCODED_REFERRER_BYTE_LENGTH = 32;
  *
  * The initial bytes of correctly encoded referrer value for ENS Holiday Awards.
  */
-export const encodedReferrerPadding = pad("0x", {
+export const EXPECTED_ENCODED_REFERRER_PADDING: Hex = pad("0x", {
   size: ENCODED_REFERRER_BYTE_OFFSET,
   dir: "left",
 });
@@ -40,7 +40,7 @@ export const encodedReferrerPadding = pad("0x", {
  *
  * Guaranteed to be a hex string representation of a 32-byte zero value.
  */
-export const zeroEncodedReferrer = pad("0x", {
+export const ZERO_ENCODED_REFERRER: EncodedReferrer = pad("0x", {
   size: ENCODED_REFERRER_BYTE_LENGTH,
   dir: "left",
 });
@@ -77,7 +77,7 @@ export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address
 
   // return zero address if the padding of encoded referrer is not correct
   // for ENS Holiday Awards
-  if (padding !== encodedReferrerPadding) {
+  if (padding !== EXPECTED_ENCODED_REFERRER_PADDING) {
     return zeroAddress;
   }
 
@@ -89,16 +89,4 @@ export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address
   } catch {
     throw new Error(`Decoded referrer value must be a valid EVM address.`);
   }
-}
-
-/**
- * Build a URL to the official ENS manager app
- * where the given {@link Address} is set as the referrer.
- */
-export function buildEnsReferralUrl(address: Address): URL {
-  const ensAppUrl = new URL("https://app.ens.domains");
-
-  ensAppUrl.searchParams.set("referrer", getAddress(address));
-
-  return ensAppUrl;
 }

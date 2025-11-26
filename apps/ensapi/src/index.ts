@@ -3,6 +3,7 @@ import config from "@/config";
 
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
+import { formatISO } from "date-fns";
 import { cors } from "hono/cors";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
@@ -12,8 +13,8 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
-import { fetcher as referrersCacheFetcher } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { fetcher as referrerLeaderboardCacheFetcher } from "@/middleware/referrer-leaderboard-cache.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
@@ -75,12 +76,16 @@ const server = serve(
     await app.request("/health");
 
     // warm start ENSAnalytics aggregated referrer snapshot cache
-    logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
-    const cache = await referrersCacheFetcher();
+    logger.info("Warming up ENSAnalytics referrer leaderboard cache...");
+    const cache = await referrerLeaderboardCacheFetcher();
     if (cache) {
-      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
+      logger.info(
+        `ENSAnalytics referrer leaderboard cache warmed up with ${cache.referrers.size} referrers from ${formatISO(cache.updatedAt)}.`,
+      );
     } else {
-      logger.error("Failed to warm up ENSAnalytics cache - no cached data available yet");
+      logger.error(
+        "Failed to warm up ENSAnalytics referrer leaderboard cache - no cached data available yet",
+      );
       // Don't exit - let the service run without pre-warmed analytics
     }
   },
