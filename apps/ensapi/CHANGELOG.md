@@ -1,5 +1,16 @@
 # ensapi
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.0.1
+  - @ensnode/ensnode-schema@1.0.1
+  - @ensnode/ponder-subgraph@1.0.1
+  - @ensnode/ensnode-sdk@1.0.1
+  - @namehash/ens-referrals@1.0.0
+
 ## 1.0.0
 
 ### Major Changes

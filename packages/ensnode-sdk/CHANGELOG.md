@@ -1,5 +1,13 @@
 # @ensnode/ensnode-sdk
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.0.1
+  - @namehash/ens-referrals@1.0.0
+
 ## 1.0.0
 
 ### Minor Changes

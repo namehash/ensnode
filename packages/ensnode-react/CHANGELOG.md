@@ -1,5 +1,14 @@
 # @ensnode/ensnode-react
 
+## 1.0.1
+
+### Patch Changes
+
+- [#1308](https://github.com/namehash/ensnode/pull/1308) [`1609f2a`](https://github.com/namehash/ensnode/commit/1609f2a47a3e40ccf4b80c182dc626fb2331c745) Thanks [@tk-o](https://github.com/tk-o)! - Technical change to allow publishing `1.0.1` package to NPM registry.
+
+- Updated dependencies []:
+  - @ensnode/ensnode-sdk@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes

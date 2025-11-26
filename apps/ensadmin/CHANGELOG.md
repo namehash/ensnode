@@ -1,5 +1,16 @@
 # ensadmin
 
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`1609f2a`](https://github.com/namehash/ensnode/commit/1609f2a47a3e40ccf4b80c182dc626fb2331c745)]:
+  - @ensnode/ensnode-react@1.0.1
+  - @ensnode/datasources@1.0.1
+  - @ensnode/ponder-metadata@1.0.1
+  - @ensnode/ensnode-schema@1.0.1
+  - @ensnode/ensnode-sdk@1.0.1
+
 ## 1.0.0
 
 ### Minor Changes
