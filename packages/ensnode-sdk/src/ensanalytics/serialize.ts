@@ -1,7 +1,14 @@
-import type { SerializedPaginatedAggregatedReferrersResponse } from "./serialized-types";
+import { serializePrice } from "../shared";
+import type {
+  SerializedPaginatedAggregatedReferrersResponse,
+  SerializedReferrerDetail,
+  SerializedReferrerDetailResponse,
+} from "./serialized-types";
 import {
   type PaginatedAggregatedReferrersResponse,
   PaginatedAggregatedReferrersResponseCodes,
+  type ReferrerDetailResponse,
+  ReferrerDetailResponseCodes,
 } from "./types";
 
 /**
@@ -20,6 +27,31 @@ export function serializePaginatedAggregatedReferrersResponse(
       return response;
 
     case PaginatedAggregatedReferrersResponseCodes.Error:
+      return response;
+  }
+}
+
+/**
+ * Serialize a {@link ReferrerDetailResponse} object.
+ *
+ * Serializes the awardPoolShare.amount from bigint to string.
+ */
+export function serializeReferrerDetailResponse(
+  response: ReferrerDetailResponse,
+): SerializedReferrerDetailResponse {
+  switch (response.responseCode) {
+    case ReferrerDetailResponseCodes.Ok:
+      return {
+        responseCode: response.responseCode,
+        data: {
+          ...response.data,
+          awardPoolShare: serializePrice(
+            response.data.awardPoolShare,
+          ) as SerializedReferrerDetail["awardPoolShare"],
+        },
+      };
+
+    case ReferrerDetailResponseCodes.Error:
       return response;
   }
 }
