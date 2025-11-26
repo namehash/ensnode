@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ponder-metadata",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "A Hono middleware for making Ponder app metadata available to clients.",
   "license": "MIT",
