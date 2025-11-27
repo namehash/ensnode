@@ -1,4 +1,4 @@
-import type { USDQuantity } from "@namehash/ens-referrals";
+import type { ReferrerLeaderboard, USDQuantity } from "@namehash/ens-referrals";
 import { getUnixTime } from "date-fns";
 import { describe, expect, it, vi } from "vitest";
 
@@ -102,6 +102,35 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(
         unqualifiedReferrers.every(([_, referrer]) => referrer.awardPoolApproxValue === 0),
       ).toBe(true);
+    });
+
+    it("returns an empty list if no referrer leaderboard records were found in database", async () => {
+      vi.mocked(database.getReferrerLeaderboardRecords).mockResolvedValue([]);
+
+      const result = await getReferrerLeaderboard(
+        totalAwardPoolValue,
+        maxQualifiedReferrers,
+        startTime,
+        endTime,
+        subregistryId,
+        chainIndexingStatusCursor,
+      );
+
+      expect(result).toMatchObject({
+        aggregatedMetrics: {
+          grandTotalIncrementalDuration: 0,
+          grandTotalQualifiedReferrersFinalScore: 0,
+          grandTotalReferrals: 0,
+        },
+        referrers: new Map(),
+        rules: {
+          totalAwardPoolValue,
+          maxQualifiedReferrers,
+          startTime,
+          endTime,
+        },
+        updatedAt: chainIndexingStatusCursor,
+      } satisfies ReferrerLeaderboard);
     });
   });
 });
