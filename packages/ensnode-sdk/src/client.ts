@@ -364,9 +364,9 @@ export class ENSNodeClient {
   }
 
   /**
-   * Fetch Paginated Aggregated Referrers
+   * Fetch Referrer Leaderboard Page
    *
-   * Retrieves a paginated list of aggregated referrer metrics with contribution percentages.
+   * Retrieves a paginated list of referrer leaderboard metrics with contribution percentages.
    * Each referrer's contribution is calculated as a percentage of the grand totals across all referrers.
    *
    * @param request - Pagination parameters
@@ -381,23 +381,44 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Get first page with default page size (25 items)
-   * const response = await client.getAggregatedReferrers();
-   * if (response.responseCode === 'ok') {
-   *   console.log(response.data.referrers);
-   *   console.log(`Page ${response.data.paginationParams.page} of ${Math.ceil(response.data.total / response.data.paginationParams.itemsPerPage)}`);
+   * const response = await client.getReferrerLeaderboard();
+   * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
+   *   const {
+   *     aggregatedMetrics,
+   *     referrers,
+   *     rules,
+   *     paginationContext,
+   *     updatedAt
+   *   } = response.data;
+   *   console.log(aggregatedMetrics);
+   *   console.log(referrers);
+   *   console.log(rules);
+   *   console.log(updatedAt);
+   *   console.log(`Page ${paginationContext.page} of ${paginationContext.totalPages}`);
    * }
    * ```
    *
    * @example
    * ```typescript
    * // Get second page with 50 items per page
-   * const response = await client.getAggregatedReferrers({ page: 2, itemsPerPage: 50 });
+   * const response = await client.getReferrerLeaderboard({ page: 2, itemsPerPage: 50 });
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Handle error response, ie. when Referrer Leaderboard is not currently available.
+   * const response = await client.getReferrerLeaderboard();
+   *
+   * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Error) {
+   *   console.error(response.error);
+   *   console.error(response.errorMessage);
+   * }
    * ```
    */
-  async getAggregatedReferrers(
+  async getReferrerLeaderboard(
     request?: ReferrerLeaderboardPaginationRequest,
   ): Promise<ReferrerLeaderboardPageResponse> {
-    const url = new URL(`/ensanalytics/aggregated-referrers`, this.options.url);
+    const url = new URL(`/ensanalytics/referrers`, this.options.url);
 
     if (request?.page) url.searchParams.set("page", request.page.toString());
     if (request?.itemsPerPage)

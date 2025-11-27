@@ -3,7 +3,7 @@ import config from "@/config";
 
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
-import { formatISO } from "date-fns";
+import { formatISO, fromUnixTime } from "date-fns";
 import { cors } from "hono/cors";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
@@ -80,7 +80,7 @@ const server = serve(
     const cache = await referrerLeaderboardCacheFetcher();
     if (cache) {
       logger.info(
-        `ENSAnalytics referrer leaderboard cache warmed up with ${cache.referrers.size} referrers from ${formatISO(cache.updatedAt)}.`,
+        `ENSAnalytics referrer leaderboard cache warmed up with ${cache.referrers.size} referrers from ${formatISO(fromUnixTime(cache.updatedAt))}.`,
       );
     } else {
       logger.error(
