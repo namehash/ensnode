@@ -3,7 +3,6 @@ import config from "@/config";
 
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
-import { formatISO, fromUnixTime } from "date-fns";
 import { cors } from "hono/cors";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
@@ -14,7 +13,6 @@ import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
-import { fetcher as referrerLeaderboardCacheFetcher } from "@/middleware/referrer-leaderboard-cache.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
@@ -61,6 +59,17 @@ app.onError((error, ctx) => {
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
 
+// trigger for warming up the ENSAnalytics aggregated referrer snapshot cache
+const triggerEnsAnalyticsAggregatedReferrerSnapshotCacheWarmup = async () => {
+  logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
+  try {
+    // call the ENSAnalytics Aggregated Referrers endpoint to trigger cache warmup
+    await app.request("/ensanalytics/aggregated-referrers");
+  } catch {
+    // Don't exit - let the service run without pre-warmed analytics
+  }
+};
+
 // start hono server
 const server = serve(
   {
@@ -76,18 +85,7 @@ const server = serve(
     await app.request("/health");
 
     // warm start ENSAnalytics aggregated referrer snapshot cache
-    logger.info("Warming up ENSAnalytics referrer leaderboard cache...");
-    const cache = await referrerLeaderboardCacheFetcher();
-    if (cache) {
-      logger.info(
-        `ENSAnalytics referrer leaderboard cache warmed up with ${cache.referrers.size} referrers from ${formatISO(fromUnixTime(cache.updatedAt))}.`,
-      );
-    } else {
-      logger.error(
-        "Failed to warm up ENSAnalytics referrer leaderboard cache - no cached data available yet",
-      );
-      // Don't exit - let the service run without pre-warmed analytics
-    }
+    await triggerEnsAnalyticsAggregatedReferrerSnapshotCacheWarmup();
   },
 );
 

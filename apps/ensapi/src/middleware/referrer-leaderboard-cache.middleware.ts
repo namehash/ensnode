@@ -5,13 +5,13 @@ import {
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
   type ReferrerLeaderboard,
 } from "@namehash/ens-referrals";
-import { getUnixTime } from "date-fns";
 import type { PromiseResult } from "p-reflect";
 import pReflect from "p-reflect";
 
 import {
   type Duration,
   getEthnamesSubregistryId,
+  type RealtimeIndexingStatusProjection,
   staleWhileRevalidate,
 } from "@ensnode/ensnode-sdk";
 
@@ -23,53 +23,62 @@ const logger = makeLogger("referrer-leaderboard-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
-export const fetcher = staleWhileRevalidate({
-  fn: async () => {
-    logger.info(
-      `Building referrer leaderboard\n` +
-        `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
-        `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
-    );
-    const subregistryId = getEthnamesSubregistryId(config.namespace);
-
-    try {
-      const result = await getReferrerLeaderboard(
-        ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-        ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-        config.ensHolidayAwardsStart,
-        config.ensHolidayAwardsEnd,
-        subregistryId,
-        // TODO: Not immediately sure of a good way to pass in a distinct / new param to this function
-        // each time it's called since it's wrapped inside the staleWhileRevalidate function.
-        // Therefore, temporarily use the current system time for the timestamp when the
-        // referrer leaderboard is accurate as of. What we really want to do here is use the indexing
-        // status middleware to set this value to `c.var.indexingStatus.value.snapshot.slowestChainIndexingCursor`.
-        // If we don't fix this, we will show incorrect timestamps for when the referrer leaderboard was last
-        // updated. This will especially be a noticable issue if the indexing status is far from realtime.
-        getUnixTime(new Date()),
-      );
+const buildSwrReferrerLeaderboardFetcher = (indexingStatus: RealtimeIndexingStatusProjection) =>
+  staleWhileRevalidate({
+    fn: async () => {
       logger.info(
-        {
-          grandTotalReferrals: result.referrers.size,
-          maxQualifiedReferrers: ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-        },
-        "Successfully built referrer leaderboard",
+        `Building referrer leaderboard\n` +
+          `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
+          `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
       );
-      return result;
-    } catch (error) {
-      logger.error({ error }, "Failed to build referrer leaderboard");
-      throw error;
-    }
-  },
-  ttl: TTL,
-});
 
+      const subregistryId = getEthnamesSubregistryId(config.namespace);
+
+      try {
+        const { slowestChainIndexingCursor } = indexingStatus.snapshot;
+        const result = await getReferrerLeaderboard(
+          ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+          ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+          config.ensHolidayAwardsStart,
+          config.ensHolidayAwardsEnd,
+          subregistryId,
+          slowestChainIndexingCursor,
+        );
+        logger.info(
+          {
+            grandTotalReferrals: result.referrers.size,
+            maxQualifiedReferrers: ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+          },
+          "Successfully built referrer leaderboard",
+        );
+        return result;
+      } catch (error) {
+        logger.error({ error }, "Failed to build referrer leaderboard");
+        throw error;
+      }
+    },
+    ttl: TTL,
+  });
+
+/**
+ * Type definition for the referrer leaderboard cache middleware context passed to downstream middleware and handlers.
+ */
 export type ReferrerLeaderboardCacheMiddlewareVariables = {
+  /**
+   * The cached referrer leaderboard containing metrics and rankings for referrers.
+   *
+   * If `isRejected` is `true`, no referrer leaderboard has been successfully fetched and cached since service startup.
+   * This may indicate the ENSIndexer service is unreachable, in an error state, or the database query failed.
+   *
+   * The leaderboard's `updatedAt` timestamp reflects the `slowestChainIndexingCursor` from the indexing status,
+   * ensuring consistency with the indexer state rather than the current system time.
+   */
   referrerLeaderboardCache: PromiseResult<ReferrerLeaderboard>;
 };
 
 /**
- * Middleware that fetches and caches a referrer leaderboard using Stale-While-Revalidate (SWR) caching.
+ * Middleware that provides {@link ReferrerLeaderboardCacheMiddlewareVariables}
+ * to downstream middleware and handlers.
  *
  * This middleware uses the SWR caching strategy to serve cached data immediately (even if stale) while
  * asynchronously revalidating in the background. This provides:
@@ -79,6 +88,9 @@ export type ReferrerLeaderboardCacheMiddlewareVariables = {
  *
  * Retrieves referrer leaderboard for all referrers with at least one referral within the ENS Holiday Awards period from the database and caches them.
  * Sets the `referrerLeaderboardCache` variable on the context for use by other middleware and handlers.
+ *
+ * Using the `slowestChainIndexingCursor` from the indexing status as the leaderboard's `updatedAt` timestamp
+ * to ensure the timestamp accurately reflects the indexer state rather than the current system time.
  *
  * @see {@link staleWhileRevalidate} for detailed documentation on the SWR caching strategy and error handling.
  */
@@ -94,8 +106,10 @@ export const referrerLeaderboardCacheMiddleware = factory.createMiddleware(async
   if (c.var.indexingStatus.isRejected) {
     promiseResult = await pReflect(
       Promise.reject(
+        // Cached indexing status response was not available.
         new Error(
           "Unable to generate a new referrer leaderboard. Indexing status is currently unavailable to this ENSApi instance.",
+          { cause: c.var.indexingStatus.reason },
         ),
       ),
     );
@@ -103,12 +117,15 @@ export const referrerLeaderboardCacheMiddleware = factory.createMiddleware(async
     return await next();
   }
 
-  const cachedLeaderboard = await fetcher();
+  const swrReferrerLeaderboardFetcher = buildSwrReferrerLeaderboardFetcher(
+    c.var.indexingStatus.value,
+  );
+  const cachedLeaderboard = await swrReferrerLeaderboardFetcher();
 
   if (cachedLeaderboard === null) {
     // A referrer leaderboard has never been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
-    // an `referrerLeaderboardCache` variable where `isRejected` is `true` and `reason` is the provided `error`.
+    // a `referrerLeaderboardCache` variable where `isRejected` is `true` and `reason` is the provided `error`.
     const errorMessage =
       "Unable to generate a new referrer leaderboard. No referrer leaderboards have been successfully fetched and stored into cache since service startup. This may indicate the referrer leaderboard service is unreachable or in an error state.";
     const error = new Error(errorMessage);
@@ -116,7 +133,7 @@ export const referrerLeaderboardCacheMiddleware = factory.createMiddleware(async
     promiseResult = await pReflect(Promise.reject(error));
   } else {
     // A referrer leaderboard has been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive an
+    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive a
     // `referrerLeaderboardCache` variable where `isFulfilled` is `true` and `value` is a {@link ReferrerLeaderboard} value
     // generated from the `cachedLeaderboard`.
     promiseResult = await pReflect(Promise.resolve(cachedLeaderboard));
