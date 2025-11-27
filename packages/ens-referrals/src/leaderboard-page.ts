@@ -241,11 +241,15 @@ export const getReferrerLeaderboardPage = (
 
   let referrers: AwardedReferrerMetrics[];
 
-  if (paginationContext.totalRecords > 0) {
+  if (
+    paginationContext.totalRecords > 0 &&
+    typeof paginationContext.startIndex !== "undefined" &&
+    typeof paginationContext.endIndex !== "undefined"
+  ) {
     // extract the referrers from the leaderboard in the range specified by `paginationContext`.
     referrers = Array.from(leaderboard.referrers.values()).slice(
       paginationContext.startIndex,
-      paginationContext.endIndex,
+      paginationContext.endIndex + 1, // For `slice`, this is exclusive of the element at the index 'end'. We need it to be inclusive, hence plus one.
     );
   } else {
     referrers = [];
