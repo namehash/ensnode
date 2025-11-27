@@ -1,5 +1,38 @@
 # ensindexer
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`4faad0b`](https://github.com/namehash/ensnode/commit/4faad0b534c5bbdfdeca4227565fe24ff29c3dd4)]:
+  - @ensnode/ensnode-sdk@1.0.3
+  - @ensnode/ensrainbow-sdk@1.0.3
+  - @ensnode/datasources@1.0.3
+  - @ensnode/ponder-metadata@1.0.3
+  - @ensnode/ensnode-schema@1.0.3
+
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [[`f6aeb17`](https://github.com/namehash/ensnode/commit/f6aeb17330da0f73ee337a2f94a02cabbab6613e)]:
+  - @ensnode/ensnode-sdk@1.0.2
+  - @ensnode/ensrainbow-sdk@1.0.2
+  - @ensnode/datasources@1.0.2
+  - @ensnode/ponder-metadata@1.0.2
+  - @ensnode/ensnode-schema@1.0.2
+
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.0.1
+  - @ensnode/ensrainbow-sdk@1.0.1
+  - @ensnode/ponder-metadata@1.0.1
+  - @ensnode/ensnode-schema@1.0.1
+  - @ensnode/ensnode-sdk@1.0.1
+
 ## 1.0.0
 
 ### Major Changes
