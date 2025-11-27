@@ -97,7 +97,7 @@ export type ReferrerLeaderboardCacheMiddlewareVariables = {
 export const referrerLeaderboardCacheMiddleware = factory.createMiddleware(async (c, next) => {
   if (c.var.indexingStatus === undefined) {
     throw new Error(
-      `Invariant("referrer-leaderboard-cache.middleware): indexingStatusMiddleware required`,
+      `Invariant(referrerLeaderboardCacheMiddleware): indexingStatusMiddleware required`,
     );
   }
 
