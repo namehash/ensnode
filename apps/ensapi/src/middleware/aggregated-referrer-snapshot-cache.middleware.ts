@@ -17,7 +17,7 @@ const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
-const swrAggregatedReferrerSnapshotFetcher = staleWhileRevalidate({
+export const swrAggregatedReferrerSnapshotFetcher = staleWhileRevalidate({
   fn: async () => {
     logger.info(
       `Building aggregated referrer snapshot\n` +
