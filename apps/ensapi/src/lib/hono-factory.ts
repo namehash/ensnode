@@ -5,13 +5,11 @@ import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelera
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
 
-type MiddlewareVariables = Partial<
-  IndexingStatusMiddlewareVariables &
-    IsRealtimeMiddlewareVariables &
-    CanAccelerateMiddlewareVariables &
-    AggregatedReferrerSnapshotCacheMiddlewareVariables
->;
+export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
+  IsRealtimeMiddlewareVariables &
+  CanAccelerateMiddlewareVariables &
+  AggregatedReferrerSnapshotCacheMiddlewareVariables;
 
 export const factory = createFactory<{
-  Variables: MiddlewareVariables;
+  Variables: Partial<MiddlewareVariables>;
 }>();

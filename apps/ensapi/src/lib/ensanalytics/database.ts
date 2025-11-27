@@ -1,4 +1,3 @@
-import { getUnixTime } from "date-fns";
 import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle-orm";
 import { zeroAddress } from "viem";
 
@@ -35,6 +34,7 @@ import logger from "@/lib/logger";
  * @param startDate - The start date (Unix timestamp, inclusive) for filtering registrar actions
  * @param endDate - The end date (Unix timestamp, inclusive) for filtering registrar actions
  * @param subregistryId - The account ID of the subregistry to filter by
+ * @param updatedAt - The timestamp to use for the snapshot's updatedAt field
  * @returns `AggregatedReferrerSnapshot` containing all referrers with at least one qualified referral, grand totals, and updatedAt timestamp
  * @throws Error if startDate > endDate (invalid date range)
  * @throws Error if the database query fails
@@ -43,6 +43,7 @@ export async function getAggregatedReferrerSnapshot(
   startDate: UnixTimestamp,
   endDate: UnixTimestamp,
   subregistryId: AccountId,
+  updatedAt: UnixTimestamp,
 ): Promise<AggregatedReferrerSnapshot> {
   if (startDate > endDate) {
     throw new Error(
@@ -51,8 +52,6 @@ export async function getAggregatedReferrerSnapshot(
   }
 
   try {
-    const updatedAt = getUnixTime(new Date());
-
     const result = await db
       .select({
         referrer: schema.registrarActions.decodedReferrer,
