@@ -15,7 +15,7 @@ import {
   staleWhileRevalidate,
 } from "@ensnode/ensnode-sdk";
 
-import { getReferrerLeaderboard } from "@/lib/ensanalytics/database";
+import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 
