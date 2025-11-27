@@ -1,25 +1,25 @@
-import type { SerializedPaginatedAggregatedReferrersResponse } from "./serialized-types";
+import type { SerializedReferrerLeaderboardPageResponse } from "./serialized-types";
 import {
-  type PaginatedAggregatedReferrersResponse,
-  PaginatedAggregatedReferrersResponseCodes,
+  type ReferrerLeaderboardPageResponse,
+  ReferrerLeaderboardPageResponseCodes,
 } from "./types";
 
 /**
- * Serialize a {@link PaginatedAggregatedReferrersResponse} object.
+ * Serialize a {@link ReferrerLeaderboardPageResponse} object.
  *
- * Note: Since all fields in PaginatedAggregatedReferrersResponse are already
+ * Note: Since all fields in ReferrerLeaderboardPageResponse are already
  * serializable primitives, this function performs an identity transformation.
  * It exists to maintain consistency with the serialization pattern used
  * throughout the codebase.
  */
-export function serializePaginatedAggregatedReferrersResponse(
-  response: PaginatedAggregatedReferrersResponse,
-): SerializedPaginatedAggregatedReferrersResponse {
+export function serializeReferrerLeaderboardPageResponse(
+  response: ReferrerLeaderboardPageResponse,
+): SerializedReferrerLeaderboardPageResponse {
   switch (response.responseCode) {
-    case PaginatedAggregatedReferrersResponseCodes.Ok:
+    case ReferrerLeaderboardPageResponseCodes.Ok:
       return response;
 
-    case PaginatedAggregatedReferrersResponseCodes.Error:
+    case ReferrerLeaderboardPageResponseCodes.Error:
       return response;
   }
 }

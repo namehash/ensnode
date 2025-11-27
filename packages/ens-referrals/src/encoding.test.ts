@@ -3,11 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildEncodedReferrer,
-  buildEnsReferralUrl,
   decodeEncodedReferrer,
   ENCODED_REFERRER_BYTE_LENGTH,
   ENCODED_REFERRER_BYTE_OFFSET,
-} from "./referrer";
+} from "./encoding";
 
 const vitalikEthAddressLowercase: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
 const vitalikEthAddressChecksummed: Address = getAddress(
@@ -74,19 +73,6 @@ describe("encoded referrer", () => {
 
       expect(decodedReferrer).toStrictEqual(expectedDecodedReferrer);
       expect(encodedReferrer).toEqual(expectedEncodedReferrer);
-    });
-  });
-
-  describe("building a referrer URL", () => {
-    it("can build a referrer URL to ENS App", () => {
-      const expectedUrlString = `https://app.ens.domains/?referrer=${vitalikEthAddressChecksummed}`;
-      expect(buildEnsReferralUrl(vitalikEthAddressLowercase).toString()).toStrictEqual(
-        expectedUrlString,
-      );
-
-      expect(buildEnsReferralUrl(vitalikEthAddressChecksummed).toString()).toStrictEqual(
-        expectedUrlString,
-      );
     });
   });
 });

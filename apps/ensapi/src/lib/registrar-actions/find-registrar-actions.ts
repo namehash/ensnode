@@ -18,7 +18,7 @@ import {
   type RegistrarActionsOrder,
   RegistrarActionsOrders,
   type RegistrationLifecycle,
-  zeroEncodedReferrer,
+  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
@@ -48,7 +48,7 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
           // apply referral encoded referrer inclusion filter
           const filterSql = and(
             isNotNull(schema.registrarActions.encodedReferrer),
-            not(eq(schema.registrarActions.encodedReferrer, zeroEncodedReferrer)),
+            not(eq(schema.registrarActions.encodedReferrer, ZERO_ENCODED_REFERRER)),
           );
 
           // Invariant: filterSql is `SQL` object - should never occur

@@ -1,28 +1,26 @@
 import type {
-  PaginatedAggregatedReferrersResponse,
-  PaginatedAggregatedReferrersResponseError,
-  PaginatedAggregatedReferrersResponseOk,
+  ReferrerLeaderboardPageResponse,
+  ReferrerLeaderboardPageResponseError,
+  ReferrerLeaderboardPageResponseOk,
 } from "./types";
 
 /**
- * Serialized representation of {@link PaginatedAggregatedReferrersResponseError}.
+ * Serialized representation of {@link ReferrerLeaderboardPageResponseError}.
  *
  * Note: All fields are already serializable, so this type is identical to the source type.
  */
-export type SerializedPaginatedAggregatedReferrersResponseError =
-  PaginatedAggregatedReferrersResponseError;
+export type SerializedReferrerLeaderboardPageResponseError = ReferrerLeaderboardPageResponseError;
 
 /**
- * Serialized representation of {@link PaginatedAggregatedReferrersResponseOk}.
+ * Serialized representation of {@link ReferrerLeaderboardPageResponseOk}.
  *
  * Note: All fields are already serializable, so this type is identical to the source type.
  */
-export type SerializedPaginatedAggregatedReferrersResponseOk =
-  PaginatedAggregatedReferrersResponseOk;
+export type SerializedReferrerLeaderboardPageResponseOk = ReferrerLeaderboardPageResponseOk;
 
 /**
- * Serialized representation of {@link PaginatedAggregatedReferrersResponse}.
+ * Serialized representation of {@link ReferrerLeaderboardPageResponse}.
  */
-export type SerializedPaginatedAggregatedReferrersResponse =
-  | SerializedPaginatedAggregatedReferrersResponseOk
-  | SerializedPaginatedAggregatedReferrersResponseError;
+export type SerializedReferrerLeaderboardPageResponse =
+  | SerializedReferrerLeaderboardPageResponseOk
+  | SerializedReferrerLeaderboardPageResponseError;
