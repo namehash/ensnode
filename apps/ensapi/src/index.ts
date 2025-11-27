@@ -12,7 +12,6 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
-import { swrAggregatedReferrerSnapshotFetcher } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -60,6 +59,17 @@ app.onError((error, ctx) => {
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
 
+// trigger for warming up the ENSAnalytics aggregated referrer snapshot cache
+const triggerEnsAnalyticsAggregatedReferrerSnapshotCacheWarmup = async () => {
+  logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
+  try {
+    // call the ENSAnalytics Aggregated Referrers endpoint to trigger cache warmup
+    await app.request("/ensanalytics/aggregated-referrers");
+  } catch {
+    // Don't exit - let the service run without pre-warmed analytics
+  }
+};
+
 // start hono server
 const server = serve(
   {
@@ -75,14 +85,7 @@ const server = serve(
     await app.request("/health");
 
     // warm start ENSAnalytics aggregated referrer snapshot cache
-    logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
-    const cache = await swrAggregatedReferrerSnapshotFetcher();
-    if (cache) {
-      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
-    } else {
-      logger.error("Failed to warm up ENSAnalytics cache - no cached data available yet");
-      // Don't exit - let the service run without pre-warmed analytics
-    }
+    await triggerEnsAnalyticsAggregatedReferrerSnapshotCacheWarmup();
   },
 );
 
