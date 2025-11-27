@@ -115,7 +115,7 @@ export type AggregatedReferrerSnapshotCacheMiddlewareVariables = {
  *
  * Retrieves all referrers with at least one qualified referral from the database and caches them.
  * Sets the `aggregatedReferrerSnapshotCache` variable on the context for use by other middleware and handlers.
- * 
+ *
  * Using the `slowestChainIndexingCursor` from the indexing status as the snapshot's `updatedAt` timestamp
  * to ensure the timestamp accurately reflects the indexer state rather than the current system time.
  *

@@ -52,7 +52,6 @@ export async function getAggregatedReferrerSnapshot(
   }
 
   try {
-
     const result = await db
       .select({
         referrer: schema.registrarActions.decodedReferrer,
