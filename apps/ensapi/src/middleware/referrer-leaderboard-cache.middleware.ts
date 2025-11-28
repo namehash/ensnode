@@ -12,7 +12,6 @@ import pReflect from "p-reflect";
 import {
   type Duration,
   getEthnamesSubregistryId,
-  type RealtimeIndexingStatusProjection,
   staleWhileRevalidate,
 } from "@ensnode/ensnode-sdk";
 
@@ -24,34 +23,31 @@ const logger = makeLogger("referrer-leaderboard-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
-const buildSwrReferrerLeaderboardFetcher = (indexingStatus: RealtimeIndexingStatusProjection) =>
-  staleWhileRevalidate({
-    fn: async () => {
-      const { slowestChainIndexingCursor } = indexingStatus.snapshot;
+const rules = buildReferralProgramRules(
+  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+  config.ensHolidayAwardsStart,
+  config.ensHolidayAwardsEnd,
+  getEthnamesSubregistryId(config.namespace),
+);
 
-      const rules = buildReferralProgramRules(
-        ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-        ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-        config.ensHolidayAwardsStart,
-        config.ensHolidayAwardsEnd,
-        getEthnamesSubregistryId(config.namespace),
+const swrReferrerLeaderboardFetcher = staleWhileRevalidate({
+  fn: async () => {
+    logger.info(`Building referrer leaderboard with rules:\n${JSON.stringify(rules, null, 2)}`);
+
+    try {
+      const result = await getReferrerLeaderboard(rules);
+      logger.info(
+        `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data`,
       );
-
-      logger.info(`Building referrer leaderboard with rules:\n${JSON.stringify(rules, null, 2)}`);
-
-      try {
-        const result = await getReferrerLeaderboard(rules, slowestChainIndexingCursor);
-        logger.info(
-          `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data up to timestamp ${result.updatedAt}`,
-        );
-        return result;
-      } catch (error) {
-        logger.error({ error }, "Failed to build referrer leaderboard");
-        throw error;
-      }
-    },
-    ttl: TTL,
-  });
+      return result;
+    } catch (error) {
+      logger.error({ error }, "Failed to build referrer leaderboard");
+      throw error;
+    }
+  },
+  ttl: TTL,
+});
 
 /**
  * Type definition for the referrer leaderboard cache middleware context passed to downstream middleware and handlers.
@@ -110,9 +106,6 @@ export const referrerLeaderboardCacheMiddleware = factory.createMiddleware(async
     return await next();
   }
 
-  const swrReferrerLeaderboardFetcher = buildSwrReferrerLeaderboardFetcher(
-    c.var.indexingStatus.value,
-  );
   const cachedLeaderboard = await swrReferrerLeaderboardFetcher();
 
   if (cachedLeaderboard === null) {

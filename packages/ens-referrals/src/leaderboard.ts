@@ -10,7 +10,6 @@ import {
   sortReferrerMetrics,
 } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
-import type { UnixTimestamp } from "./time";
 
 /**
  * Represents a leaderboard for any number of referrers.
@@ -40,28 +39,16 @@ export interface ReferrerLeaderboard {
    *            `totalReferrals`, `totalIncrementalDuration`, and `score`.
    */
   referrers: Map<Address, AwardedReferrerMetrics>;
-
-  /**
-   * Unix timestamp identifying when this `ReferrerLeaderboard` was generated.
-   */
-  updatedAt: UnixTimestamp;
 }
 
 export const buildReferrerLeaderboard = (
   allReferrers: ReferrerMetrics[],
   rules: ReferralProgramRules,
-  updatedAt: UnixTimestamp,
 ): ReferrerLeaderboard => {
   const uniqueReferrers = allReferrers.map((referrer) => referrer.referrer);
   if (uniqueReferrers.length !== allReferrers.length) {
     throw new Error(
       "ReferrerLeaderboard: Cannot buildReferrerLeaderboard containing duplicate referrers",
-    );
-  }
-
-  if (updatedAt < rules.startTime && allReferrers.length > 0) {
-    throw new Error(
-      `ReferrerLeaderboard: updatedAt (${updatedAt}) is before startTime (${rules.startTime}) which indicates the leaderboard should be empty, but referrers is not empty.`,
     );
   }
 
@@ -73,7 +60,7 @@ export const buildReferrerLeaderboard = (
     return buildRankedReferrerMetrics(referrer, index + 1, rules);
   });
 
-  const aggregatedMetrics = buildAggregatedReferrerMetrics(rankedReferrers);
+  const aggregatedMetrics = buildAggregatedReferrerMetrics(rankedReferrers, rules);
 
   const awardedReferrers = rankedReferrers.map((referrer) => {
     return buildAwardedReferrerMetrics(referrer, aggregatedMetrics, rules);
@@ -90,6 +77,5 @@ export const buildReferrerLeaderboard = (
     rules,
     aggregatedMetrics,
     referrers,
-    updatedAt,
   };
 };

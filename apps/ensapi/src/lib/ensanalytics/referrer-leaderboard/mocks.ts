@@ -158,9 +158,9 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
     grandTotalReferrals: 0,
     grandTotalIncrementalDuration: 0,
     grandTotalQualifiedReferrersFinalScore: 0,
+    minFinalScoreToQualify: 0,
   },
   referrers: new Map(),
-  updatedAt: 1764250663,
 };
 
 export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
@@ -178,6 +178,7 @@ export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
     grandTotalReferrals: 68,
     grandTotalIncrementalDuration: 367027203,
     grandTotalQualifiedReferrersFinalScore: 16.55216891669386,
+    minFinalScoreToQualify: 0,
   },
   referrers: new Map([
     [
@@ -616,7 +617,6 @@ export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
       },
     ],
   ]),
-  updatedAt: 1764250663,
 };
 
 export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseOk = {
@@ -986,6 +986,7 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       grandTotalReferrals: 68,
       grandTotalIncrementalDuration: 367027203,
       grandTotalQualifiedReferrersFinalScore: 16.55216891669386,
+      minFinalScoreToQualify: 0,
     },
     paginationContext: {
       page: 1,
@@ -997,6 +998,5 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       startIndex: 0,
       endIndex: 28,
     },
-    updatedAt: 1764256941,
   },
 };

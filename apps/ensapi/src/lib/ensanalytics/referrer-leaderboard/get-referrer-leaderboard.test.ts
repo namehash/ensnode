@@ -7,8 +7,6 @@ import {
 import { getUnixTime } from "date-fns";
 import { describe, expect, it, vi } from "vitest";
 
-import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
-
 import * as database from "./database";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard";
 import { dbResultsReferrerLeaderboard } from "./mocks";
@@ -29,18 +27,15 @@ const rules = buildReferralProgramRules(
   },
 );
 
-const chainIndexingStatusCursor: UnixTimestamp = getUnixTime("2025-11-30T23:59:59Z");
-
 describe("ENSAnalytics Referrer Leaderboard", () => {
   describe("getReferrerLeaderboard", () => {
     it("returns a leaderboard of referrers in the requested time period", async () => {
       vi.mocked(database.getReferrerMetrics).mockResolvedValue(dbResultsReferrerLeaderboard);
 
-      const result = await getReferrerLeaderboard(rules, chainIndexingStatusCursor);
+      const result = await getReferrerLeaderboard(rules);
 
       expect(result).toMatchObject({
         rules,
-        updatedAt: chainIndexingStatusCursor,
       });
 
       const referrers = result.referrers.entries();
@@ -101,17 +96,17 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
     it("returns an empty list if no referrer leaderboard records were found in database", async () => {
       vi.mocked(database.getReferrerMetrics).mockResolvedValue([]);
 
-      const result = await getReferrerLeaderboard(rules, chainIndexingStatusCursor);
+      const result = await getReferrerLeaderboard(rules);
 
       expect(result).toMatchObject({
         aggregatedMetrics: {
           grandTotalIncrementalDuration: 0,
           grandTotalQualifiedReferrersFinalScore: 0,
           grandTotalReferrals: 0,
+          minFinalScoreToQualify: 0,
         },
         referrers: new Map(),
         rules,
-        updatedAt: chainIndexingStatusCursor,
       } satisfies ReferrerLeaderboard);
     });
   });

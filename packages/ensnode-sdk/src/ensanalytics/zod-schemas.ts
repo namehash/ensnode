@@ -70,6 +70,9 @@ export const makeAggregatedReferrerMetricsSchema = (
     grandTotalQualifiedReferrersFinalScore: makeFiniteNonNegativeNumberSchema(
       `${valueLabel}.grandTotalQualifiedReferrersFinalScore`,
     ),
+    minFinalScoreToQualify: makeFiniteNonNegativeNumberSchema(
+      `${valueLabel}.minFinalScoreToQualify`,
+    ),
   });
 
 export const makeReferrerLeaderboardPaginationContextSchema = (
@@ -100,7 +103,6 @@ export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "Referrer
     paginationContext: makeReferrerLeaderboardPaginationContextSchema(
       `${valueLabel}.paginationContext`,
     ),
-    updatedAt: makeUnixTimestampSchema(`${valueLabel}.updatedAt`),
   });
 
 /**
