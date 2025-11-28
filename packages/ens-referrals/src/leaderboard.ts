@@ -42,15 +42,15 @@ export interface ReferrerLeaderboard {
   referrers: Map<Address, AwardedReferrerMetrics>;
 
   /**
-   * Unix timestamp identifying when this `ReferrerLeaderboard` was generated.
+   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboard} was accurate as of.
    */
-  updatedAt: UnixTimestamp;
+  accurateAsOf: UnixTimestamp;
 }
 
 export const buildReferrerLeaderboard = (
   allReferrers: ReferrerMetrics[],
   rules: ReferralProgramRules,
-  updatedAt: UnixTimestamp,
+  accurateAsOf: UnixTimestamp,
 ): ReferrerLeaderboard => {
   const uniqueReferrers = allReferrers.map((referrer) => referrer.referrer);
   if (uniqueReferrers.length !== allReferrers.length) {
@@ -59,9 +59,9 @@ export const buildReferrerLeaderboard = (
     );
   }
 
-  if (updatedAt < rules.startTime && allReferrers.length > 0) {
+  if (accurateAsOf < rules.startTime && allReferrers.length > 0) {
     throw new Error(
-      `ReferrerLeaderboard: updatedAt (${updatedAt}) is before startTime (${rules.startTime}) which indicates the leaderboard should be empty, but referrers is not empty.`,
+      `ReferrerLeaderboard: accurateAsOf (${accurateAsOf}) is before startTime (${rules.startTime}) which indicates allReferrers should be empty, but allReferrers is not empty.`,
     );
   }
 
@@ -90,6 +90,6 @@ export const buildReferrerLeaderboard = (
     rules,
     aggregatedMetrics,
     referrers,
-    updatedAt,
+    accurateAsOf: accurateAsOf,
   };
 };

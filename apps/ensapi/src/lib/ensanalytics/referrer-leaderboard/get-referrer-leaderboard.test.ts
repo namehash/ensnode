@@ -40,7 +40,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
 
       expect(result).toMatchObject({
         rules,
-        updatedAt: chainIndexingStatusCursor,
+        accurateAsOf: chainIndexingStatusCursor,
       });
 
       const referrers = result.referrers.entries();
@@ -111,7 +111,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         },
         referrers: new Map(),
         rules,
-        updatedAt: chainIndexingStatusCursor,
+        accurateAsOf: chainIndexingStatusCursor,
       } satisfies ReferrerLeaderboard);
     });
   });

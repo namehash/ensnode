@@ -226,8 +226,10 @@ export interface ReferrerLeaderboardPage {
    */
   paginationContext: ReferrerLeaderboardPaginationContext;
 
-  /** The {@link UnixTimestamp} of when the {@link ReferrerLeaderboard} was last updated */
-  updatedAt: UnixTimestamp;
+  /**
+   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboard} was accurate as of.
+   */
+  accurateAsOf: UnixTimestamp;
 }
 
 export const getReferrerLeaderboardPage = (
@@ -260,6 +262,6 @@ export const getReferrerLeaderboardPage = (
     referrers,
     aggregatedMetrics: leaderboard.aggregatedMetrics,
     paginationContext,
-    updatedAt: leaderboard.updatedAt,
+    accurateAsOf: leaderboard.accurateAsOf,
   };
 };

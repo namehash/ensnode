@@ -52,7 +52,7 @@ const buildSwrReferrerLeaderboardFetcher = (indexingStatus: RealtimeIndexingStat
       try {
         const result = await getReferrerLeaderboard(rules, latestIndexedBlockRef.timestamp);
         logger.info(
-          `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data up to timestamp ${result.updatedAt}`,
+          `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data up to timestamp ${result.accurateAsOf}`,
         );
         return result;
       } catch (error) {
