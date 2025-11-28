@@ -158,6 +158,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
     grandTotalReferrals: 0,
     grandTotalIncrementalDuration: 0,
     grandTotalQualifiedReferrersFinalScore: 0,
+    minFinalScoreToQualify: 0,
   },
   referrers: new Map(),
   accurateAsOf: 1764250663,
@@ -178,6 +179,7 @@ export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
     grandTotalReferrals: 68,
     grandTotalIncrementalDuration: 367027203,
     grandTotalQualifiedReferrersFinalScore: 16.55216891669386,
+    minFinalScoreToQualify: 0,
   },
   referrers: new Map([
     [
@@ -986,6 +988,7 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       grandTotalReferrals: 68,
       grandTotalIncrementalDuration: 367027203,
       grandTotalQualifiedReferrersFinalScore: 16.55216891669386,
+      minFinalScoreToQualify: 0,
     },
     paginationContext: {
       page: 1,

@@ -108,6 +108,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
           grandTotalIncrementalDuration: 0,
           grandTotalQualifiedReferrersFinalScore: 0,
           grandTotalReferrals: 0,
+          minFinalScoreToQualify: 0,
         },
         referrers: new Map(),
         rules,

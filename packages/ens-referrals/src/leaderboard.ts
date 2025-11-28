@@ -73,7 +73,7 @@ export const buildReferrerLeaderboard = (
     return buildRankedReferrerMetrics(referrer, index + 1, rules);
   });
 
-  const aggregatedMetrics = buildAggregatedReferrerMetrics(rankedReferrers);
+  const aggregatedMetrics = buildAggregatedReferrerMetrics(rankedReferrers, rules);
 
   const awardedReferrers = rankedReferrers.map((referrer) => {
     return buildAwardedReferrerMetrics(referrer, aggregatedMetrics, rules);
