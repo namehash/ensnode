@@ -12,6 +12,7 @@ import pReflect from "p-reflect";
 import {
   type Duration,
   getEthnamesSubregistryId,
+  getLatestIndexedBlockRef,
   type RealtimeIndexingStatusProjection,
   staleWhileRevalidate,
 } from "@ensnode/ensnode-sdk";
@@ -24,23 +25,32 @@ const logger = makeLogger("referrer-leaderboard-cache.middleware");
 
 const TTL: Duration = 5 * 60; // 5 minutes
 
+const rules = buildReferralProgramRules(
+  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+  config.ensHolidayAwardsStart,
+  config.ensHolidayAwardsEnd,
+  getEthnamesSubregistryId(config.namespace),
+);
+
 const buildSwrReferrerLeaderboardFetcher = (indexingStatus: RealtimeIndexingStatusProjection) =>
   staleWhileRevalidate({
     fn: async () => {
-      const { slowestChainIndexingCursor } = indexingStatus.snapshot;
-
-      const rules = buildReferralProgramRules(
-        ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-        ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-        config.ensHolidayAwardsStart,
-        config.ensHolidayAwardsEnd,
-        getEthnamesSubregistryId(config.namespace),
-      );
-
       logger.info(`Building referrer leaderboard with rules:\n${JSON.stringify(rules, null, 2)}`);
 
+      const latestIndexedBlockRef = getLatestIndexedBlockRef(
+        indexingStatus,
+        rules.subregistryId.chainId,
+      );
+
+      if (latestIndexedBlockRef === null) {
+        throw new Error(
+          `Invariant(referrerLeaderboardCacheMiddleware): latestIndexedBlockRef is null for chain ID ${rules.subregistryId.chainId}`,
+        );
+      }
+
       try {
-        const result = await getReferrerLeaderboard(rules, slowestChainIndexingCursor);
+        const result = await getReferrerLeaderboard(rules, latestIndexedBlockRef.timestamp);
         logger.info(
           `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data up to timestamp ${result.updatedAt}`,
         );
