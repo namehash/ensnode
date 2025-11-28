@@ -57,10 +57,7 @@ export type ReferrerLeaderboardCacheMiddlewareVariables = {
    * The cached referrer leaderboard containing metrics and rankings for referrers.
    *
    * If `isRejected` is `true`, no referrer leaderboard has been successfully fetched and cached since service startup.
-   * This may indicate the ENSIndexer service is unreachable, in an error state, or the database query failed.
-   *
-   * The leaderboard's `updatedAt` timestamp reflects the `slowestChainIndexingCursor` from the indexing status,
-   * ensuring consistency with the indexer state rather than the current system time.
+   * This may indicate the ENSDb query failed.
    */
   referrerLeaderboardCache: PromiseResult<ReferrerLeaderboard>;
 };
@@ -78,33 +75,10 @@ export type ReferrerLeaderboardCacheMiddlewareVariables = {
  * Retrieves referrer leaderboard for all referrers with at least one referral within the ENS Holiday Awards period from the database and caches them.
  * Sets the `referrerLeaderboardCache` variable on the context for use by other middleware and handlers.
  *
- * Using the `slowestChainIndexingCursor` from the indexing status as the leaderboard's `updatedAt` timestamp
- * to ensure the timestamp accurately reflects the indexer state rather than the current system time.
- *
  * @see {@link staleWhileRevalidate} for detailed documentation on the SWR caching strategy and error handling.
  */
 export const referrerLeaderboardCacheMiddleware = factory.createMiddleware(async (c, next) => {
-  if (c.var.indexingStatus === undefined) {
-    throw new Error(
-      `Invariant(referrerLeaderboardCacheMiddleware): indexingStatusMiddleware required`,
-    );
-  }
-
   let promiseResult: ReferrerLeaderboardCacheMiddlewareVariables["referrerLeaderboardCache"];
-
-  if (c.var.indexingStatus.isRejected) {
-    promiseResult = await pReflect(
-      Promise.reject(
-        // Cached indexing status response was not available.
-        new Error(
-          "Unable to generate a new referrer leaderboard. Indexing status is currently unavailable to this ENSApi instance.",
-          { cause: c.var.indexingStatus.reason },
-        ),
-      ),
-    );
-    c.set("referrerLeaderboardCache", promiseResult);
-    return await next();
-  }
 
   const cachedLeaderboard = await swrReferrerLeaderboardFetcher();
 

@@ -33,8 +33,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import {
-  cachedReferrerLeaderboard,
   emptyReferralLeaderboard,
+  populatedReferrerLeaderboard,
   referrerLeaderboardPageResponseOk,
 } from "@/lib/ensanalytics/referrer-leaderboard/mocks";
 
@@ -47,7 +47,7 @@ describe("/ensanalytics", () => {
       vi.mocked(middleware.referrerLeaderboardCacheMiddleware).mockImplementation(
         async (c, next) => {
           const mockedReferrerLeaderboardCache = await pReflect(
-            Promise.resolve(cachedReferrerLeaderboard),
+            Promise.resolve(populatedReferrerLeaderboard),
           );
 
           c.set("referrerLeaderboardCache", mockedReferrerLeaderboardCache);
@@ -85,7 +85,7 @@ describe("/ensanalytics", () => {
       const expectedResponsePage1 = {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
-          ...cachedReferrerLeaderboard,
+          ...populatedReferrerLeaderboard,
           paginationContext: {
             endIndex: 9,
             hasNext: true,
@@ -106,7 +106,7 @@ describe("/ensanalytics", () => {
       const expectedResponsePage2 = {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
-          ...cachedReferrerLeaderboard,
+          ...populatedReferrerLeaderboard,
           paginationContext: {
             endIndex: 19,
             hasNext: true,
@@ -126,7 +126,7 @@ describe("/ensanalytics", () => {
       const expectedResponsePage3 = {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
-          ...cachedReferrerLeaderboard,
+          ...populatedReferrerLeaderboard,
           paginationContext: {
             endIndex: 28,
             hasNext: false,

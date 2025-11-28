@@ -163,7 +163,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
   referrers: new Map(),
 };
 
-export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
+export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
   rules: {
     totalAwardPoolValue: 10000,
     maxQualifiedReferrers: 10,
