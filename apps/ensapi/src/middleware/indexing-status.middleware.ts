@@ -10,6 +10,7 @@ import {
   IndexingStatusResponseCodes,
   type RealtimeIndexingStatusProjection,
   staleWhileRevalidate,
+  swrQuery,
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
@@ -20,36 +21,33 @@ const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 const TTL: Duration = 5; // 5 seconds
 
-const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
-  fn: async () =>
-    client
-      .indexingStatus() // fetch a new indexing status snapshot
-      .then((response) => {
-        if (response.responseCode !== IndexingStatusResponseCodes.Ok) {
-          // An indexing status response was successfully fetched, but the response code contained within the response was not 'ok'.
-          // Therefore, throw an error to trigger the subsequent `.catch` handler.
-          throw new Error("Received Indexing Status response with responseCode other than 'ok'.");
-        }
+const queryFn = async () =>
+  client
+    .indexingStatus() // fetch a new indexing status snapshot
+    .then((response) => {
+      if (response.responseCode !== IndexingStatusResponseCodes.Ok) {
+        // An indexing status response was successfully fetched, but the response code contained within the response was not 'ok'.
+        // Therefore, throw an error to trigger the subsequent `.catch` handler.
+        throw new Error("Received Indexing Status response with responseCode other than 'ok'.");
+      }
 
-        // The indexing status snapshot has been fetched and successfully validated for caching.
-        // Therefore, return it so that this current invocation of `staleWhileRevalidate` will:
-        // - Replace its currently cached value (if any) with this new value.
-        // - Return this non-null value.
-        return response.realtimeProjection.snapshot;
-      })
-      .catch((error) => {
-        // Either the indexing status snapshot fetch failed, or the indexing status response was not 'ok'.
-        // Therefore, throw an error so that this current invocation of `staleWhileRevalidate` will:
-        // - Reject the newly fetched response (if any) such that it won't be cached.
-        // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
-        logger.error(
-          error,
-          "Error occurred while fetching a new indexing status snapshot. The cached indexing status snapshot (if any) will not be updated.",
-        );
-        throw error;
-      }),
-  ttl: TTL,
-});
+      // The indexing status snapshot has been fetched and successfully validated for caching.
+      // Therefore, return it so that this current invocation of `staleWhileRevalidate` will:
+      // - Replace its currently cached value (if any) with this new value.
+      // - Return this non-null value.
+      return response.realtimeProjection.snapshot;
+    })
+    .catch((error) => {
+      // Either the indexing status snapshot fetch failed, or the indexing status response was not 'ok'.
+      // Therefore, throw an error so that this current invocation of `staleWhileRevalidate` will:
+      // - Reject the newly fetched response (if any) such that it won't be cached.
+      // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
+      logger.error(
+        error,
+        "Error occurred while fetching a new indexing status snapshot. The cached indexing status snapshot (if any) will not be updated.",
+      );
+      throw error;
+    });
 
 /**
  * Type definition for the indexing status middleware context passed to downstream middleware and handlers.
@@ -91,11 +89,25 @@ export type IndexingStatusMiddlewareVariables = {
  *   to downstream middleware and handlers.
  */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  const cachedSnapshot = await swrIndexingStatusSnapshotFetcher();
+  // context must be set by the required middleware
+  if (c.var.queryClient === undefined) {
+    throw new Error(`Invariant(indexing-status.middleware): queryCacheMiddleware required`);
+  }
+
+  const cachedSnapshot = await pReflect(
+    swrQuery(
+      {
+        queryKey: ["indexing-status"],
+        queryFn,
+        staleTime: TTL,
+      },
+      c.var.queryClient,
+    ),
+  );
 
   let indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"];
 
-  if (cachedSnapshot === null) {
+  if (cachedSnapshot.isRejected) {
     // An indexing status snapshot has never been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
     // an `indexingStatus` variable where `isRejected` is `true` and `reason` is the provided `error`.
@@ -110,7 +122,7 @@ export const indexingStatusMiddleware = factory.createMiddleware(async (c, next)
     // `indexingStatus` variable where `isFulfilled` is `true` and `value` is a {@link RealtimeIndexingStatusProjection} value
     // generated from the `cachedSnapshot` based on the current time.
     const now = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot, now);
+    const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot.value, now);
     indexingStatus = await pReflect(Promise.resolve(realtimeProjection));
   }
 

@@ -3,9 +3,11 @@ import { createFactory } from "hono/factory";
 import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelerate.middleware";
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
+import type { QueryCacheMiddlewareVariables } from "@/middleware/query-cache.middleware";
 import type { ReferrerLeaderboardCacheMiddlewareVariables } from "@/middleware/referrer-leaderboard-cache.middleware";
 
-export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
+export type MiddlewareVariables = QueryCacheMiddlewareVariables &
+  IndexingStatusMiddlewareVariables &
   IsRealtimeMiddlewareVariables &
   CanAccelerateMiddlewareVariables &
   ReferrerLeaderboardCacheMiddlewareVariables;

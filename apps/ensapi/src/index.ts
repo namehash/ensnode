@@ -13,6 +13,7 @@ import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { queryCacheMiddleware } from "@/middleware/query-cache.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
@@ -32,6 +33,9 @@ app.use(cors({ origin: "*" }));
 // include automatic OpenTelemetry instrumentation for incoming requests
 // NOTE: required for protocol tracing
 app.use(otel());
+
+// add Query Cache Middleware to all routes for convenience
+app.use(queryCacheMiddleware);
 
 // add ENSIndexer Indexing Status Middleware to all routes for convenience
 app.use(indexingStatusMiddleware);
@@ -59,17 +63,6 @@ app.onError((error, ctx) => {
 // start ENSNode API OpenTelemetry SDK
 sdk.start();
 
-// trigger for warming up the ENSAnalytics aggregated referrer snapshot cache
-const triggerEnsAnalyticsAggregatedReferrerSnapshotCacheWarmup = async () => {
-  logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
-  try {
-    // call the ENSAnalytics Aggregated Referrers endpoint to trigger cache warmup
-    await app.request("/ensanalytics/aggregated-referrers");
-  } catch {
-    // Don't exit - let the service run without pre-warmed analytics
-  }
-};
-
 // start hono server
 const server = serve(
   {
@@ -83,9 +76,6 @@ const server = serve(
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
-
-    // warm start ENSAnalytics aggregated referrer snapshot cache
-    await triggerEnsAnalyticsAggregatedReferrerSnapshotCacheWarmup();
   },
 );
 
