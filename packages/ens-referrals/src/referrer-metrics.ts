@@ -39,26 +39,7 @@ export interface ReferrerMetrics {
    * the {@link ReferralProgramRules}.
    */
   totalIncrementalDuration: Duration;
-
-  /**
-   * The referrer's score.
-   *
-   * @invariant Guaranteed to be `calcReferrerScore(totalIncrementalDuration)`
-   */
-  score: ReferrerScore;
 }
-
-export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
-  validateLowercaseAddress(metrics.referrer);
-  validateNonNegativeInteger(metrics.totalReferrals);
-  validateDuration(metrics.totalIncrementalDuration);
-  validateReferrerScore(metrics.score);
-
-  const expectedScore = calcReferrerScore(metrics.totalIncrementalDuration);
-  if (metrics.score !== expectedScore) {
-    throw new Error(`Referrer: Invalid score: ${metrics.score}, expected: ${expectedScore}.`);
-  }
-};
 
 export const buildReferrerMetrics = (
   referrer: Address,
@@ -69,11 +50,16 @@ export const buildReferrerMetrics = (
     referrer: normalizeAddress(referrer),
     totalReferrals,
     totalIncrementalDuration,
-    score: calcReferrerScore(totalIncrementalDuration),
   } satisfies ReferrerMetrics;
 
   validateReferrerMetrics(result);
   return result;
+};
+
+export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
+  validateLowercaseAddress(metrics.referrer);
+  validateNonNegativeInteger(metrics.totalReferrals);
+  validateDuration(metrics.totalIncrementalDuration);
 };
 
 export const sortReferrerMetrics = (referrers: ReferrerMetrics[]): ReferrerMetrics[] => {
@@ -81,10 +67,43 @@ export const sortReferrerMetrics = (referrers: ReferrerMetrics[]): ReferrerMetri
 };
 
 /**
- * Extends {@link ReferrerMetrics} to include additional metrics
+ * Represents metrics for a single referrer independent of other referrers,
+ * including a calculation of the referrer's score.
+ */
+export interface ScoredReferrerMetrics extends ReferrerMetrics {
+  /**
+   * The referrer's score.
+   *
+   * @invariant Guaranteed to be `calcReferrerScore(totalIncrementalDuration)`
+   */
+  score: ReferrerScore;
+}
+
+export const buildScoredReferrerMetrics = (referrer: ReferrerMetrics): ScoredReferrerMetrics => {
+  const result = {
+    ...referrer,
+    score: calcReferrerScore(referrer.totalIncrementalDuration),
+  } satisfies ScoredReferrerMetrics;
+
+  validateScoredReferrerMetrics(result);
+  return result;
+};
+
+export const validateScoredReferrerMetrics = (metrics: ScoredReferrerMetrics): void => {
+  validateReferrerMetrics(metrics);
+  validateReferrerScore(metrics.score);
+
+  const expectedScore = calcReferrerScore(metrics.totalIncrementalDuration);
+  if (metrics.score !== expectedScore) {
+    throw new Error(`Referrer: Invalid score: ${metrics.score}, expected: ${expectedScore}.`);
+  }
+};
+
+/**
+ * Extends {@link ScoredReferrerMetrics} to include additional metrics
  * relative to all other referrers on a {@link ReferrerLeaderboard} and {@link ReferralProgramRules}.
  */
-export interface RankedReferrerMetrics extends ReferrerMetrics {
+export interface RankedReferrerMetrics extends ScoredReferrerMetrics {
   /**
    * The referrer's rank on the {@link ReferrerLeaderboard} relative to all other referrers.
    */
@@ -117,7 +136,7 @@ export const validateRankedReferrerMetrics = (
   metrics: RankedReferrerMetrics,
   rules: ReferralProgramRules,
 ): void => {
-  validateReferrerMetrics(metrics);
+  validateScoredReferrerMetrics(metrics);
   validateReferrerRank(metrics.rank);
 
   if (metrics.finalScoreBoost < 0 || metrics.finalScoreBoost > 1) {
@@ -155,7 +174,7 @@ export const validateRankedReferrerMetrics = (
 };
 
 export const buildRankedReferrerMetrics = (
-  referrer: ReferrerMetrics,
+  referrer: ScoredReferrerMetrics,
   rank: ReferrerRank,
   rules: ReferralProgramRules,
 ): RankedReferrerMetrics => {

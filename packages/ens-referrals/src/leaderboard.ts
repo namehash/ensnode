@@ -5,8 +5,9 @@ import {
   type AwardedReferrerMetrics,
   buildAwardedReferrerMetrics,
   buildRankedReferrerMetrics,
+  buildScoredReferrerMetrics,
   type ReferrerMetrics,
-  sortReferrerMetrics as sortReferrers,
+  sortReferrerMetrics,
 } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
 import type { UnixTimestamp } from "./time";
@@ -64,9 +65,11 @@ export const buildReferrerLeaderboard = (
     );
   }
 
-  const sortedReferrers = sortReferrers(allReferrers);
+  const sortedReferrers = sortReferrerMetrics(allReferrers);
 
-  const rankedReferrers = sortedReferrers.map((referrer, index) => {
+  const scoredReferrers = sortedReferrers.map((referrer) => buildScoredReferrerMetrics(referrer));
+
+  const rankedReferrers = scoredReferrers.map((referrer, index) => {
     return buildRankedReferrerMetrics(referrer, index + 1, rules);
   });
 

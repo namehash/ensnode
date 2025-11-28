@@ -39,7 +39,7 @@ describe("ENSNode SDK Shared: AccountId", () => {
 
   it("refuses to deserialize invalid string", () => {
     expect(() => deserializeAccountId(`eip155:-1:${vitalikEthAddressLowercase}`)).toThrowError(
-      /The numeric value represented by Account ID chain ID must be a positive integer/i,
+      /Account ID chain ID must be a positive integer/i,
     );
 
     expect(() => deserializeAccountId(`eip155:1:0xz`)).toThrowError(

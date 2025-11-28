@@ -1,8 +1,13 @@
-import type { ReferrerLeaderboard, USDQuantity } from "@namehash/ens-referrals";
+import {
+  buildReferralProgramRules,
+  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  type ReferrerLeaderboard,
+} from "@namehash/ens-referrals";
 import { getUnixTime } from "date-fns";
 import { describe, expect, it, vi } from "vitest";
 
-import type { AccountId, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard";
@@ -10,48 +15,37 @@ import { dbResultsReferrerLeaderboard } from "./mocks";
 
 // Mock the database module
 vi.mock("./database", () => ({
-  getReferrerLeaderboardRecords: vi.fn(),
+  getReferrerMetrics: vi.fn(),
 }));
+
+const rules = buildReferralProgramRules(
+  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+  getUnixTime("2025-01-01T00:00:00Z"),
+  getUnixTime("2025-12-31T23:59:59Z"),
+  {
+    chainId: 1,
+    address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+  },
+);
+
+const chainIndexingStatusCursor: UnixTimestamp = getUnixTime("2025-11-30T23:59:59Z");
 
 describe("ENSAnalytics Referrer Leaderboard", () => {
   describe("getReferrerLeaderboard", () => {
-    const totalAwardPoolValue: USDQuantity = 10_000;
-    const maxQualifiedReferrers: number = 10;
-    const startTime: UnixTimestamp = getUnixTime("2025-01-01T00:00:00Z");
-    const endTime: UnixTimestamp = getUnixTime("2025-12-31T23:59:59Z");
-    const subregistryId: AccountId = {
-      chainId: 1,
-      address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-    };
-    const chainIndexingStatusCursor: UnixTimestamp = getUnixTime("2025-11-30T23:59:59Z");
+    it("returns a leaderboard of referrers in the requested time period", async () => {
+      vi.mocked(database.getReferrerMetrics).mockResolvedValue(dbResultsReferrerLeaderboard);
 
-    it("returns a list with TOP N referrers in the requested time period", async () => {
-      vi.mocked(database.getReferrerLeaderboardRecords).mockResolvedValue(
-        dbResultsReferrerLeaderboard,
-      );
-
-      const result = await getReferrerLeaderboard(
-        totalAwardPoolValue,
-        maxQualifiedReferrers,
-        startTime,
-        endTime,
-        subregistryId,
-        chainIndexingStatusCursor,
-      );
+      const result = await getReferrerLeaderboard(rules, chainIndexingStatusCursor);
 
       expect(result).toMatchObject({
-        rules: {
-          totalAwardPoolValue,
-          maxQualifiedReferrers,
-          startTime,
-          endTime,
-        },
+        rules,
         updatedAt: chainIndexingStatusCursor,
       });
 
       const referrers = result.referrers.entries();
-      const qualifiedReferrers = referrers.take(maxQualifiedReferrers);
-      const unqualifiedReferrers = referrers.drop(maxQualifiedReferrers);
+      const qualifiedReferrers = referrers.take(rules.maxQualifiedReferrers);
+      const unqualifiedReferrers = referrers.drop(rules.maxQualifiedReferrers);
 
       /**
        * Assert {@link RankedReferrerMetrics}.
@@ -59,10 +53,10 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
 
       // Assert `rank`
       expect(
-        qualifiedReferrers.every(([_, referrer]) => referrer.rank <= maxQualifiedReferrers),
+        qualifiedReferrers.every(([_, referrer]) => referrer.rank <= rules.maxQualifiedReferrers),
       ).toBe(true);
       expect(
-        unqualifiedReferrers.every(([_, referrer]) => referrer.rank > maxQualifiedReferrers),
+        unqualifiedReferrers.every(([_, referrer]) => referrer.rank > rules.maxQualifiedReferrers),
       ).toBe(true);
 
       // Assert `isQualified` flag
@@ -105,16 +99,9 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
     });
 
     it("returns an empty list if no referrer leaderboard records were found in database", async () => {
-      vi.mocked(database.getReferrerLeaderboardRecords).mockResolvedValue([]);
+      vi.mocked(database.getReferrerMetrics).mockResolvedValue([]);
 
-      const result = await getReferrerLeaderboard(
-        totalAwardPoolValue,
-        maxQualifiedReferrers,
-        startTime,
-        endTime,
-        subregistryId,
-        chainIndexingStatusCursor,
-      );
+      const result = await getReferrerLeaderboard(rules, chainIndexingStatusCursor);
 
       expect(result).toMatchObject({
         aggregatedMetrics: {
@@ -123,12 +110,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
           grandTotalReferrals: 0,
         },
         referrers: new Map(),
-        rules: {
-          totalAwardPoolValue,
-          maxQualifiedReferrers,
-          startTime,
-          endTime,
-        },
+        rules,
         updatedAt: chainIndexingStatusCursor,
       } satisfies ReferrerLeaderboard);
     });
