@@ -301,7 +301,7 @@ export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
  */
 export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   z.strictObject({
-    chainId: makeChainIdStringSchema(`${valueLabel} chain ID`),
+    chainId: makeChainIdSchema(`${valueLabel} chain ID`),
     address: makeLowercaseAddressSchema(`${valueLabel} address`),
   });
 
@@ -315,7 +315,7 @@ export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = 
       const result = new CaipAccountId(v);
 
       return {
-        chainId: result.chainId.reference,
+        chainId: Number(result.chainId.reference),
         address: result.address,
       };
     })

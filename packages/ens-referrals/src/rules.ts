@@ -1,3 +1,5 @@
+import type { Address } from "viem";
+
 import { type USDQuantity, validateUSDQuantity } from "./currency";
 import { validateNonNegativeInteger } from "./number";
 import { type UnixTimestamp, validateUnixTimestamp } from "./time";
@@ -24,6 +26,24 @@ export const ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS = 10;
  */
 export const ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE: USDQuantity = 10_000.0;
 
+/**
+ * Chain ID
+ *
+ * Represents a unique identifier for a chain.
+ * Guaranteed to be a positive integer.
+ **/
+export type ChainId = number;
+
+/**
+ * Represents an account (contract or EOA) at `address` on chain `chainId`.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-10
+ */
+export interface AccountId {
+  chainId: ChainId;
+  address: Address;
+}
+
 export interface ReferralProgramRules {
   /**
    * The total value of the award pool in USD.
@@ -49,6 +69,11 @@ export interface ReferralProgramRules {
    * @invariant Guaranteed to be greater than or equal to `startTime`
    */
   endTime: UnixTimestamp;
+
+  /**
+   * The account ID of the subregistry for the referral program.
+   */
+  subregistryId: AccountId;
 }
 
 export const validateReferralProgramRules = (rules: ReferralProgramRules): void => {
@@ -69,12 +94,14 @@ export const buildReferralProgramRules = (
   maxQualifiedReferrers: number,
   startTime: UnixTimestamp,
   endTime: UnixTimestamp,
+  subregistryId: AccountId,
 ): ReferralProgramRules => {
   const result = {
     totalAwardPoolValue,
     maxQualifiedReferrers,
     startTime,
     endTime,
+    subregistryId,
   } satisfies ReferralProgramRules;
 
   validateReferralProgramRules(result);

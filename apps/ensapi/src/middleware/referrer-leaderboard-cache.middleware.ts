@@ -1,6 +1,7 @@
 import config from "@/config";
 
 import {
+  buildReferralProgramRules,
   ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
   type ReferrerLeaderboard,
@@ -26,30 +27,22 @@ const TTL: Duration = 5 * 60; // 5 minutes
 const buildSwrReferrerLeaderboardFetcher = (indexingStatus: RealtimeIndexingStatusProjection) =>
   staleWhileRevalidate({
     fn: async () => {
-      logger.info(
-        `Building referrer leaderboard\n` +
-          `  - ENS Holiday Awards start timestamp: ${config.ensHolidayAwardsStart}\n` +
-          `  - ENS Holiday Awards end timestamp: ${config.ensHolidayAwardsEnd}`,
+      const { slowestChainIndexingCursor } = indexingStatus.snapshot;
+
+      const rules = buildReferralProgramRules(
+        ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+        ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+        config.ensHolidayAwardsStart,
+        config.ensHolidayAwardsEnd,
+        getEthnamesSubregistryId(config.namespace),
       );
 
-      const subregistryId = getEthnamesSubregistryId(config.namespace);
+      logger.info(`Building referrer leaderboard with rules:\n${JSON.stringify(rules, null, 2)}`);
 
       try {
-        const { slowestChainIndexingCursor } = indexingStatus.snapshot;
-        const result = await getReferrerLeaderboard(
-          ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-          ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-          config.ensHolidayAwardsStart,
-          config.ensHolidayAwardsEnd,
-          subregistryId,
-          slowestChainIndexingCursor,
-        );
+        const result = await getReferrerLeaderboard(rules, slowestChainIndexingCursor);
         logger.info(
-          {
-            grandTotalReferrals: result.referrers.size,
-            maxQualifiedReferrers: ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-          },
-          "Successfully built referrer leaderboard",
+          `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data up to timestamp ${result.updatedAt}`,
         );
         return result;
       } catch (error) {

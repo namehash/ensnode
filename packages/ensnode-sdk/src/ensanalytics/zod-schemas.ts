@@ -11,6 +11,7 @@ import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "@namehash/ens-referrals";
 import z from "zod/v4";
 
 import {
+  makeAccountIdSchema,
   makeDurationSchema,
   makeFiniteNonNegativeNumberSchema,
   makeLowercaseAddressSchema,
@@ -29,6 +30,7 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
     maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
     startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
     endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
+    subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
   });
 
 /**
