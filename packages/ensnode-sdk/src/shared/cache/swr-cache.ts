@@ -129,7 +129,12 @@ export function staleWhileRevalidate<ValueType>(
   const { fn, ttl, revalidationInterval } = options;
   let cache: SWRCache<ValueType> | null = null;
   let cacheInitializer: Promise<ValueType | null> | null = null;
-  let hasBackgroundRevalidationActive = false;
+
+  /**
+   * Internal function telling if cache is stale at the moment.
+   */
+  const isCacheStale = (cache: SWRCache<ValueType>): boolean =>
+    durationBetween(cache.updatedAt, getUnixTime(new Date())) > ttl;
 
   /**
    * Internal function to trigger revalidation of the cache.
@@ -145,41 +150,41 @@ export function staleWhileRevalidate<ValueType>(
       .then((value) => {
         // Successfully updated the `SWRCache`
         cache = { value, updatedAt: getUnixTime(new Date()) };
+
+        // Start a new background revalidation after successful cache update
+        scheduleNewBackgroundRevalidation();
       })
       .catch(() => {
         // Revalidation attempt failed with an error.
+        // Swallow the error; keep serving stale data
+      })
+      .finally(() => {
         if (cache) {
           // Clear the `inProgressRevalidation` promise so that the next request
           // will retry revalidation.
           cache.inProgressRevalidation = undefined;
         }
-        // Swallow the error
       });
 
-    if (cache) {
-      cache.inProgressRevalidation = revalidationPromise;
-    }
-
+    cache.inProgressRevalidation = revalidationPromise;
     await revalidationPromise;
   };
 
   /**
-   * Initialize background revalidation schedule if revalidationInterval is defined,
-   * and background revalidation has not been active yet.
+   * Cancel any existing background revalidation schedule and start a new one
+   * (resets the schedule to interval milliseconds from now).
    */
-  const initializeBackgroundRevalidation = () => {
-    if (revalidationInterval && !hasBackgroundRevalidationActive) {
-      bgRevalidationScheduler.schedule({
-        revalidate,
-        interval: secondsToMilliseconds(revalidationInterval),
-        onError: () => {
-          // Optionally log or handle background revalidation errors
-          // For now, errors are swallowed (cache will retry on next access)
-        },
-      });
+  const scheduleNewBackgroundRevalidation = (): void => {
+    if (revalidationInterval === undefined) return;
 
-      hasBackgroundRevalidationActive = true;
-    }
+    // Cancel any existing schedule for this revalidate function
+    bgRevalidationScheduler.cancel(revalidate);
+
+    // Schedule a new one
+    bgRevalidationScheduler.schedule({
+      revalidate,
+      interval: secondsToMilliseconds(revalidationInterval),
+    });
   };
 
   return async (): Promise<ValueType | null> => {
@@ -198,8 +203,8 @@ export function staleWhileRevalidate<ValueType>(
           cache = { value, updatedAt: getUnixTime(new Date()) };
           cacheInitializer = null;
 
-          // Initialize background revalidation after successful cache initialization
-          initializeBackgroundRevalidation();
+          // Schedule new background revalidation after successful cache initialization
+          scheduleNewBackgroundRevalidation();
 
           return value;
         })
@@ -213,17 +218,12 @@ export function staleWhileRevalidate<ValueType>(
       return cacheInitializer;
     }
 
-    const isStale = durationBetween(cache.updatedAt, getUnixTime(new Date())) > ttl;
-
     // Fresh cache, return immediately
-    if (!isStale) return cache.value;
+    if (!isCacheStale(cache)) return cache.value;
 
-    // Stale cache, but revalidation already in progress
-    if (cache.inProgressRevalidation) return cache.value;
-
-    // Stale cache, kick off revalidation asynchronously in the background.
-    // (unless background revalidation is scheduled, in which case it will handle it)
-    cache.inProgressRevalidation = revalidate().then(() => undefined);
+    // Stale cache: trigger revalidation asynchronously in the background
+    // (revalidate() will noop if already in progress)
+    revalidate();
 
     // Return stale value immediately
     return cache.value;
