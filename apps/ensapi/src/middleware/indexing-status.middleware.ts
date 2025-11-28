@@ -18,7 +18,8 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("indexing-status.middleware");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
-const TTL: Duration = 5; // 5 seconds
+const TTL: Duration = 5; //
+const REVALIDATION_INTERVAL: Duration = 10;
 
 const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
   fn: async () =>
@@ -30,6 +31,8 @@ const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
           // Therefore, throw an error to trigger the subsequent `.catch` handler.
           throw new Error("Received Indexing Status response with responseCode other than 'ok'.");
         }
+
+        logger.info("Fetched Indexing Status to be cached");
 
         // The indexing status snapshot has been fetched and successfully validated for caching.
         // Therefore, return it so that this current invocation of `staleWhileRevalidate` will:
@@ -49,6 +52,7 @@ const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
         throw error;
       }),
   ttl: TTL,
+  revalidationInterval: REVALIDATION_INTERVAL,
 });
 
 /**
