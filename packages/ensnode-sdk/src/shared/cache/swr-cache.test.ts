@@ -11,6 +11,23 @@ describe("staleWhileRevalidate", () => {
     vi.useRealTimers();
   });
 
+  it("fetches data without waiting for the first call when warmup was requested", async () => {
+    const fn = vi.fn(async () => "value1");
+    const cached = staleWhileRevalidate({
+      fn,
+      ttl: 1, // 1 second
+      fetchImmediately: true,
+    });
+
+    // Fetch happened immediately
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    const result = await cached();
+
+    expect(result).toBe("value1");
+    expect(fn).toHaveBeenCalledTimes(1); // No extra fetch required for the first read
+  });
+
   it("fetches data on first call", async () => {
     const fn = vi.fn(async () => "value1");
     const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second

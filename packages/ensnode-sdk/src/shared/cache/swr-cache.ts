@@ -59,6 +59,16 @@ interface StaleWhileRevalidateOptions<ValueType> {
    * If undefined, revalidation only occurs lazily when a request is made after TTL expires.
    */
   revalidationInterval?: Duration;
+
+  /**
+   * Fetch immediately
+   *
+   * If set to `true`, will make cache to warm up right after it was created.
+   * Otherwise, there will be no fetch will happen until
+   * background revalidation occurred (if requested), or cache was accessed
+   * for the first time.
+   */
+  fetchImmediately?: boolean;
 }
 
 /**
@@ -117,6 +127,7 @@ interface StaleWhileRevalidateOptions<ValueType> {
  * @param options.ttl Time-to-live duration in seconds. After this duration, data is considered stale
  * @param options.revalidationInterval Time-to-revalidate duration in seconds. After this duration,
  *                                     data is refreshed in the background
+ * @param options.fetchImmediately If `true` will execute fetch right after cache was created.
  * @returns a value of `ValueType` that was most recently successfully returned by `fn`
  *          or `null` if `fn` has never successfully returned and has always thrown an error.
  *
@@ -126,7 +137,7 @@ interface StaleWhileRevalidateOptions<ValueType> {
 export function staleWhileRevalidate<ValueType>(
   options: StaleWhileRevalidateOptions<ValueType>,
 ): () => Promise<ValueType | null> {
-  const { fn, ttl, revalidationInterval } = options;
+  const { fn, ttl, revalidationInterval, fetchImmediately = false } = options;
   let cache: SWRCache<ValueType> | null = null;
   let cacheInitializer: Promise<ValueType | null> | null = null;
 
@@ -187,7 +198,7 @@ export function staleWhileRevalidate<ValueType>(
     });
   };
 
-  return async (): Promise<ValueType | null> => {
+  const readCache = async (): Promise<ValueType | null> => {
     if (!cache) {
       // No cache. Attempt to successfully initialize the cache.
       if (cacheInitializer) {
@@ -228,4 +239,12 @@ export function staleWhileRevalidate<ValueType>(
     // Return stale value immediately
     return cache.value;
   };
+
+  // Warm up cache if requested
+  if (fetchImmediately) {
+    // Fire-and-forget
+    readCache();
+  }
+
+  return readCache;
 }

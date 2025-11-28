@@ -18,7 +18,7 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("indexing-status.middleware");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
-const TTL: Duration = 5; //
+const TTL: Duration = 5;
 const REVALIDATION_INTERVAL: Duration = 10;
 
 const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({

@@ -6,6 +6,7 @@ import {
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
   type ReferrerLeaderboard,
 } from "@namehash/ens-referrals";
+import { minutesToSeconds } from "date-fns";
 import type { PromiseResult } from "p-reflect";
 import pReflect from "p-reflect";
 
@@ -21,7 +22,8 @@ import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("referrer-leaderboard-cache.middleware");
 
-const TTL: Duration = 5 * 60; // 5 minutes
+const TTL: Duration = minutesToSeconds(1);
+const REVALIDATION_INTERVAL: Duration = minutesToSeconds(2);
 
 const rules = buildReferralProgramRules(
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
@@ -47,6 +49,8 @@ const swrReferrerLeaderboardFetcher = staleWhileRevalidate({
     }
   },
   ttl: TTL,
+  revalidationInterval: REVALIDATION_INTERVAL,
+  fetchImmediately: true,
 });
 
 /**

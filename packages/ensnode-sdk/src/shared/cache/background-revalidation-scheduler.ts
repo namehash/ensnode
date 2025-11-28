@@ -28,6 +28,8 @@ interface ScheduleConfig {
   onError?: (error: unknown) => void;
 }
 
+type Timeout = ReturnType<typeof setTimeout>;
+
 /**
  * Metadata about an active schedule.
  *
@@ -35,7 +37,7 @@ interface ScheduleConfig {
  */
 interface ScheduleMetadata {
   config: ScheduleConfig;
-  timeoutId: NodeJS.Timeout | null;
+  timeoutId: Timeout | null;
   inProgress: boolean;
 }
 
