@@ -3,7 +3,6 @@ import type { ReferrerLeaderboard } from "./leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "./number";
 import type { AwardedReferrerMetrics } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
-import type { UnixTimestamp } from "./time";
 
 /**
  * The default number of referrers per leaderboard page.
@@ -225,11 +224,6 @@ export interface ReferrerLeaderboardPage {
    * {@link ReferrerLeaderboard}.
    */
   paginationContext: ReferrerLeaderboardPaginationContext;
-
-  /**
-   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboard} was accurate as of.
-   */
-  accurateAsOf: UnixTimestamp;
 }
 
 export const getReferrerLeaderboardPage = (
@@ -262,6 +256,5 @@ export const getReferrerLeaderboardPage = (
     referrers,
     aggregatedMetrics: leaderboard.aggregatedMetrics,
     paginationContext,
-    accurateAsOf: leaderboard.accurateAsOf,
   };
 };

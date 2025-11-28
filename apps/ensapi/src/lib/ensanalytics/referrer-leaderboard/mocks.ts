@@ -161,7 +161,6 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
     minFinalScoreToQualify: 0,
   },
   referrers: new Map(),
-  accurateAsOf: 1764250663,
 };
 
 export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
@@ -618,7 +617,6 @@ export const cachedReferrerLeaderboard: ReferrerLeaderboard = {
       },
     ],
   ]),
-  accurateAsOf: 1764250663,
 };
 
 export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseOk = {
@@ -1000,6 +998,5 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       startIndex: 0,
       endIndex: 28,
     },
-    accurateAsOf: 1764256941,
   },
 };
