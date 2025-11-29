@@ -61,14 +61,17 @@ interface StaleWhileRevalidateOptions<ValueType> {
   revalidationInterval?: Duration;
 
   /**
-   * Fetch immediately
+   * Proactively initialize
    *
-   * If set to `true`, will make cache to warm up right after it was created.
-   * Otherwise, there will be no fetch will happen until
-   * background revalidation occurred (if requested), or cache was accessed
-   * for the first time.
+   * If set to `true`:
+   * - The SWR cache will proactively work to initialize itself, even before any explicit request to
+   *    access the cached value is made.
+   * If set to `false`:
+   * - The SWR cache will lazily wait to initialize itself only when one of the following occurs:
+   *    - Background revalidation occurred (if requested); or
+   *    - An explicit attempt to access the cached value is made.
    */
-  fetchImmediately?: boolean;
+  proactivelyInitialize?: boolean;
 }
 
 /**
@@ -137,7 +140,7 @@ interface StaleWhileRevalidateOptions<ValueType> {
 export function staleWhileRevalidate<ValueType>(
   options: StaleWhileRevalidateOptions<ValueType>,
 ): () => Promise<ValueType | null> {
-  const { fn, ttl, revalidationInterval, fetchImmediately = false } = options;
+  const { fn, ttl, revalidationInterval, proactivelyInitialize = false } = options;
   let cache: SWRCache<ValueType> | null = null;
   let cacheInitializer: Promise<ValueType | null> | null = null;
 
@@ -240,8 +243,8 @@ export function staleWhileRevalidate<ValueType>(
     return cache.value;
   };
 
-  // Warm up cache if requested
-  if (fetchImmediately) {
+  // Proactively initialize the cache if requested
+  if (proactivelyInitialize) {
     // Fire-and-forget
     readCache();
   }

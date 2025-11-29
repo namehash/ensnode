@@ -16,7 +16,7 @@ describe("staleWhileRevalidate", () => {
     const cached = staleWhileRevalidate({
       fn,
       ttl: 1, // 1 second
-      fetchImmediately: true,
+      proactivelyInitialize: true,
     });
 
     // Fetch happened immediately
