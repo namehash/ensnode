@@ -40,33 +40,46 @@ interface SWRCache<ValueType> {
 
 interface StaleWhileRevalidateOptions<ValueType> {
   /**
-   * The async function to wrap with SWR caching.
-   * On success this function returns a value of type `ValueType` to store in the `SWRCache`.
-   * On error, this function throws an error and no changes will be made to the `SWRCache`.
+   * The async function generating a value of `ValueType` to wrap with SWR caching.
+   *
+   * On success:
+   * - This function returns a value of type `ValueType` to store in the `SWRCache`.
+   *
+   * On error:
+   * - This function throws an error and no changes will be made to the `SWRCache`.
    */
   fn: () => Promise<ValueType>;
 
   /**
    * Time-to-live duration in seconds. After this duration, data in the `SWRCache` is
-   * considered stale but is still retained in the cache until replaced with a new value.
+   * considered stale but is still retained in the cache until successfully replaced with a new value.
    */
   ttl: Duration;
 
   /**
-   * Optional interval in seconds for automatic background revalidation.
-   * If defined, the cache will be revalidated on this schedule regardless of whether
-   * the data is stale or if new requests are made.
-   * If undefined, revalidation only occurs lazily when a request is made after TTL expires.
+   * Optional time-to-proactively-revalidate duration in seconds. After this duration, automated attempts
+   * to asynchronously revalidate the cached value will be made in the background.
+   *
+   * If defined:
+   * - Proactive asynchronous revalidation attempts will be automatically triggered in the background
+   *   on this interval.
+   *
+   * If undefined:
+   * - Revalidation only occurs lazily when an explicit request for the cached value is
+   *   made after the `ttl` duration of the latest successfully cached value expires.
    */
   revalidationInterval?: Duration;
 
   /**
    * Proactively initialize
    *
-   * If set to `true`:
+   * Optional. Defaults to `false`.
+   *
+   * If `true`:
    * - The SWR cache will proactively work to initialize itself, even before any explicit request to
    *    access the cached value is made.
-   * If set to `false`:
+   *
+   * If `false`:
    * - The SWR cache will lazily wait to initialize itself only when one of the following occurs:
    *    - Background revalidation occurred (if requested); or
    *    - An explicit attempt to access the cached value is made.
@@ -126,21 +139,19 @@ interface StaleWhileRevalidateOptions<ValueType> {
  * // Therefore, the `fourthRead` would return stale data cached at T2.
  * ```
  *
- * @param options.fn The async function to wrap with SWR caching
- * @param options.ttl Time-to-live duration in seconds. After this duration, data is considered stale
- * @param options.revalidationInterval Time-to-revalidate duration in seconds. After this duration,
- *                                     data is refreshed in the background
- * @param options.fetchImmediately If `true` will execute fetch right after cache was created.
+ * @param options - The {@link StaleWhileRevalidateOptions} for the SWR cache.
  * @returns a value of `ValueType` that was most recently successfully returned by `fn`
  *          or `null` if `fn` has never successfully returned and has always thrown an error.
  *
  * @link https://web.dev/stale-while-revalidate/
  * @link https://datatracker.ietf.org/doc/html/rfc5861
  */
-export function staleWhileRevalidate<ValueType>(
-  options: StaleWhileRevalidateOptions<ValueType>,
-): () => Promise<ValueType | null> {
-  const { fn, ttl, revalidationInterval, proactivelyInitialize = false } = options;
+export function staleWhileRevalidate<ValueType>({
+  fn,
+  ttl,
+  revalidationInterval,
+  proactivelyInitialize = false,
+}: StaleWhileRevalidateOptions<ValueType>): () => Promise<ValueType | null> {
   let cache: SWRCache<ValueType> | null = null;
   let cacheInitializer: Promise<ValueType | null> | null = null;
 
