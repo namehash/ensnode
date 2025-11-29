@@ -209,10 +209,10 @@ export function staleWhileRevalidate<ValueType>({
   const scheduleNewBackgroundRevalidation = (): void => {
     if (revalidationInterval === undefined) return;
 
-    // Cancel any existing schedule for this revalidate function
+    // Cancel any existing background revalidation scheduled task
     bgRevalidationScheduler.cancel(revalidate);
 
-    // Schedule a new one
+    // Schedule a new background revalidation task
     bgRevalidationScheduler.schedule({
       revalidate,
       interval: secondsToMilliseconds(revalidationInterval),
@@ -223,8 +223,9 @@ export function staleWhileRevalidate<ValueType>({
     if (!cache) {
       // No cache. Attempt to successfully initialize the cache.
       if (cacheInitializer) {
-        // Initialization is already in progress. Return the existing
-        // initialization attempt to enforce no concurrent invocations of `fn`.
+        // Initialization is already in progress. Return the existing initialization
+        // attempt to enforce no concurrent invocations of `fn` by the
+        // `staleWhileRevalidate` wrapper.
         return cacheInitializer;
       }
 
@@ -233,6 +234,7 @@ export function staleWhileRevalidate<ValueType>({
         .then((value) => {
           // Successfully initialize the `SWRCache`
           cache = { value, updatedAt: getUnixTime(new Date()), ttl };
+          // remember that cache initialization is no longer in progress
           cacheInitializer = null;
 
           // Schedule new background revalidation after successful cache initialization
@@ -241,7 +243,8 @@ export function staleWhileRevalidate<ValueType>({
           return value;
         })
         .catch(() => {
-          // Initialization failed
+          // `fn` threw an error, therefore initialization failed and cache remains `null`
+          // remember that cache initialization is no longer in progress
           cacheInitializer = null;
           // Return null as no cached value is available
           return null;
