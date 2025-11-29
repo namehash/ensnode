@@ -28,6 +28,13 @@ interface SWRCache<ValueType> {
   updatedAt: UnixTimestamp;
 
   /**
+   * Time-to-live duration in seconds of `value`. After this duration, `value` in the
+   * `SWRCache` is considered stale but is still retained as `value` in the cache until
+   * successfully replaced with a new `value`.
+   */
+  ttl: Duration;
+
+  /**
    * Optional promise of the current in-progress attempt to revalidate the cached `value`.
    *
    * If undefined, no revalidation attempt is currently in progress.
@@ -37,6 +44,12 @@ interface SWRCache<ValueType> {
    */
   inProgressRevalidation?: Promise<void>;
 }
+
+/**
+ * Check if a `SWRCache` is stale.
+ */
+const isCacheStale = <ValueType>(cache: SWRCache<ValueType>): boolean =>
+  durationBetween(cache.updatedAt, getUnixTime(new Date())) > cache.ttl;
 
 interface StaleWhileRevalidateOptions<ValueType> {
   /**
@@ -156,12 +169,6 @@ export function staleWhileRevalidate<ValueType>({
   let cacheInitializer: Promise<ValueType | null> | null = null;
 
   /**
-   * Internal function telling if cache is stale at the moment.
-   */
-  const isCacheStale = (cache: SWRCache<ValueType>): boolean =>
-    durationBetween(cache.updatedAt, getUnixTime(new Date())) > ttl;
-
-  /**
    * Internal function to trigger revalidation of the cache.
    * Used by both lazy revalidation and background revalidation.
    */
@@ -174,7 +181,7 @@ export function staleWhileRevalidate<ValueType>({
     const revalidationPromise = fn()
       .then((value) => {
         // Successfully updated the `SWRCache`
-        cache = { value, updatedAt: getUnixTime(new Date()) };
+        cache = { value, updatedAt: getUnixTime(new Date()), ttl };
 
         // Start a new background revalidation after successful cache update
         scheduleNewBackgroundRevalidation();
@@ -225,7 +232,7 @@ export function staleWhileRevalidate<ValueType>({
       cacheInitializer = fn()
         .then((value) => {
           // Successfully initialize the `SWRCache`
-          cache = { value, updatedAt: getUnixTime(new Date()) };
+          cache = { value, updatedAt: getUnixTime(new Date()), ttl };
           cacheInitializer = null;
 
           // Schedule new background revalidation after successful cache initialization
