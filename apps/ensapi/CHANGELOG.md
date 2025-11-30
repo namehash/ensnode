@@ -1,5 +1,24 @@
 # ensapi
 
+## 1.1.0
+
+### Minor Changes
+
+- [#1307](https://github.com/namehash/ensnode/pull/1307) [`3126ac7`](https://github.com/namehash/ensnode/commit/3126ac744806a4994cf276e41963af38ebfae582) Thanks [@tk-o](https://github.com/tk-o)! - Updates `ReferrerLeaderboard` data model and related logic to match updated ENS Holiday Awards rules.
+
+- [#1307](https://github.com/namehash/ensnode/pull/1307) [`3126ac7`](https://github.com/namehash/ensnode/commit/3126ac744806a4994cf276e41963af38ebfae582) Thanks [@tk-o](https://github.com/tk-o)! - Renamed /ensanalytics/aggregated-referrers to /ensanalytics/referrers
+
+- [#1307](https://github.com/namehash/ensnode/pull/1307) [`3126ac7`](https://github.com/namehash/ensnode/commit/3126ac744806a4994cf276e41963af38ebfae582) Thanks [@tk-o](https://github.com/tk-o)! - Refined schema for /ensanalytics/referrers response
+
+### Patch Changes
+
+- Updated dependencies [[`3126ac7`](https://github.com/namehash/ensnode/commit/3126ac744806a4994cf276e41963af38ebfae582), [`3126ac7`](https://github.com/namehash/ensnode/commit/3126ac744806a4994cf276e41963af38ebfae582), [`3126ac7`](https://github.com/namehash/ensnode/commit/3126ac744806a4994cf276e41963af38ebfae582)]:
+  - @ensnode/ensnode-sdk@1.1.0
+  - @namehash/ens-referrals@1.1.0
+  - @ensnode/datasources@1.1.0
+  - @ensnode/ensnode-schema@1.1.0
+  - @ensnode/ponder-subgraph@1.1.0
+
 ## 1.0.3
 
 ### Patch Changes
