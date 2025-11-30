@@ -7,7 +7,7 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
 
-import * as middleware from "../middleware/referrer-leaderboard-cache.middleware";
+import * as middleware from "../middleware/referrer-leaderboard.middleware";
 
 vi.mock("@/config", () => ({
   get default() {
@@ -20,8 +20,8 @@ vi.mock("@/config", () => ({
   },
 }));
 
-vi.mock("../middleware/referrer-leaderboard-cache.middleware", () => ({
-  referrerLeaderboardCacheMiddleware: vi.fn(),
+vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
+  referrerLeaderboardMiddleware: vi.fn(),
 }));
 
 import pReflect from "p-reflect";
@@ -42,18 +42,15 @@ import app from "./ensanalytics-api";
 
 describe("/ensanalytics", () => {
   describe("/referrers", () => {
-    it("returns requested records when cached referrer leaderboard has multiple pages of data", async () => {
-      // Arrange: set `referrerLeaderboardCache` context var
-      vi.mocked(middleware.referrerLeaderboardCacheMiddleware).mockImplementation(
-        async (c, next) => {
-          const mockedReferrerLeaderboardCache = await pReflect(
-            Promise.resolve(populatedReferrerLeaderboard),
-          );
-
-          c.set("referrerLeaderboardCache", mockedReferrerLeaderboardCache);
-          return await next();
-        },
-      );
+    it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
+      // Arrange: set `referrerLeaderboard` context var
+      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
+        const mockedReferrerLeaderboard = await pReflect(
+          Promise.resolve(populatedReferrerLeaderboard),
+        );
+        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        return await next();
+      });
 
       // Arrange: all possible referrers on a single page response
       const allPossibleReferrers = referrerLeaderboardPageResponseOk.data.referrers;
@@ -144,17 +141,13 @@ describe("/ensanalytics", () => {
     });
 
     it("returns empty cached referrer leaderboard when there are no referrals yet", async () => {
-      // Arrange: set `referrerLeaderboardCache` context var
-      vi.mocked(middleware.referrerLeaderboardCacheMiddleware).mockImplementation(
-        async (c, next) => {
-          const mockedReferrerLeaderboardCache = await pReflect(
-            Promise.resolve(emptyReferralLeaderboard),
-          );
+      // Arrange: set `referrerLeaderboard` context var
+      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
+        const mockedReferrerLeaderboard = await pReflect(Promise.resolve(emptyReferralLeaderboard));
 
-          c.set("referrerLeaderboardCache", mockedReferrerLeaderboardCache);
-          return await next();
-        },
-      );
+        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        return await next();
+      });
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);

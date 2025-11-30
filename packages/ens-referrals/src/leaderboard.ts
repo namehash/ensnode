@@ -10,6 +10,7 @@ import {
   sortReferrerMetrics,
 } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
+import type { UnixTimestamp } from "./time";
 
 /**
  * Represents a leaderboard for any number of referrers.
@@ -39,16 +40,28 @@ export interface ReferrerLeaderboard {
    *            `totalReferrals`, `totalIncrementalDuration`, and `score`.
    */
   referrers: Map<Address, AwardedReferrerMetrics>;
+
+  /**
+   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboard} was accurate as of.
+   */
+  accurateAsOf: UnixTimestamp;
 }
 
 export const buildReferrerLeaderboard = (
   allReferrers: ReferrerMetrics[],
   rules: ReferralProgramRules,
+  accurateAsOf: UnixTimestamp,
 ): ReferrerLeaderboard => {
   const uniqueReferrers = allReferrers.map((referrer) => referrer.referrer);
   if (uniqueReferrers.length !== allReferrers.length) {
     throw new Error(
       "ReferrerLeaderboard: Cannot buildReferrerLeaderboard containing duplicate referrers",
+    );
+  }
+
+  if (accurateAsOf < rules.startTime && allReferrers.length > 0) {
+    throw new Error(
+      `ReferrerLeaderboard: accurateAsOf (${accurateAsOf}) is before startTime (${rules.startTime}) which indicates allReferrers should be empty, but allReferrers is not empty.`,
     );
   }
 
@@ -77,5 +90,6 @@ export const buildReferrerLeaderboard = (
     rules,
     aggregatedMetrics,
     referrers,
+    accurateAsOf,
   };
 };
