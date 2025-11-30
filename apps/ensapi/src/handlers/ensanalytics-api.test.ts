@@ -42,8 +42,8 @@ import app from "./ensanalytics-api";
 
 describe("/ensanalytics", () => {
   describe("/referrers", () => {
-    it("returns requested records when cached referrer leaderboard has multiple pages of data", async () => {
-      // Arrange: set `referrerLeaderboardCache` context var
+    it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
+      // Arrange: set `referrerLeaderboard` context var
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
         const mockedReferrerLeaderboard = await pReflect(
           Promise.resolve(populatedReferrerLeaderboard),
