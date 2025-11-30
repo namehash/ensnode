@@ -9,9 +9,9 @@ import {
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotQueued,
+  type CrossChainIndexingStatusSnapshot,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
-  type RealtimeIndexingStatusProjection,
 } from "./types";
 
 /**
@@ -268,10 +268,10 @@ export function sortChainStatusesByStartBlockAsc<
  *          isn't being indexed at all or is queued and therefore hasn't started indexing yet.
  */
 export function getLatestIndexedBlockRef(
-  indexingStatus: RealtimeIndexingStatusProjection,
+  indexingStatus: CrossChainIndexingStatusSnapshot,
   chainId: ChainId,
 ): BlockRef | null {
-  const chainIndexingStatus = indexingStatus.snapshot.omnichainSnapshot.chains.get(chainId);
+  const chainIndexingStatus = indexingStatus.omnichainSnapshot.chains.get(chainId);
 
   if (chainIndexingStatus === undefined) {
     // chain isn't being indexed at all

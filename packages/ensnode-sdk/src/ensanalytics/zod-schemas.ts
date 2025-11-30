@@ -103,6 +103,7 @@ export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "Referrer
     paginationContext: makeReferrerLeaderboardPaginationContextSchema(
       `${valueLabel}.paginationContext`,
     ),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
 /**

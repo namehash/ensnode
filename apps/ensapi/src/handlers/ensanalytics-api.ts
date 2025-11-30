@@ -14,7 +14,7 @@ import {
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { referrerLeaderboardCacheMiddleware } from "@/middleware/referrer-leaderboard-cache.middleware";
+import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard.middleware";
 
 const logger = makeLogger("ensanalytics-api");
 
@@ -37,19 +37,19 @@ const app = factory
   .createApp()
 
   // Apply referrer leaderboard cache middleware to all routes in this handler
-  .use(referrerLeaderboardCacheMiddleware)
+  .use(referrerLeaderboardMiddleware)
 
   // Get a page from the referrer leaderboard
   .get("/referrers", validate("query", paginationQuerySchema), async (c) => {
     // context must be set by the required middleware
-    if (c.var.referrerLeaderboardCache === undefined) {
-      throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardCacheMiddleware required`);
+    if (c.var.referrerLeaderboard === undefined) {
+      throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
     }
 
     try {
-      const referrerLeaderboardCache = c.var.referrerLeaderboardCache;
+      const referrerLeaderboard = c.var.referrerLeaderboard;
 
-      if (referrerLeaderboardCache.isRejected) {
+      if (referrerLeaderboard.isRejected) {
         return c.json(
           serializeReferrerLeaderboardPageResponse({
             responseCode: ReferrerLeaderboardPageResponseCodes.Error,
@@ -63,7 +63,7 @@ const app = factory
       const { page, itemsPerPage } = c.req.valid("query");
       const leaderboardPage = getReferrerLeaderboardPage(
         { page, itemsPerPage },
-        referrerLeaderboardCache.value,
+        referrerLeaderboard.value,
       );
 
       return c.json(
