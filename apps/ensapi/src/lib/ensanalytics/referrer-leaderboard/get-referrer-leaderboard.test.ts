@@ -27,12 +27,14 @@ const rules = buildReferralProgramRules(
   },
 );
 
+const accurateAsOf = getUnixTime("2025-11-30T23:59:59Z");
+
 describe("ENSAnalytics Referrer Leaderboard", () => {
   describe("getReferrerLeaderboard", () => {
     it("returns a leaderboard of referrers in the requested time period", async () => {
       vi.mocked(database.getReferrerMetrics).mockResolvedValue(dbResultsReferrerLeaderboard);
 
-      const result = await getReferrerLeaderboard(rules);
+      const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
       expect(result).toMatchObject({
         rules,
@@ -96,7 +98,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
     it("returns an empty list if no referrer leaderboard records were found in database", async () => {
       vi.mocked(database.getReferrerMetrics).mockResolvedValue([]);
 
-      const result = await getReferrerLeaderboard(rules);
+      const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
       expect(result).toMatchObject({
         aggregatedMetrics: {
@@ -107,6 +109,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
         },
         referrers: new Map(),
         rules,
+        accurateAsOf,
       } satisfies ReferrerLeaderboard);
     });
   });

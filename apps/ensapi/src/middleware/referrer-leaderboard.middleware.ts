@@ -12,6 +12,7 @@ import pReflect from "p-reflect";
 
 import {
   getEthnamesSubregistryId,
+  getLatestIndexedBlockRef,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   SWRCache,
@@ -61,10 +62,21 @@ const referrerLeaderboardCache = await SWRCache.create({
       );
     }
 
+    const latestIndexedBlockRef = getLatestIndexedBlockRef(
+      indexingStatus.value,
+      rules.subregistryId.chainId,
+    );
+
+    if (latestIndexedBlockRef === null) {
+      throw new Error(
+        `Unable to generate referrer leaderboard. Latest indexed block ref for chain ${rules.subregistryId.chainId} is null.`,
+      );
+    }
+
     logger.info(`Building referrer leaderboard with rules:\n${JSON.stringify(rules, null, 2)}`);
 
     try {
-      const result = await getReferrerLeaderboard(rules);
+      const result = await getReferrerLeaderboard(rules, latestIndexedBlockRef.timestamp);
       logger.info(
         `Successfully built referrer leaderboard with ${result.referrers.size} referrers from indexed data`,
       );
