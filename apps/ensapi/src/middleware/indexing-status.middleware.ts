@@ -5,11 +5,10 @@ import pReflect, { type PromiseResult } from "p-reflect";
 
 import {
   createRealtimeIndexingStatusProjection,
-  type Duration,
   ENSNodeClient,
   IndexingStatusResponseCodes,
   type RealtimeIndexingStatusProjection,
-  staleWhileRevalidate,
+  SWRCache,
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
@@ -18,10 +17,7 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("indexing-status.middleware");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
-const TTL: Duration = 5;
-const REVALIDATION_INTERVAL: Duration = 10;
-
-const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
+export const indexingStatusCache = await SWRCache.create({
   fn: async () =>
     client
       .indexingStatus() // fetch a new indexing status snapshot
@@ -35,14 +31,14 @@ const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
         logger.info("Fetched Indexing Status to be cached");
 
         // The indexing status snapshot has been fetched and successfully validated for caching.
-        // Therefore, return it so that this current invocation of `staleWhileRevalidate` will:
-        // - Replace its currently cached value (if any) with this new value.
+        // Therefore, return it so that this current invocation of `readCache` will:
+        // - Replace the currently cached value (if any) with this new value.
         // - Return this non-null value.
         return response.realtimeProjection.snapshot;
       })
       .catch((error) => {
         // Either the indexing status snapshot fetch failed, or the indexing status response was not 'ok'.
-        // Therefore, throw an error so that this current invocation of `staleWhileRevalidate` will:
+        // Therefore, throw an error so that this current invocation of `readCache` will:
         // - Reject the newly fetched response (if any) such that it won't be cached.
         // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
         logger.error(
@@ -51,8 +47,8 @@ const swrIndexingStatusSnapshotFetcher = staleWhileRevalidate({
         );
         throw error;
       }),
-  ttl: TTL,
-  revalidationInterval: REVALIDATION_INTERVAL,
+  ttl: 5, // 5 seconds
+  revalidationInterval: 10, // 10 seconds
 });
 
 /**
@@ -85,8 +81,8 @@ export type IndexingStatusMiddlewareVariables = {
  * to downstream middleware and handlers.
  *
  * Optimizes for low-latency and high-availability by:
- * - Managing an in-memory cache (using an efficient {@link staleWhileRevalidate} caching strategy) of the most
- *   recently successfully fetched indexing status snapshot.
+ * - Using an efficient {@link SWRCache} for managing the most recently
+ *   successfully fetched (and cached) indexing status snapshot.
  * - Automatically generates a {@link RealtimeIndexingStatusProjection} as context from the most recently
  *   successfully fetched (and cached) indexing status snapshot as of the time the middleware was invoked.
  * - Retaining the most recent successfully fetched (and cached) indexing status snapshot, such that even
@@ -95,9 +91,9 @@ export type IndexingStatusMiddlewareVariables = {
  *   to downstream middleware and handlers.
  */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  const cachedSnapshot = await swrIndexingStatusSnapshotFetcher();
+  const cachedSnapshot = await indexingStatusCache.readCache();
 
-  let indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"];
+  let promiseResult: PromiseResult<RealtimeIndexingStatusProjection>;
 
   if (cachedSnapshot === null) {
     // An indexing status snapshot has never been cached successfully.
@@ -107,17 +103,17 @@ export const indexingStatusMiddleware = factory.createMiddleware(async (c, next)
       "Unable to generate a new indexing status projection. No indexing status snapshots have been successfully fetched and stored into cache since service startup. This may indicate the ENSIndexer service is unreachable or in an error state.";
     const error = new Error(errorMessage);
     logger.error(error);
-    indexingStatus = await pReflect(Promise.reject(error));
+    promiseResult = await pReflect(Promise.reject(error));
   } else {
     // An indexing status snapshot has been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive an
     // `indexingStatus` variable where `isFulfilled` is `true` and `value` is a {@link RealtimeIndexingStatusProjection} value
     // generated from the `cachedSnapshot` based on the current time.
     const now = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot, now);
-    indexingStatus = await pReflect(Promise.resolve(realtimeProjection));
+    const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot.value, now);
+    promiseResult = await pReflect(Promise.resolve(realtimeProjection));
   }
 
-  c.set("indexingStatus", indexingStatus);
+  c.set("indexingStatus", promiseResult);
   await next();
 });

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { staleWhileRevalidate } from "./swr-cache";
+import { SWRCache } from "./swr-cache";
 
 describe("staleWhileRevalidate", () => {
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe("staleWhileRevalidate", () => {
 
   it("fetches data without waiting for the first call when warmup was requested", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate({
+    const cache = await SWRCache.create({
       fn,
       ttl: 1, // 1 second
       proactivelyInitialize: true,
@@ -22,67 +22,79 @@ describe("staleWhileRevalidate", () => {
     // Fetch happened immediately
     expect(fn).toHaveBeenCalledTimes(1);
 
-    const result = await cached();
+    const result = await cache.readCache();
 
-    expect(result).toBe("value1");
+    expect(result?.value).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(1); // No extra fetch required for the first read
   });
 
   it("fetches data on first call", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 1,
+    }); // 1 second
 
-    const result = await cached();
+    const result = await cache.readCache();
 
-    expect(result).toBe("value1");
+    expect(result?.value).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it("returns cached data within TTL without refetching", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 2,
+    }); // 2 seconds
 
-    await cached();
+    await cache.readCache();
     vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
-    const result = await cached();
+    const result = await cache.readCache();
 
-    expect(result).toBe("value1");
+    expect(result?.value).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
   it("returns stale data immediately after TTL expires", async () => {
     const fn = vi.fn(async () => "value1");
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 2,
+    }); // 2 seconds
 
-    await cached();
+    await cache.readCache();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
-    const result = await cached();
+    const result = await cache.readCache();
 
-    expect(result).toBe("value1");
+    expect(result?.value).toBe("value1");
   });
 
   it("triggers background revalidation after TTL expires", async () => {
     let value = "value1";
     const fn = vi.fn(async () => value);
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 2,
+    }); // 2 seconds
 
-    await cached();
+    await cache.readCache();
     expect(fn).toHaveBeenCalledTimes(1);
 
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
     value = "value2";
 
     // This should return stale data but trigger revalidation
-    const result1 = await cached();
-    expect(result1).toBe("value1");
+    const result1 = await cache.readCache();
+    expect(result1?.value).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(2);
 
     // Wait for revalidation to complete
     await vi.runAllTimersAsync();
 
     // Next call should have fresh data
-    const result2 = await cached();
-    expect(result2).toBe("value2");
+    const result2 = await cache.readCache();
+    expect(result2?.value).toBe("value2");
   });
 
   it("does not trigger multiple revalidations concurrently", async () => {
@@ -98,17 +110,22 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 2,
+    }); // 2 seconds
 
-    await cached();
+    await cache.readCache();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
 
     // Multiple calls after stale should not trigger multiple revalidations
-    const promise1 = cached();
-    const promise2 = cached();
-    const promise3 = cached();
+    const promise1 = cache.readCache();
+    const promise2 = cache.readCache();
+    const promise3 = cache.readCache();
 
-    const results = await Promise.all([promise1, promise2, promise3]);
+    const results = await Promise.all([promise1, promise2, promise3]).then((results) =>
+      results.map((result) => result?.value),
+    );
 
     // All should return stale value
     expect(results).toEqual(["value1", "value1", "value1"]);
@@ -134,21 +151,24 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 2,
+    }); // 2 seconds
 
-    await cached();
+    await cache.readCache();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
 
     // First call after TTL triggers revalidation
-    const result1 = await cached();
-    expect(result1).toBe("value1");
+    const result1 = await cache.readCache();
+    expect(result1?.value).toBe("value1");
 
     // Additional calls while revalidating should still return stale
-    const result2 = await cached();
-    const result3 = await cached();
+    const result2 = await cache.readCache();
+    const result3 = await cache.readCache();
 
-    expect(result2).toBe("value1");
-    expect(result3).toBe("value1");
+    expect(result2?.value).toBe("value1");
+    expect(result3?.value).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(2);
 
     // Complete revalidation
@@ -156,8 +176,8 @@ describe("staleWhileRevalidate", () => {
     await vi.runAllTimersAsync();
 
     // Now should have fresh data
-    const result4 = await cached();
-    expect(result4).toBe("value2");
+    const result4 = await cache.readCache();
+    expect(result4?.value).toBe("value2");
   });
 
   it("handles revalidation errors gracefully by keeping stale data", async () => {
@@ -169,23 +189,26 @@ describe("staleWhileRevalidate", () => {
       return "value1";
     });
 
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({
+      fn,
+      ttl: 2,
+    }); // 2 seconds
 
-    await cached();
+    await cache.readCache();
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
 
     shouldError = true;
 
     // Should return stale data even though revalidation will fail
-    const result1 = await cached();
-    expect(result1).toBe("value1");
+    const result1 = await cache.readCache();
+    expect(result1?.value).toBe("value1");
 
     // Wait for failed revalidation
     await vi.runAllTimersAsync();
 
     // Should still serve stale data
-    const result2 = await cached();
-    expect(result2).toBe("value1");
+    const result2 = await cache.readCache();
+    expect(result2?.value).toBe("value1");
 
     // Should have attempted revalidation twice (once for each call after stale)
     expect(fn).toHaveBeenCalledTimes(3);
@@ -200,27 +223,27 @@ describe("staleWhileRevalidate", () => {
       return "value2";
     });
 
-    const cached = staleWhileRevalidate({ fn, ttl: 2 }); // 2 seconds
+    const cache = await SWRCache.create({ fn, ttl: 2 }); // 2 seconds
 
     // Initial fetch
     shouldError = false;
-    await cached();
+    await cache.readCache();
 
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
     shouldError = true;
 
     // First revalidation attempt fails
-    await cached();
+    await cache.readCache();
     await vi.runAllTimersAsync();
 
     // Subsequent call should retry revalidation
     shouldError = false;
-    await cached();
+    await cache.readCache();
     await vi.runAllTimersAsync();
 
     // Should now have fresh data
-    const result = await cached();
-    expect(result).toBe("value2");
+    const result = await cache.readCache();
+    expect(result?.value).toBe("value2");
   });
 
   describe("on fetched callbacks", () => {
@@ -229,10 +252,10 @@ describe("staleWhileRevalidate", () => {
         throw new Error("Initial fetch failed");
       });
 
-      const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second
+      const cache = await SWRCache.create({ fn, ttl: 1 }); // 1 second
 
       // Initial fetch should fail and return null
-      const result = await cached();
+      const result = await cache.readCache();
       expect(result).toBeNull();
       expect(fn).toHaveBeenCalledTimes(1);
     });
@@ -246,18 +269,37 @@ describe("staleWhileRevalidate", () => {
         return "value1";
       });
 
-      const cached = staleWhileRevalidate({ fn, ttl: 1 }); // 1 second
+      const cache = await SWRCache.create({ fn, ttl: 1 }); // 1 second
 
       // Initial fetch fails and returns null
-      const result1 = await cached();
+      const result1 = await cache.readCache();
       expect(result1).toBeNull();
       expect(fn).toHaveBeenCalledTimes(1);
 
       // Retry should succeed
       shouldError = false;
-      const result2 = await cached();
-      expect(result2).toBe("value1");
+      const result2 = await cache.readCache();
+      expect(result2?.value).toBe("value1");
       expect(fn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("proactively initialize", () => {
+    it("initializes the cache proactively", async () => {
+      const fn = vi.fn(async () => "value1");
+      await SWRCache.create({ fn, ttl: 1, proactivelyInitialize: true }); // 1 second
+
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not initialize the cache proactively", async () => {
+      const fn = vi.fn(async () => "value1");
+      const cache = await SWRCache.create({ fn, ttl: 1, proactivelyInitialize: false }); // 1 second
+
+      expect(fn).toHaveBeenCalledTimes(0);
+
+      await cache.readCache();
+      expect(fn).toHaveBeenCalledTimes(1);
     });
   });
 });

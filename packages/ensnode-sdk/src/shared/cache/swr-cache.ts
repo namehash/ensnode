@@ -9,49 +9,21 @@ import { BackgroundRevalidationScheduler } from "./background-revalidation-sched
 const bgRevalidationScheduler = new BackgroundRevalidationScheduler();
 
 /**
- * Internal cache entry structure for the Stale-While-Revalidate (SWR) caching strategy.
- *
- * This interface represents a single cache entry that stores the cached value,
- * metadata about when it was last updated, and tracks any in-progress revalidation.
- *
- * @internal
+ * Data structure for a single cached value.
  */
-interface SWRCache<ValueType> {
+export interface CachedValue<ValueType> {
   /**
    * The cached value of type ValueType.
    */
   value: ValueType;
 
   /**
-   * Unix timestamp indicating when the cached `value` was last successfully updated.
+   * Unix timestamp indicating when the cached `value` was generated.
    */
   updatedAt: UnixTimestamp;
-
-  /**
-   * Time-to-live duration in seconds of `value`. After this duration, `value` in the
-   * `SWRCache` is considered stale but is still retained as `value` in the cache until
-   * successfully replaced with a new `value`.
-   */
-  ttl: Duration;
-
-  /**
-   * Optional promise of the current in-progress attempt to revalidate the cached `value`.
-   *
-   * If undefined, no revalidation attempt is currently in progress.
-   * If defined, a revalidation attempt is currently in progress.
-   *
-   * Helps to enforce no concurrent revalidation attempts.
-   */
-  inProgressRevalidation?: Promise<void>;
 }
 
-/**
- * Check if a `SWRCache` is stale.
- */
-const isCacheStale = <ValueType>(cache: SWRCache<ValueType>): boolean =>
-  durationBetween(cache.updatedAt, getUnixTime(new Date())) > cache.ttl;
-
-interface StaleWhileRevalidateOptions<ValueType> {
+export interface SWRCacheOptions<ValueType> {
   /**
    * The async function generating a value of `ValueType` to wrap with SWR caching.
    *
@@ -101,23 +73,14 @@ interface StaleWhileRevalidateOptions<ValueType> {
 }
 
 /**
- * Stale-While-Revalidate (SWR) cache wrapper for async functions.
+ * Stale-While-Revalidate (SWR) cache for async functions.
  *
  * This caching strategy serves cached data immediately (even if stale) while
  * asynchronously revalidating the cache in the background. This provides:
  * - Sub-millisecond response times (after first fetch)
  * - Always available data (serves stale data during revalidation)
- * - Automatic background updates (currently only triggered lazily when new requests
- *   are made for the cached data after it becomes stale)
- *
- * Error Handling:
- * - If a new invocation of the provided `fn` throws an error and a cached value exists
- *   from a previous successfully invocation of the provided `fn`, the stale cached value is returned.
- * - If a new invocation of the provided `fn` throws an error and NO cached value exists,
- *   from any prior invocations of the provided `fn`, such that the provided `fn` has never
- *   successfully returned a value for the lifetime of the `SWRCache`, then `null` is returned.
- * - Therefore, errors occurring within the provided `fn` are handled internally within
- *   `staleWhileRevalidate` and do not propagate to the caller.
+ * - Automatic background updates (triggered lazily when new requests
+ *   are made for the cached data or when the `revalidationInterval` is reached)
  *
  * @example
  * ```typescript
@@ -126,149 +89,162 @@ interface StaleWhileRevalidateOptions<ValueType> {
  *   return response.json();
  * };
  *
- * const cachedFetch = staleWhileRevalidate({
+ * const cache = await SWRCache.create({
  *   fn: fetchExpensiveData,
  *   ttl: 60, // 1 minute TTL
  *   revalidationInterval: 5 * 60 // proactive revalidation after 5 minutes from latest cache update
  * });
  *
  * // [T0: 0] First call: fetches data (slow)
- * const firstRead = await cachedFetch();
+ * const firstRead = await cache.readCache();
  *
  * // [T1: T0 + 59s] Within TTL: returns data cache at T0 (fast)
- * const secondRead = await cachedFetch();
+ * const secondRead = await cache.readCache();
  *
  * // [T2: T0 + 1m30s] After TTL: returns stale data that was cached at T0 immediately
  * // revalidates asynchronously in the background
- * const thirdRead = await cachedFetch(); // Still fast!
+ * const thirdRead = await cache.readCache(); // Still fast!
  *
  * // [T3: T2 + 90m] Background revalidation kicks in
  *
  * // [T4: T3 + 1m] Within TTL: returns data cache at T3 (fast)
- * const fourthRead = await cachedFetch(); // Still fast!
+ * const fourthRead = await cache.readCache(); // Still fast!
  *
- * // Please note how using `revalidationInterval` enabled action at T3 to happen.
+ * // Please note how using `SWRCache` enabled action at T3 to happen.
  * // If no `revalidationInterval` value was set, the action at T3 would not happen.
  * // Therefore, the `fourthRead` would return stale data cached at T2.
- * ```
- *
- * @param options - The {@link StaleWhileRevalidateOptions} for the SWR cache.
- * @returns a value of `ValueType` that was most recently successfully returned by `fn`
- *          or `null` if `fn` has never successfully returned and has always thrown an error.
  *
  * @link https://web.dev/stale-while-revalidate/
  * @link https://datatracker.ietf.org/doc/html/rfc5861
  */
-export function staleWhileRevalidate<ValueType>({
-  fn,
-  ttl,
-  revalidationInterval,
-  proactivelyInitialize = false,
-}: StaleWhileRevalidateOptions<ValueType>): () => Promise<ValueType | null> {
-  let cache: SWRCache<ValueType> | null = null;
-  let cacheInitializer: Promise<ValueType | null> | null = null;
+export class SWRCache<ValueType> {
+  public readonly options: SWRCacheOptions<ValueType>;
+  private cache: CachedValue<ValueType> | null;
 
   /**
-   * Internal function to trigger revalidation of the cache.
-   * Used by both lazy revalidation and background revalidation.
+   * Optional promise of the current in-progress attempt to revalidate the `cache`.
+   *
+   * If null, no revalidation attempt is currently in progress.
+   * If not null, identifies the revalidation attempt that is currently in progress.
+   *
+   * Used to enforce no concurrent revalidation attempts.
    */
-  const revalidate = async (): Promise<void> => {
-    if (!cache) return;
-
-    // Revalidation already in progress
-    if (cache.inProgressRevalidation) return;
-
-    const revalidationPromise = fn()
-      .then((value) => {
-        // Successfully updated the `SWRCache`
-        cache = { value, updatedAt: getUnixTime(new Date()), ttl };
-
-        // Start a new background revalidation after successful cache update
-        scheduleNewBackgroundRevalidation();
-      })
-      .catch(() => {
-        // Revalidation attempt failed with an error.
-        // Swallow the error; keep serving stale data
-      })
-      .finally(() => {
-        if (cache) {
-          // Clear the `inProgressRevalidation` promise so that the next request
-          // will retry revalidation.
-          cache.inProgressRevalidation = undefined;
-        }
-      });
-
-    cache.inProgressRevalidation = revalidationPromise;
-    await revalidationPromise;
-  };
+  private inProgressRevalidate: Promise<CachedValue<ValueType> | null> | null;
 
   /**
-   * Cancel any existing background revalidation schedule and start a new one
-   * (resets the schedule to interval milliseconds from now).
+   * The callback function being managed by `BackgroundRevalidationScheduler`.
+   *
+   * If null, no background revalidation is scheduled.
+   * If not null, identifies the background revalidation that is currently scheduled.
+   *
+   * Used to enforce no concurrent background revalidation attempts.
    */
-  const scheduleNewBackgroundRevalidation = (): void => {
-    if (revalidationInterval === undefined) return;
+  private scheduledBackgroundRevalidate: (() => Promise<void>) | null;
 
-    // Cancel any existing background revalidation scheduled task
-    bgRevalidationScheduler.cancel(revalidate);
-
-    // Schedule a new background revalidation task
-    bgRevalidationScheduler.schedule({
-      revalidate,
-      interval: secondsToMilliseconds(revalidationInterval),
-    });
-  };
-
-  const readCache = async (): Promise<ValueType | null> => {
-    if (!cache) {
-      // No cache. Attempt to successfully initialize the cache.
-      if (cacheInitializer) {
-        // Initialization is already in progress. Return the existing initialization
-        // attempt to enforce no concurrent invocations of `fn` by the
-        // `staleWhileRevalidate` wrapper.
-        return cacheInitializer;
-      }
-
-      // Attempt initialization of the cache.
-      cacheInitializer = fn()
-        .then((value) => {
-          // Successfully initialize the `SWRCache`
-          cache = { value, updatedAt: getUnixTime(new Date()), ttl };
-          // remember that cache initialization is no longer in progress
-          cacheInitializer = null;
-
-          // Schedule new background revalidation after successful cache initialization
-          scheduleNewBackgroundRevalidation();
-
-          return value;
-        })
-        .catch(() => {
-          // `fn` threw an error, therefore initialization failed and cache remains `null`
-          // remember that cache initialization is no longer in progress
-          cacheInitializer = null;
-          // Return null as no cached value is available
-          return null;
-        });
-
-      return cacheInitializer;
-    }
-
-    // Fresh cache, return immediately
-    if (!isCacheStale(cache)) return cache.value;
-
-    // Stale cache: trigger revalidation asynchronously in the background
-    // (revalidate() will noop if already in progress)
-    revalidate();
-
-    // Return stale value immediately
-    return cache.value;
-  };
-
-  // Proactively initialize the cache if requested
-  if (proactivelyInitialize) {
-    // Fire-and-forget
-    readCache();
+  private constructor(options: SWRCacheOptions<ValueType>) {
+    this.cache = null;
+    this.inProgressRevalidate = null;
+    this.scheduledBackgroundRevalidate = null;
+    this.options = options;
   }
 
-  return readCache;
+  /**
+   * Asynchronously create a new `SWRCache` instance.
+   *
+   * @param options - The {@link SWRCacheOptions} for the SWR cache.
+   * @returns a new `SWRCache` instance.
+   */
+  public static async create<ValueType>(
+    options: SWRCacheOptions<ValueType>,
+  ): Promise<SWRCache<ValueType>> {
+    const cache = new SWRCache<ValueType>(options);
+    if (cache.options.proactivelyInitialize) {
+      // fire and forget
+      cache.readCache();
+    }
+    return cache;
+  }
+
+  private revalidate = async (): Promise<CachedValue<ValueType> | null> => {
+    if (this.inProgressRevalidate) {
+      // An in-progress revalidation attempt is already in progress.
+      // Enforce no concurrent invocations of `fn` by a `SWRCacheManager` instance.
+      // Return the in-progress revalidation attempt.
+      return this.inProgressRevalidate;
+    }
+
+    return this.options
+      .fn() // Invoke the function attempting to generate a new value
+      .then((value) => {
+        // `fn` successfully returned `value`.
+
+        // Update `this.cache` with the new `CachedValue`
+        this.cache = {
+          value,
+          updatedAt: getUnixTime(new Date()),
+        };
+
+        return this.cache;
+      })
+      .catch(() => {
+        // `fn` threw an error.
+        // Swallow the error.
+        // Make no changes to `this.cache`.
+        // return null to indicate that no new value was generated.
+        return null;
+      })
+      .finally(() => {
+        // Clear `this.inProgressRevalidation` so that a new revalidate attempt may be started.
+        this.inProgressRevalidate = null;
+
+        if (this.options.revalidationInterval === undefined) {
+          // No revalidation interval means no background revalidation, so work is done.
+          return;
+        }
+
+        if (this.scheduledBackgroundRevalidate) {
+          // Cancel the existing background revalidation scheduled task
+          bgRevalidationScheduler.cancel(this.scheduledBackgroundRevalidate);
+        }
+
+        const backgroundRevalidate = async (): Promise<void> => {
+          this.revalidate();
+          // return void
+        };
+
+        this.scheduledBackgroundRevalidate = bgRevalidationScheduler.schedule({
+          revalidate: backgroundRevalidate,
+          interval: secondsToMilliseconds(this.options.revalidationInterval),
+        });
+      });
+  };
+
+  /**
+   * Read the most recently cached `CachedValue` from the `SWRCache`.
+   *
+   * @returns a `CachedValue` holding a `value` of `ValueType` that was most recently successfully returned by `fn`
+   *          or `null` if `fn` has never successfully returned and has always thrown an error,
+   */
+  public readCache = async (): Promise<CachedValue<ValueType> | null> => {
+    if (!this.cache) {
+      // No cache.
+      // Attempt initialization of the cache.
+      this.inProgressRevalidate = this.revalidate();
+      return this.inProgressRevalidate;
+    }
+
+    if (durationBetween(this.cache.updatedAt, getUnixTime(new Date())) <= this.options.ttl) {
+      // fresh cache, return immediately
+      return this.cache;
+    }
+
+    // stale cache
+    if (!this.inProgressRevalidate) {
+      // no in progress revalidation, trigger revalidation asynchronously in the background
+      this.inProgressRevalidate = this.revalidate();
+    }
+
+    // return stale cached value immediately
+    return this.cache;
+  };
 }
