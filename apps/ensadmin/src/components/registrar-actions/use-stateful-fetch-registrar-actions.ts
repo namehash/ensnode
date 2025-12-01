@@ -44,13 +44,9 @@ export function useStatefulRegistrarActions({
 
   let isRegistrarActionsApiSupported = false;
 
-  if (
-    ensNodeConfigQuery.isSuccess &&
-    indexingStatusQuery.isSuccess &&
-    indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Ok
-  ) {
+  if (ensNodeConfigQuery.isSuccess && indexingStatusQuery.isSuccess) {
     const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
-    const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+    const { omnichainSnapshot } = indexingStatusQuery.data.snapshot;
 
     isRegistrarActionsApiSupported =
       hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
@@ -100,7 +96,7 @@ export function useStatefulRegistrarActions({
     } satisfies StatefulFetchRegistrarActionsUnsupported;
   }
 
-  const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+  const { omnichainSnapshot } = indexingStatusQuery.data.snapshot;
 
   // fetching is temporarily not possible due to indexing status being not advanced enough
   if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
