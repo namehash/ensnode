@@ -25,7 +25,6 @@ import {
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ChainName } from "@/components/chains/ChainName";
-import { useIndexingStatusWithSwr } from "@/components/indexing-status/use-indexing-status-with-swr";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChainStatus, formatOmnichainIndexingStatus } from "@/lib/indexing-status";
@@ -34,6 +33,8 @@ import { cn } from "@/lib/utils";
 import { BackfillStatus } from "./backfill-status";
 import { BlockStats } from "./block-refs";
 import { IndexingStatusLoading } from "./indexing-status-loading";
+import { ProjectionInfo } from "./projection-info";
+import { useIndexingStatusWithSwr } from "./use-indexing-status-with-swr";
 
 interface IndexingStatsForOmnichainStatusSnapshotProps<
   OmnichainIndexingStatusSnapshotType extends
@@ -323,14 +324,17 @@ export function IndexingStatsForSnapshotFollowing({
  * UI component for presenting indexing stats UI for specific overall status.
  */
 export function IndexingStatsShell({
-  omnichainStatus,
+  realtimeProjection,
   children,
-}: PropsWithChildren<{ omnichainStatus?: OmnichainIndexingStatusId }>) {
+}: PropsWithChildren<{ realtimeProjection?: RealtimeIndexingStatusProjection }>) {
+  const omnichainStatus = realtimeProjection?.snapshot.omnichainSnapshot.omnichainStatus;
   return (
     <Card className="w-full flex flex-col gap-2">
       <CardHeader>
         <CardTitle className="flex gap-2 items-center">
           <span>Indexing Status</span>
+
+          {realtimeProjection && <ProjectionInfo realtimeProjection={realtimeProjection} />}
 
           {omnichainStatus && (
             <Badge
@@ -423,7 +427,7 @@ export function IndexingStatsForRealtimeStatusProjection({
     <section className="flex flex-col gap-6">
       {maybeIndexingTimeline}
 
-      <IndexingStatsShell omnichainStatus={omnichainStatusSnapshot.omnichainStatus}>
+      <IndexingStatsShell realtimeProjection={realtimeProjection}>
         {indexingStats}
       </IndexingStatsShell>
     </section>
@@ -450,11 +454,5 @@ export function IndexingStats(props: IndexingStatsProps) {
     return <IndexingStatusLoading />;
   }
 
-  const indexingStatus = indexingStatusQuery.data;
-
-  return (
-    <IndexingStatsForRealtimeStatusProjection
-      realtimeProjection={indexingStatus.realtimeProjection}
-    />
-  );
+  return <IndexingStatsForRealtimeStatusProjection realtimeProjection={indexingStatusQuery.data} />;
 }
