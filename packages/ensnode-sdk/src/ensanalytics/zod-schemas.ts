@@ -6,23 +6,58 @@
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
+
+import {
+  REFERRERS_PER_LEADERBOARD_PAGE_MAX,
+  type ReferrerDetailData,
+} from "@namehash/ens-referrals";
 import z from "zod/v4";
 
-import { CurrencyIds } from "../shared/currencies";
 import {
+  makeAccountIdSchema,
   makeDurationSchema,
+  makeFiniteNonNegativeNumberSchema,
   makeLowercaseAddressSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  makePriceCurrencySchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
-import {
-  ITEMS_PER_PAGE_DEFAULT,
-  ITEMS_PER_PAGE_MAX,
-  PaginatedAggregatedReferrersResponseCodes,
-  ReferrerDetailResponseCodes,
-} from "./types";
+import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
+
+/**
+ * Schema for ReferralProgramRules
+ */
+export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
+  z.object({
+    totalAwardPoolValue: makeFiniteNonNegativeNumberSchema(`${valueLabel}.totalAwardPoolValue`),
+    maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
+    startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
+    endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
+    subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
+  });
+
+/**
+ * Schema for AwardedReferrerMetrics
+ */
+export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedReferrerMetrics") =>
+  z.object({
+    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
+    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+    score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
+    rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
+    isQualified: z.boolean(),
+    finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
+      1,
+      `${valueLabel}.finalScoreBoost must be <= 1`,
+    ),
+    finalScore: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScore`),
+    awardPoolShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolShare`).max(
+      1,
+      `${valueLabel}.awardPoolShare must be <= 1`,
+    ),
+    awardPoolApproxValue: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolApproxValue`),
+  });
 
 /**
  * Schema for AggregatedReferrerMetrics
@@ -31,168 +66,91 @@ export const makeAggregatedReferrerMetricsSchema = (
   valueLabel: string = "AggregatedReferrerMetrics",
 ) =>
   z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makePositiveIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+    grandTotalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.grandTotalReferrals`),
+    grandTotalIncrementalDuration: makeDurationSchema(
+      `${valueLabel}.grandTotalIncrementalDuration`,
+    ),
+    grandTotalQualifiedReferrersFinalScore: makeFiniteNonNegativeNumberSchema(
+      `${valueLabel}.grandTotalQualifiedReferrersFinalScore`,
+    ),
+    minFinalScoreToQualify: makeFiniteNonNegativeNumberSchema(
+      `${valueLabel}.minFinalScoreToQualify`,
+    ),
   });
 
-/**
- * Schema for AggregatedReferrerMetricsContribution
- */
-export const makeAggregatedReferrerMetricsContributionSchema = (
-  valueLabel: string = "AggregatedReferrerMetricsContribution",
-) =>
-  makeAggregatedReferrerMetricsSchema(valueLabel).extend({
-    totalReferralsContribution: z
-      .number({
-        error: `${valueLabel}.totalReferralsContribution must be a number`,
-      })
-      .min(0, `${valueLabel}.totalReferralsContribution must be >= 0`)
-      .max(1, `${valueLabel}.totalReferralsContribution must be <= 1`),
-    totalIncrementalDurationContribution: z
-      .number({
-        error: `${valueLabel}.totalIncrementalDurationContribution must be a number`,
-      })
-      .min(0, `${valueLabel}.totalIncrementalDurationContribution must be >= 0`)
-      .max(1, `${valueLabel}.totalIncrementalDurationContribution must be <= 1`),
-  });
-
-/**
- * Schema for PaginationParams
- */
-export const makePaginationParamsSchema = (valueLabel: string = "PaginationParams") =>
-  z.object({
-    page: makePositiveIntegerSchema(`${valueLabel}.page`).default(1),
-    itemsPerPage: makePositiveIntegerSchema(`${valueLabel}.itemsPerPage`)
-      .max(ITEMS_PER_PAGE_MAX, `${valueLabel}.itemsPerPage must not exceed ${ITEMS_PER_PAGE_MAX}`)
-      .default(ITEMS_PER_PAGE_DEFAULT),
-  });
-
-/**
- * Schema for PaginatedAggregatedReferrers
- */
-export const makePaginatedAggregatedReferrersSchema = (
-  valueLabel: string = "PaginatedAggregatedReferrers",
-) =>
-  z
-    .object({
-      referrers: z.array(
-        makeAggregatedReferrerMetricsContributionSchema(`${valueLabel}.referrers[item]`),
-      ),
-      total: makeNonNegativeIntegerSchema(`${valueLabel}.total`),
-      paginationParams: makePaginationParamsSchema(`${valueLabel}.paginationParams`),
-      hasNext: z.boolean(),
-      hasPrev: z.boolean(),
-      updatedAt: makeUnixTimestampSchema(`${valueLabel}.updatedAt`),
-    })
-    .check((ctx) => {
-      const { paginationParams, hasNext, hasPrev, total } = ctx.value;
-
-      // Validate hasPrev
-      const expectedHasPrev = paginationParams.page > 1;
-      if (hasPrev !== expectedHasPrev) {
-        ctx.issues.push({
-          code: "custom",
-          message: `${valueLabel}.hasPrev must be ${expectedHasPrev} when page is ${paginationParams.page}`,
-          input: ctx.value,
-        });
-      }
-
-      // Validate hasNext
-      const endIndex = paginationParams.page * paginationParams.itemsPerPage;
-      const expectedHasNext = endIndex < total;
-      if (hasNext !== expectedHasNext) {
-        ctx.issues.push({
-          code: "custom",
-          message: `${valueLabel}.hasNext must be ${expectedHasNext} when page=${paginationParams.page}, itemsPerPage=${paginationParams.itemsPerPage}, total=${total}`,
-          input: ctx.value,
-        });
-      }
-    });
-
-/**
- * Schema for {@link PaginatedAggregatedReferrersResponseOk}
- */
-export const makePaginatedAggregatedReferrersResponseOkSchema = (
-  valueLabel: string = "PaginatedAggregatedReferrersResponse",
+export const makeReferrerLeaderboardPaginationContextSchema = (
+  valueLabel: string = "ReferrerLeaderboardPaginationContext",
 ) =>
   z.object({
-    responseCode: z.literal(PaginatedAggregatedReferrersResponseCodes.Ok),
-    data: makePaginatedAggregatedReferrersSchema(`${valueLabel}.data`),
+    page: makePositiveIntegerSchema(`${valueLabel}.page`),
+    itemsPerPage: makePositiveIntegerSchema(`${valueLabel}.itemsPerPage`).max(
+      REFERRERS_PER_LEADERBOARD_PAGE_MAX,
+      `${valueLabel}.itemsPerPage must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
+    ),
+    totalRecords: makeNonNegativeIntegerSchema(`${valueLabel}.totalRecords`),
+    totalPages: makePositiveIntegerSchema(`${valueLabel}.totalPages`),
+    hasNext: z.boolean(),
+    hasPrev: z.boolean(),
+    startIndex: z.optional(makeNonNegativeIntegerSchema(`${valueLabel}.startIndex`)),
+    endIndex: z.optional(makeNonNegativeIntegerSchema(`${valueLabel}.endIndex`)),
   });
 
 /**
- * Schema for {@link PaginatedAggregatedReferrersResponseError}
+ * Schema for ReferrerLeaderboardPage
  */
-export const makePaginatedAggregatedReferrersResponseErrorSchema = (
-  _valueLabel: string = "PaginatedAggregatedReferrersResponse",
+export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
+  z.object({
+    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
+    referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[item]`)),
+    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
+    paginationContext: makeReferrerLeaderboardPaginationContextSchema(
+      `${valueLabel}.paginationContext`,
+    ),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+  });
+
+/**
+ * Schema for {@link ReferrerLeaderboardPageResponseOk}
+ */
+export const makeReferrerLeaderboardPageResponseOkSchema = (
+  valueLabel: string = "ReferrerLeaderboardPageResponseOk",
 ) =>
   z.object({
-    responseCode: z.literal(PaginatedAggregatedReferrersResponseCodes.Error),
+    responseCode: z.literal(ReferrerLeaderboardPageResponseCodes.Ok),
+    data: makeReferrerLeaderboardPageSchema(`${valueLabel}.data`),
+  });
+
+/**
+ * Schema for {@link ReferrerLeaderboardPageResponseError}
+ */
+export const makeReferrerLeaderboardPageResponseErrorSchema = (
+  _valueLabel: string = "ReferrerLeaderboardPageResponseError",
+) =>
+  z.object({
+    responseCode: z.literal(ReferrerLeaderboardPageResponseCodes.Error),
     error: z.string(),
     errorMessage: z.string(),
   });
 
 /**
- * Schema for {@link PaginatedAggregatedReferrersResponse}
+ * Schema for {@link ReferrerLeaderboardPageResponse}
  */
-export const makePaginatedAggregatedReferrersResponseSchema = (
-  valueLabel: string = "PaginatedAggregatedReferrersResponse",
+export const makeReferrerLeaderboardPageResponseSchema = (
+  valueLabel: string = "ReferrerLeaderboardPageResponse",
 ) =>
   z.union([
-    makePaginatedAggregatedReferrersResponseOkSchema(valueLabel),
-    makePaginatedAggregatedReferrersResponseErrorSchema(valueLabel),
+    makeReferrerLeaderboardPageResponseOkSchema(valueLabel),
+    makeReferrerLeaderboardPageResponseErrorSchema(valueLabel),
   ]);
 
 /**
- * Schema for ReferrerDetail
+ * Schema for {@link ReferrerDetailData}
  */
-export const makeReferrerDetailSchema = (valueLabel: string = "ReferrerDetail") =>
-  z
-    .object({
-      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-      totalReferrals: makePositiveIntegerSchema(`${valueLabel}.totalReferrals`),
-      totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-      referrerScore: z
-        .number({
-          error: `${valueLabel}.referrerScore must be a number`,
-        })
-        .min(0, `${valueLabel}.referrerScore must be >= 0`),
-      grandTotalReferrerScore: z
-        .number({
-          error: `${valueLabel}.grandTotalReferrerScore must be a number`,
-        })
-        .min(0, `${valueLabel}.grandTotalReferrerScore must be >= 0`),
-      referrerContribution: z
-        .number({
-          error: `${valueLabel}.referrerContribution must be a number`,
-        })
-        .min(0, `${valueLabel}.referrerContribution must be >= 0`)
-        .max(1, `${valueLabel}.referrerContribution must be <= 1`),
-      awardPoolShare: makePriceCurrencySchema(CurrencyIds.USDC, `${valueLabel}.awardPoolShare`),
-      updatedAt: makeUnixTimestampSchema(`${valueLabel}.updatedAt`),
-    })
-    .check((ctx) => {
-      // Validate that referrerContribution is calculated correctly
-      const { referrerScore, referrerContribution, grandTotalReferrerScore } = ctx.value;
-      if (grandTotalReferrerScore > 0) {
-        const expectedContribution = referrerScore / grandTotalReferrerScore;
-        // Allow for small floating point differences
-        if (Math.abs(referrerContribution - expectedContribution) > 1e-6) {
-          ctx.issues.push({
-            code: "custom",
-            message: `${valueLabel}.referrerContribution (${referrerContribution}) must equal referrerScore / grandTotalReferrerScore (${expectedContribution})`,
-            input: ctx.value,
-          });
-        }
-      } else if (referrerContribution !== 0) {
-        ctx.issues.push({
-          code: "custom",
-          message: `${valueLabel}.referrerContribution must be 0 when grandTotalReferrerScore is 0`,
-          input: ctx.value,
-        });
-      }
-    });
+export const makeReferrerDetailDataSchema = (valueLabel: string = "ReferrerDetailData") =>
+  z.object({
+    referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+  });
 
 /**
  * Schema for {@link ReferrerDetailResponseOk}
@@ -200,7 +158,7 @@ export const makeReferrerDetailSchema = (valueLabel: string = "ReferrerDetail") 
 export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
   z.object({
     responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
-    data: makeReferrerDetailSchema(`${valueLabel}.data`),
+    data: makeReferrerDetailDataSchema(`${valueLabel}.data`),
   });
 
 /**

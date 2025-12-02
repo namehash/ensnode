@@ -1,32 +1,30 @@
-import { serializePrice } from "../shared";
 import type {
-  SerializedPaginatedAggregatedReferrersResponse,
-  SerializedReferrerDetail,
   SerializedReferrerDetailResponse,
+  SerializedReferrerLeaderboardPageResponse,
 } from "./serialized-types";
 import {
-  type PaginatedAggregatedReferrersResponse,
-  PaginatedAggregatedReferrersResponseCodes,
   type ReferrerDetailResponse,
   ReferrerDetailResponseCodes,
+  type ReferrerLeaderboardPageResponse,
+  ReferrerLeaderboardPageResponseCodes,
 } from "./types";
 
 /**
- * Serialize a {@link PaginatedAggregatedReferrersResponse} object.
+ * Serialize a {@link ReferrerLeaderboardPageResponse} object.
  *
- * Note: Since all fields in PaginatedAggregatedReferrersResponse are already
+ * Note: Since all fields in ReferrerLeaderboardPageResponse are already
  * serializable primitives, this function performs an identity transformation.
  * It exists to maintain consistency with the serialization pattern used
  * throughout the codebase.
  */
-export function serializePaginatedAggregatedReferrersResponse(
-  response: PaginatedAggregatedReferrersResponse,
-): SerializedPaginatedAggregatedReferrersResponse {
+export function serializeReferrerLeaderboardPageResponse(
+  response: ReferrerLeaderboardPageResponse,
+): SerializedReferrerLeaderboardPageResponse {
   switch (response.responseCode) {
-    case PaginatedAggregatedReferrersResponseCodes.Ok:
+    case ReferrerLeaderboardPageResponseCodes.Ok:
       return response;
 
-    case PaginatedAggregatedReferrersResponseCodes.Error:
+    case ReferrerLeaderboardPageResponseCodes.Error:
       return response;
   }
 }
@@ -34,22 +32,16 @@ export function serializePaginatedAggregatedReferrersResponse(
 /**
  * Serialize a {@link ReferrerDetailResponse} object.
  *
- * Serializes the awardPoolShare.amount from bigint to string.
+ * Note: Since all fields in ReferrerDetailData (AwardedReferrerMetrics + timestamp)
+ * are already serializable primitives, this function performs an identity transformation.
+ * It exists to maintain consistency with the serialization pattern used throughout the codebase.
  */
 export function serializeReferrerDetailResponse(
   response: ReferrerDetailResponse,
 ): SerializedReferrerDetailResponse {
   switch (response.responseCode) {
     case ReferrerDetailResponseCodes.Ok:
-      return {
-        responseCode: response.responseCode,
-        data: {
-          ...response.data,
-          awardPoolShare: serializePrice(
-            response.data.awardPoolShare,
-          ) as SerializedReferrerDetail["awardPoolShare"],
-        },
-      };
+      return response;
 
     case ReferrerDetailResponseCodes.Error:
       return response;

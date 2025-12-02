@@ -7,7 +7,7 @@ import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("can-accelerate.middleware");
 
-export type CanAccelerateVariables = { canAccelerate: boolean };
+export type CanAccelerateMiddlewareVariables = { canAccelerate: boolean };
 
 // TODO: expand this datamodel to include 'reasons' acceleration was disabled to drive ui
 
@@ -23,6 +23,7 @@ let prevCanAccelerate = false;
  * resolution handlers.
  */
 export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) => {
+  // context must be set by the required middleware
   if (c.var.isRealtime === undefined) {
     throw new Error(`Invariant(canAccelerateMiddleware): isRealtime middleware required`);
   }

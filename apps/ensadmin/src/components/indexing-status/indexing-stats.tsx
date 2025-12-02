@@ -25,6 +25,7 @@ import {
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { ChainName } from "@/components/chains/ChainName";
+import { useIndexingStatusWithSwr } from "@/components/indexing-status/use-indexing-status-with-swr";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatChainStatus, formatOmnichainIndexingStatus } from "@/lib/indexing-status";
@@ -429,31 +430,27 @@ export function IndexingStatsForRealtimeStatusProjection({
   );
 }
 
-type IndexingStatsProps = ReturnType<typeof useIndexingStatus>;
+type IndexingStatsProps = ReturnType<typeof useIndexingStatusWithSwr>;
 
 /**
- * Display indexing stats based on query results from {@link useIndexingStatus}.
+ * Display indexing stats based on query results from {@link useIndexingStatusWithSwr}.
  */
 export function IndexingStats(props: IndexingStatsProps) {
   const indexingStatusQuery = props;
 
-  if (indexingStatusQuery.status === "error") {
-    return <p>Failed to fetch Indexing Status.</p>;
-  }
-
-  if (indexingStatusQuery.status === "pending") {
-    return <IndexingStatusLoading />;
-  }
-
-  const indexingStatus = indexingStatusQuery.data;
-
-  if (indexingStatus.responseCode === IndexingStatusResponseCodes.Error) {
+  if (indexingStatusQuery.isError) {
     return (
       <IndexingStatsShell>
         <IndexingStatsForUnavailableSnapshot />
       </IndexingStatsShell>
     );
   }
+
+  if (indexingStatusQuery.isPending) {
+    return <IndexingStatusLoading />;
+  }
+
+  const indexingStatus = indexingStatusQuery.data;
 
   return (
     <IndexingStatsForRealtimeStatusProjection

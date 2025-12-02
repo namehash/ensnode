@@ -1,7 +1,7 @@
 import type { EncodedReferrer } from "@namehash/ens-referrals";
 
 export type { EncodedReferrer } from "@namehash/ens-referrals";
-export { decodeEncodedReferrer, zeroEncodedReferrer } from "@namehash/ens-referrals";
+export { decodeEncodedReferrer, ZERO_ENCODED_REFERRER } from "@namehash/ens-referrals";
 
 import type { Address, Hash } from "viem";
 

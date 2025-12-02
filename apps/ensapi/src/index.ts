@@ -12,7 +12,6 @@ import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import logger from "@/lib/logger";
 import { sdk } from "@/lib/tracing/instrumentation";
-import { fetcher as referrersCacheFetcher } from "@/middleware/aggregated-referrer-snapshot-cache.middleware";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -73,16 +72,6 @@ const server = serve(
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
     await app.request("/health");
-
-    // warm start ENSAnalytics aggregated referrer snapshot cache
-    logger.info("Warming up ENSAnalytics aggregated referrer snapshot cache...");
-    const cache = await referrersCacheFetcher();
-    if (cache) {
-      logger.info(`ENSAnalytics cache warmed up with ${cache.referrers.size} referrers`);
-    } else {
-      logger.error("Failed to warm up ENSAnalytics cache - no cached data available yet");
-      // Don't exit - let the service run without pre-warmed analytics
-    }
   },
 );
 

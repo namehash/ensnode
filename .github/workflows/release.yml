@@ -60,6 +60,7 @@ jobs:
             map(select(
                  .name == "ensindexer"
               or .name == "ensadmin"
+              or .name == "ensapi"
               or .name == "ensrainbow"
             ))
 
@@ -78,6 +79,7 @@ jobs:
             map(select(
                   .name != "ensindexer"
               and .name != "ensadmin"
+              and .name != "ensapi"
               and .name != "ensrainbow"
               and .name != "@ensnode/shared-configs"
               and (.name | startswith("@docs") | not)

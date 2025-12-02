@@ -6,4 +6,4 @@ export * from "./context";
 export * from "./hooks";
 export * from "./provider";
 export * from "./types";
-export { ASSUME_IMMUTABLE_QUERY } from "./utils/query";
+export * from "./utils/query";

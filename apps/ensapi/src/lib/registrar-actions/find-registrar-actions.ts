@@ -1,4 +1,4 @@
-import { and, desc, eq, type SQL } from "drizzle-orm/sql";
+import { and, desc, eq, isNotNull, not, type SQL } from "drizzle-orm/sql";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -14,10 +14,11 @@ import {
   type RegistrarActionReferralAvailable,
   type RegistrarActionReferralNotApplicable,
   type RegistrarActionsFilter,
-  RegistrarActionsFilterFields,
+  RegistrarActionsFilterTypes,
   type RegistrarActionsOrder,
   RegistrarActionsOrders,
   type RegistrationLifecycle,
+  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
@@ -35,19 +36,42 @@ function buildOrderByClause(order: RegistrarActionsOrder): SQL {
 /**
  * Build SQL for where clause from provided filter param.
  */
-function buildWhereClause(filter: RegistrarActionsFilter | undefined): SQL[] {
-  const binaryOperators: SQL[] = [];
+function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] {
+  const binaryOperators: SQL[] =
+    filters?.map((filter) => {
+      switch (filter.filterType) {
+        case RegistrarActionsFilterTypes.BySubregistryNode:
+          // apply subregistry node equality filter
+          return eq(schema.subregistries.node, filter.value);
 
-  // apply optional subregistry node equality filter
-  if (filter?.field === RegistrarActionsFilterFields.SubregistryNode) {
-    binaryOperators.push(eq(schema.subregistries.node, filter.value));
-  }
+        case RegistrarActionsFilterTypes.WithEncodedReferral: {
+          // apply referral encoded referrer inclusion filter
+          const filterSql = and(
+            isNotNull(schema.registrarActions.encodedReferrer),
+            not(eq(schema.registrarActions.encodedReferrer, ZERO_ENCODED_REFERRER)),
+          );
+
+          // Invariant: filterSql is `SQL` object - should never occur
+          if (typeof filterSql === "undefined") {
+            throw new Error(
+              `Filter SQL must be built successfully for 'WithEncodedReferral' filter on Registrar Actions.`,
+            );
+          }
+
+          return filterSql;
+        }
+
+        default:
+          // Invariant: Unknown filter type — should never occur
+          throw new Error(`Unknown filter type`);
+      }
+    }) ?? [];
 
   return binaryOperators;
 }
 
 interface FindRegistrarActionsOptions {
-  filter?: RegistrarActionsFilter;
+  filters?: RegistrarActionsFilter[];
 
   orderBy: RegistrarActionsOrder;
 
@@ -85,7 +109,7 @@ export async function _findRegistrarActions(options: FindRegistrarActionsOptions
       schema.subregistries,
       eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
     )
-    .where(and(...buildWhereClause(options.filter)))
+    .where(and(...buildWhereClause(options.filters)))
     .orderBy(buildOrderByClause(options.orderBy))
     .limit(options.limit);
 

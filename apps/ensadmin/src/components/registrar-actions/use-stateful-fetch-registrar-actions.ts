@@ -1,10 +1,12 @@
-import { useENSNodeConfig, useIndexingStatus, useRegistrarActions } from "@ensnode/ensnode-react";
+import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
 import {
   IndexingStatusResponseCodes,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
   registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
+
+import { useIndexingStatusWithSwr } from "@/components/indexing-status";
 
 import {
   StatefulFetchRegistrarActions,
@@ -38,7 +40,7 @@ export function useStatefulRegistrarActions({
   itemsPerPage,
 }: UseStatefulRegistrarActionsProps): StatefulFetchRegistrarActions {
   const ensNodeConfigQuery = useENSNodeConfig();
-  const indexingStatusQuery = useIndexingStatus();
+  const indexingStatusQuery = useIndexingStatusWithSwr();
 
   let isRegistrarActionsApiSupported = false;
 
@@ -66,7 +68,7 @@ export function useStatefulRegistrarActions({
   });
 
   // ENSNode config is not fetched yet, so wait in the initial status
-  if (!ensNodeConfigQuery.isFetched || !indexingStatusQuery.isFetched) {
+  if (ensNodeConfigQuery.isPending || indexingStatusQuery.isPending) {
     return {
       fetchStatus: StatefulFetchStatusIds.Connecting,
     } satisfies StatefulFetchRegistrarActionsConnecting;
@@ -81,10 +83,7 @@ export function useStatefulRegistrarActions({
   }
 
   // Indexing Status fetched as error
-  if (
-    !indexingStatusQuery.isSuccess ||
-    indexingStatusQuery.data.responseCode === IndexingStatusResponseCodes.Error
-  ) {
+  if (!indexingStatusQuery.isSuccess) {
     return {
       fetchStatus: StatefulFetchStatusIds.Error,
       reason: "Indexing Status could not be fetched successfully",
@@ -112,7 +111,7 @@ export function useStatefulRegistrarActions({
   }
 
   // fetching has not been completed
-  if (registrarActionsQuery.isPending || registrarActionsQuery.isLoading) {
+  if (registrarActionsQuery.isPending) {
     return {
       fetchStatus: StatefulFetchStatusIds.Loading,
       itemsPerPage,
@@ -120,7 +119,7 @@ export function useStatefulRegistrarActions({
   }
 
   // fetching has been completed with an error
-  if (registrarActionsQuery.isLoadingError || registrarActionsQuery.isError) {
+  if (registrarActionsQuery.isError) {
     return {
       fetchStatus: StatefulFetchStatusIds.Error,
       reason: registrarActionsQuery.error.message,

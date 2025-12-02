@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { memo, type PropsWithChildren } from "react";
 import { zeroAddress } from "viem";
 
 import {
@@ -9,7 +9,7 @@ import {
   NamedRegistrarAction,
   RegistrarActionReferral,
   RegistrarActionTypes,
-  zeroEncodedReferrer,
+  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { DisplayDuration, RelativeTime } from "@/components/datetime-utils";
@@ -58,7 +58,7 @@ function ResolveAndDisplayReferrerIdentity({
   // display a hyphen
   if (
     !isRegistrarActionReferralAvailable(referral) ||
-    referral.encodedReferrer === zeroEncodedReferrer
+    referral.encodedReferrer === ZERO_ENCODED_REFERRER
   ) {
     return <>-</>;
   }
@@ -93,6 +93,7 @@ function ResolveAndDisplayReferrerIdentity({
   return (
     <ResolveAndDisplayIdentity
       identity={referrerIdentity}
+      accelerate={true}
       withAvatar={true}
       className="font-medium"
     />
@@ -187,6 +188,7 @@ export function DisplayRegistrarActionCard({
       <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[140px]">
         <ResolveAndDisplayIdentity
           identity={registrantIdentity}
+          accelerate={true}
           withAvatar={true}
           className="font-medium"
         />
@@ -202,3 +204,5 @@ export function DisplayRegistrarActionCard({
     </div>
   );
 }
+
+export const DisplayRegistrarActionCardMemo = memo(DisplayRegistrarActionCard);

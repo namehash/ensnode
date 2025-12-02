@@ -1,53 +1,39 @@
-import type { SerializedPriceUsdc } from "../shared";
 import type {
-  PaginatedAggregatedReferrersResponse,
-  PaginatedAggregatedReferrersResponseError,
-  PaginatedAggregatedReferrersResponseOk,
-  ReferrerDetail,
   ReferrerDetailResponse,
   ReferrerDetailResponseError,
   ReferrerDetailResponseOk,
+  ReferrerLeaderboardPageResponse,
+  ReferrerLeaderboardPageResponseError,
+  ReferrerLeaderboardPageResponseOk,
 } from "./types";
 
 /**
- * Serialized representation of {@link PaginatedAggregatedReferrersResponseError}.
+ * Serialized representation of {@link ReferrerLeaderboardPageResponseError}.
  *
  * Note: All fields are already serializable, so this type is identical to the source type.
  */
-export type SerializedPaginatedAggregatedReferrersResponseError =
-  PaginatedAggregatedReferrersResponseError;
+export type SerializedReferrerLeaderboardPageResponseError = ReferrerLeaderboardPageResponseError;
 
 /**
- * Serialized representation of {@link PaginatedAggregatedReferrersResponseOk}.
+ * Serialized representation of {@link ReferrerLeaderboardPageResponseOk}.
  *
  * Note: All fields are already serializable, so this type is identical to the source type.
  */
-export type SerializedPaginatedAggregatedReferrersResponseOk =
-  PaginatedAggregatedReferrersResponseOk;
+export type SerializedReferrerLeaderboardPageResponseOk = ReferrerLeaderboardPageResponseOk;
 
 /**
- * Serialized representation of {@link PaginatedAggregatedReferrersResponse}.
+ * Serialized representation of {@link ReferrerLeaderboardPageResponse}.
  */
-export type SerializedPaginatedAggregatedReferrersResponse =
-  | SerializedPaginatedAggregatedReferrersResponseOk
-  | SerializedPaginatedAggregatedReferrersResponseError;
-
-/**
- * Serialized representation of {@link ReferrerDetail}.
- *
- * The awardPoolShare.amount is serialized from bigint to string.
- */
-export type SerializedReferrerDetail = Omit<ReferrerDetail, "awardPoolShare"> & {
-  awardPoolShare: SerializedPriceUsdc;
-};
+export type SerializedReferrerLeaderboardPageResponse =
+  | SerializedReferrerLeaderboardPageResponseOk
+  | SerializedReferrerLeaderboardPageResponseError;
 
 /**
  * Serialized representation of {@link ReferrerDetailResponseOk}.
+ *
+ * Note: All fields in ReferrerDetailData (AwardedReferrerMetrics + timestamp) are already serializable primitives.
  */
-export type SerializedReferrerDetailResponseOk = {
-  responseCode: ReferrerDetailResponseOk["responseCode"];
-  data: SerializedReferrerDetail;
-};
+export type SerializedReferrerDetailResponseOk = ReferrerDetailResponseOk;
 
 /**
  * Serialized representation of {@link ReferrerDetailResponseError}.

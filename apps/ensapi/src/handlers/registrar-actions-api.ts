@@ -1,6 +1,7 @@
 import z from "zod/v4";
 
 import {
+  type RegistrarActionsFilter,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
   type RegistrarActionsResponseError,
@@ -14,16 +15,16 @@ import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { requireRegistrarActionsPluginMiddleware } from "@/lib/middleware/require-registrar-actions-plugins..middleware";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
+import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 const app = factory.createApp();
 
-const logger = makeLogger("registrar-actions");
+const logger = makeLogger("registrar-actions-api");
 
 // Middleware managing access to Registrar Actions API routes.
 // It makes the routes available if all prerequisites are met.
-app.use(requireRegistrarActionsPluginMiddleware());
+app.use(registrarActionsApiMiddleware);
 
 const RESPONSE_ITEMS_PER_PAGE_DEFAULT = 25;
 const RESPONSE_ITEMS_PER_PAGE_MAX = 100;
@@ -78,17 +79,28 @@ app.get(
         .default(RESPONSE_ITEMS_PER_PAGE_DEFAULT)
         .pipe(z.coerce.number())
         .pipe(makePositiveIntegerSchema().max(RESPONSE_ITEMS_PER_PAGE_MAX)),
+
+      withReferral: params.boolstring.optional().default(false),
     }),
   ),
   async (c) => {
     try {
       const { parentNode } = c.req.valid("param");
-      const { orderBy, itemsPerPage } = c.req.valid("query");
-      const filter = registrarActionsFilter.byParentNode(parentNode);
+      const { orderBy, itemsPerPage, withReferral } = c.req.valid("query");
+
+      const filters: RegistrarActionsFilter[] = [];
+
+      if (parentNode) {
+        filters.push(registrarActionsFilter.byParentNode(parentNode));
+      }
+
+      if (withReferral) {
+        filters.push(registrarActionsFilter.withReferral(true));
+      }
 
       // Find the latest "logical registrar actions".
       const registrarActions = await findRegistrarActions({
-        filter,
+        filters,
         orderBy,
         limit: itemsPerPage,
       });

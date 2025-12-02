@@ -1,0 +1,51 @@
+name: Release NPM RC
+
+on:
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish-rc:
+    name: Publish Release Candidate Packages to NPM
+    if: github.repository == 'namehash/ensnode'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Enter pre-release mode
+        run: pnpm changeset pre enter rc
+
+      - name: Version packages
+        run: pnpm changeset version
+
+      - name: Build packages
+        run: pnpm packages:prepublish
+
+      - name: Publish to NPM with rc tag
+        run: pnpm changeset publish --tag rc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "✅ Release candidate packages published to NPM with 'rc' tag"
+          echo ""
+          echo "Install with: pnpm install @ensnode/package-name@rc"
+

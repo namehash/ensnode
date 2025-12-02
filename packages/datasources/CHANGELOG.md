@@ -1,5 +1,19 @@
 # @ensnode/ens-deployments
 
+## 1.1.0
+
+## 1.0.3
+
+## 1.0.2
+
+## 1.0.1
+
+## 1.0.0
+
+### Minor Changes
+
+- [#1276](https://github.com/namehash/ensnode/pull/1276) [`6be7a18`](https://github.com/namehash/ensnode/commit/6be7a189d0f9ac21d89c01941eb6b5a3cd13f88f) Thanks [@tk-o](https://github.com/tk-o)! - Add `UniversalRegistrarRenewalWithReferrer` datasource to ENSRoot Datasource for `mainnet` and `sepolia` ENSNamespaces.
+
 ## 0.36.0
 
 ### Minor Changes
