@@ -180,7 +180,7 @@ export const buildReferrerLeaderboardPaginationContext = (
   const startIndex = (materializedParams.page - 1) * materializedParams.itemsPerPage;
   const maxTheoreticalIndexOnPage = startIndex + (materializedParams.itemsPerPage - 1);
   const endIndex = Math.min(maxTheoreticalIndexOnPage, totalRecords - 1);
-  const hasNext = maxTheoreticalIndexOnPage < totalRecords;
+  const hasNext = maxTheoreticalIndexOnPage < totalRecords - 1;
   const hasPrev = materializedParams.page > 1;
 
   const result = {
