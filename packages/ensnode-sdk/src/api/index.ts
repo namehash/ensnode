@@ -3,3 +3,4 @@ export * from "./registrar-actions";
 export * from "./serialize";
 export * from "./serialized-types";
 export * from "./types";
+export * from "./zod-schemas";

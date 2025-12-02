@@ -3,6 +3,7 @@ import config from "@/config";
 
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
+import { openAPIRouteHandler } from "hono-openapi";
 import { cors } from "hono/cors";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
@@ -44,6 +45,24 @@ app.route("/subgraph", subgraphApi);
 
 // use ENSAnalytics API at /ensanalytics
 app.route("/ensanalytics", ensanalyticsApi);
+
+// use OpenAPI Schema
+app.get(
+  "/openapi.json",
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: "ENSApi",
+        version: packageJson.version,
+        description: "ENS resolution and analytics API",
+      },
+      servers: [
+        { url: `http://localhost:${config.port}`, description: "Local Development" },
+        // Add your production servers here
+      ],
+    },
+  }),
+);
 
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
