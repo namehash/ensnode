@@ -67,6 +67,7 @@
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@testing-library/react": "catalog:",
     "@types/node": "^22",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",

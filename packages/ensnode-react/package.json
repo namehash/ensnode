@@ -47,9 +47,7 @@
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@tanstack/react-query": "^5.62.14",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^14.5.2",
+    "@testing-library/react": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "19.2.7",
     "react": "19.2.1",
