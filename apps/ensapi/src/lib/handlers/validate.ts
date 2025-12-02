@@ -1,5 +1,5 @@
-import { validator } from "hono-openapi";
 import type { ValidationTargets } from "hono";
+import { validator } from "hono-openapi";
 import type { ZodType } from "zod/v4";
 
 import { errorResponse } from "./error-response";

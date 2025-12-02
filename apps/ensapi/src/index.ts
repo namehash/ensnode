@@ -3,8 +3,8 @@ import config from "@/config";
 
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
-import { openAPIRouteHandler } from "hono-openapi";
 import { cors } from "hono/cors";
+import { openAPIRouteHandler } from "hono-openapi";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 

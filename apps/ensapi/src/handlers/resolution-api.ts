@@ -1,10 +1,11 @@
+import { describeRoute, resolver } from "hono-openapi";
 import { z } from "zod/v4";
 
 import {
+  type Duration,
   makeResolvePrimaryNameResponseSchema,
   makeResolvePrimaryNamesResponseSchema,
   makeResolveRecordsResponseSchema,
-  type Duration,
   type ResolvePrimaryNameResponse,
   type ResolvePrimaryNamesResponse,
   type ResolveRecordsResponse,
@@ -19,7 +20,6 @@ import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { captureTrace } from "@/lib/tracing/protocol-tracing";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
-import { describeRoute, resolver } from "hono-openapi";
 
 /**
  * The effective distance for acceleration is indexing status cache time plus
