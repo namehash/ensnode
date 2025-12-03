@@ -1,4 +1,4 @@
-name: "Deploy: ENSNode to Railway and Render Environments"
+name: "Deploy: ENSNode to Blue/Green Environment on Railway platform"
 
 on:
   workflow_dispatch:
@@ -228,37 +228,6 @@ jobs:
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
           #ENSADMIN
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.0
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE}}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: terraform
-
-      - name: Terraform workspace
-        run: terraform workspace select ${{env.TF_VAR_render_environment}}
-        working-directory: terraform
-
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: terraform
-
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        working-directory: terraform
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-        working-directory: terraform
 
       - uses: ./.github/actions/send_slack_notification
         with:
