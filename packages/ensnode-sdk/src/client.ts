@@ -452,54 +452,85 @@ export class ENSNodeClient {
   /**
    * Fetch Referrer Detail
    *
-   * Retrieves detailed information about a specific referrer from the referrer leaderboard.
+   * Retrieves detailed information about a specific referrer, whether they are on the
+   * leaderboard or not.
    *
-   * The response contains `ReferrerDetailData` which includes:
-   * - `referrer`: The `AwardedReferrerMetrics` from @namehash/ens-referrals with score, rank,
-   *   qualification status, award pool share, total referrals, and incremental duration
+   * The response contains either `ReferrerDetailData` or `UnrankedReferrerDetailData`:
+   *
+   * **For referrers on the leaderboard** (`ReferrerDetailData`):
+   * - `referrer`: The `AwardedReferrerMetrics` from @namehash/ens-referrals
+   * - `rank`: A positive integer indicating their position on the leaderboard
+   * - `isQualified`: Boolean indicating if they qualify for awards
+   * - Includes score, award pool share, total referrals, and incremental duration
+   *
+   * **For referrers NOT on the leaderboard** (`UnrankedReferrerDetailData`):
+   * - `referrer`: The `UnrankedReferrerMetrics` from @namehash/ens-referrals
+   * - `rank`: `null` (they have no rank since they're not on the leaderboard)
+   * - `isQualified`: `false` (they don't qualify for awards)
+   * - All metrics are zero (no referrals, score, or award pool share)
+   *
+   * Both include:
    * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
    *
    * @see {@link https://www.npmjs.com/package/@namehash/ens-referrals|@namehash/ens-referrals} for calculation details
    *
    * @param request The referrer address to query
-   * @returns {ReferrerDetailResponse | null} Returns the referrer detail response, or `null` if the referrer is not found (404)
+   * @returns {ReferrerDetailResponse} Returns the referrer detail response
    *
    * @throws if the ENSNode request fails
    * @throws if the response data is malformed
    *
    * @example
-   * ```ts
-   * import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+   * ```typescript
+   * // Get referrer detail for a specific address
+   * const response = await client.referrerDetail({
+   *   referrer: "0x1234567890123456789012345678901234567890"
+   * });
+   * if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+   *   const { referrer, accurateAsOf } = response.data;
+   *   console.log(referrer);
+   *   console.log(accurateAsOf);
+   * }
+   * ```
    *
-   * const client = new ENSNodeClient();
+   * @example
+   * ```typescript
+   * // Check if referrer is ranked on the leaderboard
+   * const response = await client.referrerDetail({
+   *   referrer: "0x1234567890123456789012345678901234567890"
+   * });
+   * if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+   *   const { referrer } = response.data;
+   *   if (referrer.rank !== null) {
+   *     console.log(`Rank: ${referrer.rank}`);
+   *     console.log(`Qualified: ${referrer.isQualified}`);
+   *     console.log(`Award Pool Share: ${referrer.awardPoolShare * 100}%`);
+   *   } else {
+   *     console.log("Referrer is not on the leaderboard (no referrals yet)");
+   *   }
+   * }
+   * ```
    *
+   * @example
+   * ```typescript
+   * // Handle error response, ie. when Referrer Detail is not currently available.
    * const response = await client.referrerDetail({
    *   referrer: "0x1234567890123456789012345678901234567890"
    * });
    *
-   * if (response === null) {
-   *   console.log("Referrer not found");
-   * } else if (response.responseCode === "ok") {
-   *   const { referrer, accurateAsOf } = response.data;
-   *   console.log(`Total Referrals: ${referrer.totalReferrals}`);
-   *   console.log(`Score: ${referrer.score}`);
-   *   console.log(`Rank: ${referrer.rank}`);
-   *   console.log(`Award Pool Share: ${referrer.awardPoolShare * 100}%`);
-   *   console.log(`Award Value: $${referrer.awardPoolApproxValue}`);
+   * if (response.responseCode === ReferrerDetailResponseCodes.Error) {
+   *   console.error(response.error);
+   *   console.error(response.errorMessage);
    * }
    * ```
    */
-  async referrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse | null> {
+  async referrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse> {
     const url = new URL(
       `/api/ensanalytics/referrer/${encodeURIComponent(request.referrer)}`,
       this.options.url,
     );
 
     const response = await fetch(url);
-
-    if (response.status === 404) {
-      return null;
-    }
 
     // ENSNode API should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
