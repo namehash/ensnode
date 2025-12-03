@@ -6,7 +6,9 @@ import {
   alchemySupportsChain,
   buildAlchemyBaseUrl,
   buildDRPCUrl,
+  buildQuickNodeURL,
   drpcSupportsChain,
+  quickNodeSupportsChain,
 } from "./build-rpc-urls";
 import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./environments";
 
@@ -18,6 +20,12 @@ import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./en
  * 1. RPC_URL_*, if available in the env
  * 2. Alchemy, if ALCHEMY_API_KEY is available in the env
  * 3. DRPC, if DRPC_API_KEY is available in the env
+ * 4. QuickNode, if both, QUICKNODE_API_KEY and QUICKNODE_ENDPOINT_NAME are available in the evn
+ *    Please note that:
+ *    - Only multi-chain QuickNode endpoints are supported.
+ *      https://www.quicknode.com/guides/quicknode-products/how-to-use-multichain-endpoint
+ *    - QuickNode platform does not support Linea Sepolia RPC (as of 2025-12-03).
+ *      https://www.quicknode.com/docs/linea
  *
  * TODO: also inject wss:// urls for alchemy, drpc keys
  *
@@ -33,6 +41,8 @@ export function buildRpcConfigsFromEnv(
 
   const alchemyApiKey = env.ALCHEMY_API_KEY;
   const drpcKey = env.DRPC_API_KEY;
+  const quickNodeApiKey = env.QUICKNODE_API_KEY;
+  const quickNodeEndpointName = env.QUICKNODE_ENDPOINT_NAME;
 
   const rpcConfigs: Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> = {};
 
@@ -54,6 +64,12 @@ export function buildRpcConfigsFromEnv(
       drpcKey &&
         drpcSupportsChain(chain.id) && //
         buildDRPCUrl(chain.id, drpcKey),
+
+      // QuickNode, if specified and available
+      quickNodeApiKey &&
+        quickNodeEndpointName &&
+        quickNodeSupportsChain(chain.id) &&
+        `https://${buildQuickNodeURL(chain.id, quickNodeApiKey, quickNodeEndpointName)}`,
     ];
 
     const wsUrl =

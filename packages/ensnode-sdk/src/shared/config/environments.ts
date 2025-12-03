@@ -13,6 +13,8 @@ export interface RpcEnvironment {
   [x: `RPC_URL_${number}`]: ChainIdSpecificRpcEnvironmentVariable | undefined;
   ALCHEMY_API_KEY?: string;
   DRPC_API_KEY?: string;
+  QUICKNODE_API_KEY?: string;
+  QUICKNODE_ENDPOINT_NAME?: string;
 }
 
 /**

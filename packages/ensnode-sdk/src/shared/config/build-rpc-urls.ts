@@ -108,10 +108,73 @@ export function buildDRPCUrl(chainId: ChainId, key: string): string | undefined 
   }
 }
 
+/**
+ * Builds a QuickNode RPC base URL for the specified chain ID.
+ *
+ * @param chainId - The chain ID to build the RPC base URL for
+ * @param apiKey - The QuickNode API key
+ * @param endpointName - The QuickNode Endpoint name
+ * @returns The QuickNode RPC base URL, or undefined if the chain is not supported
+ *
+ * NOTE:
+ * - Only multi-chain QuickNode endpoints are supported.
+ *   https://www.quicknode.com/guides/quicknode-products/how-to-use-multichain-endpoint
+ * - QuickNode platform does not support Linea Sepolia RPC (as of 2025-12-03).
+ *   https://www.quicknode.com/docs/linea
+ *
+ * @example
+ * ```typescript
+ * const url = buildQuickNodeURL(1, "your-api-key", "your-endpoint-name");
+ * // Returns: "your-endpoint-name.quiknode.pro/your-api-key"
+ * ```
+ */
+export function buildQuickNodeURL(
+  chainId: ChainId,
+  apiKey: string,
+  endpointName: string,
+): string | undefined {
+  switch (chainId) {
+    case mainnet.id:
+      return `${endpointName}.quiknode.pro/${apiKey}`;
+    case sepolia.id:
+      return `${endpointName}.ethereum-sepolia.quiknode.pro/${apiKey}`;
+    case holesky.id:
+      return `${endpointName}.ethereum-holesky.quiknode.pro/${apiKey}`;
+    case arbitrum.id:
+      return `${endpointName}.arbitrum-mainnet.quiknode.pro/${apiKey}`;
+    case arbitrumSepolia.id:
+      return `${endpointName}.arbitrum-sepolia.quiknode.pro/${apiKey}`;
+    case base.id:
+      return `${endpointName}.base-mainnet.quiknode.pro/${apiKey}`;
+    case baseSepolia.id:
+      return `${endpointName}.base-sepolia.quiknode.pro/${apiKey}`;
+    case optimism.id:
+      return `${endpointName}.optimism.quiknode.pro/${apiKey}`;
+    case optimismSepolia.id:
+      return `${endpointName}.optimism-sepolia.quiknode.pro/${apiKey}`;
+    case linea.id:
+      return `${endpointName}.linea-mainnet.quiknode.pro/${apiKey}`;
+    case lineaSepolia.id:
+      //QuickNode platform does not provide RPC for Linea Sepolia
+      // https://www.quicknode.com/docs/linea
+      return undefined;
+    case scroll.id:
+      return `${endpointName}.scroll-mainnet.quiknode.pro/${apiKey}`;
+    case scrollSepolia.id:
+      return `${endpointName}.scroll-testnet.quiknode.pro/${apiKey}`;
+    default:
+      return undefined;
+  }
+}
+
 export function alchemySupportsChain(chainId: ChainId) {
   return buildAlchemyBaseUrl(chainId, "") !== undefined;
 }
 
 export function drpcSupportsChain(chainId: ChainId) {
   return buildDRPCUrl(chainId, "") !== undefined;
+}
+
+export function quickNodeSupportsChain(chainId: ChainId) {
+  return buildQuickNodeURL(chainId, "", "") !== undefined;
 }

@@ -1,3 +1,4 @@
+import { lineaSepolia } from "viem/chains";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -8,7 +9,7 @@ import {
   getENSNamespace,
 } from "@ensnode/datasources";
 
-import { buildAlchemyBaseUrl, buildDRPCUrl } from "./build-rpc-urls";
+import { buildAlchemyBaseUrl, buildDRPCUrl, buildQuickNodeURL } from "./build-rpc-urls";
 
 const KEY = "whatever";
 
@@ -25,5 +26,15 @@ describe("build-rpc-urls", () => {
       expect(buildAlchemyBaseUrl(chainId, KEY), `Alchemy ${chainId}`).not.toBeUndefined();
       expect(buildDRPCUrl(chainId, KEY), `DRPC ${chainId}`).not.toBeUndefined();
     });
+
+    // QuickNode does not support Linea Sepolia RPC (as of 2025-12-03).
+    ALL_KNOWN_PUBLIC_CHAIN_IDS.filter((chainId) => chainId !== lineaSepolia.id).forEach(
+      (chainId) => {
+        expect(
+          buildQuickNodeURL(chainId, KEY, "endpoint-name"),
+          `QuickNode ${chainId}`,
+        ).not.toBeUndefined();
+      },
+    );
   });
 });
