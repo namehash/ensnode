@@ -4,17 +4,18 @@ import { describe, expect, it, vi } from "vitest";
 import type { ReferrerLeaderboard } from "./leaderboard.ts";
 import {
   buildReferrerLeaderboardPaginationContext,
+  type ReferrerLeaderboardPaginationContext,
   type ReferrerLeaderboardPaginationParams,
 } from "./leaderboard-page.ts";
 import type { AwardedReferrerMetrics } from "./referrer-metrics.ts";
 
 describe("buildReferrerLeaderboardPaginationContext", () => {
-  it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `itemsPerPage` are equal", () => {
-    const paginationParams: ReferrerLeaderboardPaginationParams = {
-      page: 1,
-      itemsPerPage: 3,
-    };
+  const paginationParams: ReferrerLeaderboardPaginationParams = {
+    page: 1,
+    itemsPerPage: 3,
+  };
 
+  it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `itemsPerPage` are equal", () => {
     const leaderboard: ReferrerLeaderboard = {
       rules: {
         totalAwardPoolValue: 10000,
@@ -89,11 +90,60 @@ describe("buildReferrerLeaderboardPaginationContext", () => {
 
     expect(
       buildReferrerLeaderboardPaginationContextSpy,
-      "validateReferrerLeaderboardPaginationContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=3",
+      "buildReferrerLeaderboardPaginationContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=3",
     ).toHaveReturned();
     expect(
       result.hasNext,
       `Leaderboard should only have one page for itemsPerPage=3, leaderboard.referrers.size=3 (expected hasNext to be false, is ${result.hasNext})`,
     ).toStrictEqual(false);
+  });
+
+  it("Correctly builds the pagination context when `leaderboard.referrers.size` is 0", () => {
+    const leaderboard: ReferrerLeaderboard = {
+      rules: {
+        totalAwardPoolValue: 10000,
+        maxQualifiedReferrers: 10,
+        startTime: 1764547200,
+        endTime: 1767225599,
+        subregistryId: {
+          chainId: 1,
+          address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+        },
+      },
+      aggregatedMetrics: {
+        grandTotalReferrals: 17,
+        grandTotalIncrementalDuration: 464554733,
+        grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
+        minFinalScoreToQualify: 0,
+      },
+      referrers: new Map<Address, AwardedReferrerMetrics>(),
+      accurateAsOf: 1764580368,
+    };
+
+    const expectedResult: ReferrerLeaderboardPaginationContext = {
+      totalRecords: 0,
+      totalPages: 1,
+      hasNext: false,
+      hasPrev: false,
+      startIndex: undefined,
+      endIndex: undefined,
+      itemsPerPage: 3,
+      page: 1,
+    };
+
+    const buildReferrerLeaderboardPaginationContextSpy = vi.fn(
+      buildReferrerLeaderboardPaginationContext,
+    );
+    const result = buildReferrerLeaderboardPaginationContextSpy(paginationParams, leaderboard);
+
+    expect(
+      buildReferrerLeaderboardPaginationContextSpy,
+      "buildReferrerLeaderboardPaginationContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=0",
+    ).toHaveReturned();
+
+    expect(
+      result,
+      `ReferrerLeaderboardPaginationContext result should match all edge-case requirements for leaderboard.referrers.size=0`,
+    ).toStrictEqual(expectedResult);
   });
 });
