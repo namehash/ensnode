@@ -1,8 +1,14 @@
 type SyncedClockListener = () => void;
 
+/**
+ * Cerate Now
+ *
+ * Helper type defining a factory function for unix timestamp values in milliseconds.
+ * An example factory is `Date.now`.
+ */
 type CreateNow = () => number;
 
-interface SyncedClock {
+export interface SyncedClock {
   /**
    * Current time of the synced clock.
    */
@@ -10,25 +16,34 @@ interface SyncedClock {
 
   /**
    * Adds a new listener to all listeners tracking the synced clock.
-   * @param callback React Component listener
+   * @param callback to notify the listener about clock updates.
    */
   addListener(callback: SyncedClockListener): void;
 
   /**
-   * Removes a new listener from all listeners tracking the synced clock.
-   * @param callback React Component listener
+   * Removes a listener from all listeners tracking the synced clock.
+   * @param callback to notify the listener about clock updates.
    */
   removeListener(callback: SyncedClockListener): void;
 }
 
 /**
- * Create high-precision clock with updates on every frame.
- * @returns {SyncedClock} to be used with {@link useSyncExternalStore}.
+ * High-precision clock with multiple updates over each second.
  */
-export function createSyncedClock(): SyncedClock {
-  const listeners = new Set<SyncedClockListener>();
-  let _currentTime = Date.now();
-  let timerId: ReturnType<typeof setTimeout> | null = null;
+export class HighPrecisionSyncedClock implements SyncedClock {
+  private listeners = new Set<SyncedClockListener>();
+
+  private _currentTime = Date.now();
+
+  private timerId: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * Tick rate in milliseconds.
+   *
+   * For example, updating clock 60 times in a second requires
+   * tick rate of around 16ms.
+   */
+  private tickRate: number = 16;
 
   /**
    * Clock's tick handler.
@@ -36,71 +51,67 @@ export function createSyncedClock(): SyncedClock {
    * Runs multiple times a second, and notifies all listeners about
    * the current time updates.
    */
-  function tick() {
-    _currentTime = Date.now();
+  private tick = () => {
+    this._currentTime = Date.now();
 
-    listeners.forEach((listener) => listener());
+    this.listeners.forEach((listener) => listener());
 
-    timerId = setTimeout(tick, 16); // ~60fps, same as RAF
-  }
+    this.timerId = setTimeout(this.tick, this.tickRate);
+  };
 
   /**
    * Starts the clock.
    */
-  function start() {
-    if (timerId === null) {
-      _currentTime = Date.now();
-      timerId = setTimeout(tick, 16);
+  private start = () => {
+    if (this.timerId === null) {
+      this._currentTime = Date.now();
+      this.timerId = setTimeout(this.tick, 16);
     }
-  }
+  };
 
   /**
    * Stops the clock.
    */
-  function stop() {
-    if (timerId !== null) {
-      clearTimeout(timerId);
-      timerId = null;
+  private stop = () => {
+    if (this.timerId !== null) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
     }
-  }
+  };
 
   /**
    * Adds a new listener to all listeners tracking the synced clock.
    *
    * Starts the clock if there's at least one listener.
    *
-   * @param callback React Component listener
+   * @param callback to notify the listener about clock updates.
    */
-  function addListener(callback: SyncedClockListener) {
-    listeners.add(callback);
+  public addListener(callback: SyncedClockListener) {
+    this.listeners.add(callback);
 
     // start when someone is listening
-    if (listeners.size > 0) {
-      start();
+    if (this.listeners.size > 0) {
+      this.start();
     }
   }
 
   /**
-   * Remove a new listener from all listeners tracking the synced clock.
+   * Removes a listener from all listeners tracking the synced clock.
    *
    * Stops the clock if there's no listener.
    *
-   * @param callback React Component listener
+   * @param callback to notify the listener about clock updates.
    */
-  function removeListener(callback: SyncedClockListener) {
-    listeners.delete(callback);
+  public removeListener(callback: SyncedClockListener) {
+    this.listeners.delete(callback);
 
     // stop when no one is listening anymore
-    if (listeners.size === 0) {
-      stop();
+    if (this.listeners.size === 0) {
+      this.stop();
     }
   }
 
-  return {
-    get currentTime() {
-      return _currentTime;
-    },
-    addListener,
-    removeListener,
-  };
+  get currentTime() {
+    return this._currentTime;
+  }
 }

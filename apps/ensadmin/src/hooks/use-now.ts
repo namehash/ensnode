@@ -4,9 +4,10 @@ import { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { useSystemClock } from "./use-system-clock";
 
-const DEFAULT_TIME_TO_REFRESH: Duration = 1;
+/** Default time to refresh: `1` second. */
+export const DEFAULT_TIME_TO_REFRESH: Duration = 1;
 
-interface UseNowProps {
+export interface UseNowProps {
   /**
    * Duration after which time value will be refreshed.
    *
