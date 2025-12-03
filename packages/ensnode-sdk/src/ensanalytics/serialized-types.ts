@@ -31,7 +31,9 @@ export type SerializedReferrerLeaderboardPageResponse =
 /**
  * Serialized representation of {@link ReferrerDetailResponseOk}.
  *
- * Note: All fields in ReferrerDetailData (AwardedReferrerMetrics + timestamp) are already serializable primitives.
+ * Note: All fields in ReferrerDetailData and UnrankedReferrerDetailData
+ * (AwardedReferrerMetrics or UnrankedReferrerMetrics + timestamp) are already serializable primitives.
+ * The rank field can be either a number or null, both of which are valid JSON primitives.
  */
 export type SerializedReferrerDetailResponseOk = ReferrerDetailResponseOk;
 

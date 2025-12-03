@@ -1,5 +1,5 @@
 import {
-  buildZeroScoreReferrerMetrics,
+  buildUnrankedReferrerMetrics,
   getReferrerLeaderboardPage,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
 } from "@namehash/ens-referrals";
@@ -126,25 +126,30 @@ app.get("/referrer/:referrer", validate("param", referrerAddressSchema), async (
     const leaderboard = referrerLeaderboard.value;
 
     // Lookup the referrer in the leaderboard
-    let awardedReferrerMetrics = leaderboard.referrers.get(referrer);
+    const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
 
-    // If referrer not found, create a zero-score referrer record
-    if (!awardedReferrerMetrics) {
-      // Rank is leaderboard size + 1 (last position)
-      const rank = leaderboard.referrers.size + 1;
-      awardedReferrerMetrics = buildZeroScoreReferrerMetrics(
-        referrer,
-        rank,
-        leaderboard.aggregatedMetrics,
-        leaderboard.rules,
+    // If referrer is found in the leaderboard, return their ranked metrics
+    if (awardedReferrerMetrics) {
+      return c.json(
+        serializeReferrerDetailResponse({
+          responseCode: ReferrerDetailResponseCodes.Ok,
+          data: {
+            referrer: awardedReferrerMetrics,
+            accurateAsOf: leaderboard.accurateAsOf,
+          },
+        } satisfies ReferrerDetailResponse),
       );
     }
+
+    // If referrer not found, create an unranked zero-score referrer record
+    // with rank: null and isQualified: false
+    const unrankedReferrerMetrics = buildUnrankedReferrerMetrics(referrer);
 
     return c.json(
       serializeReferrerDetailResponse({
         responseCode: ReferrerDetailResponseCodes.Ok,
         data: {
-          referrer: awardedReferrerMetrics,
+          referrer: unrankedReferrerMetrics,
           accurateAsOf: leaderboard.accurateAsOf,
         },
       } satisfies ReferrerDetailResponse),

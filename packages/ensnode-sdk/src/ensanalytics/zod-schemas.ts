@@ -37,7 +37,7 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
   });
 
 /**
- * Schema for AwardedReferrerMetrics
+ * Schema for AwardedReferrerMetrics (with numeric rank)
  */
 export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedReferrerMetrics") =>
   z.object({
@@ -47,6 +47,29 @@ export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedRe
     score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
     rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
     isQualified: z.boolean(),
+    finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
+      1,
+      `${valueLabel}.finalScoreBoost must be <= 1`,
+    ),
+    finalScore: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScore`),
+    awardPoolShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolShare`).max(
+      1,
+      `${valueLabel}.awardPoolShare must be <= 1`,
+    ),
+    awardPoolApproxValue: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolApproxValue`),
+  });
+
+/**
+ * Schema for UnrankedReferrerMetrics (with null rank)
+ */
+export const makeUnrankedReferrerMetricsSchema = (valueLabel: string = "UnrankedReferrerMetrics") =>
+  z.object({
+    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
+    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+    score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
+    rank: z.null(),
+    isQualified: z.literal(false),
     finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
       1,
       `${valueLabel}.finalScoreBoost must be <= 1`,
@@ -144,7 +167,7 @@ export const makeReferrerLeaderboardPageResponseSchema = (
   ]);
 
 /**
- * Schema for {@link ReferrerDetailData}
+ * Schema for {@link ReferrerDetailData} (with ranked metrics)
  */
 export const makeReferrerDetailDataSchema = (valueLabel: string = "ReferrerDetailData") =>
   z.object({
@@ -153,12 +176,27 @@ export const makeReferrerDetailDataSchema = (valueLabel: string = "ReferrerDetai
   });
 
 /**
+ * Schema for {@link UnrankedReferrerDetailData} (with unranked metrics)
+ */
+export const makeUnrankedReferrerDetailDataSchema = (
+  valueLabel: string = "UnrankedReferrerDetailData",
+) =>
+  z.object({
+    referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+  });
+
+/**
  * Schema for {@link ReferrerDetailResponseOk}
+ * Accepts either ranked or unranked referrer detail data
  */
 export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
   z.object({
     responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
-    data: makeReferrerDetailDataSchema(`${valueLabel}.data`),
+    data: z.union([
+      makeReferrerDetailDataSchema(`${valueLabel}.data`),
+      makeUnrankedReferrerDetailDataSchema(`${valueLabel}.data`),
+    ]),
   });
 
 /**

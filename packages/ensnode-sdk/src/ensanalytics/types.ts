@@ -2,6 +2,7 @@ import type {
   ReferrerDetailData,
   ReferrerLeaderboardPage,
   ReferrerLeaderboardPaginationParams,
+  UnrankedReferrerDetailData,
 } from "@namehash/ens-referrals";
 import type { Address } from "viem";
 
@@ -88,11 +89,11 @@ export type ReferrerDetailResponseCode =
   (typeof ReferrerDetailResponseCodes)[keyof typeof ReferrerDetailResponseCodes];
 
 /**
- * A referrer detail response when the data is available.
+ * A referrer detail response when the data is available for a referrer on the leaderboard.
  */
 export type ReferrerDetailResponseOk = {
   responseCode: typeof ReferrerDetailResponseCodes.Ok;
-  data: ReferrerDetailData;
+  data: ReferrerDetailData | UnrankedReferrerDetailData;
 };
 
 /**

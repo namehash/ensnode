@@ -235,14 +235,13 @@ describe("/ensanalytics", () => {
       const response = deserializeReferrerDetailResponse(responseData);
 
       // Assert: response contains zero-score metrics for the referrer
-      // Rank should be leaderboard size + 1 (last position)
-      const expectedRank = populatedReferrerLeaderboard.referrers.size + 1; // 29 + 1 = 30
+      // Rank should be null since they're not on the leaderboard
       const expectedAccurateAsOf = populatedReferrerLeaderboard.accurateAsOf;
 
       expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Ok);
       if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
         expect(response.data.referrer.referrer).toBe(nonExistingReferrer);
-        expect(response.data.referrer.rank).toBe(expectedRank);
+        expect(response.data.referrer.rank).toBe(null);
         expect(response.data.referrer.totalReferrals).toBe(0);
         expect(response.data.referrer.totalIncrementalDuration).toBe(0);
         expect(response.data.referrer.score).toBe(0);
@@ -272,14 +271,13 @@ describe("/ensanalytics", () => {
       const response = deserializeReferrerDetailResponse(responseData);
 
       // Assert: response contains zero-score metrics for the referrer
-      // Rank should be 1 (only referrer in empty leaderboard)
-      const expectedRank = 1; // 0 + 1 = 1
+      // Rank should be null since they're not on the leaderboard
       const expectedAccurateAsOf = emptyReferralLeaderboard.accurateAsOf;
 
       expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Ok);
       if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
         expect(response.data.referrer.referrer).toBe(referrer);
-        expect(response.data.referrer.rank).toBe(expectedRank);
+        expect(response.data.referrer.rank).toBe(null);
         expect(response.data.referrer.totalReferrals).toBe(0);
         expect(response.data.referrer.totalIncrementalDuration).toBe(0);
         expect(response.data.referrer.score).toBe(0);

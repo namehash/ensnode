@@ -270,24 +270,42 @@ export const buildAwardedReferrerMetrics = (
 };
 
 /**
- * Build a zero-score referrer record for a referrer address that is not in the leaderboard.
+ * Extends {@link AwardedReferrerMetrics} but with rank set to null to represent
+ * a referrer who is not on the leaderboard (has zero referrals).
+ */
+export interface UnrankedReferrerMetrics
+  extends Omit<AwardedReferrerMetrics, "rank" | "isQualified"> {
+  /**
+   * The referrer's rank on the leaderboard is null because they are not on the leaderboard.
+   */
+  rank: null;
+
+  /**
+   * Always false for unranked referrers since they don't qualify for awards.
+   */
+  isQualified: false;
+}
+
+/**
+ * Build an unranked zero-score referrer record for a referrer address that is not in the leaderboard.
  *
- * This is useful when you want to return a referrer record for an address that has no referrals.
+ * This is useful when you want to return a referrer record for an address that has no referrals
+ * and is not qualified for the leaderboard.
  *
  * @param referrer - The referrer address
- * @param rank - The rank to assign to the referrer (typically leaderboard size + 1)
- * @param aggregatedMetrics - Aggregated metrics for all referrers
- * @param rules - The rules of the referral program
- * @returns An {@link AwardedReferrerMetrics} with zero values for all metrics
+ * @returns An {@link UnrankedReferrerMetrics} with zero values for all metrics and null rank
  */
-export const buildZeroScoreReferrerMetrics = (
-  referrer: Address,
-  rank: ReferrerRank,
-  aggregatedMetrics: AggregatedReferrerMetrics,
-  rules: ReferralProgramRules,
-): AwardedReferrerMetrics => {
+export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferrerMetrics => {
   const baseMetrics = buildReferrerMetrics(referrer, 0, 0);
   const scoredMetrics = buildScoredReferrerMetrics(baseMetrics);
-  const rankedMetrics = buildRankedReferrerMetrics(scoredMetrics, rank, rules);
-  return buildAwardedReferrerMetrics(rankedMetrics, aggregatedMetrics, rules);
+
+  return {
+    ...scoredMetrics,
+    rank: null,
+    isQualified: false,
+    finalScoreBoost: 0,
+    finalScore: 0,
+    awardPoolShare: 0,
+    awardPoolApproxValue: 0,
+  };
 };
