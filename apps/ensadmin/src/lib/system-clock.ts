@@ -1,8 +1,8 @@
-import { createSyncedClock } from "@/lib/synced-clock";
+import { HighPrecisionSyncedClock, SyncedClock } from "@/lib/synced-clock";
 
 /**
  * Synced System Clock
  *
  * There is just one instance of it in ENSAdmin.
  */
-export const systemClock = createSyncedClock();
+export const systemClock: SyncedClock = new HighPrecisionSyncedClock();

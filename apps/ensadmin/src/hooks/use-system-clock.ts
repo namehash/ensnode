@@ -26,5 +26,8 @@ export function useSystemClock(): UnixTimestamp {
 
   const syncedSystemClock = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  return syncedSystemClock || getSnapshot();
+  // syncedSystemClock will be undefined on the initial render,
+  // so we return the snapshot result to ensure there's always
+  // some UnixTime value returned.
+  return syncedSystemClock ?? getSnapshot();
 }

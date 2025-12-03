@@ -1,9 +1,9 @@
 import { act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createSyncedClock } from "./synced-clock";
+import { HighPrecisionSyncedClock } from "./synced-clock";
 
-describe("createSyncedClock", () => {
+describe("HighPrecisionSyncedClock", () => {
   const mockedSystemTime = new Date("2025-01-01 00:00:00Z");
 
   beforeEach(() => {
@@ -17,13 +17,13 @@ describe("createSyncedClock", () => {
 
   describe("basic functionality", () => {
     it("should create a clock instance with current time", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const now = Date.now();
       expect(clock.currentTime).toStrictEqual(now);
     });
 
     it("should start and stop the clock", async () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const initialTime = clock.currentTime;
 
       // No listener → clock stopped
@@ -42,7 +42,7 @@ describe("createSyncedClock", () => {
 
   describe("listener management", () => {
     it("should add listeners", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const listener = vi.fn();
 
       act(() => {
@@ -54,7 +54,7 @@ describe("createSyncedClock", () => {
     });
 
     it("should remove listeners", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const listener = vi.fn();
 
       act(() => {
@@ -74,7 +74,7 @@ describe("createSyncedClock", () => {
     });
 
     it("should start clock when first listener is added", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const initial = clock.currentTime;
       const listener = vi.fn();
 
@@ -88,7 +88,7 @@ describe("createSyncedClock", () => {
     });
 
     it("should stop clock when last listener is removed", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const l1 = vi.fn();
       const l2 = vi.fn();
 
@@ -132,7 +132,7 @@ describe("createSyncedClock", () => {
     });
 
     it("should handle multiple listeners", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const l1 = vi.fn(),
         l2 = vi.fn(),
         l3 = vi.fn();
@@ -150,7 +150,7 @@ describe("createSyncedClock", () => {
     });
 
     it("should deduplicate listeners when same listener is added multiple times", () => {
-      const clock = createSyncedClock();
+      const clock = new HighPrecisionSyncedClock();
       const listener = vi.fn();
 
       act(() => {
