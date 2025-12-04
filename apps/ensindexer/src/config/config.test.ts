@@ -668,7 +668,7 @@ describe("config (minimal base env)", () => {
         ).toBe(true);
       });
 
-      it("does not provide drpc if chain id is not supported", async () => {
+      it("does not provide dRPC if chain id is not supported", async () => {
         stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
         await expect(getConfig()).rejects.toThrow(/RPC Config/);
       });
