@@ -2,7 +2,7 @@ import type { RequestPaginationParams } from "./request";
 
 export interface ResponsePaginationContextWithNoRecords extends Required<RequestPaginationParams> {
   /**
-   * Total number of items across all pages
+   * Total number of records across all pages
    */
   totalRecords: 0;
 
@@ -22,19 +22,19 @@ export interface ResponsePaginationContextWithNoRecords extends Required<Request
   hasPrev: false;
 
   /**
-   * The start index of the items on the page (0-indexed)
+   * The start index of the records on the page (0-indexed)
    */
   startIndex: undefined;
 
   /**
-   * The end index of the items on the page (0-indexed)
+   * The end index of the records on the page (0-indexed)
    */
   endIndex: undefined;
 }
 
 export interface ResponsePaginationContextWithRecords extends Required<RequestPaginationParams> {
   /**
-   * Total number of referrers across all pages
+   * Total number of records across all pages
    * @invariant Guaranteed to be a non-negative integer (>= 0)
    */
   totalRecords: number;
@@ -58,14 +58,14 @@ export interface ResponsePaginationContextWithRecords extends Required<RequestPa
   hasPrev: boolean;
 
   /**
-   * The start index of the items on the page (0-indexed)
+   * The start index of the records on the page (0-indexed)
    *
    * @invariant Guaranteed to be a non-negative integer (>= 0)
    */
   startIndex: number;
 
   /**
-   * The end index of the items on the page (0-indexed)
+   * The end index of the records on the page (0-indexed)
    *
    * @invariant Guaranteed to be a non-negative integer (>= 0)
    * @invariant Guaranteed to be greater than or equal to `startIndex`.
