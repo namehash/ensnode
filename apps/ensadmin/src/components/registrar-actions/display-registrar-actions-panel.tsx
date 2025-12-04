@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { useNow } from "@/hooks/use-now";
 import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 
 import {
@@ -31,6 +32,7 @@ function DisplayRegistrarActionsList({
   registrarActions,
 }: DisplayRegistrarActionsListProps) {
   const [animationParent] = useAutoAnimate();
+  const now = useNow();
 
   return (
     <div
@@ -42,6 +44,7 @@ function DisplayRegistrarActionsList({
           key={namedRegistrarAction.action.id}
           namespaceId={namespaceId}
           namedRegistrarAction={namedRegistrarAction}
+          now={now}
         />
       ))}
     </div>

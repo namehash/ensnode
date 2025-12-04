@@ -9,6 +9,7 @@ import {
   NamedRegistrarAction,
   RegistrarActionReferral,
   RegistrarActionTypes,
+  UnixTimestamp,
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
@@ -18,6 +19,7 @@ import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { ExternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNow } from "@/hooks/use-now";
 import { getBlockExplorerUrlForTransactionHash } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
@@ -132,6 +134,7 @@ export function DisplayRegistrarActionCardPlaceholder() {
 export interface DisplayRegistrarActionCardProps {
   namespaceId: ENSNamespaceId;
   namedRegistrarAction: NamedRegistrarAction;
+  now: UnixTimestamp;
 }
 
 /**
@@ -140,6 +143,7 @@ export interface DisplayRegistrarActionCardProps {
 export function DisplayRegistrarActionCard({
   namespaceId,
   namedRegistrarAction,
+  now,
 }: DisplayRegistrarActionCardProps) {
   const { registrant, registrationLifecycle, type, referral, transactionHash } =
     namedRegistrarAction.action;
@@ -178,6 +182,7 @@ export function DisplayRegistrarActionCard({
           tooltipPosition="top"
           conciseFormatting={true}
           contentWrapper={withTransactionLink}
+          relativeTo={now}
         />
       </LabeledField>
 
