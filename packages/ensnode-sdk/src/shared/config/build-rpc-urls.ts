@@ -63,11 +63,11 @@ export function buildAlchemyBaseUrl(chainId: ChainId, key: string): string | und
 }
 
 /**
- * Builds a DRPC RPC URL for the specified chain ID.
+ * Builds a dRPC RPC URL for the specified chain ID.
  *
  * @param chainId - The chain ID to build the RPC URL for
- * @param key - The DRPC API key
- * @returns The complete DRPC RPC URL, or undefined if the chain is not supported
+ * @param key - The dRPC API key
+ * @returns The complete dRPC RPC URL, or undefined if the chain is not supported
  *
  * @example
  * ```typescript
@@ -171,7 +171,7 @@ export function alchemySupportsChain(chainId: ChainId) {
   return buildAlchemyBaseUrl(chainId, "") !== undefined;
 }
 
-export function drpcSupportsChain(chainId: ChainId) {
+export function dRPCSupportsChain(chainId: ChainId) {
   return buildDRPCUrl(chainId, "") !== undefined;
 }
 

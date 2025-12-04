@@ -24,17 +24,16 @@ describe("build-rpc-urls", () => {
   it("should build rpc urls for each known public chain id", () => {
     ALL_KNOWN_PUBLIC_CHAIN_IDS.forEach((chainId) => {
       expect(buildAlchemyBaseUrl(chainId, KEY), `Alchemy ${chainId}`).not.toBeUndefined();
-      expect(buildDRPCUrl(chainId, KEY), `DRPC ${chainId}`).not.toBeUndefined();
-    });
 
-    // QuickNode does not support Linea Sepolia RPC (as of 2025-12-03).
-    ALL_KNOWN_PUBLIC_CHAIN_IDS.filter((chainId) => chainId !== lineaSepolia.id).forEach(
-      (chainId) => {
+      if (chainId !== lineaSepolia.id) {
+        // QuickNode does not support Linea Sepolia RPC (as of 2025-12-03).
         expect(
           buildQuickNodeURL(chainId, KEY, "endpoint-name"),
           `QuickNode ${chainId}`,
         ).not.toBeUndefined();
-      },
-    );
+      }
+
+      expect(buildDRPCUrl(chainId, KEY), `dRPC ${chainId}`).not.toBeUndefined();
+    });
   });
 });
