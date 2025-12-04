@@ -62,8 +62,6 @@ describe("buildRpcConfigsFromEnv", () => {
 
           expect(alchemyRpcUrl.pathname).toContain(ALCHEMY_API_KEY);
 
-          // QuickNode platform does not support Linea Sepolia RPC (as of 2025-12-03).
-          // https://www.quicknode.com/docs/linea
           if (chainId !== lineaSepolia.id) {
             expect(quickNodeRpcUrl.pathname).toContain(QUICKNODE_API_KEY);
             expect(quickNodeRpcUrl.hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
@@ -88,8 +86,6 @@ describe("buildRpcConfigsFromEnv", () => {
         (chainIdString, rpcConfig) => {
           const chainId = deserializeChainId(chainIdString);
 
-          // QuickNode platform does not support Linea Sepolia RPC (as of 2025-12-03).
-          // https://www.quicknode.com/docs/linea
           if (chainId !== lineaSepolia.id) {
             const [quickNodeRpcUrl, dRPCRpcUrl] = rpcConfigHttp(rpcConfig);
             expect(quickNodeRpcUrl.pathname).toContain(QUICKNODE_API_KEY);
@@ -120,8 +116,6 @@ describe("buildRpcConfigsFromEnv", () => {
           const chainId = deserializeChainId(chainIdString);
           const [quickNodeRpcUrl] = rpcConfigHttp(rpcConfig);
 
-          // QuickNode platform does not support Linea Sepolia RPC (as of 2025-12-03).
-          // https://www.quicknode.com/docs/linea
           if (chainId !== lineaSepolia.id) {
             expect(quickNodeRpcUrl.pathname).toContain(QUICKNODE_API_KEY);
             expect(quickNodeRpcUrl.hostname.startsWith(QUICKNODE_ENDPOINT_NAME)).toBe(true);
@@ -139,7 +133,7 @@ describe("buildRpcConfigsFromEnv", () => {
     describe.each(allPublicEnsNamespaceIds)("%s ENS namespace", (ensNamespaceId) => {
       it("should not build RPC URL for chainId %d", () => {
         expect(() => buildRpcConfigsFromEnv(env, ensNamespaceId)).toThrowError(
-          /QuickNode: using API key requires using endpoint name as well/i,
+          /Using QUICKNODE_API_KEY environment variable requires using QUICKNODE_ENDPOINT_NAME one as well/i,
         );
       });
     });
@@ -153,7 +147,7 @@ describe("buildRpcConfigsFromEnv", () => {
     describe.each(allPublicEnsNamespaceIds)("%s ENS namespace", (ensNamespaceId) => {
       it("should not build RPC URL for chainId %d", () => {
         expect(() => buildRpcConfigsFromEnv(env, ensNamespaceId)).toThrowError(
-          /QuickNode: using endpoint name requires using API key as well/i,
+          /Using QUICKNODE_ENDPOINT_NAME environment variable requires using QUICKNODE_API_KEY one as well/i,
         );
       });
     });

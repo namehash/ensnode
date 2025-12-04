@@ -4,7 +4,7 @@ import {
   ENS_HOLIDAY_AWARDS_END_DATE,
   ENS_HOLIDAY_AWARDS_START_DATE,
 } from "@namehash/ens-referrals";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type ENSIndexerPublicConfig,
@@ -16,6 +16,13 @@ import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import { buildConfigFromEnvironment, buildEnsApiPublicConfig } from "@/config/config.schema";
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
+import logger from "@/lib/logger";
+
+vi.mock("@/lib/logger", () => ({
+  default: {
+    error: vi.fn(),
+  },
+}));
 
 const VALID_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/1234";
 
@@ -77,6 +84,64 @@ describe("buildConfigFromEnvironment", () => {
       ]),
       ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
       ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+    });
+  });
+
+  describe("Useful error messages", () => {
+    // Mock process.exit to prevent actual exit
+    const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+      mockExit.mockClear();
+    });
+
+    const TEST_ENV: EnsApiEnvironment = {
+      DATABASE_URL: BASE_ENV.DATABASE_URL,
+      ENSINDEXER_URL: BASE_ENV.ENSINDEXER_URL,
+    };
+
+    it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+      });
+
+      await buildConfigFromEnvironment({
+        ...TEST_ENV,
+        QUICKNODE_API_KEY: "my-api-key",
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error(
+          "Using QUICKNODE_API_KEY environment variable requires using QUICKNODE_ENDPOINT_NAME one as well.",
+        ),
+        "Failed to build EnsApiConfig",
+      );
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("logs error message when QuickNode RPC config was partially configured (missing API key)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+      });
+
+      await buildConfigFromEnvironment({
+        ...TEST_ENV,
+        QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error(
+          "Using QUICKNODE_ENDPOINT_NAME environment variable requires using QUICKNODE_API_KEY one as well.",
+        ),
+        "Failed to build EnsApiConfig",
+      );
+      expect(process.exit).toHaveBeenCalledWith(1);
     });
   });
 });

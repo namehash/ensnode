@@ -155,8 +155,6 @@ export function buildQuickNodeURL(
     case linea.id:
       return `${endpointName}.linea-mainnet.quiknode.pro/${apiKey}`;
     case lineaSepolia.id:
-      //QuickNode platform does not provide RPC for Linea Sepolia
-      // https://www.quicknode.com/docs/linea
       return undefined;
     case scroll.id:
       return `${endpointName}.scroll-mainnet.quiknode.pro/${apiKey}`;

@@ -21,15 +21,6 @@ import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./en
  * 2. Alchemy, if ALCHEMY_API_KEY is available in the env
  * 3. QuickNode, if both, QUICKNODE_API_KEY and QUICKNODE_ENDPOINT_NAME are specified,
  *    a QuickNode RPC URL will be provided for each of the chains it supports.
- *    If only one of these is set, the configuration will be rejected with an error.
- *    Please note that using QuickNode RPC endpoints requires special care.
- *      - Only multi-chain QuickNode endpoints can be used for setting
- *        QUICKNODE_API_KEY and QUICKNODE_ENDPOINT_NAME environment variables.
- *        A multi-chain endpoint allows sharing the same endpoint name and API key
- *        across all chains supported by QuickNode platform. Read more in QuickNode docs:
- *        https://www.quicknode.com/guides/quicknode-products/how-to-use-multichain-endpoint
- *      - QuickNode platform does not support Linea Sepolia RPC (as of 2025-12-03).
- *        https://www.quicknode.com/docs/linea
  * 4. DRPC, if DRPC_API_KEY is available in the env
  *
  * TODO: also inject wss:// urls for alchemy, dRPC keys
@@ -44,14 +35,28 @@ export function buildRpcConfigsFromEnv(
   env: RpcEnvironment,
   namespace: ENSNamespaceId,
 ): Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> {
-  const chainsInNamespace = Object.entries(getENSNamespace(namespace)).map(
-    ([, datasource]) => (datasource as Datasource).chain,
-  );
-
   const alchemyApiKey = env.ALCHEMY_API_KEY;
   const quickNodeApiKey = env.QUICKNODE_API_KEY;
   const quickNodeEndpointName = env.QUICKNODE_ENDPOINT_NAME;
   const dRPCKey = env.DRPC_API_KEY;
+
+  // Invariant: QuickNode: using API key requires using endpoint name as well.
+  if (quickNodeApiKey && !quickNodeEndpointName) {
+    throw new Error(
+      "Using QUICKNODE_API_KEY environment variable requires using QUICKNODE_ENDPOINT_NAME one as well.",
+    );
+  }
+
+  // Invariant: QuickNode: using endpoint name requires using API key as well.
+  if (quickNodeEndpointName && !quickNodeApiKey) {
+    throw new Error(
+      "Using QUICKNODE_ENDPOINT_NAME environment variable requires using QUICKNODE_API_KEY one as well.",
+    );
+  }
+
+  const chainsInNamespace = Object.entries(getENSNamespace(namespace)).map(
+    ([, datasource]) => (datasource as Datasource).chain,
+  );
 
   const rpcConfigs: Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> = {};
 
@@ -61,16 +66,6 @@ export function buildRpcConfigsFromEnv(
     if (specificValue) {
       rpcConfigs[serializeChainId(chain.id)] = specificValue;
       continue;
-    }
-
-    // Invariant: QuickNode: using API key requires using endpoint name as well.
-    if (quickNodeApiKey && !quickNodeEndpointName) {
-      throw new Error("QuickNode: using API key requires using endpoint name as well.");
-    }
-
-    // Invariant: QuickNode: using endpoint name requires using API key as well.
-    if (quickNodeEndpointName && !quickNodeApiKey) {
-      throw new Error("QuickNode: using endpoint name requires using API key as well.");
     }
 
     const httpUrls = [
