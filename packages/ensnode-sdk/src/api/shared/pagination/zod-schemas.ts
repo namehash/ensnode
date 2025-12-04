@@ -2,7 +2,7 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeNonNegativeIntegerSchema, makePositiveIntegerSchema } from "../../../internal";
-import { ITEMS_PER_PAGE_MAX, RequestPaginationParams } from "./request";
+import { RECORDS_PER_PAGE_MAX, RequestPaginationParams } from "./request";
 import {
   ResponsePaginationContext,
   ResponsePaginationContextWithNoRecords,
@@ -15,9 +15,9 @@ import {
 export const makeRequestPaginationParamsSchema = (valueLabel: string = "RequestPaginationParams") =>
   z.object({
     page: makePositiveIntegerSchema(`${valueLabel}.page`),
-    itemsPerPage: makePositiveIntegerSchema(`${valueLabel}.itemsPerPage`).max(
-      ITEMS_PER_PAGE_MAX,
-      `${valueLabel}.itemsPerPage must not exceed ${ITEMS_PER_PAGE_MAX}`,
+    recordsPerPage: makePositiveIntegerSchema(`${valueLabel}.recordsPerPage`).max(
+      RECORDS_PER_PAGE_MAX,
+      `${valueLabel}.recordsPerPage must not exceed ${RECORDS_PER_PAGE_MAX}`,
     ),
   });
 
@@ -41,9 +41,9 @@ export const makeResponsePaginationContextSchemaWithNoRecords = (
 function invariant_responsePaginationWithRecordsIsCorrect(
   ctx: ParsePayload<ResponsePaginationContextWithRecords>,
 ) {
-  const { hasNext, hasPrev, itemsPerPage, page, totalRecords, startIndex, endIndex } = ctx.value;
+  const { hasNext, hasPrev, recordsPerPage, page, totalRecords, startIndex, endIndex } = ctx.value;
 
-  const expectedHasNext = page * itemsPerPage < totalRecords;
+  const expectedHasNext = page * recordsPerPage < totalRecords;
   if (hasNext !== expectedHasNext) {
     ctx.issues.push({
       code: "custom",
