@@ -3,7 +3,7 @@ import {
   type RegistrarActionsFilter,
   RegistrarActionsFilterTypes,
   type RegistrarActionsFilterWithEncodedReferral,
-} from "../types";
+} from "./request";
 
 /**
  * Build a "parent node" filter object for Registrar Actions query.
