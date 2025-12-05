@@ -1,5 +1,9 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { type LabelHash, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import {
+  getEthnamesSubregistryManagedName,
+  type LabelHash,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
 
 import type { RegistrarManagedName } from "@/lib/types";
 
@@ -23,5 +27,5 @@ export function tokenIdToLabelHash(tokenId: bigint): LabelHash {
  * @returns registrar managed name
  */
 export function getRegistrarManagedName(namespaceId: ENSNamespaceId): RegistrarManagedName {
-  return getRegistrarManagedName(namespaceId);
+  return getEthnamesSubregistryManagedName(namespaceId);
 }
