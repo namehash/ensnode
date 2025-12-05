@@ -1,8 +1,10 @@
 import { AssetId as CaipAssetId } from "caip";
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
+import { prettifyError } from "zod/v4";
 
 import { type Node, uint256ToHex32 } from "../ens";
 import type { AccountId, ChainId } from "../shared";
+import { makeSerializedAssetIdSchema } from "./zod-schemas";
 
 /**
  * An enum representing the possible CAIP-19 Asset Namespace values.
@@ -52,6 +54,20 @@ export function serializeAssetId(assetId: AssetId): SerializedAssetId {
 }
 
 /**
+ * Deserialize a {@link AssetId} object.
+ */
+export function deserializeAssetId(maybeAssetId: unknown, valueLabel?: string): AssetId {
+  const schema = makeSerializedAssetIdSchema(valueLabel);
+  const parsed = schema.safeParse(maybeAssetId);
+
+  if (parsed.error) {
+    throw new RangeError(`Cannot deserialize AssetId:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+/**
  * Builds an AssetId for the NFT represented by the given contract,
  * tokenId, and assetNamespace.
  *
@@ -82,6 +98,20 @@ export interface DomainAssetId extends AssetId {
    * this `AssetId`.
    */
   domainId: Node;
+}
+
+/**
+ * Serialized representation of {@link DomainAssetId}.
+ */
+export interface SerializedDomainAssetId extends Pick<DomainAssetId, "domainId"> {
+  assetId: SerializedAssetId;
+}
+
+export function serializeDomainAssetId(domainAsset: DomainAssetId): SerializedDomainAssetId {
+  return {
+    assetId: serializeAssetId(domainAsset),
+    domainId: domainAsset.domainId,
+  };
 }
 
 /**

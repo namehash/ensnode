@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { beautifyName, getNameHierarchy } from "./names";
+import { beautifyName, getNameHierarchy, getParentNameFQDN } from "./names";
 import type { Name, NormalizedName } from "./types";
 
 describe("names", () => {
@@ -27,6 +27,24 @@ describe("names", () => {
       const name = "sub.example.com" as NormalizedName;
       const expected = ["sub.example.com", "example.com", "com"];
       expect(getNameHierarchy(name)).toEqual(expected);
+    });
+  });
+
+  describe("getParentNameFQDN", () => {
+    it("returns FQDN for an empty name", () => {
+      expect(getParentNameFQDN("")).toStrictEqual("");
+    });
+
+    it("returns FQDN for top-level name", () => {
+      expect(getParentNameFQDN("eth")).toStrictEqual("");
+    });
+
+    it("returns FQDN for 2nd-level name", () => {
+      expect(getParentNameFQDN("base.eth")).toStrictEqual("eth");
+    });
+
+    it("returns FQDN for 3rd-level name", () => {
+      expect(getParentNameFQDN("test.base.eth")).toStrictEqual("base.eth");
     });
   });
 

@@ -18,6 +18,16 @@ export const getNameHierarchy = (name: NormalizedName): NormalizedName[] =>
   name.split(".").map((_, i, labels) => labels.slice(i).join(".")) as NormalizedName[];
 
 /**
+ * Get FQDN of parent for a name.
+ */
+export const getParentNameFQDN = (name: Name): Name =>
+  // Strip off the child-most label in the name to get the FQDN of the parent
+  name
+    .split(".")
+    .slice(1)
+    .join(".");
+
+/**
  * Beautifies a name by converting each normalized label in the provided name to
  * its "beautified" form. Labels that are not normalized retain their original value.
  *
