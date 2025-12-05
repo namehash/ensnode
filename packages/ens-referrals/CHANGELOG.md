@@ -1,5 +1,11 @@
 # @namehash/ens-referrals
 
+## 1.1.1
+
+### Patch Changes
+
+- [#1339](https://github.com/namehash/ensnode/pull/1339) [`ea06a3c`](https://github.com/namehash/ensnode/commit/ea06a3cf7d802c6dd338676d0f2439185934e0ab) Thanks [@Y3drk](https://github.com/Y3drk)! - Fix calculation of `hasNext` parameter
+
 ## 1.1.0
 
 ### Minor Changes
