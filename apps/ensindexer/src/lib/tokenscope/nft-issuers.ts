@@ -5,12 +5,12 @@ import {
   AssetNamespaces,
   accountIdEqual,
   BASENAMES_NODE,
+  type DomainAssetId,
   ETH_NODE,
   type LabelHash,
   LINEANAMES_NODE,
   makeSubdomainNode,
   type Node,
-  type SupportedNFT,
   type TokenId,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
@@ -193,7 +193,7 @@ export const buildSupportedNFT = (
   datasourceName: DatasourceName,
   contractName: string,
   tokenId: TokenId,
-): SupportedNFT => {
+): DomainAssetId => {
   const contract = getDatasourceContract(namespaceId, datasourceName, contractName);
 
   const nftIssuer = getSupportedNFTIssuer(namespaceId, contract);

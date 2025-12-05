@@ -149,8 +149,8 @@ export default function () {
   //     // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
-  //     const assetId = buildSupportedNFTAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: assetId });
+  //     const serializedAssetId = serializeAssetId(nft);
+  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,
@@ -184,8 +184,8 @@ export default function () {
   //     // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
-  //     const assetId = buildSupportedNFTAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: assetId });
+  //     const serializedAssetId = serializeAssetId(nft);
+  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,

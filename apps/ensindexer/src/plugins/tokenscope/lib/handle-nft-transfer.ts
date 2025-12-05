@@ -3,13 +3,12 @@ import schema from "ponder:schema";
 import { type Address, zeroAddress } from "viem";
 
 import {
-  buildSupportedNFTAssetId,
+  type DomainAssetId,
   formatNFTTransferEventMetadata,
   getNFTTransferType,
   NFTMintStatuses,
   type NFTTransferEventMetadata,
   NFTTransferTypes,
-  type SupportedNFT,
   serializeAssetId,
 } from "@ensnode/ensnode-sdk";
 
@@ -20,7 +19,7 @@ export const handleERC1155Transfer = async (
   from: Address,
   to: Address,
   allowMintedRemint: boolean,
-  nft: SupportedNFT,
+  nft: DomainAssetId,
   amount: bigint,
   metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
@@ -40,11 +39,10 @@ export const handleNFTTransfer = async (
   from: Address,
   to: Address,
   allowMintedRemint: boolean,
-  nft: SupportedNFT,
+  nft: DomainAssetId,
   metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
-  const assetId = buildSupportedNFTAssetId(nft);
-  const serializedAssetId = serializeAssetId(assetId);
+  const serializedAssetId = serializeAssetId(nft);
 
   // get the previously indexed record for the assetId (if it exists)
   const previous = await context.db.find(schema.nameTokens, { id: serializedAssetId });

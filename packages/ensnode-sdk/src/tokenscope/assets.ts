@@ -29,7 +29,7 @@ export interface AssetId {
 }
 
 /**
- * Serialized representation of {@link AssetId}.
+ * Serialized representation of an {@link AssetId}.
  *
  * Formatted as a fully lowercase CAIP-19 AssetId.
  *
@@ -74,28 +74,18 @@ export const buildAssetId = (
 };
 
 /**
- * A struct representing a NFT that has been minted by a SupportedNFTIssuer.
- *
- * Any ERC1155 SupportedNFT we create is guaranteed to never have a balance > 1.
+ * A globally unique reference to an NFT tokenizing the ownership of a domain.
  */
-export interface SupportedNFT extends AssetId {
+export interface DomainAssetId extends AssetId {
+  /**
+   * The namehash (node) of the domain who's ownership is tokenized by
+   * this `AssetId`.
+   */
   domainId: Node;
 }
 
 /**
- * Builds a AssetId for the SupportedNFT.
- *
- * @param nft - The SupportedNFT to build an AssetId for
- * @returns The AssetId for the SupportedNFT
- */
-export const buildSupportedNFTAssetId = (nft: SupportedNFT): AssetId => {
-  const { domainId: _, ...assetId } = nft;
-
-  return assetId;
-};
-
-/**
- * An enum representing the mint status of a SupportedNFT.
+ * An enum representing the mint status of a DomainAssetId.
  *
  * After we index a NFT we never delete it from our index. Instead, when an
  * indexed NFT is burned onchain we retain its record and update its mint
@@ -120,23 +110,25 @@ export interface NFTTransferEventMetadata {
   blockNumber: bigint;
   transactionHash: Hex;
   eventHandlerName: string;
-  nft: SupportedNFT;
+  nft: DomainAssetId;
 }
 
 export const formatNFTTransferEventMetadata = (metadata: NFTTransferEventMetadata): string => {
+  const serializedAssetId = serializeAssetId(metadata.nft);
+
   return [
     `Event: ${metadata.eventHandlerName}`,
     `Chain ID: ${metadata.chainId}`,
     `Block Number: ${metadata.blockNumber}`,
     `Transaction Hash: ${metadata.transactionHash}`,
-    `NFT: ${buildSupportedNFTAssetId(metadata.nft)}`,
+    `NFT: ${serializedAssetId}`,
   ]
     .map((line) => ` - ${line}`)
     .join("\n");
 };
 
 /**
- * An enum representing the type of transfer that has occurred to a SupportedNFT.
+ * An enum representing the type of transfer that has occurred to a DomainAssetId.
  */
 export const NFTTransferTypes = {
   /**
