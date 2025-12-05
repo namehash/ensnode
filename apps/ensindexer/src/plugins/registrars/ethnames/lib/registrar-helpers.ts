@@ -23,11 +23,5 @@ export function tokenIdToLabelHash(tokenId: bigint): LabelHash {
  * @returns registrar managed name
  */
 export function getRegistrarManagedName(namespaceId: ENSNamespaceId): RegistrarManagedName {
-  switch (namespaceId) {
-    case "mainnet":
-    case "sepolia":
-    case "holesky":
-    case "ens-test-env":
-      return "eth";
-  }
+  return getRegistrarManagedName(namespaceId);
 }
