@@ -117,7 +117,7 @@ describe("buildConfigFromEnvironment", () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
-          "Using QUICKNODE_API_KEY environment variable requires using QUICKNODE_ENDPOINT_NAME one as well.",
+          "Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well.",
         ),
         "Failed to build EnsApiConfig",
       );
@@ -137,7 +137,7 @@ describe("buildConfigFromEnvironment", () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
-          "Using QUICKNODE_ENDPOINT_NAME environment variable requires using QUICKNODE_API_KEY one as well.",
+          "Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well.",
         ),
         "Failed to build EnsApiConfig",
       );

@@ -16,7 +16,7 @@ import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./en
  * Constructs dynamic chain configuration from environment variables, scoped to chain IDs that appear
  * in the specified `namespace`.
  *
- * This function provides the following RPC URLs in the following order:
+ * This function auto-generates RPC URLs in the following order:
  * 1. RPC_URL_*, if available in the env
  * 2. Alchemy, if ALCHEMY_API_KEY is available in the env
  * 3. QuickNode, if both, QUICKNODE_API_KEY and QUICKNODE_ENDPOINT_NAME are specified,
@@ -27,7 +27,7 @@ import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./en
  *
  * NOTE: This function returns raw RpcConfigEnvironment values which are not yet parsed or validated.
  *
- * @throws when using QuickNode and missing either:
+ * @throws when only one but not both of the following environment variables are defined:
  *         {@link RpcEnvironment.QUICKNODE_API_KEY} or
  *         {@link RpcEnvironment.QUICKNODE_ENDPOINT_NAME}.
  */
@@ -43,14 +43,14 @@ export function buildRpcConfigsFromEnv(
   // Invariant: QuickNode: using API key requires using endpoint name as well.
   if (quickNodeApiKey && !quickNodeEndpointName) {
     throw new Error(
-      "Using QUICKNODE_API_KEY environment variable requires using QUICKNODE_ENDPOINT_NAME one as well.",
+      "Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well.",
     );
   }
 
   // Invariant: QuickNode: using endpoint name requires using API key as well.
   if (quickNodeEndpointName && !quickNodeApiKey) {
     throw new Error(
-      "Using QUICKNODE_ENDPOINT_NAME environment variable requires using QUICKNODE_API_KEY one as well.",
+      "Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well.",
     );
   }
 

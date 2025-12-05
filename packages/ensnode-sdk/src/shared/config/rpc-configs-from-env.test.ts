@@ -133,7 +133,7 @@ describe("buildRpcConfigsFromEnv", () => {
     describe.each(allPublicEnsNamespaceIds)("%s ENS namespace", (ensNamespaceId) => {
       it("should not build RPC URL for chainId %d", () => {
         expect(() => buildRpcConfigsFromEnv(env, ensNamespaceId)).toThrowError(
-          /Using QUICKNODE_API_KEY environment variable requires using QUICKNODE_ENDPOINT_NAME one as well/i,
+          /Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well/i,
         );
       });
     });
@@ -147,7 +147,7 @@ describe("buildRpcConfigsFromEnv", () => {
     describe.each(allPublicEnsNamespaceIds)("%s ENS namespace", (ensNamespaceId) => {
       it("should not build RPC URL for chainId %d", () => {
         expect(() => buildRpcConfigsFromEnv(env, ensNamespaceId)).toThrowError(
-          /Using QUICKNODE_ENDPOINT_NAME environment variable requires using QUICKNODE_API_KEY one as well/i,
+          /Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well/i,
         );
       });
     });
