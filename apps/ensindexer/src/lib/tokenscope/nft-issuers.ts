@@ -1,6 +1,8 @@
 import { type DatasourceName, DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
   type AccountId,
+  type AssetNamespace,
+  AssetNamespaces,
   accountIdEqual,
   BASENAMES_NODE,
   ETH_NODE,
@@ -8,16 +10,12 @@ import {
   LINEANAMES_NODE,
   makeSubdomainNode,
   type Node,
+  type SupportedNFT,
+  type TokenId,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
-import {
-  type AssetNamespace,
-  AssetNamespaces,
-  type SupportedNFT,
-  type TokenId,
-} from "@/lib/tokenscope/assets";
 
 /**
  * A contract that issues tokenized ENS names in a manner that is supported by

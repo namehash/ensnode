@@ -1,8 +1,14 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { type ChainId, CurrencyIds, uniq } from "@ensnode/ensnode-sdk";
+import {
+  type AssetNamespace,
+  AssetNamespaces,
+  type ChainId,
+  CurrencyIds,
+  type SupportedNFT,
+  uniq,
+} from "@ensnode/ensnode-sdk";
 
 import { getCurrencyIdForContract } from "@/lib/currencies";
-import { type AssetNamespace, AssetNamespaces } from "@/lib/tokenscope/assets";
 import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
 import type { SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
 import {
@@ -11,8 +17,6 @@ import {
   type OfferItem,
   type OrderFulfilledEvent,
 } from "@/lib/tokenscope/seaport-types";
-
-import type { SupportedNFT } from "./assets";
 
 /**
  * Gets the supported TokenScope Asset Namespace for a given Seaport ItemType.

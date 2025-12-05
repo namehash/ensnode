@@ -4,10 +4,9 @@ import { ponder } from "ponder:registry";
 import { base, optimism } from "viem/chains";
 
 import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
-import { type ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { type ChainId, type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
-import type { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 
 import { handleERC1155Transfer } from "../lib/handle-nft-transfer";

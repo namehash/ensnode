@@ -2,7 +2,6 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, zeroAddress } from "viem";
 
-import { upsertAccount } from "@/lib/subgraph/db-helpers";
 import {
   buildSupportedNFTAssetId,
   formatNFTTransferEventMetadata,
@@ -11,7 +10,9 @@ import {
   type NFTTransferEventMetadata,
   NFTTransferTypes,
   type SupportedNFT,
-} from "@/lib/tokenscope/assets";
+} from "@ensnode/ensnode-sdk";
+
+import { upsertAccount } from "@/lib/subgraph/db-helpers";
 
 export const handleERC1155Transfer = async (
   context: Context,
