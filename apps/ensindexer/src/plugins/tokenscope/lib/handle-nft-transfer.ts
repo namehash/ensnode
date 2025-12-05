@@ -10,6 +10,7 @@ import {
   type NFTTransferEventMetadata,
   NFTTransferTypes,
   type SupportedNFT,
+  serializeAssetId,
 } from "@ensnode/ensnode-sdk";
 
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
@@ -43,9 +44,10 @@ export const handleNFTTransfer = async (
   metadata: NFTTransferEventMetadata,
 ): Promise<void> => {
   const assetId = buildSupportedNFTAssetId(nft);
+  const serializedAssetId = serializeAssetId(assetId);
 
   // get the previously indexed record for the assetId (if it exists)
-  const previous = await context.db.find(schema.nameTokens, { id: assetId });
+  const previous = await context.db.find(schema.nameTokens, { id: serializedAssetId });
   const transferType = getNFTTransferType(from, to, allowMintedRemint, metadata, previous?.owner);
 
   switch (transferType) {
@@ -54,7 +56,7 @@ export const handleNFTTransfer = async (
       // insert the record of the nft that has been minted for the first time
       await upsertAccount(context, to);
       await context.db.insert(schema.nameTokens).values({
-        id: assetId,
+        id: serializedAssetId,
         chainId: nft.contract.chainId,
         contractAddress: nft.contract.address,
         tokenId: nft.tokenId,
@@ -73,7 +75,7 @@ export const handleNFTTransfer = async (
       // TODO: should we remove this upsertAccount call with the zeroAddress?
       await upsertAccount(context, zeroAddress);
       await context.db.insert(schema.nameTokens).values({
-        id: assetId,
+        id: serializedAssetId,
         chainId: nft.contract.chainId,
         contractAddress: nft.contract.address,
         tokenId: nft.tokenId,
@@ -88,7 +90,7 @@ export const handleNFTTransfer = async (
       // mint status transition from burned -> minted
       // update the mint status and owner of the previously indexed nft
       await upsertAccount(context, to);
-      await context.db.update(schema.nameTokens, { id: assetId }).set({
+      await context.db.update(schema.nameTokens, { id: serializedAssetId }).set({
         owner: to,
         mintStatus: NFTMintStatuses.Minted,
       });
@@ -101,7 +103,7 @@ export const handleNFTTransfer = async (
       // update the mint status and owner of the previously indexed nft
       // TODO: should we remove this upsertAccount call with the zeroAddress?
       await upsertAccount(context, zeroAddress);
-      await context.db.update(schema.nameTokens, { id: assetId }).set({
+      await context.db.update(schema.nameTokens, { id: serializedAssetId }).set({
         owner: zeroAddress,
         mintStatus: NFTMintStatuses.Burned,
       });
@@ -113,7 +115,7 @@ export const handleNFTTransfer = async (
       // mint status remains minted (no change)
       // update owner of the previously indexed nft
       await upsertAccount(context, to);
-      await context.db.update(schema.nameTokens, { id: assetId }).set({
+      await context.db.update(schema.nameTokens, { id: serializedAssetId }).set({
         owner: to,
       });
       break;

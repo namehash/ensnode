@@ -3,7 +3,7 @@ import config from "@/config";
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
 
-import { buildSupportedNFTAssetId, PluginName } from "@ensnode/ensnode-sdk";
+import { buildSupportedNFTAssetId, PluginName, serializeAssetId } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { upsertAccount } from "@/lib/subgraph/db-helpers";
@@ -35,6 +35,8 @@ export default function () {
     await upsertAccount(context, sale.seller);
     await upsertAccount(context, sale.buyer);
 
+    const assetId = buildSupportedNFTAssetId(sale.nft);
+
     // insert NameSale entity
     await context.db.insert(schema.nameSales).values({
       id: makeEventId(context.chain.id, event.block.number, event.log.logIndex),
@@ -46,7 +48,7 @@ export default function () {
       contractAddress: sale.nft.contract.address,
       tokenId: sale.nft.tokenId,
       assetNamespace: sale.nft.assetNamespace,
-      assetId: buildSupportedNFTAssetId(sale.nft),
+      assetId: serializeAssetId(assetId),
       domainId: sale.nft.domainId,
       buyer: sale.buyer,
       seller: sale.seller,

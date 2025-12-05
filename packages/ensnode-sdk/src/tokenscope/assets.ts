@@ -1,7 +1,7 @@
 import { AssetId as CaipAssetId } from "caip";
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
 
-import { uint256ToHex32 } from "../ens";
+import { type Node, uint256ToHex32 } from "../ens";
 import type { AccountId, ChainId } from "../shared";
 
 /**
@@ -20,19 +20,16 @@ export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespac
 export type TokenId = bigint;
 
 /**
- * A struct representing a NFT that has been minted by a SupportedNFTIssuer.
- *
- * Any ERC1155 SupportedNFT we create is guaranteed to never have a balance > 1.
+ * A globally unique reference to an NFT.
  */
-export interface SupportedNFT {
+export interface AssetId {
   assetNamespace: AssetNamespace;
   contract: AccountId;
   tokenId: TokenId;
-  domainId: Node;
 }
 
 /**
- * A globally unique reference to a NFT.
+ * Serialized representation of {@link AssetId}.
  *
  * Formatted as a fully lowercase CAIP-19 AssetId.
  *
@@ -40,16 +37,28 @@ export interface SupportedNFT {
  * @example "eip155:1/erc721:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
  *          for vitalik.eth in the eth base registrar on mainnet.
  */
-export type AssetId = string;
+export type SerializedAssetId = string;
 
 /**
- * Builds a CAIP-19 AssetId for the NFT represented by the given contract,
+ * Serializes {@link AssetId} object.
+ */
+export function serializeAssetId(assetId: AssetId): SerializedAssetId {
+  const { assetNamespace, contract, tokenId } = assetId;
+  return CaipAssetId.format({
+    chainId: { namespace: "eip155", reference: contract.chainId.toString() },
+    assetName: { namespace: assetNamespace, reference: contract.address },
+    tokenId: uint256ToHex32(tokenId),
+  }).toLowerCase();
+}
+
+/**
+ * Builds an AssetId for the NFT represented by the given contract,
  * tokenId, and assetNamespace.
  *
  * @param contract - The contract that manages the NFT
  * @param tokenId - The tokenId of the NFT
  * @param assetNamespace - The assetNamespace of the NFT
- * @returns The CAIP-19 AssetId for the NFT represented by the given contract,
+ * @returns The AssetId for the NFT represented by the given contract,
  *          tokenId, and assetNamespace
  */
 export const buildAssetId = (
@@ -57,21 +66,32 @@ export const buildAssetId = (
   tokenId: TokenId,
   assetNamespace: AssetNamespace,
 ): AssetId => {
-  return CaipAssetId.format({
-    chainId: { namespace: "eip155", reference: contract.chainId.toString() },
-    assetName: { namespace: assetNamespace, reference: contract.address },
-    tokenId: uint256ToHex32(tokenId),
-  }).toLowerCase();
+  return {
+    assetNamespace,
+    contract,
+    tokenId,
+  };
 };
 
 /**
- * Builds a CAIP-19 AssetId for the SupportedNFT.
+ * A struct representing a NFT that has been minted by a SupportedNFTIssuer.
+ *
+ * Any ERC1155 SupportedNFT we create is guaranteed to never have a balance > 1.
+ */
+export interface SupportedNFT extends AssetId {
+  domainId: Node;
+}
+
+/**
+ * Builds a AssetId for the SupportedNFT.
  *
  * @param nft - The SupportedNFT to build an AssetId for
- * @returns The CAIP-19 AssetId for the SupportedNFT
+ * @returns The AssetId for the SupportedNFT
  */
 export const buildSupportedNFTAssetId = (nft: SupportedNFT): AssetId => {
-  return buildAssetId(nft.contract, nft.tokenId, nft.assetNamespace);
+  const { domainId: _, ...assetId } = nft;
+
+  return assetId;
 };
 
 /**
