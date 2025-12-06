@@ -113,6 +113,8 @@ jobs:
           ENSRAINBOW_URL: https://api.ensrainbow.io
           ENSINDEXER_URL: http://localhost:42069
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
+          QUICKNODE_ENDPOINT_NAME: ${{ secrets.QUICKNODE_ENDPOINT_NAME}}
           # healthcheck script env variables
           HEALTH_CHECK_TIMEOUT: 60
         run: ./.github/scripts/run_ensindexer_healthcheck.sh

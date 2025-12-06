@@ -3,10 +3,9 @@ import config from "@/config";
 import { ponder } from "ponder:registry";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
-import type { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 
 import { handleNFTTransfer } from "../lib/handle-nft-transfer";

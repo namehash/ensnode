@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import type { InterpretedName } from "../ens";
-import { makeRegistrarActionsResponseSchema } from "../internal";
-import { registrarActionsPrerequisites } from "./registrar-actions";
+import type { InterpretedName } from "../../ens";
+import { registrarActionsPrerequisites } from "../registrar-actions";
+import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./response";
 import type {
   SerializedNamedRegistrarAction,
   SerializedRegistrarActionsResponseError,
   SerializedRegistrarActionsResponseOk,
-} from "./serialized-types";
-import { RegistrarActionsResponseCodes, type RegistrarActionsResponseError } from "./types";
+} from "./serialized-response";
+import { makeRegistrarActionsResponseSchema } from "./zod-schemas";
 
 describe("ENSNode API Schema", () => {
   describe("Registrar Actions API", () => {

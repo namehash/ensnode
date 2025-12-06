@@ -1,29 +1,29 @@
 import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
 
 import {
+  type ConfigResponse,
+  deserializeConfigResponse,
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
   deserializeRegistrarActionsResponse,
+  type ErrorResponse,
+  type IndexingStatusResponse,
+  type RegistrarActionsFilter,
   RegistrarActionsFilterTypes,
+  type RegistrarActionsOrder,
   RegistrarActionsOrders,
+  type RegistrarActionsRequest,
+  type RegistrarActionsResponse,
+  type ResolvePrimaryNameRequest,
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesRequest,
+  type ResolvePrimaryNamesResponse,
+  type ResolveRecordsRequest,
+  type ResolveRecordsResponse,
+  type SerializedConfigResponse,
   type SerializedIndexingStatusResponse,
   type SerializedRegistrarActionsResponse,
 } from "./api";
-import type {
-  ConfigResponse,
-  ErrorResponse,
-  IndexingStatusResponse,
-  RegistrarActionsFilter,
-  RegistrarActionsOrder,
-  RegistrarActionsRequest,
-  RegistrarActionsResponse,
-  ResolvePrimaryNameRequest,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesRequest,
-  ResolvePrimaryNamesResponse,
-  ResolveRecordsRequest,
-  ResolveRecordsResponse,
-} from "./api/types";
 import { ClientError } from "./client-error";
 import {
   deserializeReferrerDetailResponse,
@@ -35,7 +35,6 @@ import {
   type SerializedReferrerDetailResponse,
   type SerializedReferrerLeaderboardPageResponse,
 } from "./ensanalytics";
-import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -321,7 +320,7 @@ export class ENSNodeClient {
       throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
     }
 
-    return deserializeENSApiPublicConfig(responseData as SerializedENSApiPublicConfig);
+    return deserializeConfigResponse(responseData as SerializedConfigResponse);
   }
 
   /**

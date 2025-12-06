@@ -1,8 +1,14 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { type ChainId, CurrencyIds, uniq } from "@ensnode/ensnode-sdk";
+import {
+  type AssetNamespace,
+  AssetNamespaces,
+  type ChainId,
+  CurrencyIds,
+  type DomainAssetId,
+  uniq,
+} from "@ensnode/ensnode-sdk";
 
 import { getCurrencyIdForContract } from "@/lib/currencies";
-import { type AssetNamespace, AssetNamespaces } from "@/lib/tokenscope/assets";
 import { getSupportedNFTIssuer } from "@/lib/tokenscope/nft-issuers";
 import type { SupportedPayment, SupportedSale } from "@/lib/tokenscope/sales";
 import {
@@ -11,8 +17,6 @@ import {
   type OfferItem,
   type OrderFulfilledEvent,
 } from "@/lib/tokenscope/seaport-types";
-
-import type { SupportedNFT } from "./assets";
 
 /**
  * Gets the supported TokenScope Asset Namespace for a given Seaport ItemType.
@@ -46,7 +50,7 @@ const getSupportedNFT = (
   namespaceId: ENSNamespaceId,
   chainId: ChainId,
   item: OfferItem | ConsiderationItem,
-): SupportedNFT | null => {
+): DomainAssetId | null => {
   // validate amount as exactly 1 item.
   // All SupportedNFTs (including ERC1155) must never have a balance or amount > 1.
   if (item.amount !== 1n) return null;
@@ -107,7 +111,7 @@ const getSupportedPayment = (
 };
 
 interface SeaportItemExtractions {
-  nfts: SupportedNFT[];
+  nfts: DomainAssetId[];
 
   /**
    * Seaport supports multiple payments in a single order.
@@ -149,7 +153,7 @@ const getSeaportItemExtractions = (
   return extractions;
 };
 
-const consolidateSupportedNFTs = (nfts: SupportedNFT[]): SupportedNFT | null => {
+const consolidateSupportedNFTs = (nfts: DomainAssetId[]): DomainAssetId | null => {
   // Either no NFT or multiple NFTs
   if (nfts.length !== 1) return null;
   // biome-ignore lint/style/noNonNullAssertion: ok due to length check above
