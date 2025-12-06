@@ -183,7 +183,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
   },
   referrers: new Map([
     [
-      "0x538e35b2888ed5b[c58cf2825d76cf6265aa4e31e",
+      "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
       {
         referrer: "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
         totalReferrals: 3,

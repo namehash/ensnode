@@ -268,3 +268,44 @@ export const buildAwardedReferrerMetrics = (
   validateAwardedReferrerMetrics(result, rules);
   return result;
 };
+
+/**
+ * Extends {@link AwardedReferrerMetrics} but with rank set to null to represent
+ * a referrer who is not on the leaderboard (has zero referrals within the rules associated with the leaderboard).
+ */
+export interface UnrankedReferrerMetrics
+  extends Omit<AwardedReferrerMetrics, "rank" | "isQualified"> {
+  /**
+   * The referrer is not on the leaderboard and therefore has no rank.
+   */
+  rank: null;
+
+  /**
+   * Always false for unranked referrers.
+   */
+  isQualified: false;
+}
+
+/**
+ * Build an unranked zero-score referrer record for a referrer address that is not in the leaderboard.
+ *
+ * This is useful when you want to return a referrer record for an address that has no referrals
+ * and is not qualified for the leaderboard.
+ *
+ * @param referrer - The referrer address
+ * @returns An {@link UnrankedReferrerMetrics} with zero values for all metrics and null rank
+ */
+export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferrerMetrics => {
+  const baseMetrics = buildReferrerMetrics(referrer, 0, 0);
+  const scoredMetrics = buildScoredReferrerMetrics(baseMetrics);
+
+  return {
+    ...scoredMetrics,
+    rank: null,
+    isQualified: false,
+    finalScoreBoost: 0,
+    finalScore: 0,
+    awardPoolShare: 0,
+    awardPoolApproxValue: 0,
+  };
+};

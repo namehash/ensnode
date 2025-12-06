@@ -7,6 +7,7 @@ export * from "./leaderboard-page";
 export * from "./link";
 export * from "./number";
 export * from "./rank";
+export * from "./referrer-detail";
 export * from "./referrer-metrics";
 export * from "./rules";
 export * from "./score";
