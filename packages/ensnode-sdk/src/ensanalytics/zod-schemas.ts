@@ -9,7 +9,8 @@
 
 import {
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-  type ReferrerDetailData,
+  type ReferrerDetailRanked,
+  ReferrerDetailTypeIds,
 } from "@namehash/ens-referrals";
 import z from "zod/v4";
 
@@ -167,22 +168,26 @@ export const makeReferrerLeaderboardPageResponseSchema = (
   ]);
 
 /**
- * Schema for {@link ReferrerDetailData} (with ranked metrics)
+ * Schema for {@link ReferrerDetailRanked} (with ranked metrics)
  */
-export const makeReferrerDetailDataSchema = (valueLabel: string = "ReferrerDetailData") =>
+export const makeReferrerDetailRankedSchema = (valueLabel: string = "ReferrerDetailRanked") =>
   z.object({
+    type: z.literal(ReferrerDetailTypeIds.Ranked),
+    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
+    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
 /**
- * Schema for {@link UnrankedReferrerDetailData} (with unranked metrics)
+ * Schema for {@link ReferrerDetailUnranked} (with unranked metrics)
  */
-export const makeUnrankedReferrerDetailDataSchema = (
-  valueLabel: string = "UnrankedReferrerDetailData",
-) =>
+export const makeReferrerDetailUnrankedSchema = (valueLabel: string = "ReferrerDetailUnranked") =>
   z.object({
+    type: z.literal(ReferrerDetailTypeIds.Unranked),
+    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
+    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
@@ -194,8 +199,8 @@ export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "Referre
   z.object({
     responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
     data: z.union([
-      makeReferrerDetailDataSchema(`${valueLabel}.data`),
-      makeUnrankedReferrerDetailDataSchema(`${valueLabel}.data`),
+      makeReferrerDetailRankedSchema(`${valueLabel}.data`),
+      makeReferrerDetailUnrankedSchema(`${valueLabel}.data`),
     ]),
   });
 

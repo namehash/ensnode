@@ -1,5 +1,5 @@
 import {
-  buildUnrankedReferrerMetrics,
+  getReferrerDetail,
   getReferrerLeaderboardPage,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
 } from "@namehash/ens-referrals";
@@ -8,9 +8,9 @@ import { z } from "zod/v4";
 import {
   type ReferrerDetailResponse,
   ReferrerDetailResponseCodes,
+  type ReferrerLeaderboardPageRequest,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
-  type ReferrerLeaderboardPaginationRequest,
   serializeReferrerDetailResponse,
   serializeReferrerLeaderboardPageResponse,
 } from "@ensnode/ensnode-sdk";
@@ -23,7 +23,7 @@ import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard
 
 const logger = makeLogger("ensanalytics-api");
 
-// Pagination query parameters schema (mirrors PaginatedAggregatedReferrersRequest)
+// Pagination query parameters schema (mirrors ReferrerLeaderboardPageRequest)
 const paginationQuerySchema = z.object({
   page: z.optional(z.coerce.number().int().min(1, "Page must be a positive integer")),
   itemsPerPage: z.optional(
@@ -36,7 +36,7 @@ const paginationQuerySchema = z.object({
         `Items per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
       ),
   ),
-}) satisfies z.ZodType<ReferrerLeaderboardPaginationRequest>;
+}) satisfies z.ZodType<ReferrerLeaderboardPageRequest>;
 
 const app = factory
   .createApp()
@@ -100,7 +100,7 @@ const referrerAddressSchema = z.object({
 });
 
 // Get referrer detail for a specific address
-app.get("/referrer/:referrer", validate("param", referrerAddressSchema), async (c) => {
+app.get("/referrers/:referrer", validate("param", referrerAddressSchema), async (c) => {
   // context must be set by the required middleware
   if (c.var.referrerLeaderboard === undefined) {
     throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
@@ -122,40 +122,16 @@ app.get("/referrer/:referrer", validate("param", referrerAddressSchema), async (
     }
 
     const { referrer } = c.req.valid("param");
-
-    const leaderboard = referrerLeaderboard.value;
-
-    // Lookup the referrer in the leaderboard
-    const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
-
-    // If referrer is found in the leaderboard, return their ranked metrics
-    if (awardedReferrerMetrics) {
-      return c.json(
-        serializeReferrerDetailResponse({
-          responseCode: ReferrerDetailResponseCodes.Ok,
-          data: {
-            referrer: awardedReferrerMetrics,
-            accurateAsOf: leaderboard.accurateAsOf,
-          },
-        } satisfies ReferrerDetailResponse),
-      );
-    }
-
-    // If referrer not found, create an unranked zero-score referrer record
-    // with rank: null and isQualified: false
-    const unrankedReferrerMetrics = buildUnrankedReferrerMetrics(referrer);
+    const detail = getReferrerDetail(referrer, referrerLeaderboard.value);
 
     return c.json(
       serializeReferrerDetailResponse({
         responseCode: ReferrerDetailResponseCodes.Ok,
-        data: {
-          referrer: unrankedReferrerMetrics,
-          accurateAsOf: leaderboard.accurateAsOf,
-        },
+        data: detail,
       } satisfies ReferrerDetailResponse),
     );
   } catch (error) {
-    logger.error({ error }, "Error in /ensanalytics/referrer/:referrer endpoint");
+    logger.error({ error }, "Error in /ensanalytics/referrers/:referrer endpoint");
     const errorMessage =
       error instanceof Error
         ? error.message

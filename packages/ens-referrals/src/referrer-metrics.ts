@@ -271,17 +271,17 @@ export const buildAwardedReferrerMetrics = (
 
 /**
  * Extends {@link AwardedReferrerMetrics} but with rank set to null to represent
- * a referrer who is not on the leaderboard (has zero referrals).
+ * a referrer who is not on the leaderboard (has zero referrals within the rules associated with the leaderboard).
  */
 export interface UnrankedReferrerMetrics
   extends Omit<AwardedReferrerMetrics, "rank" | "isQualified"> {
   /**
-   * The referrer's rank on the leaderboard is null because they are not on the leaderboard.
+   * The referrer is not on the leaderboard and therefore has no rank.
    */
   rank: null;
 
   /**
-   * Always false for unranked referrers since they don't qualify for awards.
+   * Always false for unranked referrers.
    */
   isQualified: false;
 }

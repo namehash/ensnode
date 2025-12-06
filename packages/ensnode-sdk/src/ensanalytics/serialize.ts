@@ -32,8 +32,8 @@ export function serializeReferrerLeaderboardPageResponse(
 /**
  * Serialize a {@link ReferrerDetailResponse} object.
  *
- * Note: Since all fields in ReferrerDetailData and UnrankedReferrerDetailData
- * (AwardedReferrerMetrics or UnrankedReferrerMetrics + timestamp) are already
+ * Note: Since all fields in ReferrerDetailRanked and ReferrerDetailUnranked
+ * (rules, referrer metrics, aggregatedMetrics, and timestamp) are already
  * serializable primitives, this function performs an identity transformation.
  * The rank field can be either a number or null, both of which are valid JSON primitives.
  * It exists to maintain consistency with the serialization pattern used throughout the codebase.

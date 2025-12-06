@@ -1,3 +1,5 @@
+import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
+
 import {
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
@@ -28,8 +30,8 @@ import {
   deserializeReferrerLeaderboardPageResponse,
   type ReferrerDetailRequest,
   type ReferrerDetailResponse,
+  type ReferrerLeaderboardPageRequest,
   type ReferrerLeaderboardPageResponse,
-  type ReferrerLeaderboardPaginationRequest,
   type SerializedReferrerDetailResponse,
   type SerializedReferrerLeaderboardPageResponse,
 } from "./ensanalytics";
@@ -385,7 +387,7 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Get first page with default page size (25 items)
-   * const response = await client.getReferrerLeaderboard();
+   * const response = await client.getReferrerLeaderboardPage();
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
    *   const {
    *     aggregatedMetrics,
@@ -405,13 +407,13 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Get second page with 50 items per page
-   * const response = await client.getReferrerLeaderboard({ page: 2, itemsPerPage: 50 });
+   * const response = await client.getReferrerLeaderboardPage({ page: 2, itemsPerPage: 50 });
    * ```
    *
    * @example
    * ```typescript
    * // Handle error response, ie. when Referrer Leaderboard is not currently available.
-   * const response = await client.getReferrerLeaderboard();
+   * const response = await client.getReferrerLeaderboardPage();
    *
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Error) {
    *   console.error(response.error);
@@ -419,8 +421,8 @@ export class ENSNodeClient {
    * }
    * ```
    */
-  async getReferrerLeaderboard(
-    request?: ReferrerLeaderboardPaginationRequest,
+  async getReferrerLeaderboardPage(
+    request?: ReferrerLeaderboardPageRequest,
   ): Promise<ReferrerLeaderboardPageResponse> {
     const url = new URL(`/ensanalytics/referrers`, this.options.url);
 
@@ -455,21 +457,20 @@ export class ENSNodeClient {
    * Retrieves detailed information about a specific referrer, whether they are on the
    * leaderboard or not.
    *
-   * The response contains either `ReferrerDetailData` or `UnrankedReferrerDetailData`:
+   * The response data is a discriminated union type with a `type` field:
    *
-   * **For referrers on the leaderboard** (`ReferrerDetailData`):
+   * **For referrers on the leaderboard** (`ReferrerDetailRanked`):
+   * - `type`: {@link ReferrerDetailTypeIds.Ranked}
    * - `referrer`: The `AwardedReferrerMetrics` from @namehash/ens-referrals
-   * - `rank`: A positive integer indicating their position on the leaderboard
-   * - `isQualified`: Boolean indicating if they qualify for awards
-   * - Includes score, award pool share, total referrals, and incremental duration
+   * - `rules`: The referral program rules
+   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
+   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
    *
-   * **For referrers NOT on the leaderboard** (`UnrankedReferrerDetailData`):
+   * **For referrers NOT on the leaderboard** (`ReferrerDetailUnranked`):
+   * - `type`: {@link ReferrerDetailTypeIds.Unranked}
    * - `referrer`: The `UnrankedReferrerMetrics` from @namehash/ens-referrals
-   * - `rank`: `null` (they have no rank since they're not on the leaderboard)
-   * - `isQualified`: `false` (they don't qualify for awards)
-   * - All metrics are zero (no referrals, score, or award pool share)
-   *
-   * Both include:
+   * - `rules`: The referral program rules
+   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
    * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
    *
    * @see {@link https://www.npmjs.com/package/@namehash/ens-referrals|@namehash/ens-referrals} for calculation details
@@ -483,11 +484,12 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Get referrer detail for a specific address
-   * const response = await client.referrerDetail({
+   * const response = await client.getReferrerDetail({
    *   referrer: "0x1234567890123456789012345678901234567890"
    * });
    * if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
-   *   const { referrer, accurateAsOf } = response.data;
+   *   const { type, referrer, rules, aggregatedMetrics, accurateAsOf } = response.data;
+   *   console.log(type); // ReferrerDetailTypeIds.Ranked or ReferrerDetailTypeIds.Unranked
    *   console.log(referrer);
    *   console.log(accurateAsOf);
    * }
@@ -495,17 +497,18 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * // Check if referrer is ranked on the leaderboard
-   * const response = await client.referrerDetail({
+   * // Use discriminated union to check if referrer is ranked
+   * const response = await client.getReferrerDetail({
    *   referrer: "0x1234567890123456789012345678901234567890"
    * });
    * if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
-   *   const { referrer } = response.data;
-   *   if (referrer.rank !== null) {
-   *     console.log(`Rank: ${referrer.rank}`);
-   *     console.log(`Qualified: ${referrer.isQualified}`);
-   *     console.log(`Award Pool Share: ${referrer.awardPoolShare * 100}%`);
+   *   if (response.data.type === ReferrerDetailTypeIds.Ranked) {
+   *     // TypeScript knows this is ReferrerDetailRanked
+   *     console.log(`Rank: ${response.data.referrer.rank}`);
+   *     console.log(`Qualified: ${response.data.referrer.isQualified}`);
+   *     console.log(`Award Pool Share: ${response.data.referrer.awardPoolShare * 100}%`);
    *   } else {
+   *     // TypeScript knows this is ReferrerDetailUnranked
    *     console.log("Referrer is not on the leaderboard (no referrals yet)");
    *   }
    * }
@@ -514,7 +517,7 @@ export class ENSNodeClient {
    * @example
    * ```typescript
    * // Handle error response, ie. when Referrer Detail is not currently available.
-   * const response = await client.referrerDetail({
+   * const response = await client.getReferrerDetail({
    *   referrer: "0x1234567890123456789012345678901234567890"
    * });
    *
@@ -524,9 +527,9 @@ export class ENSNodeClient {
    * }
    * ```
    */
-  async referrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse> {
+  async getReferrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse> {
     const url = new URL(
-      `/api/ensanalytics/referrer/${encodeURIComponent(request.referrer)}`,
+      `/api/ensanalytics/referrers/${encodeURIComponent(request.referrer)}`,
       this.options.url,
     );
 

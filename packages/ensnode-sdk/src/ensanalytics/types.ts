@@ -1,15 +1,14 @@
 import type {
-  ReferrerDetailData,
+  ReferrerDetail,
   ReferrerLeaderboardPage,
   ReferrerLeaderboardPaginationParams,
-  UnrankedReferrerDetailData,
 } from "@namehash/ens-referrals";
 import type { Address } from "viem";
 
 /**
  * Request parameters for a referrer leaderboard page query.
  */
-export interface ReferrerLeaderboardPaginationRequest extends ReferrerLeaderboardPaginationParams {}
+export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPaginationParams {}
 
 /**
  * A status code for a referrer leaderboard page API response.
@@ -93,7 +92,7 @@ export type ReferrerDetailResponseCode =
  */
 export type ReferrerDetailResponseOk = {
   responseCode: typeof ReferrerDetailResponseCodes.Ok;
-  data: ReferrerDetailData | UnrankedReferrerDetailData;
+  data: ReferrerDetail;
 };
 
 /**

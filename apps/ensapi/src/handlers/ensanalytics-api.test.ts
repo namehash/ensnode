@@ -24,6 +24,7 @@ vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
   referrerLeaderboardMiddleware: vi.fn(),
 }));
 
+import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
 import pReflect from "p-reflect";
 
 import {
@@ -183,7 +184,7 @@ describe("/ensanalytics", () => {
     });
   });
 
-  describe("/referrer/:referrer", () => {
+  describe("/referrers/:referrer", () => {
     it("returns referrer metrics when referrer exists in leaderboard", async () => {
       // Arrange: set `referrerLeaderboard` context var with populated leaderboard
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
@@ -200,7 +201,7 @@ describe("/ensanalytics", () => {
       const expectedAccurateAsOf = populatedReferrerLeaderboard.accurateAsOf;
 
       // Act: send test request to fetch referrer detail
-      const httpResponse = await app.request(`/referrer/${existingReferrer}`);
+      const httpResponse = await app.request(`/referrers/${existingReferrer}`);
       const responseData = await httpResponse.json();
       const response = deserializeReferrerDetailResponse(responseData);
 
@@ -208,7 +209,10 @@ describe("/ensanalytics", () => {
       const expectedResponse = {
         responseCode: ReferrerDetailResponseCodes.Ok,
         data: {
+          type: ReferrerDetailTypeIds.Ranked,
+          rules: populatedReferrerLeaderboard.rules,
           referrer: expectedMetrics,
+          aggregatedMetrics: populatedReferrerLeaderboard.aggregatedMetrics,
           accurateAsOf: expectedAccurateAsOf,
         },
       } satisfies ReferrerDetailResponseOk;
@@ -230,7 +234,7 @@ describe("/ensanalytics", () => {
       const nonExistingReferrer = "0x0000000000000000000000000000000000000099";
 
       // Act: send test request to fetch referrer detail
-      const httpResponse = await app.request(`/referrer/${nonExistingReferrer}`);
+      const httpResponse = await app.request(`/referrers/${nonExistingReferrer}`);
       const responseData = await httpResponse.json();
       const response = deserializeReferrerDetailResponse(responseData);
 
@@ -240,6 +244,11 @@ describe("/ensanalytics", () => {
 
       expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Ok);
       if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+        expect(response.data.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(response.data.rules).toEqual(populatedReferrerLeaderboard.rules);
+        expect(response.data.aggregatedMetrics).toEqual(
+          populatedReferrerLeaderboard.aggregatedMetrics,
+        );
         expect(response.data.referrer.referrer).toBe(nonExistingReferrer);
         expect(response.data.referrer.rank).toBe(null);
         expect(response.data.referrer.totalReferrals).toBe(0);
@@ -266,7 +275,7 @@ describe("/ensanalytics", () => {
       const referrer = "0x0000000000000000000000000000000000000001";
 
       // Act: send test request to fetch referrer detail
-      const httpResponse = await app.request(`/referrer/${referrer}`);
+      const httpResponse = await app.request(`/referrers/${referrer}`);
       const responseData = await httpResponse.json();
       const response = deserializeReferrerDetailResponse(responseData);
 
@@ -276,6 +285,9 @@ describe("/ensanalytics", () => {
 
       expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Ok);
       if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+        expect(response.data.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(response.data.rules).toEqual(emptyReferralLeaderboard.rules);
+        expect(response.data.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
         expect(response.data.referrer.referrer).toBe(referrer);
         expect(response.data.referrer.rank).toBe(null);
         expect(response.data.referrer.totalReferrals).toBe(0);
@@ -304,7 +316,7 @@ describe("/ensanalytics", () => {
       const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
 
       // Act: send test request to fetch referrer detail
-      const httpResponse = await app.request(`/referrer/${referrer}`);
+      const httpResponse = await app.request(`/referrers/${referrer}`);
       const responseData = await httpResponse.json();
       const response = deserializeReferrerDetailResponse(responseData);
 
