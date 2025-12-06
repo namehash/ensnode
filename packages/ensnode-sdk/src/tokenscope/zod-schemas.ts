@@ -44,9 +44,18 @@ export const makeSerializedAssetIdSchema = (valueLabel: string = "Serialized Ass
  * Make schema for {@link DomainAssetId}.
  */
 export const makeDomainAssetSchema = (valueLabel: string = "Domain Asset Schema") =>
-  makeAssetIdSchema(valueLabel).extend({
-    domainId: makeNodeSchema(`${valueLabel}.domainId`),
-  });
+  z.union([
+    z
+      .object({
+        assetId: z.unknown().pipe(makeSerializedAssetIdSchema(valueLabel)),
+        domainId: makeNodeSchema(`${valueLabel}.domainId`),
+      })
+      .transform(({ assetId, domainId }) => ({ ...assetId, domainId })),
+
+    makeAssetIdSchema(valueLabel).extend({
+      domainId: makeNodeSchema(`${valueLabel}.domainId`),
+    }),
+  ]);
 
 /**
  * Make schema for {@link NameToken}.
