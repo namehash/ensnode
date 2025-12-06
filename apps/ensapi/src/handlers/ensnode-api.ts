@@ -12,6 +12,7 @@ import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 
+import nameTokensApi from "./name-tokens-api";
 import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
@@ -57,6 +58,9 @@ app.get("/indexing-status", async (c) => {
     } satisfies IndexingStatusResponseOk),
   );
 });
+
+// Name Tokens API
+app.route("/name-tokens", nameTokensApi);
 
 // Registrar Actions API
 app.route("/registrar-actions", registrarActionsApi);

@@ -306,9 +306,9 @@ export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   });
 
 /**
- * Schema for {@link SerializedAccountSchema} type.
+ * Schema for {@link SerializedAccountId} type.
  */
-export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = "Account ID") =>
+export const makeSerializedAccountIdSchema = (valueLabel: string = "Account ID") =>
   z.coerce
     .string()
     .transform((v) => {

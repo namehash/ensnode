@@ -1,11 +1,16 @@
 import {
   type ConfigResponse,
   deserializeConfigResponse,
+  deserializedNameTokensResponse,
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
   deserializeRegistrarActionsResponse,
   type ErrorResponse,
   type IndexingStatusResponse,
+  type NameTokensOrder,
+  NameTokensOrders,
+  type NameTokensRequest,
+  type NameTokensResponse,
   type RegistrarActionsFilter,
   RegistrarActionsFilterTypes,
   type RegistrarActionsOrder,
@@ -20,9 +25,11 @@ import {
   type ResolveRecordsResponse,
   type SerializedConfigResponse,
   type SerializedIndexingStatusResponse,
+  type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
 } from "./api";
 import { ClientError } from "./client-error";
+import type { Name } from "./ens";
 import {
   deserializeReferrerLeaderboardPageResponse,
   type ReferrerLeaderboardPageResponse,
@@ -579,5 +586,86 @@ export class ENSNodeClient {
     }
 
     return deserializeRegistrarActionsResponse(responseData as SerializedRegistrarActionsResponse);
+  }
+
+  /**
+   * Fetch Name Tokens for requested name.
+   *
+   * @param request.name - Name for which Name Tokens will be fetched.
+   * @returns {NameTokensResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   *
+   * @example
+   * ```ts
+   * import {
+   *   ENSNodeClient,
+   * } from "@ensnode/ensnode-sdk";
+   * import { namehash } from "viem/ens";
+   *
+   * const client: ENSNodeClient;
+   *
+   * // get latest name token records from the indexed subregistry based on the requested name
+   * const response = await client.nameTokens({
+   *   name: "vitalik.eth"
+   * });
+   * ```
+   */
+  async nameTokens(request: NameTokensRequest): Promise<NameTokensResponse> {
+    const buildUrlPath = (name: Name) => new URL(`/api/name-tokens/${name}`, this.options.url);
+
+    const buildOrderArg = (order: NameTokensOrder) => {
+      switch (order) {
+        case NameTokensOrders.LatestNameTokens: {
+          const [field, direction] = order.split("=");
+          return {
+            key: `sort[${field}]`,
+            value: `${direction}`,
+          };
+        }
+      }
+    };
+
+    const url = buildUrlPath(request.name);
+
+    if (request.order) {
+      const orderArgs = buildOrderArg(request.order);
+
+      url.searchParams.set(orderArgs.key, orderArgs.value);
+    }
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // handle response errors accordingly
+    if (!response.ok) {
+      // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
+      try {
+        errorResponse = deserializeErrorResponse(responseData);
+      } catch {
+        // if errorResponse could not be determined,
+        // it means the response includes data
+        console.log("Name Tokens API: handling a known server error.");
+      }
+
+      // however, if errorResponse was defined,
+      // throw an error with the generic server error message
+      if (typeof errorResponse !== "undefined") {
+        throw new Error(`Fetching ENSNode Name Tokens Failed: ${errorResponse.message}`);
+      }
+    }
+
+    return deserializedNameTokensResponse(responseData as SerializedNameTokensResponse);
   }
 }

@@ -4,6 +4,7 @@ import type { UndefinedInitialDataOptions } from "@tanstack/react-query";
 
 import {
   ENSNodeClient,
+  type NameTokensRequest,
   type RegistrarActionsRequest,
   type ResolvePrimaryNameRequest,
   type ResolvePrimaryNamesRequest,
@@ -59,6 +60,9 @@ export const queryKeys = {
 
   registrarActions: (url: string, args: RegistrarActionsRequest) =>
     [...queryKeys.base(url), "registrar-actions", args] as const,
+
+  nameTokens: (url: string, args: NameTokensRequest) =>
+    [...queryKeys.base(url), "name-tokens", args] as const,
 };
 
 /**
@@ -154,6 +158,21 @@ export function createRegistrarActionsQueryOptions(
       const client = new ENSNodeClient(config.client);
 
       return client.registrarActions(args);
+    },
+  };
+}
+
+/**
+ * Creates query options for Name Tokens API
+ */
+export function createNameTokensQueryOptions(config: ENSNodeSDKConfig, args: NameTokensRequest) {
+  return {
+    enabled: true,
+    queryKey: queryKeys.nameTokens(config.client.url.href, args),
+    queryFn: async () => {
+      const client = new ENSNodeClient(config.client);
+
+      return client.nameTokens(args);
     },
   };
 }

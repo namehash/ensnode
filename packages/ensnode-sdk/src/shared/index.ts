@@ -1,4 +1,3 @@
-export * from "../ens/is-normalized";
 export * from "./account-id";
 export * from "./address";
 export * from "./cache";
