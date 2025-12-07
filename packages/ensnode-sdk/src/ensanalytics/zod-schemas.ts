@@ -102,8 +102,8 @@ export const makeAggregatedReferrerMetricsSchema = (
     ),
   });
 
-export const makeReferrerLeaderboardPaginationContextSchema = (
-  valueLabel: string = "ReferrerLeaderboardPaginationContext",
+export const makeReferrerLeaderboardPageContextSchema = (
+  valueLabel: string = "ReferrerLeaderboardPageContext",
 ) =>
   z.object({
     page: makePositiveIntegerSchema(`${valueLabel}.page`),
@@ -127,9 +127,7 @@ export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "Referrer
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[item]`)),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    paginationContext: makeReferrerLeaderboardPaginationContextSchema(
-      `${valueLabel}.paginationContext`,
-    ),
+    paginationContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.paginationContext`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 

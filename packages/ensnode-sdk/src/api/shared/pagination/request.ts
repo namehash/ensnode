@@ -3,9 +3,9 @@ export const RECORDS_PER_PAGE_DEFAULT = 10;
 export const RECORDS_PER_PAGE_MAX = 100;
 
 /**
- * Request pagination params.
+ * Request page params.
  */
-export interface RequestPaginationParams {
+export interface RequestPageParams {
   /**
    * Requested page number (1-indexed)
    * @invariant Must be a positive integer (>= 1)

@@ -1,14 +1,14 @@
 import type {
   ReferrerDetail,
   ReferrerLeaderboardPage,
-  ReferrerLeaderboardPaginationParams,
+  ReferrerLeaderboardPageParams,
 } from "@namehash/ens-referrals";
 import type { Address } from "viem";
 
 /**
  * Request parameters for a referrer leaderboard page query.
  */
-export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPaginationParams {}
+export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPageParams {}
 
 /**
  * A status code for a referrer leaderboard page API response.

@@ -3,14 +3,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { ReferrerLeaderboard } from "./leaderboard.ts";
 import {
-  buildReferrerLeaderboardPaginationContext,
-  type ReferrerLeaderboardPaginationContext,
-  type ReferrerLeaderboardPaginationParams,
+  buildReferrerLeaderboardPageContext,
+  type ReferrerLeaderboardPageContext,
+  type ReferrerLeaderboardPageParams,
 } from "./leaderboard-page.ts";
 import type { AwardedReferrerMetrics } from "./referrer-metrics.ts";
 
-describe("buildReferrerLeaderboardPaginationContext", () => {
-  const paginationParams: ReferrerLeaderboardPaginationParams = {
+describe("buildReferrerLeaderboardPageContext", () => {
+  const paginationParams: ReferrerLeaderboardPageParams = {
     page: 1,
     itemsPerPage: 3,
   };
@@ -83,14 +83,12 @@ describe("buildReferrerLeaderboardPaginationContext", () => {
       accurateAsOf: 1764580368,
     };
 
-    const buildReferrerLeaderboardPaginationContextSpy = vi.fn(
-      buildReferrerLeaderboardPaginationContext,
-    );
-    const result = buildReferrerLeaderboardPaginationContextSpy(paginationParams, leaderboard);
+    const buildReferrerLeaderboardPageContextSpy = vi.fn(buildReferrerLeaderboardPageContext);
+    const result = buildReferrerLeaderboardPageContextSpy(paginationParams, leaderboard);
 
     expect(
-      buildReferrerLeaderboardPaginationContextSpy,
-      "buildReferrerLeaderboardPaginationContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=3",
+      buildReferrerLeaderboardPageContextSpy,
+      "buildReferrerLeaderboardPageContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=3",
     ).toHaveReturned();
     expect(
       result.hasNext,
@@ -120,7 +118,7 @@ describe("buildReferrerLeaderboardPaginationContext", () => {
       accurateAsOf: 1764580368,
     };
 
-    const expectedResult: ReferrerLeaderboardPaginationContext = {
+    const expectedResult: ReferrerLeaderboardPageContext = {
       totalRecords: 0,
       totalPages: 1,
       hasNext: false,
@@ -131,19 +129,17 @@ describe("buildReferrerLeaderboardPaginationContext", () => {
       page: 1,
     };
 
-    const buildReferrerLeaderboardPaginationContextSpy = vi.fn(
-      buildReferrerLeaderboardPaginationContext,
-    );
-    const result = buildReferrerLeaderboardPaginationContextSpy(paginationParams, leaderboard);
+    const buildReferrerLeaderboardPageContextSpy = vi.fn(buildReferrerLeaderboardPageContext);
+    const result = buildReferrerLeaderboardPageContextSpy(paginationParams, leaderboard);
 
     expect(
-      buildReferrerLeaderboardPaginationContextSpy,
-      "buildReferrerLeaderboardPaginationContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=0",
+      buildReferrerLeaderboardPageContextSpy,
+      "buildReferrerLeaderboardPageContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=0",
     ).toHaveReturned();
 
     expect(
       result,
-      `ReferrerLeaderboardPaginationContext result should match all edge-case requirements for leaderboard.referrers.size=0`,
+      `ReferrerLeaderboardPageContext result should match all edge-case requirements for leaderboard.referrers.size=0`,
     ).toStrictEqual(expectedResult);
   });
 });

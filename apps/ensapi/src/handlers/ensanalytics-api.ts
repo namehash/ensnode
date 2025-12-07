@@ -114,10 +114,10 @@ app.get("/referrers/:referrer", validate("param", referrerAddressSchema), async 
       return c.json(
         serializeReferrerDetailResponse({
           responseCode: ReferrerDetailResponseCodes.Error,
-          error: "Internal Server Error",
-          errorMessage: "Failed to load referrer leaderboard data.",
+          error: "Service Unavailable",
+          errorMessage: "Referrer leaderboard data has not been successfully cached yet.",
         } satisfies ReferrerDetailResponse),
-        500,
+        503,
       );
     }
 

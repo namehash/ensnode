@@ -1,6 +1,6 @@
-import type { RequestPaginationParams } from "./request";
+import type { RequestPageParams } from "./request";
 
-export interface ResponsePaginationContextWithNoRecords extends Required<RequestPaginationParams> {
+export interface ResponsePageContextWithNoRecords extends Required<RequestPageParams> {
   /**
    * Total number of records across all pages
    */
@@ -32,7 +32,7 @@ export interface ResponsePaginationContextWithNoRecords extends Required<Request
   endIndex: undefined;
 }
 
-export interface ResponsePaginationContextWithRecords extends Required<RequestPaginationParams> {
+export interface ResponsePageContextWithRecords extends Required<RequestPageParams> {
   /**
    * Total number of records across all pages
    * @invariant Guaranteed to be a non-negative integer (>= 0)
@@ -74,6 +74,4 @@ export interface ResponsePaginationContextWithRecords extends Required<RequestPa
   endIndex: number;
 }
 
-export type ResponsePaginationContext =
-  | ResponsePaginationContextWithNoRecords
-  | ResponsePaginationContextWithRecords;
+export type ResponsePageContext = ResponsePageContextWithNoRecords | ResponsePageContextWithRecords;

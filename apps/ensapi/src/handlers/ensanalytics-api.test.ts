@@ -323,8 +323,10 @@ describe("/ensanalytics", () => {
       // Assert: response contains error
       expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Error);
       if (response.responseCode === ReferrerDetailResponseCodes.Error) {
-        expect(response.error).toBe("Internal Server Error");
-        expect(response.errorMessage).toBe("Failed to load referrer leaderboard data.");
+        expect(response.error).toBe("Service Unavailable");
+        expect(response.errorMessage).toBe(
+          "Referrer leaderboard data has not been successfully cached yet.",
+        );
       }
     });
   });
