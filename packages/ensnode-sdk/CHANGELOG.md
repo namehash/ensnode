@@ -1,5 +1,23 @@
 # @ensnode/ensnode-sdk
 
+## 1.2.0
+
+### Minor Changes
+
+- [#1357](https://github.com/namehash/ensnode/pull/1357) [`97e4545`](https://github.com/namehash/ensnode/commit/97e4545c70d8c7469f4bd566b91277fdb0c3a699) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `tokenscope` module.
+
+- [#1353](https://github.com/namehash/ensnode/pull/1353) [`976e284`](https://github.com/namehash/ensnode/commit/976e2842f2e25ff0844471de48a34659b136b5be) Thanks [@tk-o](https://github.com/tk-o)! - Create shared module for `pagination` features.
+
+- [#1318](https://github.com/namehash/ensnode/pull/1318) [`e35600f`](https://github.com/namehash/ensnode/commit/e35600fe9808f3c72960429b2a56a7f22893bff6) Thanks [@Goader](https://github.com/Goader)! - Add referrer detail endpoint API. Supports querying individual referrers whether they are ranked on the leaderboard or not.
+
+- [#1345](https://github.com/namehash/ensnode/pull/1345) [`4cee4ba`](https://github.com/namehash/ensnode/commit/4cee4ba538e5655ca1e8b75f4d72738f3413c9d3) Thanks [@tk-o](https://github.com/tk-o)! - Add QuickNode RPC provider support for auto-generated chain RPC URLs.
+
+### Patch Changes
+
+- Updated dependencies [[`ea06a3c`](https://github.com/namehash/ensnode/commit/ea06a3cf7d802c6dd338676d0f2439185934e0ab), [`e35600f`](https://github.com/namehash/ensnode/commit/e35600fe9808f3c72960429b2a56a7f22893bff6)]:
+  - @namehash/ens-referrals@1.2.0
+  - @ensnode/datasources@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes
