@@ -2,17 +2,17 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeNonNegativeIntegerSchema, makePositiveIntegerSchema } from "../../../internal";
-import { RECORDS_PER_PAGE_MAX, RequestPaginationParams } from "./request";
+import { RECORDS_PER_PAGE_MAX, RequestPageParams } from "./request";
 import {
-  ResponsePaginationContext,
-  ResponsePaginationContextWithNoRecords,
-  type ResponsePaginationContextWithRecords,
+  ResponsePageContext,
+  ResponsePageContextWithNoRecords,
+  type ResponsePageContextWithRecords,
 } from "./response";
 
 /**
- * Schema for {@link RequestPaginationParams}
+ * Schema for {@link RequestPageParams}
  */
-export const makeRequestPaginationParamsSchema = (valueLabel: string = "RequestPaginationParams") =>
+export const makeRequestPageParamsSchema = (valueLabel: string = "RequestPageParams") =>
   z.object({
     page: makePositiveIntegerSchema(`${valueLabel}.page`),
     recordsPerPage: makePositiveIntegerSchema(`${valueLabel}.recordsPerPage`).max(
@@ -22,10 +22,10 @@ export const makeRequestPaginationParamsSchema = (valueLabel: string = "RequestP
   });
 
 /**
- * Schema for {@link ResponsePaginationContextWithNoRecords}
+ * Schema for {@link ResponsePageContextWithNoRecords}
  */
-export const makeResponsePaginationContextSchemaWithNoRecords = (
-  valueLabel: string = "ResponsePaginationContextWithNoRecords",
+export const makeResponsePageContextSchemaWithNoRecords = (
+  valueLabel: string = "ResponsePageContextWithNoRecords",
 ) =>
   z
     .object({
@@ -36,10 +36,10 @@ export const makeResponsePaginationContextSchemaWithNoRecords = (
       startIndex: z.undefined(),
       endIndex: z.undefined(),
     })
-    .extend(makeRequestPaginationParamsSchema(valueLabel).shape);
+    .extend(makeRequestPageParamsSchema(valueLabel).shape);
 
-function invariant_responsePaginationWithRecordsIsCorrect(
-  ctx: ParsePayload<ResponsePaginationContextWithRecords>,
+function invariant_responsePageWithRecordsIsCorrect(
+  ctx: ParsePayload<ResponsePageContextWithRecords>,
 ) {
   const { hasNext, hasPrev, recordsPerPage, page, totalRecords, startIndex, endIndex } = ctx.value;
 
@@ -79,10 +79,10 @@ function invariant_responsePaginationWithRecordsIsCorrect(
 }
 
 /**
- * Schema for {@link ResponsePaginationContextWithRecords}
+ * Schema for {@link ResponsePageContextWithRecords}
  */
-export const makeResponsePaginationContextSchemaWithRecords = (
-  valueLabel: string = "ResponsePaginationContextWithRecords",
+export const makeResponsePageContextSchemaWithRecords = (
+  valueLabel: string = "ResponsePageContextWithRecords",
 ) =>
   z
     .object({
@@ -93,18 +93,16 @@ export const makeResponsePaginationContextSchemaWithRecords = (
       startIndex: makeNonNegativeIntegerSchema(`${valueLabel}.startIndex`),
       endIndex: makeNonNegativeIntegerSchema(`${valueLabel}.endIndex`),
     })
-    .extend(makeRequestPaginationParamsSchema(valueLabel).shape)
-    .check(invariant_responsePaginationWithRecordsIsCorrect);
+    .extend(makeRequestPageParamsSchema(valueLabel).shape)
+    .check(invariant_responsePageWithRecordsIsCorrect);
 
 /**
- * Schema for {@link ResponsePaginationContext}
+ * Schema for {@link ResponsePageContext}
  */
-export const makeResponsePaginationContextSchema = (
-  valueLabel: string = "ResponsePaginationContext",
-) =>
+export const makeResponsePageContextSchema = (valueLabel: string = "ResponsePageContext") =>
   z.object({
     paginationContext: z.discriminatedUnion("totalRecords", [
-      makeResponsePaginationContextSchemaWithNoRecords(valueLabel),
-      makeResponsePaginationContextSchemaWithRecords(valueLabel),
+      makeResponsePageContextSchemaWithNoRecords(valueLabel),
+      makeResponsePageContextSchemaWithRecords(valueLabel),
     ]),
   });

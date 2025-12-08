@@ -24,10 +24,14 @@ vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
   referrerLeaderboardMiddleware: vi.fn(),
 }));
 
+import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
 import pReflect from "p-reflect";
 
 import {
+  deserializeReferrerDetailResponse,
   deserializeReferrerLeaderboardPageResponse,
+  ReferrerDetailResponseCodes,
+  type ReferrerDetailResponseOk,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
 } from "@ensnode/ensnode-sdk";
@@ -177,6 +181,153 @@ describe("/ensanalytics", () => {
       } satisfies ReferrerLeaderboardPageResponseOk;
 
       expect(response).toMatchObject(expectedResponse);
+    });
+  });
+
+  describe("/referrers/:referrer", () => {
+    it("returns referrer metrics when referrer exists in leaderboard", async () => {
+      // Arrange: set `referrerLeaderboard` context var with populated leaderboard
+      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
+        const mockedReferrerLeaderboard = await pReflect(
+          Promise.resolve(populatedReferrerLeaderboard),
+        );
+        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        return await next();
+      });
+
+      // Arrange: use a referrer address that exists in the leaderboard (rank 1)
+      const existingReferrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
+      const expectedMetrics = populatedReferrerLeaderboard.referrers.get(existingReferrer)!;
+      const expectedAccurateAsOf = populatedReferrerLeaderboard.accurateAsOf;
+
+      // Act: send test request to fetch referrer detail
+      const httpResponse = await app.request(`/referrers/${existingReferrer}`);
+      const responseData = await httpResponse.json();
+      const response = deserializeReferrerDetailResponse(responseData);
+
+      // Assert: response contains the expected referrer metrics
+      const expectedResponse = {
+        responseCode: ReferrerDetailResponseCodes.Ok,
+        data: {
+          type: ReferrerDetailTypeIds.Ranked,
+          rules: populatedReferrerLeaderboard.rules,
+          referrer: expectedMetrics,
+          aggregatedMetrics: populatedReferrerLeaderboard.aggregatedMetrics,
+          accurateAsOf: expectedAccurateAsOf,
+        },
+      } satisfies ReferrerDetailResponseOk;
+
+      expect(response).toMatchObject(expectedResponse);
+    });
+
+    it("returns zero-score metrics when referrer does not exist in leaderboard", async () => {
+      // Arrange: set `referrerLeaderboard` context var with populated leaderboard
+      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
+        const mockedReferrerLeaderboard = await pReflect(
+          Promise.resolve(populatedReferrerLeaderboard),
+        );
+        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        return await next();
+      });
+
+      // Arrange: use a referrer address that does NOT exist in the leaderboard
+      const nonExistingReferrer = "0x0000000000000000000000000000000000000099";
+
+      // Act: send test request to fetch referrer detail
+      const httpResponse = await app.request(`/referrers/${nonExistingReferrer}`);
+      const responseData = await httpResponse.json();
+      const response = deserializeReferrerDetailResponse(responseData);
+
+      // Assert: response contains zero-score metrics for the referrer
+      // Rank should be null since they're not on the leaderboard
+      const expectedAccurateAsOf = populatedReferrerLeaderboard.accurateAsOf;
+
+      expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Ok);
+      if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+        expect(response.data.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(response.data.rules).toEqual(populatedReferrerLeaderboard.rules);
+        expect(response.data.aggregatedMetrics).toEqual(
+          populatedReferrerLeaderboard.aggregatedMetrics,
+        );
+        expect(response.data.referrer.referrer).toBe(nonExistingReferrer);
+        expect(response.data.referrer.rank).toBe(null);
+        expect(response.data.referrer.totalReferrals).toBe(0);
+        expect(response.data.referrer.totalIncrementalDuration).toBe(0);
+        expect(response.data.referrer.score).toBe(0);
+        expect(response.data.referrer.isQualified).toBe(false);
+        expect(response.data.referrer.finalScoreBoost).toBe(0);
+        expect(response.data.referrer.finalScore).toBe(0);
+        expect(response.data.referrer.awardPoolShare).toBe(0);
+        expect(response.data.referrer.awardPoolApproxValue).toBe(0);
+        expect(response.data.accurateAsOf).toBe(expectedAccurateAsOf);
+      }
+    });
+
+    it("returns zero-score metrics when leaderboard is empty", async () => {
+      // Arrange: set `referrerLeaderboard` context var with empty leaderboard
+      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
+        const mockedReferrerLeaderboard = await pReflect(Promise.resolve(emptyReferralLeaderboard));
+        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        return await next();
+      });
+
+      // Arrange: use any referrer address
+      const referrer = "0x0000000000000000000000000000000000000001";
+
+      // Act: send test request to fetch referrer detail
+      const httpResponse = await app.request(`/referrers/${referrer}`);
+      const responseData = await httpResponse.json();
+      const response = deserializeReferrerDetailResponse(responseData);
+
+      // Assert: response contains zero-score metrics for the referrer
+      // Rank should be null since they're not on the leaderboard
+      const expectedAccurateAsOf = emptyReferralLeaderboard.accurateAsOf;
+
+      expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Ok);
+      if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+        expect(response.data.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(response.data.rules).toEqual(emptyReferralLeaderboard.rules);
+        expect(response.data.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
+        expect(response.data.referrer.referrer).toBe(referrer);
+        expect(response.data.referrer.rank).toBe(null);
+        expect(response.data.referrer.totalReferrals).toBe(0);
+        expect(response.data.referrer.totalIncrementalDuration).toBe(0);
+        expect(response.data.referrer.score).toBe(0);
+        expect(response.data.referrer.isQualified).toBe(false);
+        expect(response.data.referrer.finalScoreBoost).toBe(0);
+        expect(response.data.referrer.finalScore).toBe(0);
+        expect(response.data.referrer.awardPoolShare).toBe(0);
+        expect(response.data.referrer.awardPoolApproxValue).toBe(0);
+        expect(response.data.accurateAsOf).toBe(expectedAccurateAsOf);
+      }
+    });
+
+    it("returns error response when leaderboard fails to load", async () => {
+      // Arrange: set `referrerLeaderboard` context var with rejected promise
+      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
+        const mockedReferrerLeaderboard = await pReflect(
+          Promise.reject(new Error("Database connection failed")),
+        );
+        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        return await next();
+      });
+
+      // Arrange: use any referrer address
+      const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
+
+      // Act: send test request to fetch referrer detail
+      const httpResponse = await app.request(`/referrers/${referrer}`);
+      const responseData = await httpResponse.json();
+      const response = deserializeReferrerDetailResponse(responseData);
+
+      // Assert: response contains error
+      expect(response.responseCode).toBe(ReferrerDetailResponseCodes.Error);
+      if (response.responseCode === ReferrerDetailResponseCodes.Error) {
+        expect(response.error).toBe("Service Unavailable");
+        expect(response.errorMessage).toBe(
+          "Referrer leaderboard data has not been successfully cached yet.",
+        );
+      }
     });
   });
 });

@@ -268,3 +268,101 @@ export const buildAwardedReferrerMetrics = (
   validateAwardedReferrerMetrics(result, rules);
   return result;
 };
+
+/**
+ * Extends {@link AwardedReferrerMetrics} but with rank set to null to represent
+ * a referrer who is not on the leaderboard (has zero referrals within the rules associated with the leaderboard).
+ */
+export interface UnrankedReferrerMetrics
+  extends Omit<AwardedReferrerMetrics, "rank" | "isQualified"> {
+  /**
+   * The referrer is not on the leaderboard and therefore has no rank.
+   */
+  rank: null;
+
+  /**
+   * Always false for unranked referrers.
+   */
+  isQualified: false;
+}
+
+export const validateUnrankedReferrerMetrics = (metrics: UnrankedReferrerMetrics): void => {
+  validateScoredReferrerMetrics(metrics);
+
+  if (metrics.rank !== null) {
+    throw new Error(`Invalid UnrankedReferrerMetrics: rank must be null, got: ${metrics.rank}.`);
+  }
+
+  if (metrics.isQualified !== false) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: isQualified must be false, got: ${metrics.isQualified}.`,
+    );
+  }
+
+  if (metrics.totalReferrals !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: totalReferrals must be 0, got: ${metrics.totalReferrals}.`,
+    );
+  }
+
+  if (metrics.totalIncrementalDuration !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: totalIncrementalDuration must be 0, got: ${metrics.totalIncrementalDuration}.`,
+    );
+  }
+
+  if (metrics.score !== 0) {
+    throw new Error(`Invalid UnrankedReferrerMetrics: score must be 0, got: ${metrics.score}.`);
+  }
+
+  if (metrics.finalScoreBoost !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: finalScoreBoost must be 0, got: ${metrics.finalScoreBoost}.`,
+    );
+  }
+
+  if (metrics.finalScore !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: finalScore must be 0, got: ${metrics.finalScore}.`,
+    );
+  }
+
+  if (metrics.awardPoolShare !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: awardPoolShare must be 0, got: ${metrics.awardPoolShare}.`,
+    );
+  }
+
+  if (metrics.awardPoolApproxValue !== 0) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: awardPoolApproxValue must be 0, got: ${metrics.awardPoolApproxValue}.`,
+    );
+  }
+};
+
+/**
+ * Build an unranked zero-score referrer record for a referrer address that is not in the leaderboard.
+ *
+ * This is useful when you want to return a referrer record for an address that has no referrals
+ * and is not qualified for the leaderboard.
+ *
+ * @param referrer - The referrer address
+ * @returns An {@link UnrankedReferrerMetrics} with zero values for all metrics and null rank
+ */
+export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferrerMetrics => {
+  const baseMetrics = buildReferrerMetrics(referrer, 0, 0);
+  const scoredMetrics = buildScoredReferrerMetrics(baseMetrics);
+
+  const result = {
+    ...scoredMetrics,
+    rank: null,
+    isQualified: false,
+    finalScoreBoost: 0,
+    finalScore: 0,
+    awardPoolShare: 0,
+    awardPoolApproxValue: 0,
+  } satisfies UnrankedReferrerMetrics;
+
+  validateUnrankedReferrerMetrics(result);
+  return result;
+};
