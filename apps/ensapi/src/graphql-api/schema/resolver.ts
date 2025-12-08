@@ -11,7 +11,6 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
@@ -148,13 +147,13 @@ DedicatedResolverMetadataRef.implement({
     ///////////////////////////
     // DedicatedResolver.owner
     ///////////////////////////
-    owner: t.field({
-      description: "TODO",
-      type: AccountRef,
-      nullable: true,
-      // TODO: resolve via EAC
-      resolve: (parent) => parent.ownerId,
-    }),
+    // owner: t.field({
+    //   description: "TODO",
+    //   type: AccountRef,
+    //   nullable: true,
+    //   // TODO: resolve via EAC
+    //   resolve: (parent) => parent.ownerId,
+    // }),
 
     /////////////////////////////////
     // DedicatedResolver.permissions

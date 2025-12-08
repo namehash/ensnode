@@ -1,6 +1,6 @@
 import z from "zod/v4";
 
-import { makeRealtimeIndexingStatusProjectionSchema } from "../../internal";
+import { makeRealtimeIndexingStatusProjectionSchema } from "../../ensindexer/indexing-status/zod-schemas";
 import {
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,

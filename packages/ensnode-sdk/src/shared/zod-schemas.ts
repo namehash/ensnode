@@ -27,11 +27,6 @@ import type {
 } from "./types";
 
 /**
- * Zod `.check()` function input.
- */
-export type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
-
-/**
  * Parses a string value as a boolean.
  */
 export const makeBooleanStringSchema = (valueLabel: string = "Value") =>

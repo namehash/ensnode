@@ -14,8 +14,8 @@ import {
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  type ZodCheckFnInput,
 } from "../../shared/zod-schemas";
+import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import type { ENSIndexerPublicConfig } from "./types";
 import { PluginName } from "./types";

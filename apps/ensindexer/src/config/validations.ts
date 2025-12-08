@@ -1,5 +1,4 @@
 import { type Address, isAddress } from "viem";
-import type { z } from "zod/v4";
 
 import {
   type DatasourceName,
@@ -8,13 +7,11 @@ import {
   maybeGetDatasource,
 } from "@ensnode/datasources";
 import { asLowerCaseAddress, PluginName, uniq } from "@ensnode/ensnode-sdk";
+import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 import { getPlugin } from "@/plugins";
 
 import type { ENSIndexerConfig } from "./types";
-
-// type alias to highlight the input param of Zod's check() method
-type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
 
 // Invariant: specified plugins' datasources are available in the specified namespace's Datasources
 export function invariant_requiredDatasources(

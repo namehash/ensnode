@@ -142,27 +142,6 @@ AccountRef.implement({
     //////////////////////////////
     // Account.dedicatedResolvers
     //////////////////////////////
-    dedicatedResolvers: t.connection({
-      description: "TODO",
-      type: ResolverRef,
-      resolve: (parent, args) =>
-        // TODO(EAC) — migrate to Permissions lookup
-        resolveCursorConnection(
-          { ...DEFAULT_CONNECTION_ARGS, args },
-          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
-            db.query.resolver.findMany({
-              where: (t, { lt, gt, and, eq }) =>
-                and(
-                  ...[
-                    eq(t.ownerId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<ResolverId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ResolverId>(after)),
-                  ].filter((c) => !!c),
-                ),
-              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
-              limit,
-            }),
-        ),
-    }),
+    // TODO: account's dedicated resolvers via EAC
   }),
 });
