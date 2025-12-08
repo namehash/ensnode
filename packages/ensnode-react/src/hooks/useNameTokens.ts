@@ -6,7 +6,7 @@ import type { QueryParameter, WithSDKConfigParameter } from "../types";
 import { createNameTokensQueryOptions } from "../utils/query";
 import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
-interface UseNameTokensParameters extends NameTokensRequest, QueryParameter<NameTokensResponse> {}
+type UseNameTokensParameters = NameTokensRequest & QueryParameter<NameTokensResponse>;
 
 /**
  * Use Name Tokens hook

@@ -715,12 +715,20 @@ export class ENSNodeClient {
    * const response = await client.nameTokens({
    *   name: "vitalik.eth"
    * });
+   *
+   * const response = await client.nameTokens({
+   *   domainId: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835" // namehash('vitalik.eth')
+   * })
    * ```
    */
   async nameTokens(request: NameTokensRequest): Promise<NameTokensResponse> {
     const url = new URL(`/api/name-tokens`, this.options.url);
 
-    url.searchParams.set("name", request.name);
+    if (request.name !== undefined) {
+      url.searchParams.set("name", request.name);
+    } else {
+      url.searchParams.set("domainId", request.domainId);
+    }
 
     const response = await fetch(url);
 

@@ -8,8 +8,10 @@ import {
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
   type NameTokensResponseErrorUnknownNameContext,
+  type Node,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
+import { makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -37,9 +39,16 @@ app.get(
   "/",
   validate(
     "query",
-    z.object({
-      name: params.name,
-    }),
+    z.union([
+      z.object({
+        domainId: makeNodeSchema("request.domainId"),
+        name: z.never(),
+      }),
+      z.object({
+        domainId: z.never(),
+        name: params.name,
+      }),
+    ]),
   ),
   async (c) => {
     // Invariant: context must be set by the required middleware
@@ -54,34 +63,43 @@ app.get(
       );
     }
 
-    const { name } = c.req.valid("query");
-    const parentNode = namehash(getParentNameFQDN(name));
-    const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
+    const queryParams = c.req.valid("query");
+    let domainId: Node | undefined;
 
-    // Return 404 response with error code for unknown name context when
-    // the parent name of the requested name was not registered in any of
-    // the actively indexed subregistries.
-    if (!subregistry) {
-      logger.error(
-        `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
+    if (queryParams.name) {
+      const { name } = queryParams;
+
+      const parentNode = namehash(getParentNameFQDN(name));
+      const subregistry = indexedSubregistries.find(
+        (subregistry) => subregistry.node === parentNode,
       );
 
-      return c.json(
-        serializeNameTokensResponse({
-          responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.UnknownNameContext,
-          error: {
-            message: "Internal Server Error",
-            details: `The requested '${name}' name is unknown to ENSNode.`,
-          },
-        } satisfies NameTokensResponseErrorUnknownNameContext),
-        404,
-      );
+      // Return 404 response with error code for unknown name context when
+      // the parent name of the requested name was not registered in any of
+      // the actively indexed subregistries.
+      if (!subregistry) {
+        logger.error(
+          `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
+        );
+
+        return c.json(
+          serializeNameTokensResponse({
+            responseCode: NameTokensResponseCodes.Error,
+            errorCode: NameTokensResponseErrorCodes.UnknownNameContext,
+            error: {
+              message: "Internal Server Error",
+              details: `The requested '${name}' name is unknown to ENSNode.`,
+            },
+          } satisfies NameTokensResponseErrorUnknownNameContext),
+          404,
+        );
+      }
+
+      domainId = namehash(name);
+    } else {
+      domainId = queryParams.domainId;
     }
 
-    const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
-
-    const domainId = namehash(name);
     const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId);
 
     // Return 404 response with error code for unknown name context when
@@ -105,6 +123,7 @@ app.get(
       );
     }
 
+    const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
     const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
 
     return c.json(
