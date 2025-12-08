@@ -2,11 +2,9 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
 
-import { ResolverABI } from "@ensnode/datasources";
 import {
   type AccountId,
   type CoinType,
-  interpretAddress,
   makeResolverId,
   makeResolverRecordsId,
   type Node,
@@ -78,22 +76,10 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     ? staticResolverImplementsAddressRecordDefaulting(resolver)
     : null;
 
-  // TODO: remove this in favor of EAC
-  const ownerId: Address | null = null;
-  // try {
-  //   const rawOwner = await context.client.readContract({
-  //     address: resolver.address,
-  //     abi: ResolverABI,
-  //     functionName: "owner",
-  //   });
-  //   ownerId = interpretAddress(rawOwner);
-  // } catch {}
-
   // ensure Resolver
   await context.db.insert(schema.resolver).values({
     id: resolverId,
     ...resolver,
-    ownerId,
     isExtended,
     isDedicated,
     isStatic,
@@ -208,18 +194,4 @@ export async function handleResolverTextRecordUpdate(
       .values({ ...id, value: interpretedValue })
       .onConflictDoUpdate({ value: interpretedValue });
   }
-}
-
-/**
- * Updates the resolver's `owner`, interpreting zeroAddress as null.
- */
-export async function handleResolverOwnerUpdate(
-  context: Context,
-  resolver: AccountId,
-  owner: Address,
-) {
-  // upsert owner, interpreting zeroAddress as null
-  await context.db
-    .update(schema.resolver, { id: makeResolverId(resolver) })
-    .set({ ownerId: interpretAddress(owner) });
 }

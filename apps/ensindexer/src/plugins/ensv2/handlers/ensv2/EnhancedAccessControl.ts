@@ -19,14 +19,6 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
  */
 type PermissionsCompositeKey = Pick<typeof schema.permissions.$inferInsert, "chainId" | "address">;
 
-/**
- * Infer the type of the PermissionsUsers entity's composite key.
- */
-type PermissionsUsersCompositeKey = Pick<
-  typeof schema.permissionsUser.$inferInsert,
-  "chainId" | "address" | "resource" | "user"
->;
-
 const ensurePermissionsResource = async (
   context: Context,
   contract: PermissionsCompositeKey,
@@ -50,92 +42,9 @@ const ensurePermissionsResource = async (
 
 const isZeroRoles = (roles: bigint) => roles === 0n;
 
-async function upsertNewRoles(context: Context, key: PermissionsUsersCompositeKey, roles: bigint) {
-  const permissionsUserId = makePermissionsUserId(
-    { chainId: key.chainId, address: key.address },
-    key.resource,
-    key.user,
-  );
-
-  if (isZeroRoles(roles)) {
-    // ensure deleted
-    await context.db.delete(schema.permissionsUser, { id: permissionsUserId });
-  } else {
-    // ensure upserted
-    await context.db
-      .insert(schema.permissionsUser)
-      .values({ id: permissionsUserId, ...key, roles })
-      .onConflictDoUpdate({ roles });
-  }
-}
-
 export default function () {
   ponder.on(
-    namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACRolesGranted"),
-    async ({
-      context,
-      event,
-    }: {
-      context: Context;
-      event: EventWithArgs<{
-        resource: bigint;
-        roleBitmap: bigint;
-        account: Address;
-      }>;
-    }) => {
-      const { resource, roleBitmap: roles, account: user } = event.args;
-
-      // ignore roles for zeroAddress
-      if (isAddressEqual(zeroAddress, user)) return;
-
-      await ensureAccount(context, user);
-
-      const accountId = getThisAccountId(context, event);
-      const permissionsUserId = makePermissionsUserId(accountId, resource, user);
-
-      await ensurePermissionsResource(context, accountId, resource);
-      const existing = await context.db.find(schema.permissionsUser, { id: permissionsUserId });
-
-      // https://github.com/ensdomains/namechain/blob/main/contracts/src/common/access-control/EnhancedAccessControl.sol#L292
-      const newRoles = (existing?.roles ?? 0n) | roles;
-      await upsertNewRoles(context, { ...accountId, resource, user }, newRoles);
-    },
-  );
-
-  ponder.on(
-    namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACRolesRevoked"),
-    async ({
-      context,
-      event,
-    }: {
-      context: Context;
-      event: EventWithArgs<{
-        resource: bigint;
-        roleBitmap: bigint;
-        account: Address;
-      }>;
-    }) => {
-      const { resource, roleBitmap: roles, account: user } = event.args;
-
-      // ignore roles for zeroAddress
-      if (isAddressEqual(zeroAddress, user)) return;
-
-      await ensureAccount(context, user);
-
-      const accountId = getThisAccountId(context, event);
-      const permissionsUserId = makePermissionsUserId(accountId, resource, user);
-
-      await ensurePermissionsResource(context, accountId, resource);
-      const existing = await context.db.find(schema.permissionsUser, { id: permissionsUserId });
-
-      // https://github.com/ensdomains/namechain/blob/main/contracts/src/common/access-control/EnhancedAccessControl.sol#L325
-      const newRoles = (existing?.roles ?? 0n) & ~roles;
-      await upsertNewRoles(context, { ...accountId, resource, user }, newRoles);
-    },
-  );
-
-  ponder.on(
-    namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACAllRolesRevoked"),
+    namespaceContract(PluginName.ENSv2, "EnhancedAccessControl:EACRolesChanged"),
     async ({
       context,
       event,
@@ -144,19 +53,37 @@ export default function () {
       event: EventWithArgs<{
         resource: bigint;
         account: Address;
+        oldRoleBitmap: bigint;
+        newRoleBitmap: bigint;
       }>;
     }) => {
-      const { resource, account: user } = event.args;
+      // biome-ignore lint/correctness/noUnusedVariables: TODO: use oldRoleBitmap at all?
+      const { resource, account: user, oldRoleBitmap, newRoleBitmap } = event.args;
 
-      // ignore roles for zeroAddress
-      if (isAddressEqual(zeroAddress, user)) return;
+      // Invariant: EAC reverts EACInvalidAccount if account === zeroAddress
+      if (isAddressEqual(zeroAddress, user)) {
+        throw new Error(
+          `Invariant(EnhancedAccessControl:EACRolesChanged): EACRolesChanged emitted for zeroAddress, should have reverted.`,
+        );
+      }
+
+      const contract = getThisAccountId(context, event);
+      const permissionsUserId = makePermissionsUserId(contract, resource, user);
 
       await ensureAccount(context, user);
+      await ensurePermissionsResource(context, contract, resource);
 
-      const accountId = getThisAccountId(context, event);
-      await ensurePermissionsResource(context, accountId, resource);
-
-      await upsertNewRoles(context, { ...accountId, resource, user }, 0n);
+      const roles = newRoleBitmap;
+      if (isZeroRoles(roles)) {
+        // ensure deleted
+        await context.db.delete(schema.permissionsUser, { id: permissionsUserId });
+      } else {
+        // ensure upserted
+        await context.db
+          .insert(schema.permissionsUser)
+          .values({ id: permissionsUserId, ...contract, resource, user, roles })
+          .onConflictDoUpdate({ roles });
+      }
     },
   );
 }

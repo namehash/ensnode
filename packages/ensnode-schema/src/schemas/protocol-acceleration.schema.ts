@@ -92,15 +92,6 @@ export const resolver = onchainTable(
     address: t.hex().notNull().$type<Address>(),
 
     /**
-     * A Resolver may have an `owner` via Ownable.
-     *
-     * TODO: move this to EAC
-     *
-     * Mainly relevant for DedicatedResolvers.
-     */
-    ownerId: t.hex().$type<Address>(),
-
-    /**
      * Whether the Resolver implements IExtendedResolver.
      */
     isExtended: t.boolean().default(false),

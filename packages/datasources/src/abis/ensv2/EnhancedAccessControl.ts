@@ -42,6 +42,11 @@ export const EnhancedAccessControl = [
     type: "error",
   },
   {
+    inputs: [],
+    name: "EACInvalidAccount",
+    type: "error",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -114,69 +119,31 @@ export const EnhancedAccessControl = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
+        indexed: true,
         internalType: "uint256",
         name: "resource",
         type: "uint256",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "address",
         name: "account",
         type: "address",
       },
-    ],
-    name: "EACAllRolesRevoked",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
       {
         indexed: false,
         internalType: "uint256",
-        name: "resource",
+        name: "oldRoleBitmap",
         type: "uint256",
       },
       {
         indexed: false,
         internalType: "uint256",
-        name: "roleBitmap",
+        name: "newRoleBitmap",
         type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
       },
     ],
-    name: "EACRolesGranted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "resource",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "roleBitmap",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-    ],
-    name: "EACRolesRevoked",
+    name: "EACRolesChanged",
     type: "event",
   },
   {

@@ -5,8 +5,6 @@ import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
-
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { LruCache, SWRCache, TtlCache } from "./cache";
+import { LruCache, TtlCache } from "./cache";
 
 describe("LruCache", () => {
   it("throws Error if capacity is not an integer", () => {

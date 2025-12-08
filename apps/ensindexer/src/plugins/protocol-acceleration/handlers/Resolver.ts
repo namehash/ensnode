@@ -1,13 +1,6 @@
 import { ponder } from "ponder:registry";
-import schema from "ponder:schema";
 
-import {
-  bigintToCoinType,
-  type CoinType,
-  ETH_COIN_TYPE,
-  makeResolverId,
-  PluginName,
-} from "@ensnode/ensnode-sdk";
+import { bigintToCoinType, type CoinType, ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
@@ -17,7 +10,6 @@ import {
   ensureResolverRecords,
   handleResolverAddressRecordUpdate,
   handleResolverNameUpdate,
-  handleResolverOwnerUpdate,
   handleResolverTextRecordUpdate,
   makeResolverRecordsCompositeKey,
 } from "@/lib/protocol-acceleration/resolver-db-helpers";
@@ -180,20 +172,6 @@ export default function () {
       await ensureResolverRecords(context, resolverRecordsKey);
 
       await handleResolverTextRecordUpdate(context, resolverRecordsKey, key, null);
-    },
-  );
-
-  ponder.on(
-    namespaceContract(pluginName, "Resolver:OwnershipTransferred"),
-    async ({ context, event }) => {
-      // ignore OwnershipTransferred events that are not about Resolvers we're aware of
-      const resolver = getThisAccountId(context, event);
-      const resolverId = makeResolverId(resolver);
-      const existing = await context.db.find(schema.resolver, { id: resolverId });
-      if (!existing) return;
-
-      const { newOwner } = event.args;
-      await handleResolverOwnerUpdate(context, resolver, newOwner);
     },
   );
 }

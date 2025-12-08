@@ -1,28 +1,9 @@
-import { zeroAddress } from "viem";
-import {
-  arbitrumSepolia,
-  baseSepolia,
-  lineaSepolia,
-  optimismSepolia,
-  scrollSepolia,
-  sepolia,
-} from "viem/chains";
+import { sepolia } from "viem/chains";
 
-// ABIs for Basenames Datasource
-import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
-import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
-import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
-import { Registry as base_Registry } from "./abis/basenames/Registry";
-import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 // ABIs for Namechain
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
-// ABIs for Lineanames Datasource
-import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
-import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
-import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
-import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
