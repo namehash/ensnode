@@ -12,8 +12,13 @@
  * app/package in the monorepo which requires `@ensnode/ensnode-sdk` dependency.
  */
 
-export * from "./api/zod-schemas";
+export * from "./api/indexing-status/zod-schemas";
+export * from "./api/registrar-actions/zod-schemas";
+export * from "./api/shared/errors/zod-schemas";
+export * from "./api/shared/pagination/zod-schemas";
 export * from "./ensindexer/config/zod-schemas";
+export * from "./ensindexer/indexing-status/zod-schemas";
+export * from "./registrars/zod-schemas";
 export * from "./rpc";
 export * from "./shared/config/build-rpc-urls";
 export * from "./shared/config/environments";
@@ -22,7 +27,6 @@ export * from "./shared/config/redacting";
 export * from "./shared/config/rpc-configs-from-env";
 export * from "./shared/config/types";
 export * from "./shared/config/validatons";
-export * from "./shared/config/zod-schemas";
 export * from "./shared/datasources-with-resolvers";
 export * from "./shared/interpretation/interpret-record-values";
 export * from "./shared/log-level";

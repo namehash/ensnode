@@ -125,10 +125,12 @@ module "ensindexer" {
   ensrainbow_url   = module.ensrainbow.ensrainbow_url
 
   # Common configuration
-  render_region         = local.render_region
-  render_environment_id = render_project.ensnode.environments["default"].id
-  ensdb_url             = module.ensdb.internal_connection_string
-  alchemy_api_key       = var.alchemy_api_key
+  render_region           = local.render_region
+  render_environment_id   = render_project.ensnode.environments["default"].id
+  ensdb_url               = module.ensdb.internal_connection_string
+  alchemy_api_key         = var.alchemy_api_key
+  quicknode_api_key       = var.quicknode_api_key
+  quicknode_endpoint_name = var.quicknode_endpoint_name
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
   ensindexer_label_set_id      = var.ensindexer_label_set_id

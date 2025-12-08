@@ -2,6 +2,7 @@ import { type Address, hexToBigInt } from "viem";
 
 import {
   type AccountId,
+  AssetNamespaces,
   type LabelHash,
   type Node,
   serializeAccountId,
@@ -37,7 +38,8 @@ export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
  */
 export const makeENSv2DomainId = (registry: AccountId, canonicalId: CanonicalId) =>
   serializeAssetId({
-    ...registry,
+    assetNamespace: AssetNamespaces.ERC1155,
+    contract: registry,
     tokenId: canonicalId,
   }) as ENSv2DomainId;
 

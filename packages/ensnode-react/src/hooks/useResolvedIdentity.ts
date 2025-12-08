@@ -23,6 +23,7 @@ import { usePrimaryName } from "./usePrimaryName";
 export interface UseResolvedIdentityParameters {
   identity: UnresolvedIdentity;
   namespaceId: ENSNamespaceId;
+  accelerate?: boolean;
 }
 
 /**
@@ -35,6 +36,8 @@ export interface UseResolvedIdentityParameters {
  * @param parameters.namespaceId - The {@link ENSNamespaceId} that `identity.chainId` should be interpreted
  *                                 through (via {@link getResolvePrimaryNameChainIdParam}) to determine the literal
  *                                 chainId that should be used for ENSIP-19 primary name resolution.
+ * @param parameters.accelerate - Whether to attempt Protocol Acceleration (default: false)
+ *                                when resolving the primary name.
  *
  * @returns An object containing:
  * - `identity`: An {@link Identity} with one of four possible {@link ResolutionStatusIds}:
@@ -45,7 +48,7 @@ export interface UseResolvedIdentityParameters {
  * - All other properties from the underlying {@link usePrimaryName} query (e.g., `isLoading`, `error`, `refetch`, etc.)
  */
 export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
-  const { identity, namespaceId, ...args } = parameters;
+  const { identity, namespaceId, accelerate, ...args } = parameters;
 
   const {
     data: primaryNameData,
@@ -54,6 +57,7 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
   } = usePrimaryName({
     address: identity.address,
     chainId: getResolvePrimaryNameChainIdParam(identity.chainId, namespaceId),
+    accelerate,
     ...args,
   });
 

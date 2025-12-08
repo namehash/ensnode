@@ -4,6 +4,8 @@ import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "@ensnode/datasources";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
+import { buildConfigFromEnvironment } from "@/config/config.schema";
+
 import type { ENSIndexerEnvironment } from "./environment";
 import { EnvironmentDefaults } from "./environment-defaults";
 
@@ -368,6 +370,41 @@ describe("config (with base env)", () => {
       await expect(getConfig()).rejects.toThrow(
         /RPC endpoint configuration for a chain must include at most one websocket \(ws\/wss\) protocol URL./i,
       );
+    });
+
+    describe("Useful error messages", () => {
+      // Mock process.exit to prevent actual exit
+      const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+
+      beforeEach(() => {
+        vi.clearAllMocks();
+      });
+
+      afterEach(() => {
+        mockExit.mockClear();
+      });
+
+      it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
+        expect(() =>
+          buildConfigFromEnvironment({
+            ...BASE_ENV,
+            QUICKNODE_API_KEY: "my-api-key",
+          }),
+        ).toThrowError(
+          /Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well/i,
+        );
+      });
+
+      it("logs error message when QuickNode RPC config was partially configured (missing API key)", async () => {
+        expect(() =>
+          buildConfigFromEnvironment({
+            ...BASE_ENV,
+            QUICKNODE_ENDPOINT_NAME: "my-endpoint-name",
+          }),
+        ).toThrowError(
+          /Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well/i,
+        );
+      });
     });
   });
 

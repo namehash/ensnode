@@ -69,10 +69,14 @@ export function serializeAccountId(accountId: AccountId): SerializedAccountId {
  *
  * @see https://chainagnostic.org/CAIPs/caip-19
  */
-export function serializeAssetId({ chainId, address, tokenId }: AssetId): SerializedAssetId {
+export function serializeAssetId({
+  assetNamespace,
+  contract: { chainId, address },
+  tokenId,
+}: AssetId): SerializedAssetId {
   return CaipAssetId.format({
     chainId: { namespace: "eip155", reference: chainId.toString() },
-    assetName: { namespace: "erc1155", reference: address },
+    assetName: { namespace: assetNamespace, reference: address },
     tokenId: tokenId.toString(),
   }).toLowerCase();
 }

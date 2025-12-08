@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import { memo, type PropsWithChildren } from "react";
 import { zeroAddress } from "viem";
 
 import {
@@ -9,7 +9,8 @@ import {
   NamedRegistrarAction,
   RegistrarActionReferral,
   RegistrarActionTypes,
-  zeroEncodedReferrer,
+  UnixTimestamp,
+  ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
 import { DisplayDuration, RelativeTime } from "@/components/datetime-utils";
@@ -18,6 +19,7 @@ import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { ExternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNow } from "@/hooks/use-now";
 import { getBlockExplorerUrlForTransactionHash } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +60,7 @@ function ResolveAndDisplayReferrerIdentity({
   // display a hyphen
   if (
     !isRegistrarActionReferralAvailable(referral) ||
-    referral.encodedReferrer === zeroEncodedReferrer
+    referral.encodedReferrer === ZERO_ENCODED_REFERRER
   ) {
     return <>-</>;
   }
@@ -93,6 +95,7 @@ function ResolveAndDisplayReferrerIdentity({
   return (
     <ResolveAndDisplayIdentity
       identity={referrerIdentity}
+      accelerate={true}
       withAvatar={true}
       className="font-medium"
     />
@@ -131,6 +134,7 @@ export function DisplayRegistrarActionCardPlaceholder() {
 export interface DisplayRegistrarActionCardProps {
   namespaceId: ENSNamespaceId;
   namedRegistrarAction: NamedRegistrarAction;
+  now: UnixTimestamp;
 }
 
 /**
@@ -139,6 +143,7 @@ export interface DisplayRegistrarActionCardProps {
 export function DisplayRegistrarActionCard({
   namespaceId,
   namedRegistrarAction,
+  now,
 }: DisplayRegistrarActionCardProps) {
   const { registrant, registrationLifecycle, type, referral, transactionHash } =
     namedRegistrarAction.action;
@@ -177,6 +182,7 @@ export function DisplayRegistrarActionCard({
           tooltipPosition="top"
           conciseFormatting={true}
           contentWrapper={withTransactionLink}
+          relativeTo={now}
         />
       </LabeledField>
 
@@ -187,6 +193,7 @@ export function DisplayRegistrarActionCard({
       <LabeledField fieldLabel="Registrant" className="w-1/5 overflow-x-auto min-w-[140px]">
         <ResolveAndDisplayIdentity
           identity={registrantIdentity}
+          accelerate={true}
           withAvatar={true}
           className="font-medium"
         />
@@ -202,3 +209,5 @@ export function DisplayRegistrarActionCard({
     </div>
   );
 }
+
+export const DisplayRegistrarActionCardMemo = memo(DisplayRegistrarActionCard);

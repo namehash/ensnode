@@ -11,4 +11,5 @@ export * from "./identity";
 export * from "./registrars";
 export * from "./resolution";
 export * from "./shared";
+export * from "./tokenscope";
 export * from "./tracing";

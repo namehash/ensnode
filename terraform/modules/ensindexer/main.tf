@@ -1,8 +1,10 @@
 locals {
   common_variables = {
     # Common configuration
-    "DATABASE_URL"    = { value = var.ensdb_url },
-    "ALCHEMY_API_KEY" = { value = var.alchemy_api_key }
+    "DATABASE_URL"            = { value = var.ensdb_url },
+    "ALCHEMY_API_KEY"         = { value = var.alchemy_api_key }
+    "QUICKNODE_API_KEY"       = { value = var.quicknode_api_key }
+    "QUICKNODE_ENDPOINT_NAME" = { value = var.quicknode_endpoint_name }
   }
 }
 

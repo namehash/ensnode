@@ -1,5 +1,29 @@
 # @docs/ensnode
 
+## 1.2.0
+
+### Patch Changes
+
+- [#1346](https://github.com/namehash/ensnode/pull/1346) [`9b498d9`](https://github.com/namehash/ensnode/commit/9b498d9ceb0d712213b56f0ce157d4728032fe79) Thanks [@djstrong](https://github.com/djstrong)! - Capitalize "Namehash Labs" to "NameHash Labs"
+
+## 1.1.0
+
+## 1.0.3
+
+## 1.0.2
+
+## 1.0.1
+
+## 1.0.0
+
+### Minor Changes
+
+- [#1265](https://github.com/namehash/ensnode/pull/1265) [`df1cf8c`](https://github.com/namehash/ensnode/commit/df1cf8c4a0d4fe0db4750b46f721416c72ba86d2) Thanks [@tk-o](https://github.com/tk-o)! - Document the HTTP endpoint for Registrar Actions API.
+
+- [#1257](https://github.com/namehash/ensnode/pull/1257) [`d7b2e23`](https://github.com/namehash/ensnode/commit/d7b2e23e856ffb1d7ce004f9d4277842fa6cf1d5) Thanks [@tk-o](https://github.com/tk-o)! - Update API docs.
+
+- [#1260](https://github.com/namehash/ensnode/pull/1260) [`0fca0c9`](https://github.com/namehash/ensnode/commit/0fca0c987441667d57c27e7a95c2a5c6076af6df) Thanks [@notrab](https://github.com/notrab)! - Use the new ENSApi icon for documentation sidebar
+
 ## 0.36.0
 
 ### Minor Changes

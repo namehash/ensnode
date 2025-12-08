@@ -14,7 +14,7 @@ import type {
   ReverseResolutionResult,
 } from "../resolution";
 import type { ProtocolTrace } from "../tracing";
-import type { ErrorResponseSchema } from "./zod-schemas";
+import type { ErrorResponseSchema } from "./shared/errors/zod-schemas";
 
 /**
  * API Error Response Type

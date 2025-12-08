@@ -33,14 +33,31 @@ export interface AccountId {
 }
 
 /**
- * Represents an ERC1155 asset by `tokenId` at `address` on chain `chainId`.
+ * An enum representing the possible CAIP-19 Asset Namespace values.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export const AssetNamespaces = {
+  ERC721: "erc721",
+  ERC1155: "erc1155",
+} as const;
+
+export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
+
+/**
+ * A uint256 value that identifies a specific NFT within a NFT contract.
+ */
+export type TokenId = bigint;
+
+/**
+ * Represents an Asset in `assetNamespace` by `tokenId` in `contract`.
  *
  * @see https://chainagnostic.org/CAIPs/caip-19
  */
 export interface AssetId {
-  chainId: ChainId;
-  address: Address;
-  tokenId: bigint;
+  assetNamespace: AssetNamespace;
+  contract: AccountId;
+  tokenId: TokenId;
 }
 
 /**

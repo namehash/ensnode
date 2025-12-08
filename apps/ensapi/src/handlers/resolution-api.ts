@@ -60,6 +60,11 @@ app.get(
       }),
   ),
   async (c) => {
+    // context must be set by the required middleware
+    if (c.var.canAccelerate === undefined) {
+      throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
+    }
+
     const { name } = c.req.valid("param");
     const { selection, trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
@@ -103,6 +108,11 @@ app.get(
     }),
   ),
   async (c) => {
+    // context must be set by the required middleware
+    if (c.var.canAccelerate === undefined) {
+      throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
+    }
+
     const { address, chainId } = c.req.valid("param");
     const { trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
@@ -144,6 +154,11 @@ app.get(
     }),
   ),
   async (c) => {
+    // context must be set by the required middleware
+    if (c.var.canAccelerate === undefined) {
+      throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
+    }
+
     const { address } = c.req.valid("param");
     const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;

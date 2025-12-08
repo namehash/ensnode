@@ -10,10 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
+import { useNow } from "@/hooks/use-now";
 import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 
 import {
-  DisplayRegistrarActionCard,
+  DisplayRegistrarActionCardMemo,
   DisplayRegistrarActionCardPlaceholder,
 } from "./display-registrar-action-card";
 import { type StatefulFetchRegistrarActions, StatefulFetchStatusIds } from "./types";
@@ -31,6 +32,7 @@ function DisplayRegistrarActionsList({
   registrarActions,
 }: DisplayRegistrarActionsListProps) {
   const [animationParent] = useAutoAnimate();
+  const now = useNow();
 
   return (
     <div
@@ -38,10 +40,11 @@ function DisplayRegistrarActionsList({
       className="w-full h-fit box-border flex flex-col justify-start items-center gap-3"
     >
       {registrarActions.map((namedRegistrarAction) => (
-        <DisplayRegistrarActionCard
-          key={namedRegistrarAction.name}
+        <DisplayRegistrarActionCardMemo
+          key={namedRegistrarAction.action.id}
           namespaceId={namespaceId}
           namedRegistrarAction={namedRegistrarAction}
+          now={now}
         />
       ))}
     </div>

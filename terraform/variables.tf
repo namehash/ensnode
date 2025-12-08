@@ -23,12 +23,20 @@ variable "render_owner_id" {
 
 variable "ensdb_disk_size_gb" {
   type    = number
-  default = 250
+  default = 255
 }
 
 # ENSNode Variables
 
 variable "alchemy_api_key" {
+  type = string
+}
+
+variable "quicknode_api_key" {
+  type = string
+}
+
+variable "quicknode_endpoint_name" {
   type = string
 }
 

@@ -78,3 +78,11 @@ variable "subgraph_compat" {
 variable "alchemy_api_key" {
   type = string
 }
+
+variable "quicknode_api_key" {
+  type = string
+}
+
+variable "quicknode_endpoint_name" {
+  type = string
+}

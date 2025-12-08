@@ -3,7 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { type IndexingStatusResponse, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import {
+  type IndexingStatusResponse,
+  IndexingStatusResponseOk,
+  OmnichainIndexingStatusIds,
+} from "@ensnode/ensnode-sdk";
 
 import { IndexingStats } from "@/components/indexing-status/indexing-stats";
 import { Button } from "@/components/ui/button";
@@ -16,7 +20,7 @@ import {
 
 type LoadingVariant = "Loading" | "Loading Error";
 type ResponseOkVariant = keyof typeof indexingStatusResponseOkOmnichain;
-type ResponseErrorVariant = "Response Error";
+type ResponseErrorVariant = "Error ResponseCode";
 type Variant = ResponseOkVariant | ResponseErrorVariant | LoadingVariant;
 
 const variants = [
@@ -26,14 +30,14 @@ const variants = [
   OmnichainIndexingStatusIds.Completed,
   "Loading",
   "Loading Error",
-  "Response Error",
+  "Error ResponseCode",
 ] as const;
 
 let loadingTimeoutId: number;
 
 async function fetchMockedIndexingStatus(
   selectedVariant: Variant,
-): Promise<IndexingStatusResponse> {
+): Promise<IndexingStatusResponseOk> {
   // always try clearing loading timeout when performing a mocked fetch
   // this way we get a fresh and very long request to observe the loading state
   if (loadingTimeoutId) {
@@ -45,11 +49,13 @@ async function fetchMockedIndexingStatus(
     case OmnichainIndexingStatusIds.Backfill:
     case OmnichainIndexingStatusIds.Following:
     case OmnichainIndexingStatusIds.Completed:
-      return indexingStatusResponseOkOmnichain[selectedVariant];
-    case "Response Error":
-      return indexingStatusResponseError;
+      return indexingStatusResponseOkOmnichain[selectedVariant] as IndexingStatusResponseOk;
+    case "Error ResponseCode":
+      throw new Error(
+        "Received Indexing Status response with responseCode other than 'ok' which will not be cached.",
+      );
     case "Loading":
-      return new Promise<IndexingStatusResponse>((_resolve, reject) => {
+      return new Promise<IndexingStatusResponseOk>((_resolve, reject) => {
         loadingTimeoutId = +setTimeout(reject, 5 * 60 * 1_000);
       });
     case "Loading Error":

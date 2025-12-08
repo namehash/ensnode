@@ -45,6 +45,20 @@ export const makeBooleanStringSchema = (valueLabel: string = "Value") =>
     .transform((val) => val === "true");
 
 /**
+ * Parses a numeric value as a finite non-negative number.
+ */
+export const makeFiniteNonNegativeNumberSchema = (valueLabel: string = "Value") =>
+  z
+    .number({
+      // NOTE: Zod's implementation of `number` automatically rejects NaN and Infinity values.
+      // and therefore the finite check is implicit.
+      error: `${valueLabel} must be a finite number.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must be a non-negative number (>=0).`,
+    });
+
+/**
  * Parses a numeric value as an integer.
  */
 export const makeIntegerSchema = (valueLabel: string = "Value") =>
@@ -287,7 +301,7 @@ export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
  */
 export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   z.strictObject({
-    chainId: makeChainIdStringSchema(`${valueLabel} chain ID`),
+    chainId: makeChainIdSchema(`${valueLabel} chain ID`),
     address: makeLowercaseAddressSchema(`${valueLabel} address`),
   });
 
@@ -301,7 +315,7 @@ export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = 
       const result = new CaipAccountId(v);
 
       return {
-        chainId: result.chainId.reference,
+        chainId: Number(result.chainId.reference),
         address: result.address,
       };
     })
