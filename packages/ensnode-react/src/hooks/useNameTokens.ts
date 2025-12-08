@@ -19,12 +19,10 @@ export function useNameTokens(parameters: WithSDKConfigParameter & UseNameTokens
 
   const queryOptions = createNameTokensQueryOptions(_config, parameters);
 
-  const options = {
+  return useQuery({
     ...queryOptions,
-    refetchInterval: 60 * 1000, // 60 seconds - latest Name Tokens change infrequently
+    refetchInterval: false, // no refetching - assume data is immutable until a full page refresh
     ...query,
     enabled: query.enabled ?? queryOptions.enabled,
-  };
-
-  return useQuery(options);
+  });
 }

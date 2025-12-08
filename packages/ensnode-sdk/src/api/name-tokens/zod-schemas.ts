@@ -1,11 +1,6 @@
 import z from "zod/v4";
-import type { ParsePayload } from "zod/v4/core";
 
-import {
-  makeNameTokenSchema,
-  makeRegistrationLifecycleSchema,
-  makeUnixTimestampSchema,
-} from "../../internal";
+import { makeNameTokenSchema, makeNodeSchema, makeUnixTimestampSchema } from "../../internal";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import {
   NameTokensResponse,
@@ -15,35 +10,18 @@ import {
   NameTokensResponseErrorGeneric,
   NameTokensResponseErrorUnknownNameContext,
   NameTokensResponseOk,
-  type RegisteredNameToken,
-  RegisteredNameTokenStatuses,
+  RegisteredNameTokens,
 } from "./response";
 
-function invariant_registrationLifecycleNodeMatchesDomainId(
-  ctx: ParsePayload<RegisteredNameToken>,
-) {
-  const { token, registrationLifecycle } = ctx.value;
-
-  if (token.domainAsset.domainId !== registrationLifecycle.node) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: `The 'registrationLifecycle.node' must be same as 'token.domainAsset.domainId'`,
-    });
-  }
-}
-
 /**
- * Schema for {@link RegisteredNameToken}.
+ * Schema for {@link RegisteredNameTokens}.
  */
 export const makeRegisteredNameTokenSchema = (valueLabel: string = "Registered Name Token") =>
-  z
-    .object({
-      token: makeNameTokenSchema(valueLabel),
-      registrationLifecycle: makeRegistrationLifecycleSchema(valueLabel),
-      tokenStatus: z.enum(RegisteredNameTokenStatuses),
-    })
-    .check(invariant_registrationLifecycleNodeMatchesDomainId);
+  z.object({
+    domainId: makeNodeSchema(`${valueLabel}.domainId`),
+    tokens: z.array(makeNameTokenSchema(`${valueLabel}.tokens`)).nonempty(),
+    expiresAt: makeUnixTimestampSchema(`${valueLabel}.expiresAt`),
+  });
 
 /**
  * Schema for {@link NameTokensResponseOk}
@@ -51,7 +29,7 @@ export const makeRegisteredNameTokenSchema = (valueLabel: string = "Registered N
 export const makeNameTokensResponseOkSchema = (valueLabel: string = "Name Tokens Response OK") =>
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Ok),
-    nameTokens: z.array(makeRegisteredNameTokenSchema(`${valueLabel}.nameTokens`)),
+    registeredNameTokens: makeRegisteredNameTokenSchema(`${valueLabel}.nameTokens`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 

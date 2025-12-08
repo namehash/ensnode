@@ -18,7 +18,7 @@ export interface NameToken {
   /**
    * Owner
    *
-   * Identifies the address that acquired the name token.
+   * Identifies the address that owns the name token.
    *
    * The "chainId" of this address is the same as is referenced in
    * `domainAsset.contract.chainId`.
@@ -28,10 +28,11 @@ export interface NameToken {
   /**
    * The mint status of the token.
    *
-   * After an NFT was indexed it can never be deleted. Instead, when an
-   * indexed NFT is burned onchain its record is retained and its mint
-   * status is updated as `burned`. If the NFT is minted again after
-   * it was burned, its mint status is updated to `minted`.
+   * After ENSNode indexes the token for a name, even if that token is burned,
+   * ENSNode will never forget how the token once represented the name.
+   * When the token for a name is burned, ENSNode remembers this token but
+   * updates its mint status to `burned`. If this token becomes minted again
+   * after it was burned, its mint status is updated to `minted` again.
    */
   mintStatus: NFTMintStatus;
 }

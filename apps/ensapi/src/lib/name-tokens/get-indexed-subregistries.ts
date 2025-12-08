@@ -8,27 +8,38 @@ import {
   getEthnamesSubregistryManagedName,
   getLineanamesSubregistryId,
   getLineanamesSubregistryManagedName,
+  PluginName,
   type Subregistry,
 } from "@ensnode/ensnode-sdk";
 
 /**
  * Get list of all actively indexed subregistries for the ENS Namespace.
  */
-export function getIndexedSubregistries(namespaceId: ENSNamespaceId): Subregistry[] {
-  const ethnames = {
-    subregistryId: getEthnamesSubregistryId(namespaceId),
-    node: namehash(getEthnamesSubregistryManagedName(namespaceId)),
-  } satisfies Subregistry;
+export function getIndexedSubregistries(
+  namespaceId: ENSNamespaceId,
+  activePlugins: string[],
+): Subregistry[] {
+  const indexedSubregistries: Subregistry[] = [];
 
-  const basenames = {
-    subregistryId: getBasenamesSubregistryId(namespaceId),
-    node: namehash(getBasenamesSubregistryManagedName(namespaceId)),
-  } satisfies Subregistry;
+  if (activePlugins.includes(PluginName.Subgraph)) {
+    indexedSubregistries.push({
+      subregistryId: getEthnamesSubregistryId(namespaceId),
+      node: namehash(getEthnamesSubregistryManagedName(namespaceId)),
+    });
+  }
+  if (activePlugins.includes(PluginName.Basenames)) {
+    indexedSubregistries.push({
+      subregistryId: getBasenamesSubregistryId(namespaceId),
+      node: namehash(getBasenamesSubregistryManagedName(namespaceId)),
+    });
+  }
 
-  const lineanames = {
-    subregistryId: getLineanamesSubregistryId(namespaceId),
-    node: namehash(getLineanamesSubregistryManagedName(namespaceId)),
-  } satisfies Subregistry;
+  if (activePlugins.includes(PluginName.Lineanames)) {
+    indexedSubregistries.push({
+      subregistryId: getLineanamesSubregistryId(namespaceId),
+      node: namehash(getLineanamesSubregistryManagedName(namespaceId)),
+    });
+  }
 
-  return [ethnames, basenames, lineanames];
+  return indexedSubregistries;
 }

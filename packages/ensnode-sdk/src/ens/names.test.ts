@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { beautifyName, getNameHierarchy, getParentNameFQDN } from "./names";
+import { beautifyName, ENS_ROOT, getNameHierarchy, getParentNameFQDN } from "./names";
 import type { Name, NormalizedName } from "./types";
 
 describe("names", () => {
@@ -31,12 +31,14 @@ describe("names", () => {
   });
 
   describe("getParentNameFQDN", () => {
-    it("returns FQDN for an empty name", () => {
-      expect(getParentNameFQDN("")).toStrictEqual("");
+    it("throws error for ENS Root", () => {
+      expect(() => getParentNameFQDN(ENS_ROOT)).toThrowError(
+        /There is no parent name for ENS Root/i,
+      );
     });
 
-    it("returns FQDN for top-level name", () => {
-      expect(getParentNameFQDN("eth")).toStrictEqual("");
+    it("returns ENS Root for top-level name", () => {
+      expect(getParentNameFQDN("eth")).toStrictEqual(ENS_ROOT);
     });
 
     it("returns FQDN for 2nd-level name", () => {

@@ -4,22 +4,18 @@ import { namehash } from "viem";
 import z from "zod/v4";
 
 import {
-  getLatestIndexedBlockRef,
   getParentNameFQDN,
-  NameTokensOrders,
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
   type NameTokensResponseErrorUnknownNameContext,
-  nameTokensFilter,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
-import { makePositiveIntegerSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { findNameTokens } from "@/lib/name-tokens/find-name-tokens";
+import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
@@ -27,34 +23,22 @@ const app = factory.createApp();
 
 const logger = makeLogger("name-tokens-api");
 
-const RESPONSE_RECORDS_PER_PAGE_DEFAULT = 25;
-const RESPONSE_RECORDS_PER_PAGE_MAX = 25;
+const indexedSubregistries = getIndexedSubregistries(
+  config.namespace,
+  config.ensIndexerPublicConfig.plugins,
+);
 
-const indexedSubregistries = getIndexedSubregistries(config.namespace);
-
-// Middleware managing access to Name Tokens API routes.
-// It makes the routes available if all prerequisites are met.
+// Middleware managing access to Name Tokens API route.
+// It makes the route available if all prerequisites are met,
+// and if not returns the appropriate HTTP 503 (Service Unavailable) error.
 app.use(nameTokensApiMiddleware);
 
 app.get(
-  "/:name",
-  validate(
-    "param",
-    z.object({
-      name: params.name,
-    }),
-  ),
-
+  "/",
   validate(
     "query",
     z.object({
-      orderBy: z.enum(NameTokensOrders).default(NameTokensOrders.LatestNameTokens),
-
-      recordsPerPage: params.queryParam
-        .optional()
-        .default(RESPONSE_RECORDS_PER_PAGE_DEFAULT)
-        .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema().max(RESPONSE_RECORDS_PER_PAGE_MAX)),
+      name: params.name,
     }),
   ),
   async (c) => {
@@ -70,13 +54,17 @@ app.get(
       );
     }
 
-    const { name } = c.req.valid("param");
-
+    const { name } = c.req.valid("query");
     const parentNode = namehash(getParentNameFQDN(name));
     const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
 
+    // Return 404 response with error code for unknown name context when
+    // the parent name of the requested name was not registered in any of
+    // the actively indexed subregistries.
     if (!subregistry) {
-      logger.error(`The requested '${name}' name is unknown to ENSNode.`);
+      logger.error(
+        `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
+      );
 
       return c.json(
         serializeNameTokensResponse({
@@ -87,34 +75,42 @@ app.get(
             details: `The requested '${name}' name is unknown to ENSNode.`,
           },
         } satisfies NameTokensResponseErrorUnknownNameContext),
+        404,
       );
     }
 
-    const { snapshot } = c.var.indexingStatus.value;
-    const { subregistryId } = subregistry;
-    const latestIndexedBlockRef = getLatestIndexedBlockRef(snapshot, subregistryId.chainId);
+    const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
 
-    // Invariant: Latest Indexed Block ref must be available for a known `subregistryId.chainId`.
-    if (latestIndexedBlockRef === null) {
-      throw new Error(
-        `Invariant(name-tokens-api): Latest Indexed Block ref must be available for a known 'subregistryId.chainId'`,
+    const domainId = namehash(name);
+    const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId);
+
+    // Return 404 response with error code for unknown name context when
+    // the no name tokens were found for the domain ID associated with
+    // the requested name.
+    if (!registeredNameTokens) {
+      logger.error(
+        `This ENSNode instance has never indexed tokens for the requested name: '${name}'.`,
+      );
+
+      return c.json(
+        serializeNameTokensResponse({
+          responseCode: NameTokensResponseCodes.Error,
+          errorCode: NameTokensResponseErrorCodes.UnknownNameContext,
+          error: {
+            message: "Internal Server Error",
+            details: `The requested '${name}' name is unknown to ENSNode.`,
+          },
+        } satisfies NameTokensResponseErrorUnknownNameContext),
+        404,
       );
     }
 
-    const { orderBy, recordsPerPage } = c.req.valid("query");
-    const accurateAsOf = latestIndexedBlockRef.timestamp;
-
-    const nameTokens = await findNameTokens({
-      filters: [nameTokensFilter.byDomainId(namehash(name))],
-      accurateAsOf,
-      orderBy,
-      limit: recordsPerPage,
-    });
+    const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
 
     return c.json(
       serializeNameTokensResponse({
         responseCode: NameTokensResponseCodes.Ok,
-        nameTokens,
+        registeredNameTokens,
         accurateAsOf,
       }),
     );

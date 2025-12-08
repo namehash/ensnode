@@ -4,6 +4,11 @@ import { isNormalizedLabel } from "./is-normalized";
 import type { Label, Name, NormalizedName } from "./types";
 
 /**
+ * Name for the ENS Root
+ */
+export const ENS_ROOT: Name = "";
+
+/**
  * Constructs a name hierarchy from a given NormalizedName.
  *
  * @example
@@ -20,12 +25,22 @@ export const getNameHierarchy = (name: NormalizedName): NormalizedName[] =>
 /**
  * Get FQDN of parent for a name.
  */
-export const getParentNameFQDN = (name: Name): Name =>
+export const getParentNameFQDN = (name: Name): Name => {
+  // Invariant: name is not ENS root.
+  if (name === ENS_ROOT) {
+    throw new Error("There is no parent name for ENS Root.");
+  }
+
+  const labels = name.split(".");
+
+  // For TLDs, return ENS_ROOT
+  if (labels.length === 1) {
+    return ENS_ROOT;
+  }
+
   // Strip off the child-most label in the name to get the FQDN of the parent
-  name
-    .split(".")
-    .slice(1)
-    .join(".");
+  return labels.slice(1).join(".");
+};
 
 /**
  * Beautifies a name by converting each normalized label in the provided name to

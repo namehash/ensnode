@@ -1,25 +1,24 @@
-import { serializeRegistrationLifecycle } from "../../registrars";
 import { serializeNameToken } from "../../tokenscope";
 import {
   type NameTokensResponse,
   NameTokensResponseCodes,
-  type RegisteredNameToken,
+  type RegisteredNameTokens,
 } from "./response";
 import type {
   SerializedNameTokensResponse,
   SerializedNameTokensResponseOk,
-  SerializedRegisteredNameToken,
+  SerializedRegisteredNameTokens,
 } from "./serialized-response";
 
-export function serializeRegisteredNameToken({
-  token,
-  registrationLifecycle,
-  tokenStatus,
-}: RegisteredNameToken): SerializedRegisteredNameToken {
+export function serializeRegisteredNameTokens({
+  domainId,
+  expiresAt,
+  tokens,
+}: RegisteredNameTokens): SerializedRegisteredNameTokens {
   return {
-    token: serializeNameToken(token),
-    registrationLifecycle: serializeRegistrationLifecycle(registrationLifecycle),
-    tokenStatus,
+    domainId,
+    expiresAt,
+    tokens: tokens.map(serializeNameToken),
   };
 }
 
@@ -30,7 +29,7 @@ export function serializeNameTokensResponse(
     case NameTokensResponseCodes.Ok:
       return {
         responseCode: response.responseCode,
-        nameTokens: response.nameTokens.map(serializeRegisteredNameToken),
+        registeredNameTokens: serializeRegisteredNameTokens(response.registeredNameTokens),
         accurateAsOf: response.accurateAsOf,
       } satisfies SerializedNameTokensResponseOk;
 

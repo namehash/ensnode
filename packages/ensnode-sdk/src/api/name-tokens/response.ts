@@ -1,7 +1,7 @@
 import type { UnixTimestamp } from "@namehash/ens-referrals";
 
-import type { RegistrationLifecycle } from "../../registrars";
-import { type NameToken, NFTMintStatus, NFTMintStatuses } from "../../tokenscope";
+import type { Node } from "../../ens";
+import type { NameToken } from "../../tokenscope";
 import type { ErrorResponse } from "../shared/errors";
 
 /**
@@ -46,45 +46,24 @@ export const NameTokensResponseErrorCodes = {
 export type NameTokensResponseErrorCode =
   (typeof NameTokensResponseErrorCodes)[keyof typeof NameTokensResponseErrorCodes];
 
-/**
- * Token Statuses
- *
- * Extends {@link NFTMintStatuses} with additional "virtual" statuses.
- */
-export const RegisteredNameTokenStatuses = {
-  ...NFTMintStatuses,
-
-  Expired: "expired",
-} as const;
-
-/**
- * Token Status
- *
- * Extends {@link NFTMintStatus} with additional "virtual" statuses.
- */
-export type RegisteredNameTokenStatus =
-  (typeof RegisteredNameTokenStatuses)[keyof typeof RegisteredNameTokenStatuses];
-
-export interface RegisteredNameToken {
-  token: NameToken;
+export interface RegisteredNameTokens {
+  /**
+   * Domain ID
+   */
+  domainId: Node;
 
   /**
-   * Registration Lifecycle
+   * Name Tokens associated with the `domainId`.
+   */
+  tokens: NameToken[];
+
+  /**
+   * Expiry date for the Registration Lifecycle associated with the `domainId`.
    *
    * The latest Registration Lifecycle for a node referenced in
    * `token.domainAsset.domainId`.
    */
-  registrationLifecycle: RegistrationLifecycle;
-
-  /**
-   * Token Status
-   *
-   * Derived from `token.mintStatus`.
-   *
-   * Set to `expired` when:
-   * - the `token.mintStatus` is "mint" however the latest registration lifecycle expiresAt is in the past.
-   */
-  tokenStatus: RegisteredNameTokenStatus;
+  expiresAt: UnixTimestamp;
 }
 
 /**
@@ -96,7 +75,7 @@ export type NameTokensResponseOk = {
   /**
    * Name Tokens for the requested name.
    */
-  nameTokens: RegisteredNameToken[];
+  registeredNameTokens: RegisteredNameTokens;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link NameTokensResponseOk.nameTokens} was accurate as of.

@@ -10,7 +10,7 @@ import type { AccountId } from "../shared";
 
 /**
  * Gets the SubregistryId (an AccountId) of the Basenames Subregistry contract (this is the
- * "BaseRegistrar" contract for direct subnames of .eth) for the provided namespace.
+ * "BaseRegistrar" contract for Basenames) for the provided namespace.
  *
  * @param namespace The ENS namespace to get the Basenames Subregistry ID for
  * @returns The AccountId for the Basenames Subregistry contract for the provided namespace.

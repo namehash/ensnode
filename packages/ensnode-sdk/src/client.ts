@@ -9,8 +9,6 @@ import {
   deserializeRegistrarActionsResponse,
   type ErrorResponse,
   type IndexingStatusResponse,
-  type NameTokensOrder,
-  NameTokensOrders,
   type NameTokensRequest,
   type NameTokensResponse,
   type RegistrarActionsFilter,
@@ -31,7 +29,6 @@ import {
   type SerializedRegistrarActionsResponse,
 } from "./api";
 import { ClientError } from "./client-error";
-import type { Name } from "./ens";
 import {
   deserializeReferrerDetailResponse,
   deserializeReferrerLeaderboardPageResponse,
@@ -721,27 +718,9 @@ export class ENSNodeClient {
    * ```
    */
   async nameTokens(request: NameTokensRequest): Promise<NameTokensResponse> {
-    const buildUrlPath = (name: Name) => new URL(`/api/name-tokens/${name}`, this.options.url);
+    const url = new URL(`/api/name-tokens`, this.options.url);
 
-    const buildOrderArg = (order: NameTokensOrder) => {
-      switch (order) {
-        case NameTokensOrders.LatestNameTokens: {
-          const [field, direction] = order.split("=");
-          return {
-            key: `sort[${field}]`,
-            value: `${direction}`,
-          };
-        }
-      }
-    };
-
-    const url = buildUrlPath(request.name);
-
-    if (request.order) {
-      const orderArgs = buildOrderArg(request.order);
-
-      url.searchParams.set(orderArgs.key, orderArgs.value);
-    }
+    url.searchParams.set("name", request.name);
 
     const response = await fetch(url);
 

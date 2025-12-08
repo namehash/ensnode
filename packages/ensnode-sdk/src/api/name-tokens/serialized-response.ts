@@ -1,10 +1,9 @@
-import type { SerializedRegistrationLifecycle } from "../../registrars";
 import type { SerializedNameToken } from "../../tokenscope";
 import type {
   NameTokensResponse,
   NameTokensResponseError,
   NameTokensResponseOk,
-  RegisteredNameToken,
+  RegisteredNameTokens,
 } from "./response";
 
 /**
@@ -15,18 +14,16 @@ export type SerializedNameTokensResponseError = NameTokensResponseError;
 /**
  * Serialized representation of {@link RegisteredNameToken}.
  */
-export interface SerializedRegisteredNameToken
-  extends Omit<RegisteredNameToken, "token" | "registrationLifecycle"> {
-  token: SerializedNameToken;
-
-  registrationLifecycle: SerializedRegistrationLifecycle;
+export interface SerializedRegisteredNameTokens extends Omit<RegisteredNameTokens, "tokens"> {
+  tokens: SerializedNameToken[];
 }
 
 /**
  * Serialized representation of {@link NameTokensResponseOk}.
  */
-export interface SerializedNameTokensResponseOk extends Omit<NameTokensResponseOk, "nameTokens"> {
-  nameTokens: SerializedRegisteredNameToken[];
+export interface SerializedNameTokensResponseOk
+  extends Omit<NameTokensResponseOk, "registeredNameTokens"> {
+  registeredNameTokens: SerializedRegisteredNameTokens;
 }
 
 /**

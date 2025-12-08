@@ -45,7 +45,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
             details: `Connected ENSIndexer must have all following plugins active: ${nameTokensPrerequisites.requiredPlugins.join(", ")}`,
           },
         }),
-        500,
+        503,
       );
     }
 
@@ -55,7 +55,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
         {
           error: c.var.indexingStatus.reason,
         },
-        `Name Tokens API requested but indexing status is not available in context.`,
+        `Name Tokens API requested but indexing status is not available in context yet.`,
       );
 
       return c.json(
@@ -63,11 +63,11 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
           responseCode: NameTokensResponseCodes.Error,
           errorCode: NameTokensResponseErrorCodes.Generic,
           error: {
-            message: `Name Tokens API is not available`,
-            details: `Indexing status is currently unavailable to this ENSApi instance.`,
+            message: `Name Tokens API is not available yet`,
+            details: `The cached omnichain indexing status of the Connected ENSIndexer must be available.`,
           },
         }),
-        500,
+        503,
       );
     }
 
@@ -79,11 +79,11 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
           responseCode: NameTokensResponseCodes.Error,
           errorCode: NameTokensResponseErrorCodes.Generic,
           error: {
-            message: `Name Tokens API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${nameTokensPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+            message: `Name Tokens API is not available yet`,
+            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${nameTokensPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}. The current status is "${omnichainSnapshot.omnichainStatus}"`,
           },
         }),
-        500,
+        503,
       );
 
     await next();
