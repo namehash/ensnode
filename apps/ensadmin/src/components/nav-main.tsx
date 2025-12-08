@@ -4,6 +4,8 @@ import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import type { UrlString } from "@ensnode/ensnode-sdk";
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   SidebarGroup,
@@ -33,7 +35,7 @@ export function NavMain({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const appendQueryParams = (url: string) => {
+  const appendQueryParams = (url: UrlString) => {
     if (pathname.startsWith("/inspector") && !url.startsWith("/inspector")) {
       const params = new URLSearchParams(searchParams.toString());
       params.delete("strategy");
@@ -47,7 +49,7 @@ export function NavMain({
       return url;
     }
 
-    if (searchParams && searchParams.toString()) {
+    if (searchParams?.toString()) {
       const separator = url.includes("?") ? "&" : "?";
       return `${url}${separator}${searchParams.toString()}`;
     }
@@ -55,7 +57,7 @@ export function NavMain({
     return url;
   };
 
-  const isActive = (url: string): boolean => {
+  const isActive = (url: UrlString): boolean => {
     const urlPathname = url.split("?")[0];
 
     return pathname === urlPathname;

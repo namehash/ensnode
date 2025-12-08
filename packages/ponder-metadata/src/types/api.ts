@@ -1,6 +1,7 @@
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import type { ReadonlyDrizzle } from "ponder";
 import type { PublicClient } from "viem";
+
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import type { BlockInfo, PonderStatus } from "./common";
 

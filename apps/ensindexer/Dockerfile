@@ -1,7 +1,7 @@
 FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-ENV PONDER_COMMAND=start
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
 WORKDIR /app
 
@@ -16,5 +16,4 @@ WORKDIR /app/apps/ensindexer
 ENV NODE_ENV=production
 EXPOSE 42069
 
-# NOTE: we use this $PONDER_COMMAND pattern because railway terraform provider can't override CMD
-CMD pnpm exec ponder $PONDER_COMMAND
+CMD ["pnpm", "start"]

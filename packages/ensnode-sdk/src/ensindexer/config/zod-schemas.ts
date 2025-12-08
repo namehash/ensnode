@@ -7,18 +7,19 @@
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
+
 import { uniq } from "../../shared";
 import {
-  ZodCheckFnInput,
   makeChainIdSchema,
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  makeUrlSchema,
+  type ZodCheckFnInput,
 } from "../../shared/zod-schemas";
-import { isSubgraphCompatible } from "./helpers";
-import { PluginName } from "./types";
+import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import type { ENSIndexerPublicConfig } from "./types";
+import { PluginName } from "./types";
+import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
 /**
  * Makes a schema for parsing {@link IndexedChainIds}.
@@ -32,23 +33,18 @@ export const makeIndexedChainIdsSchema = (valueLabel: string = "Indexed Chain ID
     .transform((v) => new Set(v));
 
 /**
- * Makes a schema for parsing a list of {@link PluginName} items.
+ * Makes a schema for parsing a list of strings that (for future-proofing)
+ * may or may not be current {@link PluginName} values.
  *
- * The list is guaranteed to include at least one item exists, and no duplicates.
+ * The list is guaranteed to include at least one string and no duplicates.
  */
 export const makePluginsListSchema = (valueLabel: string = "Plugins") =>
   z
-    .array(
-      z.enum(PluginName, {
-        error: `${valueLabel} must be a list with at least one valid plugin name. Valid plugins are: ${Object.values(
-          PluginName,
-        ).join(", ")}`,
-      }),
-    )
+    .array(z.string(), {
+      error: `${valueLabel} must be a list of strings.`,
+    })
     .min(1, {
-      error: `${valueLabel} must be a list with at least one valid plugin name. Valid plugins are: ${Object.values(
-        PluginName,
-      ).join(", ")}`,
+      error: `${valueLabel} must be a list of strings with at least one string value`,
     })
     .refine((arr) => arr.length === uniq(arr).length, {
       error: `${valueLabel} cannot contain duplicate values.`,
@@ -107,12 +103,12 @@ export const makeLabelSetVersionSchema = (valueLabel: string) => {
 export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") => {
   let valueLabelLabelSetId = valueLabel;
   let valueLabelLabelSetVersion = valueLabel;
-  if (valueLabel == "LABEL_SET") {
+  if (valueLabel === "LABEL_SET") {
     valueLabelLabelSetId = "LABEL_SET_ID";
     valueLabelLabelSetVersion = "LABEL_SET_VERSION";
   } else {
-    valueLabelLabelSetId = valueLabel + ".labelSetId";
-    valueLabelLabelSetVersion = valueLabel + ".labelSetVersion";
+    valueLabelLabelSetId = `${valueLabel}.labelSetId`;
+    valueLabelLabelSetVersion = `${valueLabel}.labelSetVersion`;
   }
   return z.object({
     labelSetId: makeLabelSetIdSchema(valueLabelLabelSetId),
@@ -123,23 +119,28 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeDependencyInfoSchema = (valueLabel: string = "Value") =>
-  z.strictObject(
-    {
-      nodejs: makeNonEmptyStringSchema(),
-      ponder: makeNonEmptyStringSchema(),
-      ensRainbow: makeNonEmptyStringSchema(),
-      ensRainbowSchema: makePositiveIntegerSchema(),
-    },
-    {
-      error: `${valueLabel} must be a valid DependencyInfo object.`,
-    },
-  );
+export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
+  z
+    .strictObject(
+      {
+        nodejs: makeNonEmptyStringSchema(),
+        ponder: makeNonEmptyStringSchema(),
+        ensDb: makeNonEmptyStringSchema(),
+        ensIndexer: makeNonEmptyStringSchema(),
+        ensNormalize: makeNonEmptyStringSchema(),
+        ensRainbow: makeNonEmptyStringSchema(),
+        ensRainbowSchema: makePositiveIntegerSchema(),
+      },
+      {
+        error: `${valueLabel} must be a valid ENSIndexerVersionInfo object.`,
+      },
+    )
+    .check(invariant_ensDbVersionIsSameAsEnsIndexerVersion);
 
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<ENSIndexerPublicConfig, "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
@@ -162,15 +163,13 @@ export function invariant_isSubgraphCompatibleRequirements(
 export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
-      ensAdminUrl: makeUrlSchema(`${valueLabel}.ensAdminUrl`),
-      ensNodePublicUrl: makeUrlSchema(`${valueLabel}.ensNodePublicUrl`),
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
       isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
-      dependencyInfo: makeDependencyInfoSchema(`${valueLabel}.dependencyInfo`),
+      versionInfo: makeENSIndexerVersionInfoSchema(`${valueLabel}.versionInfo`),
     })
     /**
      * Validations

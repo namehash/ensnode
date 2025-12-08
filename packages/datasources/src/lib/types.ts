@@ -1,4 +1,4 @@
-import { type Abi, type Address, type Chain } from "viem";
+import type { Abi, Address, Chain } from "viem";
 
 /**
  * ENSNamespaceIds encodes the set of identifiers for well-known ENS namespaces.
@@ -98,18 +98,21 @@ export type ContractConfig =
       readonly address: Address;
       readonly filter?: never;
       readonly startBlock: number;
+      readonly endBlock?: number;
     }
   | {
       readonly abi: Abi;
       readonly address: Address[];
       readonly filter?: never;
       readonly startBlock: number;
+      readonly endBlock?: number;
     }
   | {
       readonly abi: Abi;
       readonly address?: never;
       readonly filter: EventFilter[];
       readonly startBlock: number;
+      readonly endBlock?: number;
     };
 
 /**

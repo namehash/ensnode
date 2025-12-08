@@ -1,13 +1,12 @@
 import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
-import mermaid from "astro-mermaid";
 import { defineConfig, envField } from "astro/config";
+import icon from "astro-icon";
+import mermaid from "astro-mermaid";
 
 import { sitemap } from "./config/integrations/sitemap";
 import { starlight } from "./config/integrations/starlight";
-
-import icon from "astro-icon";
 
 export default defineConfig({
   site: "https://ensnode.io",

@@ -1,5 +1,6 @@
-import { EventWithArgs } from "@/lib/ponder-helpers";
-import { Address, Hex } from "viem";
+import type { Address, Hex } from "viem";
+
+import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 /**
  * Seaport's ItemType enum, re-implemented here to avoid a dependency on seaport-js.

@@ -1,7 +1,7 @@
-export * from "./lib/types";
+export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
+export { ThreeDNSToken as ThreeDNSTokenABI } from "./abis/threedns/ThreeDNSToken";
 export * from "./lib/chains";
-export * from "./namespaces";
-
 // export shared ABIs for consumer convenience
 export { ResolverABI } from "./lib/resolver";
-export { StandaloneReverseRegistrar as StandaloneReverseRegistrarABI } from "./abis/shared/StandaloneReverseRegistrar";
+export * from "./lib/types";
+export * from "./namespaces";

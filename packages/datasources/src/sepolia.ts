@@ -7,33 +7,32 @@ import {
   sepolia,
 } from "viem/chains";
 
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
-
-// ABIs for ENSRoot Datasource
-import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
-import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
-import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
-import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
-import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
 import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
-
+import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-
+// ABIs for ENSRoot Datasource
+import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
+import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
+import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
+import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
+// Types
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
  * The Sepolia ENSNamespace
@@ -84,6 +83,11 @@ export default {
         abi: root_UnwrappedEthRegistrarController,
         address: "0xfb3ce5d01e0f33f41dbb39035db9745962f1f968",
         startBlock: 8579988,
+      },
+      UniversalRegistrarRenewalWithReferrer: {
+        abi: root_UniversalRegistrarRenewalWithReferrer,
+        address: "0x7ab2947592c280542e680ba8f08a589009da8644",
+        startBlock: 9447519,
       },
       NameWrapper: {
         abi: root_NameWrapper,
@@ -146,6 +150,16 @@ export default {
         abi: base_RegistrarController,
         address: "0x49ae3cc2e3aa768b1e5654f5d3c6002144a59581",
         startBlock: 13298580,
+      },
+      /**
+       * This controller was added to BaseRegistrar contract
+       * with the following tx:
+       * https://sepolia.basescan.org/tx/0x648d984c1a379a6c300851b9561fe98a9b5282a26ca8c2c7660b11c53f0564bc
+       */
+      UpgradeableRegistrarController: {
+        abi: base_UpgradeableRegistrarController,
+        address: "0x82c858cdf64b3d893fe54962680edfddc37e94c8", // a proxy contract
+        startBlock: 29896051,
       },
     },
   },

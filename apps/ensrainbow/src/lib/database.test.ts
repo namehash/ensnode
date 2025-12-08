@@ -1,22 +1,23 @@
-import { tmpdir } from "os";
-import { join } from "path";
-import { labelHashToBytes, parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
-import { mkdtemp, rm } from "fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { labelhash } from "viem";
-import { afterEach, beforeEach, describe, expect, it, test } from "vitest";
-import { vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
+
+import { labelHashToBytes, parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
 
 import {
   DB_SCHEMA_VERSION,
   ENSRainbowDB,
   IngestionStatus,
+  isRainbowRecordKey,
+  isSystemKey,
   SYSTEM_KEY_HIGHEST_LABEL_SET_VERSION,
   SYSTEM_KEY_INGESTION_STATUS,
   SYSTEM_KEY_LABEL_SET_ID,
   SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT,
   SYSTEM_KEY_SCHEMA_VERSION,
-  isRainbowRecordKey,
-  isSystemKey,
 } from "./database";
 
 describe("Database", () => {

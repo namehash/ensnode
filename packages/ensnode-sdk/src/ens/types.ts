@@ -1,9 +1,9 @@
 import type { Hex } from "viem";
 
+export type { ENSNamespaceId } from "@ensnode/datasources";
 // re-export ENSNamespaceIds and ENSNamespaceId from @ensnode/datasources
 // so consumers don't need it as a dependency
 export { ENSNamespaceIds } from "@ensnode/datasources";
-export type { ENSNamespaceId } from "@ensnode/datasources";
 
 /**
  * A hash value that uniquely identifies a single ENS name.

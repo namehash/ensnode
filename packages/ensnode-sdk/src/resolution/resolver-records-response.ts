@@ -1,5 +1,5 @@
-import { CoinType, Name } from "../ens";
-import { ResolverRecordsSelection } from "./resolver-records-selection";
+import type { CoinType, Name } from "../ens";
+import type { ResolverRecordsSelection } from "./resolver-records-selection";
 
 /**
  * An internal type representing a non-inferred ResolverRecordsResponse, used in situations where

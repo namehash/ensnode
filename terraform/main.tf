@@ -50,7 +50,7 @@ locals {
       ensnode_indexer_type     = "alpha"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,threedns,reverse-resolvers,referrals,tokenscope"
+      plugins                  = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
       namespace                = "mainnet"
       render_instance_plan     = "standard"
       subgraph_compat          = false
@@ -60,7 +60,7 @@ locals {
       ensnode_indexer_type     = "alpha-sepolia"
       ensnode_environment_name = var.render_environment
       database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,reverse-resolvers,referrals"
+      plugins                  = "subgraph,basenames,lineanames,registrars"
       namespace                = "sepolia"
       render_instance_plan     = "starter"
       subgraph_compat          = false
@@ -111,7 +111,7 @@ module "ensadmin" {
   ensnode_environment_name = var.render_environment
   anthropic_api_key        = var.anthropic_api_key
 
-  # NEXT_PUBLIC_DEFAULT_ENSNODE_URLS is not currently configurable through
+  # NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
 }
 
@@ -134,29 +134,12 @@ module "ensindexer" {
   ensrainbow_url   = module.ensrainbow.ensrainbow_url
 
   # Common configuration
-  render_region         = local.render_region
-  render_environment_id = render_project.ensnode.environments["default"].id
-  ensdb_url             = module.ensdb.internal_connection_string
-  ensadmin_public_url   = module.ensadmin.ensadmin_public_url
-
-  # Mainnet RPC URLs
-  ethereum_mainnet_rpc_url = var.ethereum_mainnet_rpc_url
-  base_mainnet_rpc_url     = var.base_mainnet_rpc_url
-  linea_mainnet_rpc_url    = var.linea_mainnet_rpc_url
-  optimism_mainnet_rpc_url = var.optimism_mainnet_rpc_url
-  arbitrum_mainnet_rpc_url = var.arbitrum_mainnet_rpc_url
-  scroll_mainnet_rpc_url   = var.scroll_mainnet_rpc_url
-
-  # Sepolia RPC URLs
-  ethereum_sepolia_rpc_url = var.ethereum_sepolia_rpc_url
-  base_sepolia_rpc_url     = var.base_sepolia_rpc_url
-  linea_sepolia_rpc_url    = var.linea_sepolia_rpc_url
-  optimism_sepolia_rpc_url = var.optimism_sepolia_rpc_url
-  arbitrum_sepolia_rpc_url = var.arbitrum_sepolia_rpc_url
-  scroll_sepolia_rpc_url   = var.scroll_sepolia_rpc_url
-
-  # Holesky RPC URLs
-  ethereum_holesky_rpc_url = var.ethereum_holesky_rpc_url
+  render_region           = local.render_region
+  render_environment_id   = render_project.ensnode.environments["default"].id
+  ensdb_url               = module.ensdb.internal_connection_string
+  alchemy_api_key         = var.alchemy_api_key
+  quicknode_api_key       = var.quicknode_api_key
+  quicknode_endpoint_name = var.quicknode_endpoint_name
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
   ensindexer_label_set_id      = var.ensindexer_label_set_id

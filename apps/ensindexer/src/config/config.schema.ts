@@ -1,34 +1,49 @@
 import { parse as parseConnectionString } from "pg-connection-string";
-import { ZodError, prettifyError, z } from "zod/v4";
+import { prettifyError, ZodError, z } from "zod/v4";
 
-import { ENSNamespaceIds } from "@ensnode/datasources";
-import { type ChainId, PluginName, deserializeChainId, uniq } from "@ensnode/ensnode-sdk";
-import { makeFullyPinnedLabelSetSchema } from "@ensnode/ensnode-sdk";
+import { PluginName, uniq } from "@ensnode/ensnode-sdk";
 import {
+  buildRpcConfigsFromEnv,
+  DatabaseSchemaNameSchema,
+  ENSNamespaceSchema,
+  EnsIndexerUrlSchema,
   invariant_isSubgraphCompatibleRequirements,
+  invariant_rpcConfigsSpecifiedForRootChain,
+  makeFullyPinnedLabelSetSchema,
   makeUrlSchema,
+  RpcConfigsSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import {
-  DEFAULT_ENSADMIN_URL,
-  DEFAULT_PORT,
-  DEFAULT_RPC_RATE_LIMIT,
-  DEFAULT_SUBGRAPH_COMPAT,
-} from "@/lib/lib-config";
-
-import { EnvironmentDefaults, applyDefaults } from "@/config/environment-defaults";
+import { DEFAULT_SUBGRAPH_COMPAT } from "@/config/defaults";
+import type { ENSIndexerEnvironment } from "@/config/environment";
+import { applyDefaults, EnvironmentDefaults } from "@/config/environment-defaults";
 
 import { derive_indexedChainIds } from "./derived-params";
-import type { ENSIndexerConfig, ENSIndexerEnvironment, RpcConfig } from "./types";
+import type { ENSIndexerConfig } from "./types";
 import {
   invariant_globalBlockrange,
   invariant_requiredDatasources,
   invariant_rpcConfigsSpecifiedForIndexedChains,
-  invariant_rpcConfigsSpecifiedForRootChain,
   invariant_validContractConfigs,
 } from "./validations";
 
-const chainIdSchema = z.number().int().min(1);
+export const DatabaseUrlSchema = z.string().refine(
+  (url) => {
+    try {
+      if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
+        return false;
+      }
+      const config = parseConnectionString(url);
+      return !!(config.host && config.port && config.database);
+    } catch {
+      return false;
+    }
+  },
+  {
+    error:
+      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
+  },
+);
 
 // parses an env string bool with strict requirement of 'true' or 'false'
 const makeEnvStringBoolSchema = (envVarKey: string) =>
@@ -48,21 +63,6 @@ const makeBlockNumberSchema = (envVarKey: string) =>
     .min(0, { error: `${envVarKey} must be a positive integer.` })
     .optional();
 
-const RpcConfigSchema = z.object({
-  url: makeUrlSchema("RPC_URL_*"),
-  maxRequestsPerSecond: z.coerce
-    .number({ error: "RPC_REQUEST_RATE_LIMIT_* must be an integer." })
-    .int({ error: "RPC_REQUEST_RATE_LIMIT_* must be an integer." })
-    .min(1, { error: "RPC_REQUEST_RATE_LIMIT_* must be at least 1." })
-    .default(DEFAULT_RPC_RATE_LIMIT),
-});
-
-const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
-  error: (issue) => {
-    return `Invalid NAMESPACE. Supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`;
-  },
-});
-
 const BlockrangeSchema = z
   .object({
     startBlock: makeBlockNumberSchema("START_BLOCK"),
@@ -74,22 +74,9 @@ const BlockrangeSchema = z
     { error: "END_BLOCK must be greater than START_BLOCK." },
   );
 
-const EnsNodePublicUrlSchema = makeUrlSchema("ENSNODE_PUBLIC_URL");
-const EnsAdminUrlSchema = makeUrlSchema("ENSADMIN_URL").default(DEFAULT_ENSADMIN_URL);
-const EnsIndexerUrlSchema = makeUrlSchema("ENSINDEXER_URL");
-
-const PonderDatabaseSchemaSchema = z
-  .string({
-    error: "DATABASE_SCHEMA is required.",
-  })
-  .trim()
-  .min(1, {
-    error: "DATABASE_SCHEMA is required and cannot be an empty string.",
-  });
-
 const PluginsSchema = z.coerce
   .string()
-  .transform((val) => val.split(",").filter(Boolean))
+  .transform((val) => val.split(","))
   .pipe(
     z
       .array(
@@ -109,70 +96,26 @@ const PluginsSchema = z.coerce
     error: "PLUGINS cannot contain duplicate values",
   });
 
-const PortSchema = z.coerce
-  .number({ error: "PORT must be an integer." })
-  .int({ error: "PORT must be an integer." })
-  .min(1, { error: "PORT must be an integer between 1 and 65535." })
-  .max(65535, { error: "PORT must be an integer between 1 and 65535." })
-  .default(DEFAULT_PORT);
-
 const EnsRainbowUrlSchema = makeUrlSchema("ENSRAINBOW_URL");
 
 const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
-
-const RpcConfigsSchema = z
-  .record(z.string().transform(Number).pipe(chainIdSchema), RpcConfigSchema, {
-    error: "Chains configuration must be an object mapping valid chain IDs to their configs.",
-  })
-  .transform((records) => {
-    const rpcConfigs = new Map<ChainId, RpcConfig>();
-
-    for (const [chianIdString, rpcConfig] of Object.entries(records)) {
-      rpcConfigs.set(deserializeChainId(chianIdString), rpcConfig);
-    }
-
-    return rpcConfigs;
-  });
-
-const DatabaseUrlSchema = z.union(
-  [
-    z.string().refine((url) => {
-      try {
-        if (!url.startsWith("postgresql://") && !url.startsWith("postgres://")) {
-          return false;
-        }
-        const config = parseConnectionString(url);
-        return !!(config.host && config.port && config.database);
-      } catch {
-        return false;
-      }
-    }),
-    z.undefined(),
-  ],
-  {
-    message:
-      "Invalid PostgreSQL connection string. Expected format: postgresql://username:password@host:port/database",
-  },
-);
 
 const IsSubgraphCompatibleSchema =
   makeEnvStringBoolSchema("SUBGRAPH_COMPAT").default(DEFAULT_SUBGRAPH_COMPAT);
 
 const ENSIndexerConfigSchema = z
   .object({
-    namespace: ENSNamespaceSchema,
-    globalBlockrange: BlockrangeSchema,
-    ensNodePublicUrl: EnsNodePublicUrlSchema,
+    databaseUrl: DatabaseUrlSchema,
+    databaseSchemaName: DatabaseSchemaNameSchema,
+    rpcConfigs: RpcConfigsSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
-    ensAdminUrl: EnsAdminUrlSchema,
-    databaseSchemaName: PonderDatabaseSchemaSchema,
+
+    namespace: ENSNamespaceSchema,
     plugins: PluginsSchema,
-    port: PortSchema,
+    isSubgraphCompatible: IsSubgraphCompatibleSchema,
+    globalBlockrange: BlockrangeSchema,
     ensRainbowUrl: EnsRainbowUrlSchema,
     labelSet: LabelSetSchema,
-    rpcConfigs: RpcConfigsSchema,
-    databaseUrl: DatabaseUrlSchema,
-    isSubgraphCompatible: IsSubgraphCompatibleSchema,
   })
   /**
    * Invariant enforcement
@@ -216,32 +159,55 @@ const ENSIndexerConfigSchema = z
  *
  * First parses the SUBGRAPH_COMPAT environment variable to determine compatibility mode,
  * then applies appropriate environment defaults based on that mode (subgraphCompatible or alpha).
+ *
+ * Next, construct rpcConfigs based on availability of RPC provider API keys or specific RPC_URL_*
+ * environment variables.
+ *
  * Finally validates and parses the complete environment configuration using ENSIndexerConfigSchema.
  *
- * @param environment - The environment variables object to build config from
  * @returns A validated ENSIndexerConfig object
  * @throws Error with formatted validation messages if environment parsing fails
  */
-export function buildConfigFromEnvironment(environment: ENSIndexerEnvironment): ENSIndexerConfig {
+export function buildConfigFromEnvironment(_env: ENSIndexerEnvironment): ENSIndexerConfig {
   try {
-    // first parse the SUBGRAPH_COMPAT env variable
-    const subgraphCompat = IsSubgraphCompatibleSchema.parse(environment.isSubgraphCompatible);
+    // first parse the SUBGRAPH_COMPAT and NAMESPACE env variables
+    const isSubgraphCompatible = IsSubgraphCompatibleSchema.parse(_env.SUBGRAPH_COMPAT);
 
     // based on indicated subgraph compatibility preference, provide sensible defaults for the config
-    const environmentDefaults = subgraphCompat
+    const environmentDefaults = isSubgraphCompatible
       ? EnvironmentDefaults.subgraphCompatible
       : EnvironmentDefaults.alpha;
 
-    // apply the partial defaults to the ENSIndexerEnvironment
-    const environmentWithDefaults = applyDefaults(environment, environmentDefaults);
+    // apply the partial defaults to the provided env
+    const env = applyDefaults(_env, environmentDefaults);
 
-    // parse with ENSIndexerConfigSchema
-    return ENSIndexerConfigSchema.parse(environmentWithDefaults);
+    // and use that to generate rpcConfigs
+    const namespace = ENSNamespaceSchema.parse(env.NAMESPACE);
+    const rpcConfigs = buildRpcConfigsFromEnv(env, namespace);
+
+    // parse/validate with ENSIndexerConfigSchema
+    return ENSIndexerConfigSchema.parse({
+      databaseUrl: env.DATABASE_URL,
+      databaseSchemaName: env.DATABASE_SCHEMA,
+      ensIndexerUrl: env.ENSINDEXER_URL,
+      namespace: env.NAMESPACE,
+      rpcConfigs,
+
+      plugins: env.PLUGINS,
+      isSubgraphCompatible: env.SUBGRAPH_COMPAT,
+      globalBlockrange: {
+        startBlock: env.START_BLOCK,
+        endBlock: env.END_BLOCK,
+      },
+      ensRainbowUrl: env.ENSRAINBOW_URL,
+      labelSet: {
+        labelSetId: env.LABEL_SET_ID,
+        labelSetVersion: env.LABEL_SET_VERSION,
+      },
+    });
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(
-        "Failed to parse environment configuration: \n" + prettifyError(error) + "\n",
-      );
+      throw new Error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
     }
 
     throw error;

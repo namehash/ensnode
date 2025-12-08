@@ -1,5 +1,6 @@
+import type { Chain } from "viem";
+
 import { type Datasource, type ENSNamespaceId, getENSNamespace } from "@ensnode/datasources";
-import { type Chain } from "viem";
 
 /**
  * Get a chain object by ID within the context of a specific namespace.

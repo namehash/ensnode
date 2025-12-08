@@ -1,5 +1,7 @@
-import { getDependencyInfo } from "@/lib/dependency-info";
 import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+
+import { getENSIndexerVersionInfo } from "@/lib/version-info";
+
 import type { ENSIndexerConfig } from "./types";
 
 /**
@@ -11,17 +13,15 @@ import type { ENSIndexerConfig } from "./types";
 export async function buildENSIndexerPublicConfig(
   config: ENSIndexerConfig,
 ): Promise<ENSIndexerPublicConfig> {
-  const dependencyInfo = await getDependencyInfo();
+  const versionInfo = await getENSIndexerVersionInfo();
 
   return {
     databaseSchemaName: config.databaseSchemaName,
-    ensAdminUrl: config.ensAdminUrl,
-    ensNodePublicUrl: config.ensNodePublicUrl,
     labelSet: config.labelSet,
     indexedChainIds: config.indexedChainIds,
     isSubgraphCompatible: config.isSubgraphCompatible,
     namespace: config.namespace,
     plugins: config.plugins,
-    dependencyInfo,
+    versionInfo,
   };
 }

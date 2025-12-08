@@ -1,5 +1,6 @@
 import { Link } from "@namehash/namekit-react";
 import { Fragment } from "react";
+
 import RainbowLogo from "../../assets/ENSRainbowLogo.svg";
 import ensNode from "../../assets/Illustration.svg";
 import { ENSNodeSchema } from "../atoms/ENSNodeSchema.tsx";
@@ -7,7 +8,7 @@ import { ENSProfile } from "../atoms/ENSProfile.tsx";
 import { ENSProfileMobile } from "../atoms/ENSProfileMobile.tsx";
 import { LearnMoreButton } from "../atoms/LearnMoreButton.tsx";
 import { SectionDivider } from "../atoms/SectionDivider.tsx";
-import AboutRainbow, { AboutRainbowProps } from "./AboutRainbow.tsx";
+import AboutRainbow, { type AboutRainbowProps } from "./AboutRainbow.tsx";
 import FullRainbow from "./FullRainbow.tsx";
 
 export default function AboutRainbowSections() {

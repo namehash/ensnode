@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { type ZodSafeParseResult, prettifyError } from "zod/v4";
-import { DependencyInfo, PluginName } from "./types";
+import { prettifyError, type ZodSafeParseResult } from "zod/v4";
+
+import { type ENSIndexerVersionInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
-  makeDependencyInfoSchema,
   makeENSIndexerPublicConfigSchema,
+  makeENSIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
   makePluginsListSchema,
@@ -30,23 +31,27 @@ describe("ENSIndexer: Config", () => {
         expect(
           makePluginsListSchema().parse([
             `${PluginName.Subgraph}`,
-            `${PluginName.Referrals}`,
-            `${PluginName.ReverseResolvers}`,
+            `${PluginName.Registrars}`,
+            `${PluginName.ProtocolAcceleration}`,
           ]),
-        ).toStrictEqual([PluginName.Subgraph, PluginName.Referrals, PluginName.ReverseResolvers]);
+        ).toStrictEqual([
+          PluginName.Subgraph,
+          PluginName.Registrars,
+          PluginName.ProtocolAcceleration,
+        ]);
 
         expect(
           formatParseError(
             makePluginsListSchema().safeParse([
               `${PluginName.Subgraph}`,
-              `${PluginName.Referrals}`,
+              `${PluginName.Registrars}`,
               `${PluginName.Subgraph}`,
             ]),
           ),
         ).toContain("Plugins cannot contain duplicate values");
 
-        expect(formatParseError(makePluginsListSchema().safeParse([]))).toContain(
-          "Plugins must be a list with at least one valid plugin name. Valid plugins are: subgraph, basenames, lineanames, threedns, reverse-resolvers, referrals, tokenscope",
+        expect(formatParseError(makePluginsListSchema().safeParse([]))).toMatch(
+          /Plugins must be a list of strings with at least one string value/,
         );
       });
 
@@ -96,32 +101,47 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse version info values", () => {
         expect(
-          makeDependencyInfoSchema().parse({
+          makeENSIndexerVersionInfoSchema().parse({
             nodejs: "v22.22.22",
             ponder: "0.11.25",
+            ensDb: "0.32.0",
+            ensIndexer: "0.32.0",
+            ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies DependencyInfo),
+          } satisfies ENSIndexerVersionInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
           ponder: "0.11.25",
+          ensDb: "0.32.0",
+          ensIndexer: "0.32.0",
+          ensNormalize: "1.11.1",
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
-        } satisfies DependencyInfo);
+        } satisfies ENSIndexerVersionInfo);
 
         expect(
           formatParseError(
-            makeDependencyInfoSchema().safeParse({
+            makeENSIndexerVersionInfoSchema().safeParse({
               nodejs: "",
               ponder: "",
+              ensDb: "",
+              ensIndexer: "",
+              ensNormalize: "",
               ensRainbow: "",
               ensRainbowSchema: -1,
-            } satisfies DependencyInfo),
+            } satisfies ENSIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
   → at nodejs
 ✖ Value must be a non-empty string.
   → at ponder
+✖ Value must be a non-empty string.
+  → at ensDb
+✖ Value must be a non-empty string.
+  → at ensIndexer
+✖ Value must be a non-empty string.
+  → at ensNormalize
 ✖ Value must be a non-empty string.
   → at ensRainbow
 ✖ Value must be a positive integer (>0).
@@ -130,8 +150,6 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse full ENSIndexerPublicConfig with label set", () => {
         const validConfig = {
-          ensAdminUrl: "https://admin.ensnode.io",
-          ensNodePublicUrl: "http://localhost:42069",
           labelSet: {
             labelSetId: "subgraph",
             labelSetVersion: 0,
@@ -141,21 +159,20 @@ describe("ENSIndexer: Config", () => {
           namespace: "mainnet" as const,
           plugins: [PluginName.Subgraph],
           databaseSchemaName: "test_schema",
-          dependencyInfo: {
+          versionInfo: {
             nodejs: "v22.22.22",
             ponder: "0.11.25",
+            ensDb: "0.32.0",
+            ensIndexer: "0.32.0",
+            ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies DependencyInfo,
+          } satisfies ENSIndexerVersionInfo,
         };
 
         const parsedConfig = makeENSIndexerPublicConfigSchema().parse(validConfig);
 
         // The schema transforms URLs and arrays, so we need to check the transformed values
-        expect(parsedConfig.ensAdminUrl).toBeInstanceOf(URL);
-        expect(parsedConfig.ensAdminUrl.toString()).toBe("https://admin.ensnode.io/");
-        expect(parsedConfig.ensNodePublicUrl).toBeInstanceOf(URL);
-        expect(parsedConfig.ensNodePublicUrl.toString()).toBe("http://localhost:42069/");
         expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
         expect(Array.from(parsedConfig.indexedChainIds)).toEqual([1]);
         expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);
@@ -163,7 +180,7 @@ describe("ENSIndexer: Config", () => {
         expect(parsedConfig.namespace).toBe(validConfig.namespace);
         expect(parsedConfig.plugins).toEqual(validConfig.plugins);
         expect(parsedConfig.databaseSchemaName).toBe(validConfig.databaseSchemaName);
-        expect(parsedConfig.dependencyInfo).toEqual(validConfig.dependencyInfo);
+        expect(parsedConfig.versionInfo).toEqual(validConfig.versionInfo);
 
         // Test invalid labelSetId
         expect(
@@ -200,7 +217,7 @@ describe("ENSIndexer: Config", () => {
           formatParseError(
             makePluginsListSchema("PLUGINS env var").safeParse([
               `${PluginName.Subgraph}`,
-              `${PluginName.Referrals}`,
+              `${PluginName.Registrars}`,
               `${PluginName.Subgraph}`,
             ]),
           ),

@@ -18,24 +18,32 @@ pnpm install
 cp .env.local.example .env.local
 ```
 
-You can update `VITE_ENSNODE_URL` environment variable if you wish ENSAdmin to start with a custom ENSNode URL.
+Available environment variables:
+
+- `NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY` - Comma-separated list of ENSNode URLs offered as connection options (defaults to NameHash's hosted instances)
+- `ENSADMIN_PUBLIC_URL` - The public URL where ENSAdmin is hosted (optional)
 
 ## Run development server
 
-Following [Vite docs](https://vite.dev/guide/cli.html#dev-server):
-
-> Start Vite dev server in the current directory.
+Starts the Next.js development server:
 
 ```bash
 pnpm dev
 ```
 
-## Preview production website
+Visit [http://localhost:4173](http://localhost:4173) to build with ENSAdmin locally.
 
-Following [Vite docs](https://vite.dev/guide/cli.html#vite-preview):
+## Preview production build
 
-> Locally preview the production build. Do not use this as a production server as it's not designed for it.
+Create an optimized static export and serve it locally:
 
 ```bash
-pnpm build && pnpm preview
+pnpm build
+pnpm start
 ```
+
+The production preview runs on http://localhost:4173 using the `serve` package.
+
+:::note[Static Export]
+ENSAdmin uses Next.js to output a Single Page Application (SPA). The production build generates a static site in the `out` directory, which is then served by nginx in the Docker container.
+:::

@@ -1,19 +1,21 @@
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { renderMicroseconds } from "@/lib/time";
-import { getProtocolStepInfo } from "@/lib/tracing";
-import { cn } from "@/lib/utils";
+import { useCallback, useState } from "react";
+import { getAddress } from "viem";
+
 import {
   ATTR_PROTOCOL_NAME,
   ATTR_PROTOCOL_STEP,
   ATTR_PROTOCOL_STEP_RESULT,
   ForwardResolutionProtocolStep,
-  ProtocolSpan,
+  type ProtocolSpan,
   type ProtocolTrace,
   ReverseResolutionProtocolStep,
 } from "@ensnode/ensnode-sdk";
-import { useCallback, useState } from "react";
-import { getAddress } from "viem";
+
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { renderMicroseconds } from "@/lib/time";
+import { getProtocolStepInfo } from "@/lib/tracing";
+import { cn } from "@/lib/utils";
 
 const asPercentInDuration = (value: number, duration: number) =>
   `${((value / duration) * 100).toFixed(2)}%`;
@@ -52,10 +54,13 @@ function RenderEvent({
 
   const [eventOpen, setEventOpen] = useState(false);
 
-  const handleEventOpen = useCallback((open: boolean) => {
-    open && setParentOpen(false);
-    setEventOpen(open);
-  }, []);
+  const handleEventOpen = useCallback(
+    (open: boolean) => {
+      open && setParentOpen(false);
+      setEventOpen(open);
+    },
+    [setParentOpen],
+  );
 
   return (
     <Tooltip key={event.name} open={eventOpen} onOpenChange={handleEventOpen}>
@@ -139,7 +144,7 @@ function RenderSpan({ parent }: { parent: ProtocolTrace[number] }) {
       {/* render its children */}
       {parent.children.length > 0 && (
         <div className="flex flex-col gap-2">
-          {parent.children.map((child, i) => {
+          {parent.children.map((child, _i) => {
             const marginLeft = asPercentInDuration(
               child.timestamp - parent.timestamp,
               parent.duration,

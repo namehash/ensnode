@@ -8,7 +8,7 @@ export interface ErrorInfoProps {
 
 export function ErrorInfo({ title, description }: ErrorInfoProps) {
   return (
-    <section className="flex flex-col gap-6 p-6 max-sm:p-3">
+    <section className="flex flex-col gap-6">
       <Card className="w-full border-red-200 bg-red-50">
         <CardHeader className="pb-2 max-sm:p-3">
           <CardTitle className="flex flex-row justify-start items-center gap-2 text-2xl max-sm:text-lg text-red-700">

@@ -1,5 +1,5 @@
 import { pgSchema, pgTable } from "drizzle-orm/pg-core";
-import { type ReadonlyDrizzle, eq } from "ponder";
+import { eq, type ReadonlyDrizzle } from "ponder";
 
 /**
  * Internal ponder metadata type.

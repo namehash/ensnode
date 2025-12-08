@@ -1,29 +1,12 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import type { Blockrange, ChainId, ChainIdString, PluginName } from "@ensnode/ensnode-sdk";
+import type { Blockrange, ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import {
+  type DatabaseSchemaName,
+  type DatabaseUrl,
+  RpcConfig,
+  type RpcConfigs,
+} from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
-
-/**
- * Configuration for a single RPC used by ENSIndexer.
- */
-export interface RpcConfig {
-  /**
-   * The RPC endpoint URL for the chain (ex: "https://eth-mainnet.g.alchemy.com/v2/...").
-   * For nominal indexing behavior, must be an endpoint with high rate limits.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  url: URL;
-
-  /**
-   * The maximum number of RPC requests per second allowed for this chain, defaulting to
-   * 500 (DEFAULT_RPC_RATE_LIMIT). This is used to avoid rate limiting by the RPC provider.
-   *
-   * Invariants:
-   * - The value must be an integer greater than 0
-   */
-  maxRequestsPerSecond: number;
-}
 
 /**
  * The complete runtime configuration for an ENSIndexer instance.
@@ -35,28 +18,6 @@ export interface ENSIndexerConfig {
    * See {@link ENSNamespaceIds} for available namespace identifiers.
    */
   namespace: ENSNamespaceId;
-
-  /**
-   * An ENSAdmin url, defaulting to the public instance https://admin.ensnode.io (DEFAULT_ENSADMIN_URL).
-   * @see https://ensnode.io/ensadmin/overview/what-is-ensadmin
-   *
-   * The ENSNode root api route `/` redirects to {@link ensAdminUrl}, configuring
-   * ENSAdmin with an entry for this instance of ENSNode, identified by {@link ensNodePublicUrl}.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  ensAdminUrl: URL;
-
-  /**
-   * The publicly accessible endpoint of the ENSNode api (ex: http://localhost:42069).
-   *
-   * ENSAdmin will use this url to connect to the ENSNode api for querying state about the ENSNode instance.
-   *
-   * Invariants:
-   * - localhost urls are allowed (and expected).
-   */
-  ensNodePublicUrl: URL;
 
   /**
    * An ENSRainbow API Endpoint (ex: http://localhost:3223). ENSIndexer uses ENSRainbow to 'heal'
@@ -97,7 +58,7 @@ export interface ENSIndexerConfig {
    * Invariants:
    * - Must be a non-empty string that is a valid Postgres database schema identifier.
    */
-  databaseSchemaName: string;
+  databaseSchemaName: DatabaseSchemaName;
 
   /**
    * A set of {@link PluginName}s indicating which plugins to activate.
@@ -111,14 +72,6 @@ export interface ENSIndexerConfig {
   plugins: PluginName[];
 
   /**
-   * The network port ENSIndexer listens for http requests on, defaulting to 42069 (DEFAULT_PORT).
-   *
-   * Invariants:
-   * - The port must be an integer between 1 and 65535
-   */
-  port: number;
-
-  /**
    * Configuration for each indexable RPC, keyed by chain id.
    *
    * Invariants:
@@ -128,7 +81,7 @@ export interface ENSIndexerConfig {
    *   chain IDs that are not included in {@link indexedChainIds}. In other words, the keys
    *   of {@link rpcConfigs} is a superset of {@link indexedChainIds}.
    */
-  rpcConfigs: Map<ChainId, RpcConfig>;
+  rpcConfigs: RpcConfigs;
 
   /**
    * Indexed Chain IDs
@@ -138,13 +91,12 @@ export interface ENSIndexerConfig {
   indexedChainIds: Set<ChainId>;
 
   /**
-   * The database connection string for the indexer, if present. When undefined
-   * ponder will default to using an in-memory database (pglite).
+   * The database connection string for the indexer.
    *
    * Invariants:
-   * - If defined, the URL must be a valid PostgreSQL connection string
+   * - The URL must be a valid PostgreSQL connection string
    */
-  databaseUrl: string | undefined;
+  databaseUrl: DatabaseUrl;
 
   /**
    * The "primary" ENSIndexer service URL
@@ -219,39 +171,4 @@ export interface ENSIndexerConfig {
    *   composed of Interpreted Labels.
    */
   isSubgraphCompatible: boolean;
-}
-
-export interface RpcConfigEnvironment {
-  url: string;
-  maxRequestsPerSecond: string | undefined;
-}
-
-/**
- * Represents the raw, unvalidated environment variables for the ENSIndexer application.
- *
- * Keys correspond to the environment variable names, and all values are
- * strings or undefined, reflecting their state in `process.env`.
- * This interface is intended to be the source type which then gets
- * mapped/parsed into a structured configuration object like `ENSIndexerConfig`.
- */
-export interface ENSIndexerEnvironment {
-  port: string | undefined;
-  databaseSchemaName: string | undefined;
-  databaseUrl: string | undefined;
-  namespace: string | undefined;
-  plugins: string | undefined;
-  ensRainbowUrl: string | undefined;
-  labelSet: {
-    labelSetId: string | undefined;
-    labelSetVersion: string | undefined;
-  };
-  ensNodePublicUrl: string | undefined;
-  ensIndexerUrl: string | undefined;
-  ensAdminUrl: string | undefined;
-  globalBlockrange: {
-    startBlock: string | undefined;
-    endBlock: string | undefined;
-  };
-  rpcConfigs: Record<ChainIdString, RpcConfigEnvironment>;
-  isSubgraphCompatible: string | undefined;
 }

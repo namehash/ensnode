@@ -1,33 +1,32 @@
 import { arbitrum, base, linea, mainnet, optimism, scroll } from "viem/chains";
 
-import { DatasourceNames, type ENSNamespace } from "./lib/types";
-
-// ABIs for ENSRoot Datasource
-import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
-import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
-import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
-import { Registry as root_Registry } from "./abis/root/Registry";
-import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
-import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
-import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-
 // ABIs for Basenames Datasource
 import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
 import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
-
+import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
 import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
 import { Registry as linea_Registry } from "./abis/lineanames/Registry";
-import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
-
+// ABIs for ENSRoot Datasource
+import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
+import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
+import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
+import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
+import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
+import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
+import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
 import { ResolverABI, ResolverFilter } from "./lib/resolver";
+// Types
+import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
 /**
  * The Mainnet ENSNamespace
@@ -76,6 +75,11 @@ export default {
         abi: root_UnwrappedEthRegistrarController,
         address: "0x59e16fccd424cc24e280be16e11bcd56fb0ce547",
         startBlock: 22764821,
+      },
+      UniversalRegistrarRenewalWithReferrer: {
+        abi: root_UniversalRegistrarRenewalWithReferrer,
+        address: "0xf55575bde5953ee4272d5ce7cdd924c74d8fa81a",
+        startBlock: 23784217,
       },
       NameWrapper: {
         abi: root_NameWrapper,
@@ -144,15 +148,38 @@ export default {
         address: "0xd3e6775ed9b7dc12b205c8e608dc3767b9e5efda",
         startBlock: 17575699,
       },
+      /**
+       * This controller was removed from BaseRegistrar contract
+       * https://basescan.org/tx/0x88a3cc03291bb1a4b2bd9ccfe6b770988470001905d96c32bd41b866797b684b
+       */
       RegistrarController: {
         abi: base_RegistrarController,
         address: "0x4ccb0bb02fcaba27e82a56646e81d8c5bc4119a5",
         startBlock: 18619035,
+        endBlock: 35936564,
       },
-      L2Resolver: {
+      /**
+       * This controller was added to BaseRegistrar contract
+       * with the following tx:
+       * https://basescan.org/tx/0x52aed4dc975ba6c2b8b54d94f5b0b86a9cc0f27e81e78deb4a0b8b568f5e71ed
+       */
+      UpgradeableRegistrarController: {
+        abi: base_UpgradeableRegistrarController,
+        address: "0xa7d2607c6bd39ae9521e514026cbb078405ab322", // a proxy contract
+        startBlock: 35286620,
+      },
+
+      // NOTE: not indexed, but referenced for Protocol Acceleration
+      L2Resolver1: {
         abi: ResolverABI,
         address: "0xc6d566a56a1aff6508b41f6c90ff131615583bcd",
         startBlock: 17575714,
+      },
+      // NOTE: not indexed, but referenced for Protocol Acceleration
+      L2Resolver2: {
+        abi: ResolverABI,
+        address: "0x426fa03fb86e510d0dd9f70335cf102a98b10875",
+        startBlock: 35286620,
       },
     },
   },

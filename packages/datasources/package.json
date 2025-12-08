@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/datasources",
-  "version": "0.35.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "Catalog of ENSNode-related datasources including chain, contract addresses, start blocks, and event filters.",
   "license": "MIT",
@@ -33,18 +33,19 @@
   "scripts": {
     "prepublish": "tsup",
     "lint": "biome check --write .",
-    "lint:ci": "biome ci"
+    "lint:ci": "biome ci",
+    "test": "vitest"
   },
   "peerDependencies": {
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@ponder/utils": "catalog:"

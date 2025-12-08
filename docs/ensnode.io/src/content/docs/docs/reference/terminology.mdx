@@ -106,13 +106,25 @@ Outside of this terminology reference & ENSNode, the word 'labelhash' may refer 
 
 As ENSNode processes ENS data from multiple sources, labels and names exist in various states depending on normalization and data availability. These classifications are essential for proper display and validation.
 
+### ENS name normalization standard
+
+The **ENS name normalization standard** is defined by [ENSIP-15: Name Normalization](https://docs.ens.domains/ensip/15/).
+
+### ENS Normalize
+
+We define **ENS Normalize** as a specific implementation of the **ENS name normalization standard** associated with a versioned release of the [`@adraffy/ens-normalize` package](https://www.npmjs.com/package/@adraffy/ens-normalize) to NPM.
+
+It is important to note that the logic in this package changes across time with new releases. Therefore, labels / names that were unnormalized when using version X of this package may become normalized when using version X+N of this package. Generally such logic changes are based on [updates to the Unicode standard](https://www.unicode.org/versions/#schedule), such as how Unicode tends to officially release a set of new emojis each year.
+
+The ENSIndexer Config API provides details of the specific **ENS Normalize** release being used. It is also important for apps building on ENSNode to match their **ENS Normalize** version with the version of the **ENS Normalize** package used by ENSIndexer. If ENS normalization implementations are not equivalent, the guarantees ENSNode provides for **Interpreted Labels** and **Interpreted Names** may not be met. For example, if ENSNode is using a more recent version of **ENS Normalize** than an app building on ENSNode, the app may receive an Interpreted Label / Interpreted Name from ENSNode that is not formatted as an encoded labelhash (because it is normalized in version X+N of **ENS Normalize**) but the app might consider that to be an unnormalized label / name because the app is still using version X of **ENS Normalize**.
+
 ### Normalized Label
 
-A **Normalized Label** is a **Label** that has been processed through the ENS normalization algorithm and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
+A **Normalized Label** is a **Label** that has been processed through the **ENS Normalize** and represents the canonical form of that label. The normalization process ensures consistent representation and prevents homograph attacks.
 
 ### Unnormalized Label
 
-An **Unnormalized Label** is a **Label** that has not been processed through the ENS normalization algorithm, or one that would change if processed through normalization.
+An **Unnormalized Label** is a **Label** that has not been processed through the **ENS Normalize**, or one that would change if processed through normalization.
 
 ### Unknown Label
 
@@ -124,7 +136,7 @@ A **Normalized Name** is a **name** composed entirely of **Normalized Labels**. 
 
 ### Unnormalized Name
 
-An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the ENS normalization algorithm.
+An **Unnormalized Name** is a **name** that contains one or more **Unnormalized Labels**, meaning it has not been fully processed through the **ENS Normalize**.
 
 ## Display Encoding Formats
 
@@ -155,6 +167,8 @@ A **Literal Label** is the raw label data as it exists in onchain storage or eve
 An **Interpreted Label** is a **Label** that is either:
 - (if normalized): a normalized **Literal Label**
 - (if not normalized or **Unknown**): an **Encoded LabelHash**
+
+Apps building on ENSNode should take special note to align their implementation of **ENS Normalize** with the **ENS Normalize** used by the ENSNode they use. The **ENS Normalize** version used by each ENSNode can be referenced in the ENSIndexer Config API.
 
 ### Literal Name
 A **Literal Name** is a Name exclusively composed of 0 or more **Literal Labels**.

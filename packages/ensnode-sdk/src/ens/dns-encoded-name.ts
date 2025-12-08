@@ -1,6 +1,6 @@
 import { bytesToString, hexToBytes } from "viem";
 
-import { DNSEncodedLiteralName, DNSEncodedName, LiteralLabel } from "./types";
+import type { DNSEncodedLiteralName, DNSEncodedName, LiteralLabel } from "./types";
 
 /**
  * Decodes a DNS-Encoded name consisting of Literal Labels into an ordered list of Literal Labels.

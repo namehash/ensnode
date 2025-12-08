@@ -1,4 +1,4 @@
-export const ENSServiceProviderBadge = (props: React.HTMLAttributes<HTMLDivElement>) => {
+export const ENSServiceProviderBadge = (props: React.SVGAttributes<SVGElement>) => {
   return (
     <svg
       width="175"
@@ -6,6 +6,7 @@ export const ENSServiceProviderBadge = (props: React.HTMLAttributes<HTMLDivEleme
       viewBox="0 0 175 45"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       <rect x="0.229241" y="0.955803" width="174.437" height="43.5415" rx="21.7708" fill="white" />
       <rect

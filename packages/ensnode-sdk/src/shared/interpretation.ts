@@ -1,11 +1,11 @@
 import {
-  type InterpretedLabel,
-  InterpretedName,
-  Label,
-  type LiteralLabel,
-  LiteralName,
   encodeLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
   isNormalizedLabel,
+  type Label,
+  type LiteralLabel,
+  type LiteralName,
 } from "../ens";
 import { labelhashLiteralLabel } from "./labelhash";
 

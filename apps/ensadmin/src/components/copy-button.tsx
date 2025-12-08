@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, ButtonProps } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { CheckIcon, ClipboardIcon } from "lucide-react";
+import { CheckIcon, CopyIcon } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
+
+import { Button, type ButtonProps } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export interface CopyButtonProps extends Omit<ButtonProps, "onClick"> {
   value: string;
@@ -53,7 +54,7 @@ export function CopyButton({
     }
   }
 
-  const defaultIcon = <ClipboardIcon className="h-4 w-4" />;
+  const defaultIcon = <CopyIcon className="h-4 w-4" />;
   const defaultSuccessIcon = <CheckIcon className="h-4 w-4" />;
 
   return (

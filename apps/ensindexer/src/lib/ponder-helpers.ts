@@ -5,43 +5,49 @@
  */
 
 import type { Event } from "ponder:registry";
-
 import type { ChainConfig } from "ponder";
-import { Address, PublicClient } from "viem";
+import type { Address, PublicClient } from "viem";
 import * as z from "zod/v4";
 
-import { ContractConfig } from "@ensnode/datasources";
+import type { ContractConfig } from "@ensnode/datasources";
+import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
 import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
 
-import { ENSIndexerConfig } from "@/config/types";
-import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerConfig } from "@/config/types";
 
 export type EventWithArgs<ARGS extends Record<string, unknown> = {}> = Omit<Event, "args"> & {
   args: ARGS;
 };
 
 /**
- * Given a contract's start block, returns a block range describing a start and end block
+ * Given a contract's block range, returns a block range describing a start and end block
  * that maintains validity within the global blockrange. The returned start block will always be
  * defined, but if no end block is specified, the returned end block will be undefined.
  *
- * @param blockrange a Blockrange
- * @param contractStartBlock the preferred start block for the given contract, defaulting to 0
- * @returns the start and end blocks, contrained to the provided `start` and `end`
- *  i.e. (startBlock || 0) <= (contractStartBlock || 0) <= (endBlock if specificed)
+ * @param globalBlockrange a global block range across all indexed contracts
+ * @param contractBlockrange the preferred blockrange for the given contract
+ * @returns the start and end blocks, constrained to the provided `start` and `end`
+ *  i.e. (globalStartBlock || 0) <= (contractStartBlock || 0) <= (contractEndBlock if specificed) <= (globalEndBlock if specificed)
  */
 export const constrainBlockrange = (
-  blockrange: Blockrange,
-  contractStartBlock: number | undefined = 0,
+  globalBlockrange: Blockrange,
+  contractBlockrange: Blockrange,
 ): Blockrange => {
-  const { startBlock, endBlock } = blockrange;
+  const highestStartBlock = Math.max(
+    globalBlockrange.startBlock || 0,
+    contractBlockrange.startBlock || 0,
+  );
 
-  const isEndConstrained = endBlock !== undefined;
-  const concreteStartBlock = Math.max(startBlock || 0, contractStartBlock);
+  const lowestEndBlock = Math.min(
+    globalBlockrange.endBlock || Infinity,
+    contractBlockrange.endBlock || Infinity,
+  );
+
+  const isEndConstrained = Number.isFinite(lowestEndBlock);
 
   return {
-    startBlock: isEndConstrained ? Math.min(concreteStartBlock, endBlock) : concreteStartBlock,
-    endBlock,
+    startBlock: isEndConstrained ? Math.min(highestStartBlock, lowestEndBlock) : highestStartBlock,
+    endBlock: isEndConstrained ? lowestEndBlock : undefined,
   };
 };
 
@@ -51,19 +57,16 @@ export const constrainBlockrange = (
  * It's a workaround for the lack of an internal API allowing to access
  * Prometheus metrics for the Ponder application.
  *
- * @param ponderApplicationPort the port the Ponder application is served at
+ * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
  * @returns fetcher function
  */
-export function createPrometheusMetricsFetcher(
-  ponderApplicationPort: number,
-): () => Promise<string> {
+export function createPrometheusMetricsFetcher(ensIndexerUrl: URL): () => Promise<string> {
   /**
    * Fetches the Prometheus metrics from the Ponder application endpoint.
    * @returns Prometheus metrics as a text string
    */
   return async function fetchPrometheusMetrics(): Promise<string> {
-    const response = await fetch(`http://localhost:${ponderApplicationPort}/metrics`);
-
+    const response = await fetch(new URL("/metrics", ensIndexerUrl));
     return response.text();
   };
 }
@@ -102,18 +105,16 @@ const PonderDataSchema = {
  * It's a workaround for the lack of an internal API allowing to access
  * Ponder Status metrics for the Ponder application.
  *
- * @param ponderApplicationPort the port the Ponder application is served at
+ * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
  * @returns fetcher function
  */
-export function createPonderStatusFetcher(
-  ponderApplicationPort: number,
-): () => Promise<PonderStatus> {
+export function createPonderStatusFetcher(ensIndexerUrl: URL): () => Promise<PonderStatus> {
   /**
    * Fetches the Ponder Ponder status from the Ponder application endpoint.
    * @returns Parsed Ponder Status object.
    */
   return async function fetchPonderStatus() {
-    const response = await fetch(`http://localhost:${ponderApplicationPort}/status`);
+    const response = await fetch(new URL("/status", ensIndexerUrl));
     const responseData = await response.json();
 
     return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;
@@ -276,8 +277,8 @@ export function chainsConnectionConfig(
   return {
     [chainId.toString()]: {
       id: chainId,
-      rpc: rpcConfig.url.href,
-      maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
+      rpc: rpcConfig.httpRPCs.map((httpRPC) => httpRPC.toString()),
+      ws: rpcConfig.websocketRPC?.toString(),
       // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
       ...((chainId === 31337 || chainId === 1337) && { disableCache: true }),
     } satisfies ChainConfig,
@@ -299,8 +300,13 @@ export function chainConfigForContract<CONTRACT_CONFIG extends ContractConfig>(
   chainId: number,
   contractConfig: CONTRACT_CONFIG,
 ) {
+  const contractBlockrange = {
+    startBlock: contractConfig.startBlock,
+    endBlock: contractConfig.endBlock,
+  } satisfies Blockrange;
+
   // Ponder will index the contract in perpetuity if endBlock is `undefined`
-  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractConfig.startBlock);
+  const { startBlock, endBlock } = constrainBlockrange(globalBlockrange, contractBlockrange);
 
   return {
     [chainId.toString()]: {
@@ -326,6 +332,7 @@ export function mergeContractConfigs<CONTRACTS extends ContractConfig[]>(contrac
 
   return {
     // just use the first's ABI, they're all identical, no need to mergeAbis
+    // biome-ignore lint/style/noNonNullAssertion: length check above
     abi: contracts[0]!.abi,
     startBlock: Math.min(...startBlocks),
     address: addresses,

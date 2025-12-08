@@ -1,9 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ConfigParameter, UsePrimaryNamesParameters } from "../types";
+
+import type { UsePrimaryNamesParameters, WithSDKConfigParameter } from "../types";
 import { createPrimaryNamesQueryOptions } from "../utils/query";
-import { useENSNodeConfig } from "./useENSNodeConfig";
+import { useENSNodeSDKConfig } from "./useENSNodeSDKConfig";
 
 /**
  * Resolves the primary names of a specified address across multiple chains.
@@ -39,9 +40,9 @@ import { useENSNodeConfig } from "./useENSNodeConfig";
  * }
  * ```
  */
-export function usePrimaryNames(parameters: UsePrimaryNamesParameters & ConfigParameter) {
+export function usePrimaryNames(parameters: UsePrimaryNamesParameters & WithSDKConfigParameter) {
   const { config, query = {}, address, ...args } = parameters;
-  const _config = useENSNodeConfig(config);
+  const _config = useENSNodeSDKConfig(config);
 
   const canEnable = address !== null;
 

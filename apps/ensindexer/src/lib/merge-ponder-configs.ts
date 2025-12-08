@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: keep it simple */
 import { deepmergeCustom } from "deepmerge-ts";
 import { mergeAbis } from "ponder";
 import type { Abi } from "viem";
@@ -23,13 +24,13 @@ const mergePonderConfigsWithResolverBlockrange = deepmergeCustom({
       keyPath: [...(previousMeta as any).keyPath, metaMeta.key],
     };
   },
-  mergeArrays(values, utils, meta) {
+  mergeArrays(values, _utils, meta) {
     // if merging any `abi` key, use viem#mergeAbi to avoid duplicates
     if (meta !== undefined && meta.key === "abi") {
       return mergeAbis(values as unknown as Abi[]);
     }
   },
-  mergeOthers: (values, utils, meta) => {
+  mergeOthers: (values, _utils, meta) => {
     // matches keyPath = [ 'contracts', 'Resolver', 'chain', '1', 'startBlock' ]
     if (
       meta &&

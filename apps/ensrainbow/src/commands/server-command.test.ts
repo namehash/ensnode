@@ -1,11 +1,14 @@
-import { promises as fs } from "fs";
-import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
+import { promises as fs } from "node:fs";
+
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
+import type { Hono } from "hono";
 import { labelhash } from "viem";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
+
 import { ENSRainbowDB } from "@/lib/database";
+
 import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {

@@ -1,14 +1,14 @@
 "use client";
 
-import "graphiql/graphiql.css";
+import "graphiql/setup-workers/webpack";
+import "graphiql/style.css";
 import "@graphiql/plugin-explorer/style.css";
 
-import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
+// import { AiQueryGeneratorForm } from "@/components/ai-query-generator";
 import { explorerPlugin } from "@graphiql/plugin-explorer";
 import { createGraphiQLFetcher } from "@graphiql/toolkit";
-import { GraphiQL, type GraphiQLProps } from "graphiql";
+import { GraphiQL, type GraphiQLProps, HISTORY_PLUGIN } from "graphiql";
 import { useSearchParams } from "next/navigation";
-import { useGraphiQLEditor } from "./hooks";
 
 const defaultQuery = `#
 # Welcome to this interactive playground for
@@ -32,18 +32,9 @@ export function PonderGraphiQLEditor(props: GraphiQLPropsWithUrl) {
   const initialQuery = searchParams.get("query") || defaultQuery;
   const initialVariables = searchParams.get("variables") || "";
 
-  const graphiqlEditor = useGraphiQLEditor({
-    query: initialQuery,
-    variables: initialVariables,
-  });
-
   return (
     <section className="flex flex-col flex-1">
-      <GraphiQLEditor
-        {...props}
-        query={graphiqlEditor.state.query || initialQuery}
-        variables={graphiqlEditor.state.variables || initialVariables}
-      />
+      <GraphiQLEditor {...props} initialQuery={initialQuery} initialVariables={initialVariables} />
     </section>
   );
 }
@@ -57,25 +48,17 @@ export function SubgraphGraphiQLEditor(props: GraphiQLPropsWithUrl) {
   const initialQuery = searchParams.get("query") || defaultQuery;
   const initialVariables = searchParams.get("variables") || "";
 
-  const graphiqlEditor = useGraphiQLEditor({
-    query: initialQuery,
-    variables: initialVariables,
-  });
-
   return (
     <section className="flex flex-col flex-1">
-      <AiQueryGeneratorForm
+      {/*<AiQueryGeneratorForm
         onResult={({ query, variables }) => {
-          graphiqlEditor.actions.setQueryAndVariables(query, JSON.stringify(variables));
+          // TODO: Implement GraphiQLProvider to update the query and variables via context provider when AI is re-enabled
+
         }}
         url={props.url}
-      />
+      />*/}
 
-      <GraphiQLEditor
-        {...props}
-        query={graphiqlEditor.state.query || initialQuery}
-        variables={graphiqlEditor.state.variables || initialVariables}
-      />
+      <GraphiQLEditor {...props} initialQuery={initialQuery} initialVariables={initialVariables} />
     </section>
   );
 }
@@ -133,7 +116,7 @@ function GraphiQLEditor({ url, plugins = [], ...props }: GraphiQLPropsWithUrl) {
         storage={storage}
         forcedTheme="light"
         fetcher={fetcher}
-        plugins={[explorer, ...plugins]}
+        plugins={[HISTORY_PLUGIN, explorer, ...plugins]}
         {...props}
       />
     </div>

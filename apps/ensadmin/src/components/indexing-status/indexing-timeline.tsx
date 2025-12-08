@@ -2,15 +2,20 @@
  * This file gathers ideas for UI components presenting chain indexing timeline.
  */
 
-import { cn } from "@/lib/utils";
-import { ChainId, ChainIndexingStatusIds, UnixTimestamp } from "@ensnode/ensnode-sdk";
-import { intlFormat } from "date-fns";
+import {
+  type BlockRef,
+  type ChainId,
+  ChainIndexingStatusIds,
+  type UnixTimestamp,
+} from "@ensnode/ensnode-sdk";
 
 import { ChainIcon } from "@/components/chains/ChainIcon";
 import { AbsoluteTime } from "@/components/datetime-utils";
-import { BlockRefViewModel } from "@/components/indexing-status/block-refs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatChainStatus } from "@/lib/indexing-status";
 import { getChainName } from "@/lib/namespace-utils";
+import { cn } from "@/lib/utils";
+
 import { getTimelinePosition } from "./indexing-timeline-utils";
 
 interface ChainIndexingTimelinePhaseViewModel {
@@ -63,7 +68,7 @@ function ChainIndexingTimelinePhase({
     >
       {width > 10 && (
         <span className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium capitalize">
-          {phase.status}
+          {formatChainStatus(phase.status)}
         </span>
       )}
     </div>
@@ -97,8 +102,8 @@ interface ChainIndexingTimelineProps {
   timelineEndsAt: UnixTimestamp;
   chainStatus: {
     chainId: ChainId;
-    firstBlockToIndex: BlockRefViewModel;
-    lastIndexedBlock: BlockRefViewModel | null;
+    firstBlockToIndex: BlockRef;
+    lastIndexedBlock: BlockRef | null;
     phases: ChainIndexingTimelinePhaseViewModel[];
   };
 }

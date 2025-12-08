@@ -1,5 +1,6 @@
-import { asLowerCaseAddress } from "@ensnode/ensnode-sdk";
 import { type Address, type Hash, type Hex, isAddress } from "viem";
+
+import { asLowerCaseAddress } from "@ensnode/ensnode-sdk";
 
 /**
  * Options for the `callTracer` tracer. This tracer is used to enlist
@@ -102,8 +103,9 @@ export function getAddressesFromTrace(trace: Trace): Set<Address> {
     // typical EVM input data. This regex finds 40-char hex sequences
     // that appear after typical position markers (24 zeroes) in calldata.
     const regex = /000000000000000000000000([a-fA-F0-9]{40})/gi;
-    const m = [];
-    let match;
+
+    let match: ReturnType<typeof regex.exec>;
+    // biome-ignore lint/suspicious/noAssignInExpressions: this is good pattern
     while ((match = regex.exec(text)) !== null) {
       // match[1] contains the extracted address part (without the 24 zeroes)
       const maybePartialAddress = match[1];

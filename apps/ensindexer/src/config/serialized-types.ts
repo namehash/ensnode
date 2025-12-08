@@ -1,15 +1,24 @@
 import type { ChainId, ChainIdString, UrlString } from "@ensnode/ensnode-sdk";
+import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbowClientLabelSet } from "@ensnode/ensrainbow-sdk";
-import type { ENSIndexerConfig, RpcConfig } from "./types";
+
+import type { ENSIndexerConfig } from "./types";
 
 /**
  * Serialized representation of {@link RpcConfig}
  */
-export interface SerializedRpcConfig extends Omit<RpcConfig, "url"> {
+export interface SerializedRpcConfig extends Omit<RpcConfig, "httpRPCs" | "websocketRPC"> {
   /**
-   * String representation of {@link RpcConfig.url}.
+   * Serialized representation of {@link RpcConfig.httpRPCs}.
+   *
+   * Array guaranteed to contain at least 1 element.
    */
-  url: UrlString;
+  httpRPCs: [UrlString, ...UrlString[]];
+
+  /**
+   * Serialized representation of {@link RpcConfig.websocketRPC}.
+   */
+  websocketRPC?: UrlString;
 }
 
 /**
@@ -18,30 +27,15 @@ export interface SerializedRpcConfig extends Omit<RpcConfig, "url"> {
 export interface SerializedENSIndexerConfig
   extends Omit<
     ENSIndexerConfig,
-    | "ensAdminUrl"
-    | "ensNodePublicUrl"
-    | "ensIndexerUrl"
-    | "ensRainbowUrl"
-    | "indexedChainIds"
-    | "rpcConfigs"
+    "ensIndexerUrl" | "ensRainbowUrl" | "indexedChainIds" | "rpcConfigs" | "plugins"
   > {
   /**
-   * String representation of {@link ENSIndexerConfig.ensAdminUrl}.
-   */
-  ensAdminUrl: UrlString;
-
-  /**
-   * String representation of {@link ENSIndexerConfig.ensIndexerUrl}.
+   * Serialized representation of {@link ENSIndexerConfig.ensIndexerUrl}.
    */
   ensIndexerUrl: UrlString;
 
   /**
-   * String representation of {@link ENSIndexerConfig.ensNodePublicUrl}.
-   */
-  ensNodePublicUrl: UrlString;
-
-  /**
-   * String representation of {@link ENSIndexerConfig.ensRainbowUrl}.
+   * Serialized representation of {@link ENSIndexerConfig.ensRainbowUrl}.
    */
   ensRainbowUrl: UrlString;
 
@@ -51,12 +45,23 @@ export interface SerializedENSIndexerConfig
   labelSet: Required<EnsRainbowClientLabelSet>;
 
   /**
-   * String representation of {@link ENSIndexerConfig.indexedChainIds}.
+   * Serialized representation of {@link ENSIndexerConfig.indexedChainIds}.
    */
   indexedChainIds: ChainId[];
 
   /**
-   * String representation of {@link ENSIndexerConfig.rpcConfig}.
+   * Serialized representation of {@link ENSIndexerConfig.rpcConfigs}.
    */
   rpcConfigs: Record<ChainIdString, SerializedRpcConfig>;
+
+  /**
+   * Serialized representation of {@link ENSIndexerConfig.plugins}.
+   *
+   * For future-proofing, this is a list of strings that may or may
+   * not be currently valid {@link PluginName} values.
+   *
+   * Invariants:
+   * - A set of strings with at least one value.
+   */
+  plugins: string[];
 }

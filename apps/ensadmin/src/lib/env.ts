@@ -1,70 +1,46 @@
-// TODO: replace all of this validation with zod
+import { uniq } from "@ensnode/ensnode-sdk";
+
+import { buildHttpHostname, buildHttpHostnames, type HttpHostname } from "./url-utils";
+
+const DEFAULT_ENSADMIN_PORT = 4173;
+const DEFAULT_SERVER_CONNECTION_LIBRARY = [
+  "https://api.alpha.ensnode.io",
+  "https://api.alpha-sepolia.ensnode.io",
+  "https://api.mainnet.ensnode.io",
+  "https://api.sepolia.ensnode.io",
+  "https://api.holesky.ensnode.io",
+].join(",");
 
 /**
- * Get ENSAdmin service public URL.
- *
- * Note: a Vercel fallback URL will be used if application runs on Vercel platform.
- * If the Vercel fallback URL cannot be applied, then default URL will be used.
- *
- * @returns application public URL for ENSAdmin
- * @throws when Vercel platform was detected but could not determine application hostname
+ * Determines whether `variables` is a non-null object and a valid Record<string, unknown>.
  */
-export function ensAdminPublicUrl(): URL {
-  const envVarName = "ENSADMIN_PUBLIC_URL";
-  const envVarValue = process.env[envVarName];
+const isValidRuntimeEnvVariables = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-  if (!envVarValue) {
-    if (isAppOnVercelPlatform()) {
-      // build public URL using the Vercel-specific way
-      return getVercelAppPublicUrl();
-    }
+/**
+ * Retrieves an env variable from runtime variables, if specified.
+ *
+ * @param key The key of the environment variable
+ * @returns The value, if specified, or undefined.
+ */
+const getRuntimeEnvVariable = (key: string): string | undefined => {
+  if (typeof window == "undefined") return undefined;
 
-    // otherwise, use default public URL
-    return defaultEnsAdminPublicUrl();
-  }
+  const variables = (window as any).__ENSADMIN_RUNTIME_ENVIRONMENT_VARIABLES as unknown;
+  if (!isValidRuntimeEnvVariables(variables)) return undefined;
 
-  try {
-    return parseUrl(envVarValue);
-  } catch (error) {
-    console.error(error);
+  const value = variables[key];
+  if (value === undefined) return undefined;
+  if (value === null) return undefined;
+  if (typeof value !== "string") return undefined;
+  if (value === "") return undefined; // empty-string to undefined
 
-    throw new Error(`Invalid ${envVarName} value "${envVarValue}". It should be a valid URL.`);
-  }
-}
+  return value;
+};
 
-/** Build a default public URL for ENSAdmin */
-function defaultEnsAdminPublicUrl(): URL {
-  let applicationPort: number;
-
-  try {
-    applicationPort = parseApplicationPort(process.env.PORT);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-
-    console.error(`Error building default public URL for ENSAdmin: ${errorMessage}`);
-
-    applicationPort = 4173;
-  }
-
-  return new URL(`http://localhost:${applicationPort}`);
-}
-
-function parseApplicationPort(rawValue?: string): number {
-  if (!rawValue) {
-    throw new Error("Expected value not set");
-  }
-
-  const parsedValue = parseInt(rawValue, 10);
-
-  if (Number.isNaN(parsedValue)) {
-    throw new Error(`'${rawValue}' is not a number`);
-  }
-
-  if (parsedValue <= 0) {
-    throw new Error(`'${rawValue}' is not a natural number`);
-  }
-
-  return parsedValue;
+function localhostEnsAdminPublicUrl(): string {
+  const port = process.env.PORT || DEFAULT_ENSADMIN_PORT.toString();
+  return `http://localhost:${port}`;
 }
 
 /**
@@ -76,81 +52,67 @@ function isAppOnVercelPlatform(): boolean {
 
 /**
  * Builds a public URL of the app assuming it runs on Vercel.
- * @returns public URL
- * @throws when application hostname could not be determined based on `VERCEL_*` env vars
+ *
+ * @returns public URL of the app if it is running on Vercel, else `null`
+ * @throws when app is on the Vercel platform but the `HttpHostname` could not be formed.
  */
-function getVercelAppPublicUrl(): URL {
-  const vercelEnv = process.env.VERCEL_ENV;
-  let vercelAppHostname: string | undefined;
+function getVercelAppPublicUrl(): string | undefined {
+  if (!isAppOnVercelPlatform()) return undefined;
 
-  switch (vercelEnv) {
+  switch (process.env.VERCEL_ENV) {
     case "production":
-      vercelAppHostname = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+      return process.env.VERCEL_PROJECT_PRODUCTION_URL;
     case "development":
     case "preview":
-      vercelAppHostname = process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
+      return process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
   }
-
-  if (!vercelAppHostname) {
-    throw new Error(`Could not extract Vercel hostname for Vercel env "${vercelEnv}"`);
-  }
-
-  return new URL(`https://${vercelAppHostname}`);
 }
 
-const DEFAULT_ENSNODE_URL =
-  "https://api.alpha.ensnode.io,https://api.alpha-sepolia.ensnode.io,https://api.mainnet.ensnode.io,https://api.sepolia.ensnode.io,https://api.holesky.ensnode.io";
-
 /**
- * Get list of URLs for default ENSNode instances.
+ * Get ENSAdmin service public HttpHostname.
  *
- * @returns a list (with at least one element) of URLs for default ENSNode instances
+ * Note: a Vercel fallback HttpHostname will be used if application runs on Vercel platform.
+ * If the Vercel fallback HttpHostname cannot be applied, then default HttpHostname will be used.
+ *
+ * @returns application public HttpHostname for ENSAdmin
+ * @throws when Vercel platform was detected but could not determine HttpHostname
  */
-export function defaultEnsNodeUrls(): Array<URL> {
-  const envVarName = "NEXT_PUBLIC_DEFAULT_ENSNODE_URLS";
-  let envVarValue = process.env.NEXT_PUBLIC_DEFAULT_ENSNODE_URLS;
+export function ensAdminPublicUrl(): HttpHostname {
+  const envVarValue =
+    process.env.ENSADMIN_PUBLIC_URL || getVercelAppPublicUrl() || localhostEnsAdminPublicUrl();
 
-  if (!envVarValue) {
-    console.warn(
-      `No default ENSNode URL provided in "${envVarName}". Using fallback: ${DEFAULT_ENSNODE_URL}`,
-    );
-
-    envVarValue = DEFAULT_ENSNODE_URL;
-  }
-
-  try {
-    const urlList = envVarValue.split(",").map((maybeUrl) => parseUrl(maybeUrl));
-
-    if (urlList.length === 0) {
-      throw new Error(
-        `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid URL`,
-      );
-    }
-
-    return urlList;
-  } catch (error) {
-    console.error(error);
-
+  const result = buildHttpHostname(envVarValue);
+  if (!result.isValid) {
     throw new Error(
-      `Invalid ${envVarName} value "${envVarValue}" must contain a comma separated list of valid URLs.`,
+      `Invalid ENSADMIN_PUBLIC_URL value "${envVarValue}": Cannot build ENSAdmin public HttpHostname: ${result.error}`,
     );
   }
+  return result.url;
 }
 
 /**
- * Parses a URL from a string.
- * @param maybeUrl
- * @returns URL
- * @throws when the URL is invalid
+ * Gets the server's ENSNode connection library.
+ *
+ * @returns a list 1 or more `HttpHostname` values.
+ * @throws when no `HttpHostname` could be returned.
  */
-export function parseUrl(maybeUrl: string): URL {
-  try {
-    return new URL(maybeUrl);
-  } catch (error) {
-    throw new Error(`Invalid URL: ${maybeUrl}`);
-  }
-}
+export function getServerConnectionLibrary(): HttpHostname[] {
+  const envVarName = "NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY";
+  const envVarValue =
+    getRuntimeEnvVariable("NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY") ||
+    process.env.NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY || // NOTE: must specify full key for nextjs to replace
+    DEFAULT_SERVER_CONNECTION_LIBRARY;
 
-export async function ensAdminVersion(): Promise<string> {
-  return import("../../package.json").then(({ version }) => version);
+  const connections = buildHttpHostnames(envVarValue.split(","));
+
+  if (connections.length === 0) {
+    throw new Error(
+      `Invalid ${envVarName} value: "${envVarValue}" must contain at least one valid ENSNode connection URL`,
+    );
+  }
+
+  // naive deduplication
+  const uniqueConnections = uniq(connections);
+
+  return uniqueConnections;
 }

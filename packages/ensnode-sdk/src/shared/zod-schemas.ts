@@ -1,5 +1,6 @@
-import { type CoinType } from "@ensdomains/address-encoder";
-import { type Address, isAddress } from "viem";
+import type { CoinType } from "@ensdomains/address-encoder";
+import { AccountId as CaipAccountId } from "caip";
+import { type Address, type Hex, isAddress, isHex, size } from "viem";
 /**
  * All zod schemas we define must remain internal implementation details.
  * We want the freedom to move away from zod in the future without impacting
@@ -9,9 +10,14 @@ import { type Address, isAddress } from "viem";
  * `./src/internal.ts` file.
  */
 import z from "zod/v4";
-import { ENSNamespaceIds } from "../ens";
+
+import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
+import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
+import { reinterpretName } from "./reinterpretation";
+import type { SerializedAccountId } from "./serialized-types";
 import type {
+  AccountId,
   BlockRef,
   ChainId,
   Datetime,
@@ -37,6 +43,20 @@ export const makeBooleanStringSchema = (valueLabel: string = "Value") =>
       }),
     )
     .transform((val) => val === "true");
+
+/**
+ * Parses a numeric value as a finite non-negative number.
+ */
+export const makeFiniteNonNegativeNumberSchema = (valueLabel: string = "Value") =>
+  z
+    .number({
+      // NOTE: Zod's implementation of `number` automatically rejects NaN and Infinity values.
+      // and therefore the finite check is implicit.
+      error: `${valueLabel} must be a finite number.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must be a non-negative number (>=0).`,
+    });
 
 /**
  * Parses a numeric value as an integer.
@@ -81,7 +101,7 @@ export const makeChainIdSchema = (valueLabel: string = "Chain ID") =>
   makePositiveIntegerSchema(valueLabel).transform((val) => val as ChainId);
 
 /**
- * Parses a string representation of {@link ChainId}.
+ * Parses a serialized representation of {@link ChainId}.
  */
 export const makeChainIdStringSchema = (valueLabel: string = "Chain ID String") =>
   z
@@ -98,7 +118,7 @@ export const makeDefaultableChainIdSchema = (valueLabel: string = "Defaultable C
   makeNonNegativeIntegerSchema(valueLabel).transform((val) => val as DefaultableChainId);
 
 /**
- * Parses a string representation of {@link DefaultableChainId}.
+ * Parses a serialized representation of {@link DefaultableChainId}.
  */
 export const makeDefaultableChainIdStringSchema = (
   valueLabel: string = "Defaultable Chain ID String",
@@ -119,7 +139,7 @@ export const makeCoinTypeSchema = (valueLabel: string = "Coin Type") =>
     .transform((val) => val as CoinType);
 
 /**
- * Parses a string representation of {@link CoinType}.
+ * Parses a serialized representation of {@link CoinType}.
  */
 export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String") =>
   z
@@ -128,7 +148,7 @@ export const makeCoinTypeStringSchema = (valueLabel: string = "Coin Type String"
     .pipe(makeCoinTypeSchema(`The numeric value represented by ${valueLabel}`));
 
 /**
- * Parses a string representation of an EVM address into a lowercase Address.
+ * Parses a serialized representation of an EVM address into a lowercase Address.
  */
 export const makeLowercaseAddressSchema = (valueLabel: string = "EVM address") =>
   z
@@ -165,11 +185,12 @@ export const makeUrlSchema = (valueLabel: string = "Value") =>
   z
     .url({
       error: `${valueLabel} must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`,
+      abort: true,
     })
     .transform((v) => new URL(v));
 
 /**
- * Parses a string representation of a comma separated list.
+ * Parses a serialized representation of a comma separated list.
  */
 export const makeCommaSeparatedList = (valueLabel: string = "Value") =>
   z
@@ -234,10 +255,136 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     },
   });
 
-/**
- * Parses a numeric value as a port number.
- */
-export const makePortSchema = (valueLabel: string = "Port") =>
-  makePositiveIntegerSchema(valueLabel).max(65535, {
-    error: `${valueLabel} must be an integer between 1 and 65535.`,
+const makePriceAmountSchema = (valueLabel: string = "Amount") =>
+  z.coerce
+    .bigint({
+      error: `${valueLabel} must represent a bigint.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must not be negative.`,
+    });
+
+export const makePriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
+  z.strictObject({
+    amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
   });
+
+/**
+ * Schema for {@link Price} type.
+ */
+export const makePriceSchema = (valueLabel: string = "Price") =>
+  z.discriminatedUnion(
+    "currency",
+    [
+      makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+    ],
+    { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
+  );
+
+/**
+ * Schema for {@link PriceEth} type.
+ */
+export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
+  makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+/**
+ * Schema for {@link AccountId} type.
+ */
+export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
+  z.strictObject({
+    chainId: makeChainIdSchema(`${valueLabel} chain ID`),
+    address: makeLowercaseAddressSchema(`${valueLabel} address`),
+  });
+
+/**
+ * Schema for {@link SerializedAccountSchema} type.
+ */
+export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = "Account ID") =>
+  z.coerce
+    .string()
+    .transform((v) => {
+      const result = new CaipAccountId(v);
+
+      return {
+        chainId: Number(result.chainId.reference),
+        address: result.address,
+      };
+    })
+    .pipe(makeAccountIdSchema(valueLabel));
+
+/**
+ * Make a schema for {@link Hex} representation of bytes array.
+ *
+ * @param {number} options.bytesCount expected count of bytes to be hex-encoded
+ */
+export const makeHexStringSchema = (
+  options: { bytesCount: number },
+  valueLabel: string = "String representation of bytes array",
+) =>
+  z
+    .string()
+    .check(function invariant_isHexEncoded(ctx) {
+      if (!isHex(ctx.value)) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must start with '0x'.`,
+        });
+      }
+    })
+    .transform((v) => v as Hex)
+    .check(function invariant_encodesRequiredBytesCount(ctx) {
+      const expectedBytesCount = options.bytesCount;
+      const actualBytesCount = size(ctx.value);
+
+      if (actualBytesCount !== expectedBytesCount) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} must represent exactly ${expectedBytesCount} bytes. Currently represented bytes count: ${actualBytesCount}.`,
+        });
+      }
+    });
+
+/**
+ * Make schema for {@link Node}.
+ */
+export const makeNodeSchema = (valueLabel: string = "Node") =>
+  makeHexStringSchema({ bytesCount: 32 }, valueLabel);
+
+/**
+ * Make schema for Transaction Hash
+ */
+export const makeTransactionHashSchema = (valueLabel: string = "Transaction hash") =>
+  makeHexStringSchema({ bytesCount: 32 }, valueLabel);
+
+/**
+ * Make schema for {@link ReinterpretedName}.
+ */
+export const makeReinterpretedNameSchema = (valueLabel: string = "Reinterpreted Name") =>
+  z
+    .string()
+    .transform((v) => v as InterpretedName)
+    .check((ctx) => {
+      try {
+        reinterpretName(ctx.value);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `${valueLabel} cannot be reinterpreted: ${errorMessage}`,
+        });
+      }
+    })
+    .transform(reinterpretName);

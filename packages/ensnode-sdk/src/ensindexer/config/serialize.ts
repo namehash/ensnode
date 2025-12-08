@@ -1,7 +1,9 @@
-import { ChainId } from "../../shared";
-import { serializeUrl } from "../../shared/serialize";
-import { SerializedENSIndexerPublicConfig, SerializedIndexedChainIds } from "./serialized-types";
-import { ENSIndexerPublicConfig } from "./types";
+import type { ChainId } from "../../shared";
+import type {
+  SerializedENSIndexerPublicConfig,
+  SerializedIndexedChainIds,
+} from "./serialized-types";
+import type { ENSIndexerPublicConfig } from "./types";
 
 /**
  * Serializes a {@link ChainConfig} object.
@@ -16,26 +18,22 @@ export function serializeENSIndexerPublicConfig(
   config: ENSIndexerPublicConfig,
 ): SerializedENSIndexerPublicConfig {
   const {
-    ensAdminUrl,
-    ensNodePublicUrl,
     labelSet,
     indexedChainIds,
     databaseSchemaName,
     isSubgraphCompatible,
     namespace,
     plugins,
-    dependencyInfo,
+    versionInfo,
   } = config;
 
   return {
-    ensAdminUrl: serializeUrl(ensAdminUrl),
-    ensNodePublicUrl: serializeUrl(ensNodePublicUrl),
     labelSet,
     indexedChainIds: serializeIndexedChainIds(indexedChainIds),
     databaseSchemaName,
     isSubgraphCompatible,
     namespace,
     plugins,
-    dependencyInfo,
+    versionInfo,
   } satisfies SerializedENSIndexerPublicConfig;
 }

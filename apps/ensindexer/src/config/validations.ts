@@ -1,10 +1,12 @@
-import { DatasourceName, getENSRootChainId } from "@ensnode/datasources";
-import { Address, isAddress } from "viem";
-import { z } from "zod/v4";
+import { type Address, isAddress } from "viem";
+import type { z } from "zod/v4";
+
+import type { DatasourceName } from "@ensnode/datasources";
+import { asLowerCaseAddress, uniq } from "@ensnode/ensnode-sdk";
 
 import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
-import { uniq } from "@ensnode/ensnode-sdk";
+
 import type { ENSIndexerConfig } from "./types";
 
 // type alias to highlight the input param of Zod's check() method
@@ -39,23 +41,6 @@ export function invariant_requiredDatasources(
         } namespace are: [${availableDatasourceNames.join(", ")}].`,
       });
     }
-  }
-}
-
-// Invariant: rpcConfig is specified for the ENS Root Chain of the configured namespace
-export function invariant_rpcConfigsSpecifiedForRootChain(
-  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "namespace" | "rpcConfigs">>,
-) {
-  const { value: config } = ctx;
-
-  const ensRootChainId = getENSRootChainId(config.namespace);
-
-  if (!config.rpcConfigs.has(ensRootChainId)) {
-    ctx.issues.push({
-      code: "custom",
-      input: config,
-      message: `An RPC_URL_${ensRootChainId} (for the ENS Root Chain) is required, but none was specified.`,
-    });
   }
 }
 
@@ -131,15 +116,20 @@ export function invariant_validContractConfigs(
   for (const datasourceName of Object.keys(datasources) as DatasourceName[]) {
     const { contracts } = datasources[datasourceName];
 
-    // invariant: `contracts` must provide valid addresses if a filter is not provided
-    const hasAddresses = Object.values(contracts)
-      .filter((contractConfig) => "address" in contractConfig) // only ContractConfigs with `address` defined
-      .every((contractConfig) => isAddress(contractConfig.address as Address)); // must be a valid `Address`
+    // Invariant: `contracts` must provide valid addresses if a filter is not provided
+    for (const [contractName, contractConfig] of Object.entries(contracts)) {
+      if ("address" in contractConfig && typeof contractConfig.address === "string") {
+        // only ContractConfigs with `address` defined
+        const isValidAddress =
+          isAddress(contractConfig.address as Address, { strict: false }) && // must be a valid `Address`
+          contractConfig.address === asLowerCaseAddress(contractConfig.address); // and in lowercase format
 
-    if (!hasAddresses) {
-      throw new Error(
-        `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define valid addresses. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a viem#Address). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
-      );
+        if (!isValidAddress) {
+          throw new Error(
+            `The '${config.namespace}' namespace's '${datasourceName}' Datasource does not define a valid address for ${contractName}: '${contractConfig.address}'. This occurs if the address property of any ContractConfig in the Datasource is malformed (i.e. not a lowercase viem#Address). This is only likely to occur if you are actively editing the Datasource and typo'd an address.`,
+          );
+        }
+      }
     }
   }
 }

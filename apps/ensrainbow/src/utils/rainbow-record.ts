@@ -1,6 +1,7 @@
+import type { ByteArray } from "viem";
+
 import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { labelHashToBytes } from "@ensnode/ensnode-sdk";
-import { ByteArray } from "viem";
 
 /**
  * A [rainbow record](/docs/ensrainbow/concepts/glossary#rainbow-record) interface.

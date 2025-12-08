@@ -13,14 +13,16 @@ import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 import type { GraphQLSchema } from "graphql";
 import { createYoga } from "graphql-yoga";
 import { createMiddleware } from "hono/factory";
-import { buildDataLoaderCache } from "./graphql";
 
-export const graphql = (
+import { buildDataLoaderCache } from "./graphql";
+import type { Drizzle } from "./types";
+
+export function subgraphGraphQLMiddleware(
   {
-    db,
+    drizzle,
     graphqlSchema,
   }: {
-    db: any;
+    drizzle: Drizzle;
     graphqlSchema: GraphQLSchema;
   },
   {
@@ -38,22 +40,23 @@ export const graphql = (
     maxOperationDepth: 100,
     maxOperationAliases: 30,
   },
-) => {
+) {
   const yoga = createYoga({
     graphqlEndpoint: "*", // Disable built-in route validation, use Hono routing instead
     schema: graphqlSchema,
     context: () => {
-      const getDataLoader = buildDataLoaderCache({ drizzle: db });
+      const getDataLoader = buildDataLoaderCache({ drizzle });
 
-      return { drizzle: db, getDataLoader };
+      return { drizzle, getDataLoader };
     },
     maskedErrors:
       process.env.NODE_ENV === "production"
         ? true
         : {
-            maskError(error: any) {
-              console.error(error.originalError);
-              return error;
+            maskError(error: unknown) {
+              console.error(error);
+              if (error instanceof Error) return error;
+              return new Error(`Internal Server Error`);
             },
           },
     logging: false,
@@ -67,7 +70,8 @@ export const graphql = (
   });
 
   return createMiddleware(async (c) => {
-    const response = await yoga.handle(c.req.raw);
+    const response = await yoga.handle(c.req.raw, c.var);
+
     // TODO: Figure out why Yoga is returning 500 status codes for GraphQL errors.
     // @ts-expect-error
     response.status = 200;
@@ -76,4 +80,4 @@ export const graphql = (
 
     return response;
   });
-};
+}

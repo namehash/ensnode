@@ -1,4 +1,4 @@
-import { type LucideIcon, type LucideProps } from "lucide-react";
+import type { LucideIcon, LucideProps } from "lucide-react";
 import * as React from "react";
 
 export const IconENS: LucideIcon = React.forwardRef<SVGSVGElement, LucideProps>((props, ref) => {

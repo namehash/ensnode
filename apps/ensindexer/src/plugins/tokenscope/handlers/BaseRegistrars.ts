@@ -1,11 +1,12 @@
-import { ponder } from "ponder:registry";
-import { PluginName } from "@ensnode/ensnode-sdk";
-
 import config from "@/config";
-import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
-import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
+
+import { ponder } from "ponder:registry";
+
 import { DatasourceNames } from "@ensnode/datasources";
+import { type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
+
+import { namespaceContract } from "@/lib/plugin-helpers";
+import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 
 import { handleNFTTransfer } from "../lib/handle-nft-transfer";
 

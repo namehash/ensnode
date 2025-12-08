@@ -1,3 +1,10 @@
+import type { ByteArray } from "viem";
+
+import {
+  type LabelHash,
+  labelHashToBytes,
+  validateSupportedLabelSetAndVersion,
+} from "@ensnode/ensnode-sdk";
 import {
   type EnsRainbow,
   type EnsRainbowClientLabelSet,
@@ -5,17 +12,11 @@ import {
   ErrorCode,
   StatusCode,
 } from "@ensnode/ensrainbow-sdk";
-import { ByteArray } from "viem";
 
-import { ENSRainbowDB } from "@/lib/database";
-import { VersionedRainbowRecord } from "@/lib/rainbow-record";
+import type { ENSRainbowDB } from "@/lib/database";
+import type { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
-import {
-  LabelHash,
-  labelHashToBytes,
-  validateSupportedLabelSetAndVersion,
-} from "@ensnode/ensnode-sdk";
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
@@ -119,7 +120,7 @@ export class ENSRainbowServer {
         label: actualLabel,
       } satisfies EnsRainbow.HealSuccess;
     } catch (error) {
-      logger.error("Error healing label:", error);
+      logger.error(error, "Error healing label");
       return {
         status: StatusCode.Error,
         error: "Internal server error",
@@ -146,7 +147,7 @@ export class ENSRainbowServer {
         timestamp: new Date().toISOString(),
       } satisfies EnsRainbow.CountSuccess;
     } catch (error) {
-      logger.error("Failed to retrieve precalculated rainbow record count:", error);
+      logger.error(error, "Failed to retrieve precalculated rainbow record count");
       return {
         status: StatusCode.Error,
         error: "Label count not initialized. Check the validate command.",

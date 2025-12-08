@@ -2,8 +2,8 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/index.ts"],
-  platform: "browser",
-  format: ["esm"],
+  platform: "neutral",
+  format: ["esm", "cjs"],
   target: "es2022",
   bundle: true,
   splitting: false,
@@ -11,8 +11,6 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: ["viem"],
+  noExternal: ["@namehash/ens-referrals"],
   outDir: "./dist",
-  esbuildOptions(options) {
-    options.mainFields = ["browser", "module", "main"];
-  },
 });

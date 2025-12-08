@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: allow any json */
 // https://github.com/ponder-sh/ponder/blob/main/packages/core/src/utils/serialize.ts
 
 /**
@@ -8,6 +9,7 @@
  * @param value to stringify
  * @returns the stringified output
  */
+
 export function serialize(value: any) {
   return JSON.stringify(value, (_, v) =>
     typeof v === "bigint" ? { __type: "bigint", value: v.toString() } : v,

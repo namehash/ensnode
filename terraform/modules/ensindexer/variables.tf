@@ -53,10 +53,6 @@ variable "ensrainbow_url" {
   type = string
 }
 
-variable "ensadmin_public_url" {
-  type = string
-}
-
 variable "ensindexer_label_set_id" {
   type        = string
   description = "The label set ID that ENSIndexer will request from ENSRainbow for deterministic label healing (e.g., 'subgraph', 'ens-test-env')"
@@ -79,57 +75,14 @@ variable "subgraph_compat" {
   type = bool
 }
 
-# Mainnet RPC URLs
-variable "ethereum_mainnet_rpc_url" {
+variable "alchemy_api_key" {
   type = string
 }
 
-variable "base_mainnet_rpc_url" {
+variable "quicknode_api_key" {
   type = string
 }
 
-variable "linea_mainnet_rpc_url" {
-  type = string
-}
-
-variable "optimism_mainnet_rpc_url" {
-  type = string
-}
-
-variable "arbitrum_mainnet_rpc_url" {
-  type = string
-}
-
-variable "scroll_mainnet_rpc_url" {
-  type = string
-}
-
-# Sepolia RPC URLs
-variable "ethereum_sepolia_rpc_url" {
-  type = string
-}
-
-variable "base_sepolia_rpc_url" {
-  type = string
-}
-
-variable "linea_sepolia_rpc_url" {
-  type = string
-}
-
-variable "optimism_sepolia_rpc_url" {
-  type = string
-}
-
-variable "arbitrum_sepolia_rpc_url" {
-  type = string
-}
-
-variable "scroll_sepolia_rpc_url" {
-  type = string
-}
-
-# Holesky RPC URLs
-variable "ethereum_holesky_rpc_url" {
+variable "quicknode_endpoint_name" {
   type = string
 }

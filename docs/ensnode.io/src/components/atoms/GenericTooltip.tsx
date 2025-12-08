@@ -1,7 +1,8 @@
-import { Float } from "@headlessui-float/react";
 import { Popover } from "@headlessui/react";
+import { Float } from "@headlessui-float/react";
 import cc from "classcat";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 type Props = {
   trigger: React.ReactNode;
@@ -79,7 +80,7 @@ export default function GenericTooltip({
           onMouseEnter={handleOpen}
           onMouseLeave={handleClose}
           style={{ maxWidth: maxTooltipWidth }}
-          className="rounded-md bg-black focus:outline-none"
+          className="rounded-md bg-black w-[200px] focus:outline-none"
         >
           <Float.Arrow className="absolute h-5 w-5 rotate-45 bg-black rounded-b" />
           <div className="relative h-full rounded-md text-sm font-medium text-white p-2">

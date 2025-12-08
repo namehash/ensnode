@@ -1,0 +1,5 @@
+{
+  "extends": "@ensnode/shared-configs/tsconfig.lib.json",
+  "include": ["./**/*.ts"],
+  "exclude": ["dist"]
+}

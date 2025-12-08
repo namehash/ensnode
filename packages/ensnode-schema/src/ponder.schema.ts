@@ -1,9 +1,8 @@
 /**
- * Merge the various sub-schemas into a single ponder (drizzle) schema
+ * Merge the various sub-schemas into a single ponder (drizzle) schema.
  */
-export * from "./subgraph.schema";
-export * from "./resolver-records.schema";
-export * from "./tokenscope.schema";
-export * from "./resolver-relations.schema";
-export * from "./referrals.schema";
-export * from "./primary-names.schema";
+
+export * from "./schemas/protocol-acceleration.schema";
+export * from "./schemas/registrars.schema";
+export * from "./schemas/subgraph.schema";
+export * from "./schemas/tokenscope.schema";

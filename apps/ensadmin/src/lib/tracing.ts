@@ -1,5 +1,4 @@
 import type { ProtocolTrace } from "@ensnode/ensnode-sdk";
-
 import { ForwardResolutionProtocolStep, ReverseResolutionProtocolStep } from "@ensnode/ensnode-sdk";
 
 const FORWARD_STEPS: Record<ForwardResolutionProtocolStep, { title: string; description: string }> =

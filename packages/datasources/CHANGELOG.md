@@ -1,5 +1,29 @@
 # @ensnode/ens-deployments
 
+## 1.2.0
+
+## 1.1.0
+
+## 1.0.3
+
+## 1.0.2
+
+## 1.0.1
+
+## 1.0.0
+
+### Minor Changes
+
+- [#1276](https://github.com/namehash/ensnode/pull/1276) [`6be7a18`](https://github.com/namehash/ensnode/commit/6be7a189d0f9ac21d89c01941eb6b5a3cd13f88f) Thanks [@tk-o](https://github.com/tk-o)! - Add `UniversalRegistrarRenewalWithReferrer` datasource to ENSRoot Datasource for `mainnet` and `sepolia` ENSNamespaces.
+
+## 0.36.0
+
+### Minor Changes
+
+- [#1133](https://github.com/namehash/ensnode/pull/1133) [`afbf575`](https://github.com/namehash/ensnode/commit/afbf575d8448446f52ab0da8cbe8f5f2d7da6827) Thanks [@tk-o](https://github.com/tk-o)! - Index `UpgradeableRegistrarController` for Basenames.
+
+- [#1029](https://github.com/namehash/ensnode/pull/1029) [`7fc0465`](https://github.com/namehash/ensnode/commit/7fc0465d3b816affe2930c7f36577d0214d145b9) Thanks [@shrugs](https://github.com/shrugs)! - Update ens-test-env Namespace to support new deterministic ens-test-env ENS protocol deployment.
+
 ## 0.35.0
 
 ## 0.34.0

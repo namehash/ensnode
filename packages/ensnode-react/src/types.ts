@@ -1,3 +1,5 @@
+import type { QueryObserverOptions } from "@tanstack/react-query";
+
 import type {
   ClientOptions,
   ResolvePrimaryNameRequest,
@@ -9,12 +11,10 @@ import type {
   ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
 
-import type { QueryObserverOptions } from "@tanstack/react-query";
-
 /**
  * Configuration options for the ENSNode provider
  */
-export interface ENSNodeConfig {
+export interface ENSNodeSDKConfig {
   /** The ENSNode API client configuration */
   client: ClientOptions;
 }
@@ -29,7 +29,7 @@ export interface QueryParameter<TData = unknown, TError = Error> {
 /**
  * Configuration parameter for hooks that need access to config
  */
-export interface ConfigParameter<TConfig extends ENSNodeConfig = ENSNodeConfig> {
+export interface WithSDKConfigParameter<TConfig extends ENSNodeSDKConfig = ENSNodeSDKConfig> {
   config?: TConfig | undefined;
 }
 

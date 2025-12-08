@@ -1,4 +1,3 @@
-import cc from "classcat";
 import BarChart from "../molecules/BarChart.tsx";
 
 export default function FullRainbow() {

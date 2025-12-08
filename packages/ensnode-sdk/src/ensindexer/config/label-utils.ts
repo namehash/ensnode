@@ -1,4 +1,5 @@
-import { ByteArray, hexToBytes } from "viem";
+import { type ByteArray, hexToBytes } from "viem";
+
 import type { LabelHash } from "../../ens";
 
 /**

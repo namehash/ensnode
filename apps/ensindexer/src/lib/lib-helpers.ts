@@ -1,9 +1,5 @@
 export const bigintMax = (...args: bigint[]): bigint => args.reduce((a, b) => (a > b ? a : b));
 
-export const hasNullByte = (value: string) => value.indexOf("\u0000") !== -1;
-
-export const stripNullBytes = (value: string) => value.replaceAll("\u0000", "");
-
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") {
     return obj;
@@ -40,7 +36,7 @@ export function deepClone<T>(obj: T): T {
   // Handle plain objects and other object types
   const clonedObj = {} as T;
   for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    if (Object.hasOwn(obj, key)) {
       clonedObj[key] = deepClone(obj[key]);
     }
   }

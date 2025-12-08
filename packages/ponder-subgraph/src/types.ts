@@ -1,41 +1,50 @@
-export type SubgraphMetaBlock = {
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
+
+export type Schema = { [name: string]: unknown };
+
+export type Drizzle<TSchema extends Schema = Schema> = NodePgDatabase<TSchema>;
+
+interface SubgraphMetaBlockInfo {
   /** Block number */
-  number: bigint;
+  number: number;
 
   /** Block unix timestamp */
-  timestamp: bigint;
+  timestamp: number;
 
   /** Block hash */
-  hash: `0x${string}`;
+  hash: `0x${string}` | null;
 
   /** Block parent hash */
-  parentHash: `0x${string}`;
-};
+  parentHash: `0x${string}` | null;
+}
 
 /**
  * The metadata provider interface used to fetch data from the application layer.
  */
-export interface PonderMetadataProvider {
+export interface _SubgraphMeta {
   /**
-   * ENSIndexer app version.
+   * Unique ID to be used as a deployment ID in `_meta.deployment`.
    */
-  version: string;
+  deployment: string;
 
   /**
    * Get last indexed block status
    * @returns The last indexed block status
    */
-  getLastIndexedENSRootChainBlock(): Promise<SubgraphMetaBlock>;
-
-  /**
-   * Get the Ponder build ID
-   * @returns The Ponder build ID
-   */
-  getPonderBuildId(): Promise<string>;
+  block: SubgraphMetaBlockInfo;
 
   /**
    * Get the indexing errors status
    * @returns The indexing errors status
    */
-  hasIndexingErrors: () => Promise<boolean>;
+  hasIndexingErrors: boolean;
 }
+
+export type SubgraphMeta = null | _SubgraphMeta;
+
+/**
+ * Hono Variables type for Subgraph _meta Support
+ */
+export type SubgraphMetaVariables = {
+  _meta: SubgraphMeta | undefined;
+};

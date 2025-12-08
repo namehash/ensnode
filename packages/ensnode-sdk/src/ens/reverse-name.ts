@@ -1,6 +1,6 @@
-import { Address } from "viem";
+import type { Address } from "viem";
 
-import { CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
+import { type CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 import type { Label, LiteralLabel, Name } from "./types";
 
 /**

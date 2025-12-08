@@ -6,6 +6,8 @@ import Footer from "../components/organisms/Footer.tsx";
 import "../styles/tailwind.css";
 import "../styles/globals.css";
 import heroImage from "../assets/hero_skies_image.png";
+
+const { ...props } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -58,7 +60,7 @@ import heroImage from "../assets/hero_skies_image.png";
             }}
     />
 </head>
-<body>
+<body {...props}>
 <slot/>
 <Footer />
 </body>

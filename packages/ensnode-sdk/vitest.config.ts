@@ -1,4 +1,5 @@
-import { resolve } from "path";
+import { resolve } from "node:path";
+
 import { defineProject } from "vitest/config";
 
 export default defineProject({

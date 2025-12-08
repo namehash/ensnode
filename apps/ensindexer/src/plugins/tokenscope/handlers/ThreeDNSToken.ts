@@ -1,12 +1,13 @@
+import config from "@/config";
+
 import { ponder } from "ponder:registry";
-import { ChainId, PluginName } from "@ensnode/ensnode-sdk";
 import { base, optimism } from "viem/chains";
 
-import config from "@/config";
+import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
+import { type ChainId, type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
+
 import { namespaceContract } from "@/lib/plugin-helpers";
-import { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
-import { DatasourceName, DatasourceNames } from "@ensnode/datasources";
 
 import { handleERC1155Transfer } from "../lib/handle-nft-transfer";
 
@@ -73,8 +74,9 @@ export default function () {
       }
 
       for (let i = 0; i < event.args.ids.length; i++) {
-        // using ! as we know that ids and values have length > i
+        // biome-ignore lint/style/noNonNullAssertion: using ! as we know that ids and values have length > i
         const tokenId = event.args.ids[i]!;
+        // biome-ignore lint/style/noNonNullAssertion: using ! as we know that ids and values have length > i
         const value = event.args.values[i]!;
 
         const nft = buildSupportedNFT(
@@ -147,8 +149,8 @@ export default function () {
   //     // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
-  //     const assetId = buildSupportedNFTAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
+  //     const serializedAssetId = serializeAssetId(nft);
+  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,
@@ -182,8 +184,8 @@ export default function () {
   //     // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
-  //     const assetId = buildSupportedNFTAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.ext_nameTokens, { id: assetId });
+  //     const serializedAssetId = serializeAssetId(nft);
+  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,

@@ -85,15 +85,13 @@ The response includes several important configuration categories:
 - **Feature Flags**: Boolean settings for experimental features and optional
   functionality
 - **Plugins**: Activated plugins
-- **Dependency Information**: Node.js version, Ponder framework version, and
-  ENSRainbow schema details
+- **ENSIndexer Version Information**: Node.js version, Ponder framework version,
+  ENSRainbow version and schema details, ENSDb version, ENSIndexer version, [ENS Normalize version](https://www.npmjs.com/package/@adraffy/ens-normalize)
 
 ### Example response
 
 ```json
 {
-  "ensAdminUrl": "https://admin.ensnode.io/",
-  "ensNodePublicUrl": "https://api.alpha.ensnode.io/",
   "indexedChainIds": [
     1,
     8453,
@@ -102,23 +100,30 @@ The response includes several important configuration categories:
     42161,
     534352
   ],
-  "databaseSchemaName": "alphaSchema0.31.0",
+  "databaseSchemaName": "alphaSchema0.35.0",
   "isSubgraphCompatible": false,
+  "labelSet": {
+    "labelSetId": "subgraph",
+    "labelSetVersion": 0
+  },
   "namespace": "mainnet",
   "plugins": [
     "subgraph",
     "basenames",
     "lineanames",
     "threedns",
-    "reverse-resolvers",
-    "referrals",
+    "protocol-acceleration",
+    "registrars",
     "tokenscope"
   ],
-  "dependencyInfo": {
+  "versionInfo": {
     "nodejs": "22.18.0",
     "ponder": "0.11.43",
-    "ensRainbow": "0.31.0",
-    "ensRainbowSchema": 2
+    "ensDb": "0.35.0",
+    "ensIndexer": "0.35.0",
+    "ensNormalize": "1.11.1",
+    "ensRainbow": "0.34.0",
+    "ensRainbowSchema": 3
   }
 }
 ```
@@ -126,9 +131,11 @@ The response includes several important configuration categories:
 ## Indexing Status API
 
 Monitor an ENSNode's indexing progress across multiple chains with
-the Indexing Status API. This endpoint provides detailed information
-about which chains are being indexed, each chain's indexing status,
-and the overall multichain indexing status.
+the Indexing Status API. This endpoint provides a realtime indexing projection
+at the given moment. The projection includes a cross-chain indexing status
+snapshot that collects chain status snapshots for each indexed chain.
+At the moment, the cross-chain indexing status snapshot can be represented 
+as an omnichain indexing status snapshot.
 
 **Endpoint:** `GET /api/indexing-status`
 
@@ -143,40 +150,50 @@ The status response provides both overall and chain-specific information.
 
 ```json
 {
-  "overallStatus": "backfill",
-  "chains": {
-    "1": {
-      "status": "backfill",
-      "config": {
-        "strategy": "indefinite",
-        "startBlock": {
-          "timestamp": 1489165544,
-          "number": 3327417
+  "responseCode": "ok",
+  "realtimeProjection": {
+    "projectedAt": 1760435068,
+    "worstCaseDistance": 199550209,
+    "snapshot": {
+      "strategy": "omnichain",
+      "slowestChainIndexingCursor": 1560884859,
+      "snapshotTime": 1760435068,
+      "omnichainSnapshot": {
+        "omnichainStatus": "omnichain-backfill",
+        "chains": {
+          "1": {
+            "chainStatus": "chain-backfill",
+            "config": {
+              "configType": "indefinite",
+              "startBlock": {
+                "timestamp": 1489165544,
+                "number": 3327417
+              }
+            },
+            "latestIndexedBlock": {
+              "timestamp": 1560884859,
+              "number": 7984099
+            },
+            "backfillEndBlock": {
+              "timestamp": 1760432243,
+              "number": 23574893
+            }
+          },
+          "8453": {
+            "chainStatus": "chain-queued",
+            "config": {
+              "configType": "indefinite",
+              "startBlock": {
+                "timestamp": 1721932307,
+                "number": 17571480
+              }
+            }
+          }
         },
-        "endBlock": null
-      },
-      "latestIndexedBlock": {
-        "timestamp": 1496124933,
-        "number": 3791243
-      },
-      "backfillEndBlock": {
-        "timestamp": 1755182591,
-        "number": 23139951
-      }
-    },
-    "8453": {
-      "status": "queued",
-      "config": {
-        "strategy": "indefinite",
-        "startBlock": {
-          "timestamp": 1721932307,
-          "number": 17571480
-        },
-        "endBlock": null
+        "omnichainIndexingCursor": 1560884859
       }
     }
-  },
-  "omnichainIndexingCursor": 1496124933
+  }
 }
 ```
 
@@ -186,18 +203,53 @@ When monitoring indexing or performing time-sensitive operations, you may wish t
 verify that an ENSNode instance has indexed sufficient blocks to be within
 an acceptable distance from the current "tip" of all indexed chains.
 
-The Indexing Status API supports an optional `maxRealtimeDistance` query
-parameter that enables this verification.
+The Indexing Status API supports a `realtimeProjection.worstCaseDistance` field
+in response object that enables this verification.
 
 #### How it works
 
-The `maxRealtimeDistance` parameter accepts a duration value in seconds,
-representing the max allowed distance between the latest indexed block of each chain and the "tip" of all indexed chains.
-When you include this parameter it influences the HTTP response code as follows:
-
-- **Success (200 OK)**: The latest indexed block of each chain is within the requested distance from realtime.
-- **Service Unavailable (503)**: The latest indexed block of each chain is NOT within the requested distance from realtime.
+The `realtimeProjection.worstCaseDistance` field holds a duration value in
+seconds, representing the max distance between the now and
+the latest indexed block of each chain and the "tip" of all indexed chains.
 
 This allows your client to programmatically determine whether the ENSNode
 instance is sufficiently synchronized for your use case before proceeding with
 operations that depend on the latest onchain data.
+
+## Registrar Actions API
+
+Query the "logical registrar actions" performed on indexed
+subregistries with the Registrar Actions API. This endpoint returns a list
+of "logical registrar actions", such as "registration" or "renewal".
+
+Each "logical registrar action" refers to:
+- ID of the action,
+- type of the action,
+- incremental duration,
+- registrant address,
+- one registration lifecycle record,
+- pricing details (optionally),
+- referral details (optionally),
+- onchain transaction details (block number, timestamp, transaction hash),
+- event IDs that have ever contributed to the "logical registrar action" record.
+
+Each registration lifecycle record refers to:
+- subregistry that manages this Registration Lifecycle,
+- node (namehash) of the FQDN of the domain the registration lifecycle is
+  associated with,
+- expiry date which identifies when the Registration Lifecycle is scheduled
+  to expire.
+
+Each subregistry includes:
+- subregistry account ID which identifies the chainId and address of
+  the associated subregistry smart contract,
+- node (namehash) of the name the subregistry manages subnames of.
+
+
+**Endpoint:** `GET /api/registrar-actions`
+**Endpoint with custom results count limit:** `GET /api/registrar-actions?limit=5`
+**Endpoint with results sourced for the `namehash('eth')` parent node:** `GET /api/registrar-actions/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
+
+### Example response
+
+TDB

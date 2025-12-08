@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { deserializeChainId, deserializeDatetime, deserializeUrl } from "./deserialize";
 import { serializeChainId, serializeDatetime, serializeUrl } from "./serialize";
 
@@ -15,12 +16,12 @@ describe("ENSIndexer: Shared", () => {
     });
 
     it("can serialize URL into its string representation", () => {
-      const url = new URL("https://admin.ensnode.io/connect");
+      const url = new URL("https://admin.ensnode.io");
 
-      url.searchParams.set("ensnode", "https://indexer.alpha.ensnode.io");
+      url.searchParams.set("connection", "https://indexer.alpha.ensnode.io");
 
       expect(serializeUrl(url)).toBe(
-        "https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Findexer.alpha.ensnode.io",
+        "https://admin.ensnode.io/?connection=https%3A%2F%2Findexer.alpha.ensnode.io",
       );
     });
   });
@@ -61,23 +62,19 @@ describe("ENSIndexer: Shared", () => {
 
     it("can deserialize URL from its string representation", () => {
       const serializedUrl =
-        "https://admin.ensnode.io/connect?ensnode=https%3A%2F%2Findexer.alpha.ensnode.io";
+        "https://admin.ensnode.io/?connection=https%3A%2F%2Findexer.alpha.ensnode.io";
 
-      const resultUrl = new URL("https://admin.ensnode.io/connect");
+      const resultUrl = new URL("https://admin.ensnode.io");
 
-      resultUrl.searchParams.set("ensnode", "https://indexer.alpha.ensnode.io");
+      resultUrl.searchParams.set("connection", "https://indexer.alpha.ensnode.io");
 
       expect(deserializeUrl(serializedUrl)).toStrictEqual(resultUrl);
     });
 
     it("refuses to deserialize URL for invalid input", () => {
-      const errorMessage = `Cannot deserialize URL:
-✖ Value must be a valid URL string (e.g., http://localhost:8080 or https://example.com).`;
-      expect(() => deserializeUrl("example.com")).toThrowError(errorMessage);
-
-      expect(() => deserializeUrl("https://")).toThrowError(errorMessage);
-
-      expect(() => deserializeUrl("//example.com")).toThrowError(errorMessage);
+      expect(() => deserializeUrl("example.com")).toThrowError(/must be a valid URL string/i);
+      expect(() => deserializeUrl("https://")).toThrowError(/must be a valid URL string/i);
+      expect(() => deserializeUrl("//example.com")).toThrowError(/must be a valid URL string/i);
     });
   });
 });

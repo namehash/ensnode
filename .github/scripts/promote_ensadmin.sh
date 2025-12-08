@@ -78,10 +78,15 @@ response=$(curl --silent --show-error --write-out "HTTPSTATUS:%{http_code}" --re
 body=$(echo "$response" | sed -e 's/HTTPSTATUS\:.*//g')
 status=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
 
-if [[ ! "$status" =~ ^20[0-9]$ ]]; then
+# Accept 2xx (success) or 409 (already current production deployment)
+if [[ "$status" =~ ^20[0-9]$ ]] || [ "$status" = "409" ]; then
+  if [ "$status" = "409" ]; then
+    echo "Deployment already current production deployment"
+  else
+    echo "Promotion complete"
+  fi
+else
   echo "Promotion failed with status $status"
   echo "$body"
   exit 1
 fi
-
-echo "Promotion complete"

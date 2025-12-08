@@ -1,5 +1,5 @@
-import { DatasourceName, ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
-import { AccountId } from "@ensnode/ensnode-sdk";
+import { type DatasourceName, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
+import type { AccountId } from "@ensnode/ensnode-sdk";
 
 /**
  * Gets the AccountId for the contract in the specified namespace, datasource, and

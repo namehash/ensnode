@@ -1,5 +1,5 @@
 # Runtime image for ENSRainbow
-FROM --platform=${TARGETPLATFORM} node:22-slim AS runtime
+FROM node:22-slim AS runtime
 
 # Install only essential system dependencies for runtime
 RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*

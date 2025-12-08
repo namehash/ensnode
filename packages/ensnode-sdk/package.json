@@ -1,6 +1,6 @@
 {
   "name": "@ensnode/ensnode-sdk",
-  "version": "0.35.0",
+  "version": "1.2.0",
   "type": "module",
   "description": "A utility library for interacting with ENSNode and ENS data",
   "license": "MIT",
@@ -25,12 +25,18 @@
     "access": "public",
     "exports": {
       ".": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.d.ts"
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
       }
     },
-    "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
   "scripts": {
@@ -44,7 +50,6 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@biomejs/biome": "catalog:",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "tsup": "^8.3.6",
@@ -53,8 +58,12 @@
     "vitest": "catalog:"
   },
   "dependencies": {
+    "@adraffy/ens-normalize": "catalog:",
     "@ensdomains/address-encoder": "^1.1.2",
     "@ensnode/datasources": "workspace:*",
+    "@namehash/ens-referrals": "workspace:*",
+    "caip": "catalog:",
+    "date-fns": "catalog:",
     "zod": "catalog:"
   }
 }

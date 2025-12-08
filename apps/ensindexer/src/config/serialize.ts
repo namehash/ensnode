@@ -1,5 +1,13 @@
-import { serializeChainId, serializeIndexedChainIds, serializeUrl } from "@ensnode/ensnode-sdk";
-import { SerializedENSIndexerConfig } from "./serialized-types";
+import {
+  serializeChainId,
+  serializeIndexedChainIds,
+  serializeUrl,
+  type UrlString,
+} from "@ensnode/ensnode-sdk";
+
+import { redactENSIndexerConfig } from "@/config/redact";
+
+import type { SerializedENSIndexerConfig } from "./serialized-types";
 import type { ENSIndexerConfig } from "./types";
 
 /**
@@ -11,41 +19,18 @@ function serializeRpcConfigs(
   const serializedRpcConfigs: SerializedENSIndexerConfig["rpcConfigs"] = {};
 
   for (const [chainId, rpcConfig] of rpcConfigs.entries()) {
+    const serializedHttpRPCs = rpcConfig.httpRPCs.map(serializeUrl) as [UrlString, ...UrlString[]]; // guaranteed to include at least one URL
+    const serializedWebsocketRPC = rpcConfig.websocketRPC
+      ? serializeUrl(rpcConfig.websocketRPC)
+      : undefined;
+
     serializedRpcConfigs[serializeChainId(chainId)] = {
-      maxRequestsPerSecond: rpcConfig.maxRequestsPerSecond,
-      url: serializeUrl(rpcConfig.url),
+      httpRPCs: serializedHttpRPCs,
+      websocketRPC: serializedWebsocketRPC,
     };
   }
 
   return serializedRpcConfigs;
-}
-
-/**
- * Redact sensitive values for {@link ENSIndexerConfig}.
- */
-function redactENSIndexerConfig(config: ENSIndexerConfig): ENSIndexerConfig {
-  const REDACTED = "*****";
-
-  // redact database URL
-  const redactedDatabaseUrl = REDACTED;
-
-  // redact RPC configs (including RPC URLs)
-  const redactedRpcConfigs: ENSIndexerConfig["rpcConfigs"] = new Map();
-
-  for (const [chainId, rpcConfig] of config.rpcConfigs.entries()) {
-    const redactedRpcUrl = new URL(`/${REDACTED}`, rpcConfig.url.href);
-
-    redactedRpcConfigs.set(chainId, {
-      ...rpcConfig,
-      url: redactedRpcUrl,
-    });
-  }
-
-  return {
-    ...config,
-    databaseUrl: redactedDatabaseUrl,
-    rpcConfigs: redactedRpcConfigs,
-  };
 }
 
 /**
@@ -61,8 +46,6 @@ export function serializeRedactedENSIndexerConfig(
   return {
     databaseSchemaName: redactedConfig.databaseSchemaName,
     databaseUrl: redactedConfig.databaseUrl,
-    ensAdminUrl: serializeUrl(redactedConfig.ensAdminUrl),
-    ensNodePublicUrl: serializeUrl(redactedConfig.ensNodePublicUrl),
     ensIndexerUrl: serializeUrl(redactedConfig.ensIndexerUrl),
     ensRainbowUrl: serializeUrl(redactedConfig.ensRainbowUrl),
     labelSet: redactedConfig.labelSet,
@@ -71,7 +54,6 @@ export function serializeRedactedENSIndexerConfig(
     isSubgraphCompatible: redactedConfig.isSubgraphCompatible,
     namespace: redactedConfig.namespace,
     plugins: redactedConfig.plugins,
-    port: redactedConfig.port,
     rpcConfigs: serializeRpcConfigs(redactedConfig.rpcConfigs),
   } satisfies SerializedENSIndexerConfig;
 }

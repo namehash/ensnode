@@ -1,7 +1,6 @@
-import { Address, Hex } from "viem";
+import type { Address, Hex } from "viem";
 
-import { Price } from "@/lib/currencies";
-import { SupportedNFT } from "@/lib/tokenscope/assets";
+import type { DomainAssetId, Price } from "@ensnode/ensnode-sdk";
 
 export interface SupportedPayment {
   price: Price;
@@ -9,7 +8,7 @@ export interface SupportedPayment {
 
 export interface SupportedSale {
   orderHash: Hex;
-  nft: SupportedNFT;
+  nft: DomainAssetId;
   payment: SupportedPayment;
   seller: Address;
   buyer: Address;
