@@ -4,7 +4,7 @@ import { unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type { PermissionsUserId, ResolverId } from "@ensnode/ensnode-sdk";
+import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
@@ -13,7 +13,6 @@ import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
-import { ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
 export const AccountRef = builder.loadableObjectRef("Account", {
