@@ -3,7 +3,7 @@ import { zeroAddress } from "viem";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { makeAccountIdSchema, makeNodeSchema } from "../internal";
+import { makeAccountIdSchema, makeNodeSchema } from "../shared/zod-schemas";
 import {
   type AssetId,
   AssetNamespaces,

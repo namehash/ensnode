@@ -4,13 +4,13 @@ import type { Address } from "viem";
 import * as schema from "@ensnode/ensnode-schema";
 import {
   bigIntToNumber,
-  deserializeAssetId,
   getOwnershipType,
   type InterpretedName,
   type NameToken,
   type NameTokenOwnership,
   type NFTMintStatus,
   type Node,
+  parseAssetId,
   type RegisteredNameTokens,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
@@ -60,7 +60,7 @@ function _recordToNameToken(
   record: FindRegisteredNameTokensForDomainRecord,
   ownership: NameTokenOwnership,
 ): NameToken {
-  const assetId = deserializeAssetId(record.nameTokens.id);
+  const assetId = parseAssetId(record.nameTokens.id);
 
   const domainAsset = {
     ...assetId,

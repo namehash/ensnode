@@ -10,9 +10,9 @@ import {
   type BlockRef,
   bigIntToNumber,
   durationBetween,
+  formatAccountId,
   type Node,
   RegistrarActionTypes,
-  serializeAccountId,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
@@ -71,7 +71,7 @@ export async function handleRegistrarEventRegistration(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${serializeAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exists for '${formatAccountId(subregistryId)}.'`);
   }
 
   // 3. Calculate incremental duration
@@ -133,7 +133,7 @@ export async function handleRegistrarEventRenewal(
 
   // Invariant: subregistry record must exist
   if (!subregistry) {
-    throw new Error(`Subregistry record must exists for '${serializeAccountId(subregistryId)}.'`);
+    throw new Error(`Subregistry record must exists for '${formatAccountId(subregistryId)}.'`);
   }
 
   // 2. Get the current registration lifecycle before this registrar action

@@ -5,7 +5,7 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 
-import { type AccountId, type Node, serializeAccountId } from "@ensnode/ensnode-sdk";
+import { type AccountId, formatAccountId, type Node } from "@ensnode/ensnode-sdk";
 
 /**
  * Upsert Subregistry record
@@ -25,7 +25,7 @@ export async function upsertSubregistry(
   await context.db
     .insert(schema.subregistries)
     .values({
-      subregistryId: serializeAccountId(subregistryId),
+      subregistryId: formatAccountId(subregistryId),
       node,
     })
     .onConflictDoNothing();
@@ -39,6 +39,6 @@ export async function getSubregistry(
   { subregistryId }: { subregistryId: AccountId },
 ): Promise<typeof schema.subregistries.$inferSelect | null> {
   return context.db.find(schema.subregistries, {
-    subregistryId: serializeAccountId(subregistryId),
+    subregistryId: formatAccountId(subregistryId),
   });
 }

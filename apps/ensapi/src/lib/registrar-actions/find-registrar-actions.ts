@@ -4,9 +4,9 @@ import * as schema from "@ensnode/ensnode-schema";
 import {
   type BlockRef,
   bigIntToNumber,
-  deserializeAccountId,
   type InterpretedName,
   type NamedRegistrarAction,
+  parseAccountId,
   priceEth,
   type RegistrarAction,
   type RegistrarActionPricingAvailable,
@@ -88,10 +88,7 @@ export async function _findRegistrarActions(options: FindRegistrarActionsOptions
       registrarActions: schema.registrarActions,
       registrationLifecycles: schema.registrationLifecycles,
       subregistries: schema.subregistries,
-      domain: {
-        labelName: schema.subgraph_domain.labelName,
-        name: schema.subgraph_domain.name,
-      },
+      domain: schema.subgraph_domain,
     })
     .from(schema.registrarActions)
     // join Registration Lifecycles associated with Registrar Actions
@@ -134,7 +131,7 @@ function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): Name
   // build Registration Lifecycle object
   const registrationLifecycle = {
     subregistry: {
-      subregistryId: deserializeAccountId(record.subregistries.subregistryId),
+      subregistryId: parseAccountId(record.subregistries.subregistryId),
       node: record.subregistries.node,
     },
     node: record.registrationLifecycles.node,

@@ -12,11 +12,7 @@ import {
   type SerializedPriceEth,
   serializePriceEth,
 } from "../shared";
-import {
-  type RegistrationLifecycle,
-  type SerializedRegistrationLifecycle,
-  serializeRegistrationLifecycle,
-} from "./registration-lifecycle";
+import type { RegistrationLifecycle } from "./registration-lifecycle";
 
 /**
  * Globally unique, deterministic ID of an indexed onchain event
@@ -360,10 +356,7 @@ export type SerializedRegistrarActionPricing =
 /**
  * Serialized representation of {@link RegistrarAction}.
  */
-export interface SerializedRegistrarAction
-  extends Omit<RegistrarAction, "registrationLifecycle" | "pricing"> {
-  registrationLifecycle: SerializedRegistrationLifecycle;
-
+export interface SerializedRegistrarAction extends Omit<RegistrarAction, "pricing"> {
   pricing: SerializedRegistrarActionPricing;
 }
 
@@ -389,7 +382,7 @@ export function serializeRegistrarAction(
     type: registrarAction.type,
     incrementalDuration: registrarAction.incrementalDuration,
     registrant: registrarAction.registrant,
-    registrationLifecycle: serializeRegistrationLifecycle(registrarAction.registrationLifecycle),
+    registrationLifecycle: registrarAction.registrationLifecycle,
     pricing: serializeRegistrarActionPricing(registrarAction.pricing),
     referral: registrarAction.referral,
     block: registrarAction.block,

@@ -2,9 +2,9 @@ import { AccountId as CaipAccountId } from "caip";
 
 import type { Price, PriceEth, SerializedPrice, SerializedPriceEth } from "./currencies";
 import type {
+  AccountIdString,
   ChainIdString,
   DatetimeISO8601,
-  SerializedAccountId,
   UrlString,
 } from "./serialized-types";
 import type { AccountId, ChainId, Datetime } from "./types";
@@ -48,13 +48,13 @@ export function serializePriceEth(price: PriceEth): SerializedPriceEth {
 }
 
 /**
- * Serializes {@link AccountId} object.
+ * Format {@link AccountId} object as a string.
  *
  * Formatted as a fully lowercase CAIP-10 AccountId.
  *
  * @see https://chainagnostic.org/CAIPs/caip-10
  */
-export function serializeAccountId(accountId: AccountId): SerializedAccountId {
+export function formatAccountId(accountId: AccountId): AccountIdString {
   return CaipAccountId.format({
     chainId: { namespace: "eip155", reference: accountId.chainId.toString() },
     address: accountId.address,

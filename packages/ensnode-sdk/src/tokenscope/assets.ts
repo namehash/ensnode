@@ -4,7 +4,7 @@ import { prettifyError } from "zod/v4";
 
 import { type Node, uint256ToHex32 } from "../ens";
 import type { AccountId, ChainId } from "../shared";
-import { makeSerializedAssetIdSchema } from "./zod-schemas";
+import { makeAssetIdSchema, makeSerializedAssetIdSchema } from "./zod-schemas";
 
 /**
  * An enum representing the possible CAIP-19 Asset Namespace values.
@@ -22,6 +22,11 @@ export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespac
 export type TokenId = bigint;
 
 /**
+ * Serialized representation of {@link TokenId}.
+ */
+export type SerializedTokenId = string;
+
+/**
  * A globally unique reference to an NFT.
  */
 export interface AssetId {
@@ -31,7 +36,14 @@ export interface AssetId {
 }
 
 /**
- * Serialized representation of an {@link AssetId}.
+ * Serialized representation of {@link AssetId}.
+ */
+export interface SerializedAssetId extends Omit<AssetId, "tokenId"> {
+  tokenId: SerializedTokenId;
+}
+
+/**
+ * String representation of an {@link AssetId}.
  *
  * Formatted as a fully lowercase CAIP-19 AssetId.
  *
@@ -39,29 +51,55 @@ export interface AssetId {
  * @example "eip155:1/erc721:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
  *          for vitalik.eth in the eth base registrar on mainnet.
  */
-export type SerializedAssetId = string;
+export type AssetIdString = string;
 
 /**
  * Serializes {@link AssetId} object.
  */
 export function serializeAssetId(assetId: AssetId): SerializedAssetId {
-  const { assetNamespace, contract, tokenId } = assetId;
-  return CaipAssetId.format({
-    chainId: { namespace: "eip155", reference: contract.chainId.toString() },
-    assetName: { namespace: assetNamespace, reference: contract.address },
-    tokenId: uint256ToHex32(tokenId),
-  }).toLowerCase();
+  return {
+    assetNamespace: assetId.assetNamespace,
+    contract: assetId.contract,
+    tokenId: uint256ToHex32(assetId.tokenId),
+  };
 }
 
 /**
  * Deserialize a {@link AssetId} object.
  */
 export function deserializeAssetId(maybeAssetId: unknown, valueLabel?: string): AssetId {
-  const schema = makeSerializedAssetIdSchema(valueLabel);
+  const schema = makeAssetIdSchema(valueLabel);
   const parsed = schema.safeParse(maybeAssetId);
 
   if (parsed.error) {
     throw new RangeError(`Cannot deserialize AssetId:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+/**
+ * Format {@link AssetId} object as a string.
+ */
+export function formatAssetId(assetId: AssetId): AssetIdString {
+  const { assetNamespace, contract, tokenId } = serializeAssetId(assetId);
+
+  return CaipAssetId.format({
+    chainId: { namespace: "eip155", reference: contract.chainId.toString() },
+    assetName: { namespace: assetNamespace, reference: contract.address },
+    tokenId,
+  }).toLowerCase();
+}
+
+/**
+ * Parse a stringified representation of {@link AssetId} object.
+ */
+export function parseAssetId(maybeAssetId: AssetIdString, valueLabel?: string): AssetId {
+  const schema = makeSerializedAssetIdSchema(valueLabel);
+  const parsed = schema.safeParse(maybeAssetId);
+
+  if (parsed.error) {
+    throw new RangeError(`Cannot parse AssetId:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;
