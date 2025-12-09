@@ -4,7 +4,7 @@ import { prettifyError } from "zod/v4";
 
 import { type Node, uint256ToHex32 } from "../ens";
 import type { AccountId, ChainId } from "../shared";
-import { makeAssetIdSchema, makeSerializedAssetIdSchema } from "./zod-schemas";
+import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
 
 /**
  * An enum representing the possible CAIP-19 Asset Namespace values.
@@ -95,7 +95,7 @@ export function formatAssetId(assetId: AssetId): AssetIdString {
  * Parse a stringified representation of {@link AssetId} object.
  */
 export function parseAssetId(maybeAssetId: AssetIdString, valueLabel?: string): AssetId {
-  const schema = makeSerializedAssetIdSchema(valueLabel);
+  const schema = makeAssetIdStringSchema(valueLabel);
   const parsed = schema.safeParse(maybeAssetId);
 
   if (parsed.error) {
@@ -141,13 +141,13 @@ export interface DomainAssetId extends AssetId {
 /**
  * Serialized representation of {@link DomainAssetId}.
  */
-export interface SerializedDomainAssetId extends Pick<DomainAssetId, "domainId"> {
-  assetId: SerializedAssetId;
+export interface SerializedDomainAssetId extends SerializedAssetId {
+  domainId: Node;
 }
 
 export function serializeDomainAssetId(domainAsset: DomainAssetId): SerializedDomainAssetId {
   return {
-    assetId: serializeAssetId(domainAsset),
+    ...serializeAssetId(domainAsset),
     domainId: domainAsset.domainId,
   };
 }

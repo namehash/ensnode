@@ -4,13 +4,7 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeAccountIdSchema, makeNodeSchema } from "../shared/zod-schemas";
-import {
-  type AssetId,
-  AssetNamespaces,
-  type DomainAssetId,
-  NFTMintStatuses,
-  type SerializedAssetId,
-} from "./assets";
+import { type AssetId, AssetNamespaces, type DomainAssetId, NFTMintStatuses } from "./assets";
 import {
   type NameToken,
   type NameTokenOwnershipBurned,
@@ -26,44 +20,36 @@ export const makeAssetIdSchema = (valueLabel: string = "Asset ID Schema") =>
   z.object({
     assetNamespace: z.enum(AssetNamespaces),
     contract: makeAccountIdSchema(valueLabel),
-    tokenId: z.bigint().positive(),
+    tokenId: z.preprocess((v) => (typeof v === "string" ? BigInt(v) : v), z.bigint().positive()),
   });
 
 /**
- * Make schema for {@link SerializedAssetId}.
+ * Make schema for {@link AssetIdString}.
  */
-export const makeSerializedAssetIdSchema = (valueLabel: string = "Serialized Asset ID Schema") =>
-  z.coerce
-    .string()
-    .transform((v) => {
+export const makeAssetIdStringSchema = (valueLabel: string = "Asset ID String Schema") =>
+  z.preprocess((v) => {
+    if (typeof v === "string") {
       const result = new CaipAssetId(v);
       return {
-        assetNamespace: result.assetName.namespace,
+        assetNamespace: result.assetName.namespace as "erc721" | "erc1155",
         contract: {
           chainId: Number(result.chainId.reference),
           address: result.assetName.reference,
         },
         tokenId: BigInt(result.tokenId),
       };
-    })
-    .pipe(makeAssetIdSchema(valueLabel));
+    }
+
+    return v;
+  }, makeAssetIdSchema(valueLabel));
 
 /**
  * Make schema for {@link DomainAssetId}.
  */
 export const makeDomainAssetSchema = (valueLabel: string = "Domain Asset Schema") =>
-  z.union([
-    z
-      .object({
-        assetId: z.unknown().pipe(makeSerializedAssetIdSchema(valueLabel)),
-        domainId: makeNodeSchema(`${valueLabel}.domainId`),
-      })
-      .transform(({ assetId, domainId }) => ({ ...assetId, domainId })),
-
-    makeAssetIdSchema(valueLabel).extend({
-      domainId: makeNodeSchema(`${valueLabel}.domainId`),
-    }),
-  ]);
+  makeAssetIdSchema(valueLabel).extend({
+    domainId: makeNodeSchema(`${valueLabel}.domainId`),
+  });
 
 function invariant_nameTokenOwnershipHasNonZeroAddressOwner(
   ctx: ParsePayload<NameTokenOwnershipProxy | NameTokenOwnershipEffective>,
