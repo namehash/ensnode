@@ -1,11 +1,14 @@
 import { eq } from "drizzle-orm/sql";
+import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
   bigIntToNumber,
   deserializeAssetId,
+  getOwnershipType,
   type InterpretedName,
   type NameToken,
+  type NameTokenOwnership,
   type NFTMintStatus,
   type Node,
   type RegisteredNameTokens,
@@ -53,15 +56,23 @@ async function _findRegisteredNameTokensForDomain(
  * from {@link _findRegisteredNameTokensForDomain}
  * into the {@link NameToken} object.
  */
-function _recordToNameToken(record: FindRegisteredNameTokensForDomainRecord): NameToken {
+function _recordToNameToken(
+  record: FindRegisteredNameTokensForDomainRecord,
+  ownership: NameTokenOwnership,
+): NameToken {
   const assetId = deserializeAssetId(record.nameTokens.id);
+
+  const domainAsset = {
+    ...assetId,
+    domainId: record.nameTokens.domainId,
+  };
+
+  const mintStatus = record.nameTokens.mintStatus as NFTMintStatus;
+
   return {
-    domainAsset: {
-      ...assetId,
-      domainId: record.nameTokens.domainId,
-    },
-    owner: record.nameTokens.owner,
-    mintStatus: record.nameTokens.mintStatus as NFTMintStatus,
+    domainAsset,
+    ownership,
+    mintStatus,
   } satisfies NameToken;
 }
 
@@ -76,6 +87,7 @@ function _recordToNameToken(record: FindRegisteredNameTokensForDomainRecord): Na
 function _recordsToRegisteredNameTokens(
   domainId: Node,
   records: FindRegisteredNameTokensForDomainRecord[],
+  nameWrapperAddresses: Address[],
   accurateAsOf: UnixTimestamp,
 ): RegisteredNameTokens | null {
   if (records.length === 0) {
@@ -91,7 +103,16 @@ function _recordsToRegisteredNameTokens(
 
   // Group nameTokens records as RegisteredNameTokens by domain ID
   for (const record of records) {
-    const token = _recordToNameToken(record);
+    const ownerAddress = record.nameTokens.owner;
+    const ownership = {
+      ownershipType: getOwnershipType(ownerAddress, nameWrapperAddresses),
+      owner: {
+        chainId: record.nameTokens.chainId,
+        address: ownerAddress,
+      },
+    } satisfies NameTokenOwnership;
+
+    const token = _recordToNameToken(record, ownership);
     const name = record.domains.name as InterpretedName;
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
 
@@ -133,9 +154,10 @@ function _recordsToRegisteredNameTokens(
  */
 export async function findRegisteredNameTokensForDomain(
   domainId: Node,
+  nameWrapperAddresses: Address[],
   accurateAsOf: UnixTimestamp,
 ): Promise<RegisteredNameTokens | null> {
   const records = await _findRegisteredNameTokensForDomain(domainId);
 
-  return _recordsToRegisteredNameTokens(domainId, records, accurateAsOf);
+  return _recordsToRegisteredNameTokens(domainId, records, nameWrapperAddresses, accurateAsOf);
 }

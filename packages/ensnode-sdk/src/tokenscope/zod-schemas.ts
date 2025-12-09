@@ -1,7 +1,9 @@
 import { AssetId as CaipAssetId } from "caip";
+import { zeroAddress } from "viem";
 import z from "zod/v4";
+import type { ParsePayload } from "zod/v4/core";
 
-import { makeAccountIdSchema, makeLowercaseAddressSchema, makeNodeSchema } from "../internal";
+import { makeAccountIdSchema, makeNodeSchema } from "../internal";
 import {
   type AssetId,
   AssetNamespaces,
@@ -9,7 +11,13 @@ import {
   NFTMintStatuses,
   type SerializedAssetId,
 } from "./assets";
-import type { NameToken } from "./name-token";
+import {
+  type NameToken,
+  type NameTokenOwnershipBurned,
+  type NameTokenOwnershipEffective,
+  type NameTokenOwnershipProxy,
+  NameTokenOwnershipTypes,
+} from "./name-token";
 
 /**
  * Make schema for {@link AssetId}.
@@ -57,6 +65,69 @@ export const makeDomainAssetSchema = (valueLabel: string = "Domain Asset Schema"
     }),
   ]);
 
+function invariant_nameTokenOwnershipHasNonZeroAddressOwner(
+  ctx: ParsePayload<NameTokenOwnershipProxy | NameTokenOwnershipEffective>,
+) {
+  const ownership = ctx.value;
+  if (ctx.value.owner.address === zeroAddress) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `Name Token Ownership with '${ownership.ownershipType}' must have 'address' other than the zero address.`,
+    });
+  }
+}
+
+export const makeNameTokenOwnershipProxySchema = (
+  valueLabel: string = "Name Token Ownership Proxy",
+) =>
+  z
+    .object({
+      ownershipType: z.literal(NameTokenOwnershipTypes.Proxy),
+      owner: makeAccountIdSchema(`${valueLabel}.owner`),
+    })
+    .check(invariant_nameTokenOwnershipHasNonZeroAddressOwner);
+
+export const makeNameTokenOwnershipEffectiveSchema = (
+  valueLabel: string = "Name Token Ownership Effective",
+) =>
+  z
+    .object({
+      ownershipType: z.literal(NameTokenOwnershipTypes.Effective),
+      owner: makeAccountIdSchema(`${valueLabel}.owner`),
+    })
+    .check(invariant_nameTokenOwnershipHasNonZeroAddressOwner);
+
+function invariant_nameTokenOwnershipHasZeroAddressOwner(
+  ctx: ParsePayload<NameTokenOwnershipBurned>,
+) {
+  const ownership = ctx.value;
+  if (ctx.value.owner.address !== zeroAddress) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `Name Token Ownership with '${ownership.ownershipType}' must have 'address' set to the zero address.`,
+    });
+  }
+}
+
+export const makeNameTokenOwnershipBurnedSchema = (
+  valueLabel: string = "Name Token Ownership Burned",
+) =>
+  z
+    .object({
+      ownershipType: z.literal(NameTokenOwnershipTypes.Burned),
+      owner: makeAccountIdSchema(`${valueLabel}.owner`),
+    })
+    .check(invariant_nameTokenOwnershipHasZeroAddressOwner);
+
+export const makeNameTokenOwnershipSchema = (valueLabel: string = "Name Token Ownership") =>
+  z.discriminatedUnion("ownershipType", [
+    makeNameTokenOwnershipProxySchema(valueLabel),
+    makeNameTokenOwnershipEffectiveSchema(valueLabel),
+    makeNameTokenOwnershipBurnedSchema(valueLabel),
+  ]);
+
 /**
  * Make schema for {@link NameToken}.
  */
@@ -64,7 +135,7 @@ export const makeNameTokenSchema = (valueLabel: string = "Name Token Schema") =>
   z.object({
     domainAsset: makeDomainAssetSchema(`${valueLabel}.domainAsset`),
 
-    owner: makeLowercaseAddressSchema(`${valueLabel}.owner`),
+    ownership: makeNameTokenOwnershipSchema(`${valueLabel}.ownership`),
 
     mintStatus: z.enum(NFTMintStatuses),
   });

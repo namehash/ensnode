@@ -1,11 +1,65 @@
-import type { Address } from "viem";
+import { type Address, zeroAddress } from "viem";
 
+import type { AccountId } from "../shared";
 import {
   type DomainAssetId,
   type NFTMintStatus,
   type SerializedDomainAssetId,
   serializeDomainAssetId,
 } from "./assets";
+
+/**
+ * An enum representing the possible Name Token Ownership types.
+ */
+export const NameTokenOwnershipTypes = {
+  Proxy: "proxy",
+  Effective: "effective",
+  Burned: "burned",
+} as const;
+
+export type NameTokenOwnershipType =
+  (typeof NameTokenOwnershipTypes)[keyof typeof NameTokenOwnershipTypes];
+
+export interface NameTokenOwnershipProxy {
+  ownershipType: typeof NameTokenOwnershipTypes.Proxy;
+
+  /**
+   * Owner
+   *
+   * Guarantees:
+   * - `owner.address` is not the zero address.
+   */
+  owner: AccountId;
+}
+
+export interface NameTokenOwnershipEffective {
+  ownershipType: typeof NameTokenOwnershipTypes.Effective;
+
+  /**
+   * Owner
+   *
+   * Guarantees:
+   * - `owner.address` is not the zero address.
+   */
+  owner: AccountId;
+}
+
+export interface NameTokenOwnershipBurned {
+  ownershipType: typeof NameTokenOwnershipTypes.Burned;
+
+  /**
+   * Owner
+   *
+   * Guarantees:
+   * - `owner.address` is the zero address.
+   */
+  owner: AccountId;
+}
+
+export type NameTokenOwnership =
+  | NameTokenOwnershipProxy
+  | NameTokenOwnershipEffective
+  | NameTokenOwnershipBurned;
 
 export interface NameToken {
   /**
@@ -20,10 +74,10 @@ export interface NameToken {
    *
    * Identifies the address that owns the name token.
    *
-   * The "chainId" of this address is the same as is referenced in
-   * `domainAsset.contract.chainId`.
+   * The `ownership.owner.chainId` of this address is the same as is referenced
+   * in `domainAsset.contract.chainId`.
    */
-  owner: Address;
+  ownership: NameTokenOwnership;
 
   /**
    * The mint status of the token.
@@ -47,7 +101,29 @@ export interface SerializedNameToken extends Omit<NameToken, "domainAsset"> {
 export function serializeNameToken(nameToken: NameToken): SerializedNameToken {
   return {
     domainAsset: serializeDomainAssetId(nameToken.domainAsset),
-    owner: nameToken.owner,
+    ownership: nameToken.ownership,
     mintStatus: nameToken.mintStatus,
   };
+}
+
+/**
+ * Get ownership type for provided owner address.
+ */
+export function getOwnershipType(
+  ownerAddress: Address,
+  nameWrapperAddresses: Address[],
+): NameTokenOwnershipType {
+  const nameWrapperAddressIsOwnerAddress = nameWrapperAddresses.some(
+    (address) => address === ownerAddress,
+  );
+
+  if (nameWrapperAddressIsOwnerAddress) {
+    return NameTokenOwnershipTypes.Proxy;
+  }
+
+  if (ownerAddress === zeroAddress) {
+    return NameTokenOwnershipTypes.Burned;
+  }
+
+  return NameTokenOwnershipTypes.Effective;
 }

@@ -10,6 +10,7 @@ import {
   NameTokensResponseErrorCodes,
   type NameTokensResponseErrorNameNotIndexed,
   type Node,
+  type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
 import { makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
@@ -20,6 +21,7 @@ import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
+import { getNameWrapperAddresses } from "@/lib/name-tokens/get-namewrapper-addresses";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 const app = factory.createApp();
@@ -29,6 +31,11 @@ const logger = makeLogger("name-tokens-api");
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,
   config.ensIndexerPublicConfig.plugins,
+);
+
+const nameWrapperAddresses = getNameWrapperAddresses(
+  config.namespace,
+  config.ensIndexerPublicConfig.plugins as PluginName[],
 );
 
 // Middleware managing access to Name Tokens API route.
@@ -102,7 +109,11 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
   const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
   const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
 
-  const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);
+  const registeredNameTokens = await findRegisteredNameTokensForDomain(
+    domainId,
+    nameWrapperAddresses,
+    accurateAsOf,
+  );
 
   // Return 404 response with error code for unknown name context when
   // the no name tokens were found for the domain ID associated with

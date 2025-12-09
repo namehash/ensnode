@@ -90,17 +90,23 @@ export interface RegisteredNameTokens {
    * - When it includes more than one name token, it means that:
    *   1) More than 1 distinct tokenized representation of the ownership of
    *      the `name` has been indexed as of `accurateAsOf`.
-   *   2) All possible permutations of mint statuses of these tokens are possible
+   *   2) All possible permutations of mint statuses of these tokens are
+   *      possible:
    *      a) Multiple could be actively minted.
-   *      b) Multiple could be burnt.
-   *      c) Some could be burnt, others could be minted.
+   *      b) Multiple could be burned.
+   *      c) Some could be burned, others could be minted.
    *  - Order of name tokens follows the order of onchain events that were
-   *    indexed when a token was minted, or burnt.
+   *    indexed when a token was minted, or burned.
    *  - Each name token has a distinct `domainAsset` value which references
    *    NFT that tokenizes the ownership of a domain.
+   * - Each name token has ownership type (`ownership.ownershipType`) assigned:
+   *   - If there's a name token with ownership type "proxy", it means that
+   *     there must be also another name token  with ownership type "effective".
+   *   - There can be at most one name token with ownership type "effective".
+   *   - There can be any number of name tokens with ownership type "burned".
    *
    * NOTE: It can be useful to get tokenized representations of the name that
-   * are now burnt: This can be helpful for looking up historical activity for
+   * are now burned: This can be helpful for looking up historical activity for
    * the name, including past buy orders, sell orders, and sales.
    *
    * How will the direct subnames of .eth that are wrapped by the NameWrapper
