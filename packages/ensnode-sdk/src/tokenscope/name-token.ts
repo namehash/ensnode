@@ -115,6 +115,16 @@ export interface NameToken {
    * updates its `mintStatus` to `burned`. If this token becomes minted again
    * after it was burned, its `mintStatus` is updated to `minted` again.
    *
+   * NOTE: Tokens tokens managed by the .eth BaseRegistrar for
+   * direct subnames of .eth can only be burned when undergoing
+   * a state transition of `minted` -> `burned` -> `minted` all within
+   * the same registrar action for the case that a direct subname of .eth
+   * has expired and has been fully released and is now being registered again.
+   * Since all of those mint status state transitions are processed within
+   * a single block, once the token managed by the .eth BaseRegistrar for
+   * a direct subname of .eth has been minted, our state model will forever
+   * represent it as `minted`.
+   *
    * Guarantees:
    * - The `mintStatus` will be burned if and only
    *   if `ownership.ownershipType` is `NameTokenOwnershipTypes.Burned`.

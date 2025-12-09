@@ -4,7 +4,13 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeAccountIdSchema, makeNodeSchema } from "../shared/zod-schemas";
-import { type AssetId, AssetNamespaces, type DomainAssetId, NFTMintStatuses } from "./assets";
+import {
+  type AssetId,
+  AssetNamespaces,
+  type DomainAssetId,
+  NFTMintStatuses,
+  type SerializedAssetId,
+} from "./assets";
 import {
   type NameToken,
   type NameTokenOwnershipBurned,
@@ -32,13 +38,13 @@ export const makeAssetIdStringSchema = (valueLabel: string = "Asset ID String Sc
     if (typeof v === "string") {
       const result = new CaipAssetId(v);
       return {
-        assetNamespace: result.assetName.namespace as "erc721" | "erc1155",
+        assetNamespace: result.assetName.namespace,
         contract: {
           chainId: Number(result.chainId.reference),
           address: result.assetName.reference,
         },
-        tokenId: BigInt(result.tokenId),
-      };
+        tokenId: result.tokenId,
+      } as SerializedAssetId;
     }
 
     return v;
