@@ -34,33 +34,23 @@ function invariant_nameIsAssociatedWithDomainId(ctx: ParsePayload<RegisteredName
   }
 }
 
-function invariant_everyNameTokenIsAssociatedWithDomainId(ctx: ParsePayload<RegisteredNameTokens>) {
-  const { domainId, tokens } = ctx.value;
-
-  if (!tokens.every((t) => t.domainAsset.domainId === domainId)) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: `Every name token in 'tokens' must be associated with 'domainId': ${domainId}`,
-    });
-  }
-}
-
-function invariant_nameTokensOwnershipTypeProxyRequiresOwnershipTypeEffective(
+function invariant_nameTokensOwnershipTypeProxyRequiresOwnershipTypeFullyOnchainOrUnknown(
   ctx: ParsePayload<RegisteredNameTokens>,
 ) {
   const { tokens } = ctx.value;
-  const containsOwnershipProxy = tokens.some(
-    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.Proxy,
+  const containsOwnershipNameWrapper = tokens.some(
+    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.NameWrapper,
   );
-  const containsOwnershipEffective = tokens.some(
-    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.Effective,
+  const containsOwnershipFullyOnchainOrUnknown = tokens.some(
+    (t) =>
+      t.ownership.ownershipType === NameTokenOwnershipTypes.FullyOnchain ||
+      t.ownership.ownershipType === NameTokenOwnershipTypes.Unknown,
   );
-  if (containsOwnershipProxy && !containsOwnershipEffective) {
+  if (containsOwnershipNameWrapper && !containsOwnershipFullyOnchainOrUnknown) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `'tokens' must contain name token with ownership type 'effective' when name token with ownership type 'proxy' in listed`,
+      message: `'tokens' must contain name token with ownership type 'fully-onchain' or 'unknown' when name token with ownership type 'namewrapper' in listed`,
     });
   }
 }
@@ -69,14 +59,14 @@ function invariant_nameTokensContainAtMostOneWithOwnershipTypeEffective(
   ctx: ParsePayload<RegisteredNameTokens>,
 ) {
   const { tokens } = ctx.value;
-  const tokensCountWithOwnershipEffective = tokens.filter(
-    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.Effective,
+  const tokensCountWithOwnershipFullyOnchain = tokens.filter(
+    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.FullyOnchain,
   ).length;
-  if (tokensCountWithOwnershipEffective > 1) {
+  if (tokensCountWithOwnershipFullyOnchain > 1) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `'tokens' must contain at most one name token with ownership type 'effective', current count: ${tokensCountWithOwnershipEffective}`,
+      message: `'tokens' must contain at most one name token with ownership type 'fully-onchain', current count: ${tokensCountWithOwnershipFullyOnchain}`,
     });
   }
 }
@@ -94,9 +84,8 @@ export const makeRegisteredNameTokenSchema = (valueLabel: string = "Registered N
       accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
     })
     .check(invariant_nameIsAssociatedWithDomainId)
-    .check(invariant_everyNameTokenIsAssociatedWithDomainId)
     .check(invariant_nameTokensContainAtMostOneWithOwnershipTypeEffective)
-    .check(invariant_nameTokensOwnershipTypeProxyRequiresOwnershipTypeEffective);
+    .check(invariant_nameTokensOwnershipTypeProxyRequiresOwnershipTypeFullyOnchainOrUnknown);
 
 /**
  * Schema for {@link NameTokensResponseOk}

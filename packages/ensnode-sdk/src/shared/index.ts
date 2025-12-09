@@ -3,6 +3,7 @@ export * from "./address";
 export * from "./cache";
 export * from "./collections";
 export * from "./currencies";
+export * from "./datasource-contract";
 export * from "./datetime";
 export * from "./deserialize";
 export * from "./interpretation";

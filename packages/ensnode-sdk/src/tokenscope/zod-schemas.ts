@@ -8,9 +8,10 @@ import { type AssetId, AssetNamespaces, type DomainAssetId, NFTMintStatuses } fr
 import {
   type NameToken,
   type NameTokenOwnershipBurned,
-  type NameTokenOwnershipEffective,
-  type NameTokenOwnershipProxy,
+  type NameTokenOwnershipFullyOnchain,
+  type NameTokenOwnershipNameWrapper,
   NameTokenOwnershipTypes,
+  type NameTokenOwnershipUnknown,
 } from "./name-token";
 
 /**
@@ -52,7 +53,9 @@ export const makeDomainAssetSchema = (valueLabel: string = "Domain Asset Schema"
   });
 
 function invariant_nameTokenOwnershipHasNonZeroAddressOwner(
-  ctx: ParsePayload<NameTokenOwnershipProxy | NameTokenOwnershipEffective>,
+  ctx: ParsePayload<
+    NameTokenOwnershipNameWrapper | NameTokenOwnershipFullyOnchain | NameTokenOwnershipUnknown
+  >,
 ) {
   const ownership = ctx.value;
   if (ctx.value.owner.address === zeroAddress) {
@@ -64,22 +67,42 @@ function invariant_nameTokenOwnershipHasNonZeroAddressOwner(
   }
 }
 
-export const makeNameTokenOwnershipProxySchema = (
-  valueLabel: string = "Name Token Ownership Proxy",
+export const makeNameTokenOwnershipNameWrapperSchema = (
+  valueLabel: string = "Name Token Ownership NameWrapper",
 ) =>
   z
     .object({
-      ownershipType: z.literal(NameTokenOwnershipTypes.Proxy),
+      ownershipType: z.literal(NameTokenOwnershipTypes.NameWrapper),
       owner: makeAccountIdSchema(`${valueLabel}.owner`),
     })
     .check(invariant_nameTokenOwnershipHasNonZeroAddressOwner);
 
-export const makeNameTokenOwnershipEffectiveSchema = (
-  valueLabel: string = "Name Token Ownership Effective",
+export const makeNameTokenOwnershipFullyOnchainSchema = (
+  valueLabel: string = "Name Token Ownership Fully Onchain",
 ) =>
   z
     .object({
-      ownershipType: z.literal(NameTokenOwnershipTypes.Effective),
+      ownershipType: z.literal(NameTokenOwnershipTypes.FullyOnchain),
+      owner: makeAccountIdSchema(`${valueLabel}.owner`),
+    })
+    .check(invariant_nameTokenOwnershipHasNonZeroAddressOwner);
+
+export const makeNameTokenOwnershipBurnedSchema = (
+  valueLabel: string = "Name Token Ownership Burned",
+) =>
+  z
+    .object({
+      ownershipType: z.literal(NameTokenOwnershipTypes.Burned),
+      owner: makeAccountIdSchema(`${valueLabel}.owner`),
+    })
+    .check(invariant_nameTokenOwnershipHasZeroAddressOwner);
+
+export const makeNameTokenOwnershipUnknownSchema = (
+  valueLabel: string = "Name Token Ownership Unknown",
+) =>
+  z
+    .object({
+      ownershipType: z.literal(NameTokenOwnershipTypes.Unknown),
       owner: makeAccountIdSchema(`${valueLabel}.owner`),
     })
     .check(invariant_nameTokenOwnershipHasNonZeroAddressOwner);
@@ -97,21 +120,12 @@ function invariant_nameTokenOwnershipHasZeroAddressOwner(
   }
 }
 
-export const makeNameTokenOwnershipBurnedSchema = (
-  valueLabel: string = "Name Token Ownership Burned",
-) =>
-  z
-    .object({
-      ownershipType: z.literal(NameTokenOwnershipTypes.Burned),
-      owner: makeAccountIdSchema(`${valueLabel}.owner`),
-    })
-    .check(invariant_nameTokenOwnershipHasZeroAddressOwner);
-
 export const makeNameTokenOwnershipSchema = (valueLabel: string = "Name Token Ownership") =>
   z.discriminatedUnion("ownershipType", [
-    makeNameTokenOwnershipProxySchema(valueLabel),
-    makeNameTokenOwnershipEffectiveSchema(valueLabel),
+    makeNameTokenOwnershipNameWrapperSchema(valueLabel),
+    makeNameTokenOwnershipFullyOnchainSchema(valueLabel),
     makeNameTokenOwnershipBurnedSchema(valueLabel),
+    makeNameTokenOwnershipUnknownSchema(valueLabel),
   ]);
 
 /**
@@ -119,7 +133,7 @@ export const makeNameTokenOwnershipSchema = (valueLabel: string = "Name Token Ow
  */
 export const makeNameTokenSchema = (valueLabel: string = "Name Token Schema") =>
   z.object({
-    domainAsset: makeDomainAssetSchema(`${valueLabel}.domainAsset`),
+    token: makeAssetIdSchema(`${valueLabel}.token`),
 
     ownership: makeNameTokenOwnershipSchema(`${valueLabel}.ownership`),
 
