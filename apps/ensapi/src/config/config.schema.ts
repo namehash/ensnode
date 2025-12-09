@@ -71,7 +71,7 @@ const EnsApiConfigSchema = z
     ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
-  // .check(invariant_ensIndexerPublicConfigVersionInfo)
+  .check(invariant_ensIndexerPublicConfigVersionInfo)
   .check(invariant_ensHolidayAwardsEndAfterStart);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
