@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { LogLevelEnvironment } from "../internal";
+import type { LogLevelEnvironment } from "./config/environments";
 import { getLogLevelFromEnv } from "./log-level";
 
 describe("logger", () => {

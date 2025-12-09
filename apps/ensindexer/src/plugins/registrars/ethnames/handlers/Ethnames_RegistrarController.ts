@@ -7,6 +7,7 @@ import { DatasourceNames } from "@ensnode/datasources";
 import {
   addPrices,
   decodeEncodedReferrer,
+  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   priceEth,
@@ -15,7 +16,6 @@ import {
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";

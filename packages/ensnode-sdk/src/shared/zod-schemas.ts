@@ -15,7 +15,7 @@ import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
 import { reinterpretName } from "./reinterpretation";
-import type { SerializedAccountId } from "./serialized-types";
+import type { AccountIdString } from "./serialized-types";
 import type {
   AccountId,
   BlockRef,
@@ -306,9 +306,9 @@ export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   });
 
 /**
- * Schema for {@link SerializedAccountId} type.
+ * Schema for {@link AccountIdString} type.
  */
-export const makeSerializedAccountIdSchema = (valueLabel: string = "Account ID") =>
+export const makeAccountIdStringSchema = (valueLabel: string = "Account ID String") =>
   z.coerce
     .string()
     .transform((v) => {

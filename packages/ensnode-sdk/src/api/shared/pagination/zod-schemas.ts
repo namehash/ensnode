@@ -1,7 +1,10 @@
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { makeNonNegativeIntegerSchema, makePositiveIntegerSchema } from "../../../internal";
+import {
+  makeNonNegativeIntegerSchema,
+  makePositiveIntegerSchema,
+} from "../../../shared/zod-schemas";
 import { RECORDS_PER_PAGE_MAX, RequestPageParams } from "./request";
 import {
   ResponsePageContext,

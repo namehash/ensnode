@@ -7,15 +7,15 @@ import {
   BASENAMES_NODE,
   type DomainAssetId,
   ETH_NODE,
+  getDatasourceContract,
   type LabelHash,
   LINEANAMES_NODE,
   makeSubdomainNode,
+  maybeGetDatasourceContract,
   type Node,
   type TokenId,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
-
-import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
 
 /**
  * A contract that issues tokenized ENS names in a manner that is supported by

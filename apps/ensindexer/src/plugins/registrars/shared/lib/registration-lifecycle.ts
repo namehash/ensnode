@@ -3,8 +3,8 @@ import schema from "ponder:schema";
 
 import {
   type AccountId,
+  formatAccountId,
   type Node,
-  serializeAccountId,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
@@ -37,7 +37,7 @@ export async function insertRegistrationLifecycle(
   },
 ): Promise<void> {
   await context.db.insert(schema.registrationLifecycles).values({
-    subregistryId: serializeAccountId(subregistryId),
+    subregistryId: formatAccountId(subregistryId),
     node,
     expiresAt: BigInt(expiresAt),
   });

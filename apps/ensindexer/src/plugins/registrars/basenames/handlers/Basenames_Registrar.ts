@@ -7,12 +7,12 @@ import { DatasourceNames } from "@ensnode/datasources";
 import {
   type BlockRef,
   bigIntToNumber,
+  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   type Subregistry,
 } from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import {
