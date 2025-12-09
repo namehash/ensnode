@@ -5,6 +5,7 @@ import { replaceBigInts } from "ponder";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
+import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   type AccountId,
   type ForwardResolutionArgs,
@@ -15,6 +16,7 @@ import {
   isSelectionEmpty,
   makeResolverId,
   type Node,
+  PluginName,
   parseReverseName,
   type ResolverRecordsResponse,
   type ResolverRecordsSelection,
@@ -39,12 +41,12 @@ import {
   interpretRawCallsAndResults,
   makeResolveCalls,
 } from "@/lib/resolution/resolve-calls-and-results";
+import { executeResolveCallsWithUniversalResolver } from "@/lib/resolution/resolve-with-universal-resolver";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
 
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
-// const metric = metrics.getMeter("forward-resolution");
 
 // NOTE: normalize generic name to force the normalization lib to lazy-load itself (otherwise the
 // first trace generated here would be unusually slow)
@@ -93,9 +95,8 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
 }
 
 /**
- * Internal Forward Resolution implementation.
- *
- * NOTE: uses `chainId` parameter for internal Protocol Acceleration behavior (see recursive call below).
+ * Internal Forward Resolution implementation for a given `name`, beginning from the specified
+ * `registry`.
  */
 async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   name: ForwardResolutionArgs<SELECTION>["name"],
@@ -155,12 +156,40 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
           }
 
+          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
+          const publicClient = getPublicClient(chainId);
+
+          ////////////////////////////
+          /// Temporary ENSv2 Bailout
+          ////////////////////////////
+          // TODO: re-enable protocol acceleration for ENSv2
+          if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+            // execute each record's call against the UniversalResolver
+            const rawResults = await withProtocolStepAsync(
+              TraceableENSProtocol.ForwardResolution,
+              ForwardResolutionProtocolStep.ExecuteResolveCalls,
+              {},
+              () =>
+                executeResolveCallsWithUniversalResolver<SELECTION>({
+                  name,
+                  calls,
+                  publicClient,
+                }),
+            );
+
+            span.setAttribute("rawResults", JSON.stringify(replaceBigInts(rawResults, String)));
+
+            // additional semantic interpretation of the raw results from the chain
+            const results = interpretRawCallsAndResults(rawResults);
+            span.setAttribute("results", JSON.stringify(replaceBigInts(results, String)));
+
+            // return record values
+            return makeRecordsResponseFromResolveResults(selection, results);
+          }
+
           //////////////////////////////////////////////////
           // 1. Identify the active resolver for the name on the specified chain.
           //////////////////////////////////////////////////
-
-          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
-          const publicClient = getPublicClient(chainId);
 
           const { activeName, activeResolver, requiresWildcardSupport } =
             await withProtocolStepAsync(

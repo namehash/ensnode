@@ -2,7 +2,7 @@
 
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, hexToBigInt, labelhash } from "viem";
+import { type Address, hexToBigInt, labelhash, numberToHex } from "viem";
 
 import {
   type AccountId,

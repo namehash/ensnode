@@ -17,6 +17,8 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("indexing-status.middleware");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
+let hasWarnedOnFailure = false;
+
 export const indexingStatusCache = await SWRCache.create({
   fn: async () =>
     client
@@ -41,10 +43,14 @@ export const indexingStatusCache = await SWRCache.create({
         // Therefore, throw an error so that this current invocation of `readCache` will:
         // - Reject the newly fetched response (if any) such that it won't be cached.
         // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
-        logger.error(
-          error,
-          "Error occurred while fetching a new indexing status snapshot. The cached indexing status snapshot (if any) will not be updated.",
-        );
+        if (!hasWarnedOnFailure) {
+          logger.error(
+            error,
+            "Error occurred while fetching a new indexing status snapshot. The cached indexing status snapshot (if any) will not be updated.",
+          );
+
+          hasWarnedOnFailure = true;
+        }
         throw error;
       }),
   ttl: 5, // 5 seconds
@@ -102,7 +108,6 @@ export const indexingStatusMiddleware = factory.createMiddleware(async (c, next)
     const errorMessage =
       "Unable to generate a new indexing status projection. No indexing status snapshots have been successfully fetched and stored into cache since service startup. This may indicate the ENSIndexer service is unreachable or in an error state.";
     const error = new Error(errorMessage);
-    logger.error(error);
     promiseResult = await pReflect(Promise.reject(error));
   } else {
     // An indexing status snapshot has been cached successfully.
