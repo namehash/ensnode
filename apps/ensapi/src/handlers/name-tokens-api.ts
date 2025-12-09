@@ -99,7 +99,10 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
     domainId = request.domainId;
   }
 
-  const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId);
+  const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
+  const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
+
+  const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);
 
   // Return 404 response with error code for unknown name context when
   // the no name tokens were found for the domain ID associated with
@@ -125,14 +128,10 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
     );
   }
 
-  const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
-  const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
-
   return c.json(
     serializeNameTokensResponse({
       responseCode: NameTokensResponseCodes.Ok,
       registeredNameTokens,
-      accurateAsOf,
     }),
   );
 });

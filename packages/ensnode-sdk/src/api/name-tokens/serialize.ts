@@ -12,13 +12,17 @@ import type {
 
 export function serializeRegisteredNameTokens({
   domainId,
-  expiresAt,
+  name,
   tokens,
+  expiresAt,
+  accurateAsOf,
 }: RegisteredNameTokens): SerializedRegisteredNameTokens {
   return {
     domainId,
-    expiresAt,
+    name,
     tokens: tokens.map(serializeNameToken),
+    expiresAt,
+    accurateAsOf,
   };
 }
 
@@ -30,7 +34,6 @@ export function serializeNameTokensResponse(
       return {
         responseCode: response.responseCode,
         registeredNameTokens: serializeRegisteredNameTokens(response.registeredNameTokens),
-        accurateAsOf: response.accurateAsOf,
       } satisfies SerializedNameTokensResponseOk;
 
     case NameTokensResponseCodes.Error:

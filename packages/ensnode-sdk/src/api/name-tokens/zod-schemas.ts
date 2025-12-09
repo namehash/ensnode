@@ -1,6 +1,11 @@
 import z from "zod/v4";
 
-import { makeNameTokenSchema, makeNodeSchema, makeUnixTimestampSchema } from "../../internal";
+import {
+  makeNodeSchema,
+  makeReinterpretedNameSchema,
+  makeUnixTimestampSchema,
+} from "../../shared/zod-schemas";
+import { makeNameTokenSchema } from "../../tokenscope/zod-schemas";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import {
   NameTokensResponse,
@@ -20,8 +25,10 @@ import {
 export const makeRegisteredNameTokenSchema = (valueLabel: string = "Registered Name Token") =>
   z.object({
     domainId: makeNodeSchema(`${valueLabel}.domainId`),
+    name: makeReinterpretedNameSchema(valueLabel),
     tokens: z.array(makeNameTokenSchema(`${valueLabel}.tokens`)).nonempty(),
     expiresAt: makeUnixTimestampSchema(`${valueLabel}.expiresAt`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
 /**
@@ -31,7 +38,6 @@ export const makeNameTokensResponseOkSchema = (valueLabel: string = "Name Tokens
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Ok),
     registeredNameTokens: makeRegisteredNameTokenSchema(`${valueLabel}.nameTokens`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
 /**

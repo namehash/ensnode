@@ -4,15 +4,18 @@ import * as schema from "@ensnode/ensnode-schema";
 import {
   bigIntToNumber,
   deserializeAssetId,
+  type InterpretedName,
   type NameToken,
   type NFTMintStatus,
   type Node,
   type RegisteredNameTokens,
+  type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 
 interface FindRegisteredNameTokensForDomainRecord {
+  domains: typeof schema.subgraph_domain.$inferSelect;
   nameTokens: typeof schema.nameTokens.$inferSelect;
   registrationLifecycles: typeof schema.registrationLifecycles.$inferSelect;
 }
@@ -28,6 +31,7 @@ async function _findRegisteredNameTokensForDomain(
     .select({
       nameTokens: schema.nameTokens,
       registrationLifecycles: schema.registrationLifecycles,
+      domains: schema.subgraph_domain,
     })
     .from(schema.nameTokens)
     // join Registration Lifecycles associated with Name Tokens
@@ -35,6 +39,8 @@ async function _findRegisteredNameTokensForDomain(
       schema.registrationLifecycles,
       eq(schema.nameTokens.domainId, schema.registrationLifecycles.node),
     )
+    // join Domains associated with Name Tokens
+    .innerJoin(schema.subgraph_domain, eq(schema.nameTokens.domainId, schema.subgraph_domain.id))
     .where(eq(schema.nameTokens.domainId, domainId));
 
   const records = await query;
@@ -70,6 +76,7 @@ function _recordToNameToken(record: FindRegisteredNameTokensForDomainRecord): Na
 function _recordsToRegisteredNameTokens(
   domainId: Node,
   records: FindRegisteredNameTokensForDomainRecord[],
+  accurateAsOf: UnixTimestamp,
 ): RegisteredNameTokens | null {
   if (records.length === 0) {
     return null;
@@ -85,6 +92,7 @@ function _recordsToRegisteredNameTokens(
   // Group nameTokens records as RegisteredNameTokens by domain ID
   for (const record of records) {
     const token = _recordToNameToken(record);
+    const name = record.domains.name as InterpretedName;
     const expiresAt = bigIntToNumber(record.registrationLifecycles.expiresAt);
 
     if (registeredNameTokens !== null) {
@@ -94,8 +102,10 @@ function _recordsToRegisteredNameTokens(
       // initialize entry
       registeredNameTokens = {
         domainId,
-        expiresAt,
+        name,
         tokens: [token],
+        expiresAt,
+        accurateAsOf,
       } satisfies RegisteredNameTokens;
     }
   }
@@ -112,7 +122,8 @@ function _recordsToRegisteredNameTokens(
 }
 
 /**
- * Find all Name Tokens for the registered domain by domain ID.
+ * Find all Name Tokens for the registered domain by domain ID,
+ * accurate as of `accurateAsOf`.
  *
  * @returns {RegisteredNameTokens} if some tokens associated with
  * domain ID were found. Otherwise returns null.
@@ -122,8 +133,9 @@ function _recordsToRegisteredNameTokens(
  */
 export async function findRegisteredNameTokensForDomain(
   domainId: Node,
+  accurateAsOf: UnixTimestamp,
 ): Promise<RegisteredNameTokens | null> {
   const records = await _findRegisteredNameTokensForDomain(domainId);
 
-  return _recordsToRegisteredNameTokens(domainId, records);
+  return _recordsToRegisteredNameTokens(domainId, records, accurateAsOf);
 }
