@@ -5,9 +5,10 @@ import z from "zod/v4";
 
 import {
   getParentNameFQDN,
+  type NameTokensRequest,
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
-  type NameTokensResponseErrorUnknownNameContext,
+  type NameTokensResponseErrorNameNotIndexed,
   type Node,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
@@ -42,10 +43,10 @@ app.get(
     z.union([
       z.object({
         domainId: makeNodeSchema("request.domainId"),
-        name: z.never(),
+        name: z.undefined(),
       }),
       z.object({
-        domainId: z.never(),
+        domainId: z.undefined(),
         name: params.name,
       }),
     ]),
@@ -63,11 +64,11 @@ app.get(
       );
     }
 
-    const queryParams = c.req.valid("query");
+    const request = c.req.valid("query") satisfies NameTokensRequest;
     let domainId: Node | undefined;
 
-    if (queryParams.name) {
-      const { name } = queryParams;
+    if (request.name !== undefined) {
+      const { name } = request;
 
       const parentNode = namehash(getParentNameFQDN(name));
       const subregistry = indexedSubregistries.find(
@@ -85,19 +86,19 @@ app.get(
         return c.json(
           serializeNameTokensResponse({
             responseCode: NameTokensResponseCodes.Error,
-            errorCode: NameTokensResponseErrorCodes.UnknownNameContext,
+            errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
             error: {
-              message: "Internal Server Error",
-              details: `The requested '${name}' name is unknown to ENSNode.`,
+              message: "No indexed Name Tokens found",
+              details: `The requested '${name}' name is unknown to ENSNode. No Name Tokens were indexed for it.`,
             },
-          } satisfies NameTokensResponseErrorUnknownNameContext),
+          } satisfies NameTokensResponseErrorNameNotIndexed),
           404,
         );
       }
 
       domainId = namehash(name);
     } else {
-      domainId = queryParams.domainId;
+      domainId = request.domainId;
     }
 
     const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId);
@@ -106,19 +107,22 @@ app.get(
     // the no name tokens were found for the domain ID associated with
     // the requested name.
     if (!registeredNameTokens) {
+      const errorMessageSubject =
+        request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
+
       logger.error(
-        `This ENSNode instance has never indexed tokens for the requested name: '${name}'.`,
+        `This ENSNode instance has never indexed tokens for the requested ${errorMessageSubject}.`,
       );
 
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.UnknownNameContext,
+          errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
           error: {
-            message: "Internal Server Error",
-            details: `The requested '${name}' name is unknown to ENSNode.`,
+            message: "No indexed Name Tokens found",
+            details: `No Name Tokens were indexed by ENSNode the requested ${errorMessageSubject}.`,
           },
-        } satisfies NameTokensResponseErrorUnknownNameContext),
+        } satisfies NameTokensResponseErrorNameNotIndexed),
         404,
       );
     }

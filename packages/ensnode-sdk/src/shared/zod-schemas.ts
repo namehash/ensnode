@@ -337,7 +337,7 @@ export const makeHexStringSchema = (
         ctx.issues.push({
           code: "custom",
           input: ctx.value,
-          message: `${valueLabel} must start with '0x'.`,
+          message: `${valueLabel} must be a hexadecimal value which starts with '0x'.`,
         });
       }
     })

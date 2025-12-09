@@ -39,7 +39,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.Generic,
+          errorCode: NameTokensResponseErrorCodes.EnsIndexerConfigUnsupported,
           error: {
             message: `Name Tokens API is not available`,
             details: `Connected ENSIndexer must have all following plugins active: ${nameTokensPrerequisites.requiredPlugins.join(", ")}`,
@@ -61,7 +61,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.Generic,
+          errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
           error: {
             message: `Name Tokens API is not available yet`,
             details: `The cached omnichain indexing status of the Connected ENSIndexer must be available.`,
@@ -77,7 +77,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.Generic,
+          errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
           error: {
             message: `Name Tokens API is not available yet`,
             details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${nameTokensPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}. The current status is "${omnichainSnapshot.omnichainStatus}"`,

@@ -7,8 +7,9 @@ import {
   NameTokensResponseCodes,
   NameTokensResponseError,
   NameTokensResponseErrorCodes,
-  NameTokensResponseErrorGeneric,
-  NameTokensResponseErrorUnknownNameContext,
+  NameTokensResponseErrorEnsIndexerConfigUnsupported,
+  NameTokensResponseErrorIndexingStatusUnsupported,
+  NameTokensResponseErrorNameNotIndexed,
   NameTokensResponseOk,
   RegisteredNameTokens,
 } from "./response";
@@ -34,29 +35,39 @@ export const makeNameTokensResponseOkSchema = (valueLabel: string = "Name Tokens
   });
 
 /**
- * Schema for {@link NameTokensResponseErrorUnknownNameContext}
+ * Schema for {@link NameTokensResponseErrorNameNotIndexed}
  */
-export const makeNameTokensResponseErrorUnknownNameContextSchema = (
-  _valueLabel: string = "Name Tokens Response Error Unknown Name Context",
+export const makeNameTokensResponseErrorNameNotIndexedSchema = (
+  _valueLabel: string = "Name Tokens Response Error Name Not Indexed",
 ) =>
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Error),
-    errorCode: z.literal(NameTokensResponseErrorCodes.UnknownNameContext),
+    errorCode: z.literal(NameTokensResponseErrorCodes.NameNotIndexed),
     error: ErrorResponseSchema,
   });
 
 /**
- * Schema for {@link NameTokensResponseErrorGeneric}
+ * Schema for {@link NameTokensResponseErrorEnsIndexerConfigUnsupported}
  */
-export const makeNameTokensResponseErrorGenericSchema = (
-  _valueLabel: string = "Name Tokens Response Error Generic",
+export const makeNameTokensResponseErrorEnsIndexerConfigUnsupported = (
+  _valueLabel: string = "Name Tokens Response Error ENSIndexer Config Unsupported",
 ) =>
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Error),
-    errorCode: z.literal(NameTokensResponseErrorCodes.UnknownNameContext),
+    errorCode: z.literal(NameTokensResponseErrorCodes.EnsIndexerConfigUnsupported),
     error: ErrorResponseSchema,
   });
-
+/**
+ * Schema for {@link NameTokensResponseErrorIndexingStatusUnsupported}
+ */
+export const makeNameTokensResponseErrorNameIndexingStatusUnsupported = (
+  _valueLabel: string = "Name Tokens Response Error Indexing Status Unsupported",
+) =>
+  z.strictObject({
+    responseCode: z.literal(NameTokensResponseCodes.Error),
+    errorCode: z.literal(NameTokensResponseErrorCodes.IndexingStatusUnsupported),
+    error: ErrorResponseSchema,
+  });
 /**
  * Schema for {@link NameTokensResponseError}
  */
@@ -64,8 +75,9 @@ export const makeNameTokensResponseErrorSchema = (
   valueLabel: string = "Name Tokens Response Error",
 ) =>
   z.discriminatedUnion("errorCode", [
-    makeNameTokensResponseErrorUnknownNameContextSchema(valueLabel),
-    makeNameTokensResponseErrorGenericSchema(valueLabel),
+    makeNameTokensResponseErrorNameNotIndexedSchema(valueLabel),
+    makeNameTokensResponseErrorEnsIndexerConfigUnsupported(valueLabel),
+    makeNameTokensResponseErrorNameIndexingStatusUnsupported(valueLabel),
   ]);
 
 /**

@@ -9,14 +9,14 @@ export interface NameTokensRequestByDomainId {
   /**
    * Name for which name tokens were requested.
    */
-  name?: never;
+  name?: undefined;
 }
 
 /**
  * Represents request to Name Tokens API.
  */
 export interface NameTokensRequestByName {
-  domainId?: never;
+  domainId?: undefined;
 
   /**
    * Name for which name tokens were requested.
