@@ -36,82 +36,49 @@ const indexedSubregistries = getIndexedSubregistries(
 // and if not returns the appropriate HTTP 503 (Service Unavailable) error.
 app.use(nameTokensApiMiddleware);
 
-app.get(
-  "/",
-  validate(
-    "query",
-    z.union([
-      z.object({
-        domainId: makeNodeSchema("request.domainId"),
-        name: z.undefined(),
-      }),
-      z.object({
-        domainId: z.undefined(),
-        name: params.name,
-      }),
-    ]),
-  ),
-  async (c) => {
-    // Invariant: context must be set by the required middleware
-    if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(name-tokens-api): indexingStatusMiddleware required`);
-    }
+/**
+ * Request Query Schema
+ *
+ * Name Tokens API can be requested by either `name` or `domainId`, and
+ * can never be requested by both, or neither.
+ */
+const requestQuerySchema = z.union([
+  z.object({
+    domainId: makeNodeSchema("request.domainId"),
+    name: z.undefined(),
+  }),
+  z.object({
+    domainId: z.undefined(),
+    name: params.name,
+  }),
+]);
 
-    // Invariant: Indexing Status has been resolved successfully.
-    if (c.var.indexingStatus.isRejected) {
-      throw new Error(
-        `Invariant(name-tokens-api): Indexing Status has to be resolved successfully`,
-      );
-    }
+app.get("/", validate("query", requestQuerySchema), async (c) => {
+  // Invariant: context must be set by the required middleware
+  if (c.var.indexingStatus === undefined) {
+    throw new Error(`Invariant(name-tokens-api): indexingStatusMiddleware required`);
+  }
 
-    const request = c.req.valid("query") satisfies NameTokensRequest;
-    let domainId: Node | undefined;
+  // Invariant: Indexing Status has been resolved successfully.
+  if (c.var.indexingStatus.isRejected) {
+    throw new Error(`Invariant(name-tokens-api): Indexing Status has to be resolved successfully`);
+  }
 
-    if (request.name !== undefined) {
-      const { name } = request;
+  const request = c.req.valid("query") satisfies NameTokensRequest;
+  let domainId: Node | undefined;
 
-      const parentNode = namehash(getParentNameFQDN(name));
-      const subregistry = indexedSubregistries.find(
-        (subregistry) => subregistry.node === parentNode,
-      );
+  if (request.name !== undefined) {
+    const { name } = request;
 
-      // Return 404 response with error code for unknown name context when
-      // the parent name of the requested name was not registered in any of
-      // the actively indexed subregistries.
-      if (!subregistry) {
-        logger.error(
-          `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
-        );
-
-        return c.json(
-          serializeNameTokensResponse({
-            responseCode: NameTokensResponseCodes.Error,
-            errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
-            error: {
-              message: "No indexed Name Tokens found",
-              details: `The requested '${name}' name is unknown to ENSNode. No Name Tokens were indexed for it.`,
-            },
-          } satisfies NameTokensResponseErrorNameNotIndexed),
-          404,
-        );
-      }
-
-      domainId = namehash(name);
-    } else {
-      domainId = request.domainId;
-    }
-
-    const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId);
+    const parentNode = namehash(getParentNameFQDN(name));
+    const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
 
     // Return 404 response with error code for unknown name context when
-    // the no name tokens were found for the domain ID associated with
-    // the requested name.
-    if (!registeredNameTokens) {
-      const errorMessageSubject =
-        request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
-
+    // the parent name of the requested name was not registered in any of
+    // the actively indexed subregistries.
+    if (!subregistry) {
       logger.error(
-        `This ENSNode instance has never indexed tokens for the requested ${errorMessageSubject}.`,
+        `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
       );
 
       return c.json(
@@ -120,24 +87,54 @@ app.get(
           errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
           error: {
             message: "No indexed Name Tokens found",
-            details: `No Name Tokens were indexed by ENSNode the requested ${errorMessageSubject}.`,
+            details: `The requested '${name}' name is unknown to ENSNode. No Name Tokens were indexed for it.`,
           },
         } satisfies NameTokensResponseErrorNameNotIndexed),
         404,
       );
     }
 
-    const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
-    const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
+    domainId = namehash(name);
+  } else {
+    domainId = request.domainId;
+  }
+
+  const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId);
+
+  // Return 404 response with error code for unknown name context when
+  // the no name tokens were found for the domain ID associated with
+  // the requested name.
+  if (!registeredNameTokens) {
+    const errorMessageSubject =
+      request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
+
+    logger.error(
+      `This ENSNode instance has never indexed tokens for the requested ${errorMessageSubject}.`,
+    );
 
     return c.json(
       serializeNameTokensResponse({
-        responseCode: NameTokensResponseCodes.Ok,
-        registeredNameTokens,
-        accurateAsOf,
-      }),
+        responseCode: NameTokensResponseCodes.Error,
+        errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
+        error: {
+          message: "No indexed Name Tokens found",
+          details: `No Name Tokens were indexed by ENSNode the requested ${errorMessageSubject}.`,
+        },
+      } satisfies NameTokensResponseErrorNameNotIndexed),
+      404,
     );
-  },
-);
+  }
+
+  const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
+  const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
+
+  return c.json(
+    serializeNameTokensResponse({
+      responseCode: NameTokensResponseCodes.Ok,
+      registeredNameTokens,
+      accurateAsOf,
+    }),
+  );
+});
 
 export default app;
