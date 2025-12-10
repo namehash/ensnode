@@ -577,7 +577,7 @@ export class ENSNodeClient {
    *
    * const client: ENSNodeClient;
    *
-   * // Get first page with default page size (10 items)
+   * // Get first page with default page size (10 records)
    * const response = await client.registrarActions();
    * if (response.responseCode === RegistrarActionsResponseCodes.Ok) {
    *   const { registrarActions, pageContext } = response;
