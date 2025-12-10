@@ -1,5 +1,11 @@
 # @namehash/ens-referrals
 
+## 1.3.0
+
+### Minor Changes
+
+- [#1382](https://github.com/namehash/ensnode/pull/1382) [`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137) Thanks [@Goader](https://github.com/Goader)! - Renamed `itemsPerPage` to `recordsPerPage` and `paginationContext` to `pageContext` in referrer leaderboard APIs to align with registrar actions terminology.
+
 ## 1.2.0
 
 ### Minor Changes
