@@ -14,6 +14,9 @@ import type {
 } from "@ensnode/ensnode-sdk";
 
 export const builder = new SchemaBuilder<{
+  Context: {
+    now: bigint;
+  };
   Scalars: {
     BigInt: { Input: bigint; Output: bigint };
     Address: { Input: Address; Output: Address };

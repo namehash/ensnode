@@ -2,6 +2,7 @@
 // import { maxDepthPlugin } from "@escape.tech/graphql-armor-max-depth";
 // import { maxTokensPlugin } from "@escape.tech/graphql-armor-max-tokens";
 
+import { getUnixTime } from "date-fns";
 import { createYoga } from "graphql-yoga";
 
 import { schema } from "@/graphql-api/schema";
@@ -14,6 +15,10 @@ const logger = makeLogger("ensnode-graphql");
 const yoga = createYoga({
   graphqlEndpoint: "*",
   schema,
+  context: async () => ({
+    // generate a bigint UnixTimestamp per-request for handlers to use
+    now: BigInt(getUnixTime(new Date())),
+  }),
   graphiql: {
     defaultQuery: `query DomainsByOwner {
   account(address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266") {

@@ -1,4 +1,9 @@
-import type { RegistrationId, RequiredAndNotNull } from "@ensnode/ensnode-sdk";
+import {
+  isRegistrationFullyExpired,
+  isRegistrationInGracePeriod,
+  type RegistrationId,
+  type RequiredAndNotNull,
+} from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
@@ -94,6 +99,16 @@ RegistrationInterfaceRef.implement({
       resolve: (parent) => parent.expiry,
     }),
 
+    ////////////////////////
+    // Registration.expired
+    ////////////////////////
+    expired: t.field({
+      description: "TODO",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent, args, context) => isRegistrationFullyExpired(parent, context.now),
+    }),
+
     /////////////////////////
     // Registration.referrer
     /////////////////////////
@@ -168,6 +183,16 @@ BaseRegistrarRegistrationRef.implement({
       type: WrappedBaseRegistrarRegistrationRef,
       nullable: true,
       resolve: (parent) => (parent.wrapped ? parent : null),
+    }),
+
+    ////////////////////////////////
+    // Registration.isInGracePeriod
+    ////////////////////////////////
+    isInGracePeriod: t.field({
+      description: "TODO",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent, args, context) => isRegistrationInGracePeriod(parent, context.now),
     }),
   }),
 });

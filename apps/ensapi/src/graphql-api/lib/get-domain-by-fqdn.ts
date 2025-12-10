@@ -15,6 +15,7 @@ import {
   interpretedLabelsToInterpretedName,
   interpretedNameToInterpretedLabels,
   interpretedNameToLabelHashPath,
+  isRegistrationFullyExpired,
   type LabelHash,
   type LiteralLabel,
   labelhashLiteralLabel,
@@ -81,7 +82,7 @@ async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | n
 async function v2_getDomainIdByFqdn(
   registryId: RegistryId,
   name: InterpretedName,
-  { now } = { now: getUnixTime(new Date()) },
+  { now } = { now: BigInt(getUnixTime(new Date())) },
 ): Promise<DomainId | null> {
   const labelHashPath = interpretedNameToLabelHashPath(name);
 
@@ -172,8 +173,7 @@ async function v2_getDomainIdByFqdn(
     const ensv1DomainId = makeENSv1DomainId(dotEth2LDNode);
     const registration = await getLatestRegistration(ensv1DomainId);
 
-    // TODO: && isRegistrationFullyExpired(registration,)
-    if (registration) {
+    if (registration && !isRegistrationFullyExpired(registration, now)) {
       console.log(
         `ETHTLDResolver deferring to actively registered name ${dotEth2LDNode} in ENSv1...`,
       );
