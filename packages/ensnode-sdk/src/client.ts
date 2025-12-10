@@ -385,21 +385,21 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * // Get first page with default page size (25 items)
+   * // Get first page with default page size (25 records)
    * const response = await client.getReferrerLeaderboardPage();
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
    *   const {
    *     aggregatedMetrics,
    *     referrers,
    *     rules,
-   *     paginationContext,
+   *     pageContext,
    *     updatedAt
    *   } = response.data;
    *   console.log(aggregatedMetrics);
    *   console.log(referrers);
    *   console.log(rules);
    *   console.log(updatedAt);
-   *   console.log(`Page ${paginationContext.page} of ${paginationContext.totalPages}`);
+   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
    * }
    * ```
    *
@@ -426,8 +426,8 @@ export class ENSNodeClient {
     const url = new URL(`/ensanalytics/referrers`, this.options.url);
 
     if (request?.page) url.searchParams.set("page", request.page.toString());
-    if (request?.itemsPerPage)
-      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    if (request?.recordsPerPage)
+      url.searchParams.set("recordsPerPage", request.recordsPerPage.toString());
 
     const response = await fetch(url);
 

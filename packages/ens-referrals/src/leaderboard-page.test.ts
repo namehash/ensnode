@@ -10,12 +10,12 @@ import {
 import type { AwardedReferrerMetrics } from "./referrer-metrics.ts";
 
 describe("buildReferrerLeaderboardPageContext", () => {
-  const paginationParams: ReferrerLeaderboardPageParams = {
+  const pageParams: ReferrerLeaderboardPageParams = {
     page: 1,
-    itemsPerPage: 3,
+    recordsPerPage: 3,
   };
 
-  it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `itemsPerPage` are equal", () => {
+  it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `recordsPerPage` are equal", () => {
     const leaderboard: ReferrerLeaderboard = {
       rules: {
         totalAwardPoolValue: 10000,
@@ -84,15 +84,15 @@ describe("buildReferrerLeaderboardPageContext", () => {
     };
 
     const buildReferrerLeaderboardPageContextSpy = vi.fn(buildReferrerLeaderboardPageContext);
-    const result = buildReferrerLeaderboardPageContextSpy(paginationParams, leaderboard);
+    const result = buildReferrerLeaderboardPageContextSpy(pageParams, leaderboard);
 
     expect(
       buildReferrerLeaderboardPageContextSpy,
-      "buildReferrerLeaderboardPageContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=3",
+      "buildReferrerLeaderboardPageContext should successfully complete for recordsPerPage=3, leaderboard.referrers.size=3",
     ).toHaveReturned();
     expect(
       result.hasNext,
-      `Leaderboard should only have one page for itemsPerPage=3, leaderboard.referrers.size=3 (expected hasNext to be false, is ${result.hasNext})`,
+      `Leaderboard should only have one page for recordsPerPage=3, leaderboard.referrers.size=3 (expected hasNext to be false, is ${result.hasNext})`,
     ).toStrictEqual(false);
   });
 
@@ -125,16 +125,16 @@ describe("buildReferrerLeaderboardPageContext", () => {
       hasPrev: false,
       startIndex: undefined,
       endIndex: undefined,
-      itemsPerPage: 3,
+      recordsPerPage: 3,
       page: 1,
     };
 
     const buildReferrerLeaderboardPageContextSpy = vi.fn(buildReferrerLeaderboardPageContext);
-    const result = buildReferrerLeaderboardPageContextSpy(paginationParams, leaderboard);
+    const result = buildReferrerLeaderboardPageContextSpy(pageParams, leaderboard);
 
     expect(
       buildReferrerLeaderboardPageContextSpy,
-      "buildReferrerLeaderboardPageContext should successfully complete for itemsPerPage=3, leaderboard.referrers.size=0",
+      "buildReferrerLeaderboardPageContext should successfully complete for recordsPerPage=3, leaderboard.referrers.size=0",
     ).toHaveReturned();
 
     expect(
