@@ -3,7 +3,7 @@ import type { z } from "zod/v4";
 import { getENSRootChainId } from "@ensnode/datasources";
 
 import { isHttpProtocol, isWebSocketProtocol } from "../url";
-import type { ZodCheckFnInput } from "../zod-schemas";
+import type { ZodCheckFnInput } from "../zod-types";
 import type { ENSNamespaceSchema, RpcConfigsSchema } from "./zod-schemas";
 
 /**

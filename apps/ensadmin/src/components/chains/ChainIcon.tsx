@@ -3,7 +3,6 @@ import {
   arbitrumSepolia,
   base,
   baseSepolia,
-  holesky,
   linea,
   lineaSepolia,
   mainnet,
@@ -57,9 +56,6 @@ const chainIcons = new Map<number, React.ComponentType<React.SVGProps<SVGSVGElem
   [optimismSepolia.id, OptimismTestnetIcon],
   [arbitrumSepolia.id, ArbitrumTestnetIcon],
   [scrollSepolia.id, ScrollTestnetIcon],
-
-  // holesky
-  [holesky.id, EthereumTestnetIcon],
 
   // ens-test-env
   [ensTestEnvL1Chain.id, EthereumLocalIcon],

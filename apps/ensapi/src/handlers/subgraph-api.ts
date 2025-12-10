@@ -4,9 +4,8 @@ import { createDocumentationMiddleware } from "ponder-enrich-gql-docs-middleware
 
 import * as schema from "@ensnode/ensnode-schema";
 import type { Duration } from "@ensnode/ensnode-sdk";
-import { buildGraphQLSchema, subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
+import { subgraphGraphQLMiddleware } from "@ensnode/ponder-subgraph";
 
-import { makeDrizzle } from "@/lib/handlers/drizzle";
 import { factory } from "@/lib/hono-factory";
 import { makeSubgraphApiDocumentation } from "@/lib/subgraph/api-documentation";
 import { filterSchemaByPrefix } from "@/lib/subgraph/filter-schema-by-prefix";
@@ -20,13 +19,6 @@ const MAX_REALTIME_DISTANCE_TO_RESOLVE: Duration = 10 * 60; // 10 minutes in sec
 
 // generate a subgraph-specific subset of the schema
 const subgraphSchema = filterSchemaByPrefix("subgraph_", schema);
-
-// make subgraph-specific drizzle db
-const drizzle = makeDrizzle({
-  schema: subgraphSchema,
-  databaseUrl: config.databaseUrl,
-  databaseSchema: config.databaseSchemaName,
-});
 
 const app = factory.createApp();
 
@@ -51,48 +43,47 @@ app.use(subgraphMetaMiddleware);
 // use subgraph middleware
 app.use(
   subgraphGraphQLMiddleware({
-    drizzle,
-    graphqlSchema: buildGraphQLSchema({
-      schema: subgraphSchema,
-      // describes the polymorphic (interface) relationships in the schema
-      polymorphicConfig: {
-        types: {
-          DomainEvent: [
-            subgraphSchema.transfer,
-            subgraphSchema.newOwner,
-            subgraphSchema.newResolver,
-            subgraphSchema.newTTL,
-            subgraphSchema.wrappedTransfer,
-            subgraphSchema.nameWrapped,
-            subgraphSchema.nameUnwrapped,
-            subgraphSchema.fusesSet,
-            subgraphSchema.expiryExtended,
-          ],
-          RegistrationEvent: [
-            subgraphSchema.nameRegistered,
-            subgraphSchema.nameRenewed,
-            subgraphSchema.nameTransferred,
-          ],
-          ResolverEvent: [
-            subgraphSchema.addrChanged,
-            subgraphSchema.multicoinAddrChanged,
-            subgraphSchema.nameChanged,
-            subgraphSchema.abiChanged,
-            subgraphSchema.pubkeyChanged,
-            subgraphSchema.textChanged,
-            subgraphSchema.contenthashChanged,
-            subgraphSchema.interfaceChanged,
-            subgraphSchema.authorisationChanged,
-            subgraphSchema.versionChanged,
-          ],
-        },
-        fields: {
-          "Domain.events": "DomainEvent",
-          "Registration.events": "RegistrationEvent",
-          "Resolver.events": "ResolverEvent",
-        },
+    databaseUrl: config.databaseUrl,
+    databaseSchema: config.databaseSchemaName,
+    schema: subgraphSchema,
+    // describes the polymorphic (interface) relationships in the schema
+    polymorphicConfig: {
+      types: {
+        DomainEvent: [
+          subgraphSchema.transfer,
+          subgraphSchema.newOwner,
+          subgraphSchema.newResolver,
+          subgraphSchema.newTTL,
+          subgraphSchema.wrappedTransfer,
+          subgraphSchema.nameWrapped,
+          subgraphSchema.nameUnwrapped,
+          subgraphSchema.fusesSet,
+          subgraphSchema.expiryExtended,
+        ],
+        RegistrationEvent: [
+          subgraphSchema.nameRegistered,
+          subgraphSchema.nameRenewed,
+          subgraphSchema.nameTransferred,
+        ],
+        ResolverEvent: [
+          subgraphSchema.addrChanged,
+          subgraphSchema.multicoinAddrChanged,
+          subgraphSchema.nameChanged,
+          subgraphSchema.abiChanged,
+          subgraphSchema.pubkeyChanged,
+          subgraphSchema.textChanged,
+          subgraphSchema.contenthashChanged,
+          subgraphSchema.interfaceChanged,
+          subgraphSchema.authorisationChanged,
+          subgraphSchema.versionChanged,
+        ],
       },
-    }),
+      fields: {
+        "Domain.events": "DomainEvent",
+        "Registration.events": "RegistrationEvent",
+        "Resolver.events": "ResolverEvent",
+      },
+    },
   }),
 );
 

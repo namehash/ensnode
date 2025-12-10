@@ -1,77 +1,7 @@
-import { AssetId as CaipAssetId } from "caip";
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
 
-import { type Node, uint256ToHex32 } from "../ens";
-import type { AccountId, ChainId } from "../shared";
-
-/**
- * An enum representing the possible CAIP-19 Asset Namespace values.
- */
-export const AssetNamespaces = {
-  ERC721: "erc721",
-  ERC1155: "erc1155",
-} as const;
-
-export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
-
-/**
- * A uint256 value that identifies a specific NFT within a NFT contract.
- */
-export type TokenId = bigint;
-
-/**
- * A globally unique reference to an NFT.
- */
-export interface AssetId {
-  assetNamespace: AssetNamespace;
-  contract: AccountId;
-  tokenId: TokenId;
-}
-
-/**
- * Serialized representation of an {@link AssetId}.
- *
- * Formatted as a fully lowercase CAIP-19 AssetId.
- *
- * @see https://chainagnostic.org/CAIPs/caip-19
- * @example "eip155:1/erc721:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
- *          for vitalik.eth in the eth base registrar on mainnet.
- */
-export type SerializedAssetId = string;
-
-/**
- * Serializes {@link AssetId} object.
- */
-export function serializeAssetId(assetId: AssetId): SerializedAssetId {
-  const { assetNamespace, contract, tokenId } = assetId;
-  return CaipAssetId.format({
-    chainId: { namespace: "eip155", reference: contract.chainId.toString() },
-    assetName: { namespace: assetNamespace, reference: contract.address },
-    tokenId: uint256ToHex32(tokenId),
-  }).toLowerCase();
-}
-
-/**
- * Builds an AssetId for the NFT represented by the given contract,
- * tokenId, and assetNamespace.
- *
- * @param contract - The contract that manages the NFT
- * @param tokenId - The tokenId of the NFT
- * @param assetNamespace - The assetNamespace of the NFT
- * @returns The AssetId for the NFT represented by the given contract,
- *          tokenId, and assetNamespace
- */
-export const buildAssetId = (
-  contract: AccountId,
-  tokenId: TokenId,
-  assetNamespace: AssetNamespace,
-): AssetId => {
-  return {
-    assetNamespace,
-    contract,
-    tokenId,
-  };
-};
+import type { Node } from "../ens";
+import { type AssetId, type ChainId, serializeAssetId } from "../shared";
 
 /**
  * A globally unique reference to an NFT tokenizing the ownership of a domain.

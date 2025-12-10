@@ -6,7 +6,7 @@
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import { uniq } from "../../shared";
 import {
@@ -14,8 +14,8 @@ import {
   makeENSNamespaceIdSchema,
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
-  type ZodCheckFnInput,
 } from "../../shared/zod-schemas";
+import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
 import type { ENSIndexerPublicConfig } from "./types";
 import { PluginName } from "./types";

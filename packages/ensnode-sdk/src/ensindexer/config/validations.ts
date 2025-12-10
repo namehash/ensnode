@@ -1,4 +1,4 @@
-import type { ZodCheckFnInput } from "../../shared/zod-schemas";
+import type { ZodCheckFnInput } from "../../shared/zod-types";
 import type { ENSIndexerVersionInfo } from "./types";
 
 /**

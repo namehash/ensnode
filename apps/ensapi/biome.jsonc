@@ -1,0 +1,17 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
+  "extends": "//",
+  "overrides": [
+    // allow unused function parameters in pothos schema files due to resolve() pattern
+    {
+      "includes": ["./src/graphql-api/**/*.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedFunctionParameters": "off"
+          }
+        }
+      }
+    }
+  ]
+}
