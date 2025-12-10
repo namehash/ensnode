@@ -202,10 +202,9 @@ PermissionsUserRef.implement({
     ////////////////////////////
     resource: t.field({
       description: "TODO",
-      type: PermissionsResourceRef,
+      type: "BigInt",
       nullable: false,
-      resolve: ({ chainId, address, resource }) =>
-        makePermissionsResourceId({ chainId, address }, resource),
+      resolve: (parent) => parent.resource,
     }),
 
     ////////////////////////

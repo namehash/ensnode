@@ -9,6 +9,7 @@ import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
+import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -86,7 +87,7 @@ AccountRef.implement({
               .where(
                 and(
                   ...[
-                    // TODO: using any because drizzle infers id as ENSv1DomainId
+                    // NOTE: using any because drizzle infers id as ENSv1DomainId
                     before && lt(domains.id, cursors.decode<any>(before)),
                     after && gt(domains.id, cursors.decode<any>(after)),
                   ].filter((c) => !!c),
@@ -110,11 +111,9 @@ AccountRef.implement({
     permissions: t.connection({
       description: "TODO",
       type: PermissionsUserRef,
-      // TODO: allow permissions(in: { contract: { chainId, address } })
-      // or permissions(type: 'Registry' | 'Resolver')
-      // and then join (chainId, address) against Registry/Resolver index to see what it refers to
-      // and then filter on that — pretty expensive-sounding
-      // args: {},
+      args: {
+        in: t.arg({ type: AccountIdInput }),
+      },
       resolve: (parent, args, context) =>
         resolveCursorConnection(
           { ...DEFAULT_CONNECTION_ARGS, args },
@@ -123,7 +122,11 @@ AccountRef.implement({
               where: (t, { lt, gt, and, eq }) =>
                 and(
                   ...[
+                    // this user's permissions
                     eq(t.user, parent.id),
+                    // optionally filtered by contract
+                    args.in && and(eq(t.chainId, args.in.chainId), eq(t.address, args.in.address)),
+                    // optionall filtered by cursor
                     before !== undefined && lt(t.id, cursors.decode<PermissionsUserId>(before)),
                     after !== undefined && gt(t.id, cursors.decode<PermissionsUserId>(after)),
                   ].filter((c) => !!c),

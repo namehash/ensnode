@@ -52,7 +52,6 @@ export async function getDomainIdByInterpretedName(
   name: InterpretedName,
 ): Promise<DomainId | null> {
   // Domains addressable in v2 are preferred, but v1 lookups are cheap, so just do them both ahead of time
-  // TODO: when v2 names are the majority, we can unroll this into a v2 then v1 lookup.
   const [v1DomainId, v2DomainId] = await Promise.all([
     v1_getDomainIdByFqdn(name),
     v2_getDomainIdByFqdn(ROOT_REGISTRY_ID, name),
@@ -89,7 +88,7 @@ async function v2_getDomainIdByFqdn(
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
 
-  // TODO: need to join latest registration and confirm that it's not expired, otherwise should treat the domain as not existing
+  // TODO: need to join latest registration and confirm that it's not expired, if expired should treat the domain as not existing
 
   const result = await db.execute(sql`
     WITH RECURSIVE path AS (
@@ -146,7 +145,7 @@ async function v2_getDomainIdByFqdn(
 
   // we did not find an exact match for the Domain within ENSv2 on the ENS Root Chain
   // if the path terminates at the .eth Registry, we must implement the logic in ETHTLDResolver
-  // TODO: we could ad an additional invariant that the .eth v2 Registry does indeed have the ETHTLDResolver
+  // TODO: we could add an additional invariant that the .eth v2 Registry does indeed have the ETHTLDResolver
   // set as its resolver, but that is unnecessary at the moment and incurs additional db requests or a join against
   // domain_resolver_relationships
   // TODO: generalize this into other future bridging resolvers depending on how basenames etc do it
