@@ -3,28 +3,16 @@ import config from "@/config";
 import {
   bytesToHex,
   ContractFunctionExecutionError,
-  ContractFunctionRevertedError,
   decodeAbiParameters,
-  decodeErrorResult,
   encodeFunctionData,
   getAbiItem,
-  type Hex,
-  hexToBytes,
   type PublicClient,
-  parseAbiItem,
   size,
 } from "viem";
 import { packetToBytes } from "viem/ens";
 
 import { DatasourceNames, getDatasource, ResolverABI } from "@ensnode/datasources";
-import {
-  type DNSEncodedLiteralName,
-  decodeDNSEncodedLiteralName,
-  decodeDNSEncodedName,
-  literalLabelsToInterpretedName,
-  type Name,
-  type ResolverRecordsSelection,
-} from "@ensnode/ensnode-sdk";
+import type { Name, ResolverRecordsSelection } from "@ensnode/ensnode-sdk";
 
 import type {
   ResolveCalls,
@@ -34,7 +22,7 @@ import type {
 const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 
 /**
- * Execute a set of ResolveCalls for `name`
+ * Execute a set of ResolveCalls for `name` against the UniversalResolver.
  */
 export async function executeResolveCallsWithUniversalResolver<
   SELECTION extends ResolverRecordsSelection,
@@ -83,25 +71,6 @@ export async function executeResolveCallsWithUniversalResolver<
       } catch (error) {
         // in general, reverts are expected behavior
         if (error instanceof ContractFunctionExecutionError) {
-          if (error.cause instanceof ContractFunctionRevertedError) {
-            if (error.cause.data?.errorName === "ResolverError") {
-              const decoded = decodeErrorResult({
-                abi: ResolverABI,
-                // biome-ignore lint/style/noNonNullAssertion: allow
-                data: error.cause.data!.args![0] as Hex,
-              });
-
-              const _encodedName = decoded.args[0];
-              const _name = literalLabelsToInterpretedName(
-                decodeDNSEncodedLiteralName(_encodedName as DNSEncodedLiteralName),
-              );
-
-              console.log(
-                `UniversalResolver#resolve(${name}) reverted ResolverError() with internal error ${decoded.errorName} and name ${_name}`,
-              );
-            }
-          }
-
           return { call, result: null, reason: error.shortMessage };
         }
 

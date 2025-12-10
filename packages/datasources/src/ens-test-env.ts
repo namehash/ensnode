@@ -87,7 +87,7 @@ export default {
       },
       UniversalResolver: {
         abi: root_UniversalResolver,
-        address: "0xd8a5a9b31c3c0232e196d518e89fd8bf83acad43",
+        address: "0xdc11f7e700a4c898ae5caddb1082cffa76512add",
         startBlock: 0,
       },
 
