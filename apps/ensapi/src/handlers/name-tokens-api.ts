@@ -4,6 +4,7 @@ import { namehash } from "viem";
 import z from "zod/v4";
 
 import {
+  ENS_ROOT,
   getParentNameFQDN,
   type NameTokensRequest,
   NameTokensResponseCodes,
@@ -70,6 +71,21 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
   if (request.name !== undefined) {
     const { name } = request;
 
+    // return 404 when the requested name was the ENS Root
+    if (name === ENS_ROOT) {
+      return c.json(
+        serializeNameTokensResponse({
+          responseCode: NameTokensResponseCodes.Error,
+          errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
+          error: {
+            message: "No indexed Name Tokens found",
+            details: `The 'name' param must not be ENS Root.`,
+          },
+        } satisfies NameTokensResponseErrorNameNotIndexed),
+        404,
+      );
+    }
+
     const parentNode = namehash(getParentNameFQDN(name));
     const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
 
@@ -87,7 +103,7 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
           errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
           error: {
             message: "No indexed Name Tokens found",
-            details: `The requested '${name}' name is unknown to ENSNode. No Name Tokens were indexed for it.`,
+            details: `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
           },
         } satisfies NameTokensResponseErrorNameNotIndexed),
         404,
