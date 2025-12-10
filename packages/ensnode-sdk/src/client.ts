@@ -376,7 +376,7 @@ export class ENSNodeClient {
    *
    * @param request - Pagination parameters
    * @param request.page - The page number to retrieve (1-indexed, default: 1)
-   * @param request.itemsPerPage - Number of items per page (default: 25, max: 100)
+   * @param request.recordsPerPage - Number of records per page (default: 25, max: 100)
    * @returns {ReferrerLeaderboardPageResponse}
    *
    * @throws if the ENSNode request fails
@@ -405,8 +405,8 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * // Get second page with 50 items per page
-   * const response = await client.getReferrerLeaderboardPage({ page: 2, itemsPerPage: 50 });
+   * // Get second page with 50 records per page
+   * const response = await client.getReferrerLeaderboardPage({ page: 2, recordsPerPage: 50 });
    * ```
    *
    * @example
@@ -558,7 +558,7 @@ export class ENSNodeClient {
    *
    * @param request is a request configuration.
    * @param request.page sets the page number to retrieve (1-indexed, default: 1)
-   * @param request.itemsPerPage sets the number of items per page (default: 10, max: 100)
+   * @param request.recordsPerPage sets the number of records per page (default: 10, max: 100)
    * @param request.filters is an optional request filter configuration.
    * @param request.order sets the order of results in the response by field and direction.
    * @returns {RegistrarActionsResponse}
@@ -585,10 +585,10 @@ export class ENSNodeClient {
    *   console.log(`Page ${paginationContext.page} of ${paginationContext.totalPages}`);
    * }
    *
-   * // Get second page with 25 items per page
+   * // Get second page with 25 records per page
    * const response = await client.registrarActions({
    *   page: 2,
-   *   itemsPerPage: 25,
+   *   recordsPerPage: 25,
    * });
    *
    * // get latest registrar action records associated with
@@ -611,7 +611,7 @@ export class ENSNodeClient {
    * // subregistry managing `base.eth` name
    * await client.registrarActions({
    *   filters: [registrarActionsFilter.byParentNode(namehash('base.eth'))],
-   *   itemsPerPage: 10
+   *   recordsPerPage: 10
    * });
    * ```
    */
@@ -668,8 +668,8 @@ export class ENSNodeClient {
       url.searchParams.set("page", request.page.toString());
     }
 
-    if (request.itemsPerPage) {
-      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    if (request.recordsPerPage) {
+      url.searchParams.set("recordsPerPage", request.recordsPerPage.toString());
     }
 
     const referralArg = buildWithReferralArg(request.filters);

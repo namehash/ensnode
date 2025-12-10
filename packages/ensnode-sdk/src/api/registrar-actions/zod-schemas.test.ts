@@ -98,7 +98,7 @@ describe("ENSNode API Schema", () => {
       ],
       paginationContext: {
         page: 1,
-        itemsPerPage: 10,
+        recordsPerPage: 10,
         totalRecords: 2,
         totalPages: 1,
         hasNext: false,

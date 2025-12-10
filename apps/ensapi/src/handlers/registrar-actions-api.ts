@@ -2,8 +2,8 @@ import z from "zod/v4";
 
 import {
   buildPageContext,
-  ITEMS_PER_PAGE_DEFAULT,
-  ITEMS_PER_PAGE_MAX,
+  RECORDS_PER_PAGE_DEFAULT,
+  RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
@@ -54,8 +54,8 @@ app.use(registrarActionsApiMiddleware);
  * Responds with:
  * - 400 error response for bad input, such as:
  *   - (if provided) `page` search param is not a positive integer.
- *   - (if provided) `itemsPerPage` search param is not
- *     a positive integer <= {@link ITEMS_PER_PAGE_MAX}.
+ *   - (if provided) `recordsPerPage` search param is not
+ *     a positive integer <= {@link RECORDS_PER_PAGE_MAX}.
  *   - (if provided) `orderBy` search param is not part of {@link RegistrarActionsOrders}.
  * - 500 error response for cases such as:
  *   - Connected ENSNode has not all required plugins set to active.
@@ -85,11 +85,11 @@ app.get(
         .pipe(z.coerce.number())
         .pipe(makePositiveIntegerSchema("page")),
 
-      itemsPerPage: params.queryParam
+      recordsPerPage: params.queryParam
         .optional()
-        .default(ITEMS_PER_PAGE_DEFAULT)
+        .default(RECORDS_PER_PAGE_DEFAULT)
         .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema("itemsPerPage").max(ITEMS_PER_PAGE_MAX)),
+        .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX)),
 
       withReferral: params.boolstring.optional().default(false),
 
@@ -99,7 +99,7 @@ app.get(
   async (c) => {
     try {
       const { parentNode } = c.req.valid("param");
-      const { orderBy, page, itemsPerPage, withReferral, decodedReferrer } = c.req.valid("query");
+      const { orderBy, page, recordsPerPage, withReferral, decodedReferrer } = c.req.valid("query");
 
       const filters: RegistrarActionsFilter[] = [];
 
@@ -115,19 +115,19 @@ app.get(
         filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
       }
 
-      // Calculate offset from page and itemsPerPage
-      const offset = (page - 1) * itemsPerPage;
+      // Calculate offset from page and recordsPerPage
+      const offset = (page - 1) * recordsPerPage;
 
       // Find the latest "logical registrar actions" with pagination
       const { registrarActions, totalRecords } = await findRegistrarActions({
         filters,
         orderBy,
-        limit: itemsPerPage,
+        limit: recordsPerPage,
         offset,
       });
 
       // Build page context
-      const paginationContext = buildPageContext(page, itemsPerPage, totalRecords);
+      const paginationContext = buildPageContext(page, recordsPerPage, totalRecords);
 
       // respond with success response
       return c.json(

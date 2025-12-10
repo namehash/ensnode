@@ -47,7 +47,7 @@ export interface ResponsePageContextWithRecords extends Required<RequestPagePara
 
   /**
    * Indicates if there is a next page available
-   * @invariant true if and only if (`page` * `itemsPerPage` < `totalRecords`)
+   * @invariant true if and only if (`page` * `recordsPerPage` < `totalRecords`)
    */
   hasNext: boolean;
 
