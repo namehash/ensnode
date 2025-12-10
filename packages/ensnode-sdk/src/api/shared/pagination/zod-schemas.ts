@@ -86,7 +86,7 @@ export const makeResponsePageContextSchemaWithRecords = (
 ) =>
   z
     .object({
-      totalRecords: makeNonNegativeIntegerSchema(`${valueLabel}.totalRecords`),
+      totalRecords: makePositiveIntegerSchema(`${valueLabel}.totalRecords`),
       totalPages: makePositiveIntegerSchema(`${valueLabel}.totalPages`),
       hasNext: z.boolean(),
       hasPrev: z.boolean(),
@@ -100,9 +100,7 @@ export const makeResponsePageContextSchemaWithRecords = (
  * Schema for {@link ResponsePageContext}
  */
 export const makeResponsePageContextSchema = (valueLabel: string = "ResponsePageContext") =>
-  z.object({
-    paginationContext: z.discriminatedUnion("totalRecords", [
-      makeResponsePageContextSchemaWithNoRecords(valueLabel),
-      makeResponsePageContextSchemaWithRecords(valueLabel),
-    ]),
-  });
+  z.union([
+    makeResponsePageContextSchemaWithNoRecords(valueLabel),
+    makeResponsePageContextSchemaWithRecords(valueLabel),
+  ]);

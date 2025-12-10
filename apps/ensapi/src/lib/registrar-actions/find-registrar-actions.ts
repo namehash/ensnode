@@ -61,6 +61,10 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
           return filterSql;
         }
 
+        case RegistrarActionsFilterTypes.ByDecodedReferrer:
+          // apply decoded referrer equality filter
+          return eq(schema.registrarActions.decodedReferrer, filter.value);
+
         default:
           // Invariant: Unknown filter type — should never occur
           throw new Error(`Unknown filter type`);
@@ -76,6 +80,40 @@ interface FindRegistrarActionsOptions {
   orderBy: RegistrarActionsOrder;
 
   limit: number;
+
+  offset: number;
+}
+
+/**
+ * Internal function which executes a query to count total records matching the filters.
+ */
+export async function _countRegistrarActions(
+  filters: RegistrarActionsFilter[] | undefined,
+): Promise<number> {
+  const countQuery = db
+    .select({
+      count: schema.registrarActions.id,
+    })
+    .from(schema.registrarActions)
+    // join Registration Lifecycles associated with Registrar Actions
+    .innerJoin(
+      schema.registrationLifecycles,
+      eq(schema.registrarActions.node, schema.registrationLifecycles.node),
+    )
+    // join Domains associated with Registration Lifecycles
+    .innerJoin(
+      schema.subgraph_domain,
+      eq(schema.registrationLifecycles.node, schema.subgraph_domain.id),
+    )
+    // join Subregistries associated with Registration Lifecycles
+    .innerJoin(
+      schema.subregistries,
+      eq(schema.registrationLifecycles.subregistryId, schema.subregistries.subregistryId),
+    )
+    .where(and(...buildWhereClause(filters)));
+
+  const result = await countQuery;
+  return result.length;
 }
 
 /**
@@ -111,7 +149,8 @@ export async function _findRegistrarActions(options: FindRegistrarActionsOptions
     )
     .where(and(...buildWhereClause(options.filters)))
     .orderBy(buildOrderByClause(options.orderBy))
-    .limit(options.limit);
+    .limit(options.limit)
+    .offset(options.offset);
 
   const records = await query;
 
@@ -200,15 +239,30 @@ function _mapToNamedRegistrarAction(record: MapToNamedRegistrarActionArgs): Name
 }
 
 /**
+ * Result from finding registrar actions with pagination.
+ */
+export interface FindRegistrarActionsResult {
+  registrarActions: NamedRegistrarAction[];
+  totalRecords: number;
+}
+
+/**
  * Find Registrar Actions, including Domain info
  *
  * @param {SQL} options.orderBy configures which column and order apply to results.
  * @param {number} options.limit configures how many items to include in results.
+ * @param {number} options.offset configures how many items to skip.
  */
 export async function findRegistrarActions(
   options: FindRegistrarActionsOptions,
-): Promise<NamedRegistrarAction[]> {
-  const records = await _findRegistrarActions(options);
+): Promise<FindRegistrarActionsResult> {
+  const [records, totalRecords] = await Promise.all([
+    _findRegistrarActions(options),
+    _countRegistrarActions(options.filters),
+  ]);
 
-  return records.map((record) => _mapToNamedRegistrarAction(record));
+  return {
+    registrarActions: records.map((record) => _mapToNamedRegistrarAction(record)),
+    totalRecords,
+  };
 }

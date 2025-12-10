@@ -376,7 +376,7 @@ export class ENSNodeClient {
    *
    * @param request - Pagination parameters
    * @param request.page - The page number to retrieve (1-indexed, default: 1)
-   * @param request.itemsPerPage - Number of items per page (default: 25, max: 100)
+   * @param request.recordsPerPage - Number of records per page (default: 25, max: 100)
    * @returns {ReferrerLeaderboardPageResponse}
    *
    * @throws if the ENSNode request fails
@@ -405,8 +405,8 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * // Get second page with 50 items per page
-   * const response = await client.getReferrerLeaderboardPage({ page: 2, itemsPerPage: 50 });
+   * // Get second page with 50 records per page
+   * const response = await client.getReferrerLeaderboardPage({ page: 2, recordsPerPage: 50 });
    * ```
    *
    * @example
@@ -554,11 +554,13 @@ export class ENSNodeClient {
   /**
    * Fetch ENSNode Registrar Actions
    *
-   * @param {RegistrarActionsRequestFilter} request.filter is
-   *        an optional request filter configuration.
-   * @param {number} request.limit sets the maximum count of results in the response.
-   * @param {RegistrarActionsRequestOrder} request.order sets the order of
-   *        results in the response by field and direction.
+   * Retrieves a paginated list of registrar actions with optional filters.
+   *
+   * @param request is a request configuration.
+   * @param request.page sets the page number to retrieve (1-indexed, default: 1)
+   * @param request.recordsPerPage sets the number of records per page (default: 10, max: 100)
+   * @param request.filters is an optional request filter configuration.
+   * @param request.order sets the order of results in the response by field and direction.
    * @returns {RegistrarActionsResponse}
    *
    * @throws if the ENSNode request fails
@@ -568,23 +570,25 @@ export class ENSNodeClient {
    * @example
    * ```ts
    * import {
-   *   registrarActionsFilter,,
+   *   registrarActionsFilter,
    *   ENSNodeClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
    * const client: ENSNodeClient;
    *
-   * // get latest registrar action records across all indexed subregistries
-   * // NOTE: when no `limit` value is passed,
-   * //       the default RESPONSE_ITEMS_PER_PAGE_DEFAULT applies.
-   * const registrarActions = await client.registrarActions();
+   * // Get first page with default page size (10 records)
+   * const response = await client.registrarActions();
+   * if (response.responseCode === RegistrarActionsResponseCodes.Ok) {
+   *   const { registrarActions, pageContext } = response;
+   *   console.log(registrarActions);
+   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   * }
    *
-   * // get latest 5 registrar action records across all indexed subregistries
-   * // NOTE: when a `limit` value is passed, it must be lower than or equal to
-   * //       the RESPONSE_ITEMS_PER_PAGE_MAX value.
-   * const registrarActions = await client.registrarActions({
-   *   limit: 5,
+   * // Get second page with 25 records per page
+   * const response = await client.registrarActions({
+   *   page: 2,
+   *   recordsPerPage: 25,
    * });
    *
    * // get latest registrar action records associated with
@@ -598,11 +602,16 @@ export class ENSNodeClient {
    *   filters: [registrarActionsFilter.withReferral(true)],
    * });
    *
+   * // get latest registrar action records for a specific decoded referrer
+   * await client.registrarActions({
+   *   filters: [registrarActionsFilter.byDecodedReferrer("0x1234567890123456789012345678901234567890")],
+   * });
+   *
    * // get latest 10 registrar action records associated with
    * // subregistry managing `base.eth` name
    * await client.registrarActions({
    *   filters: [registrarActionsFilter.byParentNode(namehash('base.eth'))],
-   *   limit: 10
+   *   recordsPerPage: 10
    * });
    * ```
    */
@@ -625,6 +634,16 @@ export class ENSNodeClient {
       return withReferralFilter ? { key: "withReferral", value: "true" } : null;
     };
 
+    const buildDecodedReferrerArg = (filters: RegistrarActionsFilter[] | undefined) => {
+      const decodedReferrerFilter = filters?.find(
+        (f) => f.filterType === RegistrarActionsFilterTypes.ByDecodedReferrer,
+      );
+
+      return decodedReferrerFilter
+        ? { key: "decodedReferrer", value: decodedReferrerFilter.value }
+        : null;
+    };
+
     const buildOrderArg = (order: RegistrarActionsOrder) => {
       switch (order) {
         case RegistrarActionsOrders.LatestRegistrarActions: {
@@ -645,14 +664,24 @@ export class ENSNodeClient {
       url.searchParams.set(orderArgs.key, orderArgs.value);
     }
 
-    if (request.itemsPerPage) {
-      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    if (request.page) {
+      url.searchParams.set("page", request.page.toString());
+    }
+
+    if (request.recordsPerPage) {
+      url.searchParams.set("recordsPerPage", request.recordsPerPage.toString());
     }
 
     const referralArg = buildWithReferralArg(request.filters);
 
     if (referralArg) {
       url.searchParams.set(referralArg.key, referralArg.value);
+    }
+
+    const decodedReferrerArg = buildDecodedReferrerArg(request.filters);
+
+    if (decodedReferrerArg) {
+      url.searchParams.set(decodedReferrerArg.key, decodedReferrerArg.value);
     }
 
     const response = await fetch(url);

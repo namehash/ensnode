@@ -96,6 +96,16 @@ describe("ENSNode API Schema", () => {
         validNamedRegistrarActionEncodedLabelHash,
         validNamedRegistrarActionNormalizedWithReferral,
       ],
+      pageContext: {
+        page: 1,
+        recordsPerPage: 10,
+        totalRecords: 2,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+        startIndex: 0,
+        endIndex: 1,
+      },
     } satisfies SerializedRegistrarActionsResponseOk;
 
     const validResponseError = {
