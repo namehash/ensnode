@@ -41,7 +41,7 @@ export const makeRegistrarActionsResponseOkSchema = (
   z.strictObject({
     responseCode: z.literal(RegistrarActionsResponseCodes.Ok),
     registrarActions: z.array(makeNamedRegistrarActionSchema(valueLabel)),
-    paginationContext: makeResponsePageContextSchema(`${valueLabel}.paginationContext`),
+    pageContext: makeResponsePageContextSchema(`${valueLabel}.pageContext`),
   });
 
 /**

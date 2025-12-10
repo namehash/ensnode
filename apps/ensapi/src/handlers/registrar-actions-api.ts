@@ -127,14 +127,14 @@ app.get(
       });
 
       // Build page context
-      const paginationContext = buildPageContext(page, recordsPerPage, totalRecords);
+      const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
 
       // respond with success response
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Ok,
           registrarActions,
-          paginationContext,
+          pageContext,
         } satisfies RegistrarActionsResponseOk),
       );
     } catch (error) {

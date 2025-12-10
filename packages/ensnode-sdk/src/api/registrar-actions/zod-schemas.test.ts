@@ -96,7 +96,7 @@ describe("ENSNode API Schema", () => {
         validNamedRegistrarActionEncodedLabelHash,
         validNamedRegistrarActionNormalizedWithReferral,
       ],
-      paginationContext: {
+      pageContext: {
         page: 1,
         recordsPerPage: 10,
         totalRecords: 2,

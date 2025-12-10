@@ -48,7 +48,7 @@ export interface NamedRegistrarAction {
 export type RegistrarActionsResponseOk = {
   responseCode: typeof RegistrarActionsResponseCodes.Ok;
   registrarActions: NamedRegistrarAction[];
-  paginationContext: ResponsePageContext;
+  pageContext: ResponsePageContext;
 };
 
 /**

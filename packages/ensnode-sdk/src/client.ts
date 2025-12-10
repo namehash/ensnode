@@ -580,9 +580,9 @@ export class ENSNodeClient {
    * // Get first page with default page size (10 items)
    * const response = await client.registrarActions();
    * if (response.responseCode === RegistrarActionsResponseCodes.Ok) {
-   *   const { registrarActions, paginationContext } = response;
+   *   const { registrarActions, pageContext } = response;
    *   console.log(registrarActions);
-   *   console.log(`Page ${paginationContext.page} of ${paginationContext.totalPages}`);
+   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
    * }
    *
    * // Get second page with 25 records per page
