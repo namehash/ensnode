@@ -5,6 +5,7 @@ import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
 
 import {
   interpretAddress,
+  isRegistrationFullyExpired,
   makeENSv1DomainId,
   makeLatestRegistrationId,
   makeSubdomainNode,
@@ -16,7 +17,6 @@ import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-help
 import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
-  isRegistrationFullyExpired,
   supercedeLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";

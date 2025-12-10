@@ -8,6 +8,9 @@ import {
   decodeDNSEncodedLiteralName,
   interpretAddress,
   isPccFuseSet,
+  isRegistrationExpired,
+  isRegistrationFullyExpired,
+  isRegistrationInGracePeriod,
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
@@ -24,9 +27,6 @@ import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
-  isRegistrationExpired,
-  isRegistrationFullyExpired,
-  isRegistrationInGracePeriod,
   supercedeLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";

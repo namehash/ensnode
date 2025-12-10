@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import { getUnixTime } from "date-fns";
 import { Param, sql } from "drizzle-orm";
 import { labelhash, namehash } from "viem";
 
@@ -74,11 +75,13 @@ async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | n
 /**
  * Forward-traverses the ENSv2 namegraph in order to identify the Domain addressed by `name`.
  *
- * If the exact Domain was not found, and the path terminates at a bridging resolver,
+ * If the exact Domain was not found, and the path terminates at a bridging resolver, bridge to the
+ * indicated Registry and continue traversing.
  */
 async function v2_getDomainIdByFqdn(
   registryId: RegistryId,
   name: InterpretedName,
+  { now } = { now: getUnixTime(new Date()) },
 ): Promise<DomainId | null> {
   const labelHashPath = interpretedNameToLabelHashPath(name);
 
@@ -116,7 +119,7 @@ async function v2_getDomainIdByFqdn(
     ORDER BY depth;
   `);
 
-  // couldn't for the life of me figure out how to drizzle this correctly...
+  // couldn't for the life of me figure out how to type this result this correctly within drizzle...
   const rows = result.rows as {
     registry_id: RegistryId;
     domain_id: ENSv2DomainId;
@@ -133,7 +136,7 @@ async function v2_getDomainIdByFqdn(
   // we have an exact match within ENSv2 on the ENS Root Chain
   const exact = rows.length === labelHashPath.length;
   if (exact) {
-    console.log(`Found ${name} in ENSv2 from Registry ${registryId}`);
+    console.log(`Found '${name}' in ENSv2 from Registry ${registryId}`);
     return leaf.domain_id;
   }
 

@@ -8,6 +8,7 @@ import {
   type AccountId,
   getCanonicalId,
   interpretAddress,
+  isRegistrationFullyExpired,
   type LiteralLabel,
   makeENSv2DomainId,
   makeLatestRegistrationId,
@@ -19,7 +20,6 @@ import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  isRegistrationFullyExpired,
   supercedeLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
