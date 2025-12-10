@@ -107,9 +107,9 @@ export const makeReferrerLeaderboardPageContextSchema = (
 ) =>
   z.object({
     page: makePositiveIntegerSchema(`${valueLabel}.page`),
-    itemsPerPage: makePositiveIntegerSchema(`${valueLabel}.itemsPerPage`).max(
+    recordsPerPage: makePositiveIntegerSchema(`${valueLabel}.recordsPerPage`).max(
       REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-      `${valueLabel}.itemsPerPage must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
+      `${valueLabel}.recordsPerPage must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
     ),
     totalRecords: makeNonNegativeIntegerSchema(`${valueLabel}.totalRecords`),
     totalPages: makePositiveIntegerSchema(`${valueLabel}.totalPages`),
@@ -125,9 +125,9 @@ export const makeReferrerLeaderboardPageContextSchema = (
 export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
   z.object({
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[item]`)),
+    referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[record]`)),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    paginationContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.paginationContext`),
+    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 

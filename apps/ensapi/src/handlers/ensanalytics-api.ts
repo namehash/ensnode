@@ -26,14 +26,14 @@ const logger = makeLogger("ensanalytics-api");
 // Pagination query parameters schema (mirrors ReferrerLeaderboardPageRequest)
 const paginationQuerySchema = z.object({
   page: z.optional(z.coerce.number().int().min(1, "Page must be a positive integer")),
-  itemsPerPage: z.optional(
+  recordsPerPage: z.optional(
     z.coerce
       .number()
       .int()
-      .min(1, "Items per page must be at least 1")
+      .min(1, "Records per page must be at least 1")
       .max(
         REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-        `Items per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
+        `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
       ),
   ),
 }) satisfies z.ZodType<ReferrerLeaderboardPageRequest>;
@@ -65,9 +65,9 @@ const app = factory
         );
       }
 
-      const { page, itemsPerPage } = c.req.valid("query");
+      const { page, recordsPerPage } = c.req.valid("query");
       const leaderboardPage = getReferrerLeaderboardPage(
-        { page, itemsPerPage },
+        { page, recordsPerPage },
         referrerLeaderboard.value,
       );
 

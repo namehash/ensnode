@@ -62,23 +62,23 @@ describe("/ensanalytics", () => {
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);
-      const itemsPerPage = 10;
+      const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
       const responsePage1 = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "1" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 2nd page
       const responsePage2 = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "2" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "2" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 3rd page
       const responsePage3 = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "3" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "3" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
@@ -87,17 +87,17 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          paginationContext: {
+          pageContext: {
             endIndex: 9,
             hasNext: true,
             hasPrev: false,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 1,
             startIndex: 0,
             totalPages: 3,
             totalRecords: 29,
           },
-          referrers: allPossibleReferrersIterator.take(itemsPerPage).toArray(),
+          referrers: allPossibleReferrersIterator.take(recordsPerPage).toArray(),
         },
       } satisfies ReferrerLeaderboardPageResponseOk;
 
@@ -108,17 +108,17 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          paginationContext: {
+          pageContext: {
             endIndex: 19,
             hasNext: true,
             hasPrev: true,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 2,
             startIndex: 10,
             totalPages: 3,
             totalRecords: 29,
           },
-          referrers: allPossibleReferrersIterator.take(itemsPerPage).toArray(),
+          referrers: allPossibleReferrersIterator.take(recordsPerPage).toArray(),
         },
       } satisfies ReferrerLeaderboardPageResponseOk;
       expect(responsePage2).toMatchObject(expectedResponsePage2);
@@ -128,17 +128,17 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          paginationContext: {
+          pageContext: {
             endIndex: 28,
             hasNext: false,
             hasPrev: true,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 3,
             startIndex: 20,
             totalPages: 3,
             totalRecords: 29,
           },
-          referrers: allPossibleReferrersIterator.take(itemsPerPage).toArray(),
+          referrers: allPossibleReferrersIterator.take(recordsPerPage).toArray(),
         },
       } satisfies ReferrerLeaderboardPageResponseOk;
       expect(responsePage3).toMatchObject(expectedResponsePage3);
@@ -155,11 +155,11 @@ describe("/ensanalytics", () => {
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);
-      const itemsPerPage = 10;
+      const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
       const response = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "1" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
@@ -168,10 +168,10 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...emptyReferralLeaderboard,
-          paginationContext: {
+          pageContext: {
             hasNext: false,
             hasPrev: false,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 1,
             totalPages: 1,
             totalRecords: 0,
