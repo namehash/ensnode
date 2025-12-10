@@ -16,9 +16,26 @@ import {
  * An enum representing the possible Name Token Ownership types.
  */
 export const NameTokenOwnershipTypes = {
+  /**
+   * Name Token is owned by NameWrapper account.
+   */
   NameWrapper: "namewrapper",
+
+  /**
+   * Name Token is owned fully onchain.
+   *
+   * This ownership type can only apply to direct subnames of `.eth`
+   */
   FullyOnchain: "fully-onchain",
+
+  /**
+   * Name Token ownership has been transferred to the null address.
+   */
   Burned: "burned",
+
+  /**
+   * Name Token ownership is unknown.
+   */
   Unknown: "unknown",
 } as const;
 
@@ -33,7 +50,7 @@ export interface NameTokenOwnershipNameWrapper {
    *
    * Guarantees:
    * - `owner.address` is not the zero address.
-   * - `owner.chainId` is same as to the chainId of the associated NFT,
+   * - `owner.chainId` is same as the chainId of the associated NFT,
    *    even if that NFT has been burned.
    */
   owner: AccountId;
@@ -47,7 +64,7 @@ export interface NameTokenOwnershipFullyOnchain {
    *
    * Guarantees:
    * - `owner.address` is not the zero address.
-   * - `owner.chainId` is same as to the chainId of the associated NFT,
+   * - `owner.chainId` is same as the chainId of the associated NFT,
    *    even if that NFT has been burned.
    */
   owner: AccountId;
@@ -61,7 +78,7 @@ export interface NameTokenOwnershipBurned {
    *
    * Guarantees:
    * - `owner.address` is the zero address.
-   * - `owner.chainId` is same as to the chainId of the associated NFT,
+   * - `owner.chainId` is same as the chainId of the associated NFT,
    *    even if that NFT has been burned.
    */
   owner: AccountId;
@@ -75,7 +92,7 @@ export interface NameTokenOwnershipUnknown {
    *
    * Guarantees:
    * - `owner.address` is the zero address.
-   * - `owner.chainId` is same as to the chainId of the associated NFT,
+   * - `owner.chainId` is same as the chainId of the associated NFT,
    *    even if that NFT has been burned.
    */
   owner: AccountId;
@@ -91,7 +108,8 @@ export interface NameToken {
   /**
    * Token
    *
-   * References NFT that tokenizes the ownership of a domain.
+   * References the NFT that currently or previously tokenized ownership of
+   * `name`.
    */
   token: AssetId;
 
@@ -115,7 +133,7 @@ export interface NameToken {
    * updates its `mintStatus` to `burned`. If this token becomes minted again
    * after it was burned, its `mintStatus` is updated to `minted` again.
    *
-   * NOTE: Tokens tokens managed by the .eth BaseRegistrar for
+   * NOTE: Tokens managed by the .eth BaseRegistrar for
    * direct subnames of .eth can only be burned when undergoing
    * a state transition of `minted` -> `burned` -> `minted` all within
    * the same registrar action for the case that a direct subname of .eth
@@ -166,12 +184,12 @@ export function getNameWrapperAccounts(namespaceId: ENSNamespaceId): [AccountId,
   );
 
   const nameWrapperAccounts: [AccountId, ...AccountId[]] = [
-    // NameWrapper for direct subnames of .eth is always defined
+    // NameWrapper for direct subnames of .eth is defined for all ENS namespaces
     ethnamesNameWrapperAccount,
   ];
 
   if (lineanamesNameWrapperAccount) {
-    // NameWrapper for Lineanames may be optionally defined
+    // NameWrapper for Lineanames is only defined for some ENS namespaces
     nameWrapperAccounts.push(lineanamesNameWrapperAccount);
   }
 

@@ -9,8 +9,9 @@ import {
   type NameTokensRequest,
   NameTokensResponseCodes,
   NameTokensResponseErrorCodes,
-  type NameTokensResponseErrorNameNotIndexed,
+  type NameTokensResponseErrorNameTokensNotIndexed,
   type Node,
+  type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
 import { makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
@@ -29,7 +30,7 @@ const logger = makeLogger("name-tokens-api");
 
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,
-  config.ensIndexerPublicConfig.plugins,
+  config.ensIndexerPublicConfig.plugins as PluginName[],
 );
 
 // Middleware managing access to Name Tokens API route.
@@ -76,12 +77,12 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
+          errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
           error: {
             message: "No indexed Name Tokens found",
-            details: `The 'name' param must not be ENS Root.`,
+            details: `The 'name' param must not be ENS Root, no tokens exist for it.`,
           },
-        } satisfies NameTokensResponseErrorNameNotIndexed),
+        } satisfies NameTokensResponseErrorNameTokensNotIndexed),
         404,
       );
     }
@@ -89,7 +90,7 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
     const parentNode = namehash(getParentNameFQDN(name));
     const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
 
-    // Return 404 response with error code for unknown name context when
+    // Return 404 response with error code for Name Tokens Not Indexed when
     // the parent name of the requested name was not registered in any of
     // the actively indexed subregistries.
     if (!subregistry) {
@@ -100,12 +101,12 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
       return c.json(
         serializeNameTokensResponse({
           responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
+          errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
           error: {
             message: "No indexed Name Tokens found",
             details: `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
           },
-        } satisfies NameTokensResponseErrorNameNotIndexed),
+        } satisfies NameTokensResponseErrorNameTokensNotIndexed),
         404,
       );
     }
@@ -120,7 +121,7 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
 
   const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);
 
-  // Return 404 response with error code for unknown name context when
+  // Return 404 response with error code for Name Tokens Not Indexed when
   // the no name tokens were found for the domain ID associated with
   // the requested name.
   if (!registeredNameTokens) {
@@ -134,12 +135,12 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
     return c.json(
       serializeNameTokensResponse({
         responseCode: NameTokensResponseCodes.Error,
-        errorCode: NameTokensResponseErrorCodes.NameNotIndexed,
+        errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
         error: {
           message: "No indexed Name Tokens found",
-          details: `No Name Tokens were indexed by ENSNode the requested ${errorMessageSubject}.`,
+          details: `No Name Tokens were indexed by this ENSNode instance for the requested ${errorMessageSubject}.`,
         },
-      } satisfies NameTokensResponseErrorNameNotIndexed),
+      } satisfies NameTokensResponseErrorNameTokensNotIndexed),
       404,
     );
   }

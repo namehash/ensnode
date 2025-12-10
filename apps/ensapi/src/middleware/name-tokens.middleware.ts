@@ -15,8 +15,9 @@ const logger = makeLogger("name-tokens.middleware");
 /**
  * Name Tokens API Middleware
  *
- * This middleware that ensures that all prerequisites of
- * the Name Tokens API were met and HTTP requests can be served.
+ * This middleware ensures that all prerequisites of
+ * the Name Tokens API were met and HTTP requests are ready for further
+ * processing.
  *
  * Returns a 503 response for any of the following cases:
  * 1) Not all required plugins are active in the connected ENSIndexer

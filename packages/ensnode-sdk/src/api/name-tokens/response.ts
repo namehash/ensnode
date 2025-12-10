@@ -1,7 +1,7 @@
 import type { UnixTimestamp } from "@namehash/ens-referrals";
 
 import type { InterpretedName, Node } from "../../ens";
-import type { NameToken } from "../../tokenscope";
+import type { NameToken, NameTokenOwnershipTypes } from "../../tokenscope";
 import type { ErrorResponse } from "../shared/errors";
 
 /**
@@ -30,11 +30,12 @@ export type NameTokensResponseCode =
  */
 export const NameTokensResponseErrorCodes = {
   /**
-   * Name not indexed
+   * Name tokens not indexed
    *
-   * Represents an error when requested name was not indexed by ENSNode.
+   * Represents an error when tokens for the requested name are not indexed by
+   * the ENSNode instance's configuration.
    */
-  NameNotIndexed: "name-not-indexed-error",
+  NameTokensNotIndexed: "name-tokens-not-indexed",
 
   /**
    * Unsupported ENSIndexer Config
@@ -60,7 +61,8 @@ export type NameTokensResponseErrorCode =
   (typeof NameTokensResponseErrorCodes)[keyof typeof NameTokensResponseErrorCodes];
 
 /**
- * Name Tokens for a registered name.
+ * Name Tokens for a name who's tokens are configured to
+ * be indexed by the ENSNode instance's configuration.
  */
 export interface RegisteredNameTokens {
   /**
@@ -81,7 +83,7 @@ export interface RegisteredNameTokens {
   /**
    * Name Tokens associated with the `domainId`.
    *
-   * It contains every tokenized representation of the domainname that
+   * It contains every tokenized representation of `name` that
    * has ever been indexed for the given name as of `accurateAsOf`,
    * even if the given token has been burned or expired.
    *
@@ -97,13 +99,18 @@ export interface RegisteredNameTokens {
    *      c) Some could be burned, others could be minted.
    *  - Order of name tokens follows the order of onchain events that were
    *    indexed when a token was minted, or burned.
-   *  - Each name token has a distinct `domainAsset` value which references
-   *    NFT that tokenizes the ownership of a domain.
-   * - Each name token has ownership type (`ownership.ownershipType`) assigned:
-   *   - If there's a name token with ownership type "proxy", it means that
-   *     there must be also another name token  with ownership type "effective".
-   *   - There can be at most one name token with ownership type "effective".
-   *   - There can be any number of name tokens with ownership type "burned".
+   *  - Each name token has a distinct `token` value which references
+   *    the NFT that currently or previously tokenized ownership of `name`.
+   *  - Each name token has ownership type (`ownership.ownershipType`) assigned:
+   *   - If there's a name token with ownership type
+   *     {@link NameTokenOwnershipTypes.NameWrapper}, it means that there must be also
+   *     another name token with ownership type either
+   *     {@link NameTokenOwnershipTypes.FullyOnchain}, or
+   *     {@link NameTokenOwnershipTypes.Unknown}.
+   *   - There can be at most one name token with ownership type
+   *     {@link NameTokenOwnershipTypes.FullyOnchain}.
+   *   - There can be any number of name tokens with ownership type
+   *     {@link NameTokenOwnershipTypes.Burned}.
    *
    * NOTE: It can be useful to get tokenized representations of the name that
    * are now burned: This can be helpful for looking up historical activity for
@@ -128,10 +135,9 @@ export interface RegisteredNameTokens {
   tokens: NameToken[];
 
   /**
-   * Expiry date for the Registration Lifecycle associated with the `domainId`.
+   * Expiry date for the Registration Lifecycle
    *
-   * The latest Registration Lifecycle for a node referenced in
-   * `token.domainAsset.domainId`.
+   * The latest Registration Lifecycle for a node referenced in `domainId`.
    */
   expiresAt: UnixTimestamp;
 
@@ -156,9 +162,9 @@ export type NameTokensResponseOk = {
 /**
  * Represents an error response when requested name was not indexed by ENSNode.
  */
-export interface NameTokensResponseErrorNameNotIndexed {
+export interface NameTokensResponseErrorNameTokensNotIndexed {
   responseCode: typeof NameTokensResponseCodes.Error;
-  errorCode: typeof NameTokensResponseErrorCodes.NameNotIndexed;
+  errorCode: typeof NameTokensResponseErrorCodes.NameTokensNotIndexed;
   error: ErrorResponse;
 }
 
@@ -183,7 +189,7 @@ export interface NameTokensResponseErrorIndexingStatusUnsupported {
 }
 
 export type NameTokensResponseError =
-  | NameTokensResponseErrorNameNotIndexed
+  | NameTokensResponseErrorNameTokensNotIndexed
   | NameTokensResponseErrorEnsIndexerConfigUnsupported
   | NameTokensResponseErrorIndexingStatusUnsupported;
 

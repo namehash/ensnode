@@ -11,7 +11,7 @@ export const nameTokensPrerequisites = Object.freeze({
    *
    * 1. `registrars` plugin is required so that data in the `registrationLifecycles`
    *    table is populated.
-   * 4. `tokenscope` plugin is required so that data in the `nameTokens`
+   * 2. `tokenscope` plugin is required so that data in the `nameTokens`
    *    table is populated.
    */
   requiredPlugins: [PluginName.Registrars, PluginName.TokenScope] as const,

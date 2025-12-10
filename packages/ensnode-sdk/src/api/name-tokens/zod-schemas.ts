@@ -17,7 +17,7 @@ import {
   NameTokensResponseErrorCodes,
   NameTokensResponseErrorEnsIndexerConfigUnsupported,
   NameTokensResponseErrorIndexingStatusUnsupported,
-  NameTokensResponseErrorNameNotIndexed,
+  NameTokensResponseErrorNameTokensNotIndexed,
   NameTokensResponseOk,
   type RegisteredNameTokens,
 } from "./response";
@@ -34,7 +34,7 @@ function invariant_nameIsAssociatedWithDomainId(ctx: ParsePayload<RegisteredName
   }
 }
 
-function invariant_nameTokensOwnershipTypeProxyRequiresOwnershipTypeFullyOnchainOrUnknown(
+function invariant_nameTokensOwnershipTypeNameWrapperRequiresOwnershipTypeFullyOnchainOrUnknown(
   ctx: ParsePayload<RegisteredNameTokens>,
 ) {
   const { tokens } = ctx.value;
@@ -85,7 +85,7 @@ export const makeRegisteredNameTokenSchema = (valueLabel: string = "Registered N
     })
     .check(invariant_nameIsAssociatedWithDomainId)
     .check(invariant_nameTokensContainAtMostOneWithOwnershipTypeEffective)
-    .check(invariant_nameTokensOwnershipTypeProxyRequiresOwnershipTypeFullyOnchainOrUnknown);
+    .check(invariant_nameTokensOwnershipTypeNameWrapperRequiresOwnershipTypeFullyOnchainOrUnknown);
 
 /**
  * Schema for {@link NameTokensResponseOk}
@@ -97,14 +97,14 @@ export const makeNameTokensResponseOkSchema = (valueLabel: string = "Name Tokens
   });
 
 /**
- * Schema for {@link NameTokensResponseErrorNameNotIndexed}
+ * Schema for {@link NameTokensResponseErrorNameTokensNotIndexed}
  */
-export const makeNameTokensResponseErrorNameNotIndexedSchema = (
+export const makeNameTokensResponseErrorNameTokensNotIndexedSchema = (
   _valueLabel: string = "Name Tokens Response Error Name Not Indexed",
 ) =>
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Error),
-    errorCode: z.literal(NameTokensResponseErrorCodes.NameNotIndexed),
+    errorCode: z.literal(NameTokensResponseErrorCodes.NameTokensNotIndexed),
     error: ErrorResponseSchema,
   });
 
@@ -137,7 +137,7 @@ export const makeNameTokensResponseErrorSchema = (
   valueLabel: string = "Name Tokens Response Error",
 ) =>
   z.discriminatedUnion("errorCode", [
-    makeNameTokensResponseErrorNameNotIndexedSchema(valueLabel),
+    makeNameTokensResponseErrorNameTokensNotIndexedSchema(valueLabel),
     makeNameTokensResponseErrorEnsIndexerConfigUnsupported(valueLabel),
     makeNameTokensResponseErrorNameIndexingStatusUnsupported(valueLabel),
   ]);
