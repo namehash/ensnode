@@ -20,7 +20,10 @@ describe("ENSNode API Schema", () => {
         registrant: "0x877dd7fa7a6813361de23552c12d25af4a89cda7",
         registrationLifecycle: {
           subregistry: {
-            subregistryId: "eip155:11155111:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+            subregistryId: {
+              chainId: 11155111,
+              address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+            },
             node: "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
           },
           node: "0x5bcdea30f2d591f5357045b89d3470d4ba4da00fd344a32fe323ab6fa2c0f343",
@@ -65,7 +68,10 @@ describe("ENSNode API Schema", () => {
         registrant: "0x5505957ff5927f29eacabbbe8a304968bf2dc064",
         registrationLifecycle: {
           subregistry: {
-            subregistryId: "eip155:11155111:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+            subregistryId: {
+              chainId: 11155111,
+              address: "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85",
+            },
             node: "0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae",
           },
           node: "0xf1c0e6aa95596e0199f3a6341cdbe055b64ba6041662465e577ed80c4dfac2af",

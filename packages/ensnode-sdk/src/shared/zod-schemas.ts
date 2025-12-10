@@ -15,7 +15,7 @@ import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
 import { reinterpretName } from "./reinterpretation";
-import type { SerializedAccountId } from "./serialized-types";
+import type { AccountIdString } from "./serialized-types";
 import type {
   AccountId,
   BlockRef,
@@ -306,9 +306,9 @@ export const makeAccountIdSchema = (valueLabel: string = "AccountId") =>
   });
 
 /**
- * Schema for {@link SerializedAccountSchema} type.
+ * Schema for {@link AccountIdString} type.
  */
-export const makeSerializedAccountIdSchema = (valueLabel: SerializedAccountId = "Account ID") =>
+export const makeAccountIdStringSchema = (valueLabel: string = "Account ID String") =>
   z.coerce
     .string()
     .transform((v) => {
@@ -337,7 +337,7 @@ export const makeHexStringSchema = (
         ctx.issues.push({
           code: "custom",
           input: ctx.value,
-          message: `${valueLabel} must start with '0x'.`,
+          message: `${valueLabel} must be a hexadecimal value which starts with '0x'.`,
         });
       }
     })

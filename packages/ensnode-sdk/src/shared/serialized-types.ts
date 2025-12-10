@@ -1,4 +1,4 @@
-import { AccountId } from "./types";
+import type { AccountId } from "./types";
 
 /**
  * Serialized representation of {@link ChainId}.
@@ -18,10 +18,10 @@ export type DatetimeISO8601 = string;
 export type UrlString = string;
 
 /**
- * Serialized representation of {@link AccountId}.
+ * String representation of {@link AccountId}.
  *
  * Formatted as a fully lowercase CAIP-10 AccountId.
  *
  * @see https://chainagnostic.org/CAIPs/caip-10
  */
-export type SerializedAccountId = string;
+export type AccountIdString = string;

@@ -102,7 +102,6 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       databaseUrl: env.DATABASE_URL,
       ensIndexerUrl: env.ENSINDEXER_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
-
       ensIndexerPublicConfig: serializeENSIndexerPublicConfig(ensIndexerPublicConfig),
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,

@@ -1,5 +1,9 @@
 import type { ENSNamespaceId } from "@ensnode/datasources";
-import { type LabelHash, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import {
+  getBasenamesSubregistryManagedName,
+  type LabelHash,
+  uint256ToHex32,
+} from "@ensnode/ensnode-sdk";
 
 import type { RegistrarManagedName } from "@/lib/types";
 
@@ -24,15 +28,5 @@ export function tokenIdToLabelHash(tokenId: bigint): LabelHash {
  * @throws an error when no registrar managed name could be returned
  */
 export function getRegistrarManagedName(namespaceId: ENSNamespaceId): RegistrarManagedName {
-  switch (namespaceId) {
-    case "mainnet":
-      return "base.eth";
-    case "sepolia":
-      return "basetest.eth";
-    case "holesky":
-    case "ens-test-env":
-      throw new Error(
-        `No registrar managed name is known for the 'basenames' subregistry within the "${namespaceId}" namespace.`,
-      );
-  }
+  return getBasenamesSubregistryManagedName(namespaceId);
 }

@@ -7,7 +7,7 @@ import { and, count, desc, eq, gte, isNotNull, lte, ne, sql, sum } from "drizzle
 import { type Address, zeroAddress } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
-import { deserializeDuration, serializeAccountId } from "@ensnode/ensnode-sdk";
+import { deserializeDuration, formatAccountId } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 import logger from "@/lib/logger";
@@ -55,7 +55,7 @@ export const getReferrerMetrics = async (
           // Filter by decodedReferrer not zero address
           ne(schema.registrarActions.decodedReferrer, zeroAddress),
           // Filter by subregistryId matching the provided subregistryId
-          eq(schema.registrarActions.subregistryId, serializeAccountId(rules.subregistryId)),
+          eq(schema.registrarActions.subregistryId, formatAccountId(rules.subregistryId)),
         ),
       )
       .groupBy(schema.registrarActions.decodedReferrer)

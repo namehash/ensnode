@@ -3,18 +3,18 @@ import type { Address } from "viem";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
+import { addPrices, isPriceEqual } from "../shared";
 import {
+  makeAccountIdSchema,
   makeBlockRefSchema,
   makeDurationSchema,
   makeHexStringSchema,
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePriceEthSchema,
-  makeSerializedAccountIdSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
-} from "../internal";
-import { addPrices, isPriceEqual } from "../shared";
+} from "../shared/zod-schemas";
 import {
   type RegistrarAction,
   type RegistrarActionEventId,
@@ -32,7 +32,7 @@ import { Subregistry } from "./subregistry";
  */
 const makeSubregistrySchema = (valueLabel: string = "Subregistry") =>
   z.object({
-    subregistryId: makeSerializedAccountIdSchema(`${valueLabel} Subregistry ID`),
+    subregistryId: makeAccountIdSchema(`${valueLabel} Subregistry ID`),
     node: makeNodeSchema(`${valueLabel} Node`),
   });
 
