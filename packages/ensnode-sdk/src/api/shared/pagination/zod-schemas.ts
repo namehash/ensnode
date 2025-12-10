@@ -101,6 +101,6 @@ export const makeResponsePageContextSchemaWithRecords = (
  */
 export const makeResponsePageContextSchema = (valueLabel: string = "ResponsePageContext") =>
   z.union([
-      makeResponsePageContextSchemaWithNoRecords(valueLabel),
-      makeResponsePageContextSchemaWithRecords(valueLabel),
+    makeResponsePageContextSchemaWithNoRecords(valueLabel),
+    makeResponsePageContextSchemaWithRecords(valueLabel),
   ]);
