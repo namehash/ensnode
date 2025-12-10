@@ -137,12 +137,11 @@ AccountRef.implement({
         ),
     }),
 
-    //////////////////////
-    // Account.registries
-    //////////////////////
-    // TODO: this should probably be called registryPermissions...
+    ///////////////////////////////
+    // Account.registryPermissions
+    ///////////////////////////////
     // TODO: this returns all permissions in a registry, perhaps can provide api for non-token resources...
-    registries: t.connection({
+    registryPermissions: t.connection({
       description: "TODO",
       type: AccountRegistryPermissionsRef,
       resolve: (parent, args, context) =>
@@ -176,19 +175,15 @@ AccountRef.implement({
               .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
               .limit(limit);
 
-            return results.map((result) => ({
-              id: result.permissionsUser.id,
-              ...result,
-            }));
+            return results.map((result) => ({ id: result.permissionsUser.id, ...result }));
           },
         ),
     }),
 
-    /////////////////////
-    // Account.resolvers
-    /////////////////////
-    // TODO: this should probably be called resolverPermissions...
-    resolvers: t.connection({
+    ///////////////////////////////
+    // Account.resolverPermissions
+    ///////////////////////////////
+    resolverPermissions: t.connection({
       description: "TODO",
       type: AccountResolverPermissionsRef,
       resolve: (parent, args, context) =>
@@ -222,10 +217,7 @@ AccountRef.implement({
               .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
               .limit(limit);
 
-            return results.map((result) => ({
-              id: result.permissionsUser.id,
-              ...result,
-            }));
+            return results.map((result) => ({ id: result.permissionsUser.id, ...result }));
           },
         ),
     }),
