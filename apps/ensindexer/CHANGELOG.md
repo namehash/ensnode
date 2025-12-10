@@ -1,5 +1,20 @@
 # ensindexer
 
+## 1.3.0
+
+### Minor Changes
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Implements updated type system from ENSNode SDK.
+
+### Patch Changes
+
+- Updated dependencies [[`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`4bc9e82`](https://github.com/namehash/ensnode/commit/4bc9e82c288157fe29d00157160ae01517255728), [`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173)]:
+  - @ensnode/ensnode-sdk@1.3.0
+  - @ensnode/ensrainbow-sdk@1.3.0
+  - @ensnode/datasources@1.3.0
+  - @ensnode/ponder-metadata@1.3.0
+  - @ensnode/ensnode-schema@1.3.0
+
 ## 1.2.0
 
 ### Minor Changes
