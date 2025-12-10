@@ -35,7 +35,7 @@ export interface ResponsePageContextWithNoRecords extends Required<RequestPagePa
 export interface ResponsePageContextWithRecords extends Required<RequestPageParams> {
   /**
    * Total number of records across all pages
-   * @invariant Guaranteed to be a non-negative integer (>= 0)
+   * @invariant Guaranteed to be a positive integer (>= 1)
    */
   totalRecords: number;
 
@@ -47,7 +47,7 @@ export interface ResponsePageContextWithRecords extends Required<RequestPagePara
 
   /**
    * Indicates if there is a next page available
-   * @invariant true if and only if (`page` * `recordsPerPage` < `totalRecords`)
+   * @invariant true if and only if (`page` * `itemsPerPage` < `totalRecords`)
    */
   hasNext: boolean;
 

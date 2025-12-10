@@ -2,7 +2,7 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeNonNegativeIntegerSchema, makePositiveIntegerSchema } from "../../../internal";
-import { RECORDS_PER_PAGE_MAX, RequestPageParams } from "./request";
+import { ITEMS_PER_PAGE_MAX, RequestPageParams } from "./request";
 import {
   ResponsePageContext,
   ResponsePageContextWithNoRecords,
@@ -15,9 +15,9 @@ import {
 export const makeRequestPageParamsSchema = (valueLabel: string = "RequestPageParams") =>
   z.object({
     page: makePositiveIntegerSchema(`${valueLabel}.page`),
-    recordsPerPage: makePositiveIntegerSchema(`${valueLabel}.recordsPerPage`).max(
-      RECORDS_PER_PAGE_MAX,
-      `${valueLabel}.recordsPerPage must not exceed ${RECORDS_PER_PAGE_MAX}`,
+    itemsPerPage: makePositiveIntegerSchema(`${valueLabel}.itemsPerPage`).max(
+      ITEMS_PER_PAGE_MAX,
+      `${valueLabel}.itemsPerPage must not exceed ${ITEMS_PER_PAGE_MAX}`,
     ),
   });
 
@@ -41,9 +41,9 @@ export const makeResponsePageContextSchemaWithNoRecords = (
 function invariant_responsePageWithRecordsIsCorrect(
   ctx: ParsePayload<ResponsePageContextWithRecords>,
 ) {
-  const { hasNext, hasPrev, recordsPerPage, page, totalRecords, startIndex, endIndex } = ctx.value;
+  const { hasNext, hasPrev, itemsPerPage, page, totalRecords, startIndex, endIndex } = ctx.value;
 
-  const expectedHasNext = page * recordsPerPage < totalRecords;
+  const expectedHasNext = page * itemsPerPage < totalRecords;
   if (hasNext !== expectedHasNext) {
     ctx.issues.push({
       code: "custom",
@@ -86,7 +86,7 @@ export const makeResponsePageContextSchemaWithRecords = (
 ) =>
   z
     .object({
-      totalRecords: makeNonNegativeIntegerSchema(`${valueLabel}.totalRecords`),
+      totalRecords: makePositiveIntegerSchema(`${valueLabel}.totalRecords`),
       totalPages: makePositiveIntegerSchema(`${valueLabel}.totalPages`),
       hasNext: z.boolean(),
       hasPrev: z.boolean(),
@@ -100,9 +100,7 @@ export const makeResponsePageContextSchemaWithRecords = (
  * Schema for {@link ResponsePageContext}
  */
 export const makeResponsePageContextSchema = (valueLabel: string = "ResponsePageContext") =>
-  z.object({
-    paginationContext: z.discriminatedUnion("totalRecords", [
+  z.union([
       makeResponsePageContextSchemaWithNoRecords(valueLabel),
       makeResponsePageContextSchemaWithRecords(valueLabel),
-    ]),
-  });
+  ]);

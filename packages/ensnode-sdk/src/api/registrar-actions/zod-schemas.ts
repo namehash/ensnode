@@ -4,6 +4,7 @@ import type { ParsePayload } from "zod/v4/core";
 
 import { makeRegistrarActionSchema, makeReinterpretedNameSchema } from "../../internal";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
+import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
 import { type NamedRegistrarAction, RegistrarActionsResponseCodes } from "./response";
 
 function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedRegistrarAction>) {
@@ -40,6 +41,7 @@ export const makeRegistrarActionsResponseOkSchema = (
   z.strictObject({
     responseCode: z.literal(RegistrarActionsResponseCodes.Ok),
     registrarActions: z.array(makeNamedRegistrarActionSchema(valueLabel)),
+    paginationContext: makeResponsePageContextSchema(`${valueLabel}.paginationContext`),
   });
 
 /**

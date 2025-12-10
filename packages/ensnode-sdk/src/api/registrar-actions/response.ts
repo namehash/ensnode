@@ -2,6 +2,7 @@ import type { InterpretedName } from "../../ens";
 import type { RegistrarAction } from "../../registrars";
 import type { IndexingStatusResponseCodes } from "../indexing-status";
 import type { ErrorResponse } from "../shared/errors";
+import type { ResponsePageContext } from "../shared/pagination";
 
 /**
  * A status code for Registrar Actions API responses.
@@ -47,6 +48,7 @@ export interface NamedRegistrarAction {
 export type RegistrarActionsResponseOk = {
   responseCode: typeof RegistrarActionsResponseCodes.Ok;
   registrarActions: NamedRegistrarAction[];
+  paginationContext: ResponsePageContext;
 };
 
 /**

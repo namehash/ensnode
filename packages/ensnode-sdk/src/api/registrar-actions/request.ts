@@ -1,4 +1,7 @@
+import type { Address } from "viem";
+
 import type { Node } from "../../ens";
+import type { RequestPageParams } from "../shared/pagination";
 
 /**
  * Records Filters: Filter Types
@@ -6,6 +9,7 @@ import type { Node } from "../../ens";
 export const RegistrarActionsFilterTypes = {
   BySubregistryNode: "bySubregistryNode",
   WithEncodedReferral: "withEncodedReferral",
+  ByDecodedReferrer: "byDecodedReferrer",
 } as const;
 
 export type RegistrarActionsFilterType =
@@ -20,9 +24,15 @@ export type RegistrarActionsFilterWithEncodedReferral = {
   filterType: typeof RegistrarActionsFilterTypes.WithEncodedReferral;
 };
 
+export type RegistrarActionsFilterByDecodedReferrer = {
+  filterType: typeof RegistrarActionsFilterTypes.ByDecodedReferrer;
+  value: Address;
+};
+
 export type RegistrarActionsFilter =
   | RegistrarActionsFilterBySubregistryNode
-  | RegistrarActionsFilterWithEncodedReferral;
+  | RegistrarActionsFilterWithEncodedReferral
+  | RegistrarActionsFilterByDecodedReferrer;
 
 /**
  * Records Orders
@@ -37,7 +47,7 @@ export type RegistrarActionsOrder =
 /**
  * Represents a request to Registrar Actions API.
  */
-export type RegistrarActionsRequest = {
+export interface RegistrarActionsRequest extends RequestPageParams {
   /**
    * Filters to be applied while generating results.
    */
@@ -47,11 +57,4 @@ export type RegistrarActionsRequest = {
    * Order applied while generating results.
    */
   order?: RegistrarActionsOrder;
-
-  /**
-   * Limit the count of items per page to selected count of records.
-   *
-   * Guaranteed to be a positive integer (if defined).
-   */
-  itemsPerPage?: number;
-};
+}

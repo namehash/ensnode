@@ -1,6 +1,6 @@
-export const RECORDS_PER_PAGE_DEFAULT = 10;
+export const ITEMS_PER_PAGE_DEFAULT = 10;
 
-export const RECORDS_PER_PAGE_MAX = 100;
+export const ITEMS_PER_PAGE_MAX = 100;
 
 /**
  * Request page params.
@@ -14,9 +14,9 @@ export interface RequestPageParams {
   page?: number;
 
   /**
-   * Maximum number of records to return per page
-   * @invariant Must be a positive integer (>= 1) and less than or equal to {@link RECORDS_PER_PAGE_MAX}
-   * @default {@link RECORDS_PER_PAGE_DEFAULT}
+   * Maximum number of items to return per page
+   * @invariant Must be a positive integer (>= 1) and less than or equal to {@link ITEMS_PER_PAGE_MAX}
+   * @default {@link ITEMS_PER_PAGE_DEFAULT}
    */
-  recordsPerPage?: number;
+  itemsPerPage?: number;
 }
