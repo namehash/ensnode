@@ -61,7 +61,7 @@ export function useStatefulRegistrarActions({
   //       We use `isRegistrarActionsApiSupported` to enable query in those cases.
   const registrarActionsQuery = useRegistrarActions({
     order: RegistrarActionsOrders.LatestRegistrarActions,
-    itemsPerPage,
+    recordsPerPage: itemsPerPage,
     query: {
       enabled: isRegistrarActionsApiSupported,
     },
