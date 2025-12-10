@@ -990,9 +990,9 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       grandTotalQualifiedReferrersFinalScore: 16.55216891669386,
       minFinalScoreToQualify: 0,
     },
-    paginationContext: {
+    pageContext: {
       page: 1,
-      itemsPerPage: 100,
+      recordsPerPage: 100,
       totalRecords: 29,
       totalPages: 1,
       hasNext: false,
