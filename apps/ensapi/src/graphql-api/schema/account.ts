@@ -9,6 +9,8 @@ import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
+import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
+import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
@@ -135,12 +137,94 @@ AccountRef.implement({
     //////////////////////
     // Account.registries
     //////////////////////
-    // TODO: account's registries via EAC
-    // similar logic for dedicatedResolvers
+    // TODO: this should probably be called registryPermissions...
+    // TODO: this returns all permissions in a registry, perhaps can provide api for non-token resources...
+    registries: t.connection({
+      description: "TODO",
+      type: AccountRegistryPermissionsRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+            const results = await db
+              .select({
+                permissionsUser: schema.permissionsUser,
+                registry: schema.registry,
+              })
+              .from(schema.permissionsUser)
+              .innerJoin(
+                schema.registry,
+                and(
+                  eq(schema.permissionsUser.chainId, schema.registry.chainId),
+                  eq(schema.permissionsUser.address, schema.registry.address),
+                ),
+              )
+              .where(
+                and(
+                  ...[
+                    eq(schema.permissionsUser.user, parent.id),
+                    before !== undefined &&
+                      lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before)),
+                    after !== undefined &&
+                      gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              )
+              .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
+              .limit(limit);
 
-    //////////////////////////////
-    // Account.dedicatedResolvers
-    //////////////////////////////
-    // TODO: account's dedicated resolvers via EAC
+            return results.map((result) => ({
+              id: result.permissionsUser.id,
+              ...result,
+            }));
+          },
+        ),
+    }),
+
+    /////////////////////
+    // Account.resolvers
+    /////////////////////
+    // TODO: this should probably be called resolverPermissions...
+    resolvers: t.connection({
+      description: "TODO",
+      type: AccountResolverPermissionsRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+            const results = await db
+              .select({
+                permissionsUser: schema.permissionsUser,
+                resolver: schema.resolver,
+              })
+              .from(schema.permissionsUser)
+              .innerJoin(
+                schema.resolver,
+                and(
+                  eq(schema.permissionsUser.chainId, schema.resolver.chainId),
+                  eq(schema.permissionsUser.address, schema.resolver.address),
+                ),
+              )
+              .where(
+                and(
+                  ...[
+                    eq(schema.permissionsUser.user, parent.id),
+                    before !== undefined &&
+                      lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before)),
+                    after !== undefined &&
+                      gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              )
+              .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
+              .limit(limit);
+
+            return results.map((result) => ({
+              id: result.permissionsUser.id,
+              ...result,
+            }));
+          },
+        ),
+    }),
   }),
 });
