@@ -1,7 +1,6 @@
 import config from "@/config";
 
 import { getUnixTime } from "date-fns";
-import pReflect, { type PromiseResult } from "p-reflect";
 
 import {
   createRealtimeIndexingStatusProjection,
@@ -28,7 +27,7 @@ export const indexingStatusCache = await SWRCache.create({
           throw new Error("Received Indexing Status response with responseCode other than 'ok'.");
         }
 
-        logger.info("Fetched Indexing Status to be cached");
+        logger.info(`Indexing Status cached at: ${new Date()}`);
 
         // The indexing status snapshot has been fetched and successfully validated for caching.
         // Therefore, return it so that this current invocation of `readCache` will:
@@ -41,7 +40,7 @@ export const indexingStatusCache = await SWRCache.create({
         // Therefore, throw an error so that this current invocation of `readCache` will:
         // - Reject the newly fetched response (if any) such that it won't be cached.
         // - Return the most recently cached value from prior invocations, or `null` if no prior invocation successfully cached a value.
-        logger.error(
+        logger.debug(
           error,
           "Error occurred while fetching a new indexing status snapshot. The cached indexing status snapshot (if any) will not be updated.",
         );
@@ -49,6 +48,7 @@ export const indexingStatusCache = await SWRCache.create({
       }),
   ttl: 5, // 5 seconds
   revalidationInterval: 10, // 10 seconds
+  proactivelyInitialize: true,
 });
 
 /**
@@ -56,24 +56,15 @@ export const indexingStatusCache = await SWRCache.create({
  */
 export type IndexingStatusMiddlewareVariables = {
   /**
-   * A {@link PromiseResult} identifying the current indexing context.
+   * The current {@link RealtimeIndexingStatusProjection} or an {@link Error} indicating failure.
    *
-   * There are two possible states for this variable:
-   * 1) if `isRejected` is `true`, then:
-   *     - This object is of type {@link PromiseRejectedResult} and contains a
-   *       `reason` property of type `any` (should always be an {@link Error})
-   *       that may contain info about why no indexing status context is available.
-   *     - No prior attempts to successfully fetch (and cache) an indexing status
-   *       snapshot within the lifetime of this service instance have been successful.
-   * 2) if `isFulfilled` is `true` then:
-   *     - This object is of type {@link PromiseFulfilledResult} and contains a
-   *       `value` property of type {@link RealtimeIndexingStatusProjection}
-   *       representing the current realtime projection generated from the most recently
-   *       successfully fetched (and cached) indexing status snapshot.
-   *     - An indexing status snapshot was successfully fetched (and cached) at least
-   *       once within the lifetime of this service instance.
+   * If {@link indexingStatus} is an Error, no prior attempts to successfully fetch (and cache) an
+   * indexing status snapshot within the lifetime of this middleware have been successful.
+   *
+   * If {@link indexingStatus} is a RealtimeIndexingStatusProjection, an indexing status snapshot
+   * was successfully fetched (and cached) at least once within the lifetime of this middleware.
    */
-  indexingStatus: PromiseResult<RealtimeIndexingStatusProjection>;
+  indexingStatus: RealtimeIndexingStatusProjection | Error;
 };
 
 /**
@@ -91,29 +82,27 @@ export type IndexingStatusMiddlewareVariables = {
  *   to downstream middleware and handlers.
  */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  const cachedSnapshot = await indexingStatusCache.readCache();
+  const snapshot = await indexingStatusCache.readCache();
 
-  let promiseResult: PromiseResult<RealtimeIndexingStatusProjection>;
-
-  if (cachedSnapshot === null) {
+  if (snapshot === null) {
     // An indexing status snapshot has never been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
     // an `indexingStatus` variable where `isRejected` is `true` and `reason` is the provided `error`.
-    const errorMessage =
-      "Unable to generate a new indexing status projection. No indexing status snapshots have been successfully fetched and stored into cache since service startup. This may indicate the ENSIndexer service is unreachable or in an error state.";
-    const error = new Error(errorMessage);
-    logger.error(error);
-    promiseResult = await pReflect(Promise.reject(error));
+    c.set(
+      "indexingStatus",
+      new Error(
+        "Unable to generate a new indexing status projection. No indexing status snapshots have been successfully fetched and stored into cache since service startup. This may indicate the ENSIndexer service is unreachable or in an error state.",
+      ),
+    );
   } else {
     // An indexing status snapshot has been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive an
     // `indexingStatus` variable where `isFulfilled` is `true` and `value` is a {@link RealtimeIndexingStatusProjection} value
     // generated from the `cachedSnapshot` based on the current time.
     const now = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot.value, now);
-    promiseResult = await pReflect(Promise.resolve(realtimeProjection));
+    const realtimeProjection = createRealtimeIndexingStatusProjection(snapshot.value, now);
+    c.set("indexingStatus", realtimeProjection);
   }
 
-  c.set("indexingStatus", promiseResult);
   await next();
 });

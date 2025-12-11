@@ -343,9 +343,6 @@ importers:
       p-memoize:
         specifier: ^8.0.0
         version: 8.0.0
-      p-reflect:
-        specifier: ^3.1.0
-        version: 3.1.0
       p-retry:
         specifier: ^7.1.0
         version: 7.1.0
@@ -6014,10 +6011,6 @@ packages:
   p-queue@8.1.1:
     resolution: {integrity: sha512-aNZ+VfjobsWryoiPnEApGGmf5WmNsCo9xu8dfaYamG5qaLP7ClhLN6NgsFe6SwJ2UbLEBK5dv9x8Mn5+RVhMWQ==}
     engines: {node: '>=18'}
-
-  p-reflect@3.1.0:
-    resolution: {integrity: sha512-3sG3UlpisPSaX+o7u2q01hIQmrpkvdl5GSO1ZwL7pfc5kHB2bPF0eFNCfYTrW1/LTUdgmPwBAvmT0Zr8eSmaAQ==}
-    engines: {node: '>=12'}
 
   p-retry@7.1.0:
     resolution: {integrity: sha512-xL4PiFRQa/f9L9ZvR4/gUCRNus4N8YX80ku8kv9Jqz+ZokkiZLM0bcvX0gm1F3PDi9SPRsww1BDsTWgE6Y1GLQ==}
@@ -13816,8 +13809,6 @@ snapshots:
     dependencies:
       eventemitter3: 5.0.1
       p-timeout: 6.1.4
-
-  p-reflect@3.1.0: {}
 
   p-retry@7.1.0:
     dependencies:

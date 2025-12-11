@@ -7,8 +7,6 @@ import {
   type ReferrerLeaderboard,
 } from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
-import type { PromiseResult } from "p-reflect";
-import pReflect from "p-reflect";
 
 import {
   getEthnamesSubregistryId,
@@ -96,31 +94,16 @@ const referrerLeaderboardCache = await SWRCache.create({
  */
 export type ReferrerLeaderboardMiddlewareVariables = {
   /**
-   * The referrer leaderboard containing metrics and rankings for all referrers
-   * with at least one referral within the ENS Holiday Awards period.
+   * A {@link ReferrerLeaderboard} identifying the current referrer leaderboard or an {@link Error}
+   * indicating failure to build the leaderboard.
    *
-   * If `isRejected` is `true`, no referrer leaderboard has been successfully generated since service startup.
-   * This may indicate the ENSIndexer service is unreachable, in an error state, or the database query failed.
-   */
-
-  /**
-   * A {@link PromiseResult} identifying the current referrer leaderboard.
+   * If {@link referrerLeaderboard} is an Error, no prior attempts to successfully fetch (and cache)
+   * a referrer leaderboard within the lifetime of this middleware have been successful.
    *
-   * There are two possible states for this variable:
-   * 1) if `isRejected` is `true`, then:
-   *     - This object is of type {@link PromiseRejectedResult} and contains a
-   *       `reason` property of type `any` (should always be an {@link Error})
-   *       that may contain info about why no leaderboard is available.
-   *     - No prior attempts to successfully fetch (and cache) a referrer leaderboard
-   *       within the lifetime of this service instance have been successful.
-   * 2) if `isFulfilled` is `true` then:
-   *     - This object is of type {@link PromiseFulfilledResult} and contains a
-   *       `value` property of type {@link ReferrerLeaderboard}
-   *       representing the most recently successfully fetched (and cached) referrer leaderboard.
-   *     - A referrer leaderboard was successfully fetched (and cached) at least
-   *       once within the lifetime of this service instance.
+   * If {@link referrerLeaderboard} is a ReferrerLeaderboard, a referrer leaderboard was successfully
+   * fetched (and cached) at least once within the lifetime of this middleware.
    */
-  referrerLeaderboard: PromiseResult<ReferrerLeaderboard>;
+  referrerLeaderboard: ReferrerLeaderboard | Error;
 };
 
 /**
@@ -128,27 +111,25 @@ export type ReferrerLeaderboardMiddlewareVariables = {
  * to downstream middleware and handlers.
  */
 export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, next) => {
-  const cachedLeaderboard = await referrerLeaderboardCache.readCache();
+  const leaderboard = await referrerLeaderboardCache.readCache();
 
-  let promiseResult: PromiseResult<ReferrerLeaderboard>;
-
-  if (cachedLeaderboard === null) {
+  if (leaderboard === null) {
     // A referrer leaderboard has never been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
     // a `referrerLeaderboard` variable where `isRejected` is `true` and `reason` is the provided `error`.
-    const errorMessage =
-      "Unable to generate a new referrer leaderboard. No referrer leaderboards have been successfully fetched and stored into cache since service startup. This may indicate the referrer leaderboard service is unreachable or in an error state.";
-    const error = new Error(errorMessage);
-    logger.error(error);
-    promiseResult = await pReflect(Promise.reject(error));
+    c.set(
+      "referrerLeaderboard",
+      new Error(
+        "Unable to generate a new referrer leaderboard. No referrer leaderboards have been successfully fetched and stored into cache since service startup. This may indicate the referrer leaderboard service is unreachable or in an error state.",
+      ),
+    );
   } else {
     // A referrer leaderboard has been cached successfully.
     // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive a
     // `referrerLeaderboard` variable where `isFulfilled` is `true` and `value` is a {@link ReferrerLeaderboard} value
     // generated from the `cachedLeaderboard`.
-    promiseResult = await pReflect(Promise.resolve(cachedLeaderboard.value));
+    c.set("referrerLeaderboard", leaderboard.value);
   }
 
-  c.set("referrerLeaderboard", promiseResult);
   await next();
 });
