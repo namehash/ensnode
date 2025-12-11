@@ -53,11 +53,7 @@ export function ResolveAndDisplayIdentity({
   // resolve the primary name for `identity` using ENSNode
   // TODO: extract out the concept of resolving an `Identity` into a provider that child
   //       components can then hook into.
-  const { identity: identityResult } = useResolvedIdentity({
-    identity,
-    namespaceId,
-    accelerate,
-  });
+  const { identity: identityResult } = useResolvedIdentity({ identity, accelerate });
 
   return (
     <DisplayIdentity
