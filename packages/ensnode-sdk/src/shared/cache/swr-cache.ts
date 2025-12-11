@@ -65,7 +65,7 @@ export interface SWRCacheOptions<ValueType> {
  * });
  *
  * // Returns cached data or waits for initial fetch
- * const data = await cache.readCache();
+ * const data = await cache.read();
  * ```
  *
  * @link https://web.dev/stale-while-revalidate/
@@ -74,7 +74,7 @@ export interface SWRCacheOptions<ValueType> {
 export class SWRCache<ValueType> {
   private cache: CachedValue<ValueType> | null = null;
   private inProgressRevalidate: Promise<CachedValue<ValueType> | null> | null = null;
-  private backgroundInterval: NodeJS.Timeout | null = null;
+  private backgroundInterval: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private readonly options: SWRCacheOptions<ValueType>) {
     if (options.revalidationInterval) {
@@ -113,7 +113,7 @@ export class SWRCache<ValueType> {
    * @returns a `CachedValue` holding a `value` of `ValueType` that was most recently
    *          successfully returned by `fn` or `null` if `fn` has never successfully returned.
    */
-  public async readCache(): Promise<CachedValue<ValueType> | null> {
+  public async read(): Promise<CachedValue<ValueType> | null> {
     // if no cache, provide caller the in-flight revalidation
     if (!this.cache) return await this.revalidate();
 

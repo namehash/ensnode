@@ -43,9 +43,9 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
   OmnichainIndexingStatusIds.Completed,
 ];
 
-const referrerLeaderboardCache = await SWRCache.create({
+const referrerLeaderboardCache = new SWRCache({
   fn: async () => {
-    const indexingStatus = await indexingStatusCache.readCache();
+    const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus === null) {
       throw new Error(
         "Unable to generate referrer leaderboard. indexingStatusCache must have been successfully initialized.",
@@ -111,7 +111,7 @@ export type ReferrerLeaderboardMiddlewareVariables = {
  * to downstream middleware and handlers.
  */
 export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, next) => {
-  const leaderboard = await referrerLeaderboardCache.readCache();
+  const leaderboard = await referrerLeaderboardCache.read();
 
   if (leaderboard === null) {
     // A referrer leaderboard has never been cached successfully.

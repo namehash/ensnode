@@ -16,7 +16,7 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("indexing-status.middleware");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
-export const indexingStatusCache = await SWRCache.create({
+export const indexingStatusCache = new SWRCache({
   fn: async () =>
     client
       .indexingStatus() // fetch a new indexing status snapshot
@@ -82,7 +82,7 @@ export type IndexingStatusMiddlewareVariables = {
  *   to downstream middleware and handlers.
  */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  const snapshot = await indexingStatusCache.readCache();
+  const snapshot = await indexingStatusCache.read();
 
   if (snapshot === null) {
     // An indexing status snapshot has never been cached successfully.
