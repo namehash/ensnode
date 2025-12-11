@@ -22,16 +22,26 @@ import {
 } from "../utils/protobuf-schema.js";
 
 /**
+ * Estimate memory usage of a Map (rough approximation)
+ */
+function estimateMapMemory(map: Map<string, any>): number {
+  let total = 0;
+  for (const [key, value] of map) {
+    // Rough estimate: key size + value size + Map overhead (48 bytes per entry)
+    total += (key.length * 2) + (typeof value === 'string' ? value.length * 2 : 8) + 48;
+  }
+  return total;
+}
+
+/**
  * Simple deduplication database using ClassicLevel directly
  */
 class DeduplicationDB {
   private pendingWrites: Map<string, string> = new Map();
-  private cache: Map<string, boolean> = new Map();
-  private cacheSize: number;
   private bloomFilter: typeof bloomFilters.BloomFilter | null = null;
 
-  constructor(private db: ClassicLevel<string, string>, cacheSize: number = 10000, useBloomFilter: boolean = false, expectedItems: number = 10000000) {
-    this.cacheSize = cacheSize;
+  constructor(private db: ClassicLevel<string, string>, cacheSize: number = 1000, useBloomFilter: boolean = false, expectedItems: number = 10000000) {
+    // No in-memory cache - LevelDB has its own internal cache
     
     if (useBloomFilter) {
       // Create Bloom filter with 0.1% false positive rate
@@ -41,65 +51,38 @@ class DeduplicationDB {
   }
 
   async has(key: string): Promise<boolean> {
-    // Check cache first
-    if (this.cache.has(key)) {
-      return this.cache.get(key)!;
-    }
-
-    // Check pending writes
+    // Check pending writes first (not yet flushed to DB)
     if (this.pendingWrites.has(key)) {
-      this.cache.set(key, true);
       return true;
     }
 
-    // Use Bloom filter if available
+    // Use Bloom filter if available (skip expensive DB lookup)
     if (this.bloomFilter) {
-      // If Bloom filter says "not present", we can skip LevelDB check
       if (!this.bloomFilter.has(key)) {
-        this.cache.set(key, false);
         return false;
       }
-      // Bloom filter says "maybe present" - need to check LevelDB
     }
 
-    // Check database
+    // Check database (LevelDB has its own internal cache)
     try {
       await this.db.get(key);
-      this.cache.set(key, true);
       return true;
     } catch (error) {
-      this.cache.set(key, false);
       return false;
     }
   }
 
   async add(key: string, value: string): Promise<void> {
     this.pendingWrites.set(key, value);
-    this.cache.set(key, true); // Cache the fact that this key exists
     
     // Add to Bloom filter if available
     if (this.bloomFilter) {
       this.bloomFilter.add(key);
     }
     
-    // Check cache size periodically (not on every add)
-    this.evictCacheIfNeeded();
-    
-    // Flush to database periodically (smaller batch to reduce memory usage)
-    if (this.pendingWrites.size >= 5000) {
+    // Flush frequently to keep pendingWrites small
+    if (this.pendingWrites.size >= 1000) {
       await this.flush();
-    }
-  }
-
-  private evictCacheIfNeeded(): void {
-    // Limit cache size - only evict when significantly exceeded
-    if (this.cache.size > this.cacheSize * 1.2) {
-      // Remove oldest 20% of entries
-      let toRemove = Math.floor(this.cacheSize * 0.2);
-      for (const key of this.cache.keys()) {
-        if (toRemove-- <= 0) break;
-        this.cache.delete(key);
-      }
     }
   }
 
@@ -122,6 +105,15 @@ class DeduplicationDB {
   async close(): Promise<void> {
     await this.flush();
     await this.db.close();
+  }
+
+  getMemoryStats(): { pendingWrites: number; cache: number; pendingWritesMB: number; cacheMB: number } {
+    return {
+      pendingWrites: this.pendingWrites.size,
+      cache: 0, // Cache disabled - using LevelDB's internal cache
+      pendingWritesMB: estimateMapMemory(this.pendingWrites) / 1024 / 1024,
+      cacheMB: 0,
+    };
   }
 }
 
@@ -159,13 +151,14 @@ export interface ConvertCsvCommandOptions {
 }
 
 // Configuration constants
-const DEFAULT_PROGRESS_INTERVAL = 10000;
+const DEFAULT_PROGRESS_INTERVAL = 50000; // Increased from 10k to 50k to reduce logging load
 
 interface ConversionStats {
   totalLines: number;
   processedRecords: number;
   filteredExistingLabels: number;
   filteredDuplicates: number;
+  outputBackpressureEvents: number;
   startTime: Date;
   endTime?: Date;
 }
@@ -174,8 +167,12 @@ interface ConversionStats {
  * Setup output stream for writing protobuf
  */
 function setupWriteStream(outputFile: string) {
-  // For now, just write directly to file without gzip compression
-  return createWriteStream(outputFile);
+  // Use very small highWaterMark (16KB) to trigger backpressure early and frequently
+  // This prevents unbounded buffer growth when writes are faster than disk I/O
+  // Smaller buffer = more frequent backpressure = better memory control
+  return createWriteStream(outputFile, {
+    highWaterMark: 16 * 1024, // 16KB buffer - very small to catch backpressure early
+  });
 }
 
 /**
@@ -213,6 +210,7 @@ function logSummary(stats: ConversionStats) {
   logger.info(`Valid records: ${stats.processedRecords}`);
   logger.info(`Filtered existing labels: ${stats.filteredExistingLabels}`);
   logger.info(`Filtered duplicates: ${stats.filteredDuplicates}`);
+  logger.info(`Output backpressure events: ${stats.outputBackpressureEvents}`);
   logger.info(`Duration: ${duration}ms`);
 }
 
@@ -246,8 +244,8 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
     logger.info(`Input file size: ${fileSizeMB} MB`);
     
     if (stats.size > 1024 * 1024 * 1024) { // > 1GB
-      logger.warn("⚠️  Processing a very large file. This may take significant time and memory.");
-      logger.warn("💡 Consider using --existing-db-path to filter out existing labels for better performance.");
+      logger.warn("⚠️  Processing a very large file - using SEQUENTIAL mode.");
+      logger.warn("💡 Use --existing-db-path to filter existing labels and speed up processing.");
     }
   } catch (error) {
     logger.warn(`Could not determine file size: ${error}`);
@@ -351,15 +349,27 @@ async function processRecord(
     await dedupDb.add(label, "");
   }
 
-  // Create protobuf message and write immediately
+  // Create protobuf message and write with backpressure handling
   const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
-  outputStream.write(Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish()));
+  const buffer = Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish());
+  
+  // Check if write returns false (buffer full) - if so, wait for drain
+  const canContinue = outputStream.write(buffer);
+  if (!canContinue) {
+    // Buffer is full - signal backpressure
+    stats.outputBackpressureEvents++;
+    // Wait for drain event before continuing
+    // Note: The CSV stream should be paused by the caller when backpressure is detected
+    await new Promise<void>((resolve) => {
+      outputStream.once('drain', resolve);
+    });
+  }
 
   return true; // Record was processed
 }
 
 /**
- * Process the entire CSV file using fast-csv
+ * Process the entire CSV file - COMPLETELY SEQUENTIAL (one row at a time)
  */
 async function processCSVFile(
   inputFile: string,
@@ -374,102 +384,97 @@ async function processCSVFile(
   let expectedColumns: number | null = null;
   let lineNumber = 0;
   let processedRecords = 0;
-  let lastLoggedLine = 0; // Track last logged line to avoid duplicate logs
-  const startTime = Date.now(); // Track start time for overall processing
-  let lastLogTime = Date.now(); // Track time of last log for chunk timing
-  
-  // LevelDB-based deduplication: Uses temporary database to avoid RAM limits
+  let lastLoggedLine = 0;
+  const startTime = Date.now();
+  let lastLogTime = Date.now();
 
   const fileStream = createReadStream(inputFile, { encoding: "utf8" });
 
   return new Promise((resolve, reject) => {
-    let pendingCount = 0;
-    const MAX_PENDING = 100; // Smaller limit to reduce memory
+    const csvStream = parse(); // Sequential processing via pause/resume
+    let isProcessing = false;
 
-    const csvStream = parse()
-      .on("data", (row: string[]) => {
+    csvStream
+      .on("data", async (row: string[]) => {
+        // PAUSE IMMEDIATELY - process one row at a time
+        csvStream.pause();
+        isProcessing = true;
+
         lineNumber++;
 
-        // For the first row, detect column count
-        if (expectedColumns === null) {
-          expectedColumns = row.length;
-          logger.info(`Detected ${expectedColumns} columns using fast-csv`);
-        }
+        try {
+          // Detect column count on first row
+          if (expectedColumns === null) {
+            expectedColumns = row.length;
+            logger.info(`Detected ${expectedColumns} columns - SEQUENTIAL processing mode`);
+          }
 
-        // Log progress synchronously when line is read (not in async callback)
-        // This ensures logs appear at the correct intervals
-        if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
-          const currentTime = Date.now();
-          const chunkTime = currentTime - lastLogTime; // Time for this 10k chunk
-          const totalElapsed = currentTime - startTime; // Total time since start
-          const chunkTimeSeconds = (chunkTime / 1000).toFixed(2);
-          const totalTimeSeconds = (totalElapsed / 1000).toFixed(2);
-          const linesPerSecond = ((progressInterval / chunkTime) * 1000).toFixed(0);
-          
-          lastLoggedLine = lineNumber;
-          lastLogTime = currentTime;
-          
-          // Note: processedRecords may be slightly behind due to async processing
-          logger.info(
-            `Processed ${lineNumber} lines, written ${processedRecords} records | ` +
-            `Chunk: ${chunkTimeSeconds}s (${linesPerSecond} lines/sec) | ` +
-            `Total: ${totalTimeSeconds}s`
+          // Log progress (less frequently to avoid logger crashes)
+          if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
+            const currentTime = Date.now();
+            const chunkTime = currentTime - lastLogTime;
+            const totalElapsed = currentTime - startTime;
+            const chunkTimeSeconds = (chunkTime / 1000).toFixed(2);
+            const totalTimeSeconds = (totalElapsed / 1000).toFixed(2);
+            const linesPerSecond = ((progressInterval / chunkTime) * 1000).toFixed(0);
+            
+            lastLoggedLine = lineNumber;
+            lastLogTime = currentTime;
+            
+            const memUsage = process.memoryUsage();
+            const memInfo = `RSS=${(memUsage.rss / 1024 / 1024).toFixed(0)}MB, Heap=${(memUsage.heapUsed / 1024 / 1024).toFixed(0)}MB`;
+            
+            let dedupInfo = "";
+            if (dedupDb) {
+              const dedupStats = dedupDb.getMemoryStats();
+              dedupInfo = ` | Dedup: ${dedupStats.pendingWrites}/${dedupStats.cache}`;
+            }
+            
+            // Use console.log instead of logger to avoid worker thread issues
+            console.log(
+              `[${new Date().toISOString()}] Line ${lineNumber}, written ${processedRecords} | ` +
+              `${linesPerSecond} lines/sec | ${memInfo}${dedupInfo}`
+            );
+          }
+
+          // Process this one record
+          const wasProcessed = await processRecord(
+            row,
+            expectedColumns,
+            RainbowRecordType,
+            outputStream,
+            lineNumber,
+            existingDb,
+            dedupDb,
+            stats,
           );
-        }
 
-        // Backpressure: pause if too many pending
-        if (pendingCount >= MAX_PENDING) {
-          csvStream.pause();
-        }
-
-        pendingCount++;
-        processRecord(
-          row,
-          expectedColumns,
-          RainbowRecordType,
-          outputStream,
-          lineNumber,
-          existingDb,
-          dedupDb,
-          stats,
-        ).then((wasProcessed) => {
           if (wasProcessed) {
             processedRecords++;
           }
-          
-          // Update progress bar every 1000 lines
+
+          // Update progress bar
           if (lineNumber % 1000 === 0 && progressBar) {
             progressBar.tick(1000);
             progressBar.curr = lineNumber;
           }
-          
-          pendingCount--;
-          
-          // Resume when under threshold
-          if (csvStream.isPaused() && pendingCount < MAX_PENDING / 2) {
-            csvStream.resume();
-          }
-        }).catch((error) => {
+
+          // Done processing - resume for next row
+          isProcessing = false;
+          csvStream.resume();
+
+        } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           csvStream.destroy();
           fileStream.destroy();
-          reject(
-            new Error(
-              `CSV conversion failed due to invalid data on line ${lineNumber}: ${errorMessage}`,
-            ),
-          );
-        });
+          reject(new Error(`Failed on line ${lineNumber}: ${errorMessage}`));
+        }
       })
       .on("error", (error: Error) => {
         reject(new Error(`CSV parsing error: ${error.message}`));
       })
-      .on("end", async () => {
-        // Wait for all pending to complete
-        while (pendingCount > 0) {
-          await new Promise(resolve => setTimeout(resolve, 10));
-        }
-        const dedupStatus = dedupDb ? "LevelDB deduplication completed" : "Deduplication disabled";
-        logger.info(dedupStatus);
+      .on("end", () => {
+        logger.info(`Sequential processing complete`);
         resolve({ totalLines: lineNumber, processedRecords });
       });
 
@@ -490,6 +495,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     processedRecords: 0,
     filteredExistingLabels: 0,
     filteredDuplicates: 0,
+    outputBackpressureEvents: 0,
     startTime: new Date(),
   };
 
@@ -509,11 +515,16 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
         keyEncoding: 'utf8',
         valueEncoding: 'utf8',
         createIfMissing: true,
+        // Aggressive memory limits
+        cacheSize: 2 * 1024 * 1024, // 2MB block cache (minimal)
+        writeBufferSize: 4 * 1024 * 1024, // 4MB write buffer (minimal)
+        maxOpenFiles: 100, // Limit open files
+        compression: false, // Disable compression to reduce CPU/memory
       });
       await tempDb.open();
       dedupDb = new DeduplicationDB(
         tempDb, 
-        options.cacheSize ?? 10000,
+        options.cacheSize ?? 1000, // Reduced default from 10000 to 1000
         options.useBloomFilter ?? false,
         options.bloomFilterSize ?? 10000000
       );
