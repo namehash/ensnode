@@ -114,9 +114,6 @@ export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, 
   const leaderboard = await referrerLeaderboardCache.read();
 
   if (leaderboard === null) {
-    // A referrer leaderboard has never been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
-    // a `referrerLeaderboard` variable where `isRejected` is `true` and `reason` is the provided `error`.
     c.set(
       "referrerLeaderboard",
       new Error(
@@ -124,10 +121,6 @@ export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, 
       ),
     );
   } else {
-    // A referrer leaderboard has been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive a
-    // `referrerLeaderboard` variable where `isFulfilled` is `true` and `value` is a {@link ReferrerLeaderboard} value
-    // generated from the `cachedLeaderboard`.
     c.set("referrerLeaderboard", leaderboard.value);
   }
 

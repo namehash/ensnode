@@ -85,9 +85,6 @@ export const indexingStatusMiddleware = factory.createMiddleware(async (c, next)
   const snapshot = await indexingStatusCache.read();
 
   if (snapshot === null) {
-    // An indexing status snapshot has never been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
-    // an `indexingStatus` variable where `isRejected` is `true` and `reason` is the provided `error`.
     c.set(
       "indexingStatus",
       new Error(
@@ -95,10 +92,6 @@ export const indexingStatusMiddleware = factory.createMiddleware(async (c, next)
       ),
     );
   } else {
-    // An indexing status snapshot has been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive an
-    // `indexingStatus` variable where `isFulfilled` is `true` and `value` is a {@link RealtimeIndexingStatusProjection} value
-    // generated from the `cachedSnapshot` based on the current time.
     const now = getUnixTime(new Date());
     const realtimeProjection = createRealtimeIndexingStatusProjection(snapshot.value, now);
     c.set("indexingStatus", realtimeProjection);
