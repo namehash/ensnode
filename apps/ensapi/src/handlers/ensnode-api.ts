@@ -32,11 +32,11 @@ app.get("/indexing-status", async (c) => {
     throw new Error(`Invariant(ensnode-api): indexingStatusMiddleware required`);
   }
 
-  if (c.var.indexingStatus.isRejected) {
+  if (c.var.indexingStatus instanceof Error) {
     // no indexing status available in context
     logger.error(
       {
-        error: c.var.indexingStatus.reason,
+        error: c.var.indexingStatus,
       },
       "Indexing status requested but is not available in context.",
     );
@@ -53,7 +53,7 @@ app.get("/indexing-status", async (c) => {
   return c.json(
     serializeIndexingStatusResponse({
       responseCode: IndexingStatusResponseCodes.Ok,
-      realtimeProjection: c.var.indexingStatus.value,
+      realtimeProjection: c.var.indexingStatus,
     } satisfies IndexingStatusResponseOk),
   );
 });

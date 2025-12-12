@@ -19,13 +19,11 @@ import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-st
 export function indexingContextToSubgraphMeta(
   indexingStatus: IndexingStatusMiddlewareVariables["indexingStatus"],
 ): SubgraphMeta {
-  if (indexingStatus.isRejected) {
-    // indexing status middleware has never successfully fetched (and cached) an indexing status snapshot
-    // for the lifetime of this service instance.
-    return null;
-  }
+  // indexing status middleware has never successfully fetched (and cached) an indexing status snapshot
+  // for the lifetime of this service instance.
+  if (indexingStatus instanceof Error) return null;
 
-  const rootChain = indexingStatus.value.snapshot.omnichainSnapshot.chains.get(
+  const rootChain = indexingStatus.snapshot.omnichainSnapshot.chains.get(
     getENSRootChainId(config.namespace),
   );
   if (!rootChain) return null;

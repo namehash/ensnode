@@ -52,9 +52,7 @@ const app = factory
     }
 
     try {
-      const referrerLeaderboard = c.var.referrerLeaderboard;
-
-      if (referrerLeaderboard.isRejected) {
+      if (c.var.referrerLeaderboard instanceof Error) {
         return c.json(
           serializeReferrerLeaderboardPageResponse({
             responseCode: ReferrerLeaderboardPageResponseCodes.Error,
@@ -68,7 +66,7 @@ const app = factory
       const { page, itemsPerPage } = c.req.valid("query");
       const leaderboardPage = getReferrerLeaderboardPage(
         { page, itemsPerPage },
-        referrerLeaderboard.value,
+        c.var.referrerLeaderboard,
       );
 
       return c.json(
@@ -107,10 +105,8 @@ app.get("/referrers/:referrer", validate("param", referrerAddressSchema), async 
   }
 
   try {
-    const referrerLeaderboard = c.var.referrerLeaderboard;
-
     // Check if leaderboard failed to load
-    if (referrerLeaderboard.isRejected) {
+    if (c.var.referrerLeaderboard instanceof Error) {
       return c.json(
         serializeReferrerDetailResponse({
           responseCode: ReferrerDetailResponseCodes.Error,
@@ -122,7 +118,7 @@ app.get("/referrers/:referrer", validate("param", referrerAddressSchema), async 
     }
 
     const { referrer } = c.req.valid("param");
-    const detail = getReferrerDetail(referrer, referrerLeaderboard.value);
+    const detail = getReferrerDetail(referrer, c.var.referrerLeaderboard);
 
     return c.json(
       serializeReferrerDetailResponse({

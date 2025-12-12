@@ -47,12 +47,10 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       );
     }
 
-    if (c.var.indexingStatus.isRejected) {
+    if (c.var.indexingStatus instanceof Error) {
       // no indexing status available in context
       logger.error(
-        {
-          error: c.var.indexingStatus.reason,
-        },
+        c.var.indexingStatus,
         `Registrar Actions API requested but indexing status is not available in context.`,
       );
 
@@ -68,7 +66,7 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       );
     }
 
-    const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
+    const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
 
     if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
       return c.json(
