@@ -10,7 +10,7 @@ import {
   type TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
-import { type CustomProtocolSpan, protocolContextManager } from "./protocol-tracing-context";
+import { type CustomProtocolSpan, protocolTracingContextManager } from "./protocol-tracing-context";
 
 /**
  * Executes `fn` in the context of a semantic ENS Protocol Step.
@@ -29,7 +29,7 @@ export async function withProtocolStep<
   args: Record<string, AttributeValue>,
   fn: Fn,
 ): Promise<ReturnType<Fn>> {
-  return protocolContextManager.withSpan(
+  return protocolTracingContextManager.withSpan(
     `${protocol}:${step}`,
     {
       [ATTR_PROTOCOL_NAME]: protocol,
@@ -64,5 +64,5 @@ export function addProtocolStepEvent<
 export async function captureTrace<Fn extends () => Promise<any>>(
   fn: Fn,
 ): Promise<{ trace: ProtocolTrace; result: Awaited<ReturnType<Fn>> }> {
-  return protocolContextManager.runWithTrace(fn);
+  return protocolTracingContextManager.runWithTrace(fn);
 }
