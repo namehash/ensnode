@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, not, type SQL } from "drizzle-orm/sql";
+import { and, count, desc, eq, isNotNull, not, type SQL } from "drizzle-orm/sql";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -92,7 +92,7 @@ export async function _countRegistrarActions(
 ): Promise<number> {
   const countQuery = db
     .select({
-      count: schema.registrarActions.id,
+      count: count(),
     })
     .from(schema.registrarActions)
     // join Registration Lifecycles associated with Registrar Actions
@@ -113,7 +113,7 @@ export async function _countRegistrarActions(
     .where(and(...buildWhereClause(filters)));
 
   const result = await countQuery;
-  return result.length;
+  return result[0].count;
 }
 
 /**
