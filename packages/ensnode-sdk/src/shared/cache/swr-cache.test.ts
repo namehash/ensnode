@@ -13,7 +13,7 @@ describe("staleWhileRevalidate", () => {
 
   it("fetches data without waiting for the first call when warmup was requested", async () => {
     const fn = vi.fn(async () => "value1");
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 1, // 1 second
       proactivelyInitialize: true,
@@ -30,7 +30,7 @@ describe("staleWhileRevalidate", () => {
 
   it("fetches data on first call", async () => {
     const fn = vi.fn(async () => "value1");
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 1,
     }); // 1 second
@@ -43,7 +43,7 @@ describe("staleWhileRevalidate", () => {
 
   it("returns cached data within TTL without refetching", async () => {
     const fn = vi.fn(async () => "value1");
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 2,
     }); // 2 seconds
@@ -58,7 +58,7 @@ describe("staleWhileRevalidate", () => {
 
   it("returns stale data immediately after TTL expires", async () => {
     const fn = vi.fn(async () => "value1");
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 2,
     }); // 2 seconds
@@ -73,7 +73,7 @@ describe("staleWhileRevalidate", () => {
   it("triggers background revalidation after TTL expires", async () => {
     let value = "value1";
     const fn = vi.fn(async () => value);
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 2,
     }); // 2 seconds
@@ -110,7 +110,7 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 2,
     }); // 2 seconds
@@ -151,7 +151,7 @@ describe("staleWhileRevalidate", () => {
       return revalidationPromise;
     });
 
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 2,
     }); // 2 seconds
@@ -189,7 +189,7 @@ describe("staleWhileRevalidate", () => {
       return "value1";
     });
 
-    const cache = await SWRCache.create({
+    const cache = new SWRCache({
       fn,
       ttl: 2,
     }); // 2 seconds
@@ -223,7 +223,7 @@ describe("staleWhileRevalidate", () => {
       return "value2";
     });
 
-    const cache = await SWRCache.create({ fn, ttl: 2 }); // 2 seconds
+    const cache = new SWRCache({ fn, ttl: 2 }); // 2 seconds
 
     // Initial fetch
     shouldError = false;
@@ -252,7 +252,7 @@ describe("staleWhileRevalidate", () => {
         throw new Error("Initial fetch failed");
       });
 
-      const cache = await SWRCache.create({ fn, ttl: 1 }); // 1 second
+      const cache = new SWRCache({ fn, ttl: 1 }); // 1 second
 
       // Initial fetch should fail and return null
       const result = await cache.readCache();
@@ -269,7 +269,7 @@ describe("staleWhileRevalidate", () => {
         return "value1";
       });
 
-      const cache = await SWRCache.create({ fn, ttl: 1 }); // 1 second
+      const cache = new SWRCache({ fn, ttl: 1 }); // 1 second
 
       // Initial fetch fails and returns null
       const result1 = await cache.readCache();
@@ -287,14 +287,14 @@ describe("staleWhileRevalidate", () => {
   describe("proactively initialize", () => {
     it("initializes the cache proactively", async () => {
       const fn = vi.fn(async () => "value1");
-      await SWRCache.create({ fn, ttl: 1, proactivelyInitialize: true }); // 1 second
+      new SWRCache({ fn, ttl: 1, proactivelyInitialize: true }); // 1 second
 
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
     it("does not initialize the cache proactively", async () => {
       const fn = vi.fn(async () => "value1");
-      const cache = await SWRCache.create({ fn, ttl: 1, proactivelyInitialize: false }); // 1 second
+      const cache = new SWRCache({ fn, ttl: 1, proactivelyInitialize: false }); // 1 second
 
       expect(fn).toHaveBeenCalledTimes(0);
 

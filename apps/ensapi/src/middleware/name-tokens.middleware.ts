@@ -50,12 +50,10 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       );
     }
 
-    if (c.var.indexingStatus.isRejected) {
+    if (c.var.indexingStatus instanceof Error) {
       // no indexing status available in context
       logger.error(
-        {
-          error: c.var.indexingStatus.reason,
-        },
+        c.var.indexingStatus,
         `Name Tokens API requested but indexing status is not available in context yet.`,
       );
 
@@ -72,7 +70,7 @@ export const nameTokensApiMiddleware = factory.createMiddleware(
       );
     }
 
-    const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
+    const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
 
     if (!nameTokensPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
       return c.json(

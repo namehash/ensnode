@@ -62,7 +62,7 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
   }
 
   // Invariant: Indexing Status has been resolved successfully.
-  if (c.var.indexingStatus.isRejected) {
+  if (c.var.indexingStatus instanceof Error) {
     throw new Error(`Invariant(name-tokens-api): Indexing Status has to be resolved successfully`);
   }
 
@@ -116,7 +116,7 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
     domainId = request.domainId;
   }
 
-  const { omnichainSnapshot } = c.var.indexingStatus.value.snapshot;
+  const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
   const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
 
   const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);

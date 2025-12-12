@@ -7,6 +7,8 @@ import { cors } from "hono/cors";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
+import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
@@ -88,7 +90,16 @@ const closeServer = () =>
 const gracefulShutdown = async () => {
   try {
     await sdk.shutdown();
+    logger.info("Destroyed tracing instrumentation");
+
+    referrerLeaderboardCache.destroy();
+    logger.info("Destroyed referrerLeaderboardCache");
+
+    indexingStatusCache.destroy();
+    logger.info("Destroyed indexingStatusCache");
+
     await closeServer();
+    logger.info("Closed application server");
 
     process.exit(0);
   } catch (error) {
