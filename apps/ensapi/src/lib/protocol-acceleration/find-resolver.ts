@@ -22,8 +22,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { isENSRootRegistry } from "@/lib/protocol-acceleration/ens-root-registry";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 type FindResolverResult =
   | {

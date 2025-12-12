@@ -1,0 +1,192 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+
+import type { AttributeValue } from "@opentelemetry/api";
+
+import type { ProtocolSpan, ProtocolSpanTreeNode, ProtocolTrace } from "@ensnode/ensnode-sdk";
+
+/**
+ * Custom protocol span implementation that mirrors OTEL's span structure
+ */
+export class CustomProtocolSpan {
+  private static counter = 0;
+
+  public readonly id: string;
+  public readonly traceId: string;
+  public readonly parentSpanId: string | undefined;
+  public readonly name: string;
+  public readonly startTime: number;
+  public readonly attributes: Record<string, AttributeValue> = {};
+  public readonly events: Array<{
+    name: string;
+    attributes: Record<string, AttributeValue>;
+    time: number;
+  }> = [];
+
+  private endTime?: number;
+  private _status: { code: number; message?: string } = { code: 1 }; // 1 = OK, 2 = ERROR (OTEL codes)
+
+  constructor(
+    name: string,
+    traceId: string,
+    parentSpanId?: string,
+    attributes: Record<string, AttributeValue> = {},
+  ) {
+    this.id = `span-${++CustomProtocolSpan.counter}-${Date.now()}`;
+    this.traceId = traceId;
+    this.parentSpanId = parentSpanId;
+    this.name = name;
+    this.startTime = Date.now() * 1000; // microseconds
+    this.attributes = { ...attributes };
+  }
+
+  setAttribute(key: string, value: AttributeValue): void {
+    this.attributes[key] = value;
+  }
+
+  addEvent(name: string, attributes: Record<string, AttributeValue> = {}): void {
+    this.events.push({
+      name,
+      attributes,
+      time: Date.now() * 1000, // microseconds
+    });
+  }
+
+  setStatus(status: { code: "OK" | "ERROR"; message?: string }): void {
+    this._status = {
+      code: status.code === "OK" ? 1 : 2,
+      message: status.message,
+    };
+  }
+
+  recordException(error: Error): void {
+    this.addEvent("exception", {
+      "exception.type": error.constructor.name,
+      "exception.message": error.message,
+      "exception.stacktrace": error.stack || "",
+    });
+  }
+
+  end(): void {
+    this.endTime = Date.now() * 1000; // microseconds
+  }
+
+  toProtocolSpan(): ProtocolSpan {
+    return {
+      scope: "protocol-tracing",
+      id: this.id,
+      traceId: this.traceId,
+      parentSpanContext: this.parentSpanId
+        ? { traceId: this.traceId, spanId: this.parentSpanId }
+        : undefined,
+      name: this.name,
+      timestamp: this.startTime,
+      duration: (this.endTime || Date.now() * 1000) - this.startTime,
+      attributes: this.attributes,
+      status: this._status,
+      events: this.events,
+    };
+  }
+}
+
+/**
+ * Context for protocol tracing that tracks spans per request
+ */
+export interface ProtocolTracingContext {
+  traceId: string;
+  spans: CustomProtocolSpan[];
+  activeSpan?: CustomProtocolSpan;
+}
+
+/**
+ * AsyncLocalStorage-based context system for protocol tracing
+ */
+class ProtocolContextManager {
+  private storage = new AsyncLocalStorage<ProtocolTracingContext>();
+
+  /**
+   * Creates a new trace context and runs the function within it
+   */
+  async runWithTrace<T>(fn: () => Promise<T>): Promise<{ result: T; trace: ProtocolTrace }> {
+    const traceId = `trace-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const context: ProtocolTracingContext = {
+      traceId,
+      spans: [],
+      activeSpan: undefined,
+    };
+
+    const result = await this.storage.run(context, fn);
+    const trace = this.buildTrace(context.spans);
+
+    return { result, trace };
+  }
+
+  /**
+   * Starts a new span within the current trace context
+   */
+  async withSpan<T>(
+    name: string,
+    attributes: Record<string, AttributeValue>,
+    fn: (span: CustomProtocolSpan) => Promise<T>,
+  ): Promise<T> {
+    const context = this.storage.getStore();
+    if (!context) {
+      throw new Error("No protocol trace context found. Make sure to call within runWithTrace()");
+    }
+
+    const span = new CustomProtocolSpan(name, context.traceId, context.activeSpan?.id, attributes);
+
+    context.spans.push(span);
+    const previousActiveSpan = context.activeSpan;
+    context.activeSpan = span;
+
+    try {
+      const result = await fn(span);
+      span.setStatus({ code: "OK" });
+      return result;
+    } catch (error) {
+      span.setStatus({ code: "ERROR", message: String(error) });
+      if (error instanceof Error) {
+        span.recordException(error);
+      }
+      throw error;
+    } finally {
+      span.end();
+      context.activeSpan = previousActiveSpan;
+    }
+  }
+
+  /**
+   * Gets the currently active span
+   */
+  getActiveSpan(): CustomProtocolSpan | undefined {
+    return this.storage.getStore()?.activeSpan;
+  }
+
+  /**
+   * Builds a protocol trace tree from collected spans
+   */
+  private buildTrace(spans: CustomProtocolSpan[]): ProtocolTrace {
+    const idToNode = new Map<string, ProtocolSpanTreeNode>();
+    const roots: ProtocolSpanTreeNode[] = [];
+
+    // Convert spans to protocol spans and create nodes
+    for (const span of spans) {
+      const protocolSpan = span.toProtocolSpan();
+      idToNode.set(protocolSpan.id, { ...protocolSpan, children: [] });
+    }
+
+    // Build parent-child relationships
+    for (const node of idToNode.values()) {
+      const parentId = node.parentSpanContext?.spanId;
+      if (parentId && idToNode.has(parentId)) {
+        idToNode.get(parentId)?.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+
+    return roots;
+  }
+}
+
+export const protocolContextManager = new ProtocolContextManager();
