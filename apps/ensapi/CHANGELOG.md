@@ -1,5 +1,18 @@
 # ensapi
 
+## 1.3.1
+
+### Patch Changes
+
+- [#1396](https://github.com/namehash/ensnode/pull/1396) [`5d3237d`](https://github.com/namehash/ensnode/commit/5d3237d89f075be7a42d5fddb07b71837993e07a) Thanks [@tk-o](https://github.com/tk-o)! - Fixes SWR Cache management by cleaning up resources on application shutdown.
+
+- Updated dependencies [[`5d3237d`](https://github.com/namehash/ensnode/commit/5d3237d89f075be7a42d5fddb07b71837993e07a)]:
+  - @ensnode/ensnode-sdk@1.3.1
+  - @ensnode/datasources@1.3.1
+  - @ensnode/ensnode-schema@1.3.1
+  - @ensnode/ponder-subgraph@1.3.1
+  - @namehash/ens-referrals@1.3.0
+
 ## 1.3.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "ensapi",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "type": "module",
   "description": "ENSNode's ENS API",
