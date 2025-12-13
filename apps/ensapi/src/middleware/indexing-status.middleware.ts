@@ -40,25 +40,15 @@ export type IndexingStatusMiddlewareVariables = {
  *   to downstream middleware and handlers.
  */
 export const indexingStatusMiddleware = factory.createMiddleware(async (c, next) => {
-  const cachedSnapshot = await indexingStatusCache.readCache();
+  const indexingStatus = await indexingStatusCache.read();
 
-  if (cachedSnapshot === null) {
-    // An indexing status snapshot has never been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive
-    // an `indexingStatus` variable where `isRejected` is `true` and `reason` is the provided `error`.
-    c.set(
-      "indexingStatus",
-      new Error(
-        "Unable to generate a new indexing status projection. No indexing status snapshots have been successfully fetched and stored into cache since service startup. This may indicate the ENSIndexer service is unreachable or in an error state.",
-      ),
-    );
+  if (indexingStatus instanceof Error) {
+    // if indexingStatus was never fetched (and cached), propagate error to consumers
+    c.set("indexingStatus", indexingStatus);
   } else {
-    // An indexing status snapshot has been cached successfully.
-    // Build a p-reflect `PromiseResult` for downstream handlers such that they will receive an
-    // `indexingStatus` variable where `isFulfilled` is `true` and `value` is a {@link RealtimeIndexingStatusProjection} value
-    // generated from the `cachedSnapshot` based on the current time.
+    // otherwise, build realtime indexing status projection
     const now = getUnixTime(new Date());
-    const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot.value, now);
+    const realtimeProjection = createRealtimeIndexingStatusProjection(indexingStatus, now);
     c.set("indexingStatus", realtimeProjection);
   }
 

@@ -26,12 +26,10 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
         logger.warn(
           `ENSIndexer is NOT guaranteed to be within ${maxRealtimeDistance} seconds of realtime. Current indexing status has not been successfully fetched by this ENSApi instance yet and is therefore unknown to this ENSApi instance because: ${c.var.indexingStatus.message}.`,
         );
-        // we log this warning a max of once per `isRealtimeMiddleware` per
-        // ENSApi instance lifecycle since for an ENSApi instance lifecycle,
-        // it's impossible to the indexing status middleware to transition back
-        // to `Error` after becoming `RealtimeIndexingStatusProjection`.
+
         hasLoggedIndexingStatusError = true;
       }
+
       c.set("isRealtime", false);
       return await next();
     }
@@ -49,6 +47,7 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
           `ENSIndexer is NOT guaranteed to be within ${maxRealtimeDistance} seconds of realtime. (Worst Case distance: ${c.var.indexingStatus.worstCaseDistance} seconds > ${maxRealtimeDistance} seconds).`,
         );
       }
+
       lastLoggedIsRealtime = isRealtime;
     }
 

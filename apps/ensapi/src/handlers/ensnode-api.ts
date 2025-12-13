@@ -10,15 +10,12 @@ import {
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
-import { makeLogger } from "@/lib/logger";
 
 import nameTokensApi from "./name-tokens-api";
 import registrarActionsApi from "./registrar-actions-api";
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
-
-const logger = makeLogger("ensnode-api");
 
 // include ENSApi Public Config endpoint
 app.get("/config", async (c) => {
@@ -34,14 +31,6 @@ app.get("/indexing-status", async (c) => {
   }
 
   if (c.var.indexingStatus instanceof Error) {
-    // no indexing status available in context
-    logger.error(
-      {
-        error: c.var.indexingStatus,
-      },
-      "Indexing status requested but is not available in context.",
-    );
-
     return c.json(
       serializeIndexingStatusResponse({
         responseCode: IndexingStatusResponseCodes.Error,

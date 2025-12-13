@@ -26,25 +26,8 @@ export type ReferrerLeaderboardMiddlewareVariables = {
  * to downstream middleware and handlers.
  */
 export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, next) => {
-  const cachedLeaderboard = await referrerLeaderboardCache.readCache();
+  const leaderboard = await referrerLeaderboardCache.read();
 
-  if (cachedLeaderboard === null) {
-    // A referrer leaderboard has never been cached successfully.
-    // Set context variable for downstream handlers such that they will receive
-    // a `referrerLeaderboard` variable holding the provided `error`.
-    c.set(
-      "referrerLeaderboard",
-      new Error(
-        "Unable to generate a new referrer leaderboard. No referrer leaderboards have been successfully fetched and stored into cache since service startup. This may indicate the referrer leaderboard service is unreachable or in an error state.",
-      ),
-    );
-  } else {
-    // A referrer leaderboard has been cached successfully.
-    // Set context variable for downstream handlers such that they will receive a
-    // `referrerLeaderboard` variable holding the {@link ReferrerLeaderboard} value
-    // from `cachedLeaderboard.value`.
-    c.set("referrerLeaderboard", cachedLeaderboard.value);
-  }
-
+  c.set("referrerLeaderboard", leaderboard);
   await next();
 });
