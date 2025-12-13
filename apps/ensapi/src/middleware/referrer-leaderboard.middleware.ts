@@ -28,16 +28,6 @@ export type ReferrerLeaderboardMiddlewareVariables = {
 export const referrerLeaderboardMiddleware = factory.createMiddleware(async (c, next) => {
   const leaderboard = await referrerLeaderboardCache.read();
 
-  if (leaderboard === null) {
-    c.set(
-      "referrerLeaderboard",
-      new Error(
-        "Unable to generate a new referrer leaderboard. No referrer leaderboards have been successfully fetched and stored into cache since service startup. This may indicate the referrer leaderboard service is unreachable or in an error state.",
-      ),
-    );
-  } else {
-    c.set("referrerLeaderboard", leaderboard.value);
-  }
-
+  c.set("referrerLeaderboard", leaderboard);
   await next();
 });

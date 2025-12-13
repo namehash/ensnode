@@ -9,9 +9,9 @@ import type { Duration, UnixTimestamp } from "../types";
  */
 export interface CachedValue<ValueType> {
   /**
-   * The cached value of type ValueType.
+   * The cached result of the fn, either its ValueType or Error.
    */
-  value: ValueType;
+  result: ValueType | Error;
 
   /**
    * Unix timestamp indicating when the cached `value` was generated.
@@ -21,7 +21,8 @@ export interface CachedValue<ValueType> {
 
 export interface SWRCacheOptions<ValueType> {
   /**
-   * The async function generating a value of `ValueType` to wrap with SWR caching.
+   * The async function generating a value of `ValueType` to wrap with SWR caching. It may throw an
+   * Error type.
    */
   fn: () => Promise<ValueType>;
 
@@ -66,6 +67,8 @@ export interface SWRCacheOptions<ValueType> {
  *
  * // Returns cached data or waits for initial fetch
  * const data = await cache.read();
+ *
+ * if (data instanceof Error) { ... }
  * ```
  *
  * @link https://web.dev/stale-while-revalidate/
@@ -73,8 +76,8 @@ export interface SWRCacheOptions<ValueType> {
  */
 export class SWRCache<ValueType> {
   private cache: CachedValue<ValueType> | null = null;
-  private inProgressRevalidate: Promise<CachedValue<ValueType> | null> | null = null;
-  private backgroundInterval: ReturnType<typeof setTimeout> | null = null;
+  private inProgressRevalidate: Promise<void> | null = null;
+  private backgroundInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(private readonly options: SWRCacheOptions<ValueType>) {
     if (options.revalidationInterval) {
@@ -87,47 +90,60 @@ export class SWRCache<ValueType> {
     if (options.proactivelyInitialize) this.revalidate();
   }
 
-  private async revalidate(): Promise<CachedValue<ValueType> | null> {
+  private async revalidate() {
+    // ensure that there is exactly one in progress revalidation promise
     if (!this.inProgressRevalidate) {
       this.inProgressRevalidate = this.options
         .fn()
-        .then((value) => {
+        .then((result) => {
+          // on success, always update the cache with the latest revalidation
           this.cache = {
-            value,
+            result,
             updatedAt: getUnixTime(new Date()),
           };
-          return this.cache;
         })
-        .catch(() => null)
+        .catch((error) => {
+          // on error, only update the cache if this is the first revalidation
+          if (!this.cache) {
+            this.cache = {
+              result: error,
+              updatedAt: getUnixTime(new Date()),
+            };
+          }
+        })
         .finally(() => {
           this.inProgressRevalidate = null;
         });
     }
 
+    // provide it to the caller so that it may be awaited
     return this.inProgressRevalidate;
   }
 
   /**
-   * Read the most recently cached `CachedValue` from the `SWRCache`.
+   * Read the most recently cached result from the `SWRCache`.
    *
-   * @returns a `CachedValue` holding a `value` of `ValueType` that was most recently
-   *          successfully returned by `fn` or `null` if `fn` has never successfully returned.
+   * @returns a `ValueType` that was most recently successfully returned by `fn` or `Error` if `fn`
+   * has never successfully returned.
    */
-  public async read(): Promise<CachedValue<ValueType> | null> {
-    // if no cache, provide caller the in-flight revalidation
-    if (!this.cache) return await this.revalidate();
+  public async read(): Promise<ValueType | Error> {
+    // if no cache, populate the cache by awaiting revalidation
+    if (!this.cache) await this.revalidate();
+
+    // after any revalidation, this.cache is always set
+    // NOTE: not documenting read() as throwable because this is just for typechecking
+    if (!this.cache) throw new Error("never");
 
     // if expired, revalidate in background
     if (durationBetween(this.cache.updatedAt, getUnixTime(new Date())) > this.options.ttl) {
       this.revalidate();
     }
 
-    return this.cache;
+    return this.cache.result;
   }
 
   /**
-   * Clean up background resources. Call this when the cache is no longer needed
-   * to prevent memory leaks.
+   * Destroys the background revalidation interval, if exists.
    */
   public destroy(): void {
     if (this.backgroundInterval) {

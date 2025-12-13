@@ -24,7 +24,7 @@ describe("staleWhileRevalidate", () => {
 
     const result = await cache.read();
 
-    expect(result?.value).toBe("value1");
+    expect(result).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(1); // No extra fetch required for the first read
   });
 
@@ -37,7 +37,7 @@ describe("staleWhileRevalidate", () => {
 
     const result = await cache.read();
 
-    expect(result?.value).toBe("value1");
+    expect(result).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -52,7 +52,7 @@ describe("staleWhileRevalidate", () => {
     vi.advanceTimersByTime(1000); // Advance by 1000ms (1 second)
     const result = await cache.read();
 
-    expect(result?.value).toBe("value1");
+    expect(result).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
@@ -67,7 +67,7 @@ describe("staleWhileRevalidate", () => {
     vi.advanceTimersByTime(3000); // Advance by 3000ms (3 seconds) - stale after >2 seconds
     const result = await cache.read();
 
-    expect(result?.value).toBe("value1");
+    expect(result).toBe("value1");
   });
 
   it("triggers background revalidation after TTL expires", async () => {
@@ -86,7 +86,7 @@ describe("staleWhileRevalidate", () => {
 
     // This should return stale data but trigger revalidation
     const result1 = await cache.read();
-    expect(result1?.value).toBe("value1");
+    expect(result1).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(2);
 
     // Wait for revalidation to complete
@@ -94,7 +94,7 @@ describe("staleWhileRevalidate", () => {
 
     // Next call should have fresh data
     const result2 = await cache.read();
-    expect(result2?.value).toBe("value2");
+    expect(result2).toBe("value2");
   });
 
   it("does not trigger multiple revalidations concurrently", async () => {
@@ -123,9 +123,7 @@ describe("staleWhileRevalidate", () => {
     const promise2 = cache.read();
     const promise3 = cache.read();
 
-    const results = await Promise.all([promise1, promise2, promise3]).then((results) =>
-      results.map((result) => result?.value),
-    );
+    const results = await Promise.all([promise1, promise2, promise3]);
 
     // All should return stale value
     expect(results).toEqual(["value1", "value1", "value1"]);
@@ -161,14 +159,14 @@ describe("staleWhileRevalidate", () => {
 
     // First call after TTL triggers revalidation
     const result1 = await cache.read();
-    expect(result1?.value).toBe("value1");
+    expect(result1).toBe("value1");
 
     // Additional calls while revalidating should still return stale
     const result2 = await cache.read();
     const result3 = await cache.read();
 
-    expect(result2?.value).toBe("value1");
-    expect(result3?.value).toBe("value1");
+    expect(result2).toBe("value1");
+    expect(result3).toBe("value1");
     expect(fn).toHaveBeenCalledTimes(2);
 
     // Complete revalidation
@@ -177,7 +175,7 @@ describe("staleWhileRevalidate", () => {
 
     // Now should have fresh data
     const result4 = await cache.read();
-    expect(result4?.value).toBe("value2");
+    expect(result4).toBe("value2");
   });
 
   it("handles revalidation errors gracefully by keeping stale data", async () => {
@@ -201,14 +199,14 @@ describe("staleWhileRevalidate", () => {
 
     // Should return stale data even though revalidation will fail
     const result1 = await cache.read();
-    expect(result1?.value).toBe("value1");
+    expect(result1).toBe("value1");
 
     // Wait for failed revalidation
     await vi.runAllTimersAsync();
 
     // Should still serve stale data
     const result2 = await cache.read();
-    expect(result2?.value).toBe("value1");
+    expect(result2).toBe("value1");
 
     // Should have attempted revalidation twice (once for each call after stale)
     expect(fn).toHaveBeenCalledTimes(3);
@@ -243,7 +241,7 @@ describe("staleWhileRevalidate", () => {
 
     // Should now have fresh data
     const result = await cache.read();
-    expect(result?.value).toBe("value2");
+    expect(result).toBe("value2");
   });
 
   describe("on fetched callbacks", () => {
@@ -254,9 +252,10 @@ describe("staleWhileRevalidate", () => {
 
       const cache = new SWRCache({ fn, ttl: 1 }); // 1 second
 
-      // Initial fetch should fail and return null
+      // Initial fetch should fail and return Error
       const result = await cache.read();
-      expect(result).toBeNull();
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toBe("Initial fetch failed");
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
@@ -271,16 +270,30 @@ describe("staleWhileRevalidate", () => {
 
       const cache = new SWRCache({ fn, ttl: 1 }); // 1 second
 
-      // Initial fetch fails and returns null
+      // Initial fetch fails and returns Error
       const result1 = await cache.read();
-      expect(result1).toBeNull();
+      expect(result1).toBeInstanceOf(Error);
+      expect((result1 as Error).message).toBe("Initial fetch failed");
       expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance time past TTL to make cached error expire
+      vi.advanceTimersByTime(3000); // 3 seconds > 1 second TTL
 
       // Retry should succeed
       shouldError = false;
+
+      // First call after expiry returns stale error but triggers revalidation
       const result2 = await cache.read();
-      expect(result2?.value).toBe("value1");
+      expect(result2).toBeInstanceOf(Error); // Still returns cached error
       expect(fn).toHaveBeenCalledTimes(2);
+
+      // Wait for revalidation to complete
+      await vi.runAllTimersAsync();
+
+      // Now subsequent read should return the fresh value
+      const result3 = await cache.read();
+      expect(result3).toBe("value1");
+      expect(fn).toHaveBeenCalledTimes(2); // No additional call needed
     });
   });
 

@@ -45,14 +45,13 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
 export const referrerLeaderboardCache = new SWRCache({
   fn: async () => {
     const indexingStatus = await indexingStatusCache.read();
-    if (indexingStatus === null) {
+    if (indexingStatus instanceof Error) {
       throw new Error(
         "Unable to generate referrer leaderboard. indexingStatusCache must have been successfully initialized.",
       );
     }
 
-    const omnichainIndexingStatus = indexingStatus.value.omnichainSnapshot.omnichainStatus;
-
+    const omnichainIndexingStatus = indexingStatus.omnichainSnapshot.omnichainStatus;
     if (!supportedOmnichainIndexingStatuses.includes(omnichainIndexingStatus)) {
       throw new Error(
         `Unable to generate referrer leaderboard. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")} to generate a referrer leaderboard.`,
@@ -60,10 +59,9 @@ export const referrerLeaderboardCache = new SWRCache({
     }
 
     const latestIndexedBlockRef = getLatestIndexedBlockRef(
-      indexingStatus.value,
+      indexingStatus,
       rules.subregistryId.chainId,
     );
-
     if (latestIndexedBlockRef === null) {
       throw new Error(
         `Unable to generate referrer leaderboard. Latest indexed block ref for chain ${rules.subregistryId.chainId} is null.`,
