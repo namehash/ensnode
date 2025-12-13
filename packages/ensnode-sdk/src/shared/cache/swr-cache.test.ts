@@ -295,6 +295,245 @@ describe("staleWhileRevalidate", () => {
       expect(result3).toBe("value1");
       expect(fn).toHaveBeenCalledTimes(2); // No additional call needed
     });
+
+    it("converts non-Error thrown values to Error instances", async () => {
+      const fn = vi.fn(async () => {
+        throw "string error"; // Throw a string instead of Error
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      const result = await cache.read();
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toBe("string error");
+    });
+
+    it("converts null/undefined thrown values to Error instances", async () => {
+      const fn = vi.fn(async () => {
+        throw null; // Throw null
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      const result = await cache.read();
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toBe("null");
+    });
+
+    it("converts object thrown values to Error instances", async () => {
+      const thrownObject = { code: 500, message: "Server error" };
+      const fn = vi.fn(async () => {
+        throw thrownObject;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      const result = await cache.read();
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toBe("[object Object]");
+    });
+
+    it("returns the same Error instance across multiple reads", async () => {
+      const error = new Error("Persistent error");
+      const fn = vi.fn(async () => {
+        throw error;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 2 }); // 2 seconds
+
+      const result1 = await cache.read();
+      const result2 = await cache.read();
+
+      expect(result1).toBe(error);
+      expect(result2).toBe(error);
+      expect(result1).toBe(result2); // Same instance
+      expect(fn).toHaveBeenCalledTimes(1); // Only called once initially
+    });
+
+    it("preserves custom error classes and properties", async () => {
+      class CustomError extends Error {
+        constructor(
+          message: string,
+          public code: number,
+          public details: object,
+        ) {
+          super(message);
+          this.name = "CustomError";
+        }
+      }
+
+      const customError = new CustomError("Custom error message", 500, { key: "value" });
+      const fn = vi.fn(async () => {
+        throw customError;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      const result = await cache.read();
+      expect(result).toBe(customError); // Same instance
+      expect(result).toBeInstanceOf(CustomError);
+      expect((result as CustomError).code).toBe(500);
+      expect((result as CustomError).details).toEqual({ key: "value" });
+      expect((result as Error).message).toBe("Custom error message");
+    });
+
+    it("handles multiple concurrent reads when initial fetch fails", async () => {
+      let resolveInitialFetch: (error: Error) => void;
+      const initialFetchPromise = new Promise<never>((_, reject) => {
+        resolveInitialFetch = reject;
+      });
+
+      const fn = vi.fn(() => initialFetchPromise);
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      // Start multiple concurrent reads
+      const readPromise1 = cache.read();
+      const readPromise2 = cache.read();
+      const readPromise3 = cache.read();
+
+      // Reject the initial fetch
+      const error = new Error("Initial fetch failed");
+      resolveInitialFetch!(error);
+
+      // All reads should return the same error
+      const results = await Promise.all([readPromise1, readPromise2, readPromise3]);
+      expect(results).toEqual([error, error, error]);
+      expect(fn).toHaveBeenCalledTimes(1); // Only one fetch attempt
+    });
+
+    it("handles concurrent reads during revalidation errors", async () => {
+      let shouldSucceed = true;
+      const error = new Error("Revalidation failed");
+      const fn = vi.fn(async () => {
+        if (shouldSucceed) return "initial value";
+        throw error;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      // Initial successful fetch
+      const initialResult = await cache.read();
+      expect(initialResult).toBe("initial value");
+
+      // Advance time to make cache stale
+      vi.advanceTimersByTime(2000);
+
+      // Set up revalidation to fail
+      shouldSucceed = false;
+
+      // Multiple concurrent reads after TTL expiry
+      const readPromise1 = cache.read();
+      const readPromise2 = cache.read();
+      const readPromise3 = cache.read();
+
+      const results = await Promise.all([readPromise1, readPromise2, readPromise3]);
+
+      // All should return the stale successful value (not the error)
+      expect(results).toEqual(["initial value", "initial value", "initial value"]);
+
+      await vi.runAllTimersAsync();
+
+      // After revalidation failure, should still serve stale data
+      const laterResult = await cache.read();
+      expect(laterResult).toBe("initial value");
+    });
+
+    it("recovers successfully after error when function starts working again", async () => {
+      let shouldError = true;
+      const error = new Error("Temporary error");
+      const fn = vi.fn(async () => {
+        if (shouldError) throw error;
+        return "recovered value";
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      // Initial error
+      const result1 = await cache.read();
+      expect(result1).toBe(error);
+
+      // Advance time to make cache stale
+      vi.advanceTimersByTime(2000);
+
+      // Fix the error condition
+      shouldError = false;
+
+      // This should return stale error but trigger revalidation
+      const result2 = await cache.read();
+      expect(result2).toBe(error); // Still stale error
+
+      // Wait for revalidation to complete
+      await vi.runAllTimersAsync();
+
+      // Now should have the recovered value
+      const result3 = await cache.read();
+      expect(result3).toBe("recovered value");
+    });
+
+    it("handles error recovery scenarios correctly", async () => {
+      const initialError = new Error("Initial error");
+      const revalidationError = new Error("Revalidation error");
+
+      let callCount = 0;
+      const fn = vi.fn(async () => {
+        callCount++;
+        if (callCount === 1) throw initialError;
+        if (callCount === 2) throw revalidationError;
+        if (callCount === 3) return "success";
+        throw new Error(`Unexpected call ${callCount}`);
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      // Initial error should be cached and returned
+      const result1 = await cache.read();
+      expect(result1).toBe(initialError);
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance time to make error stale
+      vi.advanceTimersByTime(2000);
+
+      // Should return stale error and trigger revalidation
+      const result2 = await cache.read();
+      expect(result2).toBe(initialError); // Should be stale error
+
+      // Wait for revalidation to complete (it should fail)
+      await vi.runAllTimersAsync();
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      // After failed revalidation, should still return initial error
+      const result3 = await cache.read();
+      expect(result3).toBe(initialError);
+
+      // Advance time again to make error stale for next revalidation
+      vi.advanceTimersByTime(2000);
+
+      // This should trigger successful revalidation
+      await cache.read(); // May return success if revalidation is fast
+      await vi.runAllTimersAsync();
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      // Subsequent read should definitely have the successful value
+      const result5 = await cache.read();
+      expect(result5).toBe("success");
+    });
+
+    it("preserves error details and stack traces", async () => {
+      const originalError = new Error("Original error");
+      originalError.stack = "Original stack trace";
+      (originalError as any).customProperty = "custom value";
+
+      const fn = vi.fn(async () => {
+        throw originalError;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1 });
+
+      const result = await cache.read();
+      expect(result).toBe(originalError);
+      expect((result as Error).stack).toBe("Original stack trace");
+      expect((result as any).customProperty).toBe("custom value");
+    });
   });
 
   describe("proactively initialize", () => {

@@ -106,7 +106,8 @@ export class SWRCache<ValueType> {
           // on error, only update the cache if this is the first revalidation
           if (!this.cache) {
             this.cache = {
-              result: error,
+              // ensure thrown value is always an Error instance
+              result: error instanceof Error ? error : new Error(String(error)),
               updatedAt: getUnixTime(new Date()),
             };
           }
