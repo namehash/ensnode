@@ -19,7 +19,7 @@ import {
   interpretTextRecordValue,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 const tracer = trace.getTracer("resolve-calls-and-results");
 

@@ -4,24 +4,15 @@ import { DiagConsoleLogger, DiagLogLevel, diag } from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import {
-  BatchSpanProcessor,
-  SimpleSpanProcessor,
-  type SpanProcessor,
-} from "@opentelemetry/sdk-trace-node";
+import { BatchSpanProcessor, type SpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
-
-import { ProtocolTraceExporter } from "./protocol-tracing";
 
 // Something broken with OpenTelemetry? enable debug logging with OTEL_DEBUG=anything
 if (process.env.OTEL_DEBUG) {
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
 }
 
-const spanProcessors: SpanProcessor[] = [
-  // NOTE: the SimpleSpanProcessor is mandatory, we want synchronous access to ended spans
-  new SimpleSpanProcessor(ProtocolTraceExporter.singleton()),
-];
+const spanProcessors: SpanProcessor[] = [];
 
 // only export spans to OTel Collector iff OTEL_EXPORTER_OTLP_ENDPOINT is defined
 if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {

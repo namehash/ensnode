@@ -10,8 +10,8 @@ import {
   uniq,
 } from "@ensnode/ensnode-sdk";
 
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
-import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
 
 const tracer = trace.getTracer("multichain-primary-name-resolution");
 
