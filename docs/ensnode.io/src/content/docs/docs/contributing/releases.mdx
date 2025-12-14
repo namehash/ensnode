@@ -31,7 +31,7 @@ Upon the publishing of a new release, your change will be included in the produc
 
 ## Preview Releases
 
-Commits to `main` automatically publish prerelease versions with the `next` dist-tag to NPM. These allow testing of changes before an official release.
+Commits to `main` automatically publish prerelease package versions with the `next` dist-tag to NPM. These enable testing of package changes before an official release.
 
 To manually trigger a preview release for a branch that has not been merged to `main`, follow these steps:
 
@@ -40,5 +40,5 @@ To manually trigger a preview release for a branch that has not been merged to `
 3. Install preview packages with: `npm install @ensnode/package-name@preview-branch-name`
 
 **Important notes:**
-- Preview versions are ephemeral and don't create commits or modify the repository
+- Preview releases are ephemeral and don't create commits or modify the repository
 - No GitHub releases or tags are created for Preview Releases

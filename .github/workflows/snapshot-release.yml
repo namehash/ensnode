@@ -9,7 +9,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   snapshot:
-    name: Publish Snapshot
+    name: Publish Snapshot of Packages to NPM
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main')
     runs-on: blacksmith-4vcpu-ubuntu-2204
     permissions:

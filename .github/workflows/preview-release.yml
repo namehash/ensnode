@@ -8,11 +8,11 @@ on:
         type: string
         required: false
       skip_npm:
-        description: 'Skip NPM publishing'
+        description: 'Skip preview release of packages to NPM'
         type: boolean
         default: false
       skip_docker:
-        description: 'Skip Docker builds'
+        description: 'Skip preview release of docker images to GitHub'
         type: boolean
         default: false
       force_pr_comment:
@@ -61,23 +61,23 @@ jobs:
             BRANCH_SUFFIX="${{ inputs.custom_suffix }}"
           else
             BRANCH_SUFFIX="${{ github.ref_name }}"
-            # Replace / with -
-            BRANCH_SUFFIX="${BRANCH_SUFFIX//\//-}"
-            # Replace special characters with -
-            BRANCH_SUFFIX="${BRANCH_SUFFIX//[^a-zA-Z0-9-]/-}"
-            # Convert to lowercase
-            BRANCH_SUFFIX=$(echo "$BRANCH_SUFFIX" | tr '[:upper:]' '[:lower:]')
-            # Remove consecutive dashes (repeat until no more changes)
-            while [[ "$BRANCH_SUFFIX" =~ --+ ]]; do
-              BRANCH_SUFFIX="${BRANCH_SUFFIX//--/-}"
-            done
-            # Truncate to 30 characters
-            BRANCH_SUFFIX="${BRANCH_SUFFIX:0:30}"
-            # Remove trailing dashes
-            BRANCH_SUFFIX="${BRANCH_SUFFIX%-}"
-            # Remove leading dashes
-            BRANCH_SUFFIX="${BRANCH_SUFFIX#-}"
           fi
+          # Replace / with -
+          BRANCH_SUFFIX="${BRANCH_SUFFIX//\//-}"
+          # Replace special characters with -
+          BRANCH_SUFFIX="${BRANCH_SUFFIX//[^a-zA-Z0-9-]/-}"
+          # Convert to lowercase
+          BRANCH_SUFFIX=$(echo "$BRANCH_SUFFIX" | tr '[:upper:]' '[:lower:]')
+          # Remove consecutive dashes (repeat until no more changes)
+          while [[ "$BRANCH_SUFFIX" =~ --+ ]]; do
+            BRANCH_SUFFIX="${BRANCH_SUFFIX//--/-}"
+          done
+          # Truncate to 30 characters
+          BRANCH_SUFFIX="${BRANCH_SUFFIX:0:30}"
+          # Remove trailing dashes
+          BRANCH_SUFFIX="${BRANCH_SUFFIX%-}"
+          # Remove leading dashes
+          BRANCH_SUFFIX="${BRANCH_SUFFIX#-}"
 
           # Create dist-tag (NPM doesn't allow dots in tags)
           DIST_TAG="preview-${BRANCH_SUFFIX}"
@@ -94,13 +94,13 @@ jobs:
           echo "docker-tag-base=${DOCKER_TAG_BASE}" >> $GITHUB_OUTPUT
           echo "commit-sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
 
-          echo "🏷️  NPM dist-tag: ${DIST_TAG}"
+          echo "🏷️ NPM dist-tag: ${DIST_TAG}"
           echo "📸 Snapshot tag: ${SNAPSHOT_TAG}"
           echo "🐳 Docker tag base: ${DOCKER_TAG_BASE}"
           echo "📝 Commit SHA: ${COMMIT_SHA}"
 
   build-and-publish-npm:
-    name: Build & Publish NPM
+    name: Build & Publish Packages to NPM
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: validate-and-prepare
     if: inputs.skip_npm != true
@@ -140,7 +140,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish packages with changesets
+      - name: Publish packages to NPM with changesets
         id: publish
         run: |
           # Publish with changesets using snapshot mode
@@ -153,14 +153,14 @@ jobs:
           PUBLISHED_VERSION=$(node -p "require('./packages/ensnode-sdk/package.json').version")
           echo "published-version=${PUBLISHED_VERSION}" >> $GITHUB_OUTPUT
 
-          echo "✅ Published packages with version: ${PUBLISHED_VERSION}"
+          echo "✅ Published packages to NPM with version: ${PUBLISHED_VERSION}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  build-docker-images:
-    name: Build Docker Images
+  build-and-publish-ghcr:
+    name: Build & Publish Docker Images to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm]
     if: inputs.skip_docker != true
@@ -177,7 +177,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Build & Push Docker Image
+      - name: Build & Publish Docker Image
         uses: ./.github/actions/build_docker_image
         with:
           image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
@@ -259,7 +259,7 @@ jobs:
           "
           fi
 
-          # Docker section
+          # GHCR section
           if [[ "${{ needs.build-docker-images.result }}" == "success" ]]; then
             COMMENT_BODY+="**Docker Images:**
           \`\`\`bash
@@ -328,7 +328,7 @@ jobs:
           echo "- NPM dist-tag: ${{ needs.validate-and-prepare.outputs.dist-tag }}"
           echo "- Docker tag: ${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}"
           echo "- NPM publish: ${{ needs.build-and-publish-npm.result }}"
-          echo "- Docker build: ${{ needs.build-docker-images.result }}"
+          echo "- GHCR publish: ${{ needs.build-docker-images.result }}"
           echo "- PR detected: ${{ steps.detect-pr.outputs.has-pr }}"
           if [[ "${{ steps.detect-pr.outputs.has-pr }}" == "true" ]]; then
             echo "- PR number: #${{ steps.detect-pr.outputs.pr-number }}"
