@@ -5,16 +5,16 @@ import { durationBetween } from "../datetime";
 import type { Duration, UnixTimestamp } from "../types";
 
 /**
- * Data structure for a single cached value.
+ * Data structure for a single cached result.
  */
-export interface CachedValue<ValueType> {
+interface CachedResult<ValueType> {
   /**
    * The cached result of the fn, either its ValueType or Error.
    */
   result: ValueType | Error;
 
   /**
-   * Unix timestamp indicating when the cached `value` was generated.
+   * Unix timestamp indicating when the cached `result` was generated.
    */
   updatedAt: UnixTimestamp;
 }
@@ -27,23 +27,27 @@ export interface SWRCacheOptions<ValueType> {
   fn: () => Promise<ValueType>;
 
   /**
-   * Time-to-live duration in seconds. After this duration, data in the `SWRCache` is
-   * considered stale but is still retained in the cache until successfully replaced.
+   * Time-to-live duration of a cached result in seconds. After this duration:
+   * - the currently cached result is considered "stale" but is still retained in the cache
+   *   until successfully replaced.
+   * - Each time the cache is read, if the cached result is "stale" and no background
+   *   revalidation attempt is already in progress, a new background revalidation
+   *   attempt will be made.
    */
   ttl: Duration;
 
   /**
-   * Optional time-to-proactively-revalidate duration in seconds. After this duration,
-   * automated attempts to asynchronously revalidate the cached value will be made
-   * in the background on this interval.
+   * Optional time-to-proactively-revalidate duration in seconds. After a cached result is
+   * initialized, and this duration has passed, attempts to asynchronously revalidate
+   * the cached result will be proactively made in the background on this interval.
    */
-  revalidationInterval?: Duration;
+  proactiveRevalidationInterval?: Duration;
 
   /**
    * Optional proactive initialization. Defaults to `false`.
    *
    * If `true`: The SWR cache will proactively initialize itself.
-   * If `false`: The SWR cache will lazily wait to initialize.
+   * If `false`: The SWR cache will lazily wait to initialize itself until the first read.
    */
   proactivelyInitialize?: boolean;
 }
@@ -62,7 +66,7 @@ export interface SWRCacheOptions<ValueType> {
  * const cache = new SWRCache({
  *   fn: async () => fetch('/api/data').then(r => r.json()),
  *   ttl: 60, // 1 minute TTL
- *   revalidationInterval: 300 // revalidate every 5 minutes
+ *   proactiveRevalidationInterval: 300 // proactively revalidate every 5 minutes
  * });
  *
  * // Returns cached data or waits for initial fetch
@@ -75,15 +79,15 @@ export interface SWRCacheOptions<ValueType> {
  * @link https://datatracker.ietf.org/doc/html/rfc5861
  */
 export class SWRCache<ValueType> {
-  private cache: CachedValue<ValueType> | null = null;
+  private cache: CachedResult<ValueType> | null = null;
   private inProgressRevalidate: Promise<void> | null = null;
   private backgroundInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(private readonly options: SWRCacheOptions<ValueType>) {
-    if (options.revalidationInterval) {
+    if (options.proactiveRevalidationInterval) {
       this.backgroundInterval = setInterval(
         () => this.revalidate(),
-        secondsToMilliseconds(options.revalidationInterval),
+        secondsToMilliseconds(options.proactiveRevalidationInterval),
       );
     }
 
@@ -135,7 +139,7 @@ export class SWRCache<ValueType> {
     // NOTE: not documenting read() as throwable because this is just for typechecking
     if (!this.cache) throw new Error("never");
 
-    // if expired, revalidate in background
+    // if ttl expired, revalidate in background
     if (durationBetween(this.cache.updatedAt, getUnixTime(new Date())) > this.options.ttl) {
       this.revalidate();
     }

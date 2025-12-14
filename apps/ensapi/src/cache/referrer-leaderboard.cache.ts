@@ -82,6 +82,6 @@ export const referrerLeaderboardCache = new SWRCache({
     }
   },
   ttl: minutesToSeconds(1),
-  revalidationInterval: minutesToSeconds(2),
+  proactiveRevalidationInterval: minutesToSeconds(2),
   proactivelyInitialize: true,
 });
