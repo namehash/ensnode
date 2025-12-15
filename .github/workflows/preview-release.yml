@@ -7,14 +7,14 @@ on:
         description: 'Custom suffix (overrides branch name)'
         type: string
         required: false
-      skip_npm:
-        description: 'Skip preview release of packages to NPM'
-        type: boolean
-        default: false
-      skip_docker:
-        description: 'Skip preview release of docker images to GitHub'
-        type: boolean
-        default: false
+      publish_target:
+        description: 'Choose to publish just to NPM or NPM + ghcr'
+        type: choice
+        required: true
+        default: 'npm-and-ghcr'
+        options:
+          - npm-only
+          - npm-and-ghcr
 
 concurrency:
   group: prerelease-${{ github.ref_name }}
@@ -99,7 +99,7 @@ jobs:
     name: Build & Publish Packages to NPM
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: validate-and-prepare
-    if: inputs.skip_npm != true
+    if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-ghcr'
     permissions:
       contents: read
       id-token: write
@@ -158,7 +158,7 @@ jobs:
     name: Build & Publish Docker Images to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm]
-    if: inputs.skip_docker != true
+    if: inputs.publish_target == 'npm-and-ghcr'
     permissions:
       contents: read
       packages: write
@@ -186,8 +186,8 @@ jobs:
   detect-pr-and-comment:
     name: Update PR Comment
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    needs: [validate-and-prepare, build-and-publish-npm, build-docker-images]
-    if: always() && (needs.build-and-publish-npm.result == 'success' || needs.build-docker-images.result == 'success')
+    needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr]
+    if: always() && needs.build-and-publish-npm.result == 'success'
     permissions:
       contents: read
       pull-requests: write
@@ -233,7 +233,7 @@ jobs:
 
           "
 
-          # NPM section
+          # NPM section - always present since both options include NPM
           if [[ "${{ needs.build-and-publish-npm.result }}" == "success" ]]; then
             COMMENT_BODY+="**NPM Packages:**
           \`\`\`bash
@@ -254,8 +254,8 @@ jobs:
           "
           fi
 
-          # GHCR section
-          if [[ "${{ needs.build-docker-images.result }}" == "success" ]]; then
+          # GHCR section - only if ghcr was requested and succeeded
+          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" && "${{ needs.build-and-publish-ghcr.result }}" == "success" ]]; then
             COMMENT_BODY+="**Docker Images:**
           \`\`\`bash
           docker pull ghcr.io/namehash/ensnode/ensindexer:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
@@ -265,10 +265,23 @@ jobs:
           \`\`\`
 
           "
+          elif [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" && "${{ needs.build-and-publish-ghcr.result }}" != "success" ]]; then
+            COMMENT_BODY+="**Docker Images:** ❌ Build failed - see [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          "
+          fi
+
+          # Publish target info
+          PUBLISH_TARGET_DISPLAY=""
+          if [[ "${{ inputs.publish_target }}" == "npm-only" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages only"
+          elif [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages + 🐳 Docker images"
           fi
 
           # Build info
           COMMENT_BODY+="**Build Info:**
+          - 🎯 Target: \`${PUBLISH_TARGET_DISPLAY}\`
           - 📦 Version: \`${{ needs.build-and-publish-npm.outputs.published-version }}\`
           - 📝 Commit: \`${{ needs.validate-and-prepare.outputs.commit-sha }}\`
           - 🌿 Branch: \`${{ github.ref_name }}\`
@@ -319,11 +332,14 @@ jobs:
         run: |
           echo "## 📋 Preview Release Summary"
           echo "- Branch: ${{ github.ref_name }}"
+          echo "- Publish target: ${{ inputs.publish_target }}"
           echo "- Published version: ${{ needs.build-and-publish-npm.outputs.published-version }}"
           echo "- NPM dist-tag: ${{ needs.validate-and-prepare.outputs.dist-tag }}"
-          echo "- Docker tag: ${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}"
+          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" ]]; then
+            echo "- Docker tag: ${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}"
+            echo "- GHCR publish: ${{ needs.build-and-publish-ghcr.result }}"
+          fi
           echo "- NPM publish: ${{ needs.build-and-publish-npm.result }}"
-          echo "- GHCR publish: ${{ needs.build-docker-images.result }}"
           echo "- PR detected: ${{ steps.detect-pr.outputs.has-pr }}"
           if [[ "${{ steps.detect-pr.outputs.has-pr }}" == "true" ]]; then
             echo "- PR number: #${{ steps.detect-pr.outputs.pr-number }}"
