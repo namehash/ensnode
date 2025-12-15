@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: ./.github/actions/setup-node-environment
+      - uses: ./.github/actions/setup_node_environment
         with:
           install-dependencies: 'true'
           registry-url: 'https://registry.npmjs.org'

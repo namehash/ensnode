@@ -13,7 +13,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-environment
+      - uses: ./.github/actions/setup_node_environment
       - run: pnpm audit --audit-level=moderate
 
   prepublish:
@@ -21,7 +21,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-environment
+      - uses: ./.github/actions/setup_node_environment
         with:
           install-dependencies: 'true'
       - run: pnpm packages:prepublish
@@ -31,7 +31,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-environment
+      - uses: ./.github/actions/setup_node_environment
         with:
           install-dependencies: 'true'
 
@@ -49,7 +49,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-environment
+      - uses: ./.github/actions/setup_node_environment
         with:
           install-dependencies: 'true'
       - run: pnpm test
@@ -74,7 +74,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node-environment
+      - uses: ./.github/actions/setup_node_environment
         with:
           install-dependencies: 'true'
 
