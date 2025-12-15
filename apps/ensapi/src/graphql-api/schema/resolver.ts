@@ -2,6 +2,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { namehash } from "viem";
 
 import {
+  makePermissionsId,
   makeResolverRecordsId,
   NODE_ANY,
   type RequiredAndNotNull,
@@ -11,10 +12,12 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
+import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { db } from "@/lib/db";
 
@@ -107,6 +110,16 @@ ResolverRef.implement({
       },
     }),
 
+    /////////////////////
+    // Resolver.extended
+    /////////////////////
+    extended: t.field({
+      description: "TODO",
+      type: "Boolean",
+      nullable: false,
+      resolve: (parent) => parent.isExtended,
+    }),
+
     //////////////////////
     // Resolver.dedicated
     //////////////////////
@@ -147,25 +160,26 @@ DedicatedResolverMetadataRef.implement({
     ///////////////////////////
     // DedicatedResolver.owner
     ///////////////////////////
+    // TODO: lookup via PermissionsUser, but isn't this technically an [AccountRef] type?
     // owner: t.field({
     //   description: "TODO",
     //   type: AccountRef,
     //   nullable: true,
     //   // TODO: resolve via EAC
-    //   resolve: (parent) => parent.ownerId,
+    //   resolve: async (parent) => {},
     // }),
 
     /////////////////////////////////
     // DedicatedResolver.permissions
     /////////////////////////////////
     // TODO(EAC) — support DedicatedResolver.permissions after EAC change
-    // permissions: t.field({
-    //   description: "TODO",
-    //   type: PermissionsRef,
-    //   nullable: false,
-    //   // TODO: render a DedicatedResolverPermissions model that parses the backing permissions into dedicated-resolver-semantic roles?
-    //   resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
-    // }),
+    permissions: t.field({
+      description: "TODO",
+      type: PermissionsRef,
+      nullable: false,
+      // TODO: render a DedicatedResolverPermissions model that parses the backing permissions into dedicated-resolver-semantic roles?
+      resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
+    }),
 
     /////////////////////////////
     // Resolver.dedicatedRecords

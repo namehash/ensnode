@@ -94,17 +94,17 @@ export const resolver = onchainTable(
     /**
      * Whether the Resolver implements IExtendedResolver.
      */
-    isExtended: t.boolean().default(false),
+    isExtended: t.boolean().notNull().default(false),
 
     /**
      * Whether the Resolver implements IDedicatedResolver.
      */
-    isDedicated: t.boolean().default(false),
+    isDedicated: t.boolean().notNull().default(false),
 
     /**
      * Whether the Resolver is an Onchain Static Resolver.
      */
-    isStatic: t.boolean().default(false),
+    isStatic: t.boolean().notNull().default(false),
 
     /**
      * Whether the Resolver is an ENSIP19ReverseResolver.
