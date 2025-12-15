@@ -15,10 +15,6 @@ on:
         description: 'Skip preview release of docker images to GitHub'
         type: boolean
         default: false
-      force_pr_comment:
-        description: 'Force PR comment even if no PR detected'
-        type: boolean
-        default: false
 
 concurrency:
   group: prerelease-${{ github.ref_name }}
@@ -191,7 +187,7 @@ jobs:
     name: Update PR Comment
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm, build-docker-images]
-    if: always() && (needs.build-and-publish-npm.result == 'success' || needs.build-docker-images.result == 'success' || inputs.force_pr_comment == true)
+    if: always() && (needs.build-and-publish-npm.result == 'success' || needs.build-docker-images.result == 'success')
     permissions:
       contents: read
       pull-requests: write
@@ -227,7 +223,7 @@ jobs:
 
       - name: Generate comment body
         id: comment
-        if: steps.detect-pr.outputs.has-pr == 'true' || inputs.force_pr_comment == true
+        if: steps.detect-pr.outputs.has-pr == 'true'
         run: |
           # Build timestamp for display
           BUILD_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
