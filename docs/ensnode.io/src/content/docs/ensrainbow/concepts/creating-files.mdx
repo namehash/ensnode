@@ -124,7 +124,8 @@ pnpm run convert-csv \
   --label-set-id <label-set-id> \
   --label-set-version <version-number> \
   [--progress-interval <number>] \
-  [--existing-db-path <path/to/existing/database>]
+  [--existing-db-path <path/to/existing/database>] \
+  [--silent]
 ```
 
 ### Required Parameters
@@ -136,8 +137,9 @@ pnpm run convert-csv \
 ### Optional Parameters
 
 - `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
-- `--progress-interval`: Progress logging frequency (default: 10000 records)
+- `--progress-interval`: Progress logging frequency (default: 50000 records)
 - `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels
+- `--silent`: Disable progress bar (useful for scripts and automated workflows)
 
 ### CSV Format Support
 

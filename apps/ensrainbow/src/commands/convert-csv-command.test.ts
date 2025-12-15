@@ -1,12 +1,15 @@
+import { mkdtemp, rm, stat, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
-import { mkdtemp, rm, stat, writeFile } from "fs/promises";
+
+import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { type LabelSetId, type LabelSetVersion, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { createCLI } from "@/cli";
 import { ENSRainbowDB } from "@/lib/database";
-import { type LabelSetId, type LabelSetVersion, labelHashToBytes } from "@ensnode/ensnode-sdk";
-import { labelhash } from "viem";
+
 import { convertCsvCommand } from "./convert-csv-command";
 
 // Path to test fixtures
@@ -406,10 +409,10 @@ describe("convert-csv-command", () => {
 
       // Verify file was created
       const stats = await stat(outputFile);
-    expect(stats.isFile()).toBe(true);
-    expect(stats.size).toBeGreaterThan(0);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+    });
   });
-});
 
   describe("Streaming performance", () => {
     it("should handle small CSV files efficiently", async () => {

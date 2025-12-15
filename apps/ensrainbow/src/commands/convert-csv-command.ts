@@ -5,15 +5,16 @@
  * Supports 1-column (label only) and 2-column (label,labelhash) formats
  */
 
-import { createReadStream, createWriteStream, statSync } from "fs";
-import { rmSync } from "fs";
+import { createReadStream, createWriteStream, rmSync, statSync } from "fs";
 import { join } from "path";
-import { type LabelHash, labelHashToBytes } from "@ensnode/ensnode-sdk";
+
 import { parse } from "@fast-csv/parse";
-import { labelhash } from "viem";
 import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
-import bloomFilters from "bloom-filters";
+import { labelhash } from "viem";
+
+import { type LabelHash, labelHashToBytes } from "@ensnode/ensnode-sdk";
+
 import { ENSRainbowDB } from "../lib/database.js";
 import { logger } from "../utils/logger.js";
 import {
@@ -28,7 +29,7 @@ function estimateMapMemory(map: Map<string, any>): number {
   let total = 0;
   for (const [key, value] of map) {
     // Rough estimate: key size + value size + Map overhead (48 bytes per entry)
-    total += (key.length * 2) + (typeof value === 'string' ? value.length * 2 : 8) + 48;
+    total += key.length * 2 + (typeof value === "string" ? value.length * 2 : 8) + 48;
   }
   return total;
 }
@@ -38,29 +39,15 @@ function estimateMapMemory(map: Map<string, any>): number {
  */
 class DeduplicationDB {
   private pendingWrites: Map<string, string> = new Map();
-  private bloomFilter: typeof bloomFilters.BloomFilter | null = null;
 
-  constructor(private db: ClassicLevel<string, string>, cacheSize: number = 1000, useBloomFilter: boolean = false, expectedItems: number = 10000000) {
+  constructor(private db: ClassicLevel<string, string>) {
     // No in-memory cache - LevelDB has its own internal cache
-    
-    if (useBloomFilter) {
-      // Create Bloom filter with 0.1% false positive rate
-      this.bloomFilter = bloomFilters.BloomFilter.create(expectedItems, 0.01);
-      logger.info(`Created Bloom filter for ${expectedItems} items (~${(this.bloomFilter.size / 8 / 1024 / 1024).toFixed(2)} MB)`);
-    }
   }
 
   async has(key: string): Promise<boolean> {
     // Check pending writes first (not yet flushed to DB)
     if (this.pendingWrites.has(key)) {
       return true;
-    }
-
-    // Use Bloom filter if available (skip expensive DB lookup)
-    if (this.bloomFilter) {
-      if (!this.bloomFilter.has(key)) {
-        return false;
-      }
     }
 
     // Check database (LevelDB has its own internal cache)
@@ -74,12 +61,7 @@ class DeduplicationDB {
 
   async add(key: string, value: string): Promise<void> {
     this.pendingWrites.set(key, value);
-    
-    // Add to Bloom filter if available
-    if (this.bloomFilter) {
-      this.bloomFilter.add(key);
-    }
-    
+
     // Flush frequently to keep pendingWrites small
     if (this.pendingWrites.size >= 1000) {
       await this.flush();
@@ -95,7 +77,7 @@ class DeduplicationDB {
     }
     await batch.write();
     this.pendingWrites.clear();
-    
+
     // Hint to garbage collector after large batch
     if (global.gc) {
       global.gc();
@@ -107,7 +89,12 @@ class DeduplicationDB {
     await this.db.close();
   }
 
-  getMemoryStats(): { pendingWrites: number; cache: number; pendingWritesMB: number; cacheMB: number } {
+  getMemoryStats(): {
+    pendingWrites: number;
+    cache: number;
+    pendingWritesMB: number;
+    cacheMB: number;
+  } {
     return {
       pendingWrites: this.pendingWrites.size,
       cache: 0, // Cache disabled - using LevelDB's internal cache
@@ -117,20 +104,16 @@ class DeduplicationDB {
   }
 }
 
-
 /**
  * Sets up a simple progress bar that shows speed without total count.
  */
 function setupProgressBar(): ProgressBar {
-  return new ProgressBar(
-    "Processing CSV [:bar] :current lines - :rate lines/sec",
-    {
-      complete: "=",
-      incomplete: " ",
-      width: 40,
-      total: 200000000, // Very large total for big files
-    },
-  );
+  return new ProgressBar("Processing CSV [:bar] :current lines - :rate lines/sec", {
+    complete: "=",
+    incomplete: " ",
+    width: 40,
+    total: 200000000, // Very large total for big files
+  });
 }
 
 /**
@@ -144,10 +127,6 @@ export interface ConvertCsvCommandOptions {
   progressInterval?: number;
   existingDbPath?: string; // Path to existing ENSRainbow database to check for existing labels
   silent?: boolean; // Disable progress bar for tests
-  noDedup?: boolean; // Disable deduplication within CSV file
-  cacheSize?: number; // Cache size for deduplication (default: 10000)
-  useBloomFilter?: boolean; // Use Bloom filter for faster deduplication (default: false)
-  bloomFilterSize?: number; // Expected number of items for Bloom filter (default: 10000000)
 }
 
 // Configuration constants
@@ -242,8 +221,9 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
     const stats = statSync(options.inputFile);
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
     logger.info(`Input file size: ${fileSizeMB} MB`);
-    
-    if (stats.size > 1024 * 1024 * 1024) { // > 1GB
+
+    if (stats.size > 1024 * 1024 * 1024) {
+      // > 1GB
       logger.warn("⚠️  Processing a very large file - using SEQUENTIAL mode.");
       logger.warn("💡 Use --existing-db-path to filter existing labels and speed up processing.");
     }
@@ -352,7 +332,7 @@ async function processRecord(
   // Create protobuf message and write with backpressure handling
   const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
   const buffer = Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish());
-  
+
   // Check if write returns false (buffer full) - if so, wait for drain
   const canContinue = outputStream.write(buffer);
   if (!canContinue) {
@@ -361,7 +341,7 @@ async function processRecord(
     // Wait for drain event before continuing
     // Note: The CSV stream should be paused by the caller when backpressure is detected
     await new Promise<void>((resolve) => {
-      outputStream.once('drain', resolve);
+      outputStream.once("drain", resolve);
     });
   }
 
@@ -417,23 +397,23 @@ async function processCSVFile(
             const chunkTimeSeconds = (chunkTime / 1000).toFixed(2);
             const totalTimeSeconds = (totalElapsed / 1000).toFixed(2);
             const linesPerSecond = ((progressInterval / chunkTime) * 1000).toFixed(0);
-            
+
             lastLoggedLine = lineNumber;
             lastLogTime = currentTime;
-            
+
             const memUsage = process.memoryUsage();
             const memInfo = `RSS=${(memUsage.rss / 1024 / 1024).toFixed(0)}MB, Heap=${(memUsage.heapUsed / 1024 / 1024).toFixed(0)}MB`;
-            
+
             let dedupInfo = "";
             if (dedupDb) {
               const dedupStats = dedupDb.getMemoryStats();
               dedupInfo = ` | Dedup: ${dedupStats.pendingWrites}/${dedupStats.cache}`;
             }
-            
+
             // Use console.log instead of logger to avoid worker thread issues
             console.log(
               `[${new Date().toISOString()}] Line ${lineNumber}, written ${processedRecords} | ` +
-              `${linesPerSecond} lines/sec | ${memInfo}${dedupInfo}`
+                `${linesPerSecond} lines/sec | ${memInfo}${dedupInfo}`,
             );
           }
 
@@ -462,7 +442,6 @@ async function processCSVFile(
           // Done processing - resume for next row
           isProcessing = false;
           csvStream.resume();
-
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           csvStream.destroy();
@@ -507,30 +486,21 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     const { RainbowRecordType, outputStream, existingDb: db } = await initializeConversion(options);
     existingDb = db;
 
-    // Create temporary deduplication database (if not disabled)
-    if (!options.noDedup) {
-      tempDedupDir = join(process.cwd(), 'temp-dedup-' + Date.now());
-      logger.info(`Creating temporary deduplication database at: ${tempDedupDir}`);
-      const tempDb = new ClassicLevel<string, string>(tempDedupDir, {
-        keyEncoding: 'utf8',
-        valueEncoding: 'utf8',
-        createIfMissing: true,
-        // Aggressive memory limits
-        cacheSize: 2 * 1024 * 1024, // 2MB block cache (minimal)
-        writeBufferSize: 4 * 1024 * 1024, // 4MB write buffer (minimal)
-        maxOpenFiles: 100, // Limit open files
-        compression: false, // Disable compression to reduce CPU/memory
-      });
-      await tempDb.open();
-      dedupDb = new DeduplicationDB(
-        tempDb, 
-        options.cacheSize ?? 1000, // Reduced default from 10000 to 1000
-        options.useBloomFilter ?? false,
-        options.bloomFilterSize ?? 10000000
-      );
-    } else {
-      logger.info("Deduplication disabled - processing all records");
-    }
+    // Create temporary deduplication database
+    tempDedupDir = join(process.cwd(), "temp-dedup-" + Date.now());
+    logger.info(`Creating temporary deduplication database at: ${tempDedupDir}`);
+    const tempDb = new ClassicLevel<string, string>(tempDedupDir, {
+      keyEncoding: "utf8",
+      valueEncoding: "utf8",
+      createIfMissing: true,
+      // Aggressive memory limits
+      cacheSize: 2 * 1024 * 1024, // 2MB block cache (minimal)
+      writeBufferSize: 4 * 1024 * 1024, // 4MB write buffer (minimal)
+      maxOpenFiles: 100, // Limit open files
+      compression: false, // Disable compression to reduce CPU/memory
+    });
+    await tempDb.open();
+    dedupDb = new DeduplicationDB(tempDb);
 
     const progressInterval = options.progressInterval ?? DEFAULT_PROGRESS_INTERVAL;
 
@@ -549,16 +519,15 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
       progressBar,
     );
 
-            stats.totalLines = totalLines;
-            stats.processedRecords = processedRecords;
+    stats.totalLines = totalLines;
+    stats.processedRecords = processedRecords;
 
-            // Log final progress for large files
-            if (totalLines > 10_000) {
-              const dedupStatus = options.noDedup ? "dedup disabled" : "LevelDB dedup active";
-              logger.info(
-                `✅ Completed processing ${totalLines.toLocaleString()} lines, wrote ${processedRecords.toLocaleString()} records (${dedupStatus})`,
-              );
-            }
+    // Log final progress for large files
+    if (totalLines > 10_000) {
+      logger.info(
+        `✅ Completed processing ${totalLines.toLocaleString()} lines, wrote ${processedRecords.toLocaleString()} records (LevelDB dedup active)`,
+      );
+    }
 
     // Close output stream
     outputStream.end();

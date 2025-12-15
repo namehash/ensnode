@@ -69,11 +69,7 @@ interface ConvertCsvArgs {
   "label-set-version": LabelSetVersion;
   "progress-interval"?: number;
   "existing-db-path"?: string;
-  "silent"?: boolean;
-  "disable-dedup"?: boolean;
-  "cache-size"?: number;
-  "use-bloom-filter"?: boolean;
-  "bloom-filter-size"?: number;
+  silent?: boolean;
 }
 
 export interface CLIOptions {
@@ -264,37 +260,17 @@ export function createCLI(options: CLIOptions = {}) {
             .option("progress-interval", {
               type: "number",
               description: "Number of records to process before logging progress",
-              default: 10000,
+              default: 50000,
             })
-        .option("existing-db-path", {
-          type: "string",
-          description: "Path to existing ENSRainbow database to filter out existing labels",
-        })
-        .option("silent", {
-          type: "boolean",
-          description: "Disable progress bar (useful for scripts)",
-          default: false,
-        })
-        .option("disable-dedup", {
-          type: "boolean",
-          description: "Disable deduplication within CSV file (faster but may create duplicates)",
-          default: false,
-        })
-        .option("cache-size", {
-          type: "number",
-          description: "Cache size for deduplication (default: 5000)",
-          default: 5000,
-        })
-        .option("use-bloom-filter", {
-          type: "boolean",
-          description: "Use Bloom filter for faster deduplication (default: false)",
-          default: false,
-        })
-        .option("bloom-filter-size", {
-          type: "number",
-          description: "Expected number of items for Bloom filter (default: 10000000)",
-          default: 10000000,
-        });
+            .option("existing-db-path", {
+              type: "string",
+              description: "Path to existing ENSRainbow database to filter out existing labels",
+            })
+            .option("silent", {
+              type: "boolean",
+              description: "Disable progress bar (useful for scripts)",
+              default: false,
+            });
         },
         async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
           await convertCsvCommand({
@@ -302,13 +278,9 @@ export function createCLI(options: CLIOptions = {}) {
             outputFile: argv["output-file"],
             labelSetId: argv["label-set-id"],
             labelSetVersion: argv["label-set-version"],
-          progressInterval: argv["progress-interval"],
-          existingDbPath: argv["existing-db-path"],
-          silent: argv["silent"],
-          noDedup: argv["disable-dedup"],
-            cacheSize: argv["cache-size"],
-            useBloomFilter: argv["use-bloom-filter"],
-            bloomFilterSize: argv["bloom-filter-size"],
+            progressInterval: argv["progress-interval"],
+            existingDbPath: argv["existing-db-path"],
+            silent: argv["silent"],
           });
         },
       )
