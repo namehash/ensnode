@@ -13,10 +13,7 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: useblacksmith/setup-node@v5
-        with:
-          node-version-file: .nvmrc
+      - uses: ./.github/actions/setup-node-environment
       - run: pnpm audit --audit-level=moderate
 
   prepublish:
@@ -24,11 +21,9 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: useblacksmith/setup-node@v5
+      - uses: ./.github/actions/setup-node-environment
         with:
-          node-version-file: .nvmrc
-      - run: pnpm install --frozen-lockfile
+          install-dependencies: 'true'
       - run: pnpm packages:prepublish
 
   static-analysis:
@@ -36,11 +31,9 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: useblacksmith/setup-node@v5
+      - uses: ./.github/actions/setup-node-environment
         with:
-          node-version-file: .nvmrc
-      - run: pnpm install --frozen-lockfile
+          install-dependencies: 'true'
 
       - name: Run Biome CI
         run: pnpm lint:ci
@@ -56,11 +49,9 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: useblacksmith/setup-node@v5
+      - uses: ./.github/actions/setup-node-environment
         with:
-          node-version-file: .nvmrc
-      - run: pnpm install --frozen-lockfile
+          install-dependencies: 'true'
       - run: pnpm test
 
   integrity-check:
@@ -83,11 +74,9 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: useblacksmith/setup-node@v5
+      - uses: ./.github/actions/setup-node-environment
         with:
-          node-version-file: .nvmrc
-      - run: pnpm install --frozen-lockfile
+          install-dependencies: 'true'
 
       # This will run the dev command in background, and wait up to
       # HEALTH_CHECK_TIMEOUT seconds. It will monitor the log output to

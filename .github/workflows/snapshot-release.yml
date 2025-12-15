@@ -23,17 +23,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+      - uses: ./.github/actions/setup-node-environment
         with:
-          node-version-file: .nvmrc
+          install-dependencies: 'true'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: pnpm packages:prepublish
