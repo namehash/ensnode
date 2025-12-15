@@ -1,4 +1,4 @@
-import type { ProtocolTrace } from "@ensnode/ensnode-sdk";
+import type { Trace } from "@ensnode/ensnode-sdk";
 import { ForwardResolutionProtocolStep, ReverseResolutionProtocolStep } from "@ensnode/ensnode-sdk";
 
 const FORWARD_STEPS: Record<ForwardResolutionProtocolStep, { title: string; description: string }> =
@@ -78,6 +78,6 @@ export function getProtocolStepInfo(
   );
 }
 
-export function getTraceDuration(trace: ProtocolTrace) {
+export function getTraceDuration(trace: Trace) {
   return Math.max(...trace.map((span) => span.duration), 0);
 }

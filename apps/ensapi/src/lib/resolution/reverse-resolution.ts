@@ -13,7 +13,10 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
-import { addProtocolStepEvent, withProtocolStep } from "@/lib/tracing/protocol-tracing";
+import {
+  addEnsProtocolStepEvent as addProtocolStepEvent,
+  withEnsProtocolStep as withProtocolStep,
+} from "@/lib/tracing/ens-protocol-tracing-api";
 
 import { resolveForward } from "./forward-resolution";
 

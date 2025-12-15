@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   type AcceleratableResponse,
   ClientError,
-  type ProtocolTrace,
+  type Trace,
   type TraceableResponse,
 } from "@ensnode/ensnode-sdk";
 
@@ -21,7 +21,7 @@ type QueryResult<K extends string> = UseQueryResult<
   { [key in K]: unknown } & AcceleratableResponse & TraceableResponse
 >;
 
-const renderTraceDuration = (trace: ProtocolTrace) => renderMicroseconds(getTraceDuration(trace));
+const renderTraceDuration = (trace: Trace) => renderMicroseconds(getTraceDuration(trace));
 
 const MULTIPLE_THRESHOLD = 1.3; // accelerated requests must be 1.3x faster to be considered green
 
