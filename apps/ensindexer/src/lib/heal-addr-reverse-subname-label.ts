@@ -87,9 +87,6 @@ export async function healAddrReverseSubnameLabel(
     if (healedFromTrace !== null) return healedFromTrace;
   }
 
-  // TODO: this trace-based derivation is failing in ens-test-env for some reason
-  if (config.namespace === "ens-test-env") return "whatever" as LiteralLabel;
-
   // Invariant: by this point, we should have healed all subnames of addr.reverse
   throw new Error(
     `Invariant(healAddrReverseSubnameLabel): Unable to heal the label for subname of addr.reverse with labelHash '${labelHash}'.`,

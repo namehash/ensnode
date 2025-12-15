@@ -158,7 +158,6 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
           }
 
-          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
           const publicClient = getPublicClient(chainId);
 
           ////////////////////////////
@@ -294,8 +293,8 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               }
 
               //////////////////////////////////////////////////
-              // Protocol Acceleration: CCIP-Read Shadow Registry Resolvers
-              //   If the activeResolver is a CCIP-Read Shadow Registry Resolver,
+              // Protocol Acceleration: Bridged Resolvers
+              //   If the activeResolver is a Bridged Resolver,
               //   then we can short-circuit the CCIP-Read and defer resolution to the indicated (shadow)Registry.
               //////////////////////////////////////////////////
               if (

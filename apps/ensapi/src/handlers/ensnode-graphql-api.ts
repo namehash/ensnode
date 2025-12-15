@@ -15,7 +15,7 @@ const logger = makeLogger("ensnode-graphql");
 const yoga = createYoga({
   graphqlEndpoint: "*",
   schema,
-  context: async () => ({
+  context: () => ({
     // generate a bigint UnixTimestamp per-request for handlers to use
     now: BigInt(getUnixTime(new Date())),
   }),
