@@ -26,8 +26,6 @@ jobs:
           fetch-depth: 1
 
       - uses: ./.github/actions/setup_node_environment
-        with:
-          install-dependencies: 'true'
 
       - name: Create Release Pull Request or Publish to npm
         uses: changesets/action@v1.4.10

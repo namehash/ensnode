@@ -22,8 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
-        with:
-          install-dependencies: 'true'
       - run: pnpm packages:prepublish
 
   static-analysis:
@@ -32,8 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
-        with:
-          install-dependencies: 'true'
 
       - name: Run Biome CI
         run: pnpm lint:ci
@@ -50,8 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
-        with:
-          install-dependencies: 'true'
       - run: pnpm test
 
   integrity-check:
@@ -75,8 +69,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
-        with:
-          install-dependencies: 'true'
 
       # This will run the dev command in background, and wait up to
       # HEALTH_CHECK_TIMEOUT seconds. It will monitor the log output to
