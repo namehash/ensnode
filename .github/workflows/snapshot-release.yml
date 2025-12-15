@@ -56,7 +56,6 @@ jobs:
         run: pnpm changeset-publish:next
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   build-and-push-snapshot-docker-images:
