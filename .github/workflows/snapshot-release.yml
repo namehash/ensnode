@@ -58,8 +58,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  build-and-push-snapshot-docker-images:
-    name: Build Snapshot Docker Images
+  build-and-publish-ghcr:
+    name: Build & Publish Snapshot Docker Imagess to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
     needs: [snapshot]
