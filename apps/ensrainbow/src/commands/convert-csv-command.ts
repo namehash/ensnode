@@ -274,13 +274,22 @@ function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string 
     };
   } else {
     // Two columns: validate and use provided hash
-    const providedHash = String(row[1]);
+    // Trim whitespace from hash (metadata), but preserve label as-is
+    const providedHash = String(row[1]).trim();
+    if (providedHash === "") {
+      throw new Error("LabelHash cannot be empty");
+    }
     const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
-    const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
-    return {
-      labelhash: Buffer.from(labelHash),
-      label: label,
-    };
+    try {
+      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
+      return {
+        labelhash: Buffer.from(labelHash),
+        label: label,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Invalid labelHash: ${errorMessage}`);
+    }
   }
 }
 
@@ -373,6 +382,14 @@ async function processCSVFile(
   return new Promise((resolve, reject) => {
     const csvStream = parse(); // Sequential processing via pause/resume
     let isProcessing = false;
+    let streamEnded = false;
+
+    const checkAndResolve = () => {
+      if (streamEnded && !isProcessing) {
+        logger.info(`Sequential processing complete`);
+        resolve({ totalLines: lineNumber, processedRecords });
+      }
+    };
 
     csvStream
       .on("data", async (row: string[]) => {
@@ -383,7 +400,16 @@ async function processCSVFile(
         lineNumber++;
 
         try {
-          // Detect column count on first row
+          // Skip empty rows (no columns or all empty strings)
+          const isEmptyRow = row.length === 0 || row.every((cell) => cell === "");
+          if (isEmptyRow) {
+            isProcessing = false;
+            csvStream.resume();
+            checkAndResolve();
+            return;
+          }
+
+          // Detect column count on first non-empty row
           if (expectedColumns === null) {
             expectedColumns = row.length;
             logger.info(`Detected ${expectedColumns} columns - SEQUENTIAL processing mode`);
@@ -442,6 +468,7 @@ async function processCSVFile(
           // Done processing - resume for next row
           isProcessing = false;
           csvStream.resume();
+          checkAndResolve();
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           csvStream.destroy();
@@ -453,8 +480,8 @@ async function processCSVFile(
         reject(new Error(`CSV parsing error: ${error.message}`));
       })
       .on("end", () => {
-        logger.info(`Sequential processing complete`);
-        resolve({ totalLines: lineNumber, processedRecords });
+        streamEnded = true;
+        checkAndResolve();
       });
 
     fileStream
@@ -537,7 +564,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     logger.info("✅ CSV conversion completed successfully!");
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logger.error("❌ CSV conversion failed:", errorMessage);
+    logger.error(`❌ CSV conversion failed: ${errorMessage}`);
     throw error;
   } finally {
     // Clean up deduplication database

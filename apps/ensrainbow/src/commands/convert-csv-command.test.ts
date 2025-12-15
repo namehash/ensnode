@@ -110,7 +110,7 @@ describe("convert-csv-command", () => {
           labelSetId: "test-csv-invalid" as LabelSetId,
           labelSetVersion: 0 as LabelSetVersion,
         }),
-      ).rejects.toThrow(/CSV conversion failed due to invalid data/);
+      ).rejects.toThrow(/Failed on line 1: Invalid labelHash/);
     });
 
     it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
@@ -167,7 +167,7 @@ describe("convert-csv-command", () => {
           labelSetId: "test-csv-invalid-hash" as LabelSetId,
           labelSetVersion: 0 as LabelSetVersion,
         }),
-      ).rejects.toThrow(/CSV conversion failed due to invalid data/);
+      ).rejects.toThrow(/Failed on line 2: Invalid labelHash/);
     });
   });
 
