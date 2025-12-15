@@ -1,13 +1,13 @@
 import type { Address } from "viem";
 import { describe, expect, it, vi } from "vitest";
 
-import type { ReferrerLeaderboard } from "./leaderboard.ts";
+import type { ReferrerLeaderboard } from "./leaderboard";
 import {
   buildReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageContext,
   type ReferrerLeaderboardPageParams,
-} from "./leaderboard-page.ts";
-import type { AwardedReferrerMetrics } from "./referrer-metrics.ts";
+} from "./leaderboard-page";
+import type { AwardedReferrerMetrics } from "./referrer-metrics";
 
 describe("buildReferrerLeaderboardPageContext", () => {
   const pageParams: ReferrerLeaderboardPageParams = {

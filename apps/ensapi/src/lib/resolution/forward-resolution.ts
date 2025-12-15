@@ -1,7 +1,7 @@
 import config from "@/config";
 
 import { trace } from "@opentelemetry/api";
-import { replaceBigInts } from "ponder";
+import { replaceBigInts } from "@ponder/utils";
 import { namehash } from "viem";
 import { normalize } from "viem/ens";
 
@@ -19,6 +19,7 @@ import {
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import { ENS_ROOT_REGISTRY } from "@/lib/protocol-acceleration/ens-root-registry";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
@@ -40,8 +41,10 @@ import {
 } from "@/lib/resolution/resolve-calls-and-results";
 import { supportsENSIP10Interface } from "@/lib/rpc/ensip-10";
 import { getPublicClient } from "@/lib/rpc/public-client";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
-import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
+import {
+  addEnsProtocolStepEvent,
+  withEnsProtocolStep,
+} from "@/lib/tracing/ens-protocol-tracing-api";
 
 const logger = makeLogger("forward-resolution");
 const tracer = trace.getTracer("forward-resolution");
@@ -109,7 +112,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
   const selectionString = JSON.stringify(selection);
 
   // trace for external consumers
-  return withProtocolStepAsync(
+  return withEnsProtocolStep(
     TraceableENSProtocol.ForwardResolution,
     ForwardResolutionProtocolStep.Operation,
     { name, selection: selectionString, chainId, accelerate },
@@ -157,26 +160,24 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // 1. Identify the active resolver for the name on the specified chain.
           //////////////////////////////////////////////////
 
-          // create an un-cached viem#PublicClient separate from ponder's cached/logged clients
           const publicClient = getPublicClient(chainId);
 
-          const { activeName, activeResolver, requiresWildcardSupport } =
-            await withProtocolStepAsync(
-              TraceableENSProtocol.ForwardResolution,
-              ForwardResolutionProtocolStep.FindResolver,
-              { name, chainId },
-              () =>
-                findResolver({
-                  registry: options.registry,
-                  name,
-                  accelerate,
-                  canAccelerate,
-                  publicClient,
-                }),
-            );
+          const { activeName, activeResolver, requiresWildcardSupport } = await withEnsProtocolStep(
+            TraceableENSProtocol.ForwardResolution,
+            ForwardResolutionProtocolStep.FindResolver,
+            { name, chainId },
+            () =>
+              findResolver({
+                registry: options.registry,
+                name,
+                accelerate,
+                canAccelerate,
+                publicClient,
+              }),
+          );
 
           // 1.2 Determine whether active resolver exists
-          addProtocolStepEvent(
+          addEnsProtocolStepEvent(
             protocolTracingSpan,
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.ActiveResolverExists,
@@ -217,7 +218,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             );
 
             if (canAccelerate && activeResolverIsKnownENSIP19ReverseResolver) {
-              return withProtocolStepAsync(
+              return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
                 {},
@@ -275,7 +276,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
             });
 
             if (canAccelerate && defersToRegistry !== null) {
-              return withProtocolStepAsync(
+              return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
                 {},
@@ -283,7 +284,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               );
             }
 
-            addProtocolStepEvent(
+            addEnsProtocolStepEvent(
               protocolTracingSpan,
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
@@ -318,7 +319,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               resolverRecordsAreIndexed &&
               activeResolverIsKnownOnchainStaticResolver
             ) {
-              return withProtocolStepAsync(
+              return withEnsProtocolStep(
                 TraceableENSProtocol.ForwardResolution,
                 ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
                 {},
@@ -341,7 +342,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
               );
             }
 
-            addProtocolStepEvent(
+            addEnsProtocolStepEvent(
               protocolTracingSpan,
               TraceableENSProtocol.ForwardResolution,
               ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
@@ -356,7 +357,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           //////////////////////////////////////////////////
 
           // 3.1 requireResolver() — verifies that the resolver supports ENSIP-10 if necessary
-          const isExtendedResolver = await withProtocolStepAsync(
+          const isExtendedResolver = await withEnsProtocolStep(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.RequireResolver,
             { chainId, activeResolver, requiresWildcardSupport },
@@ -382,7 +383,7 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           }
 
           // execute each record's call against the active Resolver
-          const rawResults = await withProtocolStepAsync(
+          const rawResults = await withEnsProtocolStep(
             TraceableENSProtocol.ForwardResolution,
             ForwardResolutionProtocolStep.ExecuteResolveCalls,
             {},

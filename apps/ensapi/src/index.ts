@@ -12,8 +12,8 @@ import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
+import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
-import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -32,7 +32,6 @@ app.use(async (ctx, next) => {
 app.use(cors({ origin: "*" }));
 
 // include automatic OpenTelemetry instrumentation for incoming requests
-// NOTE: required for protocol tracing
 app.use(otel());
 
 // add ENSIndexer Indexing Status Middleware to all routes for convenience
