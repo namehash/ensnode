@@ -11,13 +11,13 @@ import type {
   Duration,
 } from "./types";
 import {
+  makeAccountIdStringSchema,
   makeBlockNumberSchema,
   makeBlockRefSchema,
   makeBlockrangeSchema,
   makeChainIdStringSchema,
   makeDatetimeSchema,
   makeDurationSchema,
-  makeSerializedAccountIdSchema,
   makeUnixTimestampSchema,
   makeUrlSchema,
 } from "./zod-schemas";
@@ -113,8 +113,8 @@ export function deserializeDuration(maybeDuration: unknown, valueLabel?: string)
   return parsed.data;
 }
 
-export function deserializeAccountId(maybeAccountId: unknown, valueLabel?: string): AccountId {
-  const schema = makeSerializedAccountIdSchema(valueLabel);
+export function parseAccountId(maybeAccountId: unknown, valueLabel?: string): AccountId {
+  const schema = makeAccountIdStringSchema(valueLabel);
   const parsed = schema.safeParse(maybeAccountId);
 
   if (parsed.error) {

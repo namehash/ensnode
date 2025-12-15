@@ -25,7 +25,7 @@ import {
 
 import { sortByArrayOrder } from "@/graphql-api/lib/sort-by-array-order";
 import { db } from "@/lib/db";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 type FindResolverResult =
   | {

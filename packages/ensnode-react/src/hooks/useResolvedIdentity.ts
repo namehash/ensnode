@@ -2,6 +2,7 @@
 
 import {
   type ENSNamespaceId,
+  ENSNamespaceIds,
   getResolvePrimaryNameChainIdParam,
   type Identity,
   type NamedIdentity,
@@ -12,19 +13,9 @@ import {
   type UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
 
+import type { UseResolvedIdentityParameters } from "../types";
+import { useENSNodeConfig } from "./useENSNodeConfig";
 import { usePrimaryName } from "./usePrimaryName";
-
-// TODO: `namespaceId` ideally would not be a parameter for this hook.
-//       Ideally it should come from the active namespace context and be a nested hook within this hook.
-//       However, currently this hook lives in ENSAdmin and not in `ensnode-react`.
-/**
- * Parameters for the useResolvedIdentity hook.
- */
-export interface UseResolvedIdentityParameters {
-  identity: UnresolvedIdentity;
-  namespaceId: ENSNamespaceId;
-  accelerate?: boolean;
-}
 
 /**
  * Hook to perform ENSIP-19 primary name resolution to resolve an
@@ -48,7 +39,10 @@ export interface UseResolvedIdentityParameters {
  * - All other properties from the underlying {@link usePrimaryName} query (e.g., `isLoading`, `error`, `refetch`, etc.)
  */
 export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
-  const { identity, namespaceId, accelerate, ...args } = parameters;
+  const { identity, accelerate, query: _query = {} } = parameters;
+
+  const { data } = useENSNodeConfig();
+  const namespace = data?.ensIndexerPublicConfig.namespace;
 
   const {
     data: primaryNameData,
@@ -56,9 +50,16 @@ export function useResolvedIdentity(parameters: UseResolvedIdentityParameters) {
     ...query
   } = usePrimaryName({
     address: identity.address,
-    chainId: getResolvePrimaryNameChainIdParam(identity.chainId, namespaceId),
+    chainId: getResolvePrimaryNameChainIdParam(
+      identity.chainId,
+      // NOTE: defaulting here for typechecking, but enabled prevents fetching before namespace is known
+      namespace ?? ENSNamespaceIds.Mainnet,
+    ),
     accelerate,
-    ...args,
+    query: {
+      ..._query,
+      enabled: (_query.enabled ?? true) && namespace !== undefined,
+    },
   });
 
   let result: Identity;

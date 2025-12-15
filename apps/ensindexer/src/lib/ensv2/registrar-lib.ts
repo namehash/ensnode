@@ -4,13 +4,13 @@ import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
   type AccountId,
   accountIdEqual,
+  getDatasourceContract,
   type InterpretedName,
   type LabelHash,
+  maybeGetDatasourceContract,
   type Name,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
-
-import { getDatasourceContract, maybeGetDatasourceContract } from "@/lib/datasource-helpers";
 
 const ethnamesNameWrapper = getDatasourceContract(
   config.namespace,

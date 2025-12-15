@@ -1,5 +1,29 @@
 # @ensnode/ensnode-sdk
 
+## 1.3.0
+
+### Minor Changes
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Includes support for strigifying/parsing, and serializing/deserializing the following types: `AssetId`, `AccountId`.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Updates serialization and deserialization methods for `AccountId` type.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `name-token` submodule to `api` module.
+
+- [#1379](https://github.com/namehash/ensnode/pull/1379) [`4bc9e82`](https://github.com/namehash/ensnode/commit/4bc9e82c288157fe29d00157160ae01517255728) Thanks [@Goader](https://github.com/Goader)! - Extended the `registrar-actions` endpoint to support filtering by `decodedReferrer` and pagination.
+
+- [#1382](https://github.com/namehash/ensnode/pull/1382) [`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137) Thanks [@Goader](https://github.com/Goader)! - Renamed `itemsPerPage` to `recordsPerPage` and `paginationContext` to `pageContext` in referrer leaderboard APIs to align with registrar actions terminology.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Introduces the `NameToken` concept to `tokenscope` module.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Implements `nameTokens` method on `ENSNodeClient`.
+
+### Patch Changes
+
+- Updated dependencies [[`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137)]:
+  - @namehash/ens-referrals@1.3.0
+  - @ensnode/datasources@1.3.0
+
 ## 1.2.0
 
 ### Minor Changes

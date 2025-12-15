@@ -28,6 +28,7 @@ export function serializeRegistrarActionsResponse(
       return {
         responseCode: response.responseCode,
         registrarActions: response.registrarActions.map(serializeNamedRegistrarAction),
+        pageContext: response.pageContext,
       } satisfies SerializedRegistrarActionsResponseOk;
 
     case RegistrarActionsResponseCodes.Error:

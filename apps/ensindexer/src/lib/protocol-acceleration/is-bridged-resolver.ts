@@ -1,9 +1,7 @@
 import config from "@/config";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import type { AccountId } from "@ensnode/ensnode-sdk";
-
-import { getDatasourceContract, makeContractMatcher } from "@/lib/datasource-helpers";
+import { type AccountId, getDatasourceContract, makeContractMatcher } from "@ensnode/ensnode-sdk";
 
 /**
  * For a given `resolver`, if it is a known Bridged Resolver, return the

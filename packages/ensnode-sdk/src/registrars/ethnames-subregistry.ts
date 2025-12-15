@@ -1,5 +1,11 @@
-import { DatasourceNames, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
+import {
+  DatasourceNames,
+  type ENSNamespaceId,
+  ENSNamespaceIds,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
 
+import type { Name } from "../ens";
 import type { AccountId } from "../shared";
 
 /**
@@ -25,4 +31,19 @@ export function getEthnamesSubregistryId(namespace: ENSNamespaceId): AccountId {
     chainId: datasource.chain.id,
     address,
   };
+}
+
+/**
+ * Get the managed name for the Ethnames subregistry for the selected ENS namespace.
+ *
+ * @param namespaceId
+ * @returns registrar managed name
+ */
+export function getEthnamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
+  switch (namespaceId) {
+    case ENSNamespaceIds.Mainnet:
+    case ENSNamespaceIds.Sepolia:
+    case ENSNamespaceIds.EnsTestEnv:
+      return "eth";
+  }
 }

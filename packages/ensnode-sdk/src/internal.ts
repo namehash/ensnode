@@ -33,3 +33,4 @@ export * from "./shared/interpretation/interpret-record-values";
 export * from "./shared/log-level";
 export * from "./shared/zod-schemas";
 export * from "./shared/zod-types";
+export * from "./tokenscope/zod-schemas";

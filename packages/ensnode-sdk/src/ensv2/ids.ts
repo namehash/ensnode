@@ -1,4 +1,4 @@
-import type { Node, SerializedAccountId } from "@ensnode/ensnode-sdk";
+import type { AccountIdString, Node } from "@ensnode/ensnode-sdk";
 
 /**
  * Serialized CAIP-10 Asset ID that uniquely identifies a Registry contract.
@@ -28,7 +28,7 @@ export type DomainId = ENSv1DomainId | ENSv2DomainId;
 /**
  * Uniquely identifies a Permissions entity.
  */
-export type PermissionsId = SerializedAccountId & { __brand: "PermissionsId" };
+export type PermissionsId = AccountIdString & { __brand: "PermissionsId" };
 
 /**
  * Uniquely identifies a PermissionsResource entity.
@@ -43,7 +43,7 @@ export type PermissionsUserId = string & { __brand: "PermissionsUserId" };
 /**
  * Uniquely identifies a Resolver entity.
  */
-export type ResolverId = SerializedAccountId & { __brand: "ResolverId" };
+export type ResolverId = AccountIdString & { __brand: "ResolverId" };
 
 /**
  * Uniquely identifies a ResolverRecords entity.

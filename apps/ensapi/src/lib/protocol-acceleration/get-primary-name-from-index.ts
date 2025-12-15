@@ -9,7 +9,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import { withSpanAsync } from "@/lib/tracing/auto-span";
+import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 
 const tracer = trace.getTracer("get-primary-name");
 

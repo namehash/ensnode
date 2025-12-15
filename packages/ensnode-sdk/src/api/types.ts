@@ -13,7 +13,7 @@ import type {
   ReverseResolutionArgs,
   ReverseResolutionResult,
 } from "../resolution";
-import type { ProtocolTrace } from "../tracing";
+import type { TracingTrace } from "../tracing";
 import type { ErrorResponseSchema } from "./shared/errors/zod-schemas";
 
 /**
@@ -26,7 +26,7 @@ export interface TraceableRequest {
 }
 
 export interface TraceableResponse {
-  trace?: ProtocolTrace;
+  trace?: TracingTrace;
 }
 
 export interface AcceleratableRequest {

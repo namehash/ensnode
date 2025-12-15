@@ -1,6 +1,9 @@
 import z from "zod/v4";
 
 import {
+  buildPageContext,
+  RECORDS_PER_PAGE_DEFAULT,
+  RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
@@ -9,7 +12,11 @@ import {
   registrarActionsFilter,
   serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
-import { makeNodeSchema, makePositiveIntegerSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  makeLowercaseAddressSchema,
+  makeNodeSchema,
+  makePositiveIntegerSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -25,9 +32,6 @@ const logger = makeLogger("registrar-actions-api");
 // Middleware managing access to Registrar Actions API routes.
 // It makes the routes available if all prerequisites are met.
 app.use(registrarActionsApiMiddleware);
-
-const RESPONSE_ITEMS_PER_PAGE_DEFAULT = 25;
-const RESPONSE_ITEMS_PER_PAGE_MAX = 100;
 
 /**
  * Get Registrar Actions
@@ -49,8 +53,9 @@ const RESPONSE_ITEMS_PER_PAGE_MAX = 100;
  *
  * Responds with:
  * - 400 error response for bad input, such as:
- *   - (if provided) `limit` search param is not
- *     a positive integer <= {@link RESPONSE_ITEMS_PER_PAGE_MAX}.
+ *   - (if provided) `page` search param is not a positive integer.
+ *   - (if provided) `recordsPerPage` search param is not
+ *     a positive integer <= {@link RECORDS_PER_PAGE_MAX}.
  *   - (if provided) `orderBy` search param is not part of {@link RegistrarActionsOrders}.
  * - 500 error response for cases such as:
  *   - Connected ENSNode has not all required plugins set to active.
@@ -74,19 +79,27 @@ app.get(
         .enum(RegistrarActionsOrders)
         .default(RegistrarActionsOrders.LatestRegistrarActions),
 
-      itemsPerPage: params.queryParam
+      page: params.queryParam
         .optional()
-        .default(RESPONSE_ITEMS_PER_PAGE_DEFAULT)
+        .default(1)
         .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema().max(RESPONSE_ITEMS_PER_PAGE_MAX)),
+        .pipe(makePositiveIntegerSchema("page")),
+
+      recordsPerPage: params.queryParam
+        .optional()
+        .default(RECORDS_PER_PAGE_DEFAULT)
+        .pipe(z.coerce.number())
+        .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX)),
 
       withReferral: params.boolstring.optional().default(false),
+
+      decodedReferrer: makeLowercaseAddressSchema("decodedReferrer").optional(),
     }),
   ),
   async (c) => {
     try {
       const { parentNode } = c.req.valid("param");
-      const { orderBy, itemsPerPage, withReferral } = c.req.valid("query");
+      const { orderBy, page, recordsPerPage, withReferral, decodedReferrer } = c.req.valid("query");
 
       const filters: RegistrarActionsFilter[] = [];
 
@@ -98,18 +111,30 @@ app.get(
         filters.push(registrarActionsFilter.withReferral(true));
       }
 
-      // Find the latest "logical registrar actions".
-      const registrarActions = await findRegistrarActions({
+      if (decodedReferrer) {
+        filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
+      }
+
+      // Calculate offset from page and recordsPerPage
+      const offset = (page - 1) * recordsPerPage;
+
+      // Find the latest "logical registrar actions" with pagination
+      const { registrarActions, totalRecords } = await findRegistrarActions({
         filters,
         orderBy,
-        limit: itemsPerPage,
+        limit: recordsPerPage,
+        offset,
       });
+
+      // Build page context
+      const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
 
       // respond with success response
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Ok,
           registrarActions,
+          pageContext,
         } satisfies RegistrarActionsResponseOk),
       );
     } catch (error) {

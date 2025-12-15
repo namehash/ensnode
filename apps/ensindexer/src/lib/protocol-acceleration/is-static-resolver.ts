@@ -1,9 +1,7 @@
 import config from "@/config";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import type { AccountId } from "@ensnode/ensnode-sdk";
-
-import { makeContractMatcher } from "@/lib/datasource-helpers";
+import { type AccountId, makeContractMatcher } from "@ensnode/ensnode-sdk";
 
 /**
  * Returns whether `resolver` is an Static Resolver.

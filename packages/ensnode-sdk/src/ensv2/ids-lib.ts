@@ -3,10 +3,10 @@ import { type Address, hexToBigInt } from "viem";
 import {
   type AccountId,
   AssetNamespaces,
+  formatAccountId,
+  formatAssetId,
   type LabelHash,
   type Node,
-  serializeAccountId,
-  serializeAssetId,
 } from "@ensnode/ensnode-sdk";
 
 import type {
@@ -24,9 +24,9 @@ import type {
 } from "./ids";
 
 /**
- * Serializes and brands an AccountId as a RegistryId.
+ * Formats and brands an AccountId as a RegistryId.
  */
-export const makeRegistryId = (accountId: AccountId) => serializeAccountId(accountId) as RegistryId;
+export const makeRegistryId = (accountId: AccountId) => formatAccountId(accountId) as RegistryId;
 
 /**
  * Makes an ENSv1 Domain Id given the ENSv1 Domain's `node`
@@ -37,7 +37,7 @@ export const makeENSv1DomainId = (node: Node) => node as ENSv1DomainId;
  * Makes an ENSv2 Domain Id given the parent `registry` and the domain's `canonicalId`.
  */
 export const makeENSv2DomainId = (registry: AccountId, canonicalId: CanonicalId) =>
-  serializeAssetId({
+  formatAssetId({
     assetNamespace: AssetNamespaces.ERC1155,
     contract: registry,
     tokenId: canonicalId,
@@ -57,10 +57,10 @@ export const getCanonicalId = (input: bigint | LabelHash): CanonicalId => {
 };
 
 /**
- * Serializes and brands an AccountId as a PermissionsId.
+ * Formats and brands an AccountId as a PermissionsId.
  */
 export const makePermissionsId = (contract: AccountId) =>
-  serializeAccountId(contract) as PermissionsId;
+  formatAccountId(contract) as PermissionsId;
 
 /**
  * Constructs a PermissionsResourceId for a given `contract`'s `resource`.
@@ -75,9 +75,9 @@ export const makePermissionsUserId = (contract: AccountId, resource: bigint, use
   `${makePermissionsId(contract)}/${resource}/${user}` as PermissionsUserId;
 
 /**
- * Serializes and brands an AccountId as a ResolverId.
+ * Formats and brands an AccountId as a ResolverId.
  */
-export const makeResolverId = (contract: AccountId) => serializeAccountId(contract) as ResolverId;
+export const makeResolverId = (contract: AccountId) => formatAccountId(contract) as ResolverId;
 
 /**
  * Constructs a ResolverRecordsId for a given `node` under `resolver`.

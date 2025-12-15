@@ -1,9 +1,7 @@
 import config from "@/config";
 
 import { DatasourceNames } from "@ensnode/datasources";
-import type { AccountId } from "@ensnode/ensnode-sdk";
-
-import { makeContractMatcher } from "@/lib/datasource-helpers";
+import { type AccountId, makeContractMatcher } from "@ensnode/ensnode-sdk";
 
 /**
  * ENSIP-19 Reverse Resolvers (i.e. DefaultReverseResolver or ChainReverseResolver) simply:

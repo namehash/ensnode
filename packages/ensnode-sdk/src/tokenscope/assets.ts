@@ -1,7 +1,90 @@
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
+import { prettifyError } from "zod/v4";
 
-import type { Node } from "../ens";
-import { type AssetId, type ChainId, serializeAssetId } from "../shared";
+import { type Node, uint256ToHex32 } from "../ens";
+import {
+  type AccountId,
+  type AssetId,
+  type AssetNamespace,
+  type ChainId,
+  formatAssetId,
+  type TokenId,
+} from "../shared";
+import type { AssetIdString } from "../shared/serialized-types";
+import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
+
+/**
+ * Serialized representation of {@link TokenId}.
+ */
+export type SerializedTokenId = string;
+
+/**
+ * Serialized representation of {@link AssetId}.
+ */
+export interface SerializedAssetId extends Omit<AssetId, "tokenId"> {
+  tokenId: SerializedTokenId;
+}
+
+/**
+ * Serializes {@link AssetId} object to a structured form.
+ */
+export function serializeAssetId(assetId: AssetId): SerializedAssetId {
+  return {
+    assetNamespace: assetId.assetNamespace,
+    contract: assetId.contract,
+    tokenId: uint256ToHex32(assetId.tokenId),
+  };
+}
+
+/**
+ * Deserialize a {@link AssetId} object.
+ */
+export function deserializeAssetId(maybeAssetId: unknown, valueLabel?: string): AssetId {
+  const schema = makeAssetIdSchema(valueLabel);
+  const parsed = schema.safeParse(maybeAssetId);
+
+  if (parsed.error) {
+    throw new RangeError(`Cannot deserialize AssetId:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+/**
+ * Parse a stringified representation of {@link AssetId} object.
+ */
+export function parseAssetId(maybeAssetId: AssetIdString, valueLabel?: string): AssetId {
+  const schema = makeAssetIdStringSchema(valueLabel);
+  const parsed = schema.safeParse(maybeAssetId);
+
+  if (parsed.error) {
+    throw new RangeError(`Cannot parse AssetId:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+/**
+ * Builds an AssetId for the NFT represented by the given contract,
+ * tokenId, and assetNamespace.
+ *
+ * @param contract - The contract that manages the NFT
+ * @param tokenId - The tokenId of the NFT
+ * @param assetNamespace - The assetNamespace of the NFT
+ * @returns The AssetId for the NFT represented by the given contract,
+ *          tokenId, and assetNamespace
+ */
+export const buildAssetId = (
+  contract: AccountId,
+  tokenId: TokenId,
+  assetNamespace: AssetNamespace,
+): AssetId => {
+  return {
+    assetNamespace,
+    contract,
+    tokenId,
+  };
+};
 
 /**
  * A globally unique reference to an NFT tokenizing the ownership of a domain.
@@ -12,6 +95,20 @@ export interface DomainAssetId extends AssetId {
    * this `AssetId`.
    */
   domainId: Node;
+}
+
+/**
+ * Serialized representation of {@link DomainAssetId}.
+ */
+export interface SerializedDomainAssetId extends SerializedAssetId {
+  domainId: Node;
+}
+
+export function serializeDomainAssetId(domainAsset: DomainAssetId): SerializedDomainAssetId {
+  return {
+    ...serializeAssetId(domainAsset),
+    domainId: domainAsset.domainId,
+  };
 }
 
 /**
@@ -44,14 +141,14 @@ export interface NFTTransferEventMetadata {
 }
 
 export const formatNFTTransferEventMetadata = (metadata: NFTTransferEventMetadata): string => {
-  const serializedAssetId = serializeAssetId(metadata.nft);
+  const assetIdString = formatAssetId(metadata.nft);
 
   return [
     `Event: ${metadata.eventHandlerName}`,
     `Chain ID: ${metadata.chainId}`,
     `Block Number: ${metadata.blockNumber}`,
     `Transaction Hash: ${metadata.transactionHash}`,
-    `NFT: ${serializedAssetId}`,
+    `NFT: ${assetIdString}`,
   ]
     .map((line) => ` - ${line}`)
     .join("\n");

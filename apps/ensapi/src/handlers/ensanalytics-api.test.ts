@@ -25,7 +25,6 @@ vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
 }));
 
 import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
-import pReflect from "p-reflect";
 
 import {
   deserializeReferrerDetailResponse,
@@ -49,10 +48,7 @@ describe("/ensanalytics", () => {
     it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
       // Arrange: set `referrerLeaderboard` context var
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        const mockedReferrerLeaderboard = await pReflect(
-          Promise.resolve(populatedReferrerLeaderboard),
-        );
-        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        c.set("referrerLeaderboard", populatedReferrerLeaderboard);
         return await next();
       });
 
@@ -62,23 +58,23 @@ describe("/ensanalytics", () => {
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);
-      const itemsPerPage = 10;
+      const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
       const responsePage1 = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "1" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 2nd page
       const responsePage2 = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "2" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "2" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 3rd page
       const responsePage3 = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "3" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "3" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
@@ -87,17 +83,17 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          paginationContext: {
+          pageContext: {
             endIndex: 9,
             hasNext: true,
             hasPrev: false,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 1,
             startIndex: 0,
             totalPages: 3,
             totalRecords: 29,
           },
-          referrers: allPossibleReferrersIterator.take(itemsPerPage).toArray(),
+          referrers: allPossibleReferrersIterator.take(recordsPerPage).toArray(),
         },
       } satisfies ReferrerLeaderboardPageResponseOk;
 
@@ -108,17 +104,17 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          paginationContext: {
+          pageContext: {
             endIndex: 19,
             hasNext: true,
             hasPrev: true,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 2,
             startIndex: 10,
             totalPages: 3,
             totalRecords: 29,
           },
-          referrers: allPossibleReferrersIterator.take(itemsPerPage).toArray(),
+          referrers: allPossibleReferrersIterator.take(recordsPerPage).toArray(),
         },
       } satisfies ReferrerLeaderboardPageResponseOk;
       expect(responsePage2).toMatchObject(expectedResponsePage2);
@@ -128,17 +124,17 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...populatedReferrerLeaderboard,
-          paginationContext: {
+          pageContext: {
             endIndex: 28,
             hasNext: false,
             hasPrev: true,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 3,
             startIndex: 20,
             totalPages: 3,
             totalRecords: 29,
           },
-          referrers: allPossibleReferrersIterator.take(itemsPerPage).toArray(),
+          referrers: allPossibleReferrersIterator.take(recordsPerPage).toArray(),
         },
       } satisfies ReferrerLeaderboardPageResponseOk;
       expect(responsePage3).toMatchObject(expectedResponsePage3);
@@ -147,19 +143,17 @@ describe("/ensanalytics", () => {
     it("returns empty cached referrer leaderboard when there are no referrals yet", async () => {
       // Arrange: set `referrerLeaderboard` context var
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        const mockedReferrerLeaderboard = await pReflect(Promise.resolve(emptyReferralLeaderboard));
-
-        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        c.set("referrerLeaderboard", emptyReferralLeaderboard);
         return await next();
       });
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);
-      const itemsPerPage = 10;
+      const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
       const response = await client.referrers
-        .$get({ query: { itemsPerPage: `${itemsPerPage}`, page: "1" } }, {})
+        .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
         .then((r) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
@@ -168,10 +162,10 @@ describe("/ensanalytics", () => {
         responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
         data: {
           ...emptyReferralLeaderboard,
-          paginationContext: {
+          pageContext: {
             hasNext: false,
             hasPrev: false,
-            itemsPerPage: 10,
+            recordsPerPage: 10,
             page: 1,
             totalPages: 1,
             totalRecords: 0,
@@ -188,10 +182,7 @@ describe("/ensanalytics", () => {
     it("returns referrer metrics when referrer exists in leaderboard", async () => {
       // Arrange: set `referrerLeaderboard` context var with populated leaderboard
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        const mockedReferrerLeaderboard = await pReflect(
-          Promise.resolve(populatedReferrerLeaderboard),
-        );
-        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        c.set("referrerLeaderboard", populatedReferrerLeaderboard);
         return await next();
       });
 
@@ -223,10 +214,7 @@ describe("/ensanalytics", () => {
     it("returns zero-score metrics when referrer does not exist in leaderboard", async () => {
       // Arrange: set `referrerLeaderboard` context var with populated leaderboard
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        const mockedReferrerLeaderboard = await pReflect(
-          Promise.resolve(populatedReferrerLeaderboard),
-        );
-        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        c.set("referrerLeaderboard", populatedReferrerLeaderboard);
         return await next();
       });
 
@@ -266,8 +254,7 @@ describe("/ensanalytics", () => {
     it("returns zero-score metrics when leaderboard is empty", async () => {
       // Arrange: set `referrerLeaderboard` context var with empty leaderboard
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        const mockedReferrerLeaderboard = await pReflect(Promise.resolve(emptyReferralLeaderboard));
-        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        c.set("referrerLeaderboard", emptyReferralLeaderboard);
         return await next();
       });
 
@@ -305,10 +292,7 @@ describe("/ensanalytics", () => {
     it("returns error response when leaderboard fails to load", async () => {
       // Arrange: set `referrerLeaderboard` context var with rejected promise
       vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        const mockedReferrerLeaderboard = await pReflect(
-          Promise.reject(new Error("Database connection failed")),
-        );
-        c.set("referrerLeaderboard", mockedReferrerLeaderboard);
+        c.set("referrerLeaderboard", new Error("Database connection failed"));
         return await next();
       });
 
