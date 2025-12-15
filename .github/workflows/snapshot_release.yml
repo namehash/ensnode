@@ -84,3 +84,4 @@ jobs:
           tags: |
             type=raw,value=next
             type=raw,value=${{ steps.snapshot-tag.outputs.tag }}
+            type=sha
