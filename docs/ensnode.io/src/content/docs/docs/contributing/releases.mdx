@@ -29,16 +29,31 @@ The `changesets/bot` will automatically comment on your PR to either remind you 
 
 Upon the publishing of a new release, your change will be included in the produced packages/images and your contributions will be referenced in the GitHub Release notes.
 
-## Preview Releases
+## Previews for Releases
 
-Commits to `main` automatically publish prerelease package versions with the `next` dist-tag to NPM. These enable testing of package changes before an official release.
+There are curently two separate flows for previewing a release: Release Snapshots and Release Previews.
+
+### Release Snapshot
+
+Each commit to `main` will trigger the `snapshot-release.yml` workflow to build and publish packages to NPM and Docker images to the GitHub Container Registry (ghcr). These public releases will be under the tag `@next`, allowing anyone who wants to test a package before the stable release. To use snapshot releases run `pnpm install @ensnode/package-name@next` or `docker run ghcr.io/namehash/ensnode:next`. If the `@latest` tag is used then it will only install or run the latest stable release.
+
+**Important notes:**
+- Release snapshots are automatic and cannot be triggered manually.
+- Release snapshots are considered a preview of what will come in a stable release, so there may be unforeseen side effects or bugs that have not been addressed yet.
+
+### Release Preveiw
 
 To manually trigger a preview release for a branch that has not been merged to `main`, follow these steps:
 
 1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/preview-release.yml)
-2. Click "Run workflow" and select the target branch
-3. Install preview packages with: `npm install @ensnode/package-name@preview-branch-name`
+2. Click "Run workflow" and select from the following options:
+ - Which branch you would like to run the preview release workflow on, ideally the branch for an open PR.
+ - Choose whether to build and publish only NPM packages, or to build and publish both NPM packages and Docker images to the GitHub Container Registry (ghcr).
+ - (Optional) Provide a custom suffix for the preview release package tag. For example, using `my-feature` would result in a tag name of `@ensnode/package-name@preview-my-feature`.
+3. Install preview packages with: `npm install @ensnode/package-name@preview-branch-name`. 
 
 **Important notes:**
-- Preview releases are ephemeral and don't create commits or modify the repository
-- No GitHub releases or tags are created for Preview Releases
+- Release previews can only be triggered by authorized NameHash team members.
+- Release previews are ephemeral and don't create commits or modify the repository.
+- Release previews are built off branches that are still under active development. There may be unforeseen side effects or bugs that have not been fixed yet.
+- No GitHub releases or tags are created for Preview Releases.
