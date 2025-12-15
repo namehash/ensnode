@@ -7,8 +7,8 @@ import {
   ATTR_PROTOCOL_STEP_RESULT,
   ForwardResolutionProtocolStep,
   ReverseResolutionProtocolStep,
-  type Span,
-  type Trace,
+  type TracingSpan,
+  type TracingTrace,
 } from "@ensnode/ensnode-sdk";
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 const asPercentInDuration = (value: number, duration: number) =>
   `${((value / duration) * 100).toFixed(2)}%`;
 
-const renderSpanAttributes = (span: Span) => {
+const renderSpanAttributes = (span: TracingSpan) => {
   const { [ATTR_PROTOCOL_STEP]: step, [ATTR_PROTOCOL_NAME]: protocol, ...rest } = span.attributes;
   switch (step) {
     case ReverseResolutionProtocolStep.Operation:
@@ -38,8 +38,8 @@ function RenderEvent({
   event,
   setParentOpen,
 }: {
-  span: Span;
-  event: Span["events"][number];
+  span: TracingSpan;
+  event: TracingSpan["events"][number];
   setParentOpen: (value: boolean) => void;
 }) {
   const left = asPercentInDuration(event.time - span.timestamp, span.duration);
@@ -91,7 +91,7 @@ function RenderEvent({
   );
 }
 
-function RenderSpan({ parent }: { parent: Trace[number] }) {
+function RenderSpan({ parent }: { parent: TracingTrace[number] }) {
   const protocolStep = parent.attributes[ATTR_PROTOCOL_STEP] as
     | ForwardResolutionProtocolStep
     | ReverseResolutionProtocolStep;
@@ -170,7 +170,7 @@ function RenderSpan({ parent }: { parent: Trace[number] }) {
   );
 }
 
-export function TraceRenderer({ trace }: { trace: Trace }) {
+export function TraceRenderer({ trace }: { trace: TracingTrace }) {
   return (
     <div className="flex flex-col gap-4 rounded-lg">
       {/* for each root span */}

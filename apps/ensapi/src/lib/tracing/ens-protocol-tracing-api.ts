@@ -9,7 +9,7 @@ import {
   type TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
-import { TracingContextManager, type TracingSpan } from "./tracing-context";
+import { type Span, TracingContextManager } from "./tracing-context";
 
 /**
  * Executes `fn` in the context of a semantic ENS Protocol Step.
@@ -21,7 +21,7 @@ export async function withEnsProtocolStep<
     : PROTOCOL extends TraceableENSProtocol.ReverseResolution
       ? ReverseResolutionProtocolStep
       : never,
-  Fn extends (span: TracingSpan) => Promise<any>,
+  Fn extends (span: Span) => Promise<any>,
 >(
   protocol: PROTOCOL,
   step: STEP,
@@ -49,7 +49,7 @@ export function addEnsProtocolStepEvent<
     : PROTOCOL extends TraceableENSProtocol.ReverseResolution
       ? ReverseResolutionProtocolStep
       : never,
->(span: TracingSpan, protocol: PROTOCOL, step: STEP, result: AttributeValue) {
+>(span: Span, protocol: PROTOCOL, step: STEP, result: AttributeValue) {
   span.addEvent(`${protocol}:${step} (${result})`, {
     [ATTR_PROTOCOL_NAME]: protocol,
     [ATTR_PROTOCOL_STEP]: step,

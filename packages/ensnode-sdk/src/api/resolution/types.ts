@@ -7,14 +7,14 @@ import type {
   ReverseResolutionArgs,
   ReverseResolutionResult,
 } from "../../resolution";
-import type { Trace } from "../../tracing";
+import type { TracingTrace } from "../../tracing";
 
 export interface TraceableRequest {
   trace?: boolean;
 }
 
 export interface TraceableResponse {
-  trace?: Trace;
+  trace?: TracingTrace;
 }
 
 export interface AcceleratableRequest {

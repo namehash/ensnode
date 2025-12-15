@@ -1,4 +1,4 @@
-import type { Trace } from "@ensnode/ensnode-sdk";
+import type { TracingTrace } from "@ensnode/ensnode-sdk";
 
 import { TracingContextManager } from "./tracing-context";
 
@@ -7,6 +7,6 @@ import { TracingContextManager } from "./tracing-context";
  */
 export async function runWithTrace<Fn extends () => Promise<any>>(
   fn: Fn,
-): Promise<{ trace: Trace; result: Awaited<ReturnType<Fn>> }> {
+): Promise<{ trace: TracingTrace; result: Awaited<ReturnType<Fn>> }> {
   return TracingContextManager.getInstance().runWithTrace(fn);
 }

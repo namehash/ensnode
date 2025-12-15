@@ -1,14 +1,14 @@
-interface SpanAttributes {
+interface TracingSpanAttributes {
   [key: string]: unknown;
 }
 
-interface SpanEvent {
+interface TracingSpanEvent {
   name: string;
-  attributes: SpanAttributes;
+  attributes: TracingSpanAttributes;
   time: number;
 }
 
-export interface Span {
+export interface TracingSpan {
   scope: string;
   id: string;
   traceId: string;
@@ -21,10 +21,10 @@ export interface Span {
   name: string;
   timestamp: number;
   duration: number;
-  attributes: SpanAttributes;
+  attributes: TracingSpanAttributes;
   status: { code: number; message?: string };
-  events: SpanEvent[];
+  events: TracingSpanEvent[];
 }
 
-export type TraceNode = Span & { children: TraceNode[] };
-export type Trace = TraceNode[];
+export type TracingNode = TracingSpan & { children: TracingNode[] };
+export type TracingTrace = TracingNode[];
