@@ -9,9 +9,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { onchainStaticResolverImplementsDefaultAddress } from "@/lib/protocol-acceleration/known-onchain-static-resolver";
 import type { IndexedResolverRecords } from "@/lib/resolution/make-records-response";
-import { withSpanAsync } from "@/lib/tracing/auto-span";
 
 const tracer = trace.getTracer("get-records");
 

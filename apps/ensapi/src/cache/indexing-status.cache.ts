@@ -38,6 +38,6 @@ export const indexingStatusCache = new SWRCache({
         throw error;
       }),
   ttl: 5, // 5 seconds
-  revalidationInterval: 10, // 10 seconds
+  proactiveRevalidationInterval: 10, // 10 seconds
   proactivelyInitialize: true,
 });

@@ -12,8 +12,11 @@ import {
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
 
-import { withActiveSpanAsync } from "@/lib/tracing/auto-span";
-import { addProtocolStepEvent, withProtocolStepAsync } from "@/lib/tracing/protocol-tracing";
+import { withActiveSpanAsync } from "@/lib/instrumentation/auto-span";
+import {
+  addEnsProtocolStepEvent as addProtocolStepEvent,
+  withEnsProtocolStep as withProtocolStep,
+} from "@/lib/tracing/ens-protocol-tracing-api";
 
 import { resolveForward } from "./forward-resolution";
 
@@ -44,7 +47,7 @@ export async function resolveReverse(
   const { accelerate = true } = options;
 
   // trace for external consumers
-  return withProtocolStepAsync(
+  return withProtocolStep(
     TraceableENSProtocol.ReverseResolution,
     ReverseResolutionProtocolStep.Operation,
     { address, chainId, accelerate },
@@ -63,7 +66,7 @@ export async function resolveReverse(
           // Steps 1-3 — Resolve coinType-specific name record
           const coinType = evmChainIdToCoinType(chainId);
           const _reverseName = reverseName(address, coinType);
-          const { name } = await withProtocolStepAsync(
+          const { name } = await withProtocolStep(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ResolveReverseName,
             { name: _reverseName },
@@ -93,7 +96,7 @@ export async function resolveReverse(
           // Step 6 — Internally handled as implementation detail of `resolveForward`
 
           // Step 7 — Resolve the name's address record for the specified coinType
-          const { addresses } = await withProtocolStepAsync(
+          const { addresses } = await withProtocolStep(
             TraceableENSProtocol.ReverseResolution,
             ReverseResolutionProtocolStep.ForwardResolveAddressRecord,
             { name },
