@@ -6,12 +6,12 @@ import { namehash } from "viem";
 import { DatasourceNames } from "@ensnode/datasources";
 import {
   decodeEncodedReferrer,
+  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   type RegistrarActionReferralAvailable,
 } from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { handleUniversalRegistrarRenewalEvent } from "@/plugins/registrars/shared/lib/universal-registrar-renewal-with-referrer-events";
 

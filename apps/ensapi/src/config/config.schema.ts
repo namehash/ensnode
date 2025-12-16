@@ -102,7 +102,6 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       databaseUrl: env.DATABASE_URL,
       ensIndexerUrl: env.ENSINDEXER_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
-
       ensIndexerPublicConfig: serializeENSIndexerPublicConfig(ensIndexerPublicConfig),
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
@@ -113,15 +112,12 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
   } catch (error) {
     if (error instanceof ZodError) {
       logger.error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
-      process.exit(1);
-    }
-
-    if (error instanceof Error) {
+    } else if (error instanceof Error) {
       logger.error(error, `Failed to build EnsApiConfig`);
-      process.exit(1);
+    } else {
+      logger.error(`Unknown Error`);
     }
 
-    logger.error(`Unknown Error`);
     process.exit(1);
   }
 }

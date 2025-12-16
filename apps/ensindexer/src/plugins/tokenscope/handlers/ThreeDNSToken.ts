@@ -4,10 +4,9 @@ import { ponder } from "ponder:registry";
 import { base, optimism } from "viem/chains";
 
 import { type DatasourceName, DatasourceNames } from "@ensnode/datasources";
-import { type ChainId, PluginName } from "@ensnode/ensnode-sdk";
+import { type ChainId, type NFTTransferEventMetadata, PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
-import type { NFTTransferEventMetadata } from "@/lib/tokenscope/assets";
 import { buildSupportedNFT } from "@/lib/tokenscope/nft-issuers";
 
 import { handleERC1155Transfer } from "../lib/handle-nft-transfer";
@@ -150,8 +149,8 @@ export default function () {
   //     // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
-  //     const assetId = buildSupportedNFTAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: assetId });
+  //     const serializedAssetId = serializeAssetId(nft);
+  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,
@@ -185,8 +184,8 @@ export default function () {
   //     // unfortunately 3DNS doesn't emit the former oldOwner in the event.args, so we need
   //     // to look it up in the database. this query is then repeated in handleTransfer which
   //     // is a bit of a bummer but better to keep our logic simple.
-  //     const assetId = buildSupportedNFTAssetId(nft);
-  //     const indexedNft = await context.db.find(schema.nameTokens, { id: assetId });
+  //     const serializedAssetId = serializeAssetId(nft);
+  //     const indexedNft = await context.db.find(schema.nameTokens, { id: serializedAssetId });
 
   //     const metadata: NFTTransferEventMetadata = {
   //       chainId: context.chain.id,

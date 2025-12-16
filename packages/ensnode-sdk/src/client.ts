@@ -1,35 +1,44 @@
+import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
+
 import {
+  type ConfigResponse,
+  deserializeConfigResponse,
+  deserializedNameTokensResponse,
   deserializeErrorResponse,
   deserializeIndexingStatusResponse,
   deserializeRegistrarActionsResponse,
+  type ErrorResponse,
+  type IndexingStatusResponse,
+  type NameTokensRequest,
+  type NameTokensResponse,
+  type RegistrarActionsFilter,
   RegistrarActionsFilterTypes,
+  type RegistrarActionsOrder,
   RegistrarActionsOrders,
+  type RegistrarActionsRequest,
+  type RegistrarActionsResponse,
+  type ResolvePrimaryNameRequest,
+  type ResolvePrimaryNameResponse,
+  type ResolvePrimaryNamesRequest,
+  type ResolvePrimaryNamesResponse,
+  type ResolveRecordsRequest,
+  type ResolveRecordsResponse,
+  type SerializedConfigResponse,
   type SerializedIndexingStatusResponse,
+  type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
 } from "./api";
-import type {
-  ConfigResponse,
-  ErrorResponse,
-  IndexingStatusResponse,
-  RegistrarActionsFilter,
-  RegistrarActionsOrder,
-  RegistrarActionsRequest,
-  RegistrarActionsResponse,
-  ResolvePrimaryNameRequest,
-  ResolvePrimaryNameResponse,
-  ResolvePrimaryNamesRequest,
-  ResolvePrimaryNamesResponse,
-  ResolveRecordsRequest,
-  ResolveRecordsResponse,
-} from "./api/types";
 import { ClientError } from "./client-error";
 import {
+  deserializeReferrerDetailResponse,
   deserializeReferrerLeaderboardPageResponse,
+  type ReferrerDetailRequest,
+  type ReferrerDetailResponse,
+  type ReferrerLeaderboardPageRequest,
   type ReferrerLeaderboardPageResponse,
-  type ReferrerLeaderboardPaginationRequest,
+  type SerializedReferrerDetailResponse,
   type SerializedReferrerLeaderboardPageResponse,
 } from "./ensanalytics";
-import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import type { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -315,7 +324,7 @@ export class ENSNodeClient {
       throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
     }
 
-    return deserializeENSApiPublicConfig(responseData as SerializedENSApiPublicConfig);
+    return deserializeConfigResponse(responseData as SerializedConfigResponse);
   }
 
   /**
@@ -371,7 +380,7 @@ export class ENSNodeClient {
    *
    * @param request - Pagination parameters
    * @param request.page - The page number to retrieve (1-indexed, default: 1)
-   * @param request.itemsPerPage - Number of items per page (default: 25, max: 100)
+   * @param request.recordsPerPage - Number of records per page (default: 25, max: 100)
    * @returns {ReferrerLeaderboardPageResponse}
    *
    * @throws if the ENSNode request fails
@@ -380,34 +389,34 @@ export class ENSNodeClient {
    *
    * @example
    * ```typescript
-   * // Get first page with default page size (25 items)
-   * const response = await client.getReferrerLeaderboard();
+   * // Get first page with default page size (25 records)
+   * const response = await client.getReferrerLeaderboardPage();
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
    *   const {
    *     aggregatedMetrics,
    *     referrers,
    *     rules,
-   *     paginationContext,
+   *     pageContext,
    *     updatedAt
    *   } = response.data;
    *   console.log(aggregatedMetrics);
    *   console.log(referrers);
    *   console.log(rules);
    *   console.log(updatedAt);
-   *   console.log(`Page ${paginationContext.page} of ${paginationContext.totalPages}`);
+   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
    * }
    * ```
    *
    * @example
    * ```typescript
-   * // Get second page with 50 items per page
-   * const response = await client.getReferrerLeaderboard({ page: 2, itemsPerPage: 50 });
+   * // Get second page with 50 records per page
+   * const response = await client.getReferrerLeaderboardPage({ page: 2, recordsPerPage: 50 });
    * ```
    *
    * @example
    * ```typescript
    * // Handle error response, ie. when Referrer Leaderboard is not currently available.
-   * const response = await client.getReferrerLeaderboard();
+   * const response = await client.getReferrerLeaderboardPage();
    *
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Error) {
    *   console.error(response.error);
@@ -415,14 +424,14 @@ export class ENSNodeClient {
    * }
    * ```
    */
-  async getReferrerLeaderboard(
-    request?: ReferrerLeaderboardPaginationRequest,
+  async getReferrerLeaderboardPage(
+    request?: ReferrerLeaderboardPageRequest,
   ): Promise<ReferrerLeaderboardPageResponse> {
     const url = new URL(`/ensanalytics/referrers`, this.options.url);
 
     if (request?.page) url.searchParams.set("page", request.page.toString());
-    if (request?.itemsPerPage)
-      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    if (request?.recordsPerPage)
+      url.searchParams.set("recordsPerPage", request.recordsPerPage.toString());
 
     const response = await fetch(url);
 
@@ -446,13 +455,116 @@ export class ENSNodeClient {
   }
 
   /**
+   * Fetch Referrer Detail
+   *
+   * Retrieves detailed information about a specific referrer, whether they are on the
+   * leaderboard or not.
+   *
+   * The response data is a discriminated union type with a `type` field:
+   *
+   * **For referrers on the leaderboard** (`ReferrerDetailRanked`):
+   * - `type`: {@link ReferrerDetailTypeIds.Ranked}
+   * - `referrer`: The `AwardedReferrerMetrics` from @namehash/ens-referrals
+   * - `rules`: The referral program rules
+   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
+   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
+   *
+   * **For referrers NOT on the leaderboard** (`ReferrerDetailUnranked`):
+   * - `type`: {@link ReferrerDetailTypeIds.Unranked}
+   * - `referrer`: The `UnrankedReferrerMetrics` from @namehash/ens-referrals
+   * - `rules`: The referral program rules
+   * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
+   * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
+   *
+   * @see {@link https://www.npmjs.com/package/@namehash/ens-referrals|@namehash/ens-referrals} for calculation details
+   *
+   * @param request The referrer address to query
+   * @returns {ReferrerDetailResponse} Returns the referrer detail response
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the response data is malformed
+   *
+   * @example
+   * ```typescript
+   * // Get referrer detail for a specific address
+   * const response = await client.getReferrerDetail({
+   *   referrer: "0x1234567890123456789012345678901234567890"
+   * });
+   * if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+   *   const { type, referrer, rules, aggregatedMetrics, accurateAsOf } = response.data;
+   *   console.log(type); // ReferrerDetailTypeIds.Ranked or ReferrerDetailTypeIds.Unranked
+   *   console.log(referrer);
+   *   console.log(accurateAsOf);
+   * }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Use discriminated union to check if referrer is ranked
+   * const response = await client.getReferrerDetail({
+   *   referrer: "0x1234567890123456789012345678901234567890"
+   * });
+   * if (response.responseCode === ReferrerDetailResponseCodes.Ok) {
+   *   if (response.data.type === ReferrerDetailTypeIds.Ranked) {
+   *     // TypeScript knows this is ReferrerDetailRanked
+   *     console.log(`Rank: ${response.data.referrer.rank}`);
+   *     console.log(`Qualified: ${response.data.referrer.isQualified}`);
+   *     console.log(`Award Pool Share: ${response.data.referrer.awardPoolShare * 100}%`);
+   *   } else {
+   *     // TypeScript knows this is ReferrerDetailUnranked
+   *     console.log("Referrer is not on the leaderboard (no referrals yet)");
+   *   }
+   * }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Handle error response, ie. when Referrer Detail is not currently available.
+   * const response = await client.getReferrerDetail({
+   *   referrer: "0x1234567890123456789012345678901234567890"
+   * });
+   *
+   * if (response.responseCode === ReferrerDetailResponseCodes.Error) {
+   *   console.error(response.error);
+   *   console.error(response.errorMessage);
+   * }
+   * ```
+   */
+  async getReferrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse> {
+    const url = new URL(
+      `/api/ensanalytics/referrers/${encodeURIComponent(request.referrer)}`,
+      this.options.url,
+    );
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // The API can return errors with 500 status, but they're still in the
+    // ReferrerDetailResponse format with responseCode: 'error'
+    // So we don't need to check response.ok here, just deserialize and let
+    // the caller handle the responseCode
+
+    return deserializeReferrerDetailResponse(responseData as SerializedReferrerDetailResponse);
+  }
+
+  /**
    * Fetch ENSNode Registrar Actions
    *
-   * @param {RegistrarActionsRequestFilter} request.filter is
-   *        an optional request filter configuration.
-   * @param {number} request.limit sets the maximum count of results in the response.
-   * @param {RegistrarActionsRequestOrder} request.order sets the order of
-   *        results in the response by field and direction.
+   * Retrieves a paginated list of registrar actions with optional filters.
+   *
+   * @param request is a request configuration.
+   * @param request.page sets the page number to retrieve (1-indexed, default: 1)
+   * @param request.recordsPerPage sets the number of records per page (default: 10, max: 100)
+   * @param request.filters is an optional request filter configuration.
+   * @param request.order sets the order of results in the response by field and direction.
    * @returns {RegistrarActionsResponse}
    *
    * @throws if the ENSNode request fails
@@ -462,23 +574,25 @@ export class ENSNodeClient {
    * @example
    * ```ts
    * import {
-   *   registrarActionsFilter,,
+   *   registrarActionsFilter,
    *   ENSNodeClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
    * const client: ENSNodeClient;
    *
-   * // get latest registrar action records across all indexed subregistries
-   * // NOTE: when no `limit` value is passed,
-   * //       the default RESPONSE_ITEMS_PER_PAGE_DEFAULT applies.
-   * const registrarActions = await client.registrarActions();
+   * // Get first page with default page size (10 records)
+   * const response = await client.registrarActions();
+   * if (response.responseCode === RegistrarActionsResponseCodes.Ok) {
+   *   const { registrarActions, pageContext } = response;
+   *   console.log(registrarActions);
+   *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   * }
    *
-   * // get latest 5 registrar action records across all indexed subregistries
-   * // NOTE: when a `limit` value is passed, it must be lower than or equal to
-   * //       the RESPONSE_ITEMS_PER_PAGE_MAX value.
-   * const registrarActions = await client.registrarActions({
-   *   limit: 5,
+   * // Get second page with 25 records per page
+   * const response = await client.registrarActions({
+   *   page: 2,
+   *   recordsPerPage: 25,
    * });
    *
    * // get latest registrar action records associated with
@@ -492,11 +606,16 @@ export class ENSNodeClient {
    *   filters: [registrarActionsFilter.withReferral(true)],
    * });
    *
+   * // get latest registrar action records for a specific decoded referrer
+   * await client.registrarActions({
+   *   filters: [registrarActionsFilter.byDecodedReferrer("0x1234567890123456789012345678901234567890")],
+   * });
+   *
    * // get latest 10 registrar action records associated with
    * // subregistry managing `base.eth` name
    * await client.registrarActions({
    *   filters: [registrarActionsFilter.byParentNode(namehash('base.eth'))],
-   *   limit: 10
+   *   recordsPerPage: 10
    * });
    * ```
    */
@@ -519,6 +638,16 @@ export class ENSNodeClient {
       return withReferralFilter ? { key: "withReferral", value: "true" } : null;
     };
 
+    const buildDecodedReferrerArg = (filters: RegistrarActionsFilter[] | undefined) => {
+      const decodedReferrerFilter = filters?.find(
+        (f) => f.filterType === RegistrarActionsFilterTypes.ByDecodedReferrer,
+      );
+
+      return decodedReferrerFilter
+        ? { key: "decodedReferrer", value: decodedReferrerFilter.value }
+        : null;
+    };
+
     const buildOrderArg = (order: RegistrarActionsOrder) => {
       switch (order) {
         case RegistrarActionsOrders.LatestRegistrarActions: {
@@ -539,14 +668,24 @@ export class ENSNodeClient {
       url.searchParams.set(orderArgs.key, orderArgs.value);
     }
 
-    if (request.itemsPerPage) {
-      url.searchParams.set("itemsPerPage", request.itemsPerPage.toString());
+    if (request.page) {
+      url.searchParams.set("page", request.page.toString());
+    }
+
+    if (request.recordsPerPage) {
+      url.searchParams.set("recordsPerPage", request.recordsPerPage.toString());
     }
 
     const referralArg = buildWithReferralArg(request.filters);
 
     if (referralArg) {
       url.searchParams.set(referralArg.key, referralArg.value);
+    }
+
+    const decodedReferrerArg = buildDecodedReferrerArg(request.filters);
+
+    if (decodedReferrerArg) {
+      url.searchParams.set(decodedReferrerArg.key, decodedReferrerArg.value);
     }
 
     const response = await fetch(url);
@@ -580,5 +719,76 @@ export class ENSNodeClient {
     }
 
     return deserializeRegistrarActionsResponse(responseData as SerializedRegistrarActionsResponse);
+  }
+
+  /**
+   * Fetch Name Tokens for requested name.
+   *
+   * @param request.name - Name for which Name Tokens will be fetched.
+   * @returns {NameTokensResponse}
+   *
+   * @throws if the ENSNode request fails
+   * @throws if the ENSNode API returns an error response
+   * @throws if the ENSNode response breaks required invariants
+   *
+   * @example
+   * ```ts
+   * import {
+   *   ENSNodeClient,
+   * } from "@ensnode/ensnode-sdk";
+   * import { namehash } from "viem/ens";
+   *
+   * const client: ENSNodeClient;
+   *
+   * // get latest name token records from the indexed subregistry based on the requested name
+   * const response = await client.nameTokens({
+   *   name: "vitalik.eth"
+   * });
+   *
+   * const response = await client.nameTokens({
+   *   domainId: "0xee6c4522aab0003e8d14cd40a6af439055fd2577951148c14b6cea9a53475835" // namehash('vitalik.eth')
+   * })
+   * ```
+   */
+  async nameTokens(request: NameTokensRequest): Promise<NameTokensResponse> {
+    const url = new URL(`/api/name-tokens`, this.options.url);
+
+    if (request.name !== undefined) {
+      url.searchParams.set("name", request.name);
+    } else {
+      url.searchParams.set("domainId", request.domainId);
+    }
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // handle response errors accordingly
+    if (!response.ok) {
+      // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
+      try {
+        errorResponse = deserializeErrorResponse(responseData);
+      } catch {
+        // if errorResponse could not be determined,
+        // it means the response includes data
+        console.log("Name Tokens API: handling a known server error.");
+      }
+
+      // however, if errorResponse was defined,
+      // throw an error with the generic server error message
+      if (typeof errorResponse !== "undefined") {
+        throw new Error(`Fetching ENSNode Name Tokens Failed: ${errorResponse.message}`);
+      }
+    }
+
+    return deserializedNameTokensResponse(responseData as SerializedNameTokensResponse);
   }
 }

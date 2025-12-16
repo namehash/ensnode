@@ -5,13 +5,13 @@ import { namehash } from "viem/ens";
 
 import { DatasourceNames } from "@ensnode/datasources";
 import {
+  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";

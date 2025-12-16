@@ -6,6 +6,7 @@ import { namehash } from "viem/ens";
 import { DatasourceNames } from "@ensnode/datasources";
 import {
   addPrices,
+  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   priceEth,
@@ -13,7 +14,6 @@ import {
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
-import { getDatasourceContract } from "@/lib/datasource-helpers";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { getRegistrarManagedName } from "../../lineanames/lib/registrar-helpers";

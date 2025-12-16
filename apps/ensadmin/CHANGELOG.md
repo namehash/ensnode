@@ -1,5 +1,40 @@
 # ensadmin
 
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [[`5d3237d`](https://github.com/namehash/ensnode/commit/5d3237d89f075be7a42d5fddb07b71837993e07a)]:
+  - @ensnode/ensnode-sdk@1.3.1
+  - @ensnode/ensnode-react@1.3.1
+  - @ensnode/datasources@1.3.1
+  - @ensnode/ponder-metadata@1.3.1
+  - @ensnode/ensnode-schema@1.3.1
+
+## 1.3.0
+
+### Patch Changes
+
+- Updated dependencies [[`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`4bc9e82`](https://github.com/namehash/ensnode/commit/4bc9e82c288157fe29d00157160ae01517255728), [`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173), [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173)]:
+  - @ensnode/ensnode-react@1.3.0
+  - @ensnode/ensnode-sdk@1.3.0
+  - @ensnode/datasources@1.3.0
+  - @ensnode/ponder-metadata@1.3.0
+  - @ensnode/ensnode-schema@1.3.0
+
+## 1.2.0
+
+### Patch Changes
+
+- [#1340](https://github.com/namehash/ensnode/pull/1340) [`ee6ce70`](https://github.com/namehash/ensnode/commit/ee6ce70b02f347ba7768dc68cd48caadda2ad217) Thanks [@tk-o](https://github.com/tk-o)! - Fix relative time values display on "Latest indexed registrar actions" view.
+
+- Updated dependencies [[`97e4545`](https://github.com/namehash/ensnode/commit/97e4545c70d8c7469f4bd566b91277fdb0c3a699), [`976e284`](https://github.com/namehash/ensnode/commit/976e2842f2e25ff0844471de48a34659b136b5be), [`e35600f`](https://github.com/namehash/ensnode/commit/e35600fe9808f3c72960429b2a56a7f22893bff6), [`4cee4ba`](https://github.com/namehash/ensnode/commit/4cee4ba538e5655ca1e8b75f4d72738f3413c9d3)]:
+  - @ensnode/ensnode-sdk@1.2.0
+  - @ensnode/ensnode-react@1.2.0
+  - @ensnode/datasources@1.2.0
+  - @ensnode/ponder-metadata@1.2.0
+  - @ensnode/ensnode-schema@1.2.0
+
 ## 1.1.0
 
 ### Patch Changes

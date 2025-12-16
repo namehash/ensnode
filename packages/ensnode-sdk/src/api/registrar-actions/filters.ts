@@ -1,9 +1,12 @@
+import type { Address } from "viem";
+
 import type { Node } from "../../ens";
 import {
   type RegistrarActionsFilter,
+  type RegistrarActionsFilterByDecodedReferrer,
   RegistrarActionsFilterTypes,
   type RegistrarActionsFilterWithEncodedReferral,
-} from "../types";
+} from "./request";
 
 /**
  * Build a "parent node" filter object for Registrar Actions query.
@@ -36,7 +39,26 @@ function withReferral(withReferral: boolean | undefined): RegistrarActionsFilter
   } satisfies RegistrarActionsFilterWithEncodedReferral;
 }
 
+/**
+ * Build a "decoded referrer" filter object for Registrar Actions query.
+ */
+function byDecodedReferrer(decodedReferrer: Address): RegistrarActionsFilter;
+function byDecodedReferrer(decodedReferrer: undefined): undefined;
+function byDecodedReferrer(
+  decodedReferrer: Address | undefined,
+): RegistrarActionsFilter | undefined {
+  if (typeof decodedReferrer === "undefined") {
+    return undefined;
+  }
+
+  return {
+    filterType: RegistrarActionsFilterTypes.ByDecodedReferrer,
+    value: decodedReferrer,
+  } satisfies RegistrarActionsFilterByDecodedReferrer;
+}
+
 export const registrarActionsFilter = {
   byParentNode,
   withReferral,
+  byDecodedReferrer,
 };

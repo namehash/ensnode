@@ -1,5 +1,57 @@
 # @ensnode/ensnode-sdk
 
+## 1.3.1
+
+### Patch Changes
+
+- [#1396](https://github.com/namehash/ensnode/pull/1396) [`5d3237d`](https://github.com/namehash/ensnode/commit/5d3237d89f075be7a42d5fddb07b71837993e07a) Thanks [@tk-o](https://github.com/tk-o)! - Replace `SWRCache` implementation to address memory leaks.
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.3.1
+  - @namehash/ens-referrals@1.3.0
+
+## 1.3.0
+
+### Minor Changes
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Includes support for strigifying/parsing, and serializing/deserializing the following types: `AssetId`, `AccountId`.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Updates serialization and deserialization methods for `AccountId` type.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `name-token` submodule to `api` module.
+
+- [#1379](https://github.com/namehash/ensnode/pull/1379) [`4bc9e82`](https://github.com/namehash/ensnode/commit/4bc9e82c288157fe29d00157160ae01517255728) Thanks [@Goader](https://github.com/Goader)! - Extended the `registrar-actions` endpoint to support filtering by `decodedReferrer` and pagination.
+
+- [#1382](https://github.com/namehash/ensnode/pull/1382) [`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137) Thanks [@Goader](https://github.com/Goader)! - Renamed `itemsPerPage` to `recordsPerPage` and `paginationContext` to `pageContext` in referrer leaderboard APIs to align with registrar actions terminology.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Introduces the `NameToken` concept to `tokenscope` module.
+
+- [#1358](https://github.com/namehash/ensnode/pull/1358) [`f64dad6`](https://github.com/namehash/ensnode/commit/f64dad6fe5c8180d1a4549f75ee61598d7c64173) Thanks [@tk-o](https://github.com/tk-o)! - Implements `nameTokens` method on `ENSNodeClient`.
+
+### Patch Changes
+
+- Updated dependencies [[`9558b9f`](https://github.com/namehash/ensnode/commit/9558b9f6dd4aa65c81be067b82003bb9404f7137)]:
+  - @namehash/ens-referrals@1.3.0
+  - @ensnode/datasources@1.3.0
+
+## 1.2.0
+
+### Minor Changes
+
+- [#1357](https://github.com/namehash/ensnode/pull/1357) [`97e4545`](https://github.com/namehash/ensnode/commit/97e4545c70d8c7469f4bd566b91277fdb0c3a699) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `tokenscope` module.
+
+- [#1353](https://github.com/namehash/ensnode/pull/1353) [`976e284`](https://github.com/namehash/ensnode/commit/976e2842f2e25ff0844471de48a34659b136b5be) Thanks [@tk-o](https://github.com/tk-o)! - Create shared module for `pagination` features.
+
+- [#1318](https://github.com/namehash/ensnode/pull/1318) [`e35600f`](https://github.com/namehash/ensnode/commit/e35600fe9808f3c72960429b2a56a7f22893bff6) Thanks [@Goader](https://github.com/Goader)! - Add referrer detail endpoint API. Supports querying individual referrers whether they are ranked on the leaderboard or not.
+
+- [#1345](https://github.com/namehash/ensnode/pull/1345) [`4cee4ba`](https://github.com/namehash/ensnode/commit/4cee4ba538e5655ca1e8b75f4d72738f3413c9d3) Thanks [@tk-o](https://github.com/tk-o)! - Add QuickNode RPC provider support for auto-generated chain RPC URLs.
+
+### Patch Changes
+
+- Updated dependencies [[`ea06a3c`](https://github.com/namehash/ensnode/commit/ea06a3cf7d802c6dd338676d0f2439185934e0ab), [`e35600f`](https://github.com/namehash/ensnode/commit/e35600fe9808f3c72960429b2a56a7f22893bff6)]:
+  - @namehash/ens-referrals@1.2.0
+  - @ensnode/datasources@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes

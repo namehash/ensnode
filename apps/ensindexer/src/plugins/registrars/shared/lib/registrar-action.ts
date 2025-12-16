@@ -4,9 +4,9 @@ import type { Hash } from "viem";
 
 import {
   type AccountId,
+  formatAccountId,
   type Node,
   type RegistrarAction,
-  serializeAccountId,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -32,7 +32,7 @@ export function makeLogicalEventKey({
   node: Node;
   transactionHash: Hash;
 }): LogicalEventKey {
-  return [serializeAccountId(subregistryId), node, transactionHash].join(":").toLowerCase();
+  return [formatAccountId(subregistryId), node, transactionHash].join(":").toLowerCase();
 }
 
 /**
@@ -71,7 +71,7 @@ export async function insertRegistrarAction(
   await context.db.insert(schema.registrarActions).values({
     id,
     type,
-    subregistryId: serializeAccountId(subregistryId),
+    subregistryId: formatAccountId(subregistryId),
     node,
     incrementalDuration: BigInt(incrementalDuration),
     registrant,

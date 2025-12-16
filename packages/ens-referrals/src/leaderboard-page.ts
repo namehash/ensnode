@@ -19,7 +19,7 @@ export const REFERRERS_PER_LEADERBOARD_PAGE_MAX = 100;
 /**
  * Pagination params for leaderboard queries.
  */
-export interface ReferrerLeaderboardPaginationParams {
+export interface ReferrerLeaderboardPageParams {
   /**
    * Requested referrer leaderboard page number (1-indexed)
    * @invariant Must be a positive integer (>= 1)
@@ -32,45 +32,42 @@ export interface ReferrerLeaderboardPaginationParams {
    * @invariant Must be a positive integer (>= 1) and less than or equal to {@link REFERRERS_PER_LEADERBOARD_PAGE_MAX}
    * @default {@link REFERRERS_PER_LEADERBOARD_PAGE_DEFAULT}
    */
-  itemsPerPage?: number;
+  recordsPerPage?: number;
 }
 
-const validateReferrerLeaderboardPaginationParams = (
-  params: ReferrerLeaderboardPaginationParams,
-): void => {
+const validateReferrerLeaderboardPageParams = (params: ReferrerLeaderboardPageParams): void => {
   if (params.page !== undefined && !isPositiveInteger(params.page)) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationParams: ${params.page}. page must be a positive integer.`,
+      `Invalid ReferrerLeaderboardPageParams: ${params.page}. page must be a positive integer.`,
     );
   }
-  if (params.itemsPerPage !== undefined && !isPositiveInteger(params.itemsPerPage)) {
+  if (params.recordsPerPage !== undefined && !isPositiveInteger(params.recordsPerPage)) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationParams: ${params.itemsPerPage}. itemsPerPage must be a positive integer.`,
+      `Invalid ReferrerLeaderboardPageParams: ${params.recordsPerPage}. recordsPerPage must be a positive integer.`,
     );
   }
   if (
-    params.itemsPerPage !== undefined &&
-    params.itemsPerPage > REFERRERS_PER_LEADERBOARD_PAGE_MAX
+    params.recordsPerPage !== undefined &&
+    params.recordsPerPage > REFERRERS_PER_LEADERBOARD_PAGE_MAX
   ) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationParams: ${params.itemsPerPage}. itemsPerPage must be less than or equal to ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}.`,
+      `Invalid ReferrerLeaderboardPageParams: ${params.recordsPerPage}. recordsPerPage must be less than or equal to ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}.`,
     );
   }
 };
 
-export const buildReferrerLeaderboardPaginationParams = (
-  params: ReferrerLeaderboardPaginationParams,
-): Required<ReferrerLeaderboardPaginationParams> => {
+export const buildReferrerLeaderboardPageParams = (
+  params: ReferrerLeaderboardPageParams,
+): Required<ReferrerLeaderboardPageParams> => {
   const result = {
     page: params.page ?? 1,
-    itemsPerPage: params.itemsPerPage ?? REFERRERS_PER_LEADERBOARD_PAGE_DEFAULT,
-  } satisfies Required<ReferrerLeaderboardPaginationParams>;
-  validateReferrerLeaderboardPaginationParams(result);
+    recordsPerPage: params.recordsPerPage ?? REFERRERS_PER_LEADERBOARD_PAGE_DEFAULT,
+  } satisfies Required<ReferrerLeaderboardPageParams>;
+  validateReferrerLeaderboardPageParams(result);
   return result;
 };
 
-export interface ReferrerLeaderboardPaginationContext
-  extends Required<ReferrerLeaderboardPaginationParams> {
+export interface ReferrerLeaderboardPageContext extends Required<ReferrerLeaderboardPageParams> {
   /**
    * Total number of referrers across all leaderboard pages
    * @invariant Guaranteed to be a non-negative integer (>= 0)
@@ -85,7 +82,7 @@ export interface ReferrerLeaderboardPaginationContext
 
   /**
    * Indicates if there is a next page available
-   * @invariant true if and only if (`page` * `itemsPerPage` < `total`)
+   * @invariant true if and only if (`page` * `recordsPerPage` < `total`)
    */
   hasNext: boolean;
 
@@ -117,51 +114,51 @@ export interface ReferrerLeaderboardPaginationContext
   endIndex?: number;
 }
 
-export const validateReferrerLeaderboardPaginationContext = (
-  context: ReferrerLeaderboardPaginationContext,
+export const validateReferrerLeaderboardPageContext = (
+  context: ReferrerLeaderboardPageContext,
 ): void => {
-  validateReferrerLeaderboardPaginationParams(context);
+  validateReferrerLeaderboardPageParams(context);
   if (!isNonNegativeInteger(context.totalRecords)) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationContext: total must be a non-negative integer but is ${context.totalRecords}.`,
+      `Invalid ReferrerLeaderboardPageContext: total must be a non-negative integer but is ${context.totalRecords}.`,
     );
   }
-  const startIndex = (context.page - 1) * context.itemsPerPage;
-  const endIndex = startIndex + context.itemsPerPage;
+  const startIndex = (context.page - 1) * context.recordsPerPage;
+  const endIndex = startIndex + context.recordsPerPage;
 
   if (!context.hasNext && endIndex < context.totalRecords) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationContext: if hasNext is false, endIndex (${endIndex}) must be greater than or equal to total (${context.totalRecords}).`,
+      `Invalid ReferrerLeaderboardPageContext: if hasNext is false, endIndex (${endIndex}) must be greater than or equal to total (${context.totalRecords}).`,
     );
-  } else if (context.hasNext && context.page * context.itemsPerPage >= context.totalRecords) {
+  } else if (context.hasNext && context.page * context.recordsPerPage >= context.totalRecords) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationContext: if hasNext is true, endIndex (${endIndex}) must be less than total (${context.totalRecords}).`,
+      `Invalid ReferrerLeaderboardPageContext: if hasNext is true, endIndex (${endIndex}) must be less than total (${context.totalRecords}).`,
     );
   }
   if (!context.hasPrev && context.page !== 1) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationContext: if hasPrev is false, page must be the first page (1) but is ${context.page}.`,
+      `Invalid ReferrerLeaderboardPageContext: if hasPrev is false, page must be the first page (1) but is ${context.page}.`,
     );
   } else if (context.hasPrev && context.page === 1) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationContext: if hasPrev is true, page must not be the first page (1) but is ${context.page}.`,
+      `Invalid ReferrerLeaderboardPageContext: if hasPrev is true, page must not be the first page (1) but is ${context.page}.`,
     );
   }
 };
 
-export const buildReferrerLeaderboardPaginationContext = (
-  optionalParams: ReferrerLeaderboardPaginationParams,
+export const buildReferrerLeaderboardPageContext = (
+  optionalParams: ReferrerLeaderboardPageParams,
   leaderboard: ReferrerLeaderboard,
-): ReferrerLeaderboardPaginationContext => {
-  const materializedParams = buildReferrerLeaderboardPaginationParams(optionalParams);
+): ReferrerLeaderboardPageContext => {
+  const materializedParams = buildReferrerLeaderboardPageParams(optionalParams);
 
   const totalRecords = leaderboard.referrers.size;
 
-  const totalPages = Math.max(1, Math.ceil(totalRecords / materializedParams.itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(totalRecords / materializedParams.recordsPerPage));
 
   if (materializedParams.page > totalPages) {
     throw new Error(
-      `Invalid ReferrerLeaderboardPaginationContext: page ${materializedParams.page} exceeds total pages ${totalPages}.`,
+      `Invalid ReferrerLeaderboardPageContext: page ${materializedParams.page} exceeds total pages ${totalPages}.`,
     );
   }
 
@@ -174,13 +171,13 @@ export const buildReferrerLeaderboardPaginationContext = (
       hasPrev: false,
       startIndex: undefined,
       endIndex: undefined,
-    } satisfies ReferrerLeaderboardPaginationContext;
+    } satisfies ReferrerLeaderboardPageContext;
   }
 
-  const startIndex = (materializedParams.page - 1) * materializedParams.itemsPerPage;
-  const maxTheoreticalIndexOnPage = startIndex + (materializedParams.itemsPerPage - 1);
+  const startIndex = (materializedParams.page - 1) * materializedParams.recordsPerPage;
+  const maxTheoreticalIndexOnPage = startIndex + (materializedParams.recordsPerPage - 1);
   const endIndex = Math.min(maxTheoreticalIndexOnPage, totalRecords - 1);
-  const hasNext = maxTheoreticalIndexOnPage < totalRecords;
+  const hasNext = maxTheoreticalIndexOnPage < totalRecords - 1;
   const hasPrev = materializedParams.page > 1;
 
   const result = {
@@ -191,8 +188,8 @@ export const buildReferrerLeaderboardPaginationContext = (
     hasPrev,
     startIndex,
     endIndex,
-  } satisfies ReferrerLeaderboardPaginationContext;
-  validateReferrerLeaderboardPaginationContext(result);
+  } satisfies ReferrerLeaderboardPageContext;
+  validateReferrerLeaderboardPageContext(result);
   return result;
 };
 
@@ -208,9 +205,9 @@ export interface ReferrerLeaderboardPage {
 
   /**
    * Ordered list of {@link AwardedReferrerMetrics} for the {@link ReferrerLeaderboardPage}
-   * described by `paginationContext` within the related {@link ReferrerLeaderboard}.
+   * described by `pageContext` within the related {@link ReferrerLeaderboard}.
    *
-   * @invariant Array will be empty if `paginationContext.totalRecords` is 0.
+   * @invariant Array will be empty if `pageContext.totalRecords` is 0.
    * @invariant Array entries are ordered by `rank` (descending).
    */
   referrers: AwardedReferrerMetrics[];
@@ -221,10 +218,10 @@ export interface ReferrerLeaderboardPage {
   aggregatedMetrics: AggregatedReferrerMetrics;
 
   /**
-   * The {@link ReferrerLeaderboardPaginationContext} of this {@link ReferrerLeaderboardPage} relative to the overall
+   * The {@link ReferrerLeaderboardPageContext} of this {@link ReferrerLeaderboardPage} relative to the overall
    * {@link ReferrerLeaderboard}.
    */
-  paginationContext: ReferrerLeaderboardPaginationContext;
+  pageContext: ReferrerLeaderboardPageContext;
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardPage} was accurate as of.
@@ -233,25 +230,22 @@ export interface ReferrerLeaderboardPage {
 }
 
 export const getReferrerLeaderboardPage = (
-  paginationParams: ReferrerLeaderboardPaginationParams,
+  pageParams: ReferrerLeaderboardPageParams,
   leaderboard: ReferrerLeaderboard,
 ): ReferrerLeaderboardPage => {
-  const paginationContext = buildReferrerLeaderboardPaginationContext(
-    paginationParams,
-    leaderboard,
-  );
+  const pageContext = buildReferrerLeaderboardPageContext(pageParams, leaderboard);
 
   let referrers: AwardedReferrerMetrics[];
 
   if (
-    paginationContext.totalRecords > 0 &&
-    typeof paginationContext.startIndex !== "undefined" &&
-    typeof paginationContext.endIndex !== "undefined"
+    pageContext.totalRecords > 0 &&
+    typeof pageContext.startIndex !== "undefined" &&
+    typeof pageContext.endIndex !== "undefined"
   ) {
-    // extract the referrers from the leaderboard in the range specified by `paginationContext`.
+    // extract the referrers from the leaderboard in the range specified by `pageContext`.
     referrers = Array.from(leaderboard.referrers.values()).slice(
-      paginationContext.startIndex,
-      paginationContext.endIndex + 1, // For `slice`, this is exclusive of the element at the index 'end'. We need it to be inclusive, hence plus one.
+      pageContext.startIndex,
+      pageContext.endIndex + 1, // For `slice`, this is exclusive of the element at the index 'end'. We need it to be inclusive, hence plus one.
     );
   } else {
     referrers = [];
@@ -261,7 +255,7 @@ export const getReferrerLeaderboardPage = (
     rules: leaderboard.rules,
     referrers,
     aggregatedMetrics: leaderboard.aggregatedMetrics,
-    paginationContext,
+    pageContext,
     accurateAsOf: leaderboard.accurateAsOf,
   };
 };

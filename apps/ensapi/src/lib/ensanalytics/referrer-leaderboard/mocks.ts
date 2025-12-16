@@ -183,7 +183,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
   },
   referrers: new Map([
     [
-      "0x538e35b2888ed5b[c58cf2825d76cf6265aa4e31e",
+      "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
       {
         referrer: "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e",
         totalReferrals: 3,
@@ -990,9 +990,9 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       grandTotalQualifiedReferrersFinalScore: 16.55216891669386,
       minFinalScoreToQualify: 0,
     },
-    paginationContext: {
+    pageContext: {
       page: 1,
-      itemsPerPage: 100,
+      recordsPerPage: 100,
       totalRecords: 29,
       totalPages: 1,
       hasNext: false,

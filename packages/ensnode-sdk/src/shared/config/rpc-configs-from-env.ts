@@ -6,7 +6,9 @@ import {
   alchemySupportsChain,
   buildAlchemyBaseUrl,
   buildDRPCUrl,
-  drpcSupportsChain,
+  buildQuickNodeURL,
+  dRPCSupportsChain,
+  quickNodeSupportsChain,
 } from "./build-rpc-urls";
 import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./environments";
 
@@ -14,25 +16,47 @@ import type { ChainIdSpecificRpcEnvironmentVariable, RpcEnvironment } from "./en
  * Constructs dynamic chain configuration from environment variables, scoped to chain IDs that appear
  * in the specified `namespace`.
  *
- * This function provides the following RPC URLs in the following order:
+ * This function auto-generates RPC URLs in the following order:
  * 1. RPC_URL_*, if available in the env
  * 2. Alchemy, if ALCHEMY_API_KEY is available in the env
- * 3. DRPC, if DRPC_API_KEY is available in the env
+ * 3. QuickNode, if both, QUICKNODE_API_KEY and QUICKNODE_ENDPOINT_NAME are specified,
+ *    a QuickNode RPC URL will be provided for each of the chains it supports.
+ * 4. DRPC, if DRPC_API_KEY is available in the env
  *
- * TODO: also inject wss:// urls for alchemy, drpc keys
+ * TODO: also inject wss:// urls for alchemy, dRPC keys
  *
  * NOTE: This function returns raw RpcConfigEnvironment values which are not yet parsed or validated.
+ *
+ * @throws when only one but not both of the following environment variables are defined:
+ *         {@link RpcEnvironment.QUICKNODE_API_KEY} or
+ *         {@link RpcEnvironment.QUICKNODE_ENDPOINT_NAME}.
  */
 export function buildRpcConfigsFromEnv(
   env: RpcEnvironment,
   namespace: ENSNamespaceId,
 ): Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> {
+  const alchemyApiKey = env.ALCHEMY_API_KEY;
+  const quickNodeApiKey = env.QUICKNODE_API_KEY;
+  const quickNodeEndpointName = env.QUICKNODE_ENDPOINT_NAME;
+  const dRPCKey = env.DRPC_API_KEY;
+
+  // Invariant: QuickNode: using API key requires using endpoint name as well.
+  if (quickNodeApiKey && !quickNodeEndpointName) {
+    throw new Error(
+      "Use of the QUICKNODE_API_KEY environment variable requires use of the QUICKNODE_ENDPOINT_NAME environment variable as well.",
+    );
+  }
+
+  // Invariant: QuickNode: using endpoint name requires using API key as well.
+  if (quickNodeEndpointName && !quickNodeApiKey) {
+    throw new Error(
+      "Use of the QUICKNODE_ENDPOINT_NAME environment variable requires use of the QUICKNODE_API_KEY environment variable as well.",
+    );
+  }
+
   const chainsInNamespace = Object.entries(getENSNamespace(namespace)).map(
     ([, datasource]) => (datasource as Datasource).chain,
   );
-
-  const alchemyApiKey = env.ALCHEMY_API_KEY;
-  const drpcKey = env.DRPC_API_KEY;
 
   const rpcConfigs: Record<ChainIdString, ChainIdSpecificRpcEnvironmentVariable> = {};
 
@@ -47,13 +71,17 @@ export function buildRpcConfigsFromEnv(
     const httpUrls = [
       // alchemy, if specified and available
       alchemyApiKey &&
-        alchemySupportsChain(chain.id) && //
+        alchemySupportsChain(chain.id) &&
         `https://${buildAlchemyBaseUrl(chain.id, alchemyApiKey)}`,
 
-      // drpc, if specified and available
-      drpcKey &&
-        drpcSupportsChain(chain.id) && //
-        buildDRPCUrl(chain.id, drpcKey),
+      // QuickNode, if specified and available
+      quickNodeApiKey &&
+        quickNodeEndpointName &&
+        quickNodeSupportsChain(chain.id) &&
+        `https://${buildQuickNodeURL(chain.id, quickNodeApiKey, quickNodeEndpointName)}`,
+
+      // dRPC, if specified and available
+      dRPCKey && dRPCSupportsChain(chain.id) && buildDRPCUrl(chain.id, dRPCKey),
     ];
 
     const wsUrl =

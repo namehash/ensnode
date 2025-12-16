@@ -8,11 +8,13 @@ import { openAPIRouteHandler } from "hono-openapi";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
+import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
+import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
-import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import ensanalyticsApi from "./handlers/ensanalytics-api";
@@ -31,7 +33,6 @@ app.use(async (ctx, next) => {
 app.use(cors({ origin: "*" }));
 
 // include automatic OpenTelemetry instrumentation for incoming requests
-// NOTE: required for protocol tracing
 app.use(otel());
 
 // add ENSIndexer Indexing Status Middleware to all routes for convenience
@@ -89,7 +90,7 @@ const server = serve(
       `ENSApi listening on port ${info.port} with config:\n${prettyPrintJson(redactEnsApiConfig(config))}`,
     );
 
-    // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
+    // self-healthcheck to connect to ENSIndexer & warm Indexing Status cache
     await app.request("/health");
   },
 );
@@ -107,7 +108,16 @@ const closeServer = () =>
 const gracefulShutdown = async () => {
   try {
     await sdk.shutdown();
+    logger.info("Destroyed tracing instrumentation");
+
+    referrerLeaderboardCache.destroy();
+    logger.info("Destroyed referrerLeaderboardCache");
+
+    indexingStatusCache.destroy();
+    logger.info("Destroyed indexingStatusCache");
+
     await closeServer();
+    logger.info("Closed application server");
 
     process.exit(0);
   } catch (error) {

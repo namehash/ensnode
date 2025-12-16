@@ -1,5 +1,10 @@
-import type { SerializedReferrerLeaderboardPageResponse } from "./serialized-types";
+import type {
+  SerializedReferrerDetailResponse,
+  SerializedReferrerLeaderboardPageResponse,
+} from "./serialized-types";
 import {
+  type ReferrerDetailResponse,
+  ReferrerDetailResponseCodes,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
 } from "./types";
@@ -20,6 +25,27 @@ export function serializeReferrerLeaderboardPageResponse(
       return response;
 
     case ReferrerLeaderboardPageResponseCodes.Error:
+      return response;
+  }
+}
+
+/**
+ * Serialize a {@link ReferrerDetailResponse} object.
+ *
+ * Note: Since all fields in ReferrerDetailRanked and ReferrerDetailUnranked
+ * (rules, referrer metrics, aggregatedMetrics, and timestamp) are already
+ * serializable primitives, this function performs an identity transformation.
+ * The rank field can be either a number or null, both of which are valid JSON primitives.
+ * It exists to maintain consistency with the serialization pattern used throughout the codebase.
+ */
+export function serializeReferrerDetailResponse(
+  response: ReferrerDetailResponse,
+): SerializedReferrerDetailResponse {
+  switch (response.responseCode) {
+    case ReferrerDetailResponseCodes.Ok:
+      return response;
+
+    case ReferrerDetailResponseCodes.Error:
       return response;
   }
 }

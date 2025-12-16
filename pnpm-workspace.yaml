@@ -9,7 +9,8 @@ catalog:
   "@astrojs/tailwind": ^6.0.2
   "@namehash/namekit-react": 0.12.0
   "@ponder/utils": 0.2.14
-  "@types/node": ^22.14.0
+  "@testing-library/react": ^16.3.0
+  "@types/node": 22.18.13
   astro: ^5.15.9
   astro-font: ^1.1.0
   astro-seo: ^0.8.4
@@ -19,7 +20,7 @@ catalog:
   hono: ^4.10.2
   pg-connection-string: ^2.9.1
   pino: 10.1.0
-  ponder: 0.13.14
+  ponder: 0.13.16
   tsup: ^8.3.6
   typescript: ^5.7.3
   viem: ^2.22.13
