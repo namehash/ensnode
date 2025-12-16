@@ -1,4 +1,4 @@
-name: Snapshot Release (@next)
+name: Release Snapshot (@next)
 
 on:
   push:

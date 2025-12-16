@@ -1,4 +1,4 @@
-name: Preview Release
+name: Release Preview (@preview)
 
 on:
   workflow_dispatch:
