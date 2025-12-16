@@ -8,7 +8,7 @@ on:
         type: string
         required: false
       publish_target:
-        description: 'Choose to publish just to NPM or NPM + ghcr'
+        description: 'Where should the release preview be published?'
         type: choice
         required: true
         default: 'npm-and-ghcr'
@@ -96,7 +96,7 @@ jobs:
           echo "📝 Commit SHA: ${COMMIT_SHA}"
 
   build-and-publish-npm:
-    name: Build & Publish Packages to NPM
+    name: Build & Publish Release Preview Packages to NPM
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: validate-and-prepare
     if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-ghcr'
@@ -126,7 +126,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish packages to NPM with changesets
+      - name: Publish release preview packages to NPM with changesets
         id: publish
         run: |
           # Publish with changesets using snapshot mode
@@ -139,7 +139,7 @@ jobs:
           PUBLISHED_VERSION=$(node -p "require('./packages/ensnode-sdk/package.json').version")
           echo "published-version=${PUBLISHED_VERSION}" >> $GITHUB_OUTPUT
 
-          echo "✅ Published packages to NPM with version: ${PUBLISHED_VERSION}"
+          echo "✅ Published release preview packages to NPM with version: ${PUBLISHED_VERSION}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -212,7 +212,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate comment body
+      - name: Generate PR comment body
         id: comment
         if: steps.detect-pr.outputs.has-pr == 'true'
         run: |
@@ -280,7 +280,7 @@ jobs:
           - 🔗 [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
           ---
-          *🤖 This comment will be updated on subsequent preview builds*
+          *🤖 This comment will be updated on subsequent publishing of release previews from the branch associated with this PR*
 
           > **Note:** Preview packages are managed by changesets. NPM dist-tags can be cleaned up manually using \`npm dist-tag rm @ensnode/ensnode-sdk ${{ needs.validate-and-prepare.outputs.dist-tag }}\`"
 

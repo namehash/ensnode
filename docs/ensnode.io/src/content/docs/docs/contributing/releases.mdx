@@ -35,13 +35,13 @@ There are curently two separate flows for previewing a release: Release Snapshot
 
 ### Release Snapshot
 
-Each commit to `main` will trigger the `snapshot-release.yml` workflow to build and publish packages to NPM and Docker images to the GitHub Container Registry (ghcr). These public releases will be under the tag `@next`, allowing anyone who wants to test a package before the stable release. To use snapshot releases run `pnpm install @ensnode/package-name@next` or `docker run ghcr.io/namehash/ensnode:next`. If the `@latest` tag is used then it will only install or run the latest stable release.
+Each commit to `main` will trigger the `snapshot-release.yml` workflow to build and publish packages to NPM and Docker images to the GitHub Container Registry (ghcr). These public releases will be under the tag `@next`, allowing anyone to use the npm packages or docker images associated with each commit to main. To install snapshot releases run `pnpm install @ensnode/package-name@next` or `docker run ghcr.io/namehash/ensnode:next`. If the `@latest` tag is used then it will only install or run the latest stable release.
 
 **Important notes:**
 - Release snapshots are automatic and cannot be triggered manually.
 - Release snapshots are considered a preview of what will come in a stable release, so there may be unforeseen side effects or bugs that have not been addressed yet.
 
-### Release Preveiw
+### Release Preview
 
 To manually trigger a preview release for a branch that has not been merged to `main`, follow these steps:
 
