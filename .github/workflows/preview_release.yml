@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       custom_suffix:
-        description: 'Custom suffix (overrides branch name)'
+        description: 'Optional custom suffix to append to the tag assigned to all assets published in the release preview. If not defined, defaults to the name of the branch associated with the release preview.'
         type: string
         required: false
       publish_target:
