@@ -72,7 +72,7 @@ export const makeRegistrarActionsResponseSchema = (
 /**
  * Schema for resolver records response (addresses, texts, name)
  */
-const makeResolverRecordsResponseSchema = (_valueLabel: string = "Resolver Records Response") =>
+const makeResolverRecordsResponseSchema = () =>
   z.object({
     name: z.string().nullable().optional(),
     addresses: z.record(z.string(), z.string().nullable()).optional(),
@@ -82,9 +82,9 @@ const makeResolverRecordsResponseSchema = (_valueLabel: string = "Resolver Recor
 /**
  * Schema for {@link ResolveRecordsResponse}
  */
-export const makeResolveRecordsResponseSchema = (valueLabel: string = "Resolve Records Response") =>
+export const makeResolveRecordsResponseSchema = () =>
   z.object({
-    records: makeResolverRecordsResponseSchema(valueLabel),
+    records: makeResolverRecordsResponseSchema(),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
     trace: z.any().optional(),
@@ -93,9 +93,7 @@ export const makeResolveRecordsResponseSchema = (valueLabel: string = "Resolve R
 /**
  * Schema for {@link ResolvePrimaryNameResponse}
  */
-export const makeResolvePrimaryNameResponseSchema = (
-  _valueLabel: string = "Resolve Primary Name Response",
-) =>
+export const makeResolvePrimaryNameResponseSchema = () =>
   z.object({
     name: z.string().nullable(),
     accelerationRequested: z.boolean(),
@@ -106,9 +104,7 @@ export const makeResolvePrimaryNameResponseSchema = (
 /**
  * Schema for {@link ResolvePrimaryNamesResponse}
  */
-export const makeResolvePrimaryNamesResponseSchema = (
-  _valueLabel: string = "Resolve Primary Names Response",
-) =>
+export const makeResolvePrimaryNamesResponseSchema = () =>
   z.object({
     names: z.record(z.number(), z.string().nullable()),
     accelerationRequested: z.boolean(),
