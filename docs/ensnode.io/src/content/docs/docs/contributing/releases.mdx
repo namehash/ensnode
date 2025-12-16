@@ -47,9 +47,9 @@ To manually trigger a preview release for a branch that has not been merged to `
 
 1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/preview-release.yml)
 2. Click "Run workflow" and select from the following options:
- - Which branch you would like to run the preview release workflow on, ideally the branch for an open PR.
+ - Which branch you would like to run the preview release workflow on, ideally the branch for an open PR. The workflow needs a target branch to build and publish for.
  - Choose whether to build and publish only NPM packages, or to build and publish both NPM packages and Docker images to the GitHub Container Registry (ghcr).
- - (Optional) Provide a custom suffix for the preview release package tag. For example, using `my-feature` would result in a tag name of `@ensnode/package-name@preview-my-feature`.
+ - (Optional) Provide a custom suffix for the preview release package tag. For example, if you had a branch called `feat/add-api-route` and left this custom suffix field blank, the preview release would be `@ensnode/package-name@preview-feat-add-api-route`. If you fill in the custom suffix field with `users-route` then the resulting package name would be `@ensnode/package-name@preview-users-route`.
 3. Install preview packages with: `npm install @ensnode/package-name@preview-branch-name`. 
 
 **Important notes:**
