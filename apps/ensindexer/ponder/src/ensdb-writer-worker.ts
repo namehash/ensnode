@@ -9,82 +9,51 @@ import config from "@/config";
 import pRetry from "p-retry";
 
 import {
-  type CrossChainIndexingStatusSnapshot,
-  type IndexingStatusResponse,
   IndexingStatusResponseCodes,
   OmnichainIndexingStatusIds,
   type SerializedENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
-import { EnsDbConnection, EnsDbWriterClient } from "@/lib/ensdb";
+import { EnsDbConnection, EnsDbMutation, EnsDbQuery } from "@/lib/ensdb";
+import { EnsIndexerClient } from "@/lib/ensindexer";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("ensdb-writer-worker");
 
-/**
- * Wait for ENSIndexer to become healthy.
- *
- * @throws when the Health endpoint didn't return HTTP Status OK.
- */
-async function waitForEnsIndexerHealthy(): Promise<void> {
-  logger.info("Fetching ENSIndexer Health status");
+const ensIndexerClient = new EnsIndexerClient(config.ensIndexerUrl);
+const waitForEnsIndexerToBecomeHealthy = pRetry(async () => ensIndexerClient.health(), {
+  retries: 5,
+});
 
-  try {
-    await fetch(new URL("/health", config.ensIndexerUrl));
-
-    logger.info("ENSIndexer is healthy");
-  } catch {
-    const errorMessage = "Health endpoint for ENSIndexer is not available yet.";
-    logger.error(errorMessage);
-
-    throw new Error(errorMessage);
-  }
-}
-
-interface FetchEnsNodeMetadataResult {
-  ensIndexerPublicConfigSerialized: SerializedENSIndexerPublicConfig;
-  indexingStatusSnapshot: CrossChainIndexingStatusSnapshot;
-}
-
-/**
- * Fetch ENSNode metadata.
- *
- * @returns ENSNode metadata when it's available and with valid Indexing Status.
- * @throws error when ENSNode metadata was not available, or was available but with invalid Indexing Status.
- */
-async function fetchEnsNodeMetadata(): Promise<FetchEnsNodeMetadataResult> {
-  logger.info("Fetching ENSNode metadata");
-
-  const [ensIndexerPublicConfigSerialized, indexingStatusSerialized] = await Promise.all([
-    fetch(new URL("/api/config", config.ensIndexerUrl))
-      .then((response) => response.json())
-      .then((response) => response as unknown as SerializedENSIndexerPublicConfig),
-    fetch(new URL("/api/indexing-status", config.ensIndexerUrl))
-      .then((response) => response.json())
-      .then((response) => response as unknown as IndexingStatusResponse),
-  ]);
-
-  logger.info("Fetched ENSNode metadata");
-
-  if (indexingStatusSerialized.responseCode === IndexingStatusResponseCodes.Ok) {
-    const { snapshot } = indexingStatusSerialized.realtimeProjection;
-    const { omnichainSnapshot } = snapshot;
-
-    if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
-      throw new Error("Indexing Status ID must be different that 'Unstarted'.");
-    }
-
-    return {
-      ensIndexerPublicConfigSerialized,
-      indexingStatusSnapshot: snapshot,
-    };
+function isEnsIndexerPublicConfigCompatible<ConfigType extends SerializedENSIndexerPublicConfig>(
+  configA: ConfigType,
+  configB: ConfigType,
+): boolean {
+  if (
+    !configA.indexedChainIds.every((configAChainId) =>
+      configB.indexedChainIds.includes(configAChainId),
+    )
+  ) {
+    return false;
   }
 
-  throw new Error("Indexing Status must be available.");
+  if (configA.isSubgraphCompatible !== configB.isSubgraphCompatible) {
+    return false;
+  }
+
+  if (configA.namespace !== configB.namespace) {
+    return false;
+  }
+
+  if (!configA.plugins.every((configAPlugin) => configB.plugins.includes(configAPlugin))) {
+    return false;
+  }
+
+  return true;
 }
 
 async function upsertEnsNodeMetadataRecords() {
-  await pRetry(waitForEnsIndexerHealthy, { retries: 5 });
+  await waitForEnsIndexerToBecomeHealthy;
 
   const ensDbConnection = new EnsDbConnection();
   const ensDbClient = ensDbConnection.connect({
@@ -96,26 +65,60 @@ async function upsertEnsNodeMetadataRecords() {
 
   logger.info("ENSDb Client connected");
 
-  const ensDbWriterClient = new EnsDbWriterClient(ensDbClient);
+  const ensDbQuery = new EnsDbQuery(ensDbClient);
+  const ensDbMutation = new EnsDbMutation(ensDbClient);
 
-  const { ensIndexerPublicConfigSerialized, indexingStatusSnapshot } = await pRetry(
-    fetchEnsNodeMetadata,
-    {
-      retries: 5,
-    },
-  );
+  const handleEnsIndexerPublicConfigRecord = async () => {
+    const [storedConfig, inMemoryConfig] = await pRetry(() =>
+      Promise.all([ensDbQuery.getEnsIndexerPublicConfig(), ensIndexerClient.config()]),
+    );
 
-  await pRetry(() =>
-    Promise.all([
-      ensDbWriterClient
-        .upsertEnsIndexerPublicConfig(ensIndexerPublicConfigSerialized)
-        .then(() => logger.info("ENSIndexer Public Config successfully stored in ENSDb.")),
+    if (storedConfig && !isEnsIndexerPublicConfigCompatible(storedConfig, inMemoryConfig)) {
+      throw new Error(
+        "In-memory ENSIndexerPublicConfig object is not compatible with its counterpart stored in ENSDb.",
+      );
+    } else {
+      // upsert ENSIndexerPublicConfig into ENSDb
+      await ensDbMutation
+        .upsertEnsIndexerPublicConfig(inMemoryConfig)
+        .then(() => logger.info("ENSIndexer Public Config successfully stored in ENSDb."));
+    }
+  };
 
-      ensDbWriterClient
-        .upsertIndexingStatus(indexingStatusSnapshot)
-        .then(() => logger.info("Indexing Status successfully stored in ENSDb.")),
-    ]),
-  );
+  // TODO: clear interval on application shutdown
+  let _indexingStatusRefreshInterval: ReturnType<typeof setTimeout>;
+
+  const handleIndexingStatusRecord = async () => {
+    try {
+      const inMemoryIndexingStatus = await ensIndexerClient.indexingStatus();
+
+      if (inMemoryIndexingStatus.responseCode !== IndexingStatusResponseCodes.Ok) {
+        throw new Error("Indexing Status must be available.");
+      }
+
+      const { snapshot } = inMemoryIndexingStatus.realtimeProjection;
+      const { omnichainSnapshot } = snapshot;
+
+      if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
+        throw new Error("Omnichain Status  must be different that 'Unstarted'.");
+      }
+
+      // upsert ENSIndexerPublicConfig into ENSDb
+      await ensDbMutation
+        .upsertIndexingStatus(snapshot)
+        .then(() => logger.info("ENSIndexer Public Config successfully stored in ENSDb."));
+    } catch (error) {
+      logger.error(error, "Could not upsert Indexing Status record");
+    } finally {
+      _indexingStatusRefreshInterval = setTimeout(handleIndexingStatusRecord, 1000);
+    }
+  };
+
+  // 1. Handle ENSIndexer Public Config just once.
+  await handleEnsIndexerPublicConfigRecord();
+
+  // 2. Handle Indexing Status on recurring basis.
+  await handleIndexingStatusRecord();
 }
 
 // Upsert ENSNode Metadata Records in a non-blocking way to

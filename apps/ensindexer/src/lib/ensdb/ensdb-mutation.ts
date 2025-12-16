@@ -1,44 +1,18 @@
 import * as schema from "@ensnode/ensnode-schema";
 import type {
-  CrossChainIndexingStatusSnapshot,
+  SerializedCrossChainIndexingStatusSnapshot,
   SerializedENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
 import type { EnsDbClient } from "./ensdb-connection";
+import { type EnsNodeMetadata, EnsNodeMetadataKeys } from "./ensnode-metadata";
 
 /**
- * Keys used to distinguish records in `ensnode_metadata` table in the ENSDb.
- */
-export const EnsNodeMetadataKeys = {
-  EnsIndexerPublicConfig: "ensindexer-public-config",
-  IndexingStatus: "indexing-status",
-} as const;
-
-export type EnsNodeMetadataKey = (typeof EnsNodeMetadataKeys)[keyof typeof EnsNodeMetadataKeys];
-
-export interface EnsNodeMetadataEnsIndexerPublicConfig {
-  key: typeof EnsNodeMetadataKeys.EnsIndexerPublicConfig;
-  value: SerializedENSIndexerPublicConfig;
-}
-
-export interface EnsNodeMetadataIndexingStatus {
-  key: typeof EnsNodeMetadataKeys.IndexingStatus;
-  value: CrossChainIndexingStatusSnapshot;
-}
-
-/**
- * ENSNode Metadata
- *
- * Union type gathering all variants of ENSNode Metadata.
- */
-export type EnsNodeMetadata = EnsNodeMetadataEnsIndexerPublicConfig | EnsNodeMetadataIndexingStatus;
-
-/**
- * ENSDb Writer Client
+ * ENSDb Mutation
  *
  * The database client performing write operations.
  */
-export class EnsDbWriterClient {
+export class EnsDbMutation {
   constructor(private ensDbClient: EnsDbClient) {}
 
   /**
@@ -63,8 +37,8 @@ export class EnsDbWriterClient {
    * @throws when upsert operation failed.
    */
   async upsertIndexingStatus(
-    indexingStatus: CrossChainIndexingStatusSnapshot,
-  ): Promise<CrossChainIndexingStatusSnapshot> {
+    indexingStatus: SerializedCrossChainIndexingStatusSnapshot,
+  ): Promise<SerializedCrossChainIndexingStatusSnapshot> {
     return this.upsertEnsNodeMetadata({
       key: EnsNodeMetadataKeys.IndexingStatus,
       value: indexingStatus,

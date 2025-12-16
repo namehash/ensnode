@@ -1,2 +1,3 @@
 export * from "./ensdb-connection";
-export * from "./ensdb-writer-client";
+export * from "./ensdb-mutation";
+export * from "./ensdb-query";
