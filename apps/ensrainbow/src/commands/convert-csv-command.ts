@@ -112,7 +112,7 @@ function setupProgressBar(): ProgressBar {
     complete: "=",
     incomplete: " ",
     width: 40,
-    total: 200000000, // Very large total for big files
+    total: 300000000, // Very large total for big files
   });
 }
 
@@ -225,7 +225,6 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
     if (stats.size > 1024 * 1024 * 1024) {
       // > 1GB
       logger.warn("⚠️  Processing a very large file - using SEQUENTIAL mode.");
-      logger.warn("💡 Use --existing-db-path to filter existing labels and speed up processing.");
     }
   } catch (error) {
     logger.warn(`Could not determine file size: ${error}`);
@@ -303,7 +302,7 @@ async function processRecord(
   outputStream: NodeJS.WritableStream,
   lineNumber: number,
   existingDb: ENSRainbowDB | null,
-  dedupDb: DeduplicationDB | null,
+  dedupDb: DeduplicationDB,
   stats: ConversionStats,
 ): Promise<boolean> {
   // Validate column count
@@ -326,17 +325,15 @@ async function processRecord(
     }
   }
 
-  // Check if label is a duplicate within this conversion using LevelDB (if enabled)
-  if (dedupDb) {
-    const existsInDedupDb = await dedupDb.has(label);
-    if (existsInDedupDb) {
-      stats.filteredDuplicates++;
-      return false; // Skip this record
-    }
-
-    // Add label to deduplication database
-    await dedupDb.add(label, "");
+  // Check if label is a duplicate within this conversion using LevelDB
+  const existsInDedupDb = await dedupDb.has(label);
+  if (existsInDedupDb) {
+    stats.filteredDuplicates++;
+    return false; // Skip this record
   }
+
+  // Add label to deduplication database
+  await dedupDb.add(label, "");
 
   // Create protobuf message and write with backpressure handling
   const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
@@ -366,7 +363,7 @@ async function processCSVFile(
   outputStream: NodeJS.WritableStream,
   progressInterval: number,
   existingDb: ENSRainbowDB | null,
-  dedupDb: DeduplicationDB | null,
+  dedupDb: DeduplicationDB,
   stats: ConversionStats,
   progressBar: ProgressBar | null,
 ): Promise<{ totalLines: number; processedRecords: number }> {
@@ -419,9 +416,6 @@ async function processCSVFile(
           if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
             const currentTime = Date.now();
             const chunkTime = currentTime - lastLogTime;
-            const totalElapsed = currentTime - startTime;
-            const chunkTimeSeconds = (chunkTime / 1000).toFixed(2);
-            const totalTimeSeconds = (totalElapsed / 1000).toFixed(2);
             const linesPerSecond = ((progressInterval / chunkTime) * 1000).toFixed(0);
 
             lastLoggedLine = lineNumber;
@@ -430,11 +424,8 @@ async function processCSVFile(
             const memUsage = process.memoryUsage();
             const memInfo = `RSS=${(memUsage.rss / 1024 / 1024).toFixed(0)}MB, Heap=${(memUsage.heapUsed / 1024 / 1024).toFixed(0)}MB`;
 
-            let dedupInfo = "";
-            if (dedupDb) {
-              const dedupStats = dedupDb.getMemoryStats();
-              dedupInfo = ` | Dedup: ${dedupStats.pendingWrites}/${dedupStats.cache}`;
-            }
+            const dedupStats = dedupDb.getMemoryStats();
+            const dedupInfo = ` | Dedup: ${dedupStats.pendingWrites}/${dedupStats.cache}`;
 
             // Use console.log instead of logger to avoid worker thread issues
             console.log(
@@ -496,6 +487,11 @@ async function processCSVFile(
  * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
+  // Validate that existingDbPath is provided when labelSetVersion > 0
+  if (options.labelSetVersion > 0 && !options.existingDbPath) {
+    throw new Error("existingDbPath must be specified if label set version is higher than 0");
+  }
+
   const stats: ConversionStats = {
     totalLines: 0,
     processedRecords: 0,
@@ -506,7 +502,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
   };
 
   let existingDb: ENSRainbowDB | null = null;
-  let dedupDb: DeduplicationDB | null = null;
+  let dedupDb: DeduplicationDB | undefined;
   let tempDedupDir: string | null = null;
 
   try {
@@ -568,7 +564,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     throw error;
   } finally {
     // Clean up deduplication database
-    if (dedupDb) {
+    if (dedupDb !== undefined) {
       try {
         await dedupDb.close();
         logger.info("Closed deduplication database");
