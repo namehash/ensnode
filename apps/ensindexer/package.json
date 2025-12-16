@@ -33,7 +33,11 @@
     "date-fns": "catalog:",
     "deepmerge-ts": "^7.1.5",
     "dns-packet": "^5.6.1",
+    "drizzle-orm": "catalog:",
+    "p-retry": "catalog:",
+    "pino": "catalog:",
     "pg-connection-string": "catalog:",
+    "pg": "8.16.3",
     "hono": "catalog:",
     "ponder": "catalog:",
     "viem": "catalog:",
@@ -43,6 +47,7 @@
     "@ensnode/shared-configs": "workspace:*",
     "@types/dns-packet": "^5.6.5",
     "@types/node": "catalog:",
+    "@types/pg": "8.16.0",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
