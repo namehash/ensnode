@@ -39,13 +39,13 @@ export class EnsIndexerClient {
   public async config(): Promise<SerializedENSIndexerPublicConfig> {
     logger.info("Fetching ENSIndexer Public Config");
 
-    const ensIndexerPublicConfigSerialized = await fetch(new URL("/api/config", this.ensIndexerUrl))
-      .then((response) => response.json())
-      .then((response) => response as unknown as SerializedENSIndexerPublicConfig);
+    const ensIndexerPublicConfigSerialized = await fetch(
+      new URL("/api/config", this.ensIndexerUrl),
+    ).then((response) => response.json());
 
     logger.info("Fetched ENSIndexer Public Config");
 
-    return ensIndexerPublicConfigSerialized;
+    return ensIndexerPublicConfigSerialized as SerializedENSIndexerPublicConfig;
   }
 
   /**
@@ -59,12 +59,10 @@ export class EnsIndexerClient {
 
     const indexingStatusSerialized = await fetch(
       new URL("/api/indexing-status", this.ensIndexerUrl),
-    )
-      .then((response) => response.json())
-      .then((response) => response as unknown as SerializedIndexingStatusResponse);
+    ).then((response) => response.json());
 
     logger.info("Fetched Indexing Status");
 
-    return indexingStatusSerialized;
+    return indexingStatusSerialized as SerializedIndexingStatusResponse;
   }
 }
