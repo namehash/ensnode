@@ -25,7 +25,7 @@ app.all("/subgraph", async (c) => {
   if (!header) return c.json({ message: "Missing Host Header" }, 400);
 
   const configTemplateId = parseHostHeader(header);
-  if (!configTemplateId) return c.json({ message: "Unable to parse Host header" }, 400);
+  if (!configTemplateId) return c.json({ message: "Unable to parse Host Header" }, 400);
 
   const namespace = namespaceForConfigTemplateId(configTemplateId);
 
@@ -58,7 +58,7 @@ app.onError((error, c) => {
   return c.text("Internal Server Error", 500);
 });
 
-// run node dev server locally for development
+// run node server if local
 if (process.env.NODE_ENV !== "production") {
   await import("@hono/node-server").then((m) => {
     const server = m.serve(app, (info) =>

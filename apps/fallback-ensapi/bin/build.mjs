@@ -6,6 +6,7 @@ import { build } from "esbuild";
 const projectRoot = process.cwd();
 const distDir = join(projectRoot, "dist");
 
+// build dist/index.mjs
 const result = await build({
   entryPoints: [join(projectRoot, "src/index.ts")],
   bundle: true,
@@ -24,7 +25,11 @@ const result = await build({
   sourcemap: false,
   treeShaking: true,
   logLevel: "info",
+  define: {
+    // define NODE_ENV as production when building to strip out @hono/node-server usage
+    "process.env.NODE_ENV": '"production"',
+  },
 });
 
-// Write the metafile
+// write dist/meta.json, analyze with https://esbuild.github.io/analyze/
 writeFileSync(join(distDir, "meta.json"), JSON.stringify(result.metafile, null, 2));

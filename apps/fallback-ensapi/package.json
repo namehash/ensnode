@@ -31,7 +31,6 @@
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@hono/node-server": "^1.19.7",
-    "@types/aws-lambda": "^8.10.159",
     "@types/node": "catalog:",
     "esbuild": "^0.27.2",
     "tsx": "^4.7.1",
