@@ -41,7 +41,7 @@ A logical collection of [rainbow records](#rainbow-record) that share a common *
 
 String (1-50 chars) consisting of lowercase ASCII letters and hyphens that names a label set.
 
-**Example:** `subgraph`, `discovery-a`
+**Example:** `subgraph`, `discovery-a`, `searchlight`
 
 ## Label Set Version
 
@@ -84,6 +84,8 @@ Special LevelDB key (length ≠ 32 bytes) storing metadata such as schema versio
 The ENSIP-15 canonicalisation process; ENSRainbow stores labels **as-is**, even if not normalised.
 
 ## Environment Variables
+
+These environment variables are typically set in Docker containers, shell scripts, or system configuration files. See the [Configuration](/ensrainbow/usage/configuration) guide for complete setup instructions.
 
 ### LABEL_SET_ID
 
