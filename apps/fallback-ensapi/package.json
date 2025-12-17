@@ -1,0 +1,37 @@
+{
+  "private": true,
+  "name": "fallback-ensapi",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "ENSNode Fallback API",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/fallback-ensapi"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/fallback-ensapi",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch --env-file ./.env.local src/index.ts",
+    "test": "vitest",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ensnode/datasources": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "hono": "catalog:",
+    "pino": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/aws-lambda": "^8.10.159",
+    "@types/node": "catalog:",
+    "pino-pretty": "^13.1.2",
+    "tsx": "^4.7.1",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
