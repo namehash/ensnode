@@ -35,7 +35,7 @@ There are curently two separate flows for previewing a release: Release Snapshot
 
 ### Release Snapshot
 
-Each commit to `main` will trigger the `snapshot-release.yml` workflow to build and publish packages to NPM and Docker images to the GitHub Container Registry (ghcr). These public releases will be under the tag `@next`, allowing anyone to use the npm packages or docker images associated with each commit to main. To install snapshot releases run `pnpm install @ensnode/package-name@next` or `docker run ghcr.io/namehash/ensnode:next`. If the `@latest` tag is used then it will only install or run the latest stable release.
+Each commit to `main` will trigger the `release_snapshot.yml` workflow to build and publish packages to NPM and Docker images to the GitHub Container Registry (ghcr). These public releases will be under the tag `@next`, allowing anyone to use the npm packages or docker images associated with each commit to main. To install snapshot releases run `pnpm install @ensnode/package-name@next` or `docker run ghcr.io/namehash/ensnode:next`. If the `@latest` tag is used then it will only install or run the latest stable release.
 
 **Important notes:**
 - Release snapshots are automatic and cannot be triggered manually.
@@ -45,7 +45,7 @@ Each commit to `main` will trigger the `snapshot-release.yml` workflow to build 
 
 To manually trigger a preview release for a branch that has not been merged to `main`, follow these steps:
 
-1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/preview-release.yml)
+1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/release_preview.yml)
 2. Click "Run workflow" and select from the following options:
  - Which branch you would like to run the preview release workflow on, ideally the branch for an open PR. The workflow needs a target branch to build and publish for.
  - Choose whether to build and publish only NPM packages, or to build and publish both NPM packages and Docker images to the GitHub Container Registry (ghcr).
