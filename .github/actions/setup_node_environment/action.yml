@@ -1,5 +1,5 @@
 name: 'Setup Node Environment'
-description: 'Sets up pnpm, Node.js, and optionally installs dependencies'
+description: 'Sets up pnpm, Node.js, and installs dependencies'
 runs:
   using: 'composite'
   steps:
