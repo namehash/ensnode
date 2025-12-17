@@ -63,7 +63,7 @@ class DeduplicationDB {
     this.pendingWrites.set(key, value);
 
     // Flush frequently to keep pendingWrites small
-    if (this.pendingWrites.size >= 1000) {
+    if (this.pendingWrites.size >= DEDUP_PENDING_WRITES_FLUSH_THRESHOLD) {
       await this.flush();
     }
   }
@@ -112,7 +112,7 @@ function setupProgressBar(): ProgressBar {
     complete: "=",
     incomplete: " ",
     width: 40,
-    total: 300000000, // Very large total for big files
+    total: PROGRESS_BAR_LARGE_TOTAL,
   });
 }
 
@@ -131,6 +131,11 @@ export interface ConvertCsvCommandOptions {
 
 // Configuration constants
 const DEFAULT_PROGRESS_INTERVAL = 50000; // Increased from 10k to 50k to reduce logging load
+const PROGRESS_BAR_LARGE_TOTAL = 300_000_000; // Very large total for progress bar to handle big files
+const DEDUP_PENDING_WRITES_FLUSH_THRESHOLD = 1000; // Flush deduplication DB when pending writes reach this count
+const OUTPUT_STREAM_BUFFER_SIZE = 16 * 1024; // 16KB buffer - very small to catch backpressure early
+const LARGE_FILE_SIZE_THRESHOLD_MB = 1024; // 1GB - warn user about very large files
+const PROGRESS_BAR_UPDATE_INTERVAL = 1000; // Update progress bar every N lines
 
 interface ConversionStats {
   totalLines: number;
@@ -150,7 +155,7 @@ function setupWriteStream(outputFile: string) {
   // This prevents unbounded buffer growth when writes are faster than disk I/O
   // Smaller buffer = more frequent backpressure = better memory control
   return createWriteStream(outputFile, {
-    highWaterMark: 16 * 1024, // 16KB buffer - very small to catch backpressure early
+    highWaterMark: OUTPUT_STREAM_BUFFER_SIZE,
   });
 }
 
@@ -222,8 +227,7 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
     logger.info(`Input file size: ${fileSizeMB} MB`);
 
-    if (stats.size > 1024 * 1024 * 1024) {
-      // > 1GB
+    if (stats.size > LARGE_FILE_SIZE_THRESHOLD_MB * 1024 * 1024) {
       logger.warn("⚠️  Processing a very large file - using SEQUENTIAL mode.");
     }
   } catch (error) {
@@ -451,8 +455,8 @@ async function processCSVFile(
           }
 
           // Update progress bar
-          if (lineNumber % 1000 === 0 && progressBar) {
-            progressBar.tick(1000);
+          if (lineNumber % PROGRESS_BAR_UPDATE_INTERVAL === 0 && progressBar) {
+            progressBar.tick(PROGRESS_BAR_UPDATE_INTERVAL);
             progressBar.curr = lineNumber;
           }
 

@@ -33,7 +33,6 @@
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "@hono/node-server": "^1.4.1",
-    "bloom-filters": "^3.0.4",
     "classic-level": "^1.4.1",
     "hono": "catalog:",
     "pino": "catalog:",
