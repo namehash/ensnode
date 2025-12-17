@@ -1,7 +1,7 @@
 import type { ConfigTemplateId } from "@ensnode/ensnode-sdk/internal";
 
 /**
- * Parses a Host header value into a ConfigTemplateId
+ * Parses a Host header value into a ConfigTemplateId.
  *
  * @param value the Host header value
  * @returns a ConfigTemplateId or null if not matched

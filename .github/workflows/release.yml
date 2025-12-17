@@ -71,18 +71,16 @@ jobs:
           compact: true
           input: ${{ steps.changesets.outputs.publishedPackages }}
           # filter publishedPackages for packages (projects whose artifact is an NPM package)
-          # 1. filter out publishedApps (see above)
-          # 2. filter out private packages that were not actually published to NPM
-          #   a. @ensnode/shared-configs
-          #   b. @docs/*
           script: |-
             map(select(
-                  .name != "ensindexer"
-              and .name != "ensadmin"
-              and .name != "ensapi"
-              and .name != "ensrainbow"
-              and .name != "@ensnode/shared-configs"
-              and (.name | startswith("@docs") | not)
+                 .name == "@ensnode/datasources"
+              or .name == "@ensnode/ens-referrals"
+              or .name == "@ensnode/ensnode-react"
+              or .name == "@ensnode/ensnode-schema"
+              or .name == "@ensnode/ensnode-sdk"
+              or .name == "@ensnode/ensrainbow-sdk"
+              or .name == "@ensnode/ponder-metadata"
+              or .name == "@ensnode/ponder-subgraph"
             ))
 
   build-and-push-ensnode:
