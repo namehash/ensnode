@@ -1,24 +1,11 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
   "compilerOptions": {
+    "target": "esnext",
     "typeRoots": ["./types"],
     "paths": {
       "@/*": ["./src/*"]
-    },
-    // the following via
-    // 1) https://github.com/tsconfig/bases/blob/main/bases/node22.json
-    // 2) https://docs.aws.amazon.com/lambda/latest/dg/lambda-typescript.html
-    "target": "es2022",
-    "module": "nodenext",
-    "moduleResolution": "node16",
-    "lib": ["es2024", "ESNext.Array", "ESNext.Collection", "ESNext.Iterator"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "preserveConstEnums": true,
-    "sourceMap": false,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true
+    }
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules"]

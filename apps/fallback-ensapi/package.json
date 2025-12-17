@@ -14,6 +14,10 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "dev": "tsx watch --env-file ./.env.local src/index.ts",
+    "build": "pnpm build:clean && pnpm build:transpile && pnpm build:bundle",
+    "build:clean": "rm -rf dist",
+    "build:transpile": "node bin/build.mjs",
+    "build:bundle": "zip -r dist/lambda.zip dist/index.mjs",
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
@@ -22,14 +26,14 @@
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
-    "hono": "catalog:",
-    "pino": "catalog:"
+    "hono": "catalog:"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
+    "@hono/node-server": "^1.19.7",
     "@types/aws-lambda": "^8.10.159",
     "@types/node": "catalog:",
-    "pino-pretty": "^13.1.2",
+    "esbuild": "^0.27.2",
     "tsx": "^4.7.1",
     "typescript": "catalog:",
     "vitest": "catalog:"

@@ -1,5 +1,5 @@
-import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { TheGraphFallback } from "@ensnode/ensnode-sdk";
+import { makeTheGraphSubgraphUrl } from "@ensnode/ensnode-sdk/internal";
 
 import type { EnsApiConfig } from "@/config/config.schema";
 
@@ -23,17 +23,4 @@ export const canFallbackToTheGraph = ({
 
   // otherwise able to fallback
   return { canFallback: true, reason: null };
-};
-
-export const makeTheGraphSubgraphUrl = (namespace: ENSNamespaceId, apiKey: string) => {
-  switch (namespace) {
-    case "mainnet":
-      return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH`;
-    case "sepolia":
-      return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/G1SxZs317YUb9nQX3CC98hDyvxfMJNZH5pPRGpNrtvwN`;
-    case "holesky":
-      return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/i5EXyL9MzTXWKCmpJ2LG6sbzBfXneUPVuTXaSjYhDDF`;
-    default:
-      return null;
-  }
 };

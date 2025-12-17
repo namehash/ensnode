@@ -1,17 +1,9 @@
 import { z } from "zod/v4";
 
 import { makeENSIndexerPublicConfigSchema } from "../../ensindexer/config/zod-schemas";
+import { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema } from "../../shared/config/thegraph";
 
-export const TheGraphCannotFallbackReasonSchema = z.enum({
-  NotSubgraphCompatible: "not-subgraph-compatible",
-  NoApiKey: "no-api-key",
-  NoSubgraphUrl: "no-subgraph-url",
-});
-
-export const TheGraphFallbackSchema = z.strictObject({
-  canFallback: z.boolean(),
-  reason: TheGraphCannotFallbackReasonSchema.nullable(),
-});
+export { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema };
 
 /**
  * Create a Zod schema for validating a serialized ENSApiPublicConfig.

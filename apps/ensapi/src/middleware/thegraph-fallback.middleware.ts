@@ -2,9 +2,11 @@ import config from "@/config";
 
 import { proxy } from "hono/proxy";
 
+import { makeTheGraphSubgraphUrl } from "@ensnode/ensnode-sdk/internal";
+
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { canFallbackToTheGraph, makeTheGraphSubgraphUrl } from "@/lib/thegraph";
+import { canFallbackToTheGraph } from "@/lib/thegraph";
 
 const logger = makeLogger("thegraph-fallback.middleware");
 
