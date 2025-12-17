@@ -1,7 +1,10 @@
 import { z } from "zod/v4";
 
 import { makeENSIndexerPublicConfigSchema } from "../../ensindexer/config/zod-schemas";
-import { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema } from "../../shared/config/thegraph";
+import {
+  TheGraphCannotFallbackReasonSchema,
+  TheGraphFallbackSchema,
+} from "../../shared/config/thegraph";
 
 export { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema };
 
