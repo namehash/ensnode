@@ -16,12 +16,12 @@ export class EnsIndexerClient {
    * @throws when the Health endpoint didn't return HTTP Status OK.
    */
   public async health(): Promise<void> {
-    logger.info("Fetching ENSIndexer Health status");
+    logger.debug("Fetching ENSIndexer Health status");
 
     try {
       await fetch(new URL("/health", this.ensIndexerUrl));
 
-      logger.info("ENSIndexer is healthy");
+      logger.debug("Fetching ENSIndexer Health status: healthy");
     } catch {
       const errorMessage = "Health endpoint for ENSIndexer is not available yet.";
       logger.error(errorMessage);
@@ -37,13 +37,13 @@ export class EnsIndexerClient {
    * @throws error when fetching ENSIndexer Public Config failed
    */
   public async config(): Promise<SerializedENSIndexerPublicConfig> {
-    logger.info("Fetching ENSIndexer Public Config");
+    logger.debug("Fetching ENSIndexer Public Config");
 
     const ensIndexerPublicConfigSerialized = await fetch(
       new URL("/api/config", this.ensIndexerUrl),
     ).then((response) => response.json());
 
-    logger.info("Fetched ENSIndexer Public Config");
+    logger.debug("Fetched ENSIndexer Public Config");
 
     return ensIndexerPublicConfigSerialized as SerializedENSIndexerPublicConfig;
   }
@@ -55,13 +55,13 @@ export class EnsIndexerClient {
    * @throws error when Indexing Status was either not available, or invalid.
    */
   public async indexingStatus(): Promise<SerializedIndexingStatusResponse> {
-    logger.info("Fetching Indexing Status");
+    logger.debug("Fetching Indexing Status");
 
     const indexingStatusSerialized = await fetch(
       new URL("/api/indexing-status", this.ensIndexerUrl),
     ).then((response) => response.json());
 
-    logger.info("Fetched Indexing Status");
+    logger.debug("Fetched Indexing Status");
 
     return indexingStatusSerialized as SerializedIndexingStatusResponse;
   }

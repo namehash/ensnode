@@ -116,7 +116,7 @@ async function ensDbWriterWorker() {
       // Upsert ENSIndexerPublicConfig into ENSDb.
       await ensDbMutation.upsertIndexingStatus(snapshot);
 
-      logger.info("ENSIndexer Public Config successfully stored in ENSDb.");
+      logger.info("Indexing Status successfully stored in ENSDb.");
     } catch (error) {
       // Do nothing about this error, but having it logged.
       logger.error(error, "Could not upsert Indexing Status record");
