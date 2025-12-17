@@ -15,6 +15,9 @@ catalogs:
     '@namehash/namekit-react':
       specifier: 0.12.0
       version: 0.12.0
+    '@ponder/client':
+      specifier: 0.13.14
+      version: 0.13.14
     '@ponder/utils':
       specifier: 0.2.14
       version: 0.2.14
@@ -45,6 +48,9 @@ catalogs:
     hono:
       specifier: ^4.10.2
       version: 4.10.3
+    p-memoize:
+      specifier: ^8.0.0
+      version: 8.0.0
     p-retry:
       specifier: ^7.1.1
       version: 7.1.1
@@ -347,7 +353,7 @@ importers:
         specifier: 'catalog:'
         version: 4.10.3
       p-memoize:
-        specifier: ^8.0.0
+        specifier: 'catalog:'
         version: 8.0.0
       p-retry:
         specifier: 'catalog:'
@@ -407,6 +413,9 @@ importers:
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
+      '@ponder/client':
+        specifier: 'catalog:'
+        version: 0.13.14(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)(typescript@5.9.3)
       caip:
         specifier: 'catalog:'
         version: 1.1.1
@@ -428,15 +437,9 @@ importers:
       p-retry:
         specifier: 'catalog:'
         version: 7.1.1
-      pg:
-        specifier: 8.16.3
-        version: 8.16.3
       pg-connection-string:
         specifier: 'catalog:'
         version: 2.9.1
-      pino:
-        specifier: 'catalog:'
-        version: 10.1.0
       ponder:
         specifier: 'catalog:'
         version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(@types/pg@8.16.0)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
@@ -2426,6 +2429,14 @@ packages:
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
+
+  '@ponder/client@0.13.14':
+    resolution: {integrity: sha512-T1hC2wP+47nJA+arDfCdaqaJGyj3z7QSHtqMv2ojy+nA0T5mHACs8kweWzsyxrI6H0jnuBgDviNijs9wUlo5Xw==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   '@ponder/utils@0.2.14':
     resolution: {integrity: sha512-O4t14Hb6/tVcD0WoS13ghFnDntP6x33/DDvA+sd0tRjemzS+Cne4YTkXl9TKW3AawBIEwMjGrGbAn82C8gXQWQ==}
@@ -4731,6 +4742,14 @@ packages:
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
+
+  eventsource-parser@3.0.6:
+    resolution: {integrity: sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==}
+    engines: {node: '>=18.0.0'}
+
+  eventsource@3.0.7:
+    resolution: {integrity: sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA==}
+    engines: {node: '>=18.0.0'}
 
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
@@ -9732,6 +9751,43 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
+  '@ponder/client@0.13.14(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)(typescript@5.9.3)':
+    dependencies:
+      drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
+      eventsource: 3.0.7
+      superjson: 2.2.5
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@libsql/client-wasm'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/sql.js'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bun-types
+      - expo-sqlite
+      - gel
+      - knex
+      - kysely
+      - mysql2
+      - pg
+      - postgres
+      - prisma
+      - sql.js
+      - sqlite3
+
   '@ponder/utils@0.2.14(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       viem: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -12170,6 +12226,12 @@ snapshots:
   eventemitter3@5.0.1: {}
 
   events@3.3.0: {}
+
+  eventsource-parser@3.0.6: {}
+
+  eventsource@3.0.7:
+    dependencies:
+      eventsource-parser: 3.0.6
 
   execa@5.1.1:
     dependencies:

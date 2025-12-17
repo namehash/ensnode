@@ -43,7 +43,7 @@
     "date-fns": "catalog:",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",
-    "p-memoize": "^8.0.0",
+    "p-memoize": "catalog:",
     "p-retry": "catalog:",
     "pg-connection-string": "catalog:",
     "pino": "catalog:",

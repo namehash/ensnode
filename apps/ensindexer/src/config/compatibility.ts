@@ -9,10 +9,7 @@ export type ENSIndexerPublicConfigCompatibilityCheck = Pick<
  * Validate if `configB` is compatible with `configA`, such that `configA` is
  * a subset of `configB`.
  *
- * @throws error if 'indexedChainIds' were incompatible.
- * @throws error if 'isSubgraphCompatible' flag was incompatible.
- * @throws error if 'namespace' was incompatible.
- * @throws error if 'plugins' were incompatible.
+ * @throws error if configs are incompatible.
  */
 export function validateENSIndexerPublicConfigCompatibility(
   configA: ENSIndexerPublicConfigCompatibilityCheck,
