@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { handle } from "hono/aws-lambda";
+import { html } from "hono/html";
 import { proxy } from "hono/proxy";
 
 import {
@@ -14,6 +15,24 @@ import { parseHostHeader } from "@/lib/parse-host-header";
 const THEGRAPH_API_KEY = process.env.THEGRAPH_API_KEY;
 
 const app = new Hono();
+
+// host welcome page
+app.get("/", (c) =>
+  c.html(html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENSApi</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>You've reached the root of the ENSApi Fallback. You might be looking for ENSNode's <a href="https://ensnode.io/docs/">documentation</a>.</p>
+</body>
+</html>
+`),
+);
 
 app.get("/health", async (c) => {
   if (!THEGRAPH_API_KEY) return c.json({ message: "THEGRAPH_API_KEY not configured" }, 500);
