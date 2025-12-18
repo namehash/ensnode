@@ -1,10 +1,12 @@
-import type { ENSNamespaceId } from "@ensnode/datasources";
+import { type ENSNamespaceId, ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { TheGraphFallback } from "./config/thegraph";
 
 /**
- * Determines whether, given the provided context, a request can be handled by a TheGraph-hosted
- * Subgraph.
+ * Determines whether, given the provided context, a Subgraph GraphQL API request can be handled by
+ * a TheGraph-hosted Subgraph.
+ *
+ * @see https://ensnode.io/docs/reference/subgraph-compatibility/
  */
 export const canFallbackToTheGraph = ({
   namespace,
@@ -16,6 +18,8 @@ export const canFallbackToTheGraph = ({
   isSubgraphCompatible: boolean;
 }): TheGraphFallback => {
   // must be subgraph-compatible
+  // NOTE: that Subgraph Compatibility requires that 'subgraph' is the only plugin, excluding
+  //  alpha-style deployments, which are unable to fall back to thegraph due to data inconsistency
   if (!isSubgraphCompatible) return { canFallback: false, reason: "not-subgraph-compatible" };
 
   // must have api key for The Graph
@@ -30,15 +34,21 @@ export const canFallbackToTheGraph = ({
   return { canFallback: true, reason: null };
 };
 
+/**
+ * Retrieves the URL of a TheGraph-hosted Subgraph given the provided `namespace`, authenticating
+ * with the provided `apiKey`.
+ */
 export const makeTheGraphSubgraphUrl = (namespace: ENSNamespaceId, apiKey: string) => {
   switch (namespace) {
-    case "mainnet":
+    case ENSNamespaceIds.Mainnet:
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH`;
-    case "sepolia":
+    case ENSNamespaceIds.Sepolia:
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/G1SxZs317YUb9nQX3CC98hDyvxfMJNZH5pPRGpNrtvwN`;
-    case "holesky":
+    case ENSNamespaceIds.Holesky:
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/i5EXyL9MzTXWKCmpJ2LG6sbzBfXneUPVuTXaSjYhDDF`;
-    default:
+    case ENSNamespaceIds.EnsTestEnv:
       return null;
+    default:
+      throw new Error("never");
   }
 };
