@@ -94,7 +94,7 @@ app.get(
       return errorResponse(
         c,
         new Error(
-          `Indexing Status 'worstCaseDistance' must be below requested 'maxRealtimeDistance'; worstCaseDistance = ${worstCaseDistance}; maxRealtimeDistance = ${maxRealtimeDistance}`,
+          `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxRealtimeDistance'; worstCaseDistance = ${worstCaseDistance}; maxRealtimeDistance = ${maxRealtimeDistance}`,
         ),
         503,
       );
