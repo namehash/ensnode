@@ -1,7 +1,7 @@
-import type { SerializedENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 
 export type ENSIndexerPublicConfigCompatibilityCheck = Pick<
-  SerializedENSIndexerPublicConfig,
+  ENSIndexerPublicConfig,
   "indexedChainIds" | "isSubgraphCompatible" | "namespace" | "plugins"
 >;
 
@@ -15,16 +15,18 @@ export function validateENSIndexerPublicConfigCompatibility(
   configA: ENSIndexerPublicConfigCompatibilityCheck,
   configB: ENSIndexerPublicConfigCompatibilityCheck,
 ): void {
+  const configAIndexedChainIds = Array.from(configA.indexedChainIds);
+  const configBIndexedChainIds = Array.from(configB.indexedChainIds);
   if (
-    !configA.indexedChainIds.every((configAChainId) =>
-      configB.indexedChainIds.includes(configAChainId),
+    !configAIndexedChainIds.every((configAChainId) =>
+      configBIndexedChainIds.includes(configAChainId),
     )
   ) {
     throw new Error(
       [
         `'indexedChainIds' must be compatible.`,
-        `Stored Config 'indexedChainIds': '${configA.indexedChainIds.join(", ")}'.`,
-        `Current Config 'indexedChainIds': '${configB.indexedChainIds.join(", ")}'.`,
+        `Stored Config 'indexedChainIds': '${configAIndexedChainIds.join(", ")}'.`,
+        `Current Config 'indexedChainIds': '${configBIndexedChainIds.join(", ")}'.`,
       ].join(" "),
     );
   }

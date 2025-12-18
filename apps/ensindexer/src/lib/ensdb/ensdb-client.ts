@@ -3,17 +3,21 @@ import config from "@/config";
 import { eq } from "drizzle-orm/sql";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type {
-  SerializedCrossChainIndexingStatusSnapshot,
-  SerializedENSIndexerPublicConfig,
+import {
+  type CrossChainIndexingStatusSnapshot,
+  deserializeCrossChainIndexingStatusSnapshot,
+  deserializeENSIndexerPublicConfig,
+  type ENSIndexerPublicConfig,
+  serializeCrossChainIndexingStatusSnapshotOmnichain,
+  serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
 
 import { makeDrizzle } from "./drizzle";
 import {
-  type EnsNodeMetadata,
-  type EnsNodeMetadataEnsIndexerPublicConfig,
-  type EnsNodeMetadataIndexingStatus,
   EnsNodeMetadataKeys,
+  type SerializedEnsNodeMetadata,
+  type SerializedEnsNodeMetadataEnsIndexerPublicConfig,
+  type SerializedEnsNodeMetadataIndexingStatus,
 } from "./ensnode-metadata";
 
 /**
@@ -22,9 +26,9 @@ import {
   Includes methods for reading from ENSDb.
  */
 export interface EnsDbClientQuery {
-  getEnsIndexerPublicConfig(): Promise<SerializedENSIndexerPublicConfig | undefined>;
+  getEnsIndexerPublicConfig(): Promise<ENSIndexerPublicConfig | undefined>;
 
-  getIndexingStatus(): Promise<SerializedCrossChainIndexingStatusSnapshot | undefined>;
+  getIndexingStatus(): Promise<CrossChainIndexingStatusSnapshot | undefined>;
 }
 
 /**
@@ -33,13 +37,9 @@ export interface EnsDbClientQuery {
  * Includes methods for writing into ENSDb.
  */
 export interface EnsDbClientMutation {
-  upsertEnsIndexerPublicConfig(
-    ensIndexerPublicConfig: SerializedENSIndexerPublicConfig,
-  ): Promise<SerializedENSIndexerPublicConfig>;
+  upsertEnsIndexerPublicConfig(ensIndexerPublicConfig: ENSIndexerPublicConfig): Promise<void>;
 
-  upsertIndexingStatus(
-    indexingStatus: SerializedCrossChainIndexingStatusSnapshot,
-  ): Promise<SerializedCrossChainIndexingStatusSnapshot>;
+  upsertIndexingStatus(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void>;
 }
 
 /**
@@ -58,10 +58,16 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
    * @returns updated record in ENSDb.
    * @throws when upsert operation failed.
    */
-  async getEnsIndexerPublicConfig(): Promise<SerializedENSIndexerPublicConfig | undefined> {
-    return this.getEnsNodeMetadata<EnsNodeMetadataEnsIndexerPublicConfig>({
+  async getEnsIndexerPublicConfig(): Promise<ENSIndexerPublicConfig | undefined> {
+    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsIndexerPublicConfig>({
       key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
     });
+
+    if (!record) {
+      return undefined;
+    }
+
+    return deserializeENSIndexerPublicConfig(record);
   }
 
   /**
@@ -70,39 +76,41 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
    * @returns updated record in ENSDb.
    * @throws when upsert operation failed.
    */
-  async getIndexingStatus(): Promise<SerializedCrossChainIndexingStatusSnapshot | undefined> {
-    return this.getEnsNodeMetadata<EnsNodeMetadataIndexingStatus>({
+  async getIndexingStatus(): Promise<CrossChainIndexingStatusSnapshot | undefined> {
+    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataIndexingStatus>({
       key: EnsNodeMetadataKeys.IndexingStatus,
     });
+
+    if (!record) {
+      return undefined;
+    }
+
+    return deserializeCrossChainIndexingStatusSnapshot(record);
   }
 
   /**
    * Upsert ENSIndexer Public Config
    *
-   * @returns updated record in ENSDb.
    * @throws when upsert operation failed.
    */
   async upsertEnsIndexerPublicConfig(
-    ensIndexerPublicConfig: SerializedENSIndexerPublicConfig,
-  ): Promise<SerializedENSIndexerPublicConfig> {
-    return this.upsertEnsNodeMetadata({
+    ensIndexerPublicConfig: ENSIndexerPublicConfig,
+  ): Promise<void> {
+    await this.upsertEnsNodeMetadata({
       key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
-      value: ensIndexerPublicConfig,
+      value: serializeENSIndexerPublicConfig(ensIndexerPublicConfig),
     });
   }
 
   /**
    * Upsert Indexing Status
    *
-   * @returns updated record in ENSDb.
    * @throws when upsert operation failed.
    */
-  async upsertIndexingStatus(
-    indexingStatus: SerializedCrossChainIndexingStatusSnapshot,
-  ): Promise<SerializedCrossChainIndexingStatusSnapshot> {
-    return this.upsertEnsNodeMetadata({
+  async upsertIndexingStatus(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void> {
+    await this.upsertEnsNodeMetadata({
       key: EnsNodeMetadataKeys.IndexingStatus,
-      value: indexingStatus,
+      value: serializeCrossChainIndexingStatusSnapshotOmnichain(indexingStatus),
     });
   }
 
@@ -112,9 +120,9 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
    * @returns selected record in ENSDb.
    * @throws when exactly one matching metadata record was not found
    */
-  private async getEnsNodeMetadata<EnsNodeMetadataType extends EnsNodeMetadata = EnsNodeMetadata>(
-    metadata: Pick<EnsNodeMetadataType, "key">,
-  ): Promise<EnsNodeMetadataType["value"] | undefined> {
+  private async getEnsNodeMetadata<
+    EnsNodeMetadataType extends SerializedEnsNodeMetadata = SerializedEnsNodeMetadata,
+  >(metadata: Pick<EnsNodeMetadataType, "key">): Promise<EnsNodeMetadataType["value"] | undefined> {
     const result = await this.#db
       .select()
       .from(schema.ensNodeMetadata)
@@ -134,13 +142,12 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
   /**
    * Upsert ENSNode metadata
    *
-   * @returns updated record in ENSDb.
    * @throws when upsert operation failed.
    */
   private async upsertEnsNodeMetadata<
-    EnsNodeMetadataType extends EnsNodeMetadata = EnsNodeMetadata,
-  >(metadata: EnsNodeMetadataType): Promise<EnsNodeMetadataType["value"]> {
-    const [result] = await this.#db
+    EnsNodeMetadataType extends SerializedEnsNodeMetadata = SerializedEnsNodeMetadata,
+  >(metadata: EnsNodeMetadataType): Promise<void> {
+    await this.#db
       .insert(schema.ensNodeMetadata)
       .values({
         key: metadata.key,
@@ -149,13 +156,6 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
       .onConflictDoUpdate({
         target: schema.ensNodeMetadata.key,
         set: { value: metadata.value },
-      })
-      .returning({ value: schema.ensNodeMetadata.value });
-
-    if (!result) {
-      throw new Error(`Failed to upsert metadata for key: ${metadata.key}`);
-    }
-
-    return result.value as EnsNodeMetadataType["value"];
+      });
   }
 }

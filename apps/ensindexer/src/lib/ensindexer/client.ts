@@ -1,6 +1,10 @@
-import type {
-  SerializedENSIndexerPublicConfig,
-  SerializedIndexingStatusResponse,
+import {
+  deserializeENSIndexerPublicConfig,
+  deserializeIndexingStatusResponse,
+  type ENSIndexerPublicConfig,
+  type IndexingStatusResponse,
+  type SerializedENSIndexerPublicConfig,
+  type SerializedIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
 
 export class EnsIndexerClient {
@@ -27,12 +31,14 @@ export class EnsIndexerClient {
    * @returns ENSIndexer Public Config
    * @throws error when fetching ENSIndexer Public Config failed
    */
-  public async config(): Promise<SerializedENSIndexerPublicConfig> {
+  public async config(): Promise<ENSIndexerPublicConfig> {
     const ensIndexerPublicConfigSerialized = await fetch(
       new URL("/api/config", this.ensIndexerUrl),
     ).then((response) => response.json());
 
-    return ensIndexerPublicConfigSerialized as SerializedENSIndexerPublicConfig;
+    return deserializeENSIndexerPublicConfig(
+      ensIndexerPublicConfigSerialized as SerializedENSIndexerPublicConfig,
+    );
   }
 
   /**
@@ -41,11 +47,13 @@ export class EnsIndexerClient {
    * @returns Indexing Status when it's available and with valid.
    * @throws error when Indexing Status was either not available, or invalid.
    */
-  public async indexingStatus(): Promise<SerializedIndexingStatusResponse> {
+  public async indexingStatus(): Promise<IndexingStatusResponse> {
     const indexingStatusSerialized = await fetch(
       new URL("/api/indexing-status", this.ensIndexerUrl),
     ).then((response) => response.json());
 
-    return indexingStatusSerialized as SerializedIndexingStatusResponse;
+    return deserializeIndexingStatusResponse(
+      indexingStatusSerialized as SerializedIndexingStatusResponse,
+    );
   }
 }
