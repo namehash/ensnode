@@ -52,5 +52,5 @@ jobs:
       - name: Build Lambda
         uses: ./.github/actions/build_lambda
         with:
-          name: ${{ matrix.app }}
+          name: ${{ matrix.lambda }}
           version: ${{ inputs.version }}
