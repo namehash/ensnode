@@ -13,9 +13,9 @@ import {
   ENSIndexerPublicConfig,
   IndexingStatusResponseCodes,
   OmnichainIndexingStatusIds,
+  validateENSIndexerPublicConfigCompatibility,
 } from "@ensnode/ensnode-sdk";
 
-import { validateENSIndexerPublicConfigCompatibility } from "@/config/compatibility";
 import { EnsDbClient } from "@/lib/ensdb";
 import { ensIndexerClient, waitForEnsIndexerToBecomeHealthy } from "@/lib/ensindexer";
 
@@ -92,6 +92,8 @@ async function ensDbWriterWorker() {
       const { omnichainSnapshot } = snapshot;
 
       // Check if Indexing Status is in expected status.
+      // The Omnichain Status must indicate that indexing has started already.
+      // Throw an error if Omnichain Status is "Unstarted".
       if (omnichainSnapshot.omnichainStatus === OmnichainIndexingStatusIds.Unstarted) {
         throw new Error("Omnichain Status must be different than 'Unstarted'.");
       }

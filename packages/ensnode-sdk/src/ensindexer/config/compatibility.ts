@@ -1,4 +1,4 @@
-import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerPublicConfig } from "./types";
 
 export type ENSIndexerPublicConfigCompatibilityCheck = Pick<
   ENSIndexerPublicConfig,

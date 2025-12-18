@@ -11,7 +11,7 @@ import {
 describe("ENSIndexerConfig compatibility", () => {
   describe("validateENSIndexerPublicConfigCompatibility()", () => {
     const config = {
-      indexedChainIds: [1, 10, 8453],
+      indexedChainIds: new Set([1, 10, 8453]),
       isSubgraphCompatible: false,
       namespace: ENSNamespaceIds.Mainnet,
       plugins: [PluginName.Subgraph, PluginName.Basenames, PluginName.ThreeDNS],
@@ -21,7 +21,7 @@ describe("ENSIndexerConfig compatibility", () => {
       const configA = structuredClone(config);
 
       const configB = structuredClone(config);
-      configB.indexedChainIds.push(59144);
+      configB.indexedChainIds.add(59144);
       configB.plugins.push(PluginName.Lineanames);
 
       expect(() =>
@@ -33,7 +33,7 @@ describe("ENSIndexerConfig compatibility", () => {
       const configA = structuredClone(config);
 
       const configB = structuredClone(config);
-      configB.indexedChainIds.pop();
+      configB.indexedChainIds.delete(8453);
 
       expect(() => validateENSIndexerPublicConfigCompatibility(configA, configB)).toThrowError(
         /'indexedChainIds' must be compatible. Stored Config 'indexedChainIds': '1, 10, 8453'. Current Config 'indexedChainIds': '1, 10'/i,

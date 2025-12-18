@@ -1,36 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { deserializeENSIndexerPublicConfig } from "./deserialize";
+import { mockedConfig, mockedSerializedConfig } from "./mocks";
 import { serializeENSIndexerPublicConfig } from "./serialize";
 import type { SerializedENSIndexerPublicConfig } from "./serialized-types";
 import { type ENSIndexerPublicConfig, PluginName } from "./types";
 
 describe("ENSIndexer: Config", () => {
+  const config = mockedConfig;
+  const serializedConfig = mockedSerializedConfig;
+
   describe("serialization", () => {
     it("can serialize ENSIndexerPublicConfig", () => {
-      // arrange
-      const config = {
-        databaseSchemaName: "public",
-        labelSet: {
-          labelSetId: "subgraph",
-          labelSetVersion: 0,
-        },
-        indexedChainIds: new Set([1]),
-        isSubgraphCompatible: true,
-        namespace: "mainnet",
-        plugins: [PluginName.Subgraph],
-        versionInfo: {
-          nodejs: "v22.10.12",
-          ponder: "0.11.25",
-          ensDb: "0.32.0",
-          ensIndexer: "0.32.0",
-          ensNormalize: "1.11.1",
-          ensRainbow: "0.32.0",
-          ensRainbowSchema: 2,
-        },
-      } satisfies ENSIndexerPublicConfig;
-
-      // act
+      // arrange & act
       const result = serializeENSIndexerPublicConfig(config);
 
       // assert
@@ -49,27 +31,7 @@ describe("ENSIndexer: Config", () => {
   });
 
   describe("deserialization", () => {
-    const correctSerializedConfig = {
-      databaseSchemaName: "public",
-      labelSet: {
-        labelSetId: "subgraph",
-        labelSetVersion: 0,
-      },
-      indexedChainIds: [1, 10, 8453],
-      isSubgraphCompatible: true,
-      namespace: "mainnet",
-      plugins: [PluginName.Subgraph],
-      versionInfo: {
-        nodejs: "v22.10.12",
-        ponder: "0.11.25",
-        ensDb: "0.32.0",
-        ensIndexer: "0.32.0",
-        ensNormalize: "1.11.1",
-        ensRainbow: "0.32.0",
-        ensRainbowSchema: 2,
-      },
-    } satisfies SerializedENSIndexerPublicConfig;
-
+    const correctSerializedConfig = serializedConfig;
     it("can deserialize SerializedENSIndexerPublicConfig", () => {
       // arrange
       const serializedConfig = structuredClone(correctSerializedConfig);
