@@ -2,11 +2,10 @@ import config from "@/config";
 
 import { proxy } from "hono/proxy";
 
-import { makeTheGraphSubgraphUrl } from "@ensnode/ensnode-sdk/internal";
+import { canFallbackToTheGraph, makeTheGraphSubgraphUrl } from "@ensnode/ensnode-sdk/internal";
 
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { canFallbackToTheGraph } from "@/lib/thegraph";
 
 const logger = makeLogger("thegraph-fallback.middleware");
 
@@ -19,13 +18,18 @@ let prevShouldFallback = false;
  * Middleware that proxies Subgraph requests to The Graph if possible & necessary.
  */
 export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, next) => {
+  const isRealtime = c.var.isRealtime;
+
   // context must be set by the required middleware
-  if (c.var.isRealtime === undefined) {
+  if (isRealtime === undefined) {
     throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
   }
 
-  const { canFallback, reason: cannotfallbackReason } = canFallbackToTheGraph(config);
-  const isRealtime = c.var.isRealtime;
+  const { canFallback, reason: cannotfallbackReason } = canFallbackToTheGraph({
+    namespace: config.namespace,
+    theGraphApiKey: config.theGraphApiKey,
+    isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+  });
 
   // log one warning to the console if !canFallback
   if (!didWarnCanFallback && !canFallback) {

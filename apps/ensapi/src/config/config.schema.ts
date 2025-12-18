@@ -12,6 +12,7 @@ import { prettifyError, ZodError, z } from "zod/v4";
 import { type ENSApiPublicConfig, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
+  canFallbackToTheGraph,
   DatabaseSchemaNameSchema,
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
@@ -31,7 +32,6 @@ import {
 } from "@/config/validations";
 import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
-import { canFallbackToTheGraph } from "@/lib/thegraph";
 
 export const DatabaseUrlSchema = z.string().refine(
   (url) => {
@@ -131,7 +131,11 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 export function buildEnsApiPublicConfig(config: EnsApiConfig): ENSApiPublicConfig {
   return {
     version: packageJson.version,
-    theGraphFallback: canFallbackToTheGraph(config),
+    theGraphFallback: canFallbackToTheGraph({
+      namespace: config.namespace,
+      theGraphApiKey: config.theGraphApiKey,
+      isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+    }),
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,
   };
 }
