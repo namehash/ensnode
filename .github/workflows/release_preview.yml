@@ -37,7 +37,7 @@
 # - Installation: npm install @ensnode/package-name@preview-branch-name
 # - Cleanup: Use npm dist-tag rm to manually remove preview tags when no longer needed
 #
-# Documentation: https://github.com/namehash/ensnode/blob/main/docs/ensnode.io/src/content/docs/docs/contributing/releases.mdx
+# Documentation: https://ensnode.io/docs/contributing/releases#preview-release
 
 name: Release Preview (@preview)
 

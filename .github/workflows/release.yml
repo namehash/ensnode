@@ -27,7 +27,7 @@
 # - This workflow does NOT run on regular commits to main (see release_snapshot.yml for that)
 # - GitHub releases and tags are only created for Full Releases
 #
-# Documentation: https://github.com/namehash/ensnode/blob/main/docs/ensnode.io/src/content/docs/docs/contributing/releases.mdx
+# Documentation: https://ensnode.io/docs/contributing/releases#full-release
 
 name: Release
 
