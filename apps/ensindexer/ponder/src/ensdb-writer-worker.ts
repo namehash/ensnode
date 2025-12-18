@@ -44,9 +44,9 @@ async function ensDbWriterWorker() {
   const ensDbClient = new EnsDbClient();
 
   /**
-   * Handle ENSIndexerPublicConfig Record
+   * Handle ENSIndexerPublicConfig and ENSDb Version Records
    */
-  const handleEnsIndexerPublicConfigRecord = async () => {
+  const handleEnsIndexerPublicConfigAndEnsDbVersionRecords = async () => {
     // Read stored config and in-memory config.
     // Note: we wrap each operation in pRetry to ensure all of them can be
     // completed successfully.
@@ -70,6 +70,8 @@ async function ensDbWriterWorker() {
         });
       }
     } else {
+      // Upsert ENSDb Version into ENSDb.
+      await ensDbClient.upsertEnsDbVersion(inMemoryConfig.versionInfo.ensDb);
       // Upsert ENSIndexerPublicConfig into ENSDb.
       await ensDbClient.upsertEnsIndexerPublicConfig(inMemoryConfig);
     }
@@ -102,7 +104,8 @@ async function ensDbWriterWorker() {
       await ensDbClient.upsertIndexingStatus(snapshot);
     } catch (error) {
       // Do nothing about this error, but having it logged.
-      console.error(error, "Could not upsert Indexing Status record");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error(`Could not upsert Indexing Status record due to: ${errorMessage}`);
     } finally {
       // Regardless of current iteration result,
       // schedule the next callback to handle Indexing Status Record.
@@ -113,21 +116,19 @@ async function ensDbWriterWorker() {
     }
   };
 
-  // 4. Handle ENSIndexer Public Config just once.
-  console.log("Task: store ENSIndexer Public Config in ENSDb.");
-  await handleEnsIndexerPublicConfigRecord().then(() =>
-    console.log("ENSIndexer Public Config successfully stored in ENSDb."),
-  );
+  // 4. Handle ENSIndexer Public Config and ENSDb Version just once.
+  console.log("Task: store ENSIndexer Public Config and ENSDb Version in ENSDb.");
+  await handleEnsIndexerPublicConfigAndEnsDbVersionRecords();
+  console.log("ENSIndexer Public Config and ENSDb Version successfully stored in ENSDb.");
 
   // 5. Handle Indexing Status on recurring basis.
   console.log("Task: store Indexing Status in ENSDb.");
-  await handleIndexingStatusRecordRecursively().then(() =>
-    console.log("Indexing Status successfully stored in ENSDb."),
-  );
+  await handleIndexingStatusRecordRecursively();
+  console.log("Indexing Status successfully stored in ENSDb.");
 }
 
-// Run ENSDb Writer Worker in a non-blocking way to
-// allow database migrations to proceed in the background.
-ensDbWriterWorker().catch((error) =>
-  console.error("ENSDb Writer Worker failed to perform its tasks", error),
-);
+// Run ENSDb Writer Worker in the background.
+ensDbWriterWorker().catch((error) => {
+  console.error("ENSDb Writer Worker failed to perform its tasks", error);
+  process.exit(1);
+});

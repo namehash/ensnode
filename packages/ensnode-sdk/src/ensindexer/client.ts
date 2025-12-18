@@ -42,6 +42,8 @@ export class EnsIndexerClient {
 
   /**
    * ENSIndexer health check endpoint.
+   *
+   * @returns ENSIndexer health check result.
    */
   public async health(): Promise<EnsIndexerHealthCheckResult> {
     let response: Response;
@@ -65,7 +67,10 @@ export class EnsIndexerClient {
    * Fetch ENSIndexer Public Config
    *
    * @returns ENSIndexer Public Config
-   * @throws error when fetching ENSIndexer Public Config failed
+   *
+   * @throws if the ENSIndexer request fails
+   * @throws if the ENSIndexer returns an error response
+   * @throws if the ENSIndexer response breaks required invariants
    */
   public async config(): Promise<ENSIndexerPublicConfig> {
     this.validateEnsIndexerHealthCheckResult();
@@ -80,10 +85,13 @@ export class EnsIndexerClient {
   }
 
   /**
-   * Fetch Indexing Status
+   * Fetch ENSIndexer Indexing Status
    *
-   * @returns Indexing Status when it's available and with valid.
-   * @throws error when Indexing Status was either not available, or invalid.
+   * @returns ENSIndexer Indexing Status
+   *
+   * @throws if the ENSIndexer request fails
+   * @throws if the ENSIndexer returns an error response
+   * @throws if the ENSIndexer response breaks required invariants
    */
   public async indexingStatus(): Promise<IndexingStatusResponse> {
     this.validateEnsIndexerHealthCheckResult();
@@ -105,7 +113,9 @@ export class EnsIndexerClient {
    */
   private validateEnsIndexerHealthCheckResult(): void {
     if (typeof this.#healthCheckResult === "undefined") {
-      throw new Error("Call the 'health()' method first.");
+      throw new Error(
+        "Running health check for ENSIndexer is required. Call the 'health()' method first.",
+      );
     }
 
     if (this.#healthCheckResult !== EnsIndexerHealthCheckResults.Ok) {

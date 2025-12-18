@@ -16,6 +16,7 @@ import { makeDrizzle } from "./drizzle";
 import {
   EnsNodeMetadataKeys,
   type SerializedEnsNodeMetadata,
+  type SerializedEnsNodeMetadataEnsDbVersion,
   type SerializedEnsNodeMetadataEnsIndexerPublicConfig,
   type SerializedEnsNodeMetadataIndexingStatus,
 } from "./ensnode-metadata";
@@ -26,8 +27,28 @@ import {
   Includes methods for reading from ENSDb.
  */
 export interface EnsDbClientQuery {
+  /**
+   * Get ENSDb Version
+   *
+   * @returns the existing record, or `undefined`.
+   * @throws if not exactly one record was found.
+   */
+  getEnsDbVersion(): Promise<string | undefined>;
+
+  /**
+   * Get ENSIndexer Public Config
+   *
+   * @returns the existing record, or `undefined`.
+   * @throws if not exactly one record was found.
+   */
   getEnsIndexerPublicConfig(): Promise<ENSIndexerPublicConfig | undefined>;
 
+  /**
+   * Get Indexing Status
+   *
+   * @returns the existing record, or `undefined`.
+   * @throws if not exactly one record was found.
+   */
   getIndexingStatus(): Promise<CrossChainIndexingStatusSnapshot | undefined>;
 }
 
@@ -37,8 +58,25 @@ export interface EnsDbClientQuery {
  * Includes methods for writing into ENSDb.
  */
 export interface EnsDbClientMutation {
+  /**
+   * Upsert ENSDb Version
+   *
+   * @throws when upsert operation failed.
+   */
+  upsertEnsDbVersion(ensDbVersion: string): Promise<void>;
+
+  /**
+   * Upsert ENSIndexer Public Config
+   *
+   * @throws when upsert operation failed.
+   */
   upsertEnsIndexerPublicConfig(ensIndexerPublicConfig: ENSIndexerPublicConfig): Promise<void>;
 
+  /**
+   * Upsert Indexing Status
+   *
+   * @throws when upsert operation failed.
+   */
   upsertIndexingStatus(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void>;
 }
 
@@ -52,12 +90,14 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
     schema,
   });
 
-  /**
-   * Upsert ENSIndexer Public Config
-   *
-   * @returns updated record in ENSDb.
-   * @throws when upsert operation failed.
-   */
+  async getEnsDbVersion(): Promise<string | undefined> {
+    const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsDbVersion>({
+      key: EnsNodeMetadataKeys.EnsDbVersion,
+    });
+
+    return record;
+  }
+
   async getEnsIndexerPublicConfig(): Promise<ENSIndexerPublicConfig | undefined> {
     const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataEnsIndexerPublicConfig>({
       key: EnsNodeMetadataKeys.EnsIndexerPublicConfig,
@@ -70,12 +110,6 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
     return deserializeENSIndexerPublicConfig(record);
   }
 
-  /**
-   * Upsert Indexing Status
-   *
-   * @returns updated record in ENSDb.
-   * @throws when upsert operation failed.
-   */
   async getIndexingStatus(): Promise<CrossChainIndexingStatusSnapshot | undefined> {
     const record = await this.getEnsNodeMetadata<SerializedEnsNodeMetadataIndexingStatus>({
       key: EnsNodeMetadataKeys.IndexingStatus,
@@ -88,11 +122,13 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
     return deserializeCrossChainIndexingStatusSnapshot(record);
   }
 
-  /**
-   * Upsert ENSIndexer Public Config
-   *
-   * @throws when upsert operation failed.
-   */
+  async upsertEnsDbVersion(ensDbVersion: string): Promise<void> {
+    await this.upsertEnsNodeMetadata({
+      key: EnsNodeMetadataKeys.EnsDbVersion,
+      value: ensDbVersion,
+    });
+  }
+
   async upsertEnsIndexerPublicConfig(
     ensIndexerPublicConfig: ENSIndexerPublicConfig,
   ): Promise<void> {
@@ -102,11 +138,6 @@ export class EnsDbClient implements EnsDbClientQuery, EnsDbClientMutation {
     });
   }
 
-  /**
-   * Upsert Indexing Status
-   *
-   * @throws when upsert operation failed.
-   */
   async upsertIndexingStatus(indexingStatus: CrossChainIndexingStatusSnapshot): Promise<void> {
     await this.upsertEnsNodeMetadata({
       key: EnsNodeMetadataKeys.IndexingStatus,
