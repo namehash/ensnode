@@ -10,12 +10,12 @@ on:
 
 jobs:
   build-and-push-ensnode:
-    name: ${{ matrix.apps }}
+    name: ${{ matrix.app }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
       matrix:
-        apps: [ensindexer, ensadmin, ensrainbow, ensapi]
+        app: [ensindexer, ensadmin, ensrainbow, ensapi]
 
     steps:
       - name: Checkout repository
@@ -26,8 +26,8 @@ jobs:
       - name: Build & Push
         uses: ./.github/actions/build_docker_image
         with:
-          image: ghcr.io/${{ github.repository }}/${{ matrix.apps }}
-          dockerfile: apps/${{ matrix.apps }}/Dockerfile
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          dockerfile: apps/${{ matrix.app }}/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
           tags: |
@@ -36,12 +36,12 @@ jobs:
             type=sha
 
   publish-lambdas:
-    name: ${{ matrix.lambdas.name }}
+    name: ${{ matrix.lambda }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
       matrix:
-        lambdas: [fallback-ensapi]
+        lambda: [fallback-ensapi]
 
     steps:
       - name: Checkout repository
@@ -60,13 +60,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build ${{ matrix.lambdas.name }}
-        run: pnpm -F ${{ matrix.lambdas.name }} build
+      - name: Build ${{ matrix.lambda }}
+        run: pnpm -F ${{ matrix.lambda }} build
 
-      - name: Upload ${{ matrix.lambdas.name }}-${{ inputs.version }}
+      - name: Upload ${{ matrix.lambda }}-${{ inputs.version }}
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ matrix.lambdas.name }}-${{ inputs.version }}
-          path: apps/${{ matrix.lambdas.name }}/dist/lambda.zip
+          name: ${{ matrix.lambda }}-${{ inputs.version }}
+          path: apps/${{ matrix.lambda }}/dist/lambda.zip
           overwrite: true
           if-no-files-found: error
