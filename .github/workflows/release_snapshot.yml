@@ -1,3 +1,41 @@
+# Snapshot Release Workflow (@next)
+#
+# This workflow automatically creates snapshot releases for every commit to main.
+# It allows users to install and test the latest features before they become stable releases.
+#
+# How it works:
+# 1. Triggered automatically on every push to main (except Release PR merges)
+# 2. Builds all packages
+# 3. Versions packages using changesets based on the merged PR's changeset
+# 4. Publishes NPM packages with @next tag
+# 5. Builds and publishes Docker images with @next tag to GitHub Container Registry
+#
+# Published artifacts:
+# - NPM packages: All @ensnode/* packages published with @next tag
+# - Docker images: ensindexer, ensadmin, ensapi, ensrainbow published with @next tag
+# - No GitHub releases or tags are created
+#
+# Version behavior:
+# - Packages advance to the version indicated in the changeset of the merged PR
+# - All packages use "fixed" versioning and advance together
+# - Each snapshot represents the pre-stable state of main
+#
+# Use cases:
+# - Development and testing environments
+# - Testing upcoming features before stable release
+# - Experimenting with new functionality
+# - Integration testing with latest main branch
+#
+# Important notes:
+# - Snapshot releases are NOT stable and should be used with caution
+# - Only use @next for development/testing, not production
+# - Automatically triggered - cannot be run manually
+# - Only runs if there are changes to publish (hasChanges check)
+# - Requires PR to be approved by ensnode team (main branch is protected)
+# - Installation: npm install @ensnode/package-name@next
+#
+# Documentation: https://github.com/namehash/ensnode/blob/main/docs/ensnode.io/src/content/docs/docs/contributing/releases.mdx
+
 name: Release Snapshot (@next)
 
 on:

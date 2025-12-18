@@ -1,3 +1,44 @@
+# Preview Release Workflow (@preview-*)
+#
+# This workflow creates preview releases for testing features before they are merged to main.
+# It must be triggered manually via GitHub Actions UI.
+#
+# How to trigger:
+# 1. Navigate to Actions > Release Preview in GitHub
+# 2. Click "Run workflow" and select:
+#    - Branch: The branch you want to create a preview release from (typically an active PR branch)
+#    - Publish target: npm-only or npm-and-ghcr (NPM packages + Docker images)
+#    - Custom suffix (optional): Custom tag suffix instead of branch name
+#
+# What it does:
+# 1. Validates the branch (cannot run on main)
+# 2. Generates a sanitized tag from the branch name or custom suffix (e.g., @preview-feat-add-api-route)
+# 3. Versions packages using changesets in snapshot mode
+# 4. Publishes NPM packages with @preview-* dist-tag
+# 5. Optionally builds and publishes Docker images with preview-* tag
+# 6. Posts/updates a comment on the associated PR with installation instructions
+#
+# Published artifacts:
+# - NPM packages: Published with @preview-{branch-name} or @preview-{custom-suffix} tag
+# - Docker images (optional): Published with preview-{branch-name} or preview-{custom-suffix} tag
+# - No GitHub releases or tags are created
+#
+# Use cases:
+# - Testing features before merging to main
+# - Collaborating on development work
+# - Validating fixes for specific issues
+# - QA testing of work-in-progress features
+#
+# Important notes:
+# - Preview releases are NOT stable and should not be used in production
+# - They are ephemeral and don't modify the repository (no commits/tags)
+# - Only authorized NameHash team members can trigger preview releases
+# - Preview releases are built from active development branches
+# - Installation: npm install @ensnode/package-name@preview-branch-name
+# - Cleanup: Use npm dist-tag rm to manually remove preview tags when no longer needed
+#
+# Documentation: https://github.com/namehash/ensnode/blob/main/docs/ensnode.io/src/content/docs/docs/contributing/releases.mdx
+
 name: Release Preview (@preview)
 
 on:
