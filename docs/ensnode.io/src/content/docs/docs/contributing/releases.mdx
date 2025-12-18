@@ -64,7 +64,7 @@ In the event that a package needs to be tested with or installed before it is me
 
 1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/release_preview.yml)
 2. Click "Run workflow" and select from the following options:
- - Which branch you would like to run the preview release workflow on. You can choose any branch and it will trigger a preview release for it, however it is recommended to use the branch where there is an active PR so the workflow can add a GitHub comment to the PR.
+ - Which branch you would like to run the preview release workflow on. You can choose any branch and it will trigger a preview release for it, however it is recommended to use the branch where there is an active PR so the workflow can add a GitHub comment to the PR. The GitHub comment will contain helpful installation info such as the generated release tag, which would otherwise have to be located manually through the action logs or the publishing registries.
  - Choose whether to build and publish only NPM packages, or to build and publish both NPM packages and Docker images to the GitHub Container Registry (ghcr).
  - (Optional) Provide a custom suffix for the preview release package tag. For example, if you had a branch called `feat/add-api-route` and left this custom suffix field blank, the preview release would be `@ensnode/package-name@preview-feat-add-api-route`. If you fill in the custom suffix field with `users-route` then the resulting tag name would be `@ensnode/package-name@preview-users-route`.
 3. Install preview packages with: `npm install @ensnode/package-name@preview-branch-name`. 
