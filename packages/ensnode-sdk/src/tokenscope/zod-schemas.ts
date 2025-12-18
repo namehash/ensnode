@@ -22,6 +22,8 @@ import {
 
 /**
  * Make schema for {@link AssetId}.
+ *
+ * TODO: Find a way to make this compatible with Zod JSON Schema: https://zod.dev/json-schema#unrepresentable
  */
 export const makeAssetIdSchema = (valueLabel: string = "Asset ID Schema") =>
   z.object({
