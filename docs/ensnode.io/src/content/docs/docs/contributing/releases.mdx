@@ -37,6 +37,7 @@ If your PR includes a changeset and is merged to `main` then it will automatical
 
 **Important Notes:**
 - Among all release types, only Full Releases are considered stable.
+- Full releases are triggered through merging the Release PR to `main`.
 - Full releases will include the `@latest` tag for published packages/images.
 - All ENSNode packages use "fixed" versioning. Once a full release is published they will all advance to the version indicated in the Release PR based on the included changesets.
 - Only members of the NameHash Labs `ensnode` team have the required permissions to merge the Release PR to `main`.
@@ -71,9 +72,10 @@ In the event that a package needs to be tested or installed before it is merged 
 
 **Important notes:**
 - Preview releases are generally built and published from branches with active PRs. They are not guaranteed to be stable as they are still under active development.
+- Preview releases can only be triggered manually.
 - Preview releases will include the `@preview-*` tag for published packages/images, followed by either the name of the branch or the custom suffix chosen during the action trigger.
+- Published packages/images will advance to the version that was included in the changeset of the selected branch.
 - Preview releases can only be triggered by authorized NameHash team members.
-- Preview releases are ephemeral and don't create commits or modify the repository.
 - No GitHub releases or tags are created for Preview Releases.
 
 # Selecting a Release for Deployment or Installation
