@@ -133,7 +133,10 @@ export function buildEnsApiPublicConfig(config: EnsApiConfig): ENSApiPublicConfi
     version: packageJson.version,
     theGraphFallback: canFallbackToTheGraph({
       namespace: config.namespace,
-      theGraphApiKey: config.theGraphApiKey,
+      // NOTE: very important here that we replace the actual server-side api key with a placeholder
+      // so that it's not sent to clients as part of the `theGraphFallback.url`. The placeholder must
+      // pass validation, of course, but the only validation necessary is that it is a string.
+      theGraphApiKey: config.theGraphApiKey ? "<API_KEY>" : undefined,
       isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
     }),
     ensIndexerPublicConfig: config.ensIndexerPublicConfig,

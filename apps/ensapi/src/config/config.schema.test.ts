@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type ENSIndexerPublicConfig,
+  isSubgraphCompatible,
   PluginName,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -209,5 +210,33 @@ describe("buildEnsApiPublicConfig", () => {
     expect(result.ensIndexerPublicConfig.databaseSchemaName).toBe(
       ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
     );
+  });
+
+  it("includes the theGraphFallback and redacts api key", () => {
+    const mockConfig = {
+      port: ENSApi_DEFAULT_PORT,
+      databaseUrl: BASE_ENV.DATABASE_URL,
+      ensIndexerUrl: new URL(BASE_ENV.ENSINDEXER_URL),
+      ensIndexerPublicConfig: {
+        ...ENSINDEXER_PUBLIC_CONFIG,
+        plugins: ["subgraph"],
+        isSubgraphCompatible: true,
+      },
+      namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
+      databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
+      rpcConfigs: new Map(),
+      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
+      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      theGraphApiKey: "secret-api-key",
+    };
+
+    const result = buildEnsApiPublicConfig(mockConfig);
+
+    expect(result.theGraphFallback.canFallback).toBe(true);
+    // discriminate the type...
+    if (!result.theGraphFallback.canFallback) throw new Error("never");
+
+    // shouldn't have the secret-api-key in the url
+    expect(result.theGraphFallback.url).not.toMatch(/secret-api-key/gi);
   });
 });

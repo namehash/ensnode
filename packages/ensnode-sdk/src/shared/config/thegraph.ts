@@ -15,9 +15,15 @@ export type TheGraphCannotFallbackReason = z.infer<typeof TheGraphCannotFallback
  * Configuration for TheGraph fallback behavior.
  * Indicates whether fallback to TheGraph is possible and the reason if not.
  */
-export const TheGraphFallbackSchema = z.strictObject({
-  canFallback: z.boolean(),
-  reason: TheGraphCannotFallbackReasonSchema.nullable(),
-});
+export const TheGraphFallbackSchema = z.discriminatedUnion("canFallback", [
+  z.strictObject({
+    canFallback: z.literal(true),
+    url: z.string(),
+  }),
+  z.strictObject({
+    canFallback: z.literal(false),
+    reason: TheGraphCannotFallbackReasonSchema,
+  }),
+]);
 
 export type TheGraphFallback = z.infer<typeof TheGraphFallbackSchema>;

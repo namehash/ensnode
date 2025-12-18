@@ -6,7 +6,6 @@ import { proxy } from "hono/proxy";
 import {
   canFallbackToTheGraph,
   isConfigTemplateSubgraphCompatible,
-  makeTheGraphSubgraphUrl,
   namespaceForConfigTemplateId,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -48,19 +47,16 @@ app.all("/subgraph", async (c) => {
 
   const namespace = namespaceForConfigTemplateId(configTemplateId);
 
-  const { canFallback } = canFallbackToTheGraph({
+  const fallback = canFallbackToTheGraph({
     namespace,
     isSubgraphCompatible: isConfigTemplateSubgraphCompatible(configTemplateId),
     theGraphApiKey: process.env.THEGRAPH_API_KEY,
   });
 
-  if (!canFallback) return c.json({ message: "Service Unavailable" }, 503);
-
-  // biome-ignore lint/style/noNonNullAssertion: both guaranteed to exist via canFallbackToTheGraph
-  const subgraphUrl = makeTheGraphSubgraphUrl(namespace, THEGRAPH_API_KEY!)!;
+  if (!fallback.canFallback) return c.json({ message: "Service Unavailable" }, 503);
 
   // https://hono.dev/docs/helpers/proxy
-  return proxy(subgraphUrl, {
+  return proxy(fallback.url, {
     // provide existing method/body
     method: c.req.method,
     body: await c.req.text(),

@@ -27,18 +27,18 @@ export const canFallbackToTheGraph = ({
   if (!hasApiKey) return { canFallback: false, reason: "no-api-key" };
 
   // and namespace must be supported by The Graph
-  const hasTheGraphSubgraphUrl = makeTheGraphSubgraphUrl(namespace, theGraphApiKey) !== null;
-  if (!hasTheGraphSubgraphUrl) return { canFallback: false, reason: "no-subgraph-url" };
+  const url = makeTheGraphSubgraphUrl(namespace, theGraphApiKey);
+  if (url === null) return { canFallback: false, reason: "no-subgraph-url" };
 
   // otherwise able to fallback
-  return { canFallback: true, reason: null };
+  return { canFallback: true, url };
 };
 
 /**
  * Retrieves the URL of a TheGraph-hosted Subgraph given the provided `namespace`, authenticating
  * with the provided `apiKey`.
  */
-export const makeTheGraphSubgraphUrl = (namespace: ENSNamespaceId, apiKey: string) => {
+const makeTheGraphSubgraphUrl = (namespace: ENSNamespaceId, apiKey: string) => {
   switch (namespace) {
     case ENSNamespaceIds.Mainnet:
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH`;
