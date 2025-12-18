@@ -18,7 +18,8 @@ export const makeResolveRecordsResponseSchema = () =>
     records: makeResolverRecordsResponseSchema(),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
-    trace: z.any().optional(),
+    // TODO: Find a better way to handle recursive types, patch solution is .unknown()
+    trace: z.array(z.unknown()).optional(),
   });
 
 /**
@@ -29,7 +30,7 @@ export const makeResolvePrimaryNameResponseSchema = () =>
     name: z.string().nullable(),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
-    trace: z.any().optional(),
+    trace: z.array(z.unknown()).optional(),
   });
 
 /**
@@ -40,5 +41,5 @@ export const makeResolvePrimaryNamesResponseSchema = () =>
     names: z.record(z.number(), z.string().nullable()),
     accelerationRequested: z.boolean(),
     accelerationAttempted: z.boolean(),
-    trace: z.any().optional(),
+    trace: z.array(z.unknown()).optional(),
   });
