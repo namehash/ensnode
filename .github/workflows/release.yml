@@ -126,7 +126,7 @@ jobs:
             type=ref,event=branch
             type=sha
 
-  publish-lambdas:
+  build-lambdas:
     name: ${{ matrix.lambdas.name }} ${{ matrix.lambdas.version }}
     needs: changesets
     if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedLambdas != '[]'
@@ -142,13 +142,11 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Upload Lambda artifact
-        uses: actions/upload-artifact@v6
+      - name: Build Lambda
+        uses: ./.github/actions/build_lambda
         with:
-          name: ${{ matrix.lambdas.name }}-${{ matrix.lambdas.version }}
-          path: apps/${{ matrix.lambdas.name }}/dist/lambda.zip
-          overwrite: true
-          if-no-files-found: error
+          name: ${{ matrix.lambdas.name }}
+          version: ${{ matrix.lambdas.version }}
 
   create-github-release:
     name: Create GitHub Release

@@ -1,0 +1,43 @@
+name: Build Lambda
+description: Builds lambda
+
+inputs:
+  name:
+    description: "App Name"
+    required: true
+
+  version:
+    description: "Version"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+
+    - name: Setup Node.js
+      uses: useblacksmith/setup-node@v5
+      with:
+        node-version-file: .nvmrc
+
+    - name: Install Dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Build ${{ inputs.name }}
+      shell: bash
+      run: pnpm -F ${{ inputs.name }} build
+
+    - name: Upload ${{ inputs.name }}-${{ inputs.version }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: ${{ inputs.name }}-${{ inputs.version }}
+        path: apps/${{ inputs.name }}/dist/lambda.zip
+        overwrite: true
+        if-no-files-found: error
