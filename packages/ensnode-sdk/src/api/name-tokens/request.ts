@@ -2,26 +2,17 @@ import type { Name, Node } from "../../ens";
 
 /**
  * Represents request to Name Tokens API.
+ *
+ * Either `domainId` or `name` must be provided, but not both.
  */
-export interface NameTokensRequestByDomainId {
-  domainId: Node;
+export interface NameTokensRequest {
+  /**
+   * Domain ID (namehash) for which name tokens were requested.
+   */
+  domainId?: Node;
 
   /**
    * Name for which name tokens were requested.
    */
-  name?: undefined;
+  name?: Name;
 }
-
-/**
- * Represents request to Name Tokens API.
- */
-export interface NameTokensRequestByName {
-  domainId?: undefined;
-
-  /**
-   * Name for which name tokens were requested.
-   */
-  name: Name;
-}
-
-export type NameTokensRequest = NameTokensRequestByDomainId | NameTokensRequestByName;

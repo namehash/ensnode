@@ -44,16 +44,14 @@ app.use(nameTokensApiMiddleware);
  * Name Tokens API can be requested by either `name` or `domainId`, and
  * can never be requested by both, or neither.
  */
-const requestQuerySchema = z.union([
-  z.object({
-    domainId: makeNodeSchema("request.domainId"),
-    name: z.undefined(),
-  }),
-  z.object({
-    domainId: z.undefined(),
-    name: params.name,
-  }),
-]);
+const requestQuerySchema = z
+  .object({
+    domainId: makeNodeSchema("request.domainId").optional(),
+    name: params.name.optional(),
+  })
+  .refine((data) => (data.domainId !== undefined) !== (data.name !== undefined), {
+    message: "Exactly one of 'domainId' or 'name' must be provided",
+  });
 
 app.get("/", validate("query", requestQuerySchema), async (c) => {
   // Invariant: context must be set by the required middleware
@@ -67,7 +65,7 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
   }
 
   const request = c.req.valid("query") satisfies NameTokensRequest;
-  let domainId: Node | undefined;
+  let domainId: Node;
 
   if (request.name !== undefined) {
     const { name } = request;
@@ -112,8 +110,11 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
     }
 
     domainId = namehash(name);
-  } else {
+  } else if (request.domainId !== undefined) {
     domainId = request.domainId;
+  } else {
+    // This should never happen due to Zod validation, but TypeScript needs this
+    throw new Error("Invariant(name-tokens-api): Either name or domainId must be provided");
   }
 
   const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
