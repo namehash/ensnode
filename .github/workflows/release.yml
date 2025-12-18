@@ -20,6 +20,7 @@ jobs:
       published: ${{ steps.changesets.outputs.published }}
       publishedApps: ${{ steps.publishedApps.outputs.output }}
       publishedPackages: ${{ steps.publishedPackages.outputs.output }}
+      publishedLambdas: ${{ steps.publishedLambdas.outputs.output }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -83,6 +84,18 @@ jobs:
               or .name == "@ensnode/ponder-subgraph"
             ))
 
+      - name: Filter Published Packages For Lambdas
+        uses: cloudposse/github-action-jq@main
+        id: publishedLambdas
+        with:
+          compact: true
+          input: ${{ steps.changesets.outputs.publishedPackages }}
+          # filter publishedPackages for lambdas (projects whose artifact is a dist/lambda.zip)
+          script: |-
+            map(select(
+                 .name == "fallback-ensapi"
+            ))
+
   build-and-push-ensnode:
     name: ${{ matrix.apps.name }} ${{ matrix.apps.version }}
     # if changesets published our npm packages, also build docker images
@@ -112,6 +125,30 @@ jobs:
             type=semver,pattern={{version}},value=${{ matrix.apps.version }}
             type=ref,event=branch
             type=sha
+
+  publish-lambdas:
+    name: ${{ matrix.lambdas.name }} ${{ matrix.lambdas.version }}
+    needs: changesets
+    if: needs.changesets.outputs.published == 'true' && needs.changesets.outputs.publishedLambdas != '[]'
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        lambdas: ${{ fromJson(needs.changesets.outputs.publishedLambdas) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Upload Lambda artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.lambdas.name }}-${{ matrix.lambdas.version }}
+          path: apps/${{ matrix.lambdas.name }}/dist/lambda.zip
+          overwrite: true
+          if-no-files-found: error
 
   create-github-release:
     name: Create GitHub Release

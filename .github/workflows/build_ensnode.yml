@@ -4,18 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Image Version (Docker Tag)"
+        description: "ENSNode Version (Docker Tag)"
         type: string
         required: true
 
 jobs:
   build-and-push-ensnode:
-    name: ${{ matrix.app }}
+    name: ${{ matrix.apps }}
     runs-on: blacksmith-4vcpu-ubuntu-2204
     strategy:
       fail-fast: false
       matrix:
-        app: [ensindexer, ensadmin, ensrainbow, ensapi]
+        apps: [ensindexer, ensadmin, ensrainbow, ensapi]
 
     steps:
       - name: Checkout repository
@@ -26,11 +26,47 @@ jobs:
       - name: Build & Push
         uses: ./.github/actions/build_docker_image
         with:
-          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
-          dockerfile: apps/${{ matrix.app }}/Dockerfile
+          image: ghcr.io/${{ github.repository }}/${{ matrix.apps }}
+          dockerfile: apps/${{ matrix.apps }}/Dockerfile
           registry_user: ${{ github.actor }}
           registry_token: ${{ secrets.GITHUB_TOKEN }}
           tags: |
             type=semver,pattern={{version}},value=${{ inputs.version }}
             type=ref,event=branch
             type=sha
+
+  publish-lambdas:
+    name: ${{ matrix.lambdas.name }}
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        lambdas: [fallback-ensapi]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: useblacksmith/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build ${{ matrix.lambdas.name }}
+        run: pnpm -F ${{ matrix.lambdas.name }} build
+
+      - name: Upload ${{ matrix.lambdas.name }}-${{ inputs.version }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.lambdas.name }}-${{ inputs.version }}
+          path: apps/${{ matrix.lambdas.name }}/dist/lambda.zip
+          overwrite: true
+          if-no-files-found: error
