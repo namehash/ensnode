@@ -42,7 +42,7 @@ describe("ENSIndexer: Config", () => {
       // assert
       expect(result).toStrictEqual({
         ...serializedConfig,
-        indexedChainIds: new Set([1, 10, 8453]),
+        indexedChainIds: new Set([1]),
       } satisfies ENSIndexerPublicConfig);
     });
 

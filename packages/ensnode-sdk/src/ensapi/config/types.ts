@@ -1,6 +1,6 @@
 import type { z } from "zod/v4";
 
-import type { ENSIndexerPublicConfig } from "../../ensindexer";
+import type { ENSIndexerPublicConfig } from "../../ensindexer/config/types";
 import type { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema } from "./zod-schemas";
 
 export type TheGraphCannotFallbackReason = z.infer<typeof TheGraphCannotFallbackReasonSchema>;

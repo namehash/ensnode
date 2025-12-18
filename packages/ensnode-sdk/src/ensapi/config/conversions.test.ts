@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-import { PluginName } from "../../ensindexer";
-import { deserializeENSApiPublicConfig, serializeENSApiPublicConfig } from ".";
+import { PluginName } from "../../ensindexer/config/types";
+import { deserializeENSApiPublicConfig } from "./deserialize";
+import { serializeENSApiPublicConfig } from "./serialize";
 import type { ENSApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
