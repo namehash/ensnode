@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Blockrange } from "@ensnode/ensnode-sdk";
 
-import { constrainBlockrange, createStartBlockByChainIdMap } from "./ponder-helpers";
+import { constrainBlockrange } from "./ponder-helpers";
 
 const UNDEFINED_BLOCKRANGE = { startBlock: undefined, endBlock: undefined } satisfies Blockrange;
 const BLOCKRANGE_WITH_END = { startBlock: undefined, endBlock: 1234 } satisfies Blockrange;
@@ -87,40 +87,6 @@ describe("ponder helpers", () => {
           startBlock: 20,
         } satisfies Blockrange);
         expect(config).toEqual({ startBlock: 30, endBlock: 1234 });
-      });
-    });
-  });
-
-  describe("createStartBlockByChainIdMap", () => {
-    it("should return a map of start blocks by chain ID", async () => {
-      const partialPonderConfig = {
-        contracts: {
-          "subgraph/Registrar": {
-            chain: {
-              "1": { id: 1, startBlock: 444_444_444 },
-            },
-          },
-          "subgraph/Registry": {
-            chain: {
-              "1": { id: 1, startBlock: 444_444_333 },
-            },
-          },
-          "basenames/Registrar": {
-            chain: {
-              "8453": { id: 8453, startBlock: 1_799_433 },
-            },
-          },
-          "basenames/Registry": {
-            chain: {
-              "8453": { id: 8453, startBlock: 1_799_430 },
-            },
-          },
-        },
-      };
-
-      expect(await createStartBlockByChainIdMap(Promise.resolve(partialPonderConfig))).toEqual({
-        1: 444_444_333,
-        8453: 1_799_430,
       });
     });
   });
