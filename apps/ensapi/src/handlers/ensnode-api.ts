@@ -80,7 +80,7 @@ app.get(
         serializeIndexingStatusResponse({
           responseCode: IndexingStatusResponseCodes.Error,
         } satisfies IndexingStatusResponseError),
-        500,
+        503,
       );
     }
 

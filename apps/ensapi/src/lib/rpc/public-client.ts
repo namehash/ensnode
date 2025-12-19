@@ -8,8 +8,7 @@ const _cache = new Map<ChainId, PublicClient>();
 
 /**
  * Gets a viem#PublicClient for the specified `chainId` using the ENSApiConfig's RPCConfig. Caches
- * the instance itself to minimize unnecessary allocations and reduce the net_listening queries that
- * power Transport Ranking.
+ * the instance itself to minimize unnecessary allocations.
  */
 export function getPublicClient(chainId: ChainId): PublicClient {
   // Invariant: ENSApi must have an rpcConfig for the requested `chainId`
@@ -23,16 +22,7 @@ export function getPublicClient(chainId: ChainId): PublicClient {
       chainId,
       // Create an viem#PublicClient that uses a fallback() transport with all specified HTTP RPCs
       createPublicClient({
-        transport: fallback(
-          rpcConfig.httpRPCs.map((url) => http(url.toString())),
-          {
-            // Transport Ranking enables each of the Transports passed to
-            // the Fallback Transport to be automatically ranked based on their
-            // latency & stability via a weighted moving score algorithm.
-            // https://v1.viem.sh/docs/clients/transports/fallback.html#transport-ranking
-            rank: { interval: 60_000, sampleCount: 5 },
-          },
-        ),
+        transport: fallback(rpcConfig.httpRPCs.map((url) => http(url.toString()))),
       }),
     );
   }

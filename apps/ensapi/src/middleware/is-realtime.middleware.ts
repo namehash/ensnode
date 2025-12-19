@@ -8,7 +8,7 @@ import { makeLogger } from "@/lib/logger";
  */
 export type IsRealtimeMiddlewareVariables = { isRealtime: boolean };
 
-export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Duration) => {
+export const makeIsRealtimeMiddleware = (scope: string, maxWorstCaseDistance: Duration) => {
   const logger = makeLogger(scope);
 
   let hasLoggedIndexingStatusError = false;
@@ -24,7 +24,7 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
       // no indexing status available in context
       if (!hasLoggedIndexingStatusError) {
         logger.warn(
-          `ENSIndexer is NOT guaranteed to be within ${maxRealtimeDistance} seconds of realtime. Current indexing status has not been successfully fetched by this ENSApi instance yet and is therefore unknown to this ENSApi instance because: ${c.var.indexingStatus.message}.`,
+          `ENSIndexer is NOT guaranteed to be within ${maxWorstCaseDistance} seconds of realtime. Current indexing status has not been successfully fetched by this ENSApi instance yet and is therefore unknown to this ENSApi instance because: ${c.var.indexingStatus.message}.`,
         );
 
         hasLoggedIndexingStatusError = true;
@@ -35,16 +35,16 @@ export const makeIsRealtimeMiddleware = (scope: string, maxRealtimeDistance: Dur
     }
 
     // determine if we're within the max worst-case distance to qualify as "realtime".
-    const isRealtime = c.var.indexingStatus.worstCaseDistance <= maxRealtimeDistance;
+    const isRealtime = c.var.indexingStatus.worstCaseDistance <= maxWorstCaseDistance;
 
     if (lastLoggedIsRealtime !== isRealtime) {
       if (isRealtime) {
         logger.info(
-          `ENSIndexer is guaranteed to be within ${maxRealtimeDistance} seconds of realtime.`,
+          `ENSIndexer is guaranteed to be within ${maxWorstCaseDistance} seconds of realtime`,
         );
       } else {
         logger.warn(
-          `ENSIndexer is NOT guaranteed to be within ${maxRealtimeDistance} seconds of realtime. (Worst Case distance: ${c.var.indexingStatus.worstCaseDistance} seconds > ${maxRealtimeDistance} seconds).`,
+          `ENSIndexer is NOT guaranteed to be within ${maxWorstCaseDistance} seconds of realtime. (Worst Case distance: ${c.var.indexingStatus.worstCaseDistance} seconds > ${maxWorstCaseDistance} seconds).`,
         );
       }
 
