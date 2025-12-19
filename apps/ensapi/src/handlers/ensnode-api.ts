@@ -71,11 +71,7 @@ app.get(
   }),
   async (c) => {
     // context must be set by the required middleware
-    if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(ensnode-api): indexingStatusMiddleware required`);
-    }
-
-    if (c.var.indexingStatus instanceof Error) {
+    if (c.var.indexingStatus === undefined || c.var.indexingStatus instanceof Error) {
       return c.json(
         serializeIndexingStatusResponse({
           responseCode: IndexingStatusResponseCodes.Error,
