@@ -53,14 +53,12 @@ app.get(
   openAPIRouteHandler(app, {
     documentation: {
       info: {
-        title: "ENSNode's APIs",
+        title: "ENSApi APIs",
         version: packageJson.version,
-        description: "ENSNode resolution and analytics API",
+        description:
+          "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
       },
-      servers: [
-        { url: `http://localhost:${config.port}`, description: "Local Development" },
-        // Add your production servers here
-      ],
+      servers: [{ url: `http://localhost:${config.port}`, description: "Local Development" }],
     },
   }),
 );

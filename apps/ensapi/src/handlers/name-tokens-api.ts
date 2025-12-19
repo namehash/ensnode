@@ -45,7 +45,7 @@ app.use(nameTokensApiMiddleware);
  * Name Tokens API can be requested by either `name` or `domainId`, and
  * can never be requested by both, or neither.
  */
-const requestQuerySchema = z
+const nameTokensQuerySchema = z
   .object({
     domainId: makeNodeSchema("request.domainId").optional(),
     name: params.name.optional(),
@@ -82,7 +82,7 @@ app.get(
       },
     },
   }),
-  validate("query", requestQuerySchema),
+  validate("query", nameTokensQuerySchema),
   async (c) => {
     // Invariant: context must be set by the required middleware
     if (c.var.indexingStatus === undefined) {

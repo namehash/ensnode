@@ -26,11 +26,11 @@ const app = factory.createApp();
 app.get(
   "/config",
   describeRoute({
-    summary: "Get ENSApi Configuration",
-    description: "Returns the public configuration of the ENSApi instance",
+    summary: "Get ENSApi Public Config",
+    description: "Gets the public config of the ENSApi instance",
     responses: {
       200: {
-        description: "Successfully retrieved configuration",
+        description: "Successfully retrieved ENSApi public config",
         content: {
           "application/json": {
             schema: validationResolver(makeENSApiPublicConfigSchema()),
@@ -84,7 +84,7 @@ app.get(
       );
     }
 
-    // return successful response using the indexing status projection from the context
+    // return successful response using the indexing status projection from the middleware context
     return c.json(
       serializeIndexingStatusResponse({
         responseCode: IndexingStatusResponseCodes.Ok,
