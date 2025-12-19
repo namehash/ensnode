@@ -46,7 +46,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  snapshot:
+  build-and-publish-npm:
     name: Build & Publish Snapshot Packages to NPM
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main')
     runs-on: blacksmith-4vcpu-ubuntu-2204
@@ -63,10 +63,10 @@ jobs:
 
       - uses: ./.github/actions/setup_node_environment
 
-      - name: Build packages
+      - name: Build snapshot packages
         run: pnpm packages:prepublish
 
-      - name: Version snapshot
+      - name: Version snapshot packages
         id: snapshot
         run: |
           pnpm changeset:next
@@ -79,7 +79,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish snapshot
+      - name: Publish snapshot packages to NPM
         if: steps.snapshot.outputs.hasChanges == 'true'
         run: pnpm changeset-publish:next
         env:
@@ -90,7 +90,7 @@ jobs:
     name: Build & Publish Snapshot Docker Images to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
-    needs: [snapshot]
+    needs: [build-and-publish-npm]
     permissions:
       contents: read
       packages: write
@@ -104,7 +104,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Generate snapshot tag
+      - name: Generate docker image snapshot tag
         id: snapshot-tag
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -112,7 +112,7 @@ jobs:
           SNAPSHOT_TAG="next-${TIMESTAMP}-${SHORT_SHA}"
           echo "tag=$SNAPSHOT_TAG" >> $GITHUB_OUTPUT
 
-      - name: Build & Push
+      - name: Build and publish snapshot docker images to GHCR
         uses: ./.github/actions/build_docker_image
         with:
           image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
