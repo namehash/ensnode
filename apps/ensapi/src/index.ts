@@ -3,24 +3,20 @@ import config from "@/config";
 
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
-import type { Duration } from "@namehash/ens-referrals";
-import { minutesToSeconds } from "date-fns";
 import { cors } from "hono/cors";
-import z from "zod/v4";
 
-import { makeDurationSchema, prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
-import { params } from "@/lib/handlers/params.schema";
-import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
+import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
@@ -51,60 +47,13 @@ app.route("/subgraph", subgraphApi);
 // use ENSAnalytics API at /ensanalytics
 app.route("/ensanalytics", ensanalyticsApi);
 
+// use Am I Realtime API at /amirealtime
+app.route("/amirealtime", amIRealtimeApi);
+
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
   return c.json({ ok: true });
 });
-
-// Set default `maxRealtimeDistance` for `GET /amirealtime` endpoint to one minute.
-const AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE: Duration = minutesToSeconds(1);
-
-// allow performance monitoring clients to read HTTP Status for the provided
-// `maxRealtimeDistance` param
-app.get(
-  "/amirealtime",
-  validate(
-    "query",
-    z.object({
-      maxRealtimeDistance: params.queryParam
-        .optional()
-        .default(AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE)
-        .pipe(makeDurationSchema("maxRealtimeDistance query param")),
-    }),
-  ),
-  async (c) => {
-    // context must be set by the required middleware
-    if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(amirealtime): indexingStatusMiddleware required.`);
-    }
-
-    if (c.var.indexingStatus instanceof Error) {
-      throw new Error(
-        `Invariant(amirealtime): Indexing Status has to be resolved successfully before 'maxRealtimeDistance' can be applied.`,
-      );
-    }
-
-    const { maxRealtimeDistance } = c.req.valid("query");
-    const { worstCaseDistance, snapshot } = c.var.indexingStatus;
-    const { slowestChainIndexingCursor } = snapshot;
-
-    // return 503 response error with details on
-    // requested `maxRealtimeDistance` vs. actual `worstCaseDistance`
-    if (worstCaseDistance > maxRealtimeDistance) {
-      return errorResponse(
-        c,
-        new Error(
-          `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxRealtimeDistance'; worstCaseDistance = ${worstCaseDistance}; maxRealtimeDistance = ${maxRealtimeDistance}`,
-        ),
-        503,
-      );
-    }
-
-    // return 200 response OK with current details on `maxRealtimeDistance`,
-    // `slowestChainIndexingCursor`, and `worstCaseDistance`
-    return c.json({ maxRealtimeDistance, slowestChainIndexingCursor, worstCaseDistance });
-  },
-);
 
 // log hono errors to console
 app.onError((error, ctx) => {
