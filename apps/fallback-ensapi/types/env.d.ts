@@ -1,9 +1,9 @@
 /// <reference types="node" />
 
-import type { TheGraphEnvironment } from "@ensnode/ensnode-sdk/internal";
-
 declare global {
   namespace NodeJS {
-    interface ProcessEnv extends TheGraphEnvironment {}
+    interface ProcessEnv {
+      THEGRAPH_API_KEY_SECRET_NAME?: string;
+    }
   }
 }

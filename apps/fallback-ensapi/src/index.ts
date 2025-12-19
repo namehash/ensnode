@@ -9,9 +9,14 @@ import {
   namespaceForConfigTemplateId,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { getSecret } from "@/lib/get-secret";
 import { parseHostHeader } from "@/lib/parse-host-header";
 
-const THEGRAPH_API_KEY = process.env.THEGRAPH_API_KEY;
+// NOTE: throws if not exists
+const THEGRAPH_API_KEY = await getSecret(
+  process.env.THEGRAPH_API_KEY_SECRET_NAME,
+  "THEGRAPH_API_KEY",
+);
 
 const app = new Hono();
 
@@ -33,10 +38,7 @@ app.get("/", (c) =>
 `),
 );
 
-app.get("/health", async (c) => {
-  if (!THEGRAPH_API_KEY) return c.json({ message: "THEGRAPH_API_KEY not configured" }, 500);
-  return c.json({ message: "ok" });
-});
+app.get("/health", async (c) => c.json({ message: "ok" }));
 
 app.all("/subgraph", async (c) => {
   const header = c.req.header("Host");
@@ -50,7 +52,7 @@ app.all("/subgraph", async (c) => {
   const fallback = canFallbackToTheGraph({
     namespace,
     isSubgraphCompatible: isConfigTemplateSubgraphCompatible(configTemplateId),
-    theGraphApiKey: process.env.THEGRAPH_API_KEY,
+    theGraphApiKey: THEGRAPH_API_KEY,
   });
 
   if (!fallback.canFallback) return c.json({ message: "Service Unavailable" }, 503);

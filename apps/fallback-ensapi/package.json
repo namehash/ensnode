@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.955.0",
     "@ensnode/datasources": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
     "hono": "catalog:"
