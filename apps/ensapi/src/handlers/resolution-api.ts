@@ -1,4 +1,4 @@
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver as validationResolver } from "hono-openapi";
 import { z } from "zod/v4";
 
 import type {
@@ -58,7 +58,7 @@ app.get(
         description: "Successfully resolved records",
         content: {
           "application/json": {
-            schema: resolver(makeResolveRecordsResponseSchema()),
+            schema: validationResolver(makeResolveRecordsResponseSchema()),
           },
         },
       },
@@ -127,7 +127,7 @@ app.get(
         description: "Successfully resolved name",
         content: {
           "application/json": {
-            schema: resolver(makeResolvePrimaryNameResponseSchema()),
+            schema: validationResolver(makeResolvePrimaryNameResponseSchema()),
           },
         },
       },
@@ -186,7 +186,7 @@ app.get(
         description: "Successfully resolved records",
         content: {
           "application/json": {
-            schema: resolver(makeResolvePrimaryNamesResponseSchema()),
+            schema: validationResolver(makeResolvePrimaryNamesResponseSchema()),
           },
         },
       },

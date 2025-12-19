@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver as validationResolver } from "hono-openapi";
 
 import {
   IndexingStatusResponseCodes,
@@ -23,7 +23,6 @@ import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
 
-// include ENSApi Public Config endpoint
 app.get(
   "/config",
   describeRoute({
@@ -34,7 +33,7 @@ app.get(
         description: "Successfully retrieved configuration",
         content: {
           "application/json": {
-            schema: resolver(makeENSApiPublicConfigSchema()),
+            schema: validationResolver(makeENSApiPublicConfigSchema()),
           },
         },
       },
@@ -46,7 +45,6 @@ app.get(
   },
 );
 
-// include ENSIndexer Indexing Status endpoint
 app.get(
   "/indexing-status",
   describeRoute({
@@ -57,7 +55,7 @@ app.get(
         description: "Successfully retrieved indexing status",
         content: {
           "application/json": {
-            schema: resolver(makeIndexingStatusResponseSchema()),
+            schema: validationResolver(makeIndexingStatusResponseSchema()),
           },
         },
       },
@@ -65,7 +63,7 @@ app.get(
         description: "Error retrieving indexing status",
         content: {
           "application/json": {
-            schema: resolver(makeIndexingStatusResponseSchema()),
+            schema: validationResolver(makeIndexingStatusResponseSchema()),
           },
         },
       },

@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { describeRoute, resolver } from "hono-openapi";
+import { describeRoute, resolver as validationResolver } from "hono-openapi";
 import { namehash } from "viem";
 import z from "zod/v4";
 
@@ -64,7 +64,7 @@ app.get(
         description: "Successfully retrieved name tokens",
         content: {
           "application/json": {
-            schema: resolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
+            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
               elo: 1,
             }),
           },
@@ -74,7 +74,7 @@ app.get(
         description: "Error retrieving name tokens",
         content: {
           "application/json": {
-            schema: resolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
+            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
               elo: 2,
             }),
           },
