@@ -9,7 +9,7 @@ import {
 import { factory } from "@/lib/hono-factory";
 import * as middleware from "@/middleware/indexing-status.middleware";
 
-import amIRealtimeApi, { AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE } from "./amirealtime-api"; // adjust import path as needed
+import amIRealtimeApi, { AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE } from "./amirealtime-api"; // adjust import path as needed
 
 vi.mock("@/middleware/indexing-status.middleware", () => ({
   indexingStatusMiddleware: vi.fn(),
@@ -100,7 +100,7 @@ describe("amirealtime-api", () => {
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE,
+          maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
         });
       });
 
@@ -115,7 +115,7 @@ describe("amirealtime-api", () => {
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE,
+          maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
         });
       });
 
@@ -214,7 +214,7 @@ describe("amirealtime-api", () => {
         const responseJson = await response.json();
 
         // Assert
-        expect(response.status).toBe(500);
+        expect(response.status).toBe(503);
         expect(responseJson).toHaveProperty("message");
         expect(responseJson.message).toMatch(
           /Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied./,

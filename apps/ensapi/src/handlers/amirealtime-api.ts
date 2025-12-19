@@ -12,7 +12,7 @@ import { factory } from "@/lib/hono-factory";
 const app = factory.createApp();
 
 // Set default `maxWorstCaseDistance` for `GET /amirealtime` endpoint to one minute.
-export const AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE: Duration = minutesToSeconds(1);
+export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSeconds(1);
 
 // allow performance monitoring clients to read HTTP Status for the provided
 // `maxWorstCaseDistance` param
@@ -23,20 +23,22 @@ app.get(
     z.object({
       maxWorstCaseDistance: params.queryParam
         .optional()
-        .default(AMIREALTIME_DEFAULT_MAX_REALTIME_DISTANCE)
+        .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
         .pipe(makeDurationSchema("maxWorstCaseDistance query param")),
     }),
   ),
   async (c) => {
     // context must be set by the required middleware
     if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(amirealtime): indexingStatusMiddleware required.`);
+      throw new Error(`Invariant(amirealtime-api): indexingStatusMiddleware required.`);
     }
 
+    // return 503 response error with details on prerequisite being unavailable
     if (c.var.indexingStatus instanceof Error) {
       return errorResponse(
         c,
-        `Invariant(amirealtime): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
+        `Invariant(amirealtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
+        503,
       );
     }
 
