@@ -1,10 +1,10 @@
-# Snapshot Release Workflow (@next)
+# Release Snapshot Workflow (@next)
 #
 # This workflow automatically creates snapshot releases for every commit to main.
-# It allows users to install and test the latest features before they become stable releases.
+# It allows users to install and test the latest features before they become full releases.
 #
 # How it works:
-# 1. Triggered automatically on every push to main (except Release PR merges)
+# 1. Triggered automatically on every push to main (except (full) Release PR merges)
 # 2. Builds all packages
 # 3. Versions packages using changesets based on the merged PR's changeset
 # 4. Publishes NPM packages with @next tag
@@ -47,7 +47,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   snapshot:
-    name: Publish Snapshot of Packages to NPM
+    name: Build & Publish Snapshot Packages to NPM
     if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main')
     runs-on: blacksmith-4vcpu-ubuntu-2204
     permissions:
