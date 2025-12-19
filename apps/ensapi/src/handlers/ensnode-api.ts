@@ -49,7 +49,7 @@ app.get(
   "/indexing-status",
   describeRoute({
     summary: "Get ENSIndexer Indexing Status",
-    description: "Returns the current indexing status of the ENSIndexer",
+    description: "Returns the most recent available indexing status snapshot from the ENSIndexer",
     responses: {
       200: {
         description: "Successfully retrieved indexing status",
@@ -59,7 +59,7 @@ app.get(
           },
         },
       },
-      500: {
+      503: {
         description: "Error retrieving indexing status",
         content: {
           "application/json": {

@@ -67,7 +67,7 @@ app.get(
   }),
 );
 
-// will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
+// will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
   return c.json({ ok: true });
 });
