@@ -70,12 +70,22 @@ app.get(
           },
         },
       },
-      500: {
-        description: "Error retrieving name tokens",
+      404: {
+        description: "Name tokens not indexed",
         content: {
           "application/json": {
             schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
               elo: 2,
+            }),
+          },
+        },
+      },
+      503: {
+        description: "Service unavailable - indexing status not ready",
+        content: {
+          "application/json": {
+            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
+              elo: 3,
             }),
           },
         },
@@ -86,13 +96,31 @@ app.get(
   async (c) => {
     // Invariant: context must be set by the required middleware
     if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(name-tokens-api): indexingStatusMiddleware required`);
+      return c.json(
+        serializeNameTokensResponse({
+          responseCode: NameTokensResponseCodes.Error,
+          errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
+          error: {
+            message: "Name Tokens API is not available yet",
+            details: "Indexing status middleware is required but not initialized.",
+          },
+        }),
+        503,
+      );
     }
 
     // Invariant: Indexing Status has been resolved successfully.
     if (c.var.indexingStatus instanceof Error) {
-      throw new Error(
-        `Invariant(name-tokens-api): Indexing Status has to be resolved successfully`,
+      return c.json(
+        serializeNameTokensResponse({
+          responseCode: NameTokensResponseCodes.Error,
+          errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
+          error: {
+            message: "Name Tokens API is not available yet",
+            details: "The indexing status must be available and resolved successfully.",
+          },
+        }),
+        503,
       );
     }
 
