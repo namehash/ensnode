@@ -17,7 +17,7 @@
     "build": "pnpm build:clean && pnpm build:transpile && pnpm build:bundle",
     "build:clean": "rm -rf dist",
     "build:transpile": "node bin/build.mjs",
-    "build:bundle": "zip -r dist/lambda.zip dist/index.mjs",
+    "build:bundle": "zip -j dist/lambda.zip dist/index.mjs",
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
