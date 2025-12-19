@@ -24,21 +24,20 @@ import {
   type ChainName,
   createSerializedChainSnapshots,
   createSerializedOmnichainIndexingStatusSnapshot,
-  fetchPonderMetrics,
-  fetchPonderStatus,
   getChainsBlockRefs,
   getChainsBlockrange,
-  type PonderStatus,
-  type PrometheusMetrics,
+  type PonderMetricsResponse,
+  type PonderStatusResponse,
   type PublicClient,
 } from "@ensnode/ponder-sdk";
 
+import { ponderClient, waitForPonderApplicationToBecomeHealthy } from "@/lib/ponder-local-client";
 import ponderConfig from "@/ponder/config";
 
 /**
- * Names for each indexed chain
+ * Stringified chain IDs for each indexed chain
  */
-const chainNames = Object.keys(ponderConfig.chains) as string[];
+const chainIds = Object.keys(ponderConfig.chains) as string[];
 
 /**
  * A {@link Blockrange} for each indexed chain.
@@ -68,7 +67,7 @@ let chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
  * re-use it for further `getChainsBlockRefs` calls.
  */
 async function getChainsBlockRefsCached(
-  metrics: PrometheusMetrics,
+  metrics: PonderMetricsResponse,
   publicClients: Record<ChainName, PublicClient>,
 ): Promise<Map<ChainName, ChainBlockRefs>> {
   // early-return the cached chain block refs
@@ -76,7 +75,7 @@ async function getChainsBlockRefsCached(
     return chainsBlockRefs;
   }
 
-  chainsBlockRefs = await getChainsBlockRefs(chainNames, chainsBlockrange, metrics, publicClients);
+  chainsBlockRefs = await getChainsBlockRefs(chainIds, chainsBlockrange, metrics, publicClients);
 
   return chainsBlockRefs;
 }
@@ -84,14 +83,16 @@ async function getChainsBlockRefsCached(
 export async function buildOmnichainIndexingStatusSnapshot(
   publicClients: Record<ChainName, PublicClient>,
 ): Promise<OmnichainIndexingStatusSnapshot> {
-  let metrics: PrometheusMetrics;
-  let status: PonderStatus;
+  await waitForPonderApplicationToBecomeHealthy;
+
+  let metrics: PonderMetricsResponse;
+  let status: PonderStatusResponse;
 
   try {
     // Get current Ponder metadata (metrics, status)
     const [ponderMetrics, ponderStatus] = await Promise.all([
-      fetchPonderMetrics(config.ensIndexerUrl),
-      fetchPonderStatus(config.ensIndexerUrl),
+      ponderClient.metrics(),
+      ponderClient.status(),
     ]);
 
     metrics = ponderMetrics;
@@ -108,7 +109,7 @@ export async function buildOmnichainIndexingStatusSnapshot(
 
   // create serialized chain indexing snapshot for each indexed chain
   const serializedChainSnapshots = createSerializedChainSnapshots(
-    chainNames,
+    chainIds,
     chainsBlockRefs,
     metrics,
     status,

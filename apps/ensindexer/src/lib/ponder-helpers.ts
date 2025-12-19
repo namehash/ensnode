@@ -7,11 +7,9 @@
 import type { Event } from "ponder:registry";
 import type { ChainConfig } from "ponder";
 import type { Address } from "viem";
-import * as z from "zod/v4";
 
 import type { ContractConfig } from "@ensnode/datasources";
 import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
-import type { PonderStatus } from "@ensnode/ponder-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
 
@@ -50,76 +48,6 @@ export const constrainBlockrange = (
     endBlock: isEndConstrained ? lowestEndBlock : undefined,
   };
 };
-
-/**
- * Creates a Prometheus metrics fetcher for the Ponder application.
- *
- * It's a workaround for the lack of an internal API allowing to access
- * Prometheus metrics for the Ponder application.
- *
- * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
- * @returns fetcher function
- */
-export function createPrometheusMetricsFetcher(ensIndexerUrl: URL): () => Promise<string> {
-  /**
-   * Fetches the Prometheus metrics from the Ponder application endpoint.
-   * @returns Prometheus metrics as a text string
-   */
-  return async function fetchPrometheusMetrics(): Promise<string> {
-    const response = await fetch(new URL("/metrics", ensIndexerUrl));
-    return response.text();
-  };
-}
-
-/**
- * Ponder Data Schemas
- *
- * These schemas allow data validation with Zod.
- */
-const PonderDataSchema = {
-  get Block() {
-    return z.object({
-      number: z.number().int().min(1),
-      timestamp: z.number().int().min(1),
-    });
-  },
-
-  get ChainId() {
-    return z.number().int().min(1);
-  },
-
-  get Status() {
-    return z.record(
-      z.string().transform(Number).pipe(PonderDataSchema.ChainId),
-      z.object({
-        id: PonderDataSchema.ChainId,
-        block: PonderDataSchema.Block,
-      }),
-    );
-  },
-};
-
-/**
- * Creates Ponder Status fetcher for the Ponder application.
- *
- * It's a workaround for the lack of an internal API allowing to access
- * Ponder Status metrics for the Ponder application.
- *
- * @param ensIndexerUrl the URL of the "primary" ENSIndexer started using `ponder start` and not `ponder serve`
- * @returns fetcher function
- */
-export function createPonderStatusFetcher(ensIndexerUrl: URL): () => Promise<PonderStatus> {
-  /**
-   * Fetches the Ponder Ponder status from the Ponder application endpoint.
-   * @returns Parsed Ponder Status object.
-   */
-  return async function fetchPonderStatus() {
-    const response = await fetch(new URL("/status", ensIndexerUrl));
-    const responseData = await response.json();
-
-    return PonderDataSchema.Status.parse(responseData) satisfies PonderStatus;
-  };
-}
 
 /**
 /**
