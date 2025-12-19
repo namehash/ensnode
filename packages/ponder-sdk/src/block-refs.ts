@@ -5,7 +5,7 @@
  * based on configured chain names, chains blockranges, and RPC calls.
  */
 
-import type { BlockRef, Blockrange } from "@ensnode/ensnode-sdk";
+import type { BlockRef, Blockrange, ChainIdString } from "@ensnode/ensnode-sdk";
 
 import type { ChainName } from "./config";
 import type { PrometheusMetrics } from "./metrics";
@@ -38,34 +38,34 @@ export interface ChainBlockRefs {
  * Guaranteed to include {@link ChainBlockRefs} for each indexed chain.
  */
 export async function getChainsBlockRefs(
-  chainNames: ChainName[],
+  chainIds: ChainIdString[],
   chainsBlockrange: Record<ChainName, Blockrange>,
   metrics: PrometheusMetrics,
   publicClients: Record<ChainName, PublicClient>,
 ): Promise<Map<ChainName, ChainBlockRefs>> {
   const chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
 
-  for (const chainName of chainNames) {
-    const blockrange = chainsBlockrange[chainName];
+  for (const chainId of chainIds) {
+    const blockrange = chainsBlockrange[chainId];
     const startBlock = blockrange?.startBlock;
     const endBlock = blockrange?.endBlock;
 
-    const publicClient = publicClients[chainName];
+    const publicClient = publicClients[chainId];
 
     if (typeof startBlock !== "number") {
-      throw new Error(`startBlock not found for chain ${chainName}`);
+      throw new Error(`startBlock not found for chain ${chainId}`);
     }
 
     if (typeof publicClient === "undefined") {
-      throw new Error(`publicClient not found for chain ${chainName}`);
+      throw new Error(`publicClient not found for chain ${chainId}`);
     }
 
     const historicalTotalBlocks = metrics.getValue("ponder_historical_total_blocks", {
-      chain: chainName,
+      chain: chainId,
     });
 
     if (typeof historicalTotalBlocks !== "number") {
-      throw new Error(`No historical total blocks metric found for chain ${chainName}`);
+      throw new Error(`No historical total blocks metric found for chain ${chainId}`);
     }
 
     const backfillEndBlock = startBlock + historicalTotalBlocks - 1;
@@ -86,9 +86,9 @@ export async function getChainsBlockRefs(
         backfillEndBlock: backfillEndBlockRef,
       } satisfies ChainBlockRefs;
 
-      chainsBlockRefs.set(chainName, chainBlockRef);
+      chainsBlockRefs.set(chainId, chainBlockRef);
     } catch {
-      throw new Error(`Could not get BlockRefs for chain ${chainName}`);
+      throw new Error(`Could not get BlockRefs for chain ${chainId}`);
     }
   }
 

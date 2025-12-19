@@ -17,13 +17,13 @@ import type { ChainIdString, ChainIndexingStatusSnapshot } from "@ensnode/ensnod
 import {
   makeBlockRefSchema,
   makeChainIdSchema,
+  makeChainIdStringSchema,
   makeNonNegativeIntegerSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { createChainIndexingSnapshot } from "./chains";
-import type { ChainName } from "./config";
 
-const makeChainNameSchema = (indexedChainNames: string[]) => z.enum(indexedChainNames);
+const makeChainIdsSchema = (chainIds: string[]) => z.enum(chainIds);
 
 const PonderBlockRefSchema = makeBlockRefSchema();
 
@@ -52,16 +52,16 @@ const PonderChainMetadataSchema = z.strictObject({
   statusBlock: PonderBlockRefSchema,
 });
 
-export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
-  const ChainNameSchema = makeChainNameSchema(indexedChainNames);
+export const makePonderChainMetadataSchema = (chainIds: ChainIdString[]) => {
+  const ChainIdsSchema = makeChainIdsSchema(chainIds);
 
-  const invariant_definedEntryForEachIndexedChain = (v: Map<ChainName, unknown>) =>
-    indexedChainNames.every((chainName) => Array.from(v.keys()).includes(chainName));
+  const invariant_definedEntryForEachIndexedChain = (v: Map<ChainIdString, unknown>) =>
+    chainIds.every((chainIds) => Array.from(v.keys()).includes(chainIds));
 
   return z
-    .map(ChainNameSchema, PonderChainMetadataSchema)
+    .map(ChainIdsSchema, PonderChainMetadataSchema)
     .refine(invariant_definedEntryForEachIndexedChain, {
-      error: "All `indexedChainNames` must be represented by Ponder Chains Block Refs object.",
+      error: "All `chainIds` must be represented by Ponder Chains Block Refs object.",
     })
 
     .transform((chains) => {
@@ -70,9 +70,9 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
         ChainIndexingStatusSnapshot
       >;
 
-      for (const chainName of indexedChainNames) {
+      for (const chainId of chainIds) {
         // biome-ignore lint/style/noNonNullAssertion: guaranteed to exist
-        const indexedChain = chains.get(chainName)!;
+        const indexedChain = chains.get(chainId)!;
 
         serializedChainIndexingStatusSnapshots[indexedChain.chainId] =
           createChainIndexingSnapshot(indexedChain);
@@ -82,18 +82,22 @@ export const makePonderChainMetadataSchema = (indexedChainNames: string[]) => {
     });
 };
 
-export const makePonderStatusSchema = (valueLabel?: "Value") => {
+export const makePonderStatusChainSchema = (valueLabel = "Ponder Status Chain") => {
   const chainIdSchema = makeChainIdSchema(valueLabel);
   const blockRefSchema = makeBlockRefSchema(valueLabel);
 
-  return z.record(
-    z.string().transform(Number).pipe(chainIdSchema),
-    z.object({
-      id: chainIdSchema,
-      block: blockRefSchema,
-    }),
+  return z.object({
+    id: chainIdSchema,
+    block: blockRefSchema,
+  });
+};
+
+export const makePonderStatusResponseSchema = (valueLabel = "Ponder Status Response") =>
+  z.record(
+    makeChainIdStringSchema(`${valueLabel}.key`),
+    makePonderStatusChainSchema(`${valueLabel}.value`),
     {
-      error: "Ponder Status must be an object mapping valid chain name to a chain status object.",
+      error:
+        "Ponder Status Response must be an object mapping valid chain ID to a ponder status chain object.",
     },
   );
-};

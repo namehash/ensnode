@@ -1,4 +1,4 @@
-import { type ParsePayload, prettifyError } from "zod/v4/core";
+import type { ParsePayload } from "zod/v4/core";
 
 import {
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
@@ -8,30 +8,6 @@ import {
   OmnichainIndexingStatusIds,
   type SerializedOmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
-import type { PrometheusMetrics } from "@ensnode/ponder-sdk";
-
-import { PonderAppSettingsSchema } from "./zod-schemas";
-
-/**
- * Validate Ponder Metrics
- *
- * @param metrics - Prometheus Metrics from Ponder
- *
- * @throws Will throw if the Ponder metrics are not valid.
- */
-export function validatePonderMetrics(metrics: PrometheusMetrics) {
-  // Invariant: Ponder command & ordering are as expected
-  const parsedAppSettings = PonderAppSettingsSchema.safeParse({
-    command: metrics.getLabel("ponder_settings_info", "command"),
-    ordering: metrics.getLabel("ponder_settings_info", "ordering"),
-  });
-
-  if (parsedAppSettings.error) {
-    throw new Error(
-      `Failed to build IndexingStatus object: \n${prettifyError(parsedAppSettings.error)}\n`,
-    );
-  }
-}
 
 /**
  * Invariant: SerializedOmnichainSnapshot Has Valid Chains
