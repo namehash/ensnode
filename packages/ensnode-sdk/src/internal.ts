@@ -14,8 +14,10 @@
 
 export * from "./api/indexing-status/zod-schemas";
 export * from "./api/registrar-actions/zod-schemas";
+export * from "./api/resolution/zod-schemas";
 export * from "./api/shared/errors/zod-schemas";
 export * from "./api/shared/pagination/zod-schemas";
+export * from "./ensapi/config/zod-schemas";
 export * from "./ensindexer/config/zod-schemas";
 export * from "./ensindexer/indexing-status/zod-schemas";
 export * from "./registrars/zod-schemas";

@@ -1,15 +1,17 @@
 import { describeRoute, resolver } from "hono-openapi";
 import { z } from "zod/v4";
 
+import type {
+  Duration,
+  ResolvePrimaryNameResponse,
+  ResolvePrimaryNamesResponse,
+  ResolveRecordsResponse,
+} from "@ensnode/ensnode-sdk";
 import {
-  type Duration,
   makeResolvePrimaryNameResponseSchema,
   makeResolvePrimaryNamesResponseSchema,
   makeResolveRecordsResponseSchema,
-  type ResolvePrimaryNameResponse,
-  type ResolvePrimaryNamesResponse,
-  type ResolveRecordsResponse,
-} from "@ensnode/ensnode-sdk";
+} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";

@@ -6,11 +6,13 @@ import {
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
   type IndexingStatusResponseOk,
-  makeENSApiPublicConfigSchema,
-  makeIndexingStatusResponseSchema,
   serializeENSApiPublicConfig,
   serializeIndexingStatusResponse,
 } from "@ensnode/ensnode-sdk";
+import {
+  makeENSApiPublicConfigSchema,
+  makeIndexingStatusResponseSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
