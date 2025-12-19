@@ -1,5 +1,6 @@
 import config from "@/config";
 
+import { describeRoute, resolver } from "hono-openapi";
 import { namehash } from "viem";
 import z from "zod/v4";
 
@@ -14,7 +15,7 @@ import {
   type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
-import { makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeNameTokensResponseSchema, makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -53,47 +54,117 @@ const requestQuerySchema = z
     message: "Exactly one of 'domainId' or 'name' must be provided",
   });
 
-app.get("/", validate("query", requestQuerySchema), async (c) => {
-  // Invariant: context must be set by the required middleware
-  if (c.var.indexingStatus === undefined) {
-    throw new Error(`Invariant(name-tokens-api): indexingStatusMiddleware required`);
-  }
-
-  // Invariant: Indexing Status has been resolved successfully.
-  if (c.var.indexingStatus instanceof Error) {
-    throw new Error(`Invariant(name-tokens-api): Indexing Status has to be resolved successfully`);
-  }
-
-  const request = c.req.valid("query") satisfies NameTokensRequest;
-  let domainId: Node;
-
-  if (request.name !== undefined) {
-    const { name } = request;
-
-    // return 404 when the requested name was the ENS Root
-    if (name === ENS_ROOT) {
-      return c.json(
-        serializeNameTokensResponse({
-          responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
-          error: {
-            message: "No indexed Name Tokens found",
-            details: `The 'name' param must not be ENS Root, no tokens exist for it.`,
+app.get(
+  "/",
+  describeRoute({
+    summary: "Get Name Tokens",
+    description: "Returns name tokens for requested identifier (domainId, or name)",
+    responses: {
+      200: {
+        description: "Successfully retrieved name tokens",
+        content: {
+          "application/json": {
+            schema: resolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
+              elo: 1,
+            }),
           },
-        } satisfies NameTokensResponseErrorNameTokensNotIndexed),
-        404,
+        },
+      },
+      500: {
+        description: "Error retrieving name tokens",
+        content: {
+          "application/json": {
+            schema: resolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
+              elo: 2,
+            }),
+          },
+        },
+      },
+    },
+  }),
+  validate("query", requestQuerySchema),
+  async (c) => {
+    // Invariant: context must be set by the required middleware
+    if (c.var.indexingStatus === undefined) {
+      throw new Error(`Invariant(name-tokens-api): indexingStatusMiddleware required`);
+    }
+
+    // Invariant: Indexing Status has been resolved successfully.
+    if (c.var.indexingStatus instanceof Error) {
+      throw new Error(
+        `Invariant(name-tokens-api): Indexing Status has to be resolved successfully`,
       );
     }
 
-    const parentNode = namehash(getParentNameFQDN(name));
-    const subregistry = indexedSubregistries.find((subregistry) => subregistry.node === parentNode);
+    const request = c.req.valid("query") satisfies NameTokensRequest;
+    let domainId: Node;
+
+    if (request.name !== undefined) {
+      const { name } = request;
+
+      // return 404 when the requested name was the ENS Root
+      if (name === ENS_ROOT) {
+        return c.json(
+          serializeNameTokensResponse({
+            responseCode: NameTokensResponseCodes.Error,
+            errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
+            error: {
+              message: "No indexed Name Tokens found",
+              details: `The 'name' param must not be ENS Root, no tokens exist for it.`,
+            },
+          } satisfies NameTokensResponseErrorNameTokensNotIndexed),
+          404,
+        );
+      }
+
+      const parentNode = namehash(getParentNameFQDN(name));
+      const subregistry = indexedSubregistries.find(
+        (subregistry) => subregistry.node === parentNode,
+      );
+
+      // Return 404 response with error code for Name Tokens Not Indexed when
+      // the parent name of the requested name was not registered in any of
+      // the actively indexed subregistries.
+      if (!subregistry) {
+        logger.error(
+          `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
+        );
+
+        return c.json(
+          serializeNameTokensResponse({
+            responseCode: NameTokensResponseCodes.Error,
+            errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
+            error: {
+              message: "No indexed Name Tokens found",
+              details: `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
+            },
+          } satisfies NameTokensResponseErrorNameTokensNotIndexed),
+          404,
+        );
+      }
+
+      domainId = namehash(name);
+    } else if (request.domainId !== undefined) {
+      domainId = request.domainId;
+    } else {
+      // This should never happen due to Zod validation, but TypeScript needs this
+      throw new Error("Invariant(name-tokens-api): Either name or domainId must be provided");
+    }
+
+    const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
+    const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
+
+    const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);
 
     // Return 404 response with error code for Name Tokens Not Indexed when
-    // the parent name of the requested name was not registered in any of
-    // the actively indexed subregistries.
-    if (!subregistry) {
+    // the no name tokens were found for the domain ID associated with
+    // the requested name.
+    if (!registeredNameTokens) {
+      const errorMessageSubject =
+        request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
+
       logger.error(
-        `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
+        `This ENSNode instance has never indexed tokens for the requested ${errorMessageSubject}.`,
       );
 
       return c.json(
@@ -102,56 +173,20 @@ app.get("/", validate("query", requestQuerySchema), async (c) => {
           errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
           error: {
             message: "No indexed Name Tokens found",
-            details: `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
+            details: `No Name Tokens were indexed by this ENSNode instance for the requested ${errorMessageSubject}.`,
           },
         } satisfies NameTokensResponseErrorNameTokensNotIndexed),
         404,
       );
     }
-
-    domainId = namehash(name);
-  } else if (request.domainId !== undefined) {
-    domainId = request.domainId;
-  } else {
-    // This should never happen due to Zod validation, but TypeScript needs this
-    throw new Error("Invariant(name-tokens-api): Either name or domainId must be provided");
-  }
-
-  const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
-  const accurateAsOf = omnichainSnapshot.omnichainIndexingCursor;
-
-  const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);
-
-  // Return 404 response with error code for Name Tokens Not Indexed when
-  // the no name tokens were found for the domain ID associated with
-  // the requested name.
-  if (!registeredNameTokens) {
-    const errorMessageSubject =
-      request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
-
-    logger.error(
-      `This ENSNode instance has never indexed tokens for the requested ${errorMessageSubject}.`,
-    );
 
     return c.json(
       serializeNameTokensResponse({
-        responseCode: NameTokensResponseCodes.Error,
-        errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
-        error: {
-          message: "No indexed Name Tokens found",
-          details: `No Name Tokens were indexed by this ENSNode instance for the requested ${errorMessageSubject}.`,
-        },
-      } satisfies NameTokensResponseErrorNameTokensNotIndexed),
-      404,
+        responseCode: NameTokensResponseCodes.Ok,
+        registeredNameTokens,
+      }),
     );
-  }
-
-  return c.json(
-    serializeNameTokensResponse({
-      responseCode: NameTokensResponseCodes.Ok,
-      registeredNameTokens,
-    }),
-  );
-});
+  },
+);
 
 export default app;

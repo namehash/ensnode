@@ -1,6 +1,5 @@
 import { namehash } from "viem";
 import z from "zod/v4";
-import type { ParsePayload } from "zod/v4/core";
 
 import {
   makeNodeSchema,
@@ -22,78 +21,78 @@ import {
   type RegisteredNameTokens,
 } from "./response";
 
-function invariant_nameIsAssociatedWithDomainId(ctx: ParsePayload<RegisteredNameTokens>) {
-  const { name, domainId } = ctx.value;
-
-  if (namehash(name) !== domainId) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: `'name' must be associated with 'domainId': ${domainId}`,
-    });
-  }
-}
-
-function invariant_nameTokensOwnershipTypeNameWrapperRequiresOwnershipTypeFullyOnchainOrUnknown(
-  ctx: ParsePayload<RegisteredNameTokens>,
-) {
-  const { tokens } = ctx.value;
-  const containsOwnershipNameWrapper = tokens.some(
-    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.NameWrapper,
-  );
-  const containsOwnershipFullyOnchainOrUnknown = tokens.some(
-    (t) =>
-      t.ownership.ownershipType === NameTokenOwnershipTypes.FullyOnchain ||
-      t.ownership.ownershipType === NameTokenOwnershipTypes.Unknown,
-  );
-  if (containsOwnershipNameWrapper && !containsOwnershipFullyOnchainOrUnknown) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: `'tokens' must contain name token with ownership type 'fully-onchain' or 'unknown' when name token with ownership type 'namewrapper' in listed`,
-    });
-  }
-}
-
-function invariant_nameTokensContainAtMostOneWithOwnershipTypeEffective(
-  ctx: ParsePayload<RegisteredNameTokens>,
-) {
-  const { tokens } = ctx.value;
-  const tokensCountWithOwnershipFullyOnchain = tokens.filter(
-    (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.FullyOnchain,
-  ).length;
-  if (tokensCountWithOwnershipFullyOnchain > 1) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: `'tokens' must contain at most one name token with ownership type 'fully-onchain', current count: ${tokensCountWithOwnershipFullyOnchain}`,
-    });
-  }
-}
-
 /**
  * Schema for {@link RegisteredNameTokens}.
  */
-export const makeRegisteredNameTokenSchema = (valueLabel: string = "Registered Name Token") =>
+export const makeRegisteredNameTokenSchema = <const SerializableType extends boolean>(
+  valueLabel: string = "Registered Name Token",
+  serializable?: SerializableType,
+) =>
   z
     .object({
       domainId: makeNodeSchema(`${valueLabel}.domainId`),
       name: makeReinterpretedNameSchema(valueLabel),
-      tokens: z.array(makeNameTokenSchema(`${valueLabel}.tokens`)).nonempty(),
+      tokens: z.array(makeNameTokenSchema(`${valueLabel}.tokens`, serializable)).nonempty(),
       expiresAt: makeUnixTimestampSchema(`${valueLabel}.expiresAt`),
       accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
     })
-    .check(invariant_nameIsAssociatedWithDomainId)
-    .check(invariant_nameTokensContainAtMostOneWithOwnershipTypeEffective)
-    .check(invariant_nameTokensOwnershipTypeNameWrapperRequiresOwnershipTypeFullyOnchainOrUnknown);
+    .check(function invariant_nameIsAssociatedWithDomainId(ctx) {
+      const { name, domainId } = ctx.value;
+
+      if (namehash(name) !== domainId) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `'name' must be associated with 'domainId': ${domainId}`,
+        });
+      }
+    })
+    .check(
+      function invariant_nameTokensOwnershipTypeNameWrapperRequiresOwnershipTypeFullyOnchainOrUnknown(
+        ctx,
+      ) {
+        const { tokens } = ctx.value;
+        const containsOwnershipNameWrapper = tokens.some(
+          (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.NameWrapper,
+        );
+        const containsOwnershipFullyOnchainOrUnknown = tokens.some(
+          (t) =>
+            t.ownership.ownershipType === NameTokenOwnershipTypes.FullyOnchain ||
+            t.ownership.ownershipType === NameTokenOwnershipTypes.Unknown,
+        );
+        if (containsOwnershipNameWrapper && !containsOwnershipFullyOnchainOrUnknown) {
+          ctx.issues.push({
+            code: "custom",
+            input: ctx.value,
+            message: `'tokens' must contain name token with ownership type 'fully-onchain' or 'unknown' when name token with ownership type 'namewrapper' in listed`,
+          });
+        }
+      },
+    )
+    .check(function invariant_nameTokensContainAtMostOneWithOwnershipTypeEffective(ctx) {
+      const { tokens } = ctx.value;
+      const tokensCountWithOwnershipFullyOnchain = tokens.filter(
+        (t) => t.ownership.ownershipType === NameTokenOwnershipTypes.FullyOnchain,
+      ).length;
+      if (tokensCountWithOwnershipFullyOnchain > 1) {
+        ctx.issues.push({
+          code: "custom",
+          input: ctx.value,
+          message: `'tokens' must contain at most one name token with ownership type 'fully-onchain', current count: ${tokensCountWithOwnershipFullyOnchain}`,
+        });
+      }
+    });
 
 /**
  * Schema for {@link NameTokensResponseOk}
  */
-export const makeNameTokensResponseOkSchema = (valueLabel: string = "Name Tokens Response OK") =>
+export const makeNameTokensResponseOkSchema = <const SerializableType extends boolean>(
+  valueLabel: string = "Name Tokens Response OK",
+  serializable?: SerializableType,
+) =>
   z.strictObject({
     responseCode: z.literal(NameTokensResponseCodes.Ok),
-    registeredNameTokens: makeRegisteredNameTokenSchema(`${valueLabel}.nameTokens`),
+    registeredNameTokens: makeRegisteredNameTokenSchema(`${valueLabel}.nameTokens`, serializable),
   });
 
 /**
@@ -145,8 +144,12 @@ export const makeNameTokensResponseErrorSchema = (
 /**
  * Schema for {@link NameTokensResponse}
  */
-export const makeNameTokensResponseSchema = (valueLabel: string = "Name Tokens Response") =>
-  z.discriminatedUnion("responseCode", [
-    makeNameTokensResponseOkSchema(valueLabel),
+export const makeNameTokensResponseSchema = <const SerializableType extends boolean = false>(
+  valueLabel: string = "Name Tokens Response",
+  serializable?: SerializableType,
+) => {
+  return z.discriminatedUnion("responseCode", [
+    makeNameTokensResponseOkSchema(valueLabel, serializable ?? false),
     makeNameTokensResponseErrorSchema(valueLabel),
   ]);
+};

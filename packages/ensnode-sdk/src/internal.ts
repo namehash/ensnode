@@ -13,6 +13,7 @@
  */
 
 export * from "./api/indexing-status/zod-schemas";
+export * from "./api/name-tokens/zod-schemas";
 export * from "./api/registrar-actions/zod-schemas";
 export * from "./api/shared/errors/zod-schemas";
 export * from "./api/shared/pagination/zod-schemas";
