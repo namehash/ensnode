@@ -69,7 +69,7 @@ app.get(
     "query",
     z
       .object({
-        ...params.selectionParams.shape,
+        selection: params.selection,
         trace: params.trace,
         accelerate: params.accelerate,
       })
