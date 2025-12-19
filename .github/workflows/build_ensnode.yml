@@ -49,8 +49,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Build Lambda
-        uses: ./.github/actions/build_lambda
+      - name: Build and Publish Lambda
+        uses: ./.github/actions/build_and_publish_lambda
         with:
           name: ${{ matrix.lambda }}
           version: ${{ inputs.version }}

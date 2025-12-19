@@ -50,7 +50,7 @@ app.get("/", (c) =>
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <p>You've reached the root of the ENSApi Fallback. You might be looking for ENSNode's <a href="https://ensnode.io/docs/">documentation</a>.</p>
+    <p>You've reached the root of an ENSApi instance. You might be looking for the <a href="https://ensnode.io/docs/">ENSNode documentation</a>.</p>
 </body>
 </html>
 `),
@@ -67,7 +67,7 @@ app.route("/ensanalytics", ensanalyticsApi);
 
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ ok: true });
+  return c.json({ message: "fallback ok" });
 });
 
 // log hono errors to console

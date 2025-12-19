@@ -9,12 +9,13 @@ import {
   namespaceForConfigTemplateId,
 } from "@ensnode/ensnode-sdk/internal";
 
+import { errorResponse } from "@/lib/error-response";
 import { getSecret } from "@/lib/get-secret";
 import { parseHostHeader } from "@/lib/parse-host-header";
 
 // NOTE: throws if not exists
 const THEGRAPH_API_KEY = await getSecret(
-  process.env.THEGRAPH_API_KEY_SECRET_NAME,
+  process.env.THEGRAPH_API_KEY_SECRET_ID,
   "THEGRAPH_API_KEY",
 );
 
@@ -28,11 +29,11 @@ app.get("/", (c) =>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENSApi</title>
+    <title>Fallback ENSApi</title>
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <p>You've reached the root of the ENSApi Fallback. You might be looking for ENSNode's <a href="https://ensnode.io/docs/">documentation</a>.</p>
+    <p>You've reached the root of the Fallback ENSApi. You might be looking for the <a href="https://ensnode.io/docs/">ENSNode documentation</a>.</p>
 </body>
 </html>
 `),
@@ -42,10 +43,14 @@ app.get("/health", async (c) => c.json({ message: "ok" }));
 
 app.all("/subgraph", async (c) => {
   const header = c.req.header("Host");
-  if (!header) return c.json({ message: "Missing Host Header" }, 400);
+  if (!header) {
+    return errorResponse(c, { error: "Missing Host Header", status: 400 });
+  }
 
   const configTemplateId = parseHostHeader(header);
-  if (!configTemplateId) return c.json({ message: "Unable to parse Host Header" }, 400);
+  if (!configTemplateId) {
+    return errorResponse(c, { error: "Unable to parse Host Header", status: 400 });
+  }
 
   const namespace = namespaceForConfigTemplateId(configTemplateId);
 
@@ -54,8 +59,13 @@ app.all("/subgraph", async (c) => {
     isSubgraphCompatible: isConfigTemplateSubgraphCompatible(configTemplateId),
     theGraphApiKey: THEGRAPH_API_KEY,
   });
-
-  if (!fallback.canFallback) return c.json({ message: "Service Unavailable" }, 503);
+  if (!fallback.canFallback) {
+    return errorResponse(c, {
+      error: "Service Unavailable",
+      status: 503,
+      details: { reason: fallback.reason },
+    });
+  }
 
   // https://hono.dev/docs/helpers/proxy
   return proxy(fallback.url, {
@@ -68,11 +78,11 @@ app.all("/subgraph", async (c) => {
 });
 
 // 503 everything else
-app.all("/*", (c) => c.json({ message: "Service Unavailable" }, 503));
+app.all("/*", (c) => errorResponse(c, { error: "Service Unavailable", status: 503 }));
 
 app.onError((error, c) => {
   console.error(error);
-  return c.text("Internal Server Error", 500);
+  return errorResponse(c, { error: "Service Unavailable", status: 503 });
 });
 
 // run node server if local

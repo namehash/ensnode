@@ -1,5 +1,5 @@
-name: Build Lambda
-description: Builds lambda
+name: Build and Publish Lambda
+description: Builds and Publishes lambda
 
 inputs:
   name:
@@ -34,7 +34,7 @@ runs:
       shell: bash
       run: pnpm -F ${{ inputs.name }} build
 
-    - name: Upload ${{ inputs.name }}-${{ inputs.version }}
+    - name: Publish ${{ inputs.name }}-${{ inputs.version }}
       uses: actions/upload-artifact@v6
       with:
         name: ${{ inputs.name }}-${{ inputs.version }}

@@ -3,7 +3,7 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      THEGRAPH_API_KEY_SECRET_NAME?: string;
+      THEGRAPH_API_KEY_SECRET_ID?: string;
     }
   }
 }

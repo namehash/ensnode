@@ -30,5 +30,5 @@ export const errorResponse = (c: Context, input: ZodError | Error | string | unk
     return c.json({ message: input } satisfies ErrorResponse, 500);
   }
 
-  return c.json({ message: "Internal Error" } satisfies ErrorResponse, 500);
+  return c.json({ message: "Internal Server Error" } satisfies ErrorResponse, 500);
 };

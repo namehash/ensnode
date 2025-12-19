@@ -8,7 +8,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type ENSIndexerPublicConfig,
-  isSubgraphCompatible,
   PluginName,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
