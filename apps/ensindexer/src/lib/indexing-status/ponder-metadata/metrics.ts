@@ -5,11 +5,11 @@
  * each indexed chain. Ponder metrics are defined by `/metrics` endpoint.
  */
 
-import { PrometheusMetrics } from "@ensnode/ponder-metadata";
+import { PrometheusMetrics } from "@ensnode/ponder-sdk";
 
 import { validatePonderMetrics } from "./validations";
 
-export { PrometheusMetrics } from "@ensnode/ponder-metadata";
+export { PrometheusMetrics } from "@ensnode/ponder-sdk";
 
 /**
  * Fetch metrics for requested Ponder instance.

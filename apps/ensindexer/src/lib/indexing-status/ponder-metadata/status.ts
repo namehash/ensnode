@@ -5,9 +5,9 @@
  * each indexed chain. Ponder status is defined by `/status` endpoint.
  */
 
-import type { PonderStatus } from "@ensnode/ponder-metadata";
+import type { PonderStatus } from "@ensnode/ponder-sdk";
 
-export type { PonderStatus } from "@ensnode/ponder-metadata";
+export type { PonderStatus } from "@ensnode/ponder-sdk";
 
 /**
  * Fetch Status for requested Ponder instance.

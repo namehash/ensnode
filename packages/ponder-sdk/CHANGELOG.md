@@ -1,4 +1,4 @@
-# @ensnode/ponder-metadata
+# @ensnode/ponder-sdk
 
 ## 1.3.1
 

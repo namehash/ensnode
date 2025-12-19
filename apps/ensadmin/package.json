@@ -26,7 +26,6 @@
     "@ensnode/ensnode-react": "workspace:*",
     "@ensnode/ensnode-schema": "workspace:*",
     "@ensnode/ensnode-sdk": "workspace:*",
-    "@ensnode/ponder-metadata": "workspace:*",
     "@formkit/auto-animate": "^0.9.0",
     "@graphiql/plugin-explorer": "5.1.1",
     "@graphiql/react": "0.37.1",

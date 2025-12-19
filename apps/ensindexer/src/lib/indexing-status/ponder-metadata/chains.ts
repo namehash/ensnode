@@ -38,7 +38,7 @@ import {
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
   type SerializedOmnichainIndexingStatusSnapshotUnstarted,
 } from "@ensnode/ensnode-sdk";
-import type { PrometheusMetrics } from "@ensnode/ponder-metadata";
+import type { PrometheusMetrics } from "@ensnode/ponder-sdk";
 
 import type { ChainBlockRefs } from "./block-refs";
 import type { ChainName } from "./config";

@@ -8,7 +8,7 @@ import {
   OmnichainIndexingStatusIds,
   type SerializedOmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
-import type { PrometheusMetrics } from "@ensnode/ponder-metadata";
+import type { PrometheusMetrics } from "@ensnode/ponder-sdk";
 
 import { PonderAppSettingsSchema } from "./zod-schemas";
 

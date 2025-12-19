@@ -11,7 +11,7 @@ import * as z from "zod/v4";
 
 import type { ContractConfig } from "@ensnode/datasources";
 import type { Blockrange, ChainId } from "@ensnode/ensnode-sdk";
-import type { BlockInfo, PonderStatus } from "@ensnode/ponder-metadata";
+import type { BlockInfo, PonderStatus } from "@ensnode/ponder-sdk";
 
 import type { ENSIndexerConfig } from "@/config/types";
 

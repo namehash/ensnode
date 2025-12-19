@@ -129,9 +129,6 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../../packages/ensnode-sdk
-      '@ensnode/ponder-metadata':
-        specifier: workspace:*
-        version: link:../../packages/ponder-metadata
       '@formkit/auto-animate':
         specifier: ^0.9.0
         version: 0.9.0
@@ -401,9 +398,9 @@ importers:
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
         version: link:../../packages/ensrainbow-sdk
-      '@ensnode/ponder-metadata':
+      '@ensnode/ponder-sdk':
         specifier: workspace:*
-        version: link:../../packages/ponder-metadata
+        version: link:../../packages/ponder-sdk
       caip:
         specifier: 'catalog:'
         version: 1.1.1
@@ -813,7 +810,7 @@ importers:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@22.18.13)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
 
-  packages/ponder-metadata:
+  packages/ponder-sdk:
     dependencies:
       '@ensnode/ensrainbow-sdk':
         specifier: workspace:*
