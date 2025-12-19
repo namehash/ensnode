@@ -216,6 +216,19 @@ This allows your client to programmatically determine whether the ENSNode
 instance is sufficiently synchronized for your use case before proceeding with
 operations that depend on the latest onchain data.
 
+#### Verification endpoint
+
+For improved developer experience, you may want to use `GET /amirealtime`
+endpoint, which supports an optional `maxRealtimeDistance` parameter.
+
+The `maxRealtimeDistance` parameter accepts a duration value in seconds,
+representing the max allowed distance from the current "tip" of all indexed chains.
+When you include this parameter it influences the HTTP response code as follows:
+
+- **Success (200 OK)**: The latest indexed block of each chain is within the requested distance from realtime.
+- **Service Unavailable (503)**: The latest indexed block of each chain is NOT within the requested distance from realtime.
+
+
 ## Registrar Actions API
 
 Query the "logical registrar actions" performed on indexed
