@@ -11,6 +11,7 @@ import {
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
   type ReferrerDetailRanked,
   ReferrerDetailTypeIds,
+  type RevenueContribution,
 } from "@namehash/ens-referrals";
 import z from "zod/v4";
 
@@ -24,6 +25,18 @@ import {
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
 import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
+
+/**
+ * Schema for {@link RevenueContribution}
+ */
+const makeRevenueContributionSchema = (valueLabel: string = "RevenueContribution") =>
+  z.coerce
+    .bigint({
+      error: `${valueLabel} must represent a bigint.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must not be negative.`,
+    });
 
 /**
  * Schema for ReferralProgramRules
@@ -45,6 +58,9 @@ export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedRe
     referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
     totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+    totalRevenueContribution: makeRevenueContributionSchema(
+      `${valueLabel}.totalRevenueContribution`,
+    ),
     score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
     rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
     isQualified: z.boolean(),
@@ -68,6 +84,9 @@ export const makeUnrankedReferrerMetricsSchema = (valueLabel: string = "Unranked
     referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
     totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
     totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+    totalRevenueContribution: makeRevenueContributionSchema(
+      `${valueLabel}.totalRevenueContribution`,
+    ),
     score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
     rank: z.null(),
     isQualified: z.literal(false),
@@ -93,6 +112,9 @@ export const makeAggregatedReferrerMetricsSchema = (
     grandTotalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.grandTotalReferrals`),
     grandTotalIncrementalDuration: makeDurationSchema(
       `${valueLabel}.grandTotalIncrementalDuration`,
+    ),
+    grandTotalRevenueContribution: makeRevenueContributionSchema(
+      `${valueLabel}.grandTotalRevenueContribution`,
     ),
     grandTotalQualifiedReferrersFinalScore: makeFiniteNonNegativeNumberSchema(
       `${valueLabel}.grandTotalQualifiedReferrersFinalScore`,

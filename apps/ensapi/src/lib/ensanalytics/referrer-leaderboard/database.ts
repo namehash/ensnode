@@ -31,6 +31,7 @@ export const getReferrerMetrics = async (
    * Step 2: Group by decodedReferrer and calculate:
    * - Sum total incrementalDuration for each decodedReferrer
    * - Count of qualified referrals for each decodedReferrer
+   * - Sum total cost (revenue contribution) for each decodedReferrer
    *
    * Step 3: Sort by sum total incrementalDuration from highest to lowest
    */
@@ -43,6 +44,10 @@ export const getReferrerMetrics = async (
         totalIncrementalDuration: sum(schema.registrarActions.incrementalDuration).as(
           "total_incremental_duration",
         ),
+        totalRevenueContribution:
+          sql<string>`COALESCE(SUM(${schema.registrarActions.total}), 0)`.as(
+            "total_revenue_contribution",
+          ),
       })
       .from(schema.registrarActions)
       .where(
@@ -64,10 +69,12 @@ export const getReferrerMetrics = async (
     // Type assertion: The WHERE clause in the query above guarantees non-null values for:
     // 1. `referrer` is guaranteed to be non-null due to isNotNull filter
     // 2. `totalIncrementalDuration` is guaranteed to be non-null as it is the sum of non-null bigint values
+    // 3. `totalRevenueContribution` is guaranteed to be non-null due to COALESCE with 0
     interface NonNullRecord {
       referrer: Address;
       totalReferrals: number;
       totalIncrementalDuration: string;
+      totalRevenueContribution: string;
     }
 
     return (records as NonNullRecord[]).map((record) => {
@@ -75,6 +82,7 @@ export const getReferrerMetrics = async (
         record.referrer,
         record.totalReferrals,
         deserializeDuration(record.totalIncrementalDuration),
+        BigInt(record.totalRevenueContribution),
       );
     });
   } catch (error) {
