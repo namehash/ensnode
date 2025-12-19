@@ -14,6 +14,7 @@ import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
+import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
@@ -43,6 +44,9 @@ app.route("/subgraph", subgraphApi);
 
 // use ENSAnalytics API at /ensanalytics
 app.route("/ensanalytics", ensanalyticsApi);
+
+// use Am I Realtime API at /amirealtime
+app.route("/amirealtime", amIRealtimeApi);
 
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
