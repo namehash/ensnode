@@ -38,7 +38,6 @@ If your PR includes a changeset and is merged to `main` then it will automatical
 **Important notes:**
 - Among all release types, only Full Releases are considered stable.
 - Full releases are triggered through merging the Release PR to `main`.
-- Full releases will include the `@latest` tag for published packages/images.
 - All ENSNode packages use "fixed" versioning. Once a full release is published they will all advance to the version indicated in the Release PR based on the included changesets.
 - Only members of the NameHash Labs `ensnode` team have the required permissions to merge the Release PR to `main`.
 - Full releases will create GitHub tags and release notes.
@@ -80,7 +79,7 @@ In the event that a package needs to be tested or installed before it is merged 
 
 # Selecting a Release for Deployment or Installation
 
-When installing ENSNode NPM packages or Docker images, you have several release types to choose from depending on your needs and risk tolerance.
+When installing ENSNode NPM packages or Docker images, you have several release types to choose from.
 
 ## Where to Find Releases
 
@@ -90,19 +89,22 @@ When installing ENSNode NPM packages or Docker images, you have several release 
 
 ## Choosing the Right Release Type
 
-### For Production Use: `@latest` (Full Releases)
+### For Production Deployments: Pinned Full Release Versions
 ```bash
-npm install @ensnode/package-name@latest
-docker run ghcr.io/namehash/ensnode:latest
+npm install @ensnode/package-name@1
+docker run ghcr.io/namehash/ensnode:1
 ```
 
 **When to use:**
-- When you need maximum stability and reliability
-- When you want thoroughly tested features
+- Production deployments and any critical infrastructure
+- When you need maximum stability and control over updates
 
 **What to expect:**
-- Stable, well-tested releases
-- Complete release notes and changelog entries
+- Stable, well-tested releases with complete release notes
+- The version will never change - you control when to upgrade
+- No unexpected breaking changes or behavior changes
+
+**Important:** Never use the `latest` tag for Docker deployments (e.g., `ghcr.io/namehash/ensnode:latest` or `ghcr.io/namehash/ensnode`). The `latest` tag is a mutable pointer that will automatically pull different versions over time, causing unexpected updates and potential breaking changes in your deployment. Always pin to a specific version number from the [GitHub releases page](https://github.com/namehash/ensnode/releases).
 
 ### For Development/Testing: `@next` (Snapshot releases)
 ```bash
@@ -137,8 +139,8 @@ docker run ghcr.io/namehash/ensnode:preview-branch-name
 
 ## Version Selection Best Practices
 
-- Check the GitHub releases page for the latest stable version and release notes
-- Pin specific versions in your integrations rather than using tags like `@latest`
-- Use full releases (`@latest`) as much as possible for stability
-- Only use snapshot releases (`@next`) for experimenting with new features
+- **Always pin Docker deployments to specific version numbers** (e.g., `1.2.3`) - never use `latest` or omit the tag
+- Check the [GitHub releases page](https://github.com/namehash/ensnode/releases) to find the specific version number you need
+- Review release notes before upgrading to understand what changed
+- Use snapshot releases (`@next`) only in development environments for testing upcoming features
 - Avoid using preview releases (`@preview`) unless you are actively contributing through a PR
