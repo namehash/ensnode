@@ -35,7 +35,7 @@ app.get("/indexing-status", async (c) => {
       serializeIndexingStatusResponse({
         responseCode: IndexingStatusResponseCodes.Error,
       } satisfies IndexingStatusResponseError),
-      500,
+      503,
     );
   }
 
