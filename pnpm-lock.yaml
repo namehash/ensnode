@@ -812,9 +812,6 @@ importers:
 
   packages/ponder-sdk:
     dependencies:
-      '@ensnode/ensrainbow-sdk':
-        specifier: workspace:*
-        version: link:../ensrainbow-sdk
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
@@ -825,6 +822,9 @@ importers:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../ensnode-sdk
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
@@ -846,6 +846,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@22.18.13)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
 
   packages/ponder-subgraph:
     dependencies:

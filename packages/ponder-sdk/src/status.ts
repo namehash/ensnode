@@ -1,13 +1,29 @@
 /**
- * Ponder Metadata: Status
+ * Ponder SDK: Status
  *
  * This file describes ideas and functionality related to Ponder status for
  * each indexed chain. Ponder status is defined by `/status` endpoint.
  */
 
-import type { PonderStatus } from "@ensnode/ponder-sdk";
+import type { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
 
-export type { PonderStatus } from "@ensnode/ponder-sdk";
+/*
+ * Ponder Status type
+ *
+ * It's a type of value returned by the `GET /status` endpoint on ponder server.
+ *
+ * Akin to:
+ * https://github.com/ponder-sh/ponder/blob/8c012a3/packages/client/src/index.ts#L13-L18
+ */
+export interface PonderStatus {
+  [chainName: string]: {
+    /** Chain ID */
+    id: ChainId;
+
+    /** Latest Indexed Block Ref */
+    block: BlockRef;
+  };
+}
 
 /**
  * Fetch Status for requested Ponder instance.

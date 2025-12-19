@@ -19,9 +19,6 @@ import {
   type OmnichainIndexingStatusSnapshot,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
-
-import ponderConfig from "@/ponder/config";
-
 import {
   type ChainBlockRefs,
   type ChainName,
@@ -34,7 +31,9 @@ import {
   type PonderStatus,
   type PrometheusMetrics,
   type PublicClient,
-} from "./ponder-metadata";
+} from "@ensnode/ponder-sdk";
+
+import ponderConfig from "@/ponder/config";
 
 /**
  * Names for each indexed chain

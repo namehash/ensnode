@@ -1,5 +1,5 @@
 /**
- * Ponder Metadata: Block Refs
+ * Ponder SDK: Block Refs
  *
  * This file describes ideas and functionality related to block references
  * based on configured chain names, chains blockranges, and RPC calls.

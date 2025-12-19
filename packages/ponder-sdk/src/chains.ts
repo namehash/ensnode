@@ -1,8 +1,8 @@
 /**
- * Ponder Metadata: Chains
+ * Ponder SDK: Chains
  *
  * This file describes ideas and functionality related to metadata about chains
- * indexing status. In this module, ideas represented in other Ponder Metadata
+ * indexing status. In this module, ideas represented in other Ponder SDK
  * modules, such as:
  * - Config
  * - Metrics
@@ -38,10 +38,10 @@ import {
   type SerializedOmnichainIndexingStatusSnapshotFollowing,
   type SerializedOmnichainIndexingStatusSnapshotUnstarted,
 } from "@ensnode/ensnode-sdk";
-import type { PrometheusMetrics } from "@ensnode/ponder-sdk";
 
 import type { ChainBlockRefs } from "./block-refs";
 import type { ChainName } from "./config";
+import type { PrometheusMetrics } from "./metrics";
 import type { PonderStatus } from "./status";
 import { makePonderChainMetadataSchema } from "./zod-schemas";
 

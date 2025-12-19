@@ -39,19 +39,20 @@
     "lint:ci": "biome ci"
   },
   "dependencies": {
-    "@ensnode/ensrainbow-sdk": "workspace:*",
     "drizzle-orm": "catalog:",
     "parse-prometheus-text-format": "^1.1.1",
     "viem": "catalog:"
   },
   "devDependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "hono": "catalog:",
     "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "hono": "catalog:",

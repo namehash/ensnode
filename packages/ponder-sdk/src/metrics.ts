@@ -1,15 +1,14 @@
 /**
- * Ponder Metadata: Metrics
+ * Ponder SDK: Metrics
  *
  * This file describes ideas and functionality related to Ponder metrics for
  * each indexed chain. Ponder metrics are defined by `/metrics` endpoint.
  */
 
-import { PrometheusMetrics } from "@ensnode/ponder-sdk";
-
+import { PrometheusMetrics } from "./prometheus/prometheus-metrics";
 import { validatePonderMetrics } from "./validations";
 
-export { PrometheusMetrics } from "@ensnode/ponder-sdk";
+export { PrometheusMetrics } from "./prometheus/prometheus-metrics";
 
 /**
  * Fetch metrics for requested Ponder instance.
