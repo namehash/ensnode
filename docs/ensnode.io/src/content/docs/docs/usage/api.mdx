@@ -219,14 +219,14 @@ operations that depend on the latest onchain data.
 #### Verification endpoint
 
 For improved developer experience, you may want to use `GET /amirealtime`
-endpoint, which supports an optional `maxRealtimeDistance` parameter.
+endpoint, which supports an optional `maxWorstCaseDistance` parameter.
 
-The `maxRealtimeDistance` parameter accepts a duration value in seconds,
-representing the max allowed distance from the current "tip" of all indexed chains.
+The `maxWorstCaseDistance` parameter accepts a duration value in seconds,
+representing the max worst case distance from the current "tip" of all indexed chains.
 When you include this parameter it influences the HTTP response code as follows:
 
-- **Success (200 OK)**: The latest indexed block of each chain is within the requested distance from realtime.
-- **Service Unavailable (503)**: The latest indexed block of each chain is NOT within the requested distance from realtime.
+- **Success (200 OK)**: The latest indexed block of each chain is guaranteed within the requested distance from realtime.
+- **Service Unavailable (503)**: The latest indexed block of each chain is NOT guaranteed within the requested distance from realtime.
 
 
 ## Registrar Actions API
