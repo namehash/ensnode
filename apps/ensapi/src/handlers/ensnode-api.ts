@@ -60,7 +60,7 @@ app.get(
         },
       },
       503: {
-        description: "Error retrieving indexing status",
+        description: "Indexing status snapshot unavailable",
         content: {
           "application/json": {
             schema: validationResolver(makeIndexingStatusResponseSchema()),
