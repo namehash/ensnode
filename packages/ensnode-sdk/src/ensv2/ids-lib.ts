@@ -19,6 +19,7 @@ import type {
   PermissionsUserId,
   RegistrationId,
   RegistryId,
+  RenewalId,
   ResolverId,
   ResolverRecordsId,
 } from "./ids";
@@ -86,13 +87,35 @@ export const makeResolverRecordsId = (resolver: AccountId, node: Node) =>
   `${makeResolverId(resolver)}/${node}` as ResolverRecordsId;
 
 /**
+ * Constructs a RegistrationId for a `domainId`'s latest Registration.
+ *
+ * @dev See apps/ensindexer/src/lib/ensv2/registration-db-helpers.ts for more info.
+ */
+export const makeLatestRegistrationId = (domainId: DomainId) =>
+  `${domainId}/latest` as RegistrationId;
+
+/**
  * Constructs a RegistrationId for a `domainId`'s `index`'thd Registration.
+ *
+ * @dev See apps/ensindexer/src/lib/ensv2/registration-db-helpers.ts for more info.
  */
 export const makeRegistrationId = (domainId: DomainId, index: number = 0) =>
   `${domainId}/${index}` as RegistrationId;
 
 /**
- * Constructs a RegistrationId denoting the latest Registration using the /latest keypath.
+ * Constructs a RenewalId for a `domainId`'s `registrationIndex`thd Registration's latest Renewal.
+ *
+ * @dev Forces usage of the 'pinned' RegistrationId to avoid collisions, see
+ * apps/ensindexer/src/lib/ensv2/registration-db-helpers.ts for more info.
  */
-export const makeLatestRegistrationId = (domainId: DomainId) =>
-  `${domainId}/latest` as RegistrationId;
+export const makeLatestRenewalId = (domainId: DomainId, registrationIndex: number) =>
+  `${makeRegistrationId(domainId, registrationIndex)}/latest` as RenewalId;
+
+/**
+ * Constructs a RenewalId for a `domainId`'s `registrationIndex`thd Registration's `index`'thd Renewal.
+ *
+ * @dev Forces usage of the 'pinned' RegistrationId to avoid collisions, see
+ * apps/ensindexer/src/lib/ensv2/registration-db-helpers.ts for more info.
+ */
+export const makeRenewalId = (domainId: DomainId, registrationIndex: number, index: number = 0) =>
+  `${makeRegistrationId(domainId, registrationIndex)}/${index}` as RenewalId;

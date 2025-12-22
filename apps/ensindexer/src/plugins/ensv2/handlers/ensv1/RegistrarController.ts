@@ -16,8 +16,9 @@ import {
 
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
-import { getLatestRegistration } from "@/lib/ensv2/registration-db-helpers";
+import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
+import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -37,7 +38,7 @@ export default function () {
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, labelHash, baseCost, premium, referrer } = event.args;
+    const { label: _label, labelHash, baseCost: base, premium, referrer } = event.args;
     const label = _label as LiteralLabel | undefined;
 
     // Invariant: If emitted, label must align with labelHash
@@ -67,10 +68,11 @@ export default function () {
       await ensureUnknownLabel(context, labelHash);
     }
 
-    // update registration's baseCost/premium
+    // update registration's base/premium
+    // TODO(paymentToken): add payment token tracking here
     await context.db
       .update(schema.registration, { id: registration.id })
-      .set({ baseCost, premium, referrer });
+      .set({ base, premium, referrer });
   }
 
   async function handleNameRenewedByController({
@@ -85,7 +87,7 @@ export default function () {
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, baseCost, premium, referrer } = event.args;
+    const { label: _label, baseCost: base, premium, referrer } = event.args;
     const label = _label as LiteralLabel;
 
     const controller = getThisAccountId(context, event);
@@ -94,17 +96,22 @@ export default function () {
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);
     const registration = await getLatestRegistration(context, domainId);
-
     if (!registration) {
       throw new Error(
         `Invariant(RegistrarController:NameRenewed): NameRenewed but no Registration.`,
       );
     }
 
-    // TODO(renewals): update renewal with base/premium
-    // const renewal = await getLatestRenewal(context, registration.id);
-    // if (!renewal) invariant
-    // await context.db.update(schema.renewal, { id: renewal.id }).set({ baseCost, premium, referrer })
+    const renewal = await getLatestRenewal(context, domainId, registration.index);
+    if (!renewal) {
+      throw new Error(
+        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Renewal for Registration\n${toJson(registration)}`,
+      );
+    }
+
+    // update renewal info
+    // TODO(paymentToken): add payment token tracking here
+    await context.db.update(schema.renewal, { id: renewal.id }).set({ base, premium, referrer });
   }
 
   //////////////////////////////////////

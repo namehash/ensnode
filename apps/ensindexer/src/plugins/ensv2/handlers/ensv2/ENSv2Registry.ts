@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
-
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
@@ -95,10 +93,10 @@ export default function () {
       const isFullyExpired =
         registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
-      // Invariant: If there is an existing Registration, it must be expired.
+      // Invariant: If the latest Registration exists, it must be fully expired
       if (registration && !isFullyExpired) {
         throw new Error(
-          `Invariant(ENSv2Registry:NameRegistered): Existing unexpired registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
+          `Invariant(ENSv2Registry:NameRegistered): Existing unexpired ENSv2Registry Registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
         );
       }
 
@@ -134,7 +132,8 @@ export default function () {
         changedBy: Address;
       }>;
     }) => {
-      const { tokenId, newExpiry: expiry, changedBy: renewer } = event.args;
+      // biome-ignore lint/correctness/noUnusedVariables: not sure if we care to index changedBy
+      const { tokenId, newExpiry: expiry, changedBy } = event.args;
 
       const registry = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
@@ -157,7 +156,10 @@ export default function () {
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // TODO(renewals): insert Renewal
+      // if newExpiry is 0, this is an `unregister` call, related to ejecting
+      // https://github.com/ensdomains/namechain/blob/9e31679f4ee6d8abb4d4e840cdf06f2d653a706b/contracts/src/L1/bridge/L1BridgeController.sol#L141
+      // TODO(migration): maybe do something special with this state?
+      // if (expiry === 0n) return;
     },
   );
 
@@ -205,6 +207,7 @@ export default function () {
         resource: bigint;
       }>;
     }) => {
+      // biome-ignore lint/correctness/noUnusedVariables: TODO: use resource
       const { oldTokenId, newTokenId, resource } = event.args;
 
       // Invariant: CanonicalIds must match

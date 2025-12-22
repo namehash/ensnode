@@ -54,3 +54,8 @@ export type ResolverRecordsId = string & { __brand: "ResolverRecordsId" };
  * Uniquely identifies a Registration entity.
  */
 export type RegistrationId = string & { __brand: "RegistrationId" };
+
+/**
+ * Uniquely identifies a Renewal entity.
+ */
+export type RenewalId = string & { __brand: "RenewalId" };

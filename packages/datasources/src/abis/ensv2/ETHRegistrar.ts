@@ -1,5 +1,18 @@
 export const ETHRegistrar = [
   {
+    inputs: [],
+    name: "REGISTRY",
+    outputs: [
+      {
+        internalType: "contract IPermissionedRegistry",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "bytes32",

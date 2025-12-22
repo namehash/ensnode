@@ -14,6 +14,7 @@ import type {
   PermissionsUserId,
   RegistrationId,
   RegistryId,
+  RenewalId,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -239,6 +240,7 @@ export const relations_v2Domain = relations(v2Domain, ({ one, many }) => ({
 /////////////////
 
 export const registrationType = onchainEnum("RegistrationType", [
+  // TODO: prefix these with ENSv1, maybe excluding ThreeDNS
   "NameWrapper",
   "BaseRegistrar",
   "ThreeDNS",
@@ -277,8 +279,12 @@ export const registration = onchainTable(
     // may have fuses (NameWrapper, Wrapped BaseRegistrar)
     fuses: t.integer(),
 
-    // may have baseCost/premium (BaseRegistrar)
-    baseCost: t.bigint(),
+    // TODO(paymentToken): add payment token tracking here
+
+    // may have base cost (ENSv2Registrar)
+    base: t.bigint(),
+
+    // may have a premium (BaseRegistrar)
     premium: t.bigint(),
 
     // may be Wrapped (BaseRegistrar)
@@ -289,7 +295,7 @@ export const registration = onchainTable(
   }),
 );
 
-export const registration_relations = relations(registration, ({ one }) => ({
+export const registration_relations = relations(registration, ({ one, many }) => ({
   // belongs to either v1Domain or v2Domain
   v1Domain: one(v1Domain, {
     fields: [registration.domainId],
@@ -305,6 +311,50 @@ export const registration_relations = relations(registration, ({ one }) => ({
     fields: [registration.registrantId],
     references: [account.id],
     relationName: "registrant",
+  }),
+
+  // has many renewals
+  renewals: many(renewal),
+}));
+
+////////////
+// Renewals
+////////////
+
+export const renewal = onchainTable(
+  "renewals",
+  (t) => ({
+    // keyed by (registrationId, index)
+    id: t.text().primaryKey().$type<RenewalId>(),
+
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull().default(0),
+    index: t.integer().notNull().default(0),
+
+    // all renewals have a duration
+    duration: t.bigint().notNull(),
+
+    // may have a referrer
+    referrer: t.hex().$type<EncodedReferrer>(),
+
+    // TODO(paymentToken): add payment token tracking here
+
+    // may have base cost
+    base: t.bigint(),
+
+    // may have a premium (ENSv1 RegistrarControllers)
+    premium: t.bigint(),
+  }),
+  (t) => ({
+    byId: uniqueIndex().on(t.domainId, t.index),
+  }),
+);
+
+export const renewal_relations = relations(renewal, ({ one }) => ({
+  // belongs to registration
+  registration: one(registration, {
+    fields: [renewal.domainId, renewal.registrationIndex],
+    references: [registration.domainId, registration.index],
   }),
 }));
 

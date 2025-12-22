@@ -15,6 +15,7 @@ import {
   labelhashLiteralLabel,
   makeENSv1DomainId,
   makeLatestRegistrationId,
+  makeLatestRenewalId,
   makeSubdomainNode,
   type Node,
   PluginName,
@@ -27,7 +28,9 @@ import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
+  getLatestRenewal,
   supercedeLatestRegistration,
+  supercedeLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -359,7 +362,39 @@ export default function () {
 
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // TODO(renewals): insert Renewal if NameWrapper Registration, otherwise handled by BaseRegistrar
+      // if this is a NameWrapper Registration, this is a Renewal event. otherwise, this is a wrapped
+      // BaseRegistrar Registration, and the Renewal is already being managed
+
+      if (registration.type !== "NameWrapper") return;
+
+      // if the Registration will no longer expire, this isn't really a Renewal, so no-op
+      if (expiry === null) return;
+
+      // If:
+      //  a) the Registration previously did not expire, and
+      //  b) the new expiry is before the current block timestamp,
+      // Then it wasn't really renewed, now, was it? And calculating Renewal.duration is more or less
+      // impossible.
+      const now = event.block.timestamp;
+      if (registration.expiry === null && expiry < now) return;
+
+      // if the Registration previously did not expire but now does, we can calculate duration
+      // as 'time added since now' (which could be 0 seconds)
+      const duration = expiry - (registration.expiry ?? event.block.timestamp);
+
+      // get latest Renewal and supercede if exists
+      const renewal = await getLatestRenewal(context, domainId, registration.index);
+      if (renewal) await supercedeLatestRenewal(context, renewal);
+
+      // insert latest Renewal
+      await context.db.insert(schema.renewal).values({
+        id: makeLatestRenewalId(domainId, registration.index),
+        domainId,
+        registrationIndex: registration.index,
+        index: renewal ? renewal.index + 1 : 0,
+        duration,
+        // NOTE: NameWrapper does not include pricing information
+      });
     },
   );
 

@@ -8,6 +8,7 @@ import {
   isRegistrationFullyExpired,
   makeENSv1DomainId,
   makeLatestRegistrationId,
+  makeLatestRenewalId,
   makeSubdomainNode,
   PluginName,
 } from "@ensnode/ensnode-sdk";
@@ -17,7 +18,9 @@ import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-help
 import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
+  getLatestRenewal,
   supercedeLatestRegistration,
+  supercedeLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -170,18 +173,48 @@ export default function () {
         );
       }
 
+      // Invariant: Must be BaseRegistrar Registration
+      if (registration.type !== "BaseRegistrar") {
+        throw new Error(
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(registration)}`,
+        );
+      }
+
+      // Invariant: Because it is a BaseRegistrar Registration, it must have an expiry.
+      if (registration.expiry === null) {
+        throw new Error(
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(registration)}`,
+        );
+      }
+
       // Invariant: The Registation must not be fully expired.
       // https://github.com/ensdomains/ens-contracts/blob/b6cb0e26/contracts/ethregistrar/BaseRegistrarImplementation.sol#L161
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no unexpired registration\n${toJson({ registration, timestamp: event.block.timestamp })}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but registration is expired:\n${toJson({ registration, timestamp: event.block.timestamp })}`,
         );
       }
+
+      // infer duration
+      const duration = expiry - registration.expiry;
 
       // update the registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
-      // TODO(renewals): insert renewal & reference registration
+      // get latest Renewal and supercede if exists
+      const renewal = await getLatestRenewal(context, domainId, registration.index);
+      if (renewal) await supercedeLatestRenewal(context, renewal);
+
+      // insert latest Renewal
+      await context.db.insert(schema.renewal).values({
+        id: makeLatestRenewalId(domainId, registration.index),
+        domainId,
+        registrationIndex: registration.index,
+        index: renewal ? renewal.index + 1 : 0,
+        duration,
+        // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
+        // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
+      });
     },
   );
 }
