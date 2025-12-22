@@ -1,6 +1,24 @@
 import type {
+  AggregatedReferrerMetrics,
+  AwardedReferrerMetrics,
+  ReferralProgramRules,
+  ReferrerDetailRanked,
+  ReferrerDetailUnranked,
+  ReferrerLeaderboardPage,
+  RevenueContribution,
+  UnrankedReferrerMetrics,
+} from "@namehash/ens-referrals";
+
+import type {
+  SerializedAggregatedReferrerMetrics,
+  SerializedAwardedReferrerMetrics,
+  SerializedReferralProgramRules,
+  SerializedReferrerDetailRanked,
   SerializedReferrerDetailResponse,
+  SerializedReferrerDetailUnranked,
+  SerializedReferrerLeaderboardPage,
   SerializedReferrerLeaderboardPageResponse,
+  SerializedUnrankedReferrerMetrics,
 } from "./serialized-types";
 import {
   type ReferrerDetailResponse,
@@ -10,19 +28,138 @@ import {
 } from "./types";
 
 /**
+ * Serializes a {@link RevenueContribution} value into its string representation.
+ */
+function serializeRevenueContribution(revenueContribution: RevenueContribution): string {
+  return revenueContribution.toString();
+}
+
+/**
+ * Serializes a {@link ReferralProgramRules} object.
+ */
+function serializeReferralProgramRules(
+  rules: ReferralProgramRules,
+): SerializedReferralProgramRules {
+  // All fields are already serializable primitives
+  return rules;
+}
+
+/**
+ * Serializes an {@link AwardedReferrerMetrics} object.
+ */
+function serializeAwardedReferrerMetrics(
+  metrics: AwardedReferrerMetrics,
+): SerializedAwardedReferrerMetrics {
+  return {
+    referrer: metrics.referrer,
+    totalReferrals: metrics.totalReferrals,
+    totalIncrementalDuration: metrics.totalIncrementalDuration,
+    totalRevenueContribution: serializeRevenueContribution(metrics.totalRevenueContribution),
+    score: metrics.score,
+    rank: metrics.rank,
+    isQualified: metrics.isQualified,
+    finalScoreBoost: metrics.finalScoreBoost,
+    finalScore: metrics.finalScore,
+    awardPoolShare: metrics.awardPoolShare,
+    awardPoolApproxValue: metrics.awardPoolApproxValue,
+  };
+}
+
+/**
+ * Serializes an {@link UnrankedReferrerMetrics} object.
+ */
+function serializeUnrankedReferrerMetrics(
+  metrics: UnrankedReferrerMetrics,
+): SerializedUnrankedReferrerMetrics {
+  return {
+    referrer: metrics.referrer,
+    totalReferrals: metrics.totalReferrals,
+    totalIncrementalDuration: metrics.totalIncrementalDuration,
+    totalRevenueContribution: serializeRevenueContribution(metrics.totalRevenueContribution),
+    score: metrics.score,
+    rank: metrics.rank,
+    isQualified: metrics.isQualified,
+    finalScoreBoost: metrics.finalScoreBoost,
+    finalScore: metrics.finalScore,
+    awardPoolShare: metrics.awardPoolShare,
+    awardPoolApproxValue: metrics.awardPoolApproxValue,
+  };
+}
+
+/**
+ * Serializes an {@link AggregatedReferrerMetrics} object.
+ */
+function serializeAggregatedReferrerMetrics(
+  metrics: AggregatedReferrerMetrics,
+): SerializedAggregatedReferrerMetrics {
+  return {
+    grandTotalReferrals: metrics.grandTotalReferrals,
+    grandTotalIncrementalDuration: metrics.grandTotalIncrementalDuration,
+    grandTotalRevenueContribution: serializeRevenueContribution(
+      metrics.grandTotalRevenueContribution,
+    ),
+    grandTotalQualifiedReferrersFinalScore: metrics.grandTotalQualifiedReferrersFinalScore,
+    minFinalScoreToQualify: metrics.minFinalScoreToQualify,
+  };
+}
+
+/**
+ * Serializes a {@link ReferrerLeaderboardPage} object.
+ */
+function serializeReferrerLeaderboardPage(
+  page: ReferrerLeaderboardPage,
+): SerializedReferrerLeaderboardPage {
+  return {
+    rules: serializeReferralProgramRules(page.rules),
+    referrers: page.referrers.map(serializeAwardedReferrerMetrics),
+    aggregatedMetrics: serializeAggregatedReferrerMetrics(page.aggregatedMetrics),
+    pageContext: page.pageContext,
+    accurateAsOf: page.accurateAsOf,
+  };
+}
+
+/**
+ * Serializes a {@link ReferrerDetailRanked} object.
+ */
+function serializeReferrerDetailRanked(
+  detail: ReferrerDetailRanked,
+): SerializedReferrerDetailRanked {
+  return {
+    type: detail.type,
+    rules: serializeReferralProgramRules(detail.rules),
+    referrer: serializeAwardedReferrerMetrics(detail.referrer),
+    aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
+    accurateAsOf: detail.accurateAsOf,
+  };
+}
+
+/**
+ * Serializes a {@link ReferrerDetailUnranked} object.
+ */
+function serializeReferrerDetailUnranked(
+  detail: ReferrerDetailUnranked,
+): SerializedReferrerDetailUnranked {
+  return {
+    type: detail.type,
+    rules: serializeReferralProgramRules(detail.rules),
+    referrer: serializeUnrankedReferrerMetrics(detail.referrer),
+    aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
+    accurateAsOf: detail.accurateAsOf,
+  };
+}
+
+/**
  * Serialize a {@link ReferrerLeaderboardPageResponse} object.
- *
- * Note: Since all fields in ReferrerLeaderboardPageResponse are already
- * serializable primitives, this function performs an identity transformation.
- * It exists to maintain consistency with the serialization pattern used
- * throughout the codebase.
  */
 export function serializeReferrerLeaderboardPageResponse(
   response: ReferrerLeaderboardPageResponse,
 ): SerializedReferrerLeaderboardPageResponse {
   switch (response.responseCode) {
     case ReferrerLeaderboardPageResponseCodes.Ok:
-      return response;
+      return {
+        responseCode: response.responseCode,
+        data: serializeReferrerLeaderboardPage(response.data),
+      };
 
     case ReferrerLeaderboardPageResponseCodes.Error:
       return response;
@@ -31,19 +168,26 @@ export function serializeReferrerLeaderboardPageResponse(
 
 /**
  * Serialize a {@link ReferrerDetailResponse} object.
- *
- * Note: Since all fields in ReferrerDetailRanked and ReferrerDetailUnranked
- * (rules, referrer metrics, aggregatedMetrics, and timestamp) are already
- * serializable primitives, this function performs an identity transformation.
- * The rank field can be either a number or null, both of which are valid JSON primitives.
- * It exists to maintain consistency with the serialization pattern used throughout the codebase.
  */
 export function serializeReferrerDetailResponse(
   response: ReferrerDetailResponse,
 ): SerializedReferrerDetailResponse {
   switch (response.responseCode) {
     case ReferrerDetailResponseCodes.Ok:
-      return response;
+      switch (response.data.type) {
+        case "ranked":
+          return {
+            responseCode: response.responseCode,
+            data: serializeReferrerDetailRanked(response.data),
+          };
+
+        case "unranked":
+          return {
+            responseCode: response.responseCode,
+            data: serializeReferrerDetailUnranked(response.data),
+          };
+      }
+      break;
 
     case ReferrerDetailResponseCodes.Error:
       return response;
