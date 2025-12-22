@@ -1,6 +1,3 @@
-import { prettifyError } from "zod/v4";
-
-import { PonderAppSettingsSchema } from "../zod-schemas";
 import type { PrometheusMetrics } from "./prometheus-metrics";
 
 /**
@@ -12,14 +9,18 @@ import type { PrometheusMetrics } from "./prometheus-metrics";
  */
 export function validatePonderMetrics(metrics: PrometheusMetrics) {
   // Invariant: Ponder command & ordering are as expected
-  const parsedAppSettings = PonderAppSettingsSchema.safeParse({
-    command: metrics.getLabel("ponder_settings_info", "command"),
-    ordering: metrics.getLabel("ponder_settings_info", "ordering"),
-  });
+  const command = metrics.getLabel("ponder_settings_info", "command");
+  const ordering = metrics.getLabel("ponder_settings_info", "ordering");
 
-  if (parsedAppSettings.error) {
+  if (typeof command !== "string" || !["dev", "start"].includes(command)) {
     throw new Error(
-      `Failed to build IndexingStatus object: \n${prettifyError(parsedAppSettings.error)}\n`,
+      `Ponder settings_info command label is invalid: expected "dev" or "start", got "${command}"`,
+    );
+  }
+
+  if (ordering !== "omnichain") {
+    throw new Error(
+      `Ponder settings_info ordering label is invalid: expected "omnichain", got "${ordering}"`,
     );
   }
 }

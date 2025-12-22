@@ -88,10 +88,7 @@ export function deserializeBlockrange(maybeBlockrange: Partial<Blockrange>, valu
   return parsed.data;
 }
 
-export function deserializeBlockRef(
-  maybeBlockRef: Partial<BlockRef>,
-  valueLabel?: string,
-): BlockRef {
+export function deserializeBlockRef(maybeBlockRef: unknown, valueLabel?: string): BlockRef {
   const schema = makeBlockRefSchema(valueLabel);
   const parsed = schema.safeParse(maybeBlockRef);
 

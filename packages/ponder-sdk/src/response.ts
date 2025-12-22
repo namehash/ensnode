@@ -1,12 +1,11 @@
 import { prettifyError } from "zod/v4";
 
-import type { ChainIdString } from "@ensnode/ensnode-sdk";
-
 import type { PonderStatusChain } from "./chains";
 import { PrometheusMetrics, validatePonderMetrics } from "./metrics";
+import type { ChainName } from "./shared";
 import { makePonderStatusResponseSchema } from "./zod-schemas";
 
-export type PonderStatusResponse = Record<ChainIdString, PonderStatusChain>;
+export type PonderStatusResponse = Record<ChainName, PonderStatusChain>;
 
 export type PonderMetricsResponse = PrometheusMetrics;
 
