@@ -2,7 +2,7 @@
   "name": "@ensnode/ponder-sdk",
   "version": "1.3.1",
   "type": "module",
-  "description": "A utility library for interacting with Ponder application and data",
+  "description": "A library of utilities for interacting with Ponder apps.",
   "license": "MIT",
   "repository": {
     "type": "git",

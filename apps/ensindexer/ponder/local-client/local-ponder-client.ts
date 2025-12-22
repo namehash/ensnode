@@ -11,7 +11,7 @@ import {
   type ChainName,
   getChainsBlockRefs,
   getChainsBlockrange,
-  type PonderClient,
+  PonderClient,
   type PonderMetricsResponse,
 } from "@ensnode/ponder-sdk";
 
@@ -27,7 +27,11 @@ export class LocalPonderClient {
    */
   private chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
 
-  constructor(private readonly ponderClient: PonderClient) {}
+  private readonly ponderClient: PonderClient;
+
+  constructor(ponderApplicationUrl: URL) {
+    this.ponderClient = new PonderClient(ponderApplicationUrl);
+  }
 
   public async buildCrossChainIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
     const [metrics, status] = await Promise.all([

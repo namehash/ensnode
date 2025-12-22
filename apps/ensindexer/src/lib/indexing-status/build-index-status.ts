@@ -18,11 +18,10 @@ import {
   type OmnichainIndexingStatusSnapshot,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
-import { PonderClient } from "@ensnode/ponder-sdk";
 
 import { LocalPonderClient } from "../../../ponder/local-client";
 
-const localPonderClient = new LocalPonderClient(new PonderClient(config.ensIndexerUrl));
+const localPonderClient = new LocalPonderClient(config.ensIndexerUrl);
 
 export async function buildOmnichainIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
   return localPonderClient.buildCrossChainIndexingStatusSnapshot();

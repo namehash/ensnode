@@ -135,12 +135,6 @@ export function createSerializedChainSnapshots(
 
     const isSyncRealtime = metrics.getValue("ponder_sync_is_realtime", { chain: chainId });
 
-    if (typeof isSyncRealtime === "string" && !["0", "1"].includes(isSyncRealtime)) {
-      throw new Error(
-        `The 'ponder_sync_is_realtime' metric for chain '${chainId}' must be a string with value "0" or "1".`,
-      );
-    }
-
     const config = {
       startBlock: deserializeBlockRef(chainBlockRefs?.config.startBlock),
       endBlock:

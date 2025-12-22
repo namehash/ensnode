@@ -175,6 +175,10 @@ TypeScript library for interacting with the [ENSRainbow API](apps/ensrainbow).
 
 Shared Drizzle schema definitions used by ENSNode
 
+### [`packages/ponder-sdk`](packages/ponder-sdk)
+
+A set of utilities for interacting with a Ponder app.
+
 ### [`packages/ponder-subgraph`](packages/ponder-subgraph)
 
 Subgraph-compatible GraphQL API

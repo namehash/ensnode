@@ -10,7 +10,7 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ["@ensnode/ensnode-sdk", "ponder", "viem", "zod"],
+  external: ["ponder", "viem", "zod"],
   noExternal: ["parse-prometheus-text-format"],
   outDir: "./dist",
 });
