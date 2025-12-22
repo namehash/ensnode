@@ -818,15 +818,9 @@ importers:
 
   packages/ponder-sdk:
     dependencies:
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
-      viem:
-        specifier: 'catalog:'
-        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
@@ -837,9 +831,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.18.13
-      hono:
-        specifier: 'catalog:'
-        version: 4.10.3
       ponder:
         specifier: 'catalog:'
         version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
@@ -849,6 +840,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      viem:
+        specifier: 'catalog:'
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
       vitest:
         specifier: 'catalog:'
         version: 4.0.5(@types/debug@4.1.12)(@types/node@22.18.13)(jiti@2.6.1)(jsdom@27.0.1(postcss@8.5.6))(lightningcss@1.30.2)(tsx@4.20.6)(yaml@2.8.1)

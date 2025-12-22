@@ -11,6 +11,7 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
   "keywords": [
+    "ENSNode",
     "Ponder"
   ],
   "files": [
@@ -23,12 +24,18 @@
     "access": "public",
     "exports": {
       ".": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
       }
     },
-    "main": "./dist/index.js",
-    "module": "./dist/index.mjs",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
   "scripts": {
@@ -39,23 +46,23 @@
     "lint:ci": "biome ci"
   },
   "dependencies": {
-    "drizzle-orm": "catalog:",
-    "parse-prometheus-text-format": "^1.1.1",
-    "viem": "catalog:"
+    "parse-prometheus-text-format": "^1.1.1"
   },
   "devDependencies": {
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
-    "hono": "catalog:",
     "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
+    "viem": "catalog:",
     "vitest": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "hono": "catalog:",
-    "ponder": "catalog:"
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "ponder": "catalog:",
+    "viem": "catalog:",
+    "zod": "catalog:"
   }
 }
