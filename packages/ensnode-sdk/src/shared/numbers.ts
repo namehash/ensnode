@@ -1,3 +1,7 @@
+import { prettifyError } from "zod/v4";
+
+import { makeNonNegativeIntegerSchema, makePositiveIntegerSchema } from "./zod-schemas";
+
 /**
  * Converts a bigint value into a number value.
  *
@@ -18,4 +22,32 @@ export function bigIntToNumber(n: bigint): number {
   }
 
   return Number(n);
+}
+
+export function deserializeNonNegativeInteger(
+  maybePositiveInteger: unknown,
+  valueLabel?: string,
+): number {
+  const schema = makeNonNegativeIntegerSchema(valueLabel);
+  const parsed = schema.safeParse(maybePositiveInteger);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize Positive Integer:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializePositiveInteger(
+  maybePositiveInteger: unknown,
+  valueLabel?: string,
+): number {
+  const schema = makePositiveIntegerSchema(valueLabel);
+  const parsed = schema.safeParse(maybePositiveInteger);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize Positive Integer:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
 }

@@ -14,20 +14,8 @@
 
 import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
-import {
-  type BlockNumber,
-  type Blockrange,
-  deserializeBlockNumber,
-  deserializeBlockrange,
-} from "@ensnode/ensnode-sdk";
-
-/**
- * Chain Name
- *
- * Often use as type for object keys expressing Ponder ideas, such as
- * chain status, or chain metrics.
- */
-export type ChainName = string;
+import type { BlockNumber, Blockrange } from "./block-refs";
+import type { ChainName } from "./shared";
 
 /**
  * Ponder config datasource with a flat `chain` value.
@@ -132,12 +120,12 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
         endBlock = ponderSource.chain[chainName].endBlock;
       }
 
-      if (typeof startBlock === "number") {
-        chainStartBlocks.push(deserializeBlockNumber(startBlock));
+      if (typeof startBlock === "number" && Number.isInteger(startBlock) && startBlock >= 0) {
+        chainStartBlocks.push(startBlock);
       }
 
-      if (typeof endBlock === "number") {
-        chainEndBlocks.push(deserializeBlockNumber(endBlock));
+      if (typeof endBlock === "number" && Number.isInteger(endBlock) && endBlock >= 0) {
+        chainEndBlocks.push(endBlock);
       }
     }
 
@@ -164,12 +152,21 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
       );
     }
 
-    // 5. Assign a valid blockrange to the chain
+    // Invariant: the startBlock must be before or equal to endBlock (if defined).
+    if (
+      typeof chainHighestEndBlock !== "undefined" &&
+      chainLowestStartBlock > chainHighestEndBlock
+    ) {
+      throw new Error(
+        `For chain '${chainName}', the start block (${chainLowestStartBlock}) must be lower or equal to the end block (${chainHighestEndBlock}).`,
+      );
+    }
 
-    chainsBlockrange[chainName] = deserializeBlockrange({
+    // 5. Assign a valid blockrange to the chain
+    chainsBlockrange[chainName] = {
       startBlock: chainLowestStartBlock,
       endBlock: chainHighestEndBlock,
-    });
+    };
   }
 
   return chainsBlockrange;

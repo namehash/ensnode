@@ -7,11 +7,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "packages/ponder-metadata-api"
+    "directory": "packages/ponder-sdk"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-sdk",
   "keywords": [
-    "ENSNode",
     "Ponder"
   ],
   "files": [
@@ -49,7 +48,6 @@
     "parse-prometheus-text-format": "^1.1.1"
   },
   "devDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
     "ponder": "catalog:",
@@ -60,7 +58,6 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*",
     "ponder": "catalog:",
     "viem": "catalog:",
     "zod": "catalog:"

@@ -8,9 +8,7 @@
 
 import type { PublicClient } from "viem";
 
-import { type BlockNumber, type BlockRef, deserializeBlockRef } from "@ensnode/ensnode-sdk";
-
-export type { PublicClient } from "viem";
+import type { BlockNumber, BlockRef } from "./block-refs";
 
 /**
  * Fetch block ref from RPC.
@@ -25,11 +23,13 @@ export async function fetchBlockRef(
   blockNumber: BlockNumber,
 ): Promise<BlockRef> {
   const block = await publicClient.getBlock({ blockNumber: BigInt(blockNumber) });
+
   if (!block) {
     throw new Error(`Could not fetch block ${blockNumber}`);
   }
-  return deserializeBlockRef({
+
+  return {
     number: Number(block.number),
     timestamp: Number(block.timestamp),
-  });
+  };
 }

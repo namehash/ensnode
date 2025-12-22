@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { publicClients } from "ponder:api";
 import { getUnixTime } from "date-fns";
 import { Hono } from "hono";
 
@@ -38,7 +37,7 @@ app.get("/indexing-status", async (c) => {
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
-    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
+    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot();
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
