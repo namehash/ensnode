@@ -1,5 +1,5 @@
 /**
- * Ponder Metadata: Config
+ * Ponder SDK: Config
  *
  * This file is about parsing the object that is exported by `ponder.config.ts`.
  *
