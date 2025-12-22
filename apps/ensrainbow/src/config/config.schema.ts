@@ -6,7 +6,7 @@ import { makeFullyPinnedLabelSetSchema, PortSchema } from "@ensnode/ensnode-sdk/
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
-import { invariant_dataDirValid, invariant_dbSchemaVersionMatch } from "@/config/validations";
+import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { logger } from "@/utils/logger";
 
 const DataDirSchema = z
@@ -44,7 +44,6 @@ const ENSRainbowConfigSchema = z
    * by calling `.check()` function with relevant invariant-enforcing logic.
    * Each such function has access to config values that were already parsed.
    */
-  .check(invariant_dataDirValid)
   .check(invariant_dbSchemaVersionMatch);
 
 export type ENSRainbowConfig = z.infer<typeof ENSRainbowConfigSchema>;
