@@ -12,6 +12,7 @@ import {
 import { errorResponse } from "@/lib/error-response";
 import { getSecret } from "@/lib/get-secret";
 import { parseHostHeader } from "@/lib/parse-host-header";
+import { requireCloudflareSecret } from "@/middleware/require-cloudfront-secret.middleware";
 
 // NOTE: throws if not exists
 const THEGRAPH_API_KEY = await getSecret(
@@ -41,7 +42,7 @@ app.get("/", (c) =>
 
 app.get("/health", async (c) => c.json({ message: "ok" }));
 
-app.all("/subgraph", async (c) => {
+app.all("/subgraph", requireCloudflareSecret, async (c) => {
   const header = c.req.header("Host");
   if (!header) {
     return errorResponse(c, { error: "Missing Host Header", status: 400 });
