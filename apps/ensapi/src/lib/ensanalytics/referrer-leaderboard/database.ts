@@ -44,6 +44,8 @@ export const getReferrerMetrics = async (
         totalIncrementalDuration: sum(schema.registrarActions.incrementalDuration).as(
           "total_incremental_duration",
         ),
+        // Note: Using raw SQL for COALESCE because Drizzle doesn't natively support it yet.
+        // See: https://github.com/drizzle-team/drizzle-orm/issues/3708
         totalRevenueContribution:
           sql<string>`COALESCE(SUM(${schema.registrarActions.total}), 0)`.as(
             "total_revenue_contribution",
