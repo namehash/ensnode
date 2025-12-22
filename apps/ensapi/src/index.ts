@@ -4,6 +4,7 @@ import config from "@/config";
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
+import { openAPIRouteHandler } from "hono-openapi";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
@@ -50,7 +51,23 @@ app.route("/ensanalytics", ensanalyticsApi);
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
 
-// will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
+// use OpenAPI Schema
+app.get(
+  "/openapi.json",
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: "ENSApi APIs",
+        version: packageJson.version,
+        description:
+          "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
+      },
+      servers: [{ url: `http://localhost:${config.port}`, description: "Local Development" }],
+    },
+  }),
+);
+
+// will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
   return c.json({ ok: true });
 });

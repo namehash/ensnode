@@ -9,7 +9,9 @@ import { makeNameTokensResponseSchema } from "./zod-schemas";
 export function deserializedNameTokensResponse(
   maybeResponse: SerializedNameTokensResponse,
 ): NameTokensResponse {
-  const parsed = makeNameTokensResponseSchema().safeParse(maybeResponse);
+  const parsed = makeNameTokensResponseSchema("Name Tokens Response", false).safeParse(
+    maybeResponse,
+  );
 
   if (parsed.error) {
     throw new Error(`Cannot deserialize NameTokensResponse:\n${prettifyError(parsed.error)}\n`);
