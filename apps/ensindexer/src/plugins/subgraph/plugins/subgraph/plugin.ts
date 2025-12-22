@@ -43,11 +43,7 @@ export default createPlugin({
           abi: contracts.ENSv1RegistryOld.abi,
         },
         [namespaceContract(pluginName, "ENSv1Registry")]: {
-          chain: chainConfigForContract(
-            config.globalBlockrange,
-            chain.id,
-            contracts.ENSv1RegistryOld,
-          ),
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.ENSv1Registry),
           abi: contracts.ENSv1Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
