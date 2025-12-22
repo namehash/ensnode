@@ -1,9 +1,8 @@
+import { type ENSIndexerPublicConfig, PluginName } from "../../ensindexer/config/types";
 import {
-  type ENSIndexerPublicConfig,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
-  PluginName,
-} from "../../ensindexer";
+} from "../../ensindexer/indexing-status/types";
 
 export const registrarActionsPrerequisites = Object.freeze({
   /**

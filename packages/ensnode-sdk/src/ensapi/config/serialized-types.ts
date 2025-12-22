@@ -1,4 +1,4 @@
-import type { SerializedENSIndexerPublicConfig } from "../../ensindexer";
+import type { SerializedENSIndexerPublicConfig } from "../../ensindexer/config/serialized-types";
 import type { ENSApiPublicConfig } from "./types";
 
 /**

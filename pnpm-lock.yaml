@@ -15,6 +15,9 @@ catalogs:
     '@namehash/namekit-react':
       specifier: 0.12.0
       version: 0.12.0
+    '@ponder/client':
+      specifier: 0.13.14
+      version: 0.13.14
     '@ponder/utils':
       specifier: 0.2.14
       version: 0.2.14
@@ -45,6 +48,12 @@ catalogs:
     hono:
       specifier: ^4.10.2
       version: 4.10.3
+    p-memoize:
+      specifier: ^8.0.0
+      version: 8.0.0
+    p-retry:
+      specifier: ^7.1.1
+      version: 7.1.1
     pg-connection-string:
       specifier: ^2.9.1
       version: 2.9.1
@@ -339,16 +348,16 @@ importers:
         version: 4.1.0
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
+        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
       hono:
         specifier: 'catalog:'
         version: 4.10.3
       p-memoize:
-        specifier: ^8.0.0
+        specifier: 'catalog:'
         version: 8.0.0
       p-retry:
-        specifier: ^7.1.0
-        version: 7.1.0
+        specifier: 'catalog:'
+        version: 7.1.1
       pg-connection-string:
         specifier: 'catalog:'
         version: 2.9.1
@@ -404,6 +413,9 @@ importers:
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
+      '@ponder/client':
+        specifier: 'catalog:'
+        version: 0.13.14(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)(typescript@5.9.3)
       caip:
         specifier: 'catalog:'
         version: 1.1.1
@@ -416,15 +428,21 @@ importers:
       dns-packet:
         specifier: ^5.6.1
         version: 5.6.1
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
       hono:
         specifier: 'catalog:'
         version: 4.10.3
+      p-retry:
+        specifier: 'catalog:'
+        version: 7.1.1
       pg-connection-string:
         specifier: 'catalog:'
         version: 2.9.1
       ponder:
         specifier: 'catalog:'
-        version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(@types/pg@8.16.0)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -441,6 +459,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.18.13
+      '@types/pg':
+        specifier: 8.16.0
+        version: 8.16.0
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -733,7 +754,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(@types/pg@8.16.0)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -820,7 +841,7 @@ importers:
         version: link:../ensrainbow-sdk
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
+        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
@@ -839,7 +860,7 @@ importers:
         version: 4.10.3
       ponder:
         specifier: 'catalog:'
-        version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(@types/pg@8.16.0)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -866,7 +887,7 @@ importers:
         version: 2.2.3
       drizzle-orm:
         specifier: 'catalog:'
-        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
+        version: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
       graphql:
         specifier: ^16.10.0
         version: 16.11.0
@@ -2409,6 +2430,14 @@ packages:
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
 
+  '@ponder/client@0.13.14':
+    resolution: {integrity: sha512-T1hC2wP+47nJA+arDfCdaqaJGyj3z7QSHtqMv2ojy+nA0T5mHACs8kweWzsyxrI6H0jnuBgDviNijs9wUlo5Xw==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   '@ponder/utils@0.2.14':
     resolution: {integrity: sha512-O4t14Hb6/tVcD0WoS13ghFnDntP6x33/DDvA+sd0tRjemzS+Cne4YTkXl9TKW3AawBIEwMjGrGbAn82C8gXQWQ==}
     peerDependencies:
@@ -3403,6 +3432,9 @@ packages:
 
   '@types/node@22.18.13':
     resolution: {integrity: sha512-Bo45YKIjnmFtv6I1TuC8AaHBbqXtIo+Om5fE4QiU1Tj8QR/qt+8O3BAtOimG5IFmwaWiPmB3Mv3jtYzBA4Us2A==}
+
+  '@types/pg@8.16.0':
+    resolution: {integrity: sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ==}
 
   '@types/progress@2.0.7':
     resolution: {integrity: sha512-iadjw02vte8qWx7U0YM++EybBha2CQLPGu9iJ97whVgJUT5Zq9MjAPYUnbfRI2Kpehimf1QjFJYxD0t8nqzu5w==}
@@ -4711,6 +4743,14 @@ packages:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
 
+  eventsource-parser@3.0.6:
+    resolution: {integrity: sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==}
+    engines: {node: '>=18.0.0'}
+
+  eventsource@3.0.7:
+    resolution: {integrity: sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA==}
+    engines: {node: '>=18.0.0'}
+
   execa@5.1.1:
     resolution: {integrity: sha512-8uSpZZocAZRBAPIEINJj3Lo9HyGitllczc27Eh5YYojjMFMn8yHMDMaUHE2Jqfq05D/wucwI4JGURyXt1vchyg==}
     engines: {node: '>=10'}
@@ -6012,8 +6052,8 @@ packages:
     resolution: {integrity: sha512-aNZ+VfjobsWryoiPnEApGGmf5WmNsCo9xu8dfaYamG5qaLP7ClhLN6NgsFe6SwJ2UbLEBK5dv9x8Mn5+RVhMWQ==}
     engines: {node: '>=18'}
 
-  p-retry@7.1.0:
-    resolution: {integrity: sha512-xL4PiFRQa/f9L9ZvR4/gUCRNus4N8YX80ku8kv9Jqz+ZokkiZLM0bcvX0gm1F3PDi9SPRsww1BDsTWgE6Y1GLQ==}
+  p-retry@7.1.1:
+    resolution: {integrity: sha512-J5ApzjyRkkf601HpEeykoiCvzHQjWxPAHhyjFcEUP2SWq0+35NKh8TLhpLw+Dkq5TZBFvUM6UigdE9hIVYTl5w==}
     engines: {node: '>=20'}
 
   p-timeout@3.2.0:
@@ -9711,6 +9751,43 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
+  '@ponder/client@0.13.14(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)(typescript@5.9.3)':
+    dependencies:
+      drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
+      eventsource: 3.0.7
+      superjson: 2.2.5
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@libsql/client-wasm'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/sql.js'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bun-types
+      - expo-sqlite
+      - gel
+      - knex
+      - kysely
+      - mysql2
+      - pg
+      - postgres
+      - prisma
+      - sql.js
+      - sqlite3
+
   '@ponder/utils@0.2.14(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))':
     dependencies:
       viem: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -10757,6 +10834,12 @@ snapshots:
   '@types/node@22.18.13':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/pg@8.16.0':
+    dependencies:
+      '@types/node': 22.18.13
+      pg-protocol: 1.10.3
+      pg-types: 2.2.0
 
   '@types/progress@2.0.7':
     dependencies:
@@ -11975,10 +12058,11 @@ snapshots:
 
   dotenv@8.6.0: {}
 
-  drizzle-orm@0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3):
+  drizzle-orm@0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3):
     optionalDependencies:
       '@electric-sql/pglite': 0.2.13
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
+      '@types/pg': 8.16.0
       kysely: 0.26.3
       pg: 8.16.3
 
@@ -12142,6 +12226,12 @@ snapshots:
   eventemitter3@5.0.1: {}
 
   events@3.3.0: {}
+
+  eventsource-parser@3.0.6: {}
+
+  eventsource@3.0.7:
+    dependencies:
+      eventsource-parser: 3.0.6
 
   execa@5.1.1:
     dependencies:
@@ -13810,7 +13900,7 @@ snapshots:
       eventemitter3: 5.0.1
       p-timeout: 6.1.4
 
-  p-retry@7.1.0:
+  p-retry@7.1.1:
     dependencies:
       is-network-error: 1.3.0
 
@@ -14054,7 +14144,7 @@ snapshots:
       graphql: 16.11.0
       hono: 4.10.3
 
-  ponder@0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
+  ponder@0.13.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(@types/pg@8.16.0)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -14071,7 +14161,7 @@ snapshots:
       dataloader: 2.2.3
       detect-package-manager: 3.0.2
       dotenv: 16.6.1
-      drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(kysely@0.26.3)(pg@8.16.3)
+      drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.13)(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/pg@8.16.0)(kysely@0.26.3)(pg@8.16.3)
       glob: 12.0.0
       graphql: 16.11.0
       graphql-yoga: 5.16.0(graphql@16.11.0)

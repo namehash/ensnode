@@ -1,4 +1,4 @@
-import type { ChainId } from "../../shared";
+import type { ChainId } from "../../shared/types";
 import type { ENSIndexerPublicConfig, ENSIndexerVersionInfo } from "./types";
 
 export type SerializedIndexedChainIds = Array<ChainId>;
