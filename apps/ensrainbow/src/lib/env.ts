@@ -1,24 +1,18 @@
-import { join } from "node:path";
+import { buildConfigFromEnvironment } from "@/config/config.schema";
+import { ENSRAINBOW_DEFAULT_PORT } from "@/config/defaults";
+import type { ENSRainbowEnvironment } from "@/config/environment";
 
-import { parseNonNegativeInteger } from "@ensnode/ensnode-sdk";
+/**
+ * @deprecated Use buildConfigFromEnvironment() instead. This constant is kept for backward compatibility.
+ */
+export const DEFAULT_PORT = ENSRAINBOW_DEFAULT_PORT;
 
-import { logger } from "@/utils/logger";
-
-export const getDefaultDataSubDir = () => join(process.cwd(), "data");
-
-export const DEFAULT_PORT = 3223;
+/**
+ * Gets the port from environment variables.
+ *
+ * @deprecated Use buildConfigFromEnvironment() instead. This function is kept for backward compatibility.
+ */
 export function getEnvPort(): number {
-  const envPort = process.env.PORT;
-  if (!envPort) {
-    return DEFAULT_PORT;
-  }
-
-  try {
-    const port = parseNonNegativeInteger(envPort);
-    return port;
-  } catch (_error: unknown) {
-    const errorMessage = `Invalid PORT value "${envPort}": must be a non-negative integer`;
-    logger.error(errorMessage);
-    throw new Error(errorMessage);
-  }
+  const config = buildConfigFromEnvironment(process.env as ENSRainbowEnvironment);
+  return config.port;
 }
