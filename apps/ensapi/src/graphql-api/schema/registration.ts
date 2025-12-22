@@ -1,16 +1,22 @@
+import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+
 import {
   isRegistrationFullyExpired,
   isRegistrationInGracePeriod,
   type RegistrationId,
+  type RenewalId,
   type RequiredAndNotNull,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
+import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import { RenewalRef } from "@/graphql-api/schema/renewal";
 import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";
 import { db } from "@/lib/db";
+import { cursors } from "@/graphql-api/schema/cursors";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
   load: (ids: RegistrationId[]) =>
@@ -117,6 +123,30 @@ RegistrationInterfaceRef.implement({
       type: "Hex",
       nullable: true,
       resolve: (parent) => parent.referrer,
+    }),
+
+    /////////////////////////
+    // Registration.renewals
+    /////////////////////////
+    renewals: t.connection({
+      description: "TODO",
+      type: RenewalRef,
+      resolve: (parent, args, context) =>
+        resolveCursorConnection(
+          { ...DEFAULT_CONNECTION_ARGS, args },
+          ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+            db.query.renewal.findMany({
+              where: (t, { lt, gt, and }) =>
+                and(
+                  ...[
+                    before !== undefined && lt(t.id, cursors.decode<RenewalId>(before)),
+                    after !== undefined && gt(t.id, cursors.decode<RenewalId>(after)),
+                  ].filter((c) => !!c),
+                ),
+              orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+              limit,
+            }),
+        ),
     }),
   }),
 });

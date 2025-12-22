@@ -9,6 +9,7 @@ import {
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
+  type RegistrationId,
   type ResolverId,
 } from "@ensnode/ensnode-sdk";
 
@@ -25,6 +26,7 @@ import {
   ENSv2DomainRef,
 } from "@/graphql-api/schema/domain";
 import { PermissionsRef } from "@/graphql-api/schema/permissions";
+import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryIdInput, RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
@@ -101,6 +103,30 @@ builder.queryType({
                     ...[
                       before !== undefined && lt(t.id, cursors.decode<ResolverId>(before)),
                       after !== undefined && gt(t.id, cursors.decode<ResolverId>(after)),
+                    ].filter((c) => !!c),
+                  ),
+                orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
+                limit,
+              }),
+          ),
+      }),
+
+      /////////////////////////////////
+      // Query.registrations (Testing)
+      /////////////////////////////////
+      registrations: t.connection({
+        description: "TODO",
+        type: RegistrationInterfaceRef,
+        resolve: (parent, args, context) =>
+          resolveCursorConnection(
+            { ...DEFAULT_CONNECTION_ARGS, args },
+            ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
+              db.query.registration.findMany({
+                where: (t, { lt, gt, and }) =>
+                  and(
+                    ...[
+                      before !== undefined && lt(t.id, cursors.decode<RegistrationId>(before)),
+                      after !== undefined && gt(t.id, cursors.decode<RegistrationId>(after)),
                     ].filter((c) => !!c),
                   ),
                 orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
