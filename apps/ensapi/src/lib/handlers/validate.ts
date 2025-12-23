@@ -20,5 +20,9 @@ export const validate = <T extends ZodType, Target extends keyof ValidationTarge
 ) =>
   validator(target, schema, (result, c) => {
     // if validation failed, return our custom-formatted ErrorResponse instead of default
-    if (!result.success) return errorResponse(c, result.error);
+    if (!result.success) {
+      // Pass the Standard Schema issues array to errorResponse
+      // It will handle converting them to the proper format
+      return errorResponse(c, result.error);
+    }
   });
