@@ -39,10 +39,11 @@ AccountRef.implement({
     //////////////
     // Account.id
     //////////////
-    id: t.expose("id", {
+    id: t.field({
       description: "TODO",
       type: "Address",
       nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     ///////////////////

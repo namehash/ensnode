@@ -12,7 +12,6 @@ import {
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
@@ -53,10 +52,11 @@ ResolverRef.implement({
     ///////////////
     // Resolver.id
     ///////////////
-    id: t.expose("id", {
-      type: "ID",
+    id: t.field({
       description: "TODO",
+      type: "ResolverId",
       nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     /////////////////////

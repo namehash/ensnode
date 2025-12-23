@@ -27,10 +27,11 @@ RegistryRef.implement({
     //////////////////////
     // Registry.id
     //////////////////////
-    id: t.expose("id", {
+    id: t.field({
       description: "TODO",
-      type: "ID",
+      type: "RegistryId",
       nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     ////////////////////

@@ -23,10 +23,11 @@ ResolverRecordsRef.implement({
     //////////////////////
     // ResolverRecords.id
     //////////////////////
-    id: t.expose("id", {
+    id: t.field({
       description: "TODO",
       type: "ID",
       nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     ////////////////////////

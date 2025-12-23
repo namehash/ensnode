@@ -81,10 +81,11 @@ DomainInterfaceRef.implement({
     //////////////////////
     // Domain.id
     //////////////////////
-    id: t.expose("id", {
-      type: "ID",
+    id: t.field({
       description: "TODO",
+      type: "DomainId",
       nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     //////////////////////

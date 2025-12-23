@@ -12,11 +12,11 @@ import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
+import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
 import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";
 import { db } from "@/lib/db";
-import { cursors } from "@/graphql-api/schema/cursors";
 
 export const RegistrationInterfaceRef = builder.loadableInterfaceRef("Registration", {
   load: (ids: RegistrationId[]) =>
@@ -59,10 +59,11 @@ RegistrationInterfaceRef.implement({
     //////////////////////
     // Registration.id
     //////////////////////
-    id: t.expose("id", {
+    id: t.field({
       description: "TODO",
       type: "ID",
       nullable: false,
+      resolve: (parent) => parent.id,
     }),
 
     ///////////////////////
