@@ -142,7 +142,8 @@ app.get(
           errorCode: NameTokensResponseErrorCodes.IndexingStatusUnsupported,
           error: {
             message: "Name Tokens API is not available yet",
-            details: "The indexing status must be available and resolved successfully.",
+            details:
+              "Indexing status has not yet reached the required state to enable the Name Tokens API.",
           },
         }),
         503,
