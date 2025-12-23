@@ -20,14 +20,11 @@ import { makeNameTokensResponseSchema, makeNodeSchema } from "@ensnode/ensnode-s
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
-import { makeLogger } from "@/lib/logger";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
 const app = factory.createApp();
-
-const logger = makeLogger("name-tokens-api");
 
 const indexedSubregistries = getIndexedSubregistries(
   config.namespace,
@@ -53,6 +50,20 @@ const nameTokensQuerySchema = z
   .refine((data) => (data.domainId !== undefined) !== (data.name !== undefined), {
     message: "Exactly one of 'domainId' or 'name' must be provided",
   });
+
+/**
+ * Factory function for creating a 404 Name Tokens Not Indexed error response
+ */
+const makeNameTokensNotIndexedResponse = (
+  details: string,
+): NameTokensResponseErrorNameTokensNotIndexed => ({
+  responseCode: NameTokensResponseCodes.Error,
+  errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
+  error: {
+    message: "No indexed Name Tokens found",
+    details,
+  },
+});
 
 app.get(
   "/",
@@ -133,14 +144,11 @@ app.get(
       // return 404 when the requested name was the ENS Root
       if (name === ENS_ROOT) {
         return c.json(
-          serializeNameTokensResponse({
-            responseCode: NameTokensResponseCodes.Error,
-            errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
-            error: {
-              message: "No indexed Name Tokens found",
-              details: `The 'name' param must not be ENS Root, no tokens exist for it.`,
-            },
-          } satisfies NameTokensResponseErrorNameTokensNotIndexed),
+          serializeNameTokensResponse(
+            makeNameTokensNotIndexedResponse(
+              `The 'name' param must not be ENS Root, no tokens exist for it.`,
+            ),
+          ),
           404,
         );
       }
@@ -155,14 +163,11 @@ app.get(
       // the actively indexed subregistries.
       if (!subregistry) {
         return c.json(
-          serializeNameTokensResponse({
-            responseCode: NameTokensResponseCodes.Error,
-            errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
-            error: {
-              message: "No indexed Name Tokens found",
-              details: `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
-            },
-          } satisfies NameTokensResponseErrorNameTokensNotIndexed),
+          serializeNameTokensResponse(
+            makeNameTokensNotIndexedResponse(
+              `This ENSNode instance has not been configured to index tokens for the requested name: '${name}`,
+            ),
+          ),
           404,
         );
       }
@@ -188,14 +193,11 @@ app.get(
         request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
 
       return c.json(
-        serializeNameTokensResponse({
-          responseCode: NameTokensResponseCodes.Error,
-          errorCode: NameTokensResponseErrorCodes.NameTokensNotIndexed,
-          error: {
-            message: "No indexed Name Tokens found",
-            details: `No Name Tokens were indexed by this ENSNode instance for the requested ${errorMessageSubject}.`,
-          },
-        } satisfies NameTokensResponseErrorNameTokensNotIndexed),
+        serializeNameTokensResponse(
+          makeNameTokensNotIndexedResponse(
+            `No Name Tokens were indexed by this ENSNode instance for the requested ${errorMessageSubject}.`,
+          ),
+        ),
         404,
       );
     }
