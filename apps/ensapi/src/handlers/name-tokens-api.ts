@@ -15,7 +15,11 @@ import {
   type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
-import { makeNameTokensResponseSchema, makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  makeNameTokensResponseSchema,
+  makeNodeSchema,
+  ErrorResponseSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -81,12 +85,22 @@ app.get(
           },
         },
       },
+      400: {
+        description: "Invalid input",
+        content: {
+          "application/json": {
+            schema: validationResolver(ErrorResponseSchema, {
+              elo: 2,
+            }),
+          },
+        },
+      },
       404: {
         description: "Name tokens not indexed",
         content: {
           "application/json": {
             schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
-              elo: 2,
+              elo: 3,
             }),
           },
         },
@@ -96,7 +110,7 @@ app.get(
         content: {
           "application/json": {
             schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
-              elo: 3,
+              elo: 4,
             }),
           },
         },
