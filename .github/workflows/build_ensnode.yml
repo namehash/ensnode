@@ -1,10 +1,10 @@
-name: "Build: ENSNode Images"
+name: "Build: ENSNode"
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Image Version (Docker Tag)"
+        description: "ENSNode Version (Docker Tag)"
         type: string
         required: true
 
@@ -34,3 +34,23 @@ jobs:
             type=semver,pattern={{version}},value=${{ inputs.version }}
             type=ref,event=branch
             type=sha
+
+  publish-lambdas:
+    name: ${{ matrix.lambda }}
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        lambda: [fallback-ensapi]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and Publish Lambda
+        uses: ./.github/actions/build_and_publish_lambda
+        with:
+          name: ${{ matrix.lambda }}
+          version: ${{ inputs.version }}
