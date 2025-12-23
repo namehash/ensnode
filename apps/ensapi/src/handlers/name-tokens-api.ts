@@ -58,10 +58,10 @@ app.get(
   "/",
   describeRoute({
     summary: "Get Name Tokens",
-    description: "Returns name tokens for requested identifier (domainId, or name)",
+    description: "Returns name tokens for the requested identifier (domainId or name)",
     responses: {
       200: {
-        description: "Successfully retrieved name tokens",
+        description: "Name tokens known",
         content: {
           "application/json": {
             schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
@@ -154,10 +154,6 @@ app.get(
       // the parent name of the requested name was not registered in any of
       // the actively indexed subregistries.
       if (!subregistry) {
-        logger.error(
-          `This ENSNode instance has not been configured to index tokens for the requested name: '${name}'.`,
-        );
-
         return c.json(
           serializeNameTokensResponse({
             responseCode: NameTokensResponseCodes.Error,
@@ -190,10 +186,6 @@ app.get(
     if (!registeredNameTokens) {
       const errorMessageSubject =
         request.name !== undefined ? `name: '${request.name}'` : `domain ID: '${request.domainId}'`;
-
-      logger.error(
-        `This ENSNode instance has never indexed tokens for the requested ${errorMessageSubject}.`,
-      );
 
       return c.json(
         serializeNameTokensResponse({
