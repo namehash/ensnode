@@ -1,5 +1,6 @@
 import type { ValidationTargets } from "hono";
 import { validator } from "hono-openapi";
+import { SchemaError } from "@standard-schema/utils";
 import type { ZodType } from "zod/v4";
 
 import { errorResponse } from "./error-response";
@@ -7,7 +8,7 @@ import { errorResponse } from "./error-response";
 /**
  * Creates a Hono validation middleware with custom error formatting.
  *
- * Wraps the Hono zValidator with custom error handling that uses the
+ * Wraps the Hono validator with custom error handling that uses the
  * errorResponse function for consistent error formatting across the API.
  *
  * @param target - The validation target (param, query, json, etc.)
@@ -21,8 +22,8 @@ export const validate = <T extends ZodType, Target extends keyof ValidationTarge
   validator(target, schema, (result, c) => {
     // if validation failed, return our custom-formatted ErrorResponse instead of default
     if (!result.success) {
-      // Pass the Standard Schema issues array to errorResponse
-      // It will handle converting them to the proper format
-      return errorResponse(c, result.error);
+      // Wrap the Standard Schema issues in a SchemaError instance
+      // for consistent error handling in errorResponse
+      return errorResponse(c, new SchemaError(result.error));
     }
   });
