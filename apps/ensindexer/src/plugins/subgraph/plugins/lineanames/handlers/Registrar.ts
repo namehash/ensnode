@@ -1,22 +1,10 @@
-import config from "@/config";
-
 import { ponder } from "ponder:registry";
 
-import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { tokenIdToLabelHash } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
-
-import { getRegistrarManagedName } from "../lib/registrar-helpers";
-
-/**
- * When direct subnames of linea.eth are registered through the linea.eth ETHRegistrarController
- * contract on Linea, an ERC721 NFT is minted that tokenizes ownership of the registration. The minted NFT
- * will be assigned a unique tokenId represented as uint256(labelhash(label)) where label is the
- * direct subname of linea.eth that was registered.
- * https://github.com/Consensys/linea-ens/blob/3a4f02f/packages/linea-ens-contracts/contracts/ethregistrar/ETHRegistrarController.sol#L447
- */
-const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
 
 /**
  * Registers event handlers with Ponder.
@@ -30,12 +18,7 @@ export default function () {
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-  } = makeRegistrarHandlers({
-    pluginName,
-    // the shared Registrar handlers in this plugin index direct subnames of
-    // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.namespace),
-  });
+  } = makeRegistrarHandlers({ pluginName });
 
   ponder.on(
     namespaceContract(pluginName, "BaseRegistrar:NameRegistered"),

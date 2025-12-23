@@ -1,18 +1,16 @@
-import config from "@/config";
-
 import { ponder } from "ponder:registry";
 import { namehash } from "viem/ens";
 
-import { DatasourceNames } from "@ensnode/datasources";
 import {
   type BlockRef,
   bigIntToNumber,
-  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   type Subregistry,
 } from "@ensnode/ensnode-sdk";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
+import { getManagedName, tokenIdToLabelHash } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import {
@@ -20,31 +18,24 @@ import {
   handleRegistrarEventRenewal,
 } from "../../shared/lib/registrar-events";
 import { upsertSubregistry } from "../../shared/lib/subregistry";
-import { getRegistrarManagedName, tokenIdToLabelHash } from "../lib/registrar-helpers";
 
 /**
  * Registers event handlers with Ponder.
  */
 export default function () {
   const pluginName = PluginName.Registrars;
-  const parentNode = namehash(getRegistrarManagedName(config.namespace));
-
-  const subregistryId = getDatasourceContract(
-    config.namespace,
-    DatasourceNames.Lineanames,
-    "BaseRegistrar",
-  );
-  const subregistry = {
-    subregistryId,
-    node: parentNode,
-  } satisfies Subregistry;
 
   ponder.on(
     namespaceContract(pluginName, "Lineanames_BaseRegistrar:NameRegistered"),
     async ({ context, event }) => {
       const id = event.id;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const subregistry = { subregistryId, node: managedNode } satisfies Subregistry;
+
       const labelHash = tokenIdToLabelHash(event.args.id);
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const node = makeSubdomainNode(labelHash, managedNode);
       const registrant = event.transaction.from;
       const expiresAt = bigIntToNumber(event.args.expires);
       const block = {
@@ -71,8 +62,12 @@ export default function () {
     namespaceContract(pluginName, "Lineanames_BaseRegistrar:NameRenewed"),
     async ({ context, event }) => {
       const id = event.id;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+
       const labelHash = tokenIdToLabelHash(event.args.id);
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const node = makeSubdomainNode(labelHash, managedNode);
       const registrant = event.transaction.from;
       const expiresAt = bigIntToNumber(event.args.expires);
       const block = {

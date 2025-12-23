@@ -1,13 +1,9 @@
-import config from "@/config";
-
 import { ponder } from "ponder:registry";
 import { namehash } from "viem";
 
-import { DatasourceNames } from "@ensnode/datasources";
 import {
   addPrices,
   decodeEncodedReferrer,
-  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   priceEth,
@@ -16,23 +12,17 @@ import {
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";
-import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
  * Registers event handlers with Ponder.
  */
 export default function () {
   const pluginName = PluginName.Registrars;
-  const parentNode = namehash(getRegistrarManagedName(config.namespace));
-
-  const subregistryId = getDatasourceContract(
-    config.namespace,
-    DatasourceNames.ENSRoot,
-    "BaseRegistrar",
-  );
 
   /**
    * Ethnames_LegacyEthRegistrarController Event Handlers
@@ -41,9 +31,18 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const node = makeSubdomainNode(labelHash, managedNode);
+      const transactionHash = event.transaction.hash;
 
       /**
        * Ethnames_LegacyEthRegistrarController does not implement premiums,
@@ -67,8 +66,6 @@ export default function () {
         decodedReferrer: null,
       } satisfies RegistrarActionReferralNotApplicable;
 
-      const transactionHash = event.transaction.hash;
-
       await handleRegistrarControllerEvent(context, {
         id,
         subregistryId,
@@ -83,9 +80,18 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_LegacyEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const node = makeSubdomainNode(labelHash, managedNode);
+      const transactionHash = event.transaction.hash;
 
       /**
        * Ethnames_LegacyEthRegistrarController does not implement premiums,
@@ -111,8 +117,6 @@ export default function () {
         decodedReferrer: null,
       } satisfies RegistrarActionReferralNotApplicable;
 
-      const transactionHash = event.transaction.hash;
-
       await handleRegistrarControllerEvent(context, {
         id,
         subregistryId,
@@ -131,9 +135,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       /**
@@ -171,9 +183,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_WrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       /**
@@ -217,9 +237,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.labelhash;
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // rename to labelHash
+          labelhash: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       /**
@@ -260,9 +288,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Ethnames_UnwrappedEthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.labelhash;
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // rename to labelHash
+          labelhash: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const managedNode = namehash(getManagedName(subregistryId));
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       /**

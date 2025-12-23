@@ -15,7 +15,6 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
-import { getRegistrarManagedName, registrarTokenIdToLabelHash } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
   getLatestRenewal,
@@ -24,6 +23,7 @@ import {
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { getManagedName, tokenIdToLabelHash } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -70,9 +70,9 @@ export default function () {
       //
       // in all such cases, a Registration is expected and we can conditionally materialize Domain owner
 
-      const labelHash = registrarTokenIdToLabelHash(tokenId);
+      const labelHash = tokenIdToLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const managedNode = namehash(getRegistrarManagedName(registrar));
+      const managedNode = namehash(getManagedName(registrar));
       const node = makeSubdomainNode(labelHash, managedNode);
       const domainId = makeENSv1DomainId(node);
 
@@ -101,9 +101,9 @@ export default function () {
     const { id: tokenId, owner, expires: expiry } = event.args;
     const registrant = owner;
 
-    const labelHash = registrarTokenIdToLabelHash(tokenId);
+    const labelHash = tokenIdToLabelHash(tokenId);
     const registrar = getThisAccountId(context, event);
-    const managedNode = namehash(getRegistrarManagedName(registrar));
+    const managedNode = namehash(getManagedName(registrar));
     const node = makeSubdomainNode(labelHash, managedNode);
 
     const domainId = makeENSv1DomainId(node);
@@ -159,9 +159,9 @@ export default function () {
     }) => {
       const { id: tokenId, expires: expiry } = event.args;
 
-      const labelHash = registrarTokenIdToLabelHash(tokenId);
+      const labelHash = tokenIdToLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const managedNode = namehash(getRegistrarManagedName(registrar));
+      const managedNode = namehash(getManagedName(registrar));
       const node = makeSubdomainNode(labelHash, managedNode);
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);

@@ -25,7 +25,6 @@ import {
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
-import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import {
   getLatestRegistration,
   getLatestRenewal,
@@ -34,6 +33,7 @@ import {
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -64,7 +64,7 @@ const interpretExpiry = (expiry: bigint): bigint | null => (expiry === 0n ? null
 
 // .eth 2LDs always have PARENT_CANNOT_CONTROL set ('burned'), they cannot be transferred during grace period
 
-const isDirectSubnameOfRegistrarManagedName = (
+const isDirectSubnameOfManagedName = (
   managedNode: Node,
   name: DNSEncodedLiteralName,
   node: Node,
@@ -78,7 +78,7 @@ const isDirectSubnameOfRegistrarManagedName = (
   } catch {
     // must be decodable
     throw new Error(
-      `Invariant(isSubnameOfRegistrarManagedName): NameWrapper emitted DNSEncodedNames for direct-subnames-of-registrar-managed-names MUST be decodable`,
+      `Invariant(isDirectSubnameOfManagedName): NameWrapper emitted DNSEncodedNames for direct-subnames-of-managed-names MUST be decodable`,
     );
   }
 
@@ -187,12 +187,12 @@ export default function () {
 
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
-        const managedNode = namehash(getRegistrarManagedName(getThisAccountId(context, event)));
+        const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
 
-        // Invariant: Emitted name is a direct subname of the RegistrarManagedName
-        if (!isDirectSubnameOfRegistrarManagedName(managedNode, name, node)) {
+        // Invariant: Emitted name is a direct subname of the Managed Name
+        if (!isDirectSubnameOfManagedName(managedNode, name, node)) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): An unexpired BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's RegistrarManagedName — wtf?`,
+            `Invariant(NameWrapper:NameWrapped): An unexpired BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's Managed Name — wtf?`,
           );
         }
 

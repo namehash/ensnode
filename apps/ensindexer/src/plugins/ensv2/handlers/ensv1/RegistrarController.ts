@@ -15,10 +15,10 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureLabel, ensureUnknownLabel } from "@/lib/ensv2/label-db-helpers";
-import { getRegistrarManagedName } from "@/lib/ensv2/registrar-lib";
 import { getLatestRegistration, getLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
@@ -49,7 +49,7 @@ export default function () {
     }
 
     const controller = getThisAccountId(context, event);
-    const managedNode = namehash(getRegistrarManagedName(controller));
+    const managedNode = namehash(getManagedName(controller));
 
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);
@@ -91,7 +91,7 @@ export default function () {
     const label = _label as LiteralLabel;
 
     const controller = getThisAccountId(context, event);
-    const managedNode = namehash(getRegistrarManagedName(controller));
+    const managedNode = namehash(getManagedName(controller));
     const labelHash = labelhash(label);
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);

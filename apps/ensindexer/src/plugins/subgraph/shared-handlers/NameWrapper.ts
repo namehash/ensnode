@@ -34,11 +34,12 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { bigintMax } from "@/lib/lib-helpers";
+import { getManagedName } from "@/lib/managed-names";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount } from "@/lib/subgraph/db-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";
-import type { RegistrarManagedName } from "@/lib/types";
 
 /**
  * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
@@ -121,16 +122,8 @@ async function materializeDomainExpiryDate(context: Context, node: Node) {
 
 /**
  * makes a set of shared handlers for the NameWrapper contract
- *
- * @param registrarManagedName the name of the Registrar that NameWrapper interacts with registers subnames of
  */
-export const makeNameWrapperHandlers = ({
-  registrarManagedName,
-}: {
-  registrarManagedName: RegistrarManagedName;
-}) => {
-  const registrarManagedNode = namehash(registrarManagedName);
-
+export const makeNameWrapperHandlers = () => {
   async function handleTransfer(
     context: Context,
     event: EventWithArgs,
@@ -250,6 +243,8 @@ export const makeNameWrapperHandlers = ({
     }) {
       const { node, owner } = event.args;
 
+      const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+
       await upsertAccount(context, owner);
 
       await context.db.update(schema.subgraph_domain, { id: node }).set((domain) => ({
@@ -259,7 +254,7 @@ export const makeNameWrapperHandlers = ({
         // expiry to null because it does not expire.
         // via https://github.com/ensdomains/ens-subgraph/blob/c844791/src/nameWrapper.ts#L123
         // NOTE: undefined = no change, null = null
-        expiryDate: domain.parentId === registrarManagedNode ? undefined : null,
+        expiryDate: domain.parentId === managedNode ? undefined : null,
         wrappedOwnerId: null,
       }));
 

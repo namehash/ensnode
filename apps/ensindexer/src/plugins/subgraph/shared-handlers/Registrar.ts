@@ -18,13 +18,14 @@ import {
   type SubgraphInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
 import { labelByLabelHash } from "@/lib/graphnode-helpers";
+import { getManagedName } from "@/lib/managed-names";
 import { pluginSupportsPremintedNames } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount, upsertRegistration } from "@/lib/subgraph/db-helpers";
 import { makeRegistrationId } from "@/lib/subgraph/ids";
 import { isLabelSubgraphIndexable } from "@/lib/subgraph/is-label-subgraph-indexable";
-import type { RegistrarManagedName } from "@/lib/types";
 import { handleNewOwner } from "@/plugins/subgraph/shared-handlers/Registry";
 
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
@@ -35,21 +36,17 @@ const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
  * @param pluginName the name of the plugin using these shared handlers
  * @param registrarManagedName the name that the Registrar contract indexes subnames of
  */
-export const makeRegistrarHandlers = ({
-  pluginName,
-  registrarManagedName,
-}: {
-  pluginName: PluginName;
-  registrarManagedName: RegistrarManagedName;
-}) => {
-  const registrarManagedNode = namehash(registrarManagedName);
-
+export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }) => {
   async function setNamePreimage(
     context: Context,
-    label: LiteralLabel,
-    labelHash: LabelHash,
-    cost: bigint,
+    event: EventWithArgs<{
+      label: LiteralLabel;
+      labelHash: LabelHash;
+      cost: bigint;
+    }>,
   ) {
+    const { label, labelHash, cost } = event.args;
+
     // NOTE(subgraph-compat): if the label is not subgraph-indexable, ignore it entirely
     if (config.isSubgraphCompatible && !isLabelSubgraphIndexable(label)) return;
 
@@ -61,7 +58,8 @@ export const makeRegistrarHandlers = ({
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         literalLabelToInterpretedLabel(label);
 
-    const node = makeSubdomainNode(labelHash, registrarManagedNode);
+    const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+    const node = makeSubdomainNode(labelHash, managedNode);
     const domain = await context.db.find(schema.subgraph_domain, { id: node });
 
     // encode the runtime assertion here https://github.com/ensdomains/ens-subgraph/blob/c68a889/src/ethRegistrar.ts#L101
@@ -70,7 +68,7 @@ export const makeRegistrarHandlers = ({
     // materialize the domain's name and labelName using the emitted values
     if (domain.labelName !== interpretedLabel) {
       // in either case a Name composed of (Subgraph) Interpreted Labels is (Subgraph) Interpreted
-      const interpretedName = `${interpretedLabel}.${registrarManagedName}` as
+      const interpretedName = `${interpretedLabel}.${managedNode}` as
         | InterpretedName
         | SubgraphInterpretedName;
 
@@ -101,7 +99,9 @@ export const makeRegistrarHandlers = ({
 
       await upsertAccount(context, owner);
 
-      const node = makeSubdomainNode(labelHash, registrarManagedNode);
+      const managedName = getManagedName(getThisAccountId(context, event));
+      const managedNode = namehash(managedName);
+      const node = makeSubdomainNode(labelHash, managedNode);
 
       // NOTE(preminted-names): The mainnet ENS Registrar(s) _always_ register a node with the ENS
       // registry (emitting Registry#NewOwner) before emitting Registrar#NameRegistered.
@@ -148,7 +148,7 @@ export const makeRegistrarHandlers = ({
             ...event,
             args: {
               owner,
-              node: registrarManagedNode,
+              node: managedNode,
               label: labelHash,
             },
           },
@@ -167,7 +167,7 @@ export const makeRegistrarHandlers = ({
           // if subgraph-indexable, the label is Subgraph Interpreted
           label = healedLabel as Label as SubgraphInterpretedLabel;
           // a name constructed of Subgraph Interpreted Labels is Subgraph Interpreted
-          name = `${label}.${registrarManagedName}` as SubgraphInterpretedName;
+          name = `${label}.${managedName}` as SubgraphInterpretedName;
         }
       } else {
         // Interpret the `healedLabel` Literal Label into an Interpreted Label
@@ -180,7 +180,7 @@ export const makeRegistrarHandlers = ({
         ) as InterpretedLabel;
 
         // a name constructed of Interpreted Labels is Interpreted
-        name = `${label}.${registrarManagedName}` as InterpretedName;
+        name = `${label}.${managedName}` as InterpretedName;
       }
 
       // update Domain
@@ -224,14 +224,10 @@ export const makeRegistrarHandlers = ({
         cost: bigint;
       }>;
     }) {
-      const { label, labelHash, cost } = event.args;
+      const { label: _label, labelHash, cost } = event.args;
+      const label = _label as LiteralLabel; // NameRegistered emits Literal Labels
 
-      await setNamePreimage(
-        context,
-        label as LiteralLabel, // NameRegistered emits Literal Labels
-        labelHash,
-        cost,
-      );
+      await setNamePreimage(context, { ...event, args: { label, labelHash, cost } });
     },
 
     async handleNameRenewedByController({
@@ -245,14 +241,10 @@ export const makeRegistrarHandlers = ({
         cost: bigint;
       }>;
     }) {
-      const { label, labelHash, cost } = event.args;
+      const { label: _label, labelHash, cost } = event.args;
+      const label = _label as LiteralLabel; // NameRenewed emits Literal Labels
 
-      await setNamePreimage(
-        context,
-        label as LiteralLabel, // NameRenewed emits Literal Labels
-        labelHash,
-        cost,
-      );
+      await setNamePreimage(context, { ...event, args: { label, labelHash, cost } });
     },
 
     async handleNameRenewed({
@@ -264,7 +256,8 @@ export const makeRegistrarHandlers = ({
     }) {
       const { labelHash, expires } = event.args;
 
-      const node = makeSubdomainNode(labelHash, registrarManagedNode);
+      const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+      const node = makeSubdomainNode(labelHash, managedNode);
       const id = makeRegistrationId(labelHash, node);
 
       // update Registration expiry
@@ -295,7 +288,8 @@ export const makeRegistrarHandlers = ({
       // NOTE(subgraph-compat): despite the short-circuits below, upsertAccount must always be run
       await upsertAccount(context, to);
 
-      const node = makeSubdomainNode(labelHash, registrarManagedNode);
+      const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+      const node = makeSubdomainNode(labelHash, managedNode);
       const id = makeRegistrationId(labelHash, node);
 
       // if the Transfer event occurs before the Registration entity exists (i.e. the initial
