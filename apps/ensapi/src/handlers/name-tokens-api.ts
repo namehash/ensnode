@@ -134,7 +134,7 @@ app.get(
       );
     }
 
-    // Invariant: Indexing Status has been resolved successfully.
+    // Indexing Status has been resolved successfully.
     if (c.var.indexingStatus instanceof Error) {
       return c.json(
         serializeNameTokensResponse({
