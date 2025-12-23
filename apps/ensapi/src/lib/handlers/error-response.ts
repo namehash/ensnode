@@ -35,5 +35,5 @@ export const errorResponse = (
     return c.json({ message: input } satisfies ErrorResponse, statusCode);
   }
 
-  return c.json({ message: "Internal Error" } satisfies ErrorResponse, statusCode);
+  return c.json({ message: "Internal Server Error" } satisfies ErrorResponse, statusCode);
 };

@@ -2,9 +2,10 @@ import config from "@/config";
 
 import { proxy } from "hono/proxy";
 
+import { canFallbackToTheGraph } from "@ensnode/ensnode-sdk/internal";
+
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { canFallbackToTheGraph, makeTheGraphSubgraphUrl } from "@/lib/thegraph";
 
 const logger = makeLogger("thegraph-fallback.middleware");
 
@@ -17,17 +18,22 @@ let prevShouldFallback = false;
  * Middleware that proxies Subgraph requests to The Graph if possible & necessary.
  */
 export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, next) => {
+  const isRealtime = c.var.isRealtime;
+
   // context must be set by the required middleware
-  if (c.var.isRealtime === undefined) {
+  if (isRealtime === undefined) {
     throw new Error(`Invariant(thegraphFallbackMiddleware): isRealtimeMiddleware expected`);
   }
 
-  const { canFallback, reason: cannotfallbackReason } = canFallbackToTheGraph(config);
-  const isRealtime = c.var.isRealtime;
+  const fallback = canFallbackToTheGraph({
+    namespace: config.namespace,
+    theGraphApiKey: config.theGraphApiKey,
+    isSubgraphCompatible: config.ensIndexerPublicConfig.isSubgraphCompatible,
+  });
 
   // log one warning to the console if !canFallback
-  if (!didWarnCanFallback && !canFallback) {
-    switch (cannotfallbackReason) {
+  if (!didWarnCanFallback && !fallback.canFallback) {
+    switch (fallback.reason) {
       case "not-subgraph-compatible": {
         logger.warn(
           `ENSApi can NOT fallback to The Graph: the connected ENSIndexer is not Subgraph Compatible and a fallback to The Graph would cause data inconsistency. ENSApi will continue internally handling Subgraph API queries regardless of realtime status.`,
@@ -54,7 +60,7 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   //  a) canFallback (see `canFallbackToTheGraph`), and
   //  v) ENSIndexer is not sufficiently realtime.
   ////////////////////////////////////////////////////////////
-  const shouldFallback = canFallback && !isRealtime;
+  const shouldFallback = fallback.canFallback && !isRealtime;
 
   // log notice when fallback begins
   if (
@@ -79,12 +85,9 @@ export const thegraphFallbackMiddleware = factory.createMiddleware(async (c, nex
   if (!shouldFallback) return await next();
 
   // otherwise, proxy request to The Graph
-  // biome-ignore lint/style/noNonNullAssertion: guaranteed due to `shouldFallback` above
-  const subgraphUrl = makeTheGraphSubgraphUrl(config.namespace, config.theGraphApiKey!)!;
-
   try {
     // https://hono.dev/docs/helpers/proxy
-    return proxy(subgraphUrl, {
+    return proxy(fallback.url, {
       // provide existing method/body
       method: c.req.method,
       body: await c.req.text(),
