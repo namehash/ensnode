@@ -95,12 +95,12 @@ export default {
 
       ETHRegistry: {
         abi: Registry,
-        address: "0x1613beb3b2c4f22ee086b2b38c1476a3ce7f78e8",
+        address: "0x0b306bf915c4d645ff596e518faf3f9669b97016",
         startBlock: 0,
       },
       RootRegistry: {
         abi: Registry,
-        address: "0x610178da211fef7d417bc0e6fed39f05609ad788",
+        address: "0x9a676e781a523b5d0c0e43731313a708cb607508",
         startBlock: 0,
       },
       Registry: {
@@ -131,12 +131,12 @@ export default {
       },
       ETHRegistry: {
         abi: Registry,
-        address: "0x0165878a594ca255338adfa4d48449f69242eb8f",
+        address: "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
         startBlock: 0,
       },
       ETHRegistrar: {
         abi: ETHRegistrar,
-        address: "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+        address: "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
         startBlock: 0,
       },
     },

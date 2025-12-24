@@ -63,12 +63,16 @@ export async function executeResolveCallsWithUniversalResolver<
         // NOTE: results is type-guaranteed to have at least 1 result (because each abi item's outputs.length >= 1)
         const result = results[0];
 
+        console.log(`.resolve(${call.functionName}, ${call.args}) -> ${result}`);
+
         return {
           call,
           result: result,
           reason: `.resolve(${call.functionName}, ${call.args})`,
         };
       } catch (error) {
+        console.log(`.resolve(${call.functionName}, ${call.args}) -> ${error}`);
+
         // in general, reverts are expected behavior
         if (error instanceof ContractFunctionExecutionError) {
           return { call, result: null, reason: error.shortMessage };
