@@ -1,7 +1,8 @@
 import config from "@/config";
 
-import { createPublicClient, fallback, http, type PublicClient } from "viem";
+import { ccipRequest, createPublicClient, fallback, http, type PublicClient } from "viem";
 
+import { ensTestEnvL1Chain } from "@ensnode/datasources";
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
 const _cache = new Map<ChainId, PublicClient>();
@@ -23,6 +24,17 @@ export function getPublicClient(chainId: ChainId): PublicClient {
       // Create an viem#PublicClient that uses a fallback() transport with all specified HTTP RPCs
       createPublicClient({
         transport: fallback(rpcConfig.httpRPCs.map((url) => http(url.toString()))),
+        ccipRead: {
+          async request({ data, sender, urls }) {
+            // Inject the ens-test-env docker-compose URG url as a fallback if http://localhost:8547 fails
+            if (chainId === ensTestEnvL1Chain.id) {
+              return ccipRequest({ data, sender, urls: [...urls, "http://devnet:8547"] });
+            }
+
+            // otherwise, handle as normal
+            return ccipRequest({ data, sender, urls });
+          },
+        },
       }),
     );
   }
