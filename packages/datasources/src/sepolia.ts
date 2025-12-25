@@ -13,6 +13,9 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
+import { Registry } from "./abis/ensv2/Registry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -30,7 +33,7 @@ import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } f
 import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -49,19 +52,18 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: sepolia,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x94f523b8261b815b87effcf4d18e6abef18d6e4b",
         startBlock: 3702721,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 3702728,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 3702721, // ignores any Resolver events prior to `startBlock` of RegistryOld on Sepolia
       },
       BaseRegistrar: {
@@ -99,6 +101,55 @@ export default {
         address: "0xb7b7dadf4d42a08b3ec1d3a1079959dfbc8cffcc",
         startBlock: 8515717,
       },
+
+      //
+
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x1291be112d480055dafd8a610b7d1e203891c274",
+        startBlock: 23794084,
+      },
+      RootRegistry: {
+        abi: Registry,
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        startBlock: 23794084,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 23794084,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 23794084,
+      },
+    },
+  },
+
+  [DatasourceNames.Namechain]: {
+    chain: sepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverABI,
+        startBlock: 23794084,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 23794084,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 23794084,
+      },
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        startBlock: 23794084,
+      },
+      ETHRegistrar: {
+        abi: ETHRegistrar,
+        address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+        startBlock: 23794084,
+      },
     },
   },
 
@@ -133,7 +184,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 13012458,
       },
       BaseRegistrar: {
@@ -195,7 +245,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 2395094, // based on startBlock of Registry on Linea Sepolia
       },
       BaseRegistrar: {
