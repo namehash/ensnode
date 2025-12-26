@@ -80,25 +80,30 @@ export default function () {
       // ensure discovered Label
       await ensureLabel(context, label);
 
-      // insert v2Domain
-      await context.db.insert(schema.v2Domain).values({
-        id: domainId,
-        tokenId,
-        registryId,
-        labelHash,
-        // NOTE: ownerId omitted, Transfer* events are sole source of ownership
-      });
-
       const registration = await getLatestRegistration(context, domainId);
       const isFullyExpired =
         registration && isRegistrationFullyExpired(registration, event.block.timestamp);
 
-      // Invariant: If the latest Registration exists, it must be fully expired
+      // Invariant: If a Registration for this v2Domain exists, it must be fully expired
       if (registration && !isFullyExpired) {
         throw new Error(
           `Invariant(ENSv2Registry:NameRegistered): Existing unexpired ENSv2Registry Registration found in NameRegistered, expected none or expired.\n${toJson(registration)}`,
         );
       }
+
+      // insert or update v2Domain
+      // console.log(`NameRegistered: '${label}'\n ↳ ${domainId}`);
+      await context.db
+        .insert(schema.v2Domain)
+        .values({
+          id: domainId,
+          tokenId,
+          registryId,
+          labelHash,
+          // NOTE: ownerId omitted, Transfer* events are sole source of ownership
+        })
+        // if the v2Domain exists, this is a re-register after expiration and tokenId may have changed
+        .onConflictDoUpdate({ tokenId });
 
       // supercede the latest Registration if exists
       if (registration) await supercedeLatestRegistration(context, registration);
@@ -181,6 +186,8 @@ export default function () {
       const registryAccountId = getThisAccountId(context, event);
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
+
+      // console.log(`SubregistryUpdated: ${subregistry} \n ↳ ${domainId}`);
 
       // update domain's subregistry
       if (subregistry === null) {

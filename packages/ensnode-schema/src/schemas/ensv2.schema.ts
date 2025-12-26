@@ -281,7 +281,7 @@ export const registration = onchainTable(
 
     // TODO(paymentToken): add payment token tracking here
 
-    // may have base cost (ENSv2Registrar)
+    // may have base cost (BaseRegistrar, ENSv2Registrar)
     base: t.bigint(),
 
     // may have a premium (BaseRegistrar)

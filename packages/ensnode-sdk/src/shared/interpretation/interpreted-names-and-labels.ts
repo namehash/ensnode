@@ -111,7 +111,7 @@ export function isInterpretedName(name: Name): name is InterpretedName {
 export function interpretedNameToLabelHashPath(name: InterpretedName): LabelHashPath {
   return interpretedNameToInterpretedLabels(name)
     .map((label) => {
-      if (!isInterpetedLabel) {
+      if (!isInterpetedLabel(label)) {
         throw new Error(
           `Invariant(interpretedNameToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
         );
