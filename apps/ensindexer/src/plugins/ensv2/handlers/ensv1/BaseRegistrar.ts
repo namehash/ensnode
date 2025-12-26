@@ -1,7 +1,7 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { GRACE_PERIOD_SECONDS } from "@ensdomains/ensjs/utils";
-import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
   interpretAddress,
@@ -72,7 +72,7 @@ export default function () {
 
       const labelHash = tokenIdToLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(registrar));
+      const { node: managedNode } = getManagedName(registrar);
       const node = makeSubdomainNode(labelHash, managedNode);
       const domainId = makeENSv1DomainId(node);
 
@@ -103,7 +103,7 @@ export default function () {
 
     const labelHash = tokenIdToLabelHash(tokenId);
     const registrar = getThisAccountId(context, event);
-    const managedNode = namehash(getManagedName(registrar));
+    const { node: managedNode } = getManagedName(registrar);
     const node = makeSubdomainNode(labelHash, managedNode);
 
     const domainId = makeENSv1DomainId(node);
@@ -161,7 +161,7 @@ export default function () {
 
       const labelHash = tokenIdToLabelHash(tokenId);
       const registrar = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(registrar));
+      const { node: managedNode } = getManagedName(registrar);
       const node = makeSubdomainNode(labelHash, managedNode);
       const domainId = makeENSv1DomainId(node);
       const registration = await getLatestRegistration(context, domainId);

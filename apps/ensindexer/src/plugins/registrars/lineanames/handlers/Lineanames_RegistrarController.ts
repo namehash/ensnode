@@ -1,5 +1,4 @@
 import { ponder } from "ponder:registry";
-import { namehash } from "viem/ens";
 
 import {
   addPrices,
@@ -47,7 +46,7 @@ export default function () {
       } = event;
 
       const subregistryId = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(subregistryId));
+      const { node: managedNode } = getManagedName(subregistryId);
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
@@ -85,7 +84,7 @@ export default function () {
       } = event;
 
       const subregistryId = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(subregistryId));
+      const { node: managedNode } = getManagedName(subregistryId);
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
@@ -123,7 +122,7 @@ export default function () {
       } = event;
 
       const subregistryId = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(subregistryId));
+      const { node: managedNode } = getManagedName(subregistryId);
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
@@ -159,7 +158,7 @@ export default function () {
       } = event;
 
       const subregistryId = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(subregistryId));
+      const { node: managedNode } = getManagedName(subregistryId);
       const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 

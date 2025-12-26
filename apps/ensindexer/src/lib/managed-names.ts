@@ -1,14 +1,16 @@
 import config from "@/config";
 
+import { namehash } from "viem";
+
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import {
   type AccountId,
   accountIdEqual,
   getDatasourceContract,
-  type InterpretedName,
   type LabelHash,
   maybeGetDatasourceContract,
   type Name,
+  type Node,
   uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
@@ -16,7 +18,7 @@ import { toJson } from "@/lib/json-stringify-with-bigints";
 
 /**
  * Many contracts within the ENSv1 Ecosystem are relative to a parent Name. For example,
- * the .eth BaseRegistrar (and RegistrarConrollers) manage direct subnames of .eth. As such, they
+ * the .eth BaseRegistrar (and RegistrarControllers) manage direct subnames of .eth. As such, they
  * operate on relative Labels, not fully qualified Names. We must know the parent name whose subnames
  * they manage in order to index them correctly.
  *
@@ -29,7 +31,7 @@ import { toJson } from "@/lib/json-stringify-with-bigints";
  * Registrar's Managed Name ('eth' in this case).
  *
  * The NameWrapper contracts are relevant here as well because they include specialized logic for
- * wrapping direct subnames of these Managed Names.
+ * wrapping direct subnames of specific Managed Names.
  */
 
 const ethnamesNameWrapper = getDatasourceContract(
@@ -45,7 +47,8 @@ const lineanamesNameWrapper = maybeGetDatasourceContract(
 );
 
 /**
- * Mapping of a Managed Name to contracts that operate in the context of said Name.
+ * Mapping of a Managed Name to contracts that operate in the context of a (sub)Registry associated
+ * with that Name.
  */
 const CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
   eth: [
@@ -118,17 +121,32 @@ const MANAGED_NAME_BY_NAMESPACE: Partial<Record<ENSNamespaceId, Record<Name, Nam
   },
 };
 
+// Because we access a contract's Managed Name (and Node) frequently in event handlers, it's likely
+// that caching the namehash() fn for these few values is beneficial, so we do so here.
+const namehashCache = new Map<Name, Node>();
+const cachedNamehash = (name: Name): Node => {
+  if (!namehashCache.has(name)) namehashCache.set(name, namehash(name));
+
+  // biome-ignore lint/style/noNonNullAssertion: guaranteed due to cache check above
+  return namehashCache.get(name)!;
+};
+
 /**
- * Given a `contract`, identify its Managed Name.
+ * Given a `contract`, identify its Managed Name and Node.
+ *
+ * @dev Caches the result of namehash(name).
  */
-export const getManagedName = (contract: AccountId) => {
+export const getManagedName = (contract: AccountId): { name: Name; node: Node } => {
   for (const [managedName, contracts] of Object.entries(CONTRACTS_BY_MANAGED_NAME)) {
     const isAnyOfTheContracts = contracts.some((_contract) => accountIdEqual(_contract, contract));
     if (isAnyOfTheContracts) {
+      const namespaceSpecific = MANAGED_NAME_BY_NAMESPACE[config.namespace]?.[managedName];
+
       // use the namespace-specific Managed Name if specified, otherwise use the default from CONTRACTS_BY_MANAGED_NAME
-      const namespaceSpecificManagedName =
-        MANAGED_NAME_BY_NAMESPACE[config.namespace]?.[managedName] ?? managedName;
-      return namespaceSpecificManagedName as InterpretedName;
+      const name = namespaceSpecific ?? managedName;
+      const node = cachedNamehash(name);
+
+      return { name, node };
     }
   }
 

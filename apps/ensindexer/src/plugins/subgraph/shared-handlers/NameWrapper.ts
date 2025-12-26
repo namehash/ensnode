@@ -17,7 +17,7 @@ import schema from "ponder:schema";
  * Related GitHub issue: https://github.com/ensdomains/ens-subgraph/issues/88
  */
 import { checkPccBurned as isPccFuseUnset } from "@ensdomains/ensjs/utils";
-import { type Address, namehash } from "viem";
+import type { Address } from "viem";
 
 import {
   type DNSEncodedLiteralName,
@@ -243,7 +243,7 @@ export const makeNameWrapperHandlers = () => {
     }) {
       const { node, owner } = event.args;
 
-      const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+      const { node: managedNode } = getManagedName(getThisAccountId(context, event));
 
       await upsertAccount(context, owner);
 

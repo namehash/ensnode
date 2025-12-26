@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { labelhash, namehash } from "viem";
+import { labelhash } from "viem";
 
 import {
   type EncodedReferrer,
@@ -49,7 +49,7 @@ export default function () {
     }
 
     const controller = getThisAccountId(context, event);
-    const managedNode = namehash(getManagedName(controller));
+    const { node: managedNode } = getManagedName(controller);
 
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);
@@ -91,7 +91,7 @@ export default function () {
     const label = _label as LiteralLabel;
 
     const controller = getThisAccountId(context, event);
-    const managedNode = namehash(getManagedName(controller));
+    const { node: managedNode } = getManagedName(controller);
     const labelHash = labelhash(label);
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);

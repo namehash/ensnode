@@ -1,6 +1,6 @@
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, isAddressEqual, namehash, zeroAddress } from "viem";
+import { type Address, isAddressEqual, zeroAddress } from "viem";
 
 import {
   type DNSEncodedLiteralName,
@@ -187,12 +187,12 @@ export default function () {
 
       // handle wraps of direct-subname-of-registrar-managed-names
       if (registration && !isFullyExpired && registration.type === "BaseRegistrar") {
-        const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+        const { node: managedNode } = getManagedName(getThisAccountId(context, event));
 
         // Invariant: Emitted name is a direct subname of the Managed Name
         if (!isDirectSubnameOfManagedName(managedNode, name, node)) {
           throw new Error(
-            `Invariant(NameWrapper:NameWrapped): An unexpired BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's Managed Name — wtf?`,
+            `Invariant(NameWrapper:NameWrapped): An unexpired BaseRegistrar Registration was found, but the name in question is NOT a direct subname of this NameWrapper's BaseRegistrar's Managed Name`,
           );
         }
 

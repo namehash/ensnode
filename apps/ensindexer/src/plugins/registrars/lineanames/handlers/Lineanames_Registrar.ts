@@ -1,5 +1,4 @@
 import { ponder } from "ponder:registry";
-import { namehash } from "viem/ens";
 
 import {
   type BlockRef,
@@ -31,7 +30,7 @@ export default function () {
       const id = event.id;
 
       const subregistryId = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(subregistryId));
+      const { node: managedNode } = getManagedName(subregistryId);
       const subregistry = { subregistryId, node: managedNode } satisfies Subregistry;
 
       const labelHash = tokenIdToLabelHash(event.args.id);
@@ -64,7 +63,7 @@ export default function () {
       const id = event.id;
 
       const subregistryId = getThisAccountId(context, event);
-      const managedNode = namehash(getManagedName(subregistryId));
+      const { node: managedNode } = getManagedName(subregistryId);
 
       const labelHash = tokenIdToLabelHash(event.args.id);
       const node = makeSubdomainNode(labelHash, managedNode);

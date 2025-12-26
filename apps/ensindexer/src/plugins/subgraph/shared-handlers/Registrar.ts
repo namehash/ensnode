@@ -2,7 +2,7 @@ import config from "@/config";
 
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
-import { type Address, namehash } from "viem";
+import type { Address } from "viem";
 
 import {
   encodeLabelHash,
@@ -58,7 +58,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         literalLabelToInterpretedLabel(label);
 
-    const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+    const { node: managedNode } = getManagedName(getThisAccountId(context, event));
     const node = makeSubdomainNode(labelHash, managedNode);
     const domain = await context.db.find(schema.subgraph_domain, { id: node });
 
@@ -99,8 +99,9 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
 
       await upsertAccount(context, owner);
 
-      const managedName = getManagedName(getThisAccountId(context, event));
-      const managedNode = namehash(managedName);
+      const { name: managedName, node: managedNode } = getManagedName(
+        getThisAccountId(context, event),
+      );
       const node = makeSubdomainNode(labelHash, managedNode);
 
       // NOTE(preminted-names): The mainnet ENS Registrar(s) _always_ register a node with the ENS
@@ -256,7 +257,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
     }) {
       const { labelHash, expires } = event.args;
 
-      const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+      const { node: managedNode } = getManagedName(getThisAccountId(context, event));
       const node = makeSubdomainNode(labelHash, managedNode);
       const id = makeRegistrationId(labelHash, node);
 
@@ -288,7 +289,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
       // NOTE(subgraph-compat): despite the short-circuits below, upsertAccount must always be run
       await upsertAccount(context, to);
 
-      const managedNode = namehash(getManagedName(getThisAccountId(context, event)));
+      const { node: managedNode } = getManagedName(getThisAccountId(context, event));
       const node = makeSubdomainNode(labelHash, managedNode);
       const id = makeRegistrationId(labelHash, node);
 
