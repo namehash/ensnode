@@ -1,24 +1,38 @@
 # Light PR
 
-> Use this template for **non-substantial** changes:
-> mechanical updates, refactors with no behavior change, dependency bumps,
-> formatting, comments, or clearly low-risk fixes.
+> Use this template for small, low-risk changes:
+> mechanical refactors, formatting, comments, dependency bumps,
+> or fixes that are obvious and contained.
 >
-> Reviewers may request the Substantial PR template if this PR is reclassified.
+> If this PR changes behavior, affects multiple consumers, or would hurt if it broke,
+> it's not a Light PR - use the "Substantial PR" template instead.
 
 ---
 
 ## Summary
 
-- Briefly describe what changed (1-3 bullets).
+- What changed (1-3 bullets, no essays).
+
+---
 
 ## Why
 
-- Why this change is needed.
+- Why this change exists.
+
+---
 
 ## Testing
 
-- How this was tested (or why testing is not applicable).
+- How this was tested.
+- If you didn't test it, say why.
+
+---
+
+## Notes for Reviewer (Optional)
+
+- Anything non-obvious or worth a heads-up.
+
+---
 
 ## Checklist
 
