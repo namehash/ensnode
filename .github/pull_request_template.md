@@ -2,7 +2,7 @@
 
 Use the appropriate template for this PR:
 
-- [**Light PR**](https://github.com/namehash/ensnode/compare/main...HEAD?template=light.md)
+- [**Light PR**](https://github.com/namehash/ensnode/compare/main...HEAD?template=lite.md)
   For small, low-risk changes (mechanical refactors, formatting, dependency bumps).
 
 - [**Substantial PR**](https://github.com/namehash/ensnode/compare/main...HEAD?template=substantial.md)
