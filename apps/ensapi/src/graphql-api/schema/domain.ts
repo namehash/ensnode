@@ -22,9 +22,9 @@ import { db } from "@/lib/db";
 
 const isENSv1Domain = (domain: Domain): domain is ENSv1Domain => "parentId" in domain;
 
-//////////////////////
-// Refs
-//////////////////////
+/////////////////////////////
+// ENSv1Domain & ENSv2Domain
+/////////////////////////////
 
 export const ENSv1DomainRef = builder.loadableObjectRef("ENSv1Domain", {
   load: (ids: ENSv1DomainId[]) =>
@@ -101,13 +101,7 @@ DomainInterfaceRef.implement({
     ////////////////////
     // Domain.canonical
     ////////////////////
-    // canonical: t.loadable({
-    //   description: "TODO",
-    //   type: "Name",
-    //   nullable: true,
-    //   load: (ids: DomainId[], context) => context.loadPosts(ids),
-    //   resolve: (user, args) => user.lastPostID,
-    // }),
+    // TODO: pending ENS team canonicalName implementation
     // canonical: t.field({
     //   description: "TODO",
     //   type: "Name",
@@ -134,6 +128,7 @@ DomainInterfaceRef.implement({
     //////////////////
     // Domain.parents
     //////////////////
+    // TODO: pending ENS team canonicalName implementation
     // parents: t.field({
     //   description: "TODO",
     //   type: [DomainInterfaceRef],
@@ -154,6 +149,7 @@ DomainInterfaceRef.implement({
     //////////////////
     // Domain.aliases
     //////////////////
+    // TODO: pending ENS team canonicalName implementation, maybe impossible to implement
     // aliases: t.field({
     //   description: "TODO",
     //   type: ["Name"],

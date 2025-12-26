@@ -242,9 +242,9 @@ ThreeDNSRegistrationRef.implement({
   }),
 });
 
-///////////////////////////
+/////////////////////////////
 // ENSv2RegistryRegistration
-///////////////////////////
+/////////////////////////////
 export const ENSv2RegistryRegistrationRef = builder.objectRef<ENSv2RegistryRegistration>(
   "ENSv2RegistryRegistration",
 );

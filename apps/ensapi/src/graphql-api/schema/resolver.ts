@@ -8,10 +8,12 @@ import {
   type RequiredAndNotNull,
   type ResolverId,
   type ResolverRecordsId,
+  ROOT_RESOURCE,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
@@ -145,6 +147,15 @@ ResolverRef.implement({
         };
       },
     }),
+
+    ////////////////////////
+    // Resolver.permissions
+    ////////////////////////
+    permissions: t.field({
+      description: "TODO",
+      type: PermissionsRef,
+      resolve: ({ chainId, address }) => makePermissionsId({ chainId, address }),
+    }),
   }),
 });
 
@@ -160,14 +171,23 @@ DedicatedResolverMetadataRef.implement({
     ///////////////////////////
     // DedicatedResolver.owner
     ///////////////////////////
-    // TODO: lookup via PermissionsUser, but isn't this technically an [AccountRef] type?
-    // owner: t.field({
-    //   description: "TODO",
-    //   type: AccountRef,
-    //   nullable: true,
-    //   // TODO: resolve via EAC
-    //   resolve: async (parent) => {},
-    // }),
+    owner: t.field({
+      description: "TODO",
+      type: AccountRef,
+      nullable: true,
+      resolve: async (parent) => {
+        const permissionsUser = await db.query.permissionsUser.findFirst({
+          where: (t, { eq, and }) =>
+            and(
+              eq(t.chainId, parent.chainId),
+              eq(t.address, parent.address),
+              eq(t.resource, ROOT_RESOURCE),
+            ),
+        });
+
+        return permissionsUser?.user;
+      },
+    }),
 
     /////////////////////////////////
     // DedicatedResolver.permissions
