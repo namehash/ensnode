@@ -1,11 +1,11 @@
-# Light PR
+# Lite PR
 
 > Use this template for small, low-risk changes:
 > mechanical refactors, formatting, comments, dependency bumps,
 > or fixes that are obvious and contained.
 >
 > If this PR changes behavior, affects multiple consumers, or would hurt if it broke,
-> it's not a Light PR - use the "Substantial PR" template instead.
+> it's not a Lite PR - use the "Substantial PR" template instead.
 
 ---
 
