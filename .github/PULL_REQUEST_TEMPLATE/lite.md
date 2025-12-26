@@ -5,7 +5,7 @@
 > or fixes that are obvious and contained.
 >
 > If this PR changes behavior, affects multiple consumers, or would hurt if it broke,
-> it's not a Lite PR - use the "Substantial PR" template instead.
+> it's not a "Lite PR" - use the "Substantial PR" template instead.
 
 ---
 
