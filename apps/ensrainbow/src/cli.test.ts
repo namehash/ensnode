@@ -4,7 +4,8 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DEFAULT_PORT, getEnvPort } from "@/lib/env";
+import { ENSRAINBOW_DEFAULT_PORT } from "@/config/defaults";
+import { getEnvPort } from "@/lib/env";
 
 import { createCLI, validatePortConfiguration } from "./cli";
 
@@ -38,8 +39,8 @@ describe("CLI", () => {
   });
 
   describe("getEnvPort", () => {
-    it("should return DEFAULT_PORT when PORT is not set", () => {
-      expect(getEnvPort()).toBe(DEFAULT_PORT);
+    it("should return ENSRAINBOW_DEFAULT_PORT when PORT is not set", () => {
+      expect(getEnvPort()).toBe(ENSRAINBOW_DEFAULT_PORT);
     });
 
     it("should return port from environment variable", () => {
@@ -50,14 +51,20 @@ describe("CLI", () => {
 
     it("should throw error for invalid port number", () => {
       process.env.PORT = "invalid";
-      expect(() => getEnvPort()).toThrow(
-        'Invalid PORT value "invalid": must be a non-negative integer',
-      );
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as never);
+      expect(() => getEnvPort()).toThrow();
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
     it("should throw error for negative port number", () => {
       process.env.PORT = "-1";
-      expect(() => getEnvPort()).toThrow('Invalid PORT value "-1": must be a non-negative integer');
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as never);
+      expect(() => getEnvPort()).toThrow();
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
 
