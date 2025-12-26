@@ -10,7 +10,7 @@
 
 ## Summary
 
-- Briefly describe what changed (1–3 bullets).
+- Briefly describe what changed (1-3 bullets).
 
 ## Why
 

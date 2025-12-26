@@ -1,170 +1,204 @@
 # Substantial PR
 
-> This template exists to reduce reviewer load and encourage engineering best practices. If it feels heavy, the PR is likely too large or insufficiently prepared.
+> Use this template for PRs that change behavior, introduce new concepts, or would hurt if they broke.
 >
-> Use this template for PRs that change behavior, affect multiple consumers, introduce new concepts, or would hurt if they broke.
+> This template exists to keep reviewers from reverse-engineering context, risk, and intent from the diff.
 >
-> Reviewers may block or close Substantial PRs with vague or incomplete responses without further justification.
+> If filling this out feels heavy, that's usually a sign the PR is too large or still half-baked.
 >
-> Reviewers may request that this PR be split if it is difficult to reason about as a single unit.
+> Reviewers may block, close, or ask for this PR to be split if it's hard to reason about as a single unit.
 
-## Requested Reviewer Focus
+---
+
+## Reviewer Focus (Read This First)
 
 <details>
-<summary>Requested Reviewer Focus</summary>
+<summary>What reviewers should focus on</summary>
 
-- Where should reviewers spend the majority of their attention?
-- What parts are most subtle, risky, or non-obvious?
-- What feedback are you explicitly asking for?
-- If you list "everything," explain why targeted review is not possible.
-- Limit focus areas to 1–3 items.
-- Avoid restating the change summary here.
+Where should reviewers spend most of their time?
+
+Call out:
+- The risky or non-obvious parts
+- Areas where you're least confident
+- The kind of feedback you actually want
+
+If your answer is "everything," explain why targeted review isn't possible.
+
+Limit this to 1-3 areas.
 
 </details>
-<br>
+
+---
 
 ## Problem & Motivation
 
 <details>
-<summary>Problem & Motivation</summary>
+<summary>Why this exists</summary>
 
-- Why does this change exist?
-- Why is this change being made now instead of earlier or later?
-- What breaks or is suboptimal without this PR?
-- Link to related issues or discussions.
-- Keep it clean and concise (aim for ≤5 bullets).
+Explain:
+- What problem this PR is solving
+- What's broken, fragile, or getting worse without it
+- Why this change is happening *now*
+- Links to issues, incidents, or prior discussion
+
+Keep this tight. Bullets are fine.
 
 </details>
-<br>
+
+---
 
 ## What Changed (Concrete)
 
 <details>
-<summary>What Changed (Concrete)</summary>
+<summary>What actually changed</summary>
 
-- List the concrete behavioral or structural changes made by this PR.
-- Keep it clean and concise.
-- Prefer numbered bullets over prose.
-- If this list exceeds ~5 items, consider splitting the PR.
-- Each bullet should correspond to a distinct diff cluster.
+List the concrete behavioral or structural changes in this PR.
+
+This should be a factual inventory, not a narrative.
+Prefer numbered bullets.
+
+If this list starts getting long, that's a signal the PR may need splitting.
 
 </details>
-<br>
+
+---
 
 ## Design & Planning
 
 <details>
-<summary>Design & Planning</summary>
+<summary>How this approach was chosen</summary>
 
-- Link to docs or design assets that existed *before* or *during* implementation.
-- If no design or planning was required, explain why (e.g. mechanical refactor, prior approved pattern).
-- List the most viable alternative(s) you considered and why they were rejected.
-- If planning was lightweight, say so explicitly.
+- Link any design docs or notes that existed before or during implementation
+- If this didn't warrant upfront design, say why
+- Mention the most realistic alternatives you considered and why you didn't take them
+- If planning was lightweight, be explicit about that
 
 </details>
-<br>
 
 - Planning artifacts:
-- Plans reviewed & approved by (only if formal review occurred):
+- Reviewed / approved by (only if there was a real review):
+
+---
 
 ## Self-Review
 
 <details>
-<summary>Self-Review</summary>
+<summary>What you caught yourself</summary>
 
-- Describe changes made **after** reviewing your own diff end-to-end.
+Describe what changed *after* you reviewed your own diff end-to-end.
+
+This is not optional.
 
 </details>
-<br>
 
 - Bugs caught:
-- Logic simplifications:
-- Naming / terminology improvements:
-- Unnecessary code removed (or explain why none was removed):
+- Logic simplified:
+- Naming / terminology improved:
+- Dead or unnecessary code removed (or why none was):
+
+---
 
 ## Cross-Codebase Alignment
 
 <details>
-<summary>Cross-Codebase Alignment</summary>
+<summary>Related code you checked</summary>
 
-- Cite the specific terms you searched for to identify related changes.
-- Identify files, packages, or docs reviewed but not modified.
-- Call out areas intentionally left unchanged and why.
-- Focus on directly related domains and terminology, don't "boil the ocean" and unnecessarily expand scope.
+Show that you looked beyond just the files in this PR.
+
+- Terms you searched for to find related code or docs
+- Files or packages you reviewed but intentionally didn't change
+- Areas you left alone on purpose (and why)
+
+Focus on directly related domains. Don't boil the ocean.
 
 </details>
-<br>
 
-- Cite the most relevant search terms (not exhaustive, usually <=5):
-- Files reviewed but unchanged:
-- Deferred alignments (with rationale):
+- Search terms used:
+- Reviewed but unchanged:
+- Deferred alignment (with rationale):
+
+---
 
 ## Downstream & Consumer Impact
 
 <details>
-<summary>Downstream & Consumer Impact</summary>
+<summary>Who this affects and how</summary>
 
-- How does this PR affect readers, callers, operators, or future maintainers?
-- Cite specific terminology, narratives, or mental models that could increase cognitive load.
-- Identify concrete changes made to reduce that load - Prefer pointing to diffs over describing intent.
-- Reference specific files or diffs where applicable.
+Explain how this change impacts:
+- Callers
+- Readers
+- Operators
+- Future maintainers
+
+Call out:
+- Terminology or concepts that might confuse someone new
+- What you changed to reduce that confusion
+
+Point to actual diffs where possible.
 
 </details>
-<br>
 
-- Public APIs / interfaces affected:
-- Docs updated (links):
-- Naming decisions worth noting:
+- Public APIs affected:
+- Docs updated:
+- Naming decisions worth calling out:
+
+---
 
 ## Testing Evidence
 
 <details>
-<summary>Testing Evidence</summary>
+<summary>How this was validated</summary>
 
-- How was this tested locally and/or in CI?
-- What important behavior is **not** tested and why?
-- If this PR is wrong, what breaks first?
+Explain:
+- How this was tested locally and/or in CI
+- What important behavior is *not* covered by tests
+- If this is wrong, what breaks first
 
 </details>
-<br>
 
 - Testing performed:
 - Known gaps:
-- What reviewers must reason about manually (and why):
+- What reviewers have to reason about manually (and why):
+
+---
 
 ## Scope Reductions
 
 <details>
-<summary>Scope Reductions</summary>
+<summary>What you intentionally didn't do</summary>
 
-- What opportunities for future improvement were identified during the creation of this PR but are selected for separate future follow-up to avoid undesirable scope growth?
-- Link to follow up issues.
+List follow-ups you identified but explicitly deferred to keep this PR reviewable.
+
+Link issues where applicable and explain the tradeoffs.
 
 </details>
-<br>
 
-- Follow up issues:
-- Why were these deferred instead of included (tradeoffs considered)?
+- Follow-ups:
+- Why they were deferred:
+
+---
 
 ## Risk Analysis
 
 <details>
-<summary>Risk Analysis</summary>
+<summary>How this could go wrong</summary>
 
-- What assumptions does this PR make?
-- Where is this most likely to fail?
-- What is the blast radius if it does?
+Call out:
+- Assumptions this PR relies on
+- Likely failure modes
+- Blast radius if it breaks
 
 </details>
-<br>
 
 - Risk areas:
-- Mitigations:
-- Named primary owner if this breaks:
+- Mitigations or rollback options:
+- Named owner if this causes problems:
+
+---
 
 ## Pre-Review Checklist (Blocking)
 
 - [ ] I reviewed every line of this diff and understand it end-to-end
-- [ ] I am prepared to defend this PR line-by-line in review
-- [ ] I would be comfortable being the on-call owner for this change
+- [ ] I'm prepared to defend this PR line-by-line in review
+- [ ] I'm comfortable being the on-call owner for this change
 - [ ] Relevant changesets are included (or explicitly not required)
