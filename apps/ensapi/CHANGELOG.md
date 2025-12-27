@@ -1,5 +1,24 @@
 # ensapi
 
+## 1.4.0
+
+### Minor Changes
+
+- [#1412](https://github.com/namehash/ensnode/pull/1412) [`fae127e`](https://github.com/namehash/ensnode/commit/fae127ed94a62a212d406daed9e86a0c51eb4f37) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `GET /amirealtime` endpoint allowing for easy realtime indexing distance verification.
+
+- [#1411](https://github.com/namehash/ensnode/pull/1411) [`ec96ff9`](https://github.com/namehash/ensnode/commit/ec96ff912c010d4623e586dc2b60a22f122a128d) Thanks [@shrugs](https://github.com/shrugs)! - Disabled viem's built-in Transport Ranking feature in order to minimize net_listening RPC credit ussage.
+
+- [#1418](https://github.com/namehash/ensnode/pull/1418) [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda) Thanks [@Goader](https://github.com/Goader)! - Added revenue contribution tracking to referrer metrics, calculating total revenue contributed to the ENS DAO from referrals. Added `totalRevenueContribution` to individual referrer metrics and `grandTotalRevenueContribution` to aggregated metrics.
+
+### Patch Changes
+
+- Updated dependencies [[`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda)]:
+  - @namehash/ens-referrals@1.4.0
+  - @ensnode/ensnode-sdk@1.4.0
+  - @ensnode/datasources@1.4.0
+  - @ensnode/ensnode-schema@1.4.0
+  - @ensnode/ponder-subgraph@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes
