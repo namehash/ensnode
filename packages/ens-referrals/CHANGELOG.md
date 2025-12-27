@@ -1,5 +1,11 @@
 # @namehash/ens-referrals
 
+## 1.4.0
+
+### Minor Changes
+
+- [#1418](https://github.com/namehash/ensnode/pull/1418) [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda) Thanks [@Goader](https://github.com/Goader)! - Added revenue contribution tracking to referrer metrics, calculating total revenue contributed to the ENS DAO from referrals. Added `totalRevenueContribution` to individual referrer metrics and `grandTotalRevenueContribution` to aggregated metrics.
+
 ## 1.3.0
 
 ### Minor Changes
