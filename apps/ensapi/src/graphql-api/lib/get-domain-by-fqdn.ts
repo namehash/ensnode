@@ -10,7 +10,7 @@ import {
   type DomainId,
   type ENSv2DomainId,
   ETH_NODE,
-  getRootRegistryId,
+  getENSv2RootRegistryId,
   type InterpretedName,
   interpretedLabelsToInterpretedName,
   interpretedNameToInterpretedLabels,
@@ -33,7 +33,7 @@ const namechain = getDatasource(config.namespace, DatasourceNames.Namechain);
 
 const ETH_LABELHASH = labelhashLiteralLabel("eth" as LiteralLabel);
 
-const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
+const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
 
 const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId({
   chainId: ensroot.chain.id,

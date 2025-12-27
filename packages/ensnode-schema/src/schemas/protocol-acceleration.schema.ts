@@ -61,10 +61,8 @@ export const domainResolverRelation = onchainTable(
     address: t.hex().notNull().$type<Address>(),
     domainId: t.hex().notNull().$type<DomainId>(),
 
-    /**
-     * The Domain's assigned Resolver address within the Registry identified by (chainId, address).
-     */
-    resolverId: t.hex().notNull().$type<ResolverId>(),
+    // The Domain's assigned Resolver's address (NOTE: always scoped to chainId)
+    resolver: t.hex().notNull().$type<Address>(),
   }),
   (t) => ({
     pk: primaryKey({ columns: [t.chainId, t.address, t.domainId] }),
@@ -73,8 +71,8 @@ export const domainResolverRelation = onchainTable(
 
 export const domainResolverRelation_relations = relations(domainResolverRelation, ({ one }) => ({
   resolver: one(resolver, {
-    fields: [domainResolverRelation.resolverId],
-    references: [resolver.id],
+    fields: [domainResolverRelation.chainId, domainResolverRelation.resolver],
+    references: [resolver.chainId, resolver.address],
   }),
 }));
 

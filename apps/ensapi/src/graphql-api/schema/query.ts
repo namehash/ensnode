@@ -5,7 +5,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import {
   type ENSv1DomainId,
   type ENSv2DomainId,
-  getRootRegistryId,
+  getENSv2RootRegistryId,
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
@@ -203,7 +203,7 @@ builder.queryType({
       description: "TODO",
       type: RegistryRef,
       nullable: false,
-      resolve: () => getRootRegistryId(config.namespace),
+      resolve: () => getENSv2RootRegistryId(config.namespace),
     }),
   }),
 });

@@ -17,7 +17,7 @@ import {
   type AccountId,
   type ENSv1DomainId,
   getNameHierarchy,
-  isRootRegistry,
+  isENSv1Registry,
   type Name,
   type Node,
   type NormalizedName,
@@ -46,8 +46,11 @@ const tracer = trace.getTracer("find-resolver");
 /**
  * Identifies `name`'s active resolver in `registry`.
  *
- * Note that any `registry` that is not the ENS Root Chain's Registry is a Shadow Registry like
- * Basenames' or Lineanames' (shadow)Registry contracts.
+ * Registry can be:
+ * - ENSv1 Root Chain Registry
+ * - ENSv1 Basenames (shadow) Registry
+ * - ENSv1 Lineanames (shadow) Registry
+ * - TODO: any ENSv2 Registry
  */
 export async function findResolver({
   registry,
@@ -74,7 +77,7 @@ export async function findResolver({
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isRootRegistry(config.namespace, registry)) {
+  if (!isENSv1Registry(config.namespace, registry)) {
     throw new Error(
       `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
@@ -204,30 +207,30 @@ async function findResolverWithIndex(
                 eq(t.address, registry.address), // exclusively for the requested registry
                 inArray(t.domainId, domainIds), // find Relations for the following Domains
               ),
-            columns: { domainId: true, address: true },
+            columns: { domainId: true, resolver: true },
           });
 
+          // 3.1 sort into the same order as `domainIds`, db results are not guaranteed to match `inArray` order
+          records.sort(sortByArrayOrder(domainIds, (drr) => drr.domainId));
+
           // cast into our semantic types
-          return records as { domainId: ENSv1DomainId; address: Address }[];
+          return records as { domainId: ENSv1DomainId; resolver: Address }[];
         },
       );
 
-      // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
-      domainResolverRelations.sort(sortByArrayOrder(domainIds, (nrr) => nrr.domainId));
-
       // 4. iterate up the hierarchy and return the first valid resolver
-      for (const { domainId, address } of domainResolverRelations) {
+      for (const { domainId, resolver } of domainResolverRelations) {
         // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
         // encodes a zeroAddress resolver as the _absence_ of a Node-Resolver relation, so there is
         // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
         // we include this invariant here to encode that expectation explicitly.
-        if (isAddressEqual(zeroAddress, address)) {
+        if (isAddressEqual(zeroAddress, resolver)) {
           throw new Error(
-            `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for Domain ${domainId}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
+            `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for Domain ${domainId}, which should be impossible: check ProtocolAcceleration Domain-Resolver Relation indexing logic.`,
           );
         }
 
-        // map the relation's `node` back to its name in `names`
+        // map the relation's `domainId` back to its name in `names`
         const indexInHierarchy = domainIds.indexOf(domainId);
         const activeName = names[indexInHierarchy];
 
@@ -240,7 +243,7 @@ async function findResolverWithIndex(
 
         return {
           activeName,
-          activeResolver: address,
+          activeResolver: resolver,
           // this resolver must have wildcard support if it was not for the first node in our hierarchy
           requiresWildcardSupport: indexInHierarchy > 0,
         };

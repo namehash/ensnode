@@ -10,7 +10,7 @@ import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
-  getRootRegistry,
+  getENSv1Registry,
   isNormalizedName,
   isSelectionEmpty,
   makeResolverId,
@@ -92,7 +92,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
   return _resolveForward(name, selection, {
     ...options,
-    registry: getRootRegistry(config.namespace),
+    registry: getENSv1Registry(config.namespace),
   });
 }
 
