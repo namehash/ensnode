@@ -6,8 +6,6 @@ import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
 
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
-
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
@@ -90,9 +88,7 @@ const server = serve(
     port: config.port,
   },
   async (info) => {
-    logger.info(
-      `ENSApi listening on port ${info.port} with config:\n${prettyPrintJson(redactEnsApiConfig(config))}`,
-    );
+    logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status cache
     await app.request("/health");

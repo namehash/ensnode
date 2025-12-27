@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SWRCache } from "./swr-cache";
 
-describe("staleWhileRevalidate", () => {
+describe("SWRCache", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2024, 0, 1) });
   });
 
   afterEach(() => {

@@ -7,26 +7,31 @@ import * as ponder from "ponder";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
-  createPlugin,
-  getDatasourceAsFullyDefinedAtCompileTime,
-  namespaceContract,
-} from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
+  chainConfigForContract,
+  chainsConnectionConfigForDatasources,
+  getRequiredDatasources,
+} from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.Basenames;
 
+const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.Basenames];
+
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: [DatasourceNames.Basenames],
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
-    const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.Basenames,
-    );
+    const {
+      basenames: { chain, contracts },
+    } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     return ponder.createConfig({
-      chains: chainsConnectionConfig(config.rpcConfigs, chain.id),
+      chains: chainsConnectionConfigForDatasources(
+        config.namespace,
+        config.rpcConfigs,
+        REQUIRED_DATASOURCE_NAMES,
+      ),
       contracts: {
         [namespaceContract(pluginName, "Registry")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),

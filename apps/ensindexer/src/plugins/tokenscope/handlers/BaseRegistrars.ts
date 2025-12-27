@@ -45,7 +45,7 @@ export default function () {
         config.namespace,
         DatasourceNames.Basenames,
         "BaseRegistrar",
-        event.args.id,
+        event.args.tokenId,
       );
 
       const metadata: NFTTransferEventMetadata = {

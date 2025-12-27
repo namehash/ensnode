@@ -5,12 +5,8 @@ import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 import { getParentNameFQDN, type InterpretedName } from "../ens";
 import { type AccountId, accountIdEqual } from "../shared";
 import { getDatasourceContract, maybeGetDatasourceContract } from "../shared/datasource-contract";
-import {
-  type AssetId,
-  type NFTMintStatus,
-  type SerializedAssetId,
-  serializeAssetId,
-} from "./assets";
+import type { AssetId } from "../shared/types";
+import { type NFTMintStatus, type SerializedAssetId, serializeAssetId } from "./assets";
 
 /**
  * An enum representing the possible Name Token Ownership types.

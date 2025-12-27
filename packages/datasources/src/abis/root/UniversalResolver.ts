@@ -2,14 +2,14 @@ export const UniversalResolver = [
   {
     inputs: [
       {
-        internalType: "contract ENS",
-        name: "ens",
+        internalType: "contract IRegistry",
+        name: "root",
         type: "address",
       },
       {
-        internalType: "string[]",
-        name: "gateways",
-        type: "string[]",
+        internalType: "contract IGatewayProvider",
+        name: "batchGatewayProvider",
+        type: "address",
       },
     ],
     stateMutability: "nonpayable",
@@ -97,6 +97,22 @@ export const UniversalResolver = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "offset",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "length",
+        type: "uint256",
+      },
+    ],
+    name: "OffsetOutOfBoundsError",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
         internalType: "bytes",
         name: "errorData",
         type: "bytes",
@@ -160,38 +176,26 @@ export const UniversalResolver = [
     type: "error",
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "batchGateways",
+    inputs: [],
+    name: "ROOT_REGISTRY",
     outputs: [
       {
-        internalType: "string",
+        internalType: "contract IRegistry",
         name: "",
-        type: "string",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "batchGatewayProvider",
+    outputs: [
+      {
+        internalType: "contract IGatewayProvider",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -368,58 +372,44 @@ export const UniversalResolver = [
         type: "bytes",
       },
     ],
+    name: "findRegistries",
+    outputs: [
+      {
+        internalType: "contract IRegistry[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes",
+        name: "name",
+        type: "bytes",
+      },
+    ],
     name: "findResolver",
     outputs: [
       {
         internalType: "address",
-        name: "",
+        name: "resolver",
         type: "address",
       },
       {
         internalType: "bytes32",
-        name: "",
+        name: "node",
         type: "bytes32",
       },
       {
         internalType: "uint256",
-        name: "",
+        name: "offset",
         type: "uint256",
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "registry",
-    outputs: [
-      {
-        internalType: "contract ENS",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "renounceOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -518,63 +508,9 @@ export const UniversalResolver = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: "bytes",
-            name: "name",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "offset",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "node",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "resolver",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "extended",
-            type: "bool",
-          },
-        ],
-        internalType: "struct AbstractUniversalResolver.ResolverInfo",
-        name: "info",
-        type: "tuple",
-      },
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "target",
-            type: "address",
-          },
-          {
-            internalType: "bytes",
-            name: "call",
-            type: "bytes",
-          },
-          {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "flags",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct CCIPBatcher.Lookup[]",
-        name: "lookups",
-        type: "tuple[]",
+        internalType: "bytes",
+        name: "response",
+        type: "bytes",
       },
       {
         internalType: "bytes",
@@ -586,15 +522,51 @@ export const UniversalResolver = [
     outputs: [
       {
         internalType: "bytes",
-        name: "result",
+        name: "",
         type: "bytes",
       },
       {
         internalType: "address",
-        name: "resolver",
+        name: "",
         type: "address",
       },
     ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes",
+        name: "response",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "extraData",
+        type: "bytes",
+      },
+    ],
+    name: "resolveDirectCallback",
+    outputs: [],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes",
+        name: "response",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    name: "resolveDirectCallbackError",
+    outputs: [],
     stateMutability: "pure",
     type: "function",
   },
@@ -620,13 +592,47 @@ export const UniversalResolver = [
     outputs: [
       {
         internalType: "bytes",
-        name: "",
+        name: "result",
         type: "bytes",
       },
       {
         internalType: "address",
-        name: "",
+        name: "resolver",
         type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "resolver",
+        type: "address",
+      },
+      {
+        internalType: "bytes",
+        name: "name",
+        type: "bytes",
+      },
+      {
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
+      },
+      {
+        internalType: "string[]",
+        name: "gateways",
+        type: "string[]",
+      },
+    ],
+    name: "resolveWithResolver",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
       },
     ],
     stateMutability: "view",
@@ -669,63 +675,9 @@ export const UniversalResolver = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: "bytes",
-            name: "name",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "offset",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "node",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "resolver",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "extended",
-            type: "bool",
-          },
-        ],
-        internalType: "struct AbstractUniversalResolver.ResolverInfo",
-        name: "info",
-        type: "tuple",
-      },
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "target",
-            type: "address",
-          },
-          {
-            internalType: "bytes",
-            name: "call",
-            type: "bytes",
-          },
-          {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "flags",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct CCIPBatcher.Lookup[]",
-        name: "lookups",
-        type: "tuple[]",
+        internalType: "bytes",
+        name: "response",
+        type: "bytes",
       },
       {
         internalType: "bytes",
@@ -757,63 +709,9 @@ export const UniversalResolver = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: "bytes",
-            name: "name",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "offset",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes32",
-            name: "node",
-            type: "bytes32",
-          },
-          {
-            internalType: "address",
-            name: "resolver",
-            type: "address",
-          },
-          {
-            internalType: "bool",
-            name: "extended",
-            type: "bool",
-          },
-        ],
-        internalType: "struct AbstractUniversalResolver.ResolverInfo",
-        name: "infoRev",
-        type: "tuple",
-      },
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "target",
-            type: "address",
-          },
-          {
-            internalType: "bytes",
-            name: "call",
-            type: "bytes",
-          },
-          {
-            internalType: "bytes",
-            name: "data",
-            type: "bytes",
-          },
-          {
-            internalType: "uint256",
-            name: "flags",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct CCIPBatcher.Lookup[]",
-        name: "lookups",
-        type: "tuple[]",
+        internalType: "bytes",
+        name: "response",
+        type: "bytes",
       },
       {
         internalType: "bytes",
@@ -864,34 +762,21 @@ export const UniversalResolver = [
     outputs: [
       {
         internalType: "string",
-        name: "",
+        name: "primary",
         type: "string",
       },
       {
         internalType: "address",
-        name: "",
+        name: "resolver",
         type: "address",
       },
       {
         internalType: "address",
-        name: "",
+        name: "reverseResolver",
         type: "address",
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string[]",
-        name: "gateways",
-        type: "string[]",
-      },
-    ],
-    name: "setBatchGateways",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -911,19 +796,6 @@ export const UniversalResolver = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
 ] as const;

@@ -9,55 +9,36 @@ import * as ponder from "ponder";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
-  createPlugin,
-  getDatasourceAsFullyDefinedAtCompileTime,
-  namespaceContract,
-} from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
+  chainConfigForContract,
+  chainsConnectionConfig,
+  getRequiredDatasources,
+} from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.TokenScope;
 
+const REQUIRED_DATASOURCE_NAMES = [
+  DatasourceNames.Seaport,
+  DatasourceNames.ENSRoot,
+  DatasourceNames.Basenames,
+  DatasourceNames.Lineanames,
+  DatasourceNames.ThreeDNSOptimism,
+  DatasourceNames.ThreeDNSBase,
+];
+
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: [
-    DatasourceNames.Seaport,
-    DatasourceNames.ENSRoot,
-    DatasourceNames.Basenames,
-    DatasourceNames.Lineanames,
-    DatasourceNames.ThreeDNSOptimism,
-    DatasourceNames.ThreeDNSBase,
-  ],
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
-    const seaport = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.Seaport,
-    );
-
-    const ensroot = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-    );
-
-    const basenames = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.Basenames,
-    );
-
-    const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.Lineanames,
-    );
-
-    const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ThreeDNSOptimism,
-    );
-
-    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ThreeDNSBase,
-    );
+    const {
+      seaport, //
+      ensroot,
+      basenames,
+      lineanames,
+      threednsOptimism,
+      threednsBase,
+    } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     // Sanity Check: Seaport and ENSRoot are on the same chain
     if (seaport.chain.id !== ensroot.chain.id) {
@@ -65,7 +46,7 @@ export default createPlugin({
     }
 
     // Sanity Check: ThreeDNSBase and Basenames are on the same chain
-    if (threeDNSBase.chain.id !== basenames.chain.id) {
+    if (threednsBase.chain.id !== basenames.chain.id) {
       throw new Error(
         "ThreeDNSBase and Basenames datasources are expected to be on the same chain",
       );
@@ -77,8 +58,8 @@ export default createPlugin({
         ...chainsConnectionConfig(config.rpcConfigs, ensroot.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, basenames.chain.id),
         ...chainsConnectionConfig(config.rpcConfigs, lineanames.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, threeDNSOptimism.chain.id),
-        ...chainsConnectionConfig(config.rpcConfigs, threeDNSBase.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, threednsOptimism.chain.id),
+        ...chainsConnectionConfig(config.rpcConfigs, threednsBase.chain.id),
       },
       contracts: {
         [namespaceContract(pluginName, "Seaport")]: {
@@ -148,17 +129,17 @@ export default createPlugin({
           chain: {
             ...chainConfigForContract(
               config.globalBlockrange,
-              threeDNSOptimism.chain.id,
-              threeDNSOptimism.contracts.ThreeDNSToken,
+              threednsOptimism.chain.id,
+              threednsOptimism.contracts.ThreeDNSToken,
             ),
             ...chainConfigForContract(
               config.globalBlockrange,
-              threeDNSBase.chain.id,
-              threeDNSBase.contracts.ThreeDNSToken,
+              threednsBase.chain.id,
+              threednsBase.contracts.ThreeDNSToken,
             ),
           },
           // NOTE: abi is identical in a multi-chain ponder config, just use Optimism's here
-          abi: threeDNSOptimism.contracts.ThreeDNSToken.abi,
+          abi: threednsOptimism.contracts.ThreeDNSToken.abi,
         },
       },
     });

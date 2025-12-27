@@ -32,7 +32,7 @@ export async function getENSIP19ReverseNameRecordFromIndex(
           and(
             // address = address
             eq(t.address, address),
-            // AND coinType IN [_coinType, DEFAULT_EVM_COIN_TYPE]
+            // AND coinType IN [coinType, DEFAULT_EVM_COIN_TYPE]
             inArray(t.coinType, [_coinType, DEFAULT_EVM_COIN_TYPE_BIGINT]),
           ),
         columns: { coinType: true, value: true },
@@ -40,7 +40,6 @@ export async function getENSIP19ReverseNameRecordFromIndex(
   );
 
   const coinTypeName = records.find((pn) => pn.coinType === _coinType)?.value ?? null;
-
   const defaultName =
     records.find((pn) => pn.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT)?.value ?? null;
 

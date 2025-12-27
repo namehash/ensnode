@@ -8,34 +8,43 @@ import * as ponder from "ponder";
 import { DatasourceNames } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 
+import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
-  createPlugin,
-  getDatasourceAsFullyDefinedAtCompileTime,
-  namespaceContract,
-} from "@/lib/plugin-helpers";
-import { chainConfigForContract, chainsConnectionConfig } from "@/lib/ponder-helpers";
+  chainConfigForContract,
+  chainsConnectionConfigForDatasources,
+  getRequiredDatasources,
+} from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.Subgraph;
 
+const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.ENSRoot];
+
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: [DatasourceNames.ENSRoot],
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
-    const { chain, contracts } = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ENSRoot,
-    );
+    const {
+      ensroot: { chain, contracts },
+    } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     return ponder.createConfig({
-      chains: chainsConnectionConfig(config.rpcConfigs, chain.id),
+      chains: chainsConnectionConfigForDatasources(
+        config.namespace,
+        config.rpcConfigs,
+        REQUIRED_DATASOURCE_NAMES,
+      ),
       contracts: {
-        [namespaceContract(pluginName, "RegistryOld")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.RegistryOld),
-          abi: contracts.Registry.abi,
+        [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
+          chain: chainConfigForContract(
+            config.globalBlockrange,
+            chain.id,
+            contracts.ENSv1RegistryOld,
+          ),
+          abi: contracts.ENSv1RegistryOld.abi,
         },
-        [namespaceContract(pluginName, "Registry")]: {
-          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.Registry),
-          abi: contracts.Registry.abi,
+        [namespaceContract(pluginName, "ENSv1Registry")]: {
+          chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.ENSv1Registry),
+          abi: contracts.ENSv1Registry.abi,
         },
         [namespaceContract(pluginName, "BaseRegistrar")]: {
           chain: chainConfigForContract(config.globalBlockrange, chain.id, contracts.BaseRegistrar),

@@ -17,8 +17,8 @@ import type { Abi, Address, Chain } from "viem";
  * - Etc..
  *
  * Each ENS namespace is logically independent of & isolated from the others, and not exclusively
- * correlated with a specific L1 chain. For example, the Sepolia and Holesky testnet ENS namepaces
- * are independent of the canonical ENS namespace on mainnet, and there could be an additional
+ * correlated with a specific L1 chain. For example, the Sepolia testnet ENS namepace
+ * is independent of the canonical ENS namespace on mainnet, and there could be an additional
  * deployment of the ENS protocol to mainnet, configured with different Datasources, resulting in a
  * logically isolated set of ENS names.
  *
@@ -29,7 +29,6 @@ import type { Abi, Address, Chain } from "viem";
 export const ENSNamespaceIds = {
   Mainnet: "mainnet",
   Sepolia: "sepolia",
-  Holesky: "holesky",
   EnsTestEnv: "ens-test-env",
 } as const;
 
@@ -56,14 +55,15 @@ export const DatasourceNames = {
   Basenames: "basenames",
   Lineanames: "lineanames",
   Seaport: "seaport",
-  ThreeDNSOptimism: "threedns-optimism",
-  ThreeDNSBase: "threedns-base",
-  ReverseResolverRoot: "reverse-resolver-root",
-  ReverseResolverBase: "reverse-resolver-base",
-  ReverseResolverLinea: "reverse-resolver-linea",
-  ReverseResolverOptimism: "reverse-resolver-optimism",
-  ReverseResolverArbitrum: "reverse-resolver-arbitrum",
-  ReverseResolverScroll: "reverse-resolver-scroll",
+  ThreeDNSOptimism: "threednsOptimism",
+  ThreeDNSBase: "threednsBase",
+  ReverseResolverRoot: "rrRoot",
+  ReverseResolverBase: "rrBase",
+  ReverseResolverLinea: "rrLinea",
+  ReverseResolverOptimism: "rrOptimism",
+  ReverseResolverArbitrum: "rrArbitrum",
+  ReverseResolverScroll: "rrScroll",
+  Namechain: "namechain",
 } as const;
 
 export type DatasourceName = (typeof DatasourceNames)[keyof typeof DatasourceNames];
@@ -78,42 +78,25 @@ export interface EventFilter {
 }
 
 /**
- * Defines the abi, address, filter, and startBlock of a contract relevant to a Datasource.
+ * Defines the abi, address, and startBlock of a contract relevant to a Datasource.
  *
  * A contract is located onchain either by
  *  1. a single Address in `address`,
  *  2. a set of Address[] in `address`,
- *  3. or a set of event signatures in `filter`.
+ *  3. or any contract that emits events as defined in `abi`.
  *
  * This type is intentionally a subset of Ponder's ContractConfig.
  *
  * @param abi - the ABI of the contract
  * @param address - (optional) Address of the contract or Address[] of each contract to be indexed
- * @param filter - (optional) array of event signatures to filter the log by
  * @param startBlock - block number the contract was deployed in
  */
-export type ContractConfig =
-  | {
-      readonly abi: Abi;
-      readonly address: Address;
-      readonly filter?: never;
-      readonly startBlock: number;
-      readonly endBlock?: number;
-    }
-  | {
-      readonly abi: Abi;
-      readonly address: Address[];
-      readonly filter?: never;
-      readonly startBlock: number;
-      readonly endBlock?: number;
-    }
-  | {
-      readonly abi: Abi;
-      readonly address?: never;
-      readonly filter: EventFilter[];
-      readonly startBlock: number;
-      readonly endBlock?: number;
-    };
+export type ContractConfig = {
+  readonly abi: Abi;
+  readonly address?: Address | Address[];
+  readonly startBlock: number;
+  readonly endBlock?: number;
+};
 
 /**
  * ENSNamespace encodes a set of known Datasources associated with the same ENS namespace.
@@ -124,3 +107,31 @@ export type ContractConfig =
 export type ENSNamespace = {
   [DatasourceNames.ENSRoot]: Datasource;
 } & Partial<Record<Exclude<DatasourceName, "ensroot">, Datasource>>;
+
+/**
+ * Helper type to merge multiple types into one.
+ */
+type MergedTypes<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void
+  ? R
+  : never;
+
+/**
+ * Preserves the chain union while merging contracts from multiple objects
+ */
+export type MergeNamespaces<T extends ENSNamespace> = T extends ENSNamespace
+  ? {
+      chain: T extends { chain: infer C } ? C : never;
+      contracts: T extends { [DatasourceNames.ENSRoot]: { contracts: infer C } }
+        ? MergedTypes<C>
+        : never;
+    }
+  : never;
+
+/**
+ * Helper type to extract the datasource type for a specific datasource name across all namespaces.
+ * Returns the union of all possible datasource types for that datasource name, or never if not found.
+ */
+export type ExtractDatasourceType<
+  Namespaces extends ENSNamespace,
+  D extends DatasourceName,
+> = Namespaces extends any ? (D extends keyof Namespaces ? Namespaces[D] : never) : never;
