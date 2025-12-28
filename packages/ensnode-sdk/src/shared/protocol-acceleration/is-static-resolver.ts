@@ -1,7 +1,5 @@
-import config from "@/config";
-
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, makeContractMatcher } from "@ensnode/ensnode-sdk";
+import { type AccountId, type ENSNamespaceId, makeContractMatcher } from "@ensnode/ensnode-sdk";
 
 /**
  * Returns whether `resolver` is an Static Resolver.
@@ -16,8 +14,8 @@ import { type AccountId, makeContractMatcher } from "@ensnode/ensnode-sdk";
  *
  * TODO: these relationships could be encoded in an ENSIP
  */
-export function isStaticResolver(resolver: AccountId): boolean {
-  const resolverEq = makeContractMatcher(config.namespace, resolver);
+export function isStaticResolver(namespace: ENSNamespaceId, resolver: AccountId): boolean {
+  const resolverEq = makeContractMatcher(namespace, resolver);
 
   return [
     // ENS Root Chain
@@ -36,8 +34,11 @@ export function isStaticResolver(resolver: AccountId): boolean {
  *
  * @see https://docs.ens.domains/ensip/19/#default-address
  */
-export function staticResolverImplementsAddressRecordDefaulting(resolver: AccountId): boolean {
-  const resolverEq = makeContractMatcher(config.namespace, resolver);
+export function staticResolverImplementsAddressRecordDefaulting(
+  namespace: ENSNamespaceId,
+  resolver: AccountId,
+): boolean {
+  const resolverEq = makeContractMatcher(namespace, resolver);
 
   return [
     // ENS Root Chain

@@ -1,7 +1,10 @@
-import config from "@/config";
-
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, getDatasourceContract, makeContractMatcher } from "@ensnode/ensnode-sdk";
+import {
+  type AccountId,
+  type ENSNamespaceId,
+  getDatasourceContract,
+  makeContractMatcher,
+} from "@ensnode/ensnode-sdk";
 
 /**
  * For a given `resolver`, if it is a known Bridged Resolver, return the
@@ -26,17 +29,20 @@ import { type AccountId, getDatasourceContract, makeContractMatcher } from "@ens
  *
  * TODO: these relationships could/should be encoded in an ENSIP
  */
-export function isBridgedResolver(resolver: AccountId): AccountId | null {
-  const resolverEq = makeContractMatcher(config.namespace, resolver);
+export function isBridgedResolver(
+  namespace: ENSNamespaceId,
+  resolver: AccountId,
+): AccountId | null {
+  const resolverEq = makeContractMatcher(namespace, resolver);
 
   // the ENSRoot's BasenamesL1Resolver bridges to the Basenames (shadow)Registry
   if (resolverEq(DatasourceNames.ENSRoot, "BasenamesL1Resolver")) {
-    return getDatasourceContract(config.namespace, DatasourceNames.Basenames, "Registry");
+    return getDatasourceContract(namespace, DatasourceNames.Basenames, "Registry");
   }
 
   // the ENSRoot's LineanamesL1Resolver bridges to the Lineanames (shadow)Registry
   if (resolverEq(DatasourceNames.ENSRoot, "LineanamesL1Resolver")) {
-    return getDatasourceContract(config.namespace, DatasourceNames.Lineanames, "Registry");
+    return getDatasourceContract(namespace, DatasourceNames.Lineanames, "Registry");
   }
 
   // TODO: ThreeDNS

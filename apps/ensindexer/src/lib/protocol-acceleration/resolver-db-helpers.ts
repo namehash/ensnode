@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
@@ -14,17 +16,15 @@ import {
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
+  isBridgedResolver,
   isDedicatedResolver,
   isExtendedResolver,
+  isKnownENSIP19ReverseResolver,
+  isStaticResolver,
+  staticResolverImplementsAddressRecordDefaulting,
 } from "@ensnode/ensnode-sdk/internal";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { isBridgedResolver } from "@/lib/protocol-acceleration/is-bridged-resolver";
-import { isKnownENSIP19ReverseResolver } from "@/lib/protocol-acceleration/is-ensip-19-reverse-resolver";
-import {
-  isStaticResolver,
-  staticResolverImplementsAddressRecordDefaulting,
-} from "@/lib/protocol-acceleration/is-static-resolver";
 
 /**
  * Infer the type of the ResolverRecord entity's composite key.
@@ -68,12 +68,12 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     publicClient: context.client,
   });
 
-  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(resolver);
-  const bridgesToRegistry = isBridgedResolver(resolver);
-  const isStatic = isStaticResolver(resolver);
+  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(config.namespace, resolver);
+  const bridgesToRegistry = isBridgedResolver(config.namespace, resolver);
+  const isStatic = isStaticResolver(config.namespace, resolver);
 
   const implementsAddressRecordDefaulting = isStatic
-    ? staticResolverImplementsAddressRecordDefaulting(resolver)
+    ? staticResolverImplementsAddressRecordDefaulting(config.namespace, resolver)
     : null;
 
   // ensure Resolver

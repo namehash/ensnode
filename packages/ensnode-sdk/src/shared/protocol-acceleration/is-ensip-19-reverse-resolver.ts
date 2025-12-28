@@ -1,7 +1,5 @@
-import config from "@/config";
-
 import { DatasourceNames } from "@ensnode/datasources";
-import { type AccountId, makeContractMatcher } from "@ensnode/ensnode-sdk";
+import { type AccountId, type ENSNamespaceId, makeContractMatcher } from "@ensnode/ensnode-sdk";
 
 /**
  * ENSIP-19 Reverse Resolvers (i.e. DefaultReverseResolver or ChainReverseResolver) simply:
@@ -10,8 +8,11 @@ import { type AccountId, makeContractMatcher } from "@ensnode/ensnode-sdk";
  *
  * We encode this behavior here, for the purposes of Protocol Acceleration.
  */
-export function isKnownENSIP19ReverseResolver(resolver: AccountId): boolean {
-  const resolverEq = makeContractMatcher(config.namespace, resolver);
+export function isKnownENSIP19ReverseResolver(
+  namespace: ENSNamespaceId,
+  resolver: AccountId,
+): boolean {
+  const resolverEq = makeContractMatcher(namespace, resolver);
 
   return [
     // DefaultReverseResolver (default.reverse)

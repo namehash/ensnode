@@ -20,9 +20,8 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
   node: Node;
   selection: SELECTION;
 }): Promise<IndexedResolverRecords | null> {
-  const resolverId = makeResolverId(_resolver);
   const resolver = await db.query.resolver.findFirst({
-    where: (t, { eq }) => eq(t.id, resolverId),
+    where: (t, { eq }) => eq(t.id, makeResolverId(_resolver)),
   });
 
   if (!resolver) return null;
@@ -44,7 +43,9 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
 
   // if the resolver implements address record defaulting, materialize all selected address records
   // that do not yet exist
-  if (resolver?.implementsAddressRecordDefaulting) {
+  // NOTE: accessing implementsAddressRecordDefaulting on Resolver is acceptable here because all
+  // Static Resolvers must have emitted events (and therefore be indexed)
+  if (resolver.implementsAddressRecordDefaulting) {
     if (selection.addresses) {
       const defaultRecord = resolverRecords.addressRecords.find(
         (record) => record.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT,
