@@ -99,14 +99,6 @@ export default function () {
    */
   ponder.on(
     namespaceContract(PluginName.ProtocolAcceleration, "Registry:NewResolver"),
-    async ({
-      context,
-      event,
-    }: {
-      context: Context;
-      event: EventWithArgs<{ node: Node; resolver: Address }>;
-    }) => {
-      await handleNewResolver({ context, event });
-    },
+    handleNewResolver,
   );
 }
