@@ -79,9 +79,7 @@ app.get(
         description: "Name tokens known",
         content: {
           "application/json": {
-            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
-              elo: 1,
-            }),
+            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true)),
           },
         },
       },
@@ -89,9 +87,7 @@ app.get(
         description: "Invalid input",
         content: {
           "application/json": {
-            schema: validationResolver(ErrorResponseSchema, {
-              elo: 2,
-            }),
+            schema: validationResolver(ErrorResponseSchema),
           },
         },
       },
@@ -99,19 +95,24 @@ app.get(
         description: "Name tokens not indexed",
         content: {
           "application/json": {
-            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
-              elo: 3,
-            }),
+            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true)),
+          },
+        },
+      },
+      500: {
+        description: "Internal server error",
+        content: {
+          "application/json": {
+            schema: validationResolver(ErrorResponseSchema),
           },
         },
       },
       503: {
-        description: "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
+        description:
+          "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
         content: {
           "application/json": {
-            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
-              elo: 4,
-            }),
+            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true)),
           },
         },
       },
