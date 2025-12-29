@@ -5,6 +5,7 @@ import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { openAPIRouteHandler } from "hono-openapi";
+import { html } from "hono/html";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
@@ -39,6 +40,24 @@ app.use(otel());
 // add ENSIndexer Indexing Status Middleware to all routes for convenience
 app.use(indexingStatusMiddleware);
 
+// host welcome page
+app.get("/", (c) =>
+  c.html(html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENSApi</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>You've reached the root of an ENSApi instance. You might be looking for the <a href="https://ensnode.io/docs/">ENSNode documentation</a>.</p>
+</body>
+</html>
+`),
+);
+
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
 
@@ -69,7 +88,7 @@ app.get(
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ ok: true });
+  return c.json({ message: "fallback ok" });
 });
 
 // log hono errors to console
