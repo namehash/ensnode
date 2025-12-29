@@ -106,7 +106,7 @@ app.get(
         },
       },
       503: {
-        description: "Service unavailable - indexing status not ready",
+        description: "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
         content: {
           "application/json": {
             schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true), {
