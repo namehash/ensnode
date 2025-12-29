@@ -135,7 +135,7 @@ app.get(
       );
     }
 
-    // Indexing Status has been resolved successfully.
+    // Check if Indexing Status resolution failed.
     if (c.var.indexingStatus instanceof Error) {
       return c.json(
         serializeNameTokensResponse({
@@ -202,7 +202,7 @@ app.get(
     const registeredNameTokens = await findRegisteredNameTokensForDomain(domainId, accurateAsOf);
 
     // Return 404 response with error code for Name Tokens Not Indexed when
-    // the no name tokens were found for the domain ID associated with
+    // no name tokens were found for the domain ID associated with
     // the requested name.
     if (!registeredNameTokens) {
       const errorMessageSubject =
