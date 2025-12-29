@@ -15,13 +15,13 @@
 import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
 import type { BlockNumber, Blockrange } from "./block-refs";
-import type { ChainName } from "./shared";
+import type { ChainIdString } from "./chains";
 
 /**
  * Ponder config datasource with a flat `chain` value.
  */
 export type PonderConfigDatasourceFlat = {
-  chain: ChainName;
+  chain: ChainIdString;
 } & AddressConfig &
   Blockrange;
 
@@ -29,7 +29,7 @@ export type PonderConfigDatasourceFlat = {
  * Ponder config datasource with a nested `chain` value.
  */
 export type PonderConfigDatasourceNested = {
-  chain: Record<ChainName, AddressConfig & Blockrange>;
+  chain: Record<ChainIdString, AddressConfig & Blockrange>;
 };
 
 /**
@@ -50,7 +50,7 @@ type PonderConfigDatasources = {
  * Chain config for each indexed chain.
  */
 type PonderConfigChains = {
-  [chainName: ChainName]: ChainConfig;
+  [chainId: ChainIdString]: ChainConfig;
 };
 
 /**
@@ -91,8 +91,10 @@ function isPonderDatasourceNested(
  * - some chains may include an endBlock,
  * - all present startBlock and endBlock values are valid {@link BlockNumber} values.
  */
-export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<ChainName, Blockrange> {
-  const chainsBlockrange = {} as Record<ChainName, Blockrange>;
+export function getChainsBlockrange(
+  ponderConfig: PonderConfigType,
+): Record<ChainIdString, Blockrange> {
+  const chainsBlockrange = {} as Record<ChainIdString, Blockrange>;
 
   // 0. Get all ponder sources (includes chain + startBlock & endBlock)
   const ponderSources = [
@@ -102,7 +104,7 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
   ] as PonderConfigDatasource[];
 
   // 1. For every indexed chain
-  for (const chainName of Object.keys(ponderConfig.chains)) {
+  for (const chainId of Object.keys(ponderConfig.chains)) {
     const chainStartBlocks: BlockNumber[] = [];
     const chainEndBlocks: BlockNumber[] = [];
 
@@ -112,12 +114,12 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
       let startBlock: Blockrange["startBlock"];
       let endBlock: Blockrange["endBlock"];
 
-      if (isPonderDatasourceFlat(ponderSource) && ponderSource.chain === chainName) {
+      if (isPonderDatasourceFlat(ponderSource) && ponderSource.chain === chainId) {
         startBlock = ponderSource.startBlock;
         endBlock = ponderSource.endBlock;
-      } else if (isPonderDatasourceNested(ponderSource) && ponderSource.chain[chainName]) {
-        startBlock = ponderSource.chain[chainName].startBlock;
-        endBlock = ponderSource.chain[chainName].endBlock;
+      } else if (isPonderDatasourceNested(ponderSource) && ponderSource.chain[chainId]) {
+        startBlock = ponderSource.chain[chainId].startBlock;
+        endBlock = ponderSource.chain[chainId].endBlock;
       }
 
       if (typeof startBlock === "number" && Number.isInteger(startBlock) && startBlock >= 0) {
@@ -148,7 +150,7 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
     // Invariant: the indexed chain must have its startBlock defined as number.
     if (typeof chainLowestStartBlock === "undefined") {
       throw new Error(
-        `No minimum start block found for chain '${chainName}'. Either all contracts, accounts, and block intervals use "latest" (unsupported) or the chain is misconfigured.`,
+        `No minimum start block found for chain '${chainId}'. Either all contracts, accounts, and block intervals use "latest" (unsupported) or the chain is misconfigured.`,
       );
     }
 
@@ -158,12 +160,12 @@ export function getChainsBlockrange(ponderConfig: PonderConfigType): Record<Chai
       chainLowestStartBlock > chainHighestEndBlock
     ) {
       throw new Error(
-        `For chain '${chainName}', the start block (${chainLowestStartBlock}) must be lower or equal to the end block (${chainHighestEndBlock}).`,
+        `For chain '${chainId}', the start block (${chainLowestStartBlock}) must be lower or equal to the end block (${chainHighestEndBlock}).`,
       );
     }
 
     // 5. Assign a valid blockrange to the chain
-    chainsBlockrange[chainName] = {
+    chainsBlockrange[chainId] = {
       startBlock: chainLowestStartBlock,
       endBlock: chainHighestEndBlock,
     };

@@ -8,16 +8,16 @@ import {
 import {
   buildHistoricalTotalBlocksForChains,
   type ChainBlockRefs,
-  type ChainName,
+  type ChainIdString,
   getChainsBlockRefs,
   getChainsBlockrange,
   PonderClient,
   type PonderMetricsResponse,
 } from "@ensnode/ponder-sdk";
 
-import { createSerializedChainSnapshots } from "./chain-indexing-status-snapshot";
 import ponderConfig from "./config";
-import { createSerializedOmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
+import { createSerializedChainSnapshots } from "./lib/chain-indexing-status-snapshot";
+import { createSerializedOmnichainIndexingStatusSnapshot } from "./lib/omnichain-indexing-status-snapshot";
 
 export class LocalPonderClient {
   /**
@@ -25,7 +25,7 @@ export class LocalPonderClient {
    *
    * {@link ChainBlockRefs} for each indexed chain.
    */
-  private chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
+  private chainsBlockRefs = new Map<ChainIdString, ChainBlockRefs>();
 
   private readonly ponderClient: PonderClient;
 
@@ -43,7 +43,7 @@ export class LocalPonderClient {
 
     // create serialized chain indexing snapshot for each indexed chain
     const serializedChainSnapshots = createSerializedChainSnapshots(
-      this.indexedChainNames,
+      this.indexedChainIds,
       chainsBlockRefs,
       metrics,
       status,
@@ -67,16 +67,16 @@ export class LocalPonderClient {
    */
   private async getChainsBlockRefsCached(
     metrics: PonderMetricsResponse,
-  ): Promise<Map<ChainName, ChainBlockRefs>> {
+  ): Promise<Map<ChainIdString, ChainBlockRefs>> {
     // early-return the cached chain block refs
     if (this.chainsBlockRefs.size > 0) {
       return this.chainsBlockRefs;
     }
 
     this.chainsBlockRefs = await getChainsBlockRefs(
-      this.indexedChainNames,
+      this.indexedChainIds,
       getChainsBlockrange(this.ponderConfig),
-      buildHistoricalTotalBlocksForChains(this.indexedChainNames, metrics),
+      buildHistoricalTotalBlocksForChains(this.indexedChainIds, metrics),
       this.publicClients,
     );
 
@@ -87,11 +87,11 @@ export class LocalPonderClient {
     return ponderConfig;
   }
 
-  private get publicClients(): Record<ChainName, PublicClient> {
+  private get publicClients(): Record<ChainIdString, PublicClient> {
     return publicClients;
   }
 
-  private get indexedChainNames(): ChainName[] {
-    return Object.keys(this.ponderConfig.chains) as ChainName[];
+  private get indexedChainIds(): ChainIdString[] {
+    return Object.keys(this.ponderConfig.chains) as ChainIdString[];
   }
 }

@@ -7,9 +7,9 @@
 
 import type { PublicClient } from "viem";
 
+import type { ChainIdString } from "./chains";
 import type { PrometheusMetrics } from "./metrics";
 import { fetchBlockRef } from "./rpc";
-import type { ChainName } from "./shared";
 import type { UnixTimestamp } from "./time";
 
 /**
@@ -81,32 +81,32 @@ export interface ChainBlockRefs {
  * - could not get BlockRefs for a chain.
  */
 export async function getChainsBlockRefs(
-  chainNames: ChainName[],
-  chainsBlockrange: Record<ChainName, Blockrange>,
-  historicalTotalBlocksForChains: Record<ChainName, number>,
-  publicClients: Record<ChainName, PublicClient>,
-): Promise<Map<ChainName, ChainBlockRefs>> {
-  const chainsBlockRefs = new Map<ChainName, ChainBlockRefs>();
+  chainIds: ChainIdString[],
+  chainsBlockrange: Record<ChainIdString, Blockrange>,
+  historicalTotalBlocksForChains: Record<ChainIdString, number>,
+  publicClients: Record<ChainIdString, PublicClient>,
+): Promise<Map<ChainIdString, ChainBlockRefs>> {
+  const chainsBlockRefs = new Map<ChainIdString, ChainBlockRefs>();
 
-  for (const chainName of chainNames) {
-    const blockrange = chainsBlockrange[chainName];
+  for (const chainId of chainIds) {
+    const blockrange = chainsBlockrange[chainId];
     const startBlock = blockrange?.startBlock;
     const endBlock = blockrange?.endBlock;
 
-    const publicClient = publicClients[chainName];
+    const publicClient = publicClients[chainId];
 
     if (typeof startBlock !== "number") {
-      throw new Error(`startBlock not found for chain ${chainName}`);
+      throw new Error(`startBlock not found for chain ${chainId}`);
     }
 
     if (typeof publicClient === "undefined") {
-      throw new Error(`publicClient not found for chain ${chainName}`);
+      throw new Error(`publicClient not found for chain ${chainId}`);
     }
 
-    const historicalTotalBlocks = historicalTotalBlocksForChains[chainName];
+    const historicalTotalBlocks = historicalTotalBlocksForChains[chainId];
 
     if (typeof historicalTotalBlocks !== "number") {
-      throw new Error(`No historical total blocks metric found for chain: ${chainName}`);
+      throw new Error(`No historical total blocks metric found for chain: ${chainId}`);
     }
 
     const backfillEndBlock = startBlock + historicalTotalBlocks - 1;
@@ -127,9 +127,9 @@ export async function getChainsBlockRefs(
         backfillEndBlock: backfillEndBlockRef,
       } satisfies ChainBlockRefs;
 
-      chainsBlockRefs.set(chainName, chainBlockRef);
+      chainsBlockRefs.set(chainId, chainBlockRef);
     } catch {
-      throw new Error(`Could not get BlockRefs for chain ${chainName}`);
+      throw new Error(`Could not get BlockRefs for chain ${chainId}`);
     }
   }
 
@@ -137,21 +137,21 @@ export async function getChainsBlockRefs(
 }
 
 export function buildHistoricalTotalBlocksForChains(
-  indexedChainNames: ChainName[],
+  indexedChainIds: ChainIdString[],
   metrics: PrometheusMetrics,
-): Record<ChainName, number> {
-  const historicalTotalBlocksForChains = {} as Record<ChainName, number>;
+): Record<ChainIdString, number> {
+  const historicalTotalBlocksForChains = {} as Record<ChainIdString, number>;
 
-  for (const chainName of indexedChainNames) {
+  for (const chainId of indexedChainIds) {
     const historicalTotalBlocksMetric = metrics.getValue("ponder_historical_total_blocks", {
-      chain: chainName,
+      chain: chainId,
     });
 
     if (typeof historicalTotalBlocksMetric !== "number") {
-      throw new Error(`No historical total blocks metric found for chain: ${chainName}`);
+      throw new Error(`No historical total blocks metric found for chain: ${chainId}`);
     }
 
-    historicalTotalBlocksForChains[chainName] = historicalTotalBlocksMetric;
+    historicalTotalBlocksForChains[chainId] = historicalTotalBlocksMetric;
   }
 
   return historicalTotalBlocksForChains;

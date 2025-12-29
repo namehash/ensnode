@@ -17,7 +17,6 @@ import {
 import type {
   ChainBlockRefs,
   ChainMetadata,
-  ChainName,
   PonderMetricsResponse,
   PonderStatusResponse,
   UnvalidatedChainMetadata,
@@ -98,7 +97,7 @@ export function createChainIndexingSnapshot(
  */
 export function createSerializedChainSnapshots(
   chainIds: ChainIdString[],
-  chainsBlockRefs: Map<ChainName, ChainBlockRefs>,
+  chainsBlockRefs: Map<ChainIdString, ChainBlockRefs>,
   metrics: PonderMetricsResponse,
   status: PonderStatusResponse,
 ): Record<ChainIdString, SerializedChainIndexingStatusSnapshot> {

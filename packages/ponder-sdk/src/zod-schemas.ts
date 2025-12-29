@@ -15,7 +15,6 @@ import z from "zod/v4";
 
 import { BlockNumber, BlockRef, Blockrange } from "./block-refs";
 import type { ChainId } from "./chains";
-import { ChainName } from "./shared";
 import type { UnixTimestamp } from "./time";
 
 /**

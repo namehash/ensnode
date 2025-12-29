@@ -1,12 +1,4 @@
 /**
- * Chain Name
- *
- * Used as a type for object keys expressing Ponder ideas, such as
- * chain status, or chain metrics.
- */
-export type ChainName = string;
-
-/**
  * A utility type that makes all properties of a type optional recursively,
  * including nested objects and arrays.
  *
