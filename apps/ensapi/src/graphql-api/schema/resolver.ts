@@ -5,11 +5,11 @@ import {
   makePermissionsId,
   makeResolverRecordsId,
   NODE_ANY,
-  type RequiredAndNotNull,
   type ResolverId,
   type ResolverRecordsId,
   ROOT_RESOURCE,
 } from "@ensnode/ensnode-sdk";
+import { isBridgedResolver } from "@ensnode/ensnode-sdk/internal";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
@@ -22,11 +22,18 @@ import { PermissionsRef } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { db } from "@/lib/db";
 
-const isDedicatedResolver = (resolver: Resolver): resolver is DedicatedResolver =>
-  resolver.isDedicated === true;
-
-const isBridgedResolver = (resolver: Resolver): resolver is BridgedResolver =>
-  resolver.bridgesToRegistryChainId !== null && resolver.bridgesToRegistryAddress !== null;
+/**
+ * Note that this indexed Resolver entity represents not _all_ Resolver contracts that exist onchain,
+ * but the set of Resolver contracts that have emitted at least one event that we are able to index.
+ *
+ * This means that if one were to access a Resolver contract that _does_ exist on-chain, but hasn't
+ * emitted any events (ex: BasenamesL1Resolver), this API (which retrieves data from the index)
+ * would say that it doesn't exist.
+ *
+ * This limitation has always been the case, including for the legacy ENS Subgraph, and would require
+ * an RPC call to the chain be performed in the case that a Resolver doesn't exist in the index, which
+ * is prohibitive in both cost and latency. As such we acknowledge this limitation here, for now.
+ */
 
 export const ResolverRef = builder.loadableObjectRef("Resolver", {
   load: (ids: ResolverId[]) =>
@@ -39,11 +46,6 @@ export const ResolverRef = builder.loadableObjectRef("Resolver", {
 });
 
 export type Resolver = Exclude<typeof ResolverRef.$inferType, ResolverId>;
-export type DedicatedResolver = Omit<Resolver, "isDedicated"> & { isDedicated: true };
-export type BridgedResolver = RequiredAndNotNull<
-  Resolver,
-  "bridgesToRegistryChainId" | "bridgesToRegistryAddress"
->;
 
 ////////////
 // Resolver
@@ -129,7 +131,7 @@ ResolverRef.implement({
       description: "TODO",
       type: DedicatedResolverMetadataRef,
       nullable: true,
-      resolve: (parent) => (isDedicatedResolver(parent) ? parent : null),
+      resolve: (parent) => (parent.isDedicated ? parent : null),
     }),
 
     ////////////////////
@@ -139,13 +141,7 @@ ResolverRef.implement({
       description: "TODO",
       type: AccountIdRef,
       nullable: true,
-      resolve: (parent) => {
-        if (!isBridgedResolver(parent)) return null;
-        return {
-          chainId: parent.bridgesToRegistryChainId,
-          address: parent.bridgesToRegistryAddress,
-        };
-      },
+      resolve: (parent, args, context) => isBridgedResolver(context.namespace, parent),
     }),
 
     ////////////////////////

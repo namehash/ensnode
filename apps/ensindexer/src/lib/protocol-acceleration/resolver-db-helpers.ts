@@ -1,5 +1,3 @@
-import config from "@/config";
-
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
@@ -16,12 +14,8 @@ import {
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
-  isBridgedResolver,
   isDedicatedResolver,
   isExtendedResolver,
-  isKnownENSIP19ReverseResolver,
-  isStaticResolver,
-  staticResolverImplementsAddressRecordDefaulting,
 } from "@ensnode/ensnode-sdk/internal";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -58,23 +52,16 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
   const existing = await context.db.find(schema.resolver, { id: resolverId });
   if (existing) return;
 
-  const isExtended = await isExtendedResolver({
-    address: resolver.address,
-    publicClient: context.client,
-  });
-
-  const isDedicated = await isDedicatedResolver({
-    address: resolver.address,
-    publicClient: context.client,
-  });
-
-  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(config.namespace, resolver);
-  const bridgesToRegistry = isBridgedResolver(config.namespace, resolver);
-  const isStatic = isStaticResolver(config.namespace, resolver);
-
-  const implementsAddressRecordDefaulting = isStatic
-    ? staticResolverImplementsAddressRecordDefaulting(config.namespace, resolver)
-    : null;
+  const [isExtended, isDedicated] = await Promise.all([
+    isExtendedResolver({
+      address: resolver.address,
+      publicClient: context.client,
+    }),
+    isDedicatedResolver({
+      address: resolver.address,
+      publicClient: context.client,
+    }),
+  ]);
 
   // ensure Resolver
   await context.db.insert(schema.resolver).values({
@@ -82,11 +69,6 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     ...resolver,
     isExtended,
     isDedicated,
-    isStatic,
-    isENSIP19ReverseResolver,
-    implementsAddressRecordDefaulting,
-    bridgesToRegistryChainId: bridgesToRegistry?.chainId ?? null,
-    bridgesToRegistryAddress: bridgesToRegistry?.address ?? null,
   });
 }
 

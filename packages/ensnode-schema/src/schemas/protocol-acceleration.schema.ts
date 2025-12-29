@@ -77,8 +77,14 @@ export const domainResolverRelation_relations = relations(domainResolverRelation
 }));
 
 /**
- * Resolver represents an individual IResolver contract. It tracks metadata about the Resolver as well,
- * for example whether it is an IExtendedResolver, IDedicatedResolver, a BridgedResolver, etc).
+ * Resolver represents an individual IResolver contract that has emitted at least 1 event.
+ * Note that Resolver contracts can exist on-chain but not emit any events and still function
+ * properly, so checks against a Resolver's existence and metadata must be done at runtime.
+ *
+ * We index whether a Resolver is an IExtendedResolver or an IDedicatedResolver, to minimize RPC
+ * requests at the API layer, when resolving resources, but note that runtime operations like
+ * Forward Resolution _must_ query a Resolver's existence against the chain, because the indexed set
+ * of Resolvers is a subset of the theoretical set of functional Resolvers deployed to a given chain.
  */
 export const resolver = onchainTable(
   "resolvers",
@@ -98,27 +104,6 @@ export const resolver = onchainTable(
      * Whether the Resolver implements IDedicatedResolver.
      */
     isDedicated: t.boolean().notNull().default(false),
-
-    /**
-     * Whether the Resolver is an Onchain Static Resolver.
-     */
-    isStatic: t.boolean().notNull().default(false),
-
-    /**
-     * Whether the Resolver is an ENSIP19ReverseResolver.
-     */
-    isENSIP19ReverseResolver: t.boolean().default(false),
-
-    /**
-     * If dedicated or static, whether the Resolver implements Address Record Defaulting.
-     */
-    implementsAddressRecordDefaulting: t.boolean(),
-
-    /**
-     * If set, the Resolver is a Bridged Resolver that bridges to the AccountId indicated.
-     */
-    bridgesToRegistryChainId: t.text().$type<ChainId>(),
-    bridgesToRegistryAddress: t.hex().$type<Address>(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),
