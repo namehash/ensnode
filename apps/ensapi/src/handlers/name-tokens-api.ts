@@ -16,9 +16,9 @@ import {
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
 import {
+  ErrorResponseSchema,
   makeNameTokensResponseSchema,
   makeNodeSchema,
-  ErrorResponseSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";

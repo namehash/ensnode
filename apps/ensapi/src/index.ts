@@ -4,8 +4,8 @@ import config from "@/config";
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
-import { openAPIRouteHandler } from "hono-openapi";
 import { html } from "hono/html";
+import { openAPIRouteHandler } from "hono-openapi";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 

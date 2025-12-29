@@ -1,6 +1,6 @@
+import { SchemaError } from "@standard-schema/utils";
 import type { ValidationTargets } from "hono";
 import { validator } from "hono-openapi";
-import { SchemaError } from "@standard-schema/utils";
 import type { ZodType } from "zod/v4";
 
 import { errorResponse } from "./error-response";

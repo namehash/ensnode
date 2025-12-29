@@ -1,6 +1,6 @@
+import { SchemaError } from "@standard-schema/utils";
 import type { Context } from "hono";
 import type { ClientErrorStatusCode, ServerErrorStatusCode } from "hono/utils/http-status";
-import { SchemaError } from "@standard-schema/utils";
 import { treeifyError, ZodError } from "zod/v4";
 
 import type { ErrorResponse } from "@ensnode/ensnode-sdk";
