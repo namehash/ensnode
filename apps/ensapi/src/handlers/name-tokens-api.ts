@@ -175,8 +175,8 @@ app.get(
       );
 
       // Return 404 response with error code for Name Tokens Not Indexed when
-      // the parent name of the requested name was not registered in any of
-      // the actively indexed subregistries.
+      // the parent name of the requested name does not match any of the
+      // actively indexed subregistries.
       if (!subregistry) {
         return c.json(
           serializeNameTokensResponse(
