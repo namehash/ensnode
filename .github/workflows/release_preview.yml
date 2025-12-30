@@ -239,7 +239,7 @@ jobs:
   detect-pr-and-comment:
     name: Update PR Comment
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr, build-lambdas]
+    needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr, build-and-publish-lambdas]
     if: always() && needs.build-and-publish-npm.result == 'success'
     permissions:
       contents: read
