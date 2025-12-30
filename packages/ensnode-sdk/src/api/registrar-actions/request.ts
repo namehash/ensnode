@@ -1,6 +1,7 @@
 import type { Address } from "viem";
 
 import type { Node } from "../../ens";
+import type { UnixTimestamp } from "../../shared";
 import type { RequestPageParams } from "../shared/pagination";
 
 /**
@@ -10,6 +11,8 @@ export const RegistrarActionsFilterTypes = {
   BySubregistryNode: "bySubregistryNode",
   WithEncodedReferral: "withEncodedReferral",
   ByDecodedReferrer: "byDecodedReferrer",
+  BeginTimestamp: "beginTimestamp",
+  EndTimestamp: "endTimestamp",
 } as const;
 
 export type RegistrarActionsFilterType =
@@ -29,10 +32,22 @@ export type RegistrarActionsFilterByDecodedReferrer = {
   value: Address;
 };
 
+export type RegistrarActionsFilterBeginTimestamp = {
+  filterType: typeof RegistrarActionsFilterTypes.BeginTimestamp;
+  value: UnixTimestamp;
+};
+
+export type RegistrarActionsFilterEndTimestamp = {
+  filterType: typeof RegistrarActionsFilterTypes.EndTimestamp;
+  value: UnixTimestamp;
+};
+
 export type RegistrarActionsFilter =
   | RegistrarActionsFilterBySubregistryNode
   | RegistrarActionsFilterWithEncodedReferral
-  | RegistrarActionsFilterByDecodedReferrer;
+  | RegistrarActionsFilterByDecodedReferrer
+  | RegistrarActionsFilterBeginTimestamp
+  | RegistrarActionsFilterEndTimestamp;
 
 /**
  * Records Orders
