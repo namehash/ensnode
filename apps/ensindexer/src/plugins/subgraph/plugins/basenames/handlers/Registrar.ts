@@ -1,8 +1,7 @@
 import { ponder } from "ponder:registry";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { interpretTokenIdAsLabelHash, PluginName } from "@ensnode/ensnode-sdk";
 
-import { tokenIdToLabelHash } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 
@@ -26,7 +25,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegistered({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: interpretTokenIdAsLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -36,7 +38,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRegistered({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: interpretTokenIdAsLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -46,7 +51,10 @@ export default function () {
     async ({ context, event }) => {
       await handleNameRenewed({
         context,
-        event: { ...event, args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.id) } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: interpretTokenIdAsLabelHash(event.args.id) },
+        },
       });
     },
   );
@@ -56,7 +64,7 @@ export default function () {
       context,
       event: {
         ...event,
-        args: { ...event.args, labelHash: tokenIdToLabelHash(event.args.tokenId) },
+        args: { ...event.args, labelHash: interpretTokenIdAsLabelHash(event.args.tokenId) },
       },
     });
   });

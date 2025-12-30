@@ -1,8 +1,7 @@
 import { ponder } from "ponder:registry";
 
-import { PluginName } from "@ensnode/ensnode-sdk";
+import { interpretTokenIdAsLabelHash, PluginName } from "@ensnode/ensnode-sdk";
 
-import { tokenIdToLabelHash } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
 
@@ -34,7 +33,7 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            labelHash: tokenIdToLabelHash(event.args.id),
+            labelHash: interpretTokenIdAsLabelHash(event.args.id),
           },
         },
       });
@@ -50,7 +49,7 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            labelHash: tokenIdToLabelHash(event.args.id),
+            labelHash: interpretTokenIdAsLabelHash(event.args.id),
           },
         },
       });
@@ -66,7 +65,7 @@ export default function () {
         args: {
           from,
           to,
-          labelHash: tokenIdToLabelHash(tokenId),
+          labelHash: interpretTokenIdAsLabelHash(tokenId),
         },
       },
     });

@@ -25,12 +25,12 @@ import {
   decodeDNSEncodedLiteralName,
   type InterpretedLabel,
   type InterpretedName,
+  interpretTokenIdAsNode,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
   type Node,
   type SubgraphInterpretedLabel,
   type SubgraphInterpretedName,
-  uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import { subgraph_decodeDNSEncodedLiteralName } from "@/lib/dns-helpers";
@@ -40,14 +40,6 @@ import { getManagedName } from "@/lib/managed-names";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 import { sharedEventValues, upsertAccount } from "@/lib/subgraph/db-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";
-
-/**
- * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
- * ownership of the name. The minted token will be assigned a unique tokenId represented as
- * uint256(namehash(name)) where name is the fully qualified ENS name being wrapped.
- * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/wrapper/ERC1155Fuse.sol#L262
- */
-const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
  * Determines whether the PCC fuse is SET in the provided `fuses`.
@@ -132,7 +124,9 @@ export const makeNameWrapperHandlers = () => {
     to: Address,
   ) {
     await upsertAccount(context, to);
-    const node = tokenIdToNode(tokenId);
+
+    // the NameWrapper's ERC1155 TokenIds are the ENSv1Domain's Node so we `interpretTokenIdAsNode`
+    const node = interpretTokenIdAsNode(tokenId);
 
     // NOTE: subgraph technically upserts domain with `createOrLoadDomain()` here, but domain
     // is guaranteed to exist. we encode this stricter logic here to illustrate that fact.

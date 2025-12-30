@@ -7,6 +7,7 @@ import {
   type DNSEncodedName,
   decodeDNSEncodedLiteralName,
   interpretAddress,
+  interpretTokenIdAsNode,
   isPccFuseSet,
   isRegistrationExpired,
   isRegistrationFullyExpired,
@@ -19,7 +20,6 @@ import {
   makeSubdomainNode,
   type Node,
   PluginName,
-  uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
@@ -38,14 +38,6 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
-
-/**
- * When a name is wrapped in the NameWrapper contract, an ERC1155 token is minted that tokenizes
- * ownership of the name. The minted token will be assigned a unique tokenId represented as
- * uint256(namehash(name)) where name is the fqdn of the name being wrapped.
- * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/wrapper/ERC1155Fuse.sol#L262
- */
-const tokenIdToNode = (tokenId: bigint): Node => uint256ToHex32(tokenId);
 
 /**
  * NameWrapper emits expiry as 0 to mean 'doesn't expire', so we interpret as null.
@@ -120,7 +112,8 @@ export default function () {
 
     // otherwise is transfer of existing registration
 
-    const domainId = makeENSv1DomainId(tokenIdToNode(tokenId));
+    // the NameWrapper's ERC1155 TokenIds are the ENSv1Domain's Node so we `interpretTokenIdAsNode`
+    const domainId = makeENSv1DomainId(interpretTokenIdAsNode(tokenId));
     const registration = await getLatestRegistration(context, domainId);
     const isExpired = registration && isRegistrationExpired(registration, event.block.timestamp);
 

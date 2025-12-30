@@ -3,13 +3,14 @@ import { ponder } from "ponder:registry";
 import {
   type BlockRef,
   bigIntToNumber,
+  interpretTokenIdAsLabelHash,
   makeSubdomainNode,
   PluginName,
   type Subregistry,
 } from "@ensnode/ensnode-sdk";
 
 import { getThisAccountId } from "@/lib/get-this-account-id";
-import { getManagedName, tokenIdToLabelHash } from "@/lib/managed-names";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
 import {
@@ -34,7 +35,7 @@ export default function () {
       const { node: managedNode } = getManagedName(subregistryId);
       const subregistry = { subregistryId, node: managedNode } satisfies Subregistry;
 
-      const labelHash = tokenIdToLabelHash(event.args.id);
+      const labelHash = interpretTokenIdAsLabelHash(event.args.id);
       const node = makeSubdomainNode(labelHash, managedNode);
       const registrant = event.transaction.from;
       const expiresAt = bigIntToNumber(event.args.expires);
@@ -67,7 +68,7 @@ export default function () {
       const { node: managedNode } = getManagedName(subregistryId);
       const subregistry = { subregistryId, node: managedNode } satisfies Subregistry;
 
-      const labelHash = tokenIdToLabelHash(event.args.id);
+      const labelHash = interpretTokenIdAsLabelHash(event.args.id);
       const node = makeSubdomainNode(labelHash, managedNode);
       const registrant = event.transaction.from;
       const expiresAt = bigIntToNumber(event.args.expires);
@@ -99,7 +100,7 @@ export default function () {
       const subregistryId = getThisAccountId(context, event);
       const { node: managedNode } = getManagedName(subregistryId);
 
-      const labelHash = tokenIdToLabelHash(event.args.id);
+      const labelHash = interpretTokenIdAsLabelHash(event.args.id);
       const node = makeSubdomainNode(labelHash, managedNode);
       const registrant = event.transaction.from;
       const expiresAt = bigIntToNumber(event.args.expires);
