@@ -617,6 +617,26 @@ export class ENSNodeClient {
    *   filters: [registrarActionsFilter.byParentNode(namehash('base.eth'))],
    *   recordsPerPage: 10
    * });
+   *
+   * // get registrar actions within a specific time range
+   * const beginTimestamp = 1764547200; // Dec 1, 2025, 00:00:00 UTC
+   * const endTimestamp = 1767225600; // Jan 1, 2026, 00:00:00 UTC
+   * await client.registrarActions({
+   *   filters: [
+   *     registrarActionsFilter.beginTimestamp(beginTimestamp),
+   *     registrarActionsFilter.endTimestamp(endTimestamp),
+   *   ],
+   * });
+   *
+   * // get registrar actions from a specific timestamp onwards
+   * await client.registrarActions({
+   *   filters: [registrarActionsFilter.beginTimestamp(1764547200)],
+   * });
+   *
+   * // get registrar actions up to a specific timestamp
+   * await client.registrarActions({
+   *   filters: [registrarActionsFilter.endTimestamp(1767225600)],
+   * });
    * ```
    */
   async registrarActions(request: RegistrarActionsRequest = {}): Promise<RegistrarActionsResponse> {
@@ -645,6 +665,26 @@ export class ENSNodeClient {
 
       return decodedReferrerFilter
         ? { key: "decodedReferrer", value: decodedReferrerFilter.value }
+        : null;
+    };
+
+    const buildBeginTimestampArg = (filters: RegistrarActionsFilter[] | undefined) => {
+      const beginTimestampFilter = filters?.find(
+        (f) => f.filterType === RegistrarActionsFilterTypes.BeginTimestamp,
+      );
+
+      return beginTimestampFilter
+        ? { key: "beginTimestamp", value: beginTimestampFilter.value.toString() }
+        : null;
+    };
+
+    const buildEndTimestampArg = (filters: RegistrarActionsFilter[] | undefined) => {
+      const endTimestampFilter = filters?.find(
+        (f) => f.filterType === RegistrarActionsFilterTypes.EndTimestamp,
+      );
+
+      return endTimestampFilter
+        ? { key: "endTimestamp", value: endTimestampFilter.value.toString() }
         : null;
     };
 
@@ -686,6 +726,18 @@ export class ENSNodeClient {
 
     if (decodedReferrerArg) {
       url.searchParams.set(decodedReferrerArg.key, decodedReferrerArg.value);
+    }
+
+    const beginTimestampArg = buildBeginTimestampArg(request.filters);
+
+    if (beginTimestampArg) {
+      url.searchParams.set(beginTimestampArg.key, beginTimestampArg.value);
+    }
+
+    const endTimestampArg = buildEndTimestampArg(request.filters);
+
+    if (endTimestampArg) {
+      url.searchParams.set(endTimestampArg.key, endTimestampArg.value);
     }
 
     const response = await fetch(url);
