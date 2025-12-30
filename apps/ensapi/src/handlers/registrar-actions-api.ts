@@ -100,14 +100,14 @@ app.get(
         decodedReferrer: makeLowercaseAddressSchema("decodedReferrer").optional(),
 
         beginTimestamp: params.queryParam
-          .optional()
           .pipe(z.coerce.number())
-          .pipe(makeUnixTimestampSchema("beginTimestamp")),
+          .pipe(makeUnixTimestampSchema("beginTimestamp"))
+          .optional(),
 
         endTimestamp: params.queryParam
-          .optional()
           .pipe(z.coerce.number())
-          .pipe(makeUnixTimestampSchema("endTimestamp")),
+          .pipe(makeUnixTimestampSchema("endTimestamp"))
+          .optional(),
       })
       .refine(
         (data) => {
