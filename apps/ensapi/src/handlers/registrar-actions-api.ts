@@ -16,6 +16,7 @@ import {
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
+  makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -57,6 +58,8 @@ app.use(registrarActionsApiMiddleware);
  *   - (if provided) `recordsPerPage` search param is not
  *     a positive integer <= {@link RECORDS_PER_PAGE_MAX}.
  *   - (if provided) `orderBy` search param is not part of {@link RegistrarActionsOrders}.
+ *   - (if provided) `beginTimestamp` or `endTimestamp` search params are not valid Unix timestamps.
+ *   - (if both provided) `endTimestamp` is less than `beginTimestamp`.
  * - 500 error response for cases such as:
  *   - Connected ENSNode has not all required plugins set to active.
  *   - Connected ENSNode is not in `omnichainStatus` of either
@@ -74,32 +77,64 @@ app.get(
   ),
   validate(
     "query",
-    z.object({
-      orderBy: z
-        .enum(RegistrarActionsOrders)
-        .default(RegistrarActionsOrders.LatestRegistrarActions),
+    z
+      .object({
+        orderBy: z
+          .enum(RegistrarActionsOrders)
+          .default(RegistrarActionsOrders.LatestRegistrarActions),
 
-      page: params.queryParam
-        .optional()
-        .default(1)
-        .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema("page")),
+        page: params.queryParam
+          .optional()
+          .default(1)
+          .pipe(z.coerce.number())
+          .pipe(makePositiveIntegerSchema("page")),
 
-      recordsPerPage: params.queryParam
-        .optional()
-        .default(RECORDS_PER_PAGE_DEFAULT)
-        .pipe(z.coerce.number())
-        .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX)),
+        recordsPerPage: params.queryParam
+          .optional()
+          .default(RECORDS_PER_PAGE_DEFAULT)
+          .pipe(z.coerce.number())
+          .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX)),
 
-      withReferral: params.boolstring.optional().default(false),
+        withReferral: params.boolstring.optional().default(false),
 
-      decodedReferrer: makeLowercaseAddressSchema("decodedReferrer").optional(),
-    }),
+        decodedReferrer: makeLowercaseAddressSchema("decodedReferrer").optional(),
+
+        beginTimestamp: params.queryParam
+          .pipe(z.coerce.number())
+          .pipe(makeUnixTimestampSchema("beginTimestamp"))
+          .optional(),
+
+        endTimestamp: params.queryParam
+          .pipe(z.coerce.number())
+          .pipe(makeUnixTimestampSchema("endTimestamp"))
+          .optional(),
+      })
+      .refine(
+        (data) => {
+          // If both timestamps are provided, endTimestamp must be >= beginTimestamp
+          if (data.beginTimestamp !== undefined && data.endTimestamp !== undefined) {
+            return data.endTimestamp >= data.beginTimestamp;
+          }
+          return true;
+        },
+        {
+          message: "endTimestamp must be greater than or equal to beginTimestamp",
+          path: ["endTimestamp"],
+        },
+      ),
   ),
   async (c) => {
     try {
       const { parentNode } = c.req.valid("param");
-      const { orderBy, page, recordsPerPage, withReferral, decodedReferrer } = c.req.valid("query");
+      const {
+        orderBy,
+        page,
+        recordsPerPage,
+        withReferral,
+        decodedReferrer,
+        beginTimestamp,
+        endTimestamp,
+      } = c.req.valid("query");
 
       const filters: RegistrarActionsFilter[] = [];
 
@@ -113,6 +148,14 @@ app.get(
 
       if (decodedReferrer) {
         filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
+      }
+
+      if (beginTimestamp) {
+        filters.push(registrarActionsFilter.beginTimestamp(beginTimestamp));
+      }
+
+      if (endTimestamp) {
+        filters.push(registrarActionsFilter.endTimestamp(endTimestamp));
       }
 
       // Calculate offset from page and recordsPerPage
