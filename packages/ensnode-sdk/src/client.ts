@@ -807,7 +807,7 @@ export class ENSNodeClient {
 
     if (request.name !== undefined) {
       url.searchParams.set("name", request.name);
-    } else {
+    } else if (request.domainId !== undefined) {
       url.searchParams.set("domainId", request.domainId);
     }
 

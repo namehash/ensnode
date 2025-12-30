@@ -1,3 +1,4 @@
+import { describeRoute, resolver as validationResolver } from "hono-openapi";
 import { z } from "zod/v4";
 
 import type {
@@ -6,6 +7,11 @@ import type {
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
+import {
+  makeResolvePrimaryNameResponseSchema,
+  makeResolvePrimaryNamesResponseSchema,
+  makeResolveRecordsResponseSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -44,12 +50,26 @@ app.use(canAccelerateMiddleware);
  */
 app.get(
   "/records/:name",
+  describeRoute({
+    summary: "Resolve ENS Records",
+    description: "Resolves ENS records for a given name",
+    responses: {
+      200: {
+        description: "Successfully resolved records",
+        content: {
+          "application/json": {
+            schema: validationResolver(makeResolveRecordsResponseSchema()),
+          },
+        },
+      },
+    },
+  }),
   validate("param", z.object({ name: params.name })),
   validate(
     "query",
     z
       .object({
-        ...params.selectionParams.shape,
+        selection: params.selection,
         trace: params.trace,
         accelerate: params.accelerate,
       })
@@ -99,6 +119,20 @@ app.get(
  */
 app.get(
   "/primary-name/:address/:chainId",
+  describeRoute({
+    summary: "Resolve Primary Name",
+    description: "Resolves a primary name for a given `address` and `chainId`",
+    responses: {
+      200: {
+        description: "Successfully resolved name",
+        content: {
+          "application/json": {
+            schema: validationResolver(makeResolvePrimaryNameResponseSchema()),
+          },
+        },
+      },
+    },
+  }),
   validate("param", z.object({ address: params.address, chainId: params.defaultableChainId })),
   validate(
     "query",
@@ -144,6 +178,20 @@ app.get(
  */
 app.get(
   "/primary-names/:address",
+  describeRoute({
+    summary: "Resolve Primary Names",
+    description: "Resolves all primary names for a given address across multiple chains",
+    responses: {
+      200: {
+        description: "Successfully resolved records",
+        content: {
+          "application/json": {
+            schema: validationResolver(makeResolvePrimaryNamesResponseSchema()),
+          },
+        },
+      },
+    },
+  }),
   validate("param", z.object({ address: params.address })),
   validate(
     "query",
