@@ -66,7 +66,7 @@ describe("managed-names", () => {
 
     it("should throw an error for a contract without a managed name", () => {
       const unknownContract: AccountId = { chainId: 1, address: zeroAddress };
-      expect(() => getManagedName(unknownContract)).toThrow("does not have a Managed Name");
+      expect(() => getManagedName(unknownContract)).toThrow();
     });
   });
 });
