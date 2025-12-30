@@ -44,7 +44,11 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
-const RegistryOld = getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "RegistryOld");
+const ENSv1RegistryOld = getDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSRoot,
+  "ENSv1RegistryOld",
+);
 
 /**
  * Identifies `name`'s active resolver in `registry`.
@@ -217,7 +221,10 @@ async function findResolverWithIndex(
                     and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
                     // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
                     isENSv1Registry(config.namespace, registry) &&
-                      and(eq(t.chainId, RegistryOld.chainId), eq(t.address, RegistryOld.address)),
+                      and(
+                        eq(t.chainId, ENSv1RegistryOld.chainId),
+                        eq(t.address, ENSv1RegistryOld.address),
+                      ),
                   ].filter((c) => !!c),
                 ),
                 // filter for Domain-Resolver Relations for the following DomainIds
