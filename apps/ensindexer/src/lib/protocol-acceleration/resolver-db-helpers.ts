@@ -19,12 +19,6 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
-import { isBridgedResolver } from "@/lib/protocol-acceleration/is-bridged-resolver";
-import { isKnownENSIP19ReverseResolver } from "@/lib/protocol-acceleration/is-ensip-19-reverse-resolver";
-import {
-  isStaticResolver,
-  staticResolverImplementsAddressRecordDefaulting,
-} from "@/lib/protocol-acceleration/is-static-resolver";
 
 /**
  * Infer the type of the ResolverRecord entity's composite key.
@@ -58,23 +52,16 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
   const existing = await context.db.find(schema.resolver, { id: resolverId });
   if (existing) return;
 
-  const isExtended = await isExtendedResolver({
-    address: resolver.address,
-    publicClient: context.client,
-  });
-
-  const isDedicated = await isDedicatedResolver({
-    address: resolver.address,
-    publicClient: context.client,
-  });
-
-  const isENSIP19ReverseResolver = isKnownENSIP19ReverseResolver(resolver);
-  const bridgesToRegistry = isBridgedResolver(resolver);
-  const isStatic = isStaticResolver(resolver);
-
-  const implementsAddressRecordDefaulting = isStatic
-    ? staticResolverImplementsAddressRecordDefaulting(resolver)
-    : null;
+  const [isExtended, isDedicated] = await Promise.all([
+    isExtendedResolver({
+      address: resolver.address,
+      publicClient: context.client,
+    }),
+    isDedicatedResolver({
+      address: resolver.address,
+      publicClient: context.client,
+    }),
+  ]);
 
   // ensure Resolver
   await context.db.insert(schema.resolver).values({
@@ -82,11 +69,6 @@ export async function ensureResolver(context: Context, resolver: AccountId) {
     ...resolver,
     isExtended,
     isDedicated,
-    isStatic,
-    isENSIP19ReverseResolver,
-    implementsAddressRecordDefaulting,
-    bridgesToRegistryChainId: bridgesToRegistry?.chainId ?? null,
-    bridgesToRegistryAddress: bridgesToRegistry?.address ?? null,
   });
 }
 

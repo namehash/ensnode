@@ -48,10 +48,6 @@ import type {
  *
  * Many datamodels are sharable between ENSv1 and ENSv2, including Registrations, Renewals, and Resolvers.
  *
- * Resolvers implement 'extensions' more so than polymorphism — a Resovler can abide by many
- * permutations of behavior (IExtendedResolver, IDedicatedResolver, BridgedResolver, ...etc), that are
- * not technically mutually exclusive, as they'd be with a truly polymorphic entity.
- *
  * Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
  * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
  * Registry Registrations do not).

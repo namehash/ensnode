@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import {
   type AccountId,
   DEFAULT_EVM_COIN_TYPE,
@@ -5,6 +7,7 @@ import {
   type Node,
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
+import { staticResolverImplementsAddressRecordDefaulting } from "@ensnode/ensnode-sdk/internal";
 
 import { db } from "@/lib/db";
 import type { IndexedResolverRecords } from "@/lib/resolution/make-records-response";
@@ -20,9 +23,8 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
   node: Node;
   selection: SELECTION;
 }): Promise<IndexedResolverRecords | null> {
-  const resolverId = makeResolverId(_resolver);
   const resolver = await db.query.resolver.findFirst({
-    where: (t, { eq }) => eq(t.id, resolverId),
+    where: (t, { eq }) => eq(t.id, makeResolverId(_resolver)),
   });
 
   if (!resolver) return null;
@@ -44,7 +46,7 @@ export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelec
 
   // if the resolver implements address record defaulting, materialize all selected address records
   // that do not yet exist
-  if (resolver?.implementsAddressRecordDefaulting) {
+  if (staticResolverImplementsAddressRecordDefaulting(config.namespace, resolver)) {
     if (selection.addresses) {
       const defaultRecord = resolverRecords.addressRecords.find(
         (record) => record.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT,

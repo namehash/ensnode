@@ -1,11 +1,9 @@
-import config from "@/config";
-
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 
 import {
   type ENSv1DomainId,
   type ENSv2DomainId,
-  getRootRegistryId,
+  getENSv2RootRegistryId,
   makePermissionsId,
   makeRegistryId,
   makeResolverId,
@@ -203,7 +201,7 @@ builder.queryType({
       description: "TODO",
       type: RegistryRef,
       nullable: false,
-      resolve: () => getRootRegistryId(config.namespace),
+      resolve: (parent, args, context) => getENSv2RootRegistryId(context.namespace),
     }),
   }),
 });

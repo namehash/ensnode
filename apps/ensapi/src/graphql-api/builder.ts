@@ -7,6 +7,7 @@ import type {
   ChainId,
   CoinType,
   DomainId,
+  ENSNamespaceId,
   InterpretedName,
   Node,
   RegistryId,
@@ -15,6 +16,7 @@ import type {
 
 export const builder = new SchemaBuilder<{
   Context: {
+    namespace: ENSNamespaceId;
     now: bigint;
   };
   Scalars: {

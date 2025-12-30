@@ -2,7 +2,7 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, isAddressEqual, zeroAddress } from "viem";
 
-import { type AccountId, type DomainId, makeResolverId } from "@ensnode/ensnode-sdk";
+import type { AccountId, DomainId } from "@ensnode/ensnode-sdk";
 
 /**
  * Ensures that the Domain-Resolver Relationship for the provided `domainId` in `registry` is set
@@ -15,14 +15,12 @@ export async function ensureDomainResolverRelation(
   domainId: DomainId,
   resolver: Address,
 ) {
-  const isZeroResolver = isAddressEqual(zeroAddress, resolver);
-  if (isZeroResolver) {
+  if (isAddressEqual(zeroAddress, resolver)) {
     await context.db.delete(schema.domainResolverRelation, { ...registry, domainId });
   } else {
-    const resolverId = makeResolverId({ chainId: registry.chainId, address: resolver });
     await context.db
       .insert(schema.domainResolverRelation)
-      .values({ ...registry, domainId, resolverId })
-      .onConflictDoUpdate({ resolverId });
+      .values({ ...registry, domainId, resolver })
+      .onConflictDoUpdate({ resolver });
   }
 }

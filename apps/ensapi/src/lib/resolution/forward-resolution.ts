@@ -10,10 +10,9 @@ import {
   type ForwardResolutionArgs,
   ForwardResolutionProtocolStep,
   type ForwardResolutionResult,
-  getRootRegistry,
+  getENSv1Registry,
   isNormalizedName,
   isSelectionEmpty,
-  makeResolverId,
   type Node,
   PluginName,
   parseReverseName,
@@ -21,9 +20,13 @@ import {
   type ResolverRecordsSelection,
   TraceableENSProtocol,
 } from "@ensnode/ensnode-sdk";
-import { isExtendedResolver } from "@ensnode/ensnode-sdk/internal";
+import {
+  isBridgedResolver,
+  isExtendedResolver,
+  isKnownENSIP19ReverseResolver,
+  isStaticResolver,
+} from "@ensnode/ensnode-sdk/internal";
 
-import { db } from "@/lib/db";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { makeLogger } from "@/lib/logger";
 import { findResolver } from "@/lib/protocol-acceleration/find-resolver";
@@ -92,7 +95,7 @@ export async function resolveForward<SELECTION extends ResolverRecordsSelection>
   // initially be ENS Root Chain's Registry: see `_resolveForward` for additional context.
   return _resolveForward(name, selection, {
     ...options,
-    registry: getRootRegistry(config.namespace),
+    registry: getENSv1Registry(config.namespace),
   });
 }
 
@@ -237,138 +240,123 @@ async function _resolveForward<SELECTION extends ResolverRecordsSelection>(
           // Protocol Acceleration
           //////////////////////////////////////////////////
           if (accelerate && canAccelerate) {
-            const resolverId = makeResolverId({ chainId, address: activeResolver });
-            const resolver = await db.query.resolver.findFirst({
-              where: (t, { eq }) => eq(t.id, resolverId),
-            });
+            // NOTE: because Resolvers can exist without emitting events (and therefore may or may
+            // not actually exist in the index), we have to do runtime validation of the Resolver's
+            // metadata (i.e. whether it's an ENSIP-19 Reverse Resolver, a Bridged Resolver, etc)
+            // ex: BasenamesL1Resolver need not emit events to function properly
+            // https://etherscan.io/address/0xde9049636f4a1dfe0a64d1bfe3155c0a14c54f31#code
+            const resolver = { chainId, address: activeResolver };
 
-            // Must have an indexed Resolver in order to accelerate further — otherwise fall back to
-            // Forward Resolution
-            if (resolver) {
-              //////////////////////////////////////////////////
-              // Protocol Acceleration: ENSIP-19 Reverse Resolvers
-              //   If the activeResolver is a Known ENSIP-19 Reverse Resolver,
-              //   then we can just read the name record value directly from the index.
-              //////////////////////////////////////////////////
-              if (resolver.isENSIP19ReverseResolver) {
-                return withEnsProtocolStep(
-                  TraceableENSProtocol.ForwardResolution,
-                  ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
-                  {},
-                  async () => {
-                    // Invariant: consumer must be selecting the `name` record at this point
-                    if (selection.name !== true) {
-                      throw new Error(
-                        `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
-                      );
-                    }
-
-                    // Sanity Check: This should only happen in the context of Reverse Resolution, and
-                    // the selection should just be `{ name: true }`, but technically not prohibited to
-                    // select more records than just 'name', so just warn if that happens.
-                    if (selection.addresses !== undefined || selection.texts !== undefined) {
-                      logger.warn(
-                        `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
-                      );
-                    }
-
-                    // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
-                    const parsed = parseReverseName(name);
-                    if (!parsed) {
-                      throw new Error(
-                        `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
-                      );
-                    }
-
-                    // retrieve the name record from the index
-                    const nameRecordValue = await getENSIP19ReverseNameRecordFromIndex(
-                      parsed.address,
-                      parsed.coinType,
+            //////////////////////////////////////////////////
+            // Protocol Acceleration: ENSIP-19 Reverse Resolvers
+            //   If the activeResolver is a Known ENSIP-19 Reverse Resolver,
+            //   then we can just read the name record value directly from the index.
+            //////////////////////////////////////////////////
+            if (isKnownENSIP19ReverseResolver(config.namespace, resolver)) {
+              return withEnsProtocolStep(
+                TraceableENSProtocol.ForwardResolution,
+                ForwardResolutionProtocolStep.AccelerateENSIP19ReverseResolver,
+                {},
+                async () => {
+                  // Invariant: consumer must be selecting the `name` record at this point
+                  if (selection.name !== true) {
+                    throw new Error(
+                      `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected 'name' record in selection but instead received: ${JSON.stringify(selection)}.`,
                     );
+                  }
 
-                    // NOTE: typecast is ok because of sanity checks above
-                    return { name: nameRecordValue } as ResolverRecordsResponse<SELECTION>;
-                  },
-                );
-              }
+                  // Sanity Check: This should only happen in the context of Reverse Resolution, and
+                  // the selection should just be `{ name: true }`, but technically not prohibited to
+                  // select more records than just 'name', so just warn if that happens.
+                  if (selection.addresses !== undefined || selection.texts !== undefined) {
+                    logger.warn(
+                      `Sanity Check(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a selection of exactly '{ name: true }' but received ${JSON.stringify(selection)}.`,
+                    );
+                  }
 
-              //////////////////////////////////////////////////
-              // Protocol Acceleration: Bridged Resolvers
-              //   If the activeResolver is a Bridged Resolver,
-              //   then we can short-circuit the CCIP-Read and defer resolution to the indicated (shadow)Registry.
-              //////////////////////////////////////////////////
-              if (
-                resolver.bridgesToRegistryChainId !== null &&
-                resolver.bridgesToRegistryAddress !== null
-              ) {
-                return withEnsProtocolStep(
-                  TraceableENSProtocol.ForwardResolution,
-                  ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
-                  {},
-                  () =>
-                    _resolveForward(name, selection, {
-                      ...options,
-                      registry: {
-                        // biome-ignore lint/style/noNonNullAssertion: null check above
-                        chainId: resolver.bridgesToRegistryChainId!,
-                        // biome-ignore lint/style/noNonNullAssertion: null check above
-                        address: resolver.bridgesToRegistryAddress!,
-                      },
-                    }),
-                );
-              }
+                  // Invariant: the name in question should be an ENSIP-19 Reverse Name that we're able to parse
+                  const parsed = parseReverseName(name);
+                  if (!parsed) {
+                    throw new Error(
+                      `Invariant(ENSIP-19 Reverse Resolvers Protocol Acceleration): expected a valid ENSIP-19 Reverse Name but recieved '${name}'.`,
+                    );
+                  }
 
-              addEnsProtocolStepEvent(
-                protocolTracingSpan,
-                TraceableENSProtocol.ForwardResolution,
-                ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
-                false,
-              );
+                  // retrieve the name record from the index
+                  const nameRecordValue = await getENSIP19ReverseNameRecordFromIndex(
+                    parsed.address,
+                    parsed.coinType,
+                  );
 
-              //////////////////////////////////////////////////
-              // Protocol Acceleration: Known On-Chain Static Resolvers
-              //   If:
-              //    1) the ProtocolAcceleration Plugin indexes records for all Resolver contracts on
-              //       this chain, and
-              //    2) the activeResolver is a Static Resolver,
-              //   then we can retrieve records directly from the database.
-              //////////////////////////////////////////////////
-              const resolverRecordsAreIndexed =
-                areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
-                  config.namespace,
-                  chainId,
-                );
-
-              if (resolverRecordsAreIndexed && resolver.isStatic) {
-                return withEnsProtocolStep(
-                  TraceableENSProtocol.ForwardResolution,
-                  ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
-                  {},
-                  async () => {
-                    const resolver = await getRecordsFromIndex({
-                      resolver: { chainId, address: activeResolver },
-                      node,
-                      selection,
-                    });
-
-                    // if resolver doesn't exist here, there are no records in the index
-                    if (!resolver) {
-                      return makeEmptyResolverRecordsResponse(selection);
-                    }
-
-                    // format into RecordsResponse and return
-                    return makeRecordsResponseFromIndexedRecords(selection, resolver);
-                  },
-                );
-              }
-
-              addEnsProtocolStepEvent(
-                protocolTracingSpan,
-                TraceableENSProtocol.ForwardResolution,
-                ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
-                false,
+                  // NOTE: typecast is ok because of sanity checks above
+                  return { name: nameRecordValue } as ResolverRecordsResponse<SELECTION>;
+                },
               );
             }
+
+            //////////////////////////////////////////////////
+            // Protocol Acceleration: Bridged Resolvers
+            //   If the activeResolver is a Bridged Resolver,
+            //   then we can short-circuit the CCIP-Read and defer resolution to the indicated (shadow)Registry.
+            //////////////////////////////////////////////////
+            const bridgesTo = isBridgedResolver(config.namespace, resolver);
+            if (bridgesTo) {
+              return withEnsProtocolStep(
+                TraceableENSProtocol.ForwardResolution,
+                ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
+                {},
+                () => _resolveForward(name, selection, { ...options, registry: bridgesTo }),
+              );
+            }
+
+            addEnsProtocolStepEvent(
+              protocolTracingSpan,
+              TraceableENSProtocol.ForwardResolution,
+              ForwardResolutionProtocolStep.AccelerateKnownOffchainLookupResolver,
+              false,
+            );
+
+            //////////////////////////////////////////////////
+            // Protocol Acceleration: Known On-Chain Static Resolvers
+            //   If:
+            //    1) the ProtocolAcceleration Plugin indexes records for all Resolver contracts on
+            //       this chain, and
+            //    2) the activeResolver is a Static Resolver,
+            //   then we can retrieve records directly from the database.
+            //////////////////////////////////////////////////
+            const resolverRecordsAreIndexed =
+              areResolverRecordsIndexedByProtocolAccelerationPluginOnChainId(
+                config.namespace,
+                chainId,
+              );
+
+            if (resolverRecordsAreIndexed && isStaticResolver(config.namespace, resolver)) {
+              return withEnsProtocolStep(
+                TraceableENSProtocol.ForwardResolution,
+                ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
+                {},
+                async () => {
+                  const records = await getRecordsFromIndex({
+                    resolver: { chainId, address: activeResolver },
+                    node,
+                    selection,
+                  });
+
+                  // if resolver doesn't exist here, there are no records in the index
+                  if (!records) return makeEmptyResolverRecordsResponse(selection);
+
+                  // otherwise, format into RecordsResponse and return
+                  return makeRecordsResponseFromIndexedRecords(selection, records);
+                },
+              );
+            }
+
+            addEnsProtocolStepEvent(
+              protocolTracingSpan,
+              TraceableENSProtocol.ForwardResolution,
+              ForwardResolutionProtocolStep.AccelerateKnownOnchainStaticResolver,
+              false,
+            );
           }
 
           //////////////////////////////////////////////////

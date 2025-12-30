@@ -6,14 +6,14 @@ import * as schema from "@ensnode/ensnode-schema";
 import {
   type CanonicalPath,
   type DomainId,
-  getRootRegistryId,
+  getENSv2RootRegistryId,
   type RegistryId,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
 
 const MAX_DEPTH = 16;
-const ROOT_REGISTRY_ID = getRootRegistryId(config.namespace);
+const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
 
 /**
  * Provide the canonical parents from the Root Registry to `domainId`.

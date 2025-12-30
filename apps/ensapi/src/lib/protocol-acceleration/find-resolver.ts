@@ -15,15 +15,16 @@ import { packetToBytes } from "viem/ens";
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   type AccountId,
-  type ENSv1DomainId,
+  accountIdEqual,
+  type DomainId,
+  getDatasourceContract,
   getNameHierarchy,
-  isRootRegistry,
+  isENSv1Registry,
   type Name,
   type Node,
   type NormalizedName,
 } from "@ensnode/ensnode-sdk";
 
-import { sortByArrayOrder } from "@/graphql-api/lib/sort-by-array-order";
 import { db } from "@/lib/db";
 import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 
@@ -43,11 +44,20 @@ const NULL_RESULT: FindResolverResult = {
 
 const tracer = trace.getTracer("find-resolver");
 
+const ENSv1RegistryOld = getDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSRoot,
+  "ENSv1RegistryOld",
+);
+
 /**
  * Identifies `name`'s active resolver in `registry`.
  *
- * Note that any `registry` that is not the ENS Root Chain's Registry is a Shadow Registry like
- * Basenames' or Lineanames' (shadow)Registry contracts.
+ * Registry can be:
+ * - ENSv1 Root Chain Registry
+ * - ENSv1 Basenames (shadow) Registry
+ * - ENSv1 Lineanames (shadow) Registry
+ * - TODO: any ENSv2 Registry
  */
 export async function findResolver({
   registry,
@@ -67,14 +77,14 @@ export async function findResolver({
   //   If:
   //    1) the caller requested acceleration, and
   //    2) the ProtocolAcceleration plugin is active,
-  //   then we can identify a node's active resolver via the indexed Node-Resolver Relationships.
+  //   then we can identify a node's active resolver via the indexed Domain-Resolver Relationships.
   //////////////////////////////////////////////////
   if (accelerate && canAccelerate) {
     return findResolverWithIndex(registry, name);
   }
 
   // Invariant: UniversalResolver#findResolver only works for ENS Root Registry
-  if (!isRootRegistry(config.namespace, registry)) {
+  if (!isENSv1Registry(config.namespace, registry)) {
     throw new Error(
       `Invariant(findResolver): UniversalResolver#findResolver only identifies active resolvers agains the ENs Root Registry, but a different Registry contract was passed: ${JSON.stringify(registry)}.`,
     );
@@ -187,67 +197,88 @@ async function findResolverWithIndex(
         throw new Error(`Invariant(findResolverWithIndex): received an invalid name: '${name}'`);
       }
 
-      // 2. compute node of each via namehash
+      // 2. compute domainId of each node
+      // NOTE: this is currently ENSv1-specific
       const nodes = names.map((name) => namehash(name) as Node);
-      const domainIds = nodes as ENSv1DomainId[];
+      const domainIds = nodes as DomainId[];
 
-      // 3. for each node, find its associated resolver (only in the specified registry)
+      // 3. for each domain, find its associated resolver in the selected registry
       const domainResolverRelations = await withSpanAsync(
         tracer,
         "domainResolverRelation.findMany",
         {},
         async () => {
+          // the current ENS Root Chain Registry is actually ENSRegistryWithFallback: if a node
+          // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
+          // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
+          // https://github.com/ensdomains/ens-contracts/blob/be53b9c25be5b2c7326f524bbd34a3939374ab1f/contracts/registry/ENSRegistryWithFallback.sol#L19
           const records = await db.query.domainResolverRelation.findMany({
-            where: (t, { inArray, and, eq }) =>
+            where: (t, { inArray, and, or, eq }) =>
               and(
-                eq(t.chainId, registry.chainId), // exclusively for the requested registry
-                eq(t.address, registry.address), // exclusively for the requested registry
-                inArray(t.domainId, domainIds), // find Relations for the following Domains
+                or(
+                  ...[
+                    // filter for Domain-Resolver Relationship in the current Registry
+                    and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
+                    // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
+                    isENSv1Registry(config.namespace, registry) &&
+                      and(
+                        eq(t.chainId, ENSv1RegistryOld.chainId),
+                        eq(t.address, ENSv1RegistryOld.address),
+                      ),
+                  ].filter((c) => !!c),
+                ),
+                // filter for Domain-Resolver Relations for the following DomainIds
+                inArray(t.domainId, domainIds),
               ),
-            columns: { domainId: true, address: true },
           });
 
-          // cast into our semantic types
-          return records as { domainId: ENSv1DomainId; address: Address }[];
+          // 3.1 sort into the same order as `domainIds`: db results are not guaranteed to match `inArray` order
+          // NOTE: we also sort with a preference for `registry` matching the specific Registry we're
+          // searching within — this provides the "prefer Domain-Resolver-Relationships in Registry
+          // over RegistryOld" necessary to implement fallback.
+          records.sort((a, b) => {
+            // if the DomainIds match, prefer exact-registry-match
+            if (a.domainId === b.domainId) return accountIdEqual(a, registry) ? -1 : 1;
+
+            // otherwise, sort by order in `domainIds`
+            return domainIds.indexOf(a.domainId) > domainIds.indexOf(b.domainId) ? 1 : -1;
+          });
+
+          return records;
         },
       );
 
-      // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
-      domainResolverRelations.sort(sortByArrayOrder(domainIds, (nrr) => nrr.domainId));
+      // 4. If no Domain-Resolver Relations were found, there is no active resolver for the given domain
+      if (domainResolverRelations.length === 0) return NULL_RESULT;
 
-      // 4. iterate up the hierarchy and return the first valid resolver
-      for (const { domainId, address } of domainResolverRelations) {
-        // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
-        // encodes a zeroAddress resolver as the _absence_ of a Node-Resolver relation, so there is
-        // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
-        // we include this invariant here to encode that expectation explicitly.
-        if (isAddressEqual(zeroAddress, address)) {
-          throw new Error(
-            `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for Domain ${domainId}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
-          );
-        }
+      // 5. The first record is the active resolver
+      const { domainId, resolver } = domainResolverRelations[0];
 
-        // map the relation's `node` back to its name in `names`
-        const indexInHierarchy = domainIds.indexOf(domainId);
-        const activeName = names[indexInHierarchy];
-
-        // will never occur, exlusively for typechecking
-        if (!activeName) {
-          throw new Error(
-            `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's domainId: ${domainId}.`,
-          );
-        }
-
-        return {
-          activeName,
-          activeResolver: address,
-          // this resolver must have wildcard support if it was not for the first node in our hierarchy
-          requiresWildcardSupport: indexInHierarchy > 0,
-        };
+      // Invariant: Domain-Resolver Relations encodes the unsetting of a Resolver as null, so `resolver`
+      // should never be zeroAddress.
+      if (isAddressEqual(resolver, zeroAddress)) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for ${domainId}, which should be impossible: check ProtocolAcceleration Domain-Resolver Relation indexing logic.`,
+        );
       }
 
-      // 5. unable to find an active resolver
-      return NULL_RESULT;
+      // map the relation's `domainId` back to its name in `names`
+      const indexInHierarchy = domainIds.indexOf(domainId);
+      const activeName = names[indexInHierarchy];
+
+      // will never occur, exlusively for typechecking
+      if (!activeName) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} domains = ${JSON.stringify(domainIds)} active resolver's domainId: ${domainId}.`,
+        );
+      }
+
+      return {
+        activeName,
+        activeResolver: resolver,
+        // this resolver must have wildcard support if it was not for the first domain in our hierarchy
+        requiresWildcardSupport: indexInHierarchy > 0,
+      };
     },
   );
 }
