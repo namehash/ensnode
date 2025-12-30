@@ -13,7 +13,7 @@ import { factory } from "@/lib/hono-factory";
 import { resolveForward } from "@/lib/resolution/forward-resolution";
 import { resolvePrimaryNames } from "@/lib/resolution/multichain-primary-name-resolution";
 import { resolveReverse } from "@/lib/resolution/reverse-resolution";
-import { captureTrace } from "@/lib/tracing/protocol-tracing";
+import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
@@ -69,7 +69,7 @@ app.get(
     const { selection, trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
 
-    const { result, trace } = await captureTrace(() =>
+    const { result, trace } = await runWithTrace(() =>
       resolveForward(name, selection, { accelerate, canAccelerate }),
     );
 
@@ -117,7 +117,7 @@ app.get(
     const { trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
 
-    const { result, trace } = await captureTrace(() =>
+    const { result, trace } = await runWithTrace(() =>
       resolveReverse(address, chainId, { accelerate, canAccelerate }),
     );
 
@@ -163,7 +163,7 @@ app.get(
     const { chainIds, trace: showTrace, accelerate } = c.req.valid("query");
     const canAccelerate = c.var.canAccelerate;
 
-    const { result, trace } = await captureTrace(() =>
+    const { result, trace } = await runWithTrace(() =>
       resolvePrimaryNames(address, chainIds, { accelerate, canAccelerate }),
     );
 

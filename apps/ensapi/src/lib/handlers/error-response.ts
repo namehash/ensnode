@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import type { ClientErrorStatusCode, ServerErrorStatusCode } from "hono/utils/http-status";
 import { treeifyError, ZodError } from "zod/v4";
 
 import type { ErrorResponse } from "@ensnode/ensnode-sdk";
@@ -14,7 +15,11 @@ import type { ErrorResponse } from "@ensnode/ensnode-sdk";
  * @param input - The error input (ZodError, Error, string, or unknown)
  * @returns JSON error response with appropriate HTTP status code
  */
-export const errorResponse = (c: Context, input: ZodError | Error | string | unknown) => {
+export const errorResponse = (
+  c: Context,
+  input: ZodError | Error | string | unknown,
+  statusCode: ClientErrorStatusCode | ServerErrorStatusCode = 500,
+) => {
   if (input instanceof ZodError) {
     return c.json(
       { message: "Invalid Input", details: treeifyError(input) } satisfies ErrorResponse,
@@ -23,12 +28,12 @@ export const errorResponse = (c: Context, input: ZodError | Error | string | unk
   }
 
   if (input instanceof Error) {
-    return c.json({ message: input.message } satisfies ErrorResponse, 500);
+    return c.json({ message: input.message } satisfies ErrorResponse, statusCode);
   }
 
   if (typeof input === "string") {
-    return c.json({ message: input } satisfies ErrorResponse, 500);
+    return c.json({ message: input } satisfies ErrorResponse, statusCode);
   }
 
-  return c.json({ message: "Internal Error" } satisfies ErrorResponse, 500);
+  return c.json({ message: "Internal Server Error" } satisfies ErrorResponse, statusCode);
 };

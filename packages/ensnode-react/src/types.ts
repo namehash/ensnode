@@ -1,6 +1,7 @@
 import type { QueryObserverOptions } from "@tanstack/react-query";
 
 import type {
+  AcceleratableRequest,
   ClientOptions,
   ResolvePrimaryNameRequest,
   ResolvePrimaryNameResponse,
@@ -9,6 +10,7 @@ import type {
   ResolveRecordsRequest,
   ResolveRecordsResponse,
   ResolverRecordsSelection,
+  UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -64,4 +66,13 @@ export interface UsePrimaryNamesParameters
   extends Omit<ResolvePrimaryNamesRequest, "address">,
     QueryParameter<ResolvePrimaryNamesResponse> {
   address: ResolvePrimaryNamesRequest["address"] | null;
+}
+
+/**
+ * Parameters for the useResolvedIdentity hook.
+ */
+export interface UseResolvedIdentityParameters
+  extends QueryParameter<ResolvePrimaryNameResponse>,
+    AcceleratableRequest {
+  identity: UnresolvedIdentity;
 }

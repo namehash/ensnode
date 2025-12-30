@@ -4,6 +4,7 @@ import config from "@/config";
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
+import { html } from "hono/html";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
@@ -12,10 +13,11 @@ import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
+import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
-import { sdk } from "@/lib/tracing/instrumentation";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
+import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
@@ -32,11 +34,28 @@ app.use(async (ctx, next) => {
 app.use(cors({ origin: "*" }));
 
 // include automatic OpenTelemetry instrumentation for incoming requests
-// NOTE: required for protocol tracing
 app.use(otel());
 
 // add ENSIndexer Indexing Status Middleware to all routes for convenience
 app.use(indexingStatusMiddleware);
+
+// host welcome page
+app.get("/", (c) =>
+  c.html(html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENSApi</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>You've reached the root of an ENSApi instance. You might be looking for the <a href="https://ensnode.io/docs/">ENSNode documentation</a>.</p>
+</body>
+</html>
+`),
+);
 
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
@@ -47,9 +66,12 @@ app.route("/subgraph", subgraphApi);
 // use ENSAnalytics API at /ensanalytics
 app.route("/ensanalytics", ensanalyticsApi);
 
+// use Am I Realtime API at /amirealtime
+app.route("/amirealtime", amIRealtimeApi);
+
 // will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ ok: true });
+  return c.json({ message: "fallback ok" });
 });
 
 // log hono errors to console
@@ -72,7 +94,7 @@ const server = serve(
       `ENSApi listening on port ${info.port} with config:\n${prettyPrintJson(redactEnsApiConfig(config))}`,
     );
 
-    // self-healthcheck to connect to ENSIndexer & warm Indexing Status / Can Accelerate cache
+    // self-healthcheck to connect to ENSIndexer & warm Indexing Status cache
     await app.request("/health");
   },
 );

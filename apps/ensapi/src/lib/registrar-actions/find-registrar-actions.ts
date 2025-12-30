@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, not, type SQL } from "drizzle-orm/sql";
+import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -65,6 +65,14 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
           // apply decoded referrer equality filter
           return eq(schema.registrarActions.decodedReferrer, filter.value);
 
+        case RegistrarActionsFilterTypes.BeginTimestamp:
+          // apply begin timestamp filter (inclusive)
+          return gte(schema.registrarActions.timestamp, BigInt(filter.value));
+
+        case RegistrarActionsFilterTypes.EndTimestamp:
+          // apply end timestamp filter (inclusive)
+          return lte(schema.registrarActions.timestamp, BigInt(filter.value));
+
         default:
           // Invariant: Unknown filter type — should never occur
           throw new Error(`Unknown filter type`);
@@ -92,7 +100,7 @@ export async function _countRegistrarActions(
 ): Promise<number> {
   const countQuery = db
     .select({
-      count: schema.registrarActions.id,
+      count: count(),
     })
     .from(schema.registrarActions)
     // join Registration Lifecycles associated with Registrar Actions
@@ -113,7 +121,7 @@ export async function _countRegistrarActions(
     .where(and(...buildWhereClause(filters)));
 
   const result = await countQuery;
-  return result.length;
+  return result[0].count;
 }
 
 /**

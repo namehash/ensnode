@@ -15,6 +15,8 @@ import { packetToBytes } from "viem/ens";
 import { DatasourceNames, getDatasource } from "@ensnode/datasources";
 import {
   type AccountId,
+  accountIdEqual,
+  getDatasourceContract,
   getNameHierarchy,
   type Name,
   type Node,
@@ -22,8 +24,8 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { withActiveSpanAsync, withSpanAsync } from "@/lib/instrumentation/auto-span";
 import { isENSRootRegistry } from "@/lib/protocol-acceleration/ens-root-registry";
-import { withActiveSpanAsync, withSpanAsync } from "@/lib/tracing/auto-span";
 
 type FindResolverResult =
   | {
@@ -40,6 +42,8 @@ const NULL_RESULT: FindResolverResult = {
 };
 
 const tracer = trace.getTracer("find-resolver");
+
+const RegistryOld = getDatasourceContract(config.namespace, DatasourceNames.ENSRoot, "RegistryOld");
 
 /**
  * Identifies `name`'s active resolver in `registry`.
@@ -186,20 +190,48 @@ async function findResolverWithIndex(
       // 2. compute node of each via namehash
       const nodes = names.map((name) => namehash(name) as Node);
 
-      // 3. for each node, find its associated resolver (only in the specified registry)
+      // 3. for each node, find its resolver in the selected registry
       const nodeResolverRelations = await withSpanAsync(
         tracer,
         "nodeResolverRelation.findMany",
         {},
         async () => {
+          // the current ENS Root Chain Registry is actually ENSRegistryWithFallback: if a node
+          // doesn't exist in its own storage, it directs the lookup to RegistryOld. We must encode
+          // this logic here, so that the active resolver of unmigrated nodes can be correctly identified.
+          // https://github.com/ensdomains/ens-contracts/blob/be53b9c25be5b2c7326f524bbd34a3939374ab1f/contracts/registry/ENSRegistryWithFallback.sol#L19
           const records = await db.query.nodeResolverRelation.findMany({
-            where: (nrr, { inArray, and, eq }) =>
+            where: (nrr, { inArray, and, or, eq }) =>
               and(
-                eq(nrr.chainId, registry.chainId), // exclusively for the requested registry
-                eq(nrr.registry, registry.address), // exclusively for the requested registry
-                inArray(nrr.node, nodes), // find Relations for the following Nodes
+                or(
+                  ...[
+                    // filter for Node-Resolver Relationship in the current Registry
+                    and(eq(nrr.chainId, registry.chainId), eq(nrr.registry, registry.address)),
+                    // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
+                    isENSRootRegistry(registry) &&
+                      and(
+                        eq(nrr.chainId, RegistryOld.chainId),
+                        eq(nrr.registry, RegistryOld.address),
+                      ),
+                  ].filter((c) => !!c),
+                ),
+                // filter for Node-Resolver Relations for the following Nodes
+                inArray(nrr.node, nodes),
               ),
-            columns: { node: true, resolver: true },
+          });
+
+          // 3.1 sort into the same order as `nodes`: db results are not guaranteed to match `inArray` order
+          // NOTE: we also sort with a preference for `registry` matching the specific Registry we're
+          // searching within — this provides the "prefer Node-Resolver-Relationships in Registry
+          // over RegistryOld" necessary to implement fallback.
+          records.sort((a, b) => {
+            // if the nodes match, prefer exact-registry-match
+            if (a.node === b.node) {
+              return accountIdEqual({ chainId: a.chainId, address: a.registry }, registry) ? -1 : 1;
+            }
+
+            // otherwise, sort by order in `nodes`
+            return nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1;
           });
 
           // cast into our semantic types
@@ -207,44 +239,37 @@ async function findResolverWithIndex(
         },
       );
 
-      // 3.1 sort into the same order as `nodes`, db results are not guaranteed to match `inArray` order
-      nodeResolverRelations.sort((a, b) =>
-        nodes.indexOf(a.node) > nodes.indexOf(b.node) ? 1 : -1,
-      );
+      // 4. If no Node-Resolver Relations were found, there is no active resolver for the given node
+      if (nodeResolverRelations.length === 0) return NULL_RESULT;
 
-      // 4. iterate up the hierarchy and return the first valid resolver
-      for (const { node, resolver } of nodeResolverRelations) {
-        // NOTE: this zeroAddress check is not strictly necessary, as the ProtocolAcceleration plugin
-        // encodes a zeroAddress resolver as the _absence_ of a Node-Resolver relation, so there is
-        // no case where a Node-Resolver relation exists and the resolverAddress is zeroAddress, but
-        // we include this invariant here to encode that expectation explicitly.
-        if (isAddressEqual(resolver, zeroAddress)) {
-          throw new Error(
-            `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for node ${node}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
-          );
-        }
+      // 5. The first record is the active resolver
+      const { node, resolver } = nodeResolverRelations[0];
 
-        // map the relation's `node` back to its name in `names`
-        const indexInHierarchy = nodes.indexOf(node);
-        const activeName = names[indexInHierarchy];
-
-        // will never occur, exlusively for typechecking
-        if (!activeName) {
-          throw new Error(
-            `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's node: ${node}.`,
-          );
-        }
-
-        return {
-          activeName,
-          activeResolver: resolver,
-          // this resolver must have wildcard support if it was not for the first node in our hierarchy
-          requiresWildcardSupport: indexInHierarchy > 0,
-        };
+      // Invariant: Node-Resolver Relations encodes the unsetting of a Resolver as null, so `resolver`
+      // should never be zeroAddress.
+      if (isAddressEqual(resolver, zeroAddress)) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): Encountered a zeroAddress resolverAddress for node ${node}, which should be impossible: check ProtocolAcceleration Node-Resolver Relation indexing logic.`,
+        );
       }
 
-      // 5. unable to find an active resolver
-      return NULL_RESULT;
+      // map the relation's `node` back to its name in `names`
+      const indexInHierarchy = nodes.indexOf(node);
+      const activeName = names[indexInHierarchy];
+
+      // will never occur, exlusively for typechecking
+      if (!activeName) {
+        throw new Error(
+          `Invariant(findResolverWithIndex): activeName could not be determined. names = ${JSON.stringify(names)} nodes = ${JSON.stringify(nodes)} active resolver's node: ${node}.`,
+        );
+      }
+
+      return {
+        activeName,
+        activeResolver: resolver,
+        // this resolver must have wildcard support if it was not for the first node in our hierarchy
+        requiresWildcardSupport: indexInHierarchy > 0,
+      };
     },
   );
 }
