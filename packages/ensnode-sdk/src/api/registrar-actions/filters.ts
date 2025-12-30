@@ -1,9 +1,12 @@
 import type { Address } from "viem";
 
 import type { Node } from "../../ens";
+import type { UnixTimestamp } from "../../shared";
 import {
   type RegistrarActionsFilter,
+  type RegistrarActionsFilterBeginTimestamp,
   type RegistrarActionsFilterByDecodedReferrer,
+  type RegistrarActionsFilterEndTimestamp,
   RegistrarActionsFilterTypes,
   type RegistrarActionsFilterWithEncodedReferral,
 } from "./request";
@@ -57,8 +60,46 @@ function byDecodedReferrer(
   } satisfies RegistrarActionsFilterByDecodedReferrer;
 }
 
+/**
+ * Build a "begin timestamp" filter object for Registrar Actions query.
+ *
+ * Filters registrar actions to only include those at or after the specified timestamp (inclusive).
+ */
+function beginTimestamp(timestamp: UnixTimestamp): RegistrarActionsFilter;
+function beginTimestamp(timestamp: undefined): undefined;
+function beginTimestamp(timestamp: UnixTimestamp | undefined): RegistrarActionsFilter | undefined {
+  if (typeof timestamp === "undefined") {
+    return undefined;
+  }
+
+  return {
+    filterType: RegistrarActionsFilterTypes.BeginTimestamp,
+    value: timestamp,
+  } satisfies RegistrarActionsFilterBeginTimestamp;
+}
+
+/**
+ * Build an "end timestamp" filter object for Registrar Actions query.
+ *
+ * Filters registrar actions to only include those at or before the specified timestamp (inclusive).
+ */
+function endTimestamp(timestamp: UnixTimestamp): RegistrarActionsFilter;
+function endTimestamp(timestamp: undefined): undefined;
+function endTimestamp(timestamp: UnixTimestamp | undefined): RegistrarActionsFilter | undefined {
+  if (typeof timestamp === "undefined") {
+    return undefined;
+  }
+
+  return {
+    filterType: RegistrarActionsFilterTypes.EndTimestamp,
+    value: timestamp,
+  } satisfies RegistrarActionsFilterEndTimestamp;
+}
+
 export const registrarActionsFilter = {
   byParentNode,
   withReferral,
   byDecodedReferrer,
+  beginTimestamp,
+  endTimestamp,
 };
