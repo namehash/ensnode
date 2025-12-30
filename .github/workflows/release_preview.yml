@@ -215,10 +215,31 @@ jobs:
             type=raw,value=${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
             type=sha
 
+  build-and-publish-lambdas:
+    name: Build & Publish Preview Lambdas
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [validate-and-prepare, build-and-publish-npm]
+    if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-ghcr'
+    strategy:
+      fail-fast: false
+      matrix:
+        lambda: [fallback-ensapi]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and Publish Lambda
+        uses: ./.github/actions/build_and_publish_lambda
+        with:
+          name: ${{ matrix.lambda }}
+          version: ${{ needs.validate-and-prepare.outputs.dist-tag }}
+
   detect-pr-and-comment:
     name: Update PR Comment
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr]
+    needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr, build-lambdas]
     if: always() && needs.build-and-publish-npm.result == 'success'
     permissions:
       contents: read

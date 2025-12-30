@@ -123,3 +123,24 @@ jobs:
             type=raw,value=next
             type=raw,value=${{ steps.snapshot-tag.outputs.tag }}
             type=sha
+
+  build-and-publish-lambdas:
+    name: Build & Publish Snapshot Lambdas
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    needs: [build-and-publish-npm]
+    strategy:
+      fail-fast: false
+      matrix:
+        lambda: [fallback-ensapi]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and Publish Lambda
+        uses: ./.github/actions/build_and_publish_lambda
+        with:
+          name: ${{ matrix.lambda }}
+          version: next
