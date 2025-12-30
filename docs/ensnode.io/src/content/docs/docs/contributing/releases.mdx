@@ -13,17 +13,17 @@ We use [changesets](https://github.com/changesets/changesets) to manage version 
 
 When you open a PR with feature or bug fix changes, you'll need to include a changeset file that documents your changes:
 
-1. Run `changeset` or `pnpm changeset` in the repository root
-2. Select the packages/apps your changes affect using the interactive prompt
+1. Run `changeset` or `pnpm changeset` in the repository root.
+2. Select the packages/apps your changes affect using the interactive prompt.
 3. Choose whether your changes are "major" (breaking changes), "minor" (features), or "patch" (bug fixes).
-4. Write a clear description of your changes - this will appear in the release notes
+4. Write a clear description of your changes - this will appear in the release notes.
 
 The `changesets/bot` will automatically comment on your PR to either remind you to add a changeset or confirm the version changes that will happen when your PR is merged.
 
 **Important notes:**
-- Changesets are only required for user-facing changes (features, bug fixes)
-- You don't need a changeset for documentation changes or internal refactoring
-- All our packages use "fixed" versioning - they all share the same version number regardless of which package triggered the version bump
+- Changesets are only required for user-facing changes (features, bug fixes).
+- You don't need a changeset for documentation changes or internal refactoring.
+- All our packages use "fixed" versioning - they all share the same version number regardless of which package triggered the version bump.
 
 # Creating a Release
 
@@ -60,11 +60,11 @@ Each commit to `main` will automatically trigger the `release_snapshot.yml` work
 
 Workflow File: [release_preview.yml](https://github.com/namehash/ensnode/blob/main/.github/workflows/release_preview.yml)
 
-In the event that a package needs to be tested or installed before it is merged into `main`, a preview release can be used. To manually trigger a preview release for a branch, follow these steps:
+To test or install a package before merging it into `main`, a preview release can be used. To manually trigger a preview release for a branch, follow these steps:
 
 1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/release_preview.yml)
 2. Click "Run workflow" and select from the following options:
- - Which branch you would like to run the preview release workflow on. You can choose any branch other than `main` and it will trigger a preview release for it, however it is recommended to use the branch where there is an active PR so the workflow can add a GitHub comment to the PR. The GitHub comment will contain helpful installation info such as the generated release tag, which would otherwise have to be located manually through the action logs or the publishing registries.
+ - The branch on which to run the preview release workflow. Any branch other than `main` can be selected. Using a branch with an active PR allows the workflow to add a GitHub comment containing the installation information.
  - Choose whether to build and publish only NPM packages, or to build and publish both NPM packages and Docker images to the GitHub Container Registry (ghcr).
  - (Optional) Provide a custom suffix for the preview release package tag. For example, if you had a branch called `feat/add-api-route` and left this custom suffix field blank, the preview release would be `@ensnode/package-name@preview-feat-add-api-route`. If you fill in the custom suffix field with `users-route` then the resulting tag name would be `@ensnode/package-name@preview-users-route`.
 3. Install preview packages with: `npm install @ensnode/package-name@preview-branch-name`. 
@@ -89,58 +89,44 @@ When installing ENSNode NPM packages or Docker images, you have several release 
 
 ## Choosing the Right Release Type
 
-### For Production Deployments: Pinned Full Release Versions
+### Pinned Full Release Versions
+:::note
+The example version below of `1.0.0` is a placeholder. Visit the [Releases Page](https://github.com/namehash/ensnode/releases) to pick a pinned full release.
+:::
 ```bash
-npm install @ensnode/package-name@1
-docker run ghcr.io/namehash/ensnode:1
+npm install @ensnode/package-name@1.0.0
+docker run ghcr.io/namehash/ensnode:1.0.0
 ```
 
-**When to use:**
-- Production deployments and any critical infrastructure
-- When you need maximum stability and control over updates
+Pinned full releases are recommended for those who want to start using ENSNode packages or Docker images. By using a pinned version you can maintain full control over features or patches that might be included. Feview the release notes on the [Releases Page](https://github.com/namehash/ensnode/releases) to help decide which version to install.
 
-**What to expect:**
-- Stable, well-tested releases with complete release notes
-- The version will never change - you control when to upgrade
-- No unexpected breaking changes or behavior changes
+:::caution
+Never use the `latest` tag for Docker deployments (e.g., `ghcr.io/namehash/ensnode:latest` or `ghcr.io/namehash/ensnode`). The `latest` tag is a mutable pointer that will automatically pull different versions over time, causing unexpected updates and potential breaking changes in your deployment. Always pin to a specific version number from the [GitHub releases page](https://github.com/namehash/ensnode/releases).
+:::
 
-**Important:** Never use the `latest` tag for Docker deployments (e.g., `ghcr.io/namehash/ensnode:latest` or `ghcr.io/namehash/ensnode`). The `latest` tag is a mutable pointer that will automatically pull different versions over time, causing unexpected updates and potential breaking changes in your deployment. Always pin to a specific version number from the [GitHub releases page](https://github.com/namehash/ensnode/releases).
-
-### For Development/Testing: `@next` (Snapshot releases)
+### Snapshot Releases
 ```bash
 npm install @ensnode/package-name@next  
 docker run ghcr.io/namehash/ensnode:next
 ```
 
-**When to use:**
-- Development environments
-- When you want to test upcoming features before they're stable
+Snapshot releases should be used by those who need to test features or patches before they are included in full releases. These releases follow the `main` branch and are not referenced in the GitHub Releases page. Instead they are installed by using the `next` tag for NPM packages or Docker images. 
 
-**What to expect:**
-- Latest features and bug fixes from the main branch
-- May contain breaking changes or unstable features
-- More frequent updates (every commit to main)
+:::caution
+Snapshot releases may contain unstable changes and should only be used in development environments.
+:::
 
-### For Feature Testing: `@preview-*` (Preview Releases)
+### Preview Releases
+:::note
+The example below is a mock of what a preview release might look like. Read [preview releases section](#preview-release) for more information.
+:::
 ```bash
 npm install @ensnode/package-name@preview-branch-name
 docker run ghcr.io/namehash/ensnode:preview-branch-name
 ```
 
-**When to use:**
-- Testing specific features before they're merged
-- Collaborating on development work
-- Validating fixes for specific issues
+Preview releases are designed to test features or patches on a branch that have not been merged to the `main` branch, which means they can contain experimental and unstable changes. Therefore preview releases should be avoided unless you are actively contributing through a PR and need to test work on a branch. 
 
-**What to expect:**
-- Experimental and potentially unstable
-- Built from active development branches
-- May not be compatible with other packages
-
-## Version Selection Best Practices
-
-- **Always pin Docker deployments to specific version numbers** (e.g., `1.2.3`) - never use `latest` or omit the tag
-- Check the [GitHub releases page](https://github.com/namehash/ensnode/releases) to find the specific version number you need
-- Review release notes before upgrading to understand what changed
-- Use snapshot releases (`@next`) only in development or staging environments for testing upcoming features
-- Avoid using preview releases (`@preview`) unless you are actively contributing through a PR
+:::caution
+Avoid using preview releases unless you are actively contributing to ENSNode and need to test changes on an active branch.
+:::
