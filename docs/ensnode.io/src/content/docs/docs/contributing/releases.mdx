@@ -64,26 +64,27 @@ Each commit to `main` will automatically trigger the `release_snapshot.yml` work
 
 Workflow File: [release_preview.yml](https://github.com/namehash/ensnode/blob/main/.github/workflows/release_preview.yml)
 
-To test or install a package before merging it into `main`, a preview release can be used. To manually trigger a preview release for a branch, follow these steps:
+To test or install a package before merging it into `main`, a preview release can be used. Each preview release is associated with a PR, and the PR will receive a comment with installation instructions. To manually trigger a preview release, follow these steps:
 
 1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/release_preview.yml)
 2. Click "Run workflow" and select from the following options:
- - The branch on which to run the preview release workflow. Any branch other than `main` can be selected. Using a branch with an active PR allows the workflow to add a GitHub comment containing the installation information. If multiple preview releases are triggered for the same branch/PR, the GitHub comment on the associated PR will update with the latest preview release.
+ - The branch on which to run the preview release workflow. The branch must have an open PR.
  - Choose which artifacts to build and publish:
    - `npm-only`: NPM packages only
    - `npm-and-lambdas`: NPM packages + Lambda functions
    - `npm-and-ghcr`: NPM packages + Docker images
    - `all`: NPM packages + Lambda functions + Docker images
  - (Optional) Provide a custom suffix for the preview release tag. For example, if you had a branch called `feat/add-api-route` and left this custom suffix field blank, the preview release would be `@ensnode/[package-name]@preview-feat-add-api-route`. If you fill in the custom suffix field with `users-route` then the resulting tag name would be `@ensnode/[package-name]@preview-users-route`.
-3. Install preview packages with: `npm install @ensnode/[package-name]@preview-branch-name`. 
+3. The workflow will post a comment on the PR with installation instructions. If multiple preview releases are triggered for the same PR, the comment will update with the latest release info.
+4. Install preview packages with: `npm install @ensnode/[package-name]@preview-branch-name`. 
 
 **Important notes:**
-- Preview releases are generally built and published from branches with active PRs. They are not guaranteed to be stable as they are still under active development.
-- Preview releases can only be triggered manually.
+- Preview releases require an open PR. The workflow will abort if no PR exists for the branch.
+- Preview releases are not guaranteed to be stable as they are still under active development.
+- Preview releases can only be triggered manually by authorized NameHash team members.
 - Preview releases will include the `@preview-*` tag for published artifacts, followed by either the name of the branch or the custom suffix chosen during the action trigger.
 - Published artifacts will advance to the version that was included in the changeset of the selected branch.
-- Preview releases can only be triggered by authorized NameHash team members.
-- No GitHub releases or tags are created for Preview Releases.
+- No GitHub releases or tags are created for preview releases.
 
 # Selecting a Release for Deployment or Installation
 
@@ -124,15 +125,15 @@ Snapshot releases may contain unstable changes and should only be used in develo
 
 ### Preview Releases
 :::note
-The example below is a mock of what a preview release might look like. Read [preview releases section](#preview-release) for more information.
+The example below is a mock of what a preview release might look like. Read the [preview releases section](#preview-release) for more information.
 :::
 ```bash
 npm install @ensnode/[package-name]@[preview-branch-name]
 docker run ghcr.io/namehash/ensnode/[app-name]:[preview-branch-name]
 ```
 
-Preview releases are designed to test features or patches on a branch that have not been merged to the `main` branch, which means they can contain experimental and unstable changes. Therefore preview releases should be avoided unless you are actively contributing through a PR and need to test work on a branch. 
+Preview releases are designed to test features or patches on a PR branch before it is merged to `main`. Each preview release is associated with a PR, and the PR will have a comment with installation instructions. Since preview releases can contain experimental and unstable changes, they should be avoided unless you are actively contributing through a PR and need to test work on a branch.
 
 :::caution
-Avoid using preview releases unless you are actively contributing to ENSNode and need to test changes on an active branch.
+Avoid using preview releases unless you are actively contributing to ENSNode and need to test changes on an active PR.
 :::

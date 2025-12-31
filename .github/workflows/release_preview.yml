@@ -3,10 +3,14 @@
 # This workflow creates preview releases for testing features before they are merged to main.
 # It must be triggered manually via the GitHub Actions UI.
 #
+# Requirements:
+# - The branch must have an open PR targeting main
+# - Cannot be run on the main branch
+#
 # How to trigger:
 # 1. Navigate to Actions > Release Preview in GitHub
 # 2. Click "Run workflow" and select:
-#    - Branch: The branch you want to create a preview release from (typically an active PR branch)
+#    - Branch: The branch you want to create a preview release from (must have an open PR)
 #    - Publish target:
 #      - npm-only: NPM packages only
 #      - npm-and-lambdas: NPM packages + Lambda functions
@@ -15,13 +19,13 @@
 #    - Custom tag suffix (optional): Custom tag suffix instead of branch name
 #
 # What it does:
-# 1. Validates the branch (cannot run on main)
+# 1. Validates the branch (cannot run on main) and verifies an open PR exists
 # 2. Generates a sanitized tag from the branch name or custom tag suffix (e.g., @preview-feat-add-api-route)
 # 3. Versions packages using changesets in snapshot mode
 # 4. Publishes NPM packages with @preview-* dist-tag
 # 5. Optionally builds and publishes Lambda functions as GitHub Actions artifacts
 # 6. Optionally builds and publishes Docker images with preview-* tag
-# 7. Posts/updates a comment on the associated PR with installation instructions
+# 7. Posts/updates a comment on the PR with installation instructions
 #
 # Published artifacts:
 # - NPM packages: Published with @preview-{branch-name} or @preview-{custom-suffix} tag
@@ -30,16 +34,17 @@
 # - No GitHub releases or tags are created
 #
 # Use cases:
-# - Testing features before merging to main
+# - Testing PR features before merging to main
 # - Collaborating on development work
 # - Validating fixes for specific issues
 # - QA testing of work-in-progress features
 #
 # Important notes:
+# - Preview releases require an open PR targeting main
 # - Preview releases are NOT stable and should not be used in production
 # - They are ephemeral and don't modify the repository (no commits/tags in git)
 # - Only authorized NameHash team members can trigger preview releases
-# - Preview releases are built from active development branches
+# - Each preview release will update the PR comment with installation instructions
 # - Installation: npm install @ensnode/package-name@preview-branch-name
 # - Cleanup: Use npm dist-tag rm to manually remove preview tags when no longer needed
 #
@@ -86,7 +91,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate branch
+      - name: Validate branch and PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "❌ Cannot run prerelease workflow on main branch"
@@ -94,6 +101,20 @@ jobs:
             exit 1
           fi
           echo "✅ Branch validation passed: ${{ github.ref_name }}"
+
+          # Require an open PR for this branch
+          PR_DATA=$(gh pr list --state=open --head="${{ github.ref_name }}" --base=main --json number,title --limit 1)
+
+          if [[ "$PR_DATA" == "[]" || -z "$PR_DATA" ]]; then
+            echo "❌ No open PR found for branch '${{ github.ref_name }}'"
+            echo "Preview releases require an open PR targeting main."
+            echo "Please create a PR for this branch before running a preview release."
+            exit 1
+          fi
+
+          PR_NUMBER=$(echo "$PR_DATA" | jq -r '.[0].number')
+          PR_TITLE=$(echo "$PR_DATA" | jq -r '.[0].title')
+          echo "✅ Found PR #${PR_NUMBER}: ${PR_TITLE}"
 
       - name: Prepare tags and identifiers
         id: prepare
@@ -244,7 +265,7 @@ jobs:
           name: ${{ matrix.lambda }}
           version: ${{ needs.validate-and-prepare.outputs.dist-tag }}
 
-  detect-pr-and-comment:
+  update-pr-comment:
     name: Update PR Comment
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr, build-and-publish-lambdas]
@@ -258,33 +279,22 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Detect PR
-        id: detect-pr
+      - name: Get PR number
+        id: get-pr
         run: |
-          # Try to find PR for this branch
-          PR_DATA=$(gh pr list --state=open --head="${{ github.ref_name }}" --base=main --json number,title,url --limit 1)
+          # PR is guaranteed to exist (validated in validate-and-prepare job)
+          PR_DATA=$(gh pr list --state=open --head="${{ github.ref_name }}" --base=main --json number,title --limit 1)
+          PR_NUMBER=$(echo "$PR_DATA" | jq -r '.[0].number')
+          PR_TITLE=$(echo "$PR_DATA" | jq -r '.[0].title')
 
-          if [[ "$PR_DATA" != "[]" && -n "$PR_DATA" ]]; then
-            PR_NUMBER=$(echo "$PR_DATA" | jq -r '.[0].number')
-            PR_TITLE=$(echo "$PR_DATA" | jq -r '.[0].title')
-            PR_URL=$(echo "$PR_DATA" | jq -r '.[0].url')
-
-            echo "pr-number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-            echo "pr-title=${PR_TITLE}" >> $GITHUB_OUTPUT
-            echo "pr-url=${PR_URL}" >> $GITHUB_OUTPUT
-            echo "has-pr=true" >> $GITHUB_OUTPUT
-
-            echo "✅ Found PR #${PR_NUMBER}: ${PR_TITLE}"
-          else
-            echo "has-pr=false" >> $GITHUB_OUTPUT
-            echo "ℹ️  No open PR found for branch ${{ github.ref_name }}"
-          fi
+          echo "pr-number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "pr-title=${PR_TITLE}" >> $GITHUB_OUTPUT
+          echo "✅ Updating PR #${PR_NUMBER}: ${PR_TITLE}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate PR comment body
         id: comment
-        if: steps.detect-pr.outputs.has-pr == 'true'
         run: |
           # Build timestamp for display
           BUILD_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
@@ -385,10 +395,9 @@ jobs:
 
       - name: Find existing comment
         id: find-comment
-        if: steps.detect-pr.outputs.has-pr == 'true'
         run: |
           # Look for existing comment from github-actions bot
-          COMMENT_ID=$(gh pr view ${{ steps.detect-pr.outputs.pr-number }} --json comments --jq '.comments[] | select(.author.login == "github-actions" and (.body | contains("🚀 Preview Packages"))) | .id' | head -1)
+          COMMENT_ID=$(gh pr view ${{ steps.get-pr.outputs.pr-number }} --json comments --jq '.comments[] | select(.author.login == "github-actions" and (.body | contains("🚀 Preview Packages"))) | .id' | head -1)
 
           if [[ -n "$COMMENT_ID" ]]; then
             echo "existing-comment-id=${COMMENT_ID}" >> $GITHUB_OUTPUT
@@ -400,15 +409,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update or create PR comment
-        if: steps.detect-pr.outputs.has-pr == 'true'
         run: |
           if [[ -n "${{ steps.find-comment.outputs.existing-comment-id }}" ]]; then
             # Update existing comment
-            gh pr comment ${{ steps.detect-pr.outputs.pr-number }} --edit-last --body-file ${{ steps.comment.outputs.comment-file }}
+            gh pr comment ${{ steps.get-pr.outputs.pr-number }} --edit-last --body-file ${{ steps.comment.outputs.comment-file }}
             echo "✅ Updated existing PR comment"
           else
             # Create new comment
-            gh pr comment ${{ steps.detect-pr.outputs.pr-number }} --body-file ${{ steps.comment.outputs.comment-file }}
+            gh pr comment ${{ steps.get-pr.outputs.pr-number }} --body-file ${{ steps.comment.outputs.comment-file }}
             echo "✅ Created new PR comment"
           fi
         env:
@@ -418,6 +426,7 @@ jobs:
         run: |
           echo "## 📋 Preview Release Summary"
           echo "- Branch: ${{ github.ref_name }}"
+          echo "- PR: #${{ steps.get-pr.outputs.pr-number }}"
           echo "- Publish target: ${{ inputs.publish_target }}"
           echo "- Published version: ${{ needs.build-and-publish-npm.outputs.published-version }}"
           echo "- NPM dist-tag: ${{ needs.validate-and-prepare.outputs.dist-tag }}"
@@ -428,8 +437,4 @@ jobs:
           if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" || "${{ inputs.publish_target }}" == "all" ]]; then
             echo "- Docker tag: ${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}"
             echo "- GHCR publish: ${{ needs.build-and-publish-ghcr.result }}"
-          fi
-          echo "- PR detected: ${{ steps.detect-pr.outputs.has-pr }}"
-          if [[ "${{ steps.detect-pr.outputs.has-pr }}" == "true" ]]; then
-            echo "- PR number: #${{ steps.detect-pr.outputs.pr-number }}"
           fi
