@@ -1,21 +1,9 @@
 import { ponder } from "ponder:registry";
 
-import { type LabelHash, PluginName, uint256ToHex32 } from "@ensnode/ensnode-sdk";
+import { interpretTokenIdAsLabelHash, PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeRegistrarHandlers } from "@/plugins/subgraph/shared-handlers/Registrar";
-
-/**
- * When direct subnames of .eth are registered through the ETHRegistrarController contract on
- * Ethereum mainnet, an ERC721 NFT is minted that tokenizes ownership of the registration. The minted NFT
- * will be assigned a unique tokenId which is uint256(labelhash(label)) where label is the
- * direct subname of .eth that was registered.
- * https://github.com/ensdomains/ens-contracts/blob/db613bc/contracts/ethregistrar/ETHRegistrarController.sol#L215
- */
-const tokenIdToLabelHash = (tokenId: bigint): LabelHash => uint256ToHex32(tokenId);
-
-// the shared Registrar handlers in this plugin index direct subnames of '.eth'
-const registrarManagedName = "eth" as const;
 
 /**
  * Registers event handlers with Ponder.
@@ -29,10 +17,7 @@ export default function () {
     handleNameRenewedByController,
     handleNameRenewed,
     handleNameTransferred,
-  } = makeRegistrarHandlers({
-    pluginName,
-    registrarManagedName,
-  });
+  } = makeRegistrarHandlers({ pluginName });
 
   ///////////////////////////////
   // BaseRegistrar
@@ -48,7 +33,7 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            labelHash: tokenIdToLabelHash(event.args.id),
+            labelHash: interpretTokenIdAsLabelHash(event.args.id),
           },
         },
       });
@@ -64,7 +49,7 @@ export default function () {
           ...event,
           args: {
             ...event.args,
-            labelHash: tokenIdToLabelHash(event.args.id),
+            labelHash: interpretTokenIdAsLabelHash(event.args.id),
           },
         },
       });
@@ -80,7 +65,7 @@ export default function () {
         args: {
           from,
           to,
-          labelHash: tokenIdToLabelHash(tokenId),
+          labelHash: interpretTokenIdAsLabelHash(tokenId),
         },
       },
     });
