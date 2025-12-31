@@ -7,7 +7,11 @@
 # 1. Navigate to Actions > Release Preview in GitHub
 # 2. Click "Run workflow" and select:
 #    - Branch: The branch you want to create a preview release from (typically an active PR branch)
-#    - Publish target: npm-only or npm-and-ghcr (NPM packages + Docker images)
+#    - Publish target:
+#      - npm-only: NPM packages only
+#      - npm-and-lambdas: NPM packages + Lambda functions
+#      - npm-and-ghcr: NPM packages + Docker images
+#      - all: NPM packages + Lambda functions + Docker images
 #    - Custom tag suffix (optional): Custom tag suffix instead of branch name
 #
 # What it does:
@@ -15,11 +19,13 @@
 # 2. Generates a sanitized tag from the branch name or custom tag suffix (e.g., @preview-feat-add-api-route)
 # 3. Versions packages using changesets in snapshot mode
 # 4. Publishes NPM packages with @preview-* dist-tag
-# 5. Optionally builds and publishes Docker images with preview-* tag
-# 6. Posts/updates a comment on the associated PR with installation instructions
+# 5. Optionally builds and publishes Lambda functions as GitHub Actions artifacts
+# 6. Optionally builds and publishes Docker images with preview-* tag
+# 7. Posts/updates a comment on the associated PR with installation instructions
 #
 # Published artifacts:
 # - NPM packages: Published with @preview-{branch-name} or @preview-{custom-suffix} tag
+# - Lambda functions (optional): Published as GitHub Actions artifacts
 # - Docker images (optional): Published with preview-{branch-name} or preview-{custom-suffix} tag
 # - No GitHub releases or tags are created
 #
@@ -52,10 +58,12 @@ on:
         description: 'Where should the release preview be published?'
         type: choice
         required: true
-        default: 'npm-and-ghcr'
+        default: 'all'
         options:
           - npm-only
+          - npm-and-lambdas
           - npm-and-ghcr
+          - all
 
 concurrency:
   group: prerelease-${{ github.ref_name }}
@@ -140,7 +148,7 @@ jobs:
     name: Build & Publish Release Preview Packages to NPM
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: validate-and-prepare
-    if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-ghcr'
+    if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-lambdas' || inputs.publish_target == 'npm-and-ghcr' || inputs.publish_target == 'all'
     permissions:
       contents: read
       id-token: write
@@ -189,7 +197,7 @@ jobs:
     name: Build & Publish Docker Images to GHCR
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm]
-    if: inputs.publish_target == 'npm-and-ghcr'
+    if: inputs.publish_target == 'npm-and-ghcr' || inputs.publish_target == 'all'
     permissions:
       contents: read
       packages: write
@@ -219,7 +227,7 @@ jobs:
     name: Build & Publish Preview Lambdas
     runs-on: blacksmith-4vcpu-ubuntu-2204
     needs: [validate-and-prepare, build-and-publish-npm]
-    if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-ghcr'
+    if: inputs.publish_target == 'npm-and-lambdas' || inputs.publish_target == 'all'
     strategy:
       fail-fast: false
       matrix:
@@ -307,9 +315,29 @@ jobs:
           "
           fi
 
-          # GHCR section - only if ghcr was requested and succeeded
-          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" && "${{ needs.build-and-publish-ghcr.result }}" == "success" ]]; then
-            COMMENT_BODY+="**Docker Images:**
+          # Lambdas section - only if lambdas were requested
+          if [[ "${{ inputs.publish_target }}" == "npm-and-lambdas" || "${{ inputs.publish_target }}" == "all" ]]; then
+            if [[ "${{ needs.build-and-publish-lambdas.result }}" == "success" ]]; then
+              COMMENT_BODY+="**Lambda Functions:**
+          \`\`\`
+          Published as GitHub Actions artifacts:
+          - fallback-ensapi-${{ needs.validate-and-prepare.outputs.dist-tag }}
+
+          Download from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          \`\`\`
+
+          "
+            else
+              COMMENT_BODY+="**Lambda Functions:** ❌ Build failed - see [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          "
+            fi
+          fi
+
+          # GHCR section - only if ghcr was requested
+          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" || "${{ inputs.publish_target }}" == "all" ]]; then
+            if [[ "${{ needs.build-and-publish-ghcr.result }}" == "success" ]]; then
+              COMMENT_BODY+="**Docker Images:**
           \`\`\`bash
           docker pull ghcr.io/namehash/ensnode/ensindexer:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
           docker pull ghcr.io/namehash/ensnode/ensadmin:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
@@ -318,18 +346,23 @@ jobs:
           \`\`\`
 
           "
-          elif [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" && "${{ needs.build-and-publish-ghcr.result }}" != "success" ]]; then
-            COMMENT_BODY+="**Docker Images:** ❌ Build failed - see [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            else
+              COMMENT_BODY+="**Docker Images:** ❌ Build failed - see [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
           "
+            fi
           fi
 
           # Publish target info
           PUBLISH_TARGET_DISPLAY=""
           if [[ "${{ inputs.publish_target }}" == "npm-only" ]]; then
             PUBLISH_TARGET_DISPLAY="📦 NPM packages only"
+          elif [[ "${{ inputs.publish_target }}" == "npm-and-lambdas" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages + ⚡ Lambda functions"
           elif [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" ]]; then
             PUBLISH_TARGET_DISPLAY="📦 NPM packages + 🐳 Docker images"
+          elif [[ "${{ inputs.publish_target }}" == "all" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages + ⚡ Lambda functions + 🐳 Docker images"
           fi
 
           # Build info
@@ -388,11 +421,14 @@ jobs:
           echo "- Publish target: ${{ inputs.publish_target }}"
           echo "- Published version: ${{ needs.build-and-publish-npm.outputs.published-version }}"
           echo "- NPM dist-tag: ${{ needs.validate-and-prepare.outputs.dist-tag }}"
-          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" ]]; then
+          echo "- NPM publish: ${{ needs.build-and-publish-npm.result }}"
+          if [[ "${{ inputs.publish_target }}" == "npm-and-lambdas" || "${{ inputs.publish_target }}" == "all" ]]; then
+            echo "- Lambda publish: ${{ needs.build-and-publish-lambdas.result }}"
+          fi
+          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" || "${{ inputs.publish_target }}" == "all" ]]; then
             echo "- Docker tag: ${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}"
             echo "- GHCR publish: ${{ needs.build-and-publish-ghcr.result }}"
           fi
-          echo "- NPM publish: ${{ needs.build-and-publish-npm.result }}"
           echo "- PR detected: ${{ steps.detect-pr.outputs.has-pr }}"
           if [[ "${{ steps.detect-pr.outputs.has-pr }}" == "true" ]]; then
             echo "- PR number: #${{ steps.detect-pr.outputs.pr-number }}"

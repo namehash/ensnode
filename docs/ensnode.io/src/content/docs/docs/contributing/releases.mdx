@@ -69,7 +69,11 @@ To test or install a package before merging it into `main`, a preview release ca
 1. Navigate to [Actions > Release Preview](https://github.com/namehash/ensnode/actions/workflows/release_preview.yml)
 2. Click "Run workflow" and select from the following options:
  - The branch on which to run the preview release workflow. Any branch other than `main` can be selected. Using a branch with an active PR allows the workflow to add a GitHub comment containing the installation information. If multiple preview releases are triggered for the same branch/PR, the GitHub comment on the associated PR will update with the latest preview release.
- - Choose which artifacts to build and publish (NPM packages, Docker images, Lambda zips, or any combination).
+ - Choose which artifacts to build and publish:
+   - `npm-only`: NPM packages only
+   - `npm-and-lambdas`: NPM packages + Lambda functions
+   - `npm-and-ghcr`: NPM packages + Docker images
+   - `all`: NPM packages + Lambda functions + Docker images
  - (Optional) Provide a custom suffix for the preview release tag. For example, if you had a branch called `feat/add-api-route` and left this custom suffix field blank, the preview release would be `@ensnode/[package-name]@preview-feat-add-api-route`. If you fill in the custom suffix field with `users-route` then the resulting tag name would be `@ensnode/[package-name]@preview-users-route`.
 3. Install preview packages with: `npm install @ensnode/[package-name]@preview-branch-name`. 
 
