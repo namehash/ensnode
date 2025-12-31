@@ -112,6 +112,10 @@ docker run ghcr.io/namehash/ensnode/[app-name]:[version]
 Pinned full releases are required for those who want to use ENSNode Docker Images. By using a pinned version you can maintain full control over features or patches that might be included. This is specifically important for ENSNode as a new version might require updates to environment variables such as `DATABASE_SCHEMA` or change how ENSNode apps work together. Review the release notes on the [Releases Page](https://github.com/namehash/ensnode/releases) to help decide which version to install.
 
 ### Snapshot Releases
+:::caution
+The `next` tag is a floating pointer that always references the most recent snapshot release. When using Docker images with the `next` tag, you must run `docker pull` to update your local Docker cache if you want to get the actual latest image. Without pulling, you may continue using an older cached version.
+:::
+
 ```bash
 npm install @ensnode/[package-name]@next  
 docker run ghcr.io/namehash/ensnode/[app-name]:next
