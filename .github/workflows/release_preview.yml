@@ -85,6 +85,8 @@ jobs:
       snapshot-tag: ${{ steps.prepare.outputs.snapshot-tag }}
       docker-tag-base: ${{ steps.prepare.outputs.docker-tag-base }}
       commit-sha: ${{ steps.prepare.outputs.commit-sha }}
+      pr-number: ${{ steps.validate.outputs.pr-number }}
+      pr-title: ${{ steps.validate.outputs.pr-title }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -92,6 +94,7 @@ jobs:
           fetch-depth: 0
 
       - name: Validate branch and PR
+        id: validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -114,6 +117,8 @@ jobs:
 
           PR_NUMBER=$(echo "$PR_DATA" | jq -r '.[0].number')
           PR_TITLE=$(echo "$PR_DATA" | jq -r '.[0].title')
+          echo "pr-number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "pr-title=${PR_TITLE}" >> $GITHUB_OUTPUT
           echo "✅ Found PR #${PR_NUMBER}: ${PR_TITLE}"
 
       - name: Prepare tags and identifiers
@@ -279,20 +284,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Get PR number
-        id: get-pr
-        run: |
-          # PR is guaranteed to exist (validated in validate-and-prepare job)
-          PR_DATA=$(gh pr list --state=open --head="${{ github.ref_name }}" --base=main --json number,title --limit 1)
-          PR_NUMBER=$(echo "$PR_DATA" | jq -r '.[0].number')
-          PR_TITLE=$(echo "$PR_DATA" | jq -r '.[0].title')
-
-          echo "pr-number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-          echo "pr-title=${PR_TITLE}" >> $GITHUB_OUTPUT
-          echo "✅ Updating PR #${PR_NUMBER}: ${PR_TITLE}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Generate PR comment body
         id: comment
         run: |
@@ -397,7 +388,7 @@ jobs:
         id: find-comment
         run: |
           # Look for existing comment from github-actions bot
-          COMMENT_ID=$(gh pr view ${{ steps.get-pr.outputs.pr-number }} --json comments --jq '.comments[] | select(.author.login == "github-actions" and (.body | contains("🚀 Preview Packages"))) | .id' | head -1)
+          COMMENT_ID=$(gh pr view ${{ needs.validate-and-prepare.outputs.pr-number }} --json comments --jq '.comments[] | select(.author.login == "github-actions" and (.body | contains("🚀 Preview Packages"))) | .id' | head -1)
 
           if [[ -n "$COMMENT_ID" ]]; then
             echo "existing-comment-id=${COMMENT_ID}" >> $GITHUB_OUTPUT
@@ -412,11 +403,11 @@ jobs:
         run: |
           if [[ -n "${{ steps.find-comment.outputs.existing-comment-id }}" ]]; then
             # Update existing comment
-            gh pr comment ${{ steps.get-pr.outputs.pr-number }} --edit-last --body-file ${{ steps.comment.outputs.comment-file }}
+            gh pr comment ${{ needs.validate-and-prepare.outputs.pr-number }} --edit-last --body-file ${{ steps.comment.outputs.comment-file }}
             echo "✅ Updated existing PR comment"
           else
             # Create new comment
-            gh pr comment ${{ steps.get-pr.outputs.pr-number }} --body-file ${{ steps.comment.outputs.comment-file }}
+            gh pr comment ${{ needs.validate-and-prepare.outputs.pr-number }} --body-file ${{ steps.comment.outputs.comment-file }}
             echo "✅ Created new PR comment"
           fi
         env:
@@ -426,7 +417,7 @@ jobs:
         run: |
           echo "## 📋 Preview Release Summary"
           echo "- Branch: ${{ github.ref_name }}"
-          echo "- PR: #${{ steps.get-pr.outputs.pr-number }}"
+          echo "- PR: #${{ needs.validate-and-prepare.outputs.pr-number }}"
           echo "- Publish target: ${{ inputs.publish_target }}"
           echo "- Published version: ${{ needs.build-and-publish-npm.outputs.published-version }}"
           echo "- NPM dist-tag: ${{ needs.validate-and-prepare.outputs.dist-tag }}"
