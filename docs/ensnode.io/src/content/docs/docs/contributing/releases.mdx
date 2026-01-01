@@ -101,7 +101,7 @@ When using ENSNode artifacts, you have several release types to choose from.
 
 ### Pinned Full Release Versions
 :::note
-In the Docker example below, `[version]` is a placeholder that must be replaced with a specific version number from the [Releases Page](https://github.com/namehash/ensnode/releases). Pinning to specific versions is critical for Docker images because the `latest` tag is a mutable pointer. Each time you pull or redeploy, you may receive a different version, introducing unexpected breaking changes or bugs into your running deployment without warning.
+In the installation examples below, `[version]` is a placeholder that must be replaced with a specific version number from the [Releases Page](https://github.com/namehash/ensnode/releases). Pinning to specific versions is critical for all published assets because the `latest` tag is a mutable pointer. Each time you pull or redeploy, you may receive a different version, introducing unexpected breaking changes or bugs into your running deployment without warning.
 :::
 
 ```bash
@@ -109,7 +109,7 @@ npm install @ensnode/[package-name]@latest
 docker run ghcr.io/namehash/ensnode/[app-name]:[version]
 ```
 
-Pinned full releases are required for those who want to use ENSNode Docker Images. By using a pinned version you can maintain full control over features or patches that might be included. This is specifically important for ENSNode as a new version might require updates to environment variables such as `DATABASE_SCHEMA` or change how ENSNode apps work together. Review the release notes on the [Releases Page](https://github.com/namehash/ensnode/releases) to help decide which version to install.
+Pinned full releases are required for those who want to use any published ENSNode artifacts. By using a pinned version you can maintain full control over features or patches that might be included. This is specifically important for ENSNode as a new version might require updates to environment variables such as `DATABASE_SCHEMA` or change how ENSNode apps work together. Review the release notes on the [Releases Page](https://github.com/namehash/ensnode/releases) to help decide which version to install.
 
 ### Snapshot Releases
 :::caution
