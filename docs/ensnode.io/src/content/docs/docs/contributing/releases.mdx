@@ -104,16 +104,36 @@ When using ENSNode artifacts, you have several release types to choose from.
 ## Choosing the Right Release Type
 
 ### Pinned Full Release Versions
-:::note
-In the installation examples below, `[version]` is a placeholder that must be replaced with a specific version number from the [Releases Page](https://github.com/namehash/ensnode/releases). Pinning to specific versions is critical for all published assets because the `latest` tag is a mutable pointer. Each time you pull or redeploy, you may receive a different version, introducing unexpected breaking changes or bugs into your running deployment without warning.
-:::
+
+When deploying ENSNode to production environments, it is advisable to use a Pinned Full Release. Pinned full releases are required for those who want to use any published ENSNode artifacts. By using a pinned version you can maintain full control over features or patches that might be included. Review the release notes on the [Releases Page](https://github.com/namehash/ensnode/releases) to help decide which version to install.
 
 ```bash
 npm install @ensnode/[package-name]@[version]
 docker run ghcr.io/namehash/ensnode/[app-name]:[version]
 ```
 
-Pinned full releases are required for those who want to use any published ENSNode artifacts. By using a pinned version you can maintain full control over features or patches that might be included. This is specifically important for ENSNode as a new version might require updates to environment variables such as `DATABASE_SCHEMA` or change how ENSNode apps work together. Review the release notes on the [Releases Page](https://github.com/namehash/ensnode/releases) to help decide which version to install.
+:::caution
+When installing NPM packages for use in production environments, it is also advisable to pin a specific Pinned Full Release version number. ENSNode patch version increments MAY include breaking changes, so the usage of exact version package specifiers is encouraged.
+
+For example:
+
+✅ `"@ensnode/[package-name]": "1.0.0"`  
+❌ `"@ensnode/[package-name]": "^1.0.0"`
+
+And when installing from the command line:
+
+✅ `pnpm install @ensnode/[package-name]@1.0.0`  
+❌ `pnpm install @ensnode/[package-name]`
+:::
+
+:::caution
+In particular, when deploying ENSNode to production environments, using the `latest` Docker tag without strict pull policies could result in a version mismatch between interdependent ENSNode apps (which will helpfully crash at startup). Due to this, we highly recommend using a specific Pinned Full Release version number tag like `1.0.0` instead of the tag `latest`, which could point to different versions of the ENSNode app depending on the platform's pull policy.
+:::
+
+:::caution
+Each ENSIndexer version update is likely to produce an updated [Ponder Build Id](https://ponder.sh/docs/api-reference/ponder/database). When updating your ENSIndexer version, you should expect to update the `DATABASE_SCHEMA` environment variable to point to a new Postgres Database Schema for a complete reindexing with the new Ponder Build Id. A complete reindexing may take over 24 hours depending on your configuration. ENSNode version updates require special coordination and should not be assumed to be a simple version bump.
+:::
+
 
 ### Snapshot Releases
 :::caution
