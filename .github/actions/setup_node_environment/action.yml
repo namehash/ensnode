@@ -10,6 +10,9 @@ runs:
       uses: useblacksmith/setup-node@v5
       with:
         node-version-file: .nvmrc
+        # NOTE: This registry-url is required so NODE_AUTH_TOKEN / NPM_TOKEN work for npm auth,
+        # especially in workflows that publish packages. Do not remove unless auth is no longer needed.
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Install dependencies
       shell: bash
