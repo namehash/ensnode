@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import { LayoutWrapper } from "@/components/layout-wrapper";
 import { QueryClientProvider } from "@/components/query-client/components";
 import { Toaster } from "@/components/ui/sonner";
+import { UseClearUrlParams } from "@/hooks/use-clear-url-params";
 import { ConnectionsLibraryProvider } from "@/hooks/use-connections-library";
 import { ensAdminPublicUrl } from "@/lib/env";
 
@@ -62,6 +63,7 @@ export default function Layout({
         <QueryClientProvider>
           <Suspense>
             <ConnectionsLibraryProvider>
+              <UseClearUrlParams allowedParams={{ name: ["/name"] }} />
               <LayoutWrapper breadcrumbs={breadcrumbs} actions={actions}>
                 {children}
               </LayoutWrapper>
