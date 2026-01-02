@@ -11,6 +11,7 @@ export type CanAccelerateMiddlewareVariables = { canAccelerate: boolean };
 
 // TODO: expand this datamodel to include 'reasons' acceleration was disabled to drive ui
 
+let didWarnCannotAccelerateENSv2 = false;
 let didWarnNoProtocolAccelerationPlugin = false;
 let didInitialCanAccelerate = false;
 let prevCanAccelerate = false;
@@ -28,9 +29,26 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
     throw new Error(`Invariant(canAccelerateMiddleware): isRealtime middleware required`);
   }
 
-  /////////////////////////////////////////////
+  ////////////////////////////
+  /// Temporary ENSv2 Bailout
+  ////////////////////////////
+  // TODO: re-enable acceleration for ensv2 once implemented
+  if (config.ensIndexerPublicConfig.plugins.includes(PluginName.ENSv2)) {
+    if (!didWarnCannotAccelerateENSv2) {
+      logger.warn(
+        `ENSApi is currently unable to accelerate Resolution API requests while indexing ENSv2. Protocol Acceleration is DISABLED.`,
+      );
+
+      didWarnCannotAccelerateENSv2 = true;
+    }
+
+    c.set("canAccelerate", false);
+    return await next();
+  }
+
+  //////////////////////////////////////////////
   /// Protocol Acceleration Plugin Availability
-  /////////////////////////////////////////////
+  //////////////////////////////////////////////
 
   const hasProtocolAccelerationPlugin = config.ensIndexerPublicConfig.plugins.includes(
     PluginName.ProtocolAcceleration,
@@ -45,9 +63,9 @@ export const canAccelerateMiddleware = factory.createMiddleware(async (c, next) 
     didWarnNoProtocolAccelerationPlugin = true;
   }
 
-  /////////////////////////////
+  //////////////////////////////
   /// Can Accelerate Derivation
-  /////////////////////////////
+  //////////////////////////////
 
   // the Resolution API can accelerate requests if
   // a) ENSIndexer reports that it is within MAX_REALTIME_DISTANCE_TO_ACCELERATE of realtime, and

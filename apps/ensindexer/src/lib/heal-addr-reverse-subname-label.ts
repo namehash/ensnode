@@ -72,13 +72,13 @@ export async function healAddrReverseSubnameLabel(
   // https://etherscan.io/tx/0x9a6a5156f9f1fc6b1d5551483b97930df32e802f2f9229b35572170f1111134d
 
   // The `debug_traceTransaction` RPC call is cached by Ponder
-  const traces = await context.client.request<DebugTraceTransactionSchema>({
+  const trace = await context.client.request<DebugTraceTransactionSchema>({
     method: "debug_traceTransaction",
     params: [event.transaction.hash, { tracer: "callTracer" }],
   });
 
   // extract all addresses from the traces
-  const allAddressesInTransaction = getAddressesFromTrace(traces);
+  const allAddressesInTransaction = getAddressesFromTrace(trace);
 
   // iterate over all addresses in the transaction traces
   // and try to heal the label with each address

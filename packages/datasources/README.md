@@ -10,7 +10,7 @@ For example, the canonical ENS Namespace on mainnet includes:
 - The `threedns-optimism` and `threedns-base` Datasources documenting the 3DNS contracts on Optimism and Base, respectively
 - 🚧 Various offchain Datasources (e.g. `.cb.id`, `.uni.eth`)
 
-Each ENS namespace is logically independent and isolated from the others: for instance, the `sepolia` and `holesky` testnet namespaces manage a set of names that is entirely separate from the canonical `mainnet` namespace, and have distinct `basenames` and `lineanames` **Datasource**s defined.
+Each ENS namespace is logically independent and isolated from the others: for instance, the `sepolia` testnet manages a set of names that is entirely separate from the canonical `mainnet` namespace, and have distinct `basenames` and `lineanames` **Datasource**s defined.
 
 The `ens-test-env` namespace describes the contracts deployed to an _Anvil_ chain for development and testing with the [ens-test-env](https://github.com/ensdomains/ens-test-env) tool.
 
@@ -48,8 +48,8 @@ import { getDatasource } from '@ensnode/datasources';
 // get ensroot datasource relative to mainnet ENS namespace
 const { chain, contracts } = getDatasource('mainnet', 'ensroot');
 
-// get ensroot datasource relative to holesky ENS namespace
-const { chain, contracts } = getDatasource('holesky', 'ensroot');
+// get ensroot datasource relative to sepolia ENS namespace
+const { chain, contracts } = getDatasource('sepolia', 'ensroot');
 
 // get threedns-base datasource relative to mainnet ENS namespace
 const { chain, contracts } = getDatasource('mainnet', 'threedns-base');
@@ -58,7 +58,6 @@ const { chain, contracts } = getDatasource('mainnet', 'threedns-base');
 The available `ENSNamespaceId`s are:
 - `mainnet`
 - `sepolia`
-- `holesky`
 - `ens-test-env` — Represents a local testing namespace running on an Anvil chain (chain id 1337) with deterministic configurations that deliberately start at block zero for rapid testing and development. See [ens-test-env](https://github.com/ensdomains/ens-test-env) for additional context.
 
 ### DatasourceName

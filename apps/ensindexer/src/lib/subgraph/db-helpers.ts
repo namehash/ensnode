@@ -1,7 +1,8 @@
-import type { Context, Event } from "ponder:registry";
+import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Address } from "viem";
 
+import type { LogEvent } from "@/lib/ponder-helpers";
 import { makeEventId } from "@/lib/subgraph/ids";
 
 export async function upsertAccount(context: Context, address: Address) {
@@ -42,7 +43,7 @@ export async function upsertRegistration(
 }
 
 // simplifies generating the shared event column values from the ponder Event object
-export function sharedEventValues(chainId: number, event: Omit<Event, "args">) {
+export function sharedEventValues(chainId: number, event: Omit<LogEvent, "args">) {
   return {
     id: makeEventId(chainId, event.block.number, event.log.logIndex),
     blockNumber: event.block.number,

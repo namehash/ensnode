@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { InterpretedName } from "../../ens";
-import { AssetNamespaces, NameTokenOwnershipTypes, NFTMintStatuses } from "../../tokenscope";
+import { AssetNamespaces } from "../../shared/types";
+import { NameTokenOwnershipTypes, NFTMintStatuses } from "../../tokenscope";
 import { NameTokensResponseCodes, type NameTokensResponseOk } from "./response";
 import type { SerializedNameTokensResponseOk } from "./serialized-response";
 import { makeNameTokensResponseSchema } from "./zod-schemas";
