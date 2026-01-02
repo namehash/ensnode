@@ -1,5 +1,21 @@
 # @ensnode/ensnode-sdk
 
+## 1.4.0
+
+### Minor Changes
+
+- [#1444](https://github.com/namehash/ensnode/pull/1444) [`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d) Thanks [@Goader](https://github.com/Goader)! - Added optional time range filtering to the Registrar Actions API.
+
+- [#1418](https://github.com/namehash/ensnode/pull/1418) [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda) Thanks [@Goader](https://github.com/Goader)! - Added revenue contribution tracking to referrer metrics, calculating total revenue contributed to the ENS DAO from referrals. Added `totalRevenueContribution` to individual referrer metrics and `grandTotalRevenueContribution` to aggregated metrics.
+
+### Patch Changes
+
+- [#1338](https://github.com/namehash/ensnode/pull/1338) [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3) Thanks [@stevedylandev](https://github.com/stevedylandev)! - Adds OpenAPI schema endpoint and route descriptions to ENSApi
+
+- Updated dependencies [[`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda)]:
+  - @namehash/ens-referrals@1.4.0
+  - @ensnode/datasources@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes
