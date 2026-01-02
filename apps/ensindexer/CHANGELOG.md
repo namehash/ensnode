@@ -1,5 +1,16 @@
 # ensindexer
 
+## 1.4.0
+
+### Patch Changes
+
+- Updated dependencies [[`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d), [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda), [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3)]:
+  - @ensnode/ensnode-sdk@1.4.0
+  - @ensnode/ensrainbow-sdk@1.4.0
+  - @ensnode/datasources@1.4.0
+  - @ensnode/ponder-metadata@1.4.0
+  - @ensnode/ensnode-schema@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes
