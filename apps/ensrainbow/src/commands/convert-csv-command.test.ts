@@ -341,12 +341,12 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should handle non-existent database path gracefully", async () => {
+    it("should throw error when existing database path cannot be opened", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
       const outputFile = join(tempDir, "output_no_db.ensrainbow");
       const nonExistentDbPath = join(tempDir, "non-existent-db");
 
-      // Should not throw error even with non-existent database path
+      // Should throw error when database path is provided but cannot be opened
       await expect(
         convertCsvCommand({
           inputFile,
@@ -355,12 +355,7 @@ describe("convert-csv-command", () => {
           labelSetVersion: 0 as LabelSetVersion,
           existingDbPath: nonExistentDbPath,
         }),
-      ).resolves.not.toThrow();
-
-      // Verify the output file was still created
-      const stats = await stat(outputFile);
-      expect(stats.isFile()).toBe(true);
-      expect(stats.size).toBeGreaterThan(0);
+      ).rejects.toThrow("Cannot proceed without existing database");
     });
 
     it("should work through CLI with existing database path", async () => {

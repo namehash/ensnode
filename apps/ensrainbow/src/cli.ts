@@ -227,12 +227,25 @@ export function createCLI(options: CLIOptions = {}) {
             .option("existing-db-path", {
               type: "string",
               description:
-                "Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file",
+                "Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file (required when --label-set-version > 0)",
             })
             .option("silent", {
               type: "boolean",
               description: "Disable progress bar (useful for scripts)",
               default: false,
+            })
+            .check((argv) => {
+              const labelSetVersion = argv["label-set-version"];
+              if (
+                labelSetVersion !== undefined &&
+                labelSetVersion > 0 &&
+                !argv["existing-db-path"]
+              ) {
+                throw new Error(
+                  "--existing-db-path is required when --label-set-version is greater than 0",
+                );
+              }
+              return true;
             });
         },
         async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {

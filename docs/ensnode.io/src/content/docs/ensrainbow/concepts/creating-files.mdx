@@ -172,7 +172,7 @@ pnpm run convert \
 4. **Computes** or validates labelhashes as needed
 5. **Filters** existing labels if `--existing-db-path` is provided
 6. **Filters** duplicate labels within the same CSV file
-7. **Writes** protobuf messages with length-delimited encoding
+7. **Writes** .ensrainbow file as output
 
 ## Method 2: Converting from SQL Dumps
 
@@ -231,8 +231,7 @@ pnpm run convert-sql \
 1. **Streams** the gzipped SQL file to avoid memory issues
 2. **Parses** SQL COPY statements to extract label/labelhash pairs
 3. **Validates** each record and skips invalid entries
-4. **Writes** protobuf messages with length-delimited encoding
-5. **Creates** a header message followed by individual record messages
+4. **Writes** .ensrainbow file as output
 
 ## Common Workflows
 

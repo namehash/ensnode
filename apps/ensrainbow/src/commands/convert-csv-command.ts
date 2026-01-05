@@ -242,8 +242,13 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
       existingDb = await ENSRainbowDB.open(options.existingDbPath);
       logger.info("Successfully opened existing database for label filtering");
     } catch (error) {
-      logger.warn(`Failed to open existing database at ${options.existingDbPath}: ${error}`);
-      logger.warn("Proceeding without filtering existing labels");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(
+        `Failed to open existing database at ${options.existingDbPath}: ${errorMessage}`,
+      );
+      throw new Error(
+        `Cannot proceed without existing database. Failed to open database at ${options.existingDbPath}: ${errorMessage}`,
+      );
     }
   }
 
