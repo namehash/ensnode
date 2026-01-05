@@ -103,6 +103,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(result).toMatchObject({
         aggregatedMetrics: {
           grandTotalIncrementalDuration: 0,
+          grandTotalRevenueContribution: 0n,
           grandTotalQualifiedReferrersFinalScore: 0,
           grandTotalReferrals: 0,
           minFinalScoreToQualify: 0,

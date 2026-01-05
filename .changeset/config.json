@@ -10,6 +10,7 @@
       "ensadmin",
       "ensrainbow",
       "ensapi",
+      "fallback-ensapi",
       "@ensnode/datasources",
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ensnode-schema",

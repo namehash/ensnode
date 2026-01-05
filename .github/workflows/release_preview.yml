@@ -1,0 +1,431 @@
+# Release Preview Workflow (@preview-*)
+#
+# This workflow creates preview releases for testing features before they are merged to main.
+# It must be triggered manually via the GitHub Actions UI.
+#
+# Requirements:
+# - The branch must have an open PR targeting main
+# - Cannot be run on the main branch
+#
+# How to trigger:
+# 1. Navigate to Actions > Release Preview in GitHub
+# 2. Click "Run workflow" and select:
+#    - Branch: The branch you want to create a preview release from (must have an open PR)
+#    - Publish target:
+#      - npm-only: NPM packages only
+#      - npm-and-lambdas: NPM packages + Lambda functions
+#      - npm-and-ghcr: NPM packages + Docker images
+#      - all: NPM packages + Lambda functions + Docker images
+#    - Custom tag suffix (optional): Custom tag suffix instead of branch name
+#
+# What it does:
+# 1. Validates the branch (cannot run on main) and verifies an open PR exists
+# 2. Generates a sanitized tag from the branch name or custom tag suffix (e.g., @preview-feat-add-api-route)
+# 3. Versions packages using changesets in snapshot mode
+# 4. Publishes NPM packages with @preview-* dist-tag
+# 5. Optionally builds and publishes Lambda functions as GitHub Actions artifacts
+# 6. Optionally builds and publishes Docker images with preview-* tag
+# 7. Posts/updates a comment on the PR with installation instructions
+#
+# Published artifacts:
+# - NPM packages: Published with @preview-{branch-name} or @preview-{custom-suffix} tag
+# - Lambda functions (optional): Published as GitHub Actions artifacts
+# - Docker images (optional): Published with preview-{branch-name} or preview-{custom-suffix} tag
+# - No GitHub releases or tags are created
+#
+# Use cases:
+# - Testing PR features before merging to main
+# - Collaborating on development work
+# - Validating fixes for specific issues
+# - QA testing of work-in-progress features
+#
+# Important notes:
+# - Preview releases require an open PR targeting main
+# - Preview releases are NOT stable and should not be used in production
+# - They are ephemeral and don't modify the repository (no commits/tags in git)
+# - Only authorized NameHash team members can trigger preview releases
+# - Each preview release will update the PR comment with installation instructions
+# - Installation: npm install @ensnode/package-name@preview-branch-name
+# - Cleanup: Use npm dist-tag rm to manually remove preview tags when no longer needed
+#
+# Documentation: https://ensnode.io/docs/contributing/releases#preview-release
+
+name: Release Preview (@preview)
+
+on:
+  workflow_dispatch:
+    inputs:
+      custom_suffix:
+        description: 'Optional custom suffix to append to the tag assigned to all assets published in the release preview. If not defined, defaults to the name of the branch associated with the release preview.'
+        type: string
+        required: false
+      publish_target:
+        description: 'Where should the release preview be published?'
+        type: choice
+        required: true
+        default: 'all'
+        options:
+          - npm-only
+          - npm-and-lambdas
+          - npm-and-ghcr
+          - all
+
+concurrency:
+  group: prerelease-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-prepare:
+    name: Validate Branch & Prepare
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    if: github.repository == 'namehash/ensnode'
+    outputs:
+      branch-suffix: ${{ steps.prepare.outputs.branch-suffix }}
+      dist-tag: ${{ steps.prepare.outputs.dist-tag }}
+      snapshot-tag: ${{ steps.prepare.outputs.snapshot-tag }}
+      docker-tag-base: ${{ steps.prepare.outputs.docker-tag-base }}
+      commit-sha: ${{ steps.prepare.outputs.commit-sha }}
+      pr-number: ${{ steps.validate.outputs.pr-number }}
+      pr-title: ${{ steps.validate.outputs.pr-title }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate branch and PR
+        id: validate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "❌ Cannot run prerelease workflow on main branch"
+            echo "Use the snapshot workflow instead for main branch previews"
+            exit 1
+          fi
+          echo "✅ Branch validation passed: ${{ github.ref_name }}"
+
+          # Require an open PR for this branch
+          PR_DATA=$(gh pr list --state=open --head="${{ github.ref_name }}" --base=main --json number,title --limit 1)
+
+          if [[ "$PR_DATA" == "[]" || -z "$PR_DATA" ]]; then
+            echo "❌ No open PR found for branch '${{ github.ref_name }}'"
+            echo "Preview releases require an open PR targeting main."
+            echo "Please create a PR for this branch before running a preview release."
+            exit 1
+          fi
+
+          PR_NUMBER=$(echo "$PR_DATA" | jq -r '.[0].number')
+          PR_TITLE=$(echo "$PR_DATA" | jq -r '.[0].title')
+          echo "pr-number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "pr-title=${PR_TITLE}" >> $GITHUB_OUTPUT
+          echo "✅ Found PR #${PR_NUMBER}: ${PR_TITLE}"
+
+      - name: Prepare tags and identifiers
+        id: prepare
+        run: |
+          # Get short commit SHA
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+
+          # Sanitize branch name for use in versions and tags
+          if [[ -n "${{ inputs.custom_suffix }}" ]]; then
+            BRANCH_SUFFIX="${{ inputs.custom_suffix }}"
+          else
+            BRANCH_SUFFIX="${{ github.ref_name }}"
+          fi
+          # Replace / with -
+          BRANCH_SUFFIX="${BRANCH_SUFFIX//\//-}"
+          # Replace special characters with -
+          BRANCH_SUFFIX="${BRANCH_SUFFIX//[^a-zA-Z0-9-]/-}"
+          # Convert to lowercase
+          BRANCH_SUFFIX=$(echo "$BRANCH_SUFFIX" | tr '[:upper:]' '[:lower:]')
+          # Remove consecutive dashes (repeat until no more changes)
+          while [[ "$BRANCH_SUFFIX" =~ --+ ]]; do
+            BRANCH_SUFFIX="${BRANCH_SUFFIX//--/-}"
+          done
+          # Truncate to 30 characters
+          BRANCH_SUFFIX="${BRANCH_SUFFIX:0:30}"
+          # Remove trailing dashes
+          BRANCH_SUFFIX="${BRANCH_SUFFIX%-}"
+          # Remove leading dashes
+          BRANCH_SUFFIX="${BRANCH_SUFFIX#-}"
+
+          # Create dist-tag (NPM doesn't allow dots in tags)
+          DIST_TAG="preview-${BRANCH_SUFFIX}"
+
+          # Snapshot tag for changesets (used in version string)
+          SNAPSHOT_TAG="preview-${BRANCH_SUFFIX}"
+
+          # Docker tag base (no version, just branch)
+          DOCKER_TAG_BASE="preview-${BRANCH_SUFFIX}"
+
+          echo "branch-suffix=${BRANCH_SUFFIX}" >> $GITHUB_OUTPUT
+          echo "dist-tag=${DIST_TAG}" >> $GITHUB_OUTPUT
+          echo "snapshot-tag=${SNAPSHOT_TAG}" >> $GITHUB_OUTPUT
+          echo "docker-tag-base=${DOCKER_TAG_BASE}" >> $GITHUB_OUTPUT
+          echo "commit-sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
+
+          echo "🏷️ NPM dist-tag: ${DIST_TAG}"
+          echo "📸 Snapshot tag: ${SNAPSHOT_TAG}"
+          echo "🐳 Docker tag base: ${DOCKER_TAG_BASE}"
+          echo "📝 Commit SHA: ${COMMIT_SHA}"
+
+  build-and-publish-npm:
+    name: Build & Publish Release Preview Packages to NPM
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: validate-and-prepare
+    if: inputs.publish_target == 'npm-only' || inputs.publish_target == 'npm-and-lambdas' || inputs.publish_target == 'npm-and-ghcr' || inputs.publish_target == 'all'
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      published-version: ${{ steps.publish.outputs.published-version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup_node_environment
+
+      - name: Build packages
+        run: pnpm packages:prepublish
+
+      - name: Version packages with changesets (snapshot)
+        run: |
+          # Use changesets to create snapshot versions
+          # The snapshot tag will be used as part of the version string
+          pnpm changeset version --snapshot ${{ needs.validate-and-prepare.outputs.snapshot-tag }}
+
+          echo "📦 Packages versioned with snapshot tag: ${{ needs.validate-and-prepare.outputs.snapshot-tag }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release preview packages to NPM with changesets
+        id: publish
+        run: |
+          # Publish with changesets using snapshot mode
+          # --no-git-tag: Don't create git tags for preview releases
+          # --snapshot: Publish as snapshot/preview release
+          # --tag: Use our custom dist-tag
+          pnpm changeset publish --no-git-tag --snapshot --tag ${{ needs.validate-and-prepare.outputs.dist-tag }}
+
+          # Extract published version from package.json
+          PUBLISHED_VERSION=$(node -p "require('./packages/ensnode-sdk/package.json').version")
+          echo "published-version=${PUBLISHED_VERSION}" >> $GITHUB_OUTPUT
+
+          echo "✅ Published release preview packages to NPM with version: ${PUBLISHED_VERSION}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  build-and-publish-ghcr:
+    name: Build & Publish Docker Images to GHCR
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [validate-and-prepare, build-and-publish-npm]
+    if: inputs.publish_target == 'npm-and-ghcr' || inputs.publish_target == 'all'
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ensindexer, ensadmin, ensapi, ensrainbow]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build & Publish Docker Image
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          dockerfile: apps/${{ matrix.app }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: |
+            type=raw,value=${{ needs.validate-and-prepare.outputs.docker-tag-base }}
+            type=raw,value=${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
+            type=sha
+
+  build-and-publish-lambdas:
+    name: Build & Publish Preview Lambdas
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [validate-and-prepare, build-and-publish-npm]
+    if: inputs.publish_target == 'npm-and-lambdas' || inputs.publish_target == 'all'
+    strategy:
+      fail-fast: false
+      matrix:
+        lambda: [fallback-ensapi]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and Publish Lambda
+        uses: ./.github/actions/build_and_publish_lambda
+        with:
+          name: ${{ matrix.lambda }}
+          version: ${{ needs.validate-and-prepare.outputs.dist-tag }}
+
+  update-pr-comment:
+    name: Update PR Comment
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    needs: [validate-and-prepare, build-and-publish-npm, build-and-publish-ghcr, build-and-publish-lambdas]
+    if: always() && needs.build-and-publish-npm.result == 'success'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate PR comment body
+        id: comment
+        run: |
+          # Build timestamp for display
+          BUILD_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          # Start building comment
+          COMMENT_BODY="## 🚀 Preview Packages - \`${{ github.ref_name }}\`
+
+          "
+
+          # NPM section - always present since both options include NPM
+          if [[ "${{ needs.build-and-publish-npm.result }}" == "success" ]]; then
+            COMMENT_BODY+="**NPM Packages:**
+          \`\`\`bash
+          # Install latest preview for this branch
+          pnpm add @ensnode/datasources@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ensnode-react@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ensrainbow-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ensnode-schema@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ensnode-sdk@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ponder-subgraph@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ponder-metadata@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/ens-referrals@${{ needs.validate-and-prepare.outputs.dist-tag }}
+
+          # Or install specific version
+          pnpm add @ensnode/ensnode-sdk@${{ needs.build-and-publish-npm.outputs.published-version }}
+          \`\`\`
+
+          "
+          fi
+
+          # Lambdas section - only if lambdas were requested
+          if [[ "${{ inputs.publish_target }}" == "npm-and-lambdas" || "${{ inputs.publish_target }}" == "all" ]]; then
+            if [[ "${{ needs.build-and-publish-lambdas.result }}" == "success" ]]; then
+              COMMENT_BODY+="**Lambda Functions:**
+          \`\`\`
+          Published as GitHub Actions artifacts:
+          - fallback-ensapi-${{ needs.validate-and-prepare.outputs.dist-tag }}
+
+          Download from: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          \`\`\`
+
+          "
+            else
+              COMMENT_BODY+="**Lambda Functions:** ❌ Build failed - see [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          "
+            fi
+          fi
+
+          # GHCR section - only if ghcr was requested
+          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" || "${{ inputs.publish_target }}" == "all" ]]; then
+            if [[ "${{ needs.build-and-publish-ghcr.result }}" == "success" ]]; then
+              COMMENT_BODY+="**Docker Images:**
+          \`\`\`bash
+          docker pull ghcr.io/namehash/ensnode/ensindexer:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
+          docker pull ghcr.io/namehash/ensnode/ensadmin:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
+          docker pull ghcr.io/namehash/ensnode/ensapi:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
+          docker pull ghcr.io/namehash/ensnode/ensrainbow:${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}
+          \`\`\`
+
+          "
+            else
+              COMMENT_BODY+="**Docker Images:** ❌ Build failed - see [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          "
+            fi
+          fi
+
+          # Publish target info
+          PUBLISH_TARGET_DISPLAY=""
+          if [[ "${{ inputs.publish_target }}" == "npm-only" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages only"
+          elif [[ "${{ inputs.publish_target }}" == "npm-and-lambdas" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages + ⚡ Lambda functions"
+          elif [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages + 🐳 Docker images"
+          elif [[ "${{ inputs.publish_target }}" == "all" ]]; then
+            PUBLISH_TARGET_DISPLAY="📦 NPM packages + ⚡ Lambda functions + 🐳 Docker images"
+          fi
+
+          # Build info
+          COMMENT_BODY+="**Build Info:**
+          - 🎯 Target: \`${PUBLISH_TARGET_DISPLAY}\`
+          - 📦 Version: \`${{ needs.build-and-publish-npm.outputs.published-version }}\`
+          - 📝 Commit: \`${{ needs.validate-and-prepare.outputs.commit-sha }}\`
+          - 🌿 Branch: \`${{ github.ref_name }}\`
+          - ⏰ Built: \`${BUILD_TIME}\`
+          - 🔗 [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ---
+          *🤖 This comment will be updated on subsequent publishing of release previews from the branch associated with this PR*
+
+          > **Note:** Preview packages are managed by changesets. NPM dist-tags can be cleaned up manually using \`npm dist-tag rm @ensnode/ensnode-sdk ${{ needs.validate-and-prepare.outputs.dist-tag }}\`"
+
+          # Save to file for proper multiline handling
+          echo "$COMMENT_BODY" > comment_body.txt
+          echo "comment-file=comment_body.txt" >> $GITHUB_OUTPUT
+
+      - name: Find existing comment
+        id: find-comment
+        run: |
+          # Look for existing comment from github-actions bot
+          COMMENT_ID=$(gh pr view ${{ needs.validate-and-prepare.outputs.pr-number }} --json comments --jq '.comments[] | select(.author.login == "github-actions" and (.body | contains("🚀 Preview Packages"))) | .id' | head -1)
+
+          if [[ -n "$COMMENT_ID" ]]; then
+            echo "existing-comment-id=${COMMENT_ID}" >> $GITHUB_OUTPUT
+            echo "✅ Found existing comment ID: ${COMMENT_ID}"
+          else
+            echo "ℹ️  No existing comment found, will create new one"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update or create PR comment
+        run: |
+          if [[ -n "${{ steps.find-comment.outputs.existing-comment-id }}" ]]; then
+            # Update existing comment
+            gh pr comment ${{ needs.validate-and-prepare.outputs.pr-number }} --edit-last --body-file ${{ steps.comment.outputs.comment-file }}
+            echo "✅ Updated existing PR comment"
+          else
+            # Create new comment
+            gh pr comment ${{ needs.validate-and-prepare.outputs.pr-number }} --body-file ${{ steps.comment.outputs.comment-file }}
+            echo "✅ Created new PR comment"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log summary
+        run: |
+          echo "## 📋 Preview Release Summary"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- PR: #${{ needs.validate-and-prepare.outputs.pr-number }}"
+          echo "- Publish target: ${{ inputs.publish_target }}"
+          echo "- Published version: ${{ needs.build-and-publish-npm.outputs.published-version }}"
+          echo "- NPM dist-tag: ${{ needs.validate-and-prepare.outputs.dist-tag }}"
+          echo "- NPM publish: ${{ needs.build-and-publish-npm.result }}"
+          if [[ "${{ inputs.publish_target }}" == "npm-and-lambdas" || "${{ inputs.publish_target }}" == "all" ]]; then
+            echo "- Lambda publish: ${{ needs.build-and-publish-lambdas.result }}"
+          fi
+          if [[ "${{ inputs.publish_target }}" == "npm-and-ghcr" || "${{ inputs.publish_target }}" == "all" ]]; then
+            echo "- Docker tag: ${{ needs.validate-and-prepare.outputs.docker-tag-base }}-${{ needs.validate-and-prepare.outputs.commit-sha }}"
+            echo "- GHCR publish: ${{ needs.build-and-publish-ghcr.result }}"
+          fi

@@ -15,7 +15,6 @@ export interface ConfigInfoItemProps {
 export interface ConfigInfoFeatureProps {
   label: string;
   description: ReactNode;
-  isActivated?: boolean;
   icon: ReactElement;
 }
 
@@ -69,12 +68,7 @@ export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemP
 /**
  * ConfigInfoFeature - Renders a single feature badge with tooltip
  */
-export function ConfigInfoFeature({
-  label,
-  description,
-  isActivated = true,
-  icon,
-}: ConfigInfoFeatureProps) {
+export function ConfigInfoFeature({ label, description, icon }: ConfigInfoFeatureProps) {
   return (
     <div className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1">
       <div className={featureActivationsWrapperStyles}>
