@@ -50,7 +50,8 @@ For detailed information about the file format structure, see the [Data Model](/
 
 ### When to Use SQL Conversion
 
-- Working with the legacy `ens_names.sql.gz` file. These legacy data files can be obtained from [The Graph's ENS Rainbow repository](https://github.com/graphprotocol/ens-rainbow).
+- **Legacy migration only**: Converting existing `ens_names.sql.gz` file from the legacy ENS Subgraph. This file can be obtained from [The Graph's ENS Rainbow repository](https://github.com/graphprotocol/ens-rainbow).
+- **Note**: We recommend using CSV conversion for all new label sets. The SQL conversion method exists primarily for migrating away from legacy subgraph data, not for creating new subgraph-based label sets.
 
 ## Method 1: Converting from CSV Files
 
@@ -72,12 +73,12 @@ pnpm run convert \
 ### Required Parameters
 
 - `--input-file`: Path to the CSV file
-- `--label-set-id`: Identifier for the label set
-- `--label-set-version`: Version number for the label set
+- `--label-set-id`: Identifier for the output `.ensrainbow` file that will be created (used in file naming and metadata)
+- `--label-set-version`: Version number for the output `.ensrainbow` file that will be created (used in file naming and metadata)
 
 ### Optional Parameters
 
-- `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
+- `--output-file`: Output file path (defaults to `rainbow-records-{label-set-id}_{label-set-version}.ensrainbow`)
 - `--progress-interval`: Progress logging frequency (default: 50000 records)
 - `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file
 - `--silent`: Disable progress bar (useful for scripts and automated workflows)
@@ -175,7 +176,9 @@ pnpm run convert \
 
 ## Method 2: Converting from SQL Dumps
 
-The `convert-sql` command processes gzipped SQL dump files from the ENS Subgraph.
+:::warning[Legacy Method]
+The `convert-sql` command processes gzipped SQL dump file from the legacy ENS Subgraph. This method exists for migrating away from legacy subgraph data. **For all new label sets, we strongly recommend using CSV conversion (Method 1) instead.**
+:::
 
 ### Command Syntax
 
@@ -190,17 +193,21 @@ pnpm run convert-sql \
 ### Required Parameters
 
 - `--input-file`: Path to the gzipped SQL dump file
-- `--label-set-id`: Identifier for the label set (e.g., `subgraph`, `discovery-a`)
-- `--label-set-version`: Version number for the label set (non-negative integer)
+- `--label-set-id`: Identifier for the output `.ensrainbow` file that will be created (used in file naming and metadata, e.g., `subgraph`)
+- `--label-set-version`: Version number for the output `.ensrainbow` file that will be created (used in file naming and metadata, non-negative integer)
 
 ### Optional Parameters
 
-- `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
+- `--output-file`: Output file path (defaults to `rainbow-records-{label-set-id}_{label-set-version}.ensrainbow`)
 
-### Example: Converting ENS Subgraph Data
+### Example: Converting Legacy ENS Subgraph Data
+
+:::note[Legacy Migration Only]
+This example shows how to convert existing legacy subgraph data. For new label sets, use CSV conversion instead.
+:::
 
 ```bash
-# Convert main ENS Subgraph data
+# Convert legacy ENS Subgraph data (migration use case only)
 pnpm run convert-sql \
   --input-file ens_names.sql.gz \
   --output-file subgraph_0.ensrainbow \
@@ -229,10 +236,14 @@ pnpm run convert-sql \
 
 ## Common Workflows
 
-### Workflow 1: Migrating from ENS Subgraph
+### Workflow 1: Migrating from Legacy ENS Subgraph
+
+:::warning[Legacy Migration Only]
+This workflow is for migrating away from legacy ENS Subgraph data. For creating new label sets, use CSV conversion (see Workflow 3) instead.
+:::
 
 ```bash
-# 1. Convert SQL dump to .ensrainbow
+# 1. Convert legacy SQL dump to .ensrainbow
 pnpm run convert-sql \
   --input-file ens_names.sql.gz \
   --output-file subgraph_0.ensrainbow \
@@ -356,8 +367,7 @@ ENSRainbow download scripts save files to specific subdirectories:
 Follow the naming convention: `{label-set-id}_{label-set-version}.ensrainbow`
 
 **Examples:**
-- `subgraph_0.ensrainbow` - Main ENS data, version 0
-- `subgraph_1.ensrainbow` - Main ENS data, version 1 (incremental update)
+- `subgraph_0.ensrainbow` - Legacy ENS data, version 0
 - `discovery-a_0.ensrainbow` - Discovery dataset, version 0
 - `ens-test-env_0.ensrainbow` - Test environment data, version 0
 
@@ -395,13 +405,6 @@ pnpm run convert \
   --label-set-version 1 \
   --existing-db-path data-my-dataset
 
-# For legacy SQL data
-pnpm run convert-sql \
-  --input-file my-data.sql.gz \
-  --output-file my-dataset_0.ensrainbow \
-  --label-set-id my-dataset \
-  --label-set-version 0
-```
 
 ### 2. Validate Your File
 

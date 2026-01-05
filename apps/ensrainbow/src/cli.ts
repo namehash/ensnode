@@ -57,14 +57,14 @@ interface PurgeArgs {
 
 interface ConvertArgs {
   "input-file": string;
-  "output-file": string;
+  "output-file"?: string;
   "label-set-id": LabelSetId;
   "label-set-version": LabelSetVersion;
 }
 
 interface ConvertCsvArgs {
   "input-file": string;
-  "output-file": string;
+  "output-file"?: string;
   "label-set-id": LabelSetId;
   "label-set-version": LabelSetVersion;
   "progress-interval"?: number;
@@ -203,11 +203,6 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Path to the CSV input file",
               demandOption: true,
             })
-            .option("output-file", {
-              type: "string",
-              description: "Path to where the resulting ensrainbow file will be output",
-              default: join(process.cwd(), "rainbow-records.ensrainbow"),
-            })
             .option("label-set-id", {
               type: "string",
               description: "Label set id for the generated ensrainbow file",
@@ -220,6 +215,10 @@ export function createCLI(options: CLIOptions = {}) {
               demandOption: true,
             })
             .coerce("label-set-version", buildLabelSetVersion)
+            .option("output-file", {
+              type: "string",
+              description: "Path to where the resulting ensrainbow file will be output",
+            })
             .option("progress-interval", {
               type: "number",
               description: "Number of records to process before logging progress",
@@ -237,9 +236,12 @@ export function createCLI(options: CLIOptions = {}) {
             });
         },
         async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
+          const outputFile =
+            argv["output-file"] ??
+            join(process.cwd(), `${argv["label-set-id"]}_${argv["label-set-version"]}.ensrainbow`);
           await convertCsvCommand({
             inputFile: argv["input-file"],
-            outputFile: argv["output-file"],
+            outputFile,
             labelSetId: argv["label-set-id"],
             labelSetVersion: argv["label-set-version"],
             progressInterval: argv["progress-interval"],
@@ -258,11 +260,6 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Path to the gzipped SQL dump file",
               default: join(process.cwd(), "ens_names.sql.gz"),
             })
-            .option("output-file", {
-              type: "string",
-              description: "Path to where the resulting ensrainbow file will be output",
-              default: join(process.cwd(), "rainbow-records.ensrainbow"),
-            })
             .option("label-set-id", {
               type: "string",
               description: "Label set id for the generated ensrainbow file",
@@ -274,12 +271,19 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Label set version for the generated ensrainbow file",
               demandOption: true,
             })
-            .coerce("label-set-version", buildLabelSetVersion);
+            .coerce("label-set-version", buildLabelSetVersion)
+            .option("output-file", {
+              type: "string",
+              description: "Path to where the resulting ensrainbow file will be output",
+            });
         },
         async (argv: ArgumentsCamelCase<ConvertArgs>) => {
+          const outputFile =
+            argv["output-file"] ??
+            join(process.cwd(), `${argv["label-set-id"]}_${argv["label-set-version"]}.ensrainbow`);
           await convertCommand({
             inputFile: argv["input-file"],
-            outputFile: argv["output-file"],
+            outputFile,
             labelSetId: argv["label-set-id"],
             labelSetVersion: argv["label-set-version"],
           });
