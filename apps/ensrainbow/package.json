@@ -19,7 +19,7 @@
     "validate:lite": "tsx src/cli.ts validate --lite",
     "purge": "tsx src/cli.ts purge",
     "convert": "tsx src/cli.ts convert",
-    "convert-csv": "tsx src/cli.ts convert-csv",
+    "convert-sql": "tsx src/cli.ts convert-sql",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "biome check --write .",

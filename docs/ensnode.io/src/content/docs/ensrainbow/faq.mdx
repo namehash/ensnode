@@ -22,18 +22,27 @@ To stay informed about new versions, monitor the [Available Label Sets](/ensrain
 
 ## How can I create my own .ensrainbow file?
 
-Currently, the `convert` command is the **only way** to create new `.ensrainbow` files from scratch. This command converts PostgreSQL rainbow table dumps (`.sql.gz` format) into the binary protobuf format that ENSRainbow uses.
+ENSRainbow provides two methods for creating `.ensrainbow` files:
 
-**To create a custom .ensrainbow file:**
+**Method 1: CSV Conversion (Recommended)**
 
-1. **Prepare your data** as a PostgreSQL dump file (`.sql.gz`) with ENS labels and labelhashes
+The `convert` command is the **primary method** for creating new `.ensrainbow` files from CSV data:
+
+1. **Prepare your data** as a CSV file with labels (1 column) or labels and labelhashes (2 columns)
 2. **Run the convert command:**
    ```bash
-   pnpm run convert --input-file your_data.sql.gz --output-file custom.ensrainbow
+   pnpm run convert --input-file your_labels.csv --output-file custom.ensrainbow --label-set-id my-dataset --label-set-version 0
    ```
-3. **Specify the label set details** using `--label-set-id` and `--label-set-version` flags
 
-**Note:** You can download existing `.ensrainbow` files using the download scripts, but for creating entirely new files with your own data, the `convert` command is currently the only option available.
+**Method 2: SQL Conversion (Legacy)**
+
+For converting legacy ENS Subgraph data from PostgreSQL dumps:
+
+```bash
+pnpm run convert-sql --input-file ens_names.sql.gz --output-file custom.ensrainbow --label-set-id subgraph --label-set-version 0
+```
+
+**Note:** You can also download existing `.ensrainbow` files using the download scripts.
 
 See the [CLI Reference](/ensrainbow/contributing/cli-reference/) for detailed command usage.
 

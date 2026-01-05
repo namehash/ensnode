@@ -115,7 +115,7 @@ To ingest the test data into ENSRainbow:
     If you don't have a pre-converted `ens-test-env-0.ensrainbow` file:
     ```bash
     # Navigate to apps/ensrainbow or adjust paths accordingly
-    pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env-0.ensrainbow
+    pnpm run convert-sql --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env-0.ensrainbow --label-set-id ens-test-env --label-set-version 0
     ```
     This creates `ens-test-env-0.ensrainbow`.
 
@@ -274,21 +274,21 @@ This section covers the conversion of source data (like SQL dumps or empty files
 This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for version 0 of the `subgraph` Label Set.
 ```bash
 # Assuming ens_names.sql.gz contains the primary dataset
-time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
+time pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
 ```
 
 **For the `discovery-a` Label Set (initially empty for discovered labels):**
 This creates an empty `.ensrainbow` file for version 0 of the `discovery-a` Label Set, which is used for labels discovered dynamically.
 ```bash
-touch empty.sql
-gzip empty.sql
-time pnpm run convert --input-file empty.sql.gz --output-file discovery-a_0.ensrainbow --label-set-id discovery-a --label-set-version 0
+# Create empty CSV file for discovery dataset
+echo "" > empty.csv
+time pnpm run convert --input-file empty.csv --output-file discovery-a_0.ensrainbow --label-set-id discovery-a --label-set-version 0
 ```
 
 **For the `ens-test-env` Label Set (for testing):**
 This converts a test dataset SQL dump into an `.ensrainbow` file for version 0 of the `ens-test-env` Label Set.
 ```bash
-time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env --label-set-version 0
+time pnpm run convert-sql --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env --label-set-version 0
 ```
 
 ### 2. Upload `.ensrainbow` Files to R2 Storage

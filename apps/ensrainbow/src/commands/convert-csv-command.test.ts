@@ -197,7 +197,7 @@ describe("convert-csv-command", () => {
 
       // Test convert-csv command through CLI
       await cli.parse([
-        "convert-csv",
+        "convert",
         "--input-file",
         inputFile,
         "--output-file",
@@ -373,7 +373,7 @@ describe("convert-csv-command", () => {
       const cli = createCLI({ exitProcess: false });
 
       await cli.parse([
-        "convert-csv",
+        "convert",
         "--input-file",
         inputFile,
         "--output-file",
@@ -394,7 +394,7 @@ describe("convert-csv-command", () => {
 
       // Now test CLI with existing database path
       await cli.parse([
-        "convert-csv",
+        "convert",
         "--input-file",
         inputFile,
         "--output-file",

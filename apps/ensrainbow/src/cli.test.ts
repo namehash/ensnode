@@ -111,7 +111,7 @@ describe("CLI", () => {
 
         expect(() =>
           cli.parse([
-            "convert",
+            "convert-sql",
             "--input-file",
             sqlInputFile,
             "--output-file",
@@ -122,7 +122,7 @@ describe("CLI", () => {
         // Successful convert with args
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
@@ -132,7 +132,7 @@ describe("CLI", () => {
           "--label-set-version",
           labelSetVersion.toString(),
         ]);
-        //command: pnpm convert --input-file test/fixtures/test_ens_names.sql.gz --output-file test/fixtures/test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
+        //command: pnpm convert-sql --input-file test/fixtures/test_ens_names.sql.gz --output-file test/fixtures/test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -163,7 +163,7 @@ describe("CLI", () => {
 
         expect(() =>
           cli.parse([
-            "convert",
+            "convert-sql",
             "--input-file",
             sqlInputFile,
             "--output-file",
@@ -174,7 +174,7 @@ describe("CLI", () => {
         // Successful convert with args
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
@@ -184,7 +184,7 @@ describe("CLI", () => {
           "--label-set-version",
           labelSetVersion.toString(),
         ]);
-        //command: pnpm convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
+        //command: pnpm convert-sql --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -211,7 +211,7 @@ describe("CLI", () => {
 
         expect(() =>
           cli.parse([
-            "convert",
+            "convert-sql",
             "--input-file",
             sqlInputFile,
             "--output-file",
@@ -222,7 +222,7 @@ describe("CLI", () => {
         const ingestCli2 = createCLI({ exitProcess: false });
         // Successful convert with args
         await ingestCli2.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
@@ -266,7 +266,7 @@ describe("CLI", () => {
         // Successful convert with label set version 2
         const convertCli = createCLI({ exitProcess: false });
         await convertCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
@@ -318,7 +318,7 @@ describe("CLI", () => {
         // Create second file with different label set id and label set version 0
         const convertCli = createCLI({ exitProcess: false });
         await convertCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
@@ -331,7 +331,7 @@ describe("CLI", () => {
 
         // Create third file with different label set id and label set version 1
         await convertCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",

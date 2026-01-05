@@ -195,43 +195,6 @@ export function createCLI(options: CLIOptions = {}) {
       )
       .command(
         "convert",
-        "Convert rainbow tables from SQL dump to ensrainbow format",
-        (yargs: Argv) => {
-          return yargs
-            .option("input-file", {
-              type: "string",
-              description: "Path to the gzipped SQL dump file",
-              default: join(process.cwd(), "ens_names.sql.gz"),
-            })
-            .option("output-file", {
-              type: "string",
-              description: "Path to the output ensrainbow file",
-              default: join(process.cwd(), "rainbow-records.ensrainbow"),
-            })
-            .option("label-set-id", {
-              type: "string",
-              description: "Label set id for the rainbow record collection",
-              demandOption: true,
-            })
-            .coerce("label-set-id", buildLabelSetId)
-            .option("label-set-version", {
-              type: "number",
-              description: "Label set version for the rainbow record collection",
-              demandOption: true,
-            })
-            .coerce("label-set-version", buildLabelSetVersion);
-        },
-        async (argv: ArgumentsCamelCase<ConvertArgs>) => {
-          await convertCommand({
-            inputFile: argv["input-file"],
-            outputFile: argv["output-file"],
-            labelSetId: argv["label-set-id"],
-            labelSetVersion: argv["label-set-version"],
-          });
-        },
-      )
-      .command(
-        "convert-csv",
         "Convert rainbow tables from CSV format to ensrainbow format",
         (yargs: Argv) => {
           return yargs
@@ -264,7 +227,8 @@ export function createCLI(options: CLIOptions = {}) {
             })
             .option("existing-db-path", {
               type: "string",
-              description: "Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file",
+              description:
+                "Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file",
             })
             .option("silent", {
               type: "boolean",
@@ -281,6 +245,43 @@ export function createCLI(options: CLIOptions = {}) {
             progressInterval: argv["progress-interval"],
             existingDbPath: argv["existing-db-path"],
             silent: argv["silent"],
+          });
+        },
+      )
+      .command(
+        "convert-sql",
+        "Convert rainbow tables from legacy SQL dump to ensrainbow format",
+        (yargs: Argv) => {
+          return yargs
+            .option("input-file", {
+              type: "string",
+              description: "Path to the gzipped SQL dump file",
+              default: join(process.cwd(), "ens_names.sql.gz"),
+            })
+            .option("output-file", {
+              type: "string",
+              description: "Path to the output ensrainbow file",
+              default: join(process.cwd(), "rainbow-records.ensrainbow"),
+            })
+            .option("label-set-id", {
+              type: "string",
+              description: "Label set id for the rainbow record collection",
+              demandOption: true,
+            })
+            .coerce("label-set-id", buildLabelSetId)
+            .option("label-set-version", {
+              type: "number",
+              description: "Label set version for the rainbow record collection",
+              demandOption: true,
+            })
+            .coerce("label-set-version", buildLabelSetVersion);
+        },
+        async (argv: ArgumentsCamelCase<ConvertArgs>) => {
+          await convertCommand({
+            inputFile: argv["input-file"],
+            outputFile: argv["output-file"],
+            labelSetId: argv["label-set-id"],
+            labelSetVersion: argv["label-set-version"],
           });
         },
       )

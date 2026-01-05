@@ -41,81 +41,29 @@ For detailed information about the file format structure, see the [Data Model](/
 
 | Method | Input Format | Use Case | Command |
 |--------|-------------|----------|---------|
-| **SQL Conversion** | Gzipped SQL dump (`ens_names.sql.gz`) | Converting legacy ENS Subgraph data | `pnpm run convert` |
-| **CSV Conversion** | CSV file (1 or 2 columns) | Building new ENS rainbow tables | `pnpm run convert-csv` |
-
-### When to Use SQL Conversion
-
-- Converting existing ENS Subgraph rainbow tables
-- Working with the legacy `ens_names.sql.gz` file.
-- Migrating from previous ENS data formats
+| **CSV Conversion** | CSV file (1 or 2 columns) | Building new ENS rainbow tables | `pnpm run convert` |
+| **SQL Conversion** | Gzipped SQL dump (`ens_names.sql.gz`) | Converting legacy ENS Subgraph data | `pnpm run convert-sql` |
 
 ### When to Use CSV Conversion
 
 - Creating new rainbow tables for ENSRainbow
+- Building custom label sets
+- Standard data ingestion workflow
 
-## Method 1: Converting from SQL Dumps
+### When to Use SQL Conversion
 
-The `convert` command processes gzipped SQL dump files from the ENS Subgraph.
+- Converting existing ENS Subgraph rainbow tables
+- Working with the legacy `ens_names.sql.gz` file
+- Migrating from previous ENS data formats
 
-### Command Syntax
+## Method 1: Converting from CSV Files
 
-```bash
-pnpm run convert \
-  --input-file <path/to/ens_names.sql.gz> \
-  --output-file <output.ensrainbow> \
-  --label-set-id <label-set-id> \
-  --label-set-version <version-number>
-```
-
-### Required Parameters
-
-- `--input-file`: Path to the gzipped SQL dump file
-- `--label-set-id`: Identifier for the label set (e.g., `subgraph`, `discovery-a`)
-- `--label-set-version`: Version number for the label set (non-negative integer)
-
-### Optional Parameters
-
-- `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
-
-### Example: Converting ENS Subgraph Data
-
-```bash
-# Convert main ENS Subgraph data
-pnpm run convert \
-  --input-file ens_names.sql.gz \
-  --output-file subgraph_0.ensrainbow \
-  --label-set-id subgraph \
-  --label-set-version 0
-```
-
-### Example: Converting Test Data
-
-```bash
-# Convert ens-test-env data
-pnpm run convert \
-  --input-file test/fixtures/ens_test_env_names.sql.gz \
-  --output-file ens-test-env_0.ensrainbow \
-  --label-set-id ens-test-env \
-  --label-set-version 0
-```
-
-### How It Works
-
-1. **Streams** the gzipped SQL file to avoid memory issues
-2. **Parses** SQL COPY statements to extract label/labelhash pairs
-3. **Validates** each record and skips invalid entries
-4. **Writes** protobuf messages with length-delimited encoding
-5. **Creates** a header message followed by individual record messages
-
-## Method 2: Converting from CSV Files
-
-The `convert-csv` command processes CSV files with flexible column formats.
+The `convert` command processes CSV files with flexible column formats.
 
 ### Command Syntax
 
 ```bash
-pnpm run convert-csv \
+pnpm run convert \
   --input-file <path/to/data.csv> \
   --output-file <output.ensrainbow> \
   --label-set-id <label-set-id> \
@@ -168,7 +116,7 @@ The CSV converter includes built-in filtering capabilities to prevent duplicate 
 Use `--existing-db-path` to filter out labels that already exist in an existing ENSRainbow database:
 
 ```bash
-pnpm run convert-csv \
+pnpm run convert \
   --input-file new-labels.csv \
   --output-file incremental_1.ensrainbow \
   --label-set-id my-dataset \
@@ -200,7 +148,7 @@ Duration: 150ms
 
 ```bash
 # Create test dataset from CSV
-pnpm run convert-csv \
+pnpm run convert \
   --input-file test-labels.csv \
   --output-file test-dataset_0.ensrainbow \
   --label-set-id test-dataset \
@@ -212,7 +160,7 @@ pnpm run convert-csv \
 ```bash
 # Create discovery dataset (initially empty)
 echo "" > empty.csv
-pnpm run convert-csv \
+pnpm run convert \
   --input-file empty.csv \
   --output-file discovery-a_0.ensrainbow \
   --label-set-id discovery-a \
@@ -227,7 +175,61 @@ pnpm run convert-csv \
 4. **Computes** or validates labelhashes as needed
 5. **Filters** existing labels if `--existing-db-path` is provided
 6. **Filters** duplicate labels within the same CSV file
-7. **Writes** protobuf messages with the same format as SQL conversion
+7. **Writes** protobuf messages with length-delimited encoding
+
+## Method 2: Converting from SQL Dumps
+
+The `convert-sql` command processes gzipped SQL dump files from the ENS Subgraph.
+
+### Command Syntax
+
+```bash
+pnpm run convert-sql \
+  --input-file <path/to/ens_names.sql.gz> \
+  --output-file <output.ensrainbow> \
+  --label-set-id <label-set-id> \
+  --label-set-version <version-number>
+```
+
+### Required Parameters
+
+- `--input-file`: Path to the gzipped SQL dump file
+- `--label-set-id`: Identifier for the label set (e.g., `subgraph`, `discovery-a`)
+- `--label-set-version`: Version number for the label set (non-negative integer)
+
+### Optional Parameters
+
+- `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
+
+### Example: Converting ENS Subgraph Data
+
+```bash
+# Convert main ENS Subgraph data
+pnpm run convert-sql \
+  --input-file ens_names.sql.gz \
+  --output-file subgraph_0.ensrainbow \
+  --label-set-id subgraph \
+  --label-set-version 0
+```
+
+### Example: Converting Test Data
+
+```bash
+# Convert ens-test-env data
+pnpm run convert-sql \
+  --input-file test/fixtures/ens_test_env_names.sql.gz \
+  --output-file ens-test-env_0.ensrainbow \
+  --label-set-id ens-test-env \
+  --label-set-version 0
+```
+
+### How It Works
+
+1. **Streams** the gzipped SQL file to avoid memory issues
+2. **Parses** SQL COPY statements to extract label/labelhash pairs
+3. **Validates** each record and skips invalid entries
+4. **Writes** protobuf messages with length-delimited encoding
+5. **Creates** a header message followed by individual record messages
 
 ## Common Workflows
 
@@ -235,7 +237,7 @@ pnpm run convert-csv \
 
 ```bash
 # 1. Convert SQL dump to .ensrainbow
-pnpm run convert \
+pnpm run convert-sql \
   --input-file ens_names.sql.gz \
   --output-file subgraph_0.ensrainbow \
   --label-set-id subgraph \
@@ -257,7 +259,7 @@ pnpm run serve --data-dir data-subgraph --port 3223
 
 ```bash
 # 1. Convert test data
-pnpm run convert \
+pnpm run convert-sql \
   --input-file test/fixtures/ens_test_env_names.sql.gz \
   --output-file ens-test-env_0.ensrainbow \
   --label-set-id ens-test-env \
@@ -281,7 +283,7 @@ mylabel2
 mylabel3" > custom-labels.csv
 
 # 2. Convert to .ensrainbow
-pnpm run convert-csv \
+pnpm run convert \
   --input-file custom-labels.csv \
   --output-file custom_0.ensrainbow \
   --label-set-id custom \
@@ -299,7 +301,7 @@ pnpm run serve --data-dir data-custom --port 3223
 
 ```bash
 # 1. Create initial labelset
-pnpm run convert-csv \
+pnpm run convert \
   --input-file initial-labels.csv \
   --output-file my-dataset_0.ensrainbow \
   --label-set-id my-dataset \
@@ -311,7 +313,7 @@ pnpm run ingest-ensrainbow \
   --data-dir data-my-dataset
 
 # 3. Create incremental update (filtering existing labels)
-pnpm run convert-csv \
+pnpm run convert \
   --input-file new-labels.csv \
   --output-file my-dataset_1.ensrainbow \
   --label-set-id my-dataset \
@@ -379,26 +381,26 @@ If you want to create, publish, and distribute your own `.ensrainbow` files, fol
 
 ### 1. Create Your Dataset
 
-First, prepare your data in either SQL or CSV (recommended) format, then convert it using the appropriate method:
+First, prepare your data in either CSV (recommended) or SQL format, then convert it using the appropriate method:
 
 ```bash
-# For CSV data
-pnpm run convert-csv \
+# For CSV data (recommended)
+pnpm run convert \
   --input-file my-labels.csv \
   --output-file my-dataset_0.ensrainbow \
   --label-set-id my-dataset \
   --label-set-version 0
 
 # For CSV data with filtering (if you have an existing database)
-pnpm run convert-csv \
+pnpm run convert \
   --input-file my-labels.csv \
   --output-file my-dataset_1.ensrainbow \
   --label-set-id my-dataset \
   --label-set-version 1 \
   --existing-db-path data-my-dataset
 
-# For SQL data
-pnpm run convert \
+# For legacy SQL data
+pnpm run convert-sql \
   --input-file my-data.sql.gz \
   --output-file my-dataset_0.ensrainbow \
   --label-set-id my-dataset \
@@ -614,7 +616,7 @@ LABEL_SET_ID="my-dataset"
 NEW_VERSION="1"
 
 # Create new .ensrainbow file
-pnpm run convert-csv \
+pnpm run convert \
   --input-file updated-labels.csv \
   --output-file ${LABEL_SET_ID}_${NEW_VERSION}.ensrainbow \
   --label-set-id ${LABEL_SET_ID} \
@@ -652,7 +654,7 @@ export ENSRAINBOW_LABELSET_SERVER_URL="https://my-label-set-server.com"
 # Test downloading prebuilt database
 ./scripts/download-prebuilt-database.sh 3 my-dataset 0
 
-# Verify the database works
+# Verify the database works by ingesting the downloaded file
 pnpm run ingest-ensrainbow \
   --input-file labelsets/my-dataset_0.ensrainbow \
   --data-dir test-data
