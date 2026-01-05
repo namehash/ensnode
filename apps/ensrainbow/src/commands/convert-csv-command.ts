@@ -21,6 +21,7 @@ import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
   createRainbowProtobufRoot,
 } from "../utils/protobuf-schema.js";
+import type { RainbowRecord } from "../utils/rainbow-record.js";
 
 /**
  * Estimate memory usage of a Map (rough approximation)
@@ -270,18 +271,18 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
 /**
  * Create rainbow record from parsed CSV row
  */
-function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string } {
+function createRainbowRecord(row: string[]): RainbowRecord {
   const label = String(row[0]);
 
   if (row.length === 1) {
     // Single column: compute labelhash using labelhash function
     const labelHashBytes = labelHashToBytes(labelhash(label));
     return {
-      labelhash: Buffer.from(labelHashBytes),
+      labelHash: labelHashBytes,
       label: label,
     };
   } else {
-    // Two columns: validate and use provided hash
+    // Two columns: validate labelhash format and use provided hash
     // Trim whitespace from hash (metadata), but preserve label as-is
     const providedHash = String(row[1]).trim();
     if (providedHash === "") {
@@ -291,7 +292,7 @@ function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string 
     try {
       const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
       return {
-        labelhash: Buffer.from(labelHash),
+        labelHash: labelHash,
         label: label,
       };
     } catch (error) {
@@ -323,7 +324,7 @@ async function processRecord(
 
   const rainbowRecord = createRainbowRecord(row);
   const label = rainbowRecord.label;
-  const labelHashBytes = rainbowRecord.labelhash;
+  const labelHashBytes = Buffer.from(rainbowRecord.labelHash);
 
   // Check if labelhash already exists in the existing database
   if (existingDb) {
@@ -345,7 +346,11 @@ async function processRecord(
   await dedupDb.add(label, "");
 
   // Create protobuf message and write with backpressure handling
-  const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
+  // Map RainbowRecord (labelHash) to protobuf format (labelhash)
+  const recordMessage = RainbowRecordType.fromObject({
+    labelhash: Buffer.from(rainbowRecord.labelHash),
+    label: rainbowRecord.label,
+  });
   const buffer = Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish());
 
   // Check if write returns false (buffer full) - if so, wait for drain
