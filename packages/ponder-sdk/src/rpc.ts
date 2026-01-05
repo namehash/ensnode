@@ -1,5 +1,5 @@
 /**
- * Ponder Metadata: RPC
+ * Ponder SDK: RPC
  *
  * This file includes functionality required to read RPC data.
  * The `PublicClient` type matches the type used for values of
