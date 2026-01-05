@@ -36,7 +36,7 @@ export type ReferralProgramStatusId =
  *
  * @param now - Current date in {@link UnixTimestamp} format.
  */
-const calcReferralProgramStatus = (
+export const calcReferralProgramStatus = (
   referralProgramRules: ReferralProgramRules,
   now: UnixTimestamp,
 ): ReferralProgramStatusId => {
