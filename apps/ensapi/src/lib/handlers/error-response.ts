@@ -1,3 +1,4 @@
+import { SchemaError } from "@standard-schema/utils";
 import type { Context } from "hono";
 import type { ClientErrorStatusCode, ServerErrorStatusCode } from "hono/utils/http-status";
 import { treeifyError, ZodError } from "zod/v4";
@@ -8,21 +9,31 @@ import type { ErrorResponse } from "@ensnode/ensnode-sdk";
  * Creates a standardized error response for the ENSApi.
  *
  * Handles different types of errors and converts them to appropriate HTTP responses
- * with consistent error formatting. ZodErrors return 400 status codes with validation
- * details, while other errors return 500 status codes.
+ * with consistent error formatting. ZodErrors and Standard Schema validation errors
+ * return 400 status codes with validation details, while other errors return 500
+ * status codes.
  *
  * @param c - Hono context object
- * @param input - The error input (ZodError, Error, string, or unknown)
+ * @param input - The error input (ZodError, SchemaError, Error, string, or unknown)
  * @returns JSON error response with appropriate HTTP status code
  */
 export const errorResponse = (
   c: Context,
-  input: ZodError | Error | string | unknown,
+  input: ZodError | SchemaError | Error | string | unknown,
   statusCode: ClientErrorStatusCode | ServerErrorStatusCode = 500,
 ) => {
   if (input instanceof ZodError) {
     return c.json(
       { message: "Invalid Input", details: treeifyError(input) } satisfies ErrorResponse,
+      400,
+    );
+  }
+
+  if (input instanceof SchemaError) {
+    // Convert Standard Schema issues to ZodError for consistent formatting
+    const zodError = new ZodError(input.issues as ZodError["issues"]);
+    return c.json(
+      { message: "Invalid Input", details: treeifyError(zodError) } satisfies ErrorResponse,
       400,
     );
   }
@@ -35,5 +46,5 @@ export const errorResponse = (
     return c.json({ message: input } satisfies ErrorResponse, statusCode);
   }
 
-  return c.json({ message: "Internal Error" } satisfies ErrorResponse, statusCode);
+  return c.json({ message: "Internal Server Error" } satisfies ErrorResponse, statusCode);
 };
