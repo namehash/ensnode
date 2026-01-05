@@ -101,6 +101,7 @@ jobs:
               or .name == "@ensnode/ensnode-schema"
               or .name == "@ensnode/ensnode-sdk"
               or .name == "@ensnode/ensrainbow-sdk"
+              or .name == "@ensnode/namehash-ui"
               or .name == "@ensnode/ponder-metadata"
               or .name == "@ensnode/ponder-subgraph"
             ))
