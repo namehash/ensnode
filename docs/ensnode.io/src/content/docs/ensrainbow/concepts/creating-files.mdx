@@ -1,10 +1,10 @@
 ---
 title: Creating ENSRainbow Files
-description: Complete guide to creating .ensrainbow files from SQL dumps and CSV data.
+description: Complete guide to creating .ensrainbow files.
 sidebar:
   label: Creating Files
   order: 3
-keywords: [ensrainbow, file creation, conversion, sql, csv]
+keywords: [ensrainbow, file creation, conversion, csv]
 ---
 
 ENSRainbow provides two methods for creating `.ensrainbow` files from different data sources. This guide helps you choose the right method and provides step-by-step instructions.
@@ -42,20 +42,17 @@ For detailed information about the file format structure, see the [Data Model](/
 | Method | Input Format | Use Case | Command |
 |--------|-------------|----------|---------|
 | **SQL Conversion** | Gzipped SQL dump (`ens_names.sql.gz`) | Converting legacy ENS Subgraph data | `pnpm run convert` |
-| **CSV Conversion** | CSV file (1 or 2 columns) | Custom datasets, test data, external sources | `pnpm run convert-csv` |
+| **CSV Conversion** | CSV file (1 or 2 columns) | Building new ENS rainbow tables | `pnpm run convert-csv` |
 
 ### When to Use SQL Conversion
 
 - Converting existing ENS Subgraph rainbow tables
-- Working with legacy `ens_names.sql.gz` files
+- Working with the legacy `ens_names.sql.gz` file.
 - Migrating from previous ENS data formats
 
 ### When to Use CSV Conversion
 
-- Creating test datasets
-- Converting data from external sources
-- Working with custom label collections
-- Building incremental label sets
+- Creating new rainbow tables for ENSRainbow
 
 ## Method 1: Converting from SQL Dumps
 
@@ -275,7 +272,7 @@ pnpm run ingest-ensrainbow \
 pnpm run serve --data-dir data-test-env --port 3223
 ```
 
-### Workflow 3: Building Custom Dataset
+### Workflow 3: Create a new Labelset
 
 ```bash
 # 1. Create CSV with your labels
@@ -298,10 +295,10 @@ pnpm run ingest-ensrainbow \
 pnpm run serve --data-dir data-custom --port 3223
 ```
 
-### Workflow 4: Creating Incremental Updates
+### Workflow 4: Creating Incremental Label Set Versions
 
 ```bash
-# 1. Create initial dataset
+# 1. Create initial labelset
 pnpm run convert-csv \
   --input-file initial-labels.csv \
   --output-file my-dataset_0.ensrainbow \
