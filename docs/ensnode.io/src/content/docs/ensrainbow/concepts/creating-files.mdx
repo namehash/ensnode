@@ -47,8 +47,6 @@ For detailed information about the file format structure, see the [Data Model](/
 ### When to Use CSV Conversion
 
 - Creating new rainbow tables for ENSRainbow
-- Building custom label sets
-- Standard data ingestion workflow
 
 ### When to Use SQL Conversion
 
@@ -83,7 +81,7 @@ pnpm run convert \
 
 - `--output-file`: Output file path (defaults to `rainbow-records.ensrainbow`)
 - `--progress-interval`: Progress logging frequency (default: 50000 records)
-- `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels
+- `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file
 - `--silent`: Disable progress bar (useful for scripts and automated workflows)
 
 ### CSV Format Support

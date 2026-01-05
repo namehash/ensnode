@@ -260,18 +260,18 @@ export function createCLI(options: CLIOptions = {}) {
             })
             .option("output-file", {
               type: "string",
-              description: "Path to the output ensrainbow file",
+              description: "Path to where the resulting ensrainbow file will be output",
               default: join(process.cwd(), "rainbow-records.ensrainbow"),
             })
             .option("label-set-id", {
               type: "string",
-              description: "Label set id for the rainbow record collection",
+              description: "Label set id for the generated ensrainbow file",
               demandOption: true,
             })
             .coerce("label-set-id", buildLabelSetId)
             .option("label-set-version", {
               type: "number",
-              description: "Label set version for the rainbow record collection",
+              description: "Label set version for the generated ensrainbow file",
               demandOption: true,
             })
             .coerce("label-set-version", buildLabelSetVersion);
