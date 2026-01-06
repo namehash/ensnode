@@ -217,7 +217,7 @@ jobs:
           echo "✅ Published release preview packages to NPM with version: ${PUBLISHED_VERSION}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   build-and-publish-ghcr:
     name: Build & Publish Docker Images to GHCR
