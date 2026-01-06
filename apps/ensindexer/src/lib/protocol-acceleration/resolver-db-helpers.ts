@@ -14,8 +14,6 @@ import {
   interpretNameRecordValue,
   interpretTextRecordKey,
   interpretTextRecordValue,
-  isDedicatedResolver,
-  isExtendedResolver,
 } from "@ensnode/ensnode-sdk/internal";
 
 import type { EventWithArgs } from "@/lib/ponder-helpers";
@@ -44,32 +42,16 @@ export function makeResolverRecordsCompositeKey(
 }
 
 /**
- * Ensures that the Resolver contract described by `resolver` exists, including behavioral metadata
- * on initial insert.
+ * Ensures that the Resolver contract described by `resolver` exists.
  */
 export async function ensureResolver(context: Context, resolver: AccountId) {
-  const resolverId = makeResolverId(resolver);
-  const existing = await context.db.find(schema.resolver, { id: resolverId });
-  if (existing) return;
-
-  const [isExtended, isDedicated] = await Promise.all([
-    isExtendedResolver({
-      address: resolver.address,
-      publicClient: context.client,
-    }),
-    isDedicatedResolver({
-      address: resolver.address,
-      publicClient: context.client,
-    }),
-  ]);
-
-  // ensure Resolver
-  await context.db.insert(schema.resolver).values({
-    id: resolverId,
-    ...resolver,
-    isExtended,
-    isDedicated,
-  });
+  await context.db
+    .insert(schema.resolver)
+    .values({
+      id: makeResolverId(resolver),
+      ...resolver,
+    })
+    .onConflictDoNothing();
 }
 
 /**

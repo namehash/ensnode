@@ -3,7 +3,6 @@ import config from "@/config";
 import {
   type AccountId,
   DEFAULT_EVM_COIN_TYPE,
-  makeResolverId,
   type Node,
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";

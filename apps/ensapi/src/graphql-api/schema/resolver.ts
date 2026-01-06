@@ -18,7 +18,7 @@ import { AccountIdInput, AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import { NameOrNodeInput } from "@/graphql-api/schema/name-or-node";
-import { PermissionsRef } from "@/graphql-api/schema/permissions";
+import { PermissionsRef, type PermissionsUserResource } from "@/graphql-api/schema/permissions";
 import { ResolverRecordsRef } from "@/graphql-api/schema/resolver-records";
 import { db } from "@/lib/db";
 
@@ -114,16 +114,6 @@ ResolverRef.implement({
       },
     }),
 
-    /////////////////////
-    // Resolver.extended
-    /////////////////////
-    extended: t.field({
-      description: "TODO",
-      type: "Boolean",
-      nullable: false,
-      resolve: (parent) => parent.isExtended,
-    }),
-
     //////////////////////
     // Resolver.dedicated
     //////////////////////
@@ -131,7 +121,15 @@ ResolverRef.implement({
       description: "TODO",
       type: DedicatedResolverMetadataRef,
       nullable: true,
-      resolve: (parent) => (parent.isDedicated ? parent : null),
+      resolve: async (parent, args, context) =>
+        db.query.permissionsUser.findFirst({
+          where: (t, { eq, and }) =>
+            and(
+              eq(t.chainId, parent.chainId),
+              eq(t.address, parent.address),
+              eq(t.resource, ROOT_RESOURCE),
+            ),
+        }),
     }),
 
     ////////////////////
@@ -158,7 +156,7 @@ ResolverRef.implement({
 /////////////////////////////
 // DedicatedResolverMetadata
 /////////////////////////////
-export const DedicatedResolverMetadataRef = builder.objectRef<Resolver>(
+export const DedicatedResolverMetadataRef = builder.objectRef<PermissionsUserResource>(
   "DedicatedResolverMetadataRef",
 );
 DedicatedResolverMetadataRef.implement({
@@ -170,25 +168,13 @@ DedicatedResolverMetadataRef.implement({
     owner: t.field({
       description: "TODO",
       type: AccountRef,
-      nullable: true,
-      resolve: async (parent) => {
-        const permissionsUser = await db.query.permissionsUser.findFirst({
-          where: (t, { eq, and }) =>
-            and(
-              eq(t.chainId, parent.chainId),
-              eq(t.address, parent.address),
-              eq(t.resource, ROOT_RESOURCE),
-            ),
-        });
-
-        return permissionsUser?.user;
-      },
+      nullable: false,
+      resolve: (parent) => parent.user,
     }),
 
     /////////////////////////////////
     // DedicatedResolver.permissions
     /////////////////////////////////
-    // TODO(EAC) — support DedicatedResolver.permissions after EAC change
     permissions: t.field({
       description: "TODO",
       type: PermissionsRef,

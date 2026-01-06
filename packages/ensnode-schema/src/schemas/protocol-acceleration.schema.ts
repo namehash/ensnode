@@ -80,11 +80,6 @@ export const domainResolverRelation_relations = relations(domainResolverRelation
  * Resolver represents an individual IResolver contract that has emitted at least 1 event.
  * Note that Resolver contracts can exist on-chain but not emit any events and still function
  * properly, so checks against a Resolver's existence and metadata must be done at runtime.
- *
- * We index whether a Resolver is an IExtendedResolver or an IDedicatedResolver, to minimize RPC
- * requests at the API layer, when resolving resources, but note that runtime operations like
- * Forward Resolution _must_ query a Resolver's existence against the chain, because the indexed set
- * of Resolvers is a subset of the theoretical set of functional Resolvers deployed to a given chain.
  */
 export const resolver = onchainTable(
   "resolvers",
@@ -94,16 +89,6 @@ export const resolver = onchainTable(
 
     chainId: t.integer().notNull().$type<ChainId>(),
     address: t.hex().notNull().$type<Address>(),
-
-    /**
-     * Whether the Resolver implements IExtendedResolver.
-     */
-    isExtended: t.boolean().notNull().default(false),
-
-    /**
-     * Whether the Resolver implements IDedicatedResolver.
-     */
-    isDedicated: t.boolean().notNull().default(false),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.chainId, t.address),
