@@ -14,7 +14,6 @@ import { RegistrarController as base_RegistrarController } from "./abis/basename
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
-import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
@@ -125,33 +124,34 @@ export default {
     },
   },
 
-  [DatasourceNames.Namechain]: {
-    chain: sepolia,
-    contracts: {
-      Resolver: {
-        abi: ResolverABI,
-        startBlock: 23794084,
-      },
-      Registry: {
-        abi: Registry,
-        startBlock: 23794084,
-      },
-      EnhancedAccessControl: {
-        abi: EnhancedAccessControl,
-        startBlock: 23794084,
-      },
-      ETHRegistry: {
-        abi: Registry,
-        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
-        startBlock: 23794084,
-      },
-      ETHRegistrar: {
-        abi: ETHRegistrar,
-        address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
-        startBlock: 23794084,
-      },
-    },
-  },
+  // TODO(ensv2): reference Sepolia deployment
+  // [DatasourceNames.Namechain]: {
+  //   chain: sepolia,
+  //   contracts: {
+  //     Resolver: {
+  //       abi: ResolverABI,
+  //       startBlock: 23794084,
+  //     },
+  //     Registry: {
+  //       abi: Registry,
+  //       startBlock: 23794084,
+  //     },
+  //     EnhancedAccessControl: {
+  //       abi: EnhancedAccessControl,
+  //       startBlock: 23794084,
+  //     },
+  //     ETHRegistry: {
+  //       abi: Registry,
+  //       address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  //       startBlock: 23794084,
+  //     },
+  //     ETHRegistrar: {
+  //       abi: ETHRegistrar,
+  //       address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+  //       startBlock: 23794084,
+  //     },
+  //   },
+  // },
 
   /**
    * Basenames Datasource

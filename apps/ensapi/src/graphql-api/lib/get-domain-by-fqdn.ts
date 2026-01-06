@@ -4,7 +4,7 @@ import { getUnixTime } from "date-fns";
 import { Param, sql } from "drizzle-orm";
 import { labelhash, namehash } from "viem";
 
-import { DatasourceNames, getDatasource } from "@ensnode/datasources";
+import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
@@ -29,7 +29,14 @@ import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration
 import { db } from "@/lib/db";
 
 const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
-const namechain = getDatasource(config.namespace, DatasourceNames.Namechain);
+const namechain = maybeGetDatasource(config.namespace, DatasourceNames.Namechain);
+
+// TODO: remove this (and switch to `getDatasource` above) when all namespaces define Namechain datasource
+if (!namechain) {
+  throw new Error(
+    `Invariant: Namechain Datasource required in this context (should be enforced by plugin requirements!).`,
+  );
+}
 
 const ETH_LABELHASH = labelhashLiteralLabel("eth" as LiteralLabel);
 

@@ -52,8 +52,8 @@ catalogs:
       specifier: 10.1.0
       version: 10.1.0
     ponder:
-      specifier: 0.15.16
-      version: 0.15.16
+      specifier: 0.15.17
+      version: 0.15.17
     tsup:
       specifier: ^8.3.6
       version: 8.5.0
@@ -454,7 +454,7 @@ importers:
         version: 2.9.1
       ponder:
         specifier: 'catalog:'
-        version: 0.15.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.15.17(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -800,7 +800,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.15.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.4)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.15.17(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.4)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -909,7 +909,7 @@ importers:
         version: 4.10.3
       ponder:
         specifier: 'catalog:'
-        version: 0.15.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.15.17(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -6934,8 +6934,8 @@ packages:
       graphql: ^16.10.0
       hono: ^4.6.19
 
-  ponder@0.15.16:
-    resolution: {integrity: sha512-UWJgcnLm9JnvQNA1ehIDmVcX+0KcbborYAl3lYwAHx0pQsc9zN0IbvWU8DR95a02caQrVX9jNq07vCtt75Dzbw==}
+  ponder@0.15.17:
+    resolution: {integrity: sha512-yCZBFHqi0VGeOSfxE5fKS8pKLdhStUC1g0otwm/mPcF6uRqprKZyCKtVmP13H64MppyGCkIxWNdxpS1U8+fCEg==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
@@ -15718,7 +15718,7 @@ snapshots:
       graphql: 16.11.0
       hono: 4.10.3
 
-  ponder@0.15.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
+  ponder@0.15.17(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@22.18.13)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -15803,7 +15803,7 @@ snapshots:
       - yaml
       - zod
 
-  ponder@0.15.16(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.4)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
+  ponder@0.15.17(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.4)(hono@4.10.3)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.20.6)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)

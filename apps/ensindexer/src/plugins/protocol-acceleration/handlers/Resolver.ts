@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 
+import { ResolverABI } from "@ensnode/datasources";
 import { bigintToCoinType, type CoinType, ETH_COIN_TYPE, PluginName } from "@ensnode/ensnode-sdk";
 
 import { parseDnsTxtRecordArgs } from "@/lib/dns-helpers";
@@ -83,7 +84,7 @@ export default function () {
       let value: string | null = null;
       try {
         value = await context.client.readContract({
-          abi: context.contracts.Resolver.abi,
+          abi: ResolverABI,
           address: event.log.address,
           functionName: "text",
           args: [node, key],
