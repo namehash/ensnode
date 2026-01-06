@@ -60,9 +60,11 @@ export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
 
 /**
  * Parses a numeric value as a port number.
+ * Ensures the value is an integer (not a float) within the valid port range.
  */
 export const PortSchema = z.coerce
   .number({ error: "PORT must be a number." })
+  .int({ error: "PORT must be an integer." })
   .min(1, { error: "PORT must be greater than 1." })
   .max(65535, { error: "PORT must be less than 65535" })
   .optional();
