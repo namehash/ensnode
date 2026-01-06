@@ -5,7 +5,7 @@ import { join } from "path";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type LabelSetId, type LabelSetVersion, labelHashToBytes } from "@ensnode/ensnode-sdk";
+import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { createCLI } from "@/cli";
 import { ENSRainbowDB } from "@/lib/database";
@@ -40,7 +40,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-csv-one-col" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -74,7 +73,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-csv-two-col" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -108,7 +106,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-csv-invalid" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
         }),
       ).rejects.toThrow(/Failed on line 1: Invalid labelHash/);
     });
@@ -123,7 +120,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-csv-special" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -165,7 +161,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-csv-invalid-hash" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
         }),
       ).rejects.toThrow(/Failed on line 2: Invalid labelHash/);
     });
@@ -181,7 +176,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-missing" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
         }),
       ).rejects.toThrow();
     });
@@ -204,8 +198,6 @@ describe("convert-csv-command", () => {
         outputFile,
         "--label-set-id",
         "test-cli-csv",
-        "--label-set-version",
-        "0",
       ]);
 
       // Verify file was created
@@ -234,7 +226,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile: initialOutputFile,
         labelSetId: "test-filtering" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -256,11 +247,11 @@ describe("convert-csv-command", () => {
       await db.close();
 
       // Now convert the same CSV file again, but with filtering enabled
+      // This should automatically determine version 1 from the existing database
       await convertCsvCommand({
         inputFile,
         outputFile,
         labelSetId: "test-filtering" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion, // Use same version as initial
         existingDbPath: dataDir,
         silent: true,
       });
@@ -273,21 +264,12 @@ describe("convert-csv-command", () => {
       const initialStats = await stat(initialOutputFile);
       expect(outputStats.size).toBeLessThan(initialStats.size);
 
-      // Verify that the filtered file contains fewer records
+      // Verify that ingesting the filtered file (version 1) into a new database fails
+      // because new databases require version 0 for initial ingestion
       const filteredDataDir = join(tempDir, "db_filtered_result");
-      await cli.parse([
-        "ingest-ensrainbow",
-        "--input-file",
-        outputFile,
-        "--data-dir",
-        filteredDataDir,
-      ]);
-
-      const filteredDb = await ENSRainbowDB.open(filteredDataDir);
-      expect(await filteredDb.validate()).toBe(true);
-      const filteredCount = await filteredDb.getPrecalculatedRainbowRecordCount();
-      expect(filteredCount).toBe(0); // All labels should be filtered out since they already exist
-      await filteredDb.close();
+      await expect(
+        cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", filteredDataDir]),
+      ).rejects.toThrow(/Initial ingestion must use a file with label set version 0/);
     });
 
     it("should filter out duplicate labels within the same conversion", async () => {
@@ -303,7 +285,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-duplicates" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -352,10 +333,9 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-no-db" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           existingDbPath: nonExistentDbPath,
         }),
-      ).rejects.toThrow("Cannot proceed without existing database");
+      ).rejects.toThrow(/Database is not open/);
     });
 
     it("should work through CLI with existing database path", async () => {
@@ -375,8 +355,6 @@ describe("convert-csv-command", () => {
         initialOutputFile,
         "--label-set-id",
         "test-cli-filtering",
-        "--label-set-version",
-        "0",
       ]);
 
       await cli.parse([
@@ -396,8 +374,6 @@ describe("convert-csv-command", () => {
         outputFile,
         "--label-set-id",
         "test-cli-filtering",
-        "--label-set-version",
-        "1",
         "--existing-db-path",
         dataDir,
       ]);
@@ -429,7 +405,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-small" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -475,7 +450,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-many-labels" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -498,7 +472,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-empty" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).resolves.not.toThrow();
@@ -531,7 +504,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-whitespace" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).resolves.not.toThrow();
@@ -555,7 +527,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-header" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).rejects.toThrow(/Invalid labelHash/);
@@ -569,7 +540,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-header-valid" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).resolves.not.toThrow();
@@ -600,7 +570,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-malformed" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).rejects.toThrow(/Expected \d+ columns/);
@@ -619,7 +588,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-malformed2" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).rejects.toThrow(/Expected \d+ columns/);
@@ -638,7 +606,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-quoted" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).resolves.not.toThrow();
@@ -683,7 +650,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-empty-hash" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           silent: true,
         }),
       ).rejects.toThrow(/LabelHash cannot be empty/);

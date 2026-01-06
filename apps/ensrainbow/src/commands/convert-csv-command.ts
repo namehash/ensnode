@@ -122,11 +122,10 @@ function setupProgressBar(): ProgressBar {
  */
 export interface ConvertCsvCommandOptions {
   inputFile: string;
-  outputFile: string;
+  outputFile?: string; // Optional - will be generated if not provided
   labelSetId: string;
-  labelSetVersion: number;
   progressInterval?: number;
-  existingDbPath?: string; // Path to existing ENSRainbow database to check for existing labels
+  existingDbPath?: string; // Path to existing ENSRainbow database to check for existing labels and determine next version
   silent?: boolean; // Disable progress bar for tests
 }
 
@@ -213,14 +212,63 @@ async function checkLabelHashExists(db: ENSRainbowDB, labelHashBytes: Buffer): P
 }
 
 /**
+ * Determine the label set version based on existing database or default to 0
+ */
+async function determineLabelSetVersion(
+  existingDbPath: string | undefined,
+  labelSetId: string,
+): Promise<number> {
+  if (!existingDbPath) {
+    return 0;
+  }
+
+  try {
+    logger.info(`Opening existing database to determine next label set version: ${existingDbPath}`);
+    const existingDb = await ENSRainbowDB.open(existingDbPath);
+    const labelSet = await existingDb.getLabelSet();
+
+    // Validate that the label set ID matches
+    if (labelSet.labelSetId !== labelSetId) {
+      await existingDb.close();
+      throw new Error(
+        `Label set ID mismatch! Database label set id: ${labelSet.labelSetId}, provided label set id: ${labelSetId}`,
+      );
+    }
+
+    const nextVersion = labelSet.highestLabelSetVersion + 1;
+    await existingDb.close();
+    logger.info(
+      `Determined next label set version: ${nextVersion} (current highest: ${labelSet.highestLabelSetVersion})`,
+    );
+    return nextVersion;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Failed to determine label set version from existing database at ${existingDbPath}: ${errorMessage}`,
+    );
+  }
+}
+
+/**
+ * Generate output file name from label set ID and version
+ */
+function generateOutputFileName(labelSetId: string, labelSetVersion: number): string {
+  return `${labelSetId}_${labelSetVersion}.ensrainbow`;
+}
+
+/**
  * Initialize conversion setup and logging
  */
-async function initializeConversion(options: ConvertCsvCommandOptions) {
+async function initializeConversion(
+  options: ConvertCsvCommandOptions,
+  labelSetVersion: number,
+  outputFile: string,
+) {
   logger.info("Starting conversion from CSV to protobuf format...");
   logger.info(`Input file: ${options.inputFile}`);
-  logger.info(`Output file: ${options.outputFile}`);
+  logger.info(`Output file: ${outputFile}`);
   logger.info(`Label set id: ${options.labelSetId}`);
-  logger.info(`Label set version: ${options.labelSetVersion}`);
+  logger.info(`Label set version: ${labelSetVersion}`);
 
   // Check file size and warn for very large files
   try {
@@ -235,7 +283,7 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
     logger.warn(`Could not determine file size: ${error}`);
   }
 
-  // Open existing database if path is provided
+  // Open existing database if path is provided (for filtering existing labels)
   let existingDb: ENSRainbowDB | null = null;
   if (options.existingDbPath) {
     try {
@@ -254,14 +302,9 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
   }
 
   const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
-  const outputStream = setupWriteStream(options.outputFile);
+  const outputStream = setupWriteStream(outputFile);
 
-  writeHeader(
-    outputStream,
-    RainbowRecordCollectionType,
-    options.labelSetId,
-    options.labelSetVersion,
-  );
+  writeHeader(outputStream, RainbowRecordCollectionType, options.labelSetId, labelSetVersion);
 
   logger.info("Reading and processing CSV file line by line with streaming...");
 
@@ -501,10 +544,15 @@ async function processCSVFile(
  * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
-  // Validate that existingDbPath is provided when labelSetVersion > 0
-  if (options.labelSetVersion > 0 && !options.existingDbPath) {
-    throw new Error("existingDbPath must be specified if label set version is higher than 0");
-  }
+  // Determine label set version from existing database or default to 0
+  const labelSetVersion = await determineLabelSetVersion(
+    options.existingDbPath,
+    options.labelSetId,
+  );
+
+  // Generate output file name if not provided
+  const outputFile =
+    options.outputFile ?? generateOutputFileName(options.labelSetId, labelSetVersion);
 
   const stats: ConversionStats = {
     totalLines: 0,
@@ -520,7 +568,11 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
   let tempDedupDir: string | null = null;
 
   try {
-    const { RainbowRecordType, outputStream, existingDb: db } = await initializeConversion(options);
+    const {
+      RainbowRecordType,
+      outputStream,
+      existingDb: db,
+    } = await initializeConversion(options, labelSetVersion, outputFile);
     existingDb = db;
 
     // Create temporary deduplication database

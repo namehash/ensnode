@@ -66,7 +66,6 @@ interface ConvertCsvArgs {
   "input-file": string;
   "output-file"?: string;
   "label-set-id": LabelSetId;
-  "label-set-version": LabelSetVersion;
   "progress-interval"?: number;
   "existing-db-path"?: string;
   silent?: boolean;
@@ -209,15 +208,10 @@ export function createCLI(options: CLIOptions = {}) {
               demandOption: true,
             })
             .coerce("label-set-id", buildLabelSetId)
-            .option("label-set-version", {
-              type: "number",
-              description: "Label set version for the generated ensrainbow file",
-              demandOption: true,
-            })
-            .coerce("label-set-version", buildLabelSetVersion)
             .option("output-file", {
               type: "string",
-              description: "Path to where the resulting ensrainbow file will be output",
+              description:
+                "Path to where the resulting ensrainbow file will be output (if not provided, will be generated automatically)",
             })
             .option("progress-interval", {
               type: "number",
@@ -227,36 +221,19 @@ export function createCLI(options: CLIOptions = {}) {
             .option("existing-db-path", {
               type: "string",
               description:
-                "Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file (required when --label-set-version > 0)",
+                "Path to existing ENSRainbow database to filter out existing labels and determine the next label set version (if not provided, version will be 0)",
             })
             .option("silent", {
               type: "boolean",
               description: "Disable progress bar (useful for scripts)",
               default: false,
-            })
-            .check((argv) => {
-              const labelSetVersion = argv["label-set-version"];
-              if (
-                labelSetVersion !== undefined &&
-                labelSetVersion > 0 &&
-                !argv["existing-db-path"]
-              ) {
-                throw new Error(
-                  "--existing-db-path is required when --label-set-version is greater than 0",
-                );
-              }
-              return true;
             });
         },
         async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
-          const outputFile =
-            argv["output-file"] ??
-            join(process.cwd(), `${argv["label-set-id"]}_${argv["label-set-version"]}.ensrainbow`);
           await convertCsvCommand({
             inputFile: argv["input-file"],
-            outputFile,
+            outputFile: argv["output-file"],
             labelSetId: argv["label-set-id"],
-            labelSetVersion: argv["label-set-version"],
             progressInterval: argv["progress-interval"],
             existingDbPath: argv["existing-db-path"],
             silent: argv["silent"],
