@@ -1,3 +1,2 @@
-/*biome-ignore lint: Tailwind specific formatting*/
 @import "tailwindcss" prefix(nhui);
 /*directly following https://tailwindcss.com/docs/upgrade-guide#using-a-prefix*/
