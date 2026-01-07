@@ -12,7 +12,7 @@ import {
   type LabelSetVersion,
 } from "@ensnode/ensnode-sdk";
 
-import { convertCommand } from "@/commands/convert-command";
+import { convertCommand } from "@/commands/convert-command-sql";
 import { convertCsvCommand } from "@/commands/convert-csv-command";
 // import { ingestCommand } from "@/commands/ingest-command";
 import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
