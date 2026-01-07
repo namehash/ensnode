@@ -19,10 +19,11 @@ export function isStaticResolver(namespace: ENSNamespaceId, resolver: AccountId)
 
   return [
     // ENS Root Chain
-    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver0"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver1"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver2"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver4"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver5"),
     resolverEq(DatasourceNames.ENSRoot, "ArgentResolver"),
 
     // Base Chain
@@ -47,7 +48,7 @@ export function staticResolverImplementsAddressRecordDefaulting(
 
   return [
     // ENS Root Chain
-    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver5"),
 
     // Base Chain
     resolverEq(DatasourceNames.Basenames, "L2Resolver2"),

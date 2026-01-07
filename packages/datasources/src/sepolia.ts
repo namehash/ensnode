@@ -293,17 +293,17 @@ export default {
         startBlock: 8580041,
       },
 
-      DefaultPublicResolver1: {
+      DefaultPublicResolver3: {
         abi: ResolverABI,
         address: "0x8fade66b79cc9f707ab26799354482eb93a5b7dd",
         startBlock: 3790251,
       },
-      DefaultPublicResolver2: {
+      DefaultPublicResolver4: {
         abi: ResolverABI,
         address: "0x8948458626811dd0c23eb25cc74291247077cc51",
         startBlock: 7035086,
       },
-      DefaultPublicResolver3: {
+      DefaultPublicResolver5: {
         abi: ResolverABI,
         address: "0xe99638b40e4fff0129d56f03b55b6bbc4bbe49b5",
         startBlock: 8580001,
