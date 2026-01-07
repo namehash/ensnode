@@ -257,8 +257,7 @@ export function createCLI(options: CLIOptions = {}) {
         },
         async (argv: ArgumentsCamelCase<ConvertArgs>) => {
           const outputFile =
-            argv["output-file"] ??
-            join(process.cwd(), `${argv["label-set-id"]}_0.ensrainbow`);
+            argv["output-file"] ?? join(process.cwd(), `${argv["label-set-id"]}_0.ensrainbow`);
           await convertCommand({
             inputFile: argv["input-file"],
             outputFile,
