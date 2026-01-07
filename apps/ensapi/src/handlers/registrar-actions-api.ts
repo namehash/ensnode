@@ -179,7 +179,7 @@ app.get(
       // Build page context
       const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
 
-      // Get the accurateAsOf timestamp from the latest indexed block for the root chain
+      // Get the accurateAsOf timestamp from the latest indexed block
       const accurateAsOf = getAccurateAsOfTimestamp(c.var.indexingStatus.snapshot);
 
       // respond with success response
