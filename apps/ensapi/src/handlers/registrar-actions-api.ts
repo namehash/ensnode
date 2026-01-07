@@ -71,13 +71,13 @@ const registrarActionsQuerySchema = z
       .pipe(z.coerce.number())
       .pipe(makeUnixTimestampSchema("beginTimestamp"))
       .optional()
-      .describe("Filter actions after this Unix timestamp"),
+      .describe("Filter actions at or after this Unix timestamp"),
 
     endTimestamp: params.queryParam
       .pipe(z.coerce.number())
       .pipe(makeUnixTimestampSchema("endTimestamp"))
       .optional()
-      .describe("Filter actions before this Unix timestamp"),
+      .describe("Filter actions at or before this Unix timestamp"),
   })
   .refine(
     (data) => {
@@ -164,7 +164,7 @@ app.get(
         description: "Successfully retrieved registrar actions",
       },
       400: {
-        description: "Invalid input",
+        description: "Invalid query",
       },
       500: {
         description: "Internal server error",
@@ -257,7 +257,7 @@ app.get(
     "param",
     z.object({
       parentNode: makeNodeSchema("parentNode param").describe(
-        "Parent node hash to filter registrar actions",
+        "Parent node to filter registrar actions",
       ),
     }),
   ),

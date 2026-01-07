@@ -20,15 +20,15 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 app.get(
   "/",
   describeRoute({
-    summary: "Check Realtime Status",
+    summary: "Check indexing progress",
     description:
-      "Checks if the indexer is within an acceptable worst-case indexing distance for realtime monitoring",
+      "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
     responses: {
       200: {
-        description: "Indexer is within acceptable distance",
+        description: "Indexing progress is guaranteed to be within the requested distance of realtime",
       },
       503: {
-        description: "Indexer is not within acceptable distance or indexing status unavailable",
+        description: "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
       },
     },
   }),
