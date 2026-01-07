@@ -83,7 +83,7 @@ pnpm run convert \
 
 ### CSV Format Support
 
-The CSV converter supports two formats:
+The CSV converter supports two formats and expects CSV files **without a header row**.
 
 #### Single Column Format (Label Only)
 ```csv
@@ -458,6 +458,8 @@ Create documentation for your custom label set including:
 - Checksum: `https://example.com/my-dataset_0.tgz.sha256sum`
 
 ### Usage
+```
+
 ```bash
 # Using with Docker
 docker run -d \

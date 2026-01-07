@@ -264,7 +264,7 @@ async function initializeConversion(
   labelSetVersion: number,
   outputFile: string,
 ) {
-  logger.info("Starting conversion from CSV to protobuf format...");
+  logger.info("Starting conversion from CSV to .ensrainbow format...");
   logger.info(`Input file: ${options.inputFile}`);
   logger.info(`Output file: ${outputFile}`);
   logger.info(`Label set id: ${options.labelSetId}`);
@@ -428,7 +428,6 @@ async function processCSVFile(
   let lineNumber = 0;
   let processedRecords = 0;
   let lastLoggedLine = 0;
-  const startTime = Date.now();
   let lastLogTime = Date.now();
 
   const fileStream = createReadStream(inputFile, { encoding: "utf8" });

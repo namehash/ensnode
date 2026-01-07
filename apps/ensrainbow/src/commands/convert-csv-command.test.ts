@@ -513,7 +513,7 @@ describe("convert-csv-command", () => {
       expect(stats.isFile()).toBe(true);
     });
 
-    it("should skip CSV header row if present", async () => {
+    it("should process all CSV rows including potential headers", async () => {
       const inputFile = join(tempDir, "with_header.csv");
       const outputFile = join(tempDir, "output_header.ensrainbow");
       const csvContent =
