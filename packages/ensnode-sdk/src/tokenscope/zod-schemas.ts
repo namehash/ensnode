@@ -3,14 +3,9 @@ import { zeroAddress } from "viem";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
+import { type AssetId, AssetNamespaces } from "../shared/types";
 import { makeAccountIdSchema, makeNodeSchema } from "../shared/zod-schemas";
-import {
-  type AssetId,
-  AssetNamespaces,
-  type DomainAssetId,
-  NFTMintStatuses,
-  type SerializedAssetId,
-} from "./assets";
+import { type DomainAssetId, NFTMintStatuses, type SerializedAssetId } from "./assets";
 import {
   type NameToken,
   type NameTokenOwnershipBurned,

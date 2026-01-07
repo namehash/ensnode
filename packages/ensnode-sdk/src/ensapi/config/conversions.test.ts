@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
-import { PluginName } from "../../ensindexer";
+import { PluginName } from "../../ensindexer/config/types";
 import { deserializeENSApiPublicConfig, serializeENSApiPublicConfig } from ".";
 import type { ENSApiPublicConfig } from "./types";
 

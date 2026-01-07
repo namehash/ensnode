@@ -16,10 +16,12 @@ export const ensTestEnvL1Chain = {
   ...localhost,
   id: l1ChainId,
   name: "ens-test-env L1",
-} satisfies Chain;
+  rpcUrls: { default: { http: ["http://localhost:8545"] } },
+} as const satisfies Chain;
 
 export const ensTestEnvL2Chain = {
   ...localhost,
   id: l2ChainId,
   name: "ens-test-env L2",
-} satisfies Chain;
+  rpcUrls: { default: { http: ["http://localhost:8546"] } },
+} as const satisfies Chain;

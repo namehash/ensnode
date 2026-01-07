@@ -4,7 +4,7 @@ import { TtlCache } from "./ttl-cache";
 
 describe("TtlCache", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true, now: new Date(2024, 0, 1) });
   });
 
   afterEach(() => {

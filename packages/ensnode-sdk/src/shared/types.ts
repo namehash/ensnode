@@ -33,6 +33,34 @@ export interface AccountId {
 }
 
 /**
+ * An enum representing the possible CAIP-19 Asset Namespace values.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export const AssetNamespaces = {
+  ERC721: "erc721",
+  ERC1155: "erc1155",
+} as const;
+
+export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
+
+/**
+ * A uint256 value that identifies a specific NFT within a NFT contract.
+ */
+export type TokenId = bigint;
+
+/**
+ * Represents an Asset in `assetNamespace` by `tokenId` in `contract`.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export interface AssetId {
+  assetNamespace: AssetNamespace;
+  contract: AccountId;
+  tokenId: TokenId;
+}
+
+/**
  * Block Number
  *
  * Guaranteed to be a non-negative integer.
@@ -134,4 +162,11 @@ export type DeepPartial<T> = {
     : T[P] extends object
       ? DeepPartial<T[P]>
       : T[P];
+};
+
+/**
+ * Marks keys in K as required (not undefined) and not null.
+ */
+export type RequiredAndNotNull<T, K extends keyof T> = T & {
+  [P in K]-?: NonNullable<T[P]>;
 };
