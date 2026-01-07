@@ -11,3 +11,13 @@ npm install @namehash/namehash-ui @ensnode/ensnode-react
 ```
 
 Note: `@ensnode/ensnode-react` is necessary only for some components. It might happen that you won't need it. 
+
+## Setup
+
+The `namehash-ui` package comes with its own styles exported for some components, as well as global Tailwind styles (soon to be removed).
+
+Make sure you import the `styles.css` file somewhere in your app:
+
+```tsx
+import "@namehash/namehash-ui/styles.css";
+```

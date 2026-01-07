@@ -19,7 +19,11 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./styles.css": {
+      "import": "./dist/index.css",
+      "default": "./dist/index.css"
+    }
   },
   "sideEffects": false,
   "publishConfig": {
@@ -28,6 +32,10 @@
       ".": {
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./styles.css": {
+        "import": "./dist/index.css",
+        "default": "./dist/index.css"
       }
     },
     "main": "./dist/index.js",
