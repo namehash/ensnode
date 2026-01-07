@@ -24,6 +24,7 @@ import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
+import { getAccurateAsOfTimestamp } from "@/lib/registrar-actions/get-accurate-as-of-timestamp";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 const app = factory.createApp();
@@ -125,6 +126,12 @@ app.get(
   ),
   async (c) => {
     try {
+      // Middleware ensures indexingStatus is available and not an Error
+      // This check is for TypeScript type safety
+      if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+        throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+      }
+
       const { parentNode } = c.req.valid("param");
       const {
         orderBy,
@@ -172,12 +179,16 @@ app.get(
       // Build page context
       const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
 
+      // Get the accurateAsOf timestamp from the latest indexed block for the root chain
+      const accurateAsOf = getAccurateAsOfTimestamp(c.var.indexingStatus.snapshot);
+
       // respond with success response
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Ok,
           registrarActions,
           pageContext,
+          accurateAsOf,
         } satisfies RegistrarActionsResponseOk),
       );
     } catch (error) {
