@@ -316,7 +316,7 @@ function createRainbowRecord(row: string[]): RainbowRecord {
       labelHash: labelHashBytes,
       label: label,
     };
-  } else {
+  } else if (row.length === 2) {
     // Two columns: validate labelhash format and use provided hash
     // Trim whitespace from hash (metadata), but preserve label as-is
     const providedHash = String(row[1]).trim();
@@ -327,13 +327,15 @@ function createRainbowRecord(row: string[]): RainbowRecord {
     try {
       const labelHash = labelHashToBytes(maybeLabelHash as LabelHash); // performs labelhash format validation
       return {
-        labelHash: labelHash,
-        label: label,
+        labelHash,
+        label,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Invalid labelHash: ${errorMessage}`);
     }
+  } else {
+    throw new Error(`Expected 1 or 2 columns, but found ${row.length} columns`);
   }
 }
 

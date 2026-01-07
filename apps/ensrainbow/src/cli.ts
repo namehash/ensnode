@@ -5,12 +5,7 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
-import {
-  buildLabelSetId,
-  buildLabelSetVersion,
-  type LabelSetId,
-  type LabelSetVersion,
-} from "@ensnode/ensnode-sdk";
+import { buildLabelSetId, type LabelSetId } from "@ensnode/ensnode-sdk";
 
 import { convertCommand } from "@/commands/convert-command-sql";
 import { convertCsvCommand } from "@/commands/convert-csv-command";
@@ -59,7 +54,6 @@ interface ConvertArgs {
   "input-file": string;
   "output-file"?: string;
   "label-set-id": LabelSetId;
-  "label-set-version": LabelSetVersion;
 }
 
 interface ConvertCsvArgs {
@@ -256,12 +250,6 @@ export function createCLI(options: CLIOptions = {}) {
               demandOption: true,
             })
             .coerce("label-set-id", buildLabelSetId)
-            .option("label-set-version", {
-              type: "number",
-              description: "Label set version for the generated ensrainbow file",
-              demandOption: true,
-            })
-            .coerce("label-set-version", buildLabelSetVersion)
             .option("output-file", {
               type: "string",
               description: "Path to where the resulting ensrainbow file will be output",
@@ -269,13 +257,12 @@ export function createCLI(options: CLIOptions = {}) {
         },
         async (argv: ArgumentsCamelCase<ConvertArgs>) => {
           const outputFile =
-            argv["output-file"] ??
-            join(process.cwd(), `${argv["label-set-id"]}_${argv["label-set-version"]}.ensrainbow`);
+            argv["output-file"] ?? join(process.cwd(), `${argv["label-set-id"]}_.ensrainbow`);
           await convertCommand({
             inputFile: argv["input-file"],
             outputFile,
             labelSetId: argv["label-set-id"],
-            labelSetVersion: argv["label-set-version"],
+            labelSetVersion: 0,
           });
         },
       )

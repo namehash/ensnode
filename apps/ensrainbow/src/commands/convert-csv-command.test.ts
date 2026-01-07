@@ -107,7 +107,7 @@ describe("convert-csv-command", () => {
           outputFile,
           labelSetId: "test-csv-invalid" as LabelSetId,
         }),
-      ).rejects.toThrow(/Failed on line 1: Invalid labelHash/);
+      ).rejects.toThrow(/Failed on line 1: Expected 1 or 2 col/);
     });
 
     it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
