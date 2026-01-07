@@ -11,7 +11,7 @@ import {
  * Gets the `accurateAsOf` timestamp for registrar actions data.
  *
  * This timestamp represents when the registrar actions data was accurate as of,
- * based on the latest indexed block for the root chain (where the ENS BaseRegistrar contract lives).
+ * based on the latest indexed block for the root chain.
  *
  * @param snapshot - The cross-chain indexing status snapshot
  * @returns The Unix timestamp of when the data was accurate as of
