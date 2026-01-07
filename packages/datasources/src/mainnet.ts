@@ -104,6 +104,13 @@ export default {
         startBlock: 20410692,
       },
 
+      // the Argent Resolver used by Argent vaults
+      ArgentResolver: {
+        abi: ResolverABI,
+        address: "0xda1756bb923af5d1a05e277cb1e54f1d0a127890",
+        startBlock: 7173574,
+      },
+
       //
 
       ETHRegistry: {
@@ -283,6 +290,13 @@ export default {
         address: "0xa53cca02f98d590819141aa85c891e2af713c223",
         startBlock: 6682956,
       },
+
+      // this is Linea's Default Public Resolver
+      DefaultPublicResolver: {
+        abi: ResolverABI,
+        address: "0x86c5aed9f27837074612288610fb98ccc1733126",
+        startBlock: 6682994,
+      },
     },
   },
 
@@ -371,7 +385,22 @@ export default {
         startBlock: 22764871,
       },
 
-      // the original default public resolver aka LegacyPublicResolver
+      // the original default public resolver
+      // it uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver0: {
+        abi: ResolverABI,
+        address: "0x5ffc014343cd971b7eb70732021e26c35b744cc4",
+        startBlock: 3733668,
+      },
+
+      // it uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolverFuck: {
+        abi: ResolverABI,
+        address: "0x226159d592e2b063810a10ebf6dcbada94ed68b8",
+        startBlock: 8659893,
+      },
+
+      // aka 'LegacyPublicResolver' in the ENS Subgraph terminology
       // it uses a TextChanged event that does not include the `value` parameter
       DefaultPublicResolver1: {
         abi: ResolverABI,
