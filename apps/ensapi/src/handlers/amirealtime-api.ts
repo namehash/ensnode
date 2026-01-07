@@ -1,4 +1,5 @@
 import { minutesToSeconds } from "date-fns";
+import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
 import type { Duration } from "@ensnode/ensnode-sdk";
@@ -18,6 +19,19 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 // `maxWorstCaseDistance` param
 app.get(
   "/",
+  describeRoute({
+    summary: "Check Realtime Status",
+    description:
+      "Checks if the indexer is within an acceptable worst-case indexing distance for realtime monitoring",
+    responses: {
+      200: {
+        description: "Indexer is within acceptable distance",
+      },
+      503: {
+        description: "Indexer is not within acceptable distance or indexing status unavailable",
+      },
+    },
+  }),
   validate(
     "query",
     z.object({
