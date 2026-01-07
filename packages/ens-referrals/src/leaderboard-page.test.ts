@@ -30,6 +30,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
       aggregatedMetrics: {
         grandTotalReferrals: 17,
         grandTotalIncrementalDuration: 464554733,
+        grandTotalRevenueContribution: 60_000_000_000_000_000n, // 0.06 ETH
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },
@@ -40,6 +41,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
             referrer: "0x6837047f46da1d5d9a79846b25810b92adf456f6",
             totalReferrals: 1,
             totalIncrementalDuration: 189302400,
+            totalRevenueContribution: 20_000_000_000_000_000n, // 0.02 ETH
             score: 5.99875425231182,
             rank: 1,
             isQualified: true,
@@ -55,6 +57,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
             referrer: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
             totalReferrals: 10,
             totalIncrementalDuration: 155847533,
+            totalRevenueContribution: 25_000_000_000_000_000n, // 0.025 ETH
             score: 4.93861172016867,
             rank: 2,
             isQualified: true,
@@ -70,6 +73,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
             referrer: "0x7e491cde0fbf08e51f54c4fb6b9e24afbd18966d",
             totalReferrals: 6,
             totalIncrementalDuration: 119404800,
+            totalRevenueContribution: 15_000_000_000_000_000n, // 0.015 ETH
             score: 3.78378748365812,
             rank: 3,
             isQualified: true,
@@ -111,6 +115,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
       aggregatedMetrics: {
         grandTotalReferrals: 17,
         grandTotalIncrementalDuration: 464554733,
+        grandTotalRevenueContribution: 50_000_000_000_000_000n, // 0.05 ETH
         grandTotalQualifiedReferrersFinalScore: 28.05273061366773,
         minFinalScoreToQualify: 0,
       },

@@ -21,6 +21,7 @@
     ".": "./src/index.ts",
     "./internal": "./src/internal.ts"
   },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public",
     "exports": {

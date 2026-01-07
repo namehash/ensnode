@@ -169,14 +169,10 @@ console.log(config);
 
 #### Indexing Status API
 
-##### `indexingStatus(options)`
+##### `indexingStatus()`
 
 Fetches the ENSNode's multichain indexing status.
 
-- `options`: (optional) additional options
-  - `maxRealtimeDistance`: (optional) The max allowed distance in seconds between the latest indexed block of the slowest indexed chain and the current time. Setting this parameter influences the HTTP response code:
-    - Success (200 OK): The latest indexed block of each chain is within the requested distance from realtime
-    - Service Unavailable (503): The latest indexed block of each chain is NOT within the requested distance from realtime
 - Returns: `IndexingStatusResponse` - The indexing status data for all indexed chains
 - Throws: Error if the request fails or the ENSNode API returns an error response
 
@@ -185,11 +181,6 @@ Fetches the ENSNode's multichain indexing status.
 const status = await client.indexingStatus();
 console.log(status);
 // Returns indexing status for all indexed chains
-
-// Check if omnichain indexing is within 60 seconds of realtime
-const status = await client.indexingStatus({ maxRealtimeDistance: 60 });
-console.log(status);
-// Returns indexing status, throws if not within 60 seconds of realtime
 ```
 
 ### Configuration

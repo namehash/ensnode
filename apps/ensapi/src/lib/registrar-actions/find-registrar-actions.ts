@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNotNull, not, type SQL } from "drizzle-orm/sql";
+import { and, count, desc, eq, gte, isNotNull, lte, not, type SQL } from "drizzle-orm/sql";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
@@ -64,6 +64,14 @@ function buildWhereClause(filters: RegistrarActionsFilter[] | undefined): SQL[] 
         case RegistrarActionsFilterTypes.ByDecodedReferrer:
           // apply decoded referrer equality filter
           return eq(schema.registrarActions.decodedReferrer, filter.value);
+
+        case RegistrarActionsFilterTypes.BeginTimestamp:
+          // apply begin timestamp filter (inclusive)
+          return gte(schema.registrarActions.timestamp, BigInt(filter.value));
+
+        case RegistrarActionsFilterTypes.EndTimestamp:
+          // apply end timestamp filter (inclusive)
+          return lte(schema.registrarActions.timestamp, BigInt(filter.value));
 
         default:
           // Invariant: Unknown filter type — should never occur
