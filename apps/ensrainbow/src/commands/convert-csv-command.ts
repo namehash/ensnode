@@ -333,7 +333,7 @@ function createRainbowRecord(row: string[]): RainbowRecord {
     }
     const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
     try {
-      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
+      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash); // performs labelhash format validation
       return {
         labelHash: labelHash,
         label: label,

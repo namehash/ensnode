@@ -64,7 +64,6 @@ pnpm run convert \
   --input-file <path/to/data.csv> \
   --output-file <output.ensrainbow> \
   --label-set-id <label-set-id> \
-  --label-set-version <version-number> \
   [--progress-interval <number>] \
   [--existing-db-path <path/to/existing/database>] \
   [--silent]
@@ -74,7 +73,6 @@ pnpm run convert \
 
 - `--input-file`: Path to the CSV file
 - `--label-set-id`: Identifier for the output `.ensrainbow` file that will be created (used in file naming and metadata)
-- `--label-set-version`: Version number for the output `.ensrainbow` file that will be created (used in file naming and metadata)
 
 ### Optional Parameters
 
@@ -103,7 +101,7 @@ vitalik,0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
 ens,0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da
 ```
 
-The converter validates that provided labelhashes match the computed hash for each label.
+The converter validates the format of provided labelhashes (does not verify they match the label).
 
 ### Label Filtering
 
@@ -117,7 +115,6 @@ pnpm run convert \
   --input-file new-labels.csv \
   --output-file incremental_1.ensrainbow \
   --label-set-id my-dataset \
-  --label-set-version 1 \
   --existing-db-path data-my-dataset
 ```
 
@@ -149,7 +146,6 @@ pnpm run convert \
   --input-file test-labels.csv \
   --output-file test-dataset_0.ensrainbow \
   --label-set-id test-dataset \
-  --label-set-version 0
 ```
 
 ### Example: Creating Discovery Dataset
@@ -161,7 +157,6 @@ pnpm run convert \
   --input-file empty.csv \
   --output-file discovery-a_0.ensrainbow \
   --label-set-id discovery-a \
-  --label-set-version 0
 ```
 
 ### How It Works
@@ -170,6 +165,9 @@ pnpm run convert \
 2. **Streams** CSV parsing using fast-csv for memory efficiency
 3. **Validates** column count and data format
 4. **Computes** or validates labelhashes as needed
+   - For single-column format: Computes labelhash using the `labelhash()` function
+   - For two-column format: Validates the format of the provided labelhash (does not verify it matches the label)
+   - Invalid labelhashes are rejected if they don't meet format requirements (66 characters including "0x" prefix, lowercase hex, valid hex format)
 5. **Filters** existing labels if `--existing-db-path` is provided
 6. **Filters** duplicate labels within the same CSV file
 7. **Writes** .ensrainbow file as output
@@ -215,22 +213,19 @@ pnpm run convert-sql \
   --label-set-version 0
 ```
 
-### Example: Converting Test Data
-
-```bash
-# Convert ens-test-env data
-pnpm run convert-sql \
-  --input-file test/fixtures/ens_test_env_names.sql.gz \
-  --output-file ens-test-env_0.ensrainbow \
-  --label-set-id ens-test-env \
-  --label-set-version 0
-```
 
 ### How It Works
 
 1. **Streams** the gzipped SQL file to avoid memory issues
 2. **Parses** SQL COPY statements to extract label/labelhash pairs
 3. **Validates** each record and skips invalid entries
+   - **Invalid line format**: Lines that don't contain exactly 2 tab-separated columns (labelHash and label)
+   - **Invalid labelHash format**: LabelHash values that:
+     - Don't have exactly 66 characters (must be "0x" prefix + 64 hex digits)
+     - Are not in lowercase (must be all lowercase hexadecimal)
+     - Don't start with "0x" prefix
+     - Contain invalid hexadecimal characters
+   - Invalid entries are safely skipped as they would be unreachable by the ENS Subgraph
 4. **Writes** .ensrainbow file as output
 
 ## Common Workflows
@@ -265,11 +260,10 @@ pnpm run serve --data-dir data-subgraph --port 3223
 
 ```bash
 # 1. Convert test data
-pnpm run convert-sql \
-  --input-file test/fixtures/ens_test_env_names.sql.gz \
+pnpm run convert \
+  --input-file test/fixtures/ens_test_env_names.csv \
   --output-file ens-test-env_0.ensrainbow \
-  --label-set-id ens-test-env \
-  --label-set-version 0
+  --label-set-id ens-test-env
 
 # 2. Ingest test data
 pnpm run ingest-ensrainbow \
@@ -292,8 +286,7 @@ mylabel3" > custom-labels.csv
 pnpm run convert \
   --input-file custom-labels.csv \
   --output-file custom_0.ensrainbow \
-  --label-set-id custom \
-  --label-set-version 0
+  --label-set-id custom
 
 # 3. Ingest and serve
 pnpm run ingest-ensrainbow \
@@ -310,8 +303,7 @@ pnpm run serve --data-dir data-custom --port 3223
 pnpm run convert \
   --input-file initial-labels.csv \
   --output-file my-dataset_0.ensrainbow \
-  --label-set-id my-dataset \
-  --label-set-version 0
+  --label-set-id my-dataset
 
 # 2. Ingest initial data
 pnpm run ingest-ensrainbow \
@@ -323,7 +315,6 @@ pnpm run convert \
   --input-file new-labels.csv \
   --output-file my-dataset_1.ensrainbow \
   --label-set-id my-dataset \
-  --label-set-version 1 \
   --existing-db-path data-my-dataset
 
 # 4. Ingest incremental update
@@ -386,24 +377,21 @@ If you want to create, publish, and distribute your own `.ensrainbow` files, fol
 
 ### 1. Create Your Dataset
 
-First, prepare your data in either CSV (recommended) or SQL format, then convert it using the appropriate method:
+First, prepare your data in CSV format, then convert it using the `convert` command:
 
 ```bash
-# For CSV data (recommended)
 pnpm run convert \
   --input-file my-labels.csv \
   --output-file my-dataset_0.ensrainbow \
-  --label-set-id my-dataset \
-  --label-set-version 0
+  --label-set-id my-dataset
 
-# For CSV data with filtering (if you have an existing database)
+# to create an incremental update, you can use the `--existing-db-path` flag to filter out existing labels:
 pnpm run convert \
-  --input-file my-labels.csv \
+  --input-file my-labels2.csv \
   --output-file my-dataset_1.ensrainbow \
   --label-set-id my-dataset \
-  --label-set-version 1 \
   --existing-db-path data-my-dataset
-
+```
 
 ### 2. Validate Your File
 
@@ -617,8 +605,7 @@ NEW_VERSION="1"
 pnpm run convert \
   --input-file updated-labels.csv \
   --output-file ${LABEL_SET_ID}_${NEW_VERSION}.ensrainbow \
-  --label-set-id ${LABEL_SET_ID} \
-  --label-set-version ${NEW_VERSION}
+  --label-set-id ${LABEL_SET_ID}
 
 # Create prebuilt database
 pnpm run ingest-ensrainbow \

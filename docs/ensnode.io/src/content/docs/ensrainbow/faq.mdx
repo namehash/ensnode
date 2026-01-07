@@ -22,25 +22,13 @@ To stay informed about new versions, monitor the [Available Label Sets](/ensrain
 
 ## How can I create my own .ensrainbow file?
 
-ENSRainbow provides two methods for creating `.ensrainbow` files:
-
-**Method 1: CSV Conversion (Recommended)**
-
-The `convert` command is the **primary method** for creating new `.ensrainbow` files from CSV data:
+You can create your own `.ensrainbow` files from CSV data using the `convert` command, which generates new `.ensrainbow` files from your supplied CSV input.
 
 1. **Prepare your data** as a CSV file with labels (1 column) or labels and labelhashes (2 columns)
 2. **Run the convert command:**
    ```bash
-   pnpm run convert --input-file your_labels.csv --output-file custom.ensrainbow --label-set-id my-dataset --label-set-version 0
+   pnpm run convert --input-file your_labels.csv --output-file custom.ensrainbow --label-set-id my-dataset
    ```
-
-**Method 2: SQL Conversion (Legacy)**
-
-For converting legacy ENS Subgraph data from PostgreSQL dumps:
-
-```bash
-pnpm run convert-sql --input-file ens_names.sql.gz --output-file custom.ensrainbow --label-set-id subgraph --label-set-version 0
-```
 
 **Note:** You can also download existing `.ensrainbow` files using the download scripts.
 

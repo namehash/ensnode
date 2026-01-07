@@ -8,7 +8,7 @@ keywords: [ensrainbow, cli]
 
 | Command | Purpose | Most useful flags | Example |
 |---------|---------|-------------------|---------|
-| `convert` | Convert CSV files to `.ensrainbow` format. **This is the primary method for creating new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version`, `--existing-db-path`, `--silent` | `pnpm run convert --input-file labels.csv --output-file my-dataset_0.ensrainbow --label-set-id my-dataset --label-set-version 0` |
+| `convert` | Convert CSV files to `.ensrainbow` format. **This is the primary method for creating new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--existing-db-path`, `--silent` | `pnpm run convert --input-file labels.csv --output-file my-dataset_0.ensrainbow --label-set-id my-dataset` |
 | `convert-sql` | Convert legacy `.sql.gz` rainbow tables (ENS Subgraph data) to `.ensrainbow` format | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version` | `pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0` |
 | `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB | `--input-file`, `--data-dir` | `pnpm run ingest-ensrainbow --input-file my-dataset_0.ensrainbow --data-dir ./data` |
 | `validate` | Verify DB integrity | `--data-dir`, `--lite` | `pnpm run validate --lite` |
@@ -27,7 +27,6 @@ pnpm run convert \
   --input-file path/to/labels.csv \
   --output-file path/to/output.ensrainbow \
   --label-set-id your-label-set-id \
-  --label-set-version 0 \
   [--existing-db-path path/to/existing/database] \
   [--silent]
 ```
