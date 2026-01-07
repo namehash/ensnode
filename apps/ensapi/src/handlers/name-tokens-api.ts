@@ -72,6 +72,7 @@ const makeNameTokensNotIndexedResponse = (
 app.get(
   "/",
   describeRoute({
+    tags: ["Explore"],
     summary: "Get Name Tokens",
     description: "Returns name tokens for the requested identifier (domainId or name)",
     responses: {

@@ -157,6 +157,7 @@ async function fetchRegistrarActions(
 app.get(
   "/",
   describeRoute({
+    tags: ["Explore"],
     summary: "Get Registrar Actions",
     description: "Returns all registrar actions with optional filtering and pagination",
     responses: {
@@ -238,6 +239,7 @@ app.get(
 app.get(
   "/:parentNode",
   describeRoute({
+    tags: ["Explore"],
     summary: "Get Registrar Actions by Parent Node",
     description:
       "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",

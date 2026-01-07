@@ -20,6 +20,7 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 app.get(
   "/",
   describeRoute({
+    tags: ["Meta"],
     summary: "Check indexing progress",
     description:
       "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",

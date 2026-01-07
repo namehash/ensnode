@@ -26,6 +26,7 @@ const app = factory.createApp();
 app.get(
   "/config",
   describeRoute({
+    tags: ["Meta"],
     summary: "Get ENSApi Public Config",
     description: "Gets the public config of the ENSApi instance",
     responses: {
@@ -48,6 +49,7 @@ app.get(
 app.get(
   "/indexing-status",
   describeRoute({
+    tags: ["Meta"],
     summary: "Get ENSIndexer Indexing Status",
     description: "Returns the indexing status snapshot most recently captured from ENSIndexer",
     responses: {
