@@ -25,10 +25,12 @@ app.get(
       "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
     responses: {
       200: {
-        description: "Indexing progress is guaranteed to be within the requested distance of realtime",
+        description:
+          "Indexing progress is guaranteed to be within the requested distance of realtime",
       },
       503: {
-        description: "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
+        description:
+          "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
       },
     },
   }),
