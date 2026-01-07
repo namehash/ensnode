@@ -206,8 +206,11 @@ async function checkLabelHashExists(db: ENSRainbowDB, labelHashBytes: Buffer): P
     const record = await db.getVersionedRainbowRecord(labelHashBytes);
     return record !== null;
   } catch (error) {
-    // If there's an error checking, assume it doesn't exist
-    return false;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(
+      `Error while checking if labelhash exists in ENSRainbow database: ${errorMessage}`,
+    );
+    throw error;
   }
 }
 
@@ -564,7 +567,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
 
   let existingDb: ENSRainbowDB | null = null;
   let dedupDb: DeduplicationDB | undefined;
-  let tempDedupDir: string | null = null;
+  let temporaryDedupDir: string | null = null;
 
   try {
     const {
@@ -575,9 +578,9 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     existingDb = db;
 
     // Create temporary deduplication database
-    tempDedupDir = join(process.cwd(), "temp-dedup-" + Date.now());
-    logger.info(`Creating temporary deduplication database at: ${tempDedupDir}`);
-    const tempDb = new ClassicLevel<string, string>(tempDedupDir, {
+    temporaryDedupDir = join(process.cwd(), "temp-dedup-" + Date.now());
+    logger.info(`Creating temporary deduplication database at: ${temporaryDedupDir}`);
+    const tempDb = new ClassicLevel<string, string>(temporaryDedupDir, {
       keyEncoding: "utf8",
       valueEncoding: "utf8",
       createIfMissing: true,
@@ -649,10 +652,10 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     }
 
     // Remove temporary deduplication database directory
-    if (tempDedupDir) {
+    if (temporaryDedupDir) {
       try {
-        rmSync(tempDedupDir, { recursive: true, force: true });
-        logger.info(`Removed temporary deduplication database: ${tempDedupDir}`);
+        rmSync(temporaryDedupDir, { recursive: true, force: true });
+        logger.info(`Removed temporary deduplication database: ${temporaryDedupDir}`);
       } catch (error) {
         logger.warn(`Failed to remove temporary deduplication database: ${error}`);
       }

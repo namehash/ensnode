@@ -338,6 +338,52 @@ describe("convert-csv-command", () => {
       ).rejects.toThrow(/Database is not open/);
     });
 
+    it("should throw error when label set ID mismatches existing database", async () => {
+      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
+      const outputFile = join(tempDir, "output_mismatch.ensrainbow");
+      const dataDir = join(tempDir, "db_mismatch");
+
+      // First, create a database with one label set ID
+      const initialOutputFile = join(tempDir, "initial_mismatch.ensrainbow");
+      await convertCsvCommand({
+        inputFile,
+        outputFile: initialOutputFile,
+        labelSetId: "test-label-set-a" as LabelSetId,
+        silent: true,
+      });
+
+      // Ingest the initial file to create the database
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse([
+        "ingest-ensrainbow",
+        "--input-file",
+        initialOutputFile,
+        "--data-dir",
+        dataDir,
+      ]);
+
+      // Verify initial database was created
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const labelSet = await db.getLabelSet();
+      expect(labelSet.labelSetId).toBe("test-label-set-a");
+      await db.close();
+
+      // Now try to convert with a different label set ID and the existing database path
+      // This should throw an error about label set ID mismatch
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-label-set-b" as LabelSetId,
+          existingDbPath: dataDir,
+          silent: true,
+        }),
+      ).rejects.toThrow(
+        /Label set ID mismatch! Database label set id: test-label-set-a, provided label set id: test-label-set-b/,
+      );
+    });
+
     it("should work through CLI with existing database path", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
       const outputFile = join(tempDir, "cli_output_with_db.ensrainbow");
