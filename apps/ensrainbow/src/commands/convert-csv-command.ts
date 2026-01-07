@@ -215,14 +215,15 @@ async function checkLabelHashExists(db: ENSRainbowDB, labelHashBytes: Buffer): P
 }
 
 /**
- * Determine the label set version based on existing database or default to 0
+ * Get the label set version and open database connection if needed
+ * Returns both the version and the open database connection (if opened) to avoid redundant opens
  */
-async function determineLabelSetVersion(
+async function getLabelSetVersionAndDatabase(
   existingDbPath: string | undefined,
   labelSetId: string,
-): Promise<number> {
+): Promise<{ version: number; existingDb: ENSRainbowDB | null }> {
   if (!existingDbPath) {
-    return 0;
+    return { version: 0, existingDb: null };
   }
 
   try {
@@ -239,11 +240,11 @@ async function determineLabelSetVersion(
     }
 
     const nextVersion = labelSet.highestLabelSetVersion + 1;
-    await existingDb.close();
     logger.info(
       `Determined next label set version: ${nextVersion} (current highest: ${labelSet.highestLabelSetVersion})`,
     );
-    return nextVersion;
+    // Return the open database connection instead of closing it
+    return { version: nextVersion, existingDb };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
@@ -266,6 +267,7 @@ async function initializeConversion(
   options: ConvertCsvCommandOptions,
   labelSetVersion: number,
   outputFile: string,
+  existingDb: ENSRainbowDB | null,
 ) {
   logger.info("Starting conversion from CSV to .ensrainbow format...");
   logger.info(`Input file: ${options.inputFile}`);
@@ -286,22 +288,9 @@ async function initializeConversion(
     logger.warn(`Could not determine file size: ${error}`);
   }
 
-  // Open existing database if path is provided (for filtering existing labels)
-  let existingDb: ENSRainbowDB | null = null;
-  if (options.existingDbPath) {
-    try {
-      logger.info(`Opening existing database for filtering: ${options.existingDbPath}`);
-      existingDb = await ENSRainbowDB.open(options.existingDbPath);
-      logger.info("Successfully opened existing database for label filtering");
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(
-        `Failed to open existing database at ${options.existingDbPath}: ${errorMessage}`,
-      );
-      throw new Error(
-        `Cannot proceed without existing database. Failed to open database at ${options.existingDbPath}: ${errorMessage}`,
-      );
-    }
+  // Log if using existing database for filtering
+  if (existingDb) {
+    logger.info("Using existing database connection for label filtering");
   }
 
   const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
@@ -546,8 +535,9 @@ async function processCSVFile(
  * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
-  // Determine label set version from existing database or default to 0
-  const labelSetVersion = await determineLabelSetVersion(
+  // Get label set version from existing database or default to 0
+  // This also opens the database if needed, and we'll reuse that connection
+  const { version: labelSetVersion, existingDb: openedDb } = await getLabelSetVersionAndDatabase(
     options.existingDbPath,
     options.labelSetId,
   );
@@ -565,7 +555,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     startTime: new Date(),
   };
 
-  let existingDb: ENSRainbowDB | null = null;
+  let existingDb: ENSRainbowDB | null = openedDb;
   let dedupDb: DeduplicationDB | undefined;
   let temporaryDedupDir: string | null = null;
 
@@ -574,7 +564,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
       RainbowRecordType,
       outputStream,
       existingDb: db,
-    } = await initializeConversion(options, labelSetVersion, outputFile);
+    } = await initializeConversion(options, labelSetVersion, outputFile, existingDb);
     existingDb = db;
 
     // Create temporary deduplication database
