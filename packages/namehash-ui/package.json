@@ -2,7 +2,7 @@
   "name": "@namehash/namehash-ui",
   "version": "1.3.1",
   "type": "module",
-  "description": "Internal NameHash UI components",
+  "description": "Opinionated UI components for use in apps published by NameHash Labs",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -60,6 +60,5 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
