@@ -1,73 +1,63 @@
-import { trace } from "@opentelemetry/api";
-import type { Address } from "viem";
+import config from "@/config";
 
 import {
-  type ChainId,
+  type AccountId,
   DEFAULT_EVM_COIN_TYPE,
   type Node,
   type ResolverRecordsSelection,
 } from "@ensnode/ensnode-sdk";
+import { staticResolverImplementsAddressRecordDefaulting } from "@ensnode/ensnode-sdk/internal";
 
 import { db } from "@/lib/db";
-import { withSpanAsync } from "@/lib/instrumentation/auto-span";
-import { onchainStaticResolverImplementsDefaultAddress } from "@/lib/protocol-acceleration/known-onchain-static-resolver";
 import type { IndexedResolverRecords } from "@/lib/resolution/make-records-response";
-
-const tracer = trace.getTracer("get-records");
 
 const DEFAULT_EVM_COIN_TYPE_BIGINT = BigInt(DEFAULT_EVM_COIN_TYPE);
 
 export async function getRecordsFromIndex<SELECTION extends ResolverRecordsSelection>({
-  chainId,
-  resolverAddress,
+  resolver,
   node,
   selection,
 }: {
-  chainId: ChainId;
-  resolverAddress: Address;
+  resolver: AccountId;
   node: Node;
   selection: SELECTION;
 }): Promise<IndexedResolverRecords | null> {
-  // fetch the Resolver Records from index
-  const resolverRecords = await withSpanAsync(tracer, "resolverRecords.findFirst", {}, async () => {
-    const records = await db.query.resolverRecords.findFirst({
-      where: (resolver, { and, eq }) =>
-        and(
-          eq(resolver.chainId, chainId),
-          eq(resolver.resolver, resolverAddress),
-          eq(resolver.node, node),
-        ),
-      columns: { name: true },
-      with: { addressRecords: true, textRecords: true },
-    });
+  const records = (await db.query.resolverRecords.findFirst({
+    where: (t, { and, eq }) =>
+      and(
+        // filter by specific resolver
+        eq(t.chainId, resolver.chainId),
+        eq(t.address, resolver.address),
+        // filter by specific node
+        eq(t.node, node),
+      ),
+    columns: { name: true },
+    with: { addressRecords: true, textRecords: true },
+  })) as IndexedResolverRecords | undefined;
 
-    return records as IndexedResolverRecords | undefined;
-  });
+  // no records found
+  if (!records) return null;
 
-  if (!resolverRecords) return null;
+  // if the resolver doesn't implement address record defaulting, return records as-is
+  if (!staticResolverImplementsAddressRecordDefaulting(config.namespace, resolver)) return records;
 
-  // if the resolver implements address record defaulting, materialize all selected address records
-  // that do not yet exist
-  if (onchainStaticResolverImplementsDefaultAddress(chainId, resolverAddress)) {
-    if (selection.addresses) {
-      const defaultRecord = resolverRecords.addressRecords.find(
-        (record) => record.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT,
-      );
+  // otherwise, materialize all selected address records that do not yet exist
+  if (selection.addresses) {
+    const defaultRecord = records.addressRecords.find(
+      (record) => record.coinType === DEFAULT_EVM_COIN_TYPE_BIGINT,
+    );
 
-      for (const coinType of selection.addresses) {
-        const _coinType = BigInt(coinType);
-        const existing = resolverRecords.addressRecords.find(
-          (record) => record.coinType === _coinType,
-        );
-        if (!existing && defaultRecord) {
-          resolverRecords.addressRecords.push({
-            address: defaultRecord.address,
-            coinType: _coinType,
-          });
-        }
+    for (const coinType of selection.addresses) {
+      const _coinType = BigInt(coinType);
+      const existing = records.addressRecords.find((record) => record.coinType === _coinType);
+      if (!existing && defaultRecord) {
+        records.addressRecords.push({
+          value: defaultRecord.value,
+          coinType: _coinType,
+        });
       }
     }
   }
 
-  return resolverRecords;
+  return records;
 }

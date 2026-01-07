@@ -1,9 +1,8 @@
-import { type ChainConfig, createConfig } from "ponder";
+import { createConfig } from "ponder";
 
 import {
-  type DatasourceName,
   DatasourceNames,
-  getDatasource,
+  RegistryABI,
   ResolverABI,
   StandaloneReverseRegistrarABI,
   ThreeDNSTokenABI,
@@ -14,15 +13,13 @@ import {
   getDatasourcesWithResolvers,
 } from "@ensnode/ensnode-sdk/internal";
 
-import {
-  createPlugin,
-  getDatasourceAsFullyDefinedAtCompileTime,
-  namespaceContract,
-} from "@/lib/plugin-helpers";
+import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
   chainConfigForContract,
-  chainsConnectionConfig,
+  chainsConnectionConfigForDatasources,
   constrainBlockrange,
+  getRequiredDatasources,
+  maybeGetDatasources,
 } from "@/lib/ponder-helpers";
 
 /**
@@ -46,77 +43,44 @@ const DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS = [
   DatasourceNames.ReverseResolverOptimism,
   DatasourceNames.ReverseResolverArbitrum,
   DatasourceNames.ReverseResolverScroll,
-] as const satisfies DatasourceName[];
+];
 
 const ALL_DATASOURCE_NAMES = [
   ...DATASOURCE_NAMES_WITH_RESOLVERS,
   ...DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS,
-] as const satisfies DatasourceName[];
+];
+
+const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.ENSRoot];
 
 export default createPlugin({
   name: pluginName,
-  requiredDatasourceNames: [DatasourceNames.ENSRoot],
+  requiredDatasourceNames: REQUIRED_DATASOURCE_NAMES,
   createPonderConfig(config) {
-    const allDatasources = ALL_DATASOURCE_NAMES.map((datasourceName) =>
-      getDatasourceAsFullyDefinedAtCompileTime(config.namespace, datasourceName),
-    ).filter((datasource) => !!datasource);
-
-    const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
-    const basenames = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.Basenames,
-    );
-    const lineanames = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.Lineanames,
-    );
-    const threeDNSOptimism = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ThreeDNSOptimism,
-    );
-    const threeDNSBase = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ThreeDNSBase,
-    );
-
-    const rrRoot = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ReverseResolverRoot,
-    );
-    const rrBase = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ReverseResolverBase,
-    );
-    const rrLinea = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ReverseResolverLinea,
-    );
-    const rrOptimism = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ReverseResolverOptimism,
-    );
-    const rrArbitrum = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ReverseResolverArbitrum,
-    );
-    const rrScroll = getDatasourceAsFullyDefinedAtCompileTime(
-      config.namespace,
-      DatasourceNames.ReverseResolverScroll,
-    );
+    const { ensroot } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
+    const {
+      namechain,
+      basenames,
+      lineanames,
+      threednsOptimism,
+      threednsBase,
+      rrRoot,
+      rrBase,
+      rrLinea,
+      rrOptimism,
+      rrArbitrum,
+      rrScroll,
+    } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
 
     return createConfig({
-      chains: allDatasources
-        .map((datasource) => datasource.chain)
-        .reduce<Record<string, ChainConfig>>(
-          (memo, chain) => ({
-            ...memo,
-            ...chainsConnectionConfig(config.rpcConfigs, chain.id),
-          }),
-          {},
-        ),
-
+      chains: chainsConnectionConfigForDatasources(
+        config.namespace,
+        config.rpcConfigs,
+        ALL_DATASOURCE_NAMES,
+      ),
       contracts: {
-        // a multi-chain Resolver ContractConfig
+        //////////////////////
+        // Resolver Contracts
+        //////////////////////
         [namespaceContract(pluginName, "Resolver")]: {
           abi: ResolverABI,
           chain: getDatasourcesWithResolvers(config.namespace).reduce(
@@ -131,27 +95,31 @@ export default createPlugin({
           ),
         },
 
-        // index the RegistryOld on ENS Root Chain
-        [namespaceContract(pluginName, "RegistryOld")]: {
-          abi: ensroot.contracts.RegistryOld.abi,
+        /////////////////////
+        // ENSv1 RegistryOld
+        /////////////////////
+        [namespaceContract(pluginName, "ENSv1RegistryOld")]: {
+          abi: ensroot.contracts.ENSv1RegistryOld.abi,
           chain: {
             ...chainConfigForContract(
               config.globalBlockrange,
               ensroot.chain.id,
-              ensroot.contracts.RegistryOld,
+              ensroot.contracts.ENSv1RegistryOld,
             ),
           },
         },
 
-        // a multi-chain Registry ContractConfig
-        [namespaceContract(pluginName, "Registry")]: {
-          abi: ensroot.contracts.Registry.abi,
+        ////////////////////////////
+        // ENSv1 Registry Contracts
+        ////////////////////////////
+        [namespaceContract(pluginName, "ENSv1Registry")]: {
+          abi: ensroot.contracts.ENSv1Registry.abi,
           chain: {
             // ENS Root Chain Registry
             ...chainConfigForContract(
               config.globalBlockrange,
               ensroot.chain.id,
-              ensroot.contracts.Registry,
+              ensroot.contracts.ENSv1Registry,
             ),
             // Basenames (shadow)Registry
             ...(basenames &&
@@ -170,26 +138,50 @@ export default createPlugin({
           },
         },
 
-        // a multi-chain ThreeDNSToken ContractConfig
-        [namespaceContract(pluginName, "ThreeDNSToken")]: {
-          abi: ThreeDNSTokenABI,
+        ////////////////////////////
+        // ENSv2 Registry Contracts
+        ////////////////////////////
+        [namespaceContract(pluginName, "ENSv2Registry")]: {
+          abi: RegistryABI,
           chain: {
-            ...(threeDNSOptimism &&
+            ...chainConfigForContract(
+              config.globalBlockrange,
+              ensroot.chain.id,
+              ensroot.contracts.Registry,
+            ),
+            ...(namechain &&
               chainConfigForContract(
                 config.globalBlockrange,
-                threeDNSOptimism.chain.id,
-                threeDNSOptimism.contracts.ThreeDNSToken,
-              )),
-            ...(threeDNSBase &&
-              chainConfigForContract(
-                config.globalBlockrange,
-                threeDNSBase.chain.id,
-                threeDNSBase.contracts.ThreeDNSToken,
+                namechain.chain.id,
+                namechain.contracts.Registry,
               )),
           },
         },
 
-        // a multi-chain StandaloneReverseRegistrar ContractConfig
+        /////////////////
+        // ThreeDNSToken
+        /////////////////
+        [namespaceContract(pluginName, "ThreeDNSToken")]: {
+          abi: ThreeDNSTokenABI,
+          chain: {
+            ...(threednsOptimism &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                threednsOptimism.chain.id,
+                threednsOptimism.contracts.ThreeDNSToken,
+              )),
+            ...(threednsBase &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                threednsBase.chain.id,
+                threednsBase.contracts.ThreeDNSToken,
+              )),
+          },
+        },
+
+        ///////////////////////////////
+        // StandaloneReverseRegistrars
+        ///////////////////////////////
         [namespaceContract(pluginName, "StandaloneReverseRegistrar")]: {
           abi: StandaloneReverseRegistrarABI,
           chain: {

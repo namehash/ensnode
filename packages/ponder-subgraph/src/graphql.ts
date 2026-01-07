@@ -153,7 +153,7 @@ export interface PolymorphicConfig {
   fields: Record<string, string>;
 }
 
-interface BuildGraphQLSchemaOptions {
+export interface BuildGraphQLSchemaOptions {
   schema: Schema;
   polymorphicConfig?: PolymorphicConfig;
 }

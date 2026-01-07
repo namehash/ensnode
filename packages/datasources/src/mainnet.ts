@@ -6,6 +6,9 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for Namechain
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { Registry } from "./abis/ensv2/Registry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -24,7 +27,7 @@ import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -41,20 +44,19 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: mainnet,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x314159265dd8dbb310642f98f50c066173c1259b",
         startBlock: 3327417,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 9380380,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
-        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
+        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld on Mainnet
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
@@ -101,8 +103,58 @@ export default {
         address: "0xde16ee87b0c019499cebdde29c9f7686560f679a",
         startBlock: 20410692,
       },
+
+      //
+
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x1291be112d480055dafd8a610b7d1e203891c274",
+        startBlock: 23794084,
+      },
+      RootRegistry: {
+        abi: Registry,
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        startBlock: 23794084,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 23794084,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 23794084,
+      },
     },
   },
+
+  // TODO(ensv2): reference Mainnet deployment
+  // [DatasourceNames.Namechain]: {
+  //   chain: mainnet,
+  //   contracts: {
+  //     Resolver: {
+  //       abi: ResolverABI,
+  //       startBlock: 23794084,
+  //     },
+  //     Registry: {
+  //       abi: Registry,
+  //       startBlock: 23794084,
+  //     },
+  //     EnhancedAccessControl: {
+  //       abi: EnhancedAccessControl,
+  //       startBlock: 23794084,
+  //     },
+  //     ETHRegistry: {
+  //       abi: Registry,
+  //       address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  //       startBlock: 23794084,
+  //     },
+  //     ETHRegistrar: {
+  //       abi: ETHRegistrar,
+  //       address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+  //       startBlock: 23794084,
+  //     },
+  //   },
+  // },
 
   /**
    * Basenames Datasource
@@ -135,7 +187,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -215,7 +266,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {
