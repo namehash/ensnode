@@ -104,11 +104,18 @@ export default {
         startBlock: 20410692,
       },
 
-      // the Argent Resolver used by Argent vaults
+      // the Resolver for *.argent.xyz names
       ArgentResolver: {
         abi: ResolverABI,
         address: "0xda1756bb923af5d1a05e277cb1e54f1d0a127890",
         startBlock: 7173574,
+      },
+
+      // the Resolver for *.loopring.eth names
+      LoopringResolver: {
+        abi: ResolverABI,
+        address: "0xf58d55f06bb92f083e78bb5063a2dd3544f9b6a3",
+        startBlock: 10170681,
       },
 
       //
@@ -383,6 +390,13 @@ export default {
         abi: ResolverABI,
         address: "0xa7d635c8de9a58a228aa69353a1699c7cc240dcf",
         startBlock: 22764871,
+      },
+
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver0: {
+        abi: ResolverABI,
+        address: "0x1da022710df5002339274aadee8d58218e9d6ab5",
+        startBlock: 3648359,
       },
 
       // this resolver uses a TextChanged event that does not include the `value` parameter

@@ -19,19 +19,25 @@ export function isStaticResolver(namespace: ENSNamespaceId, resolver: AccountId)
 
   return [
     // ENS Root Chain
+    resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver0"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver1"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver2"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver3"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver4"),
     resolverEq(DatasourceNames.ReverseResolverRoot, "DefaultPublicResolver5"),
     resolverEq(DatasourceNames.ENSRoot, "ArgentResolver"),
+    resolverEq(DatasourceNames.ENSRoot, "LoopringResolver"),
 
-    // Base Chain
+    // Basenames
     resolverEq(DatasourceNames.Basenames, "L2Resolver1"),
     resolverEq(DatasourceNames.Basenames, "L2Resolver2"),
 
-    // Linea Chain
+    // Lineanames
     resolverEq(DatasourceNames.Lineanames, "DefaultPublicResolver"),
+
+    // ThreeDNS
+    resolverEq(DatasourceNames.ThreeDNSBase, "Resolver"),
+    resolverEq(DatasourceNames.ThreeDNSOptimism, "Resolver"),
   ].some(Boolean);
 }
 
