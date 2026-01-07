@@ -72,7 +72,9 @@ app.get(
   validate(
     "param",
     z.object({
-      parentNode: makeNodeSchema("parentNode param").optional(),
+      parentNode: makeNodeSchema("parentNode param")
+        .optional()
+        .describe("Parent node hash to filter registrar actions"),
     }),
   ),
   validate(
@@ -81,33 +83,43 @@ app.get(
       .object({
         orderBy: z
           .enum(RegistrarActionsOrders)
-          .default(RegistrarActionsOrders.LatestRegistrarActions),
+          .default(RegistrarActionsOrders.LatestRegistrarActions)
+          .describe("Order of results"),
 
         page: params.queryParam
           .optional()
           .default(1)
           .pipe(z.coerce.number())
-          .pipe(makePositiveIntegerSchema("page")),
+          .pipe(makePositiveIntegerSchema("page"))
+          .describe("Page number for pagination"),
 
         recordsPerPage: params.queryParam
           .optional()
           .default(RECORDS_PER_PAGE_DEFAULT)
           .pipe(z.coerce.number())
-          .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX)),
+          .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX))
+          .describe("Number of records per page"),
 
-        withReferral: params.boolstring.optional().default(false),
+        withReferral: params.boolstring
+          .optional()
+          .default(false)
+          .describe("Filter to only include actions with referrals"),
 
-        decodedReferrer: makeLowercaseAddressSchema("decodedReferrer").optional(),
+        decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
+          .optional()
+          .describe("Filter by decoded referrer address"),
 
         beginTimestamp: params.queryParam
           .pipe(z.coerce.number())
           .pipe(makeUnixTimestampSchema("beginTimestamp"))
-          .optional(),
+          .optional()
+          .describe("Filter actions after this Unix timestamp"),
 
         endTimestamp: params.queryParam
           .pipe(z.coerce.number())
           .pipe(makeUnixTimestampSchema("endTimestamp"))
-          .optional(),
+          .optional()
+          .describe("Filter actions before this Unix timestamp"),
       })
       .refine(
         (data) => {

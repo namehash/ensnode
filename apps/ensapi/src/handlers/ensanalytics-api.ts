@@ -25,17 +25,21 @@ const logger = makeLogger("ensanalytics-api");
 
 // Pagination query parameters schema (mirrors ReferrerLeaderboardPageRequest)
 const paginationQuerySchema = z.object({
-  page: z.optional(z.coerce.number().int().min(1, "Page must be a positive integer")),
-  recordsPerPage: z.optional(
-    z.coerce
-      .number()
-      .int()
-      .min(1, "Records per page must be at least 1")
-      .max(
-        REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-        `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
-      ),
-  ),
+  page: z
+    .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
+    .describe("Page number for pagination"),
+  recordsPerPage: z
+    .optional(
+      z.coerce
+        .number()
+        .int()
+        .min(1, "Records per page must be at least 1")
+        .max(
+          REFERRERS_PER_LEADERBOARD_PAGE_MAX,
+          `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
+        ),
+    )
+    .describe("Number of referrers per page"),
 }) satisfies z.ZodType<ReferrerLeaderboardPageRequest>;
 
 const app = factory
@@ -94,7 +98,7 @@ const app = factory
 
 // Referrer address parameter schema
 const referrerAddressSchema = z.object({
-  referrer: makeLowercaseAddressSchema("Referrer address"),
+  referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
 });
 
 // Get referrer detail for a specific address
