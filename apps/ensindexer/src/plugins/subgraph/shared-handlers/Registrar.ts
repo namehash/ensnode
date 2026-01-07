@@ -31,10 +31,9 @@ import { handleNewOwner } from "@/plugins/subgraph/shared-handlers/Registry";
 const GRACE_PERIOD_SECONDS = 7776000n; // 90 days in seconds
 
 /**
- * makes a set of shared handlers for a Registrar contract that registers subnames of `registrarManagedName`
+ * Makes a set of shared handlers for a Registrar contract
  *
  * @param pluginName the name of the plugin using these shared handlers
- * @param registrarManagedName the name that the Registrar contract indexes subnames of
  */
 export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }) => {
   async function setNamePreimage(
@@ -58,7 +57,9 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
         // see https://ensnode.io/docs/reference/terminology#interpreted-label
         literalLabelToInterpretedLabel(label);
 
-    const { node: managedNode } = getManagedName(getThisAccountId(context, event));
+    const { node: managedNode, name: managedName } = getManagedName(
+      getThisAccountId(context, event),
+    );
     const node = makeSubdomainNode(labelHash, managedNode);
     const domain = await context.db.find(schema.subgraph_domain, { id: node });
 
@@ -68,7 +69,7 @@ export const makeRegistrarHandlers = ({ pluginName }: { pluginName: PluginName }
     // materialize the domain's name and labelName using the emitted values
     if (domain.labelName !== interpretedLabel) {
       // in either case a Name composed of (Subgraph) Interpreted Labels is (Subgraph) Interpreted
-      const interpretedName = `${interpretedLabel}.${managedNode}` as
+      const interpretedName = `${interpretedLabel}.${managedName}` as
         | InterpretedName
         | SubgraphInterpretedName;
 
