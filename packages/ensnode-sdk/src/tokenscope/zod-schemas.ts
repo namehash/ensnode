@@ -3,14 +3,9 @@ import { zeroAddress } from "viem";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
+import { type AssetId, AssetNamespaces } from "../shared/types";
 import { makeAccountIdSchema, makeNodeSchema } from "../shared/zod-schemas";
-import {
-  type AssetId,
-  AssetNamespaces,
-  type DomainAssetId,
-  NFTMintStatuses,
-  type SerializedAssetId,
-} from "./assets";
+import { type DomainAssetId, NFTMintStatuses, type SerializedAssetId } from "./assets";
 import {
   type NameToken,
   type NameTokenOwnershipBurned,
@@ -20,15 +15,41 @@ import {
   type NameTokenOwnershipUnknown,
 } from "./name-token";
 
+const tokenIdSchemaSerializable = z.string();
+const tokenIdSchemaNative = z.preprocess(
+  (v) => (typeof v === "string" ? BigInt(v) : v),
+  z.bigint().positive(),
+);
+
+export function makeTokenIdSchema<const SerializableType extends boolean>(
+  _valueLabel: string,
+  serializable: SerializableType,
+): SerializableType extends true ? typeof tokenIdSchemaSerializable : typeof tokenIdSchemaNative;
+export function makeTokenIdSchema(
+  _valueLabel: string = "Token ID Schema",
+  serializable: true | false = false,
+): typeof tokenIdSchemaSerializable | typeof tokenIdSchemaNative {
+  if (serializable) {
+    return tokenIdSchemaSerializable;
+  } else {
+    return tokenIdSchemaNative;
+  }
+}
+
 /**
  * Make schema for {@link AssetId}.
+ *
  */
-export const makeAssetIdSchema = (valueLabel: string = "Asset ID Schema") =>
-  z.object({
+export const makeAssetIdSchema = <const SerializableType extends boolean = false>(
+  valueLabel: string = "Asset ID Schema",
+  serializable?: SerializableType,
+) => {
+  return z.object({
     assetNamespace: z.enum(AssetNamespaces),
     contract: makeAccountIdSchema(valueLabel),
-    tokenId: z.preprocess((v) => (typeof v === "string" ? BigInt(v) : v), z.bigint().positive()),
+    tokenId: makeTokenIdSchema(valueLabel, serializable ?? false),
   });
+};
 
 /**
  * Make schema for {@link AssetIdString}.
@@ -137,9 +158,12 @@ export const makeNameTokenOwnershipSchema = (valueLabel: string = "Name Token Ow
 /**
  * Make schema for {@link NameToken}.
  */
-export const makeNameTokenSchema = (valueLabel: string = "Name Token Schema") =>
+export const makeNameTokenSchema = <const SerializableType extends boolean>(
+  valueLabel: string = "Name Token Schema",
+  serializable?: SerializableType,
+) =>
   z.object({
-    token: makeAssetIdSchema(`${valueLabel}.token`),
+    token: makeAssetIdSchema(`${valueLabel}.token`, serializable),
 
     ownership: makeNameTokenOwnershipSchema(`${valueLabel}.ownership`),
 

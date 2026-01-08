@@ -9,12 +9,12 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
  * The only way to share Zod schemas is to re-export them from
  * `./src/internal.ts` file.
  */
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
-import { reinterpretName } from "./reinterpretation";
+import { reinterpretName } from "./interpretation/reinterpretation";
 import type { AccountIdString } from "./serialized-types";
 import type {
   AccountId,
@@ -25,11 +25,6 @@ import type {
   Duration,
   UnixTimestamp,
 } from "./types";
-
-/**
- * Zod `.check()` function input.
- */
-export type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
 
 /**
  * Parses a string value as a boolean.

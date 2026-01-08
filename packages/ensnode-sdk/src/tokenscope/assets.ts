@@ -1,39 +1,22 @@
-import { AssetId as CaipAssetId } from "caip";
 import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
 import { prettifyError } from "zod/v4";
 
 import { type Node, uint256ToHex32 } from "../ens";
-import type { AccountId, ChainId } from "../shared";
+import {
+  type AccountId,
+  type AssetId,
+  type AssetNamespace,
+  type ChainId,
+  formatAssetId,
+  type TokenId,
+} from "../shared";
+import type { AssetIdString } from "../shared/serialized-types";
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
-
-/**
- * An enum representing the possible CAIP-19 Asset Namespace values.
- */
-export const AssetNamespaces = {
-  ERC721: "erc721",
-  ERC1155: "erc1155",
-} as const;
-
-export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
-
-/**
- * A uint256 value that identifies a specific NFT within a NFT contract.
- */
-export type TokenId = bigint;
 
 /**
  * Serialized representation of {@link TokenId}.
  */
 export type SerializedTokenId = string;
-
-/**
- * A globally unique reference to an NFT.
- */
-export interface AssetId {
-  assetNamespace: AssetNamespace;
-  contract: AccountId;
-  tokenId: TokenId;
-}
 
 /**
  * Serialized representation of {@link AssetId}.
@@ -43,18 +26,7 @@ export interface SerializedAssetId extends Omit<AssetId, "tokenId"> {
 }
 
 /**
- * String representation of an {@link AssetId}.
- *
- * Formatted as a fully lowercase CAIP-19 AssetId.
- *
- * @see https://chainagnostic.org/CAIPs/caip-19
- * @example "eip155:1/erc721:0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc"
- *          for vitalik.eth in the eth base registrar on mainnet.
- */
-export type AssetIdString = string;
-
-/**
- * Serializes {@link AssetId} object.
+ * Serializes {@link AssetId} object to a structured form.
  */
 export function serializeAssetId(assetId: AssetId): SerializedAssetId {
   return {
@@ -76,19 +48,6 @@ export function deserializeAssetId(maybeAssetId: unknown, valueLabel?: string): 
   }
 
   return parsed.data;
-}
-
-/**
- * Format {@link AssetId} object as a string.
- */
-export function formatAssetId(assetId: AssetId): AssetIdString {
-  const { assetNamespace, contract, tokenId } = serializeAssetId(assetId);
-
-  return CaipAssetId.format({
-    chainId: { namespace: "eip155", reference: contract.chainId.toString() },
-    assetName: { namespace: assetNamespace, reference: contract.address },
-    tokenId,
-  }).toLowerCase();
 }
 
 /**
@@ -182,14 +141,14 @@ export interface NFTTransferEventMetadata {
 }
 
 export const formatNFTTransferEventMetadata = (metadata: NFTTransferEventMetadata): string => {
-  const serializedAssetId = serializeAssetId(metadata.nft);
+  const assetIdString = formatAssetId(metadata.nft);
 
   return [
     `Event: ${metadata.eventHandlerName}`,
     `Chain ID: ${metadata.chainId}`,
     `Block Number: ${metadata.blockNumber}`,
     `Transaction Hash: ${metadata.transactionHash}`,
-    `NFT: ${serializedAssetId}`,
+    `NFT: ${assetIdString}`,
   ]
     .map((line) => ` - ${line}`)
     .join("\n");

@@ -10,6 +10,7 @@
       "ensadmin",
       "ensrainbow",
       "ensapi",
+      "fallback-ensapi",
       "@ensnode/datasources",
       "@ensnode/ensrainbow-sdk",
       "@ensnode/ponder-metadata",
@@ -19,7 +20,8 @@
       "@ensnode/ensnode-sdk",
       "@ensnode/shared-configs",
       "@docs/ensnode",
-      "@docs/ensrainbow"
+      "@docs/ensrainbow",
+      "@namehash/namehash-ui"
     ]
   ],
   "updateInternalDependencies": "patch",

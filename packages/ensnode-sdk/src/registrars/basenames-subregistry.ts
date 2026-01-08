@@ -46,7 +46,6 @@ export function getBasenamesSubregistryManagedName(namespaceId: ENSNamespaceId):
       return "base.eth";
     case ENSNamespaceIds.Sepolia:
       return "basetest.eth";
-    case ENSNamespaceIds.Holesky:
     case ENSNamespaceIds.EnsTestEnv:
       throw new Error(
         `No registrar managed name is known for the 'basenames' subregistry within the "${namespaceId}" namespace.`,

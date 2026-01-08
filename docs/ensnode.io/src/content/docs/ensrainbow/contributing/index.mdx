@@ -105,9 +105,9 @@ Starts the API server. The process will exit with:
 
 ## Using ENSRainbow with ens-test-env
 
-The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.sql.gz` file that can be used with ENSRainbow for testing purposes.
+The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.csv` file that can be used with ENSRainbow for testing purposes.
 
-### Ingesting ens_test_env_names.sql.gz
+### Ingesting ens_test_env_names.csv
 
 To ingest the test data into ENSRainbow:
 
@@ -115,7 +115,7 @@ To ingest the test data into ENSRainbow:
     If you don't have a pre-converted `ens-test-env-0.ensrainbow` file:
     ```bash
     # Navigate to apps/ensrainbow or adjust paths accordingly
-    pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env-0.ensrainbow
+    pnpm run convert --input-file test/fixtures/ens_test_env_names.csv --output-file ens-test-env-0.ensrainbow --label-set-id ens-test-env
     ```
     This creates `ens-test-env-0.ensrainbow`.
 
@@ -268,27 +268,27 @@ These steps are typically performed by project maintainers for releasing officia
 
 ### 1. Prepare `.ensrainbow` Files
 
-This section covers the conversion of source data (like SQL dumps or empty files for initial datasets) into the `.ensrainbow` format. For detailed conversion instructions and examples, see the [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files) guide.
+This section covers the conversion of source data (like CSV data or empty files for initial datasets) into the `.ensrainbow` format. For detailed conversion instructions and examples, see the [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files) guide.
 
-**For the `subgraph` Label Set (main dataset):**
-This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for version 0 of the `subgraph` Label Set.
+**For the `subgraph` Label Set (legacy migration only):**
+This command converts a SQL dump file (`ens_names.sql.gz`) from the legacy ENS Subgraph into an `.ensrainbow` file for version 0 of the `subgraph` Label Set. **Note:** SQL conversion is only for migrating legacy ENS Subgraph data. For all new label sets, use CSV conversion instead.
 ```bash
-# Assuming ens_names.sql.gz contains the primary dataset
-time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
+# Assuming ens_names.sql.gz contains the dataset
+time pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
 ```
 
 **For the `discovery-a` Label Set (initially empty for discovered labels):**
 This creates an empty `.ensrainbow` file for version 0 of the `discovery-a` Label Set, which is used for labels discovered dynamically.
 ```bash
-touch empty.sql
-gzip empty.sql
-time pnpm run convert --input-file empty.sql.gz --output-file discovery-a_0.ensrainbow --label-set-id discovery-a --label-set-version 0
+# Create empty CSV file for discovery dataset
+echo "" > empty.csv
+time pnpm run convert --input-file empty.csv --output-file discovery-a_0.ensrainbow --label-set-id discovery-a
 ```
 
 **For the `ens-test-env` Label Set (for testing):**
-This converts a test dataset SQL dump into an `.ensrainbow` file for version 0 of the `ens-test-env` Label Set.
+This converts a test dataset CSV file into an `.ensrainbow` file for version 0 of the `ens-test-env` Label Set.
 ```bash
-time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env --label-set-version 0
+time pnpm run convert --input-file test/fixtures/ens_test_env_names.csv --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env
 ```
 
 ### 2. Upload `.ensrainbow` Files to R2 Storage

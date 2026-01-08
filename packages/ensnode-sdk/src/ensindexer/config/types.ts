@@ -15,6 +15,7 @@ export enum PluginName {
   ProtocolAcceleration = "protocol-acceleration",
   Registrars = "registrars",
   TokenScope = "tokenscope",
+  ENSv2 = "ensv2",
 }
 
 /**

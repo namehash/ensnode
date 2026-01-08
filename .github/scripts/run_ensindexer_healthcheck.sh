@@ -5,7 +5,7 @@
 
 # Set default timeout if not provided by environment
 # Use env var if set, otherwise default to 60 seconds
-: "${HEALTH_CHECK_TIMEOUT:=60}" 
+: "${HEALTH_CHECK_TIMEOUT:=60}"
 
 # Detect if running from CI or local
 if [ -n "$GITHUB_WORKSPACE" ]; then
@@ -38,19 +38,27 @@ PID=$!
 
 echo "ENSIndexer started with PID: $PID"
 
+# Require ENSINDEXER_URL to be set
+if [ -z "$ENSINDEXER_URL" ]; then
+  echo "Error: ENSINDEXER_URL environment variable must be set"
+  kill -9 $PID 2>/dev/null || true
+  wait $PID 2>/dev/null || true
+  rm -f "$LOG_FILE"
+  [ -f "$ENV_FILE" ] && rm -f "$ENV_FILE"
+  exit 1
+fi
+
 # Wait for health check to pass
-echo "Waiting for health check to pass (up to $HEALTH_CHECK_TIMEOUT seconds)..."
+echo "Waiting for health check to pass at ${ENSINDEXER_URL}/health (up to $HEALTH_CHECK_TIMEOUT seconds)..."
 health_check_start=$(date +%s)
 last_log_check=0
 
 while true; do
   current_time=$(date +%s)
 
-  # Periodically show log progress (every 15 seconds) to prevent CI timeout
+  # Periodically show progress (every 15 seconds) to prevent CI timeout
   if [ $((current_time - last_log_check)) -ge 15 ]; then
     echo "Still waiting for health check at $(date) (elapsed: $((current_time - health_check_start)) seconds)..."
-    echo "Recent log entries:"
-    tail -n 10 "$LOG_FILE"
     last_log_check=$current_time
   fi
 
@@ -63,30 +71,26 @@ while true; do
     echo "Last 30 lines of log:"
     tail -n 30 "$LOG_FILE"
     rm -f "$LOG_FILE"
-    # Clean up env file
     [ -f "$ENV_FILE" ] && rm -f "$ENV_FILE"
     exit 1
   fi
 
-  # Check for health ready message
-  if grep -q "Started returning 200 responses from /health endpoint" "$LOG_FILE"; then
+  # Check health endpoint
+  if curl -sf "${ENSINDEXER_URL}/health" >/dev/null 2>&1; then
     echo "Health check passed! ENSIndexer is up and running."
     echo "Test successful - terminating ENSIndexer"
     # Force kill the ENSIndexer process
     kill -9 $PID 2>/dev/null || true
-    # Make sure we don't wait for the process to exit since we've force killed it
     wait $PID 2>/dev/null || true
     # Clean up the log file and env file
     rm -f "$LOG_FILE"
     [ -f "$ENV_FILE" ] && rm -f "$ENV_FILE"
-    # Explicitly exit with success code
     echo "Exiting with success code 0"
     exit 0
   fi
 
   # Check if we've reached the health check timeout
   elapsed=$((current_time - health_check_start))
-
   if [ $elapsed -ge $HEALTH_CHECK_TIMEOUT ]; then
     echo "Health check timeout reached. ENSIndexer did not become healthy."
     kill -9 $PID 2>/dev/null || true
@@ -94,7 +98,6 @@ while true; do
     echo "Last 30 lines of log:"
     tail -n 30 "$LOG_FILE"
     rm -f "$LOG_FILE"
-    # Clean up env file
     [ -f "$ENV_FILE" ] && rm -f "$ENV_FILE"
     exit 1
   fi

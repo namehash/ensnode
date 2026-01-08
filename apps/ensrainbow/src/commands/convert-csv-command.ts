@@ -21,6 +21,7 @@ import {
   CURRENT_ENSRAINBOW_FILE_FORMAT_VERSION,
   createRainbowProtobufRoot,
 } from "../utils/protobuf-schema.js";
+import type { RainbowRecord } from "../utils/rainbow-record.js";
 
 /**
  * Estimate memory usage of a Map (rough approximation)
@@ -63,7 +64,7 @@ class DeduplicationDB {
     this.pendingWrites.set(key, value);
 
     // Flush frequently to keep pendingWrites small
-    if (this.pendingWrites.size >= 1000) {
+    if (this.pendingWrites.size >= DEDUP_PENDING_WRITES_FLUSH_THRESHOLD) {
       await this.flush();
     }
   }
@@ -112,7 +113,7 @@ function setupProgressBar(): ProgressBar {
     complete: "=",
     incomplete: " ",
     width: 40,
-    total: 300000000, // Very large total for big files
+    total: PROGRESS_BAR_LARGE_TOTAL,
   });
 }
 
@@ -121,16 +122,20 @@ function setupProgressBar(): ProgressBar {
  */
 export interface ConvertCsvCommandOptions {
   inputFile: string;
-  outputFile: string;
+  outputFile?: string; // Optional - will be generated if not provided
   labelSetId: string;
-  labelSetVersion: number;
   progressInterval?: number;
-  existingDbPath?: string; // Path to existing ENSRainbow database to check for existing labels
+  existingDbPath?: string; // Path to existing ENSRainbow database to check for existing labels and determine next version
   silent?: boolean; // Disable progress bar for tests
 }
 
 // Configuration constants
 const DEFAULT_PROGRESS_INTERVAL = 50000; // Increased from 10k to 50k to reduce logging load
+const PROGRESS_BAR_LARGE_TOTAL = 300_000_000; // Very large total for progress bar to handle big files
+const DEDUP_PENDING_WRITES_FLUSH_THRESHOLD = 1000; // Flush deduplication DB when pending writes reach this count
+const OUTPUT_STREAM_BUFFER_SIZE = 16 * 1024; // 16KB buffer - very small to catch backpressure early
+const LARGE_FILE_SIZE_THRESHOLD_MB = 1024; // 1GB - warn user about very large files
+const PROGRESS_BAR_UPDATE_INTERVAL = 1000; // Update progress bar every N lines
 
 interface ConversionStats {
   totalLines: number;
@@ -150,7 +155,7 @@ function setupWriteStream(outputFile: string) {
   // This prevents unbounded buffer growth when writes are faster than disk I/O
   // Smaller buffer = more frequent backpressure = better memory control
   return createWriteStream(outputFile, {
-    highWaterMark: 16 * 1024, // 16KB buffer - very small to catch backpressure early
+    highWaterMark: OUTPUT_STREAM_BUFFER_SIZE,
   });
 }
 
@@ -201,20 +206,74 @@ async function checkLabelHashExists(db: ENSRainbowDB, labelHashBytes: Buffer): P
     const record = await db.getVersionedRainbowRecord(labelHashBytes);
     return record !== null;
   } catch (error) {
-    // If there's an error checking, assume it doesn't exist
-    return false;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(
+      `Error while checking if labelhash exists in ENSRainbow database: ${errorMessage}`,
+    );
+    throw error;
   }
+}
+
+/**
+ * Get the label set version and open database connection if needed
+ * Returns both the version and the open database connection (if opened) to avoid redundant opens
+ */
+async function getLabelSetVersionAndDatabase(
+  existingDbPath: string | undefined,
+  labelSetId: string,
+): Promise<{ version: number; existingDb: ENSRainbowDB | null }> {
+  if (!existingDbPath) {
+    return { version: 0, existingDb: null };
+  }
+
+  try {
+    logger.info(`Opening existing database to determine next label set version: ${existingDbPath}`);
+    const existingDb = await ENSRainbowDB.open(existingDbPath);
+    const labelSet = await existingDb.getLabelSet();
+
+    // Validate that the label set ID matches
+    if (labelSet.labelSetId !== labelSetId) {
+      await existingDb.close();
+      throw new Error(
+        `Label set ID mismatch! Database label set id: ${labelSet.labelSetId}, provided label set id: ${labelSetId}`,
+      );
+    }
+
+    const nextVersion = labelSet.highestLabelSetVersion + 1;
+    logger.info(
+      `Determined next label set version: ${nextVersion} (current highest: ${labelSet.highestLabelSetVersion})`,
+    );
+    // Return the open database connection instead of closing it
+    return { version: nextVersion, existingDb };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Failed to determine label set version from existing database at ${existingDbPath}: ${errorMessage}`,
+    );
+  }
+}
+
+/**
+ * Generate output file name from label set ID and version
+ */
+function generateOutputFileName(labelSetId: string, labelSetVersion: number): string {
+  return `${labelSetId}_${labelSetVersion}.ensrainbow`;
 }
 
 /**
  * Initialize conversion setup and logging
  */
-async function initializeConversion(options: ConvertCsvCommandOptions) {
-  logger.info("Starting conversion from CSV to protobuf format...");
+async function initializeConversion(
+  options: ConvertCsvCommandOptions,
+  labelSetVersion: number,
+  outputFile: string,
+  existingDb: ENSRainbowDB | null,
+) {
+  logger.info("Starting conversion from CSV to .ensrainbow format...");
   logger.info(`Input file: ${options.inputFile}`);
-  logger.info(`Output file: ${options.outputFile}`);
+  logger.info(`Output file: ${outputFile}`);
   logger.info(`Label set id: ${options.labelSetId}`);
-  logger.info(`Label set version: ${options.labelSetVersion}`);
+  logger.info(`Label set version: ${labelSetVersion}`);
 
   // Check file size and warn for very large files
   try {
@@ -222,36 +281,22 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
     logger.info(`Input file size: ${fileSizeMB} MB`);
 
-    if (stats.size > 1024 * 1024 * 1024) {
-      // > 1GB
+    if (stats.size > LARGE_FILE_SIZE_THRESHOLD_MB * 1024 * 1024) {
       logger.warn("⚠️  Processing a very large file - using SEQUENTIAL mode.");
     }
   } catch (error) {
     logger.warn(`Could not determine file size: ${error}`);
   }
 
-  // Open existing database if path is provided
-  let existingDb: ENSRainbowDB | null = null;
-  if (options.existingDbPath) {
-    try {
-      logger.info(`Opening existing database for filtering: ${options.existingDbPath}`);
-      existingDb = await ENSRainbowDB.open(options.existingDbPath);
-      logger.info("Successfully opened existing database for label filtering");
-    } catch (error) {
-      logger.warn(`Failed to open existing database at ${options.existingDbPath}: ${error}`);
-      logger.warn("Proceeding without filtering existing labels");
-    }
+  // Log if using existing database for filtering
+  if (existingDb) {
+    logger.info("Using existing database connection for label filtering");
   }
 
   const { RainbowRecordType, RainbowRecordCollectionType } = createRainbowProtobufRoot();
-  const outputStream = setupWriteStream(options.outputFile);
+  const outputStream = setupWriteStream(outputFile);
 
-  writeHeader(
-    outputStream,
-    RainbowRecordCollectionType,
-    options.labelSetId,
-    options.labelSetVersion,
-  );
+  writeHeader(outputStream, RainbowRecordCollectionType, options.labelSetId, labelSetVersion);
 
   logger.info("Reading and processing CSV file line by line with streaming...");
 
@@ -261,18 +306,18 @@ async function initializeConversion(options: ConvertCsvCommandOptions) {
 /**
  * Create rainbow record from parsed CSV row
  */
-function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string } {
+function createRainbowRecord(row: string[]): RainbowRecord {
   const label = String(row[0]);
 
   if (row.length === 1) {
     // Single column: compute labelhash using labelhash function
     const labelHashBytes = labelHashToBytes(labelhash(label));
     return {
-      labelhash: Buffer.from(labelHashBytes),
+      labelHash: labelHashBytes,
       label: label,
     };
-  } else {
-    // Two columns: validate and use provided hash
+  } else if (row.length === 2) {
+    // Two columns: validate labelhash format and use provided hash
     // Trim whitespace from hash (metadata), but preserve label as-is
     const providedHash = String(row[1]).trim();
     if (providedHash === "") {
@@ -280,15 +325,17 @@ function createRainbowRecord(row: string[]): { labelhash: Buffer; label: string 
     }
     const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
     try {
-      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash);
+      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash); // performs labelhash format validation
       return {
-        labelhash: Buffer.from(labelHash),
-        label: label,
+        labelHash,
+        label,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Invalid labelHash: ${errorMessage}`);
     }
+  } else {
+    throw new Error(`Expected 1 or 2 columns, but found ${row.length} columns`);
   }
 }
 
@@ -314,7 +361,7 @@ async function processRecord(
 
   const rainbowRecord = createRainbowRecord(row);
   const label = rainbowRecord.label;
-  const labelHashBytes = rainbowRecord.labelhash;
+  const labelHashBytes = Buffer.from(rainbowRecord.labelHash);
 
   // Check if labelhash already exists in the existing database
   if (existingDb) {
@@ -336,7 +383,11 @@ async function processRecord(
   await dedupDb.add(label, "");
 
   // Create protobuf message and write with backpressure handling
-  const recordMessage = RainbowRecordType.fromObject(rainbowRecord);
+  // Map RainbowRecord (labelHash) to protobuf format (labelhash)
+  const recordMessage = RainbowRecordType.fromObject({
+    labelhash: Buffer.from(rainbowRecord.labelHash),
+    label: rainbowRecord.label,
+  });
   const buffer = Buffer.from(RainbowRecordType.encodeDelimited(recordMessage).finish());
 
   // Check if write returns false (buffer full) - if so, wait for drain
@@ -371,7 +422,6 @@ async function processCSVFile(
   let lineNumber = 0;
   let processedRecords = 0;
   let lastLoggedLine = 0;
-  const startTime = Date.now();
   let lastLogTime = Date.now();
 
   const fileStream = createReadStream(inputFile, { encoding: "utf8" });
@@ -451,8 +501,8 @@ async function processCSVFile(
           }
 
           // Update progress bar
-          if (lineNumber % 1000 === 0 && progressBar) {
-            progressBar.tick(1000);
+          if (lineNumber % PROGRESS_BAR_UPDATE_INTERVAL === 0 && progressBar) {
+            progressBar.tick(PROGRESS_BAR_UPDATE_INTERVAL);
             progressBar.curr = lineNumber;
           }
 
@@ -487,10 +537,16 @@ async function processCSVFile(
  * Main CSV conversion command with true streaming using fast-csv
  */
 export async function convertCsvCommand(options: ConvertCsvCommandOptions): Promise<void> {
-  // Validate that existingDbPath is provided when labelSetVersion > 0
-  if (options.labelSetVersion > 0 && !options.existingDbPath) {
-    throw new Error("existingDbPath must be specified if label set version is higher than 0");
-  }
+  // Get label set version from existing database or default to 0
+  // This also opens the database if needed, and we'll reuse that connection
+  const { version: labelSetVersion, existingDb: openedDb } = await getLabelSetVersionAndDatabase(
+    options.existingDbPath,
+    options.labelSetId,
+  );
+
+  // Generate output file name if not provided
+  const outputFile =
+    options.outputFile ?? generateOutputFileName(options.labelSetId, labelSetVersion);
 
   const stats: ConversionStats = {
     totalLines: 0,
@@ -501,18 +557,22 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     startTime: new Date(),
   };
 
-  let existingDb: ENSRainbowDB | null = null;
+  let existingDb: ENSRainbowDB | null = openedDb;
   let dedupDb: DeduplicationDB | undefined;
-  let tempDedupDir: string | null = null;
+  let temporaryDedupDir: string | null = null;
 
   try {
-    const { RainbowRecordType, outputStream, existingDb: db } = await initializeConversion(options);
+    const {
+      RainbowRecordType,
+      outputStream,
+      existingDb: db,
+    } = await initializeConversion(options, labelSetVersion, outputFile, existingDb);
     existingDb = db;
 
     // Create temporary deduplication database
-    tempDedupDir = join(process.cwd(), "temp-dedup-" + Date.now());
-    logger.info(`Creating temporary deduplication database at: ${tempDedupDir}`);
-    const tempDb = new ClassicLevel<string, string>(tempDedupDir, {
+    temporaryDedupDir = join(process.cwd(), "temp-dedup-" + Date.now());
+    logger.info(`Creating temporary deduplication database at: ${temporaryDedupDir}`);
+    const tempDb = new ClassicLevel<string, string>(temporaryDedupDir, {
       keyEncoding: "utf8",
       valueEncoding: "utf8",
       createIfMissing: true,
@@ -584,10 +644,10 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     }
 
     // Remove temporary deduplication database directory
-    if (tempDedupDir) {
+    if (temporaryDedupDir) {
       try {
-        rmSync(tempDedupDir, { recursive: true, force: true });
-        logger.info(`Removed temporary deduplication database: ${tempDedupDir}`);
+        rmSync(temporaryDedupDir, { recursive: true, force: true });
+        logger.info(`Removed temporary deduplication database: ${temporaryDedupDir}`);
       } catch (error) {
         logger.warn(`Failed to remove temporary deduplication database: ${error}`);
       }

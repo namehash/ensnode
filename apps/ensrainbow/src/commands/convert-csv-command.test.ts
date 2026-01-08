@@ -5,7 +5,7 @@ import { join } from "path";
 import { labelhash } from "viem";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { type LabelSetId, type LabelSetVersion, labelHashToBytes } from "@ensnode/ensnode-sdk";
+import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { createCLI } from "@/cli";
 import { ENSRainbowDB } from "@/lib/database";
@@ -40,7 +40,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-csv-one-col" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -74,7 +73,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-csv-two-col" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -108,9 +106,8 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-csv-invalid" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
         }),
-      ).rejects.toThrow(/Failed on line 1: Invalid labelHash/);
+      ).rejects.toThrow(/Failed on line 1: Expected 1 or 2 col/);
     });
 
     it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
@@ -123,7 +120,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-csv-special" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -165,7 +161,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-csv-invalid-hash" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
         }),
       ).rejects.toThrow(/Failed on line 2: Invalid labelHash/);
     });
@@ -181,7 +176,6 @@ describe("convert-csv-command", () => {
           inputFile,
           outputFile,
           labelSetId: "test-missing" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
         }),
       ).rejects.toThrow();
     });
@@ -195,17 +189,15 @@ describe("convert-csv-command", () => {
 
       const cli = createCLI({ exitProcess: false });
 
-      // Test convert-csv command through CLI
+      // Test convert command through CLI
       await cli.parse([
-        "convert-csv",
+        "convert",
         "--input-file",
         inputFile,
         "--output-file",
         outputFile,
         "--label-set-id",
         "test-cli-csv",
-        "--label-set-version",
-        "0",
       ]);
 
       // Verify file was created
@@ -234,7 +226,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile: initialOutputFile,
         labelSetId: "test-filtering" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -256,11 +247,11 @@ describe("convert-csv-command", () => {
       await db.close();
 
       // Now convert the same CSV file again, but with filtering enabled
+      // This should automatically determine version 1 from the existing database
       await convertCsvCommand({
         inputFile,
         outputFile,
         labelSetId: "test-filtering" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion, // Use same version as initial
         existingDbPath: dataDir,
         silent: true,
       });
@@ -273,21 +264,12 @@ describe("convert-csv-command", () => {
       const initialStats = await stat(initialOutputFile);
       expect(outputStats.size).toBeLessThan(initialStats.size);
 
-      // Verify that the filtered file contains fewer records
+      // Verify that ingesting the filtered file (version 1) into a new database fails
+      // because new databases require version 0 for initial ingestion
       const filteredDataDir = join(tempDir, "db_filtered_result");
-      await cli.parse([
-        "ingest-ensrainbow",
-        "--input-file",
-        outputFile,
-        "--data-dir",
-        filteredDataDir,
-      ]);
-
-      const filteredDb = await ENSRainbowDB.open(filteredDataDir);
-      expect(await filteredDb.validate()).toBe(true);
-      const filteredCount = await filteredDb.getPrecalculatedRainbowRecordCount();
-      expect(filteredCount).toBe(0); // All labels should be filtered out since they already exist
-      await filteredDb.close();
+      await expect(
+        cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", filteredDataDir]),
+      ).rejects.toThrow(/Initial ingestion must use a file with label set version 0/);
     });
 
     it("should filter out duplicate labels within the same conversion", async () => {
@@ -303,7 +285,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-duplicates" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -341,26 +322,66 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should handle non-existent database path gracefully", async () => {
+    it("should throw error when existing database path cannot be opened", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
       const outputFile = join(tempDir, "output_no_db.ensrainbow");
       const nonExistentDbPath = join(tempDir, "non-existent-db");
 
-      // Should not throw error even with non-existent database path
+      // Should throw error when database path is provided but cannot be opened
       await expect(
         convertCsvCommand({
           inputFile,
           outputFile,
           labelSetId: "test-no-db" as LabelSetId,
-          labelSetVersion: 0 as LabelSetVersion,
           existingDbPath: nonExistentDbPath,
         }),
-      ).resolves.not.toThrow();
+      ).rejects.toThrow(/Database is not open/);
+    });
 
-      // Verify the output file was still created
-      const stats = await stat(outputFile);
-      expect(stats.isFile()).toBe(true);
-      expect(stats.size).toBeGreaterThan(0);
+    it("should throw error when label set ID mismatches existing database", async () => {
+      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_1col.csv");
+      const outputFile = join(tempDir, "output_mismatch.ensrainbow");
+      const dataDir = join(tempDir, "db_mismatch");
+
+      // First, create a database with one label set ID
+      const initialOutputFile = join(tempDir, "initial_mismatch.ensrainbow");
+      await convertCsvCommand({
+        inputFile,
+        outputFile: initialOutputFile,
+        labelSetId: "test-label-set-a" as LabelSetId,
+        silent: true,
+      });
+
+      // Ingest the initial file to create the database
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse([
+        "ingest-ensrainbow",
+        "--input-file",
+        initialOutputFile,
+        "--data-dir",
+        dataDir,
+      ]);
+
+      // Verify initial database was created
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const labelSet = await db.getLabelSet();
+      expect(labelSet.labelSetId).toBe("test-label-set-a");
+      await db.close();
+
+      // Now try to convert with a different label set ID and the existing database path
+      // This should throw an error about label set ID mismatch
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-label-set-b" as LabelSetId,
+          existingDbPath: dataDir,
+          silent: true,
+        }),
+      ).rejects.toThrow(
+        /Label set ID mismatch! Database label set id: test-label-set-a, provided label set id: test-label-set-b/,
+      );
     });
 
     it("should work through CLI with existing database path", async () => {
@@ -373,15 +394,13 @@ describe("convert-csv-command", () => {
       const cli = createCLI({ exitProcess: false });
 
       await cli.parse([
-        "convert-csv",
+        "convert",
         "--input-file",
         inputFile,
         "--output-file",
         initialOutputFile,
         "--label-set-id",
         "test-cli-filtering",
-        "--label-set-version",
-        "0",
       ]);
 
       await cli.parse([
@@ -394,15 +413,13 @@ describe("convert-csv-command", () => {
 
       // Now test CLI with existing database path
       await cli.parse([
-        "convert-csv",
+        "convert",
         "--input-file",
         inputFile,
         "--output-file",
         outputFile,
         "--label-set-id",
         "test-cli-filtering",
-        "--label-set-version",
-        "1",
         "--existing-db-path",
         dataDir,
       ]);
@@ -434,7 +451,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-small" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -480,7 +496,6 @@ describe("convert-csv-command", () => {
         inputFile,
         outputFile,
         labelSetId: "test-many-labels" as LabelSetId,
-        labelSetVersion: 0 as LabelSetVersion,
         silent: true,
       });
 
@@ -489,5 +504,201 @@ describe("convert-csv-command", () => {
       expect(stats.isFile()).toBe(true);
       expect(stats.size).toBeGreaterThan(0);
     }, 60000); // 60 second timeout for large file test
+  });
+
+  describe("Edge cases", () => {
+    it("should handle empty CSV file", async () => {
+      const inputFile = join(tempDir, "empty.csv");
+      const outputFile = join(tempDir, "output_empty.ensrainbow");
+      await writeFile(inputFile, "");
+
+      // Should not throw error for empty file
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-empty" as LabelSetId,
+          silent: true,
+        }),
+      ).resolves.not.toThrow();
+
+      // Verify the output file was created (should have header only)
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+
+      // Ingest and verify no records were written
+      const dataDir = join(tempDir, "db_empty");
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
+
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(recordsCount).toBe(0);
+      await db.close();
+    });
+
+    it("should handle CSV file with only whitespace", async () => {
+      const inputFile = join(tempDir, "whitespace.csv");
+      const outputFile = join(tempDir, "output_whitespace.ensrainbow");
+      await writeFile(inputFile, "   \n  \n\t\n  ");
+
+      // Should not throw error for whitespace-only file
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-whitespace" as LabelSetId,
+          silent: true,
+        }),
+      ).resolves.not.toThrow();
+
+      // Verify the output file was created
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+    });
+
+    it("should process all CSV rows including potential headers", async () => {
+      const inputFile = join(tempDir, "with_header.csv");
+      const outputFile = join(tempDir, "output_header.ensrainbow");
+      const csvContent =
+        "label,labelhash\nalice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob,0x38e47a7b719dce63662aeaf43440326f551b8a7ee198cee35cb5d517f2d296a2";
+      await writeFile(inputFile, csvContent);
+
+      // Should process the file (header will be treated as a regular row and fail validation)
+      // Actually, the header row will be processed and fail because "label" is not a valid hex hash
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-header" as LabelSetId,
+          silent: true,
+        }),
+      ).rejects.toThrow(/Invalid labelHash/);
+
+      // For a proper test, let's create a CSV where the header is valid data
+      const csvContentValid = "label\nlabel1\nlabel2";
+      await writeFile(inputFile, csvContentValid);
+
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-header-valid" as LabelSetId,
+          silent: true,
+        }),
+      ).resolves.not.toThrow();
+
+      // Verify records were created (including "label" as a label)
+      const dataDir = join(tempDir, "db_header");
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
+
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      // Should have 3 records: "label", "label1", "label2"
+      expect(recordsCount).toBe(3);
+      await db.close();
+    });
+
+    it("should handle CSV with malformed rows (extra columns)", async () => {
+      const inputFile = join(tempDir, "malformed_extra_cols.csv");
+      const outputFile = join(tempDir, "output_malformed.ensrainbow");
+      const csvContent =
+        "alice\nbob,0x38e47a7b719dce63662aeaf43440326f551b8a7ee198cee35cb5d517f2d296a2,extra\ncharlie";
+      await writeFile(inputFile, csvContent);
+
+      // Should fail when column count is inconsistent
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-malformed" as LabelSetId,
+          silent: true,
+        }),
+      ).rejects.toThrow(/Expected \d+ columns/);
+    });
+
+    it("should handle CSV with malformed rows (missing columns)", async () => {
+      const inputFile = join(tempDir, "malformed_missing_cols.csv");
+      const outputFile = join(tempDir, "output_malformed2.ensrainbow");
+      const csvContent =
+        "alice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob\ncharlie,0x87a213ce1ee769e28decedefb98f6fe48890a74ba84957ebf877fb591e37e0de";
+      await writeFile(inputFile, csvContent);
+
+      // Should fail when column count is inconsistent
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-malformed2" as LabelSetId,
+          silent: true,
+        }),
+      ).rejects.toThrow(/Expected \d+ columns/);
+    });
+
+    it("should handle CSV with quoted fields containing commas", async () => {
+      const inputFile = join(tempDir, "quoted_fields.csv");
+      const outputFile = join(tempDir, "output_quoted.ensrainbow");
+      // CSV with quoted fields that contain commas - use single column format to auto-compute hashes
+      const csvContent = '"label,with,commas"\n"another,label"';
+      await writeFile(inputFile, csvContent);
+
+      // Should handle quoted fields correctly
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-quoted" as LabelSetId,
+          silent: true,
+        }),
+      ).resolves.not.toThrow();
+
+      // Verify the output file was created
+      const stats = await stat(outputFile);
+      expect(stats.isFile()).toBe(true);
+      expect(stats.size).toBeGreaterThan(0);
+
+      // Ingest and verify records
+      const dataDir = join(tempDir, "db_quoted");
+      const cli = createCLI({ exitProcess: false });
+      await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
+
+      const db = await ENSRainbowDB.open(dataDir);
+      expect(await db.validate()).toBe(true);
+      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
+      expect(recordsCount).toBe(2);
+
+      // Verify the labels were stored correctly
+      const label1 = "label,with,commas";
+      const label2 = "another,label";
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label1))))?.label).toBe(
+        label1,
+      );
+      expect((await db.getVersionedRainbowRecord(labelHashToBytes(labelhash(label2))))?.label).toBe(
+        label2,
+      );
+      await db.close();
+    });
+
+    it("should handle CSV with empty labelhash column (should fail validation)", async () => {
+      const inputFile = join(tempDir, "empty_hash.csv");
+      const outputFile = join(tempDir, "output_empty_hash.ensrainbow");
+      const csvContent =
+        "alice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob,\ncharlie,0x87a213ce1ee769e28decedefb98f6fe48890a74ba84957ebf877fb591e37e0de";
+      await writeFile(inputFile, csvContent);
+
+      // Should fail when labelhash is empty
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-empty-hash" as LabelSetId,
+          silent: true,
+        }),
+      ).rejects.toThrow(/LabelHash cannot be empty/);
+    });
   });
 });
