@@ -8,26 +8,38 @@ keywords: [ensrainbow, cli]
 
 | Command | Purpose | Most useful flags | Example |
 |---------|---------|-------------------|---------|
-| `convert` | Convert legacy `.sql.gz` rainbow tables to `.ensrainbow` format. **This is currently the only way to create new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version` | `pnpm run convert --input-file ens_names.sql.gz --output-file subgraph-0.ensrainbow` |
-| `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB | `--input-file`, `--data-dir` | `pnpm run ingest-ensrainbow --input-file subgraph-0.ensrainbow --data-dir ./data` |
+| `convert` | Convert CSV files to `.ensrainbow` format. **This is the primary method for creating new .ensrainbow files.** | `--input-file`, `--output-file`, `--label-set-id`, `--existing-db-path`, `--silent` | `pnpm run convert --input-file labels.csv --output-file my-dataset_0.ensrainbow --label-set-id my-dataset` |
+| `convert-sql` | Convert legacy `.sql.gz` rainbow tables (ENS Subgraph data) to `.ensrainbow` format | `--input-file`, `--output-file`, `--label-set-id`, `--label-set-version` | `pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0` |
+| `ingest-ensrainbow` | Stream a `.ensrainbow` file into LevelDB | `--input-file`, `--data-dir` | `pnpm run ingest-ensrainbow --input-file my-dataset_0.ensrainbow --data-dir ./data` |
 | `validate` | Verify DB integrity | `--data-dir`, `--lite` | `pnpm run validate --lite` |
 | `purge` | Delete all DB files in a directory | `--data-dir` | `pnpm run purge --data-dir ./data` |
 | `serve` | Launch the HTTP API server | `--data-dir`, `--port` | `pnpm run serve --port 3223` |
 
 ## Creating .ensrainbow Files
 
-:::note[Important]
-The `convert` command is **the only way** to create new `.ensrainbow` files from scratch. If you need to create custom label sets with your own data, you must use this command to convert from PostgreSQL dump format.
+### CSV Conversion (Recommended)
 
-You can download existing `.ensrainbow` files using the download scripts, but for creating entirely new files, `convert` is your only option.
-:::
+The `convert` command is the **primary method** for creating new `.ensrainbow` files from CSV data.
 
 **Full convert command syntax:**
 ```bash
 pnpm run convert \
-  --input-file path/to/your_data.sql.gz \
+  --input-file path/to/labels.csv \
   --output-file path/to/output.ensrainbow \
   --label-set-id your-label-set-id \
+  [--existing-db-path path/to/existing/database] \
+  [--silent]
+```
+
+### SQL Conversion (Legacy)
+
+For converting legacy ENS Subgraph data from SQL dumps:
+
+```bash
+pnpm run convert-sql \
+  --input-file path/to/ens_names.sql.gz \
+  --output-file path/to/output.ensrainbow \
+  --label-set-id subgraph \
   --label-set-version 0
 ```
 
