@@ -1,45 +1,52 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "almond",
   "name": "ENSNode Docs",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0080bc",
+    "light": "#0080bc",
+    "dark": "#0080bc"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/assets/favicon.svg",
   "navigation": {
-    "tabs": [
+    "products": [
       {
-        "tab": "API Reference",
-        "openapi": "https://api.alpha.green.ensnode.io/openapi.json"
+        "product": "ENSApi",
+        "icon": "/assets/ensapi.svg",
+        "description": "ENSApi is the API service for ENSNode",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "ENSApi",
+                "pages": ["ensapi/index"]
+              },
+              {
+                "group": "API Reference",
+                "openapi": "https://gist.githubusercontent.com/notrab/94b637e77468cbddd895d7933ce88f64/raw/12cb5ed183558a9bdda5d1c7004db6c794dbd13e/green-ensnode-openapi.json"
+              }
+            ]
+          }
+        ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/assets/logo-light.svg",
+    "dark": "/assets/logo-dark.svg"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:hello@namehashlabs.org"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "label": "ENSAdmin",
+      "href": "https://admin.ensnode.io"
     }
   },
   "contextual": {
@@ -56,9 +63,8 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/NamehashLabs",
+      "github": "https://github.com/namehash"
     }
   }
 }
