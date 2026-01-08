@@ -50,6 +50,7 @@ import {
   AnyRegistrarControllerABI,
   DatasourceNames,
   EnhancedAccessControlABI,
+  ETHRegistrarABI,
   RegistryABI,
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
@@ -66,11 +67,11 @@ export const pluginName = PluginName.ENSv2;
 
 const REQUIRED_DATASOURCE_NAMES = [
   DatasourceNames.ENSRoot, //
-  DatasourceNames.Namechain,
 ];
 
 const ALL_DATASOURCE_NAMES = [
   ...REQUIRED_DATASOURCE_NAMES,
+  DatasourceNames.Namechain,
   DatasourceNames.Basenames,
   DatasourceNames.Lineanames,
 ];
@@ -81,11 +82,11 @@ export default createPlugin({
   createPonderConfig(config) {
     const {
       ensroot, //
-      namechain,
     } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     const {
-      basenames, //
+      namechain, //
+      basenames,
       lineanames,
     } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
 
@@ -141,12 +142,15 @@ export default createPlugin({
         // Namechain ETHRegistrar
         //////////////////////////
         [namespaceContract(pluginName, "ETHRegistrar")]: {
-          abi: namechain.contracts.ETHRegistrar.abi,
-          chain: chainConfigForContract(
-            config.globalBlockrange,
-            namechain.chain.id,
-            namechain.contracts.ETHRegistrar,
-          ),
+          abi: ETHRegistrarABI,
+          chain: {
+            ...(namechain &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                namechain.chain.id,
+                namechain.contracts.ETHRegistrar,
+              )),
+          },
         },
 
         //////////////////////////////////////
