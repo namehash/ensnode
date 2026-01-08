@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export default function SplashPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-3">
-      <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl border border-gray-300 shadow-sm max-w-lg">
+      <div className="flex flex-col items-center gap-1 text-center bg-[#F9FAFB] p-8 md:p-16 rounded-2xl border border-gray-300 shadow-xs max-w-lg">
         <div className="relative w-full aspect-[1056/820]">
           <img src="/ensadmin-illustration.png" alt="ENSAdmin" className="object-contain" />
         </div>

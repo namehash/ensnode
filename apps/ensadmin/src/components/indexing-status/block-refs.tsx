@@ -31,7 +31,7 @@ function BlockNumber({ chainId, block }: BlockNumberProps) {
         className="w-fit text-lg font-semibold flex items-center gap-1 text-blue-600 hover:underline cursor-pointer"
       >
         {block.number}
-        <ExternalLinkIcon size={16} className="inline-block flex-shrink-0" />
+        <ExternalLinkIcon size={16} className="inline-block shrink-0" />
       </a>
     );
   }

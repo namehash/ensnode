@@ -74,11 +74,11 @@ function ResolveAndDisplayReferrerIdentity({
         Unknown
         <Tooltip delayDuration={1000}>
           <TooltipTrigger>
-            <InfoIcon className="flex-shrink-0" />
+            <InfoIcon className="shrink-0" />
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
+            className="bg-gray-50 text-sm text-black text-left shadow-md outline-hidden w-fit"
           >
             Encoded referrer
             <code className="block">{referral.encodedReferrer}</code> does not follow the formatting
@@ -109,23 +109,23 @@ export function DisplayRegistrarActionCardPlaceholder() {
   return (
     <div className="w-full min-h-[80px] box-border flex flex-row flex-wrap justify-between items-center max-lg:gap-3 gap-y-3 rounded-xl border p-3 text-sm">
       <LabeledField fieldLabel="Name" className="w-[30%] min-w-[200px]">
-        <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5" />
+        <div className="animate-pulse mt-1 h-6 bg-muted rounded-sm w-3/5" />
       </LabeledField>
 
       <LabeledField fieldLabel="Registered" className="w-[15%] min-w-[140px]">
-        <div className="animate-pulse mt-1 h-6 bg-muted rounded w-4/5" />
+        <div className="animate-pulse mt-1 h-6 bg-muted rounded-sm w-4/5" />
       </LabeledField>
 
       <LabeledField fieldLabel="Duration" className="w-[10%] min-w-[140px]">
-        <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-4/5" />
+        <div className=" animate-pulse mt-1 h-6 bg-muted rounded-sm w-4/5" />
       </LabeledField>
 
       <LabeledField fieldLabel="Registrant" className="w-1/5 min-w-[140px]">
-        <div className="animate-pulse mt-1 h-6 bg-muted rounded w-3/5" />
+        <div className="animate-pulse mt-1 h-6 bg-muted rounded-sm w-3/5" />
       </LabeledField>
 
       <LabeledField fieldLabel="Referrer" className="w-[15%]  min-w-[140px]">
-        <div className=" animate-pulse mt-1 h-6 bg-muted rounded w-full" />
+        <div className=" animate-pulse mt-1 h-6 bg-muted rounded-sm w-full" />
       </LabeledField>
     </div>
   );
