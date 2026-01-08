@@ -157,13 +157,13 @@ export default {
         startBlock: 0,
       },
 
-      DefaultPublicResolver2: {
+      DefaultPublicResolver4: {
         abi: ResolverABI,
         address: "0x367761085bf3c12e5da2df99ac6e1a824612b8fb",
         startBlock: 0,
       },
 
-      DefaultPublicResolver3: {
+      DefaultPublicResolver5: {
         abi: ResolverABI,
         address: "0x4c2f7092c2ae51d986befee378e50bd4db99c901",
         startBlock: 0,

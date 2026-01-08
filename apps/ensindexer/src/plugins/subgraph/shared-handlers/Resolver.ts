@@ -185,7 +185,7 @@ export async function handleTextChanged({
   // NOTE(subgraph-compat): subgraph implicitly strips null bytes from event args
   const sanitizedKey = stripNullBytes(key);
 
-  // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver (DefaultPublicResolver1)
+  // NOTE(subgraph-compat): value can be undefined in the case of a LegacyPublicResolver (DefaultPublicResolver3)
   // event, and the subgraph indexes that as `null`. value can also be decoded to empty string, which
   // the subgraph also indexes as `null`.
   // ex: https://etherscan.io/tx/0x7fac4f1802c9b1969311be0412e6f900d531c59155421ff8ce1fda78b87956d0#eventlog

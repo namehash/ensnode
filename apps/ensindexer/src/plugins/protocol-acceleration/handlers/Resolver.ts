@@ -77,7 +77,7 @@ export default function () {
     async ({ context, event }) => {
       const { node, key } = event.args;
 
-      // this is a LegacyPublicResolver (DefaultPublicResolver1) event which does not emit `value`,
+      // this is a LegacyPublicResolver (DefaultPublicResolver3) event which does not emit `value`,
       // so we fetch it here if possible
 
       // default record value as 'null' which will be interpreted as deletion/non-existence of record

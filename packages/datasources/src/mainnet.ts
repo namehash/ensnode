@@ -104,6 +104,20 @@ export default {
         startBlock: 20410692,
       },
 
+      // the Resolver for *.argent.xyz names
+      ArgentResolver: {
+        abi: ResolverABI,
+        address: "0xda1756bb923af5d1a05e277cb1e54f1d0a127890",
+        startBlock: 7173574,
+      },
+
+      // the Resolver for *.loopring.eth names
+      LoopringResolver: {
+        abi: ResolverABI,
+        address: "0xf58d55f06bb92f083e78bb5063a2dd3544f9b6a3",
+        startBlock: 10170681,
+      },
+
       //
 
       ETHRegistry: {
@@ -283,6 +297,13 @@ export default {
         address: "0xa53cca02f98d590819141aa85c891e2af713c223",
         startBlock: 6682956,
       },
+
+      // this is Linea's Default Public Resolver
+      DefaultPublicResolver: {
+        abi: ResolverABI,
+        address: "0x86c5aed9f27837074612288610fb98ccc1733126",
+        startBlock: 6682994,
+      },
     },
   },
 
@@ -371,9 +392,30 @@ export default {
         startBlock: 22764871,
       },
 
-      // the original default public resolver aka LegacyPublicResolver
-      // it uses a TextChanged event that does not include the `value` parameter
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver0: {
+        abi: ResolverABI,
+        address: "0x1da022710df5002339274aadee8d58218e9d6ab5",
+        startBlock: 3648359,
+      },
+
+      // this resolver uses a TextChanged event that does not include the `value` parameter
       DefaultPublicResolver1: {
+        abi: ResolverABI,
+        address: "0x5ffc014343cd971b7eb70732021e26c35b744cc4",
+        startBlock: 3733668,
+      },
+
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x226159d592e2b063810a10ebf6dcbada94ed68b8",
+        startBlock: 8659893,
+      },
+
+      // aka 'LegacyPublicResolver' in the ENS Subgraph terminology
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver3: {
         abi: ResolverABI,
         address: "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41",
         startBlock: 9412610,
@@ -382,7 +424,7 @@ export default {
       // this PublicResolver was enabled in the following proposal:
       // https://discuss.ens.domains/t/ep3-5-executable-activate-new-eth-controller-and-reverse-registrar/16776
       // https://www.tally.xyz/gov/ens/proposal/42973781582803845389836855775840822719678533376883030929209752909248937768242
-      DefaultPublicResolver2: {
+      DefaultPublicResolver4: {
         abi: ResolverABI,
         address: "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63",
         startBlock: 16925619,
@@ -391,7 +433,7 @@ export default {
       // this PublicResolver was enabled in the following proposal
       // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
       // https://www.tally.xyz/gov/ens/proposal/42524979896803285837776370636134389407867034021879791462477783237030656381157
-      DefaultPublicResolver3: {
+      DefaultPublicResolver5: {
         abi: ResolverABI,
         address: "0xf29100983e058b709f3d539b0c765937b804ac15",
         startBlock: 22764828,
