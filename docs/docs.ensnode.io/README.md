@@ -21,7 +21,7 @@
 3. Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify):
 
    ```bash
-   npm i -g mintlify
+   pnpm add -g mintlify
    ```
 
 4. Start the local development server:
@@ -39,7 +39,7 @@
 
 ## Publishing Changes
 
-Changes pushed to the default branch are automatically deployed to production.
+Changes pushed to the main branch are automatically deployed to production.
 
 ## Resources
 
