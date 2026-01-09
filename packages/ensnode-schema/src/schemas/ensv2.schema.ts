@@ -373,7 +373,7 @@ export const renewal = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.index),
   }),
 );
 
