@@ -84,7 +84,7 @@ export function isRainbowRecordKey(key: ByteArray): boolean {
 /**
  * Type representing the ENSRainbow LevelDB database.
  *
- * For user-facing documentation, see the [Data Model documentation](/docs/ensrainbow/concepts/data-model).
+ * For user-facing documentation, see the [Data Model documentation](https://ensnode.io/ensrainbow/concepts/data-model).
  *
  * Schema:
  * - Keys are binary encoded and represent:

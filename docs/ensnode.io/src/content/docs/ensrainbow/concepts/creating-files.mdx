@@ -446,7 +446,7 @@ Create documentation for your custom label set including:
 
 ### Example Documentation Format
 
-```markdown
+````markdown
 ## Custom Label Set: my-dataset
 
 **Label Set ID**: `my-dataset`  
@@ -460,6 +460,7 @@ Create documentation for your custom label set including:
 ### Usage
 
 # Using with Docker
+```bash
 docker run -d \
   -e DB_SCHEMA_VERSION="3" \
   -e LABEL_SET_ID="my-dataset" \
@@ -467,6 +468,7 @@ docker run -d \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
+````
 
 ## Setting Up Your Own Label Set Server
 

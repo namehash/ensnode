@@ -4,7 +4,7 @@ import type { LabelHash } from "@ensnode/ensnode-sdk";
 import { labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 /**
- * A [rainbow record](/docs/ensrainbow/concepts/glossary#rainbow-record) interface.
+ * A [rainbow record](https://ensnode.io/ensrainbow/concepts/glossary#rainbow-record) interface.
  */
 export interface RainbowRecord {
   labelHash: ByteArray;
