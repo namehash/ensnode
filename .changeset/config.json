@@ -20,7 +20,9 @@
       "@ensnode/ensnode-sdk",
       "@ensnode/shared-configs",
       "@docs/ensnode",
-      "@docs/ensrainbow"
+      "@docs/ensrainbow",
+      "@namehash/ens-referrals",
+      "@namehash/namehash-ui"
     ]
   ],
   "updateInternalDependencies": "patch",

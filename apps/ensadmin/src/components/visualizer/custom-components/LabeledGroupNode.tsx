@@ -57,7 +57,7 @@ export const GroupNode = forwardRef<HTMLDivElement, GroupNodeProps>(
       <BaseNode
         ref={ref}
         selected={selected}
-        className="h-full overflow-hidden rounded-sm bg-white bg-opacity-50 p-0"
+        className="h-full overflow-hidden rounded-xs bg-white/50 p-0"
         {...props}
       >
         <Panel

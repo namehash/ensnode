@@ -15,6 +15,7 @@ export const DATASOURCE_NAMES_WITH_RESOLVERS = [
   DatasourceNames.Lineanames,
   DatasourceNames.ThreeDNSOptimism,
   DatasourceNames.ThreeDNSBase,
+  DatasourceNames.Namechain,
 ] as const satisfies DatasourceName[];
 
 /**
@@ -28,7 +29,7 @@ export const getDatasourcesWithResolvers = (
     maybeGetDatasource(namespace, datasourceName),
   )
     .filter((datasource) => !!datasource)
-    .filter((datasource): datasource is DatasourceWithResolverContract => {
+    .filter((datasource) => {
       // all of the relevant datasources provide a Resolver ContractConfig with a `startBlock`
       if (!datasource.contracts.Resolver) {
         console.warn(

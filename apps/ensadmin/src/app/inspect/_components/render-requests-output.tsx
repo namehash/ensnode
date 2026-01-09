@@ -41,7 +41,7 @@ export function RenderRequestsOutput<KEY extends string>({
     if (tab === "unaccelerated") return unaccelerated;
 
     throw new Error("never");
-  }, [accelerated, unaccelerated]);
+  }, [accelerated, unaccelerated, tab]);
 
   // need special derivation to capture refetching state
   const acceleratedLoading = accelerated.isPending || accelerated.isRefetching;
@@ -159,7 +159,7 @@ export function RenderRequestsOutput<KEY extends string>({
                 })()}
 
                 <TabsList>
-                  <TabsTrigger value="accelerated" className="flex flex-row gap-2">
+                  <TabsTrigger value="accelerated" className="flex flex-row gap-2 cursor-pointer">
                     <span>Accelerated</span>
                     {acceleratedSuccess && accelerated.data.trace ? (
                       `(${renderTraceDuration(accelerated.data.trace)})`
@@ -169,7 +169,7 @@ export function RenderRequestsOutput<KEY extends string>({
                   </TabsTrigger>
                   <TabsTrigger
                     value="unaccelerated"
-                    className="flex flex-row gap-2"
+                    className="flex flex-row gap-2 cursor-pointer"
                     disabled={unacceleratedLoading}
                   >
                     <span>Unaccelerated</span>

@@ -18,10 +18,7 @@ export default function () {
     handleNameWrapped,
     handleTransferBatch,
     handleTransferSingle,
-  } = makeNameWrapperHandlers({
-    // the shared Registrar handlers in this plugin index direct subnames of '.eth'
-    registrarManagedName: "eth",
-  });
+  } = makeNameWrapperHandlers();
 
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);

@@ -17,6 +17,7 @@ This guide covers running ENSRainbow locally for development and contributions.
 For focused guidance on specific topics, check out these dedicated pages:
 
 <LinkCard title="Local Development" href="/ensrainbow/contributing/local-development" />
+<LinkCard title="Creating ENSRainbow Files" href="/ensrainbow/concepts/creating-files" />
 <LinkCard title="CLI Reference" href="/ensrainbow/contributing/cli-reference" />
 <LinkCard title="Service Management" href="/ensrainbow/contributing/service-management" />
 <LinkCard title="System Requirements" href="/ensrainbow/contributing/system-requirements" />
@@ -24,6 +25,7 @@ For focused guidance on specific topics, check out these dedicated pages:
 
 :::tip[Choose Your Path]
 - **New to the project?** Start with [Local Development](/ensrainbow/contributing/local-development)
+- **Creating custom datasets?** See [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files)
 - **Need CLI help?** Check the [CLI Reference](/ensrainbow/contributing/cli-reference)
 - **Building for production?** See [Building Docker Images](/ensrainbow/contributing/building)
 :::
@@ -41,6 +43,7 @@ Follow these steps to start contributing to ENSRainbow:
 ## Quick Reference
 
 - **Need to build from source?** → [Building Docker Images](/ensrainbow/contributing/building)
+- **Creating custom datasets?** → [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files)
 - **Looking for CLI commands?** → [CLI Reference](/ensrainbow/contributing/cli-reference)
 - **Running into issues?** → [Troubleshooting](/ensrainbow/usage/troubleshooting)
 - **Want to understand the data flow?** → [Data Model](/ensrainbow/concepts/data-model)
@@ -102,9 +105,9 @@ Starts the API server. The process will exit with:
 
 ## Using ENSRainbow with ens-test-env
 
-The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.sql.gz` file that can be used with ENSRainbow for testing purposes.
+The ens-test-env project provides a test environment for ENS development. It includes a small dataset of ENS names in the `ens_test_env_names.csv` file that can be used with ENSRainbow for testing purposes.
 
-### Ingesting ens_test_env_names.sql.gz
+### Ingesting ens_test_env_names.csv
 
 To ingest the test data into ENSRainbow:
 
@@ -112,7 +115,7 @@ To ingest the test data into ENSRainbow:
     If you don't have a pre-converted `ens-test-env-0.ensrainbow` file:
     ```bash
     # Navigate to apps/ensrainbow or adjust paths accordingly
-    pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env-0.ensrainbow
+    pnpm run convert --input-file test/fixtures/ens_test_env_names.csv --output-file ens-test-env-0.ensrainbow --label-set-id ens-test-env
     ```
     This creates `ens-test-env-0.ensrainbow`.
 
@@ -182,11 +185,11 @@ When using ENSRainbow with Docker, the following environment variables control w
   - **Goal**: Ensures compatibility between the ENSRainbow software and the structure of downloaded database files that are prebuilt for startup-time optimizations.
   - **Configuration**: It is strongly recommended to use the latest available schema version unless you have specific compatibility requirements.
 
-- **`LABEL_SET_ID`**: The identifier for a **Label Set**, which is a collection of ENS labelhash-to-label mappings from a specific source.
+- **`LABEL_SET_ID`**: See **[Label Set ID](/ensrainbow/concepts/glossary#label-set-id)**.
   - **Goal**: To enable the extensible definition of new label sets (e.g., subgraph vs. production vs. test).
   - **Configuration**: See the [Available Label Sets](/ensrainbow/usage/available-label-sets) page for a complete list of currently available label set IDs and their descriptions.
 
-- **`LABEL_SET_VERSION`**: A non-negative integer representing the version of a **Label Set**.
+- **`LABEL_SET_VERSION`**: See **[Label Set Version](/ensrainbow/concepts/glossary#label-set-version)**.
   - **Goal**: To support the deterministic evolution of datasets over time, allowing services to achieve reproducible results.
   - **Configuration**: Use the highest available version number for the most up-to-date data. Versions are sequential and incremental:
     - `0` - The initial/base version of the **Label Set**.
@@ -265,27 +268,27 @@ These steps are typically performed by project maintainers for releasing officia
 
 ### 1. Prepare `.ensrainbow` Files
 
-This section covers the conversion of source data (like SQL dumps or empty files for initial datasets) into the `.ensrainbow` format. The `time` command is used here to measure the duration of potentially long-running conversion processes.
+This section covers the conversion of source data (like CSV data or empty files for initial datasets) into the `.ensrainbow` format. For detailed conversion instructions and examples, see the [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files) guide.
 
-**For the `subgraph` Label Set (main dataset):**
-This command converts a SQL dump file (`ens_names.sql.gz`) into an `.ensrainbow` file for version 0 of the `subgraph` Label Set.
+**For the `subgraph` Label Set (legacy migration only):**
+This command converts a SQL dump file (`ens_names.sql.gz`) from the legacy ENS Subgraph into an `.ensrainbow` file for version 0 of the `subgraph` Label Set. **Note:** SQL conversion is only for migrating legacy ENS Subgraph data. For all new label sets, use CSV conversion instead.
 ```bash
-# Assuming ens_names.sql.gz contains the primary dataset
-time pnpm run convert --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
+# Assuming ens_names.sql.gz contains the dataset
+time pnpm run convert-sql --input-file ens_names.sql.gz --output-file subgraph_0.ensrainbow --label-set-id subgraph --label-set-version 0
 ```
 
 **For the `discovery-a` Label Set (initially empty for discovered labels):**
 This creates an empty `.ensrainbow` file for version 0 of the `discovery-a` Label Set, which is used for labels discovered dynamically.
 ```bash
-touch empty.sql
-gzip empty.sql
-time pnpm run convert --input-file empty.sql.gz --output-file discovery-a_0.ensrainbow --label-set-id discovery-a --label-set-version 0
+# Create empty CSV file for discovery dataset
+echo "" > empty.csv
+time pnpm run convert --input-file empty.csv --output-file discovery-a_0.ensrainbow --label-set-id discovery-a
 ```
 
 **For the `ens-test-env` Label Set (for testing):**
-This converts a test dataset SQL dump into an `.ensrainbow` file for version 0 of the `ens-test-env` Label Set.
+This converts a test dataset CSV file into an `.ensrainbow` file for version 0 of the `ens-test-env` Label Set.
 ```bash
-time pnpm run convert --input-file test/fixtures/ens_test_env_names.sql.gz --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env --label-set-version 0
+time pnpm run convert --input-file test/fixtures/ens_test_env_names.csv --output-file ens-test-env_0.ensrainbow --label-set-id ens-test-env
 ```
 
 ### 2. Upload `.ensrainbow` Files to R2 Storage

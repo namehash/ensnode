@@ -12,8 +12,8 @@ describe("lib-resolution", () => {
     const mockRecords: IndexedResolverRecords = {
       name: "test.eth",
       addressRecords: [
-        { coinType: 60n, address: "0x123" },
-        { coinType: 1001n, address: "0x456" },
+        { coinType: 60n, value: "0x123" },
+        { coinType: 1001n, value: "0x456" },
       ],
       textRecords: [
         { key: "com.twitter", value: "@test" },

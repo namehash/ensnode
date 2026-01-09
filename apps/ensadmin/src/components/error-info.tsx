@@ -12,7 +12,7 @@ export function ErrorInfo({ title, description }: ErrorInfoProps) {
       <Card className="w-full border-red-200 bg-red-50">
         <CardHeader className="pb-2 max-sm:p-3">
           <CardTitle className="flex flex-row justify-start items-center gap-2 text-2xl max-sm:text-lg text-red-700">
-            <AlertIcon width={22} height={22} className="flex-shrink-0" />
+            <AlertIcon width={22} height={22} className="shrink-0" />
             {title ? title : "Error"}
           </CardTitle>
         </CardHeader>

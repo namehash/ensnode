@@ -52,10 +52,6 @@ export const DefaultRecordsSelection = {
     addresses: getCommonCoinTypes(ENSNamespaceIds.Sepolia),
     texts: TEXTS,
   },
-  [ENSNamespaceIds.Holesky]: {
-    addresses: getCommonCoinTypes(ENSNamespaceIds.Holesky),
-    texts: TEXTS,
-  },
   [ENSNamespaceIds.EnsTestEnv]: {
     addresses: getCommonCoinTypes(ENSNamespaceIds.EnsTestEnv),
     texts: TEXTS,
