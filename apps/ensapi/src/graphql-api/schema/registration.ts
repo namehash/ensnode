@@ -137,9 +137,11 @@ RegistrationInterfaceRef.implement({
           { ...DEFAULT_CONNECTION_ARGS, args },
           ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
             db.query.renewal.findMany({
-              where: (t, { lt, gt, and }) =>
+              where: (t, { eq, lt, gt, and }) =>
                 and(
                   ...[
+                    eq(t.domainId, parent.domainId),
+                    eq(t.registrationIndex, parent.index),
                     before !== undefined && lt(t.id, cursors.decode<RenewalId>(before)),
                     after !== undefined && gt(t.id, cursors.decode<RenewalId>(after)),
                   ].filter((c) => !!c),
