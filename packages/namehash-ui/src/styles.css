@@ -115,9 +115,9 @@
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
+        @apply nhui:border-border nhui:outline-ring/50;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply nhui:bg-background nhui:text-foreground;
     }
 }
