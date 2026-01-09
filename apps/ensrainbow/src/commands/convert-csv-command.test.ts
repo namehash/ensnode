@@ -189,7 +189,7 @@ describe("convert-csv-command", () => {
 
       const cli = createCLI({ exitProcess: false });
 
-      // Test convert-csv command through CLI
+      // Test convert command through CLI
       await cli.parse([
         "convert",
         "--input-file",
