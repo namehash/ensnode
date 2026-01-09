@@ -170,21 +170,32 @@ export default function () {
       // Invariant: There must be a Registration to renew.
       if (!registration) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no Registration to renew.`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no Registration to renew.\n${toJson(
+            {
+              labelHash,
+              managedNode,
+              node,
+              domainId,
+            },
+          )}`,
         );
       }
 
       // Invariant: Must be BaseRegistrar Registration
       if (registration.type !== "BaseRegistrar") {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(registration)}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(
+            { labelHash, managedNode, node, domainId, registration },
+          )}`,
         );
       }
 
       // Invariant: Because it is a BaseRegistrar Registration, it must have an expiry.
       if (registration.expiry === null) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(registration)}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(
+            { labelHash, managedNode, node, domainId, registration },
+          )}`,
         );
       }
 
@@ -192,7 +203,16 @@ export default function () {
       // https://github.com/ensdomains/ens-contracts/blob/b6cb0e26/contracts/ethregistrar/BaseRegistrarImplementation.sol#L161
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but registration is expired:\n${toJson({ registration, timestamp: event.block.timestamp })}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but registration is expired:\n${toJson(
+            {
+              labelHash,
+              managedNode,
+              node,
+              domainId,
+              registration,
+              timestamp: event.block.timestamp,
+            },
+          )}`,
         );
       }
 
