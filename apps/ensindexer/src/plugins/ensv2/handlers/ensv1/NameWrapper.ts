@@ -233,11 +233,9 @@ export default function () {
           );
         }
 
-        const isAlreadyExpired = expiry && expiry <= event.block.timestamp;
-        if (isAlreadyExpired) {
-          // technically this is allowed... may as well just remove the warning
-          console.warn(`Creating NameWrapper registration for already-expired name: ${node}`);
-        }
+        // NOTE: it's technically possible to create a NameWrapper Registration for a domain with an
+        // incoming `expiry` that is _already_ expired, so we explicitly do not create an invariant
+        // to validate the incoming `expiry` value
 
         // supercede the latest Registration if exists
         if (registration) await supercedeLatestRegistration(context, registration);
