@@ -3,7 +3,6 @@ import {
   arbitrumSepolia,
   base,
   baseSepolia,
-  holesky,
   linea,
   lineaSepolia,
   mainnet,
@@ -35,8 +34,6 @@ export function buildAlchemyBaseUrl(chainId: ChainId, key: string): string | und
       return `eth-mainnet.g.alchemy.com/v2/${key}`;
     case sepolia.id:
       return `eth-sepolia.g.alchemy.com/v2/${key}`;
-    case holesky.id:
-      return `eth-holesky.g.alchemy.com/v2/${key}`;
     case arbitrum.id:
       return `arb-mainnet.g.alchemy.com/v2/${key}`;
     case arbitrumSepolia.id:
@@ -81,8 +78,6 @@ export function buildDRPCUrl(chainId: ChainId, key: string): string | undefined 
       return `https://lb.drpc.live/ethereum/${key}`;
     case sepolia.id:
       return `https://lb.drpc.live/ethereum-sepolia/${key}`;
-    case holesky.id:
-      return `https://lb.drpc.live/holesky/${key}`;
     case arbitrum.id:
       return `https://lb.drpc.live/arbitrum/${key}`;
     case arbitrumSepolia.id:
@@ -138,8 +133,6 @@ export function buildQuickNodeURL(
       return `${endpointName}.quiknode.pro/${apiKey}`;
     case sepolia.id:
       return `${endpointName}.ethereum-sepolia.quiknode.pro/${apiKey}`;
-    case holesky.id:
-      return `${endpointName}.ethereum-holesky.quiknode.pro/${apiKey}`;
     case arbitrum.id:
       return `${endpointName}.arbitrum-mainnet.quiknode.pro/${apiKey}`;
     case arbitrumSepolia.id:

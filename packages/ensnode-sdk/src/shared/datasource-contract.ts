@@ -1,5 +1,10 @@
-import { type DatasourceName, type ENSNamespaceId, maybeGetDatasource } from "@ensnode/datasources";
-import type { AccountId } from "@ensnode/ensnode-sdk";
+import {
+  type Datasource,
+  type DatasourceName,
+  type ENSNamespaceId,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
+import { type AccountId, accountIdEqual } from "@ensnode/ensnode-sdk";
 
 /**
  * Gets the AccountId for the contract in the specified namespace, datasource, and
@@ -8,19 +13,22 @@ import type { AccountId } from "@ensnode/ensnode-sdk";
  * This is useful when you want to retrieve the AccountId for a contract by its name
  * where it may or may not actually be defined for the given namespace and datasource.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *                      'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
  * @param contractName - The name of the contract to retrieve
  * @returns The AccountId of the contract with the given namespace, datasource,
  *          and contract name, or undefined if it is not found or is not a single AccountId
  */
-export const maybeGetDatasourceContract = (
-  namespaceId: ENSNamespaceId,
-  datasourceName: DatasourceName,
-  contractName: string,
+export const maybeGetDatasourceContract = <
+  N extends ENSNamespaceId,
+  D extends DatasourceName,
+  C extends string,
+>(
+  namespaceId: N,
+  datasourceName: D,
+  contractName: C,
 ): AccountId | undefined => {
-  const datasource = maybeGetDatasource(namespaceId, datasourceName);
+  const datasource = maybeGetDatasource(namespaceId, datasourceName) as Datasource | undefined;
   if (!datasource) return undefined;
 
   const address = datasource.contracts[contractName]?.address;
@@ -36,8 +44,7 @@ export const maybeGetDatasourceContract = (
  * Gets the AccountId for the contract in the specified namespace, datasource, and
  * contract name, or throws an error if it is not defined or is not a single AccountId.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *                      'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param datasourceName - The name of the Datasource to search for contractName in
  * @param contractName - The name of the contract to retrieve
  * @returns The AccountId of the contract with the given namespace, datasource,
@@ -57,3 +64,13 @@ export const getDatasourceContract = (
   }
   return contract;
 };
+
+/**
+ * Makes a comparator fn for `b` against the contract described by `namespace`, `datasourceName`, and `contractName`.
+ */
+export const makeContractMatcher =
+  (namespace: ENSNamespaceId, b: AccountId) =>
+  (datasourceName: DatasourceName, contractName: string) => {
+    const a = maybeGetDatasourceContract(namespace, datasourceName, contractName);
+    return a && accountIdEqual(a, b);
+  };

@@ -1,0 +1,146 @@
+# Release Snapshot Workflow (@next)
+#
+# This workflow automatically creates snapshot releases for every commit to main.
+# It allows users to install and test the latest features before they become full releases.
+#
+# How it works:
+# 1. Triggered automatically on every push to main (except (full) Release PR merges)
+# 2. Builds all packages
+# 3. Versions packages using changesets based on the merged PR's changeset
+# 4. Publishes NPM packages with @next tag
+# 5. Builds and publishes Docker images with @next tag to GitHub Container Registry
+#
+# Published artifacts:
+# - NPM packages: All @ensnode/* packages published with @next tag
+# - Docker images: ensindexer, ensadmin, ensapi, ensrainbow published with @next tag
+# - No GitHub releases or tags are created
+#
+# Version behavior:
+# - Packages advance to the version indicated in the changeset of the merged PR
+# - All packages use "fixed" versioning and advance together
+# - Each snapshot represents the pre-stable state of main
+#
+# Use cases:
+# - Development and testing environments
+# - Testing upcoming features before stable release
+# - Experimenting with new functionality
+# - Integration testing with latest main branch
+#
+# Important notes:
+# - Snapshot releases are NOT stable and should be used with caution
+# - Only use @next for development/testing, not production
+# - Automatically triggered - cannot be run manually
+# - Only runs if there are changes to publish (hasChanges check)
+# - Requires PR to be approved by ensnode team (main branch is protected)
+# - Installation: npm install @ensnode/package-name@next
+#
+# Documentation: https://ensnode.io/docs/contributing/releases#snapshot-release
+
+name: Release Snapshot (@next)
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build-and-publish-npm:
+    name: Build & Publish Snapshot Packages to NPM
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main')
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      hasChanges: ${{ steps.snapshot.outputs.hasChanges }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup_node_environment
+
+      - name: Build snapshot packages
+        run: pnpm packages:prepublish
+
+      - name: Version snapshot packages
+        id: snapshot
+        run: |
+          pnpm changeset:next
+          # Check if there are any changes to publish
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "hasChanges=true" >> $GITHUB_OUTPUT
+          else
+            echo "hasChanges=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish snapshot packages to NPM
+        if: steps.snapshot.outputs.hasChanges == 'true'
+        run: pnpm changeset-publish:next
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  build-and-publish-ghcr:
+    name: Build & Publish Snapshot Docker Images to GHCR
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    needs: [build-and-publish-npm]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ensindexer, ensadmin, ensrainbow, ensapi]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate docker image snapshot tag
+        id: snapshot-tag
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          SNAPSHOT_TAG="next-${TIMESTAMP}-${SHORT_SHA}"
+          echo "tag=$SNAPSHOT_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build and publish snapshot docker images to GHCR
+        uses: ./.github/actions/build_docker_image
+        with:
+          image: ghcr.io/${{ github.repository }}/${{ matrix.app }}
+          dockerfile: apps/${{ matrix.app }}/Dockerfile
+          registry_user: ${{ github.actor }}
+          registry_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: |
+            type=raw,value=next
+            type=raw,value=${{ steps.snapshot-tag.outputs.tag }}
+            type=sha
+
+  build-and-publish-lambdas:
+    name: Build & Publish Snapshot Lambdas
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    if: github.repository == 'namehash/ensnode' && !contains(github.event.head_commit.message, 'changeset-release/main') && needs.snapshot.outputs.hasChanges == 'true'
+    needs: [build-and-publish-npm]
+    strategy:
+      fail-fast: false
+      matrix:
+        lambda: [fallback-ensapi]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Build and Publish Lambda
+        uses: ./.github/actions/build_and_publish_lambda
+        with:
+          name: ${{ matrix.lambda }}
+          version: next

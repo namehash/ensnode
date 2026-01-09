@@ -20,6 +20,7 @@ Use these **currently available** identifiers with the [download script](/ensrai
 ./scripts/download-ensrainbow-files.sh subgraph 0        # Production dataset
 ./scripts/download-ensrainbow-files.sh ens-test-env 0    # Test dataset  
 ./scripts/download-ensrainbow-files.sh discovery-a 0     # Discovery dataset
+./scripts/download-ensrainbow-files.sh searchlight 0     # Extended discovery dataset
 ```
 
 ## Available Label Sets
@@ -54,15 +55,13 @@ The information below reflects actual availability as of the last check.
 |---------|--------|-------------|
 | `0` | ✅ Available | Initial empty dataset for dynamic discoveries |
 
-### Planned/Coming Soon
-
-#### `searchlight` 
+#### `searchlight`
 **Source**: Extended discovery mechanisms  
-**Description**: Enhanced dataset with additional label discoveries beyond the subgraph.
+**Description**: Enhanced dataset with additional label discoveries beyond the subgraph, providing maximum healing coverage.
 
 | Version | Status | Description |
 |---------|--------|-------------|
-| `0` | 🚧 Coming Soon | Extended dataset with additional discoveries |
+| `0` | ✅ Available | Extended dataset with additional discoveries |
 
 ## Usage Examples
 
@@ -82,6 +81,12 @@ cd apps/ensrainbow
 ```bash title="Download discovery dataset"
 cd apps/ensrainbow
 ./scripts/download-ensrainbow-files.sh discovery-a 0
+```
+
+### For Maximum Coverage
+```bash title="Download extended discovery dataset"
+cd apps/ensrainbow
+./scripts/download-ensrainbow-files.sh searchlight 0
 ```
 
 ### For API Configuration

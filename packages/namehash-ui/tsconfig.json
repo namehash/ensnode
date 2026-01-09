@@ -1,0 +1,10 @@
+{
+  "extends": "@ensnode/shared-configs/tsconfig.lib.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "rootDir": ".", // necessary for 'The project root is ambiguous'
+    "types": ["react"]
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"],
+  "exclude": ["dist", "**/__tests__/**", "**/examples/**"]
+}

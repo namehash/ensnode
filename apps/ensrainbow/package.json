@@ -19,6 +19,7 @@
     "validate:lite": "tsx src/cli.ts validate --lite",
     "purge": "tsx src/cli.ts purge",
     "convert": "tsx src/cli.ts convert",
+    "convert-sql": "tsx src/cli.ts convert-sql",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "biome check --write .",
@@ -38,7 +39,8 @@
     "progress": "^2.0.3",
     "protobufjs": "^7.4.0",
     "viem": "catalog:",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "@fast-csv/parse": "^5.0.0"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",

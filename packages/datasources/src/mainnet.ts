@@ -6,6 +6,9 @@ import { EarlyAccessRegistrarController as base_EARegistrarController } from "./
 import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
+// ABIs for Namechain
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { Registry } from "./abis/ensv2/Registry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
 import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
@@ -24,7 +27,7 @@ import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ThreeDNSToken } from "./abis/threedns/ThreeDNSToken";
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -41,20 +44,19 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: mainnet,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x314159265dd8dbb310642f98f50c066173c1259b",
         startBlock: 3327417,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
         address: "0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e",
         startBlock: 9380380,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
-        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of RegistryOld on Mainnet
+        startBlock: 3327417, // ignores any Resolver events prior to `startBlock` of ENSv1RegistryOld on Mainnet
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
@@ -101,8 +103,72 @@ export default {
         address: "0xde16ee87b0c019499cebdde29c9f7686560f679a",
         startBlock: 20410692,
       },
+
+      // the Resolver for *.argent.xyz names
+      ArgentResolver: {
+        abi: ResolverABI,
+        address: "0xda1756bb923af5d1a05e277cb1e54f1d0a127890",
+        startBlock: 7173574,
+      },
+
+      // the Resolver for *.loopring.eth names
+      LoopringResolver: {
+        abi: ResolverABI,
+        address: "0xf58d55f06bb92f083e78bb5063a2dd3544f9b6a3",
+        startBlock: 10170681,
+      },
+
+      //
+
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x1291be112d480055dafd8a610b7d1e203891c274",
+        startBlock: 23794084,
+      },
+      RootRegistry: {
+        abi: Registry,
+        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+        startBlock: 23794084,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 23794084,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 23794084,
+      },
     },
   },
+
+  // TODO(ensv2): reference Mainnet deployment
+  // [DatasourceNames.Namechain]: {
+  //   chain: mainnet,
+  //   contracts: {
+  //     Resolver: {
+  //       abi: ResolverABI,
+  //       startBlock: 23794084,
+  //     },
+  //     Registry: {
+  //       abi: Registry,
+  //       startBlock: 23794084,
+  //     },
+  //     EnhancedAccessControl: {
+  //       abi: EnhancedAccessControl,
+  //       startBlock: 23794084,
+  //     },
+  //     ETHRegistry: {
+  //       abi: Registry,
+  //       address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+  //       startBlock: 23794084,
+  //     },
+  //     ETHRegistrar: {
+  //       abi: ETHRegistrar,
+  //       address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
+  //       startBlock: 23794084,
+  //     },
+  //   },
+  // },
 
   /**
    * Basenames Datasource
@@ -135,7 +201,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 17571480, // based on startBlock of Registry on Base
       },
       BaseRegistrar: {
@@ -215,7 +280,6 @@ export default {
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 6682888, // based on startBlock of Registry on Linea
       },
       BaseRegistrar: {
@@ -232,6 +296,13 @@ export default {
         abi: linea_NameWrapper,
         address: "0xa53cca02f98d590819141aa85c891e2af713c223",
         startBlock: 6682956,
+      },
+
+      // this is Linea's Default Public Resolver
+      DefaultPublicResolver: {
+        abi: ResolverABI,
+        address: "0x86c5aed9f27837074612288610fb98ccc1733126",
+        startBlock: 6682994,
       },
     },
   },
@@ -321,9 +392,30 @@ export default {
         startBlock: 22764871,
       },
 
-      // the original default public resolver aka LegacyPublicResolver
-      // it uses a TextChanged event that does not include the `value` parameter
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver0: {
+        abi: ResolverABI,
+        address: "0x1da022710df5002339274aadee8d58218e9d6ab5",
+        startBlock: 3648359,
+      },
+
+      // this resolver uses a TextChanged event that does not include the `value` parameter
       DefaultPublicResolver1: {
+        abi: ResolverABI,
+        address: "0x5ffc014343cd971b7eb70732021e26c35b744cc4",
+        startBlock: 3733668,
+      },
+
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver2: {
+        abi: ResolverABI,
+        address: "0x226159d592e2b063810a10ebf6dcbada94ed68b8",
+        startBlock: 8659893,
+      },
+
+      // aka 'LegacyPublicResolver' in the ENS Subgraph terminology
+      // this resolver uses a TextChanged event that does not include the `value` parameter
+      DefaultPublicResolver3: {
         abi: ResolverABI,
         address: "0x4976fb03c32e5b8cfe2b6ccb31c09ba78ebaba41",
         startBlock: 9412610,
@@ -332,7 +424,7 @@ export default {
       // this PublicResolver was enabled in the following proposal:
       // https://discuss.ens.domains/t/ep3-5-executable-activate-new-eth-controller-and-reverse-registrar/16776
       // https://www.tally.xyz/gov/ens/proposal/42973781582803845389836855775840822719678533376883030929209752909248937768242
-      DefaultPublicResolver2: {
+      DefaultPublicResolver4: {
         abi: ResolverABI,
         address: "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63",
         startBlock: 16925619,
@@ -341,7 +433,7 @@ export default {
       // this PublicResolver was enabled in the following proposal
       // https://discuss.ens.domains/t/executable-enable-l2-reverse-registrars-and-new-eth-registrar-controller/20969
       // https://www.tally.xyz/gov/ens/proposal/42524979896803285837776370636134389407867034021879791462477783237030656381157
-      DefaultPublicResolver3: {
+      DefaultPublicResolver5: {
         abi: ResolverABI,
         address: "0xf29100983e058b709f3d539b0c765937b804ac15",
         startBlock: 22764828,

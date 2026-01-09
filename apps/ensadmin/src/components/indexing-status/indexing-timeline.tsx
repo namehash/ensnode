@@ -54,7 +54,7 @@ function ChainIndexingTimelinePhase({
 
   return (
     <div
-      className={cn("absolute h-5 rounded-sm z-10", {
+      className={cn("absolute h-5 rounded-xs z-10", {
         "bg-gray-400": phase.status === ChainIndexingStatusIds.Queued,
         "bg-blue-500": phase.status === ChainIndexingStatusIds.Backfill,
       })}
@@ -126,7 +126,7 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
           </TooltipTrigger>
           <TooltipContent
             side="left"
-            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+            className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
           >
             {getChainName(chainStatus.chainId)}
           </TooltipContent>

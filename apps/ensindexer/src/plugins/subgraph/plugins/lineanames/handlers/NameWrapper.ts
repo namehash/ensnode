@@ -1,13 +1,9 @@
-import config from "@/config";
-
 import { ponder } from "ponder:registry";
 
 import { PluginName } from "@ensnode/ensnode-sdk";
 
 import { namespaceContract } from "@/lib/plugin-helpers";
 import { makeNameWrapperHandlers } from "@/plugins/subgraph/shared-handlers/NameWrapper";
-
-import { getRegistrarManagedName } from "../lib/registrar-helpers";
 
 /**
  * Registers event handlers with Ponder.
@@ -22,11 +18,7 @@ export default function () {
     handleExpiryExtended,
     handleTransferSingle,
     handleTransferBatch,
-  } = makeNameWrapperHandlers({
-    // the shared Registrar handlers in this plugin index direct subnames of
-    // the name returned from `getRegistrarManagedName` function call
-    registrarManagedName: getRegistrarManagedName(config.namespace),
-  });
+  } = makeNameWrapperHandlers();
 
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameWrapped"), handleNameWrapped);
   ponder.on(namespaceContract(pluginName, "NameWrapper:NameUnwrapped"), handleNameUnwrapped);

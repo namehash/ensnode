@@ -176,7 +176,7 @@ export const IdentityTooltip = ({
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side="top"
-        className="bg-gray-50 text-sm text-black text-left shadow-md outline-none w-fit"
+        className="bg-gray-50 text-sm text-black text-left shadow-md outline-hidden w-fit"
       >
         <div className="flex gap-4">
           <div className="flex items-center">

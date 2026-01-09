@@ -19,6 +19,8 @@ ENSRainbow stores its rainbow table in a **LevelDB** database. The schema is int
 
 ## Versioned Rainbow Record
 
+A [rainbow record](/docs/ensrainbow/concepts/glossary#rainbow-record) with versioning information:
+
 ```ts
 interface VersionedRainbowRecord {
   label: string;          // original label
@@ -58,6 +60,7 @@ Protocol Buffers is Google's language-neutral, platform-neutral extensible mecha
 The `.ensrainbow` file format uses two main message types:
 
 ```protobuf
+// Protobuf serialization format for [rainbow records](/docs/ensrainbow/concepts/glossary#rainbow-record)
 message RainbowRecord {
   bytes labelhash = 1;    // 32-byte labelhash
   string label = 2;       // original label string
@@ -104,15 +107,14 @@ subgraph_0.ensrainbow     # labelSetId = "subgraph", version = 0
 subgraph_1.ensrainbow     # next version with incremental labelhash-to-label mappings added
 ```
 
-## Converting Legacy SQL Data
+## Creating ENSRainbow Files
 
-If you have a legacy gzipped rainbow table (`ens_names.sql.gz`) from the ENS Subgraph, you can convert it to the `.ensrainbow` format:
+ENSRainbow provides two methods for creating `.ensrainbow` files from different data sources:
 
-```bash title="Convert legacy SQL data"
-pnpm run convert --input-file path/to/ens_names.sql.gz --output-file subgraph-0.ensrainbow
-```
+- **CSV Conversion**: Convert custom datasets from CSV files using `pnpm run convert`
+- **SQL Conversion**: Convert legacy ENS Subgraph data (`ens_names.sql.gz`) using `pnpm run convert-sql`. These legacy data files can be obtained from [The Graph's ENS Rainbow repository](https://github.com/graphprotocol/ens-rainbow).
 
-This conversion process allows you to migrate existing rainbow table data that was previously stored in SQL format to ENSRainbow's optimized binary format. The resulting `.ensrainbow` file will be equivalent to the rainbow tables used by the ENS Subgraph, maintaining the same label-to-labelhash mappings while providing better performance and storage efficiency.
+For complete instructions, examples, and workflow guidance, see the [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files) guide.
 
 ## Ingestion Process
 
@@ -137,6 +139,6 @@ graph LR;
 
 ## Related Documentation
 
-- **[Glossary](/ensrainbow/concepts/glossary)** - Key terms like System Key, Ingestion, etc.
+- **[Glossary](/ensrainbow/concepts/glossary)** - Key terms like [System Key](/ensrainbow/concepts/glossary#system-key), [Ingestion](/ensrainbow/concepts/glossary#ingestion), etc.
 - **[Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning)** - Understanding the versioning system
 - **[TypeScript Interfaces](/ensrainbow/concepts/typescript-interfaces)** - Type definitions for working with the data 
