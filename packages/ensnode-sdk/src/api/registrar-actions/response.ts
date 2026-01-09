@@ -53,8 +53,13 @@ export type RegistrarActionsResponseOk = {
 
   /**
    * The {@link UnixTimestamp} of when the data used to build the list of {@link NamedRegistrarAction} was accurate as of.
+   *
+   * @remarks
+   * **Temporary:** This field is currently optional to maintain backward compatibility with ENS Awards
+   * using older snapshot NPM packages. This will be changed to required in a future release.
+   * See: https://github.com/namehash/ensnode/issues/1497
    */
-  accurateAsOf: UnixTimestamp;
+  accurateAsOf?: UnixTimestamp;
 };
 
 /**
