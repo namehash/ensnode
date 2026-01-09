@@ -39,11 +39,11 @@ export const makeNamedRegistrarActionSchema = (valueLabel: string = "Named Regis
 export const makeRegistrarActionsResponseOkSchema = (
   valueLabel: string = "Registrar Actions Response OK",
 ) =>
-  z.strictObject({
+  z.object({
     responseCode: z.literal(RegistrarActionsResponseCodes.Ok),
     registrarActions: z.array(makeNamedRegistrarActionSchema(valueLabel)),
     pageContext: makeResponsePageContextSchema(`${valueLabel}.pageContext`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`).optional(),
   });
 
 /**
