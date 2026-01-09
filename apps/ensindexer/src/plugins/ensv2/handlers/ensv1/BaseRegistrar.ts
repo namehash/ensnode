@@ -16,6 +16,7 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import {
   getLatestRegistration,
   getLatestRenewal,
@@ -136,6 +137,7 @@ export default function () {
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
+      eventId: await ensureEvent(context, event),
     });
 
     // materialize Domain owner if exists
@@ -233,6 +235,7 @@ export default function () {
         registrationIndex: registration.index,
         index: renewal ? renewal.index + 1 : 0,
         duration,
+        eventId: await ensureEvent(context, event),
         // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
         // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
       });
