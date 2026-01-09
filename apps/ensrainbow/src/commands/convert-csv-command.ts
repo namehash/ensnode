@@ -6,7 +6,7 @@
  */
 
 import { createReadStream, createWriteStream, rmSync, statSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 
 import { parse } from "@fast-csv/parse";
 import { ClassicLevel } from "classic-level";
@@ -559,6 +559,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
 
   let existingDb: ENSRainbowDB | null = openedDb;
   let dedupDb: DeduplicationDB | undefined;
+  let tempDb: ClassicLevel<string, string> | undefined;
   let temporaryDedupDir: string | null = null;
 
   try {
@@ -569,10 +570,12 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     } = await initializeConversion(options, labelSetVersion, outputFile, existingDb);
     existingDb = db;
 
-    // Create temporary deduplication database
-    temporaryDedupDir = join(process.cwd(), "temp-dedup-" + Date.now());
+    // Create temporary deduplication database in the same directory as the output file
+    // This ensures it's on the same filesystem/disk as the output, avoiding space issues
+    const outputDir = dirname(outputFile);
+    temporaryDedupDir = join(outputDir, "temp-dedup-" + Date.now());
     logger.info(`Creating temporary deduplication database at: ${temporaryDedupDir}`);
-    const tempDb = new ClassicLevel<string, string>(temporaryDedupDir, {
+    tempDb = new ClassicLevel<string, string>(temporaryDedupDir, {
       keyEncoding: "utf8",
       valueEncoding: "utf8",
       createIfMissing: true,
@@ -623,13 +626,27 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     logger.error(`❌ CSV conversion failed: ${errorMessage}`);
     throw error;
   } finally {
-    // Clean up deduplication database
+    // Clean up deduplication database - close the wrapper first
     if (dedupDb !== undefined) {
       try {
         await dedupDb.close();
         logger.info("Closed deduplication database");
       } catch (error) {
         logger.warn(`Failed to close deduplication database: ${error}`);
+      }
+    }
+
+    // Also ensure tempDb is closed directly if dedupDb.close() didn't handle it
+    // This is a safety measure in case dedupDb.close() failed or didn't fully close
+    if (tempDb !== undefined) {
+      try {
+        await tempDb.close();
+        logger.info("Closed temporary database directly");
+      } catch (error) {
+        // Database might already be closed, which is fine
+        logger.warn(
+          `Failed to close temporary database directly (may already be closed): ${error}`,
+        );
       }
     }
 

@@ -10,7 +10,7 @@ export default function MultipleHandlesNode({ data }: NodeProps) {
   return (
     <div
       className={cn(
-        "rounded bg-white border border-black p-[10px] h-12 flex flex-col justify-center items-center",
+        "rounded-sm bg-white border border-black p-[10px] h-12 flex flex-col justify-center items-center",
         data.style as string,
       )}
     >

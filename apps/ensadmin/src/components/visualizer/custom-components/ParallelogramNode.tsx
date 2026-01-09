@@ -10,7 +10,7 @@ export default function ParallelogramNode({ data }: NodeProps) {
   return (
     <div
       className={cn(
-        "-skew-x-[25deg] rounded bg-white border border-black p-[10px] h-10 flex flex-col justify-center items-center",
+        "-skew-x-[25deg] rounded-sm bg-white border border-black p-[10px] h-10 flex flex-col justify-center items-center",
         data.style as string,
       )}
     >

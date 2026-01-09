@@ -125,7 +125,7 @@ export function RelativeTime({
       </TooltipTrigger>
       <TooltipContent
         side={tooltipPosition}
-        className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+        className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
       >
         <AbsoluteTime
           timestamp={timestamp}

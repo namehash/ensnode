@@ -73,7 +73,7 @@ function ENSNodeCardLoadingSkeleton() {
 
           <Card className="animate-pulse">
             <CardHeader className="max-sm:p-3">
-              <div className="h-6 bg-muted rounded w-1/3" />
+              <div className="h-6 bg-muted rounded-sm w-1/3" />
             </CardHeader>
             <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
               <div className="space-y-2">
@@ -231,7 +231,7 @@ function ENSNodeConfigCardContent({
       label="Heal Reverse Addresses"
       key="ENSIndexer Heal Reverse Addresses feature"
       description={healReverseAddressesDescription}
-      icon={<HealIcon width={15} height={15} className="flex-shrink-0" />}
+      icon={<HealIcon width={15} height={15} className="shrink-0" />}
     />
   );
 
@@ -240,7 +240,7 @@ function ENSNodeConfigCardContent({
       label="Index Additional Resolver Records"
       key="ENSIndexer Index Additional Resolver Records feature"
       description={indexAdditionalRecordsDescription}
-      icon={<IndexAdditionalRecordsIcon width={15} height={15} className="flex-shrink-0" />}
+      icon={<IndexAdditionalRecordsIcon width={15} height={15} className="shrink-0" />}
     />
   );
 
@@ -249,7 +249,7 @@ function ENSNodeConfigCardContent({
       label="Replace Unnormalized Labels"
       key="ENSIndexer Replace Unnormalized Labels feature"
       description={replaceUnnormalizedLabelsDescription}
-      icon={<Replace width={15} height={15} stroke="#3F3F46" className="flex-shrink-0" />}
+      icon={<Replace width={15} height={15} stroke="#3F3F46" className="shrink-0" />}
     />
   );
 
@@ -258,7 +258,7 @@ function ENSNodeConfigCardContent({
       label="Subgraph Compatibility"
       key="ENSIndexer Subgraph Compatibility feature"
       description={subgraphCompatibilityDescription}
-      icon={<IconGraphNetwork width={15} height={15} className="text-[#3F3F46] flex-shrink-0" />}
+      icon={<IconGraphNetwork width={15} height={15} className="text-[#3F3F46] shrink-0" />}
     />
   );
 
@@ -325,7 +325,7 @@ function ENSNodeConfigCardContent({
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                    className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
                   >
                     {getChainName(ensRootChainId)}
                   </TooltipContent>
@@ -367,7 +367,7 @@ function ENSNodeConfigCardContent({
                 </p>
               )
             }
-            icon={<History width={15} height={15} className="flex-shrink-0" />}
+            icon={<History width={15} height={15} className="shrink-0" />}
           />
         </ConfigInfoFeatures>
       </ConfigInfoAppCard>
@@ -447,7 +447,7 @@ function ENSNodeConfigCardContent({
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
-                      className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                      className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
                     >
                       {getChainName(chainId)}
                     </TooltipContent>
