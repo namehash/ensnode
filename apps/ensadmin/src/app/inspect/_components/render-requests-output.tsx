@@ -41,7 +41,7 @@ export function RenderRequestsOutput<KEY extends string>({
     if (tab === "unaccelerated") return unaccelerated;
 
     throw new Error("never");
-  }, [accelerated, unaccelerated]);
+  }, [accelerated, unaccelerated, tab]);
 
   // need special derivation to capture refetching state
   const acceleratedLoading = accelerated.isPending || accelerated.isRefetching;

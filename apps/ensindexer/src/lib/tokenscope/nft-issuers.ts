@@ -8,13 +8,13 @@ import {
   type DomainAssetId,
   ETH_NODE,
   getDatasourceContract,
-  type LabelHash,
+  interpretTokenIdAsLabelHash,
+  interpretTokenIdAsNode,
   LINEANAMES_NODE,
   makeSubdomainNode,
   maybeGetDatasourceContract,
   type Node,
   type TokenId,
-  uint256ToHex32,
 } from "@ensnode/ensnode-sdk";
 
 /**
@@ -50,9 +50,7 @@ export interface SupportedNFTIssuer {
  * @param tokenId - The tokenId to convert
  * @returns The Node of the tokenId
  */
-const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
-  return uint256ToHex32(tokenId);
-};
+const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => interpretTokenIdAsNode(tokenId);
 
 /**
  * Converts the tokenId from an ENS name token-issuing contract to a Node
@@ -64,14 +62,14 @@ const nameHashGeneratedTokenIdToNode = (tokenId: TokenId): Node => {
  * @returns The Node of the tokenId issued under the parentNode
  */
 const labelHashGeneratedTokenIdToNode = (tokenId: TokenId, parentNode: Node): Node => {
-  const labelHash: LabelHash = uint256ToHex32(tokenId);
+  const labelHash = interpretTokenIdAsLabelHash(tokenId);
   return makeSubdomainNode(labelHash, parentNode);
 };
 
 /**
  * Gets all the SupportedNFTIssuer for the specified namespace.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky', 'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @returns an array of 0 or more SupportedNFTIssuer for the specified namespace
  */
 const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer[] => {
@@ -112,9 +110,7 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
     result.push({
       assetNamespace: AssetNamespaces.ERC721,
       contract: ethBaseRegistrar,
-      getDomainId: (tokenId: TokenId): Node => {
-        return labelHashGeneratedTokenIdToNode(tokenId, ETH_NODE);
-      },
+      getDomainId: (tokenId: TokenId): Node => labelHashGeneratedTokenIdToNode(tokenId, ETH_NODE),
     });
   }
 
@@ -122,9 +118,7 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
     result.push({
       assetNamespace: AssetNamespaces.ERC1155,
       contract: nameWrapper,
-      getDomainId: (tokenId: TokenId): Node => {
-        return nameHashGeneratedTokenIdToNode(tokenId);
-      },
+      getDomainId: nameHashGeneratedTokenIdToNode,
     });
   }
 
@@ -132,9 +126,7 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
     result.push({
       assetNamespace: AssetNamespaces.ERC1155,
       contract: threeDnsBaseRegistrar,
-      getDomainId: (tokenId: TokenId): Node => {
-        return nameHashGeneratedTokenIdToNode(tokenId);
-      },
+      getDomainId: nameHashGeneratedTokenIdToNode,
     });
   }
 
@@ -142,9 +134,7 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
     result.push({
       assetNamespace: AssetNamespaces.ERC1155,
       contract: threeDnsOptimismRegistrar,
-      getDomainId: (tokenId: TokenId): Node => {
-        return nameHashGeneratedTokenIdToNode(tokenId);
-      },
+      getDomainId: nameHashGeneratedTokenIdToNode,
     });
   }
 
@@ -152,9 +142,8 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
     result.push({
       assetNamespace: AssetNamespaces.ERC721,
       contract: lineanamesRegistrar,
-      getDomainId: (tokenId: TokenId): Node => {
-        return labelHashGeneratedTokenIdToNode(tokenId, LINEANAMES_NODE);
-      },
+      getDomainId: (tokenId: TokenId): Node =>
+        labelHashGeneratedTokenIdToNode(tokenId, LINEANAMES_NODE),
     });
   }
 
@@ -162,9 +151,8 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
     result.push({
       assetNamespace: AssetNamespaces.ERC721,
       contract: basenamesRegistrar,
-      getDomainId: (tokenId: TokenId): Node => {
-        return labelHashGeneratedTokenIdToNode(tokenId, BASENAMES_NODE);
-      },
+      getDomainId: (tokenId: TokenId): Node =>
+        labelHashGeneratedTokenIdToNode(tokenId, BASENAMES_NODE),
     });
   }
 
@@ -174,8 +162,7 @@ const getSupportedNFTIssuers = (namespaceId: ENSNamespaceId): SupportedNFTIssuer
 /**
  * Gets the SupportedNFTIssuer for the given contract in the specified namespace.
  *
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param contract - The AccountId of the contract to get the SupportedNFTIssuer for
  * @returns the SupportedNFTIssuer for the given contract, or null
  *          if the contract is not a SupportedNFTIssuer in the specified namespace

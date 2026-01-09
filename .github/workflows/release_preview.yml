@@ -308,6 +308,7 @@ jobs:
           pnpm add @ensnode/ponder-subgraph@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ponder-metadata@${{ needs.validate-and-prepare.outputs.dist-tag }}
           pnpm add @ensnode/ens-referrals@${{ needs.validate-and-prepare.outputs.dist-tag }}
+          pnpm add @ensnode/namehash-ui@${{ needs.validate-and-prepare.outputs.dist-tag }}
 
           # Or install specific version
           pnpm add @ensnode/ensnode-sdk@${{ needs.build-and-publish-npm.outputs.published-version }}

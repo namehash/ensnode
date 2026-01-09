@@ -9,7 +9,6 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 export const ConfigTemplateIds = {
   Mainnet: "mainnet",
   Sepolia: "sepolia",
-  Holesky: "holesky",
   Alpha: "alpha",
   AlphaSepolia: "alpha-sepolia",
 };
@@ -28,7 +27,6 @@ export function isConfigTemplateSubgraphCompatible(configTemplateId: ConfigTempl
     // these ConfigTemplates are run with SUBGRAPH_COMPAT, meaning they are Subgraph Compatible
     case ConfigTemplateIds.Mainnet:
     case ConfigTemplateIds.Sepolia:
-    case ConfigTemplateIds.Holesky:
       return true;
 
     // these instances are NOT run with SUBGRAPH_COMPAT, meaning they are NOT Subgraph Compatible
@@ -53,8 +51,6 @@ export function namespaceForConfigTemplateId(configTemplateId: ConfigTemplateId)
     case ConfigTemplateIds.AlphaSepolia:
     case ConfigTemplateIds.Sepolia:
       return ENSNamespaceIds.Sepolia;
-    case ConfigTemplateIds.Holesky:
-      return ENSNamespaceIds.Holesky;
     default:
       throw new Error("never");
   }

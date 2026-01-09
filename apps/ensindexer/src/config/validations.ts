@@ -1,16 +1,17 @@
 import { type Address, isAddress } from "viem";
-import type { z } from "zod/v4";
 
-import type { DatasourceName } from "@ensnode/datasources";
-import { asLowerCaseAddress, uniq } from "@ensnode/ensnode-sdk";
+import {
+  type DatasourceName,
+  type ENSNamespace,
+  getENSNamespace,
+  maybeGetDatasource,
+} from "@ensnode/datasources";
+import { asLowerCaseAddress, PluginName, uniq } from "@ensnode/ensnode-sdk";
+import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
-import { getENSNamespaceAsFullyDefinedAtCompileTime } from "@/lib/plugin-helpers";
 import { getPlugin } from "@/plugins";
 
 import type { ENSIndexerConfig } from "./types";
-
-// type alias to highlight the input param of Zod's check() method
-type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
 
 // Invariant: specified plugins' datasources are available in the specified namespace's Datasources
 export function invariant_requiredDatasources(
@@ -18,7 +19,7 @@ export function invariant_requiredDatasources(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
+  const datasources = getENSNamespace(config.namespace);
   const availableDatasourceNames = Object.keys(datasources) as DatasourceName[];
 
   // validate that each active plugin's requiredDatasources are available in availableDatasourceNames
@@ -50,19 +51,18 @@ export function invariant_rpcConfigsSpecifiedForIndexedChains(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
-
   for (const pluginName of config.plugins) {
     const datasourceNames = getPlugin(pluginName).requiredDatasourceNames;
 
     for (const datasourceName of datasourceNames) {
-      const { chain } = datasources[datasourceName];
+      const datasource = maybeGetDatasource(config.namespace, datasourceName);
+      if (!datasource) continue; // ignore undefined datasources, caught by requiredDatasources invariant
 
-      if (!config.rpcConfigs.has(chain.id)) {
+      if (!config.rpcConfigs.has(datasource.chain.id)) {
         ctx.issues.push({
           code: "custom",
           input: config,
-          message: `Plugin '${pluginName}' indexes chain with id ${chain.id} but RPC_URL_${chain.id} is not specified.`,
+          message: `Plugin '${pluginName}' indexes chain with id ${datasource.chain.id} but RPC_URL_${datasource.chain.id} is not specified.`,
         });
       }
     }
@@ -77,11 +77,12 @@ export function invariant_globalBlockrange(
   const { globalBlockrange } = config;
 
   if (globalBlockrange.startBlock !== undefined || globalBlockrange.endBlock !== undefined) {
-    const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
+    const datasources = getENSNamespace(config.namespace) as ENSNamespace;
     const indexedChainIds = uniq(
       config.plugins
         .flatMap((pluginName) => getPlugin(pluginName).requiredDatasourceNames)
         .map((datasourceName) => datasources[datasourceName])
+        .filter((ds) => !!ds) // ignore undefined datasources, caught by requiredDatasources invariant
         .map((datasource) => datasource.chain.id),
     );
 
@@ -97,7 +98,7 @@ export function invariant_globalBlockrange(
   END_BLOCK=${globalBlockrange.endBlock || "n/a"}
 
   The usage you're most likely interested in is:
-    NAMESPACE=(mainnet|sepolia|holesky) PLUGINS=subgraph END_BLOCK=x pnpm run start
+    NAMESPACE=(mainnet|sepolia) PLUGINS=subgraph END_BLOCK=x pnpm run start
   which runs just the 'subgraph' plugin with a specific end block, suitable for snapshotting ENSNode and comparing to Subgraph snapshots.
 
   In the future, indexing multiple chains with chain-specific blockrange constraints may be possible.`,
@@ -112,12 +113,14 @@ export function invariant_validContractConfigs(
 ) {
   const { value: config } = ctx;
 
-  const datasources = getENSNamespaceAsFullyDefinedAtCompileTime(config.namespace);
-  for (const datasourceName of Object.keys(datasources) as DatasourceName[]) {
-    const { contracts } = datasources[datasourceName];
+  const datasources = getENSNamespace(config.namespace) as ENSNamespace;
+  const datasourceNames = Object.keys(datasources) as DatasourceName[];
+  for (const datasourceName of datasourceNames) {
+    const datasource = datasources[datasourceName];
+    if (!datasource) continue; // ignore undefined datasources, caught by requiredDatasources invariant
 
     // Invariant: `contracts` must provide valid addresses if a filter is not provided
-    for (const [contractName, contractConfig] of Object.entries(contracts)) {
+    for (const [contractName, contractConfig] of Object.entries(datasource.contracts)) {
       if ("address" in contractConfig && typeof contractConfig.address === "string") {
         // only ContractConfigs with `address` defined
         const isValidAddress =
@@ -131,5 +134,22 @@ export function invariant_validContractConfigs(
         }
       }
     }
+  }
+}
+
+// Invariant: ensv2 core plugin requires protocol acceleration
+export function invariant_ensv2RequiresProtocolAcceleration(
+  ctx: ZodCheckFnInput<Pick<ENSIndexerConfig, "plugins">>,
+) {
+  const { value: config } = ctx;
+
+  // TODO: getCorePlugin(config.plugins)
+  if (
+    config.plugins.includes(PluginName.ENSv2) &&
+    !config.plugins.includes(PluginName.ProtocolAcceleration)
+  ) {
+    throw new Error(
+      `Core Plugin '${PluginName.ENSv2}' requires inclusion of '${PluginName.ProtocolAcceleration}' plugin.`,
+    );
   }
 }

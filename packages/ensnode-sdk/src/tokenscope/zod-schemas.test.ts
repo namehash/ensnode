@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { type AssetId, type AssetIdString, serializeAssetId } from "./assets";
+import type { AssetIdString } from "../shared/serialized-types";
+import type { AssetId } from "../shared/types";
+import { serializeAssetId } from "./assets";
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
 
 describe("Tokenscope: Zod Schemas", () => {

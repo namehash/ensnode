@@ -44,8 +44,6 @@ const makeTheGraphSubgraphUrl = (namespace: ENSNamespaceId, apiKey: string) => {
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH`;
     case ENSNamespaceIds.Sepolia:
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/G1SxZs317YUb9nQX3CC98hDyvxfMJNZH5pPRGpNrtvwN`;
-    case ENSNamespaceIds.Holesky:
-      return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/i5EXyL9MzTXWKCmpJ2LG6sbzBfXneUPVuTXaSjYhDDF`;
     case ENSNamespaceIds.EnsTestEnv:
       return null;
     default:

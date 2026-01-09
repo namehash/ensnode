@@ -1,0 +1,61 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "ENSNode Docs",
+  "colors": {
+    "primary": "#0080bc",
+    "light": "#0080bc",
+    "dark": "#0080bc"
+  },
+  "favicon": "/assets/favicon.svg",
+  "navigation": {
+    "products": [
+      {
+        "product": "ENSApi",
+        "icon": "/assets/ensapi.svg",
+        "description": "ENSApi is the API service for ENSNode",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "ENSApi",
+                "pages": ["ensapi/index"]
+              },
+              {
+                "group": "API Reference",
+                "openapi": "https://gist.githubusercontent.com/notrab/94b637e77468cbddd895d7933ce88f64/raw/12cb5ed183558a9bdda5d1c7004db6c794dbd13e/green-ensnode-openapi.json"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/assets/logo-light.svg",
+    "dark": "/assets/logo-dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:hello@namehashlabs.org"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "ENSAdmin",
+      "href": "https://admin.ensnode.io"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/NamehashLabs",
+      "github": "https://github.com/namehash"
+    }
+  }
+}
