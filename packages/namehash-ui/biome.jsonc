@@ -3,6 +3,7 @@
   "extends": "//",
   "files": {
     "includes": [
+      "src/**/*",
       "!src/styles.css"
     ]
   }
