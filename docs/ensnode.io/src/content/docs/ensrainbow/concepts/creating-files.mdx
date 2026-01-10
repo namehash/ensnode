@@ -1,6 +1,6 @@
 ---
 title: Creating ENSRainbow Files
-description: Complete guide to creating .ensrainbow files.
+description: Complete guide to creating .ensrainbow files from CSV data.
 sidebar:
   label: Creating Files
   order: 3
@@ -145,7 +145,7 @@ Duration: 150ms
 pnpm run convert \
   --input-file test-labels.csv \
   --output-file test-dataset_0.ensrainbow \
-  --label-set-id test-dataset \
+  --label-set-id test-dataset
 ```
 
 ### Example: Creating Discovery Dataset
@@ -156,7 +156,7 @@ echo "" > empty.csv
 pnpm run convert \
   --input-file empty.csv \
   --output-file discovery-a_0.ensrainbow \
-  --label-set-id discovery-a \
+  --label-set-id discovery-a
 ```
 
 ### How It Works
@@ -172,7 +172,7 @@ pnpm run convert \
 6. **Filters** duplicate labels within the same CSV file
 7. **Writes** .ensrainbow file as output
 
-## Method 2: Converting from SQL Dumps
+## Method 2: Migrating from ENS Subgraph
 
 :::warning[Legacy Method]
 The `convert-sql` command processes gzipped SQL dump file from the legacy ENS Subgraph. This method exists for migrating away from legacy subgraph data. **For all new label sets, we strongly recommend using CSV conversion (Method 1) instead.**
@@ -446,7 +446,7 @@ Create documentation for your custom label set including:
 
 ### Example Documentation Format
 
-```markdown
+````markdown
 ## Custom Label Set: my-dataset
 
 **Label Set ID**: `my-dataset`  
@@ -458,10 +458,9 @@ Create documentation for your custom label set including:
 - Checksum: `https://example.com/my-dataset_0.tgz.sha256sum`
 
 ### Usage
-```
 
-```bash
 # Using with Docker
+```bash
 docker run -d \
   -e DB_SCHEMA_VERSION="3" \
   -e LABEL_SET_ID="my-dataset" \
@@ -469,6 +468,7 @@ docker run -d \
   -p 3223:3223 \
   ghcr.io/namehash/ensnode/ensrainbow:latest
 ```
+````
 
 ## Setting Up Your Own Label Set Server
 

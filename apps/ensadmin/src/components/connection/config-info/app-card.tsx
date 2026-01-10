@@ -49,11 +49,11 @@ export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemP
         {additionalInfo && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="flex-shrink-0" />
+              <InfoIcon className="shrink-0" />
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
+              className="bg-gray-50 text-sm text-black shadow-md outline-hidden max-w-[275px]"
             >
               {additionalInfo}
             </TooltipContent>
@@ -81,7 +81,7 @@ export function ConfigInfoFeature({ label, description, icon }: ConfigInfoFeatur
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
+            className="bg-gray-50 text-sm text-black shadow-md outline-hidden max-w-[275px]"
           >
             {description}
           </TooltipContent>
@@ -124,7 +124,7 @@ export function ConfigInfoAppCard({
   children,
 }: ConfigInfoAppCardProps) {
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-xs">
       {(docsLink || name || icon || version) && (
         <CardHeader className="pb-6 max-sm:p-3">
           <div className={cardHeaderLayoutStyles}>

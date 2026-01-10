@@ -16,7 +16,7 @@ New label-set versions are generated manually for now:
 - **`subgraph`**: data from the ENS Subgraph rainbow tables, no plans to update
 - **`discovery-a`**: may be updated periodically as new labels are dynamically discovered
 - **`ens-test-env`**: Static test dataset, no plans to update
-- **`searchlight`**: Enhanced discovery dataset (coming soon)
+- **`searchlight`**: Enhanced discovery dataset with additional label discoveries beyond the subgraph
 
 To stay informed about new versions, monitor the [Available Label Sets](/ensrainbow/usage/available-label-sets/) documentation page.
 
@@ -27,12 +27,15 @@ You can create your own `.ensrainbow` files from CSV data using the `convert` co
 1. **Prepare your data** as a CSV file with labels (1 column) or labels and labelhashes (2 columns)
 2. **Run the convert command:**
    ```bash
-   pnpm run convert --input-file your_labels.csv --output-file custom.ensrainbow --label-set-id my-dataset
+   pnpm run convert \
+     --input-file your_labels.csv \
+     --output-file custom.ensrainbow \
+     --label-set-id my-dataset
    ```
 
 **Note:** You can also download existing `.ensrainbow` files using the download scripts.
 
-See the [CLI Reference](/ensrainbow/contributing/cli-reference/) for detailed command usage.
+For complete instructions, examples, and workflow guidance, see the [Creating ENSRainbow Files](/ensrainbow/concepts/creating-files) guide. See the [CLI Reference](/ensrainbow/contributing/cli-reference/) for detailed command usage.
 
 ## Does ENSRainbow normalise labels?
 No. It returns labels exactly as stored. Your client should perform ENS Normalisation if required.
