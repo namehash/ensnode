@@ -51,6 +51,7 @@ app.use(canAccelerateMiddleware);
 app.get(
   "/records/:name",
   describeRoute({
+    tags: ["Resolution"],
     summary: "Resolve ENS Records",
     description: "Resolves ENS records for a given name",
     responses: {
@@ -120,6 +121,7 @@ app.get(
 app.get(
   "/primary-name/:address/:chainId",
   describeRoute({
+    tags: ["Resolution"],
     summary: "Resolve Primary Name",
     description: "Resolves a primary name for a given `address` and `chainId`",
     responses: {
@@ -179,6 +181,7 @@ app.get(
 app.get(
   "/primary-names/:address",
   describeRoute({
+    tags: ["Resolution"],
     summary: "Resolve Primary Names",
     description: "Resolves all primary names for a given address across multiple chains",
     responses: {
