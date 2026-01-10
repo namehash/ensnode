@@ -1,7 +1,6 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: ignore for now */
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { labelhash } from "viem";
 
 import {
   type EncodedReferrer,
@@ -81,32 +80,63 @@ export default function () {
   }: {
     context: Context;
     event: EventWithArgs<{
-      label: string;
+      label?: string;
+      labelHash: LabelHash;
       baseCost?: bigint;
       premium?: bigint;
       referrer?: EncodedReferrer;
     }>;
   }) {
-    const { label: _label, baseCost: base, premium, referrer } = event.args;
+    const { label: _label, labelHash, baseCost: base, premium, referrer } = event.args;
     const label = _label as LiteralLabel;
+
+    // Invariant: If emitted, label must align with labelHash
+    if (label !== undefined && labelHash !== labelhashLiteralLabel(label)) {
+      throw new Error(
+        `Invariant(RegistrarController:NameRegistered): Emitted label '${label}' does not labelhash to emitted labelHash '${labelHash}'.`,
+      );
+    }
 
     const controller = getThisAccountId(context, event);
     const { node: managedNode } = getManagedName(controller);
-    const labelHash = labelhash(label);
     const node = makeSubdomainNode(labelHash, managedNode);
     const domainId = makeENSv1DomainId(node);
     const registration = await getLatestRegistration(context, domainId);
+
     if (!registration) {
       throw new Error(
-        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Registration.`,
+        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Registration.\n${toJson({
+          label,
+          labelHash,
+          managedNode,
+          node,
+          domainId,
+        })}`,
       );
     }
 
     const renewal = await getLatestRenewal(context, domainId, registration.index);
     if (!renewal) {
       throw new Error(
-        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Renewal for Registration\n${toJson(registration)}`,
+        `Invariant(RegistrarController:NameRenewed): NameRenewed but no Renewal for Registration\n${toJson(
+          {
+            label,
+            labelHash,
+            managedNode,
+            node,
+            domainId,
+            registration,
+          },
+        )}`,
       );
+    }
+
+    // ensure label
+    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
+    if (label !== undefined) {
+      await ensureLabel(context, label);
+    } else {
+      await ensureUnknownLabel(context, labelHash);
     }
 
     // update renewal info
@@ -185,7 +215,10 @@ export default function () {
     ({ context, event }) =>
       handleNameRenewedByController({
         context,
-        event: { ...event, args: { ...event.args, baseCost: event.args.cost } },
+        event: {
+          ...event,
+          args: { ...event.args, labelHash: event.args.labelhash, baseCost: event.args.cost },
+        },
       }),
   );
   ponder.on(
@@ -196,7 +229,16 @@ export default function () {
     ({ context, event }) =>
       handleNameRenewedByController({
         context,
-        event: { ...event, args: { ...event.args, baseCost: event.args.cost } },
+        event: {
+          ...event,
+          args: {
+            // name is actually label
+            label: event.args.name,
+            // label is actually labelHash
+            labelHash: event.args.label,
+            baseCost: event.args.cost,
+          },
+        },
       }),
   );
   ponder.on(
@@ -204,6 +246,18 @@ export default function () {
       pluginName,
       "RegistrarController:NameRenewed(string name, bytes32 indexed label, uint256 expires)",
     ),
-    handleNameRenewedByController,
+    ({ context, event }) =>
+      handleNameRenewedByController({
+        context,
+        event: {
+          ...event,
+          args: {
+            // name is actually label
+            label: event.args.name,
+            // label is actually labelHash
+            labelHash: event.args.label,
+          },
+        },
+      }),
   );
 }

@@ -42,7 +42,7 @@
     "@escape.tech/graphql-armor-max-aliases": "^2.6.2",
     "@escape.tech/graphql-armor-max-depth": "^2.4.2",
     "@escape.tech/graphql-armor-max-tokens": "^2.5.1",
-    "@ponder/client": "^0.14.13",
+    "@ponder/client": "catalog:",
     "dataloader": "^2.2.3",
     "drizzle-orm": "0.41.0",
     "graphql": "^16.10.0",

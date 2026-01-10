@@ -24,6 +24,7 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
@@ -233,11 +234,9 @@ export default function () {
           );
         }
 
-        const isAlreadyExpired = expiry && expiry <= event.block.timestamp;
-        if (isAlreadyExpired) {
-          // technically this is allowed... may as well just remove the warning
-          console.warn(`Creating NameWrapper registration for already-expired name: ${node}`);
-        }
+        // NOTE: it's technically possible to create a NameWrapper Registration for a domain with an
+        // incoming `expiry` that is _already_ expired, so we explicitly do not create an invariant
+        // to validate the incoming `expiry` value
 
         // supercede the latest Registration if exists
         if (registration) await supercedeLatestRegistration(context, registration);
@@ -255,6 +254,7 @@ export default function () {
           start: event.block.timestamp,
           fuses,
           expiry,
+          eventId: await ensureEvent(context, event),
         });
       }
     },
@@ -386,6 +386,7 @@ export default function () {
         registrationIndex: registration.index,
         index: renewal ? renewal.index + 1 : 0,
         duration,
+        eventId: await ensureEvent(context, event),
         // NOTE: NameWrapper does not include pricing information
       });
     },

@@ -15,6 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import {
   getLatestRegistration,
   getLatestRenewal,
@@ -172,6 +173,7 @@ export default function () {
         index: renewal ? renewal.index + 1 : 0,
         duration,
         referrer,
+        eventId: await ensureEvent(context, event),
 
         // TODO(paymentToken)
         base,

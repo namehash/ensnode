@@ -1,5 +1,5 @@
 import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
-import type { Address } from "viem";
+import type { Address, Hash } from "viem";
 
 import type {
   ChainId,
@@ -46,7 +46,7 @@ import type {
  * within this ENSv2 plugin materialize the v1Domain's effective owner to simplify this aspect of ENS,
  * and enable efficient queries against v1Domain.owner.
  *
- * Many datamodels are sharable between ENSv1 and ENSv2, including Registrations, Renewals, and Resolvers.
+ * Many datamodels are shared between ENSv1 and ENSv2, including Registrations, Renewals, and Resolvers.
  *
  * Registrations are polymorphic between the defined RegistrationTypes, depending on the associated
  * guarantees (for example, ENSv1 BaseRegistrar Registrations may have a gracePeriod, but ENSv2
@@ -57,7 +57,7 @@ import type {
  * new label is encountered onchain, all Domains that use that label are automatically healed at
  * resolution-time.
  *
- * v1Domains exist in a flat namespace and are absolutely addressed by `node`. As such, they inhabit
+ * v1Domains exist in a flat namespace and are absolutely addressed by `node`. As such, they describe
  * a simple tree datamodel of:
  *   v1Domain -> v1Domain(s) -> v1Domain(s) -> ...etc
  *
@@ -77,8 +77,27 @@ import type {
  * allows us to trivially implement cursor-based pagination and allow consumers to reference these
  * deeply nested entities by a straightforward string ID. In cases where an entity's `id` is composed
  * of multiple pieces of information (for example, a Registry is identified by (chainId, address)),
- * then that information is, as well, included in the entity.
+ * then that information is, as well, included in the entity's columns, not just encoded in the id.
+ *
+ * Many entities may directly reference an Event, which represents the metadata associated with the
+ * on-chain event responsible for its existence.
  */
+
+/////////
+// Event
+/////////
+
+export const event = onchainTable("events", (t) => ({
+  // Ponder's event.id
+  id: t.text().primaryKey(),
+
+  // Event Metadata
+  chainId: t.integer().notNull().$type<ChainId>(),
+  address: t.hex().notNull().$type<Address>(),
+  blockHash: t.hex().notNull().$type<Hash>(),
+  transactionHash: t.hex().notNull().$type<Hash>(),
+  logIndex: t.integer().notNull().$type<number>(),
+}));
 
 ///////////
 // Account
@@ -285,6 +304,9 @@ export const registration = onchainTable(
 
     // may be Wrapped (BaseRegistrar)
     wrapped: t.boolean().default(false),
+
+    // has an event
+    eventId: t.text().notNull(),
   }),
   (t) => ({
     byId: uniqueIndex().on(t.domainId, t.index),
@@ -311,6 +333,12 @@ export const registration_relations = relations(registration, ({ one, many }) =>
 
   // has many renewals
   renewals: many(renewal),
+
+  // has an event
+  event: one(event, {
+    fields: [registration.eventId],
+    references: [event.id],
+  }),
 }));
 
 ////////////
@@ -340,9 +368,12 @@ export const renewal = onchainTable(
 
     // may have a premium (ENSv1 RegistrarControllers)
     premium: t.bigint(),
+
+    // has an event
+    eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.index),
   }),
 );
 
@@ -351,6 +382,12 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
   registration: one(registration, {
     fields: [renewal.domainId, renewal.registrationIndex],
     references: [registration.domainId, registration.index],
+  }),
+
+  // has an event
+  event: one(event, {
+    fields: [renewal.eventId],
+    references: [event.id],
   }),
 }));
 

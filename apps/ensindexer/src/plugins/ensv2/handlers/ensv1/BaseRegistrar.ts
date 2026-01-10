@@ -16,6 +16,7 @@ import {
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { materializeENSv1DomainEffectiveOwner } from "@/lib/ensv2/domain-db-helpers";
+import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import {
   getLatestRegistration,
   getLatestRenewal,
@@ -136,6 +137,7 @@ export default function () {
       expiry,
       // all BaseRegistrar-derived Registrars use the same GRACE_PERIOD
       gracePeriod: BigInt(GRACE_PERIOD_SECONDS),
+      eventId: await ensureEvent(context, event),
     });
 
     // materialize Domain owner if exists
@@ -170,21 +172,32 @@ export default function () {
       // Invariant: There must be a Registration to renew.
       if (!registration) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no Registration to renew.`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but no Registration to renew.\n${toJson(
+            {
+              labelHash,
+              managedNode,
+              node,
+              domainId,
+            },
+          )}`,
         );
       }
 
       // Invariant: Must be BaseRegistrar Registration
       if (registration.type !== "BaseRegistrar") {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(registration)}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a non-BaseRegistrar registration:\n${toJson(
+            { labelHash, managedNode, node, domainId, registration },
+          )}`,
         );
       }
 
       // Invariant: Because it is a BaseRegistrar Registration, it must have an expiry.
       if (registration.expiry === null) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(registration)}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted for a BaseRegistrar registration that has a null expiry:\n${toJson(
+            { labelHash, managedNode, node, domainId, registration },
+          )}`,
         );
       }
 
@@ -192,7 +205,16 @@ export default function () {
       // https://github.com/ensdomains/ens-contracts/blob/b6cb0e26/contracts/ethregistrar/BaseRegistrarImplementation.sol#L161
       if (isRegistrationFullyExpired(registration, event.block.timestamp)) {
         throw new Error(
-          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but registration is expired:\n${toJson({ registration, timestamp: event.block.timestamp })}`,
+          `Invariant(BaseRegistrar:NameRenewed): NameRenewed emitted but registration is expired:\n${toJson(
+            {
+              labelHash,
+              managedNode,
+              node,
+              domainId,
+              registration,
+              timestamp: event.block.timestamp,
+            },
+          )}`,
         );
       }
 
@@ -213,6 +235,7 @@ export default function () {
         registrationIndex: registration.index,
         index: renewal ? renewal.index + 1 : 0,
         duration,
+        eventId: await ensureEvent(context, event),
         // NOTE: no pricing information from BaseRegistrar#NameRenewed. in ENSv1, this info is
         // indexed from the Registrar Controllers, see apps/ensindexer/src/plugins/ensv2/handlers/ensv1/RegistrarController.ts
       });

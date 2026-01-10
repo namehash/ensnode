@@ -14,6 +14,7 @@ import { AccountIdRef } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import { EventRef } from "@/graphql-api/schema/event";
 import { RenewalRef } from "@/graphql-api/schema/renewal";
 import { WrappedBaseRegistrarRegistrationRef } from "@/graphql-api/schema/wrapped-baseregistrar-registration";
 import { db } from "@/lib/db";
@@ -137,9 +138,11 @@ RegistrationInterfaceRef.implement({
           { ...DEFAULT_CONNECTION_ARGS, args },
           ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) =>
             db.query.renewal.findMany({
-              where: (t, { lt, gt, and }) =>
+              where: (t, { eq, lt, gt, and }) =>
                 and(
                   ...[
+                    eq(t.domainId, parent.domainId),
+                    eq(t.registrationIndex, parent.index),
                     before !== undefined && lt(t.id, cursors.decode<RenewalId>(before)),
                     after !== undefined && gt(t.id, cursors.decode<RenewalId>(after)),
                   ].filter((c) => !!c),
@@ -148,6 +151,16 @@ RegistrationInterfaceRef.implement({
               limit,
             }),
         ),
+    }),
+
+    //////////////////////
+    // Registration.event
+    //////////////////////
+    event: t.field({
+      description: "TODO",
+      type: EventRef,
+      nullable: false,
+      resolve: (parent) => parent.eventId,
     }),
   }),
 });
