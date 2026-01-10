@@ -1,5 +1,12 @@
 # @ensnode/ponder-metadata
 
+## 1.4.0
+
+### Patch Changes
+
+- Updated dependencies [[`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990)]:
+  - @ensnode/ensrainbow-sdk@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes
