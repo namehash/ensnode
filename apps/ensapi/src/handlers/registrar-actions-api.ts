@@ -24,7 +24,6 @@ import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
-import { getAccurateAsOfTimestamp } from "@/lib/registrar-actions/get-accurate-as-of-timestamp";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 const app = factory.createApp();
@@ -179,8 +178,8 @@ app.get(
       // Build page context
       const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
 
-      // Get the accurateAsOf timestamp from the latest indexed block
-      const accurateAsOf = getAccurateAsOfTimestamp(c.var.indexingStatus.snapshot);
+      // Get the accurateAsOf timestamp from the slowest chain indexing cursor
+      const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
       // respond with success response
       return c.json(

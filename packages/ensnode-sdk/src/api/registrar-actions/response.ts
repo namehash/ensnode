@@ -55,6 +55,10 @@ export type RegistrarActionsResponseOk = {
    * The {@link UnixTimestamp} of when the data used to build the list of {@link NamedRegistrarAction} was accurate as of.
    *
    * @remarks
+   * **Note:** This value represents the `slowestChainIndexingCursor` from the latest omnichain indexing status
+   * snapshot captured by ENSApi. The state returned in the response is guaranteed to be accurate as of this
+   * timestamp but may be from a timestamp higher than this value.
+   *
    * **Temporary:** This field is currently optional to maintain backward compatibility with ENS Awards
    * using older snapshot NPM packages. This will be changed to required in a future release.
    * See: https://github.com/namehash/ensnode/issues/1497
