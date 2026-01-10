@@ -1,5 +1,15 @@
 # @docs/ensnode
 
+## 1.4.0
+
+### Minor Changes
+
+- [#1412](https://github.com/namehash/ensnode/pull/1412) [`fae127e`](https://github.com/namehash/ensnode/commit/fae127ed94a62a212d406daed9e86a0c51eb4f37) Thanks [@tk-o](https://github.com/tk-o)! - Extends `Realtime Indexing Distance` section on the API Usage page.
+
+### Patch Changes
+
+- [#1075](https://github.com/namehash/ensnode/pull/1075) [`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990) Thanks [@djstrong](https://github.com/djstrong)! - Refine ENSRainbow Docs
+
 ## 1.3.1
 
 ## 1.3.0
