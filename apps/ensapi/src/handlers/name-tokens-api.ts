@@ -48,8 +48,8 @@ app.use(nameTokensApiMiddleware);
  */
 const nameTokensQuerySchema = z
   .object({
-    domainId: makeNodeSchema("request.domainId").optional(),
-    name: params.name.optional(),
+    domainId: makeNodeSchema("request.domainId").optional().describe("Domain node hash identifier"),
+    name: params.name.optional().describe("ENS name to look up tokens for"),
   })
   .refine((data) => (data.domainId !== undefined) !== (data.name !== undefined), {
     message: "Exactly one of 'domainId' or 'name' must be provided",
@@ -72,6 +72,7 @@ const makeNameTokensNotIndexedResponse = (
 app.get(
   "/",
   describeRoute({
+    tags: ["Explore"],
     summary: "Get Name Tokens",
     description: "Returns name tokens for the requested identifier (domainId or name)",
     responses: {
