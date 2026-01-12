@@ -95,14 +95,6 @@ function ResolveAndDisplayReferrerIdentity({
   if (referral.decodedReferrer === zeroAddress) {
     // when we only want to display avatar (without textual identifier) use a dedicated placeholder.
     // Otherwise, display "unknown" plus the placeholder.
-    const tooltipContent = (
-      <p>
-        Encoded referrer
-        <code className="nhui:block">{referral.encodedReferrer}</code> does not follow the
-        formatting requirements of incentive programs.
-      </p>
-    );
-
     const unknownAvatarPlaceholder = (className?: string, iconSize = 24) => (
       <div
         className={cn(
@@ -130,8 +122,8 @@ function ResolveAndDisplayReferrerIdentity({
             className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit"
           >
             Encoded referrer
-            <code className="block">{referral.encodedReferrer}</code> does not follow the formatting
-            requirements of ENS Referral Programs.
+            <code className="nhui:block">{referral.encodedReferrer}</code> does not follow the
+            formatting requirements of incentive programs.
           </TooltipContent>
         </Tooltip>
       </span>
