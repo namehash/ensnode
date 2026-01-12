@@ -74,3 +74,5 @@ const AvatarLoading = ({ className }: EnsAvatarLoadingProps) => (
     )}
   />
 );
+
+// TODO: Copied from ENSAwards (as a newer version) - further alignment might be needed
