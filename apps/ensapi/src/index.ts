@@ -80,6 +80,25 @@ app.get(
           "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
       },
       servers: [{ url: `http://localhost:${config.port}`, description: "Local Development" }],
+      tags: [
+        {
+          name: "Resolution",
+          description: "APIs for resolving ENS names and addresses",
+        },
+        {
+          name: "Meta",
+          description: "APIs for indexing status, configuration, and realtime monitoring",
+        },
+        {
+          name: "Explore",
+          description:
+            "APIs for exploring the indexed state of ENS, including name tokens and registrar actions",
+        },
+        {
+          name: "ENSAwards",
+          description: "APIs for ENSAwards functionality, including referrer data",
+        },
+      ],
     },
   }),
 );

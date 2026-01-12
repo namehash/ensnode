@@ -1,7 +1,9 @@
+import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
 import {
   buildPageContext,
+  type Node,
   RECORDS_PER_PAGE_DEFAULT,
   RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
@@ -34,11 +36,178 @@ const logger = makeLogger("registrar-actions-api");
 // It makes the routes available if all prerequisites are met.
 app.use(registrarActionsApiMiddleware);
 
+// Shared query schema for registrar actions
+const registrarActionsQuerySchema = z
+  .object({
+    orderBy: z
+      .enum(RegistrarActionsOrders)
+      .default(RegistrarActionsOrders.LatestRegistrarActions)
+      .describe("Order of results"),
+
+    page: params.queryParam
+      .optional()
+      .default(1)
+      .pipe(z.coerce.number())
+      .pipe(makePositiveIntegerSchema("page"))
+      .describe("Page number for pagination"),
+
+    recordsPerPage: params.queryParam
+      .optional()
+      .default(RECORDS_PER_PAGE_DEFAULT)
+      .pipe(z.coerce.number())
+      .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX))
+      .describe("Number of records per page"),
+
+    withReferral: params.boolstring
+      .optional()
+      .default(false)
+      .describe("Filter to only include actions with referrals"),
+
+    decodedReferrer: makeLowercaseAddressSchema("decodedReferrer")
+      .optional()
+      .describe("Filter by decoded referrer address"),
+
+    beginTimestamp: params.queryParam
+      .pipe(z.coerce.number())
+      .pipe(makeUnixTimestampSchema("beginTimestamp"))
+      .optional()
+      .describe("Filter actions at or after this Unix timestamp"),
+
+    endTimestamp: params.queryParam
+      .pipe(z.coerce.number())
+      .pipe(makeUnixTimestampSchema("endTimestamp"))
+      .optional()
+      .describe("Filter actions at or before this Unix timestamp"),
+  })
+  .refine(
+    (data) => {
+      // If both timestamps are provided, endTimestamp must be >= beginTimestamp
+      if (data.beginTimestamp !== undefined && data.endTimestamp !== undefined) {
+        return data.endTimestamp >= data.beginTimestamp;
+      }
+      return true;
+    },
+    {
+      message: "endTimestamp must be greater than or equal to beginTimestamp",
+      path: ["endTimestamp"],
+    },
+  );
+
+// Shared business logic for fetching registrar actions
+async function fetchRegistrarActions(
+  parentNode: Node | undefined,
+  query: z.infer<typeof registrarActionsQuerySchema>,
+) {
+  const {
+    orderBy,
+    page,
+    recordsPerPage,
+    withReferral,
+    decodedReferrer,
+    beginTimestamp,
+    endTimestamp,
+  } = query;
+
+  const filters: RegistrarActionsFilter[] = [];
+
+  if (parentNode) {
+    filters.push(registrarActionsFilter.byParentNode(parentNode));
+  }
+
+  if (withReferral) {
+    filters.push(registrarActionsFilter.withReferral(true));
+  }
+
+  if (decodedReferrer) {
+    filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
+  }
+
+  if (beginTimestamp) {
+    filters.push(registrarActionsFilter.beginTimestamp(beginTimestamp));
+  }
+
+  if (endTimestamp) {
+    filters.push(registrarActionsFilter.endTimestamp(endTimestamp));
+  }
+
+  // Calculate offset from page and recordsPerPage
+  const offset = (page - 1) * recordsPerPage;
+
+  // Find the latest "logical registrar actions" with pagination
+  const { registrarActions, totalRecords } = await findRegistrarActions({
+    filters,
+    orderBy,
+    limit: recordsPerPage,
+    offset,
+  });
+
+  // Build page context
+  const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
+
+  return { registrarActions, pageContext };
+}
+
 /**
- * Get Registrar Actions
+ * Get Registrar Actions (all records)
+ *
+ * Example: `GET /api/registrar-actions`
+ *
+ * @see {@link app.get("/:parentNode")} for response documentation
+ */
+app.get(
+  "/",
+  describeRoute({
+    tags: ["Explore"],
+    summary: "Get Registrar Actions",
+    description: "Returns all registrar actions with optional filtering and pagination",
+    responses: {
+      200: {
+        description: "Successfully retrieved registrar actions",
+      },
+      400: {
+        description: "Invalid query",
+      },
+      500: {
+        description: "Internal server error",
+      },
+    },
+  }),
+  validate("query", registrarActionsQuerySchema),
+  async (c) => {
+    try {
+      const query = c.req.valid("query");
+      const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
+
+      // respond with success response
+      return c.json(
+        serializeRegistrarActionsResponse({
+          responseCode: RegistrarActionsResponseCodes.Ok,
+          registrarActions,
+          pageContext,
+        } satisfies RegistrarActionsResponseOk),
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      logger.error(errorMessage);
+
+      // respond with 500 error response
+      return c.json(
+        serializeRegistrarActionsResponse({
+          responseCode: RegistrarActionsResponseCodes.Error,
+          error: {
+            message: `Registrar Actions API Response is unavailable`,
+          },
+        } satisfies RegistrarActionsResponseError),
+        500,
+      );
+    }
+  },
+);
+
+/**
+ * Get Registrar Actions (filtered by parent node)
  *
  * Examples of use:
- * - all records: `GET /api/registrar-actions`
  * - all records associated with `namehash('eth')` parent node:
  *   `GET /api/registrar-actions/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
  * - all records associated with `namehash('base.eth')` parent node:
@@ -68,109 +237,47 @@ app.use(registrarActionsApiMiddleware);
  *   - unknown server error occurs.
  */
 app.get(
-  "/:parentNode?",
+  "/:parentNode",
+  describeRoute({
+    tags: ["Explore"],
+    summary: "Get Registrar Actions by Parent Node",
+    description:
+      "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
+    responses: {
+      200: {
+        description: "Successfully retrieved registrar actions",
+      },
+      400: {
+        description: "Invalid input",
+      },
+      500: {
+        description: "Internal server error",
+      },
+    },
+  }),
   validate(
     "param",
     z.object({
-      parentNode: makeNodeSchema("parentNode param").optional(),
+      parentNode: makeNodeSchema("parentNode param").describe(
+        "Parent node to filter registrar actions",
+      ),
     }),
   ),
-  validate(
-    "query",
-    z
-      .object({
-        orderBy: z
-          .enum(RegistrarActionsOrders)
-          .default(RegistrarActionsOrders.LatestRegistrarActions),
-
-        page: params.queryParam
-          .optional()
-          .default(1)
-          .pipe(z.coerce.number())
-          .pipe(makePositiveIntegerSchema("page")),
-
-        recordsPerPage: params.queryParam
-          .optional()
-          .default(RECORDS_PER_PAGE_DEFAULT)
-          .pipe(z.coerce.number())
-          .pipe(makePositiveIntegerSchema("recordsPerPage").max(RECORDS_PER_PAGE_MAX)),
-
-        withReferral: params.boolstring.optional().default(false),
-
-        decodedReferrer: makeLowercaseAddressSchema("decodedReferrer").optional(),
-
-        beginTimestamp: params.queryParam
-          .pipe(z.coerce.number())
-          .pipe(makeUnixTimestampSchema("beginTimestamp"))
-          .optional(),
-
-        endTimestamp: params.queryParam
-          .pipe(z.coerce.number())
-          .pipe(makeUnixTimestampSchema("endTimestamp"))
-          .optional(),
-      })
-      .refine(
-        (data) => {
-          // If both timestamps are provided, endTimestamp must be >= beginTimestamp
-          if (data.beginTimestamp !== undefined && data.endTimestamp !== undefined) {
-            return data.endTimestamp >= data.beginTimestamp;
-          }
-          return true;
-        },
-        {
-          message: "endTimestamp must be greater than or equal to beginTimestamp",
-          path: ["endTimestamp"],
-        },
-      ),
-  ),
+  validate("query", registrarActionsQuerySchema),
   async (c) => {
     try {
+      // Middleware ensures indexingStatus is available and not an Error
+      // This check is for TypeScript type safety
+      if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+        throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+      }
+
       const { parentNode } = c.req.valid("param");
-      const {
-        orderBy,
-        page,
-        recordsPerPage,
-        withReferral,
-        decodedReferrer,
-        beginTimestamp,
-        endTimestamp,
-      } = c.req.valid("query");
+      const query = c.req.valid("query");
+      const { registrarActions, pageContext } = await fetchRegistrarActions(parentNode, query);
 
-      const filters: RegistrarActionsFilter[] = [];
-
-      if (parentNode) {
-        filters.push(registrarActionsFilter.byParentNode(parentNode));
-      }
-
-      if (withReferral) {
-        filters.push(registrarActionsFilter.withReferral(true));
-      }
-
-      if (decodedReferrer) {
-        filters.push(registrarActionsFilter.byDecodedReferrer(decodedReferrer));
-      }
-
-      if (beginTimestamp) {
-        filters.push(registrarActionsFilter.beginTimestamp(beginTimestamp));
-      }
-
-      if (endTimestamp) {
-        filters.push(registrarActionsFilter.endTimestamp(endTimestamp));
-      }
-
-      // Calculate offset from page and recordsPerPage
-      const offset = (page - 1) * recordsPerPage;
-
-      // Find the latest "logical registrar actions" with pagination
-      const { registrarActions, totalRecords } = await findRegistrarActions({
-        filters,
-        orderBy,
-        limit: recordsPerPage,
-        offset,
-      });
-
-      // Build page context
-      const pageContext = buildPageContext(page, recordsPerPage, totalRecords);
+      // Get the accurateAsOf timestamp from the slowest chain indexing cursor
+      const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
       // respond with success response
       return c.json(
@@ -178,6 +285,7 @@ app.get(
           responseCode: RegistrarActionsResponseCodes.Ok,
           registrarActions,
           pageContext,
+          accurateAsOf,
         } satisfies RegistrarActionsResponseOk),
       );
     } catch (error) {
