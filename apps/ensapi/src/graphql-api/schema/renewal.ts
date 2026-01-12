@@ -2,6 +2,7 @@ import type { RenewalId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { EventRef } from "@/graphql-api/schema/event";
 import { db } from "@/lib/db";
 
 export const RenewalRef = builder.loadableObjectRef("Renewal", {
@@ -70,6 +71,16 @@ RenewalRef.implement({
       type: "BigInt",
       nullable: true,
       resolve: (parent) => parent.premium,
+    }),
+
+    //////////////////////
+    // Renewal.event
+    //////////////////////
+    event: t.field({
+      description: "TODO",
+      type: EventRef,
+      nullable: false,
+      resolve: (parent) => parent.eventId,
     }),
 
     // TODO(paymentToken): add payment token tracking here
