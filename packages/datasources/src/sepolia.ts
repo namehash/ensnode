@@ -14,6 +14,7 @@ import { RegistrarController as base_RegistrarController } from "./abis/basename
 import { Registry as base_Registry } from "./abis/basenames/Registry";
 import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
 // ABIs for Lineanames Datasource
 import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
@@ -105,53 +106,57 @@ export default {
 
       ETHRegistry: {
         abi: Registry,
-        address: "0x1291be112d480055dafd8a610b7d1e203891c274",
-        startBlock: 23794084,
+        address: "0x3f0920aa92c5f9bce54643c09955c5f241f1f763",
+        startBlock: 9771260,
       },
       RootRegistry: {
         abi: Registry,
-        address: "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
-        startBlock: 23794084,
+        address: "0x245de1984f9bb890c5db0b1fb839470c6a4c7e08",
+        startBlock: 9771022,
+      },
+      UniversalResolverV2: {
+        abi: root_UniversalResolver,
+        address: "0x50168842c0f5c9992a34085d9a6dc5b0a4f306ce",
+        startBlock: 9771281,
       },
       Registry: {
         abi: Registry,
-        startBlock: 23794084,
+        startBlock: 9770973,
       },
       EnhancedAccessControl: {
         abi: EnhancedAccessControl,
-        startBlock: 23794084,
+        startBlock: 9770973,
       },
     },
   },
 
-  // TODO(ensv2): reference Sepolia deployment
-  // [DatasourceNames.Namechain]: {
-  //   chain: sepolia,
-  //   contracts: {
-  //     Resolver: {
-  //       abi: ResolverABI,
-  //       startBlock: 23794084,
-  //     },
-  //     Registry: {
-  //       abi: Registry,
-  //       startBlock: 23794084,
-  //     },
-  //     EnhancedAccessControl: {
-  //       abi: EnhancedAccessControl,
-  //       startBlock: 23794084,
-  //     },
-  //     ETHRegistry: {
-  //       abi: Registry,
-  //       address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
-  //       startBlock: 23794084,
-  //     },
-  //     ETHRegistrar: {
-  //       abi: ETHRegistrar,
-  //       address: "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853",
-  //       startBlock: 23794084,
-  //     },
-  //   },
-  // },
+  [DatasourceNames.Namechain]: {
+    chain: sepolia,
+    contracts: {
+      Resolver: {
+        abi: ResolverABI,
+        startBlock: 3702721,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 9770973,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 9770973,
+      },
+      ETHRegistry: {
+        abi: Registry,
+        address: "0xf332544e6234f1ca149907d0d4658afd5feb6831",
+        startBlock: 9770973,
+      },
+      ETHRegistrar: {
+        abi: ETHRegistrar,
+        address: "0xe37a1366c827d18dc0ad57f3767de4b3025ceac2",
+        startBlock: 9843689,
+      },
+    },
+  },
 
   /**
    * Basenames Datasource
