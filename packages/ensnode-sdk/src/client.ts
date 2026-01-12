@@ -587,6 +587,7 @@ export class ENSNodeClient {
    *   const { registrarActions, pageContext } = response;
    *   console.log(registrarActions);
    *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
+   *   console.log(`Accurate as of: ${response.accurateAsOf}`);
    * }
    *
    * // Get second page with 25 records per page
