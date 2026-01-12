@@ -219,7 +219,6 @@ export function DisplayIdentity({
     result = (
       <IdentityLink
         linkDetails={identityLinkDetails}
-        identity={identity}
         className={cn("nhui:inline-flex nhui:w-fit nhui:h-fit")}
       >
         {result}
