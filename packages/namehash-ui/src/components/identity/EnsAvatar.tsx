@@ -4,9 +4,9 @@ import * as React from "react";
 import type { ENSNamespaceId } from "@ensnode/datasources";
 import type { Name } from "@ensnode/ensnode-sdk";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar.tsx";
-import { cn } from "@/utils/cn.ts";
-import { getEnsMetadataServiceAvatarUrl } from "@/utils/ensMetadata.ts";
+import { cn } from "../../utils/cn";
+import { getEnsMetadataServiceAvatarUrl } from "../../utils/ensMetadata";
+import { Avatar, AvatarImage } from "../ui/avatar";
 
 interface EnsAvatarProps {
   name: Name;

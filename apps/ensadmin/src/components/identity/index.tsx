@@ -1,5 +1,6 @@
 "use client";
 
+import { ChainIcon } from "@namehash/namehash-ui";
 import type * as React from "react";
 
 import { useResolvedIdentity } from "@ensnode/ensnode-react";
@@ -12,7 +13,6 @@ import {
   type UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
 import { EnsAvatar } from "@/components/ens-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveNamespace } from "@/hooks/active/use-active-namespace";

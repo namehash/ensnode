@@ -165,6 +165,9 @@ importers:
       '@icons-pack/react-simple-icons':
         specifier: ^13.7.0
         version: 13.8.0(react@19.2.1)
+      '@namehash/namehash-ui':
+        specifier: workspace:*
+        version: link:../../packages/namehash-ui
       '@ponder/utils':
         specifier: 'catalog:'
         version: 0.2.16(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))
@@ -232,7 +235,7 @@ importers:
         specifier: ^16.10.0
         version: 16.11.0
       lucide-react:
-        specifier: ^0.548.0
+        specifier: 'catalog:'
         version: 0.548.0(react@19.2.1)
       next:
         specifier: 16.0.10
@@ -256,10 +259,10 @@ importers:
         specifier: ^2.0.3
         version: 2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       tailwind-merge:
-        specifier: ^3.4.0
+        specifier: 'catalog:'
         version: 3.4.0
       tailwindcss-animate:
-        specifier: ^1.0.7
+        specifier: 'catalog:'
         version: 1.0.7(tailwindcss@4.1.18)
       viem:
         specifier: 'catalog:'
@@ -284,7 +287,7 @@ importers:
         specifier: ^8.5.6
         version: 8.5.6
       tailwindcss:
-        specifier: ^4.1.18
+        specifier: 'catalog:'
         version: 4.1.18
       typescript:
         specifier: ^5

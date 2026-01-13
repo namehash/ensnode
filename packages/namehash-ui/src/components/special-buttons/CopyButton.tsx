@@ -1,8 +1,8 @@
 import * as React from "react";
 import { toast } from "sonner";
 
-import { Button, type ButtonProps } from "@/components/ui/button";
-import { cn } from "@/utils/cn.ts";
+import { cn } from "../../utils/cn";
+import { Button, type ButtonProps } from "../ui/button";
 
 export interface CopyButtonProps extends Omit<ButtonProps, "onClick"> {
   value: string;

@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-import { AbsoluteTime } from "@/components/datetime/AbsoluteTime.tsx";
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { cn } from "@/utils/cn.ts";
+import { cn } from "../../utils/cn";
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { AbsoluteTime } from "./AbsoluteTime";
 
 /**
  * Formats a Unix timestamp as its relative distance with now

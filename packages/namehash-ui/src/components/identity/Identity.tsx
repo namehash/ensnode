@@ -8,16 +8,16 @@ import {
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon.tsx";
-import { ChainExplorerIcon } from "@/components/icons/ChainExplorerIcon.tsx";
-import { EnsIcon } from "@/components/icons/ens/EnsIcon.tsx";
-import { AddressDisplay } from "@/components/identity/Address.tsx";
-import { CopyButton } from "@/components/special-buttons/CopyButton.tsx";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { getBlockExplorerAddressDetailsUrl } from "@/utils/blockExplorers.ts";
-import { getChainName } from "@/utils/chains.ts";
-import { cn } from "@/utils/cn.ts";
-import { getEnsManagerAddressDetailsUrl } from "@/utils/ensManager.ts";
+import { getBlockExplorerAddressDetailsUrl } from "../../utils/blockExplorers";
+import { getChainName } from "../../utils/chains";
+import { cn } from "../../utils/cn";
+import { getEnsManagerAddressDetailsUrl } from "../../utils/ensManager";
+import { ChainIcon } from "../chains/ChainIcon";
+import { ChainExplorerIcon } from "../icons/ChainExplorerIcon";
+import { EnsIcon } from "../icons/ens/EnsIcon";
+import { CopyButton } from "../special-buttons/CopyButton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { AddressDisplay } from "./Address";
 
 export interface IdentityLinkDetails {
   isExternal: boolean;

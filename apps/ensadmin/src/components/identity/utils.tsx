@@ -1,3 +1,4 @@
+import { ChainIcon } from "@namehash/namehash-ui";
 import type { PropsWithChildren } from "react";
 import { type Address, getAddress } from "viem";
 
@@ -12,7 +13,6 @@ import {
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
 import { CopyButton } from "@/components/copy-button";
 import { ChainExplorerIcon } from "@/components/icons/chain-explorer-icon";
 import { IconENS } from "@/components/icons/ens";

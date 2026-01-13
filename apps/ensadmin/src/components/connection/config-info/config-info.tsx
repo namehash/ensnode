@@ -5,13 +5,13 @@
 
 "use client";
 
+import { ChainIcon } from "@namehash/namehash-ui";
 import { History, Replace } from "lucide-react";
 import { Fragment, ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
 import {
   ConfigInfoAppCard,
   ConfigInfoFeature,

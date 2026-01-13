@@ -16,18 +16,18 @@ import {
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
-import { DisplayDuration } from "@/components/datetime/DisplayDuration.tsx";
-import { RelativeTime } from "@/components/datetime/RelativeTime.tsx";
-import type { IdentityLinkDetails } from "@/components/identity/Identity.tsx";
-import { NameDisplay } from "@/components/identity/Name.tsx";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import { getBlockExplorerTransactionDetailsUrl } from "../../utils/blockExplorers";
+import { cn } from "../../utils/cn";
+import { DisplayDuration } from "../datetime/DisplayDuration";
+import { RelativeTime } from "../datetime/RelativeTime";
+import type { IdentityLinkDetails } from "../identity/Identity";
+import { NameDisplay } from "../identity/Name";
 import {
   ResolveAndDisplayIdentity,
   type ResolveAndDisplayIdentityProps,
-} from "@/components/identity/ResolveAndDisplayIdentity.tsx";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { useIsMobile } from "@/hooks/useIsMobile.tsx";
-import { getBlockExplorerTransactionDetailsUrl } from "@/utils/blockExplorers.ts";
-import { cn } from "@/utils/cn.ts";
+} from "../identity/ResolveAndDisplayIdentity";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface LabeledFieldProps {
   fieldLabel: string;

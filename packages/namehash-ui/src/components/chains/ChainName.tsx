@@ -1,6 +1,6 @@
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
-import { getChainName } from "@/utils/chains.ts";
+import { getChainName } from "../../utils/chains";
 
 export interface ChainNameProps {
   chainId: ChainId;

@@ -7,7 +7,7 @@ export * from "./components/datetime/DisplayDuration";
 export * from "./components/datetime/RelativeTime";
 export * from "./components/footer/Footer";
 export * from "./components/icons/ChainExplorerIcon";
-export * from "./components/icons/ens/EnsIcon.tsx";
+export * from "./components/icons/ens/EnsIcon";
 export * from "./components/icons/ens/EnsServiceProviderIcon";
 export * from "./components/icons/InfoIcon";
 export * from "./components/icons/socials/EfpIcon";

@@ -2,6 +2,8 @@
  * This file gathers ideas for UI components presenting chain indexing timeline.
  */
 
+import { ChainIcon } from "@namehash/namehash-ui";
+
 import {
   type BlockRef,
   type ChainId,
@@ -9,7 +11,6 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
 import { AbsoluteTime } from "@/components/datetime-utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatChainStatus } from "@/lib/indexing-status";

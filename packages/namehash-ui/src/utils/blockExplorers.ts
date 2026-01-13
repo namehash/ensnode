@@ -2,7 +2,7 @@ import type { Address, Hash } from "viem";
 
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
-import { SUPPORTED_CHAINS } from "@/utils/chains.ts";
+import { SUPPORTED_CHAINS } from "./chains";
 
 /**
  * Gets the "base" block explorer URL for a given {@link ChainId}
