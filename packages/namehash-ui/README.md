@@ -7,10 +7,10 @@ For UI component libraries intended for the general public, we recommend [ensnod
 ## Installation
 
 ```bash
-npm install @namehash/namehash-ui @ensnode/ensnode-react
+npm install @namehash/namehash-ui @ensnode/ensnode-react sonner
 ```
 
-Note: `@ensnode/ensnode-react` is necessary only for some components. It might happen that you won't need it. 
+Note: `@ensnode/ensnode-react` and `sonner` are package's peer dependencies. The former is necessary only for some components and same goes for `sonner` which is only necessary for `CopyButton` component. It might happen that you won't need these installed, depending on which components you want to use.
 
 ## Setup
 
