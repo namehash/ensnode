@@ -17,7 +17,8 @@
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate:openapi": "tsx scripts/generate-openapi.ts && biome format --write openapi.json"
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",

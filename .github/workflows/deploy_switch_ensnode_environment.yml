@@ -81,6 +81,14 @@ jobs:
           chmod +x ./.github/scripts/promote_ensadmin.sh
           ./.github/scripts/promote_ensadmin.sh
 
+      - name: Trigger Mintlify Docs Rebuild
+        if: ${{ secrets.MINTLIFY_WEBHOOK_URL != '' }}
+        run: |
+          curl -X POST "${{ secrets.MINTLIFY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{"event": "environment_switch", "target": "${{ inputs.target }}"}'
+        continue-on-error: true
+
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
         with:

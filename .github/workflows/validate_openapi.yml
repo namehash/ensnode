@@ -1,0 +1,43 @@
+name: "Validate: OpenAPI Spec"
+
+on:
+  pull_request:
+    paths:
+      - "apps/ensapi/**"
+
+jobs:
+  validate-openapi:
+    runs-on: ubuntu-latest
+    name: Validate OpenAPI Spec
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate OpenAPI spec
+        run: pnpm --filter ensapi run generate:openapi
+
+      - name: Check for uncommitted changes
+        run: |
+          if git diff --exit-code apps/ensapi/openapi.json; then
+            echo "OpenAPI spec is up to date"
+          else
+            echo "::error::OpenAPI spec is out of sync. Please run 'pnpm --filter ensapi run generate:openapi' and commit the changes."
+            git diff apps/ensapi/openapi.json
+            exit 1
+          fi
+
+      - name: Validate OpenAPI spec with Mintlify
+        run: npx mint openapi-check apps/ensapi/openapi.json

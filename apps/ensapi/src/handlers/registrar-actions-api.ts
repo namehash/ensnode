@@ -1,4 +1,3 @@
-import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
 import {
@@ -27,6 +26,10 @@ import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
+import {
+  registrarActionsByParentNodeRoute,
+  registrarActionsRoute,
+} from "@/routes/registrar-actions-api.routes";
 
 const app = factory.createApp();
 
@@ -154,55 +157,35 @@ async function fetchRegistrarActions(
  *
  * @see {@link app.get("/:parentNode")} for response documentation
  */
-app.get(
-  "/",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Registrar Actions",
-    description: "Returns all registrar actions with optional filtering and pagination",
-    responses: {
-      200: {
-        description: "Successfully retrieved registrar actions",
-      },
-      400: {
-        description: "Invalid query",
-      },
-      500: {
-        description: "Internal server error",
-      },
-    },
-  }),
-  validate("query", registrarActionsQuerySchema),
-  async (c) => {
-    try {
-      const query = c.req.valid("query");
-      const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
+app.get("/", registrarActionsRoute, validate("query", registrarActionsQuerySchema), async (c) => {
+  try {
+    const query = c.req.valid("query");
+    const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
 
-      // respond with success response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Ok,
-          registrarActions,
-          pageContext,
-        } satisfies RegistrarActionsResponseOk),
-      );
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      logger.error(errorMessage);
+    // respond with success response
+    return c.json(
+      serializeRegistrarActionsResponse({
+        responseCode: RegistrarActionsResponseCodes.Ok,
+        registrarActions,
+        pageContext,
+      } satisfies RegistrarActionsResponseOk),
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error(errorMessage);
 
-      // respond with 500 error response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API Response is unavailable`,
-          },
-        } satisfies RegistrarActionsResponseError),
-        500,
-      );
-    }
-  },
-);
+    // respond with 500 error response
+    return c.json(
+      serializeRegistrarActionsResponse({
+        responseCode: RegistrarActionsResponseCodes.Error,
+        error: {
+          message: `Registrar Actions API Response is unavailable`,
+        },
+      } satisfies RegistrarActionsResponseError),
+      500,
+    );
+  }
+});
 
 /**
  * Get Registrar Actions (filtered by parent node)
@@ -238,23 +221,7 @@ app.get(
  */
 app.get(
   "/:parentNode",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Registrar Actions by Parent Node",
-    description:
-      "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
-    responses: {
-      200: {
-        description: "Successfully retrieved registrar actions",
-      },
-      400: {
-        description: "Invalid input",
-      },
-      500: {
-        description: "Internal server error",
-      },
-    },
-  }),
+  registrarActionsByParentNodeRoute,
   validate(
     "param",
     z.object({
