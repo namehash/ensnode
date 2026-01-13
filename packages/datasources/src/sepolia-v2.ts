@@ -1,26 +1,8 @@
-import {
-  arbitrumSepolia,
-  baseSepolia,
-  lineaSepolia,
-  optimismSepolia,
-  scrollSepolia,
-  sepolia,
-} from "viem/chains";
+import { sepolia } from "viem/chains";
 
-// ABIs for Basenames Datasource
-import { BaseRegistrar as base_BaseRegistrar } from "./abis/basenames/BaseRegistrar";
-import { EarlyAccessRegistrarController as base_EARegistrarController } from "./abis/basenames/EARegistrarController";
-import { RegistrarController as base_RegistrarController } from "./abis/basenames/RegistrarController";
-import { Registry as base_Registry } from "./abis/basenames/Registry";
-import { UpgradeableRegistrarController as base_UpgradeableRegistrarController } from "./abis/basenames/UpgradeableRegistrarController";
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
-// ABIs for Lineanames Datasource
-import { BaseRegistrar as linea_BaseRegistrar } from "./abis/lineanames/BaseRegistrar";
-import { EthRegistrarController as linea_EthRegistrarController } from "./abis/lineanames/EthRegistrarController";
-import { NameWrapper as linea_NameWrapper } from "./abis/lineanames/NameWrapper";
-import { Registry as linea_Registry } from "./abis/lineanames/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
@@ -30,7 +12,6 @@ import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewal
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-import { Seaport as Seaport1_5 } from "./abis/seaport/Seaport1.5";
 // Shared ABIs
 import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
 import { ResolverABI } from "./lib/ResolverABI";
@@ -40,16 +21,10 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
 /**
  * The Sepolia V2 ENSNamespace
  *
- * This represents the ENS V2 deployment on Sepolia, a separate namespace from the original Sepolia ENS deployment.
- *
- * NOTE: The Sepolia V2 ENS namespace does not support 3DNS.
+ * This represents the ENS V2 deployment on Sepolia, a separate namespace from the original Sepolia
+ * ENS deployment, used for testing ENSv2.
  */
 export default {
-  /**
-   * ENSRoot Datasource
-   *
-   * ENS V2 contracts deployed on Sepolia
-   */
   [DatasourceNames.ENSRoot]: {
     chain: sepolia,
     contracts: {
@@ -105,11 +80,6 @@ export default {
 
       // ENS V2 contracts
 
-      ETHRegistry: {
-        abi: Registry,
-        address: "0x3f0920aa92c5f9bce54643c09955c5f241f1f763",
-        startBlock: 9771260,
-      },
       RootRegistry: {
         abi: Registry,
         address: "0x245de1984f9bb890c5db0b1fb839470c6a4c7e08",
@@ -119,6 +89,11 @@ export default {
         abi: root_UniversalResolver,
         address: "0x50168842c0f5c9992a34085d9a6dc5b0a4f306ce",
         startBlock: 9771281,
+      },
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x3f0920aa92c5f9bce54643c09955c5f241f1f763",
+        startBlock: 9771260,
       },
       Registry: {
         abi: Registry,
@@ -155,118 +130,6 @@ export default {
         abi: ETHRegistrar,
         address: "0xe37a1366c827d18dc0ad57f3767de4b3025ceac2",
         startBlock: 9843689,
-      },
-    },
-  },
-
-  /**
-   * Basenames Datasource
-   *
-   * Addresses and Start Blocks from Basenames
-   * https://github.com/base-org/basenames
-   */
-  [DatasourceNames.Basenames]: {
-    /**
-     * As of 5-Jun-2025 the Resolver for 'basetest.eth' in the Sepolia ENS namespace is
-     * 0x084D10C07EfEecD9fFc73DEb38ecb72f9eEb65aB.
-     *
-     * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
-     * the forward resolution of data associated with subnames of 'basetest.eth' to an offchain
-     * gateway server operated by Coinbase that uses the following subregistry contracts on
-     * Base Sepolia as its source of truth.
-     *
-     * The owner of 'basetest.eth' in the ENS Registry on the Sepolia ENS namespace
-     * (e.g. Coinbase) has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
-     */
-    chain: baseSepolia,
-    contracts: {
-      Registry: {
-        abi: base_Registry,
-        address: "0x1493b2567056c2181630115660963e13a8e32735",
-        startBlock: 13012458,
-      },
-      Resolver: {
-        abi: ResolverABI,
-        startBlock: 13012458,
-      },
-      BaseRegistrar: {
-        abi: base_BaseRegistrar,
-        address: "0xa0c70ec36c010b55e3c434d6c6ebeec50c705794",
-        startBlock: 13012465,
-      },
-      EARegistrarController: {
-        abi: base_EARegistrarController,
-        address: "0x3a0e8c2a0a28f396a5e5b69edb2e630311f1517a",
-        startBlock: 13041164,
-      },
-      RegistrarController: {
-        abi: base_RegistrarController,
-        address: "0x49ae3cc2e3aa768b1e5654f5d3c6002144a59581",
-        startBlock: 13298580,
-      },
-      /**
-       * This controller was added to BaseRegistrar contract
-       * with the following tx:
-       * https://sepolia.basescan.org/tx/0x648d984c1a379a6c300851b9561fe98a9b5282a26ca8c2c7660b11c53f0564bc
-       */
-      UpgradeableRegistrarController: {
-        abi: base_UpgradeableRegistrarController,
-        address: "0x82c858cdf64b3d893fe54962680edfddc37e94c8", // a proxy contract
-        startBlock: 29896051,
-      },
-    },
-  },
-
-  /**
-   * Lineanames Datasource
-   *
-   * Addresses and Start Blocks from Lineanames
-   * https://github.com/Consensys/linea-ens
-   */
-  [DatasourceNames.Lineanames]: {
-    /**
-     * As of 5-Jun-2025 the Resolver for 'linea-sepolia.eth' in the Sepolia ENS namespace is
-     * 0x64884ED06241c059497aEdB2C7A44CcaE6bc7937.
-     *
-     * This Resolver uses ENSIP-10 (Wildcard Resolution) and EIP-3668 (CCIP Read) to delegate
-     * the forward resolution of data associated with subnames of 'linea-sepolia.eth' to an offchain
-     * gateway server operated by Consensys that uses the following subregistry contracts on
-     * Linea Sepolia as its source of truth.
-     *
-     * The owner of 'linea-sepolia.eth' in the ENS Registry on the Sepolia ENS namespace
-     * (e.g. Consensys) has the ability to change this configuration at any time.
-     *
-     * See the reference documentation for additional context:
-     * docs/ensnode/src/content/docs/reference/mainnet-registered-subnames-of-subregistries.mdx
-     */
-    chain: lineaSepolia,
-    contracts: {
-      Registry: {
-        abi: linea_Registry,
-        address: "0x5b2636f0f2137b4ae722c01dd5122d7d3e9541f7",
-        startBlock: 2395094,
-      },
-      Resolver: {
-        abi: ResolverABI,
-        startBlock: 2395094, // based on startBlock of Registry on Linea Sepolia
-      },
-      BaseRegistrar: {
-        abi: linea_BaseRegistrar,
-        address: "0x83475a84c0ea834f06c8e636a62631e7d2e07a44",
-        startBlock: 2395099,
-      },
-      EthRegistrarController: {
-        abi: linea_EthRegistrarController,
-        address: "0x0f81e3b3a32dfe1b8a08d3c0061d852337a09338",
-        startBlock: 2395231,
-      },
-      NameWrapper: {
-        abi: linea_NameWrapper,
-        address: "0xf127de9e039a789806fed4c6b1c0f3affea9425e",
-        startBlock: 2395202,
       },
     },
   },
@@ -348,87 +211,6 @@ export default {
         // https://adraffy.github.io/ens-normalize.js/test/resolver.html?sepolia#8008274f.reverse
         address: "0x9fa59673e43f15bdb8722fdaf5c2107574b99062",
         startBlock: 8580040,
-      },
-    },
-  },
-
-  /**
-   * Contracts that power Reverse Resolution on Base Sepolia.
-   */
-  [DatasourceNames.ReverseResolverBase]: {
-    chain: baseSepolia,
-    contracts: {
-      L2ReverseRegistrar: {
-        abi: ResolverABI,
-        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
-        startBlock: 21788010,
-      },
-    },
-  },
-
-  /**
-   * Contracts that power Reverse Resolution on Optimism Sepolia.
-   */
-  [DatasourceNames.ReverseResolverOptimism]: {
-    chain: optimismSepolia,
-    contracts: {
-      L2ReverseRegistrar: {
-        abi: ResolverABI,
-        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
-        startBlock: 23770766,
-      },
-    },
-  },
-
-  /**
-   * Contracts that power Reverse Resolution on Arbitrum Sepolia.
-   */
-  [DatasourceNames.ReverseResolverArbitrum]: {
-    chain: arbitrumSepolia,
-    contracts: {
-      L2ReverseRegistrar: {
-        abi: ResolverABI,
-        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
-        startBlock: 123142726,
-      },
-    },
-  },
-
-  /**
-   * Contracts that power Reverse Resolution on Scroll Sepolia.
-   */
-  [DatasourceNames.ReverseResolverScroll]: {
-    chain: scrollSepolia,
-    contracts: {
-      L2ReverseRegistrar: {
-        abi: ResolverABI,
-        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
-        startBlock: 8175276,
-      },
-    },
-  },
-
-  /**
-   * Contracts that power Reverse Resolution on Linea Sepolia.
-   */
-  [DatasourceNames.ReverseResolverLinea]: {
-    chain: lineaSepolia,
-    contracts: {
-      L2ReverseRegistrar: {
-        abi: ResolverABI,
-        address: "0x00000beef055f7934784d6d81b6bc86665630dba",
-        startBlock: 9267966,
-      },
-    },
-  },
-
-  [DatasourceNames.Seaport]: {
-    chain: sepolia,
-    contracts: {
-      Seaport1_5: {
-        abi: Seaport1_5, // Seaport 1.5
-        address: "0x00000000000000adc04c56bf30ac9d3c0aaf14dc",
-        startBlock: 3365529,
       },
     },
   },
