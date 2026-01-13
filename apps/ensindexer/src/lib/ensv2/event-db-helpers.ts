@@ -15,6 +15,7 @@ export async function ensureEvent(context: Context, event: LogEvent) {
     chainId: context.chain.id,
     address: event.log.address,
     blockHash: event.block.hash,
+    timestamp: event.block.timestamp,
     transactionHash: event.transaction.hash,
     logIndex: event.log.logIndex,
   });
