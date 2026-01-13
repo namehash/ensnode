@@ -1,11 +1,17 @@
 import packageJson from "@/../package.json" with { type: "json" };
 import config from "@/config";
 
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
-import { openAPIRouteHandler } from "hono-openapi";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const openApiSpec = JSON.parse(readFileSync(resolve(__dirname, "../openapi.json"), "utf-8"));
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
@@ -68,40 +74,8 @@ app.route("/ensanalytics", ensanalyticsApi);
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
 
-// use OpenAPI Schema
-app.get(
-  "/openapi.json",
-  openAPIRouteHandler(app, {
-    documentation: {
-      info: {
-        title: "ENSApi APIs",
-        version: packageJson.version,
-        description:
-          "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
-      },
-      servers: [{ url: `http://localhost:${config.port}`, description: "Local Development" }],
-      tags: [
-        {
-          name: "Resolution",
-          description: "APIs for resolving ENS names and addresses",
-        },
-        {
-          name: "Meta",
-          description: "APIs for indexing status, configuration, and realtime monitoring",
-        },
-        {
-          name: "Explore",
-          description:
-            "APIs for exploring the indexed state of ENS, including name tokens and registrar actions",
-        },
-        {
-          name: "ENSAwards",
-          description: "APIs for ENSAwards functionality, including referrer data",
-        },
-      ],
-    },
-  }),
-);
+// serve static OpenAPI spec (generated at build time via `pnpm run generate:openapi`)
+app.get("/openapi.json", (c) => c.json(openApiSpec));
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
