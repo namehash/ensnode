@@ -95,6 +95,7 @@ export const event = onchainTable("events", (t) => ({
   chainId: t.integer().notNull().$type<ChainId>(),
   address: t.hex().notNull().$type<Address>(),
   blockHash: t.hex().notNull().$type<Hash>(),
+  timestamp: t.bigint().notNull(),
   transactionHash: t.hex().notNull().$type<Hash>(),
   logIndex: t.integer().notNull().$type<number>(),
 }));
