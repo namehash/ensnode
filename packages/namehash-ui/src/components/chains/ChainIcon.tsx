@@ -14,6 +14,7 @@ import {
 } from "viem/chains";
 
 import { ensTestEnvL1Chain } from "@ensnode/datasources";
+import type { ChainId } from "@ensnode/ensnode-sdk";
 
 import { ArbitrumIcon } from "./icons/ArbitrumIcon.tsx";
 import { ArbitrumTestnetIcon } from "./icons/ArbitrumTestnetIcon.tsx";
@@ -31,14 +32,13 @@ import { ScrollTestnetIcon } from "./icons/ScrollTestnetIcon.tsx";
 import { UnrecognizedChainIcon } from "./icons/UnrecognizedChainIcon.tsx";
 
 export interface ChainIconProps {
-  chainId: number;
+  chainId: ChainId;
   width?: number;
   height?: number;
 }
 
 /**
- * Mapping of chain id to chain icon.
- * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
+ * Mapping of {@link ChainId} to chain icon.
  */
 const chainIcons = new Map<number, React.ComponentType<React.SVGProps<SVGSVGElement>>>([
   // mainnet

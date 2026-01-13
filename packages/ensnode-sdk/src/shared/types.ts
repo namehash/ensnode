@@ -7,6 +7,8 @@ import type { DEFAULT_EVM_CHAIN_ID } from "../ens";
  *
  * Represents a unique identifier for a chain.
  * Guaranteed to be a positive integer.
+ *
+ * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  **/
 export type ChainId = number;
 

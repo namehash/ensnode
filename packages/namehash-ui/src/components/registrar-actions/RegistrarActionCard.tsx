@@ -18,15 +18,16 @@ import {
 
 import { DisplayDuration } from "@/components/datetime/DisplayDuration.tsx";
 import { RelativeTime } from "@/components/datetime/RelativeTime.tsx";
+import type { IdentityLinkDetails } from "@/components/identity/Identity.tsx";
+import { NameDisplay } from "@/components/identity/Name.tsx";
 import {
   ResolveAndDisplayIdentity,
   type ResolveAndDisplayIdentityProps,
 } from "@/components/identity/ResolveAndDisplayIdentity.tsx";
-import { type IdentityLinkDetails, NameDisplay } from "@/components/identity/utils.tsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { useIsMobile } from "@/hooks/useMobile.tsx";
+import { useIsMobile } from "@/hooks/useIsMobile.tsx";
+import { getBlockExplorerTransactionDetailsUrl } from "@/utils/blockExplorers.ts";
 import { cn } from "@/utils/cn.ts";
-import { getBlockExplorerUrlForTransactionHash } from "@/utils/namespace.ts";
 
 interface LabeledFieldProps {
   fieldLabel: string;
@@ -80,7 +81,7 @@ function ResolveAndDisplayReferrerIdentity({
     !isRegistrarActionReferralAvailable(referral) ||
     referral.encodedReferrer === ZERO_ENCODED_REFERRER
   ) {
-    // when we only want to display avatar (without textual identifier) don't display anything (return en empty placeholder).
+    // when we only want to display avatar (without textual identifier) don't display anything (return an empty placeholder).
     // Otherwise, display a hyphen with no avatar
     return withAvatar && !withIdentifier ? (
       <div className="nhui:w-10 nhui:h-10" />
@@ -243,7 +244,7 @@ export function RegistrarActionCard({
     namedRegistrarAction.action;
   const { chainId } = registrationLifecycle.subregistry.subregistryId;
 
-  const transactionDetailUrl = getBlockExplorerUrlForTransactionHash(chainId, transactionHash);
+  const transactionDetailUrl = getBlockExplorerTransactionDetailsUrl(chainId, transactionHash);
   const withTransactionLink = ({ children }: PropsWithChildren) =>
     // wrap `children` content with a transaction link only if the URL is defined
     transactionDetailUrl ? (

@@ -6,7 +6,7 @@ import type { Name } from "@ensnode/ensnode-sdk";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar.tsx";
 import { cn } from "@/utils/cn.ts";
-import { buildEnsMetadataServiceAvatarUrl } from "@/utils/namespace.ts";
+import { getEnsMetadataServiceAvatarUrl } from "@/utils/ensMetadata.ts";
 
 interface EnsAvatarProps {
   name: Name;
@@ -21,7 +21,7 @@ type ImageLoadingStatus = Parameters<
 
 export const EnsAvatar = ({ name, namespaceId, className, isSquare = false }: EnsAvatarProps) => {
   const [loadingStatus, setLoadingStatus] = React.useState<ImageLoadingStatus>("idle");
-  const avatarUrl = buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+  const avatarUrl = getEnsMetadataServiceAvatarUrl(name, namespaceId);
 
   if (avatarUrl === null) {
     return (

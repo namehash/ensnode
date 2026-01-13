@@ -35,5 +35,3 @@ export const EnsIcon: LucideIcon = React.forwardRef<SVGSVGElement, LucideProps>(
     </svg>
   );
 });
-
-EnsIcon.displayName = "EnsIcon";

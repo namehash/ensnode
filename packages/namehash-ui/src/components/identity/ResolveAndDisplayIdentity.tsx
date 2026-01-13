@@ -11,18 +11,18 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ChainIcon } from "@/components/chains/ChainIcon.tsx";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useIsMobile } from "@/hooks/useMobile.tsx";
-import { cn } from "@/utils/cn.ts";
-
-import { EnsAvatar } from "./EnsAvatar.tsx";
+import { AddressDisplay } from "@/components/identity/Address.tsx";
 import {
-  AddressDisplay,
   IdentityLink,
   type IdentityLinkDetails,
   IdentityTooltip,
-  NameDisplay,
-} from "./utils";
+} from "@/components/identity/Identity.tsx";
+import { NameDisplay } from "@/components/identity/Name.tsx";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/useIsMobile.tsx";
+import { cn } from "@/utils/cn.ts";
+
+import { EnsAvatar } from "./EnsAvatar.tsx";
 
 export interface ResolveAndDisplayIdentityProps {
   identity: UnresolvedIdentity;
@@ -40,8 +40,7 @@ export interface ResolveAndDisplayIdentityProps {
  * Resolves the provided `UnresolvedIdentity` through ENSNode and displays the result.
  *
  * @param identity - The `UnresolvedIdentity` to resolve and display.
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *  'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param accelerate - Whether to attempt Protocol Acceleration (default: false)
  *                      when resolving the primary name.
  * @param withLink - Whether to wrap the displayed identity in an `IdentityLink` component.
@@ -102,8 +101,7 @@ interface DisplayIdentityProps {
  *
  * @param identity - The identity to display. May be a `ResolvedIdentity` or an `UnresolvedIdentity`.
  *                      If not a `ResolvedIdentity` (and therefore just an `UnresolvedIdentity`) then displays a loading state.
- * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'holesky',
- *                        'ens-test-env')
+ * @param namespaceId - The ENSNamespace identifier (e.g. 'mainnet', 'sepolia', 'ens-test-env')
  * @param withLink - Whether to wrap the displayed identity in an `IdentityLink` component.
  * @param identityLinkDetails - If the `withLink` is true, provides info on where should it lead and should it be an external link.
  * @param withTooltip - Whether to wrap the displayed identity in an `IdentityInfoTooltip` component.

@@ -25,5 +25,3 @@ export const ChainExplorerIcon: LucideIcon = React.forwardRef<SVGSVGElement, Luc
     );
   },
 );
-
-ChainExplorerIcon.displayName = "Chain Explorer Icon";

@@ -1,13 +1,9 @@
 import type { PropsWithChildren } from "react";
-import { type Address, getAddress } from "viem";
 
+import type { ENSNamespaceId, Identity } from "@ensnode/ensnode-sdk";
 import {
-  beautifyName,
   DEFAULT_EVM_CHAIN_ID,
-  type ENSNamespaceId,
-  type Identity,
   isResolvedIdentity,
-  type Name,
   ResolutionStatusIds,
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
@@ -15,45 +11,13 @@ import {
 import { ChainIcon } from "@/components/chains/ChainIcon.tsx";
 import { ChainExplorerIcon } from "@/components/icons/ChainExplorerIcon.tsx";
 import { EnsIcon } from "@/components/icons/ens/EnsIcon.tsx";
+import { AddressDisplay } from "@/components/identity/Address.tsx";
 import { CopyButton } from "@/components/special-buttons/CopyButton.tsx";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
+import { getBlockExplorerAddressDetailsUrl } from "@/utils/blockExplorers.ts";
+import { getChainName } from "@/utils/chains.ts";
 import { cn } from "@/utils/cn.ts";
-import {
-  getAddressDetailsUrl,
-  getBlockExplorerUrlForAddress,
-  getChainName,
-} from "@/utils/namespace.ts";
-
-interface NameDisplayProps {
-  name: Name;
-  className?: string;
-}
-
-/**
- * Displays an ENS name in beautified form.
- *
- * @param name - The name to display in beautified form.
- *
- */
-export function NameDisplay({ name, className = "nhui:font-medium" }: NameDisplayProps) {
-  const beautifiedName = beautifyName(name);
-  return <span className={className}>{beautifiedName}</span>;
-}
-
-interface AddressDisplayProps {
-  address: Address;
-  className?: string;
-}
-
-/**
- * Displays a truncated checksummed address without any navigation.
- * Pure display component for showing addresses.
- */
-export function AddressDisplay({ address, className }: AddressDisplayProps) {
-  const checksummedAddress = getAddress(address);
-  const truncatedAddress = `${checksummedAddress.slice(0, 6)}...${checksummedAddress.slice(-4)}`;
-  return <span className={className}>{truncatedAddress}</span>;
-}
+import { getEnsManagerAddressDetailsUrl } from "@/utils/ensManager.ts";
 
 export interface IdentityLinkDetails {
   isExternal: boolean;
@@ -129,7 +93,7 @@ export const IdentityTooltip = ({
       break;
   }
 
-  const ensAppAddressDetailsUrl = getAddressDetailsUrl(identity.address, namespaceId);
+  const ensAppAddressDetailsUrl = getEnsManagerAddressDetailsUrl(identity.address, namespaceId);
 
   const body = (
     <span>
@@ -138,7 +102,7 @@ export const IdentityTooltip = ({
   );
 
   const effectiveChainId = translateDefaultableChainIdToChainId(identity.chainId, namespaceId);
-  const chainExplorerUrl = getBlockExplorerUrlForAddress(effectiveChainId, identity.address);
+  const chainExplorerUrl = getBlockExplorerAddressDetailsUrl(effectiveChainId, identity.address);
 
   return (
     <Tooltip delayDuration={250}>

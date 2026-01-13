@@ -1,12 +1,14 @@
-import { getChainName } from "@/utils/namespace.ts";
+import type { ChainId } from "@ensnode/ensnode-sdk";
+
+import { getChainName } from "@/utils/chains.ts";
 
 export interface ChainNameProps {
-  chainId: number;
+  chainId: ChainId;
   className: string;
 }
 
 /**
- * Renders a prettified chain name for the provided chain ID.
+ * Renders a prettified chain name for the provided {@link ChainId}.
  */
 export const ChainName = ({ chainId, className }: ChainNameProps) => (
   <p className={className}>{getChainName(chainId)}</p>

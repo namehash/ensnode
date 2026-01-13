@@ -1,10 +1,5 @@
 import type React from "react";
 
-// <?xml version="1.0" encoding="UTF-8"?>
-// Creator: CorelDRAW 2019 (64-Bit)
-// <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-// xmlns:Xodm={"http://www.corel.com/coreldraw/odm/2003"}
-
 export const EthereumIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="12"
