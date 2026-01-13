@@ -31,13 +31,6 @@ import { db } from "@/lib/db";
 const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
 const namechain = maybeGetDatasource(config.namespace, DatasourceNames.Namechain);
 
-// TODO: remove this (and switch to `getDatasource` above) when all namespaces define Namechain datasource
-if (!namechain) {
-  throw new Error(
-    `Invariant: Namechain Datasource required in this context (should be enforced by plugin requirements!).`,
-  );
-}
-
 const ETH_LABELHASH = labelhashLiteralLabel("eth" as LiteralLabel);
 
 const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
@@ -45,11 +38,6 @@ const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
 const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId({
   chainId: ensroot.chain.id,
   address: ensroot.contracts.ETHRegistry.address,
-});
-
-const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId({
-  chainId: namechain.chain.id,
-  address: namechain.contracts.ETHRegistry.address,
 });
 
 /**
@@ -157,6 +145,10 @@ async function v2_getDomainIdByFqdn(
   // domain_resolver_relationships
   // TODO: generalize this into other future bridging resolvers depending on how basenames etc do it
   if (leaf.registry_id === ENS_ROOT_V2_ETH_REGISTRY_ID) {
+    // TODO(ensv2): remove when all namspaces have Namechain datasource defined
+    // if namechain doesn't exist, we can't bridge the request to that Registry, so terminate
+    if (!namechain) return null;
+
     // Invariant: must be >= 2LD
     if (labelHashPath.length < 2) {
       throw new Error(`Invariant: Not >= 2LD??`);
@@ -191,8 +183,14 @@ async function v2_getDomainIdByFqdn(
       interpretedNameToInterpretedLabels(name).slice(0, -1),
     );
     console.log(
-      `ETHTLDResolver deferring ${nameWithoutTld} to ENSv2 .eth Registry on Namechain...`,
+      `ETHTLDResolver deferring '${nameWithoutTld}' to ENSv2 .eth Registry on Namechain...`,
     );
+
+    const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId({
+      chainId: namechain.chain.id,
+      address: namechain.contracts.ETHRegistry.address,
+    });
+
     return v2_getDomainIdByFqdn(NAMECHAIN_V2_ETH_REGISTRY_ID, nameWithoutTld);
   }
 

@@ -1,5 +1,41 @@
 # ensapi
 
+## 1.4.0
+
+### Minor Changes
+
+- [#1412](https://github.com/namehash/ensnode/pull/1412) [`fae127e`](https://github.com/namehash/ensnode/commit/fae127ed94a62a212d406daed9e86a0c51eb4f37) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `GET /amirealtime` endpoint allowing for easy realtime indexing distance verification.
+
+- [#1442](https://github.com/namehash/ensnode/pull/1442) [`05d7481`](https://github.com/namehash/ensnode/commit/05d7481d6fd3e1842262c72b930bbdbddd866715) Thanks [@shrugs](https://github.com/shrugs)! - Fixed issue regarding Protocol Accelerated Resolution API requests and legacy unmigrated names, which should now resolve correctly when accelerated.
+
+- [#1280](https://github.com/namehash/ensnode/pull/1280) [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the ENSv2 Plugin ('ensv2') for indexing both ENSv1 and the future ENSv2 protocol.
+
+- [#1411](https://github.com/namehash/ensnode/pull/1411) [`ec96ff9`](https://github.com/namehash/ensnode/commit/ec96ff912c010d4623e586dc2b60a22f122a128d) Thanks [@shrugs](https://github.com/shrugs)! - Disabled viem's built-in Transport Ranking feature in order to minimize net_listening RPC credit ussage.
+
+- [#1444](https://github.com/namehash/ensnode/pull/1444) [`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d) Thanks [@Goader](https://github.com/Goader)! - Added optional time range filtering to the Registrar Actions API.
+
+- [#1484](https://github.com/namehash/ensnode/pull/1484) [`cf1b218`](https://github.com/namehash/ensnode/commit/cf1b218c27cb2253f37ef6b452c908d5c387aa0a) Thanks [@Goader](https://github.com/Goader)! - Added `accurateAsOf` response field to the Registrar Actions API.
+
+- [#1418](https://github.com/namehash/ensnode/pull/1418) [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda) Thanks [@Goader](https://github.com/Goader)! - Added revenue contribution tracking to referrer metrics, calculating total revenue contributed to the ENS DAO from referrals. Added `totalRevenueContribution` to individual referrer metrics and `grandTotalRevenueContribution` to aggregated metrics.
+
+### Patch Changes
+
+- [#1485](https://github.com/namehash/ensnode/pull/1485) [`4f3abbe`](https://github.com/namehash/ensnode/commit/4f3abbe6c1447b7d5c5e7f2a39cf250067122877) Thanks [@notrab](https://github.com/notrab)! - Fix openapi validation errors by adding missing route descriptions
+
+  - Add `describeRoute` with tags, summary, description, and responses to `/amirealtime`, `/ensanalytics/referrers`, `/ensanalytics/referrers/:referrer`, `/registrar-actions`, and `/registrar-actions/:parentNode` endpoints
+  - Add `.describe()` to Zod schema fields for query and path parameters to improve OpenAPI documentation
+  - Add OpenAPI tags (`Resolution`, `Meta`, `Explore`, `ENSAwards`) to organize endpoints in the spec
+  - Split optional parent node path param in registrar-actions-api into dedicated handlers to fix OpenAPI validation
+
+- [#1338](https://github.com/namehash/ensnode/pull/1338) [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3) Thanks [@stevedylandev](https://github.com/stevedylandev)! - Adds OpenAPI schema endpoint and route descriptions to ENSApi
+
+- Updated dependencies [[`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990), [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec), [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec), [`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d), [`9862514`](https://github.com/namehash/ensnode/commit/9862514d320b2ed50e06410b57b28e3e30077ade), [`cf1b218`](https://github.com/namehash/ensnode/commit/cf1b218c27cb2253f37ef6b452c908d5c387aa0a), [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda), [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3)]:
+  - @ensnode/ensnode-sdk@1.4.0
+  - @ensnode/ensnode-schema@1.4.0
+  - @ensnode/datasources@1.4.0
+  - @namehash/ens-referrals@1.4.0
+  - @ensnode/ponder-subgraph@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes
