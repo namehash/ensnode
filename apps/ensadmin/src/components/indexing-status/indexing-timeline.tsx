@@ -2,7 +2,7 @@
  * This file gathers ideas for UI components presenting chain indexing timeline.
  */
 
-import { ChainIcon } from "@namehash/namehash-ui";
+import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 
 import {
   type BlockRef,
@@ -14,7 +14,6 @@ import {
 import { AbsoluteTime } from "@/components/datetime-utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatChainStatus } from "@/lib/indexing-status";
-import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
 import { getTimelinePosition } from "./indexing-timeline-utils";

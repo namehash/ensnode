@@ -4,7 +4,7 @@
  * Each omnichain status can present different indexing stats.
  */
 
-import { ChainIcon } from "@namehash/namehash-ui";
+import { ChainIcon, ChainName } from "@namehash/namehash-ui";
 import type { PropsWithChildren, ReactElement } from "react";
 
 import type { useIndexingStatus } from "@ensnode/ensnode-react";
@@ -24,7 +24,6 @@ import {
   sortChainStatusesByStartBlockAsc,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainName } from "@/components/chains/ChainName";
 import { useIndexingStatusWithSwr } from "@/components/indexing-status/use-indexing-status-with-swr";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

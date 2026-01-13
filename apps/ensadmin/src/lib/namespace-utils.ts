@@ -40,27 +40,6 @@ const SUPPORTED_CHAINS = [
 ];
 
 /**
- * Mapping of chain id to prettified chain name.
- *
- * NOTE: We prefer our custom names here, rather than those provided by default in `Chain#name`.
- */
-const CUSTOM_CHAIN_NAMES = new Map<number, string>([
-  [ensTestEnvL1Chain.id, "Ethereum Local (ens-test-env)"],
-  [mainnet.id, "Ethereum"],
-  [sepolia.id, "Ethereum Sepolia"],
-  [base.id, "Base"],
-  [baseSepolia.id, "Base Sepolia"],
-  [linea.id, "Linea"],
-  [lineaSepolia.id, "Linea Sepolia"],
-  [optimism.id, "Optimism"],
-  [optimismSepolia.id, "Optimism Sepolia"],
-  [arbitrum.id, "Arbitrum"],
-  [arbitrumSepolia.id, "Arbitrum Sepolia"],
-  [scroll.id, "Scroll"],
-  [scrollSepolia.id, "Scroll Sepolia"],
-]);
-
-/**
  * Returns the Address of the NameWrapper contract within the requested namespace.
  *
  * @returns the viem#Address object
@@ -200,11 +179,3 @@ export const getBlockExplorerUrlForTransactionHash = (
 
   return new URL(`tx/${transactionHash}`, chainBlockExplorer.toString());
 };
-
-/**
- * Returns a prettified chain name for the provided chain id.
- */
-export function getChainName(chainId: ChainId): string {
-  const name = CUSTOM_CHAIN_NAMES.get(chainId);
-  return name || `Unknown Chain (${chainId})`;
-}

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { ChainIcon } from "@namehash/namehash-ui";
+import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 import { History, Replace } from "lucide-react";
 import { Fragment, ReactNode } from "react";
 
@@ -33,7 +33,6 @@ import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
 /**

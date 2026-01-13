@@ -1,4 +1,4 @@
-import { ChainIcon } from "@namehash/namehash-ui";
+import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 import type { PropsWithChildren } from "react";
 import { type Address, getAddress } from "viem";
 
@@ -19,11 +19,7 @@ import { IconENS } from "@/components/icons/ens";
 import { ExternalLink, InternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import {
-  getAddressDetailsUrl,
-  getBlockExplorerUrlForAddress,
-  getChainName,
-} from "@/lib/namespace-utils";
+import { getAddressDetailsUrl, getBlockExplorerUrlForAddress } from "@/lib/namespace-utils";
 
 interface NameDisplayProps {
   name: Name;

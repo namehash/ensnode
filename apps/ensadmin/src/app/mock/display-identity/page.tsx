@@ -1,5 +1,6 @@
 "use client";
 
+import { getChainName } from "@namehash/namehash-ui";
 import { useState } from "react";
 import { type Address, isAddress } from "viem";
 
@@ -33,7 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getChainName } from "@/lib/namespace-utils";
 
 const DEFAULT_NAMESPACE_ID: ENSNamespaceId = ENSNamespaceIds.Mainnet;
 const DEFAULT_RESOLUTION_STATUS: ResolutionStatusId = ResolutionStatusIds.Named;
