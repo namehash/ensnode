@@ -2,8 +2,6 @@
   "$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
   "extends": "//",
   "files": {
-    "includes": [
-      "!src/styles.css"
-    ]
+    "includes": ["**/*", "!src/styles.css"]
   }
 }

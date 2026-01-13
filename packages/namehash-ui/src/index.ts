@@ -1,3 +1,24 @@
 import "./styles.css";
 
-export * from "./components/placeholder/Placeholder";
+export * from "./components/chains/ChainIcon";
+export * from "./components/chains/ChainName";
+export * from "./components/datetime/AbsoluteTime";
+export * from "./components/datetime/DisplayDuration";
+export * from "./components/datetime/RelativeTime";
+export * from "./components/footer/Footer";
+export * from "./components/icons/ChainExplorerIcon";
+export * from "./components/icons/ens/EnsIcon.tsx";
+export * from "./components/icons/ens/EnsServiceProviderIcon";
+export * from "./components/icons/InfoIcon";
+export * from "./components/icons/socials/EfpIcon";
+export * from "./components/icons/socials/EmailIcon";
+export * from "./components/icons/socials/FarcasterIcon";
+export * from "./components/icons/socials/GitHubIcon";
+export * from "./components/icons/socials/TelegramIcon";
+export * from "./components/icons/socials/TwitterIcon";
+export * from "./components/identity/Address";
+export * from "./components/identity/EnsAvatar";
+export * from "./components/identity/Identity";
+export * from "./components/identity/Name";
+export * from "./components/identity/ResolveAndDisplayIdentity";
+export * from "./components/registrar-actions/RegistrarActionCard";
