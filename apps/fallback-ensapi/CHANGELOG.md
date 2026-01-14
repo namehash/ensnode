@@ -1,5 +1,13 @@
 # fallback-ensapi
 
+## 1.5.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
 ## 1.4.0
 
 ### Minor Changes

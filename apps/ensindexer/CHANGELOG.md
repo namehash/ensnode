@@ -1,5 +1,20 @@
 # ensindexer
 
+## 1.5.0
+
+### Patch Changes
+
+- [#1515](https://github.com/namehash/ensnode/pull/1515) [`eda900e`](https://github.com/namehash/ensnode/commit/eda900e1073e26111aa2ed6a04ec4310ca46b65f) Thanks [@shrugs](https://github.com/shrugs)! - Adds `timestamp` to Event entities in the ENSv2 schema (Registration.event, Renewal.event).
+
+- [#1527](https://github.com/namehash/ensnode/pull/1527) [`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc) Thanks [@tk-o](https://github.com/tk-o)! - Update `registrars` plugin indexing logic to store at most one metadata record in ENSDb for current "logical registrar action".
+
+- Updated dependencies [[`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc)]:
+  - @ensnode/ensnode-schema@1.5.0
+  - @ensnode/datasources@1.5.0
+  - @ensnode/ensrainbow-sdk@1.5.0
+  - @ensnode/ponder-metadata@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
 ## 1.4.0
 
 ### Minor Changes

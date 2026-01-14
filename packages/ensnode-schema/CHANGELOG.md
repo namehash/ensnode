@@ -1,5 +1,11 @@
 # @ensnode/ensnode-schema
 
+## 1.5.0
+
+### Minor Changes
+
+- [#1527](https://github.com/namehash/ensnode/pull/1527) [`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc) Thanks [@tk-o](https://github.com/tk-o)! - Update `registrars` schema to enable storing at most one metadata record.
+
 ## 1.4.0
 
 ### Minor Changes
