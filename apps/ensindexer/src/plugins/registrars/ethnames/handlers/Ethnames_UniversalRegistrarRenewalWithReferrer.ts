@@ -45,7 +45,6 @@ export default function () {
 
       await handleUniversalRegistrarRenewalEvent(context, {
         id,
-        subregistryId,
         node,
         referral,
         transactionHash,

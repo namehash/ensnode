@@ -2,12 +2,7 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Hash } from "viem";
 
-import {
-  type AccountId,
-  formatAccountId,
-  type Node,
-  type RegistrarAction,
-} from "@ensnode/ensnode-sdk";
+import { formatAccountId, type Node, type RegistrarAction } from "@ensnode/ensnode-sdk";
 
 /**
  * Logical Event Key
