@@ -21,6 +21,7 @@
       "@ensnode/shared-configs",
       "@docs/ensnode",
       "@docs/ensrainbow",
+      "@docs/ensnode-api",
       "@namehash/ens-referrals",
       "@namehash/namehash-ui"
     ]

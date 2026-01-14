@@ -18,16 +18,16 @@
    cd ensnode/docs/docs.ensnode.io
    ```
 
-3. Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify):
+3. Install dependencies:
 
    ```bash
-   pnpm add -g mintlify
+   pnpm install
    ```
 
 4. Start the local development server:
 
    ```bash
-   mintlify dev
+   pnpm dev
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
