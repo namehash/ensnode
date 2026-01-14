@@ -29,6 +29,7 @@ import type { Abi, Address, Chain } from "viem";
 export const ENSNamespaceIds = {
   Mainnet: "mainnet",
   Sepolia: "sepolia",
+  SepoliaV2: "sepolia-v2",
   EnsTestEnv: "ens-test-env",
 } as const;
 

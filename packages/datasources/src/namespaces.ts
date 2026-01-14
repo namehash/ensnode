@@ -7,15 +7,18 @@ import {
 } from "./lib/types";
 import mainnet from "./mainnet";
 import sepolia from "./sepolia";
+import sepoliaV2 from "./sepolia-v2";
 
 // internal map ENSNamespaceId -> ENSNamespace
 const ENSNamespacesById: {
   readonly mainnet: typeof mainnet;
   readonly sepolia: typeof sepolia;
+  readonly "sepolia-v2": typeof sepoliaV2;
   readonly "ens-test-env": typeof ensTestEnv;
 } = {
   mainnet,
   sepolia,
+  "sepolia-v2": sepoliaV2,
   "ens-test-env": ensTestEnv,
 } as const;
 
