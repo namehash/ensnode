@@ -1,5 +1,6 @@
 "use client";
 
+import { InfoIcon } from "@namehash/namehash-ui";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -7,7 +8,6 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
 import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
-import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -226,7 +226,9 @@ const RelativeTimePropCheck = ({
       <p className="text-sm leading-6 font-semibold text-gray-500">{checkName}</p>
       <div className={checksWrapperStyles}>
         <Tooltip>
-          <TooltipTrigger asChild>{<InfoIcon className="shrink-0" />}</TooltipTrigger>
+          <TooltipTrigger asChild>
+            {<InfoIcon className="shrink-0 text-[#9CA3AF]" />}
+          </TooltipTrigger>
           <TooltipContent
             side="top"
             className="bg-gray-50 text-sm text-black shadow-md outline-hidden max-w-[275px]"

@@ -1,3 +1,4 @@
+import { InfoIcon } from "@namehash/namehash-ui";
 import { memo, type PropsWithChildren } from "react";
 import { zeroAddress } from "viem";
 
@@ -14,7 +15,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { DisplayDuration, RelativeTime } from "@/components/datetime-utils";
-import { InfoIcon } from "@/components/icons/InfoIcon";
 import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { ExternalLink } from "@/components/link";
@@ -74,7 +74,7 @@ function ResolveAndDisplayReferrerIdentity({
         Unknown
         <Tooltip delayDuration={1000}>
           <TooltipTrigger>
-            <InfoIcon className="shrink-0" />
+            <InfoIcon className="shrink-0 text-[#9CA3AF]" />
           </TooltipTrigger>
           <TooltipContent
             side="top"

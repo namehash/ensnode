@@ -1,4 +1,4 @@
-import { ChainIcon, getChainName } from "@namehash/namehash-ui";
+import { ChainExplorerIcon, ChainIcon, EnsIcon, getChainName } from "@namehash/namehash-ui";
 import type { PropsWithChildren } from "react";
 import { type Address, getAddress } from "viem";
 
@@ -14,8 +14,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { CopyButton } from "@/components/copy-button";
-import { ChainExplorerIcon } from "@/components/icons/chain-explorer-icon";
-import { IconENS } from "@/components/icons/ens";
 import { ExternalLink, InternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
@@ -203,7 +201,7 @@ export const IdentityTooltip = ({
             )}
             {ensAppAddressDetailsUrl && (
               <ExternalLink href={ensAppAddressDetailsUrl.toString()}>
-                <IconENS
+                <EnsIcon
                   height={24}
                   width={24}
                   className="text-gray-500 hover:text-gray-700 transition-colors"
