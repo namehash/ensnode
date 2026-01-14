@@ -401,6 +401,19 @@ export const registrarActions = onchainTable(
 );
 
 /**
+ * Logical Registrar Action Metadata Type Enum
+ *
+ * Types of internal registrar action metadata.
+ *
+ * NOTE: This enum is an internal implementation detail of ENSIndexer and
+ * should not be used outside of ENSIndexer.
+ */
+export const internal_registrarActionMetadataType = onchainEnum(
+  "_ensindexer_registrar_action_metadata_type",
+  ["CURRENT_LOGICAL_REGISTRAR_ACTION"],
+);
+
+/**
  * Logical Registrar Action Metadata
  *
  * NOTE: This table is an internal implementation detail of ENSIndexer and
@@ -423,12 +436,19 @@ export const internal_registrarActionMetadata = onchainTable(
   "_ensindexer_registrar_action_metadata",
   (t) => ({
     /**
+     * Registrar Action Metadata Type
+     *
+     * The type of internal registrar action metadata being stored.
+     */
+    metadataType: internal_registrarActionMetadataType().primaryKey(),
+
+    /**
      * Logical Event Key
      *
      * A fully lowercase string formatted as:
-     * `{chainId}:{subregistryAddress}:{node}:{transactionHash}`
+     * `{domainId}:{transactionHash}`
      */
-    logicalEventKey: t.text().primaryKey(),
+    logicalEventKey: t.text().notNull(),
 
     /**
      * Logical Event ID
