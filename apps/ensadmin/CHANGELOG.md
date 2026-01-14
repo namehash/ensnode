@@ -1,5 +1,16 @@
 # ensadmin
 
+## 1.5.0
+
+### Patch Changes
+
+- Updated dependencies [[`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc)]:
+  - @ensnode/ensnode-schema@1.5.0
+  - @ensnode/datasources@1.5.0
+  - @ensnode/ponder-metadata@1.5.0
+  - @ensnode/ensnode-react@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
 ## 1.4.0
 
 ### Patch Changes
