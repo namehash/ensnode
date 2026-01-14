@@ -63,7 +63,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
@@ -101,7 +100,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
@@ -137,7 +135,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
@@ -173,7 +170,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
