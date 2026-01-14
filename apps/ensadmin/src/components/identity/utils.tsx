@@ -1,5 +1,13 @@
-import { ChainExplorerIcon, ChainIcon, EnsIcon, getChainName } from "@namehash/namehash-ui";
+import {
+  ChainExplorerIcon,
+  ChainIcon,
+  CopyButton,
+  EnsIcon,
+  getChainName,
+} from "@namehash/namehash-ui";
+import { CheckIcon, CopyIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
+import * as React from "react";
 import { type Address, getAddress } from "viem";
 
 import {
@@ -13,7 +21,6 @@ import {
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
 
-import { CopyButton } from "@/components/copy-button";
 import { ExternalLink, InternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
@@ -189,6 +196,9 @@ export const IdentityTooltip = ({
             <CopyButton
               value={identity.address}
               className="text-gray-500 hover:text-gray-700 transition-colors"
+              successIcon={<CheckIcon className="h-4 w-4" />}
+              icon={<CopyIcon className="h-4 w-4" />}
+              showToast={true}
             />
             {chainExplorerUrl && (
               <ExternalLink href={chainExplorerUrl.toString()}>

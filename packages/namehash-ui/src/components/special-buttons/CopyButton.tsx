@@ -63,7 +63,7 @@ export function CopyButton({
       type="button"
       onClick={copyToClipboard}
       disabled={isCopying}
-      className={cn(className)}
+      className={cn("nhui:cursor-pointer", className)}
       {...props}
     >
       {hasCopied ? (successIcon ? successIcon : "Copied") : icon ? icon : "Copy"}

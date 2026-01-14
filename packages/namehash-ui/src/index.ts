@@ -22,4 +22,5 @@ export * from "./components/identity/Identity";
 export * from "./components/identity/Name";
 export * from "./components/identity/ResolveAndDisplayIdentity";
 export * from "./components/registrar-actions/RegistrarActionCard";
+export * from "./components/special-buttons/CopyButton";
 export { getChainName } from "./utils/chains";

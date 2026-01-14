@@ -4,7 +4,10 @@
     "jsx": "react-jsx",
     "rootDir": ".", // necessary for 'The project root is ambiguous'
     "types": ["react"],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["./**/*.ts", "./**/*.tsx"],
   "exclude": ["dist", "**/__tests__/**", "**/examples/**"]

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@namehash/namehash-ui/styles.css";
 @config "../../tailwind.config.ts";
 
 @layer base {
@@ -142,15 +143,6 @@
     @apply border-border outline-ring/50;
   }
 
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
   body {
     @apply bg-background text-foreground;
   }
