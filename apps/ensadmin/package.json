@@ -13,8 +13,8 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensadmin",
   "scripts": {
-    "dev": "pnpm --filter @namehash/namehash-ui build:css && next dev -p 4173",
-    "build": "pnpm --filter @namehash/namehash-ui build:css && next build",
+    "dev": "next dev -p 4173",
+    "build": "next build",
     "start": "serve out -l 4173",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",

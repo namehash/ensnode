@@ -41,7 +41,8 @@
     "styles": "./dist/index.css"
   },
   "scripts": {
-    "prepublish": "tsup",
+    "postinstall": "pnpm build:css",
+    "prepublish": "pnpm build:css && tsup",
     "build:css": "postcss src/styles.css -o dist/index.css",
     "dev": "tsup --watch",
     "lint": "biome check --write .",
