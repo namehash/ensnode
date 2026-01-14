@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "@namehash/namehash-ui";
 @import "@namehash/namehash-ui/styles.css";
 @config "../../tailwind.config.ts";
 
