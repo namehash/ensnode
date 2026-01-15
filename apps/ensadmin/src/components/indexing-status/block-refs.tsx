@@ -2,11 +2,11 @@
  * This file defines UI components for presenting {@link BlockRef}.
  */
 
+import { RelativeTime } from "@namehash/namehash-ui";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
 import type { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
 
-import { RelativeTime } from "@/components/datetime-utils";
 import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 
 interface BlockNumberProps {
@@ -72,6 +72,7 @@ export function BlockStats({ chainId, label, block }: BlockStatsProps) {
           includeSeconds={true}
           tooltipPosition="bottom"
           prefix="from "
+          tooltipStyles="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
         />
       </div>
     </div>

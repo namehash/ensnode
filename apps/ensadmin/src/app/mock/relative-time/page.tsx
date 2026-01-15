@@ -1,13 +1,12 @@
 "use client";
 
-import { InfoIcon } from "@namehash/namehash-ui";
+import { AbsoluteTime, InfoIcon, RelativeTime } from "@namehash/namehash-ui";
 import { CheckIcon, X as XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import mockDataJson from "@/app/mock/relative-time/data.json";
-import { AbsoluteTime, RelativeTime } from "@/components/datetime-utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";

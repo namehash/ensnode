@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { cn } from "../../utils/cn";
-import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { AbsoluteTime } from "./AbsoluteTime";
 
 /**
@@ -135,10 +135,7 @@ export function RelativeTime({
           }}
         />{" "}
         (UTC)
-        <TooltipArrow width={12} height={8} />
       </TooltipContent>
     </Tooltip>
   );
 }
-
-// TODO: Copied from ENSAwards - some alignment made but further changes may be needed

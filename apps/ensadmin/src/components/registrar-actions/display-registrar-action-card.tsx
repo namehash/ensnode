@@ -1,4 +1,4 @@
-import { InfoIcon } from "@namehash/namehash-ui";
+import { DisplayDuration, InfoIcon, RelativeTime } from "@namehash/namehash-ui";
 import { memo, type PropsWithChildren } from "react";
 import { zeroAddress } from "viem";
 
@@ -14,12 +14,10 @@ import {
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
-import { DisplayDuration, RelativeTime } from "@/components/datetime-utils";
 import { ResolveAndDisplayIdentity } from "@/components/identity";
 import { NameDisplay, NameLink } from "@/components/identity/utils";
 import { ExternalLink } from "@/components/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useNow } from "@/hooks/use-now";
 import { getBlockExplorerUrlForTransactionHash } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
@@ -183,6 +181,7 @@ export function DisplayRegistrarActionCard({
           conciseFormatting={true}
           contentWrapper={withTransactionLink}
           relativeTo={now}
+          tooltipStyles="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
         />
       </LabeledField>
 
