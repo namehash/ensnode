@@ -1,10 +1,16 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import {
+  getEnsManagerAddressDetailsUrl,
+  RegistrarActionCardLoading,
+  RegistrarActionCardMemo,
+} from "@namehash/namehash-ui";
 
 import { ENSNamespaceId, NamedRegistrarAction } from "@ensnode/ensnode-sdk";
 
 import { ErrorInfo } from "@/components/error-info";
+import { getNameDetailsRelativePath } from "@/components/identity";
 import { InternalLink } from "@/components/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,10 +19,6 @@ import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
 import { useNow } from "@/hooks/use-now";
 import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 
-import {
-  DisplayRegistrarActionCardMemo,
-  DisplayRegistrarActionCardPlaceholder,
-} from "./display-registrar-action-card";
 import { type StatefulFetchRegistrarActions, StatefulFetchStatusIds } from "./types";
 
 interface DisplayRegistrarActionsListProps {
@@ -33,6 +35,7 @@ function DisplayRegistrarActionsList({
 }: DisplayRegistrarActionsListProps) {
   const [animationParent] = useAutoAnimate();
   const now = useNow();
+  const { retainCurrentRawConnectionUrlParam } = useRawConnectionUrlParam();
 
   return (
     <div
@@ -40,11 +43,29 @@ function DisplayRegistrarActionsList({
       className="w-full h-fit box-border flex flex-col justify-start items-center gap-3"
     >
       {registrarActions.map((namedRegistrarAction) => (
-        <DisplayRegistrarActionCardMemo
+        <RegistrarActionCardMemo
           key={namedRegistrarAction.action.id}
           namespaceId={namespaceId}
           namedRegistrarAction={namedRegistrarAction}
           now={now}
+          links={{
+            name: {
+              isExternal: false,
+              link: new URL(
+                retainCurrentRawConnectionUrlParam(
+                  getNameDetailsRelativePath(namedRegistrarAction.name),
+                ),
+                "https://admin.ensnode.io/",
+              ),
+            },
+            registrant: {
+              isExternal: true,
+              link: getEnsManagerAddressDetailsUrl(
+                namedRegistrarAction.action.registrant,
+                namespaceId,
+              ),
+            },
+          }}
         />
       ))}
     </div>
@@ -64,7 +85,7 @@ function DisplayRegistrarActionsListPlaceholder({
   return (
     <div className="space-y-4">
       {[...Array(itemsPerPage)].map((_, idx) => (
-        <DisplayRegistrarActionCardPlaceholder key={idx} />
+        <RegistrarActionCardLoading key={idx} />
       ))}
     </div>
   );

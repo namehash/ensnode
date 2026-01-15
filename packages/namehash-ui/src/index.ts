@@ -23,4 +23,7 @@ export * from "./components/identity/Name";
 export * from "./components/identity/ResolveAndDisplayIdentity";
 export * from "./components/registrar-actions/RegistrarActionCard";
 export * from "./components/special-buttons/CopyButton";
+export * from "./utils/blockExplorers";
 export { getChainName } from "./utils/chains";
+export * from "./utils/ensManager";
+export * from "./utils/ensMetadata";

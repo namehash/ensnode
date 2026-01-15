@@ -42,7 +42,7 @@ export const EnsAvatar = ({ name, namespaceId, className, isSquare = false }: En
       />
       {loadingStatus === "error" && <EnsAvatarFallback name={name} isSquare={isSquare} />}
       {(loadingStatus === "idle" || loadingStatus === "loading") && (
-        <AvatarLoading className={className} />
+        <AvatarLoading isSquare={isSquare} />
       )}
     </Avatar>
   );
@@ -65,12 +65,12 @@ const EnsAvatarFallback = ({ name, isSquare }: EnsAvatarFallbackProps) => (
   />
 );
 
-type EnsAvatarLoadingProps = Omit<EnsAvatarProps, "name" | "namespaceId">;
-const AvatarLoading = ({ className }: EnsAvatarLoadingProps) => (
+type EnsAvatarLoadingProps = Omit<EnsAvatarProps, "name" | "namespaceId" | "className">;
+const AvatarLoading = ({ isSquare }: EnsAvatarLoadingProps) => (
   <div
     className={cn(
-      "nhui:h-full nhui:w-full nhui:rounded-full nhui:animate-pulse nhui:bg-gray-200",
-      className,
+      "nhui:h-full nhui:w-full nhui:animate-pulse nhui:bg-gray-200",
+      isSquare && "nhui:rounded-full",
     )}
   />
 );

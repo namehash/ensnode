@@ -1,6 +1,10 @@
 "use client";
 
-import { getChainName } from "@namehash/namehash-ui";
+import {
+  DisplayIdentity,
+  getChainName,
+  getEnsManagerAddressDetailsUrl,
+} from "@namehash/namehash-ui";
 import { useState } from "react";
 import { type Address, isAddress } from "viem";
 
@@ -23,7 +27,6 @@ import {
   uniq,
 } from "@ensnode/ensnode-sdk";
 
-import { DisplayIdentity } from "@/components/identity";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -315,6 +318,10 @@ export default function MockDisplayIdentityPage() {
             identity={selectedIdentity}
             namespaceId={selectedNamespaceId}
             withLink={withLink}
+            identityLinkDetails={{
+              isExternal: true,
+              link: getEnsManagerAddressDetailsUrl(selectedIdentity.address, selectedNamespaceId),
+            }}
             withTooltip={withTooltip}
             withAvatar={withAvatar}
           />

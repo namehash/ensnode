@@ -1,10 +1,9 @@
 "use client";
 
+import { getEnsMetadataServiceAvatarUrl } from "@namehash/namehash-ui";
 import { useQuery } from "@tanstack/react-query";
 
 import type { Name } from "@ensnode/ensnode-sdk";
-
-import { buildEnsMetadataServiceAvatarUrl } from "@/lib/namespace-utils";
 
 import { useNamespace } from "./use-namespace";
 
@@ -46,7 +45,7 @@ export function useEnsMetadataServiceAvatarUrl({ name }: UseEnsMetadataServiceAv
     queryKey: ["avatarUrl", name, namespaceId],
     queryFn: () => {
       if (namespaceId === null) throw new Error("namespaceId required to execute this query");
-      return buildEnsMetadataServiceAvatarUrl(name, namespaceId);
+      return getEnsMetadataServiceAvatarUrl(name, namespaceId);
     },
     enabled: namespaceId !== null,
   });

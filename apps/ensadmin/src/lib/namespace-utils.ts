@@ -1,4 +1,5 @@
-import type { Address, Hash } from "viem";
+import { getBlockExplorerUrl, getEnsManagerUrl } from "@namehash/namehash-ui";
+import type { Address } from "viem";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -48,95 +49,17 @@ export const getNameWrapperAddress = (namespaceId: ENSNamespaceId): Address =>
   getDatasource(namespaceId, DatasourceNames.ENSRoot).contracts.NameWrapper.address;
 
 /**
- * Get the ENS Manager App URL for the provided namespace.
- *
- * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @returns ENS Manager App URL for the provided namespace, or null if the provided namespace
- * doesn't have a known ENS Manager App
- */
-export function getEnsManagerAppUrl(namespaceId: ENSNamespaceId): URL | null {
-  switch (namespaceId) {
-    case ENSNamespaceIds.Mainnet:
-      return new URL(`https://app.ens.domains/`);
-    case ENSNamespaceIds.Sepolia:
-      return new URL(`https://sepolia.app.ens.domains/`);
-    case ENSNamespaceIds.EnsTestEnv:
-      // ens-test-env runs on a local chain and is not supported by app.ens.domains
-      return null;
-  }
-}
-
-/**
- * Build the avatar image URL for a name on the given ENS Namespace that (once fetched) would
- * load the avatar image for the given name from the ENS Metadata Service
- * (https://metadata.ens.domains/docs).
- *
- * The returned URL is dynamically built based on the provided ENS namespace. Not all ENS
- * namespaces are supported by the ENS Metadata Service. Therefore, the returned URL may
- * be null.
- *
- * @param {Name} name - ENS name to build the avatar image URL for
- * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @returns avatar image URL for the name on the given ENS Namespace, or null if the given
- *          ENS namespace is not supported by the ENS Metadata Service
- */
-export function buildEnsMetadataServiceAvatarUrl(
-  name: Name,
-  namespaceId: ENSNamespaceId,
-): URL | null {
-  switch (namespaceId) {
-    case ENSNamespaceIds.Mainnet:
-      return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
-    case ENSNamespaceIds.Sepolia:
-      return new URL(name, `https://metadata.ens.domains/sepolia/avatar/`);
-    case ENSNamespaceIds.EnsTestEnv:
-      // ens-test-env runs on a local chain and is not supported by metadata.ens.domains
-      // TODO: Above comment is not true. Details at https://github.com/namehash/ensnode/issues/1078
-      return null;
-  }
-}
-
-/**
  * Builds the URL of the external ENS Manager App Profile page for a given name and ENS Namespace.
  *
  * @returns URL to the Profile page in the external ENS Manager App for a given name and ENS Namespace,
  * or null if this URL is not known
  */
 export function buildExternalEnsAppProfileUrl(name: Name, namespaceId: ENSNamespaceId): URL | null {
-  const baseUrl = getEnsManagerAppUrl(namespaceId);
+  const baseUrl = getEnsManagerUrl(namespaceId);
   if (!baseUrl) return null;
 
   return new URL(name, baseUrl);
 }
-
-/**
- * Get the URL of the address details page in ENS Manager App for a given address and ENS Namespace.
- *
- * @returns URL to the address details page in the ENS Manager App for a given address and ENS
- * Namespace, or null if this URL is not known
- */
-export function getAddressDetailsUrl(address: Address, namespaceId: ENSNamespaceId): URL | null {
-  const baseUrl = getEnsManagerAppUrl(namespaceId);
-  if (!baseUrl) return null;
-
-  return new URL(address, baseUrl);
-}
-
-/**
- * Gets the base block explorer URL for a given chainId
- *
- * @returns default block explorer URL for the chain with the provided id,
- * or null if the referenced chain doesn't have a known block explorer
- */
-export const getChainBlockExplorerUrl = (chainId: ChainId): URL | null => {
-  const chain = SUPPORTED_CHAINS.find((chain) => chain.id === chainId);
-  if (!chain) return null;
-
-  // NOTE: anvil/ens-test-env chain does not have a blockExplorer
-  if (!chain.blockExplorers) return null;
-
-  return new URL(chain.blockExplorers.default.url);
-};
 
 /**
  * Gets the block explorer URL for a specific block on a specific chainId
@@ -145,37 +68,8 @@ export const getChainBlockExplorerUrl = (chainId: ChainId): URL | null => {
  * or null if the referenced chain doesn't have a known block explorer
  */
 export const getBlockExplorerUrlForBlock = (chainId: ChainId, blockNumber: number): URL | null => {
-  const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
+  const chainBlockExplorer = getBlockExplorerUrl(chainId);
   if (!chainBlockExplorer) return null;
 
   return new URL(`block/${blockNumber}`, chainBlockExplorer.toString());
-};
-
-/**
- * Gets the block explorer URL for a specific address on a specific chainId
- *
- * @returns complete block explorer URL for a specific address on a specific chainId,
- * or null if the referenced chain doesn't have a known block explorer
- */
-export const getBlockExplorerUrlForAddress = (chainId: ChainId, address: Address): URL | null => {
-  const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
-  if (!chainBlockExplorer) return null;
-
-  return new URL(`address/${address}`, chainBlockExplorer.toString());
-};
-
-/**
- * Gets the block explorer URL for a specific transaction hash on a specific chainId
- *
- * @returns complete block explorer URL for a specific transaction hash on a specific chainId,
- * or null if the referenced chain doesn't have a known block explorer
- */
-export const getBlockExplorerUrlForTransactionHash = (
-  chainId: ChainId,
-  transactionHash: Hash,
-): URL | null => {
-  const chainBlockExplorer = getChainBlockExplorerUrl(chainId);
-  if (!chainBlockExplorer) return null;
-
-  return new URL(`tx/${transactionHash}`, chainBlockExplorer.toString());
 };

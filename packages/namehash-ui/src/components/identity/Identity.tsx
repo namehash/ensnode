@@ -1,4 +1,6 @@
+import { CheckIcon, CopyIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
+import * as React from "react";
 
 import type { ENSNamespaceId, Identity } from "@ensnode/ensnode-sdk";
 import {
@@ -21,7 +23,7 @@ import { AddressDisplay } from "./Address";
 
 export interface IdentityLinkDetails {
   isExternal: boolean;
-  link: URL;
+  link: URL | null;
 }
 interface IdentityLinkProps {
   linkDetails: IdentityLinkDetails;
@@ -41,6 +43,10 @@ export function IdentityLink({
   className,
   children,
 }: PropsWithChildren<IdentityLinkProps>) {
+  if (linkDetails.link === null) {
+    return <>{children}</>;
+  }
+
   return (
     <a
       href={linkDetails.link.href}
@@ -109,8 +115,10 @@ export const IdentityTooltip = ({
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side="top"
-        className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit"
+        className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
       >
+        {/*TODO: The styling of the tooltip should either be unified across all our apps or made customizable. */}
+        {/*Currently aligned to fit ensadmin, cause it's only used there*/}
         <div className="nhui:flex nhui:gap-4">
           <div className="nhui:flex nhui:items-center">
             <ChainIcon
@@ -128,6 +136,9 @@ export const IdentityTooltip = ({
             <CopyButton
               value={identity.address}
               className="nhui:text-gray-500 nhui:hover:text-gray-700 nhui:transition-colors"
+              successIcon={<CheckIcon className="nhui:h-4 nhui:w-4" />}
+              icon={<CopyIcon className="nhui:h-4 nhui:w-4" />}
+              showToast={true}
             />
             {chainExplorerUrl && (
               <a target="_blank" href={chainExplorerUrl.toString()}>
