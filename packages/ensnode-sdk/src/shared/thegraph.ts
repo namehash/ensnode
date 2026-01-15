@@ -6,7 +6,7 @@ import type { TheGraphFallback } from "./config/thegraph";
  * Determines whether, given the provided context, a Subgraph GraphQL API request can be handled by
  * a TheGraph-hosted Subgraph.
  *
- * @see https://ensnode.io/docs/reference/subgraph-compatibility/
+ * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/
  */
 export const canFallbackToTheGraph = ({
   namespace,
