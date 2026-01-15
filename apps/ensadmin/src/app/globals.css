@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import "@namehash/namehash-ui/styles.css";
+@import "tailwindcss";
 @config "../../tailwind.config.ts";
 
 @layer base {

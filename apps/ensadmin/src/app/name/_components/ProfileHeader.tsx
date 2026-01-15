@@ -1,8 +1,9 @@
 "use client";
 
+import { EnsAvatar } from "@namehash/namehash-ui";
+
 import type { ENSNamespaceId, Name } from "@ensnode/ensnode-sdk";
 
-import { EnsAvatar } from "@/components/ens-avatar";
 import { NameDisplay } from "@/components/identity/utils";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent } from "@/components/ui/card";
