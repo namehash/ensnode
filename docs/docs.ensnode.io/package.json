@@ -1,0 +1,21 @@
+{
+  "name": "@docs/mintlify",
+  "version": "1.5.0",
+  "private": true,
+  "type": "module",
+  "description": "ENSNode's Mintlify docs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "docs/docs.ensnode.io"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/docs/docs.ensnode.io",
+  "scripts": {
+    "dev": "mintlify dev"
+  },
+  "devDependencies": {
+    "mintlify": "^4.1.0"
+  },
+  "packageManager": "pnpm@10.28.0"
+}
