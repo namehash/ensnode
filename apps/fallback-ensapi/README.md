@@ -10,11 +10,11 @@ This Fallback ENSApi proxies ENS Subgraph GraphQL API requests originally sent t
 
 When run in production, it also requires configuration of the `CLOUDFLARE_SECRET` environment variable to avoid exposing our `/subgraph` proxy to the public net.
 
-For data consistency, this fallback is exclusively enabled for NameHash's ENSNode deployments that use a [Subgraph Compatible](https://www.ensnode.io/docs/concepts/what-is-the-ens-subgraph/) configuration. More specifically:
+For data consistency, this fallback is exclusively enabled for NameHash's ENSNode deployments that use a [Subgraph Compatible](https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/) configuration. More specifically:
 - Mainnet: https://api.mainnet.ensnode.io/
 - Sepolia: https://api.sepolia.ensnode.io/
 
-The following NameHash ENSNode deployments are _not_ fully [Subgraph Compatible](https://www.ensnode.io/docs/concepts/what-is-the-ens-subgraph/), as they produce a _superset_ of the data indexed by TheGraph. Fallback ENSApi will return an HTTP 503 (Service Unavailable) in response to any Subgraph API requests for these deployments:
+The following NameHash ENSNode deployments are _not_ fully [Subgraph Compatible](https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/), as they produce a _superset_ of the data indexed by TheGraph. Fallback ENSApi will return an HTTP 503 (Service Unavailable) in response to any Subgraph API requests for these deployments:
 - Mainnet: https://api.alpha.ensnode.io/
 - Sepolia: https://api.alpha-sepolia.ensnode.io/
 

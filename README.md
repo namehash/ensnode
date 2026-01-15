@@ -52,10 +52,10 @@ ENSNode provides enhanced ENS indexing capabilities beyond the ENS Subgraph, inc
   - ✅ Automatically reconciles chain reorganizations
   - ✅ Deploy anywhere with Node.js & Docker
 - Designed for web developers
-  - ✅ [use ENSNode with ENSjs](https://www.ensnode.io/docs/usage/with-ensjs/)
+  - ✅ [use ENSNode with ENSjs](https://ensnode.io/docs/usage/with-ensjs/)
   - ✅ [GraphQL APIs](https://ensnode.io/docs/usage/api/)
   - ✅ Custom APIs for your app
-- [1:1 Subgraph Compatibility](https://www.ensnode.io/docs/concepts/what-is-the-ens-subgraph/)
+- [1:1 Subgraph Compatibility](https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/)
   - ✅ [100% data equivalency](https://github.com/namehash/ens-subgraph-transition-tools) as compared to Subgraph
   - ✅ 100% ensjs test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
   - ✅ 100% ens-app-v3 test suites passing via [ens-test-env](https://github.com/namehash/ens-test-env)
