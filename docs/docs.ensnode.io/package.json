@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/docs/docs.ensnode.io",
   "scripts": {
-    "dev": "pnpm dlx mintlify@^4.1.0 dev"
+    "mint": "pnpm dlx mint@^4.1.0"
   },
   "packageManager": "pnpm@10.28.0"
 }
