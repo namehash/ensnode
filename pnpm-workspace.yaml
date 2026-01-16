@@ -11,7 +11,7 @@ catalog:
   "@ponder/client": 0.16.1
   "@ponder/utils": 0.2.16
   "@testing-library/react": ^16.3.0
-  "@types/node": 22.18.13
+  "@types/node": 24.10.9
   astro: ^5.15.9
   astro-font: ^1.1.0
   astro-seo: ^0.8.4
