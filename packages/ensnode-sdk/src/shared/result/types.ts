@@ -8,56 +8,35 @@
  */
 export const ResultCodes = {
   Ok: "ok",
-  Error: "error",
+  ServerError: "server-error",
 } as const;
 
 export type ResultCode = (typeof ResultCodes)[keyof typeof ResultCodes];
 
+export type ErrorResultCode = Exclude<ResultCode, typeof ResultCodes.Ok>;
+
 /**
- * Value type useful for `ResultOk` type.
+ * Abstract representation of any result.
  */
-export interface ResultOkValue<ValueCodeType> {
-  valueCode: ValueCodeType;
+export interface AbstractResult<ResultCode> {
+  resultCode: ResultCode;
 }
 
 /**
- * Result Ok returned by a successful operation call.
+ * Abstract representation of a successful result.
  */
-export interface ResultOk<ValueType> {
+export interface AbstractResultOk<DataType> extends AbstractResult<typeof ResultCodes.Ok> {
   resultCode: typeof ResultCodes.Ok;
-  value: ValueType;
+  data: DataType;
 }
 
-/**
- * Value type useful for `ResultError` type.
- */
-export interface ResultErrorValue<ErrorCodeType> {
-  errorCode: ErrorCodeType;
+export interface AbstractResultError<ResultCode extends ErrorResultCode>
+  extends AbstractResult<ResultCode> {
+  errorMessage: string;
+  transient: boolean;
 }
 
-/**
- * Result Error returned by a failed operation call.
- */
-export interface ResultError<ErrorType> {
-  resultCode: typeof ResultCodes.Error;
-  value: ErrorType;
+export interface AbstractResultErrorData<ResultCode extends ErrorResultCode, DataType>
+  extends AbstractResultError<ResultCode> {
+  data: DataType;
 }
-
-/**
- * Result returned by an operation.
- *
- * Guarantees:
- * - `resultCode` indicates if operation succeeded or failed.
- * - `value` describes the outcome of the operation, for example
- *   - {@link ResultOkValue} for successful operation call.
- *   - {@link ResultErrorValue} for failed operation call.
- */
-export type Result<OkType, ErrorType> = ResultOk<OkType> | ResultError<ErrorType>;
-
-/**
- * Type for marking error as a transient one.
- *
- * It's useful for downstream consumers to know, so they can attempt fetching
- * the result once again.
- */
-export type ErrorTransient<ErrorType> = ErrorType & { transient: true };
