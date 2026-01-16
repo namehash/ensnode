@@ -6,7 +6,7 @@ import {
   decodeEncodedReferrer,
   ENCODED_REFERRER_BYTE_LENGTH,
   ENCODED_REFERRER_BYTE_OFFSET,
-} from "./encoding";
+} from "./encoded-referrer";
 
 const vitalikEthAddressLowercase: Address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
 const vitalikEthAddressChecksummed: Address = getAddress(

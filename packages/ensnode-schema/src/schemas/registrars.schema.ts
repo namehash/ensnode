@@ -321,8 +321,8 @@ export const registrarActions = onchainTable(
     /**
      * Decoded referrer
      *
-     * Decoded referrer according to the subjective interpretation of
-     * `encodedReferrer` defined for ENS Holiday Awards.
+     * The referrer address decoded from `encodedReferrer` using strict
+     * left-zero-padding validation.
      *
      * Identifies the interpreted address of the referrer.
      * The "chainId" of this address is the same as is referenced in

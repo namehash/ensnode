@@ -18,7 +18,8 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./internal": "./src/internal.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -45,6 +46,9 @@
   },
   "peerDependencies": {
     "viem": "catalog:"
+  },
+  "dependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
