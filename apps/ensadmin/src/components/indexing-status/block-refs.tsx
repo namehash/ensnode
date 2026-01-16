@@ -72,7 +72,7 @@ export function BlockStats({ chainId, label, block }: BlockStatsProps) {
           includeSeconds={true}
           tooltipPosition="bottom"
           prefix="from "
-          tooltipStyles="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
+          tooltipStyles="bg-gray-50 text-sm text-black text-left shadow-md outline-hidden w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
         />
       </div>
     </div>

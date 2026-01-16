@@ -70,7 +70,7 @@ const AvatarLoading = ({ isSquare }: EnsAvatarLoadingProps) => (
   <div
     className={cn(
       "nhui:h-full nhui:w-full nhui:animate-pulse nhui:bg-gray-200",
-      isSquare && "nhui:rounded-full",
+      !isSquare && "nhui:rounded-full",
     )}
   />
 );

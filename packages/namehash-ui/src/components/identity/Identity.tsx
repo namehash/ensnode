@@ -117,7 +117,7 @@ export const IdentityTooltip = ({
         side="top"
         className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
       >
-        {/*TODO: The styling of the tooltip should either be unified across all our apps or made customizable. */}
+        {/*TODO: The styling of all tooltips should either be unified across all our apps or made customizable. */}
         {/*Currently aligned to fit ensadmin, cause it's only used there*/}
         <div className="nhui:flex nhui:gap-4">
           <div className="nhui:flex nhui:items-center">
