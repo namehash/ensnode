@@ -20,7 +20,7 @@ export type ConfigTemplateId = (typeof ConfigTemplateIds)[keyof typeof ConfigTem
  *
  * See packages/ensnode-sdk/src/ensindexer/config/is-subgraph-compatible.ts for additional info.
  *
- * @see https://ensnode.io/docs/reference/subgraph-compatibility/
+ * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/
  */
 export function isConfigTemplateSubgraphCompatible(configTemplateId: ConfigTemplateId) {
   switch (configTemplateId) {

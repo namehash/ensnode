@@ -1,5 +1,18 @@
 # @namehash/namehash-ui
 
+## 1.5.0
+
+### Minor Changes
+
+- [#1507](https://github.com/namehash/ensnode/pull/1507) [`8d10a61`](https://github.com/namehash/ensnode/commit/8d10a6132263975689792a2670fc9f8bbfb9eaf7) Thanks [@Y3drk](https://github.com/Y3drk)! - Populates `namehash-ui` package with shared UI components.
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.5.0
+  - @ensnode/ensnode-react@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
 ## 1.4.0
 
 ### Minor Changes

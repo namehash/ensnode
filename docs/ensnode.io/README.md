@@ -24,4 +24,4 @@ The documentation uses optional environment variables:
    - `ENSADMIN_URL`: Base URL for an ENSAdmin instance. Used for links that open in ENSAdmin. (defaults to `https://admin.ensnode.io`)
 3. Stop the Astro server and restart it with `pnpm dev`
 
-Visit [ensnode.io](https://www.ensnode.io) for documentation, guides, and the API reference.
+Visit [ensnode.io](https://ensnode.io) for documentation, guides, and the API reference.
