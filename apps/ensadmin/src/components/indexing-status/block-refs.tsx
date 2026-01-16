@@ -2,12 +2,10 @@
  * This file defines UI components for presenting {@link BlockRef}.
  */
 
-import { RelativeTime } from "@namehash/namehash-ui";
+import { getBlockExplorerBlockUrl, RelativeTime } from "@namehash/namehash-ui";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 
 import type { BlockRef, ChainId } from "@ensnode/ensnode-sdk";
-
-import { getBlockExplorerUrlForBlock } from "@/lib/namespace-utils";
 
 interface BlockNumberProps {
   chainId: ChainId;
@@ -21,7 +19,7 @@ interface BlockNumberProps {
  * If the chain has no known block explorer, just displays the block number (without link).
  **/
 function BlockNumber({ chainId, block }: BlockNumberProps) {
-  const blockExplorerUrl = getBlockExplorerUrlForBlock(chainId, block.number);
+  const blockExplorerUrl = getBlockExplorerBlockUrl(chainId, block.number);
   if (blockExplorerUrl) {
     return (
       <a

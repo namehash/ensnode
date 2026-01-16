@@ -154,6 +154,7 @@ function ResolveAndDisplayReferrerIdentity({
 
 export interface RegistrarActionCardLoadingProps {
   showReferrer?: boolean;
+  showReferralProgramField?: boolean;
 }
 
 /**
@@ -161,6 +162,7 @@ export interface RegistrarActionCardLoadingProps {
  */
 export function RegistrarActionCardLoading({
   showReferrer = true,
+  showReferralProgramField = true,
 }: RegistrarActionCardLoadingProps) {
   const isMobile = useIsMobile();
 
@@ -211,9 +213,11 @@ export function RegistrarActionCardLoading({
         </div>
       )}
 
-      <LabeledField fieldLabel="Incentive program" className="nhui:w-[15%] nhui:min-w-[162px]">
-        <div className="nhui:animate-pulse nhui:h-[14px] nhui:mt-[4px] nhui:mb-[3px] nhui:bg-gray-200 nhui:rounded-sm nhui:w-1/4 nhui:sm:w-4/5" />
-      </LabeledField>
+      {showReferralProgramField && (
+        <LabeledField fieldLabel="Incentive program" className="nhui:w-[15%] nhui:min-w-[162px]">
+          <div className="nhui:animate-pulse nhui:h-[14px] nhui:mt-[4px] nhui:mb-[3px] nhui:bg-gray-200 nhui:rounded-sm nhui:w-1/4 nhui:sm:w-4/5" />
+        </LabeledField>
+      )}
     </div>
   );
 }
@@ -269,13 +273,19 @@ export function RegistrarActionCard({
     nhui:items-start nhui:gap-2 nhui:p-4 nhui:sm:p-6 nhui:sm:gap-y-5 nhui:rounded-2xl nhui:border nhui:border-gray-200 nhui:text-sm nhui:bg-white"
     >
       <LabeledField fieldLabel="Name" className="nhui:w-[15%] nhui:min-w-[162px]">
-        <a
-          target="_blank"
-          href={links.name.link ? links.name.link.href : undefined}
-          className="nhui:max-sm:max-w-3/4 nhui:sm:w-full nhui:box-border nhui:overflow-x-auto nhui:text-blue-600 nhui:font-medium nhui:hover:underline nhui:hover:underline-offset-[25%] nhui:whitespace-nowrap"
-        >
-          <NameDisplay name={namedRegistrarAction.name} className="nhui:h-[21px]" />
-        </a>
+        {links.name.link !== null ? (
+          <a
+            target={links.name.isExternal ? "_blank" : "_self"}
+            href={links.name.link.href}
+            className="nhui:max-sm:max-w-3/4 nhui:sm:w-full nhui:box-border nhui:overflow-x-auto nhui:text-blue-600 nhui:font-medium nhui:hover:underline nhui:hover:underline-offset-[25%] nhui:whitespace-nowrap"
+          >
+            <NameDisplay name={namedRegistrarAction.name} className="nhui:h-[21px]" />
+          </a>
+        ) : (
+          <p className="nhui:max-sm:max-w-3/4 nhui:sm:w-full nhui:box-border nhui:overflow-x-auto nhui:font-medium nhui:whitespace-nowrap">
+            <NameDisplay name={namedRegistrarAction.name} className="nhui:h-[21px]" />
+          </p>
+        )}
       </LabeledField>
 
       <LabeledField

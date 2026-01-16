@@ -5,20 +5,20 @@ import {
   getEnsManagerAddressDetailsUrl,
   RegistrarActionCardLoading,
   RegistrarActionCardMemo,
+  useNow,
 } from "@namehash/namehash-ui";
 
 import { ENSNamespaceId, NamedRegistrarAction } from "@ensnode/ensnode-sdk";
 
 import { ErrorInfo } from "@/components/error-info";
-import { getNameDetailsRelativePath } from "@/components/identity";
 import { InternalLink } from "@/components/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRawConnectionUrlParam } from "@/hooks/use-connection-url-param";
-import { useNow } from "@/hooks/use-now";
 import { formatOmnichainIndexingStatus } from "@/lib/indexing-status";
 
+import { getNameDetailsRelativePath } from "../name-links";
 import { type StatefulFetchRegistrarActions, StatefulFetchStatusIds } from "./types";
 
 interface DisplayRegistrarActionsListProps {
@@ -85,7 +85,7 @@ function DisplayRegistrarActionsListPlaceholder({
   return (
     <div className="space-y-4">
       {[...Array(itemsPerPage)].map((_, idx) => (
-        <RegistrarActionCardLoading key={idx} />
+        <RegistrarActionCardLoading key={idx} showReferralProgramField={false} />
       ))}
     </div>
   );

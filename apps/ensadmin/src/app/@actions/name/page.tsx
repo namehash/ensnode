@@ -1,5 +1,6 @@
 "use client";
 
+import { getEnsManagerNameDetailsUrl } from "@namehash/namehash-ui";
 import { useSearchParams } from "next/navigation";
 
 import type { Name } from "@ensnode/ensnode-sdk";
@@ -7,7 +8,6 @@ import type { Name } from "@ensnode/ensnode-sdk";
 import { ExternalLinkWithIcon } from "@/components/link";
 import { Button } from "@/components/ui/button";
 import { useNamespace } from "@/hooks/async/use-namespace";
-import { buildExternalEnsAppProfileUrl } from "@/lib/namespace-utils";
 
 export default function ActionsNamePage() {
   const searchParams = useSearchParams();
@@ -17,8 +17,7 @@ export default function ActionsNamePage() {
 
   const { data: namespace } = useNamespace();
 
-  const ensAppProfileUrl =
-    name && namespace ? buildExternalEnsAppProfileUrl(name, namespace) : null;
+  const ensAppProfileUrl = name && namespace ? getEnsManagerNameDetailsUrl(name, namespace) : null;
 
   if (!ensAppProfileUrl) return null;
 

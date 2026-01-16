@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-import { useSystemClock } from "./use-system-clock";
+import { useSystemClock } from "./useSystemClock";
 
 /** Default time to refresh: `1` second. */
 export const DEFAULT_TIME_TO_REFRESH: Duration = 1;

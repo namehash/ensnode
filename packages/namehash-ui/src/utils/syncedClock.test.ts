@@ -1,7 +1,7 @@
 import { act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { HighResolutionSyncedClock } from "./synced-clock";
+import { HighResolutionSyncedClock } from "./syncedClock.ts";
 
 describe("HighResolutionSyncedClock", () => {
   const mockedSystemTime = new Date("2025-01-01 00:00:00Z");

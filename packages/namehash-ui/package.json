@@ -47,7 +47,8 @@
     "dev": "tsup --watch",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
   },
   "peerDependencies": {
     "@ensnode/ensnode-react": "workspace:*",
@@ -68,7 +69,8 @@
     "tailwindcss": "catalog:",
     "tsup": "^8.3.6",
     "typescript": "catalog:",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",
