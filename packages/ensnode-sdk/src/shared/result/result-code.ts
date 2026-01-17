@@ -56,14 +56,10 @@ export const RESULT_CODE_CLIENT_ERROR_CODES = [
   ...RESULT_CODE_SERVER_ERROR_CODES,
 ] as const;
 
-const RESULT_CODE_ERROR_CODES = [
-  ...RESULT_CODE_SERVER_ERROR_CODES,
-  ...RESULT_CODE_CLIENT_ERROR_CODES,
-] as const;
 const RESULT_CODE_ALL_CODES = [
   ResultCodes.Loading,
   ResultCodes.Ok,
-  ...RESULT_CODE_ERROR_CODES,
+  ...RESULT_CODE_CLIENT_ERROR_CODES,
 ] as const;
 
 /**
@@ -90,11 +86,6 @@ export type ResultCodeServerError = (typeof RESULT_CODE_SERVER_ERROR_CODES)[numb
  * ResultCode for an error result that may be determined by the client.
  */
 export type ResultCodeClientError = (typeof RESULT_CODE_CLIENT_ERROR_CODES)[number];
-
-/**
- * ResultCode for a result that is an error.
- */
-export type ResultCodeError = (typeof RESULT_CODE_ERROR_CODES)[number];
 
 /************************************************************
  * Compile-time helpers to ensure invariants expected of
@@ -124,10 +115,6 @@ export type AssertResultCodeExact<
     ? true
     : false
   : false;
-
-type _CompileTimeCheck_ResultCodeErrorMatchesUnion = ExpectTrue<
-  AssertResultCodeExact<ResultCodeError, typeof RESULT_CODE_ERROR_CODES>
->;
 
 type _CompileTimeCheck_ResultCodeMatchesUnion = ExpectTrue<
   AssertResultCodeExact<ResultCode, typeof RESULT_CODE_ALL_CODES>

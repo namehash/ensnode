@@ -1,4 +1,9 @@
-import type { ResultCode, ResultCodeError, ResultCodes } from "./result-code";
+import type {
+  ResultCode,
+  ResultCodeClientError,
+  ResultCodeServerError,
+  ResultCodes,
+} from "./result-code";
 
 /************************************************************
  * Abstract results
@@ -28,10 +33,37 @@ export interface AbstractResultOk<TDataType> extends AbstractResult<typeof Resul
 }
 
 /**
- * Abstract representation of an error result.
+ * Abstract representation of a server error result.
  */
-export interface AbstractResultError<TResultCode extends ResultCodeError, TDataType = undefined>
-  extends AbstractResult<TResultCode> {
+export interface AbstractResultServerError<
+  TResultCode extends ResultCodeServerError,
+  TDataType = undefined,
+> extends AbstractResult<TResultCode> {
+  /**
+   * A description of the error.
+   */
+  errorMessage: string;
+
+  /**
+   * Identifies if it may be relevant to retry the operation.
+   *
+   * If `false`, retrying the operation is unlikely to be helpful.
+   */
+  suggestRetry: boolean;
+
+  /**
+   * Optional data associated with the error.
+   */
+  data?: TDataType;
+}
+
+/**
+ * Abstract representation of a client error result.
+ */
+export interface AbstractResultClientError<
+  TResultCode extends ResultCodeClientError,
+  TDataType = undefined,
+> extends AbstractResult<TResultCode> {
   /**
    * A description of the error.
    */

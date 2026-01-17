@@ -2,11 +2,11 @@
  * Internal Server Error
  ************************************************************/
 
-import type { AbstractResultError } from "./result-base";
+import type { AbstractResultClientError, AbstractResultServerError } from "./result-base";
 import { type ResultCode, ResultCodes } from "./result-code";
 
 export interface ResultInternalServerError
-  extends AbstractResultError<typeof ResultCodes.InternalServerError> {}
+  extends AbstractResultServerError<typeof ResultCodes.InternalServerError> {}
 
 export const buildResultInternalServerError = (
   errorMessage?: string,
@@ -23,7 +23,7 @@ export const buildResultInternalServerError = (
  * Not Found
  ************************************************************/
 
-export interface ResultNotFound extends AbstractResultError<typeof ResultCodes.NotFound> {}
+export interface ResultNotFound extends AbstractResultServerError<typeof ResultCodes.NotFound> {}
 
 export const buildResultNotFound = (
   errorMessage?: string,
@@ -41,7 +41,7 @@ export const buildResultNotFound = (
  ************************************************************/
 
 export interface ResultInvalidRequest
-  extends AbstractResultError<typeof ResultCodes.InvalidRequest> {}
+  extends AbstractResultServerError<typeof ResultCodes.InvalidRequest> {}
 
 export const buildResultInvalidRequest = (
   errorMessage?: string,
@@ -59,7 +59,7 @@ export const buildResultInvalidRequest = (
  ************************************************************/
 
 export interface ResultConnectionError
-  extends AbstractResultError<typeof ResultCodes.ConnectionError> {}
+  extends AbstractResultClientError<typeof ResultCodes.ConnectionError> {}
 
 export const buildResultConnectionError = (
   errorMessage?: string,
@@ -77,7 +77,7 @@ export const buildResultConnectionError = (
  ************************************************************/
 
 export interface ResultRequestTimeout
-  extends AbstractResultError<typeof ResultCodes.RequestTimeout> {}
+  extends AbstractResultClientError<typeof ResultCodes.RequestTimeout> {}
 
 export const buildResultRequestTimeout = (
   errorMessage?: string,
@@ -107,7 +107,7 @@ export const buildResultRequestTimeout = (
  * for recognition by clients that are running version X.
  */
 export interface ResultClientUnrecognizedOperationResult
-  extends AbstractResultError<typeof ResultCodes.ClientUnrecognizedOperationResult> {}
+  extends AbstractResultClientError<typeof ResultCodes.ClientUnrecognizedOperationResult> {}
 
 export const buildResultClientUnrecognizedOperationResult = (
   unrecognizedResult: unknown,
