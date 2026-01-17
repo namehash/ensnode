@@ -20,10 +20,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./styles.css": {
-      "import": "./dist/index.css",
-      "default": "./dist/index.css"
-    }
+    "./styles.css": "./dist/index.css"
   },
   "sideEffects": false,
   "publishConfig": {
@@ -44,11 +41,14 @@
     "styles": "./dist/index.css"
   },
   "scripts": {
-    "prepublish": "tsup",
+    "postinstall": "pnpm build:css",
+    "prepublish": "pnpm build:css && tsup",
+    "build:css": "postcss src/styles.css -o dist/index.css",
     "dev": "tsup --watch",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
   },
   "peerDependencies": {
     "@ensnode/ensnode-react": "workspace:*",
@@ -64,11 +64,13 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
     "react": "19.2.1",
     "tailwindcss": "catalog:",
     "tsup": "^8.3.6",
     "typescript": "catalog:",
-    "viem": "catalog:"
+    "viem": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@ensnode/datasources": "workspace:*",

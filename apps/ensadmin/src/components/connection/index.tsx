@@ -2,7 +2,9 @@
 
 import packageJson from "@/../package.json" with { type: "json" };
 
-import { PlugZap } from "lucide-react";
+import { CopyButton } from "@namehash/namehash-ui";
+import { CheckIcon, CopyIcon, PlugZap } from "lucide-react";
+import * as React from "react";
 
 import { ENSNodeConfigInfo } from "@/components/connection/config-info";
 import {
@@ -11,7 +13,6 @@ import {
   ConfigInfoItems,
 } from "@/components/connection/config-info/app-card";
 import { ConnectionLine } from "@/components/connection-line";
-import { CopyButton } from "@/components/copy-button";
 import { ENSAdminIcon } from "@/components/icons/ensnode-apps/ensadmin-icon";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
@@ -41,7 +42,13 @@ export default function ConnectionInfo() {
               value={
                 <span className="flex flex-row flex-no-wrap justify-start items-center gap-0.5 text-sm/6">
                   {rawSelectedConnection}{" "}
-                  <CopyButton value={rawSelectedConnection} className="max-sm:hidden" />
+                  <CopyButton
+                    value={rawSelectedConnection}
+                    className="max-sm:hidden"
+                    successIcon={<CheckIcon className="h-4 w-4" />}
+                    icon={<CopyIcon className="h-4 w-4" />}
+                    showToast={true}
+                  />
                 </span>
               }
             />
