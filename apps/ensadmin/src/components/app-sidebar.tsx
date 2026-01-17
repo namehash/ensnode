@@ -1,9 +1,9 @@
 "use client";
 
+import { EnsIcon } from "@namehash/namehash-ui";
 import { Activity, PlugZap, RadioTower, Telescope } from "lucide-react";
 import type * as React from "react";
 
-import { IconENS } from "@/components/icons/ens";
 import { NavMain } from "@/components/nav-main";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 
@@ -33,7 +33,7 @@ const navItems = [
   {
     title: "ENS Protocol Inspector",
     url: "#",
-    icon: IconENS,
+    icon: EnsIcon,
     isActive: true,
     items: [
       { title: "Record Resolution", url: "/inspect/records" },

@@ -1,5 +1,15 @@
 # ensrainbow
 
+## 1.5.1
+
+### Patch Changes
+
+- [#1537](https://github.com/namehash/ensnode/pull/1537) [`63617fa`](https://github.com/namehash/ensnode/commit/63617fa827daa4bd7761f482812daf7b507da3d2) Thanks [@tk-o](https://github.com/tk-o)! - Updates Node.js runtime to the current LTS version (v24).
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@1.5.1
+  - @ensnode/ensnode-sdk@1.5.1
+
 ## 1.5.0
 
 ### Patch Changes

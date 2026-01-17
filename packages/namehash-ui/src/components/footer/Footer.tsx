@@ -1,11 +1,11 @@
-import { EnsServiceProviderIcon } from "@/components/icons/ens/EnsServiceProviderIcon.tsx";
-import { NameHashLabsIcon } from "@/components/icons/namehash/NameHashLabsIcon.tsx";
-import { EfpIcon } from "@/components/icons/socials/EfpIcon.tsx";
-import { EmailIcon } from "@/components/icons/socials/EmailIcon.tsx";
-import { FarcasterIcon } from "@/components/icons/socials/FarcasterIcon.tsx";
-import { GitHubIcon } from "@/components/icons/socials/GitHubIcon.tsx";
-import { TelegramIcon } from "@/components/icons/socials/TelegramIcon.tsx";
-import { TwitterIcon } from "@/components/icons/socials/TwitterIcon.tsx";
+import { EnsServiceProviderIcon } from "../icons/ens/EnsServiceProviderIcon";
+import { NameHashLabsIcon } from "../icons/namehash/NameHashLabsIcon";
+import { EfpIcon } from "../icons/socials/EfpIcon";
+import { EmailIcon } from "../icons/socials/EmailIcon";
+import { FarcasterIcon } from "../icons/socials/FarcasterIcon";
+import { GitHubIcon } from "../icons/socials/GitHubIcon";
+import { TelegramIcon } from "../icons/socials/TelegramIcon";
+import { TwitterIcon } from "../icons/socials/TwitterIcon";
 
 const footerProducts = [
   {

@@ -1,8 +1,8 @@
 import * as React from "react";
 import { toast } from "sonner";
 
-import { Button, type ButtonProps } from "@/components/ui/button";
-import { cn } from "@/utils/cn.ts";
+import { cn } from "../../utils/cn";
+import { Button, type ButtonProps } from "../ui/button";
 
 export interface CopyButtonProps extends Omit<ButtonProps, "onClick"> {
   value: string;
@@ -63,7 +63,7 @@ export function CopyButton({
       type="button"
       onClick={copyToClipboard}
       disabled={isCopying}
-      className={cn(className)}
+      className={cn("nhui:cursor-pointer", className)}
       {...props}
     >
       {hasCopied ? (successIcon ? successIcon : "Copied") : icon ? icon : "Copy"}

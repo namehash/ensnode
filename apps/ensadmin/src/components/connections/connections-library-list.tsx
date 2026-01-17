@@ -1,8 +1,9 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { CopyButton } from "@namehash/namehash-ui";
+import { CheckIcon, CopyIcon, Trash2 } from "lucide-react";
+import * as React from "react";
 
-import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import type { ConnectionOption } from "@/hooks/use-connections-library";
@@ -55,7 +56,12 @@ export function ConnectionsLibraryList({
                   <Trash2 className="w-3 h-3" />
                 </Button>
               )}
-              <CopyButton value={beautifiedUrl} />
+              <CopyButton
+                value={beautifiedUrl}
+                successIcon={<CheckIcon className="h-4 w-4" />}
+                icon={<CopyIcon className="h-4 w-4" />}
+                showToast={true}
+              />
             </div>
           </div>
         );

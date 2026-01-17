@@ -3,6 +3,7 @@
  * the {@link OmnichainIndexingStatusSnapshotBackfill} indexing status object.
  */
 
+import { AbsoluteTime } from "@namehash/namehash-ui";
 import { Clock } from "lucide-react";
 
 import {
@@ -14,7 +15,6 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { AbsoluteTime } from "@/components/datetime-utils";
 import {
   generateYearMarkers,
   getTimelinePosition,

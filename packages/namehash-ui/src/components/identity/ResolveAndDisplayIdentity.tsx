@@ -10,19 +10,14 @@ import {
   type UnresolvedIdentity,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon.tsx";
-import { AddressDisplay } from "@/components/identity/Address.tsx";
-import {
-  IdentityLink,
-  type IdentityLinkDetails,
-  IdentityTooltip,
-} from "@/components/identity/Identity.tsx";
-import { NameDisplay } from "@/components/identity/Name.tsx";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useIsMobile } from "@/hooks/useIsMobile.tsx";
-import { cn } from "@/utils/cn.ts";
-
-import { EnsAvatar } from "./EnsAvatar.tsx";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import { cn } from "../../utils/cn";
+import { ChainIcon } from "../chains/ChainIcon";
+import { Skeleton } from "../ui/skeleton";
+import { AddressDisplay } from "./Address";
+import { EnsAvatar } from "./EnsAvatar";
+import { IdentityLink, type IdentityLinkDetails, IdentityTooltip } from "./Identity";
+import { NameDisplay } from "./Name";
 
 export interface ResolveAndDisplayIdentityProps {
   identity: UnresolvedIdentity;

@@ -1,11 +1,11 @@
 "use client";
 
+import { NameDisplay } from "@namehash/namehash-ui";
 import { useSearchParams } from "next/navigation";
 
 import type { Name } from "@ensnode/ensnode-sdk";
 
 import BreadcrumbsGroup from "@/components/breadcrumbs/group";
-import { NameDisplay } from "@/components/identity/utils";
 import {
   BreadcrumbItem,
   BreadcrumbLink,
