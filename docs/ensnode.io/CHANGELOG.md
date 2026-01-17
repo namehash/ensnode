@@ -1,5 +1,11 @@
 # @docs/ensnode
 
+## 1.5.1
+
+### Patch Changes
+
+- [#1534](https://github.com/namehash/ensnode/pull/1534) [`bc1897d`](https://github.com/namehash/ensnode/commit/bc1897d99fe6f3e3b33db77e76eb1943cbcdbb71) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Refine docs for the ENS Subgraph
+
 ## 1.5.0
 
 ## 1.4.0

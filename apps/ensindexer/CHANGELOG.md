@@ -1,5 +1,20 @@
 # ensindexer
 
+## 1.5.1
+
+### Patch Changes
+
+- [#1534](https://github.com/namehash/ensnode/pull/1534) [`bc1897d`](https://github.com/namehash/ensnode/commit/bc1897d99fe6f3e3b33db77e76eb1943cbcdbb71) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Updated default plugin activations when `SUBGRAPH_COMPAT=false` (default) to also include protocol-acceleration, registrars, and tokenscope.
+
+- [#1537](https://github.com/namehash/ensnode/pull/1537) [`63617fa`](https://github.com/namehash/ensnode/commit/63617fa827daa4bd7761f482812daf7b507da3d2) Thanks [@tk-o](https://github.com/tk-o)! - Updates Node.js runtime to the current LTS version (v24).
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.5.1
+  - @ensnode/ensrainbow-sdk@1.5.1
+  - @ensnode/ponder-metadata@1.5.1
+  - @ensnode/ensnode-schema@1.5.1
+  - @ensnode/ensnode-sdk@1.5.1
+
 ## 1.5.0
 
 ### Patch Changes
