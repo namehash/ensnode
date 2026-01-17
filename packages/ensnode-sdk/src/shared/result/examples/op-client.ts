@@ -1,3 +1,17 @@
+/**
+ * Example of a simple client-side operation that calls a server operation
+ * and returns Result data model.
+ *
+ * Note: In a real-world scenario, this would involve making an HTTP request
+ * to a server endpoint. Here, for simplicity, we directly call the server
+ * operation function.
+ *
+ * We also simulate client-side errors like connection errors and timeouts.
+ *
+ * If the server returns a result code that is not recognized by this client
+ * version, the client handles it by returning a special unrecognized operation
+ * result.
+ */
 import type { Address } from "viem";
 
 import {

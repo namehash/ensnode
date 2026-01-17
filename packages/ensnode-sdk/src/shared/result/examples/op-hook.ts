@@ -1,3 +1,7 @@
+/**
+ * Example of a simple client-side operation hook that returns
+ * Result data model with Loading state.
+ */
 import type { Address } from "viem";
 
 import type { AbstractResultLoading } from "../result-base";

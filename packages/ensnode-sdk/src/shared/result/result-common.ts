@@ -8,6 +8,9 @@ import { type ResultCode, ResultCodes } from "./result-code";
 export interface ResultInternalServerError
   extends AbstractResultError<typeof ResultCodes.InternalServerError> {}
 
+/**
+ * Builds a result object representing an internal server error.
+ */
 export const buildResultInternalServerError = (
   errorMessage?: string,
   suggestRetry: boolean = true,
@@ -25,6 +28,9 @@ export const buildResultInternalServerError = (
 
 export interface ResultNotFound extends AbstractResultError<typeof ResultCodes.NotFound> {}
 
+/**
+ * Builds a result object representing a not found error.
+ */
 export const buildResultNotFound = (
   errorMessage?: string,
   suggestRetry: boolean = false,
@@ -43,6 +49,9 @@ export const buildResultNotFound = (
 export interface ResultInvalidRequest
   extends AbstractResultError<typeof ResultCodes.InvalidRequest> {}
 
+/**
+ * Builds a result object representing an invalid request error.
+ */
 export const buildResultInvalidRequest = (
   errorMessage?: string,
   suggestRetry: boolean = false,
@@ -61,6 +70,9 @@ export const buildResultInvalidRequest = (
 export interface ResultConnectionError
   extends AbstractResultError<typeof ResultCodes.ConnectionError> {}
 
+/**
+ * Builds a result object representing a connection error.
+ */
 export const buildResultConnectionError = (
   errorMessage?: string,
   suggestRetry: boolean = true,
@@ -79,6 +91,9 @@ export const buildResultConnectionError = (
 export interface ResultRequestTimeout
   extends AbstractResultError<typeof ResultCodes.RequestTimeout> {}
 
+/**
+ * Builds a result object representing a request timeout error.
+ */
 export const buildResultRequestTimeout = (
   errorMessage?: string,
   suggestRetry: boolean = true,
@@ -109,6 +124,9 @@ export const buildResultRequestTimeout = (
 export interface ResultClientUnrecognizedOperationResult
   extends AbstractResultError<typeof ResultCodes.ClientUnrecognizedOperationResult> {}
 
+/**
+ * Builds a result object representing an unrecognized operation result.
+ */
 export const buildResultClientUnrecognizedOperationResult = (
   unrecognizedResult: unknown,
 ): ResultClientUnrecognizedOperationResult => {
@@ -137,6 +155,9 @@ export const buildResultClientUnrecognizedOperationResult = (
   };
 };
 
+/**
+ * Checks if a result code is recognized for a specific operation.
+ */
 export const isRecognizedResultCodeForOperation = (
   resultCode: ResultCode | string,
   recognizedResultCodesForOperation: readonly ResultCode[],

@@ -1,3 +1,12 @@
+/**
+ * Example of a simple server-side operation that returns Result data model.
+ *
+ * In a real-world scenario, this could be part of a backend service
+ * handling requests and returning structured responses.
+ *
+ * In this example, we show how to return both successful and error results
+ * based on input conditions.
+ */
 import type { Address } from "viem";
 import { zeroAddress } from "viem";
 
@@ -43,7 +52,7 @@ export const EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES = [
 
 // Intentionally unused: compile-time assertion that the recognized result codes
 // exactly match the union of ExampleOpServerResult["resultCode"].
-type AssertExampleOpServerResultCodesMatch = ExpectTrue<
+type _AssertExampleOpServerResultCodesMatch = ExpectTrue<
   AssertResultCodeExact<ExampleOpServerResultCode, typeof EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES>
 >;
 

@@ -1,3 +1,14 @@
+/**
+ * Example of a simple client-side DX hook that consumes an operation
+ * returning Result data model.
+ *
+ * In a real-world scenario, this could be part of a React component
+ * calling a hook to manage async data fetching.
+ *
+ * In this example, we show how to handle both successful and error results
+ * returned by the operation. This includes a retry suggestion for
+ * certain error cases.
+ */
 import type { Address } from "viem";
 
 import { ResultCodes } from "../result-code";

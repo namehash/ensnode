@@ -1,3 +1,15 @@
+/**
+ * Example of a simple client-side application client that calls an operation
+ * returning Result data model.
+ *
+ * In a real-world scenario, this could be part of a frontend application
+ * calling a client to send a request to a backend service and handle
+ * the response.
+ *
+ * In this example, we show how to handle both successful and error results
+ * returned by the operation. This includes a retry suggestion for
+ * certain error cases.
+ */
 import type { Address } from "viem";
 
 import { ResultCodes } from "../result-code";

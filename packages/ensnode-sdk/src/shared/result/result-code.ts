@@ -43,12 +43,18 @@ export const ResultCodes = {
   ClientUnrecognizedOperationResult: "client-unrecognized-operation-result",
 } as const;
 
+/**
+ * List of ResultCodes that represent server error results.
+ */
 export const RESULT_CODE_SERVER_ERROR_CODES = [
   ResultCodes.InternalServerError,
   ResultCodes.NotFound,
   ResultCodes.InvalidRequest,
 ] as const;
 
+/**
+ * List of ResultCodes that represent client error results.
+ */
 export const RESULT_CODE_CLIENT_ERROR_CODES = [
   ResultCodes.ConnectionError,
   ResultCodes.RequestTimeout,
@@ -56,6 +62,9 @@ export const RESULT_CODE_CLIENT_ERROR_CODES = [
   ...RESULT_CODE_SERVER_ERROR_CODES,
 ] as const;
 
+/**
+ * List of all ResultCodes.
+ */
 const RESULT_CODE_ALL_CODES = [
   ResultCodes.Loading,
   ResultCodes.Ok,
