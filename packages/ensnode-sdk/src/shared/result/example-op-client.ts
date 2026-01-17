@@ -6,10 +6,10 @@ import {
   exampleOp,
 } from "./example-op-server";
 import {
+  buildResultClientUnrecognizedOperationResult,
   buildResultConnectionError,
   buildResultRequestTimeout,
-  buildResultUnknownError,
-  hasUnrecognizedResultCode,
+  isRecognizedResultCodeForOperation,
   type ResultClientError,
 } from "./result-common";
 
@@ -20,8 +20,13 @@ export const callExampleOp = (address: Address): ExampleOpClientResult => {
     const result = exampleOp(address);
 
     // ensure server result code is recognized by this client version
-    if (hasUnrecognizedResultCode(result, EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES)) {
-      return buildResultUnknownError(result);
+    if (
+      isRecognizedResultCodeForOperation(
+        result.resultCode,
+        EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES,
+      )
+    ) {
+      return buildResultClientUnrecognizedOperationResult(result);
     }
 
     // return server result

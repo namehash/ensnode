@@ -3,7 +3,7 @@
  ************************************************************/
 
 import type { AbstractResultError } from "./result-base";
-import { type ResultCode, type ResultCodeError, ResultCodes } from "./result-code";
+import { type ResultCode, ResultCodes } from "./result-code";
 
 export interface ResultInternalServerError
   extends AbstractResultError<typeof ResultCodes.InternalServerError> {}
@@ -91,48 +91,64 @@ export const buildResultRequestTimeout = (
 };
 
 /************************************************************
- * Unknown Error
+ * Client-Unrecognized Operation Result
  ************************************************************/
 
 /**
- * Represents an error result that is not recognized by the SDK.
+ * Represents a result for an operation that was unrecognized by the client.
  *
  * Relevant for cases where a client is running version X while the server
  * is running version X+N and the server returns a result code that is not
- * recognized by a client because the result code exist in the version X+N
- * but not in the version X and therefore needs transformation into a
- * fallback result code that will be recognized in version X.
+ * recognized by a client for a specific operation because the result code
+ * exists in version X+N for the operation on the server but not in the
+ * version X for the operation on the client and therefore needs
+ * transformation into a fallback result code for the client that is safe
+ * for recognition by clients that are running version X.
  */
-export interface ResultErrorUnrecognized
-  extends Omit<AbstractResultError<ResultCodeError>, "resultCode"> {
-  /**
-   * The result code that is not recognized by the SDK but was returned by the server.
-   */
-  resultCode: string;
-}
+export interface ResultClientUnrecognizedOperationResult
+  extends AbstractResultError<typeof ResultCodes.ClientUnrecognizedOperationResult> {}
 
-export interface ResultUnknownError extends AbstractResultError<typeof ResultCodes.UnknownError> {}
+export const buildResultClientUnrecognizedOperationResult = (
+  unrecognizedResult: unknown,
+): ResultClientUnrecognizedOperationResult => {
+  let errorMessage = "An unrecognized result for the operation occurred.";
+  let suggestRetry = true;
 
-export const buildResultUnknownError = (
-  unrecognizedError: ResultErrorUnrecognized,
-): ResultUnknownError => {
+  if (typeof unrecognizedResult === "object" && unrecognizedResult !== null) {
+    if (
+      "errorMessage" in unrecognizedResult &&
+      typeof unrecognizedResult.errorMessage === "string"
+    ) {
+      errorMessage = unrecognizedResult.errorMessage;
+    }
+    if (
+      "suggestRetry" in unrecognizedResult &&
+      typeof unrecognizedResult.suggestRetry === "boolean"
+    ) {
+      suggestRetry = unrecognizedResult.suggestRetry;
+    }
+  }
+
   return {
-    resultCode: ResultCodes.UnknownError,
-    errorMessage: unrecognizedError.errorMessage,
-    suggestRetry: unrecognizedError.suggestRetry,
+    resultCode: ResultCodes.ClientUnrecognizedOperationResult,
+    errorMessage,
+    suggestRetry,
   };
 };
 
-export const hasUnrecognizedResultCode = (
-  result: { resultCode: ResultCode | string },
-  recognizedResultCodes: readonly ResultCode[],
-): result is ResultErrorUnrecognized => {
-  // Checks if result.resultCode is not one of the recognized ResultCodes for an operation
-  return !recognizedResultCodes.includes(result.resultCode as ResultCode);
+export const isRecognizedResultCodeForOperation = (
+  resultCode: ResultCode | string,
+  recognizedResultCodesForOperation: readonly ResultCode[],
+): boolean => {
+  // Checks if resultCode is one of the recognizedResultCodes for an operation
+  return recognizedResultCodesForOperation.includes(resultCode as ResultCode);
 };
 
 /************************************************************
  * All common client errors
  ************************************************************/
 
-export type ResultClientError = ResultConnectionError | ResultRequestTimeout | ResultUnknownError;
+export type ResultClientError =
+  | ResultConnectionError
+  | ResultRequestTimeout
+  | ResultClientUnrecognizedOperationResult;

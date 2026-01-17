@@ -38,28 +38,27 @@ export const ResultCodes = {
   RequestTimeout: "request-timeout",
 
   /**
-   * Client error: received an unexpected result code from the server.
+   * Client error: received an unrecognized result from the server for an operation.
    */
-  UnknownError: "unknown-error",
+  ClientUnrecognizedOperationResult: "client-unrecognized-operation-result",
 } as const;
-
-export const RESULT_CODE_SERVER_AND_CLIENT_ERROR_CODES = [ResultCodes.InvalidRequest] as const;
 
 export const RESULT_CODE_SERVER_ERROR_CODES = [
   ResultCodes.InternalServerError,
   ResultCodes.NotFound,
-  ...RESULT_CODE_SERVER_AND_CLIENT_ERROR_CODES,
+  ResultCodes.InvalidRequest,
 ] as const;
 
 export const RESULT_CODE_CLIENT_ERROR_CODES = [
   ResultCodes.ConnectionError,
   ResultCodes.RequestTimeout,
-  ResultCodes.UnknownError,
-  ...RESULT_CODE_SERVER_AND_CLIENT_ERROR_CODES,
+  ResultCodes.ClientUnrecognizedOperationResult,
+  ...RESULT_CODE_SERVER_ERROR_CODES,
 ] as const;
 
 const RESULT_CODE_ERROR_CODES = [
-  ...new Set([...RESULT_CODE_SERVER_ERROR_CODES, ...RESULT_CODE_CLIENT_ERROR_CODES]),
+  ...RESULT_CODE_SERVER_ERROR_CODES,
+  ...RESULT_CODE_CLIENT_ERROR_CODES,
 ] as const;
 const RESULT_CODE_ALL_CODES = [
   ResultCodes.Loading,
