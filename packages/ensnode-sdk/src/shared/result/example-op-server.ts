@@ -10,11 +10,11 @@ import {
   type ResultInvalidRequest,
 } from "./result-common";
 
-export interface ExampleOpResultOkData {
+export interface ResultExampleOpOkData {
   name: string;
 }
 
-export interface ResultExampleOpOk extends AbstractResultOk<ExampleOpResultOkData> {}
+export interface ResultExampleOpOk extends AbstractResultOk<ResultExampleOpOkData> {}
 
 export const buildResultExampleOpOk = (name: string): ResultExampleOpOk => {
   return {
