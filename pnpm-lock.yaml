@@ -769,6 +769,9 @@ importers:
       '@ensnode/ensnode-sdk':
         specifier: workspace:*
         version: link:../ensnode-sdk
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*

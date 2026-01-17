@@ -48,7 +48,8 @@
     "viem": "catalog:"
   },
   "dependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*"
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
