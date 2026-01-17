@@ -40,7 +40,7 @@ export interface AbstractResultError<TResultCode extends ResultCodeError, TDataT
   /**
    * Identifies if it may be relevant to retry the operation.
    *
-   * If `false`, retrying the operation is unlikely tobe helpful.
+   * If `false`, retrying the operation is unlikely to be helpful.
    */
   suggestRetry: boolean;
 

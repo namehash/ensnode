@@ -14,7 +14,7 @@ export const buildResultExampleOpLoading = (address: Address): ResultExampleOpLo
   return {
     resultCode: ResultCodes.Loading,
     data: {
-      address: address,
+      address,
     },
   };
 };

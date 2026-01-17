@@ -2,7 +2,7 @@
  * Internal Server Error
  ************************************************************/
 
-import type { AbstractResult, AbstractResultError } from "./result-base";
+import type { AbstractResultError } from "./result-base";
 import { type ResultCode, type ResultCodeError, ResultCodes } from "./result-code";
 
 export interface ResultInternalServerError
@@ -123,15 +123,12 @@ export const buildResultUnknownError = (
   };
 };
 
-export const isUnrecognizedResult = (
-  result: AbstractResult<any>,
+export const hasUnrecognizedResultCode = (
+  result: { resultCode: ResultCode | string },
   recognizedResultCodes: readonly ResultCode[],
 ): result is ResultErrorUnrecognized => {
   // Checks if result.resultCode is not one of the recognized ResultCodes for an operation
-  return (
-    typeof result.resultCode === "string" &&
-    !recognizedResultCodes.includes(result.resultCode as ResultCode)
-  );
+  return !recognizedResultCodes.includes(result.resultCode as ResultCode);
 };
 
 /************************************************************

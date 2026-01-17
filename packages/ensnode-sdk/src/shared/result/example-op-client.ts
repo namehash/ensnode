@@ -9,7 +9,7 @@ import {
   buildResultConnectionError,
   buildResultRequestTimeout,
   buildResultUnknownError,
-  isUnrecognizedResult,
+  hasUnrecognizedResultCode,
   type ResultClientError,
 } from "./result-common";
 
@@ -19,8 +19,8 @@ export const callExampleOp = (address: Address): ExampleOpClientResult => {
   try {
     const result = exampleOp(address);
 
-    // ensure server result is recognized by client version
-    if (isUnrecognizedResult(result, EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES)) {
+    // ensure server result code is recognized by this client version
+    if (hasUnrecognizedResultCode(result, EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES)) {
       return buildResultUnknownError(result);
     }
 

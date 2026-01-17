@@ -59,10 +59,8 @@ export const RESULT_CODE_CLIENT_ERROR_CODES = [
 ] as const;
 
 const RESULT_CODE_ERROR_CODES = [
-  ...RESULT_CODE_SERVER_ERROR_CODES,
-  ...RESULT_CODE_CLIENT_ERROR_CODES,
+  ...new Set([...RESULT_CODE_SERVER_ERROR_CODES, ...RESULT_CODE_CLIENT_ERROR_CODES]),
 ] as const;
-
 const RESULT_CODE_ALL_CODES = [
   ResultCodes.Loading,
   ResultCodes.Ok,
