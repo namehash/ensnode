@@ -95,7 +95,8 @@ export const buildResultRequestTimeout = (
  ************************************************************/
 
 /**
- * Represents a result for an operation that was unrecognized by the client.
+ * Represents an operation result with a result code that is not recognized
+ * by this client version.
  *
  * Relevant for cases where a client is running version X while the server
  * is running version X+N and the server returns a result code that is not

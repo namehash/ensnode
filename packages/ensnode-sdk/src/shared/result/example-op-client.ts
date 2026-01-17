@@ -21,7 +21,7 @@ export const callExampleOp = (address: Address): ExampleOpClientResult => {
 
     // ensure server result code is recognized by this client version
     if (
-      isRecognizedResultCodeForOperation(
+      !isRecognizedResultCodeForOperation(
         result.resultCode,
         EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES,
       )
