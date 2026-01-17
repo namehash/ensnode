@@ -10,6 +10,7 @@ export * from "./interpretation";
 export * from "./labelhash";
 export * from "./null-bytes";
 export * from "./numbers";
+export * from "./result";
 export * from "./root-registry";
 export * from "./serialize";
 export * from "./serialized-types";
