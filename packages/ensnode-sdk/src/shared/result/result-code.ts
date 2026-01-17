@@ -59,16 +59,23 @@ export const RESULT_CODE_CLIENT_ERROR_CODES = [
   ResultCodes.ConnectionError,
   ResultCodes.RequestTimeout,
   ResultCodes.ClientUnrecognizedOperationResult,
+] as const;
+
+/**
+ * List of all error codes the client can return (client-originated + relayed from server).
+ */
+export const RESULT_CODE_ALL_ERROR_CODES = [
+  ...RESULT_CODE_CLIENT_ERROR_CODES,
   ...RESULT_CODE_SERVER_ERROR_CODES,
 ] as const;
 
 /**
  * List of all ResultCodes.
  */
-const RESULT_CODE_ALL_CODES = [
+export const RESULT_CODE_ALL_CODES = [
   ResultCodes.Loading,
   ResultCodes.Ok,
-  ...RESULT_CODE_CLIENT_ERROR_CODES,
+  ...RESULT_CODE_ALL_ERROR_CODES,
 ] as const;
 
 /**
