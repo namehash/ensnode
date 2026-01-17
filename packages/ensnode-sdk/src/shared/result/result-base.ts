@@ -33,35 +33,10 @@ export interface AbstractResultOk<TDataType> extends AbstractResult<typeof Resul
 }
 
 /**
- * Abstract representation of a server error result.
+ * Abstract representation of an error result.
  */
-export interface AbstractResultServerError<
-  TResultCode extends ResultCodeServerError,
-  TDataType = undefined,
-> extends AbstractResult<TResultCode> {
-  /**
-   * A description of the error.
-   */
-  errorMessage: string;
-
-  /**
-   * Identifies if it may be relevant to retry the operation.
-   *
-   * If `false`, retrying the operation is unlikely to be helpful.
-   */
-  suggestRetry: boolean;
-
-  /**
-   * Optional data associated with the error.
-   */
-  data?: TDataType;
-}
-
-/**
- * Abstract representation of a client error result.
- */
-export interface AbstractResultClientError<
-  TResultCode extends ResultCodeClientError,
+export interface AbstractResultError<
+  TResultCode extends ResultCodeServerError | ResultCodeClientError,
   TDataType = undefined,
 > extends AbstractResult<TResultCode> {
   /**

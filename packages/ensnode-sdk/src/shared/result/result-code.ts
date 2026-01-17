@@ -23,7 +23,7 @@ export const ResultCodes = {
   NotFound: "not-found",
 
   /**
-   * Server and client error: the request was invalid.
+   * Server error: the request was invalid.
    */
   InvalidRequest: "invalid-request",
 
