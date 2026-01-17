@@ -116,6 +116,12 @@ export type AssertResultCodeExact<
     : false
   : false;
 
+/**
+ * Intentionally unused type alias used only for compile-time verification that
+ * the `ResultCode` union exactly matches the entries in `RESULT_CODE_ALL_CODES`.
+ * If this type ever fails to compile, it indicates that one of the above
+ * invariants has been broken and the result code definitions are out of sync.
+ */
 type _CompileTimeCheck_ResultCodeMatchesUnion = ExpectTrue<
   AssertResultCodeExact<ResultCode, typeof RESULT_CODE_ALL_CODES>
 >;
