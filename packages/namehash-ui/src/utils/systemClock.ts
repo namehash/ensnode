@@ -1,4 +1,4 @@
-import { HighResolutionSyncedClock, SyncedClock } from "@/lib/synced-clock";
+import { HighResolutionSyncedClock, type SyncedClock } from "./syncedClock";
 
 /**
  * Synced System Clock

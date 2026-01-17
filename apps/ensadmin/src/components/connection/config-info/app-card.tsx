@@ -1,7 +1,7 @@
+import { InfoIcon } from "@namehash/namehash-ui";
 import { ExternalLink } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
 
-import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,7 @@ export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemP
         {additionalInfo && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="shrink-0" />
+              <InfoIcon className="shrink-0 text-[#9CA3AF]" />
             </TooltipTrigger>
             <TooltipContent
               side="top"

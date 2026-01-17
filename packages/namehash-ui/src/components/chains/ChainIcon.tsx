@@ -16,20 +16,20 @@ import {
 import { ensTestEnvL1Chain } from "@ensnode/datasources";
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
-import { ArbitrumIcon } from "./icons/ArbitrumIcon.tsx";
-import { ArbitrumTestnetIcon } from "./icons/ArbitrumTestnetIcon.tsx";
-import { BaseIcon } from "./icons/BaseIcon.tsx";
-import { BaseTestnetIcon } from "./icons/BaseTestnetIcon.tsx";
-import { EthereumIcon } from "./icons/EthereumIcon.tsx";
-import { EthereumLocalIcon } from "./icons/EthereumLocalIcon.tsx";
-import { EthereumTestnetIcon } from "./icons/EthereumTestnetIcon.tsx";
-import { LineaIcon } from "./icons/LineaIcon.tsx";
-import { LineaTestnetIcon } from "./icons/LineaTestnetIcon.tsx";
-import { OptimismIcon } from "./icons/OptimismIcon.tsx";
-import { OptimismTestnetIcon } from "./icons/OptimismTestnetIcon.tsx";
-import { ScrollIcon } from "./icons/ScrollIcon.tsx";
-import { ScrollTestnetIcon } from "./icons/ScrollTestnetIcon.tsx";
-import { UnrecognizedChainIcon } from "./icons/UnrecognizedChainIcon.tsx";
+import { ArbitrumIcon } from "./icons/ArbitrumIcon";
+import { ArbitrumTestnetIcon } from "./icons/ArbitrumTestnetIcon";
+import { BaseIcon } from "./icons/BaseIcon";
+import { BaseTestnetIcon } from "./icons/BaseTestnetIcon";
+import { EthereumIcon } from "./icons/EthereumIcon";
+import { EthereumLocalIcon } from "./icons/EthereumLocalIcon";
+import { EthereumTestnetIcon } from "./icons/EthereumTestnetIcon";
+import { LineaIcon } from "./icons/LineaIcon";
+import { LineaTestnetIcon } from "./icons/LineaTestnetIcon";
+import { OptimismIcon } from "./icons/OptimismIcon";
+import { OptimismTestnetIcon } from "./icons/OptimismTestnetIcon";
+import { ScrollIcon } from "./icons/ScrollIcon";
+import { ScrollTestnetIcon } from "./icons/ScrollTestnetIcon";
+import { UnrecognizedChainIcon } from "./icons/UnrecognizedChainIcon";
 
 export interface ChainIconProps {
   chainId: ChainId;
