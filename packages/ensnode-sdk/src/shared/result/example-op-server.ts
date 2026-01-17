@@ -41,7 +41,9 @@ export const EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES = [
   ResultCodes.InvalidRequest,
 ] as const satisfies readonly ExampleOpServerResultCode[];
 
-type _CompileTimeAlignmentCheck = ExpectTrue<
+// Intentionally unused: compile-time assertion that the recognized result codes
+// exactly match the union of ExampleOpServerResult["resultCode"].
+type AssertExampleOpServerResultCodesMatch = ExpectTrue<
   AssertResultCodeExact<ExampleOpServerResultCode, typeof EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES>
 >;
 
