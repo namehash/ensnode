@@ -1,4 +1,6 @@
-import { type Duration, SECONDS_PER_YEAR } from "./time";
+import type { Duration } from "@ensnode/ensnode-sdk";
+
+import { SECONDS_PER_YEAR } from "./time";
 
 /**
  * The score of a referrer.

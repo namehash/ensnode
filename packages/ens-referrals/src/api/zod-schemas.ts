@@ -7,12 +7,6 @@
  * `./src/internal.ts` file.
  */
 
-import {
-  REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-  type ReferrerDetailRanked,
-  ReferrerDetailTypeIds,
-  type RevenueContribution,
-} from "@namehash/ens-referrals";
 import z from "zod/v4";
 
 import {
@@ -23,7 +17,11 @@ import {
   makeNonNegativeIntegerSchema,
   makePositiveIntegerSchema,
   makeUnixTimestampSchema,
-} from "../shared/zod-schemas";
+} from "@ensnode/ensnode-sdk/internal";
+
+import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
+import { type ReferrerDetailRanked, ReferrerDetailTypeIds } from "../referrer-detail";
+import type { RevenueContribution } from "../revenue-contribution";
 import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
 
 /**

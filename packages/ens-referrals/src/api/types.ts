@@ -1,9 +1,7 @@
-import type {
-  ReferrerDetail,
-  ReferrerLeaderboardPage,
-  ReferrerLeaderboardPageParams,
-} from "@namehash/ens-referrals";
 import type { Address } from "viem";
+
+import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
+import type { ReferrerDetail } from "../referrer-detail";
 
 /**
  * Request parameters for a referrer leaderboard page query.

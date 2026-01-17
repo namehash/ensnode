@@ -1,9 +1,9 @@
-import type { ReferrerLeaderboard, ReferrerMetrics } from "@namehash/ens-referrals";
-
 import {
+  type ReferrerLeaderboard,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
-} from "@ensnode/ensnode-sdk";
+  type ReferrerMetrics,
+} from "@namehash/ens-referrals";
 
 export const dbResultsReferrerLeaderboard: ReferrerMetrics[] = [
   {

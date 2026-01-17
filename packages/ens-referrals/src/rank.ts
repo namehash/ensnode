@@ -1,9 +1,10 @@
 import type { Address } from "viem";
 
+import type { Duration } from "@ensnode/ensnode-sdk";
+
 import { isPositiveInteger } from "./number";
 import type { ReferralProgramRules } from "./rules";
 import { calcReferrerScore, type ReferrerScore } from "./score";
-import type { Duration } from "./time";
 
 /**
  * The rank of a referrer relative to all other referrers, where 1 is the

@@ -1,5 +1,7 @@
 import type { Address } from "viem";
 
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+
 import { type AggregatedReferrerMetrics, buildAggregatedReferrerMetrics } from "./aggregations";
 import {
   type AwardedReferrerMetrics,
@@ -10,7 +12,6 @@ import {
   sortReferrerMetrics,
 } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
-import type { UnixTimestamp } from "./time";
 
 /**
  * Represents a leaderboard for any number of referrers.

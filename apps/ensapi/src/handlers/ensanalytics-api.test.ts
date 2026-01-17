@@ -24,16 +24,15 @@ vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
   referrerLeaderboardMiddleware: vi.fn(),
 }));
 
-import { ReferrerDetailTypeIds } from "@namehash/ens-referrals";
-
 import {
   deserializeReferrerDetailResponse,
   deserializeReferrerLeaderboardPageResponse,
   ReferrerDetailResponseCodes,
   type ReferrerDetailResponseOk,
+  ReferrerDetailTypeIds,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
-} from "@ensnode/ensnode-sdk";
+} from "@namehash/ens-referrals";
 
 import {
   emptyReferralLeaderboard,

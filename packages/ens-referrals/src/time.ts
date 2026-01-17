@@ -1,30 +1,12 @@
-import { isInteger, isNonNegativeInteger } from "./number";
+import type { Duration, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-/**
- * Unix timestamp value
- *
- * Represents the number of seconds that have elapsed
- * since January 1, 1970 (midnight UTC/GMT). May be zero or negative to represent a time at or
- * before Jan 1, 1970.
- *
- * @invariant Guaranteed to be an integer.
- */
-export type UnixTimestamp = number;
+import { isInteger, isNonNegativeInteger } from "./number";
 
 export const validateUnixTimestamp = (timestamp: UnixTimestamp): void => {
   if (!isInteger(timestamp)) {
     throw new Error(`Invalid Unix timestamp: ${timestamp}. Unix timestamp must be an integer.`);
   }
 };
-
-/**
- * Duration
- *
- * Represents a duration in seconds.
- *
- * Guaranteed to be a non-negative integer.
- */
-export type Duration = number;
 
 /**
  * The number of seconds in a year.

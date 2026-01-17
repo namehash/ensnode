@@ -1,5 +1,7 @@
 import type { Address } from "viem";
 
+import type { Duration } from "@ensnode/ensnode-sdk";
+
 import { normalizeAddress, validateLowercaseAddress } from "./address";
 import type { AggregatedReferrerMetrics } from "./aggregations";
 import type { USDQuantity } from "./currency";
@@ -16,7 +18,6 @@ import type { RevenueContribution } from "./revenue-contribution";
 import { validateRevenueContribution } from "./revenue-contribution";
 import type { ReferralProgramRules } from "./rules";
 import { calcReferrerScore, type ReferrerScore, validateReferrerScore } from "./score";
-import type { Duration } from "./time";
 import { validateDuration } from "./time";
 
 /**

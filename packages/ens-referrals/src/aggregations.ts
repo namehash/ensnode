@@ -1,10 +1,12 @@
+import type { Duration } from "@ensnode/ensnode-sdk";
+
 import { validateNonNegativeInteger } from "./number";
 import type { RankedReferrerMetrics } from "./referrer-metrics";
 import type { RevenueContribution } from "./revenue-contribution";
 import { validateRevenueContribution } from "./revenue-contribution";
 import type { ReferralProgramRules } from "./rules";
 import { type ReferrerScore, validateReferrerScore } from "./score";
-import { type Duration, validateDuration } from "./time";
+import { validateDuration } from "./time";
 
 /**
  * Represents aggregated metrics for a list of `RankedReferrerMetrics`.

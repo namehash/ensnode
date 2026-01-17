@@ -2,8 +2,9 @@ import {
   buildReferrerLeaderboard,
   type ReferralProgramRules,
   type ReferrerLeaderboard,
-  type UnixTimestamp,
 } from "@namehash/ens-referrals";
+
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { getReferrerMetrics } from "./database";
 

@@ -1,13 +1,8 @@
-import type {
-  AggregatedReferrerMetrics,
-  AwardedReferrerMetrics,
-  ReferralProgramRules,
-  ReferrerDetailRanked,
-  ReferrerDetailUnranked,
-  ReferrerLeaderboardPage,
-  UnrankedReferrerMetrics,
-} from "@namehash/ens-referrals";
-
+import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
+import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
+import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
+import type { ReferralProgramRules } from "../rules";
 import type {
   ReferrerDetailResponse,
   ReferrerDetailResponseError,

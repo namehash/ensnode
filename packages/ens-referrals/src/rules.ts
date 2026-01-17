@@ -1,8 +1,8 @@
-import type { Address } from "viem";
+import type { AccountId, UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import { type USDQuantity, validateUSDQuantity } from "./currency";
 import { validateNonNegativeInteger } from "./number";
-import { type UnixTimestamp, validateUnixTimestamp } from "./time";
+import { validateUnixTimestamp } from "./time";
 
 /**
  * Start date for the ENS Holiday Awards referral program.
@@ -25,24 +25,6 @@ export const ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS = 10;
  * The total value of the award pool in USD.
  */
 export const ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE: USDQuantity = 10_000.0;
-
-/**
- * Chain ID
- *
- * Represents a unique identifier for a chain.
- * Guaranteed to be a positive integer.
- **/
-export type ChainId = number;
-
-/**
- * Represents an account (contract or EOA) at `address` on chain `chainId`.
- *
- * @see https://chainagnostic.org/CAIPs/caip-10
- */
-export interface AccountId {
-  chainId: ChainId;
-  address: Address;
-}
 
 export interface ReferralProgramRules {
   /**

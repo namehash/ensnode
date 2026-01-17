@@ -11,5 +11,6 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: ["viem"],
+  noExternal: ["@ensnode/ensnode-sdk"],
   outDir: "./dist",
 });

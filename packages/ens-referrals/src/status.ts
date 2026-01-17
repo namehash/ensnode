@@ -1,5 +1,6 @@
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+
 import type { ReferralProgramRules } from "./rules.ts";
-import type { UnixTimestamp } from "./time.ts";
 
 /**
  * The type of referral program's status.
