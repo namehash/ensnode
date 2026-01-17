@@ -1,8 +1,8 @@
 import type { Address } from "viem";
 
-import { callExampleOp, type ExampleOpClientResult } from "./example-op-client";
-import type { AbstractResultLoading } from "./result-base";
-import { ResultCodes } from "./result-code";
+import type { AbstractResultLoading } from "../result-base";
+import { ResultCodes } from "../result-code";
+import { callExampleOp, type ExampleOpClientResult } from "./op-client";
 
 export interface ExampleOpLoadingData {
   address: Address;

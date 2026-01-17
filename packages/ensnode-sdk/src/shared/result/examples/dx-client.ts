@@ -1,15 +1,12 @@
 import type { Address } from "viem";
 
-import { useExampleOp } from "./example-op-hook";
-import { ResultCodes } from "./result-code";
+import { ResultCodes } from "../result-code";
+import { callExampleOp } from "./op-client";
 
-export const myExampleDXHook = (address: Address): void => {
-  const result = useExampleOp(address);
+export const myExampleDXClient = (address: Address): void => {
+  const result = callExampleOp(address);
 
-  if (result.resultCode === ResultCodes.Loading) {
-    // NOTE: Here the type system knows that `result` is of type `ResultExampleOpLoading`
-    console.log("Loading...");
-  } else if (result.resultCode === ResultCodes.Ok) {
+  if (result.resultCode === ResultCodes.Ok) {
     // NOTE: Here the type system knows that `result` is of type `ResultExampleOpOk`
     console.log(result.data.name);
   } else {

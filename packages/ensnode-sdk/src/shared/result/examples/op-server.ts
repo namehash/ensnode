@@ -1,14 +1,14 @@
 import type { Address } from "viem";
 import { zeroAddress } from "viem";
 
-import type { AbstractResultOk } from "./result-base";
-import { type AssertResultCodeExact, type ExpectTrue, ResultCodes } from "./result-code";
+import type { AbstractResultOk } from "../result-base";
+import { type AssertResultCodeExact, type ExpectTrue, ResultCodes } from "../result-code";
 import {
   buildResultInternalServerError,
   buildResultInvalidRequest,
   type ResultInternalServerError,
   type ResultInvalidRequest,
-} from "./result-common";
+} from "../result-common";
 
 export interface ResultExampleOpOkData {
   name: string;

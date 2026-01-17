@@ -1,9 +1,9 @@
 import type { Address } from "viem";
 
-import { exampleOp } from "./example-op-server";
-import type { AbstractResult } from "./result-base";
-import type { ResultCode } from "./result-code";
-import { buildResultInternalServerError, buildResultNotFound } from "./result-common";
+import type { AbstractResult } from "../result-base";
+import type { ResultCode } from "../result-code";
+import { buildResultInternalServerError, buildResultNotFound } from "../result-common";
+import { exampleOp } from "./op-server";
 
 const routeRequest = (path: string): AbstractResult<ResultCode> => {
   // imagine Hono router logic here

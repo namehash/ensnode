@@ -1,17 +1,17 @@
 import type { Address } from "viem";
 
 import {
-  EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES,
-  type ExampleOpServerResult,
-  exampleOp,
-} from "./example-op-server";
-import {
   buildResultClientUnrecognizedOperationResult,
   buildResultConnectionError,
   buildResultRequestTimeout,
   isRecognizedResultCodeForOperation,
   type ResultClientError,
-} from "./result-common";
+} from "../result-common";
+import {
+  EXAMPLE_OP_RECOGNIZED_SERVER_RESULT_CODES,
+  type ExampleOpServerResult,
+  exampleOp,
+} from "./op-server";
 
 export type ExampleOpClientResult = ExampleOpServerResult | ResultClientError;
 
