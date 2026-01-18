@@ -6,22 +6,39 @@
  * builders for successful results as well as various error scenarios.
  */
 
-import type { AbstractResultError, AbstractResultOk } from "./result-base";
+import type { UnixTimestamp } from "../../shared";
+import type {
+  AbstractResultError,
+  AbstractResultOk,
+  AbstractResultOkTimestamped,
+} from "./result-base";
 import { type ResultCode, ResultCodes } from "./result-code";
 
 /************************************************************
  * Result OK
  ************************************************************/
 
-export type ResultOk<TData> = AbstractResultOk<TData>;
-
 /**
  * Builds a result object representing a successful operation.
  */
-export function buildResultOk<const TData>(data: TData): ResultOk<TData> {
+export function buildResultOk<const TData>(data: TData): AbstractResultOk<TData> {
   return {
     resultCode: ResultCodes.Ok,
     data,
+  };
+}
+
+/**
+ * Builds a result object representing a successful operation
+ * with data guaranteed to be at least up to a certain timestamp.
+ */
+export function buildResultOkTimestamped<const TData>(
+  data: TData,
+  minIndexingCursor: UnixTimestamp,
+): AbstractResultOkTimestamped<TData> {
+  return {
+    ...buildResultOk(data),
+    minIndexingCursor,
   };
 }
 
@@ -30,19 +47,21 @@ export function buildResultOk<const TData>(data: TData): ResultOk<TData> {
  ************************************************************/
 
 export interface ResultServiceUnavailable
-  extends AbstractResultError<typeof ResultCodes.ServiceUnavailable> {}
+  extends AbstractResultError<typeof ResultCodes.ServiceUnavailable, { details?: string }> {}
 
 /**
  * Builds a result object representing a service unavailable error.
  */
 export const buildResultServiceUnavailable = (
   errorMessage?: string,
+  data?: { details?: string },
   suggestRetry: boolean = true,
 ): ResultServiceUnavailable => {
   return {
     resultCode: ResultCodes.ServiceUnavailable,
     errorMessage: errorMessage ?? "The service is currently unavailable.",
     suggestRetry,
+    data,
   };
 };
 
@@ -229,3 +248,22 @@ export type ResultClientError =
   | ResultConnectionError
   | ResultRequestTimeout
   | ResultClientUnrecognizedOperationResult;
+
+/************************************************************
+ * Server Operation Result Types
+ ************************************************************/
+
+/**
+ * Type representing a successful server operation result.
+ */
+export type OpResultServerOk<TData> = AbstractResultOk<TData> | AbstractResultOkTimestamped<TData>;
+
+/**
+ * Union type representing all possible server operation results.
+ */
+export type OpResultServer<TData = unknown> = OpResultServerOk<TData> | ResultServerError;
+
+/**
+ * Type representing all possible server operation result codes.
+ */
+export type OpResultServerResultCode = OpResultServer["resultCode"];

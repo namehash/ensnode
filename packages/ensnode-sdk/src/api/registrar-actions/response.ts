@@ -1,6 +1,6 @@
 import type { InterpretedName } from "../../ens";
 import type { RegistrarAction } from "../../registrars";
-import type { UnixTimestamp } from "../../shared";
+import type { OpResultServer, UnixTimestamp } from "../../shared";
 import type { IndexingStatusResponseCodes } from "../indexing-status";
 import type { ErrorResponse } from "../shared/errors";
 import type { ResponsePageContext } from "../shared/pagination";
@@ -81,3 +81,16 @@ export interface RegistrarActionsResponseError {
  * at runtime.
  */
 export type RegistrarActionsResponse = RegistrarActionsResponseOk | RegistrarActionsResponseError;
+
+export interface RegistrarActionsResultOkData {
+  registrarActions: NamedRegistrarAction[];
+  pageContext: ResponsePageContext;
+}
+
+/**
+ * Registrar Actions Result
+ *
+ * Use the `resultCode` field to determine the specific type interpretation
+ * at runtime.
+ */
+export type RegistrarActionsResult = OpResultServer<RegistrarActionsResultOkData>;

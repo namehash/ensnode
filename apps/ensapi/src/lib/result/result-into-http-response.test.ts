@@ -10,11 +10,7 @@ import {
   ResultCodes,
 } from "@ensnode/ensnode-sdk";
 
-import {
-  type OpResultServer,
-  resultCodeToHttpStatusCode,
-  resultIntoHttpResponse,
-} from "./result-into-http-response";
+import { resultCodeToHttpStatusCode, resultIntoHttpResponse } from "./result-into-http-response";
 
 describe("resultCodeToHttpStatusCode", () => {
   it("should return 200 for ResultCodes.Ok", () => {
@@ -55,10 +51,7 @@ describe("resultIntoHttpResponse", () => {
       json: vi.fn().mockReturnValue(mockResponse),
     } as unknown as Context;
 
-    const result: OpResultServer<string> = {
-      resultCode: ResultCodes.Ok,
-      data: "test data",
-    };
+    const result = buildResultOk("test data");
 
     const response = resultIntoHttpResponse(mockContext, result);
 

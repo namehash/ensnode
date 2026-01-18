@@ -20,6 +20,12 @@ export function serializeNamedRegistrarAction({
   };
 }
 
+export function serializeNamedRegistrarActions(
+  actions: NamedRegistrarAction[],
+): SerializedNamedRegistrarAction[] {
+  return actions.map(serializeNamedRegistrarAction);
+}
+
 export function serializeRegistrarActionsResponse(
   response: RegistrarActionsResponse,
 ): SerializedRegistrarActionsResponse {

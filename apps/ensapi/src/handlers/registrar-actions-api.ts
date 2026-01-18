@@ -3,16 +3,16 @@ import z from "zod/v4";
 
 import {
   buildPageContext,
+  buildResultOkTimestamped,
+  buildResultServiceUnavailable,
   type Node,
   RECORDS_PER_PAGE_DEFAULT,
   RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
-  RegistrarActionsResponseCodes,
-  type RegistrarActionsResponseError,
-  type RegistrarActionsResponseOk,
+  ResultCodes,
   registrarActionsFilter,
-  serializeRegistrarActionsResponse,
+  serializeNamedRegistrarActions,
 } from "@ensnode/ensnode-sdk";
 import {
   makeLowercaseAddressSchema,
@@ -26,6 +26,10 @@ import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
+import {
+  resultCodeToHttpStatusCode,
+  resultIntoHttpResponse,
+} from "@/lib/result/result-into-http-response";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 const app = factory.createApp();
@@ -161,45 +165,48 @@ app.get(
     summary: "Get Registrar Actions",
     description: "Returns all registrar actions with optional filtering and pagination",
     responses: {
-      200: {
+      [resultCodeToHttpStatusCode(ResultCodes.Ok)]: {
         description: "Successfully retrieved registrar actions",
       },
-      400: {
+      [resultCodeToHttpStatusCode(ResultCodes.InvalidRequest)]: {
         description: "Invalid query",
       },
-      500: {
-        description: "Internal server error",
+      [resultCodeToHttpStatusCode(ResultCodes.ServiceUnavailable)]: {
+        description: "Registrar Actions API is unavailable at the moment",
       },
     },
   }),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
     try {
+      // Middleware ensures indexingStatus is available and not an Error
+      // This check is for TypeScript type safety
+      if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+        throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+      }
+
       const query = c.req.valid("query");
       const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
 
-      // respond with success response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Ok,
-          registrarActions,
+      // Get the accurateAsOf timestamp from the slowest chain indexing cursor
+      const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
+
+      const result = buildResultOkTimestamped(
+        {
+          registrarActions: serializeNamedRegistrarActions(registrarActions),
           pageContext,
-        } satisfies RegistrarActionsResponseOk),
+        },
+        accurateAsOf,
       );
+
+      return resultIntoHttpResponse(c, result);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       logger.error(errorMessage);
 
-      // respond with 500 error response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API Response is unavailable`,
-          },
-        } satisfies RegistrarActionsResponseError),
-        500,
-      );
+      const result = buildResultServiceUnavailable("Registrar Actions API Response is unavailable");
+
+      return resultIntoHttpResponse(c, result);
     }
   },
 );
@@ -244,14 +251,14 @@ app.get(
     description:
       "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
     responses: {
-      200: {
+      [resultCodeToHttpStatusCode(ResultCodes.Ok)]: {
         description: "Successfully retrieved registrar actions",
       },
-      400: {
-        description: "Invalid input",
+      [resultCodeToHttpStatusCode(ResultCodes.InvalidRequest)]: {
+        description: "Invalid query",
       },
-      500: {
-        description: "Internal server error",
+      [resultCodeToHttpStatusCode(ResultCodes.ServiceUnavailable)]: {
+        description: "Registrar Actions API is unavailable at the moment",
       },
     },
   }),
@@ -279,29 +286,22 @@ app.get(
       // Get the accurateAsOf timestamp from the slowest chain indexing cursor
       const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
-      // respond with success response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Ok,
-          registrarActions,
+      const result = buildResultOkTimestamped(
+        {
+          registrarActions: serializeNamedRegistrarActions(registrarActions),
           pageContext,
-          accurateAsOf,
-        } satisfies RegistrarActionsResponseOk),
+        },
+        accurateAsOf,
       );
+
+      return resultIntoHttpResponse(c, result);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       logger.error(errorMessage);
 
-      // respond with 500 error response
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API Response is unavailable`,
-          },
-        } satisfies RegistrarActionsResponseError),
-        500,
-      );
+      const result = buildResultServiceUnavailable("Registrar Actions API Response is unavailable");
+
+      return resultIntoHttpResponse(c, result);
     }
   },
 );

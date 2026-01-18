@@ -1,13 +1,14 @@
 import config from "@/config";
 
 import {
-  RegistrarActionsResponseCodes,
+  buildResultInternalServerError,
+  buildResultServiceUnavailable,
   registrarActionsPrerequisites,
-  serializeRegistrarActionsResponse,
 } from "@ensnode/ensnode-sdk";
 
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
+import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
 
 const logger = makeLogger("registrar-actions.middleware");
 
@@ -31,20 +32,20 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
   async function registrarActionsApiMiddleware(c, next) {
     // context must be set by the required middleware
     if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(registrar-actions.middleware): indexingStatusMiddleware required`);
+      return resultIntoHttpResponse(
+        c,
+        buildResultInternalServerError(
+          `Invariant(registrar-actions.middleware): indexingStatusMiddleware required.`,
+        ),
+      );
     }
 
     if (!registrarActionsPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API is not available`,
-            details: `Connected ENSIndexer must have all following plugins active: ${registrarActionsPrerequisites.requiredPlugins.join(", ")}`,
-          },
-        }),
-        500,
-      );
+      const result = buildResultServiceUnavailable(`Registrar Actions API is not available`, {
+        details: `Connected ENSIndexer must have all following plugins active: ${registrarActionsPrerequisites.requiredPlugins.join(", ")}`,
+      });
+
+      return resultIntoHttpResponse(c, result);
     }
 
     if (c.var.indexingStatus instanceof Error) {
@@ -54,31 +55,24 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
         `Registrar Actions API requested but indexing status is not available in context.`,
       );
 
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API is not available`,
-            details: `Indexing status is currently unavailable to this ENSApi instance.`,
-          },
-        }),
-        500,
-      );
+      const result = buildResultServiceUnavailable(`Registrar Actions API is not available`, {
+        details: `Indexing status is currently unavailable to this ENSApi instance.`,
+      });
+
+      return resultIntoHttpResponse(c, result);
     }
 
     const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
 
-    if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
-      return c.json(
-        serializeRegistrarActionsResponse({
-          responseCode: RegistrarActionsResponseCodes.Error,
-          error: {
-            message: `Registrar Actions API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
-          },
-        }),
-        500,
-      );
+    if (
+      !registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)
+    ) {
+      const result = buildResultServiceUnavailable(`Registrar Actions API is not available`, {
+        details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+      });
+
+      return resultIntoHttpResponse(c, result);
+    }
 
     await next();
   },

@@ -1,13 +1,11 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import { type AbstractResultOk, ResultCodes, type ResultServerError } from "@ensnode/ensnode-sdk";
-
-export type OpResultServerOk<TData> = AbstractResultOk<TData>;
-
-export type OpResultServer<TData = unknown> = OpResultServerOk<TData> | ResultServerError;
-
-export type OpResultServerResultCode = OpResultServer["resultCode"];
+import {
+  type OpResultServer,
+  type OpResultServerResultCode,
+  ResultCodes,
+} from "@ensnode/ensnode-sdk";
 
 /**
  * Get HTTP status code corresponding to the given operation result code.

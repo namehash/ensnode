@@ -1,3 +1,4 @@
+import type { UnixTimestamp } from "../../shared";
 import type {
   ResultCode,
   ResultCodeClientError,
@@ -30,6 +31,26 @@ export interface AbstractResultOk<TDataType> extends AbstractResult<typeof Resul
    * The data of the result.
    */
   data: TDataType;
+}
+
+/**
+ * Abstract representation of a successful result with data guaranteed to be
+ * at least up to a certain timestamp.
+ */
+export interface AbstractResultOkTimestamped<TDataType> extends AbstractResultOk<TDataType> {
+  /**
+   * The minimum indexing cursor timestamp that the data is
+   * guaranteed to be accurate as of.
+   *
+   * Guarantees:
+   * - `data` is guaranteed to be at least up to `minIndexingCursor`, but
+   *   may be indexed with timestamps higher than `minIndexingCursor`.
+   *   - This guarantee may temporarily be violated during a chain reorg.
+   *     ENSNode automatically recovers from chain reorgs, but during one
+   *     the `minIndexingCursor` may theoretically be some seconds ahead of
+   *     the true state of indexed data.
+   */
+  minIndexingCursor: UnixTimestamp;
 }
 
 /**
