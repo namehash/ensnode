@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  buildResultOk,
   type CrossChainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
   type UnixTimestamp,
@@ -69,9 +70,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: 300,
-        });
+        expect(responseJson).toMatchObject(
+          buildResultOk({
+            maxWorstCaseDistance: 300,
+          }),
+        );
       });
 
       it("should accept valid maxWorstCaseDistance query param (set to `0`)", async () => {
@@ -84,9 +87,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: 0,
-        });
+        expect(responseJson).toMatchObject(
+          buildResultOk({
+            maxWorstCaseDistance: 0,
+          }),
+        );
       });
 
       it("should use default maxWorstCaseDistance when unset", async () => {
@@ -99,9 +104,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
-        });
+        expect(responseJson).toMatchObject(
+          buildResultOk({
+            maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
+          }),
+        );
       });
 
       it("should use default maxWorstCaseDistance when not provided", async () => {
@@ -114,9 +121,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
-        });
+        expect(responseJson).toMatchObject(
+          buildResultOk({
+            maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
+          }),
+        );
       });
 
       it("should reject invalid maxWorstCaseDistance (negative number)", async () => {
@@ -161,11 +170,13 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: 10,
-          slowestChainIndexingCursor: 1766123720,
-          worstCaseDistance: 9,
-        });
+        expect(responseJson).toStrictEqual(
+          buildResultOk({
+            maxWorstCaseDistance: 10,
+            slowestChainIndexingCursor: 1766123720,
+            worstCaseDistance: 9,
+          }),
+        );
       });
 
       it("should return 200 when worstCaseDistance equals maxWorstCaseDistance", async () => {
@@ -178,11 +189,13 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject({
-          maxWorstCaseDistance: 10,
-          slowestChainIndexingCursor: 1766123719,
-          worstCaseDistance: 10,
-        });
+        expect(responseJson).toStrictEqual(
+          buildResultOk({
+            maxWorstCaseDistance: 10,
+            slowestChainIndexingCursor: 1766123719,
+            worstCaseDistance: 10,
+          }),
+        );
       });
 
       it("should return 503 when worstCaseDistance exceeds maxWorstCaseDistance", async () => {
@@ -195,8 +208,8 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(503);
-        expect(responseJson).toHaveProperty("message");
-        expect(responseJson.message).toMatch(
+        expect(responseJson).toHaveProperty("errorMessage");
+        expect(responseJson.errorMessage).toMatch(
           /Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 11; maxWorstCaseDistance = 10/,
         );
       });
@@ -215,8 +228,8 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(503);
-        expect(responseJson).toHaveProperty("message");
-        expect(responseJson.message).toMatch(
+        expect(responseJson).toHaveProperty("errorMessage");
+        expect(responseJson.errorMessage).toMatch(
           /Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied./,
         );
       });
