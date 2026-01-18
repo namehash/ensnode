@@ -1,9 +1,54 @@
+/**
+ * Common Result Types and Builders
+ *
+ * This module defines common result types and builder functions for
+ * standardizing operation results across the SDK. It includes types and
+ * builders for successful results as well as various error scenarios.
+ */
+
+import type { AbstractResultError, AbstractResultOk } from "./result-base";
+import { type ResultCode, ResultCodes } from "./result-code";
+
+/************************************************************
+ * Result OK
+ ************************************************************/
+
+export type ResultOk<TData> = AbstractResultOk<TData>;
+
+/**
+ * Builds a result object representing a successful operation.
+ */
+export function buildResultOk<const TData>(data: TData): ResultOk<TData> {
+  return {
+    resultCode: ResultCodes.Ok,
+    data,
+  };
+}
+
+/************************************************************
+ * Service Unavailable
+ ************************************************************/
+
+export interface ResultServiceUnavailable
+  extends AbstractResultError<typeof ResultCodes.ServiceUnavailable> {}
+
+/**
+ * Builds a result object representing a service unavailable error.
+ */
+export const buildResultServiceUnavailable = (
+  errorMessage?: string,
+  suggestRetry: boolean = true,
+): ResultServiceUnavailable => {
+  return {
+    resultCode: ResultCodes.ServiceUnavailable,
+    errorMessage: errorMessage ?? "The service is currently unavailable.",
+    suggestRetry,
+  };
+};
+
 /************************************************************
  * Internal Server Error
  ************************************************************/
-
-import type { AbstractResultError } from "./result-base";
-import { type ResultCode, ResultCodes } from "./result-code";
 
 export interface ResultInternalServerError
   extends AbstractResultError<typeof ResultCodes.InternalServerError> {}
@@ -165,6 +210,16 @@ export const isRecognizedResultCodeForOperation = (
   // Checks if resultCode is one of the recognizedResultCodes for an operation
   return recognizedResultCodesForOperation.includes(resultCode as ResultCode);
 };
+
+/************************************************************
+ * All common server errors
+ ************************************************************/
+
+export type ResultServerError =
+  | ResultInvalidRequest
+  | ResultNotFound
+  | ResultInternalServerError
+  | ResultServiceUnavailable;
 
 /************************************************************
  * All common client errors

@@ -18,6 +18,11 @@ export const ResultCodes = {
   InternalServerError: "internal-server-error",
 
   /**
+   * Server error: the operation failed due to the service being unavailable at the time.
+   */
+  ServiceUnavailable: "service-unavailable",
+
+  /**
    * Server error: the requested resource was not found.
    */
   NotFound: "not-found",
@@ -48,6 +53,7 @@ export const ResultCodes = {
  */
 export const RESULT_CODE_SERVER_ERROR_CODES = [
   ResultCodes.InternalServerError,
+  ResultCodes.ServiceUnavailable,
   ResultCodes.NotFound,
   ResultCodes.InvalidRequest,
 ] as const;
