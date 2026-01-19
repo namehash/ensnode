@@ -1,5 +1,6 @@
 import type { Context } from "hono";
-import { describe, expect, it, vi } from "vitest";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildResultInternalServerError,
@@ -8,6 +9,8 @@ import {
   buildResultOk,
   buildResultServiceUnavailable,
   ResultCodes,
+  type ResultServer,
+  type ResultServerResultCode,
 } from "@ensnode/ensnode-sdk";
 
 import { resultCodeToHttpStatusCode, resultIntoHttpResponse } from "./result-into-http-response";
@@ -42,90 +45,93 @@ describe("resultCodeToHttpStatusCode", () => {
 
     expect(statusCode).toBe(503);
   });
+
+  it("should throw an error for unhandled result code", () => {
+    const unhandledResultCode = "test" as ResultServerResultCode;
+    expect(() => resultCodeToHttpStatusCode(unhandledResultCode)).toThrowError(
+      `Unhandled result code: ${unhandledResultCode}`,
+    );
+  });
 });
 
 describe("resultIntoHttpResponse", () => {
-  it("should return HTTP response with status 200 for Ok result", () => {
-    const mockResponse = { status: 200, body: "test" };
-    const mockContext = {
-      json: vi.fn().mockReturnValue(mockResponse),
-    } as unknown as Context;
+  let mockContext: Context;
 
+  beforeEach(() => {
+    mockContext = {
+      json: vi.fn((object: Response, status: ContentfulStatusCode) => {
+        return Response.json(object, { status });
+      }),
+    } as unknown as Context;
+  });
+
+  it("should return HTTP response with status 200 for Ok result", async () => {
     const result = buildResultOk("test data");
 
     const response = resultIntoHttpResponse(mockContext, result);
 
-    expect(mockContext.json).toHaveBeenCalledWith(result, 200);
-    expect(response).toBe(mockResponse);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toStrictEqual(result);
   });
 
-  it("should return HTTP response with status 400 for InvalidRequest result", () => {
-    const mockResponse = { status: 400, body: "error" };
-    const mockContext = {
-      json: vi.fn().mockReturnValue(mockResponse),
-    } as unknown as Context;
-
+  it("should return HTTP response with status 400 for InvalidRequest result", async () => {
     const result = buildResultInvalidRequest("Invalid request");
 
     const response = resultIntoHttpResponse(mockContext, result);
 
-    expect(mockContext.json).toHaveBeenCalledWith(result, 400);
-    expect(response).toBe(mockResponse);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toStrictEqual(result);
   });
 
-  it("should return HTTP response with status 404 for NotFound result", () => {
-    const mockResponse = { status: 404, body: "not found" };
-    const mockContext = {
-      json: vi.fn().mockReturnValue(mockResponse),
-    } as unknown as Context;
-
+  it("should return HTTP response with status 404 for NotFound result", async () => {
     const result = buildResultNotFound("Resource not found");
 
     const response = resultIntoHttpResponse(mockContext, result);
 
-    expect(mockContext.json).toHaveBeenCalledWith(result, 404);
-    expect(response).toBe(mockResponse);
+    expect(response.status).toBe(404);
+    expect(await response.json()).toStrictEqual(result);
   });
 
-  it("should return HTTP response with status 500 for InternalServerError result", () => {
-    const mockResponse = { status: 500, body: "Internal server error" };
-    const mockContext = {
-      json: vi.fn().mockReturnValue(mockResponse),
-    } as unknown as Context;
-
+  it("should return HTTP response with status 500 for InternalServerError result", async () => {
     const result = buildResultInternalServerError("Internal server error");
 
     const response = resultIntoHttpResponse(mockContext, result);
 
-    expect(mockContext.json).toHaveBeenCalledWith(result, 500);
-    expect(response).toBe(mockResponse);
+    expect(response.status).toBe(500);
+    expect(await response.json()).toStrictEqual(result);
   });
 
-  it("should return HTTP response with status 503 for ServiceUnavailable result", () => {
-    const mockResponse = { status: 503, body: "unavailable" };
-    const mockContext = {
-      json: vi.fn().mockReturnValue(mockResponse),
-    } as unknown as Context;
-
+  it("should return HTTP response with status 503 for ServiceUnavailable result", async () => {
     const result = buildResultServiceUnavailable("Service unavailable");
 
     const response = resultIntoHttpResponse(mockContext, result);
 
-    expect(mockContext.json).toHaveBeenCalledWith(result, 503);
-    expect(response).toBe(mockResponse);
+    expect(response.status).toBe(503);
+    const responseJson = await response.json();
+    expect(responseJson).toStrictEqual(result);
   });
 
-  it("should handle result with complex data object", () => {
-    const mockResponse = { status: 200, body: "complex" };
-    const mockContext = {
-      json: vi.fn().mockReturnValue(mockResponse),
-    } as unknown as Context;
-
-    const result = buildResultOk({ id: 1, name: "Test" });
+  it("should handle result with complex data object", async () => {
+    const complexData = { id: 1, name: "Test", attributes: { key: "value" } };
+    const result = buildResultOk(complexData);
 
     const response = resultIntoHttpResponse(mockContext, result);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toStrictEqual(result);
+  });
 
-    expect(mockContext.json).toHaveBeenCalledWith(result, 200);
-    expect(response).toBe(mockResponse);
+  it("should handle result with with unhandled result code", async () => {
+    const unhandledResultCode = "test" as ResultServerResultCode;
+    const result = {
+      resultCode: unhandledResultCode,
+      errorMessage: "Unhandled result code",
+    };
+
+    const response = resultIntoHttpResponse(mockContext, result as ResultServer);
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toStrictEqual(
+      buildResultInternalServerError("An internal server error occurred."),
+    );
   });
 });

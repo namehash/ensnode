@@ -61,7 +61,7 @@ export const buildResultServiceUnavailable = (
     resultCode: ResultCodes.ServiceUnavailable,
     errorMessage: errorMessage ?? "The service is currently unavailable.",
     suggestRetry,
-    data,
+    ...(data ? { data } : {}),
   };
 };
 

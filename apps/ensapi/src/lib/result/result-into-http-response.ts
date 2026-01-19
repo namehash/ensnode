@@ -1,13 +1,23 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import { ResultCodes, type ResultServer, type ResultServerResultCode } from "@ensnode/ensnode-sdk";
+import {
+  buildResultInternalServerError,
+  ResultCodes,
+  type ResultServer,
+  type ResultServerResultCode,
+} from "@ensnode/ensnode-sdk";
+
+import { makeLogger } from "@/lib/logger";
+
+const logger = makeLogger("result-into-http-response");
 
 /**
  * Get HTTP status code corresponding to the given operation result code.
  *
  * @param resultCode - The operation result code
  * @returns Corresponding HTTP status code
+ * @throws Error if the result code is unhandled
  */
 export function resultCodeToHttpStatusCode(
   resultCode: ResultServerResultCode,
@@ -23,6 +33,8 @@ export function resultCodeToHttpStatusCode(
       return 500;
     case ResultCodes.ServiceUnavailable:
       return 503;
+    default:
+      throw new Error(`Unhandled result code: ${resultCode}`);
   }
 }
 
@@ -37,7 +49,20 @@ export function resultIntoHttpResponse<TResult extends ResultServer>(
   c: Context,
   result: TResult,
 ): Response {
-  const statusCode = resultCodeToHttpStatusCode(result.resultCode);
+  try {
+    // Determine HTTP status code from result code
+    const statusCode = resultCodeToHttpStatusCode(result.resultCode);
 
-  return c.json(result, statusCode);
+    // Return JSON response with appropriate status code
+    return c.json(result, statusCode);
+  } catch {
+    // In case of unhandled result code, log error and
+    // return response from internal server error result
+    logger.error(`Unhandled result code encountered: ${result.resultCode}`);
+
+    return resultIntoHttpResponse(
+      c,
+      buildResultInternalServerError("An internal server error occurred."),
+    );
+  }
 }
