@@ -8,10 +8,10 @@ import { buildResultInvalidRequest } from "@ensnode/ensnode-sdk";
 import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
 
 /**
- * Creates a Hono validation middleware with custom error formatting.
+ * Creates a Hono validation middleware.
  *
- * Wraps the Hono validator with custom error handling that uses the
- * errorResponse function for consistent error formatting across the API.
+ * Wraps the Hono validator with custom error handling that uses standardized
+ * response data model across the API.
  *
  * @param target - The validation target (param, query, json, etc.)
  * @param schema - The Zod schema to validate against
@@ -22,12 +22,13 @@ export const validate = <T extends ZodType, Target extends keyof ValidationTarge
   schema: T,
 ) =>
   validator(target, schema, (result, c) => {
-    // if validation failed, return our custom-formatted ErrorResponse instead of default
+    // Respond with the invalid request result if validation failed.
     if (!result.success) {
       // Convert Standard Schema issues to ZodError for consistent formatting
       const schemaError = new SchemaError(result.error);
       const zodError = new ZodError(schemaError.issues as ZodError["issues"]);
+      const errorMessage = prettifyError(zodError);
 
-      return resultIntoHttpResponse(c, buildResultInvalidRequest(prettifyError(zodError)));
+      return resultIntoHttpResponse(c, buildResultInvalidRequest(errorMessage));
     }
   });

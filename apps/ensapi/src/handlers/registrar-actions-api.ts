@@ -3,6 +3,7 @@ import z from "zod/v4";
 
 import {
   buildPageContext,
+  buildResultInternalServerError,
   buildResultOkTimestamped,
   buildResultServiceUnavailable,
   type Node,
@@ -182,7 +183,11 @@ app.get(
       // Middleware ensures indexingStatus is available and not an Error
       // This check is for TypeScript type safety
       if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+        const result = buildResultInternalServerError(
+          "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
+        );
+
+        return resultIntoHttpResponse(c, result);
       }
 
       const query = c.req.valid("query");
@@ -276,7 +281,11 @@ app.get(
       // Middleware ensures indexingStatus is available and not an Error
       // This check is for TypeScript type safety
       if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        throw new Error("Invariant violation: indexingStatus should be validated by middleware");
+        const result = buildResultInternalServerError(
+          "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
+        );
+
+        return resultIntoHttpResponse(c, result);
       }
 
       const { parentNode } = c.req.valid("param");
