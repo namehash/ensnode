@@ -4,12 +4,13 @@
  * Generate OpenAPI spec from a running ENSApi instance.
  *
  * Usage:
- *   pnpm openapi:generate
- *   pnpm openapi:generate http://localhost:3223
+ *   pnpm openapi:generate                           # Uses default URL (production)
+ *   pnpm openapi:generate http://localhost:3223     # Uses custom URL
  *   ENSAPI_URL=http://localhost:3223 pnpm openapi:generate
  *
  * Output:
- *   Writes openapi.json to the docs directory for Mintilify
+ *   Writes openapi.json to the docs directory for Mintlify to consume.
+ *   Run `pnpm biome format --write docs/docs.ensnode.io/openapi.json` after to format.
  */
 
 import { writeFileSync } from "node:fs";
@@ -35,7 +36,7 @@ async function main() {
   const spec = await response.json();
 
   // Pretty-print the JSON for readability in git diffs
-  const content = JSON.stringify(spec, null, 2);
+  const content = `${JSON.stringify(spec, null, 2)}\n`;
 
   writeFileSync(OUTPUT_PATH, content, "utf-8");
 
