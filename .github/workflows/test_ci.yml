@@ -48,6 +48,30 @@ jobs:
       - uses: ./.github/actions/setup_node_environment
       - run: pnpm test
 
+  openapi-sync-check:
+    name: "OpenAPI Spec Sync Check"
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    # Only run on main branch - PRs may intentionally have different specs
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup_node_environment
+
+      - name: Generate OpenAPI spec from production
+        run: pnpm --filter ensapi openapi:generate
+
+      - name: Verify OpenAPI spec matches production
+        run: |
+          if git diff --exit-code docs/docs.ensnode.io/openapi.json; then
+            echo "✅ OpenAPI spec is in sync with production"
+          else
+            echo "❌ OpenAPI spec is out of sync with production"
+            echo ""
+            echo "The committed openapi.json differs from the production API."
+            echo "Run 'pnpm --filter ensapi openapi:generate' and commit the changes."
+            exit 1
+          fi
+
   integrity-check:
     name: "Integrity Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204

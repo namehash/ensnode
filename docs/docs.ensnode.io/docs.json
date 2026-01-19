@@ -24,7 +24,13 @@
               },
               {
                 "group": "API Reference",
-                "openapi": "https://gist.githubusercontent.com/notrab/94b637e77468cbddd895d7933ce88f64/raw/12cb5ed183558a9bdda5d1c7004db6c794dbd13e/green-ensnode-openapi.json"
+                "openapi": "https://api.alpha.ensnode.io/openapi.json"
+              },
+              {
+                "group": "Preview",
+                "pages": ["ensapi/preview"],
+                "openapi": "./openapi.json",
+                "hidden": true
               }
             ]
           }
