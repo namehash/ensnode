@@ -179,19 +179,20 @@ app.get(
   }),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
+    // Middleware ensures indexingStatus is available and not an Error
+    // This check is for TypeScript type safety, should never occur in
+    // practice.
+    if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+      const result = buildResultServiceUnavailable(
+        "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
+      );
+
+      return resultIntoHttpResponse(c, result);
+    }
+
+    const query = c.req.valid("query");
+
     try {
-      // Middleware ensures indexingStatus is available and not an Error
-      // This check is for TypeScript type safety, should never occur in
-      // practice.
-      if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        const result = buildResultServiceUnavailable(
-          "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
-        );
-
-        return resultIntoHttpResponse(c, result);
-      }
-
-      const query = c.req.valid("query");
       const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
 
       // Get the accurateAsOf timestamp from the slowest chain indexing cursor
@@ -268,20 +269,21 @@ app.get(
   ),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
+    // Middleware ensures indexingStatus is available and not an Error
+    // This check is for TypeScript type safety, should never occur in
+    // practice.
+    if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+      const result = buildResultServiceUnavailable(
+        "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
+      );
+
+      return resultIntoHttpResponse(c, result);
+    }
+
+    const { parentNode } = c.req.valid("param");
+    const query = c.req.valid("query");
+
     try {
-      // Middleware ensures indexingStatus is available and not an Error
-      // This check is for TypeScript type safety, should never occur in
-      // practice.
-      if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        const result = buildResultServiceUnavailable(
-          "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
-        );
-
-        return resultIntoHttpResponse(c, result);
-      }
-
-      const { parentNode } = c.req.valid("param");
-      const query = c.req.valid("query");
       const { registrarActions, pageContext } = await fetchRegistrarActions(parentNode, query);
 
       // Get the accurateAsOf timestamp from the slowest chain indexing cursor
