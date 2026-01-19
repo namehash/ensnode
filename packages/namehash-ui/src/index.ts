@@ -25,6 +25,6 @@ export * from "./components/registrar-actions/RegistrarActionCard";
 export * from "./components/special-buttons/CopyButton";
 export { useNow } from "./hooks/useNow";
 export * from "./utils/blockExplorers";
-export { getChainName } from "./utils/chains";
+export * from "./utils/chains";
 export * from "./utils/ensManager";
 export * from "./utils/ensMetadata";
