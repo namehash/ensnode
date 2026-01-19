@@ -1,6 +1,6 @@
 import { Info as InfoIcon, CircleQuestionMark as QuestionmarkIcon } from "lucide-react";
 import { memo, type PropsWithChildren, type ReactNode } from "react";
-import { zeroAddress } from "viem";
+import { type Address, zeroAddress } from "viem";
 
 import type {
   DefaultableChainId,
@@ -19,7 +19,6 @@ import {
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { getBlockExplorerTransactionDetailsUrl } from "../../utils/blockExplorers";
 import { cn } from "../../utils/cn";
-import { getEnsManagerAddressDetailsUrl } from "../../utils/ensManager";
 import { DisplayDuration } from "../datetime/DisplayDuration";
 import { RelativeTime } from "../datetime/RelativeTime";
 import type { IdentityLinkDetails } from "../identity/Identity";
@@ -38,7 +37,11 @@ interface LabeledFieldProps {
 /**
  * Display a labeled field.
  */
-function LabeledField({ fieldLabel, className, children }: PropsWithChildren<LabeledFieldProps>) {
+export function LabeledField({
+  fieldLabel,
+  className,
+  children,
+}: PropsWithChildren<LabeledFieldProps>) {
   return (
     <div
       className={cn(
@@ -54,10 +57,13 @@ function LabeledField({ fieldLabel, className, children }: PropsWithChildren<Lab
   );
 }
 
+type ReferrerLinkFunction = (address: Address, namespaceId: ENSNamespaceId) => URL | null;
+
 interface ResolveAndDisplayReferrerIdentityProps
   extends Omit<ResolveAndDisplayIdentityProps, "identity" | "identityLinkDetails"> {
   chainId: DefaultableChainId;
   referral: RegistrarActionReferral;
+  getReferrerLink: ReferrerLinkFunction;
 }
 
 /**
@@ -71,6 +77,7 @@ function ResolveAndDisplayReferrerIdentity({
   referral,
   accelerate = true,
   withLink = true,
+  getReferrerLink,
   withTooltip = true,
   withAvatar = false,
   withIdentifier = true,
@@ -146,7 +153,7 @@ function ResolveAndDisplayReferrerIdentity({
       withLink={withLink}
       identityLinkDetails={{
         isExternal: true,
-        link: getEnsManagerAddressDetailsUrl(referrerIdentity.address, namespaceId),
+        link: getReferrerLink(referrerIdentity.address, namespaceId),
       }}
     />
   );
@@ -229,6 +236,7 @@ export interface RegistrarActionCardProps {
   links: {
     name: IdentityLinkDetails;
     registrant: IdentityLinkDetails;
+    referrerLinkFunction: ReferrerLinkFunction;
   };
   showReferrer?: boolean;
   referralProgramField?: ReactNode;
@@ -342,6 +350,7 @@ export function RegistrarActionCard({
               withAvatar={true}
               withIdentifier={false}
               withTooltip={false}
+              getReferrerLink={links.referrerLinkFunction}
             />
           )}
           <LabeledField fieldLabel="Referrer" className="nhui:w-[15%] nhui:min-w-[110px]">
@@ -352,6 +361,7 @@ export function RegistrarActionCard({
               withAvatar={isMobile}
               withIdentifier={true}
               withTooltip={false}
+              getReferrerLink={links.referrerLinkFunction}
             />
           </LabeledField>
         </div>
@@ -363,6 +373,3 @@ export function RegistrarActionCard({
 }
 
 export const RegistrarActionCardMemo = memo(RegistrarActionCard);
-
-// TODO: Copied from ENSAwards (as a newer version) - performed some refactor actions
-//  to make the component usable across all our apps, but further alignment might be needed

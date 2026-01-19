@@ -65,6 +65,7 @@ function DisplayRegistrarActionsList({
                 namespaceId,
               ),
             },
+            referrerLinkFunction: getEnsManagerAddressDetailsUrl,
           }}
         />
       ))}
