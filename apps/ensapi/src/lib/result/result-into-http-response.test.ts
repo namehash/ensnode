@@ -120,7 +120,7 @@ describe("resultIntoHttpResponse", () => {
     expect(await response.json()).toStrictEqual(result);
   });
 
-  it("should handle result with with unhandled result code", async () => {
+  it("should handle result with unhandled result code", async () => {
     const unhandledResultCode = "test" as ResultServerResultCode;
     const result = {
       resultCode: unhandledResultCode,
