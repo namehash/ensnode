@@ -23,6 +23,7 @@ export * from "./components/identity/Name";
 export * from "./components/identity/ResolveAndDisplayIdentity";
 export * from "./components/registrar-actions/RegistrarActionCard";
 export * from "./components/special-buttons/CopyButton";
+export { useIsMobile } from "./hooks/useIsMobile";
 export { useNow } from "./hooks/useNow";
 export * from "./utils/blockExplorers";
 export * from "./utils/chains";
