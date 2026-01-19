@@ -22,7 +22,7 @@ export function buildRouteResponsesDescription<TResult extends ResultServer>(
     (acc, entry) => {
       const [resultCode, desc] = entry as [TResult["resultCode"], RouteDescription];
 
-      acc[resultCodeToHttpStatusCode(resultCode as TResult["resultCode"])] = desc;
+      acc[resultCodeToHttpStatusCode(resultCode)] = desc;
 
       return acc;
     },
