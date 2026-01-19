@@ -1,5 +1,6 @@
 import type {
   ResultInternalServerError,
+  ResultInvalidRequest,
   ResultServerOk,
   ResultServiceUnavailable,
 } from "../../shared";
@@ -26,5 +27,6 @@ export interface RegistrarActionsResultOkData {
  */
 export type RegistrarActionsResult =
   | ResultServerOk<RegistrarActionsResultOkData>
+  | ResultInvalidRequest
   | ResultInternalServerError
   | ResultServiceUnavailable;

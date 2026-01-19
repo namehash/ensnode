@@ -37,6 +37,9 @@ app.get(
         description:
           "Indexing progress is guaranteed to be within the requested distance of realtime",
       },
+      [ResultCodes.InvalidRequest]: {
+        description: "Invalid request parameters",
+      },
       [ResultCodes.InternalServerError]: {
         description: "Indexing progress cannot be determined due to an internal server error",
       },

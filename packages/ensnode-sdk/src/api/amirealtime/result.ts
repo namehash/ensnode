@@ -2,6 +2,7 @@ import type { RealtimeIndexingStatusProjection } from "../../ensindexer";
 import type {
   Duration,
   ResultInternalServerError,
+  ResultInvalidRequest,
   ResultServerOk,
   ResultServiceUnavailable,
   UnixTimestamp,
@@ -41,5 +42,6 @@ export interface AmIRealtimeResultOkData {
  */
 export type AmIRealtimeResult =
   | ResultServerOk<AmIRealtimeResultOkData>
+  | ResultInvalidRequest
   | ResultInternalServerError
   | ResultServiceUnavailable;

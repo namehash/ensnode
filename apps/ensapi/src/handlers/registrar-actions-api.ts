@@ -154,6 +154,9 @@ const routeResponsesDescription = buildRouteResponsesDescription<RegistrarAction
   [ResultCodes.Ok]: {
     description: "Successfully retrieved registrar actions",
   },
+  [ResultCodes.InvalidRequest]: {
+    description: "Invalid request parameters",
+  },
   [ResultCodes.ServiceUnavailable]: {
     description: "Registrar Actions API is unavailable at the moment",
   },
