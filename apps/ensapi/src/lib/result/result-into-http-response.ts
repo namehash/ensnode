@@ -1,11 +1,7 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import {
-  type OpResultServer,
-  type OpResultServerResultCode,
-  ResultCodes,
-} from "@ensnode/ensnode-sdk";
+import { ResultCodes, type ResultServer, type ResultServerResultCode } from "@ensnode/ensnode-sdk";
 
 /**
  * Get HTTP status code corresponding to the given operation result code.
@@ -14,7 +10,7 @@ import {
  * @returns Corresponding HTTP status code
  */
 export function resultCodeToHttpStatusCode(
-  resultCode: OpResultServerResultCode,
+  resultCode: ResultServerResultCode,
 ): ContentfulStatusCode {
   switch (resultCode) {
     case ResultCodes.Ok:
@@ -37,7 +33,7 @@ export function resultCodeToHttpStatusCode(
  * @param result - The operation result
  * @returns HTTP response with appropriate status code and JSON body
  */
-export function resultIntoHttpResponse<TResult extends OpResultServer>(
+export function resultIntoHttpResponse<TResult extends ResultServer>(
   c: Context,
   result: TResult,
 ): Response {

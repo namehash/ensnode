@@ -3,6 +3,7 @@ import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
 import {
+  type AmIRealtimeResult,
   buildResultInternalServerError,
   buildResultOk,
   buildResultServiceUnavailable,
@@ -12,12 +13,10 @@ import {
 import { makeDurationSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
+import { buildRouteResponsesDescription } from "@/lib/handlers/route-responses-description";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
-import {
-  resultCodeToHttpStatusCode,
-  resultIntoHttpResponse,
-} from "@/lib/result/result-into-http-response";
+import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
 
 const app = factory.createApp();
 
@@ -33,19 +32,19 @@ app.get(
     summary: "Check indexing progress",
     description:
       "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-    responses: {
-      [resultCodeToHttpStatusCode(ResultCodes.Ok)]: {
+    responses: buildRouteResponsesDescription<AmIRealtimeResult>({
+      [ResultCodes.Ok]: {
         description:
           "Indexing progress is guaranteed to be within the requested distance of realtime",
       },
-      [resultCodeToHttpStatusCode(ResultCodes.InternalServerError)]: {
+      [ResultCodes.InternalServerError]: {
         description: "Indexing progress cannot be determined due to an internal server error",
       },
-      [resultCodeToHttpStatusCode(ResultCodes.ServiceUnavailable)]: {
+      [ResultCodes.ServiceUnavailable]: {
         description:
           "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
       },
-    },
+    }),
   }),
   validate(
     "query",
@@ -58,45 +57,38 @@ app.get(
     }),
   ),
   async (c) => {
-    // context must be set by the required middleware
+    // Invariant: Indexing Status must be available in application context
     if (c.var.indexingStatus === undefined) {
-      return resultIntoHttpResponse(
-        c,
-        buildResultInternalServerError(
-          `Invariant(amirealtime-api): indexingStatusMiddleware required.`,
-        ),
+      const result = buildResultInternalServerError(
+        `Invariant(amirealtime-api): Indexing Status must be available in application context.`,
       );
+
+      return resultIntoHttpResponse(c, result);
     }
 
-    // return 503 response error with details on prerequisite being unavailable
+    // Invariant: Indexing Status must be resolved successfully before 'maxWorstCaseDistance' can be applied
     if (c.var.indexingStatus instanceof Error) {
-      return resultIntoHttpResponse(
-        c,
-        // todo: differentiate between 500 vs. 503 based on error type
-        buildResultServiceUnavailable(
-          `Invariant(amirealtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
-        ),
+      const result = buildResultServiceUnavailable(
+        `Invariant(amirealtime-api): Indexing Status must be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
       );
+
+      return resultIntoHttpResponse(c, result);
     }
 
     const { maxWorstCaseDistance } = c.req.valid("query");
     const { worstCaseDistance, snapshot } = c.var.indexingStatus;
     const { slowestChainIndexingCursor } = snapshot;
 
-    // return 503 response error with details on
-    // requested `maxWorstCaseDistance` vs. actual `worstCaseDistance`
+    // Case: worst-case distance exceeds requested maximum
     if (worstCaseDistance > maxWorstCaseDistance) {
-      // todo: differentiate between 500 vs. 503 based on error type
-      return resultIntoHttpResponse(
-        c,
-        buildResultServiceUnavailable(
-          `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
-        ),
+      const result = buildResultServiceUnavailable(
+        `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
       );
+
+      return resultIntoHttpResponse(c, result);
     }
 
-    // return 200 response OK with current details on `maxWorstCaseDistance`,
-    // `slowestChainIndexingCursor`, and `worstCaseDistance`
+    // Case: worst-case distance is within requested maximum
     return resultIntoHttpResponse(
       c,
       buildResultOk({

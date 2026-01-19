@@ -3,7 +3,6 @@ import z from "zod/v4";
 
 import {
   buildPageContext,
-  buildResultInternalServerError,
   buildResultOkTimestamped,
   buildResultServiceUnavailable,
   type Node,
@@ -11,6 +10,7 @@ import {
   RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
+  type RegistrarActionsResult,
   ResultCodes,
   registrarActionsFilter,
   serializeNamedRegistrarActions,
@@ -23,14 +23,12 @@ import {
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
+import { buildRouteResponsesDescription } from "@/lib/handlers/route-responses-description";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
-import {
-  resultCodeToHttpStatusCode,
-  resultIntoHttpResponse,
-} from "@/lib/result/result-into-http-response";
+import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 const app = factory.createApp();
@@ -152,6 +150,18 @@ async function fetchRegistrarActions(
   return { registrarActions, pageContext };
 }
 
+const routeResponsesDescription = buildRouteResponsesDescription<RegistrarActionsResult>({
+  [ResultCodes.Ok]: {
+    description: "Successfully retrieved registrar actions",
+  },
+  [ResultCodes.ServiceUnavailable]: {
+    description: "Registrar Actions API is unavailable at the moment",
+  },
+  [ResultCodes.InternalServerError]: {
+    description: "An internal server error occurred",
+  },
+});
+
 /**
  * Get Registrar Actions (all records)
  *
@@ -165,25 +175,16 @@ app.get(
     tags: ["Explore"],
     summary: "Get Registrar Actions",
     description: "Returns all registrar actions with optional filtering and pagination",
-    responses: {
-      [resultCodeToHttpStatusCode(ResultCodes.Ok)]: {
-        description: "Successfully retrieved registrar actions",
-      },
-      [resultCodeToHttpStatusCode(ResultCodes.InvalidRequest)]: {
-        description: "Invalid query",
-      },
-      [resultCodeToHttpStatusCode(ResultCodes.ServiceUnavailable)]: {
-        description: "Registrar Actions API is unavailable at the moment",
-      },
-    },
+    responses: routeResponsesDescription,
   }),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
     try {
       // Middleware ensures indexingStatus is available and not an Error
-      // This check is for TypeScript type safety
+      // This check is for TypeScript type safety, should never occur in
+      // practice.
       if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        const result = buildResultInternalServerError(
+        const result = buildResultServiceUnavailable(
           "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
         );
 
@@ -255,17 +256,7 @@ app.get(
     summary: "Get Registrar Actions by Parent Node",
     description:
       "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
-    responses: {
-      [resultCodeToHttpStatusCode(ResultCodes.Ok)]: {
-        description: "Successfully retrieved registrar actions",
-      },
-      [resultCodeToHttpStatusCode(ResultCodes.InvalidRequest)]: {
-        description: "Invalid query",
-      },
-      [resultCodeToHttpStatusCode(ResultCodes.ServiceUnavailable)]: {
-        description: "Registrar Actions API is unavailable at the moment",
-      },
-    },
+    responses: routeResponsesDescription,
   }),
   validate(
     "param",
@@ -279,9 +270,10 @@ app.get(
   async (c) => {
     try {
       // Middleware ensures indexingStatus is available and not an Error
-      // This check is for TypeScript type safety
+      // This check is for TypeScript type safety, should never occur in
+      // practice.
       if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
-        const result = buildResultInternalServerError(
+        const result = buildResultServiceUnavailable(
           "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
         );
 

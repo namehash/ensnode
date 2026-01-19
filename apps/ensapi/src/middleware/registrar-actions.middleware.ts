@@ -3,6 +3,8 @@ import config from "@/config";
 import {
   buildResultInternalServerError,
   buildResultServiceUnavailable,
+  ResultInternalServerError,
+  ResultServiceUnavailable,
   registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
 
@@ -18,7 +20,13 @@ const logger = makeLogger("registrar-actions.middleware");
  * This middleware that ensures that all prerequisites of
  * the Registrar Actions API were met and HTTP requests can be served.
  *
- * Returns a 500 response for any of the following cases:
+ * Returns a response from {@link ResultInternalServerError} for any of
+ * the following cases:
+ * 1) The application context does not have the indexing status set by
+ *   `indexingStatusMiddleware`.
+ *
+ * Returns a response from {@link ResultServiceUnavailable} for any of
+ * the following cases:
  * 1) Not all required plugins are active in the connected ENSIndexer
  *    configuration.
  * 2) ENSApi has not yet successfully cached the Indexing Status in memory from
@@ -32,12 +40,11 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
   async function registrarActionsApiMiddleware(c, next) {
     // context must be set by the required middleware
     if (c.var.indexingStatus === undefined) {
-      return resultIntoHttpResponse(
-        c,
-        buildResultInternalServerError(
-          `Invariant(registrar-actions.middleware): indexingStatusMiddleware required.`,
-        ),
+      const result = buildResultInternalServerError(
+        `Invariant(registrar-actions.middleware): indexingStatusMiddleware required.`,
       );
+
+      return resultIntoHttpResponse(c, result);
     }
 
     if (!registrarActionsPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {

@@ -214,7 +214,7 @@ describe("amirealtime-api", () => {
         );
       });
 
-      it("should return 500 when indexing status has not been resolved", async () => {
+      it("should return 503 when indexing status has not been resolved", async () => {
         // Arrange: set `indexingStatus` context var
         indexingStatusMiddlewareMock.mockImplementation(async (c, next) => {
           c.set("indexingStatus", new Error("Network error"));
@@ -230,7 +230,7 @@ describe("amirealtime-api", () => {
         expect(response.status).toBe(503);
         expect(responseJson).toHaveProperty("errorMessage");
         expect(responseJson.errorMessage).toMatch(
-          /Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied./,
+          /Indexing Status must be resolved successfully before 'maxWorstCaseDistance' can be applied./,
         );
       });
     });

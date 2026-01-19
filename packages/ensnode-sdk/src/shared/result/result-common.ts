@@ -256,14 +256,14 @@ export type ResultClientError =
 /**
  * Type representing a successful server operation result.
  */
-export type OpResultServerOk<TData> = AbstractResultOk<TData> | AbstractResultOkTimestamped<TData>;
+export type ResultServerOk<TData> = AbstractResultOk<TData> | AbstractResultOkTimestamped<TData>;
 
 /**
  * Union type representing all possible server operation results.
  */
-export type OpResultServer<TData = unknown> = OpResultServerOk<TData> | ResultServerError;
+export type ResultServer<TData = unknown> = ResultServerOk<TData> | ResultServerError;
 
 /**
  * Type representing all possible server operation result codes.
  */
-export type OpResultServerResultCode = OpResultServer["resultCode"];
+export type ResultServerResultCode = ResultServer["resultCode"];
