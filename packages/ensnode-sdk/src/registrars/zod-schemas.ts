@@ -1,4 +1,3 @@
-import { decodeEncodedReferrer, ENCODED_REFERRER_BYTE_LENGTH } from "@namehash/ens-referrals";
 import type { Address } from "viem";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
@@ -15,6 +14,7 @@ import {
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
+import { decodeEncodedReferrer, ENCODED_REFERRER_BYTE_LENGTH } from "./encoded-referrer";
 import {
   type RegistrarAction,
   type RegistrarActionEventId,

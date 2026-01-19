@@ -2,11 +2,6 @@ import {
   getReferrerDetail,
   getReferrerLeaderboardPage,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-} from "@namehash/ens-referrals";
-import { describeRoute } from "hono-openapi";
-import { z } from "zod/v4";
-
-import {
   type ReferrerDetailResponse,
   ReferrerDetailResponseCodes,
   type ReferrerLeaderboardPageRequest,
@@ -14,7 +9,10 @@ import {
   ReferrerLeaderboardPageResponseCodes,
   serializeReferrerDetailResponse,
   serializeReferrerLeaderboardPageResponse,
-} from "@ensnode/ensnode-sdk";
+} from "@namehash/ens-referrals";
+import { describeRoute } from "hono-openapi";
+import { z } from "zod/v4";
+
 import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validate } from "@/lib/handlers/validate";
