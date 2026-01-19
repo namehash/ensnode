@@ -51,8 +51,6 @@ jobs:
   openapi-sync-check:
     name: "OpenAPI Spec Sync Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204
-    # Only run on main branch - PRs may intentionally have different specs
-    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
