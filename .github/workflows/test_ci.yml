@@ -58,6 +58,9 @@ jobs:
       - name: Generate OpenAPI spec from production
         run: pnpm --filter ensapi openapi:generate
 
+      - name: Format generated spec with Biome
+        run: pnpm biome format --write docs/docs.ensnode.io/openapi.json
+
       - name: Verify OpenAPI spec matches production
         run: |
           if git diff --exit-code docs/docs.ensnode.io/openapi.json; then
