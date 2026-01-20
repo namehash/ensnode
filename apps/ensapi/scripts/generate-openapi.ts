@@ -9,7 +9,7 @@
  *   ENSAPI_URL=http://localhost:3223 pnpm openapi:generate
  *
  * Output:
- *   Writes openapi.json to the docs directory for Mintlify to consume.
+ *   Writes openapi.json to the docs directory for Mintlify to consume. Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
  *   Run `pnpm biome format --write docs/docs.ensnode.io/openapi.json` after to format.
  */
 

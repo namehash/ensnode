@@ -2,11 +2,11 @@
 
 [docs.ensnode.io](https://docs.ensnode.io) hosts the ENSApi reference documentation.
 
-Learn more about [ENSNode](https://ensnode.io) from [the ENSNode docs](https://ensnode.io/docs/).
+Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode docs](https://ensnode.io/docs/). Everything from these "Starlight" docs is planned to be transitioned into these Mintlify docs soon.
 
-## Architecture
+## API Docs
 
-The documentation serves API reference from two sources:
+This Mintlify site serves two (potentially distinct) sets of API docs from two sources:
 
 | Section              | Source             | Purpose                                     |
 | -------------------- | ------------------ | ------------------------------------------- |
@@ -21,7 +21,7 @@ We use a combination of runtime URLs and committed files to keep API docs in syn
 
 - Production API docs match the production deployment, even when production lags behind `main`
 - Non-API docs stay in sync with `main` through normal Git flow
-- Each branch has its own `openapi.json`, validated by CI
+- Each branch has its own `openapi.json`, validated by the CI to be in sync with the `openapi.json` that would actually be returned by the code for ENSApi in the same branch.
 - PR previews show upcoming API changes before merge
 
 ### Generating the Spec
@@ -61,4 +61,4 @@ Changes pushed to the main branch are automatically deployed to production.
 ## Resources
 
 - [Mintlify documentation](https://mintlify.com/docs)
-- [ENSNode documentation](https://ensnode.io/docs/)
+- [ENSNode "Starlight" docs](https://ensnode.io/docs/)
