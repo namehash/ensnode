@@ -72,9 +72,6 @@ jobs:
         working-directory: docs/docs.ensnode.io
         run: pnpm openapi:generate http://localhost:4334
 
-      - name: Format generated spec with Biome
-        run: pnpm biome format --write docs/docs.ensnode.io/openapi.json
-
       - name: Verify OpenAPI spec matches committed version
         run: |
           if git diff --exit-code docs/docs.ensnode.io/openapi.json; then

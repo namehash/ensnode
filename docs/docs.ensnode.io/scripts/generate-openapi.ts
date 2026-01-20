@@ -8,9 +8,9 @@
  *
  * Output:
  *   Writes openapi.json to the docs directory for Mintlify to consume. Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
- *   Run `pnpm biome format --write docs/docs.ensnode.io/openapi.json` after to format.
  */
 
+import { execSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -88,6 +88,16 @@ async function main() {
   console.log(`OpenAPI spec written to: ${OUTPUT_PATH}`);
   console.log(`Spec version: ${typedSpec.info?.version}`);
   console.log(`Paths: ${Object.keys(typedSpec.paths || {}).length}`);
+
+  // Format the output with Biome
+  console.log("Formatting with Biome...");
+  try {
+    execSync(`pnpm biome format --write ${OUTPUT_PATH}`, {
+      stdio: "inherit",
+    });
+  } catch {
+    console.error("Warning: Failed to format with Biome. The file was still written.");
+  }
 }
 
 main();
