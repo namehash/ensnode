@@ -39,7 +39,7 @@ export const SUPPORTED_CHAINS = [
  */
 const CUSTOM_CHAIN_NAMES = new Map<ChainId, string>([
   [ensTestEnvL1Chain.id, "Ethereum Local (ens-test-env)"],
-  [mainnet.id, "Ethereum"],
+  [mainnet.id, "Mainnet"],
   [sepolia.id, "Ethereum Sepolia"],
   [base.id, "Base"],
   [baseSepolia.id, "Base Sepolia"],
