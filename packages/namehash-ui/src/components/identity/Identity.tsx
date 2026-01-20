@@ -135,8 +135,8 @@ export const IdentityTooltip = ({
             <CopyButton
               value={identity.address}
               className="nhui:text-gray-500 nhui:hover:text-gray-700 nhui:transition-colors"
-              successIcon={<CheckIcon className="nhui:h-4 nhui:w-4" />}
-              icon={<CopyIcon className="nhui:h-4 nhui:w-4" />}
+              successIcon={<CheckIcon className="nhui:h-4 nhui:w-4" style={{ fill: "none" }} />}
+              icon={<CopyIcon className="nhui:h-4 nhui:w-4" style={{ fill: "none" }} />}
               showToast={true}
             />
             {chainExplorerUrl && (
@@ -163,5 +163,3 @@ export const IdentityTooltip = ({
     </Tooltip>
   );
 };
-
-// TODO: Copied from ENSAwards - some alignment made but further changes may be needed
