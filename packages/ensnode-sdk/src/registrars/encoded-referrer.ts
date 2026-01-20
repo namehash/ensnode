@@ -5,16 +5,17 @@ import { type Address, getAddress, type Hex, pad, size, slice, zeroAddress } fro
  *
  * Represents a "raw" ENS referrer value.
  *
- * Guaranteed to be a hex string representation of a 32-byte value.
- * For ENS Holiday Awards a correctly encoded referrer is
- * a left-padded lowercase EVM address.
+ * Registrar controllers emit referrer data as bytes32 values. This type represents
+ * that raw 32-byte hex string.
+ *
+ * @invariant Guaranteed to be a hex string representation of a 32-byte value.
  */
 export type EncodedReferrer = Hex;
 
 /**
- * Encoded Referrer byte offset for ENS Holiday Awards.
+ * Encoded Referrer byte offset
  *
- * The count of left-padded bytes in an {@link EncodedReferrer} value for ENS Holiday Awards.
+ * The count of left-padded bytes in an {@link EncodedReferrer} value.
  */
 export const ENCODED_REFERRER_BYTE_OFFSET = 12;
 
@@ -26,9 +27,10 @@ export const ENCODED_REFERRER_BYTE_OFFSET = 12;
 export const ENCODED_REFERRER_BYTE_LENGTH = 32;
 
 /**
- * Encoded Referrer Padding for ENS Holiday Awards
+ * Expected padding for a valid encoded referrer
  *
- * The initial bytes of correctly encoded referrer value for ENS Holiday Awards.
+ * Properly encoded referrers must have exactly 12 zero bytes of left padding
+ * before the 20-byte Ethereum address.
  */
 export const EXPECTED_ENCODED_REFERRER_PADDING: Hex = pad("0x", {
   size: ENCODED_REFERRER_BYTE_OFFSET,
@@ -47,7 +49,7 @@ export const ZERO_ENCODED_REFERRER: EncodedReferrer = pad("0x", {
 
 /**
  * Build an {@link EncodedReferrer} value for the given {@link Address}
- * according to the subjective referrer encoding used for ENS Holiday Awards.
+ * according to the referrer encoding with left-zero-padding.
  */
 export function buildEncodedReferrer(address: Address): EncodedReferrer {
   const lowercaseAddress = address.toLowerCase() as Address;
@@ -57,7 +59,7 @@ export function buildEncodedReferrer(address: Address): EncodedReferrer {
 
 /**
  * Decode an {@link EncodedReferrer} value into a checksummed {@link Address}
- * according to the subjective referrer encoding used for ENS Holiday Awards.
+ * according to the referrer encoding with left-zero-padding.
  *
  * @param encodedReferrer - The "raw" {@link EncodedReferrer} value to decode.
  * @returns The decoded referrer checksummed address.
@@ -75,8 +77,8 @@ export function decodeEncodedReferrer(encodedReferrer: EncodedReferrer): Address
 
   const padding = slice(encodedReferrer, 0, ENCODED_REFERRER_BYTE_OFFSET);
 
-  // return zero address if the padding of encoded referrer is not correct
-  // for ENS Holiday Awards
+  // strict validation: padding must be all zeros
+  // if any byte in the padding is non-zero, treat as Zero Encoded Referrer
   if (padding !== EXPECTED_ENCODED_REFERRER_PADDING) {
     return zeroAddress;
   }
