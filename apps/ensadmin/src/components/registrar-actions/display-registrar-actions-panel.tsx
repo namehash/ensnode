@@ -67,6 +67,10 @@ function DisplayRegistrarActionsList({
             },
             referrerLinkFunction: getEnsManagerAddressDetailsUrl,
           }}
+          showIdentityTooltips={{
+            registrant: true,
+            referrer: true,
+          }}
         />
       ))}
     </div>

@@ -127,7 +127,7 @@ function ResolveAndDisplayReferrerIdentity({
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit"
+            className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
           >
             Encoded referrer
             <code className="nhui:block">{referral.encodedReferrer}</code> does not follow the
@@ -238,6 +238,10 @@ export interface RegistrarActionCardProps {
     registrant: IdentityLinkDetails;
     referrerLinkFunction: ReferrerLinkFunction;
   };
+  showIdentityTooltips?: {
+    registrant: boolean;
+    referrer: boolean;
+  };
   showReferrer?: boolean;
   referralProgramField?: ReactNode;
 }
@@ -250,6 +254,10 @@ export function RegistrarActionCard({
   namedRegistrarAction,
   now,
   links,
+  showIdentityTooltips = {
+    registrant: false,
+    referrer: false,
+  },
   showReferrer = true,
   referralProgramField,
 }: RegistrarActionCardProps) {
@@ -323,7 +331,7 @@ export function RegistrarActionCard({
             identity={registrantIdentity}
             namespaceId={namespaceId}
             withAvatar={true}
-            withTooltip={false}
+            withTooltip={showIdentityTooltips.registrant}
             withIdentifier={false}
             identityLinkDetails={links.registrant}
           />
@@ -333,7 +341,7 @@ export function RegistrarActionCard({
             identity={registrantIdentity}
             namespaceId={namespaceId}
             withAvatar={isMobile}
-            withTooltip={false}
+            withTooltip={showIdentityTooltips.registrant}
             className="nhui:font-medium nhui:sm:max-[1220px]:max-w-[110px] nhui:min-[1220px]:max-w-[140px]"
             identityLinkDetails={links.registrant}
           />
@@ -349,7 +357,7 @@ export function RegistrarActionCard({
               referral={referral}
               withAvatar={true}
               withIdentifier={false}
-              withTooltip={false}
+              withTooltip={showIdentityTooltips.referrer}
               getReferrerLink={links.referrerLinkFunction}
             />
           )}
@@ -360,7 +368,7 @@ export function RegistrarActionCard({
               referral={referral}
               withAvatar={isMobile}
               withIdentifier={true}
-              withTooltip={false}
+              withTooltip={showIdentityTooltips.referrer}
               getReferrerLink={links.referrerLinkFunction}
             />
           </LabeledField>
