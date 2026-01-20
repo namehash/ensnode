@@ -1,8 +1,11 @@
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import type { ResultServer } from "@ensnode/ensnode-sdk";
+import type { AbstractResult } from "@ensnode/ensnode-sdk";
 
-import { resultCodeToHttpStatusCode } from "@/lib/result/result-into-http-response";
+import {
+  resultCodeToHttpStatusCode,
+  type ServerResultCode,
+} from "@/lib/result/result-into-http-response";
 
 interface RouteDescription {
   description: string;
@@ -15,7 +18,7 @@ interface RouteDescription {
  * @param routes - A record mapping operation result codes to route descriptions
  * @returns A record mapping HTTP status codes to route descriptions
  */
-export function buildRouteResponsesDescription<TResult extends ResultServer>(
+export function buildRouteResponsesDescription<TResult extends AbstractResult<ServerResultCode>>(
   routes: Record<TResult["resultCode"], RouteDescription>,
 ): Record<ContentfulStatusCode, RouteDescription> {
   return Object.entries(routes).reduce(

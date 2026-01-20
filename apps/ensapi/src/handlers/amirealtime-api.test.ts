@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  buildResultOk,
+  buildAmIRealtimeResultOk,
   type CrossChainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
   type UnixTimestamp,
@@ -70,9 +70,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject(
-          buildResultOk({
+        expect(responseJson).toStrictEqual(
+          buildAmIRealtimeResultOk({
             maxWorstCaseDistance: 300,
+            worstCaseDistance: 10,
+            slowestChainIndexingCursor: now - 10,
           }),
         );
       });
@@ -87,9 +89,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject(
-          buildResultOk({
+        expect(responseJson).toStrictEqual(
+          buildAmIRealtimeResultOk({
             maxWorstCaseDistance: 0,
+            worstCaseDistance: 0,
+            slowestChainIndexingCursor: now,
           }),
         );
       });
@@ -104,9 +108,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject(
-          buildResultOk({
+        expect(responseJson).toStrictEqual(
+          buildAmIRealtimeResultOk({
             maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
+            worstCaseDistance: 10,
+            slowestChainIndexingCursor: now - 10,
           }),
         );
       });
@@ -121,9 +127,11 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(200);
-        expect(responseJson).toMatchObject(
-          buildResultOk({
+        expect(responseJson).toStrictEqual(
+          buildAmIRealtimeResultOk({
             maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
+            worstCaseDistance: 10,
+            slowestChainIndexingCursor: now - 10,
           }),
         );
       });
@@ -171,9 +179,9 @@ describe("amirealtime-api", () => {
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildResultOk({
+          buildAmIRealtimeResultOk({
             maxWorstCaseDistance: 10,
-            slowestChainIndexingCursor: 1766123720,
+            slowestChainIndexingCursor: now - 9,
             worstCaseDistance: 9,
           }),
         );
@@ -190,7 +198,7 @@ describe("amirealtime-api", () => {
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildResultOk({
+          buildAmIRealtimeResultOk({
             maxWorstCaseDistance: 10,
             slowestChainIndexingCursor: 1766123719,
             worstCaseDistance: 10,

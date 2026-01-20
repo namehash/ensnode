@@ -3,17 +3,17 @@ import z from "zod/v4";
 
 import {
   buildPageContext,
-  buildResultOkTimestamped,
+  buildRegistrarActionsResultOk,
   buildResultServiceUnavailable,
   type Node,
   RECORDS_PER_PAGE_DEFAULT,
   RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
-  type RegistrarActionsResult,
+  type RegistrarActionsServerResult,
   ResultCodes,
   registrarActionsFilter,
-  serializeNamedRegistrarActions,
+  serializeRegistrarActionsResultOk,
 } from "@ensnode/ensnode-sdk";
 import {
   makeLowercaseAddressSchema,
@@ -150,7 +150,7 @@ async function fetchRegistrarActions(
   return { registrarActions, pageContext };
 }
 
-const routeResponsesDescription = buildRouteResponsesDescription<RegistrarActionsResult>({
+const routeResponsesDescription = buildRouteResponsesDescription<RegistrarActionsServerResult>({
   [ResultCodes.Ok]: {
     description: "Successfully retrieved registrar actions",
   },
@@ -201,9 +201,9 @@ app.get(
       // Get the accurateAsOf timestamp from the slowest chain indexing cursor
       const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
-      const result = buildResultOkTimestamped(
+      const result = buildRegistrarActionsResultOk(
         {
-          registrarActions: serializeNamedRegistrarActions(registrarActions),
+          registrarActions,
           pageContext,
         },
         accurateAsOf,
@@ -292,15 +292,17 @@ app.get(
       // Get the accurateAsOf timestamp from the slowest chain indexing cursor
       const accurateAsOf = c.var.indexingStatus.snapshot.slowestChainIndexingCursor;
 
-      const result = buildResultOkTimestamped(
+      const result = buildRegistrarActionsResultOk(
         {
-          registrarActions: serializeNamedRegistrarActions(registrarActions),
+          registrarActions,
           pageContext,
         },
         accurateAsOf,
       );
 
-      return resultIntoHttpResponse(c, result);
+      const serializedResult = serializeRegistrarActionsResultOk(result);
+
+      return resultIntoHttpResponse(c, serializedResult);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       logger.error(errorMessage);

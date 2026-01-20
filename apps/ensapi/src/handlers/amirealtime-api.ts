@@ -3,9 +3,9 @@ import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
 import {
-  type AmIRealtimeResult,
+  type AmIRealtimeServerResult,
+  buildAmIRealtimeResultOk,
   buildResultInternalServerError,
-  buildResultOk,
   buildResultServiceUnavailable,
   type Duration,
   ResultCodes,
@@ -32,7 +32,7 @@ app.get(
     summary: "Check indexing progress",
     description:
       "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-    responses: buildRouteResponsesDescription<AmIRealtimeResult>({
+    responses: buildRouteResponsesDescription<AmIRealtimeServerResult>({
       [ResultCodes.Ok]: {
         description:
           "Indexing progress is guaranteed to be within the requested distance of realtime",
@@ -60,7 +60,6 @@ app.get(
     }),
   ),
   async (c) => {
-    // Invariant: Indexing Status must be available in application context
     if (c.var.indexingStatus === undefined) {
       const result = buildResultInternalServerError(
         `Invariant(amirealtime-api): Indexing Status must be available in application context.`,
@@ -69,7 +68,6 @@ app.get(
       return resultIntoHttpResponse(c, result);
     }
 
-    // Invariant: Indexing Status must be resolved successfully before 'maxWorstCaseDistance' can be applied
     if (c.var.indexingStatus instanceof Error) {
       const result = buildResultServiceUnavailable(
         `Invariant(amirealtime-api): Indexing Status must be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
@@ -92,14 +90,14 @@ app.get(
     }
 
     // Case: worst-case distance is within requested maximum
-    return resultIntoHttpResponse(
-      c,
-      buildResultOk({
-        maxWorstCaseDistance,
-        slowestChainIndexingCursor,
-        worstCaseDistance,
-      }),
-    );
+
+    const result = buildAmIRealtimeResultOk({
+      maxWorstCaseDistance,
+      slowestChainIndexingCursor,
+      worstCaseDistance,
+    });
+
+    return resultIntoHttpResponse(c, result);
   },
 );
 

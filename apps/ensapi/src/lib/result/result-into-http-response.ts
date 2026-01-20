@@ -1,27 +1,17 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import {
-  buildResultInternalServerError,
-  ResultCodes,
-  type ResultServer,
-  type ResultServerResultCode,
-} from "@ensnode/ensnode-sdk";
+import { type ResultCodeServerError, ResultCodes } from "@ensnode/ensnode-sdk";
 
-import { makeLogger } from "@/lib/logger";
-
-const logger = makeLogger("result-into-http-response");
+export type ServerResultCode = ResultCodeServerError | typeof ResultCodes.Ok;
 
 /**
  * Get HTTP status code corresponding to the given operation result code.
  *
  * @param resultCode - The operation result code
  * @returns Corresponding HTTP status code
- * @throws Error if the result code is unhandled
  */
-export function resultCodeToHttpStatusCode(
-  resultCode: ResultServerResultCode,
-): ContentfulStatusCode {
+export function resultCodeToHttpStatusCode(resultCode: ServerResultCode): ContentfulStatusCode {
   switch (resultCode) {
     case ResultCodes.Ok:
       return 200;
@@ -33,8 +23,6 @@ export function resultCodeToHttpStatusCode(
       return 500;
     case ResultCodes.ServiceUnavailable:
       return 503;
-    default:
-      throw new Error(`Unhandled result code: ${resultCode}`);
   }
 }
 
@@ -45,24 +33,13 @@ export function resultCodeToHttpStatusCode(
  * @param result - The operation result
  * @returns HTTP response with appropriate status code and JSON body
  */
-export function resultIntoHttpResponse<TResult extends ResultServer>(
+export function resultIntoHttpResponse<TResult extends { resultCode: ServerResultCode }>(
   c: Context,
   result: TResult,
 ): Response {
-  try {
-    // Determine HTTP status code from result code
-    const statusCode = resultCodeToHttpStatusCode(result.resultCode);
+  // Determine HTTP status code from result code
+  const statusCode = resultCodeToHttpStatusCode(result.resultCode);
 
-    // Return JSON response with appropriate status code
-    return c.json(result, statusCode);
-  } catch {
-    // In case of unhandled result code, log error and
-    // return response from internal server error result
-    logger.error(`Unhandled result code encountered: ${result.resultCode}`);
-
-    return resultIntoHttpResponse(
-      c,
-      buildResultInternalServerError("An internal server error occurred."),
-    );
-  }
+  // Return JSON response with appropriate status code
+  return c.json(result, statusCode);
 }

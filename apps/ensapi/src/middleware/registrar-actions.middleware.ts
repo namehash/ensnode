@@ -48,9 +48,14 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
     }
 
     if (!registrarActionsPrerequisites.hasEnsIndexerConfigSupport(config.ensIndexerPublicConfig)) {
-      const result = buildResultServiceUnavailable(`Registrar Actions API is not available`, {
-        details: `Connected ENSIndexer must have all following plugins active: ${registrarActionsPrerequisites.requiredPlugins.join(", ")}`,
-      });
+      const errorMessage = [
+        `Registrar Actions API is not available.`,
+        `Connected ENSIndexer configuration does not have all required plugins active.`,
+        `Current plugins: "${config.ensIndexerPublicConfig.plugins.join(", ")}".`,
+        `Required plugins: "${registrarActionsPrerequisites.requiredPlugins.join(", ")}".`,
+      ].join(" ");
+
+      const result = buildResultServiceUnavailable(errorMessage);
 
       return resultIntoHttpResponse(c, result);
     }
@@ -62,9 +67,12 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
         `Registrar Actions API requested but indexing status is not available in context.`,
       );
 
-      const result = buildResultServiceUnavailable(`Registrar Actions API is not available`, {
-        details: `Indexing status is currently unavailable to this ENSApi instance.`,
-      });
+      const errorMessage = [
+        `Registrar Actions API is not available.`,
+        `Indexing status is currently unavailable to this ENSApi instance.`,
+      ].join(" ");
+
+      const result = buildResultServiceUnavailable(errorMessage);
 
       return resultIntoHttpResponse(c, result);
     }
@@ -74,9 +82,14 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
     if (
       !registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)
     ) {
-      const result = buildResultServiceUnavailable(`Registrar Actions API is not available`, {
-        details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
-      });
+      const errorMessage = [
+        `Registrar Actions API is not available.`,
+        `The cached omnichain indexing status of the connected ENSIndexer is not supported.`,
+        `Currently indexing status: "${omnichainSnapshot.omnichainStatus}".`,
+        `Supported indexing statuses: [${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}].`,
+      ].join(" ");
+
+      const result = buildResultServiceUnavailable(errorMessage);
 
       return resultIntoHttpResponse(c, result);
     }

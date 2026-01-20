@@ -1,13 +1,17 @@
 import type { RealtimeIndexingStatusProjection } from "../../ensindexer";
-import type {
-  Duration,
-  ResultInternalServerError,
-  ResultInvalidRequest,
-  ResultServerOk,
-  ResultServiceUnavailable,
-  UnixTimestamp,
+import {
+  type AbstractResultOk,
+  type Duration,
+  ResultCodes,
+  type ResultInternalServerError,
+  type ResultInvalidRequest,
+  type ResultServiceUnavailable,
+  type UnixTimestamp,
 } from "../../shared";
 
+/**
+ * Successful result data for "Am I Realtime?" API requests.
+ */
 export interface AmIRealtimeResultOkData {
   /**
    * Represents the maximum worst-case distance from the current "tip" of
@@ -35,13 +39,25 @@ export interface AmIRealtimeResultOkData {
 }
 
 /**
+ * Successful result for "Am I Realtime?" API requests.
+ */
+export type AmIRealtimeResultOk = AbstractResultOk<AmIRealtimeResultOkData>;
+
+export function buildAmIRealtimeResultOk(data: AmIRealtimeResultOkData): AmIRealtimeResultOk {
+  return {
+    resultCode: ResultCodes.Ok,
+    data,
+  };
+}
+
+/**
  * The operation result for "Am I Realtime?" API requests.
  *
  * Use the `resultCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type AmIRealtimeResult =
-  | ResultServerOk<AmIRealtimeResultOkData>
+export type AmIRealtimeServerResult =
+  | AmIRealtimeResultOk
   | ResultInvalidRequest
   | ResultInternalServerError
   | ResultServiceUnavailable;

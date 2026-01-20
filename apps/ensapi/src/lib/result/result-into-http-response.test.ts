@@ -6,11 +6,8 @@ import {
   buildResultInternalServerError,
   buildResultInvalidRequest,
   buildResultNotFound,
-  buildResultOk,
   buildResultServiceUnavailable,
   ResultCodes,
-  type ResultServer,
-  type ResultServerResultCode,
 } from "@ensnode/ensnode-sdk";
 
 import { resultCodeToHttpStatusCode, resultIntoHttpResponse } from "./result-into-http-response";
@@ -45,13 +42,6 @@ describe("resultCodeToHttpStatusCode", () => {
 
     expect(statusCode).toBe(503);
   });
-
-  it("should throw an error for unhandled result code", () => {
-    const unhandledResultCode = "test" as ResultServerResultCode;
-    expect(() => resultCodeToHttpStatusCode(unhandledResultCode)).toThrowError(
-      `Unhandled result code: ${unhandledResultCode}`,
-    );
-  });
 });
 
 describe("resultIntoHttpResponse", () => {
@@ -66,7 +56,7 @@ describe("resultIntoHttpResponse", () => {
   });
 
   it("should return HTTP response with status 200 for Ok result", async () => {
-    const result = buildResultOk("test data");
+    const result = { resultCode: ResultCodes.Ok, data: "test data" };
 
     const response = resultIntoHttpResponse(mockContext, result);
 
@@ -113,25 +103,10 @@ describe("resultIntoHttpResponse", () => {
 
   it("should handle result with complex data object", async () => {
     const complexData = { id: 1, name: "Test", attributes: { key: "value" } };
-    const result = buildResultOk(complexData);
+    const result = { resultCode: ResultCodes.Ok, data: complexData };
 
     const response = resultIntoHttpResponse(mockContext, result);
     expect(response.status).toBe(200);
     expect(await response.json()).toStrictEqual(result);
-  });
-
-  it("should handle result with unhandled result code", async () => {
-    const unhandledResultCode = "test" as ResultServerResultCode;
-    const result = {
-      resultCode: unhandledResultCode,
-      errorMessage: "Unhandled result code",
-    };
-
-    const response = resultIntoHttpResponse(mockContext, result as ResultServer);
-
-    expect(response.status).toBe(500);
-    expect(await response.json()).toStrictEqual(
-      buildResultInternalServerError("An internal server error occurred."),
-    );
   });
 });

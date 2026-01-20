@@ -1,67 +1,30 @@
 /**
  * Common Result Types and Builders
  *
- * This module defines common result types and builder functions for
- * standardizing operation results across the SDK. It includes types and
- * builders for successful results as well as various error scenarios.
+ * This module defines specific result data models that might be shared across more than 1 route.
  */
 
-import type { UnixTimestamp } from "../../shared";
-import type {
-  AbstractResultError,
-  AbstractResultOk,
-  AbstractResultOkTimestamped,
-} from "./result-base";
+import type { AbstractResultError } from "./result-base";
 import { type ResultCode, ResultCodes } from "./result-code";
-
-/************************************************************
- * Result OK
- ************************************************************/
-
-/**
- * Builds a result object representing a successful operation.
- */
-export function buildResultOk<const TData>(data: TData): AbstractResultOk<TData> {
-  return {
-    resultCode: ResultCodes.Ok,
-    data,
-  };
-}
-
-/**
- * Builds a result object representing a successful operation
- * with data guaranteed to be at least up to a certain timestamp.
- */
-export function buildResultOkTimestamped<const TData>(
-  data: TData,
-  minIndexingCursor: UnixTimestamp,
-): AbstractResultOkTimestamped<TData> {
-  return {
-    ...buildResultOk(data),
-    minIndexingCursor,
-  };
-}
 
 /************************************************************
  * Service Unavailable
  ************************************************************/
 
 export interface ResultServiceUnavailable
-  extends AbstractResultError<typeof ResultCodes.ServiceUnavailable, { details?: string }> {}
+  extends AbstractResultError<typeof ResultCodes.ServiceUnavailable> {}
 
 /**
  * Builds a result object representing a service unavailable error.
  */
 export const buildResultServiceUnavailable = (
   errorMessage?: string,
-  data?: { details?: string },
   suggestRetry: boolean = true,
 ): ResultServiceUnavailable => {
   return {
     resultCode: ResultCodes.ServiceUnavailable,
     errorMessage: errorMessage ?? "The service is currently unavailable.",
     suggestRetry,
-    ...(data ? { data } : {}),
   };
 };
 
@@ -231,16 +194,6 @@ export const isRecognizedResultCodeForOperation = (
 };
 
 /************************************************************
- * All common server errors
- ************************************************************/
-
-export type ResultServerError =
-  | ResultInvalidRequest
-  | ResultNotFound
-  | ResultInternalServerError
-  | ResultServiceUnavailable;
-
-/************************************************************
  * All common client errors
  ************************************************************/
 
@@ -248,22 +201,3 @@ export type ResultClientError =
   | ResultConnectionError
   | ResultRequestTimeout
   | ResultClientUnrecognizedOperationResult;
-
-/************************************************************
- * Server Operation Result Types
- ************************************************************/
-
-/**
- * Type representing a successful server operation result.
- */
-export type ResultServerOk<TData> = AbstractResultOk<TData> | AbstractResultOkTimestamped<TData>;
-
-/**
- * Union type representing all possible server operation results.
- */
-export type ResultServer<TData = unknown> = ResultServerOk<TData> | ResultServerError;
-
-/**
- * Type representing all possible server operation result codes.
- */
-export type ResultServerResultCode = ResultServer["resultCode"];
