@@ -57,7 +57,7 @@ export function LabeledField({
   );
 }
 
-interface ReferrerLinkData {
+export interface ReferrerLinkData {
   isExternal: boolean;
   getLink: (address: Address, namespaceId: ENSNamespaceId) => URL | null;
 }
