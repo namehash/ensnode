@@ -57,13 +57,16 @@ export function LabeledField({
   );
 }
 
-type ReferrerLinkFunction = (address: Address, namespaceId: ENSNamespaceId) => URL | null;
+export interface ReferrerLinkData {
+  isExternal: boolean;
+  getLink: (address: Address, namespaceId: ENSNamespaceId) => URL | null;
+}
 
 interface ResolveAndDisplayReferrerIdentityProps
   extends Omit<ResolveAndDisplayIdentityProps, "identity" | "identityLinkDetails"> {
   chainId: DefaultableChainId;
   referral: RegistrarActionReferral;
-  getReferrerLink: ReferrerLinkFunction;
+  referrerLinkData: ReferrerLinkData;
 }
 
 /**
@@ -77,7 +80,7 @@ function ResolveAndDisplayReferrerIdentity({
   referral,
   accelerate = true,
   withLink = true,
-  getReferrerLink,
+  referrerLinkData,
   withTooltip = true,
   withAvatar = false,
   withIdentifier = true,
@@ -152,8 +155,8 @@ function ResolveAndDisplayReferrerIdentity({
       className={className}
       withLink={withLink}
       identityLinkDetails={{
-        isExternal: true,
-        link: getReferrerLink(referrerIdentity.address, namespaceId),
+        isExternal: referrerLinkData.isExternal,
+        link: referrerLinkData.getLink(referrerIdentity.address, namespaceId),
       }}
     />
   );
@@ -236,7 +239,7 @@ export interface RegistrarActionCardProps {
   links: {
     name: IdentityLinkDetails;
     registrant: IdentityLinkDetails;
-    referrerLinkFunction: ReferrerLinkFunction;
+    referrer: ReferrerLinkData;
   };
   showIdentityTooltips?: {
     registrant: boolean;
@@ -358,7 +361,7 @@ export function RegistrarActionCard({
               withAvatar={true}
               withIdentifier={false}
               withTooltip={showIdentityTooltips.referrer}
-              getReferrerLink={links.referrerLinkFunction}
+              referrerLinkData={links.referrer}
             />
           )}
           <LabeledField fieldLabel="Referrer" className="nhui:w-[15%] nhui:min-w-[110px]">
@@ -369,7 +372,7 @@ export function RegistrarActionCard({
               withAvatar={isMobile}
               withIdentifier={true}
               withTooltip={showIdentityTooltips.referrer}
-              getReferrerLink={links.referrerLinkFunction}
+              referrerLinkData={links.referrer}
             />
           </LabeledField>
         </div>
