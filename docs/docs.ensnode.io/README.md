@@ -26,20 +26,23 @@ We use a combination of runtime URLs and committed files to keep API docs in syn
 
 ### Generating the Spec
 
+To generate the OpenAPI spec, you need a running ENSApi instance. For local development without external dependencies, use the `OPENAPI_CI_CHECK` mode:
+
 ```bash
-pnpm openapi:generate http://localhost:3223
+# Start ENSApi in CI check mode (no external dependencies required)
+OPENAPI_CI_CHECK=true pnpm --filter ensapi start
+
+# In another terminal, generate the spec
+pnpm --filter docs.ensnode.io openapi:generate http://localhost:4334
 ```
 
 The URL argument is required — there is no default to avoid accidentally generating from the wrong source.
 
 ### CI Validation
 
-CI runs an `openapi-sync-check` job that compares the committed `openapi.json` against production. If they differ, the check fails.
+CI runs an `openapi-sync-check` job that starts ENSApi in `OPENAPI_CI_CHECK` mode and compares the generated spec against the committed `openapi.json`. If they differ, the check fails.
 
-Update the committed spec when:
-
-- You've changed API routes or schemas (generate from your local instance)
-- Production was updated (generate from production)
+Update the committed spec when you've changed API routes or schemas.
 
 ## Local Development
 

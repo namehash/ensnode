@@ -4,7 +4,7 @@
  * Generate OpenAPI spec from a running ENSApi instance.
  *
  * Usage:
- *   pnpm openapi:generate http://localhost:3223
+ *   pnpm --filter docs.ensnode.io openapi:generate http://localhost:3223
  *
  * Output:
  *   Writes openapi.json to the docs directory for Mintlify to consume. Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
