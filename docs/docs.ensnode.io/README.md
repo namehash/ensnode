@@ -27,14 +27,10 @@ We use a combination of runtime URLs and committed files to keep API docs in syn
 ### Generating the Spec
 
 ```bash
-# Generate from a local ENSApi instance
 pnpm openapi:generate http://localhost:3223
-
-# Or using an environment variable
-ENSAPI_URL=http://localhost:3223 pnpm openapi:generate
 ```
 
-The URL is required — there is no default to avoid accidentally generating from the wrong source.
+The URL argument is required — there is no default to avoid accidentally generating from the wrong source.
 
 ### CI Validation
 

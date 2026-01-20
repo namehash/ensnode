@@ -4,8 +4,7 @@
  * Generate OpenAPI spec from a running ENSApi instance.
  *
  * Usage:
- *   pnpm openapi:generate http://localhost:3223     # Pass URL as argument
- *   ENSAPI_URL=http://localhost:3223 pnpm openapi:generate  # Or via environment variable
+ *   pnpm openapi:generate http://localhost:3223
  *
  * Output:
  *   Writes openapi.json to the docs directory for Mintlify to consume. Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
@@ -19,13 +18,11 @@ const OUTPUT_PATH = resolve(import.meta.dirname, "../openapi.json");
 const TIMEOUT_MS = 30000;
 
 async function main() {
-  // Get URL from argument or environment variable (required)
-  const ensapiUrl = process.argv[2] || process.env.ENSAPI_URL;
+  const ensapiUrl = process.argv[2];
 
   if (!ensapiUrl) {
     console.error("Error: ENSApi URL is required.");
     console.error("Usage: pnpm openapi:generate <url>");
-    console.error("   or: ENSAPI_URL=<url> pnpm openapi:generate");
     console.error("Example: pnpm openapi:generate http://localhost:3223");
     process.exit(1);
   }
