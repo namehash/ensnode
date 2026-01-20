@@ -76,6 +76,58 @@ const EnsApiConfigSchema = z
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
+
+const EnsApiConfigSchemaForOpenApiCiCheck = z.object({
+  port: PortSchema.default(ENSApi_DEFAULT_PORT),
+  databaseUrl: DatabaseUrlSchema,
+  databaseSchemaName: DatabaseSchemaNameSchema,
+  ensIndexerUrl: EnsIndexerUrlSchema,
+  theGraphApiKey: TheGraphApiKeySchema,
+  namespace: ENSNamespaceSchema,
+  rpcConfigs: RpcConfigsSchema,
+  ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
+  ensHolidayAwardsStart: z.number(),
+  ensHolidayAwardsEnd: z.number(),
+});
+
+function buildConfigForOpenApiCiCheck(env: EnsApiEnvironment): EnsApiConfig {
+  logger.info("OPENAPI_CI_CHECK mode enabled - using minimal mock config");
+
+  return EnsApiConfigSchemaForOpenApiCiCheck.parse({
+    port: env.PORT || ENSApi_DEFAULT_PORT,
+    databaseUrl: "postgresql://openapi:openapi@localhost:5432/openapi",
+    databaseSchemaName: "public",
+    ensIndexerUrl: "http://localhost:42069",
+    theGraphApiKey: undefined,
+    namespace: "mainnet",
+    rpcConfigs: {
+      "1": "https://rpc.example.com",
+    },
+    ensIndexerPublicConfig: {
+      labelSet: {
+        labelSetId: "ens-default",
+        labelSetVersion: 1,
+      },
+      indexedChainIds: [1],
+      isSubgraphCompatible: false,
+      namespace: "mainnet",
+      plugins: ["subgraph"],
+      databaseSchemaName: "public",
+      versionInfo: {
+        nodejs: process.version,
+        ponder: "0.0.0",
+        ensDb: packageJson.version,
+        ensIndexer: packageJson.version,
+        ensNormalize: "0.0.0",
+        ensRainbow: packageJson.version,
+        ensRainbowSchema: 1,
+      },
+    },
+    ensHolidayAwardsStart: getUnixTime(new Date(ENS_HOLIDAY_AWARDS_START_DATE)),
+    ensHolidayAwardsEnd: getUnixTime(new Date(ENS_HOLIDAY_AWARDS_END_DATE)),
+  }) as EnsApiConfig;
+}
+
 /**
  * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
  *
@@ -83,6 +135,10 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
  * @throws Error with formatted validation messages if environment parsing fails
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
+  if (env.OPENAPI_CI_CHECK === "true") {
+    return buildConfigForOpenApiCiCheck(env);
+  }
+
   try {
     const ensIndexerUrl = EnsIndexerUrlSchema.parse(env.ENSINDEXER_URL);
 

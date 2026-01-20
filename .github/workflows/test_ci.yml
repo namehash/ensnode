@@ -55,21 +55,35 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup_node_environment
 
-      - name: Generate OpenAPI spec from production
-        run: pnpm --filter ensapi openapi:generate
+      - name: Start ENSApi in OpenAPI CI check mode
+        run: |
+          OPENAPI_CI_CHECK=true pnpm --filter ensapi start &
+          # Wait for server to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:4334/openapi.json > /dev/null 2>&1; then
+              echo "ENSApi is ready"
+              break
+            fi
+            echo "Waiting for ENSApi to start... ($i/30)"
+            sleep 1
+          done
+
+      - name: Generate OpenAPI spec from local build
+        working-directory: docs/docs.ensnode.io
+        run: pnpm openapi:generate http://localhost:4334
 
       - name: Format generated spec with Biome
         run: pnpm biome format --write docs/docs.ensnode.io/openapi.json
 
-      - name: Verify OpenAPI spec matches production
+      - name: Verify OpenAPI spec matches committed version
         run: |
           if git diff --exit-code docs/docs.ensnode.io/openapi.json; then
-            echo "✅ OpenAPI spec is in sync with production"
+            echo "✅ OpenAPI spec is in sync with codebase"
           else
-            echo "❌ OpenAPI spec is out of sync with production"
+            echo "❌ OpenAPI spec is out of sync"
             echo ""
-            echo "The committed openapi.json differs from the production API."
-            echo "Run 'pnpm --filter ensapi openapi:generate' and commit the changes."
+            echo "The committed openapi.json differs from what ENSApi generates."
+            echo "Run 'OPENAPI_CI_CHECK=true pnpm --filter ensapi start' then 'pnpm --filter @docs/mintlify openapi:generate http://localhost:4334' and commit the changes."
             exit 1
           fi
 
