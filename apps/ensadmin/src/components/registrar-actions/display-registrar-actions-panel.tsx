@@ -65,7 +65,10 @@ function DisplayRegistrarActionsList({
                 namespaceId,
               ),
             },
-            referrerLinkFunction: getEnsManagerAddressDetailsUrl,
+            referrer: {
+              isExternal: true,
+              getLink: getEnsManagerAddressDetailsUrl,
+            },
           }}
           showIdentityTooltips={{
             registrant: true,
