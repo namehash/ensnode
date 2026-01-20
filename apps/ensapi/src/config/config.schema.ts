@@ -76,7 +76,6 @@ const EnsApiConfigSchema = z
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
-
 const EnsApiConfigSchemaForOpenApiCiCheck = z.object({
   port: PortSchema.default(ENSApi_DEFAULT_PORT),
   databaseUrl: DatabaseUrlSchema,
