@@ -1,6 +1,6 @@
-# ENSNode API Documentation
+# ENSNode Documentation
 
-[docs.ensnode.io](https://docs.ensnode.io) hosts the ENSApi reference documentation.
+[docs.ensnode.io](https://docs.ensnode.io) runs on [Mintlify](https://mintlify.com).
 
 Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode docs](https://ensnode.io/docs/). Everything from these "Starlight" docs is planned to be transitioned into these Mintlify docs soon.
 
@@ -27,9 +27,14 @@ We use a combination of runtime URLs and committed files to keep API docs in syn
 ### Generating the Spec
 
 ```bash
-# Generate from production API
-pnpm --filter ensapi openapi:generate
+# Generate from a local ENSApi instance
+pnpm openapi:generate http://localhost:3223
+
+# Or using an environment variable
+ENSAPI_URL=http://localhost:3223 pnpm openapi:generate
 ```
+
+The URL is required — there is no default to avoid accidentally generating from the wrong source.
 
 ### CI Validation
 
