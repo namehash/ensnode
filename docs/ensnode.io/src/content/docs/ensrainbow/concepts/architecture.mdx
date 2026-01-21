@@ -10,7 +10,7 @@ import { LinkCard } from '@astrojs/starlight/components';
 
 ENSRainbow consists of four primary layers working together to "heal" unknown labels:
 
-1. **Data Generation & Conversion** – legacy `.sql.gz` rainbow tables are converted to the modern `.ensrainbow` format.
+1. **Data Generation & Conversion** – CSV files are converted to the modern `.ensrainbow` format (SQL conversion is available only for migrating legacy ENS Subgraph data).
 2. **Data Ingestion** – the `.ensrainbow` files are ingested into a LevelDB database using the `ingest-ensrainbow` CLI.
 3. **HTTP API Service** – state in the database is exposed through a lightweight HTTP API.
 4. **Client Integration** – applications call the API directly or via the TypeScript SDK.
@@ -18,10 +18,13 @@ ENSRainbow consists of four primary layers working together to "heal" unknown la
 ```mermaid
 flowchart TD
     subgraph Data_Generation
-        SQL[".sql.gz files"]
+        CSV["CSV files"]
+        SQL[".sql.gz files<br/>(legacy only)"]
         ENSRB[".ensrainbow files"]
-        SQL --> Convert["convert" command]
-        Convert --> ENSRB
+        CSV --> ConvertCSV["convert command"]
+        SQL --> ConvertSQL["convert-sql command<br/>(legacy migration)"]
+        ConvertCSV --> ENSRB
+        ConvertSQL --> ENSRB
     end
 
     ENSRB --> Ingest["ingest-ensrainbow"]

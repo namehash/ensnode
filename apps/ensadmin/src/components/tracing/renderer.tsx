@@ -67,7 +67,7 @@ function RenderEvent({
       <TooltipTrigger asChild>
         <div
           className={cn(
-            "w-2 z-10 rounded-sm bg-gray-400 text-xs whitespace-nowrap flex-shrink-0 cursor-pointer absolute top-0 bottom-0",
+            "w-2 z-10 rounded-xs bg-gray-400 text-xs whitespace-nowrap shrink-0 cursor-pointer absolute top-0 bottom-0",
             eventOpen && "bg-gray-500",
           )}
           style={{ left: `calc(${left} - 0.25rem)` }}
@@ -75,7 +75,7 @@ function RenderEvent({
       </TooltipTrigger>
       <TooltipContent
         side="top"
-        className="flex flex-col gap-2 w-full max-w-sm z-50 rounded-md border bg-popover p-4 text-md text-popover-foreground shadow-md outline-none"
+        className="flex flex-col gap-2 w-full max-w-sm z-50 rounded-md border bg-popover p-4 text-md text-popover-foreground shadow-md outline-hidden"
         collisionPadding={16}
       >
         <h3 className="text-md font-medium">{title}</h3>
@@ -106,7 +106,7 @@ function RenderSpan({ parent }: { parent: TracingTrace[number] }) {
         <HoverCardTrigger asChild>
           <div
             className={cn(
-              "w-full flex flex-col justify-center bg-blue-100 border border-blue-300 rounded py-1 px-2 flex-shrink-0 cursor-pointer relative",
+              "w-full flex flex-col justify-center bg-blue-100 border border-blue-300 rounded-sm py-1 px-2 shrink-0 cursor-pointer relative",
               parentOpen && "bg-blue-200",
             )}
           >

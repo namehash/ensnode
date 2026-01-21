@@ -1,5 +1,7 @@
 import type { Address } from "viem";
 
+import type { Duration } from "@ensnode/ensnode-sdk";
+
 import { normalizeAddress, validateLowercaseAddress } from "./address";
 import type { AggregatedReferrerMetrics } from "./aggregations";
 import type { USDQuantity } from "./currency";
@@ -12,9 +14,10 @@ import {
   type ReferrerRank,
   validateReferrerRank,
 } from "./rank";
+import type { RevenueContribution } from "./revenue-contribution";
+import { validateRevenueContribution } from "./revenue-contribution";
 import type { ReferralProgramRules } from "./rules";
 import { calcReferrerScore, type ReferrerScore, validateReferrerScore } from "./score";
-import type { Duration } from "./time";
 import { validateDuration } from "./time";
 
 /**
@@ -39,17 +42,31 @@ export interface ReferrerMetrics {
    * the {@link ReferralProgramRules}.
    */
   totalIncrementalDuration: Duration;
+
+  /**
+   * The total revenue contribution (in Wei) made to the ENS DAO by all referrals
+   * from this referrer.
+   *
+   * This is the sum of the total cost paid by registrants for all registrar actions
+   * where this address was the referrer.
+   *
+   * @invariant Guaranteed to be a non-negative bigint value (>= 0n)
+   * @invariant Never null (records with null `total` in the database are treated as 0 when summing)
+   */
+  totalRevenueContribution: RevenueContribution;
 }
 
 export const buildReferrerMetrics = (
   referrer: Address,
   totalReferrals: number,
   totalIncrementalDuration: Duration,
+  totalRevenueContribution: RevenueContribution,
 ): ReferrerMetrics => {
   const result = {
     referrer: normalizeAddress(referrer),
     totalReferrals,
     totalIncrementalDuration,
+    totalRevenueContribution,
   } satisfies ReferrerMetrics;
 
   validateReferrerMetrics(result);
@@ -60,6 +77,7 @@ export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
   validateLowercaseAddress(metrics.referrer);
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
+  validateRevenueContribution(metrics.totalRevenueContribution);
 };
 
 export const sortReferrerMetrics = (referrers: ReferrerMetrics[]): ReferrerMetrics[] => {
@@ -311,6 +329,12 @@ export const validateUnrankedReferrerMetrics = (metrics: UnrankedReferrerMetrics
     );
   }
 
+  if (metrics.totalRevenueContribution !== 0n) {
+    throw new Error(
+      `Invalid UnrankedReferrerMetrics: totalRevenueContribution must be 0n, got: ${metrics.totalRevenueContribution.toString()}.`,
+    );
+  }
+
   if (metrics.score !== 0) {
     throw new Error(`Invalid UnrankedReferrerMetrics: score must be 0, got: ${metrics.score}.`);
   }
@@ -350,7 +374,7 @@ export const validateUnrankedReferrerMetrics = (metrics: UnrankedReferrerMetrics
  * @returns An {@link UnrankedReferrerMetrics} with zero values for all metrics and null rank
  */
 export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferrerMetrics => {
-  const baseMetrics = buildReferrerMetrics(referrer, 0, 0);
+  const baseMetrics = buildReferrerMetrics(referrer, 0, 0, 0n);
   const scoredMetrics = buildScoredReferrerMetrics(baseMetrics);
 
   const result = {

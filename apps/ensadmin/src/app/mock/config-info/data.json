@@ -38,7 +38,7 @@
     "version": "0.35.0",
     "theGraphFallback": {
       "canFallback": true,
-      "reason": null
+      "url": ""
     },
     "ensIndexerPublicConfig": {
       "labelSet": {
@@ -122,33 +122,6 @@
       "isSubgraphCompatible": true
     }
   },
-  "Subgraph Holesky": {
-    "version": "0.35.0",
-    "theGraphFallback": {
-      "canFallback": false,
-      "reason": "no-api-key"
-    },
-    "ensIndexerPublicConfig": {
-      "labelSet": {
-        "labelSetId": "subgraph",
-        "labelSetVersion": 0
-      },
-      "versionInfo": {
-        "nodejs": "22.18.0",
-        "ponder": "0.11.43",
-        "ensDb": "0.35.0",
-        "ensIndexer": "0.35.0",
-        "ensNormalize": "1.11.1",
-        "ensRainbow": "0.34.0",
-        "ensRainbowSchema": 3
-      },
-      "indexedChainIds": [17000],
-      "namespace": "holesky",
-      "plugins": ["subgraph"],
-      "databaseSchemaName": "holeskySchema0.34.0",
-      "isSubgraphCompatible": true
-    }
-  },
   "Serialization Error": {
     "version": "0.35.0",
     "theGraphFallback": {
@@ -169,8 +142,8 @@
         "ensRainbow": "",
         "ensRainbowSchema": -1
       },
-      "indexedChainIds": [17000],
-      "namespace": "holesky",
+      "indexedChainIds": [11155111],
+      "namespace": "sepolia",
       "plugins": ["subgraph"],
       "databaseSchemaName": "DeserializationSchema0.34.0",
       "isSubgraphCompatible": true

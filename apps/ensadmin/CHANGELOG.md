@@ -1,5 +1,45 @@
 # ensadmin
 
+## 1.5.1
+
+### Patch Changes
+
+- [#1524](https://github.com/namehash/ensnode/pull/1524) [`a0126b2`](https://github.com/namehash/ensnode/commit/a0126b2dd0c3d1cf6d098627b8693e70c7b7317c) Thanks [@Y3drk](https://github.com/Y3drk)! - Applies `@namehash/namehash-ui`'s components across the app.
+
+- [#1537](https://github.com/namehash/ensnode/pull/1537) [`63617fa`](https://github.com/namehash/ensnode/commit/63617fa827daa4bd7761f482812daf7b507da3d2) Thanks [@tk-o](https://github.com/tk-o)! - Updates Node.js runtime to the current LTS version (v24).
+
+- Updated dependencies [[`a0126b2`](https://github.com/namehash/ensnode/commit/a0126b2dd0c3d1cf6d098627b8693e70c7b7317c)]:
+  - @namehash/namehash-ui@1.5.1
+  - @ensnode/datasources@1.5.1
+  - @ensnode/ponder-metadata@1.5.1
+  - @ensnode/ensnode-schema@1.5.1
+  - @ensnode/ensnode-react@1.5.1
+  - @ensnode/ensnode-sdk@1.5.1
+
+## 1.5.0
+
+### Patch Changes
+
+- Updated dependencies [[`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc)]:
+  - @ensnode/ensnode-schema@1.5.0
+  - @ensnode/datasources@1.5.0
+  - @ensnode/ponder-metadata@1.5.0
+  - @ensnode/ensnode-react@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
+## 1.4.0
+
+### Patch Changes
+
+- [#1453](https://github.com/namehash/ensnode/pull/1453) [`842b704`](https://github.com/namehash/ensnode/commit/842b704992538d8a94f12b2069103136793e8cb1) Thanks [@Y3drk](https://github.com/Y3drk)! - Fixes an issue where `?name=` param stays on page regardless of route.
+
+- Updated dependencies [[`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990), [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec), [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec), [`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d), [`cf1b218`](https://github.com/namehash/ensnode/commit/cf1b218c27cb2253f37ef6b452c908d5c387aa0a), [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda), [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3)]:
+  - @ensnode/ensnode-sdk@1.4.0
+  - @ensnode/ensnode-schema@1.4.0
+  - @ensnode/datasources@1.4.0
+  - @ensnode/ensnode-react@1.4.0
+  - @ensnode/ponder-metadata@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes

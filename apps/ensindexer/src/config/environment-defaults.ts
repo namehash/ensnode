@@ -23,6 +23,9 @@ export const EnvironmentDefaults = {
       PluginName.Basenames,
       PluginName.Lineanames,
       PluginName.ThreeDNS,
+      PluginName.ProtocolAcceleration,
+      PluginName.Registrars,
+      PluginName.TokenScope,
     ].join(","),
     // TODO: set these to the most up-to-date ENSRainbow Label Set
     LABEL_SET_ID: "subgraph",

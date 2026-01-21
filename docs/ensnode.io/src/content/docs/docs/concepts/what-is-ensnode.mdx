@@ -30,7 +30,7 @@ ENSNode version 1 (`V1`), discussed here, prioritizes equivalency with the [ENS 
 
    - Full support for existing ENS Subgraph queries used by [`ensjs`](https://github.com/ensdomains/ensjs/) and [`ens-app-v3`](https://github.com/ensdomains/ens-app-v3)
    - Drop-in replacement for applications using the ENS Subgraph
-   - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/reference/subgraph-compatibility))
+   - Verified compatibility through extensive testing with [`ens-test-env`](https://github.com/namehash/ens-test-env/) and [ens-subgraph-transition-tools](https://github.com/namehash/ens-subgraph-transition-tools) (see [Subgraph Compatibility](/docs/concepts/what-is-the-ens-subgraph/))
 
 2. **Multi-Registry Plugin Architecture**
 
@@ -68,7 +68,7 @@ Each plugin requires two files:
 
 Because plugins indexing subregistries use the shared handlers and may clobber entities created by the `subgraph` plugin—which didn't expect multichain or multi-source entities—, id-generating code is abstracted to be plugin-specific. See the helpers in `apps/ensindexer/src/lib/ids.ts`. In these cases, for the `subgraph` plugin, the original behavior is left un-modified to facilitate 1:1 responses from the subgraph-compatible api.
 
-This scoping also applies to the concept of a `RegistrarManagedName` (see `apps/ensindexer/src/lib/types.ts` and `makeRegistrarHandlers` in `apps/ensindexer/src/handlers/Registrar.ts`) — teh shared handlers derived from the subgraph which are used by some plugins expect the context of a name whos subnames they manage. In the original subgraph implementation, this was hardcoded as the `.eth` name, and operations under the `Registrar` are in the context of direct subnames of `.eth`.
+This scoping also applies to the concept of a "Managed Name" (see `apps/ensindexer/src/lib/managed-names.ts`): some contracts (like Registrars and RegistrarControllers) operate in the context of a Managed Name (like 'eth', 'base.eth', or 'linea.eth'). In the original subgraph implementation, this was hardcoded for the .eth Registrar/RegistrarControllers as the `eth` name, but because ENSNode shares indexing logic between these similar contracts across `.eth` names, `.base.eth` names, etc, we introduce the concept of a contract's "Managed Name" within the context of which it operates.
 
 ### Ponder Plugin Integration
 
@@ -90,7 +90,7 @@ When ENSIndexer is run, the configs for all of the active plugins (those selecte
 
 This package provides configurations for each known ENS namespace. An ENS namespace represents a single, unified set of ENS names with a distinct onchain root Registry and the capability to span across multiple chains, subregistries, and offchain resources.
 
-Each namespace is logically independent - for instance, the Sepolia and Holesky testnet namespaces are entirely separate from the canonical mainnet namespace. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each namespace.
+Each namespace is logically independent - for instance, the Sepolia namespace is entirely separate from the canonical mainnet namespace. This package centralizes the contract addresses, start blocks, and other configuration needed to interact with each namespace.
 
 ENSIndexer uses `@ensnode/datasources` to configure its plugins and determine which are available for a given target namespace.
 

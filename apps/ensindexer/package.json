@@ -1,6 +1,6 @@
 {
   "name": "ensindexer",
-  "version": "1.3.1",
+  "version": "1.5.1",
   "private": true,
   "type": "module",
   "description": "A multichain ENS indexer, powered by Ponder",
@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/apps/ensindexer",
   "scripts": {
-    "dev": "DATABASE_SCHEMA=public ponder --root ./ponder dev",
+    "dev": "DATABASE_SCHEMA=public ponder --root ./ponder dev --disable-ui",
     "start": "ponder --root ./ponder start",
     "serve": "ponder --root ./ponder serve",
     "db": "ponder --root ./ponder db",

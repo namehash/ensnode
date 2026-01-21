@@ -7,6 +7,8 @@ import type { DEFAULT_EVM_CHAIN_ID } from "../ens";
  *
  * Represents a unique identifier for a chain.
  * Guaranteed to be a positive integer.
+ *
+ * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  **/
 export type ChainId = number;
 
@@ -30,6 +32,34 @@ export type DefaultableChainId = typeof DEFAULT_EVM_CHAIN_ID | ChainId;
 export interface AccountId {
   chainId: ChainId;
   address: Address;
+}
+
+/**
+ * An enum representing the possible CAIP-19 Asset Namespace values.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export const AssetNamespaces = {
+  ERC721: "erc721",
+  ERC1155: "erc1155",
+} as const;
+
+export type AssetNamespace = (typeof AssetNamespaces)[keyof typeof AssetNamespaces];
+
+/**
+ * A uint256 value that identifies a specific NFT within a NFT contract.
+ */
+export type TokenId = bigint;
+
+/**
+ * Represents an Asset in `assetNamespace` by `tokenId` in `contract`.
+ *
+ * @see https://chainagnostic.org/CAIPs/caip-19
+ */
+export interface AssetId {
+  assetNamespace: AssetNamespace;
+  contract: AccountId;
+  tokenId: TokenId;
 }
 
 /**
@@ -134,4 +164,11 @@ export type DeepPartial<T> = {
     : T[P] extends object
       ? DeepPartial<T[P]>
       : T[P];
+};
+
+/**
+ * Marks keys in K as required (not undefined) and not null.
+ */
+export type RequiredAndNotNull<T, K extends keyof T> = T & {
+  [P in K]-?: NonNullable<T[P]>;
 };

@@ -4,8 +4,8 @@ import config from "@/config";
 import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
-
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+import { html } from "hono/html";
+import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
@@ -38,6 +38,24 @@ app.use(otel());
 // add ENSIndexer Indexing Status Middleware to all routes for convenience
 app.use(indexingStatusMiddleware);
 
+// host welcome page
+app.get("/", (c) =>
+  c.html(html`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENSApi</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>You've reached the root of an ENSApi instance. You might be looking for the <a href="https://ensnode.io/docs/">ENSNode documentation</a>.</p>
+</body>
+</html>
+`),
+);
+
 // use ENSNode HTTP API at /api
 app.route("/api", ensNodeApi);
 
@@ -50,9 +68,51 @@ app.route("/ensanalytics", ensanalyticsApi);
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
 
-// will automatically 500 if config is not available due to ensIndexerPublicConfigMiddleware
+// use OpenAPI Schema
+app.get(
+  "/openapi.json",
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: "ENSApi APIs",
+        version: packageJson.version,
+        description:
+          "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
+      },
+      servers: [
+        { url: "https://api.alpha.ensnode.io", description: "ENSNode Alpha (Mainnet)" },
+        {
+          url: "https://api.alpha-sepolia.ensnode.io",
+          description: "ENSNode Alpha (Sepolia Testnet)",
+        },
+        { url: `http://localhost:${config.port}`, description: "Local Development" },
+      ],
+      tags: [
+        {
+          name: "Resolution",
+          description: "APIs for resolving ENS names and addresses",
+        },
+        {
+          name: "Meta",
+          description: "APIs for indexing status, configuration, and realtime monitoring",
+        },
+        {
+          name: "Explore",
+          description:
+            "APIs for exploring the indexed state of ENS, including name tokens and registrar actions",
+        },
+        {
+          name: "ENSAwards",
+          description: "APIs for ENSAwards functionality, including referrer data",
+        },
+      ],
+    },
+  }),
+);
+
+// will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ ok: true });
+  return c.json({ message: "fallback ok" });
 });
 
 // log hono errors to console
@@ -71,9 +131,7 @@ const server = serve(
     port: config.port,
   },
   async (info) => {
-    logger.info(
-      `ENSApi listening on port ${info.port} with config:\n${prettyPrintJson(redactEnsApiConfig(config))}`,
-    );
+    logger.info({ config: redactEnsApiConfig(config) }, `ENSApi listening on port ${info.port}`);
 
     // self-healthcheck to connect to ENSIndexer & warm Indexing Status cache
     await app.request("/health");

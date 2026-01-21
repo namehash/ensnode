@@ -114,32 +114,29 @@ describe("CLI", () => {
         const ensrainbowFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
         const ensrainbowOutputFile = join(tempDir, "test_ens_names_0.ensrainbow");
         const labelSetId = "test-ens-names"; // Needed for convert
-        const labelSetVersion = 0; // Needed for convert
 
         expect(() =>
           cli.parse([
-            "convert",
+            "convert-sql",
             "--input-file",
             sqlInputFile,
             "--output-file",
             ensrainbowOutputFile,
           ]),
-        ).toThrow(/Missing required arguments: label-set-id, label-set-version/);
+        ).toThrow(/Missing required argument: label-set-id/);
 
         // Successful convert with args
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
           ensrainbowOutputFile,
           "--label-set-id",
           labelSetId,
-          "--label-set-version",
-          labelSetVersion.toString(),
         ]);
-        //command: pnpm convert --input-file test/fixtures/test_ens_names.sql.gz --output-file test/fixtures/test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
+        //command: pnpm convert-sql --input-file test/fixtures/test_ens_names.sql.gz --output-file test/fixtures/test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -166,32 +163,29 @@ describe("CLI", () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "ens_test_env_names.sql.gz");
         const ensrainbowOutputFile = join(tempDir, "ens_test_env_0.ensrainbow");
         const labelSetId = "ens-test-env"; // Needed for convert
-        const labelSetVersion = 0; // Needed for convert
 
         expect(() =>
           cli.parse([
-            "convert",
+            "convert-sql",
             "--input-file",
             sqlInputFile,
             "--output-file",
             ensrainbowOutputFile,
           ]),
-        ).toThrow(/Missing required arguments: label-set-id, label-set-version/);
+        ).toThrow(/Missing required argument: label-set-id/);
 
         // Successful convert with args
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
-          "convert",
+          "convert-sql",
           "--input-file",
           sqlInputFile,
           "--output-file",
           ensrainbowOutputFile,
           "--label-set-id",
           labelSetId,
-          "--label-set-version",
-          labelSetVersion.toString(),
         ]);
-        //command: pnpm convert --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
+        //command: pnpm convert-sql --input-file test_ens_names.sql.gz --output-file test_ens_names_0.ensrainbow --label-set-id test-ens-names --label-set-version 0
         //verify that the file is created
 
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -214,30 +208,56 @@ describe("CLI", () => {
         const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
         const ensrainbowOutputFile = join(tempDir, "test_ens_names_1.ensrainbow");
         const labelSetId = "test-ens-names"; // Needed for convert
-        const labelSetVersion = 1; // Needed for convert
 
         expect(() =>
           cli.parse([
-            "convert",
+            "convert-sql",
             "--input-file",
             sqlInputFile,
             "--output-file",
             ensrainbowOutputFile,
           ]),
-        ).toThrow(/Missing required arguments: label-set-id, label-set-version/);
+        ).toThrow(/Missing required argument: label-set-id/);
 
         const ingestCli2 = createCLI({ exitProcess: false });
-        // Successful convert with args
+        // Successful convert with args (convert-sql always creates version 0)
+        // To test version 1, we need to use convert command with existing database
+        // But for this test, we'll create version 0 and then manually test the ingestion failure
+        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
+        const tempDbDirForV1 = join(tempDir, "temp-db-for-v1");
+        const version0FileForV1 = join(tempDir, "test_ens_names_0_for_v1.ensrainbow");
+
+        // Create version 0 file
         await ingestCli2.parse([
           "convert",
           "--input-file",
-          sqlInputFile,
+          csvInputFile,
+          "--output-file",
+          version0FileForV1,
+          "--label-set-id",
+          labelSetId,
+        ]);
+
+        // Ingest version 0 to create database
+        await ingestCli2.parse([
+          "ingest-ensrainbow",
+          "--input-file",
+          version0FileForV1,
+          "--data-dir",
+          tempDbDirForV1,
+        ]);
+
+        // Create version 1 file using existing database
+        await ingestCli2.parse([
+          "convert",
+          "--input-file",
+          csvInputFile,
           "--output-file",
           ensrainbowOutputFile,
           "--label-set-id",
           labelSetId,
-          "--label-set-version",
-          labelSetVersion.toString(),
+          "--existing-db-path",
+          tempDbDirForV1,
         ]);
         //verify it is created
         await expect(stat(ensrainbowOutputFile)).resolves.toBeDefined();
@@ -261,38 +281,99 @@ describe("CLI", () => {
       });
 
       it("should ingest first file successfully but reject second file with label set version not being 1 higher than the current highest label set version", async () => {
-        // First, ingest a valid file with label set version 0
-        const firstInputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
+        // First, we'll create a version 0 file and then a version 2 file
         const secondInputFile = join(tempDir, "test_ens_names_2.ensrainbow");
 
         // Create an ensrainbow file with label set version 2
-        const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
+        // To create version 2, we need to create version 0, ingest it, create version 1, ingest it, then create version 2
+        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
         const labelSetId = "test-ens-names";
-        const labelSetVersion = 2; // Higher than 1
 
-        // Successful convert with label set version 2
+        // Create temporary directory for building up versions sequentially
+        const tempDbDir = join(tempDir, "temp-db");
+        const version0File = join(tempDir, "test_ens_names_0_temp.ensrainbow");
+        const version1File = join(tempDir, "test_ens_names_1_temp.ensrainbow");
+
         const convertCli = createCLI({ exitProcess: false });
+
+        // Step 1: Create version 0 file
         await convertCli.parse([
           "convert",
           "--input-file",
-          sqlInputFile,
+          csvInputFile,
+          "--output-file",
+          version0File,
+          "--label-set-id",
+          labelSetId,
+        ]);
+
+        // Step 2: Ingest version 0 to create database (database now has version 0)
+        await convertCli.parse([
+          "ingest-ensrainbow",
+          "--input-file",
+          version0File,
+          "--data-dir",
+          tempDbDir,
+        ]);
+
+        // Step 3: Create version 1 file using existing database (will be version 1)
+        await convertCli.parse([
+          "convert",
+          "--input-file",
+          csvInputFile,
+          "--output-file",
+          version1File,
+          "--label-set-id",
+          labelSetId,
+          "--existing-db-path",
+          tempDbDir,
+        ]);
+
+        // Step 4: Ingest version 1 into the same database (database now has versions 0 and 1, highest is 1)
+        await convertCli.parse([
+          "ingest-ensrainbow",
+          "--input-file",
+          version1File,
+          "--data-dir",
+          tempDbDir,
+        ]);
+
+        // Step 5: Create version 2 file using existing database (will be version 2, since highest is 1)
+        await convertCli.parse([
+          "convert",
+          "--input-file",
+          csvInputFile,
           "--output-file",
           secondInputFile,
           "--label-set-id",
           labelSetId,
-          "--label-set-version",
-          labelSetVersion.toString(),
+          "--existing-db-path",
+          tempDbDir,
         ]);
 
         // Verify the file with label set version 2 was created
         await expect(stat(secondInputFile)).resolves.toBeDefined();
+
+        // Create a completely separate version 0 file for the final test
+        // Use a fresh CLI instance and ensure no existing-db-path is used
+        const finalTestCli = createCLI({ exitProcess: false });
+        const finalTestVersion0File = join(tempDir, "final_test_v0.ensrainbow");
+        await finalTestCli.parse([
+          "convert",
+          "--input-file",
+          csvInputFile,
+          "--output-file",
+          finalTestVersion0File,
+          "--label-set-id",
+          labelSetId,
+        ]);
 
         // First ingest succeeds with label set version 0
         const ingestCli = createCLI({ exitProcess: false });
         await ingestCli.parse([
           "ingest-ensrainbow",
           "--input-file",
-          firstInputFile,
+          finalTestVersion0File,
           "--data-dir",
           testDataDir,
         ]);
@@ -318,35 +399,45 @@ describe("CLI", () => {
         const thirdInputFile = join(tempDir, "different_label_set_id_1.ensrainbow");
 
         // Create an ensrainbow file with different label set id
-        const sqlInputFile = join(TEST_FIXTURES_DIR, "test_ens_names.sql.gz");
+        const csvInputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
         const labelSetId = "different-label-set-id"; // Different from test-ens-names
-        const labelSetVersion = 0;
+
+        // Create temporary directory for version 0 database
+        const tempDbDir0 = join(tempDir, "temp-db-different-v0");
 
         // Create second file with different label set id and label set version 0
         const convertCli = createCLI({ exitProcess: false });
         await convertCli.parse([
           "convert",
           "--input-file",
-          sqlInputFile,
+          csvInputFile,
           "--output-file",
           secondInputFile,
           "--label-set-id",
           labelSetId,
-          "--label-set-version",
-          labelSetVersion.toString(),
         ]);
 
         // Create third file with different label set id and label set version 1
+        // First, ingest version 0 to create database
+        await convertCli.parse([
+          "ingest-ensrainbow",
+          "--input-file",
+          secondInputFile,
+          "--data-dir",
+          tempDbDir0,
+        ]);
+
+        // Then create version 1 using existing database
         await convertCli.parse([
           "convert",
           "--input-file",
-          sqlInputFile,
+          csvInputFile,
           "--output-file",
           thirdInputFile,
           "--label-set-id",
           labelSetId,
-          "--label-set-version",
-          "1",
+          "--existing-db-path",
+          tempDbDir0,
         ]);
 
         // Verify the file with different label set id was created

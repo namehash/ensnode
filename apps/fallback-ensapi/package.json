@@ -1,0 +1,41 @@
+{
+  "private": true,
+  "name": "fallback-ensapi",
+  "version": "1.5.1",
+  "type": "module",
+  "description": "Infrastructure-level Fallback for ENSApi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "apps/fallback-ensapi"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/apps/fallback-ensapi",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch --env-file ./.env.local src/index.ts",
+    "build": "pnpm build:clean && pnpm build:transpile && pnpm build:bundle",
+    "build:clean": "rm -rf dist",
+    "build:transpile": "node bin/build.mjs",
+    "build:bundle": "zip -j dist/lambda.zip dist/index.mjs",
+    "test": "vitest",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.955.0",
+    "@ensnode/datasources": "workspace:*",
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "hono": "catalog:"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@hono/node-server": "^1.19.7",
+    "@types/node": "catalog:",
+    "esbuild": "^0.27.2",
+    "tsx": "^4.7.1",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

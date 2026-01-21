@@ -1,5 +1,6 @@
 "use client";
 
+import { getChainName } from "@namehash/namehash-ui";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedValue } from "rooks";
@@ -26,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getChainName } from "@/lib/namespace-utils";
 
 const EXAMPLE_INPUT = [
   { address: "0x179A862703a4adfb29896552DF9e307980D19285", chainId: "1" }, // greg mainnet

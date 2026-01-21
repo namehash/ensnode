@@ -3,7 +3,6 @@ import schema from "ponder:schema";
 import type { Address, Hash } from "viem";
 
 import {
-  type AccountId,
   type EncodedReferrer,
   isRegistrarActionReferralAvailable,
   type Node,
@@ -21,13 +20,11 @@ export async function handleUniversalRegistrarRenewalEvent(
   context: Context,
   {
     id,
-    subregistryId,
     node,
     referral,
     transactionHash,
   }: {
     id: Event["id"];
-    subregistryId: AccountId;
     node: Node;
     referral: RegistrarActionReferral;
     transactionHash: Hash;
@@ -35,7 +32,6 @@ export async function handleUniversalRegistrarRenewalEvent(
 ): Promise<void> {
   // 1. Make Logical Event Key
   const logicalEventKey = makeLogicalEventKey({
-    subregistryId,
     node,
     transactionHash,
   });
@@ -43,29 +39,34 @@ export async function handleUniversalRegistrarRenewalEvent(
   // 2. Use the Logical Event Key to get the "logical registrar action" record
   //    which needs to be updated.
 
-  // 2. a) Find subregistryActionMetadata record by logical event key.
-  const subregistryActionMetadata = await context.db.find(schema.internal_registrarActionMetadata, {
-    logicalEventKey,
+  // 2. a) Find registrarActionMetadata record for the current "logical registrar action".
+  const registrarActionMetadata = await context.db.find(schema.internal_registrarActionMetadata, {
+    metadataType: "CURRENT_LOGICAL_REGISTRAR_ACTION",
   });
 
-  // Invariant: the subregistryActionMetadata record must be available for `logicalEventKey`
-  if (!subregistryActionMetadata) {
+  // Invariant: the registrarActionMetadata record must exist
+  if (!registrarActionMetadata) {
     throw new Error(
       `The required "logical registrar action" ID could not be found for the following logical event key: '${logicalEventKey}'.`,
     );
   }
 
-  const { logicalEventId } = subregistryActionMetadata;
+  // Invariant: the stored logical event key must match the current logical event key
+  if (registrarActionMetadata.logicalEventKey !== logicalEventKey) {
+    throw new Error(
+      `The logical event key ('${registrarActionMetadata.logicalEventKey}') for the "logical registrar action" record must be same as the current logical event key ('${logicalEventKey}').`,
+    );
+  }
 
   // 2. b) Find "logical registrar action" record by `logicalEventId`.
   const logicalRegistrarAction = await context.db.find(schema.registrarActions, {
-    id: logicalEventId,
+    id: registrarActionMetadata.logicalEventId,
   });
 
   // Invariant: the "logical registrar action" record must be available for `logicalEventId`
   if (!logicalRegistrarAction) {
     throw new Error(
-      `The "logical registrar action" record, which could not be found for the following logical event ID: '${logicalEventId}'.`,
+      `The "logical registrar action" record, which could not be found for the following logical event ID: '${registrarActionMetadata.logicalEventId}'.`,
     );
   }
 

@@ -117,6 +117,7 @@ export async function executeResolveCalls<SELECTION extends ResolverRecordsSelec
   return withActiveSpanAsync(tracer, "executeResolveCalls", { name }, async (span) => {
     const ResolverContract = { abi: ResolverABI, address: resolverAddress } as const;
 
+    // NOTE: automatically multicalled by viem
     return await Promise.all(
       calls.map(async (call) => {
         try {

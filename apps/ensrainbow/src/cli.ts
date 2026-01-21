@@ -5,14 +5,10 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
-import {
-  buildLabelSetId,
-  buildLabelSetVersion,
-  type LabelSetId,
-  type LabelSetVersion,
-} from "@ensnode/ensnode-sdk";
+import { buildLabelSetId, type LabelSetId } from "@ensnode/ensnode-sdk";
 
-import { convertCommand } from "@/commands/convert-command";
+import { convertCommand } from "@/commands/convert-command-sql";
+import { convertCsvCommand } from "@/commands/convert-csv-command";
 // import { ingestCommand } from "@/commands/ingest-command";
 import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
@@ -57,9 +53,17 @@ interface PurgeArgs {
 
 interface ConvertArgs {
   "input-file": string;
-  "output-file": string;
+  "output-file"?: string;
   "label-set-id": LabelSetId;
-  "label-set-version": LabelSetVersion;
+}
+
+interface ConvertCsvArgs {
+  "input-file": string;
+  "output-file"?: string;
+  "label-set-id": LabelSetId;
+  "progress-interval"?: number;
+  "existing-db-path"?: string;
+  silent?: boolean;
 }
 
 export interface CLIOptions {
@@ -185,7 +189,55 @@ export function createCLI(options: CLIOptions = {}) {
       )
       .command(
         "convert",
-        "Convert rainbow tables from SQL dump to protobuf format",
+        "Convert rainbow tables from CSV format to ensrainbow format",
+        (yargs: Argv) => {
+          return yargs
+            .option("input-file", {
+              type: "string",
+              description: "Path to the CSV input file",
+              demandOption: true,
+            })
+            .option("label-set-id", {
+              type: "string",
+              description: "Label set id for the generated ensrainbow file",
+              demandOption: true,
+            })
+            .coerce("label-set-id", buildLabelSetId)
+            .option("output-file", {
+              type: "string",
+              description:
+                "Path to where the resulting ensrainbow file will be output (if not provided, will be generated automatically)",
+            })
+            .option("progress-interval", {
+              type: "number",
+              description: "Number of records to process before logging progress",
+              default: 50000,
+            })
+            .option("existing-db-path", {
+              type: "string",
+              description:
+                "Path to existing ENSRainbow database to filter out existing labels and determine the next label set version (if not provided, version will be 0)",
+            })
+            .option("silent", {
+              type: "boolean",
+              description: "Disable progress bar (useful for scripts)",
+              default: false,
+            });
+        },
+        async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
+          await convertCsvCommand({
+            inputFile: argv["input-file"],
+            outputFile: argv["output-file"],
+            labelSetId: argv["label-set-id"],
+            progressInterval: argv["progress-interval"],
+            existingDbPath: argv["existing-db-path"],
+            silent: argv.silent,
+          });
+        },
+      )
+      .command(
+        "convert-sql",
+        "Convert rainbow tables from legacy SQL dump to ensrainbow format",
         (yargs: Argv) => {
           return yargs
             .option("input-file", {
@@ -193,30 +245,25 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Path to the gzipped SQL dump file",
               default: join(process.cwd(), "ens_names.sql.gz"),
             })
-            .option("output-file", {
-              type: "string",
-              description: "Path to the output protobuf file",
-              default: join(process.cwd(), "rainbow-records.ensrainbow"),
-            })
             .option("label-set-id", {
               type: "string",
-              description: "Label set id for the rainbow record collection",
+              description: "Label set id for the generated ensrainbow file",
               demandOption: true,
             })
             .coerce("label-set-id", buildLabelSetId)
-            .option("label-set-version", {
-              type: "number",
-              description: "Label set version for the rainbow record collection",
-              demandOption: true,
-            })
-            .coerce("label-set-version", buildLabelSetVersion);
+            .option("output-file", {
+              type: "string",
+              description: "Path to where the resulting ensrainbow file will be output",
+            });
         },
         async (argv: ArgumentsCamelCase<ConvertArgs>) => {
+          const outputFile =
+            argv["output-file"] ?? join(process.cwd(), `${argv["label-set-id"]}_0.ensrainbow`);
           await convertCommand({
             inputFile: argv["input-file"],
-            outputFile: argv["output-file"],
+            outputFile,
             labelSetId: argv["label-set-id"],
-            labelSetVersion: argv["label-set-version"],
+            labelSetVersion: 0,
           });
         },
       )

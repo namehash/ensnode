@@ -1,4 +1,5 @@
 import { minutesToSeconds } from "date-fns";
+import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
 import type { Duration } from "@ensnode/ensnode-sdk";
@@ -18,13 +19,30 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 // `maxWorstCaseDistance` param
 app.get(
   "/",
+  describeRoute({
+    tags: ["Meta"],
+    summary: "Check indexing progress",
+    description:
+      "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
+    responses: {
+      200: {
+        description:
+          "Indexing progress is guaranteed to be within the requested distance of realtime",
+      },
+      503: {
+        description:
+          "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
+      },
+    },
+  }),
   validate(
     "query",
     z.object({
       maxWorstCaseDistance: params.queryParam
         .optional()
         .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
-        .pipe(makeDurationSchema("maxWorstCaseDistance query param")),
+        .pipe(makeDurationSchema("maxWorstCaseDistance query param"))
+        .describe("Maximum acceptable worst-case indexing distance in seconds"),
     }),
   ),
   async (c) => {
@@ -58,7 +76,11 @@ app.get(
 
     // return 200 response OK with current details on `maxWorstCaseDistance`,
     // `slowestChainIndexingCursor`, and `worstCaseDistance`
-    return c.json({ maxWorstCaseDistance, slowestChainIndexingCursor, worstCaseDistance });
+    return c.json({
+      maxWorstCaseDistance,
+      slowestChainIndexingCursor,
+      worstCaseDistance,
+    });
   },
 );
 

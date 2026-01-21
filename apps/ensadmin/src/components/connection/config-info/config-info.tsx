@@ -5,13 +5,13 @@
 
 "use client";
 
+import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 import { History, Replace } from "lucide-react";
 import { Fragment, ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
 import {
   ConfigInfoAppCard,
   ConfigInfoFeature,
@@ -33,7 +33,6 @@ import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
 /**
@@ -73,7 +72,7 @@ function ENSNodeCardLoadingSkeleton() {
 
           <Card className="animate-pulse">
             <CardHeader className="max-sm:p-3">
-              <div className="h-6 bg-muted rounded w-1/3" />
+              <div className="h-6 bg-muted rounded-sm w-1/3" />
             </CardHeader>
             <CardContent className="space-y-3 max-sm:p-3 max-sm:pt-0">
               <div className="space-y-2">
@@ -226,6 +225,61 @@ function ENSNodeConfigCardContent({
     </p>
   );
 
+  const healReverseAddressesFeature = (
+    <ConfigInfoFeature
+      label="Heal Reverse Addresses"
+      key="ENSIndexer Heal Reverse Addresses feature"
+      description={healReverseAddressesDescription}
+      icon={<HealIcon width={15} height={15} className="shrink-0" />}
+    />
+  );
+
+  const indexAdditionalRecordsFeature = (
+    <ConfigInfoFeature
+      label="Index Additional Resolver Records"
+      key="ENSIndexer Index Additional Resolver Records feature"
+      description={indexAdditionalRecordsDescription}
+      icon={<IndexAdditionalRecordsIcon width={15} height={15} className="shrink-0" />}
+    />
+  );
+
+  const replaceUnnormalizedLabelsFeature = (
+    <ConfigInfoFeature
+      label="Replace Unnormalized Labels"
+      key="ENSIndexer Replace Unnormalized Labels feature"
+      description={replaceUnnormalizedLabelsDescription}
+      icon={<Replace width={15} height={15} stroke="#3F3F46" className="shrink-0" />}
+    />
+  );
+
+  const subgraphCompatabilityFeature = (
+    <ConfigInfoFeature
+      label="Subgraph Compatibility"
+      key="ENSIndexer Subgraph Compatibility feature"
+      description={subgraphCompatibilityDescription}
+      icon={<IconGraphNetwork width={15} height={15} className="text-[#3F3F46] shrink-0" />}
+    />
+  );
+
+  const ensIndexerFeatures = [
+    {
+      isActivated: healReverseAddressesActivated,
+      feature: healReverseAddressesFeature,
+    },
+    {
+      isActivated: indexAdditionalRecordsActivated,
+      feature: indexAdditionalRecordsFeature,
+    },
+    {
+      isActivated: replaceUnnormalizedLabelsActivated,
+      feature: replaceUnnormalizedLabelsFeature,
+    },
+    {
+      isActivated: subgraphCompatibilityActivated,
+      feature: subgraphCompatabilityFeature,
+    },
+  ];
+
   const ensRootChainId = getENSRootChainId(ensIndexerPublicConfig.namespace);
 
   return (
@@ -270,7 +324,7 @@ function ENSNodeConfigCardContent({
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                    className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
                   >
                     {getChainName(ensRootChainId)}
                   </TooltipContent>
@@ -285,7 +339,7 @@ function ENSNodeConfigCardContent({
             }
           />
         </ConfigInfoItems>
-        <ConfigInfoFeatures>
+        <ConfigInfoFeatures activated={ensApiPublicConfig.theGraphFallback.canFallback}>
           <ConfigInfoFeature
             label="Subgraph API Fallback"
             description={
@@ -312,8 +366,7 @@ function ENSNodeConfigCardContent({
                 </p>
               )
             }
-            isActivated={ensApiPublicConfig.theGraphFallback.canFallback}
-            icon={<History width={15} height={15} className="flex-shrink-0" />}
+            icon={<History width={15} height={15} className="shrink-0" />}
           />
         </ConfigInfoFeatures>
       </ConfigInfoAppCard>
@@ -393,7 +446,7 @@ function ENSNodeConfigCardContent({
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
-                      className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+                      className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
                     >
                       {getChainName(chainId)}
                     </TooltipContent>
@@ -471,33 +524,15 @@ function ENSNodeConfigCardContent({
             }
           />
         </ConfigInfoItems>
-        <ConfigInfoFeatures>
-          <ConfigInfoFeature
-            label="Heal Reverse Addresses"
-            description={healReverseAddressesDescription}
-            isActivated={healReverseAddressesActivated}
-            icon={<HealIcon width={15} height={15} className="flex-shrink-0" />}
-          />
-          <ConfigInfoFeature
-            label="Index Additional Resolver Records"
-            description={indexAdditionalRecordsDescription}
-            isActivated={indexAdditionalRecordsActivated}
-            icon={<IndexAdditionalRecordsIcon width={15} height={15} className="flex-shrink-0" />}
-          />
-          <ConfigInfoFeature
-            label="Replace Unnormalized Labels"
-            description={replaceUnnormalizedLabelsDescription}
-            isActivated={replaceUnnormalizedLabelsActivated}
-            icon={<Replace width={15} height={15} stroke="#3F3F46" className="flex-shrink-0" />}
-          />
-          <ConfigInfoFeature
-            label="Subgraph Compatibility"
-            description={subgraphCompatibilityDescription}
-            isActivated={subgraphCompatibilityActivated}
-            icon={
-              <IconGraphNetwork width={15} height={15} className="text-[#3F3F46] flex-shrink-0" />
-            }
-          />
+        <ConfigInfoFeatures activated={true}>
+          {ensIndexerFeatures
+            .filter((feature) => feature.isActivated)
+            .map((feature) => feature.feature)}
+        </ConfigInfoFeatures>
+        <ConfigInfoFeatures activated={false}>
+          {ensIndexerFeatures
+            .filter((feature) => !feature.isActivated)
+            .map((feature) => feature.feature)}
         </ConfigInfoFeatures>
         <ConfigInfoItems>
           <ConfigInfoItem

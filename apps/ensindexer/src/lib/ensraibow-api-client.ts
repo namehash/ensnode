@@ -16,9 +16,7 @@ export function getENSRainbowApiClient() {
     EnsRainbowApiClient.defaultOptions().endpointUrl
   ) {
     console.warn(
-      `Using default public ENSRainbow server which may cause increased network latency.
-For production, use your own ENSRainbow server that runs on the same network
-as the ENSIndexer server.`,
+      `Using default public ENSRainbow server which may cause increased network latency. For production, use your own ENSRainbow server that runs on the same network as the ENSIndexer server.`,
     );
   }
 

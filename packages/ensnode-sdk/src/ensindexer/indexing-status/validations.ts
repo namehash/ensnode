@@ -437,7 +437,7 @@ export function invariant_snapshotTimeIsTheHighestKnownBlockTimestamp(
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
-      message: `'snapshotTime' must be greater than or equal to  the "highest known block timestamp" (${highestKnownBlockTimestamp})`,
+      message: `'snapshotTime' (${snapshotTime}) must be greater than or equal to the "highest known block timestamp" (${highestKnownBlockTimestamp})`,
     });
   }
 }

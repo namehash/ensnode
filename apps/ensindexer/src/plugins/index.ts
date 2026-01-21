@@ -2,6 +2,8 @@ import type { PluginName } from "@ensnode/ensnode-sdk";
 
 import type { MergedTypes } from "@/lib/lib-helpers";
 
+// ENSV2 Core Plugin
+import ensv2Plugin from "./ensv2/plugin";
 // Core-Schema-Indepdendent Plugins
 import protocolAccelerationPlugin from "./protocol-acceleration/plugin";
 import registrarsPlugin from "./registrars/plugin";
@@ -20,6 +22,7 @@ export const ALL_PLUGINS = [
   tokenScopePlugin,
   protocolAccelerationPlugin,
   registrarsPlugin,
+  ensv2Plugin,
 ] as const;
 
 /**

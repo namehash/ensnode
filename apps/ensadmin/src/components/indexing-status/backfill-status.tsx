@@ -3,6 +3,7 @@
  * the {@link OmnichainIndexingStatusSnapshotBackfill} indexing status object.
  */
 
+import { AbsoluteTime } from "@namehash/namehash-ui";
 import { Clock } from "lucide-react";
 
 import {
@@ -14,7 +15,6 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { AbsoluteTime } from "@/components/datetime-utils";
 import {
   generateYearMarkers,
   getTimelinePosition,
@@ -169,11 +169,11 @@ export function BackfillStatus({ realtimeProjection }: BackfillStatusProps) {
           {/* Legend */}
           <div className="flex items-center justify-end mt-8 text-xs gap-4">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-gray-400" />
+              <div className="w-3 h-3 rounded-xs bg-gray-400" />
               <span>Queued</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-blue-500" />
+              <div className="w-3 h-3 rounded-xs bg-blue-500" />
               <span>Backfill</span>
             </div>
             <div className="flex items-center gap-1.5">

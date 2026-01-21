@@ -112,6 +112,7 @@ describe("ENSNode API Schema", () => {
         startIndex: 0,
         endIndex: 1,
       },
+      accurateAsOf: 1767718566,
     } satisfies SerializedRegistrarActionsResponseOk;
 
     const validResponseError = {

@@ -2,6 +2,8 @@
  * This file gathers ideas for UI components presenting chain indexing timeline.
  */
 
+import { AbsoluteTime, ChainIcon, getChainName } from "@namehash/namehash-ui";
+
 import {
   type BlockRef,
   type ChainId,
@@ -9,11 +11,8 @@ import {
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
-import { AbsoluteTime } from "@/components/datetime-utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatChainStatus } from "@/lib/indexing-status";
-import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
 import { getTimelinePosition } from "./indexing-timeline-utils";
@@ -54,7 +53,7 @@ function ChainIndexingTimelinePhase({
 
   return (
     <div
-      className={cn("absolute h-5 rounded-sm z-10", {
+      className={cn("absolute h-5 rounded-xs z-10", {
         "bg-gray-400": phase.status === ChainIndexingStatusIds.Queued,
         "bg-blue-500": phase.status === ChainIndexingStatusIds.Backfill,
       })}
@@ -126,7 +125,7 @@ export function ChainIndexingTimeline(props: ChainIndexingTimelineProps) {
           </TooltipTrigger>
           <TooltipContent
             side="left"
-            className="bg-gray-50 text-sm text-black text-center shadow-md outline-none w-fit"
+            className="bg-gray-50 text-sm text-black text-center shadow-md outline-hidden w-fit"
           >
             {getChainName(chainStatus.chainId)}
           </TooltipContent>

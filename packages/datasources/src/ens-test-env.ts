@@ -1,14 +1,21 @@
+import { zeroAddress } from "viem";
+
+import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
+import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
+import { Registry } from "./abis/ensv2/Registry";
 // ABIs for ENSRoot Datasource
 import { BaseRegistrar as root_BaseRegistrar } from "./abis/root/BaseRegistrar";
 import { LegacyEthRegistrarController as root_LegacyEthRegistrarController } from "./abis/root/LegacyEthRegistrarController";
 import { NameWrapper as root_NameWrapper } from "./abis/root/NameWrapper";
 import { Registry as root_Registry } from "./abis/root/Registry";
+import { UniversalRegistrarRenewalWithReferrer as root_UniversalRegistrarRenewalWithReferrer } from "./abis/root/UniversalRegistrarRenewalWithReferrer";
 import { UniversalResolver as root_UniversalResolver } from "./abis/root/UniversalResolver";
 import { UnwrappedEthRegistrarController as root_UnwrappedEthRegistrarController } from "./abis/root/UnwrappedEthRegistrarController";
 import { WrappedEthRegistrarController as root_WrappedEthRegistrarController } from "./abis/root/WrappedEthRegistrarController";
-import { ensTestEnvL1Chain } from "./lib/chains";
+import { StandaloneReverseRegistrar } from "./abis/shared/StandaloneReverseRegistrar";
+import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "./lib/chains";
 // Shared ABIs
-import { ResolverABI, ResolverFilter } from "./lib/resolver";
+import { ResolverABI } from "./lib/ResolverABI";
 // Types
 import { DatasourceNames, type ENSNamespace } from "./lib/types";
 
@@ -34,29 +41,28 @@ export default {
   [DatasourceNames.ENSRoot]: {
     chain: ensTestEnvL1Chain,
     contracts: {
-      RegistryOld: {
+      ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x610178da211fef7d417bc0e6fed39f05609ad788",
+        address: "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
         startBlock: 0,
       },
-      Registry: {
+      ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e",
+        address: "0x9a676e781a523b5d0c0e43731313a708cb607508",
         startBlock: 0,
       },
       Resolver: {
         abi: ResolverABI,
-        filter: ResolverFilter,
         startBlock: 0,
       },
       BaseRegistrar: {
         abi: root_BaseRegistrar,
-        address: "0xa82ff9afd8f496c3d6ac40e2a0f282e47488cfc9",
+        address: "0xb7278a61aa25c888815afc32ad3cc52ff24fe575",
         startBlock: 0,
       },
       LegacyEthRegistrarController: {
         abi: root_LegacyEthRegistrarController,
-        address: "0x5081a39b8a5f0e35a8d959395a630b68b74dd30f",
+        address: "0xbec49fa140acaa83533fb00a2bb19bddd0290f25",
         startBlock: 0,
       },
       WrappedEthRegistrarController: {
@@ -66,17 +72,100 @@ export default {
       },
       UnwrappedEthRegistrarController: {
         abi: root_UnwrappedEthRegistrarController,
-        address: "0x36b58f5c1969b7b6591d752ea6f5486d069010ab",
+        address: "0xfbc22278a96299d91d41c453234d97b4f5eb9b2d",
+        startBlock: 0,
+      },
+      UniversalRegistrarRenewalWithReferrer: {
+        abi: root_UniversalRegistrarRenewalWithReferrer,
+        address: zeroAddress,
         startBlock: 0,
       },
       NameWrapper: {
         abi: root_NameWrapper,
-        address: "0x2e2ed0cfd3ad2f1d34481277b3204d807ca2f8c2",
+        address: "0xfd471836031dc5108809d173a067e8486b9047a3",
         startBlock: 0,
       },
       UniversalResolver: {
         abi: root_UniversalResolver,
-        address: "0xd84379ceae14aa33c123af12424a37803f885889",
+        address: "0xdc11f7e700a4c898ae5caddb1082cffa76512add",
+        startBlock: 0,
+      },
+
+      //
+
+      ETHRegistry: {
+        abi: Registry,
+        address: "0x0b306bf915c4d645ff596e518faf3f9669b97016",
+        startBlock: 0,
+      },
+      RootRegistry: {
+        abi: Registry,
+        address: "0x9a676e781a523b5d0c0e43731313a708cb607508",
+        startBlock: 0,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.Namechain]: {
+    chain: ensTestEnvL2Chain,
+    contracts: {
+      Resolver: {
+        abi: ResolverABI,
+        startBlock: 0,
+      },
+      Registry: {
+        abi: Registry,
+        startBlock: 0,
+      },
+      EnhancedAccessControl: {
+        abi: EnhancedAccessControl,
+        startBlock: 0,
+      },
+      ETHRegistry: {
+        abi: Registry,
+        address: "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+        startBlock: 0,
+      },
+      ETHRegistrar: {
+        abi: ETHRegistrar,
+        address: "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
+        startBlock: 0,
+      },
+    },
+  },
+
+  [DatasourceNames.ReverseResolverRoot]: {
+    chain: ensTestEnvL1Chain,
+    contracts: {
+      DefaultReverseRegistrar: {
+        abi: StandaloneReverseRegistrar,
+        address: "0x8f86403a4de0bb5791fa46b8e795c547942fe4cf",
+        startBlock: 0,
+      },
+
+      DefaultReverseResolver3: {
+        abi: ResolverABI,
+        address: "0x5eb3bc0a489c5a8288765d2336659ebca68fcd00",
+        startBlock: 0,
+      },
+
+      DefaultPublicResolver4: {
+        abi: ResolverABI,
+        address: "0x367761085bf3c12e5da2df99ac6e1a824612b8fb",
+        startBlock: 0,
+      },
+
+      DefaultPublicResolver5: {
+        abi: ResolverABI,
+        address: "0x4c2f7092c2ae51d986befee378e50bd4db99c901",
         startBlock: 0,
       },
     },

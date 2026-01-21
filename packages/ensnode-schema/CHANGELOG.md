@@ -1,5 +1,19 @@
 # @ensnode/ensnode-schema
 
+## 1.5.1
+
+## 1.5.0
+
+### Minor Changes
+
+- [#1527](https://github.com/namehash/ensnode/pull/1527) [`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc) Thanks [@tk-o](https://github.com/tk-o)! - Update `registrars` schema to enable storing at most one metadata record.
+
+## 1.4.0
+
+### Minor Changes
+
+- [#1280](https://github.com/namehash/ensnode/pull/1280) [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the ENSv2 Plugin ('ensv2') for indexing both ENSv1 and the future ENSv2 protocol.
+
 ## 1.3.1
 
 ## 1.3.0

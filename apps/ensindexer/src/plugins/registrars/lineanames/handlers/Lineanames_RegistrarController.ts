@@ -1,12 +1,7 @@
-import config from "@/config";
-
 import { ponder } from "ponder:registry";
-import { namehash } from "viem/ens";
 
-import { DatasourceNames } from "@ensnode/datasources";
 import {
   addPrices,
-  getDatasourceContract,
   makeSubdomainNode,
   PluginName,
   priceEth,
@@ -14,9 +9,10 @@ import {
   type RegistrarActionReferralNotApplicable,
 } from "@ensnode/ensnode-sdk";
 
+import { getThisAccountId } from "@/lib/get-this-account-id";
+import { getManagedName } from "@/lib/managed-names";
 import { namespaceContract } from "@/lib/plugin-helpers";
 
-import { getRegistrarManagedName } from "../../lineanames/lib/registrar-helpers";
 import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-controller-events";
 
 /**
@@ -24,13 +20,6 @@ import { handleRegistrarControllerEvent } from "../../shared/lib/registrar-contr
  */
 export default function () {
   const pluginName = PluginName.Registrars;
-  const parentNode = namehash(getRegistrarManagedName(config.namespace));
-
-  const subregistryId = getDatasourceContract(
-    config.namespace,
-    DatasourceNames.Lineanames,
-    "BaseRegistrar",
-  );
 
   /**
    * No Registrar Controller for Lineanames implements referrals or
@@ -48,9 +37,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:OwnerNameRegistered"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const { node: managedNode } = getManagedName(subregistryId);
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       /**
@@ -66,7 +63,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
@@ -78,9 +74,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:PohNameRegistered"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const { node: managedNode } = getManagedName(subregistryId);
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       /**
@@ -96,7 +100,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
@@ -108,9 +111,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:NameRegistered"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const { node: managedNode } = getManagedName(subregistryId);
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       const baseCost = priceEth(event.args.baseCost);
@@ -124,7 +135,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,
@@ -136,9 +146,17 @@ export default function () {
   ponder.on(
     namespaceContract(pluginName, "Lineanames_EthRegistrarController:NameRenewed"),
     async ({ context, event }) => {
-      const id = event.id;
-      const labelHash = event.args.label; // this field is the labelhash, not the label
-      const node = makeSubdomainNode(labelHash, parentNode);
+      const {
+        id,
+        args: {
+          // this field is the labelhash, not the label
+          label: labelHash,
+        },
+      } = event;
+
+      const subregistryId = getThisAccountId(context, event);
+      const { node: managedNode } = getManagedName(subregistryId);
+      const node = makeSubdomainNode(labelHash, managedNode);
       const transactionHash = event.transaction.hash;
 
       const baseCost = priceEth(event.args.cost);
@@ -152,7 +170,6 @@ export default function () {
 
       await handleRegistrarControllerEvent(context, {
         id,
-        subregistryId,
         node,
         pricing,
         referral,

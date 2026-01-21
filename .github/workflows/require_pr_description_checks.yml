@@ -1,0 +1,14 @@
+name: Require PR Description Checks
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, ready_for_review, converted_to_draft]
+
+jobs:
+  require-pr-description-checks:
+    if: ${{ github.event.pull_request.draft != true }} # skip on draft PRs
+    runs-on: blacksmith-4vcpu-ubuntu-2204
+    steps:
+      - uses: mheap/require-checklist-action@v2
+        with:
+          requireChecklist: false # If this is true and there are no checklists detected, the action will fail

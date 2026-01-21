@@ -1,7 +1,7 @@
+import { InfoIcon } from "@namehash/namehash-ui";
 import { ExternalLink } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
 
-import { InfoIcon } from "@/components/icons/InfoIcon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,6 @@ export interface ConfigInfoItemProps {
 export interface ConfigInfoFeatureProps {
   label: string;
   description: ReactNode;
-  isActivated?: boolean;
   icon: ReactElement;
 }
 
@@ -50,11 +49,11 @@ export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemP
         {additionalInfo && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="flex-shrink-0" />
+              <InfoIcon className="shrink-0 text-[#9CA3AF]" />
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
+              className="bg-gray-50 text-sm text-black shadow-md outline-hidden max-w-[275px]"
             >
               {additionalInfo}
             </TooltipContent>
@@ -69,12 +68,7 @@ export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemP
 /**
  * ConfigInfoFeature - Renders a single feature badge with tooltip
  */
-export function ConfigInfoFeature({
-  label,
-  description,
-  isActivated = true,
-  icon,
-}: ConfigInfoFeatureProps) {
+export function ConfigInfoFeature({ label, description, icon }: ConfigInfoFeatureProps) {
   return (
     <div className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1">
       <div className={featureActivationsWrapperStyles}>
@@ -87,7 +81,7 @@ export function ConfigInfoFeature({
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-gray-50 text-sm text-black shadow-md outline-none max-w-[275px]"
+            className="bg-gray-50 text-sm text-black shadow-md outline-hidden max-w-[275px]"
           >
             {description}
           </TooltipContent>
@@ -130,7 +124,7 @@ export function ConfigInfoAppCard({
   children,
 }: ConfigInfoAppCardProps) {
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-xs">
       {(docsLink || name || icon || version) && (
         <CardHeader className="pb-6 max-sm:p-3">
           <div className={cardHeaderLayoutStyles}>

@@ -1,8 +1,12 @@
+import type { Duration } from "@ensnode/ensnode-sdk";
+
 import { validateNonNegativeInteger } from "./number";
 import type { RankedReferrerMetrics } from "./referrer-metrics";
+import type { RevenueContribution } from "./revenue-contribution";
+import { validateRevenueContribution } from "./revenue-contribution";
 import type { ReferralProgramRules } from "./rules";
 import { type ReferrerScore, validateReferrerScore } from "./score";
-import { type Duration, validateDuration } from "./time";
+import { validateDuration } from "./time";
 
 /**
  * Represents aggregated metrics for a list of `RankedReferrerMetrics`.
@@ -18,6 +22,16 @@ export interface AggregatedReferrerMetrics {
    * @invariant The sum of `totalIncrementalDuration` across all `RankedReferrerMetrics` in the list.
    */
   grandTotalIncrementalDuration: Duration;
+
+  /**
+   * The total revenue contribution (in Wei) to the ENS DAO from all referrals
+   * across all referrers on the leaderboard.
+   *
+   * This is the sum of `totalRevenueContribution` across all `RankedReferrerMetrics` in the list.
+   *
+   * @invariant Guaranteed to be a non-negative bigint value (>= 0n)
+   */
+  grandTotalRevenueContribution: RevenueContribution;
 
   /**
    * @invariant The sum of `finalScore` across all `RankedReferrerMetrics` where `isQualified` is `true`.
@@ -37,6 +51,7 @@ export interface AggregatedReferrerMetrics {
 export const validateAggregatedReferrerMetrics = (metrics: AggregatedReferrerMetrics): void => {
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
+  validateRevenueContribution(metrics.grandTotalRevenueContribution);
   validateReferrerScore(metrics.grandTotalQualifiedReferrersFinalScore);
   validateReferrerScore(metrics.minFinalScoreToQualify);
 };
@@ -47,12 +62,14 @@ export const buildAggregatedReferrerMetrics = (
 ): AggregatedReferrerMetrics => {
   let grandTotalReferrals = 0;
   let grandTotalIncrementalDuration = 0;
+  let grandTotalRevenueContribution = 0n;
   let grandTotalQualifiedReferrersFinalScore = 0;
   let minFinalScoreToQualify = Number.MAX_SAFE_INTEGER;
 
   for (const referrer of referrers) {
     grandTotalReferrals += referrer.totalReferrals;
     grandTotalIncrementalDuration += referrer.totalIncrementalDuration;
+    grandTotalRevenueContribution += referrer.totalRevenueContribution;
     if (referrer.isQualified) {
       grandTotalQualifiedReferrersFinalScore += referrer.finalScore;
       if (referrer.finalScore < minFinalScoreToQualify) {
@@ -81,6 +98,7 @@ export const buildAggregatedReferrerMetrics = (
   const result = {
     grandTotalReferrals,
     grandTotalIncrementalDuration,
+    grandTotalRevenueContribution,
     grandTotalQualifiedReferrersFinalScore,
     minFinalScoreToQualify,
   };

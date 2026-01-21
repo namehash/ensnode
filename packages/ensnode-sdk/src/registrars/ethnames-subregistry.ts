@@ -43,7 +43,6 @@ export function getEthnamesSubregistryManagedName(namespaceId: ENSNamespaceId): 
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
     case ENSNamespaceIds.Sepolia:
-    case ENSNamespaceIds.Holesky:
     case ENSNamespaceIds.EnsTestEnv:
       return "eth";
   }
