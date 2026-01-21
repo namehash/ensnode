@@ -50,7 +50,7 @@ app.get(
           "application/json": {
             schema: responseSchemaResolver(amIRealtimeResultOkSchema),
             examples: {
-              [ResultCodes.Ok]: {
+              [`Result Code: ${ResultCodes.Ok}`]: {
                 summary: '"Am I Realtime?" API indexing progress is within requested distance',
                 value: buildAmIRealtimeResultOk({
                   maxWorstCaseDistance: 12,
@@ -70,7 +70,7 @@ app.get(
           "application/json": {
             schema: responseSchemaResolver(resultErrorInvalidRequestSchema),
             examples: {
-              [ResultCodes.InvalidRequest]: {
+              [`Result Code: ${ResultCodes.InvalidRequest}`]: {
                 summary: '"Am I Realtime?" API invalid request',
                 value: {
                   resultCode: ResultCodes.InvalidRequest,
@@ -90,14 +90,14 @@ app.get(
           "application/json": {
             schema: responseSchemaResolver(resultErrorInternalServerErrorSchema),
             examples: {
-              [ResultCodes.InternalServerError]: {
+              [`Result Code: ${ResultCodes.InternalServerError}`]: {
                 summary: '"Am I Realtime?" API internal server error',
                 value: buildResultInternalServerError(
                   '"Am I Realtime?" API is currently experiencing an internal server error.',
                 ),
                 description: "External service or dependency is unavailable.",
               },
-              [ResultCodes.InsufficientIndexingProgress]: {
+              [`Result Code: ${ResultCodes.InsufficientIndexingProgress}`]: {
                 summary: '"Am I Realtime?" API has insufficient indexing progress',
                 value: buildResultInsufficientIndexingProgress(
                   "Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 12; maxWorstCaseDistance = 10",
@@ -128,14 +128,14 @@ app.get(
               ]),
             ),
             examples: {
-              [ResultCodes.ServiceUnavailable]: {
+              [`Result Code: ${ResultCodes.ServiceUnavailable}`]: {
                 summary: '"Am I Realtime?" API is unavailable',
                 value: buildResultServiceUnavailable(
                   '"Am I Realtime?" API is currently unavailable.',
                 ),
                 description: "External service or dependency is unavailable.",
               },
-              [ResultCodes.InsufficientIndexingProgress]: {
+              [`Result Code: ${ResultCodes.InsufficientIndexingProgress}`]: {
                 summary: '"Am I Realtime?" API has insufficient indexing progress',
                 value: buildResultInsufficientIndexingProgress(
                   "Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 12; maxWorstCaseDistance = 10",

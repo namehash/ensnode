@@ -22,7 +22,7 @@ const logger = makeLogger("registrar-actions.middleware");
 /**
  * Registrar Actions API Middleware
  *
- * This middleware that ensures that all prerequisites of
+ * This middleware ensures that all prerequisites of
  * the Registrar Actions API were met and HTTP requests can be served.
  *
  * Returns a response from {@link ResultInternalServerError} for any of

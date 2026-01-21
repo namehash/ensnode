@@ -15,6 +15,7 @@
 export * from "./api/amirealtime/zod-schemas";
 export * from "./api/indexing-status/zod-schemas";
 export * from "./api/name-tokens/zod-schemas";
+export * from "./api/registrar-actions/zod-responses";
 export * from "./api/registrar-actions/zod-schemas";
 export * from "./api/resolution/zod-schemas";
 export * from "./api/shared/errors/zod-schemas";

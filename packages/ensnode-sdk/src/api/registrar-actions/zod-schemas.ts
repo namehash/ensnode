@@ -25,10 +25,13 @@ function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedR
 /**
  * Schema for {@link NamedRegistrarAction}.
  */
-export const makeNamedRegistrarActionSchema = (valueLabel: string = "Named Registrar Action") =>
+export const makeNamedRegistrarActionSchema = <SerializableType extends boolean>(
+  valueLabel: string = "Named Registrar Action",
+  serializable?: SerializableType,
+) =>
   z
     .object({
-      action: makeRegistrarActionSchema(valueLabel),
+      action: makeRegistrarActionSchema(valueLabel, serializable),
       name: makeReinterpretedNameSchema(valueLabel),
     })
     .check(invariant_registrationLifecycleNodeMatchesName);
