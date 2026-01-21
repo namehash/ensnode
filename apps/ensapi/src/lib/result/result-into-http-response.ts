@@ -22,6 +22,7 @@ export function resultCodeToHttpStatusCode(resultCode: ServerResultCode): Conten
     case ResultCodes.InternalServerError:
       return 500;
     case ResultCodes.ServiceUnavailable:
+    case ResultCodes.InsufficientIndexingProgress:
       return 503;
   }
 }

@@ -25,6 +25,11 @@ export const ResultCodes = {
   ServiceUnavailable: "service-unavailable",
 
   /**
+   * Server error: the operation failed due to insufficient indexing progress.
+   */
+  InsufficientIndexingProgress: "insufficient-indexing-progress",
+
+  /**
    * Server error: the requested resource was not found.
    */
   NotFound: "not-found",
@@ -57,6 +62,7 @@ export const ResultCodes = {
 export const RESULT_CODE_SERVER_ERROR_CODES = [
   ResultCodes.InternalServerError,
   ResultCodes.ServiceUnavailable,
+  ResultCodes.InsufficientIndexingProgress,
   ResultCodes.NotFound,
   ResultCodes.InvalidRequest,
 ] as const;

@@ -3,6 +3,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  buildResultInsufficientIndexingProgress,
   buildResultInternalServerError,
   buildResultInvalidRequest,
   buildResultNotFound,
@@ -93,6 +94,24 @@ describe("resultIntoHttpResponse", () => {
 
   it("should return HTTP response with status 503 for ServiceUnavailable result", async () => {
     const result = buildResultServiceUnavailable("Service unavailable");
+
+    const response = resultIntoHttpResponse(mockContext, result);
+
+    expect(response.status).toBe(503);
+    const responseJson = await response.json();
+    expect(responseJson).toStrictEqual(result);
+  });
+
+  it("should return HTTP response with status 503 for InsufficientIndexingProgress result", async () => {
+    const result = buildResultInsufficientIndexingProgress("Insufficient indexing progress", {
+      indexingStatus: "omnichain-backfill",
+      slowestChainIndexingCursor: 1620003600,
+      earliestIndexingCursor: 1620000000,
+      progressSufficientFrom: {
+        indexingStatus: "realtime",
+        indexingCursor: 1620007200,
+      },
+    });
 
     const response = resultIntoHttpResponse(mockContext, result);
 

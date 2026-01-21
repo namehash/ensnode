@@ -4,6 +4,7 @@
  * This module defines specific result data models that might be shared across more than 1 route.
  */
 
+import type { UnixTimestamp } from "../types";
 import type { AbstractResultError } from "./result-base";
 import { type ResultCode, ResultCodes } from "./result-code";
 
@@ -25,6 +26,67 @@ export const buildResultServiceUnavailable = (
     resultCode: ResultCodes.ServiceUnavailable,
     errorMessage: errorMessage ?? "The service is currently unavailable.",
     suggestRetry,
+  };
+};
+
+/************************************************************
+ * Insufficient Indexing Progress
+ ************************************************************/
+
+/**
+ * Data for insufficient indexing progress error result.
+ */
+export interface ResultInsufficientIndexingProgressData {
+  /**
+   * The current omnichain indexing status.
+   */
+  indexingStatus: string;
+
+  /**
+   * The timestamp of the "slowest" latest indexed block timestamp
+   * across all indexed chains.
+   */
+  slowestChainIndexingCursor: UnixTimestamp;
+
+  /**
+   * The timestamp of the earliest indexed block across all indexed chains.
+   */
+  earliestIndexingCursor: UnixTimestamp;
+
+  /**
+   * Information about when indexing progress is considered sufficient.
+   */
+  progressSufficientFrom: {
+    /**
+     * The required omnichain indexing status for sufficient progress.
+     */
+    indexingStatus: string;
+
+    /**
+     * The timestamp from which indexing progress is considered sufficient.
+     */
+    indexingCursor: UnixTimestamp;
+  };
+}
+
+export interface ResultInsufficientIndexingProgress
+  extends AbstractResultError<
+    typeof ResultCodes.InsufficientIndexingProgress,
+    ResultInsufficientIndexingProgressData
+  > {}
+
+/**
+ * Builds a result object representing a insufficient indexing progress error.
+ */
+export const buildResultInsufficientIndexingProgress = (
+  errorMessage: string,
+  data: ResultInsufficientIndexingProgressData,
+): ResultInsufficientIndexingProgress => {
+  return {
+    resultCode: ResultCodes.InsufficientIndexingProgress,
+    suggestRetry: true,
+    errorMessage,
+    data,
   };
 };
 
