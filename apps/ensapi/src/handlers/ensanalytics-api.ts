@@ -53,7 +53,7 @@ const app = factory
   .get(
     "/referrers",
     describeRoute({
-      tags: ["ENSAwardsssss"],
+      tags: ["ENSAwards"],
       summary: "Get Referrer Leaderboard",
       description: "Returns a paginated page from the referrer leaderboard",
       responses: {
