@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -14,7 +16,6 @@ import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
-import config from "@/config";
 import { getDefaultDataDir } from "@/config/defaults";
 import { getEnvPort } from "@/lib/env";
 
