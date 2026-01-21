@@ -8,6 +8,12 @@ import {
 import { ENSNamespaceIds } from "./ens";
 
 describe("getDefaultEnsNodeUrl", () => {
+  it("returns the mainnet default URL when no namespace is provided", () => {
+    const url = getDefaultEnsNodeUrl();
+
+    expect(url.href).toBe(`${DEFAULT_ENSNODE_API_URL_MAINNET}/`);
+  });
+
   it("returns the mainnet default URL", () => {
     const url = getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet);
 

@@ -13,12 +13,15 @@ export const DEFAULT_ENSNODE_API_URL_SEPOLIA = "https://api.alpha-sepolia.ensnod
 /**
  * Gets the default ENSNode URL for the provided ENSNamespaceId.
  *
- * @param namespace - The ENSNamespaceId to get the default ENSNode URL for
- * @returns The default ENSNode URL for the provided ENSNamespaceId
+ * @param namespace - Optional. The ENSNamespaceId to get the default ENSNode URL for. If not
+ *                    provided, defaults to Mainnet.
+ * @returns The default ENSNode URL for the provided ENSNamespaceId, or for Mainnet if no
+ *          namespace is provided.
  * @throws If the provided ENSNamespaceId does not have a default ENSNode URL defined
  */
-export const getDefaultEnsNodeUrl = (namespace: ENSNamespaceId): URL => {
-  switch (namespace) {
+export const getDefaultEnsNodeUrl = (namespace?: ENSNamespaceId): URL => {
+  const effectiveNamespace = namespace ?? ENSNamespaceIds.Mainnet;
+  switch (effectiveNamespace) {
     case ENSNamespaceIds.Mainnet:
       return new URL(DEFAULT_ENSNODE_API_URL_MAINNET);
     case ENSNamespaceIds.Sepolia:
