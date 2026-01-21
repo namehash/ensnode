@@ -1,9 +1,15 @@
 import {
+  type ChainIndexingConfigTypeId,
+  ChainIndexingConfigTypeIds,
   type ENSIndexerPublicConfig,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   PluginName,
 } from "../../ensindexer";
+
+export type SupportedOmnichainIndexingStatusId =
+  | typeof OmnichainIndexingStatusIds.Completed
+  | typeof OmnichainIndexingStatusIds.Following;
 
 export const registrarActionsPrerequisites = Object.freeze({
   /**
@@ -28,6 +34,21 @@ export const registrarActionsPrerequisites = Object.freeze({
   ] as const,
 
   /**
+   * Gets the omnichain indexing status required to support
+   * the Registrar Actions API for a given indexing config type.
+   */
+  getSupportedIndexingStatus(
+    configType: ChainIndexingConfigTypeId,
+  ): SupportedOmnichainIndexingStatusId {
+    switch (configType) {
+      case ChainIndexingConfigTypeIds.Definite:
+        return OmnichainIndexingStatusIds.Completed;
+      case ChainIndexingConfigTypeIds.Indefinite:
+        return OmnichainIndexingStatusIds.Following;
+    }
+  },
+
+  /**
    * Check if provided ENSApiPublicConfig supports the Registrar Actions API.
    */
   hasEnsIndexerConfigSupport(config: ENSIndexerPublicConfig): boolean {
@@ -35,23 +56,18 @@ export const registrarActionsPrerequisites = Object.freeze({
       config.plugins.includes(plugin),
     );
   },
-  /**
-   * Required Indexing Status IDs
-   *
-   * Database indexes are created by the time the omnichain indexing status
-   * is either `completed` or `following`.
-   */
-  supportedIndexingStatusIds: [
-    OmnichainIndexingStatusIds.Completed,
-    OmnichainIndexingStatusIds.Following,
-  ],
 
   /**
-   * Check if provided indexing status supports the Registrar Actions API.
+   * Check if provided indexing status supports the Registrar Actions API, given
+   * the indexing config type.
    */
-  hasIndexingStatusSupport(omnichainIndexingStatusId: OmnichainIndexingStatusId): boolean {
-    return registrarActionsPrerequisites.supportedIndexingStatusIds.some(
-      (supportedIndexingStatusId) => supportedIndexingStatusId === omnichainIndexingStatusId,
+  hasIndexingStatusSupport(
+    configType: ChainIndexingConfigTypeId,
+    omnichainIndexingStatusId: OmnichainIndexingStatusId,
+  ): boolean {
+    return (
+      registrarActionsPrerequisites.getSupportedIndexingStatus(configType) ===
+      omnichainIndexingStatusId
     );
   },
 });

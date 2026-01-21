@@ -2,8 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildAmIRealtimeResultOk,
+  ChainIndexingConfigTypeIds,
+  ChainIndexingStatusIds,
+  type ChainIndexingStatusSnapshotFollowing,
   type CrossChainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
+  OmnichainIndexingStatusIds,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
@@ -26,15 +30,42 @@ describe("amirealtime-api", () => {
     slowestChainIndexingCursor,
   }: {
     now: UnixTimestamp;
-    slowestChainIndexingCursor?: UnixTimestamp;
+    slowestChainIndexingCursor: UnixTimestamp;
   }) => {
     indexingStatusMiddlewareMock.mockImplementation(async (c, next) => {
       const indexingStatus = {
-        slowestChainIndexingCursor: slowestChainIndexingCursor ?? now - 10,
+        omnichainSnapshot: {
+          omnichainStatus: OmnichainIndexingStatusIds.Following,
+          omnichainIndexingCursor: slowestChainIndexingCursor,
+          chains: new Map([
+            [
+              1,
+              {
+                chainStatus: ChainIndexingStatusIds.Following,
+                latestIndexedBlock: {
+                  timestamp: now - 10,
+                  number: 150,
+                },
+                latestKnownBlock: {
+                  timestamp: now,
+                  number: 151,
+                },
+                config: {
+                  configType: ChainIndexingConfigTypeIds.Indefinite,
+                  startBlock: {
+                    number: 100,
+                    timestamp: now - 1000,
+                  },
+                },
+              } satisfies ChainIndexingStatusSnapshotFollowing,
+            ],
+          ]),
+        } as CrossChainIndexingStatusSnapshot["omnichainSnapshot"],
         snapshotTime: now,
+        slowestChainIndexingCursor,
       } satisfies Pick<
         CrossChainIndexingStatusSnapshot,
-        "slowestChainIndexingCursor" | "snapshotTime"
+        "omnichainSnapshot" | "slowestChainIndexingCursor" | "snapshotTime"
       > as CrossChainIndexingStatusSnapshot;
 
       const realtimeProjection = createRealtimeIndexingStatusProjection(indexingStatus, now);
@@ -62,7 +93,7 @@ describe("amirealtime-api", () => {
     describe("request", () => {
       it("should accept valid maxWorstCaseDistance query param", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now });
+        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=300");
@@ -100,7 +131,7 @@ describe("amirealtime-api", () => {
 
       it("should use default maxWorstCaseDistance when unset", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now });
+        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance");
@@ -119,7 +150,7 @@ describe("amirealtime-api", () => {
 
       it("should use default maxWorstCaseDistance when not provided", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now });
+        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
         const response = await app.request("http://localhost/amirealtime");
@@ -138,7 +169,7 @@ describe("amirealtime-api", () => {
 
       it("should reject invalid maxWorstCaseDistance (negative number)", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now });
+        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
         const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=-1");
@@ -152,7 +183,7 @@ describe("amirealtime-api", () => {
 
       it("should reject invalid maxWorstCaseDistance (not a number)", async () => {
         // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now });
+        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
         const response = await app.request(

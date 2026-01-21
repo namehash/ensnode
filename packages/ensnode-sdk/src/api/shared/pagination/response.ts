@@ -20,16 +20,6 @@ export interface ResponsePageContextWithNoRecords extends Required<RequestPagePa
    * Indicates if there is a previous page available
    */
   hasPrev: false;
-
-  /**
-   * The start index of the records on the page (0-indexed)
-   */
-  startIndex: undefined;
-
-  /**
-   * The end index of the records on the page (0-indexed)
-   */
-  endIndex: undefined;
 }
 
 export interface ResponsePageContextWithRecords extends Required<RequestPageParams> {

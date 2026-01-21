@@ -1,19 +1,28 @@
 import { minutesToSeconds } from "date-fns";
-import { describeRoute } from "hono-openapi";
+import { describeRoute, resolver as responseSchemaResolver } from "hono-openapi";
 import z from "zod/v4";
 
 import {
-  type AmIRealtimeServerResult,
   buildAmIRealtimeResultOk,
+  buildResultInsufficientIndexingProgress,
   buildResultInternalServerError,
   buildResultServiceUnavailable,
   type Duration,
+  getTimestampForHighestOmnichainKnownBlock,
+  getTimestampForLowestOmnichainStartBlock,
+  OmnichainIndexingStatusIds,
   ResultCodes,
 } from "@ensnode/ensnode-sdk";
-import { makeDurationSchema } from "@ensnode/ensnode-sdk/internal";
+import {
+  amIRealtimeResultOkSchema,
+  makeDurationSchema,
+  resultErrorInsufficientIndexingProgressSchema,
+  resultErrorInternalServerErrorSchema,
+  resultErrorInvalidRequestSchema,
+  resultErrorServiceUnavailableSchema,
+} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
-import { buildRouteResponsesDescription } from "@/lib/handlers/route-responses-description";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
@@ -32,22 +41,120 @@ app.get(
     summary: "Check indexing progress",
     description:
       "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-    responses: buildRouteResponsesDescription<AmIRealtimeServerResult>({
-      [ResultCodes.Ok]: {
+    responses: {
+      200: {
         description:
           "Indexing progress is guaranteed to be within the requested distance of realtime",
+
+        content: {
+          "application/json": {
+            schema: responseSchemaResolver(amIRealtimeResultOkSchema),
+            examples: {
+              [ResultCodes.Ok]: {
+                summary: '"Am I Realtime?" API indexing progress is within requested distance',
+                value: buildAmIRealtimeResultOk({
+                  maxWorstCaseDistance: 12,
+                  slowestChainIndexingCursor: 1768999701,
+                  worstCaseDistance: 9,
+                }),
+                description:
+                  "The connected ENSIndexer has sufficient omnichain indexing progress to serve this request.",
+              },
+            },
+          },
+        },
       },
-      [ResultCodes.InvalidRequest]: {
+      400: {
         description: "Invalid request parameters",
+        content: {
+          "application/json": {
+            schema: responseSchemaResolver(resultErrorInvalidRequestSchema),
+            examples: {
+              [ResultCodes.InvalidRequest]: {
+                summary: '"Am I Realtime?" API invalid request',
+                value: {
+                  resultCode: ResultCodes.InvalidRequest,
+                  errorMessage:
+                    "maxWorstCaseDistance query param must be a non-negative integer (>=0)",
+                },
+                description:
+                  "The provided `maxWorstCaseDistance` query parameter is not a non-negative integer.",
+              },
+            },
+          },
+        },
       },
-      [ResultCodes.InternalServerError]: {
+      500: {
         description: "Indexing progress cannot be determined due to an internal server error",
+        content: {
+          "application/json": {
+            schema: responseSchemaResolver(resultErrorInternalServerErrorSchema),
+            examples: {
+              [ResultCodes.InternalServerError]: {
+                summary: '"Am I Realtime?" API internal server error',
+                value: buildResultInternalServerError(
+                  '"Am I Realtime?" API is currently experiencing an internal server error.',
+                ),
+                description: "External service or dependency is unavailable.",
+              },
+              [ResultCodes.InsufficientIndexingProgress]: {
+                summary: '"Am I Realtime?" API has insufficient indexing progress',
+                value: buildResultInsufficientIndexingProgress(
+                  "Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 12; maxWorstCaseDistance = 10",
+                  {
+                    indexingStatus: "omnichain-following",
+                    slowestChainIndexingCursor: 1768998722,
+                    earliestIndexingCursor: 1489165544,
+                    progressSufficientFrom: {
+                      indexingStatus: "omnichain-following",
+                      indexingCursor: 1768998731,
+                    },
+                  },
+                ),
+              },
+            },
+          },
+        },
       },
-      [ResultCodes.ServiceUnavailable]: {
+      503: {
         description:
           "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
+        content: {
+          "application/json": {
+            schema: responseSchemaResolver(
+              z.discriminatedUnion("resultCode", [
+                resultErrorServiceUnavailableSchema,
+                resultErrorInsufficientIndexingProgressSchema,
+              ]),
+            ),
+            examples: {
+              [ResultCodes.ServiceUnavailable]: {
+                summary: '"Am I Realtime?" API is unavailable',
+                value: buildResultServiceUnavailable(
+                  '"Am I Realtime?" API is currently unavailable.',
+                ),
+                description: "External service or dependency is unavailable.",
+              },
+              [ResultCodes.InsufficientIndexingProgress]: {
+                summary: '"Am I Realtime?" API has insufficient indexing progress',
+                value: buildResultInsufficientIndexingProgress(
+                  "Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 12; maxWorstCaseDistance = 10",
+                  {
+                    indexingStatus: "omnichain-following",
+                    slowestChainIndexingCursor: 1768998722,
+                    earliestIndexingCursor: 1489165544,
+                    progressSufficientFrom: {
+                      indexingStatus: "omnichain-following",
+                      indexingCursor: 1768998731,
+                    },
+                  },
+                ),
+              },
+            },
+          },
+        },
       },
-    }),
+    },
   }),
   validate(
     "query",
@@ -78,12 +185,25 @@ app.get(
 
     const { maxWorstCaseDistance } = c.req.valid("query");
     const { worstCaseDistance, snapshot } = c.var.indexingStatus;
-    const { slowestChainIndexingCursor } = snapshot;
+    const { slowestChainIndexingCursor, omnichainSnapshot } = snapshot;
+    const chains = Array.from(omnichainSnapshot.chains.values());
 
     // Case: worst-case distance exceeds requested maximum
     if (worstCaseDistance > maxWorstCaseDistance) {
-      const result = buildResultServiceUnavailable(
+      const earliestIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
+      const latestIndexingCursor = getTimestampForHighestOmnichainKnownBlock(chains);
+
+      const result = buildResultInsufficientIndexingProgress(
         `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
+        {
+          indexingStatus: omnichainSnapshot.omnichainStatus,
+          slowestChainIndexingCursor,
+          earliestIndexingCursor,
+          progressSufficientFrom: {
+            indexingStatus: OmnichainIndexingStatusIds.Following,
+            indexingCursor: latestIndexingCursor,
+          },
+        },
       );
 
       return resultIntoHttpResponse(c, result);

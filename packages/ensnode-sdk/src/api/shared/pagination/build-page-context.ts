@@ -26,8 +26,6 @@ export function buildPageContext(
       totalPages: 1,
       hasNext: false,
       hasPrev: false,
-      startIndex: undefined,
-      endIndex: undefined,
     } satisfies ResponsePageContextWithNoRecords;
   }
 

@@ -3,6 +3,7 @@ import {
   type ChainIndexingConfig,
   type ChainIndexingConfigDefinite,
   type ChainIndexingConfigIndefinite,
+  type ChainIndexingConfigTypeId,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
@@ -169,6 +170,30 @@ export function createIndexingConfig(
     configType: ChainIndexingConfigTypeIds.Indefinite,
     startBlock,
   } satisfies ChainIndexingConfigIndefinite;
+}
+
+/**
+ * Get Chain Indexing Config Type ID from Chain Indexing Status Snapshots.
+ * @param chains Chain Indexing Status Snapshots
+ * @returns Chain Indexing Config Type ID
+ * @throws Error if Chain Indexing Config Type IDs are mixed across chains
+ */
+export function getChainIndexingConfigTypeId(
+  chains: ChainIndexingStatusSnapshot[],
+): ChainIndexingConfigTypeId {
+  const chainConfigTypeIds = chains.map((chain) => chain.config.configType);
+
+  if (chainConfigTypeIds.every((typeId) => typeId === ChainIndexingConfigTypeIds.Definite)) {
+    return ChainIndexingConfigTypeIds.Definite;
+  }
+
+  if (chainConfigTypeIds.every((typeId) => typeId === ChainIndexingConfigTypeIds.Indefinite)) {
+    return ChainIndexingConfigTypeIds.Indefinite;
+  }
+
+  throw new Error(
+    `Invariant: all ChainIndexingConfigTypeIds must be the same across indexed chains to determine overall ConfigTypeId.`,
+  );
 }
 
 /**

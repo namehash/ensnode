@@ -1,8 +1,13 @@
 import config from "@/config";
 
 import {
+  buildResultInsufficientIndexingProgress,
   buildResultInternalServerError,
   buildResultServiceUnavailable,
+  getChainIndexingConfigTypeId,
+  getTimestampForHighestOmnichainKnownBlock,
+  getTimestampForLowestOmnichainStartBlock,
+  ResultInsufficientIndexingProgress,
   ResultInternalServerError,
   ResultServiceUnavailable,
   registrarActionsPrerequisites,
@@ -31,7 +36,10 @@ const logger = makeLogger("registrar-actions.middleware");
  *    configuration.
  * 2) ENSApi has not yet successfully cached the Indexing Status in memory from
  *    the connected ENSIndexer.
- * 3) The omnichain indexing status of the connected ENSIndexer that is cached
+ *
+ * Returns a response from {@link ResultInsufficientIndexingProgress} for any of
+ * the following cases:
+ * 1) The omnichain indexing status of the connected ENSIndexer that is cached
  *    in memory is not "completed" or "following".
  *
  * @returns Hono middleware that validates the plugin's HTTP API availability.
@@ -77,19 +85,37 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       return resultIntoHttpResponse(c, result);
     }
 
-    const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
+    const { omnichainSnapshot, slowestChainIndexingCursor } = c.var.indexingStatus.snapshot;
+
+    const chains = Array.from(omnichainSnapshot.chains.values());
+    const configTypeId = getChainIndexingConfigTypeId(chains);
 
     if (
-      !registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)
+      !registrarActionsPrerequisites.hasIndexingStatusSupport(
+        configTypeId,
+        omnichainSnapshot.omnichainStatus,
+      )
     ) {
+      const earliestIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
+      const latestIndexingCursor = getTimestampForHighestOmnichainKnownBlock(chains);
+
+      const targetIndexingStatus =
+        registrarActionsPrerequisites.getSupportedIndexingStatus(configTypeId);
+
       const errorMessage = [
         `Registrar Actions API is not available.`,
-        `The cached omnichain indexing status of the connected ENSIndexer is not supported.`,
-        `Currently indexing status: "${omnichainSnapshot.omnichainStatus}".`,
-        `Supported indexing statuses: [${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}].`,
+        `The cached omnichain indexing status of the connected ENSIndexer has insufficient progress.`,
       ].join(" ");
 
-      const result = buildResultServiceUnavailable(errorMessage);
+      const result = buildResultInsufficientIndexingProgress(errorMessage, {
+        indexingStatus: omnichainSnapshot.omnichainStatus,
+        slowestChainIndexingCursor,
+        earliestIndexingCursor,
+        progressSufficientFrom: {
+          indexingStatus: targetIndexingStatus,
+          indexingCursor: latestIndexingCursor,
+        },
+      });
 
       return resultIntoHttpResponse(c, result);
     }

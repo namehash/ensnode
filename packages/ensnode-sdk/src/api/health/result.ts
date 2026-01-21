@@ -18,6 +18,6 @@ export function buildHealthResultOk(data: HealthResultOkData): HealthResultOk {
 }
 
 /**
- * The operation result for "Am I Realtime?" API requests.
+ * The operation result for Health API requests.
  */
 export type HealthServerResult = HealthResultOk;

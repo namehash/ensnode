@@ -1,16 +1,16 @@
-import { describeRoute } from "hono-openapi";
+import { describeRoute, resolver as responseSchemaResolver } from "hono-openapi";
 import z from "zod/v4";
 
 import {
   buildPageContext,
   buildRegistrarActionsResultOk,
+  buildResultInsufficientIndexingProgress,
   buildResultServiceUnavailable,
   type Node,
   RECORDS_PER_PAGE_DEFAULT,
   RECORDS_PER_PAGE_MAX,
   type RegistrarActionsFilter,
   RegistrarActionsOrders,
-  type RegistrarActionsServerResult,
   ResultCodes,
   registrarActionsFilter,
   serializeRegistrarActionsResultOk,
@@ -20,10 +20,11 @@ import {
   makeNodeSchema,
   makePositiveIntegerSchema,
   makeUnixTimestampSchema,
+  resultErrorInsufficientIndexingProgressSchema,
+  resultErrorServiceUnavailableSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
-import { buildRouteResponsesDescription } from "@/lib/handlers/route-responses-description";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
@@ -150,20 +151,71 @@ async function fetchRegistrarActions(
   return { registrarActions, pageContext };
 }
 
-const routeResponsesDescription = buildRouteResponsesDescription<RegistrarActionsServerResult>({
-  [ResultCodes.Ok]: {
+const routeResponsesDescription = {
+  200: {
     description: "Successfully retrieved registrar actions",
+    content: {
+      "application/json": {
+        schema: responseSchemaResolver(z.object()),
+        examples: {
+          [ResultCodes.Ok]: {
+            summary: "Successfully retrieved registrar actions",
+            value: serializeRegistrarActionsResultOk(
+              buildRegistrarActionsResultOk(
+                {
+                  registrarActions: [],
+                  pageContext: buildPageContext(1, 10, 0),
+                },
+                1700000000,
+              ),
+            ),
+          },
+        },
+      },
+    },
   },
-  [ResultCodes.InvalidRequest]: {
+  400: {
     description: "Invalid request parameters",
   },
-  [ResultCodes.ServiceUnavailable]: {
-    description: "Registrar Actions API is unavailable at the moment",
-  },
-  [ResultCodes.InternalServerError]: {
+  500: {
     description: "An internal server error occurred",
   },
-});
+  503: {
+    description: "Registrar Actions API is unavailable",
+    content: {
+      "application/json": {
+        schema: responseSchemaResolver(
+          z.discriminatedUnion("resultCode", [
+            resultErrorServiceUnavailableSchema,
+            resultErrorInsufficientIndexingProgressSchema,
+          ]),
+        ),
+        examples: {
+          [ResultCodes.ServiceUnavailable]: {
+            summary: "Registrar Actions API is unavailable",
+            value: buildResultServiceUnavailable("Registrar Actions API is currently unavailable."),
+            description: "External service or dependency is unavailable.",
+          },
+          [ResultCodes.InsufficientIndexingProgress]: {
+            summary: "Registrar Actions API has insufficient indexing progress",
+            value: buildResultInsufficientIndexingProgress(
+              "The connected ENSIndexer has insufficient omnichain indexing progress to serve this request.",
+              {
+                indexingStatus: "omnichain-backfill",
+                slowestChainIndexingCursor: 1700000000,
+                earliestIndexingCursor: 1690000000,
+                progressSufficientFrom: {
+                  indexingStatus: "omnichain-following",
+                  indexingCursor: 1705000000,
+                },
+              },
+            ),
+          },
+        },
+      },
+    },
+  },
+};
 
 /**
  * Get Registrar Actions (all records)
@@ -209,12 +261,16 @@ app.get(
         accurateAsOf,
       );
 
-      return resultIntoHttpResponse(c, result);
+      const serializedResult = serializeRegistrarActionsResultOk(result);
+
+      return resultIntoHttpResponse(c, serializedResult);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       logger.error(errorMessage);
 
-      const result = buildResultServiceUnavailable("Registrar Actions API Response is unavailable");
+      const result = buildResultServiceUnavailable(
+        `Registrar Actions API Response is unavailable due to following error: ${errorMessage}`,
+      );
 
       return resultIntoHttpResponse(c, result);
     }
@@ -307,7 +363,9 @@ app.get(
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       logger.error(errorMessage);
 
-      const result = buildResultServiceUnavailable("Registrar Actions API Response is unavailable");
+      const result = buildResultServiceUnavailable(
+        `Registrar Actions API Response is unavailable due to following error: ${errorMessage}`,
+      );
 
       return resultIntoHttpResponse(c, result);
     }

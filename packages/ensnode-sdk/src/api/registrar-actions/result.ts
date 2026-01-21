@@ -1,6 +1,7 @@
 import {
   type AbstractResultOkTimestamped,
   ResultCodes,
+  type ResultInsufficientIndexingProgress,
   type ResultInternalServerError,
   type ResultInvalidRequest,
   type ResultServiceUnavailable,
@@ -47,7 +48,8 @@ export type SerializedRegistrarActionsResultOk =
  *
  * @param data - The data for the successful result
  * @param minIndexingCursor - The minimum indexing cursor timestamp
- * @returns
+ * @returns The successful result object with data guaranteed to be up to
+ *          the specified indexing cursor.
  */
 export function buildRegistrarActionsResultOk(
   data: RegistrarActionsResultOkData,
@@ -83,6 +85,7 @@ export function serializeRegistrarActionsResultOk(
  */
 export type RegistrarActionsServerResult =
   | RegistrarActionsResultOk
+  | ResultInsufficientIndexingProgress
   | ResultInvalidRequest
   | ResultInternalServerError
   | ResultServiceUnavailable;

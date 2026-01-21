@@ -12,6 +12,7 @@
  * app/package in the monorepo which requires `@ensnode/ensnode-sdk` dependency.
  */
 
+export * from "./api/amirealtime/zod-schemas";
 export * from "./api/indexing-status/zod-schemas";
 export * from "./api/name-tokens/zod-schemas";
 export * from "./api/registrar-actions/zod-schemas";
