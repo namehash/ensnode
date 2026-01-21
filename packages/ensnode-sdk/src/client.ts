@@ -28,7 +28,6 @@ import {
 } from "./api";
 import { ClientError } from "./client-error";
 import { getDefaultEnsNodeUrl } from "./deployments";
-import { ENSNamespaceIds } from "./ens";
 import type { ResolverRecordsSelection } from "./resolution";
 
 /**
@@ -88,7 +87,7 @@ export class ENSNodeClient {
 
   static defaultOptions(): ClientOptions {
     return {
-      url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
+      url: getDefaultEnsNodeUrl(),
     };
   }
 
