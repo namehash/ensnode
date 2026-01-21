@@ -14,14 +14,16 @@ import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
+import config from "@/config";
 import { getDefaultDataDir } from "@/config/defaults";
 import { getEnvPort } from "@/lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
-  const envPort = process.env.PORT;
-  if (envPort !== undefined && cliPort !== getEnvPort()) {
+  // Only validate if PORT was explicitly set in the environment
+  // If PORT is not set, CLI port can override the default
+  if (process.env.PORT !== undefined && cliPort !== config.port) {
     throw new Error(
-      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
+      `Port conflict: Command line argument (${cliPort}) differs from configured port (${config.port}). ` +
         `Please use only one method to specify the port.`,
     );
   }
