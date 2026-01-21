@@ -27,12 +27,9 @@ import {
   type SerializedRegistrarActionsResponse,
 } from "./api";
 import { ClientError } from "./client-error";
+import { getDefaultEnsNodeUrl } from "./deployments";
+import { ENSNamespaceIds } from "./ens";
 import type { ResolverRecordsSelection } from "./resolution";
-
-/**
- * Default ENSNode API endpoint URL
- */
-export const DEFAULT_ENSNODE_API_URL = "https://api.alpha.ensnode.io" as const;
 
 /**
  * Configuration options for ENSNode API client
@@ -64,6 +61,22 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
+ * // Use default ENSNode API URL for Mainnet
+ * const client = new ENSNodeClient({
+ *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Use default ENSNode API URL for Sepolia
+ * const client = new ENSNodeClient({
+ *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
  * // Custom configuration
  * const client = new ENSNodeClient({
  *   url: new URL("https://my-ensnode-instance.com"),
@@ -75,7 +88,7 @@ export class ENSNodeClient {
 
   static defaultOptions(): ClientOptions {
     return {
-      url: new URL(DEFAULT_ENSNODE_API_URL),
+      url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
     };
   }
 
