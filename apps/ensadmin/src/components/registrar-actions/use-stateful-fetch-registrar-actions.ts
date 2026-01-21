@@ -1,5 +1,6 @@
 import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
 import {
+  getChainIndexingConfigTypeId,
   IndexingStatusResponseCodes,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
@@ -27,7 +28,7 @@ const {
   hasEnsIndexerConfigSupport,
   hasIndexingStatusSupport,
   requiredPlugins,
-  supportedIndexingStatusIds,
+  getSupportedIndexingStatus,
 } = registrarActionsPrerequisites;
 
 /**
@@ -51,10 +52,12 @@ export function useStatefulRegistrarActions({
   ) {
     const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
     const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+    const chains = Array.from(omnichainSnapshot.chains.values());
+    const configTypeId = getChainIndexingConfigTypeId(chains);
 
     isRegistrarActionsApiSupported =
       hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
-      hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus);
+      hasIndexingStatusSupport(configTypeId, omnichainSnapshot.omnichainStatus);
   }
 
   // Note: ENSNode Registrar Actions API is available only in certain cases.
@@ -101,12 +104,14 @@ export function useStatefulRegistrarActions({
   }
 
   const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+  const chains = Array.from(omnichainSnapshot.chains.values());
+  const configTypeId = getChainIndexingConfigTypeId(chains);
 
   // fetching is temporarily not possible due to indexing status being not advanced enough
-  if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
+  if (!hasIndexingStatusSupport(configTypeId, omnichainSnapshot.omnichainStatus)) {
     return {
       fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusIds,
+      supportedIndexingStatusId: getSupportedIndexingStatus(configTypeId),
     } satisfies StatefulFetchRegistrarActionsNotReady;
   }
 
