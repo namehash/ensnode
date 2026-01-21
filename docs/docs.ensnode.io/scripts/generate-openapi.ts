@@ -4,13 +4,13 @@
  * Generate OpenAPI spec from a running ENSApi instance.
  *
  * Usage:
- *   pnpm --filter docs.ensnode.io openapi:generate http://localhost:3223
+ *   pnpm openapi:generate http://localhost:4334
  *
  * Output:
  *   Writes openapi.json to the docs directory for Mintlify to consume. Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
  */
 
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -23,7 +23,7 @@ async function main() {
   if (!ensapiUrl) {
     console.error("Error: ENSApi URL is required.");
     console.error("Usage: pnpm openapi:generate <url>");
-    console.error("Example: pnpm openapi:generate http://localhost:3223");
+    console.error("Example: pnpm openapi:generate http://localhost:4334");
     process.exit(1);
   }
 
@@ -92,7 +92,7 @@ async function main() {
   // Format the output with Biome
   console.log("Formatting with Biome...");
   try {
-    execSync(`pnpm biome format --write ${OUTPUT_PATH}`, {
+    execFileSync("pnpm", ["biome", "format", "--write", OUTPUT_PATH], {
       stdio: "inherit",
     });
   } catch {

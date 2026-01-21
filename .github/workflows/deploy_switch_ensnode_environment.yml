@@ -81,6 +81,13 @@ jobs:
           chmod +x ./.github/scripts/promote_ensadmin.sh
           ./.github/scripts/promote_ensadmin.sh
 
+      - name: Trigger Mintlify Docs Rebuild
+        run: |
+          curl --request POST \
+            --url "https://api.mintlify.com/v1/project/update/${{ secrets.MINTLIFY_PROJECT_ID }}" \
+            --header "Authorization: Bearer ${{ secrets.MINTLIFY_API_TOKEN }}" \
+            --fail
+
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
         with:

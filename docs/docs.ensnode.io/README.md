@@ -4,25 +4,9 @@
 
 Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode docs](https://ensnode.io/docs/). Everything from these "Starlight" docs is planned to be transitioned into these Mintlify docs soon.
 
-## API Docs
+## OpenAPI Spec
 
-This Mintlify site serves two (potentially distinct) sets of API docs from two sources:
-
-| Section              | Source             | Purpose                                     |
-| -------------------- | ------------------ | ------------------------------------------- |
-| **API Reference**    | Production API URL | Always reflects the live deployed API       |
-| **Preview** (hidden) | `./openapi.json`   | PR preview deployments for upcoming changes |
-
-When you change API routes or schemas, update the committed `openapi.json` to preview changes in Mintlify's PR deployments.
-
-## OpenAPI Spec Management
-
-We use a combination of runtime URLs and committed files to keep API docs in sync across environments. This setup achieves:
-
-- Production API docs match the production deployment, even when production lags behind `main`
-- Non-API docs stay in sync with `main` through normal Git flow
-- Each branch has its own `openapi.json`, validated by the CI to be in sync with the `openapi.json` that would actually be returned by the code for ENSApi in the same branch.
-- PR previews show upcoming API changes before merge
+The API reference documentation is generated from the committed `openapi.json` file. CI validates that this file stays in sync with what ENSApi actually generates.
 
 ### Generating the Spec
 
@@ -61,6 +45,12 @@ Update the committed spec when you've changed API routes or schemas.
 ## Publishing Changes
 
 Changes pushed to the main branch are automatically deployed to production.
+
+### Environment Switch
+
+When switching production environments (green/blue), the `deploy_switch_ensnode_environment` workflow triggers a Mintlify rebuild to pick up the new OpenAPI spec from the production API.
+
+This requires `MINTLIFY_API_TOKEN` and `MINTLIFY_PROJECT_ID` to be configured as repository secrets.
 
 ## Resources
 
