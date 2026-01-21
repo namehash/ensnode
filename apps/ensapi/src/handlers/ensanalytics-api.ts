@@ -37,8 +37,8 @@ const paginationQuerySchema = z.object({
         .min(1, "Records per page must be at least 1")
         .max(
           REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-          `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`
-        )
+          `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
+        ),
     )
     .describe("Number of referrers per page"),
 }) satisfies z.ZodType<ReferrerLeaderboardPageRequest>;
@@ -69,9 +69,7 @@ const app = factory
     async (c) => {
       // context must be set by the required middleware
       if (c.var.referrerLeaderboard === undefined) {
-        throw new Error(
-          `Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`
-        );
+        throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
       }
 
       try {
@@ -82,21 +80,21 @@ const app = factory
               error: "Internal Server Error",
               errorMessage: "Failed to load referrer leaderboard data.",
             } satisfies ReferrerLeaderboardPageResponse),
-            500
+            500,
           );
         }
 
         const { page, recordsPerPage } = c.req.valid("query");
         const leaderboardPage = getReferrerLeaderboardPage(
           { page, recordsPerPage },
-          c.var.referrerLeaderboard
+          c.var.referrerLeaderboard,
         );
 
         return c.json(
           serializeReferrerLeaderboardPageResponse({
             responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
             data: leaderboardPage,
-          } satisfies ReferrerLeaderboardPageResponse)
+          } satisfies ReferrerLeaderboardPageResponse),
         );
       } catch (error) {
         logger.error({ error }, "Error in /ensanalytics/referrers endpoint");
@@ -110,17 +108,15 @@ const app = factory
             error: "Internal server error",
             errorMessage,
           } satisfies ReferrerLeaderboardPageResponse),
-          500
+          500,
         );
       }
-    }
+    },
   );
 
 // Referrer address parameter schema
 const referrerAddressSchema = z.object({
-  referrer: makeLowercaseAddressSchema("Referrer address").describe(
-    "Referrer Ethereum address"
-  ),
+  referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
 });
 
 // Get referrer detail for a specific address
@@ -129,8 +125,7 @@ app.get(
   describeRoute({
     tags: ["ENSAwards"],
     summary: "Get Referrer Detail",
-    description:
-      "Returns detailed information for a specific referrer by address",
+    description: "Returns detailed information for a specific referrer by address",
     responses: {
       200: {
         description: "Successfully retrieved referrer detail",
@@ -139,8 +134,7 @@ app.get(
         description: "Internal server error",
       },
       503: {
-        description:
-          "Service unavailable - referrer leaderboard data not yet cached",
+        description: "Service unavailable - referrer leaderboard data not yet cached",
       },
     },
   }),
@@ -148,9 +142,7 @@ app.get(
   async (c) => {
     // context must be set by the required middleware
     if (c.var.referrerLeaderboard === undefined) {
-      throw new Error(
-        `Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`
-      );
+      throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
     }
 
     try {
@@ -160,10 +152,9 @@ app.get(
           serializeReferrerDetailResponse({
             responseCode: ReferrerDetailResponseCodes.Error,
             error: "Service Unavailable",
-            errorMessage:
-              "Referrer leaderboard data has not been successfully cached yet.",
+            errorMessage: "Referrer leaderboard data has not been successfully cached yet.",
           } satisfies ReferrerDetailResponse),
-          503
+          503,
         );
       }
 
@@ -174,13 +165,10 @@ app.get(
         serializeReferrerDetailResponse({
           responseCode: ReferrerDetailResponseCodes.Ok,
           data: detail,
-        } satisfies ReferrerDetailResponse)
+        } satisfies ReferrerDetailResponse),
       );
     } catch (error) {
-      logger.error(
-        { error },
-        "Error in /ensanalytics/referrers/:referrer endpoint"
-      );
+      logger.error({ error }, "Error in /ensanalytics/referrers/:referrer endpoint");
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -191,10 +179,10 @@ app.get(
           error: "Internal server error",
           errorMessage,
         } satisfies ReferrerDetailResponse),
-        500
+        500,
       );
     }
-  }
+  },
 );
 
 export default app;
