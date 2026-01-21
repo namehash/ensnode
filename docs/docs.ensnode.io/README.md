@@ -33,7 +33,7 @@ To generate the OpenAPI spec, you need a running ENSApi instance. For local deve
 OPENAPI_CI_CHECK=true pnpm --filter ensapi start
 
 # In another terminal, generate the spec
-pnpm --filter docs.ensnode.io openapi:generate http://localhost:4334
+pnpm --filter @docs/mintlify openapi:generate http://localhost:4334
 ```
 
 The URL argument is required — there is no default to avoid accidentally generating from the wrong source.
