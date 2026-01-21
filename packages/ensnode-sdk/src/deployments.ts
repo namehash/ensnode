@@ -27,6 +27,8 @@ export const getDefaultEnsNodeUrl = (namespace?: ENSNamespaceId): URL => {
     case ENSNamespaceIds.Sepolia:
       return new URL(DEFAULT_ENSNODE_API_URL_SEPOLIA);
     default:
-      throw new Error(`ENSNamespaceId ${namespace} does not have a default ENSNode URL defined`);
+      throw new Error(
+        `ENSNamespaceId ${effectiveNamespace} does not have a default ENSNode URL defined`,
+      );
   }
 };

@@ -48,6 +48,8 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
+ * import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+ *
  * // Create client with default options
  * const client = new ENSNodeClient();
  *
@@ -60,6 +62,8 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
+ * import { ENSNamespaceIds, ENSNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ *
  * // Use default ENSNode API URL for Mainnet
  * const client = new ENSNodeClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
@@ -68,6 +72,8 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
+ * import { ENSNamespaceIds, ENSNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ *
  * // Use default ENSNode API URL for Sepolia
  * const client = new ENSNodeClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
@@ -76,6 +82,8 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
+ * import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+ *
  * // Custom configuration
  * const client = new ENSNodeClient({
  *   url: new URL("https://my-ensnode-instance.com"),
