@@ -18,6 +18,7 @@ import { indexingStatusMiddleware } from "@/middleware/indexing-status.middlewar
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
+import ensanalyticsApiV1 from "./handlers/ensanalytics-api-v1";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
@@ -62,8 +63,11 @@ app.route("/api", ensNodeApi);
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
-// use ENSAnalytics API at /ensanalytics
+// use ENSAnalytics API at /ensanalytics (v0, implicit)
 app.route("/ensanalytics", ensanalyticsApi);
+
+// use ENSAnalytics API v1 at /ensanalytics/v1
+app.route("/ensanalytics/v1", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
