@@ -322,9 +322,17 @@ app.get(
     // Middleware ensures indexingStatus is available and not an Error
     // This check is for TypeScript type safety, should never occur in
     // practice.
-    if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+    if (c.var.indexingStatus === undefined) {
+      const result = buildResultInternalServerError(
+        `Invariant(registrar-actions-api): Indexing Status must be available in application context.`,
+      );
+
+      return resultIntoHttpResponse(c, result);
+    }
+
+    if (c.var.indexingStatus instanceof Error) {
       const result = buildResultServiceUnavailable(
-        "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
+        `Invariant(registrar-actions-api): Indexing Status must be resolved successfully before Registrar Actions API can be served.`,
       );
 
       return resultIntoHttpResponse(c, result);
@@ -416,9 +424,17 @@ app.get(
     // Middleware ensures indexingStatus is available and not an Error
     // This check is for TypeScript type safety, should never occur in
     // practice.
-    if (!c.var.indexingStatus || c.var.indexingStatus instanceof Error) {
+    if (c.var.indexingStatus === undefined) {
+      const result = buildResultInternalServerError(
+        `Invariant(registrar-actions-api): Indexing Status must be available in application context.`,
+      );
+
+      return resultIntoHttpResponse(c, result);
+    }
+
+    if (c.var.indexingStatus instanceof Error) {
       const result = buildResultServiceUnavailable(
-        "Invariant(registrar-actions-api): indexingStatus must be available in the application context",
+        `Invariant(registrar-actions-api): Indexing Status must be resolved successfully before Registrar Actions API can be served.`,
       );
 
       return resultIntoHttpResponse(c, result);
