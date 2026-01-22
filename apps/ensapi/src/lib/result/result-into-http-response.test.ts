@@ -43,6 +43,12 @@ describe("resultCodeToHttpStatusCode", () => {
 
     expect(statusCode).toBe(503);
   });
+
+  it("should return 503 for ResultCodes.InsufficientIndexingProgress", () => {
+    const statusCode = resultCodeToHttpStatusCode(ResultCodes.InsufficientIndexingProgress);
+
+    expect(statusCode).toBe(503);
+  });
 });
 
 describe("resultIntoHttpResponse", () => {

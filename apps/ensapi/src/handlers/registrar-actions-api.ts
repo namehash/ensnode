@@ -5,6 +5,7 @@ import {
   buildPageContext,
   buildRegistrarActionsResultOk,
   buildResultInsufficientIndexingProgress,
+  buildResultInternalServerError,
   buildResultServiceUnavailable,
   type InterpretedName,
   type Node,
@@ -23,6 +24,7 @@ import {
   makePositiveIntegerSchema,
   makeRegistrarActionsResultOkSchema,
   makeResultErrorInsufficientIndexingProgressSchema,
+  makeResultErrorInternalServerErrorSchema,
   makeResultErrorInvalidRequestSchema,
   makeResultErrorServiceUnavailableSchema,
   makeUnixTimestampSchema,
@@ -235,7 +237,7 @@ const routeResponsesDescription = {
         schema: responseSchemaResolver(makeResultErrorInvalidRequestSchema()),
         examples: {
           [`Result Code: ${ResultCodes.InvalidRequest}`]: {
-            summary: '"Registrar Actions API invalid request',
+            summary: "Registrar Actions API invalid request",
             value: {
               resultCode: ResultCodes.InvalidRequest,
               errorMessage: "parentNode param must be a hexadecimal value which starts with '0x'",
@@ -251,12 +253,12 @@ const routeResponsesDescription = {
     description: "An internal server error occurred",
     content: {
       "application/json": {
-        schema: responseSchemaResolver(makeResultErrorServiceUnavailableSchema()),
+        schema: responseSchemaResolver(makeResultErrorInternalServerErrorSchema()),
         examples: {
-          [`Result Code: ${ResultCodes.ServiceUnavailable}`]: {
+          [`Result Code: ${ResultCodes.InternalServerError}`]: {
             summary: "Registrar Actions API internal server error",
-            value: buildResultServiceUnavailable(
-              "Registrar Actions API is currently experiencing an internal server error.",
+            value: buildResultInternalServerError(
+              "Internal server error occurred in Registrar Actions API.",
             ),
             description: "External service or dependency is unavailable.",
           },

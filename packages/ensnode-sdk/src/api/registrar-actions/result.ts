@@ -85,7 +85,7 @@ export function serializeRegistrarActionsResultOk(
  */
 export type RegistrarActionsServerResult =
   | RegistrarActionsResultOk
-  | ResultInsufficientIndexingProgress
   | ResultInvalidRequest
   | ResultInternalServerError
-  | ResultServiceUnavailable;
+  | ResultServiceUnavailable
+  | ResultInsufficientIndexingProgress;

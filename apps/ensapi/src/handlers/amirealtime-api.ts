@@ -96,21 +96,6 @@ app.get(
                 ),
                 description: "External service or dependency is unavailable.",
               },
-              [`Result Code: ${ResultCodes.InsufficientIndexingProgress}`]: {
-                summary: '"Am I Realtime?" API has insufficient indexing progress',
-                value: buildResultInsufficientIndexingProgress(
-                  "Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 12; maxWorstCaseDistance = 10",
-                  {
-                    indexingStatus: "omnichain-following",
-                    slowestChainIndexingCursor: 1768998722,
-                    earliestChainIndexingCursor: 1489165544,
-                    progressSufficientFrom: {
-                      indexingStatus: "omnichain-following",
-                      chainIndexingCursor: 1768998731,
-                    },
-                  },
-                ),
-              },
             },
           },
         },

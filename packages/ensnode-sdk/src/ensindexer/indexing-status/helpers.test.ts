@@ -230,62 +230,62 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
       // assert
       expect(configTypeId).toBe(ChainIndexingConfigTypeIds.Definite);
     });
-  });
 
-  it("returns the correct config type id when all chains have the Indefinite config", () => {
-    // arrange
-    const chainStatuses: ChainIndexingStatusSnapshot[] = [
-      {
-        chainStatus: ChainIndexingStatusIds.Queued,
-        config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: earliestBlockRef,
-        },
-      } satisfies ChainIndexingStatusSnapshotQueued,
-      {
-        chainStatus: ChainIndexingStatusIds.Backfill,
-        config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: earliestBlockRef,
-        },
-        latestIndexedBlock: laterBlockRef,
-        backfillEndBlock: latestBlockRef,
-      } satisfies ChainIndexingStatusSnapshotBackfill,
-    ];
+    it("returns the correct config type id when all chains have the Indefinite config", () => {
+      // arrange
+      const chainStatuses: ChainIndexingStatusSnapshot[] = [
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ];
 
-    // act
-    const configTypeId = getChainIndexingConfigTypeId(chainStatuses);
+      // act
+      const configTypeId = getChainIndexingConfigTypeId(chainStatuses);
 
-    // assert
-    expect(configTypeId).toBe(ChainIndexingConfigTypeIds.Indefinite);
-  });
+      // assert
+      expect(configTypeId).toBe(ChainIndexingConfigTypeIds.Indefinite);
+    });
 
-  it("throws an error when chains have mixed config types", () => {
-    // arrange
-    const chainStatuses: ChainIndexingStatusSnapshot[] = [
-      {
-        chainStatus: ChainIndexingStatusIds.Queued,
-        config: {
-          configType: ChainIndexingConfigTypeIds.Definite,
-          startBlock: earliestBlockRef,
-          endBlock: latestBlockRef,
-        },
-      } satisfies ChainIndexingStatusSnapshotQueued,
-      {
-        chainStatus: ChainIndexingStatusIds.Backfill,
-        config: {
-          configType: ChainIndexingConfigTypeIds.Indefinite,
-          startBlock: earliestBlockRef,
-        },
-        latestIndexedBlock: laterBlockRef,
-        backfillEndBlock: latestBlockRef,
-      } satisfies ChainIndexingStatusSnapshotBackfill,
-    ];
+    it("throws an error when chains have mixed config types", () => {
+      // arrange
+      const chainStatuses: ChainIndexingStatusSnapshot[] = [
+        {
+          chainStatus: ChainIndexingStatusIds.Queued,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Definite,
+            startBlock: earliestBlockRef,
+            endBlock: latestBlockRef,
+          },
+        } satisfies ChainIndexingStatusSnapshotQueued,
+        {
+          chainStatus: ChainIndexingStatusIds.Backfill,
+          config: {
+            configType: ChainIndexingConfigTypeIds.Indefinite,
+            startBlock: earliestBlockRef,
+          },
+          latestIndexedBlock: laterBlockRef,
+          backfillEndBlock: latestBlockRef,
+        } satisfies ChainIndexingStatusSnapshotBackfill,
+      ];
 
-    // act & assert
-    expect(() => getChainIndexingConfigTypeId(chainStatuses)).toThrowError(
-      /All ChainIndexingConfigTypeIds must be the same across indexed chains to determine overall ConfigTypeId/i,
-    );
+      // act & assert
+      expect(() => getChainIndexingConfigTypeId(chainStatuses)).toThrowError(
+        /All ChainIndexingConfigTypeIds must be the same across indexed chains to determine overall ConfigTypeId/i,
+      );
+    });
   });
 });
 

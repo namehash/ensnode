@@ -3,7 +3,7 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeRegistrarActionSchema } from "../../registrars/zod-schemas";
-import { makeAbstractResultOkSchema } from "../../shared/result/zod-schemas";
+import { makeAbstractResultOkTimestampedSchema } from "../../shared/result/zod-schemas";
 import { makeReinterpretedNameSchema, makeUnixTimestampSchema } from "../../shared/zod-schemas";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
@@ -74,7 +74,7 @@ export const makeRegistrarActionsResponseSchema = (
   ]);
 
 export const makeRegistrarActionsResultOkSchema = () =>
-  makeAbstractResultOkSchema<RegistrarActionsResultOkData>(
+  makeAbstractResultOkTimestampedSchema<RegistrarActionsResultOkData>(
     z.object({
       registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions", true)),
       pageContext: makeResponsePageContextSchema("pageContext"),

@@ -97,11 +97,14 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
         omnichainSnapshot.omnichainStatus,
       )
     ) {
+      // Registrar Actions API has no particular maximum worst-case distance requirement,
+      // so we simply use the current worst-case distance as the maximum here.
+      const maxWorstCaseDistance = worstCaseDistance;
       const earliestChainIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
       const progressSufficientFromChainIndexingCursor = getSufficientIndexingProgressChainCursor(
         slowestChainIndexingCursor,
         worstCaseDistance,
-        0,
+        maxWorstCaseDistance,
       );
 
       const targetIndexingStatus =

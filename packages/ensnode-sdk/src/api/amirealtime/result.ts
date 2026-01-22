@@ -3,6 +3,7 @@ import {
   type AbstractResultOk,
   type Duration,
   ResultCodes,
+  type ResultInsufficientIndexingProgress,
   type ResultInternalServerError,
   type ResultInvalidRequest,
   type ResultServiceUnavailable,
@@ -60,4 +61,5 @@ export type AmIRealtimeServerResult =
   | AmIRealtimeResultOk
   | ResultInvalidRequest
   | ResultInternalServerError
-  | ResultServiceUnavailable;
+  | ResultServiceUnavailable
+  | ResultInsufficientIndexingProgress;

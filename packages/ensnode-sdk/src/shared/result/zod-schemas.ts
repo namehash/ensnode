@@ -1,5 +1,6 @@
 import z from "zod/v4";
 
+import { AbstractResultError, AbstractResultOk, AbstractResultOkTimestamped } from "../result";
 import { makeUnixTimestampSchema } from "../zod-schemas";
 import { type ResultCode, ResultCodes } from "./result-code";
 import {
@@ -11,7 +12,7 @@ import {
 } from "./result-common";
 
 /**
- * Schema for a successful result with the given data schema.
+ * Schema for {@link AbstractResultOk}.
  */
 export const makeAbstractResultOkSchema = <TData>(dataSchema: z.ZodType<TData>) =>
   z.object({
@@ -20,7 +21,7 @@ export const makeAbstractResultOkSchema = <TData>(dataSchema: z.ZodType<TData>) 
   });
 
 /**
- * Schema for a successful result with timestamped data.
+ * Schema for {@link AbstractResultOkTimestamped}.
  */
 export const makeAbstractResultOkTimestampedSchema = <TData>(dataSchema: z.ZodType<TData>) =>
   z.object({
@@ -30,7 +31,7 @@ export const makeAbstractResultOkTimestampedSchema = <TData>(dataSchema: z.ZodTy
   });
 
 /**
- * Schema for an error result with the given result code.
+ * Schema for {@link AbstractResultError}.
  */
 export const makeAbstractResultErrorSchema = <TResultCode extends ResultCode>(
   resultCode: TResultCode,
@@ -38,18 +39,17 @@ export const makeAbstractResultErrorSchema = <TResultCode extends ResultCode>(
   z.object({
     resultCode: z.literal(resultCode),
     errorMessage: z.string(),
+    suggestRetry: z.boolean(),
   });
 
 /**
- * Schema for an error result with the given result code and data schema.
+ * Schema for {@link AbstractResultError} with data.
  */
 export const makeAbstractResultErrorWithDataSchema = <TResultCode extends ResultCode, TData>(
   resultCode: TResultCode,
   dataSchema: z.ZodType<TData>,
 ) =>
-  z.object({
-    resultCode: z.literal(resultCode),
-    errorMessage: z.string(),
+  makeAbstractResultErrorSchema(resultCode).extend({
     data: dataSchema,
   });
 

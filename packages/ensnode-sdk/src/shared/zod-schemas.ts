@@ -264,19 +264,19 @@ const makePriceAmountSchemaNative = (valueLabel: string = "Price Amount") =>
   );
 
 export function makePriceAmountSchema<const SerializableType extends boolean>(
-  _valueLabel: string,
+  valueLabel: string,
   serializable: SerializableType,
 ): SerializableType extends true
   ? typeof priceAmountSchemaSerializable
   : ReturnType<typeof makePriceAmountSchemaNative>;
 export function makePriceAmountSchema(
-  _valueLabel: string = " Price Amount Schema",
+  valueLabel: string = " Price Amount Schema",
   serializable: true | false = false,
 ): typeof priceAmountSchemaSerializable | ReturnType<typeof makePriceAmountSchemaNative> {
   if (serializable) {
     return priceAmountSchemaSerializable;
   } else {
-    return makePriceAmountSchemaNative(_valueLabel);
+    return makePriceAmountSchemaNative(valueLabel);
   }
 }
 
