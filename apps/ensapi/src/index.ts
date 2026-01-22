@@ -124,7 +124,7 @@ app.get("/health", async (c) => {
 });
 
 app.notFound((c) => {
-  const result = buildResultNotFound("Resource not found");
+  const result = buildResultNotFound(`Resource not found: ${c.req.path}`);
 
   return resultIntoHttpResponse(c, result);
 });

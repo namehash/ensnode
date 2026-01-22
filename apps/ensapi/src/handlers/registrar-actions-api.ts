@@ -163,7 +163,7 @@ const routeResponsesDescription = {
     description: "Successfully retrieved registrar actions",
     content: {
       "application/json": {
-        schema: responseSchemaResolver(makeRegistrarActionsResultOkSchema()),
+        schema: responseSchemaResolver(makeRegistrarActionsResultOkSchema(true)),
         examples: {
           [`Result Code: ${ResultCodes.Ok}`]: {
             summary: "Successfully retrieved registrar actions",

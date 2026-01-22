@@ -73,10 +73,12 @@ export const makeRegistrarActionsResponseSchema = (
     makeRegistrarActionsResponseErrorSchema(valueLabel),
   ]);
 
-export const makeRegistrarActionsResultOkSchema = () =>
+export const makeRegistrarActionsResultOkSchema = <const SerializableType extends boolean>(
+  serializable?: SerializableType,
+) =>
   makeAbstractResultOkTimestampedSchema<RegistrarActionsResultOkData>(
     z.object({
-      registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions", true)),
+      registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions", serializable)),
       pageContext: makeResponsePageContextSchema("pageContext"),
     }),
   );
