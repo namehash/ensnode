@@ -1,9 +1,9 @@
 import z from "zod/v4";
 
-import { AbstractResultError, AbstractResultOk, AbstractResultOkTimestamped } from "../result";
+import type { AbstractResultError, AbstractResultOk, AbstractResultOkTimestamped } from "../result";
 import { makeUnixTimestampSchema } from "../zod-schemas";
 import { type ResultCode, ResultCodes } from "./result-code";
-import {
+import type {
   ResultInsufficientIndexingProgress,
   ResultInsufficientIndexingProgressData,
   ResultInternalServerError,

@@ -6,6 +6,7 @@ import {
   buildAmIRealtimeResultOk,
   buildResultInsufficientIndexingProgress,
   buildResultInternalServerError,
+  buildResultInvalidRequest,
   buildResultServiceUnavailable,
   type Duration,
   getSufficientIndexingProgressChainCursor,
@@ -71,13 +72,11 @@ app.get(
             examples: {
               [`Result Code: ${ResultCodes.InvalidRequest}`]: {
                 summary: '"Am I Realtime?" API invalid request',
-                value: {
-                  resultCode: ResultCodes.InvalidRequest,
-                  errorMessage:
-                    "maxWorstCaseDistance query param must be a non-negative integer (>=0)",
-                },
+                value: buildResultInvalidRequest(
+                  "maxWorstCaseDistance query param must be a non-negative integer (>=0)",
+                ),
                 description:
-                  "The provided `maxWorstCaseDistance` query parameter is not a non-negative integer.",
+                  "The provided `maxWorstCaseDistance` query parameter is a negative integer.",
               },
             },
           },

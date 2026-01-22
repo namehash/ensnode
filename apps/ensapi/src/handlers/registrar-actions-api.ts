@@ -6,6 +6,7 @@ import {
   buildRegistrarActionsResultOk,
   buildResultInsufficientIndexingProgress,
   buildResultInternalServerError,
+  buildResultInvalidRequest,
   buildResultServiceUnavailable,
   type InterpretedName,
   type Node,
@@ -238,12 +239,10 @@ const routeResponsesDescription = {
         examples: {
           [`Result Code: ${ResultCodes.InvalidRequest}`]: {
             summary: "Registrar Actions API invalid request",
-            value: {
-              resultCode: ResultCodes.InvalidRequest,
-              errorMessage: "parentNode param must be a hexadecimal value which starts with '0x'",
-            },
-            description:
-              "The provided `parentNode` query parameter is not a valid hexadecimal value.",
+            value: buildResultInvalidRequest(
+              "parentNode param must be a hexadecimal value which starts with '0x'",
+            ),
+            description: "The provided `parentNode` query parameter is not a hexadecimal value.",
           },
         },
       },
