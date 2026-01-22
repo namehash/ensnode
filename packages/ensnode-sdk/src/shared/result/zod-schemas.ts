@@ -86,7 +86,7 @@ export const insufficientIndexingProgressDataSchema = z.object({
   earliestChainIndexingCursor: makeUnixTimestampSchema("earliestChainIndexingCursor"),
   progressSufficientFrom: z.object({
     indexingStatus: z.string(),
-    indexingCursor: makeUnixTimestampSchema("progressSufficientFrom.indexingCursor"),
+    chainIndexingCursor: makeUnixTimestampSchema("progressSufficientFrom.chainIndexingCursor"),
   }),
 });
 

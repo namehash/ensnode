@@ -51,7 +51,7 @@ export interface ResultInsufficientIndexingProgressData {
   /**
    * The timestamp of the earliest indexed block across all indexed chains.
    */
-  earliestIndexingCursor: UnixTimestamp;
+  earliestChainIndexingCursor: UnixTimestamp;
 
   /**
    * Information about when indexing progress is considered sufficient.
@@ -65,7 +65,7 @@ export interface ResultInsufficientIndexingProgressData {
     /**
      * The timestamp from which indexing progress is considered sufficient.
      */
-    indexingCursor: UnixTimestamp;
+    chainIndexingCursor: UnixTimestamp;
   };
 }
 

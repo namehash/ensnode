@@ -106,10 +106,10 @@ describe("resultIntoHttpResponse", () => {
     const result = buildResultInsufficientIndexingProgress("Insufficient indexing progress", {
       indexingStatus: "omnichain-backfill",
       slowestChainIndexingCursor: 1620003600,
-      earliestIndexingCursor: 1620000000,
+      earliestChainIndexingCursor: 1620000000,
       progressSufficientFrom: {
         indexingStatus: "realtime",
-        indexingCursor: 1620007200,
+        chainIndexingCursor: 1620007200,
       },
     });
 

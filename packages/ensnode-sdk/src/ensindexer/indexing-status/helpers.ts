@@ -1,3 +1,5 @@
+import type { Duration } from "@namehash/ens-referrals";
+
 import type { BlockRef, ChainId, UnixTimestamp } from "../../shared";
 import {
   type ChainIndexingConfig,
@@ -170,6 +172,23 @@ export function createIndexingConfig(
     configType: ChainIndexingConfigTypeIds.Indefinite,
     startBlock,
   } satisfies ChainIndexingConfigIndefinite;
+}
+
+/**
+ * Get sufficient indexing progress chain cursor for given Indexing Status
+ * parameters.
+ *
+ * @param slowestChainIndexingCursor Slowest Chain Indexing Cursor
+ * @param worstCaseDistance Worst Case Distance
+ * @param maxWorstCaseDistance Maximum Worst Case Distance
+ * @returns Sufficient Indexing Progress Chain Cursor
+ */
+export function getSufficientIndexingProgressChainCursor(
+  slowestChainIndexingCursor: UnixTimestamp,
+  worstCaseDistance: Duration,
+  maxWorstCaseDistance: Duration,
+): UnixTimestamp {
+  return slowestChainIndexingCursor + worstCaseDistance - maxWorstCaseDistance;
 }
 
 /**

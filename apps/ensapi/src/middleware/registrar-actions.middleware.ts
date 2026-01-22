@@ -5,7 +5,7 @@ import {
   buildResultInternalServerError,
   buildResultServiceUnavailable,
   getChainIndexingConfigTypeId,
-  getTimestampForHighestOmnichainKnownBlock,
+  getSufficientIndexingProgressChainCursor,
   getTimestampForLowestOmnichainStartBlock,
   ResultInsufficientIndexingProgress,
   ResultInternalServerError,
@@ -85,7 +85,8 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       return resultIntoHttpResponse(c, result);
     }
 
-    const { omnichainSnapshot, slowestChainIndexingCursor } = c.var.indexingStatus.snapshot;
+    const { snapshot, worstCaseDistance } = c.var.indexingStatus;
+    const { omnichainSnapshot, slowestChainIndexingCursor } = snapshot;
 
     const chains = Array.from(omnichainSnapshot.chains.values());
     const configTypeId = getChainIndexingConfigTypeId(chains);
@@ -96,8 +97,12 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
         omnichainSnapshot.omnichainStatus,
       )
     ) {
-      const earliestIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
-      const latestIndexingCursor = getTimestampForHighestOmnichainKnownBlock(chains);
+      const earliestChainIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
+      const progressSufficientFromChainIndexingCursor = getSufficientIndexingProgressChainCursor(
+        slowestChainIndexingCursor,
+        worstCaseDistance,
+        0,
+      );
 
       const targetIndexingStatus =
         registrarActionsPrerequisites.getSupportedIndexingStatus(configTypeId);
@@ -110,10 +115,10 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
       const result = buildResultInsufficientIndexingProgress(errorMessage, {
         indexingStatus: omnichainSnapshot.omnichainStatus,
         slowestChainIndexingCursor,
-        earliestIndexingCursor,
+        earliestChainIndexingCursor,
         progressSufficientFrom: {
           indexingStatus: targetIndexingStatus,
-          indexingCursor: latestIndexingCursor,
+          chainIndexingCursor: progressSufficientFromChainIndexingCursor,
         },
       });
 

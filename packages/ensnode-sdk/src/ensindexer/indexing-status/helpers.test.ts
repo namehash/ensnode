@@ -6,6 +6,7 @@ import {
   getChainIndexingConfigTypeId,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
+  getSufficientIndexingProgressChainCursor,
 } from "./helpers";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
@@ -414,5 +415,24 @@ describe("getOmnichainIndexingCursor", () => {
     expect(() => getOmnichainIndexingCursor([])).toThrowError(
       /Unable to determine omnichain indexing cursor/,
     );
+  });
+});
+
+describe("getSufficientIndexingProgressChainCursor", () => {
+  it("calculates sufficient indexing progress chain cursor correctly", () => {
+    // arrange
+    const slowestChainIndexingCursor = 1500; // example timestamp
+    const worstCaseDistance = 300; // 5 minutes in seconds
+    const maxWorstCaseDistance = 120; // 2 minutes in seconds
+
+    // act
+    const sufficientCursor = getSufficientIndexingProgressChainCursor(
+      slowestChainIndexingCursor,
+      worstCaseDistance,
+      maxWorstCaseDistance,
+    );
+
+    // assert
+    expect(sufficientCursor).toBe(1680);
   });
 });

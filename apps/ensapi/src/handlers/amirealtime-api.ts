@@ -8,7 +8,7 @@ import {
   buildResultInternalServerError,
   buildResultServiceUnavailable,
   type Duration,
-  getTimestampForHighestOmnichainKnownBlock,
+  getSufficientIndexingProgressChainCursor,
   getTimestampForLowestOmnichainStartBlock,
   OmnichainIndexingStatusIds,
   ResultCodes,
@@ -104,10 +104,10 @@ app.get(
                   {
                     indexingStatus: "omnichain-following",
                     slowestChainIndexingCursor: 1768998722,
-                    earliestIndexingCursor: 1489165544,
+                    earliestChainIndexingCursor: 1489165544,
                     progressSufficientFrom: {
                       indexingStatus: "omnichain-following",
-                      indexingCursor: 1768998731,
+                      chainIndexingCursor: 1768998731,
                     },
                   },
                 ),
@@ -142,10 +142,10 @@ app.get(
                   {
                     indexingStatus: "omnichain-following",
                     slowestChainIndexingCursor: 1768998722,
-                    earliestIndexingCursor: 1489165544,
+                    earliestChainIndexingCursor: 1489165544,
                     progressSufficientFrom: {
                       indexingStatus: "omnichain-following",
-                      indexingCursor: 1768998731,
+                      chainIndexingCursor: 1768998731,
                     },
                   },
                 ),
@@ -190,18 +190,22 @@ app.get(
 
     // Case: worst-case distance exceeds requested maximum
     if (worstCaseDistance > maxWorstCaseDistance) {
-      const earliestIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
-      const latestIndexingCursor = getTimestampForHighestOmnichainKnownBlock(chains);
+      const earliestChainIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
+      const progressSufficientFromChainIndexingCursor = getSufficientIndexingProgressChainCursor(
+        slowestChainIndexingCursor,
+        worstCaseDistance,
+        maxWorstCaseDistance,
+      );
 
       const result = buildResultInsufficientIndexingProgress(
         `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
         {
           indexingStatus: omnichainSnapshot.omnichainStatus,
           slowestChainIndexingCursor,
-          earliestIndexingCursor,
+          earliestChainIndexingCursor,
           progressSufficientFrom: {
             indexingStatus: OmnichainIndexingStatusIds.Following,
-            indexingCursor: latestIndexingCursor,
+            chainIndexingCursor: progressSufficientFromChainIndexingCursor,
           },
         },
       );

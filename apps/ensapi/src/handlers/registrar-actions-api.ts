@@ -287,10 +287,10 @@ const routeResponsesDescription = {
               {
                 indexingStatus: "omnichain-backfill",
                 slowestChainIndexingCursor: 1700000000,
-                earliestIndexingCursor: 1690000000,
+                earliestChainIndexingCursor: 1690000000,
                 progressSufficientFrom: {
                   indexingStatus: "omnichain-following",
-                  indexingCursor: 1705000000,
+                  chainIndexingCursor: 1705000000,
                 },
               },
             ),
