@@ -14,12 +14,12 @@ import {
   ResultCodes,
 } from "@ensnode/ensnode-sdk";
 import {
-  amIRealtimeResultOkSchema,
+  makeAmIRealtimeResultOkSchema,
   makeDurationSchema,
-  resultErrorInsufficientIndexingProgressSchema,
-  resultErrorInternalServerErrorSchema,
-  resultErrorInvalidRequestSchema,
-  resultErrorServiceUnavailableSchema,
+  makeResultErrorInsufficientIndexingProgressSchema,
+  makeResultErrorInternalServerErrorSchema,
+  makeResultErrorInvalidRequestSchema,
+  makeResultErrorServiceUnavailableSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -45,10 +45,9 @@ app.get(
       200: {
         description:
           "Indexing progress is guaranteed to be within the requested distance of realtime",
-
         content: {
           "application/json": {
-            schema: responseSchemaResolver(amIRealtimeResultOkSchema),
+            schema: responseSchemaResolver(makeAmIRealtimeResultOkSchema()),
             examples: {
               [`Result Code: ${ResultCodes.Ok}`]: {
                 summary: '"Am I Realtime?" API indexing progress is within requested distance',
@@ -68,7 +67,7 @@ app.get(
         description: "Invalid request parameters",
         content: {
           "application/json": {
-            schema: responseSchemaResolver(resultErrorInvalidRequestSchema),
+            schema: responseSchemaResolver(makeResultErrorInvalidRequestSchema()),
             examples: {
               [`Result Code: ${ResultCodes.InvalidRequest}`]: {
                 summary: '"Am I Realtime?" API invalid request',
@@ -88,7 +87,7 @@ app.get(
         description: "Indexing progress cannot be determined due to an internal server error",
         content: {
           "application/json": {
-            schema: responseSchemaResolver(resultErrorInternalServerErrorSchema),
+            schema: responseSchemaResolver(makeResultErrorInternalServerErrorSchema()),
             examples: {
               [`Result Code: ${ResultCodes.InternalServerError}`]: {
                 summary: '"Am I Realtime?" API internal server error',
@@ -123,8 +122,8 @@ app.get(
           "application/json": {
             schema: responseSchemaResolver(
               z.discriminatedUnion("resultCode", [
-                resultErrorServiceUnavailableSchema,
-                resultErrorInsufficientIndexingProgressSchema,
+                makeResultErrorServiceUnavailableSchema(),
+                makeResultErrorInsufficientIndexingProgressSchema(),
               ]),
             ),
             examples: {

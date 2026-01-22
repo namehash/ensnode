@@ -21,11 +21,11 @@ import {
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
+  makeRegistrarActionsResultOkSchema,
+  makeResultErrorInsufficientIndexingProgressSchema,
+  makeResultErrorInvalidRequestSchema,
+  makeResultErrorServiceUnavailableSchema,
   makeUnixTimestampSchema,
-  registrarActionsResultOkSchema,
-  resultErrorInsufficientIndexingProgressSchema,
-  resultErrorInvalidRequestSchema,
-  resultErrorServiceUnavailableSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
@@ -160,7 +160,7 @@ const routeResponsesDescription = {
     description: "Successfully retrieved registrar actions",
     content: {
       "application/json": {
-        schema: responseSchemaResolver(registrarActionsResultOkSchema),
+        schema: responseSchemaResolver(makeRegistrarActionsResultOkSchema()),
         examples: {
           [`Result Code: ${ResultCodes.Ok}`]: {
             summary: "Successfully retrieved registrar actions",
@@ -232,7 +232,7 @@ const routeResponsesDescription = {
     description: "Invalid request parameters",
     content: {
       "application/json": {
-        schema: responseSchemaResolver(resultErrorInvalidRequestSchema),
+        schema: responseSchemaResolver(makeResultErrorInvalidRequestSchema()),
         examples: {
           [`Result Code: ${ResultCodes.InvalidRequest}`]: {
             summary: '"Registrar Actions API invalid request',
@@ -251,7 +251,7 @@ const routeResponsesDescription = {
     description: "An internal server error occurred",
     content: {
       "application/json": {
-        schema: responseSchemaResolver(resultErrorServiceUnavailableSchema),
+        schema: responseSchemaResolver(makeResultErrorServiceUnavailableSchema()),
         examples: {
           [`Result Code: ${ResultCodes.ServiceUnavailable}`]: {
             summary: "Registrar Actions API internal server error",
@@ -270,8 +270,8 @@ const routeResponsesDescription = {
       "application/json": {
         schema: responseSchemaResolver(
           z.discriminatedUnion("resultCode", [
-            resultErrorServiceUnavailableSchema,
-            resultErrorInsufficientIndexingProgressSchema,
+            makeResultErrorServiceUnavailableSchema(),
+            makeResultErrorInsufficientIndexingProgressSchema(),
           ]),
         ),
         examples: {

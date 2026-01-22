@@ -3,10 +3,12 @@ import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeRegistrarActionSchema } from "../../registrars/zod-schemas";
+import { makeAbstractResultOkSchema } from "../../shared/result/zod-schemas";
 import { makeReinterpretedNameSchema, makeUnixTimestampSchema } from "../../shared/zod-schemas";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
 import { type NamedRegistrarAction, RegistrarActionsResponseCodes } from "./response";
+import type { RegistrarActionsResultOkData } from "./result";
 
 function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedRegistrarAction>) {
   const { name, action } = ctx.value;
@@ -70,3 +72,11 @@ export const makeRegistrarActionsResponseSchema = (
     makeRegistrarActionsResponseOkSchema(valueLabel),
     makeRegistrarActionsResponseErrorSchema(valueLabel),
   ]);
+
+export const makeRegistrarActionsResultOkSchema = () =>
+  makeAbstractResultOkSchema<RegistrarActionsResultOkData>(
+    z.object({
+      registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions", true)),
+      pageContext: makeResponsePageContextSchema("pageContext"),
+    }),
+  );
