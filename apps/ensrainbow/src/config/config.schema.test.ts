@@ -1,9 +1,8 @@
 import { isAbsolute, resolve } from "node:path";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
-import { logger } from "@/utils/logger";
 
 import { buildConfigFromEnvironment } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";

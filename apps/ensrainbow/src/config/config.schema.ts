@@ -2,7 +2,7 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { isAbsolute, resolve } from "node:path";
 
-import { prettifyError, ZodError, z } from "zod/v4";
+import { ZodError, z } from "zod/v4";
 
 import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema, PortSchema } from "@ensnode/ensnode-sdk/internal";
@@ -11,7 +11,6 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
-import { logger } from "@/utils/logger";
 
 const DataDirSchema = z
   .string()
