@@ -1,15 +1,11 @@
-import type {
-  AggregatedReferrerMetrics,
-  AwardedReferrerMetrics,
-  ReferralProgramRules,
-  ReferrerDetailRanked,
-  ReferrerDetailUnranked,
-  ReferrerLeaderboardPage,
-  RevenueContribution,
-  UnrankedReferrerMetrics,
-} from "@namehash/ens-referrals";
 import { prettifyError } from "zod/v4";
 
+import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
+import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
+import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
+import type { RevenueContribution } from "../revenue-contribution";
+import type { ReferralProgramRules } from "../rules";
 import type {
   SerializedAggregatedReferrerMetrics,
   SerializedAwardedReferrerMetrics,

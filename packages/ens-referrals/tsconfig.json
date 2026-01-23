@@ -1,5 +1,8 @@
 {
   "extends": "@ensnode/shared-configs/tsconfig.lib.json",
+  "compilerOptions": {
+    "rootDir": "." // necessary for 'The project root is ambiguous'
+  },
   "include": ["./**/*.ts"],
   "exclude": ["dist"]
 }

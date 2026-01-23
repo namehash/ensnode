@@ -11,9 +11,10 @@ import {
   type SerializedIndexingStatusResponseOk,
   serializeIndexingStatusResponse,
 } from "./api";
-import { DEFAULT_ENSNODE_API_URL, ENSNodeClient } from "./client";
+import { ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
-import type { Name } from "./ens";
+import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
+import { ENSNamespaceIds, type Name } from "./ens";
 import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import {
   ChainIndexingConfigTypeIds,
@@ -210,7 +211,7 @@ describe("ENSNodeClient", () => {
       const client = new ENSNodeClient();
       const options = client.getOptions();
 
-      expect(options).toEqual({ url: new URL(DEFAULT_ENSNODE_API_URL) });
+      expect(options).toEqual({ url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet) });
     });
 
     it("should merge provided options with defaults", () => {
@@ -238,7 +239,10 @@ describe("ENSNodeClient", () => {
       const client = new ENSNodeClient();
       const response = await client.resolveRecords(EXAMPLE_NAME, EXAMPLE_SELECTION);
 
-      const expectedUrl = new URL(`/api/resolve/records/${EXAMPLE_NAME}`, DEFAULT_ENSNODE_API_URL);
+      const expectedUrl = new URL(
+        `/api/resolve/records/${EXAMPLE_NAME}`,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
+      );
       expectedUrl.searchParams.set("addresses", EXAMPLE_SELECTION.addresses.join(","));
       expectedUrl.searchParams.set("texts", EXAMPLE_SELECTION.texts.join(","));
 
@@ -255,7 +259,10 @@ describe("ENSNodeClient", () => {
         trace: true,
       });
 
-      const expectedUrl = new URL(`/api/resolve/records/${EXAMPLE_NAME}`, DEFAULT_ENSNODE_API_URL);
+      const expectedUrl = new URL(
+        `/api/resolve/records/${EXAMPLE_NAME}`,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
+      );
       expectedUrl.searchParams.set("addresses", EXAMPLE_SELECTION.addresses.join(","));
       expectedUrl.searchParams.set("texts", EXAMPLE_SELECTION.texts.join(","));
       expectedUrl.searchParams.set("trace", "true");
@@ -286,7 +293,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
@@ -302,7 +309,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
       expectedUrl.searchParams.set("trace", "true");
 
@@ -321,7 +328,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-name/${EXAMPLE_ADDRESS}/1`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
       expectedUrl.searchParams.set("accelerate", "true");
 
@@ -348,7 +355,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
 
       expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
@@ -366,7 +373,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
       expectedUrl.searchParams.set("chainIds", "1,10");
 
@@ -382,7 +389,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
       expectedUrl.searchParams.set("trace", "true");
 
@@ -401,7 +408,7 @@ describe("ENSNodeClient", () => {
 
       const expectedUrl = new URL(
         `/api/resolve/primary-names/${EXAMPLE_ADDRESS}`,
-        DEFAULT_ENSNODE_API_URL,
+        DEFAULT_ENSNODE_API_URL_MAINNET,
       );
       expectedUrl.searchParams.set("accelerate", "true");
 
@@ -419,7 +426,7 @@ describe("ENSNodeClient", () => {
   describe("Config API", () => {
     it("can fetch config object successfully", async () => {
       // arrange
-      const requestUrl = new URL(`/api/config`, DEFAULT_ENSNODE_API_URL);
+      const requestUrl = new URL(`/api/config`, DEFAULT_ENSNODE_API_URL_MAINNET);
       const serializedMockedResponse = EXAMPLE_CONFIG_RESPONSE;
       const mockedResponse = deserializeENSApiPublicConfig(serializedMockedResponse);
       const client = new ENSNodeClient();
@@ -446,7 +453,7 @@ describe("ENSNodeClient", () => {
   describe("Indexing Status API", () => {
     it("can fetch overall indexing 'backfill' status object successfully", async () => {
       // arrange
-      const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL);
+      const requestUrl = new URL(`/api/indexing-status`, DEFAULT_ENSNODE_API_URL_MAINNET);
       const mockedResponse = EXAMPLE_INDEXING_STATUS_BACKFILL_RESPONSE;
 
       const client = new ENSNodeClient();

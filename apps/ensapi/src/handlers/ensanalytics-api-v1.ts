@@ -20,7 +20,7 @@ import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard.middleware";
 
-const logger = makeLogger("ensanalytics-api");
+const logger = makeLogger("ensanalytics-api-v1");
 
 // Pagination query parameters schema (mirrors ReferrerLeaderboardPageRequest)
 const paginationQuerySchema = z.object({
@@ -52,7 +52,7 @@ const app = factory
     "/referrers",
     describeRoute({
       tags: ["ENSAwards"],
-      summary: "Get Referrer Leaderboard",
+      summary: "Get Referrer Leaderboard (v1)",
       description: "Returns a paginated page from the referrer leaderboard",
       responses: {
         200: {
@@ -67,7 +67,7 @@ const app = factory
     async (c) => {
       // context must be set by the required middleware
       if (c.var.referrerLeaderboard === undefined) {
-        throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
+        throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddleware required`);
       }
 
       try {
@@ -95,7 +95,7 @@ const app = factory
           } satisfies ReferrerLeaderboardPageResponse),
         );
       } catch (error) {
-        logger.error({ error }, "Error in /ensanalytics/referrers endpoint");
+        logger.error({ error }, "Error in /ensanalytics/v1/referrers endpoint");
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -122,7 +122,7 @@ app.get(
   "/referrers/:referrer",
   describeRoute({
     tags: ["ENSAwards"],
-    summary: "Get Referrer Detail",
+    summary: "Get Referrer Detail (v1)",
     description: "Returns detailed information for a specific referrer by address",
     responses: {
       200: {
@@ -140,7 +140,7 @@ app.get(
   async (c) => {
     // context must be set by the required middleware
     if (c.var.referrerLeaderboard === undefined) {
-      throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
+      throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddleware required`);
     }
 
     try {
@@ -166,7 +166,7 @@ app.get(
         } satisfies ReferrerDetailResponse),
       );
     } catch (error) {
-      logger.error({ error }, "Error in /ensanalytics/referrers/:referrer endpoint");
+      logger.error({ error }, "Error in /ensanalytics/v1/referrers/:referrer endpoint");
       const errorMessage =
         error instanceof Error
           ? error.message
