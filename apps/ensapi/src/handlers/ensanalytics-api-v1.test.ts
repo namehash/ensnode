@@ -38,9 +38,9 @@ import {
   referrerLeaderboardPageResponseOk,
 } from "@/lib/ensanalytics/referrer-leaderboard/mocks";
 
-import app from "./ensanalytics-api";
+import app from "./ensanalytics-api-v1";
 
-describe("/ensanalytics", () => {
+describe("/ensanalytics/v1", () => {
   describe("/referrers", () => {
     it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
       // Arrange: set `referrerLeaderboard` context var
