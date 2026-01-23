@@ -13,8 +13,11 @@ export function invariant_dbSchemaVersionMatch(
   const { value: config } = ctx;
 
   if (config.dbSchemaVersion !== undefined && config.dbSchemaVersion !== DB_SCHEMA_VERSION) {
-    throw new Error(
-      `DB_SCHEMA_VERSION mismatch! Expected version ${DB_SCHEMA_VERSION} from code, but found ${config.dbSchemaVersion} in environment variables.`,
-    );
+    ctx.issues.push({
+      code: "custom",
+      path: ["dbSchemaVersion"],
+      input: config.dbSchemaVersion,
+      message: `DB_SCHEMA_VERSION mismatch! Expected version ${DB_SCHEMA_VERSION} from code, but found ${config.dbSchemaVersion} in environment variables.`,
+    });
   }
 }

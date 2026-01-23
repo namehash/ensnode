@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 
 import { prettifyError, ZodError, z } from "zod/v4";
 
@@ -16,11 +16,11 @@ const DataDirSchema = z
     error: "DATA_DIR must be a non-empty string.",
   })
   .transform((path: string) => {
-    // Resolve relative paths to absolute paths
-    if (path.startsWith("/")) {
+    // Resolve relative paths to absolute paths (cross-platform)
+    if (isAbsolute(path)) {
       return path;
     }
-    return join(process.cwd(), path);
+    return resolve(process.cwd(), path);
   });
 
 const DbSchemaVersionSchema = z.coerce

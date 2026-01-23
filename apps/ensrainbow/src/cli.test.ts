@@ -5,7 +5,6 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ENSRAINBOW_DEFAULT_PORT } from "@/config/defaults";
-import { getEnvPort } from "@/lib/env";
 
 import { createCLI, validatePortConfiguration } from "./cli";
 
@@ -75,8 +74,10 @@ describe("CLI", () => {
   });
 
   describe("validatePortConfiguration", () => {
-    it("should not throw when PORT env var is not set", () => {
-      expect(() => validatePortConfiguration(3000)).not.toThrow();
+    it("should not throw when PORT env var is not set", async () => {
+      vi.resetModules();
+      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
+      expect(() => validatePortConfigurationFresh(3000)).not.toThrow();
     });
 
     it("should not throw when PORT matches CLI port", async () => {

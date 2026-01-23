@@ -16,7 +16,6 @@ import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
-import { getEnvPort } from "@/lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
   // Only validate if PORT was explicitly set in the environment
