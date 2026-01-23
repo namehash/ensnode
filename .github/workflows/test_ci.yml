@@ -87,6 +87,9 @@ jobs:
             exit 1
           fi
 
+      - name: Validate OpenAPI spec with Mintlify
+        run: pnpm dlx mintlify openapi-check docs/docs.ensnode.io/openapi.json
+
   integrity-check:
     name: "Integrity Check"
     runs-on: blacksmith-4vcpu-ubuntu-2204
