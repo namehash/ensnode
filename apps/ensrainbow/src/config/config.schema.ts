@@ -58,32 +58,60 @@ export type ENSRainbowConfig = z.infer<typeof ENSRainbowConfigSchema>;
  * Validates and parses the complete environment configuration using ENSRainbowConfigSchema.
  *
  * @returns A validated ENSRainbowConfig object
- * @throws Error with formatted validation messages if environment parsing fails
+ * @throws ZodError with detailed validation messages if environment parsing fails
  */
 export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowConfig {
-  try {
-    return ENSRainbowConfigSchema.parse({
-      port: env.PORT,
-      dataDir: env.DATA_DIR,
-      dbSchemaVersion: env.DB_SCHEMA_VERSION,
-      labelSet:
-        env.LABEL_SET_ID || env.LABEL_SET_VERSION
-          ? {
-              labelSetId: env.LABEL_SET_ID,
-              labelSetVersion: env.LABEL_SET_VERSION,
-            }
-          : undefined,
+  // Transform environment variables into config shape with validation
+  const envToConfigSchema = z
+    .object({
+      PORT: z.string().optional(),
+      DATA_DIR: z.string().optional(),
+      DB_SCHEMA_VERSION: z.string().optional(),
+      LABEL_SET_ID: z.string().optional(),
+      LABEL_SET_VERSION: z.string().optional(),
+    })
+    .transform((env) => {
+      // Validate label set configuration: both must be provided together, or neither
+      const hasLabelSetId = env.LABEL_SET_ID !== undefined && env.LABEL_SET_ID.trim() !== "";
+      const hasLabelSetVersion =
+        env.LABEL_SET_VERSION !== undefined && env.LABEL_SET_VERSION.trim() !== "";
+
+      if (hasLabelSetId && !hasLabelSetVersion) {
+        throw new Error(
+          `LABEL_SET_ID is set but LABEL_SET_VERSION is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
+        );
+      }
+
+      if (!hasLabelSetId && hasLabelSetVersion) {
+        throw new Error(
+          `LABEL_SET_VERSION is set but LABEL_SET_ID is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
+        );
+      }
+
+      return {
+        port: env.PORT,
+        dataDir: env.DATA_DIR,
+        dbSchemaVersion: env.DB_SCHEMA_VERSION,
+        labelSet:
+          hasLabelSetId && hasLabelSetVersion
+            ? {
+                labelSetId: env.LABEL_SET_ID,
+                labelSetVersion: env.LABEL_SET_VERSION,
+              }
+            : undefined,
+      };
     });
+
+  try {
+    const configInput = envToConfigSchema.parse(env);
+    return ENSRainbowConfigSchema.parse(configInput);
   } catch (error) {
     if (error instanceof ZodError) {
-      logger.error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
-    } else if (error instanceof Error) {
-      logger.error(error, `Failed to build ENSRainbowConfig`);
-    } else {
-      logger.error(`Unknown Error`);
+      // Re-throw ZodError to preserve structured error information
+      throw error;
     }
-
-    process.exit(1);
+    // Re-throw other errors (like our custom label set validation errors)
+    throw error;
   }
 }
 

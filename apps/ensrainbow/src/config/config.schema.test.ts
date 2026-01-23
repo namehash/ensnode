@@ -16,17 +16,6 @@ vi.mock("@/utils/logger", () => ({
 }));
 
 describe("buildConfigFromEnvironment", () => {
-  // Mock process.exit to prevent actual exit
-  const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    mockExit.mockClear();
-  });
-
   describe("Success cases", () => {
     it("returns a valid config with all defaults when environment is empty", () => {
       const env: ENSRainbowEnvironment = {};
@@ -159,10 +148,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "not-a-number",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is a float", () => {
@@ -170,10 +156,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "3000.5",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is less than 1", () => {
@@ -181,10 +164,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "0",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is negative", () => {
@@ -192,10 +172,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "-100",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is greater than 65535", () => {
@@ -203,10 +180,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "65536",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DATA_DIR is empty string", () => {
@@ -214,10 +188,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: "",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DATA_DIR is only whitespace", () => {
@@ -225,10 +196,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: "   ",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DB_SCHEMA_VERSION is not a number", () => {
@@ -236,10 +204,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: "not-a-number",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DB_SCHEMA_VERSION is a float", () => {
@@ -247,10 +212,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: "3.5",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when LABEL_SET_VERSION is not a number", () => {
@@ -259,10 +221,7 @@ describe("buildConfigFromEnvironment", () => {
         LABEL_SET_VERSION: "not-a-number",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when LABEL_SET_VERSION is negative", () => {
@@ -271,10 +230,7 @@ describe("buildConfigFromEnvironment", () => {
         LABEL_SET_VERSION: "-1",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when LABEL_SET_ID is empty", () => {
@@ -283,10 +239,7 @@ describe("buildConfigFromEnvironment", () => {
         LABEL_SET_VERSION: "0",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when only LABEL_SET_ID is set (both ID and version required)", () => {
@@ -294,10 +247,9 @@ describe("buildConfigFromEnvironment", () => {
         LABEL_SET_ID: "subgraph",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow(
+        "LABEL_SET_ID is set but LABEL_SET_VERSION is missing",
+      );
     });
 
     it("fails when only LABEL_SET_VERSION is set (both ID and version required)", () => {
@@ -305,10 +257,9 @@ describe("buildConfigFromEnvironment", () => {
         LABEL_SET_VERSION: "0",
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(() => buildConfigFromEnvironment(env)).toThrow(
+        "LABEL_SET_VERSION is set but LABEL_SET_ID is missing",
+      );
     });
   });
 
@@ -319,16 +270,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: wrongVersion.toString(),
       };
 
-      buildConfigFromEnvironment(env);
-
-      expect(logger.error).toHaveBeenCalled();
-      expect(process.exit).toHaveBeenCalledWith(1);
-      // Verify the error message mentions version mismatch
-      const errorCall = vi.mocked(logger.error).mock.calls[0];
-      expect(errorCall[0]).toContain("Failed to parse environment configuration");
-      expect(errorCall[0]).toContain("DB_SCHEMA_VERSION mismatch");
-      expect(errorCall[0]).toContain(DB_SCHEMA_VERSION.toString());
-      expect(errorCall[0]).toContain(wrongVersion.toString());
+      expect(() => buildConfigFromEnvironment(env)).toThrow(/DB_SCHEMA_VERSION mismatch/);
     });
 
     it("passes when DB_SCHEMA_VERSION matches code version", () => {
@@ -339,8 +281,6 @@ describe("buildConfigFromEnvironment", () => {
       const config = buildConfigFromEnvironment(env);
 
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
-      expect(logger.error).not.toHaveBeenCalled();
-      expect(process.exit).not.toHaveBeenCalled();
     });
 
     it("passes when DB_SCHEMA_VERSION is undefined", () => {
@@ -349,8 +289,6 @@ describe("buildConfigFromEnvironment", () => {
       const config = buildConfigFromEnvironment(env);
 
       expect(config.dbSchemaVersion).toBeUndefined();
-      expect(logger.error).not.toHaveBeenCalled();
-      expect(process.exit).not.toHaveBeenCalled();
     });
   });
 

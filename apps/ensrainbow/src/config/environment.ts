@@ -21,11 +21,13 @@ export type ENSRainbowEnvironment = PortEnvironment &
 
     /**
      * Expected Label Set ID.
+     * Must be provided together with LABEL_SET_VERSION, or neither should be set.
      */
     LABEL_SET_ID?: string;
 
     /**
      * Expected Label Set Version.
+     * Must be provided together with LABEL_SET_ID, or neither should be set.
      */
     LABEL_SET_VERSION?: string;
   };
