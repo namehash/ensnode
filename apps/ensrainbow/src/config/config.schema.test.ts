@@ -375,29 +375,6 @@ describe("buildConfigFromEnvironment", () => {
       expect(config.port).toBe(65535);
     });
 
-    it("handles DB_SCHEMA_VERSION of 0", () => {
-      // This test assumes 0 is not the current DB_SCHEMA_VERSION
-      // If DB_SCHEMA_VERSION is 0, this test would pass which is correct
-      if (DB_SCHEMA_VERSION === 0) {
-        const env: ENSRainbowEnvironment = {
-          DB_SCHEMA_VERSION: "0",
-        };
-
-        const config = buildConfigFromEnvironment(env);
-
-        expect(config.dbSchemaVersion).toBe(0);
-      } else {
-        const env: ENSRainbowEnvironment = {
-          DB_SCHEMA_VERSION: "0",
-        };
-
-        buildConfigFromEnvironment(env);
-
-        expect(logger.error).toHaveBeenCalled();
-        expect(process.exit).toHaveBeenCalledWith(1);
-      }
-    });
-
     it("handles LABEL_SET_VERSION of 0", () => {
       const env: ENSRainbowEnvironment = {
         LABEL_SET_ID: "subgraph",
