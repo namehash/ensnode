@@ -39,8 +39,10 @@ describe("CLI", () => {
   });
 
   describe("getEnvPort", () => {
-    it("should return ENSRAINBOW_DEFAULT_PORT when PORT is not set", () => {
-      expect(getEnvPort()).toBe(ENSRAINBOW_DEFAULT_PORT);
+    it("should return ENSRAINBOW_DEFAULT_PORT when PORT is not set", async () => {
+      vi.resetModules();
+      const { getEnvPort: getEnvPortFresh } = await import("@/lib/env");
+      expect(getEnvPortFresh()).toBe(ENSRAINBOW_DEFAULT_PORT);
     });
 
     it("should return port from environment variable", async () => {

@@ -1,13 +1,8 @@
-import type { z } from "zod/v4";
+import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
 import type { ENSRainbowConfig } from "./config.schema";
-
-/**
- * Zod `.check()` function input.
- */
-type ZodCheckFnInput<T> = z.core.ParsePayload<T>;
 
 /**
  * Invariant: dbSchemaVersion must match the version expected by the code.

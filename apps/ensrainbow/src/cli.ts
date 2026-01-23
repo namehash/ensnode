@@ -1,4 +1,4 @@
-import config from "@/config";
+import config, { getDefaultDataDir } from "@/config";
 
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,7 +16,6 @@ import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
-import { getDefaultDataDir } from "@/config/defaults";
 import { getEnvPort } from "@/lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
@@ -134,7 +133,7 @@ export function createCLI(options: CLIOptions = {}) {
             .option("port", {
               type: "number",
               description: "Port to listen on",
-              default: getEnvPort(),
+              default: config.port,
             })
             .option("data-dir", {
               type: "string",
