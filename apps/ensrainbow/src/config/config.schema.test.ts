@@ -1,0 +1,450 @@
+import { isAbsolute, resolve } from "node:path";
+
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { DB_SCHEMA_VERSION } from "@/lib/database";
+import { logger } from "@/utils/logger";
+
+import { buildConfigFromEnvironment } from "./config.schema";
+import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
+import type { ENSRainbowEnvironment } from "./environment";
+
+vi.mock("@/utils/logger", () => ({
+  logger: {
+    error: vi.fn(),
+  },
+}));
+
+describe("buildConfigFromEnvironment", () => {
+  // Mock process.exit to prevent actual exit
+  const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    mockExit.mockClear();
+  });
+
+  describe("Success cases", () => {
+    it("returns a valid config with all defaults when environment is empty", () => {
+      const env: ENSRainbowEnvironment = {};
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config).toStrictEqual({
+        port: ENSRAINBOW_DEFAULT_PORT,
+        dataDir: getDefaultDataDir(),
+        dbSchemaVersion: undefined,
+        labelSet: undefined,
+      });
+    });
+
+    it("applies custom port when PORT is set", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "5000",
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.port).toBe(5000);
+      expect(config.dataDir).toBe(getDefaultDataDir());
+    });
+
+    it("applies custom DATA_DIR when set", () => {
+      const customDataDir = "/var/lib/ensrainbow/data";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: customDataDir,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dataDir).toBe(customDataDir);
+    });
+
+    it("normalizes relative DATA_DIR to absolute path", () => {
+      const relativeDataDir = "my-data";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: relativeDataDir,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(isAbsolute(config.dataDir)).toBe(true);
+      expect(config.dataDir).toBe(resolve(process.cwd(), relativeDataDir));
+    });
+
+    it("resolves nested relative DATA_DIR correctly", () => {
+      const relativeDataDir = "./data/ensrainbow/db";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: relativeDataDir,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(isAbsolute(config.dataDir)).toBe(true);
+      expect(config.dataDir).toBe(resolve(process.cwd(), relativeDataDir));
+    });
+
+    it("preserves absolute DATA_DIR", () => {
+      const absoluteDataDir = "/absolute/path/to/data";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: absoluteDataDir,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dataDir).toBe(absoluteDataDir);
+    });
+
+    it("applies DB_SCHEMA_VERSION when set and matches code version", () => {
+      const env: ENSRainbowEnvironment = {
+        DB_SCHEMA_VERSION: DB_SCHEMA_VERSION.toString(),
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
+    });
+
+    it("allows DB_SCHEMA_VERSION to be undefined", () => {
+      const env: ENSRainbowEnvironment = {};
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dbSchemaVersion).toBeUndefined();
+    });
+
+    it("applies full label set configuration when both ID and version are set", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_ID: "subgraph",
+        LABEL_SET_VERSION: "0",
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.labelSet).toStrictEqual({
+        labelSetId: "subgraph",
+        labelSetVersion: 0,
+      });
+    });
+
+    it("handles all valid configuration options together", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "4444",
+        DATA_DIR: "/opt/ensrainbow/data",
+        DB_SCHEMA_VERSION: DB_SCHEMA_VERSION.toString(),
+        LABEL_SET_ID: "ens-normalize-latest",
+        LABEL_SET_VERSION: "2",
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config).toStrictEqual({
+        port: 4444,
+        dataDir: "/opt/ensrainbow/data",
+        dbSchemaVersion: DB_SCHEMA_VERSION,
+        labelSet: {
+          labelSetId: "ens-normalize-latest",
+          labelSetVersion: 2,
+        },
+      });
+    });
+  });
+
+  describe("Validation errors", () => {
+    it("fails when PORT is not a number", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "not-a-number",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when PORT is a float", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "3000.5",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when PORT is less than 1", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "0",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when PORT is negative", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "-100",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when PORT is greater than 65535", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "65536",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when DATA_DIR is empty string", () => {
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: "",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when DATA_DIR is only whitespace", () => {
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: "   ",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when DB_SCHEMA_VERSION is not a number", () => {
+      const env: ENSRainbowEnvironment = {
+        DB_SCHEMA_VERSION: "not-a-number",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when DB_SCHEMA_VERSION is a float", () => {
+      const env: ENSRainbowEnvironment = {
+        DB_SCHEMA_VERSION: "3.5",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when LABEL_SET_VERSION is not a number", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_ID: "subgraph",
+        LABEL_SET_VERSION: "not-a-number",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when LABEL_SET_VERSION is negative", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_ID: "subgraph",
+        LABEL_SET_VERSION: "-1",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when LABEL_SET_ID is empty", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_ID: "",
+        LABEL_SET_VERSION: "0",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when only LABEL_SET_ID is set (both ID and version required)", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_ID: "subgraph",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it("fails when only LABEL_SET_VERSION is set (both ID and version required)", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_VERSION: "0",
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe("Invariant: DB_SCHEMA_VERSION must match code version", () => {
+    it("fails when DB_SCHEMA_VERSION does not match code version", () => {
+      const wrongVersion = DB_SCHEMA_VERSION + 1;
+      const env: ENSRainbowEnvironment = {
+        DB_SCHEMA_VERSION: wrongVersion.toString(),
+      };
+
+      buildConfigFromEnvironment(env);
+
+      expect(logger.error).toHaveBeenCalled();
+      expect(process.exit).toHaveBeenCalledWith(1);
+      // Verify the error message mentions version mismatch
+      const errorCall = vi.mocked(logger.error).mock.calls[0];
+      expect(errorCall[0]).toContain("Failed to parse environment configuration");
+      expect(errorCall[0]).toContain("DB_SCHEMA_VERSION mismatch");
+      expect(errorCall[0]).toContain(DB_SCHEMA_VERSION.toString());
+      expect(errorCall[0]).toContain(wrongVersion.toString());
+    });
+
+    it("passes when DB_SCHEMA_VERSION matches code version", () => {
+      const env: ENSRainbowEnvironment = {
+        DB_SCHEMA_VERSION: DB_SCHEMA_VERSION.toString(),
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(process.exit).not.toHaveBeenCalled();
+    });
+
+    it("passes when DB_SCHEMA_VERSION is undefined", () => {
+      const env: ENSRainbowEnvironment = {};
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dbSchemaVersion).toBeUndefined();
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(process.exit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Edge cases", () => {
+    it("handles PORT at minimum valid value (1)", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "1",
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.port).toBe(1);
+    });
+
+    it("handles PORT at maximum valid value (65535)", () => {
+      const env: ENSRainbowEnvironment = {
+        PORT: "65535",
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.port).toBe(65535);
+    });
+
+    it("handles DB_SCHEMA_VERSION of 0", () => {
+      // This test assumes 0 is not the current DB_SCHEMA_VERSION
+      // If DB_SCHEMA_VERSION is 0, this test would pass which is correct
+      if (DB_SCHEMA_VERSION === 0) {
+        const env: ENSRainbowEnvironment = {
+          DB_SCHEMA_VERSION: "0",
+        };
+
+        const config = buildConfigFromEnvironment(env);
+
+        expect(config.dbSchemaVersion).toBe(0);
+      } else {
+        const env: ENSRainbowEnvironment = {
+          DB_SCHEMA_VERSION: "0",
+        };
+
+        buildConfigFromEnvironment(env);
+
+        expect(logger.error).toHaveBeenCalled();
+        expect(process.exit).toHaveBeenCalledWith(1);
+      }
+    });
+
+    it("handles LABEL_SET_VERSION of 0", () => {
+      const env: ENSRainbowEnvironment = {
+        LABEL_SET_ID: "subgraph",
+        LABEL_SET_VERSION: "0",
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.labelSet?.labelSetVersion).toBe(0);
+    });
+
+    it("trims whitespace from DATA_DIR", () => {
+      const dataDir = "/my/path/to/data";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: `  ${dataDir}  `,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(config.dataDir).toBe(dataDir);
+    });
+
+    it("handles DATA_DIR with .. (parent directory)", () => {
+      const relativeDataDir = "../data";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: relativeDataDir,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(isAbsolute(config.dataDir)).toBe(true);
+      expect(config.dataDir).toBe(resolve(process.cwd(), relativeDataDir));
+    });
+
+    it("handles DATA_DIR with ~ (not expanded, treated as relative)", () => {
+      // Note: The config schema does NOT expand ~ to home directory
+      // It would be treated as a relative path
+      const tildeDataDir = "~/data";
+      const env: ENSRainbowEnvironment = {
+        DATA_DIR: tildeDataDir,
+      };
+
+      const config = buildConfigFromEnvironment(env);
+
+      expect(isAbsolute(config.dataDir)).toBe(true);
+      // ~ is treated as a directory name, not home expansion
+      expect(config.dataDir).toBe(resolve(process.cwd(), tildeDataDir));
+    });
+  });
+});

@@ -65,7 +65,7 @@ export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
 export const PortSchema = z.coerce
   .number({ error: "PORT must be a number." })
   .int({ error: "PORT must be an integer." })
-  .min(1, { error: "PORT must be greater than or equal to 1." })
+  .min(1, { error: "PORT must be greater than or equal to 1" })
   .max(65535, { error: "PORT must be less than or equal to 65535" })
   .optional();
 
