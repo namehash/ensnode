@@ -54,8 +54,15 @@ export const makeSerializedNamedRegistrarActionSchema = (
 ) =>
   z
     .object({
-      action: makeSerializedRegistrarActionSchema(valueLabel),
-      name: makeReinterpretedNameSchema(valueLabel),
+      action: makeSerializedRegistrarActionSchema(valueLabel).meta({
+        description: `"Logical registrar action".`,
+      }),
+      name: makeReinterpretedNameSchema(valueLabel).meta({
+        description: `FQDN of the name associated with 'action'.`,
+      }),
+    })
+    .meta({
+      description: `"Logical registrar action" with its associated name.`,
     })
     .check(invariant_registrationLifecycleNodeMatchesName);
 
