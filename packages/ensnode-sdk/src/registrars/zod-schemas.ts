@@ -12,6 +12,7 @@ import {
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePriceEthSchema,
+  makeSerializedPriceEthSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
@@ -23,6 +24,10 @@ import {
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralAvailable,
   RegistrarActionTypes,
+  SerializedRegistrarAction,
+  SerializedRegistrarActionPricing,
+  type SerializedRegistrarActionPricingAvailable,
+  type SerializedRegistrarActionPricingUnknown,
 } from "./registrar-action";
 import type { RegistrationLifecycle } from "./registration-lifecycle";
 import { Subregistry } from "./subregistry";
@@ -65,17 +70,14 @@ function invariant_registrarActionPricingTotalIsSumOfBaseCostAndPremium(
 /**
  * Schema for parsing objects into {@link RegistrarActionPricing}.
  */
-const makeRegistrarActionPricingSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Registrar Action Pricing",
-  serializable?: SerializableType,
-) =>
+const makeRegistrarActionPricingSchema = (valueLabel: string = "Registrar Action Pricing") =>
   z.union([
     // pricing available
     z
       .object({
-        baseCost: makePriceEthSchema(`${valueLabel} Base Cost`, serializable),
-        premium: makePriceEthSchema(`${valueLabel} Premium`, serializable),
-        total: makePriceEthSchema(`${valueLabel} Total`, serializable),
+        baseCost: makePriceEthSchema(`${valueLabel} Base Cost`),
+        premium: makePriceEthSchema(`${valueLabel} Premium`),
+        total: makePriceEthSchema(`${valueLabel} Total`),
       })
       .check(invariant_registrarActionPricingTotalIsSumOfBaseCostAndPremium)
       .transform((v) => v as RegistrarActionPricingAvailable),
@@ -88,6 +90,32 @@ const makeRegistrarActionPricingSchema = <const SerializableType extends boolean
         total: z.null(),
       })
       .transform((v) => v as RegistrarActionPricingUnknown),
+  ]);
+
+/**
+ * Schema for parsing objects into {@link SerializedRegistrarActionPricing}.
+ */
+const makeSerializedRegistrarActionPricingSchema = (
+  valueLabel: string = "Serialized Registrar Action Pricing",
+) =>
+  z.union([
+    // pricing available
+    z
+      .object({
+        baseCost: makeSerializedPriceEthSchema(`${valueLabel} Base Cost`),
+        premium: makeSerializedPriceEthSchema(`${valueLabel} Premium`),
+        total: makeSerializedPriceEthSchema(`${valueLabel} Total`),
+      })
+      .transform((v) => v as SerializedRegistrarActionPricingAvailable),
+
+    // pricing unknown
+    z
+      .object({
+        baseCost: z.null(),
+        premium: z.null(),
+        total: z.null(),
+      })
+      .transform((v) => v as SerializedRegistrarActionPricingUnknown),
   ]);
 
 /** Invariant: decodedReferrer is based on encodedReferrer */
@@ -162,10 +190,7 @@ const EventIdsSchema = z
   .min(1)
   .transform((v) => v as [RegistrarActionEventId, ...RegistrarActionEventId[]]);
 
-export const makeBaseRegistrarActionSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Base Registrar Action",
-  serializable?: SerializableType,
-) =>
+export const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registrar Action") =>
   z
     .object({
       id: EventIdSchema,
@@ -174,7 +199,6 @@ export const makeBaseRegistrarActionSchema = <const SerializableType extends boo
       registrationLifecycle: makeRegistrationLifecycleSchema(
         `${valueLabel} Registration Lifecycle`,
       ),
-      pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`, serializable),
       referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
       block: makeBlockRefSchema(`${valueLabel} Block`),
       transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`),
@@ -182,30 +206,51 @@ export const makeBaseRegistrarActionSchema = <const SerializableType extends boo
     })
     .check(invariant_eventIdsInitialElementIsTheActionId);
 
-export const makeRegistrarActionRegistrationSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Registration ",
-  serializable?: SerializableType,
-) =>
-  makeBaseRegistrarActionSchema(valueLabel, serializable).extend({
+export const makeRegistrarActionRegistrationSchema = (valueLabel: string = "Registration ") =>
+  makeBaseRegistrarActionSchema(valueLabel).extend({
     type: z.literal(RegistrarActionTypes.Registration),
+    pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
   });
 
-export const makeRegistrarActionRenewalSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Renewal",
-  serializable?: SerializableType,
+export const makeSerializedRegistrarActionRegistrationSchema = (
+  valueLabel: string = "SerializedRegistration ",
 ) =>
-  makeBaseRegistrarActionSchema(valueLabel, serializable).extend({
+  makeBaseRegistrarActionSchema(valueLabel).extend({
+    type: z.literal(RegistrarActionTypes.Registration),
+
+    pricing: makeSerializedRegistrarActionPricingSchema(`${valueLabel} Pricing`),
+  });
+
+export const makeRegistrarActionRenewalSchema = (valueLabel: string = "Renewal") =>
+  makeBaseRegistrarActionSchema(valueLabel).extend({
     type: z.literal(RegistrarActionTypes.Renewal),
+    pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
+  });
+
+export const makeSerializedRegistrarActionRenewalSchema = (
+  valueLabel: string = "Serialized Renewal",
+) =>
+  makeBaseRegistrarActionSchema(valueLabel).extend({
+    type: z.literal(RegistrarActionTypes.Renewal),
+    pricing: makeSerializedRegistrarActionPricingSchema(`${valueLabel} Pricing`),
   });
 
 /**
  * Schema for {@link RegistrarAction}.
  */
-export const makeRegistrarActionSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Registrar Action",
-  serializable?: SerializableType,
+export const makeRegistrarActionSchema = (valueLabel: string = "Registrar Action") =>
+  z.discriminatedUnion("type", [
+    makeRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
+    makeRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
+  ]);
+
+/**
+ * Schema for {@link SerializedRegistrarAction}.
+ */
+export const makeSerializedRegistrarActionSchema = (
+  valueLabel: string = "Serialized Registrar Action",
 ) =>
   z.discriminatedUnion("type", [
-    makeRegistrarActionRegistrationSchema(`${valueLabel} Registration`, serializable),
-    makeRegistrarActionRenewalSchema(`${valueLabel} Renewal`, serializable),
+    makeSerializedRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
+    makeSerializedRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
   ]);

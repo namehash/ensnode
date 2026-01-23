@@ -2,15 +2,26 @@ import { namehash } from "viem/ens";
 import z from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { makeRegistrarActionSchema } from "../../registrars/zod-schemas";
+import {
+  makeRegistrarActionSchema,
+  makeSerializedRegistrarActionSchema,
+} from "../../registrars/zod-schemas";
 import { makeAbstractResultOkTimestampedSchema } from "../../shared/result/zod-schemas";
 import { makeReinterpretedNameSchema, makeUnixTimestampSchema } from "../../shared/zod-schemas";
 import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
 import { type NamedRegistrarAction, RegistrarActionsResponseCodes } from "./response";
-import type { RegistrarActionsResultOkData } from "./result";
+import type {
+  RegistrarActionsResultOk,
+  RegistrarActionsResultOkData,
+  SerializedRegistrarActionsResultOk,
+  SerializedRegistrarActionsResultOkData,
+} from "./result";
+import type { SerializedNamedRegistrarAction } from "./serialized-response";
 
-function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedRegistrarAction>) {
+function invariant_registrationLifecycleNodeMatchesName(
+  ctx: ParsePayload<NamedRegistrarAction | SerializedNamedRegistrarAction>,
+) {
   const { name, action } = ctx.value;
   const expectedNode = action.registrationLifecycle.node;
   const actualNode = namehash(name);
@@ -27,13 +38,23 @@ function invariant_registrationLifecycleNodeMatchesName(ctx: ParsePayload<NamedR
 /**
  * Schema for {@link NamedRegistrarAction}.
  */
-export const makeNamedRegistrarActionSchema = <SerializableType extends boolean>(
-  valueLabel: string = "Named Registrar Action",
-  serializable?: SerializableType,
+export const makeNamedRegistrarActionSchema = (valueLabel: string = "Named Registrar Action") =>
+  z
+    .object({
+      action: makeRegistrarActionSchema(valueLabel),
+      name: makeReinterpretedNameSchema(valueLabel),
+    })
+    .check(invariant_registrationLifecycleNodeMatchesName);
+
+/**
+ * Schema for {@link SerializedNamedRegistrarAction}.
+ */
+export const makeSerializedNamedRegistrarActionSchema = (
+  valueLabel: string = "Serialized Named Registrar Action",
 ) =>
   z
     .object({
-      action: makeRegistrarActionSchema(valueLabel, serializable),
+      action: makeSerializedRegistrarActionSchema(valueLabel),
       name: makeReinterpretedNameSchema(valueLabel),
     })
     .check(invariant_registrationLifecycleNodeMatchesName);
@@ -73,12 +94,24 @@ export const makeRegistrarActionsResponseSchema = (
     makeRegistrarActionsResponseErrorSchema(valueLabel),
   ]);
 
-export const makeRegistrarActionsResultOkSchema = <const SerializableType extends boolean>(
-  serializable?: SerializableType,
-) =>
+/**
+ * Schema for {@link RegistrarActionsResultOk}
+ */
+export const makeRegistrarActionsResultOkSchema = () =>
   makeAbstractResultOkTimestampedSchema<RegistrarActionsResultOkData>(
     z.object({
-      registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions", serializable)),
+      registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions")),
+      pageContext: makeResponsePageContextSchema("pageContext"),
+    }),
+  );
+
+/**
+ * Schema for {@link SerializedRegistrarActionsResultOk}
+ */
+export const makeSerializedRegistrarActionsResultOkSchema = () =>
+  makeAbstractResultOkTimestampedSchema<SerializedRegistrarActionsResultOkData>(
+    z.object({
+      registrarActions: z.array(makeSerializedNamedRegistrarActionSchema("registrarActions")),
       pageContext: makeResponsePageContextSchema("pageContext"),
     }),
   );

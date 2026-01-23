@@ -13,7 +13,14 @@ import { z } from "zod/v4";
 
 import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
-import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
+import {
+  type CurrencyId,
+  CurrencyIds,
+  Price,
+  type PriceEth,
+  SerializedPrice,
+  type SerializedPriceEth,
+} from "./currencies";
 import { reinterpretName } from "./interpretation/reinterpretation";
 import type { AccountIdString } from "./serialized-types";
 import type {
@@ -250,7 +257,8 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     },
   });
 
-const priceAmountSchemaSerializable = z.string();
+const makeSerializedPriceAmountSchema = (_valueLabel: string = "Serialized Price Amount") =>
+  z.string();
 const makePriceAmountSchemaNative = (valueLabel: string = "Price Amount") =>
   z.preprocess(
     (v) => (typeof v === "string" ? BigInt(v) : v),
@@ -263,30 +271,24 @@ const makePriceAmountSchemaNative = (valueLabel: string = "Price Amount") =>
       }),
   );
 
-export function makePriceAmountSchema<const SerializableType extends boolean>(
-  valueLabel: string,
-  serializable: SerializableType,
-): SerializableType extends true
-  ? typeof priceAmountSchemaSerializable
-  : ReturnType<typeof makePriceAmountSchemaNative>;
-export function makePriceAmountSchema(
-  valueLabel: string = "Price Amount Schema",
-  serializable: true | false = false,
-): typeof priceAmountSchemaSerializable | ReturnType<typeof makePriceAmountSchemaNative> {
-  if (serializable) {
-    return priceAmountSchemaSerializable;
-  } else {
-    return makePriceAmountSchemaNative(valueLabel);
-  }
-}
-
-export const makePriceCurrencySchema = <const SerializableType extends boolean>(
+export const makePriceCurrencySchema = (
   currency: CurrencyId,
   valueLabel: string = "Price Currency",
-  serializable: SerializableType,
 ) =>
   z.strictObject({
-    amount: makePriceAmountSchema(`${valueLabel} amount`, serializable),
+    amount: makePriceAmountSchemaNative(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+export const makeSerializedPriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
+  z.strictObject({
+    amount: makeSerializedPriceAmountSchema(`${valueLabel} amount`),
 
     currency: z.literal(currency, {
       error: `${valueLabel} currency must be set to '${currency}'.`,
@@ -296,16 +298,27 @@ export const makePriceCurrencySchema = <const SerializableType extends boolean>(
 /**
  * Schema for {@link Price} type.
  */
-export const makePriceSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Price",
-  serializable?: SerializableType,
-) =>
+export const makePriceSchema = (valueLabel: string = "Price") =>
   z.discriminatedUnion(
     "currency",
     [
-      makePriceCurrencySchema(CurrencyIds.ETH, valueLabel, serializable ?? false),
-      makePriceCurrencySchema(CurrencyIds.USDC, valueLabel, serializable ?? false),
-      makePriceCurrencySchema(CurrencyIds.DAI, valueLabel, serializable ?? false),
+      makePriceCurrencySchema(CurrencyIds.ETH, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.USDC, valueLabel),
+      makePriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+    ],
+    { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
+  );
+
+/**
+ * Schema for {@link SerializedPrice} type.
+ */
+export const makeSerializedPriceSchema = (valueLabel: string = "Serialized Price") =>
+  z.discriminatedUnion(
+    "currency",
+    [
+      makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel),
+      makeSerializedPriceCurrencySchema(CurrencyIds.USDC, valueLabel),
+      makeSerializedPriceCurrencySchema(CurrencyIds.DAI, valueLabel),
     ],
     { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
   );
@@ -313,12 +326,15 @@ export const makePriceSchema = <const SerializableType extends boolean>(
 /**
  * Schema for {@link PriceEth} type.
  */
-export const makePriceEthSchema = <const SerializableType extends boolean>(
-  valueLabel: string = "Price ETH",
-  serializable?: SerializableType,
-) =>
-  makePriceCurrencySchema(CurrencyIds.ETH, valueLabel, serializable ?? false).transform(
-    (v) => v as PriceEth,
+export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
+  makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+/**
+ * Schema for {@link SerializedPriceEth} type.
+ */
+export const makeSerializedPriceEthSchema = (valueLabel: string = "Serialized Price ETH") =>
+  makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform(
+    (v) => v as SerializedPriceEth,
   );
 
 /**

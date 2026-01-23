@@ -23,11 +23,11 @@ import {
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePositiveIntegerSchema,
-  makeRegistrarActionsResultOkSchema,
   makeResultErrorInsufficientIndexingProgressSchema,
   makeResultErrorInternalServerErrorSchema,
   makeResultErrorInvalidRequestSchema,
   makeResultErrorServiceUnavailableSchema,
+  makeSerializedRegistrarActionsResultOkSchema,
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -163,7 +163,7 @@ const routeResponsesDescription = {
     description: "Successfully retrieved registrar actions",
     content: {
       "application/json": {
-        schema: responseSchemaResolver(makeRegistrarActionsResultOkSchema(true)),
+        schema: responseSchemaResolver(makeSerializedRegistrarActionsResultOkSchema()),
         examples: {
           [`Result Code: ${ResultCodes.Ok}`]: {
             summary: "Successfully retrieved registrar actions",
