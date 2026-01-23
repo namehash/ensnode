@@ -2,7 +2,7 @@ import { buildConfigFromEnvironment } from "./config.schema";
 import type { ENSRainbowEnvironment } from "./environment";
 
 export type { ENSRainbowConfig } from "./config.schema";
-export { buildConfigFromEnvironment } from "./config.schema";
+export { buildConfigFromEnvironment, buildENSRainbowPublicConfig } from "./config.schema";
 export { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 export type { ENSRainbowEnvironment } from "./environment";
 

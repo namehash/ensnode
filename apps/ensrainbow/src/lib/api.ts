@@ -1,4 +1,5 @@
 import packageJson from "@/../package.json";
+import config from "@/config";
 
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
@@ -14,6 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
+import { buildENSRainbowPublicConfig } from "@/config/config.schema";
 import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
@@ -101,6 +103,33 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     return c.json(result, result.errorCode);
   });
 
+  api.get("/v1/config", async (c: HonoContext) => {
+    logger.debug("Config request");
+    const countResult = await server.labelCount();
+    if (countResult.status === StatusCode.Error) {
+      logger.error("Failed to get records count for config endpoint");
+      return c.json(
+        {
+          status: StatusCode.Error,
+          error: countResult.error,
+          errorCode: countResult.errorCode,
+        },
+        500,
+      );
+    }
+
+    const publicConfig = buildENSRainbowPublicConfig(
+      config,
+      server.getServerLabelSet(),
+      countResult.count,
+    );
+    logger.debug(publicConfig, `Config result`);
+    return c.json(publicConfig);
+  });
+
+  /**
+   * @deprecated Use GET /v1/config instead. This endpoint will be removed in a future version.
+   */
   api.get("/v1/version", (c: HonoContext) => {
     logger.debug("Version request");
     const result: EnsRainbow.VersionResponse = {

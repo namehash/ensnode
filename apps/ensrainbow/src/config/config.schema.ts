@@ -1,8 +1,12 @@
+import packageJson from "@/../package.json" with { type: "json" };
+
 import { isAbsolute, resolve } from "node:path";
 
 import { prettifyError, ZodError, z } from "zod/v4";
 
+import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema, PortSchema } from "@ensnode/ensnode-sdk/internal";
+import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
@@ -81,4 +85,24 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
 
     process.exit(1);
   }
+}
+
+/**
+ * Builds the ENSRainbow public configuration from an ENSRainbowConfig object and server state.
+ *
+ * @param config - The validated ENSRainbowConfig object
+ * @param labelSet - The label set managed by the ENSRainbow server
+ * @param recordsCount - The total count of records managed by the ENSRainbow service
+ * @returns A complete ENSRainbowPublicConfig object
+ */
+export function buildENSRainbowPublicConfig(
+  config: ENSRainbowConfig,
+  labelSet: EnsRainbowServerLabelSet,
+  recordsCount: number,
+): EnsRainbow.ENSRainbowPublicConfig {
+  return {
+    version: packageJson.version,
+    labelSet,
+    recordsCount,
+  };
 }
