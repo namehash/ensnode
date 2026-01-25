@@ -45,8 +45,8 @@ The API Reference is generated from an OpenAPI spec. In production, Mintlify fet
 To generate the OpenAPI spec, start ENSApi and run the generator:
 
 ```bash
-# Start ENSApi in CI check mode (no external dependencies required)
-OPENAPI_CI_CHECK=true pnpm --filter ensapi start
+# Start ENSApi in OpenAPI generate mode (no external dependencies required)
+OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start
 
 # In another terminal, generate the spec
 pnpm --filter @docs/mintlify openapi:generate http://localhost:4334

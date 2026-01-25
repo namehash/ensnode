@@ -22,5 +22,5 @@ export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   LogLevelEnvironment &
   TheGraphEnvironment &
   EnsHolidayAwardsEnvironment & {
-    OPENAPI_CI_CHECK?: string;
+    OPENAPI_GENERATE_MODE?: string;
   };

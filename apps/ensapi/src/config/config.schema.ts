@@ -90,7 +90,7 @@ const EnsApiConfigSchemaForOpenApiCiCheck = z.object({
 });
 
 function buildConfigForOpenApiCiCheck(env: EnsApiEnvironment): EnsApiConfig {
-  logger.info("OPENAPI_CI_CHECK mode enabled - using minimal mock config");
+  logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
 
   return EnsApiConfigSchemaForOpenApiCiCheck.parse({
     port: env.PORT || ENSApi_DEFAULT_PORT,
@@ -134,7 +134,7 @@ function buildConfigForOpenApiCiCheck(env: EnsApiEnvironment): EnsApiConfig {
  * @throws Error with formatted validation messages if environment parsing fails
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
-  if (env.OPENAPI_CI_CHECK === "true") {
+  if (env.OPENAPI_GENERATE_MODE === "true") {
     return buildConfigForOpenApiCiCheck(env);
   }
 
