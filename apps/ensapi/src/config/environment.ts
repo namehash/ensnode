@@ -9,6 +9,16 @@ import type {
 } from "@ensnode/ensnode-sdk/internal";
 
 /**
+ * Environment variables for OpenAPI generation mode.
+ *
+ * When enabled, ENSApi starts with a minimal mock configuration,
+ * bypassing the need for external dependencies like a database or ENSIndexer.
+ */
+export interface OpenApiGenerateModeEnvironment {
+  OPENAPI_GENERATE_MODE?: string;
+}
+
+/**
  * Represents the raw, unvalidated environment variables for the ENSApi application.
  *
  * Keys correspond to the environment variable names, and all values are optional strings, reflecting
@@ -21,6 +31,5 @@ export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   PortEnvironment &
   LogLevelEnvironment &
   TheGraphEnvironment &
-  EnsHolidayAwardsEnvironment & {
-    OPENAPI_GENERATE_MODE?: string;
-  };
+  EnsHolidayAwardsEnvironment &
+  OpenApiGenerateModeEnvironment;
