@@ -95,7 +95,8 @@ function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
 
   return EnsApiConfigSchemaForOpenApiGeneration.parse({
     port: env.PORT || ENSApi_DEFAULT_PORT,
-    databaseUrl: "postgresql://openapi:openapi@localhost:5432/openapi",
+    databaseUrl:
+      "postgresql://mock_openapi_only:mock_openapi_only@localhost:5432/mock_openapi_only",
     databaseSchemaName: "public",
     ensIndexerUrl: "http://localhost:42069",
     theGraphApiKey: undefined,
