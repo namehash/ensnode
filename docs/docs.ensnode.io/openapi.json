@@ -6,24 +6,15 @@
     "version": "1.5.1"
   },
   "servers": [
-    {
-      "url": "https://api.alpha.ensnode.io",
-      "description": "ENSNode Alpha (Mainnet)"
-    },
+    { "url": "https://api.alpha.ensnode.io", "description": "ENSNode Alpha (Mainnet)" },
     {
       "url": "https://api.alpha-sepolia.ensnode.io",
       "description": "ENSNode Alpha (Sepolia Testnet)"
     },
-    {
-      "url": "http://localhost:4334",
-      "description": "Local Development"
-    }
+    { "url": "http://localhost:4334", "description": "Local Development" }
   ],
   "tags": [
-    {
-      "name": "Resolution",
-      "description": "APIs for resolving ENS names and addresses"
-    },
+    { "name": "Resolution", "description": "APIs for resolving ENS names and addresses" },
     {
       "name": "Meta",
       "description": "APIs for indexing status, configuration, and realtime monitoring"
@@ -52,22 +43,14 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "version": {
-                      "type": "string",
-                      "minLength": 1
-                    },
+                    "version": { "type": "string", "minLength": 1 },
                     "theGraphFallback": {
                       "anyOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "canFallback": {
-                              "type": "boolean",
-                              "const": true
-                            },
-                            "url": {
-                              "type": "string"
-                            }
+                            "canFallback": { "type": "boolean", "const": true },
+                            "url": { "type": "string" }
                           },
                           "required": ["canFallback", "url"],
                           "additionalProperties": false
@@ -75,10 +58,7 @@
                         {
                           "type": "object",
                           "properties": {
-                            "canFallback": {
-                              "type": "boolean",
-                              "const": false
-                            },
+                            "canFallback": { "type": "boolean", "const": false },
                             "reason": {
                               "type": "string",
                               "enum": ["not-subgraph-compatible", "no-api-key", "no-subgraph-url"]
@@ -101,9 +81,7 @@
                               "maxLength": 50,
                               "pattern": "^[a-z-]+$"
                             },
-                            "labelSetVersion": {
-                              "type": "number"
-                            }
+                            "labelSetVersion": { "type": "number" }
                           },
                           "required": ["labelSetId", "labelSetVersion"]
                         },
@@ -116,9 +94,7 @@
                             "maximum": 9007199254740991
                           }
                         },
-                        "isSubgraphCompatible": {
-                          "type": "boolean"
-                        },
+                        "isSubgraphCompatible": { "type": "boolean" },
                         "namespace": {
                           "type": "string",
                           "enum": ["mainnet", "sepolia", "ens-test-env"]
@@ -126,41 +102,18 @@
                         "plugins": {
                           "minItems": 1,
                           "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
+                          "items": { "type": "string" }
                         },
-                        "databaseSchemaName": {
-                          "type": "string",
-                          "minLength": 1
-                        },
+                        "databaseSchemaName": { "type": "string", "minLength": 1 },
                         "versionInfo": {
                           "type": "object",
                           "properties": {
-                            "nodejs": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "ponder": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "ensDb": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "ensIndexer": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "ensNormalize": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "ensRainbow": {
-                              "type": "string",
-                              "minLength": 1
-                            },
+                            "nodejs": { "type": "string", "minLength": 1 },
+                            "ponder": { "type": "string", "minLength": 1 },
+                            "ensDb": { "type": "string", "minLength": 1 },
+                            "ensIndexer": { "type": "string", "minLength": 1 },
+                            "ensNormalize": { "type": "string", "minLength": 1 },
+                            "ensRainbow": { "type": "string", "minLength": 1 },
                             "ensRainbowSchema": {
                               "type": "integer",
                               "exclusiveMinimum": 0,
@@ -215,10 +168,7 @@
                     {
                       "type": "object",
                       "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "ok"
-                        },
+                        "responseCode": { "type": "string", "const": "ok" },
                         "realtimeProjection": {
                           "type": "object",
                           "properties": {
@@ -227,18 +177,13 @@
                               "minimum": -9007199254740991,
                               "maximum": 9007199254740991
                             },
-                            "worstCaseDistance": {
-                              "type": "number"
-                            },
+                            "worstCaseDistance": { "type": "number" },
                             "snapshot": {
                               "anyOf": [
                                 {
                                   "type": "object",
                                   "properties": {
-                                    "strategy": {
-                                      "type": "string",
-                                      "const": "omnichain"
-                                    },
+                                    "strategy": { "type": "string", "const": "omnichain" },
                                     "slowestChainIndexingCursor": {
                                       "type": "integer",
                                       "minimum": -9007199254740991,
@@ -260,9 +205,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -678,9 +621,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -1096,9 +1037,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -1514,9 +1453,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -1946,12 +1883,7 @@
                     },
                     {
                       "type": "object",
-                      "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "error"
-                        }
-                      },
+                      "properties": { "responseCode": { "type": "string", "const": "error" } },
                       "required": ["responseCode"],
                       "additionalProperties": false
                     }
@@ -1969,10 +1901,7 @@
                     {
                       "type": "object",
                       "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "ok"
-                        },
+                        "responseCode": { "type": "string", "const": "ok" },
                         "realtimeProjection": {
                           "type": "object",
                           "properties": {
@@ -1981,18 +1910,13 @@
                               "minimum": -9007199254740991,
                               "maximum": 9007199254740991
                             },
-                            "worstCaseDistance": {
-                              "type": "number"
-                            },
+                            "worstCaseDistance": { "type": "number" },
                             "snapshot": {
                               "anyOf": [
                                 {
                                   "type": "object",
                                   "properties": {
-                                    "strategy": {
-                                      "type": "string",
-                                      "const": "omnichain"
-                                    },
+                                    "strategy": { "type": "string", "const": "omnichain" },
                                     "slowestChainIndexingCursor": {
                                       "type": "integer",
                                       "minimum": -9007199254740991,
@@ -2014,9 +1938,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -2432,9 +2354,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -2850,9 +2770,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -3268,9 +3186,7 @@
                                             },
                                             "chains": {
                                               "type": "object",
-                                              "propertyNames": {
-                                                "type": "string"
-                                              },
+                                              "propertyNames": { "type": "string" },
                                               "additionalProperties": {
                                                 "anyOf": [
                                                   {
@@ -3700,12 +3616,7 @@
                     },
                     {
                       "type": "object",
-                      "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "error"
-                        }
-                      },
+                      "properties": { "responseCode": { "type": "string", "const": "error" } },
                       "required": ["responseCode"],
                       "additionalProperties": false
                     }
@@ -3733,19 +3644,12 @@
                     {
                       "type": "object",
                       "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "ok"
-                        },
+                        "responseCode": { "type": "string", "const": "ok" },
                         "registeredNameTokens": {
                           "type": "object",
                           "properties": {
-                            "domainId": {
-                              "type": "string"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
+                            "domainId": { "type": "string" },
+                            "name": { "type": "string" },
                             "tokens": {
                               "minItems": 1,
                               "type": "array",
@@ -3767,16 +3671,12 @@
                                             "exclusiveMinimum": 0,
                                             "maximum": 9007199254740991
                                           },
-                                          "address": {
-                                            "type": "string"
-                                          }
+                                          "address": { "type": "string" }
                                         },
                                         "required": ["chainId", "address"],
                                         "additionalProperties": false
                                       },
-                                      "tokenId": {
-                                        "type": "string"
-                                      }
+                                      "tokenId": { "type": "string" }
                                     },
                                     "required": ["assetNamespace", "contract", "tokenId"]
                                   },
@@ -3797,9 +3697,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -3822,9 +3720,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -3835,10 +3731,7 @@
                                       {
                                         "type": "object",
                                         "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "const": "burned"
-                                          },
+                                          "ownershipType": { "type": "string", "const": "burned" },
                                           "owner": {
                                             "type": "object",
                                             "properties": {
@@ -3847,9 +3740,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -3860,10 +3751,7 @@
                                       {
                                         "type": "object",
                                         "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "const": "unknown"
-                                          },
+                                          "ownershipType": { "type": "string", "const": "unknown" },
                                           "owner": {
                                             "type": "object",
                                             "properties": {
@@ -3872,9 +3760,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -3884,10 +3770,7 @@
                                       }
                                     ]
                                   },
-                                  "mintStatus": {
-                                    "type": "string",
-                                    "enum": ["minted", "burned"]
-                                  }
+                                  "mintStatus": { "type": "string", "enum": ["minted", "burned"] }
                                 },
                                 "required": ["token", "ownership", "mintStatus"]
                               }
@@ -3914,22 +3797,11 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
-                            "errorCode": {
-                              "type": "string",
-                              "const": "name-tokens-not-indexed"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
+                            "errorCode": { "type": "string", "const": "name-tokens-not-indexed" },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -3939,22 +3811,14 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
                             "errorCode": {
                               "type": "string",
                               "const": "unsupported-ensindexer-config"
                             },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -3964,22 +3828,14 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
                             "errorCode": {
                               "type": "string",
                               "const": "unsupported-indexing-status"
                             },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -3999,12 +3855,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
+                  "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"]
                 }
               }
@@ -4019,19 +3870,12 @@
                     {
                       "type": "object",
                       "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "ok"
-                        },
+                        "responseCode": { "type": "string", "const": "ok" },
                         "registeredNameTokens": {
                           "type": "object",
                           "properties": {
-                            "domainId": {
-                              "type": "string"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
+                            "domainId": { "type": "string" },
+                            "name": { "type": "string" },
                             "tokens": {
                               "minItems": 1,
                               "type": "array",
@@ -4053,16 +3897,12 @@
                                             "exclusiveMinimum": 0,
                                             "maximum": 9007199254740991
                                           },
-                                          "address": {
-                                            "type": "string"
-                                          }
+                                          "address": { "type": "string" }
                                         },
                                         "required": ["chainId", "address"],
                                         "additionalProperties": false
                                       },
-                                      "tokenId": {
-                                        "type": "string"
-                                      }
+                                      "tokenId": { "type": "string" }
                                     },
                                     "required": ["assetNamespace", "contract", "tokenId"]
                                   },
@@ -4083,9 +3923,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4108,9 +3946,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4121,10 +3957,7 @@
                                       {
                                         "type": "object",
                                         "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "const": "burned"
-                                          },
+                                          "ownershipType": { "type": "string", "const": "burned" },
                                           "owner": {
                                             "type": "object",
                                             "properties": {
@@ -4133,9 +3966,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4146,10 +3977,7 @@
                                       {
                                         "type": "object",
                                         "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "const": "unknown"
-                                          },
+                                          "ownershipType": { "type": "string", "const": "unknown" },
                                           "owner": {
                                             "type": "object",
                                             "properties": {
@@ -4158,9 +3986,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4170,10 +3996,7 @@
                                       }
                                     ]
                                   },
-                                  "mintStatus": {
-                                    "type": "string",
-                                    "enum": ["minted", "burned"]
-                                  }
+                                  "mintStatus": { "type": "string", "enum": ["minted", "burned"] }
                                 },
                                 "required": ["token", "ownership", "mintStatus"]
                               }
@@ -4200,22 +4023,11 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
-                            "errorCode": {
-                              "type": "string",
-                              "const": "name-tokens-not-indexed"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
+                            "errorCode": { "type": "string", "const": "name-tokens-not-indexed" },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -4225,22 +4037,14 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
                             "errorCode": {
                               "type": "string",
                               "const": "unsupported-ensindexer-config"
                             },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -4250,22 +4054,14 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
                             "errorCode": {
                               "type": "string",
                               "const": "unsupported-indexing-status"
                             },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -4285,12 +4081,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
+                  "properties": { "message": { "type": "string" }, "details": {} },
                   "required": ["message"]
                 }
               }
@@ -4305,19 +4096,12 @@
                     {
                       "type": "object",
                       "properties": {
-                        "responseCode": {
-                          "type": "string",
-                          "const": "ok"
-                        },
+                        "responseCode": { "type": "string", "const": "ok" },
                         "registeredNameTokens": {
                           "type": "object",
                           "properties": {
-                            "domainId": {
-                              "type": "string"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
+                            "domainId": { "type": "string" },
+                            "name": { "type": "string" },
                             "tokens": {
                               "minItems": 1,
                               "type": "array",
@@ -4339,16 +4123,12 @@
                                             "exclusiveMinimum": 0,
                                             "maximum": 9007199254740991
                                           },
-                                          "address": {
-                                            "type": "string"
-                                          }
+                                          "address": { "type": "string" }
                                         },
                                         "required": ["chainId", "address"],
                                         "additionalProperties": false
                                       },
-                                      "tokenId": {
-                                        "type": "string"
-                                      }
+                                      "tokenId": { "type": "string" }
                                     },
                                     "required": ["assetNamespace", "contract", "tokenId"]
                                   },
@@ -4369,9 +4149,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4394,9 +4172,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4407,10 +4183,7 @@
                                       {
                                         "type": "object",
                                         "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "const": "burned"
-                                          },
+                                          "ownershipType": { "type": "string", "const": "burned" },
                                           "owner": {
                                             "type": "object",
                                             "properties": {
@@ -4419,9 +4192,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4432,10 +4203,7 @@
                                       {
                                         "type": "object",
                                         "properties": {
-                                          "ownershipType": {
-                                            "type": "string",
-                                            "const": "unknown"
-                                          },
+                                          "ownershipType": { "type": "string", "const": "unknown" },
                                           "owner": {
                                             "type": "object",
                                             "properties": {
@@ -4444,9 +4212,7 @@
                                                 "exclusiveMinimum": 0,
                                                 "maximum": 9007199254740991
                                               },
-                                              "address": {
-                                                "type": "string"
-                                              }
+                                              "address": { "type": "string" }
                                             },
                                             "required": ["chainId", "address"],
                                             "additionalProperties": false
@@ -4456,10 +4222,7 @@
                                       }
                                     ]
                                   },
-                                  "mintStatus": {
-                                    "type": "string",
-                                    "enum": ["minted", "burned"]
-                                  }
+                                  "mintStatus": { "type": "string", "enum": ["minted", "burned"] }
                                 },
                                 "required": ["token", "ownership", "mintStatus"]
                               }
@@ -4486,22 +4249,11 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
-                            "errorCode": {
-                              "type": "string",
-                              "const": "name-tokens-not-indexed"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
+                            "errorCode": { "type": "string", "const": "name-tokens-not-indexed" },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -4511,22 +4263,14 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
                             "errorCode": {
                               "type": "string",
                               "const": "unsupported-ensindexer-config"
                             },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -4536,22 +4280,14 @@
                         {
                           "type": "object",
                           "properties": {
-                            "responseCode": {
-                              "type": "string",
-                              "const": "error"
-                            },
+                            "responseCode": { "type": "string", "const": "error" },
                             "errorCode": {
                               "type": "string",
                               "const": "unsupported-indexing-status"
                             },
                             "error": {
                               "type": "object",
-                              "properties": {
-                                "message": {
-                                  "type": "string"
-                                },
-                                "details": {}
-                              },
+                              "properties": { "message": { "type": "string" }, "details": {} },
                               "required": ["message"]
                             }
                           },
@@ -4570,17 +4306,13 @@
           {
             "in": "query",
             "name": "domainId",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Domain node hash identifier"
           },
           {
             "in": "query",
             "name": "name",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "ENS name to look up tokens for"
           }
         ]
@@ -4593,15 +4325,9 @@
         "summary": "Get Registrar Actions",
         "description": "Returns all registrar actions with optional filtering and pagination",
         "responses": {
-          "200": {
-            "description": "Successfully retrieved registrar actions"
-          },
-          "400": {
-            "description": "Invalid query"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "200": { "description": "Successfully retrieved registrar actions" },
+          "400": { "description": "Invalid query" },
+          "500": { "description": "Internal server error" }
         },
         "parameters": [
           {
@@ -4629,17 +4355,13 @@
           {
             "in": "query",
             "name": "withReferral",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Filter to only include actions with referrals"
           },
           {
             "in": "query",
             "name": "decodedReferrer",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Filter by decoded referrer address"
           },
           {
@@ -4664,23 +4386,15 @@
         "summary": "Get Registrar Actions by Parent Node",
         "description": "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
         "responses": {
-          "200": {
-            "description": "Successfully retrieved registrar actions"
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "200": { "description": "Successfully retrieved registrar actions" },
+          "400": { "description": "Invalid input" },
+          "500": { "description": "Internal server error" }
         },
         "parameters": [
           {
             "in": "path",
             "name": "parentNode",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "required": true,
             "description": "Parent node to filter registrar actions"
           },
@@ -4709,17 +4423,13 @@
           {
             "in": "query",
             "name": "withReferral",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Filter to only include actions with referrals"
           },
           {
             "in": "query",
             "name": "decodedReferrer",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "description": "Filter by decoded referrer address"
           },
           {
@@ -4754,60 +4464,26 @@
                     "records": {
                       "type": "object",
                       "properties": {
-                        "name": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
+                        "name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
                         "addresses": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
-                          },
+                          "propertyNames": { "type": "string" },
                           "additionalProperties": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "anyOf": [{ "type": "string" }, { "type": "null" }]
                           }
                         },
                         "texts": {
                           "type": "object",
-                          "propertyNames": {
-                            "type": "string"
-                          },
+                          "propertyNames": { "type": "string" },
                           "additionalProperties": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
+                            "anyOf": [{ "type": "string" }, { "type": "null" }]
                           }
                         }
                       }
                     },
-                    "accelerationRequested": {
-                      "type": "boolean"
-                    },
-                    "accelerationAttempted": {
-                      "type": "boolean"
-                    },
-                    "trace": {
-                      "type": "array",
-                      "items": {}
-                    }
+                    "accelerationRequested": { "type": "boolean" },
+                    "accelerationAttempted": { "type": "boolean" },
+                    "trace": { "type": "array", "items": {} }
                   },
                   "required": ["records", "accelerationRequested", "accelerationAttempted"]
                 }
@@ -4816,49 +4492,12 @@
           }
         },
         "parameters": [
-          {
-            "in": "path",
-            "name": "name",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "name",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "addresses",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "texts",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "trace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "accelerate",
-            "schema": {
-              "type": "string"
-            }
-          }
+          { "in": "path", "name": "name", "schema": { "type": "string" }, "required": true },
+          { "in": "query", "name": "name", "schema": { "type": "string" } },
+          { "in": "query", "name": "addresses", "schema": { "type": "string" } },
+          { "in": "query", "name": "texts", "schema": { "type": "string" } },
+          { "in": "query", "name": "trace", "schema": { "type": "string" } },
+          { "in": "query", "name": "accelerate", "schema": { "type": "string" } }
         ]
       }
     },
@@ -4876,26 +4515,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "name": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    },
-                    "accelerationRequested": {
-                      "type": "boolean"
-                    },
-                    "accelerationAttempted": {
-                      "type": "boolean"
-                    },
-                    "trace": {
-                      "type": "array",
-                      "items": {}
-                    }
+                    "name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+                    "accelerationRequested": { "type": "boolean" },
+                    "accelerationAttempted": { "type": "boolean" },
+                    "trace": { "type": "array", "items": {} }
                   },
                   "required": ["name", "accelerationRequested", "accelerationAttempted"]
                 }
@@ -4904,36 +4527,10 @@
           }
         },
         "parameters": [
-          {
-            "in": "path",
-            "name": "address",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "chainId",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "trace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "accelerate",
-            "schema": {
-              "type": "string"
-            }
-          }
+          { "in": "path", "name": "address", "schema": { "type": "string" }, "required": true },
+          { "in": "path", "name": "chainId", "schema": { "type": "string" }, "required": true },
+          { "in": "query", "name": "trace", "schema": { "type": "string" } },
+          { "in": "query", "name": "accelerate", "schema": { "type": "string" } }
         ]
       }
     },
@@ -4953,30 +4550,14 @@
                   "properties": {
                     "names": {
                       "type": "object",
-                      "propertyNames": {
-                        "type": "number"
-                      },
+                      "propertyNames": { "type": "number" },
                       "additionalProperties": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                        "anyOf": [{ "type": "string" }, { "type": "null" }]
                       }
                     },
-                    "accelerationRequested": {
-                      "type": "boolean"
-                    },
-                    "accelerationAttempted": {
-                      "type": "boolean"
-                    },
-                    "trace": {
-                      "type": "array",
-                      "items": {}
-                    }
+                    "accelerationRequested": { "type": "boolean" },
+                    "accelerationAttempted": { "type": "boolean" },
+                    "trace": { "type": "array", "items": {} }
                   },
                   "required": ["names", "accelerationRequested", "accelerationAttempted"]
                 }
@@ -4985,35 +4566,10 @@
           }
         },
         "parameters": [
-          {
-            "in": "path",
-            "name": "address",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "chainIds",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "trace",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "accelerate",
-            "schema": {
-              "type": "string"
-            }
-          }
+          { "in": "path", "name": "address", "schema": { "type": "string" }, "required": true },
+          { "in": "query", "name": "chainIds", "schema": { "type": "string" } },
+          { "in": "query", "name": "trace", "schema": { "type": "string" } },
+          { "in": "query", "name": "accelerate", "schema": { "type": "string" } }
         ]
       }
     },
@@ -5024,32 +4580,20 @@
         "summary": "Get Referrer Leaderboard",
         "description": "Returns a paginated page from the referrer leaderboard",
         "responses": {
-          "200": {
-            "description": "Successfully retrieved referrer leaderboard page"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "200": { "description": "Successfully retrieved referrer leaderboard page" },
+          "500": { "description": "Internal server error" }
         },
         "parameters": [
           {
             "in": "query",
             "name": "page",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 9007199254740991
-            },
+            "schema": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
             "description": "Page number for pagination"
           },
           {
             "in": "query",
             "name": "recordsPerPage",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100
-            },
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100 },
             "description": "Number of referrers per page"
           }
         ]
@@ -5062,23 +4606,15 @@
         "summary": "Get Referrer Detail",
         "description": "Returns detailed information for a specific referrer by address",
         "responses": {
-          "200": {
-            "description": "Successfully retrieved referrer detail"
-          },
-          "500": {
-            "description": "Internal server error"
-          },
-          "503": {
-            "description": "Service unavailable - referrer leaderboard data not yet cached"
-          }
+          "200": { "description": "Successfully retrieved referrer detail" },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable - referrer leaderboard data not yet cached" }
         },
         "parameters": [
           {
             "in": "path",
             "name": "referrer",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "required": true,
             "description": "Referrer Ethereum address"
           }
@@ -5092,32 +4628,20 @@
         "summary": "Get Referrer Leaderboard (v1)",
         "description": "Returns a paginated page from the referrer leaderboard",
         "responses": {
-          "200": {
-            "description": "Successfully retrieved referrer leaderboard page"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
+          "200": { "description": "Successfully retrieved referrer leaderboard page" },
+          "500": { "description": "Internal server error" }
         },
         "parameters": [
           {
             "in": "query",
             "name": "page",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 9007199254740991
-            },
+            "schema": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
             "description": "Page number for pagination"
           },
           {
             "in": "query",
             "name": "recordsPerPage",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100
-            },
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100 },
             "description": "Number of referrers per page"
           }
         ]
@@ -5130,23 +4654,15 @@
         "summary": "Get Referrer Detail (v1)",
         "description": "Returns detailed information for a specific referrer by address",
         "responses": {
-          "200": {
-            "description": "Successfully retrieved referrer detail"
-          },
-          "500": {
-            "description": "Internal server error"
-          },
-          "503": {
-            "description": "Service unavailable - referrer leaderboard data not yet cached"
-          }
+          "200": { "description": "Successfully retrieved referrer detail" },
+          "500": { "description": "Internal server error" },
+          "503": { "description": "Service unavailable - referrer leaderboard data not yet cached" }
         },
         "parameters": [
           {
             "in": "path",
             "name": "referrer",
-            "schema": {
-              "type": "string"
-            },
+            "schema": { "type": "string" },
             "required": true,
             "description": "Referrer Ethereum address"
           }
