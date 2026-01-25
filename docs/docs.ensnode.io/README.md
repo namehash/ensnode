@@ -34,8 +34,6 @@ To avoid documenting unreleased features:
 
 This ensures documentation stays aligned with what users can actually access, while still allowing PR previews for review.
 
-> **Note:** Mintlify currently doesn't support separating auto-deploy from PR previews, or an API for triggering preview builds for specific branches. If this changes, we could decouple the workflows.
-
 ## OpenAPI Spec
 
 The API Reference is generated from an OpenAPI spec. In production, Mintlify fetches this from the live API URL. For PR previews, Mintlify uses the committed `openapi.json` file.
