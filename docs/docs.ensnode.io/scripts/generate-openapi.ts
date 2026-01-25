@@ -7,7 +7,8 @@
  *   pnpm openapi:generate http://localhost:4334
  *
  * Output:
- *   Writes openapi.json to the docs directory for Mintlify to consume. Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
+ *   Writes openapi.json to the docs directory for Mintlify to consume, then formats it with Biome.
+ *   Note that a rebuild of Mintlify is required for it to reflect an updated openapi.json.
  */
 
 import { execFileSync } from "node:child_process";
@@ -80,10 +81,7 @@ async function main() {
     paths?: Record<string, unknown>;
   };
 
-  // Pretty-print the JSON for readability in git diffs
-  const content = `${JSON.stringify(spec, null, 2)}\n`;
-
-  writeFileSync(OUTPUT_PATH, content, "utf-8");
+  writeFileSync(OUTPUT_PATH, JSON.stringify(spec), "utf-8");
 
   console.log(`OpenAPI spec written to: ${OUTPUT_PATH}`);
   console.log(`Spec version: ${typedSpec.info?.version}`);
@@ -100,4 +98,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((error) => {
+  console.error("Unexpected error:", error);
+  process.exit(1);
+});
