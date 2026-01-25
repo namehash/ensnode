@@ -83,7 +83,9 @@ jobs:
             echo ""
             git diff --color docs/docs.ensnode.io/openapi.json
             echo ""
-            echo "Run 'OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start' then 'pnpm --filter @docs/mintlify openapi:generate http://localhost:4334' and commit the changes."
+            echo "To fix: OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start"
+            echo "Then:   pnpm --filter @docs/mintlify openapi:generate http://localhost:4334"
+            echo "Then commit the updated openapi.json."
             exit 1
           fi
 
