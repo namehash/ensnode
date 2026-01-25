@@ -16,25 +16,23 @@ Learn more about [ENSNode](https://ensnode.io) from [the "Starlight" ENSNode doc
 - If a page loads as a 404, ensure you're running in a folder with a valid `docs.json`
 - Run `pnpm mint --help` for more Mintlify CLI details
 
-## Publishing Changes
+## Deployments
 
-Mintlify automatically deploys when changes are pushed to `main`. This presents a tradeoff:
+Mintlify deploys automatically: preview deploys on each branch, production deploys on merge to `main`.
 
 | Content Type      | Source             | Behavior                                    |
 | ----------------- | ------------------ | ------------------------------------------- |
 | **API Reference** | Production API URL | Always in sync with deployed production API |
 | **Other docs**    | Committed files    | Deploys immediately on merge to main        |
 
-**The tradeoff:** Non-API documentation (guides, concepts, etc.) may be published before the corresponding code is released to production. However, the API Reference always reflects the actual production API since Mintlify fetches it from the production URL at build time.
+Non-API documentation (guides, concepts, etc.) may be published before the corresponding code is released to production. The API Reference always reflects the actual production API since Mintlify fetches it from the production URL at build time.
 
 To avoid documenting unreleased features:
 
 1. **Keep documentation PRs separate from code PRs**
 2. **Merge documentation PRs only after the corresponding code is deployed to production**
 
-This ensures documentation stays aligned with what users can actually access, while still allowing PR previews for review.
-
-## OpenAPI Spec
+## API Reference
 
 The API Reference is generated from an OpenAPI spec. In production, Mintlify fetches this from the live API URL. For PR previews, Mintlify uses the committed `openapi.json` file.
 
