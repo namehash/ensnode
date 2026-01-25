@@ -60,7 +60,7 @@ CI runs an `openapi-sync-check` job that validates the committed `openapi.json` 
 
 When switching production environments (green/blue), the `deploy_switch_ensnode_environment` workflow triggers a Mintlify rebuild to fetch the latest OpenAPI spec from the production API.
 
-This requires `MINTLIFY_API_TOKEN` and `MINTLIFY_PROJECT_ID` to be configured as repository secrets.
+This requires `MINTLIFY_API_TOKEN` to be configured as a repository secret and `MINTLIFY_PROJECT_ID` to be configured as a repository variable.
 
 ## Resources
 
