@@ -87,15 +87,11 @@ async function main() {
   console.log(`Spec version: ${typedSpec.info?.version}`);
   console.log(`Paths: ${Object.keys(typedSpec.paths || {}).length}`);
 
-  // Format the output with Biome
+  // Format the output with Biome (required for CI to pass)
   console.log("Formatting with Biome...");
-  try {
-    execFileSync("pnpm", ["biome", "format", "--write", OUTPUT_PATH], {
-      stdio: "inherit",
-    });
-  } catch {
-    console.error("Warning: Failed to format with Biome. The file was still written.");
-  }
+  execFileSync("pnpm", ["biome", "format", "--write", OUTPUT_PATH], {
+    stdio: "inherit",
+  });
 }
 
 main().catch((error) => {

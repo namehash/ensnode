@@ -58,15 +58,30 @@ jobs:
       - name: Start ENSApi in OpenAPI generate mode
         run: |
           OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start &
+          ENSAPI_PID=$!
+
           # Wait for server to be ready
+          SERVER_READY=false
           for i in {1..30}; do
-            if curl -s http://localhost:4334/openapi.json > /dev/null 2>&1; then
+            if curl -sf http://localhost:4334/openapi.json > /dev/null 2>&1; then
               echo "ENSApi is ready"
+              SERVER_READY=true
               break
+            fi
+            # Check if the background process is still running
+            if ! kill -0 $ENSAPI_PID 2>/dev/null; then
+              echo "❌ ENSApi process exited unexpectedly"
+              exit 1
             fi
             echo "Waiting for ENSApi to start... ($i/30)"
             sleep 1
           done
+
+          if [ "$SERVER_READY" != "true" ]; then
+            echo "❌ ENSApi failed to start within 30 seconds"
+            kill $ENSAPI_PID 2>/dev/null || true
+            exit 1
+          fi
 
       - name: Generate OpenAPI spec from local build
         working-directory: docs/docs.ensnode.io
