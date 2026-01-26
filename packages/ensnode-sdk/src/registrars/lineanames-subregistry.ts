@@ -34,11 +34,11 @@ export function getLineanamesSubregistryId(namespace: ENSNamespaceId): AccountId
 }
 
 /**
- * Get the managed name for the Lineanames subregistry for the selected ENS namespace.
+ * Return the registrar-managed name for the Lineanames subregistry in the specified ENS namespace.
  *
- * @param namespaceId
- * @returns registrar managed name
- * @throws an error when no registrar managed name could be returned
+ * @param namespaceId - The ENS namespace identifier to resolve the managed name for
+ * @returns The registrar-managed name (e.g., `"linea.eth"` or `"linea-sepolia.eth"`)
+ * @throws Error when no registrar-managed name is known for the given namespace
  */
 export function getLineanamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
   switch (namespaceId) {

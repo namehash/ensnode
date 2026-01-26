@@ -4,11 +4,10 @@ import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds, type Name } from "@ensnode/ensnode-sdk";
 
 /**
- * Get the ENS Manager App URL for the provided namespace.
+ * Determine the ENS Manager App base URL for a given ENS namespace.
  *
- * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @returns ENS Manager App URL for the provided namespace, or null if the provided namespace
- * doesn't have a known ENS Manager App
+ * @param namespaceId - ENS namespace identifier
+ * @returns The ENS Manager App URL for the namespace, or `null` if that namespace has no known external ENS Manager App
  */
 export function getEnsManagerUrl(namespaceId: ENSNamespaceId): URL | null {
   switch (namespaceId) {

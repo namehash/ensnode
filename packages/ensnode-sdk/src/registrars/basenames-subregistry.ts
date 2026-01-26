@@ -34,11 +34,11 @@ export function getBasenamesSubregistryId(namespace: ENSNamespaceId): AccountId 
 }
 
 /**
- * Get the managed name for the Basenames subregistry for the selected ENS namespace.
+ * Determines the registrar-managed name for the basenames subregistry in the given ENS namespace.
  *
- * @param namespaceId
- * @returns registrar managed name
- * @throws an error when no registrar managed name could be returned
+ * @param namespaceId - The ENS namespace to resolve the basenames subregistry for
+ * @returns The registrar-managed name for the basenames subregistry in the specified namespace
+ * @throws Error if no registrar-managed name is known for the provided namespace
  */
 export function getBasenamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
   switch (namespaceId) {

@@ -286,12 +286,12 @@ export async function createStartBlockByChainIdMap(
 }
 
 /**
-/**
- * Builds a ponder#Config["chains"] for a single, specific chain in the context of the ENSIndexerConfig.
+ * Build a Ponder chains config entry for a specific chain using ENSIndexer RPC settings.
  *
- * @param rpcConfigs - The RPC configuration object from ENSIndexerConfig, keyed by chain ID.
- * @param chainId - The numeric chain ID for which to build the chain config.
- * @returns a ponder#Config["chains"]
+ * @param rpcConfigs - Map of chain ID to RPC configuration from ENSIndexerConfig
+ * @param chainId - Numeric chain ID to build the connection config for
+ * @returns An object whose key is the chain ID string and whose value is the ChainConfig including `id`, `rpc` (HTTP URLs), optional `ws` (WebSocket URL), and `disableCache`
+ * @throws If no RPC configuration exists for the provided `chainId`
  */
 export function chainsConnectionConfig(
   rpcConfigs: ENSIndexerConfig["rpcConfigs"],

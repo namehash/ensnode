@@ -2,18 +2,11 @@ import type { ENSNamespaceId } from "@ensnode/datasources";
 import { ENSNamespaceIds, type Name } from "@ensnode/ensnode-sdk";
 
 /**
- * Build the avatar image URL for a name on the given ENS Namespace that (once fetched) would
- * load the avatar image for the given name from the ENS Metadata Service
- * (https://metadata.ens.domains/docs).
+ * Builds the ENS Metadata Service avatar URL for a given ENS name and namespace.
  *
- * The returned URL is dynamically built based on the provided ENS namespace. Not all ENS
- * namespaces are supported by the ENS Metadata Service. Therefore, the returned URL may
- * be null.
- *
- * @param {Name} name - ENS name to build the avatar image URL for
- * @param {ENSNamespaceId} namespaceId - ENS Namespace identifier
- * @returns avatar image URL for the name on the given ENS Namespace, or null if the given
- *          ENS namespace is not supported by the ENS Metadata Service
+ * @param name - ENS name to build the avatar URL for
+ * @param namespaceId - ENS namespace identifier used to select the metadata endpoint
+ * @returns The avatar image URL for the name on the specified ENS namespace, or `null` if the namespace is not supported
  */
 export function getEnsMetadataServiceAvatarUrl(
   name: Name,

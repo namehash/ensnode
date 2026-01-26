@@ -34,10 +34,10 @@ export function getEthnamesSubregistryId(namespace: ENSNamespaceId): AccountId {
 }
 
 /**
- * Get the managed name for the Ethnames subregistry for the selected ENS namespace.
+ * Determine the managed name used by the Ethnames subregistry for a given ENS namespace.
  *
- * @param namespaceId
- * @returns registrar managed name
+ * @param namespaceId - The ENS namespace identifier to query
+ * @returns `"eth"` when `namespaceId` is `ENSNamespaceIds.Mainnet`, `ENSNamespaceIds.Sepolia`, `ENSNamespaceIds.SepoliaV2`, or `ENSNamespaceIds.EnsTestEnv`; `undefined` for other namespaces
  */
 export function getEthnamesSubregistryManagedName(namespaceId: ENSNamespaceId): Name {
   switch (namespaceId) {

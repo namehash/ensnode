@@ -61,10 +61,14 @@ async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | n
 }
 
 /**
- * Forward-traverses the ENSv2 namegraph in order to identify the Domain addressed by `name`.
+ * Locate the DomainId addressed by an interpreted ENS name by traversing an ENSv2 namegraph from a given registry.
  *
- * If the exact Domain was not found, and the path terminates at a bridging resolver, bridge to the
- * indicated Registry and continue traversing.
+ * If an exact ENSv2 domain is not found and the traversal terminates at the .eth bridging resolver, the function will either defer resolution to ENSv1 (if an active ENSv1 registration exists for the 2LD) or continue traversal against the Namechain .eth ENSv2 registry.
+ *
+ * @param registryId - The starting ENSv2 registry identifier to begin traversal from
+ * @param name - The interpreted ENS name to resolve
+ * @param now - Current Unix time (as a BigInt) used to determine registration expiry; defaults to the current time
+ * @returns The matching DomainId if found, or `null` if no domain could be resolved
  */
 async function v2_getDomainIdByFqdn(
   registryId: RegistryId,
