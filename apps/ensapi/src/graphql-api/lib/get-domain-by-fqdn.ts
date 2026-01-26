@@ -149,16 +149,7 @@ async function v2_getDomainIdByFqdn(
   );
   if (!ENS_ROOT_V2_ETH_REGISTRY) return null;
 
-  // if there's no ETHRegistry on Namechain, the domain was not found
-  const NAMECHAIN_V2_ETH_REGISTRY = maybeGetDatasourceContract(
-    config.namespace,
-    DatasourceNames.Namechain,
-    "ETHRegistry",
-  );
-  if (!NAMECHAIN_V2_ETH_REGISTRY) return null;
-
   const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId(ENS_ROOT_V2_ETH_REGISTRY);
-  const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId(NAMECHAIN_V2_ETH_REGISTRY);
 
   // if the path did not terminate at the .eth Registry, then there's nothing to be done and the domain was not found
   if (leaf.registry_id !== ENS_ROOT_V2_ETH_REGISTRY_ID) return null;
@@ -199,6 +190,16 @@ async function v2_getDomainIdByFqdn(
   }
 
   // 2. otherwise, direct to Namechain ENSv2 .eth Registry
+  // if there's no ETHRegistry on Namechain, the domain was not found
+  const NAMECHAIN_V2_ETH_REGISTRY = maybeGetDatasourceContract(
+    config.namespace,
+    DatasourceNames.Namechain,
+    "ETHRegistry",
+  );
+  if (!NAMECHAIN_V2_ETH_REGISTRY) return null;
+
+  const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId(NAMECHAIN_V2_ETH_REGISTRY);
+
   const nameWithoutTld = interpretedLabelsToInterpretedName(
     interpretedNameToInterpretedLabels(name).slice(0, -1),
   );
@@ -206,5 +207,5 @@ async function v2_getDomainIdByFqdn(
     `ETHTLDResolver deferring '${nameWithoutTld}' to ENSv2 .eth Registry on Namechain...`,
   );
 
-  return v2_getDomainIdByFqdn(NAMECHAIN_V2_ETH_REGISTRY_ID, nameWithoutTld);
+  return v2_getDomainIdByFqdn(NAMECHAIN_V2_ETH_REGISTRY_ID, nameWithoutTld, { now });
 }
