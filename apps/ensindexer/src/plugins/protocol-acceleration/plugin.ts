@@ -144,11 +144,13 @@ export default createPlugin({
         [namespaceContract(pluginName, "ENSv2Registry")]: {
           abi: RegistryABI,
           chain: {
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              ensroot.chain.id,
-              ensroot.contracts.Registry,
-            ),
+            // TODO(ensv2-coverage): remove this conditional once ENSv2 exists in all namespaces
+            ...("Registry" in ensroot.contracts &&
+              chainConfigForContract(
+                config.globalBlockrange,
+                ensroot.chain.id,
+                ensroot.contracts.Registry,
+              )),
             ...(namechain &&
               chainConfigForContract(
                 config.globalBlockrange,

@@ -23,6 +23,7 @@ export function getEnsMetadataServiceAvatarUrl(
     case ENSNamespaceIds.Mainnet:
       return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
     case ENSNamespaceIds.Sepolia:
+    case ENSNamespaceIds.SepoliaV2:
       return new URL(name, `https://metadata.ens.domains/sepolia/avatar/`);
     case ENSNamespaceIds.EnsTestEnv:
       // ens-test-env runs on a local chain and is not supported by metadata.ens.domains
