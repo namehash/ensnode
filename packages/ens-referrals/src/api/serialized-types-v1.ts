@@ -1,0 +1,129 @@
+import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-sdk";
+
+import type { AggregatedReferrerMetrics } from "../aggregations-v1";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page-v1";
+import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail-v1";
+import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics-v1";
+import type { ReferralProgramRules } from "../rules-v1";
+import type {
+  ReferrerDetailResponse,
+  ReferrerDetailResponseError,
+  ReferrerDetailResponseOk,
+  ReferrerLeaderboardPageResponse,
+  ReferrerLeaderboardPageResponseError,
+  ReferrerLeaderboardPageResponseOk,
+} from "./types-v1";
+
+/**
+ * Serialized representation of {@link ReferralProgramRules}.
+ */
+export interface SerializedReferralProgramRules
+  extends Omit<ReferralProgramRules, "totalAwardPoolValue"> {
+  totalAwardPoolValue: SerializedPriceUsdc;
+}
+
+/**
+ * Serialized representation of {@link AwardedReferrerMetrics}.
+ */
+export interface SerializedAwardedReferrerMetrics
+  extends Omit<AwardedReferrerMetrics, "totalRevenueContribution" | "awardPoolApproxValue"> {
+  totalRevenueContribution: SerializedPriceEth;
+  awardPoolApproxValue: SerializedPriceUsdc;
+}
+
+/**
+ * Serialized representation of {@link UnrankedReferrerMetrics}.
+ */
+export interface SerializedUnrankedReferrerMetrics
+  extends Omit<UnrankedReferrerMetrics, "totalRevenueContribution" | "awardPoolApproxValue"> {
+  totalRevenueContribution: SerializedPriceEth;
+  awardPoolApproxValue: SerializedPriceUsdc;
+}
+
+/**
+ * Serialized representation of {@link AggregatedReferrerMetrics}.
+ */
+export interface SerializedAggregatedReferrerMetrics
+  extends Omit<AggregatedReferrerMetrics, "grandTotalRevenueContribution"> {
+  grandTotalRevenueContribution: SerializedPriceEth;
+}
+
+/**
+ * Serialized representation of {@link ReferrerLeaderboardPage}.
+ */
+export interface SerializedReferrerLeaderboardPage
+  extends Omit<ReferrerLeaderboardPage, "rules" | "referrers" | "aggregatedMetrics"> {
+  rules: SerializedReferralProgramRules;
+  referrers: SerializedAwardedReferrerMetrics[];
+  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
+}
+
+/**
+ * Serialized representation of {@link ReferrerDetailRanked}.
+ */
+export interface SerializedReferrerDetailRanked
+  extends Omit<ReferrerDetailRanked, "rules" | "referrer" | "aggregatedMetrics"> {
+  rules: SerializedReferralProgramRules;
+  referrer: SerializedAwardedReferrerMetrics;
+  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
+}
+
+/**
+ * Serialized representation of {@link ReferrerDetailUnranked}.
+ */
+export interface SerializedReferrerDetailUnranked
+  extends Omit<ReferrerDetailUnranked, "rules" | "referrer" | "aggregatedMetrics"> {
+  rules: SerializedReferralProgramRules;
+  referrer: SerializedUnrankedReferrerMetrics;
+  aggregatedMetrics: SerializedAggregatedReferrerMetrics;
+}
+
+/**
+ * Serialized representation of {@link ReferrerDetail} (union of ranked and unranked).
+ */
+export type SerializedReferrerDetail =
+  | SerializedReferrerDetailRanked
+  | SerializedReferrerDetailUnranked;
+
+/**
+ * Serialized representation of {@link ReferrerLeaderboardPageResponseError}.
+ *
+ * Note: All fields are already serializable, so this type is identical to the source type.
+ */
+export type SerializedReferrerLeaderboardPageResponseError = ReferrerLeaderboardPageResponseError;
+
+/**
+ * Serialized representation of {@link ReferrerLeaderboardPageResponseOk}.
+ */
+export interface SerializedReferrerLeaderboardPageResponseOk
+  extends Omit<ReferrerLeaderboardPageResponseOk, "data"> {
+  data: SerializedReferrerLeaderboardPage;
+}
+
+/**
+ * Serialized representation of {@link ReferrerLeaderboardPageResponse}.
+ */
+export type SerializedReferrerLeaderboardPageResponse =
+  | SerializedReferrerLeaderboardPageResponseOk
+  | SerializedReferrerLeaderboardPageResponseError;
+
+/**
+ * Serialized representation of {@link ReferrerDetailResponseError}.
+ *
+ * Note: All fields are already serializable, so this type is identical to the source type.
+ */
+export type SerializedReferrerDetailResponseError = ReferrerDetailResponseError;
+
+/**
+ * Serialized representation of {@link ReferrerDetailResponseOk}.
+ */
+export interface SerializedReferrerDetailResponseOk extends Omit<ReferrerDetailResponseOk, "data"> {
+  data: SerializedReferrerDetail;
+}
+
+/**
+ * Serialized representation of {@link ReferrerDetailResponse}.
+ */
+export type SerializedReferrerDetailResponse =
+  | SerializedReferrerDetailResponseOk
+  | SerializedReferrerDetailResponseError;

@@ -9,7 +9,7 @@ import {
   ReferrerLeaderboardPageResponseCodes,
   serializeReferrerDetailResponse,
   serializeReferrerLeaderboardPageResponse,
-} from "@namehash/ens-referrals";
+} from "@namehash/ens-referrals/v1";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod/v4";
 

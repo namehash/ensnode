@@ -30,13 +30,13 @@ import {
   ReferrerDetailTypeIds,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
-} from "@namehash/ens-referrals";
+} from "@namehash/ens-referrals/v1";
 
 import {
   emptyReferralLeaderboard,
   populatedReferrerLeaderboard,
   referrerLeaderboardPageResponseOk,
-} from "@/lib/ensanalytics/referrer-leaderboard/mocks";
+} from "@/lib/ensanalytics/referrer-leaderboard/mocks-v1";
 
 import app from "./ensanalytics-api-v1";
 
@@ -243,7 +243,10 @@ describe("/ensanalytics/v1", () => {
         expect(response.data.referrer.finalScoreBoost).toBe(0);
         expect(response.data.referrer.finalScore).toBe(0);
         expect(response.data.referrer.awardPoolShare).toBe(0);
-        expect(response.data.referrer.awardPoolApproxValue).toBe(0);
+        expect(response.data.referrer.awardPoolApproxValue).toStrictEqual({
+          currency: "USDC",
+          amount: 0n,
+        });
         expect(response.data.accurateAsOf).toBe(expectedAccurateAsOf);
       }
     });
@@ -281,7 +284,10 @@ describe("/ensanalytics/v1", () => {
         expect(response.data.referrer.finalScoreBoost).toBe(0);
         expect(response.data.referrer.finalScore).toBe(0);
         expect(response.data.referrer.awardPoolShare).toBe(0);
-        expect(response.data.referrer.awardPoolApproxValue).toBe(0);
+        expect(response.data.referrer.awardPoolApproxValue).toStrictEqual({
+          currency: "USDC",
+          amount: 0n,
+        });
         expect(response.data.accurateAsOf).toBe(expectedAccurateAsOf);
       }
     });
