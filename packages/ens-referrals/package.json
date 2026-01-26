@@ -18,26 +18,8 @@
     "dist"
   ],
   "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
-    },
-    "./v1": {
-      "import": {
-        "types": "./dist/v1.d.ts",
-        "default": "./dist/v1.js"
-      },
-      "require": {
-        "types": "./dist/v1.d.cts",
-        "default": "./dist/v1.cjs"
-      }
-    },
+    ".": "./src/index.ts",
+    "./v1": "./src/v1.ts",
     "./internal": "./src/internal.ts"
   },
   "publishConfig": {
