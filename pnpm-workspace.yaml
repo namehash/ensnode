@@ -31,4 +31,4 @@ catalog:
   viem: ^2.22.13
   vite: ^7.1.12
   vitest: ^4.0.2
-  zod: ^3.25.7
+  zod: ^4.3.6

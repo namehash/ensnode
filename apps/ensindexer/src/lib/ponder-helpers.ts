@@ -7,7 +7,7 @@
 import type { Event, EventNames } from "ponder:registry";
 import type { ChainConfig } from "ponder";
 import type { Address, PublicClient } from "viem";
-import * as z from "zod/v4";
+import { z } from "zod/v4";
 
 import {
   type ContractConfig,
