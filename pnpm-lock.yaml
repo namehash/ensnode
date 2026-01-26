@@ -322,9 +322,6 @@ importers:
       '@hono/standard-validator':
         specifier: ^0.2.2
         version: 0.2.2(@standard-schema/spec@1.0.0)(hono@4.11.4)
-      '@hono/zod-validator':
-        specifier: ^0.7.2
-        version: 0.7.4(hono@4.11.4)(zod@4.3.6)
       '@namehash/ens-referrals':
         specifier: workspace:*
         version: link:../../packages/ens-referrals
@@ -2202,12 +2199,6 @@ packages:
     peerDependencies:
       '@standard-schema/spec': ^1.0.0
       hono: '>=3.9.0'
-
-  '@hono/zod-validator@0.7.4':
-    resolution: {integrity: sha512-biKGn3BRJVaftZlIPMyK+HCe/UHAjJ6sH0UyXe3+v0OcgVr9xfImDROTJFLtn9e3XEEAHGZIM9U6evu85abm8Q==}
-    peerDependencies:
-      hono: '>=3.9.0'
-      zod: ^3.25.0 || ^4.0.0
 
   '@iconify-json/lucide@1.2.71':
     resolution: {integrity: sha512-KL+3JHW+wN8QqT3CN+7e1SzTe+gIunFBuUICtVmdCmdVRx+MdGNkX4xJhXoYHfhYO2azrEhoGPG+It9k30aZkw==}
@@ -10487,11 +10478,6 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.0.0
       hono: 4.11.4
-
-  '@hono/zod-validator@0.7.4(hono@4.11.4)(zod@4.3.6)':
-    dependencies:
-      hono: 4.11.4
-      zod: 4.3.6
 
   '@iconify-json/lucide@1.2.71':
     dependencies:
