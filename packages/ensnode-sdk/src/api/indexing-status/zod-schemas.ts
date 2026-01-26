@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import { makeRealtimeIndexingStatusProjectionSchema } from "../../ensindexer/indexing-status/zod-schemas";
 import {
