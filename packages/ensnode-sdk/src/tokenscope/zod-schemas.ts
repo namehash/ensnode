@@ -1,6 +1,6 @@
 import { AssetId as CaipAssetId } from "caip";
 import { zeroAddress } from "viem";
-import z from "zod/v4";
+import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { type AssetId, AssetNamespaces } from "../shared/types";
