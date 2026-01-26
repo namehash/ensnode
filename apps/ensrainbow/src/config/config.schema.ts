@@ -12,6 +12,44 @@ import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 
+/**
+ * Validates and extracts label set configuration from environment variables.
+ *
+ * Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither should be set.
+ *
+ * @param labelSetId - The raw LABEL_SET_ID environment variable
+ * @param labelSetVersion - The raw LABEL_SET_VERSION environment variable
+ * @returns The validated label set configuration object, or undefined if neither is set
+ * @throws Error if only one of the label set variables is provided
+ */
+function validateLabelSetConfiguration(
+  labelSetId: string | undefined,
+  labelSetVersion: string | undefined,
+): { labelSetId: string; labelSetVersion: string } | undefined {
+  // Validate label set configuration: both must be provided together, or neither
+  const hasLabelSetId = labelSetId !== undefined && labelSetId.trim() !== "";
+  const hasLabelSetVersion = labelSetVersion !== undefined && labelSetVersion.trim() !== "";
+
+  if (hasLabelSetId && !hasLabelSetVersion) {
+    throw new Error(
+      `LABEL_SET_ID is set but LABEL_SET_VERSION is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
+    );
+  }
+
+  if (!hasLabelSetId && hasLabelSetVersion) {
+    throw new Error(
+      `LABEL_SET_VERSION is set but LABEL_SET_ID is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
+    );
+  }
+
+  return hasLabelSetId && hasLabelSetVersion
+    ? {
+        labelSetId,
+        labelSetVersion,
+      }
+    : undefined;
+}
+
 const DataDirSchema = z
   .string()
   .trim()
@@ -57,7 +95,8 @@ export type ENSRainbowConfig = z.infer<typeof ENSRainbowConfigSchema>;
  * Validates and parses the complete environment configuration using ENSRainbowConfigSchema.
  *
  * @returns A validated ENSRainbowConfig object
- * @throws ZodError with detailed validation messages if environment parsing fails
+ * @throws {ZodError} with detailed validation messages if environment parsing fails
+ * @throws {Error} if label set configuration is invalid (e.g., only one of LABEL_SET_ID or LABEL_SET_VERSION is provided)
  */
 export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowConfig {
   // Transform environment variables into config shape with validation
@@ -70,48 +109,18 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
       LABEL_SET_VERSION: z.string().optional(),
     })
     .transform((env) => {
-      // Validate label set configuration: both must be provided together, or neither
-      const hasLabelSetId = env.LABEL_SET_ID !== undefined && env.LABEL_SET_ID.trim() !== "";
-      const hasLabelSetVersion =
-        env.LABEL_SET_VERSION !== undefined && env.LABEL_SET_VERSION.trim() !== "";
-
-      if (hasLabelSetId && !hasLabelSetVersion) {
-        throw new Error(
-          `LABEL_SET_ID is set but LABEL_SET_VERSION is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
-        );
-      }
-
-      if (!hasLabelSetId && hasLabelSetVersion) {
-        throw new Error(
-          `LABEL_SET_VERSION is set but LABEL_SET_ID is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
-        );
-      }
+      const labelSet = validateLabelSetConfiguration(env.LABEL_SET_ID, env.LABEL_SET_VERSION);
 
       return {
         port: env.PORT,
         dataDir: env.DATA_DIR,
         dbSchemaVersion: env.DB_SCHEMA_VERSION,
-        labelSet:
-          hasLabelSetId && hasLabelSetVersion
-            ? {
-                labelSetId: env.LABEL_SET_ID,
-                labelSetVersion: env.LABEL_SET_VERSION,
-              }
-            : undefined,
+        labelSet,
       };
     });
 
-  try {
-    const configInput = envToConfigSchema.parse(env);
-    return ENSRainbowConfigSchema.parse(configInput);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      // Re-throw ZodError to preserve structured error information
-      throw error;
-    }
-    // Re-throw other errors (like our custom label set validation errors)
-    throw error;
-  }
+  const configInput = envToConfigSchema.parse(env);
+  return ENSRainbowConfigSchema.parse(configInput);
 }
 
 /**

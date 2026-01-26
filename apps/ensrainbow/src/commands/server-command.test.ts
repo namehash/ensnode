@@ -167,6 +167,39 @@ describe("Server Command Tests", () => {
     });
   });
 
+  describe("GET /v1/config", () => {
+    it("should return an error when database is empty", async () => {
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/config`);
+      expect(response.status).toBe(500);
+      const data = (await response.json()) as {
+        status: typeof StatusCode.Error;
+        error: string;
+        errorCode: typeof ErrorCode.ServerError;
+      };
+      const expectedData = {
+        status: StatusCode.Error,
+        error: "Label count not initialized. Check the validate command.",
+        errorCode: ErrorCode.ServerError,
+      };
+      expect(data).toEqual(expectedData);
+    });
+
+    it("should return correct config when label count is initialized", async () => {
+      // Set a specific precalculated rainbow record count in the database
+      await db.setPrecalculatedRainbowRecordCount(42);
+
+      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/config`);
+      expect(response.status).toBe(200);
+      const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
+
+      expect(typeof data.version).toBe("string");
+      expect(data.version.length).toBeGreaterThan(0);
+      expect(data.labelSet.labelSetId).toBe("test-label-set-id");
+      expect(data.labelSet.highestLabelSetVersion).toBe(0);
+      expect(data.recordsCount).toBe(42);
+    });
+  });
+
   describe("CORS headers for /v1/* routes", () => {
     it("should return CORS headers for /v1/* routes", async () => {
       const validLabel = "test-label";
@@ -186,6 +219,9 @@ describe("Server Command Tests", () => {
           method: "OPTIONS",
         }),
         fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`, {
+          method: "OPTIONS",
+        }),
+        fetch(`http://localhost:${nonDefaultPort}/v1/config`, {
           method: "OPTIONS",
         }),
         fetch(`http://localhost:${nonDefaultPort}/v1/version`, {
