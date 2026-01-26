@@ -5,8 +5,8 @@
  * Supports 1-column (label only) and 2-column (label,labelhash) formats
  */
 
-import { createReadStream, createWriteStream, rmSync, statSync } from "fs";
-import { dirname, join } from "path";
+import { createReadStream, createWriteStream, rmSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 import { parse } from "@fast-csv/parse";
 import { ClassicLevel } from "classic-level";
@@ -55,7 +55,7 @@ class DeduplicationDB {
     try {
       await this.db.get(key);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -573,7 +573,7 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     // Create temporary deduplication database in the same directory as the output file
     // This ensures it's on the same filesystem/disk as the output, avoiding space issues
     const outputDir = dirname(outputFile);
-    temporaryDedupDir = join(outputDir, "temp-dedup-" + Date.now());
+    temporaryDedupDir = join(outputDir, `temp-dedup-${Date.now()}`);
     logger.info(`Creating temporary deduplication database at: ${temporaryDedupDir}`);
     tempDb = new ClassicLevel<string, string>(temporaryDedupDir, {
       keyEncoding: "utf8",

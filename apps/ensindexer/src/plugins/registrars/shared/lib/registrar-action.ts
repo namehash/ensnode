@@ -2,12 +2,7 @@ import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 import type { Hash } from "viem";
 
-import {
-  type AccountId,
-  formatAccountId,
-  type Node,
-  type RegistrarAction,
-} from "@ensnode/ensnode-sdk";
+import { formatAccountId, type Node, type RegistrarAction } from "@ensnode/ensnode-sdk";
 
 /**
  * Logical Event Key
@@ -24,15 +19,13 @@ export type LogicalEventKey = string;
  * Make a logical event key for a "logical registrar action".
  */
 export function makeLogicalEventKey({
-  subregistryId,
   node,
   transactionHash,
 }: {
-  subregistryId: AccountId;
   node: Node;
   transactionHash: Hash;
 }): LogicalEventKey {
-  return [formatAccountId(subregistryId), node, transactionHash].join(":").toLowerCase();
+  return [node, transactionHash].join(":").toLowerCase();
 }
 
 /**
@@ -57,15 +50,25 @@ export async function insertRegistrarAction(
   // 1. Create logical event key
   const logicalEventKey = makeLogicalEventKey({
     node,
-    subregistryId,
     transactionHash,
   });
 
   // 2. Store mapping between logical event key and logical event id
-  await context.db.insert(schema.internal_registrarActionMetadata).values({
-    logicalEventKey,
-    logicalEventId: id,
-  });
+  //    Note: If the metadata record already exists,
+  //          we update it to point to the current logical event key and id.
+  //          This ensures that there is always at most one record in ENSDb
+  //          for the current "logical registrar action".
+  await context.db
+    .insert(schema.internal_registrarActionMetadata)
+    .values({
+      metadataType: "CURRENT_LOGICAL_REGISTRAR_ACTION",
+      logicalEventKey,
+      logicalEventId: id,
+    })
+    .onConflictDoUpdate(() => ({
+      logicalEventKey,
+      logicalEventId: id,
+    }));
 
   // 3. Store initial record for the "logical registrar action"
   await context.db.insert(schema.registrarActions).values({

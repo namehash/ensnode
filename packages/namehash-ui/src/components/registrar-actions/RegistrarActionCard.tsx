@@ -1,6 +1,6 @@
 import { Info as InfoIcon, CircleQuestionMark as QuestionmarkIcon } from "lucide-react";
 import { memo, type PropsWithChildren, type ReactNode } from "react";
-import { zeroAddress } from "viem";
+import { type Address, zeroAddress } from "viem";
 
 import type {
   DefaultableChainId,
@@ -16,18 +16,18 @@ import {
   ZERO_ENCODED_REFERRER,
 } from "@ensnode/ensnode-sdk";
 
-import { DisplayDuration } from "@/components/datetime/DisplayDuration.tsx";
-import { RelativeTime } from "@/components/datetime/RelativeTime.tsx";
-import type { IdentityLinkDetails } from "@/components/identity/Identity.tsx";
-import { NameDisplay } from "@/components/identity/Name.tsx";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import { getBlockExplorerTransactionDetailsUrl } from "../../utils/blockExplorers";
+import { cn } from "../../utils/cn";
+import { DisplayDuration } from "../datetime/DisplayDuration";
+import { RelativeTime } from "../datetime/RelativeTime";
+import type { IdentityLinkDetails } from "../identity/Identity";
+import { NameDisplay } from "../identity/Name";
 import {
   ResolveAndDisplayIdentity,
   type ResolveAndDisplayIdentityProps,
-} from "@/components/identity/ResolveAndDisplayIdentity.tsx";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { useIsMobile } from "@/hooks/useIsMobile.tsx";
-import { getBlockExplorerTransactionDetailsUrl } from "@/utils/blockExplorers.ts";
-import { cn } from "@/utils/cn.ts";
+} from "../identity/ResolveAndDisplayIdentity";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface LabeledFieldProps {
   fieldLabel: string;
@@ -37,7 +37,11 @@ interface LabeledFieldProps {
 /**
  * Display a labeled field.
  */
-function LabeledField({ fieldLabel, className, children }: PropsWithChildren<LabeledFieldProps>) {
+export function LabeledField({
+  fieldLabel,
+  className,
+  children,
+}: PropsWithChildren<LabeledFieldProps>) {
   return (
     <div
       className={cn(
@@ -53,10 +57,16 @@ function LabeledField({ fieldLabel, className, children }: PropsWithChildren<Lab
   );
 }
 
+export interface ReferrerLinkData {
+  isExternal: boolean;
+  getLink: (address: Address, namespaceId: ENSNamespaceId) => URL | null;
+}
+
 interface ResolveAndDisplayReferrerIdentityProps
-  extends Omit<ResolveAndDisplayIdentityProps, "identity"> {
+  extends Omit<ResolveAndDisplayIdentityProps, "identity" | "identityLinkDetails"> {
   chainId: DefaultableChainId;
   referral: RegistrarActionReferral;
+  referrerLinkData: ReferrerLinkData;
 }
 
 /**
@@ -70,7 +80,7 @@ function ResolveAndDisplayReferrerIdentity({
   referral,
   accelerate = true,
   withLink = true,
-  identityLinkDetails,
+  referrerLinkData,
   withTooltip = true,
   withAvatar = false,
   withIdentifier = true,
@@ -120,7 +130,7 @@ function ResolveAndDisplayReferrerIdentity({
           </TooltipTrigger>
           <TooltipContent
             side="top"
-            className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit"
+            className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
           >
             Encoded referrer
             <code className="nhui:block">{referral.encodedReferrer}</code> does not follow the
@@ -144,13 +154,17 @@ function ResolveAndDisplayReferrerIdentity({
       withIdentifier={withIdentifier}
       className={className}
       withLink={withLink}
-      identityLinkDetails={identityLinkDetails}
+      identityLinkDetails={{
+        isExternal: referrerLinkData.isExternal,
+        link: referrerLinkData.getLink(referrerIdentity.address, namespaceId),
+      }}
     />
   );
 }
 
 export interface RegistrarActionCardLoadingProps {
   showReferrer?: boolean;
+  showReferralProgramField?: boolean;
 }
 
 /**
@@ -158,6 +172,7 @@ export interface RegistrarActionCardLoadingProps {
  */
 export function RegistrarActionCardLoading({
   showReferrer = true,
+  showReferralProgramField = true,
 }: RegistrarActionCardLoadingProps) {
   const isMobile = useIsMobile();
 
@@ -208,9 +223,11 @@ export function RegistrarActionCardLoading({
         </div>
       )}
 
-      <LabeledField fieldLabel="Incentive program" className="nhui:w-[15%] nhui:min-w-[162px]">
-        <div className="nhui:animate-pulse nhui:h-[14px] nhui:mt-[4px] nhui:mb-[3px] nhui:bg-gray-200 nhui:rounded-sm nhui:w-1/4 nhui:sm:w-4/5" />
-      </LabeledField>
+      {showReferralProgramField && (
+        <LabeledField fieldLabel="Incentive program" className="nhui:w-[15%] nhui:min-w-[162px]">
+          <div className="nhui:animate-pulse nhui:h-[14px] nhui:mt-[4px] nhui:mb-[3px] nhui:bg-gray-200 nhui:rounded-sm nhui:w-1/4 nhui:sm:w-4/5" />
+        </LabeledField>
+      )}
     </div>
   );
 }
@@ -222,7 +239,11 @@ export interface RegistrarActionCardProps {
   links: {
     name: IdentityLinkDetails;
     registrant: IdentityLinkDetails;
-    referrer?: IdentityLinkDetails;
+    referrer: ReferrerLinkData;
+  };
+  showIdentityTooltips?: {
+    registrant: boolean;
+    referrer: boolean;
   };
   showReferrer?: boolean;
   referralProgramField?: ReactNode;
@@ -236,6 +257,10 @@ export function RegistrarActionCard({
   namedRegistrarAction,
   now,
   links,
+  showIdentityTooltips = {
+    registrant: false,
+    referrer: false,
+  },
   showReferrer = true,
   referralProgramField,
 }: RegistrarActionCardProps) {
@@ -267,13 +292,19 @@ export function RegistrarActionCard({
     nhui:items-start nhui:gap-2 nhui:p-4 nhui:sm:p-6 nhui:sm:gap-y-5 nhui:rounded-2xl nhui:border nhui:border-gray-200 nhui:text-sm nhui:bg-white"
     >
       <LabeledField fieldLabel="Name" className="nhui:w-[15%] nhui:min-w-[162px]">
-        <a
-          target="_blank"
-          href={links.name.link.href}
-          className="nhui:max-sm:max-w-3/4 nhui:sm:w-full nhui:box-border nhui:overflow-x-auto nhui:text-blue-600 nhui:font-medium nhui:hover:underline nhui:hover:underline-offset-[25%] nhui:whitespace-nowrap"
-        >
-          <NameDisplay name={namedRegistrarAction.name} className="nhui:h-[21px]" />
-        </a>
+        {links.name.link !== null ? (
+          <a
+            target={links.name.isExternal ? "_blank" : "_self"}
+            href={links.name.link.href}
+            className="nhui:max-sm:max-w-3/4 nhui:sm:w-full nhui:box-border nhui:overflow-x-auto nhui:text-blue-600 nhui:font-medium nhui:hover:underline nhui:hover:underline-offset-[25%] nhui:whitespace-nowrap"
+          >
+            <NameDisplay name={namedRegistrarAction.name} className="nhui:h-[21px]" />
+          </a>
+        ) : (
+          <p className="nhui:max-sm:max-w-3/4 nhui:sm:w-full nhui:box-border nhui:overflow-x-auto nhui:font-medium nhui:whitespace-nowrap">
+            <NameDisplay name={namedRegistrarAction.name} className="nhui:h-[21px]" />
+          </p>
+        )}
       </LabeledField>
 
       <LabeledField
@@ -303,7 +334,7 @@ export function RegistrarActionCard({
             identity={registrantIdentity}
             namespaceId={namespaceId}
             withAvatar={true}
-            withTooltip={false}
+            withTooltip={showIdentityTooltips.registrant}
             withIdentifier={false}
             identityLinkDetails={links.registrant}
           />
@@ -313,7 +344,7 @@ export function RegistrarActionCard({
             identity={registrantIdentity}
             namespaceId={namespaceId}
             withAvatar={isMobile}
-            withTooltip={false}
+            withTooltip={showIdentityTooltips.registrant}
             className="nhui:font-medium nhui:sm:max-[1220px]:max-w-[110px] nhui:min-[1220px]:max-w-[140px]"
             identityLinkDetails={links.registrant}
           />
@@ -329,8 +360,8 @@ export function RegistrarActionCard({
               referral={referral}
               withAvatar={true}
               withIdentifier={false}
-              withTooltip={false}
-              identityLinkDetails={links.referrer}
+              withTooltip={showIdentityTooltips.referrer}
+              referrerLinkData={links.referrer}
             />
           )}
           <LabeledField fieldLabel="Referrer" className="nhui:w-[15%] nhui:min-w-[110px]">
@@ -340,8 +371,8 @@ export function RegistrarActionCard({
               referral={referral}
               withAvatar={isMobile}
               withIdentifier={true}
-              withTooltip={false}
-              identityLinkDetails={links.referrer}
+              withTooltip={showIdentityTooltips.referrer}
+              referrerLinkData={links.referrer}
             />
           </LabeledField>
         </div>
@@ -353,6 +384,3 @@ export function RegistrarActionCard({
 }
 
 export const RegistrarActionCardMemo = memo(RegistrarActionCard);
-
-// TODO: Copied from ENSAwards (as a newer version) - performed some refactor actions
-//  to make the component usable across all our apps, but further alignment might be needed

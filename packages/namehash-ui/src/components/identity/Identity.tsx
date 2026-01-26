@@ -1,3 +1,4 @@
+import { CheckIcon, CopyIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
 
 import type { ENSNamespaceId, Identity } from "@ensnode/ensnode-sdk";
@@ -8,20 +9,20 @@ import {
   translateDefaultableChainIdToChainId,
 } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon.tsx";
-import { ChainExplorerIcon } from "@/components/icons/ChainExplorerIcon.tsx";
-import { EnsIcon } from "@/components/icons/ens/EnsIcon.tsx";
-import { AddressDisplay } from "@/components/identity/Address.tsx";
-import { CopyButton } from "@/components/special-buttons/CopyButton.tsx";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { getBlockExplorerAddressDetailsUrl } from "@/utils/blockExplorers.ts";
-import { getChainName } from "@/utils/chains.ts";
-import { cn } from "@/utils/cn.ts";
-import { getEnsManagerAddressDetailsUrl } from "@/utils/ensManager.ts";
+import { getBlockExplorerAddressDetailsUrl } from "../../utils/blockExplorers";
+import { getChainName } from "../../utils/chains";
+import { cn } from "../../utils/cn";
+import { getEnsManagerAddressDetailsUrl } from "../../utils/ensManager";
+import { ChainIcon } from "../chains/ChainIcon";
+import { ChainExplorerIcon } from "../icons/ChainExplorerIcon";
+import { EnsIcon } from "../icons/ens/EnsIcon";
+import { CopyButton } from "../special-buttons/CopyButton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { AddressDisplay } from "./Address";
 
 export interface IdentityLinkDetails {
   isExternal: boolean;
-  link: URL;
+  link: URL | null;
 }
 interface IdentityLinkProps {
   linkDetails: IdentityLinkDetails;
@@ -41,6 +42,10 @@ export function IdentityLink({
   className,
   children,
 }: PropsWithChildren<IdentityLinkProps>) {
+  if (linkDetails.link === null) {
+    return <>{children}</>;
+  }
+
   return (
     <a
       href={linkDetails.link.href}
@@ -109,8 +114,10 @@ export const IdentityTooltip = ({
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side="top"
-        className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit"
+        className="nhui:bg-gray-50 nhui:text-sm nhui:text-black nhui:text-left nhui:shadow-md nhui:outline-hidden nhui:w-fit [&_svg]:fill-gray-50 [&_svg]:bg-gray-50"
       >
+        {/*TODO: The styling of all tooltips should either be unified across all our apps or made customizable. */}
+        {/*Currently aligned to fit ensadmin, cause it's only used there*/}
         <div className="nhui:flex nhui:gap-4">
           <div className="nhui:flex nhui:items-center">
             <ChainIcon
@@ -128,6 +135,9 @@ export const IdentityTooltip = ({
             <CopyButton
               value={identity.address}
               className="nhui:text-gray-500 nhui:hover:text-gray-700 nhui:transition-colors"
+              successIcon={<CheckIcon className="nhui:h-4 nhui:w-4" style={{ fill: "none" }} />}
+              icon={<CopyIcon className="nhui:h-4 nhui:w-4" style={{ fill: "none" }} />}
+              showToast={true}
             />
             {chainExplorerUrl && (
               <a target="_blank" href={chainExplorerUrl.toString()}>
@@ -153,5 +163,3 @@ export const IdentityTooltip = ({
     </Tooltip>
   );
 };
-
-// TODO: Copied from ENSAwards - some alignment made but further changes may be needed

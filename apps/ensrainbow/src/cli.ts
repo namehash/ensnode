@@ -230,7 +230,7 @@ export function createCLI(options: CLIOptions = {}) {
             labelSetId: argv["label-set-id"],
             progressInterval: argv["progress-interval"],
             existingDbPath: argv["existing-db-path"],
-            silent: argv["silent"],
+            silent: argv.silent,
           });
         },
       )

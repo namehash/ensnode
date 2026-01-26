@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMobile } from "@namehash/namehash-ui";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeft } from "lucide-react";
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
@@ -26,6 +26,7 @@ const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+const SIDEBAR_MOBILE_BREAKPOINT = 768;
 
 type SidebarContext = {
   state: "expanded" | "collapsed";
@@ -68,7 +69,7 @@ const SidebarProvider = React.forwardRef<
     },
     ref,
   ) => {
-    const isMobile = useIsMobile();
+    const isMobile = useIsMobile(SIDEBAR_MOBILE_BREAKPOINT);
     const [openMobile, setOpenMobile] = React.useState(false);
 
     // This is the internal state of the sidebar.

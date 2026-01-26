@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "fallback-ensapi",
-  "version": "1.4.0",
+  "version": "1.5.1",
   "type": "module",
   "description": "Infrastructure-level Fallback for ENSApi",
   "license": "MIT",

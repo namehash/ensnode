@@ -70,6 +70,11 @@ const CONTRACTS_BY_MANAGED_NAME: Record<Name, AccountId[]> = {
       DatasourceNames.ENSRoot,
       "UnwrappedEthRegistrarController",
     ),
+    getDatasourceContract(
+      config.namespace,
+      DatasourceNames.ENSRoot,
+      "UniversalRegistrarRenewalWithReferrer",
+    ),
     ethnamesNameWrapper,
   ],
   "base.eth": [

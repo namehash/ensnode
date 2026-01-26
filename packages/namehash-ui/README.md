@@ -14,7 +14,7 @@ Note: `@ensnode/ensnode-react` and `sonner` are package's peer dependencies. The
 
 ## Setup
 
-The `namehash-ui` package comes with its own styles exported for some components, as well as global Tailwind styles (soon to be removed).
+The `namehash-ui` package comes with its own styles exported for some components, as well as global Tailwind styles.
 
 Make sure you import the `styles.css` file somewhere in your app:
 

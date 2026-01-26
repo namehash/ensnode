@@ -1,6 +1,6 @@
 {
   "name": "@namehash/ens-referrals",
-  "version": "1.4.0",
+  "version": "1.5.1",
   "type": "module",
   "description": "Utilities for ENS Referrals.",
   "license": "MIT",
@@ -18,7 +18,8 @@
     "dist"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./internal": "./src/internal.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -45,6 +46,10 @@
   },
   "peerDependencies": {
     "viem": "catalog:"
+  },
+  "dependencies": {
+    "@ensnode/ensnode-sdk": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",

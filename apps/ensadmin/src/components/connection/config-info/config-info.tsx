@@ -5,13 +5,13 @@
 
 "use client";
 
+import { ChainIcon, getChainName } from "@namehash/namehash-ui";
 import { History, Replace } from "lucide-react";
 import { Fragment, ReactNode } from "react";
 
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
-import { ChainIcon } from "@/components/chains/ChainIcon";
 import {
   ConfigInfoAppCard,
   ConfigInfoFeature,
@@ -33,7 +33,6 @@ import { ExternalLinkWithIcon } from "@/components/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getChainName } from "@/lib/namespace-utils";
 import { cn } from "@/lib/utils";
 
 /**

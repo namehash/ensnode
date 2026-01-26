@@ -1,8 +1,8 @@
 export * from "./api";
 export { type ClientOptions, ENSNodeClient } from "./client";
 export * from "./client-error";
+export * from "./deployments";
 export * from "./ens";
-export * from "./ensanalytics";
 export * from "./ensapi";
 export * from "./ensindexer";
 export * from "./ensrainbow";
