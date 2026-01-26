@@ -7,9 +7,7 @@ import type { ENSRainbowConfig } from "./config.schema";
 /**
  * Invariant: dbSchemaVersion must match the version expected by the code.
  */
-export function invariant_dbSchemaVersionMatch(
-  ctx: ZodCheckFnInput<Pick<ENSRainbowConfig, "dbSchemaVersion">>,
-): void {
+export function invariant_dbSchemaVersionMatch(ctx: ZodCheckFnInput<ENSRainbowConfig>): void {
   const { value: config } = ctx;
 
   if (config.dbSchemaVersion !== undefined && config.dbSchemaVersion !== DB_SCHEMA_VERSION) {
