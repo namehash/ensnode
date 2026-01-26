@@ -1,5 +1,5 @@
 import { describeRoute } from "hono-openapi";
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import {
   buildPageContext,

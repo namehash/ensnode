@@ -7,7 +7,7 @@
  * `./src/internal.ts` file.
  */
 
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import {
   makeAccountIdSchema,
