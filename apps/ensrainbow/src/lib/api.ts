@@ -1,5 +1,4 @@
 import packageJson from "@/../package.json";
-import config from "@/config";
 
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
@@ -118,11 +117,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       );
     }
 
-    const publicConfig = buildENSRainbowPublicConfig(
-      config,
-      server.getServerLabelSet(),
-      countResult.count,
-    );
+    const publicConfig = buildENSRainbowPublicConfig(server.getServerLabelSet(), countResult.count);
     logger.debug(publicConfig, `Config result`);
     return c.json(publicConfig);
   });

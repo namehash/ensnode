@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ENSRAINBOW_DEFAULT_PORT } from "@/config/defaults";
 
-import { createCLI, validatePortConfiguration } from "./cli";
+import { createCLI } from "./cli";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");

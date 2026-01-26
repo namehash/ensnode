@@ -2,7 +2,7 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { isAbsolute, resolve } from "node:path";
 
-import { ZodError, z } from "zod/v4";
+import { z } from "zod/v4";
 
 import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema, PortSchema } from "@ensnode/ensnode-sdk/internal";
@@ -132,7 +132,6 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
  * @returns A complete ENSRainbowPublicConfig object
  */
 export function buildENSRainbowPublicConfig(
-  config: ENSRainbowConfig,
   labelSet: EnsRainbowServerLabelSet,
   recordsCount: number,
 ): EnsRainbow.ENSRainbowPublicConfig {
