@@ -4,7 +4,7 @@ import { getUnixTime } from "date-fns";
 import { Param, sql } from "drizzle-orm";
 import { namehash } from "viem";
 
-import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
+import { DatasourceNames } from "@ensnode/datasources";
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
@@ -29,8 +29,6 @@ import {
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { db } from "@/lib/db";
 import logger from "@/lib/logger";
-
-const namechain = maybeGetDatasource(config.namespace, DatasourceNames.Namechain);
 
 const ETH_LABELHASH = labelhashLiteralLabel("eth" as LiteralLabel);
 const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
@@ -162,14 +160,10 @@ async function v2_getDomainIdByFqdn(
   const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId(ENS_ROOT_V2_ETH_REGISTRY);
   const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId(NAMECHAIN_V2_ETH_REGISTRY);
 
-  // if the path did not terminate at the .eth Registry, then it was not found
+  // if the path did not terminate at the .eth Registry, then there's nothing to be done and the domain was not found
   if (leaf.registry_id !== ENS_ROOT_V2_ETH_REGISTRY_ID) return null;
 
   logger.debug({ name, rows });
-
-  // TODO(ensv2): remove when all namspaces have Namechain datasource defined
-  // if namechain doesn't exist, we can't bridge the request to that Registry, so terminate
-  if (!namechain) return null;
 
   // Invariant: must be >= 2LD
   if (labelHashPath.length < 2) {
