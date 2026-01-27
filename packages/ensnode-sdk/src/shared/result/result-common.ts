@@ -42,33 +42,28 @@ export interface ResultInsufficientIndexingProgressData {
   /**
    * The current omnichain indexing status.
    */
-  indexingStatus: string;
+  currentIndexingStatus: string;
 
   /**
    * The timestamp of the "slowest" latest indexed block timestamp
    * across all indexed chains.
    */
-  slowestChainIndexingCursor: UnixTimestamp;
+  currentIndexingCursor: UnixTimestamp;
 
   /**
    * The timestamp of the earliest indexed block across all indexed chains.
    */
-  earliestChainIndexingCursor: UnixTimestamp;
+  startIndexingCursor: UnixTimestamp;
 
   /**
-   * Information about when indexing progress is considered sufficient.
+   * The target omnichain indexing status for sufficient progress.
    */
-  progressSufficientFrom: {
-    /**
-     * The required omnichain indexing status for sufficient progress.
-     */
-    indexingStatus: string;
+  targetIndexingStatus: string;
 
-    /**
-     * The timestamp from which indexing progress is considered sufficient.
-     */
-    chainIndexingCursor: UnixTimestamp;
-  };
+  /**
+   * The target timestamp from which indexing progress is considered sufficient.
+   */
+  targetIndexingCursor: UnixTimestamp;
 }
 
 export interface ResultInsufficientIndexingProgress

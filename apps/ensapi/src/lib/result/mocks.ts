@@ -12,6 +12,7 @@ import {
   buildResultNotFound,
   buildResultRequestTimeout,
   buildResultServiceUnavailable,
+  OmnichainIndexingStatusIds,
   ResultCodes,
 } from "@ensnode/ensnode-sdk";
 
@@ -52,14 +53,12 @@ export const mockResultInternalServerError =
 export const mockResultServiceUnavailable = buildResultServiceUnavailable("Service unavailable");
 
 export const mockResultInsufficientIndexingProgress = buildResultInsufficientIndexingProgress(
-  "Insufficient indexing progress",
+  "The connected ENSIndexer has insufficient omnichain indexing progress to serve this request.",
   {
-    indexingStatus: "omnichain-backfill",
-    slowestChainIndexingCursor: 1620003600,
-    earliestChainIndexingCursor: 1620000000,
-    progressSufficientFrom: {
-      indexingStatus: "realtime",
-      chainIndexingCursor: 1620007200,
-    },
+    currentIndexingStatus: OmnichainIndexingStatusIds.Backfill,
+    currentIndexingCursor: 1620003600,
+    startIndexingCursor: 1620000000,
+    targetIndexingStatus: OmnichainIndexingStatusIds.Following,
+    targetIndexingCursor: 1620007200,
   },
 );

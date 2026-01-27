@@ -9,6 +9,7 @@ import {
   buildResultOkRegistrarActions,
   buildResultServiceUnavailable,
   type InterpretedName,
+  OmnichainIndexingStatusIds,
   RegistrarActionTypes,
   ResultCodes,
   serializeResultOkRegistrarActions,
@@ -153,13 +154,11 @@ export const registrarActionsApi503Response = {
           value: buildResultInsufficientIndexingProgress(
             "The connected ENSIndexer has insufficient omnichain indexing progress to serve this request.",
             {
-              indexingStatus: "omnichain-backfill",
-              slowestChainIndexingCursor: 1700000000,
-              earliestChainIndexingCursor: 1690000000,
-              progressSufficientFrom: {
-                indexingStatus: "omnichain-following",
-                chainIndexingCursor: 1705000000,
-              },
+              currentIndexingStatus: OmnichainIndexingStatusIds.Backfill,
+              currentIndexingCursor: 1700000000,
+              startIndexingCursor: 1690000000,
+              targetIndexingStatus: OmnichainIndexingStatusIds.Following,
+              targetIndexingCursor: 1710000000,
             },
           ),
         },

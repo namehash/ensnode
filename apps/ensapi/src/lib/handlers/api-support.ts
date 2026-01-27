@@ -78,13 +78,11 @@ export function getIndexingStatusForSupportedApiHandler(
     ].join(" ");
 
     return buildResultInsufficientIndexingProgress(errorMessage, {
-      indexingStatus: omnichainSnapshot.omnichainStatus,
-      slowestChainIndexingCursor,
-      earliestChainIndexingCursor,
-      progressSufficientFrom: {
-        indexingStatus: targetIndexingStatus,
-        chainIndexingCursor: progressSufficientFromChainIndexingCursor,
-      },
+      currentIndexingStatus: omnichainSnapshot.omnichainStatus,
+      currentIndexingCursor: slowestChainIndexingCursor,
+      startIndexingCursor: earliestChainIndexingCursor,
+      targetIndexingStatus,
+      targetIndexingCursor: progressSufficientFromChainIndexingCursor,
     });
   }
 

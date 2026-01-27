@@ -7,6 +7,7 @@ import {
   buildResultInvalidRequest,
   buildResultOkAmIRealtime,
   buildResultServiceUnavailable,
+  OmnichainIndexingStatusIds,
   ResultCodes,
 } from "@ensnode/ensnode-sdk";
 import {
@@ -100,13 +101,11 @@ export const amIRealtimeApi503Response = {
           value: buildResultInsufficientIndexingProgress(
             "Indexing Status 'worstCaseDistance' must be below or equal to the requested 'requestedMaxWorstCaseDistance'; worstCaseDistance = 12; requestedMaxWorstCaseDistance = 10",
             {
-              indexingStatus: "omnichain-following",
-              slowestChainIndexingCursor: 1768998722,
-              earliestChainIndexingCursor: 1489165544,
-              progressSufficientFrom: {
-                indexingStatus: "omnichain-following",
-                chainIndexingCursor: 1768998731,
-              },
+              currentIndexingStatus: OmnichainIndexingStatusIds.Backfill,
+              currentIndexingCursor: 1768998722,
+              startIndexingCursor: 1489165544,
+              targetIndexingStatus: OmnichainIndexingStatusIds.Following,
+              targetIndexingCursor: 1768998731,
             },
           ),
         },

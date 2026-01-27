@@ -259,7 +259,7 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
 
 const makeSerializedPriceAmountSchema = (_valueLabel: string = "Serialized Price Amount") =>
   z.string();
-const makePriceAmountSchemaNative = (valueLabel: string = "Price Amount") =>
+const makePriceAmountSchema = (valueLabel: string = "Price Amount") =>
   z.preprocess(
     (v) => (typeof v === "string" ? BigInt(v) : v),
     z
@@ -276,7 +276,7 @@ export const makePriceCurrencySchema = (
   valueLabel: string = "Price Currency",
 ) =>
   z.strictObject({
-    amount: makePriceAmountSchemaNative(`${valueLabel} amount`),
+    amount: makePriceAmountSchema(`${valueLabel} amount`),
 
     currency: z.literal(currency, {
       error: `${valueLabel} currency must be set to '${currency}'.`,

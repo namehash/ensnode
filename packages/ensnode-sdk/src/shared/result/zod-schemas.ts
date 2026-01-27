@@ -76,13 +76,11 @@ export const makeResultErrorServiceUnavailableSchema = () =>
  */
 export const makeResultErrorInsufficientIndexingProgressDataSchema = () =>
   z.object({
-    indexingStatus: z.string(),
-    slowestChainIndexingCursor: makeUnixTimestampSchema("slowestChainIndexingCursor"),
-    earliestChainIndexingCursor: makeUnixTimestampSchema("earliestChainIndexingCursor"),
-    progressSufficientFrom: z.object({
-      indexingStatus: z.string(),
-      chainIndexingCursor: makeUnixTimestampSchema("progressSufficientFrom.chainIndexingCursor"),
-    }),
+    currentIndexingStatus: z.string(),
+    currentIndexingCursor: makeUnixTimestampSchema("currentIndexingCursor"),
+    startIndexingCursor: makeUnixTimestampSchema("startIndexingCursor"),
+    targetIndexingStatus: z.string(),
+    targetIndexingCursor: makeUnixTimestampSchema("targetIndexingCursor"),
   });
 
 /**

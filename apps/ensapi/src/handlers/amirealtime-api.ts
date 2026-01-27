@@ -70,13 +70,11 @@ app.get(
       const result = buildResultInsufficientIndexingProgress(
         `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'requestedMaxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; requestedMaxWorstCaseDistance = ${requestedMaxWorstCaseDistance}`,
         {
-          indexingStatus: omnichainSnapshot.omnichainStatus,
-          slowestChainIndexingCursor,
-          earliestChainIndexingCursor,
-          progressSufficientFrom: {
-            indexingStatus: OmnichainIndexingStatusIds.Following,
-            chainIndexingCursor: progressSufficientFromChainIndexingCursor,
-          },
+          currentIndexingStatus: omnichainSnapshot.omnichainStatus,
+          currentIndexingCursor: slowestChainIndexingCursor,
+          startIndexingCursor: earliestChainIndexingCursor,
+          targetIndexingStatus: OmnichainIndexingStatusIds.Following,
+          targetIndexingCursor: progressSufficientFromChainIndexingCursor,
         },
       );
 
