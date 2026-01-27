@@ -3,53 +3,14 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  buildResultInsufficientIndexingProgress,
-  buildResultInternalServerError,
-  buildResultInvalidRequest,
-  buildResultNotFound,
-  buildResultServiceUnavailable,
-  ResultCodes,
-} from "@ensnode/ensnode-sdk";
-
-import { resultCodeToHttpStatusCode, resultIntoHttpResponse } from "./result-into-http-response";
-
-describe("resultCodeToHttpStatusCode", () => {
-  it("should return 200 for ResultCodes.Ok", () => {
-    const statusCode = resultCodeToHttpStatusCode(ResultCodes.Ok);
-
-    expect(statusCode).toBe(200);
-  });
-
-  it("should return 400 for ResultCodes.InvalidRequest", () => {
-    const statusCode = resultCodeToHttpStatusCode(ResultCodes.InvalidRequest);
-
-    expect(statusCode).toBe(400);
-  });
-
-  it("should return 404 for ResultCodes.NotFound", () => {
-    const statusCode = resultCodeToHttpStatusCode(ResultCodes.NotFound);
-
-    expect(statusCode).toBe(404);
-  });
-
-  it("should return 500 for ResultCodes.InternalServerError", () => {
-    const statusCode = resultCodeToHttpStatusCode(ResultCodes.InternalServerError);
-
-    expect(statusCode).toBe(500);
-  });
-
-  it("should return 503 for ResultCodes.ServiceUnavailable", () => {
-    const statusCode = resultCodeToHttpStatusCode(ResultCodes.ServiceUnavailable);
-
-    expect(statusCode).toBe(503);
-  });
-
-  it("should return 503 for ResultCodes.InsufficientIndexingProgress", () => {
-    const statusCode = resultCodeToHttpStatusCode(ResultCodes.InsufficientIndexingProgress);
-
-    expect(statusCode).toBe(503);
-  });
-});
+  mockResultInsufficientIndexingProgress,
+  mockResultInternalServerError,
+  mockResultInvalidRequest,
+  mockResultNotFound,
+  mockResultOk,
+  mockResultServiceUnavailable,
+} from "./mocks";
+import { resultIntoHttpResponse } from "./result-into-http-response";
 
 describe("resultIntoHttpResponse", () => {
   let mockContext: Context;
@@ -63,75 +24,43 @@ describe("resultIntoHttpResponse", () => {
   });
 
   it("should return HTTP response with status 200 for Ok result", async () => {
-    const result = { resultCode: ResultCodes.Ok, data: "test data" };
-
-    const response = resultIntoHttpResponse(mockContext, result);
+    const response = resultIntoHttpResponse(mockContext, mockResultOk);
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toStrictEqual(result);
+    expect(await response.json()).toStrictEqual(mockResultOk);
   });
 
   it("should return HTTP response with status 400 for InvalidRequest result", async () => {
-    const result = buildResultInvalidRequest("Invalid request");
-
-    const response = resultIntoHttpResponse(mockContext, result);
-
+    const response = resultIntoHttpResponse(mockContext, mockResultInvalidRequest);
     expect(response.status).toBe(400);
-    expect(await response.json()).toStrictEqual(result);
+    expect(await response.json()).toStrictEqual(mockResultInvalidRequest);
   });
 
   it("should return HTTP response with status 404 for NotFound result", async () => {
-    const result = buildResultNotFound("Resource not found");
-
-    const response = resultIntoHttpResponse(mockContext, result);
+    const response = resultIntoHttpResponse(mockContext, mockResultNotFound);
 
     expect(response.status).toBe(404);
-    expect(await response.json()).toStrictEqual(result);
+    expect(await response.json()).toStrictEqual(mockResultNotFound);
   });
 
   it("should return HTTP response with status 500 for InternalServerError result", async () => {
-    const result = buildResultInternalServerError("Internal server error");
-
-    const response = resultIntoHttpResponse(mockContext, result);
+    const response = resultIntoHttpResponse(mockContext, mockResultInternalServerError);
 
     expect(response.status).toBe(500);
-    expect(await response.json()).toStrictEqual(result);
+    expect(await response.json()).toStrictEqual(mockResultInternalServerError);
   });
 
   it("should return HTTP response with status 503 for ServiceUnavailable result", async () => {
-    const result = buildResultServiceUnavailable("Service unavailable");
-
-    const response = resultIntoHttpResponse(mockContext, result);
-
+    const response = resultIntoHttpResponse(mockContext, mockResultServiceUnavailable);
     expect(response.status).toBe(503);
     const responseJson = await response.json();
-    expect(responseJson).toStrictEqual(result);
+    expect(responseJson).toStrictEqual(mockResultServiceUnavailable);
   });
 
   it("should return HTTP response with status 503 for InsufficientIndexingProgress result", async () => {
-    const result = buildResultInsufficientIndexingProgress("Insufficient indexing progress", {
-      indexingStatus: "omnichain-backfill",
-      slowestChainIndexingCursor: 1620003600,
-      earliestChainIndexingCursor: 1620000000,
-      progressSufficientFrom: {
-        indexingStatus: "realtime",
-        chainIndexingCursor: 1620007200,
-      },
-    });
-
-    const response = resultIntoHttpResponse(mockContext, result);
-
+    const response = resultIntoHttpResponse(mockContext, mockResultInsufficientIndexingProgress);
     expect(response.status).toBe(503);
     const responseJson = await response.json();
-    expect(responseJson).toStrictEqual(result);
-  });
-
-  it("should handle result with complex data object", async () => {
-    const complexData = { id: 1, name: "Test", attributes: { key: "value" } };
-    const result = { resultCode: ResultCodes.Ok, data: complexData };
-
-    const response = resultIntoHttpResponse(mockContext, result);
-    expect(response.status).toBe(200);
-    expect(await response.json()).toStrictEqual(result);
+    expect(responseJson).toStrictEqual(mockResultInsufficientIndexingProgress);
   });
 });

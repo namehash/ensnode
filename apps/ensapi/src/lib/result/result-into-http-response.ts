@@ -1,31 +1,22 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import { type ResultCodeServerError, ResultCodes } from "@ensnode/ensnode-sdk";
-
-export type ServerResultCode = ResultCodeServerError | typeof ResultCodes.Ok;
+import { type AbstractResult, type ResultCodeServer, ResultCodes } from "@ensnode/ensnode-sdk";
 
 /**
- * Get HTTP status code corresponding to the given operation result code.
+ * Mapping of ResultCodes to HTTP status codes.
  *
- * @param resultCode - The operation result code
- * @returns Corresponding HTTP status code
+ * Used to determine the appropriate HTTP status code for a given operation
+ * result.
  */
-export function resultCodeToHttpStatusCode(resultCode: ServerResultCode): ContentfulStatusCode {
-  switch (resultCode) {
-    case ResultCodes.Ok:
-      return 200;
-    case ResultCodes.InvalidRequest:
-      return 400;
-    case ResultCodes.NotFound:
-      return 404;
-    case ResultCodes.InternalServerError:
-      return 500;
-    case ResultCodes.ServiceUnavailable:
-    case ResultCodes.InsufficientIndexingProgress:
-      return 503;
-  }
-}
+export const HTTP_STATUS_CODES = {
+  [ResultCodes.Ok]: 200,
+  [ResultCodes.InvalidRequest]: 400,
+  [ResultCodes.NotFound]: 404,
+  [ResultCodes.InternalServerError]: 500,
+  [ResultCodes.ServiceUnavailable]: 503,
+  [ResultCodes.InsufficientIndexingProgress]: 503,
+} as const satisfies Record<ResultCodeServer, ContentfulStatusCode>;
 
 /**
  * Get an HTTP response from the given operation result.
@@ -34,12 +25,12 @@ export function resultCodeToHttpStatusCode(resultCode: ServerResultCode): Conten
  * @param result - The operation result
  * @returns HTTP response with appropriate status code and JSON body
  */
-export function resultIntoHttpResponse<TResult extends { resultCode: ServerResultCode }>(
+export function resultIntoHttpResponse(
   c: Context,
-  result: TResult,
+  result: AbstractResult<ResultCodeServer>,
 ): Response {
   // Determine HTTP status code from result code
-  const statusCode = resultCodeToHttpStatusCode(result.resultCode);
+  const statusCode = HTTP_STATUS_CODES[result.resultCode];
 
   // Return JSON response with appropriate status code
   return c.json(result, statusCode);
