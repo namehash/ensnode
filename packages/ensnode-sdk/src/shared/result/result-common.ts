@@ -5,7 +5,7 @@
  */
 
 import type { UnixTimestamp } from "../types";
-import type { AbstractResultError } from "./result-base";
+import type { AbstractResultError, AbstractResultErrorData } from "./result-base";
 import { type ResultCode, ResultCodes } from "./result-code";
 
 /************************************************************
@@ -24,8 +24,10 @@ export const buildResultServiceUnavailable = (
 ): ResultServiceUnavailable => {
   return {
     resultCode: ResultCodes.ServiceUnavailable,
-    errorMessage: errorMessage ?? "The service is currently unavailable.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "The service is currently unavailable.",
+      suggestRetry,
+    },
   };
 };
 
@@ -72,7 +74,7 @@ export interface ResultInsufficientIndexingProgressData {
 export interface ResultInsufficientIndexingProgress
   extends AbstractResultError<
     typeof ResultCodes.InsufficientIndexingProgress,
-    ResultInsufficientIndexingProgressData
+    ResultInsufficientIndexingProgressData & AbstractResultErrorData
   > {}
 
 /**
@@ -84,9 +86,11 @@ export const buildResultInsufficientIndexingProgress = (
 ): ResultInsufficientIndexingProgress => {
   return {
     resultCode: ResultCodes.InsufficientIndexingProgress,
-    suggestRetry: true,
-    errorMessage,
-    data,
+    data: {
+      ...data,
+      errorMessage,
+      suggestRetry: true,
+    },
   };
 };
 
@@ -106,8 +110,10 @@ export const buildResultInternalServerError = (
 ): ResultInternalServerError => {
   return {
     resultCode: ResultCodes.InternalServerError,
-    errorMessage: errorMessage ?? "An unknown internal server error occurred.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "An unknown internal server error occurred.",
+      suggestRetry,
+    },
   };
 };
 
@@ -126,8 +132,10 @@ export const buildResultNotFound = (
 ): ResultNotFound => {
   return {
     resultCode: ResultCodes.NotFound,
-    errorMessage: errorMessage ?? "Requested resource not found.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Requested resource not found.",
+      suggestRetry,
+    },
   };
 };
 
@@ -147,8 +155,10 @@ export const buildResultInvalidRequest = (
 ): ResultInvalidRequest => {
   return {
     resultCode: ResultCodes.InvalidRequest,
-    errorMessage: errorMessage ?? "Invalid request.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Invalid request.",
+      suggestRetry,
+    },
   };
 };
 
@@ -168,8 +178,10 @@ export const buildResultConnectionError = (
 ): ResultConnectionError => {
   return {
     resultCode: ResultCodes.ConnectionError,
-    errorMessage: errorMessage ?? "Connection error.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Connection error.",
+      suggestRetry,
+    },
   };
 };
 
@@ -189,8 +201,10 @@ export const buildResultRequestTimeout = (
 ): ResultRequestTimeout => {
   return {
     resultCode: ResultCodes.RequestTimeout,
-    errorMessage: errorMessage ?? "Request timed out.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Request timed out.",
+      suggestRetry,
+    },
   };
 };
 
@@ -239,8 +253,10 @@ export const buildResultClientUnrecognizedOperationResult = (
 
   return {
     resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-    errorMessage,
-    suggestRetry,
+    data: {
+      errorMessage,
+      suggestRetry,
+    },
   };
 };
 

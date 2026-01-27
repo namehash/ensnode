@@ -26,7 +26,8 @@ export interface AbstractResult<TResultCode extends ResultCode> {
 /**
  * Abstract representation of a successful result.
  */
-export interface AbstractResultOk<TDataType> extends AbstractResult<typeof ResultCodes.Ok> {
+export interface AbstractResultOk<TDataType extends object>
+  extends AbstractResult<typeof ResultCodes.Ok> {
   /**
    * The data of the result.
    */
@@ -37,7 +38,8 @@ export interface AbstractResultOk<TDataType> extends AbstractResult<typeof Resul
  * Abstract representation of a successful result with data guaranteed to be
  * at least up to a certain timestamp.
  */
-export interface AbstractResultOkTimestamped<TDataType> extends AbstractResultOk<TDataType> {
+export interface AbstractResultOkTimestamped<TDataType extends object>
+  extends AbstractResultOk<TDataType> {
   /**
    * The minimum indexing cursor timestamp that the data is
    * guaranteed to be accurate as of.
@@ -54,12 +56,9 @@ export interface AbstractResultOkTimestamped<TDataType> extends AbstractResultOk
 }
 
 /**
- * Abstract representation of an error result.
+ * Abstract representation of error result data.
  */
-export interface AbstractResultError<
-  TResultCode extends ResultCodeServerError | ResultCodeClientError,
-  TDataType = undefined,
-> extends AbstractResult<TResultCode> {
+export interface AbstractResultErrorData {
   /**
    * A description of the error.
    */
@@ -71,17 +70,25 @@ export interface AbstractResultError<
    * If `false`, retrying the operation is unlikely to be helpful.
    */
   suggestRetry: boolean;
+}
 
+/**
+ * Abstract representation of an error result.
+ */
+export interface AbstractResultError<
+  TResultCode extends ResultCodeServerError | ResultCodeClientError,
+  TDataType extends AbstractResultErrorData = AbstractResultErrorData,
+> extends AbstractResult<TResultCode> {
   /**
-   * Optional data associated with the error.
+   * Data associated with the error.
    */
-  data?: TDataType;
+  data: TDataType;
 }
 
 /**
  * Abstract representation of a loading result.
  */
-export interface AbstractResultLoading<TDataType = undefined>
+export interface AbstractResultLoading<TDataType extends object | undefined = undefined>
   extends AbstractResult<typeof ResultCodes.Loading> {
   /**
    * Optional data associated with the loading operation.

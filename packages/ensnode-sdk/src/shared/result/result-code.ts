@@ -115,6 +115,11 @@ export type ResultCodeDefinite = Exclude<ResultCode, ResultCodeIndefinite>;
 export type ResultCodeServerError = (typeof RESULT_CODE_SERVER_ERROR_CODES)[number];
 
 /**
+ * ResultCode for a result that may be determined by the server.
+ */
+export type ResultCodeServer = ResultCodeServerError | typeof ResultCodes.Ok;
+
+/**
  * ResultCode for an error result that may be determined by the client.
  */
 export type ResultCodeClientError = (typeof RESULT_CODE_CLIENT_ERROR_CODES)[number];
