@@ -18,8 +18,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.InternalServerError,
-        errorMessage: "Database connection failed",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Database connection failed",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -28,8 +30,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.InternalServerError,
-        errorMessage: "An unknown internal server error occurred.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "An unknown internal server error occurred.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -38,8 +42,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.InternalServerError,
-        errorMessage: "Error",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Error",
+          suggestRetry: false,
+        },
       });
     });
   });
@@ -50,8 +56,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.NotFound,
-        errorMessage: "User not found",
-        suggestRetry: false,
+        data: {
+          errorMessage: "User not found",
+          suggestRetry: false,
+        },
       });
     });
 
@@ -60,8 +68,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.NotFound,
-        errorMessage: "Requested resource not found.",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Requested resource not found.",
+          suggestRetry: false,
+        },
       });
     });
 
@@ -70,8 +80,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.NotFound,
-        errorMessage: "Not found",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Not found",
+          suggestRetry: true,
+        },
       });
     });
   });
@@ -82,8 +94,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.InvalidRequest,
-        errorMessage: "Missing required field: email",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Missing required field: email",
+          suggestRetry: false,
+        },
       });
     });
 
@@ -92,8 +106,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.InvalidRequest,
-        errorMessage: "Invalid request.",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Invalid request.",
+          suggestRetry: false,
+        },
       });
     });
 
@@ -102,8 +118,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.InvalidRequest,
-        errorMessage: "Bad input",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Bad input",
+          suggestRetry: true,
+        },
       });
     });
   });
@@ -114,8 +132,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ConnectionError,
-        errorMessage: "Failed to connect to server",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Failed to connect to server",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -124,8 +144,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ConnectionError,
-        errorMessage: "Connection error.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Connection error.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -134,8 +156,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ConnectionError,
-        errorMessage: "Connection failed",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Connection failed",
+          suggestRetry: false,
+        },
       });
     });
   });
@@ -146,8 +170,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.RequestTimeout,
-        errorMessage: "Request exceeded 30 second limit",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Request exceeded 30 second limit",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -156,8 +182,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.RequestTimeout,
-        errorMessage: "Request timed out.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Request timed out.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -166,8 +194,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.RequestTimeout,
-        errorMessage: "Timeout",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Timeout",
+          suggestRetry: false,
+        },
       });
     });
   });
@@ -178,8 +208,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "An unrecognized result for the operation occurred.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "An unrecognized result for the operation occurred.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -189,8 +221,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "Custom error message",
-        suggestRetry: true,
+        data: {
+          errorMessage: "Custom error message",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -200,8 +234,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "An unrecognized result for the operation occurred.",
-        suggestRetry: false,
+        data: {
+          errorMessage: "An unrecognized result for the operation occurred.",
+          suggestRetry: false,
+        },
       });
     });
 
@@ -214,8 +250,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "Custom error",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Custom error",
+          suggestRetry: false,
+        },
       });
     });
 
@@ -225,8 +263,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "An unrecognized result for the operation occurred.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "An unrecognized result for the operation occurred.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -236,8 +276,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "An unrecognized result for the operation occurred.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "An unrecognized result for the operation occurred.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -246,8 +288,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "An unrecognized result for the operation occurred.",
-        suggestRetry: true,
+        data: {
+          errorMessage: "An unrecognized result for the operation occurred.",
+          suggestRetry: true,
+        },
       });
     });
 
@@ -262,8 +306,10 @@ describe("Result Error Builders", () => {
 
       expect(result).toStrictEqual({
         resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-        errorMessage: "Error occurred",
-        suggestRetry: false,
+        data: {
+          errorMessage: "Error occurred",
+          suggestRetry: false,
+        },
       });
     });
   });

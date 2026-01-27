@@ -7,14 +7,27 @@ import {
   type ChainIndexingStatusSnapshotFollowing,
   type CrossChainIndexingStatusSnapshot,
   createRealtimeIndexingStatusProjection,
+  ENSNamespaceIds,
   OmnichainIndexingStatusIds,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
 
+import type { EnsApiConfig } from "@/config/config.schema";
 import { factory } from "@/lib/hono-factory";
 import * as middleware from "@/middleware/indexing-status.middleware";
 
 import amIRealtimeApi, { AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE } from "./amirealtime-api"; // adjust import path as needed
+
+vi.mock("@/config", () => ({
+  get default() {
+    const mockedConfig: Pick<EnsApiConfig, "ensIndexerUrl" | "namespace"> = {
+      ensIndexerUrl: new URL("https://ensnode.example.com"),
+      namespace: ENSNamespaceIds.Mainnet,
+    };
+
+    return mockedConfig;
+  },
+}));
 
 vi.mock("@/middleware/indexing-status.middleware", () => ({
   indexingStatusMiddleware: vi.fn(),
@@ -267,8 +280,7 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(503);
-        expect(responseJson).toHaveProperty("errorMessage");
-        expect(responseJson.errorMessage).toMatch(
+        expect(responseJson.data.errorMessage).toMatch(
           /Indexing Status 'worstCaseDistance' must be below or equal to the requested 'requestedMaxWorstCaseDistance'; worstCaseDistance = 11; requestedMaxWorstCaseDistance = 10/,
         );
       });
@@ -289,9 +301,8 @@ describe("amirealtime-api", () => {
 
         // Assert
         expect(response.status).toBe(503);
-        expect(responseJson).toHaveProperty("errorMessage");
-        expect(responseJson.errorMessage).toMatch(
-          /Indexing Status must be resolved successfully before 'requestedMaxWorstCaseDistance' can be applied./,
+        expect(responseJson.data.errorMessage).toMatch(
+          /This API is temporarily unavailable for this ENSNode instance. The indexing status has not been loaded by ENSApi yet./,
         );
       });
     });
