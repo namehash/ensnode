@@ -8,9 +8,9 @@ import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
 import {
-  buildHealthResultOk,
   buildResultInternalServerError,
   buildResultNotFound,
+  buildResultOkHealth,
 } from "@ensnode/ensnode-sdk";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
@@ -118,7 +118,7 @@ app.get(
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  const result = buildHealthResultOk("fallback ok");
+  const result = buildResultOkHealth({ message: "fallback ok" });
 
   return resultIntoHttpResponse(c, result);
 });
@@ -130,12 +130,12 @@ app.notFound((c) => {
 });
 
 // log hono errors to console
-app.onError((error, ctx) => {
+app.onError((error, c) => {
   logger.error(error);
 
   const result = buildResultInternalServerError(`Internal Server Error: ${error.message}`);
 
-  return resultIntoHttpResponse(ctx, result);
+  return resultIntoHttpResponse(c, result);
 });
 
 // start ENSNode API OpenTelemetry SDK

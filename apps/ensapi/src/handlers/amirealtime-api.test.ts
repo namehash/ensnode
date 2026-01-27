@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  buildAmIRealtimeResultOk,
+  buildResultOkAmIRealtime,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotFollowing,
@@ -91,64 +91,73 @@ describe("amirealtime-api", () => {
 
   describe("GET /amirealtime", () => {
     describe("request", () => {
-      it("should accept valid maxWorstCaseDistance query param", async () => {
+      it("should accept valid requestedMaxWorstCaseDistance query param", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=300");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=300",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildAmIRealtimeResultOk({
-            maxWorstCaseDistance: 300,
+          buildResultOkAmIRealtime({
+            requestedMaxWorstCaseDistance: 300,
             worstCaseDistance: 10,
             slowestChainIndexingCursor: now - 10,
+            serverNow: now,
           }),
         );
       });
 
-      it("should accept valid maxWorstCaseDistance query param (set to `0`)", async () => {
+      it("should accept valid requestedMaxWorstCaseDistance query param (set to `0`)", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=0");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=0",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildAmIRealtimeResultOk({
-            maxWorstCaseDistance: 0,
+          buildResultOkAmIRealtime({
+            requestedMaxWorstCaseDistance: 0,
             worstCaseDistance: 0,
             slowestChainIndexingCursor: now,
+            serverNow: now,
           }),
         );
       });
 
-      it("should use default maxWorstCaseDistance when unset", async () => {
+      it("should use default requestedMaxWorstCaseDistance when unset", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildAmIRealtimeResultOk({
-            maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
+          buildResultOkAmIRealtime({
+            requestedMaxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
             worstCaseDistance: 10,
             slowestChainIndexingCursor: now - 10,
+            serverNow: now,
           }),
         );
       });
 
-      it("should use default maxWorstCaseDistance when not provided", async () => {
+      it("should use default requestedMaxWorstCaseDistance when not provided", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
@@ -159,97 +168,108 @@ describe("amirealtime-api", () => {
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildAmIRealtimeResultOk({
-            maxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
+          buildResultOkAmIRealtime({
+            requestedMaxWorstCaseDistance: AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE,
             worstCaseDistance: 10,
             slowestChainIndexingCursor: now - 10,
+            serverNow: now,
           }),
         );
       });
 
-      it("should reject invalid maxWorstCaseDistance (negative number)", async () => {
-        // Arrange: set `indexingStatus` context var
-        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
-
-        // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=-1");
-
-        // Assert
-        expect(response.status).toBe(400);
-        await expect(response.text()).resolves.toMatch(
-          /maxWorstCaseDistance query param must be a non-negative integer/,
-        );
-      });
-
-      it("should reject invalid maxWorstCaseDistance (not a number)", async () => {
+      it("should reject invalid requestedMaxWorstCaseDistance (negative number)", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
         const response = await app.request(
-          "http://localhost/amirealtime?maxWorstCaseDistance=invalid",
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=-1",
         );
 
         // Assert
         expect(response.status).toBe(400);
         await expect(response.text()).resolves.toMatch(
-          /maxWorstCaseDistance query param must be a number/,
+          /requestedMaxWorstCaseDistance query param must be a non-negative integer/,
+        );
+      });
+
+      it("should reject invalid requestedMaxWorstCaseDistance (not a number)", async () => {
+        // Arrange: set `indexingStatus` context var
+        arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
+
+        // Act
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=invalid",
+        );
+
+        // Assert
+        expect(response.status).toBe(400);
+        await expect(response.text()).resolves.toMatch(
+          /requestedMaxWorstCaseDistance query param must be a number/,
         );
       });
     });
 
     describe("response", () => {
-      it("should return 200 when worstCaseDistance is below maxWorstCaseDistance", async () => {
+      it("should return 200 when worstCaseDistance is below requestedMaxWorstCaseDistance", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 9 });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=10",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildAmIRealtimeResultOk({
-            maxWorstCaseDistance: 10,
+          buildResultOkAmIRealtime({
+            requestedMaxWorstCaseDistance: 10,
             slowestChainIndexingCursor: now - 9,
             worstCaseDistance: 9,
+            serverNow: now,
           }),
         );
       });
 
-      it("should return 200 when worstCaseDistance equals maxWorstCaseDistance", async () => {
+      it("should return 200 when worstCaseDistance equals requestedMaxWorstCaseDistance", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 10 });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=10",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(200);
         expect(responseJson).toStrictEqual(
-          buildAmIRealtimeResultOk({
-            maxWorstCaseDistance: 10,
+          buildResultOkAmIRealtime({
+            requestedMaxWorstCaseDistance: 10,
             slowestChainIndexingCursor: 1766123719,
             worstCaseDistance: 10,
+            serverNow: now,
           }),
         );
       });
 
-      it("should return 503 when worstCaseDistance exceeds maxWorstCaseDistance", async () => {
+      it("should return 503 when worstCaseDistance exceeds requestedMaxWorstCaseDistance", async () => {
         // Arrange: set `indexingStatus` context var
         arrangeMockedIndexingStatusMiddleware({ now, slowestChainIndexingCursor: now - 11 });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=10",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(503);
         expect(responseJson).toHaveProperty("errorMessage");
         expect(responseJson.errorMessage).toMatch(
-          /Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = 11; maxWorstCaseDistance = 10/,
+          /Indexing Status 'worstCaseDistance' must be below or equal to the requested 'requestedMaxWorstCaseDistance'; worstCaseDistance = 11; requestedMaxWorstCaseDistance = 10/,
         );
       });
 
@@ -262,14 +282,16 @@ describe("amirealtime-api", () => {
         });
 
         // Act
-        const response = await app.request("http://localhost/amirealtime?maxWorstCaseDistance=10");
+        const response = await app.request(
+          "http://localhost/amirealtime?requestedMaxWorstCaseDistance=10",
+        );
         const responseJson = await response.json();
 
         // Assert
         expect(response.status).toBe(503);
         expect(responseJson).toHaveProperty("errorMessage");
         expect(responseJson.errorMessage).toMatch(
-          /Indexing Status must be resolved successfully before 'maxWorstCaseDistance' can be applied./,
+          /Indexing Status must be resolved successfully before 'requestedMaxWorstCaseDistance' can be applied./,
         );
       });
     });
