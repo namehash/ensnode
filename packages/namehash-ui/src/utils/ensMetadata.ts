@@ -23,8 +23,10 @@ export function getEnsMetadataServiceAvatarUrl(
     case ENSNamespaceIds.Mainnet:
       return new URL(name, `https://metadata.ens.domains/mainnet/avatar/`);
     case ENSNamespaceIds.Sepolia:
-    case ENSNamespaceIds.SepoliaV2:
       return new URL(name, `https://metadata.ens.domains/sepolia/avatar/`);
+    case ENSNamespaceIds.SepoliaV2:
+      // sepolia-v2 is an ephemeral test deployment of ensv2 to sepolia and doesn't have a metadata service
+      return null;
     case ENSNamespaceIds.EnsTestEnv:
       // ens-test-env runs on a local chain and is not supported by metadata.ens.domains
       // TODO: Above comment is not true. Details at https://github.com/namehash/ensnode/issues/1078

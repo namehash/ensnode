@@ -15,8 +15,10 @@ export function getEnsManagerUrl(namespaceId: ENSNamespaceId): URL | null {
     case ENSNamespaceIds.Mainnet:
       return new URL(`https://app.ens.domains/`);
     case ENSNamespaceIds.Sepolia:
-    case ENSNamespaceIds.SepoliaV2:
       return new URL(`https://sepolia.app.ens.domains/`);
+    case ENSNamespaceIds.SepoliaV2:
+      // sepolia-v2 is an ephemeral test deployment of ensv2 to sepolia and doesn't have a manager url
+      return null;
     case ENSNamespaceIds.EnsTestEnv:
       // ens-test-env runs on a local chain and is not supported by app.ens.domains
       return null;
