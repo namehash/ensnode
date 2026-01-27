@@ -1,6 +1,5 @@
-import type { UnixTimestamp } from "@namehash/ens-referrals";
-
 import type { InterpretedName, Node } from "../../ens";
+import type { UnixTimestamp } from "../../shared/types";
 import type { NameToken, NameTokenOwnershipTypes } from "../../tokenscope";
 import type { ErrorResponse } from "../shared/errors";
 

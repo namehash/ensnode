@@ -1,5 +1,3 @@
-import type { Duration } from "@namehash/ens-referrals";
-
 import type { BlockRef, ChainId, UnixTimestamp } from "../../shared";
 import {
   type ChainIndexingConfig,
@@ -175,29 +173,12 @@ export function createIndexingConfig(
 }
 
 /**
- * Get sufficient indexing progress chain cursor for given Indexing Status
- * parameters.
- *
- * @param slowestChainIndexingCursor Slowest Chain Indexing Cursor
- * @param worstCaseDistance Worst Case Distance
- * @param maxWorstCaseDistance Maximum Worst Case Distance
- * @returns Sufficient Indexing Progress Chain Cursor
- */
-export function getSufficientIndexingProgressChainCursor(
-  slowestChainIndexingCursor: UnixTimestamp,
-  worstCaseDistance: Duration,
-  maxWorstCaseDistance: Duration,
-): UnixTimestamp {
-  return slowestChainIndexingCursor + worstCaseDistance - maxWorstCaseDistance;
-}
-
-/**
- * Get Chain Indexing Config Type ID from Chain Indexing Status Snapshots.
+ * Get Omnichain Indexing Config Type ID from Chain Indexing Status Snapshots.
  * @param chains Chain Indexing Status Snapshots
- * @returns Chain Indexing Config Type ID
- * @throws Error if Chain Indexing Config Type IDs are mixed across chains
+ * @returns Omnichain Indexing Config Type ID
+ * @throws Error if Omnichain Indexing Config Type IDs are mixed across chains
  */
-export function getChainIndexingConfigTypeId(
+export function getOmnichainIndexingConfigTypeId(
   chains: ChainIndexingStatusSnapshot[],
 ): ChainIndexingConfigTypeId {
   const chainConfigTypeIds = chains.map((chain) => chain.config.configType);

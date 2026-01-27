@@ -1,16 +1,16 @@
 import { type AbstractResultOk, ResultCodes } from "../../shared";
 
 /**
- * Successful result data for Health API requests.
+ * Data included with a successful Health result.
  */
-export type HealthResultOkData = string;
+export type ResultOkHealthData = { message: string };
 
 /**
  * Successful result for Health API requests.
  */
-export type HealthResultOk = AbstractResultOk<HealthResultOkData>;
+export type ResultOkHealth = AbstractResultOk<ResultOkHealthData>;
 
-export function buildHealthResultOk(data: HealthResultOkData): HealthResultOk {
+export function buildResultOkHealth(data: ResultOkHealthData): ResultOkHealth {
   return {
     resultCode: ResultCodes.Ok,
     data,
@@ -20,4 +20,4 @@ export function buildHealthResultOk(data: HealthResultOkData): HealthResultOk {
 /**
  * The operation result for Health API requests.
  */
-export type HealthServerResult = HealthResultOk;
+export type HealthServerResult = ResultOkHealth;

@@ -12,10 +12,10 @@ import { ErrorResponseSchema } from "../shared/errors/zod-schemas";
 import { makeResponsePageContextSchema } from "../shared/pagination/zod-schemas";
 import { type NamedRegistrarAction, RegistrarActionsResponseCodes } from "./response";
 import type {
-  RegistrarActionsResultOk,
-  RegistrarActionsResultOkData,
-  SerializedRegistrarActionsResultOk,
-  SerializedRegistrarActionsResultOkData,
+  ResultOkRegistrarActions,
+  ResultOkRegistrarActionsData,
+  SerializedResultOkRegistrarActions,
+  SerializedResultOkRegistrarActionsData,
 } from "./result";
 import type { SerializedNamedRegistrarAction } from "./serialized-response";
 
@@ -102,10 +102,10 @@ export const makeRegistrarActionsResponseSchema = (
   ]);
 
 /**
- * Schema for {@link RegistrarActionsResultOk}
+ * Schema for {@link ResultOkRegistrarActions}
  */
-export const makeRegistrarActionsResultOkSchema = () =>
-  makeAbstractResultOkTimestampedSchema<RegistrarActionsResultOkData>(
+export const makeResultOkRegistrarActionsSchema = () =>
+  makeAbstractResultOkTimestampedSchema<ResultOkRegistrarActionsData>(
     z.object({
       registrarActions: z.array(makeNamedRegistrarActionSchema("registrarActions")),
       pageContext: makeResponsePageContextSchema("pageContext"),
@@ -113,10 +113,10 @@ export const makeRegistrarActionsResultOkSchema = () =>
   );
 
 /**
- * Schema for {@link SerializedRegistrarActionsResultOk}
+ * Schema for {@link SerializedResultOkRegistrarActions}
  */
-export const makeSerializedRegistrarActionsResultOkSchema = () =>
-  makeAbstractResultOkTimestampedSchema<SerializedRegistrarActionsResultOkData>(
+export const makeSerializedResultOkRegistrarActionsSchema = () =>
+  makeAbstractResultOkTimestampedSchema<SerializedResultOkRegistrarActionsData>(
     z.object({
       registrarActions: z.array(makeSerializedNamedRegistrarActionSchema("registrarActions")),
       pageContext: makeResponsePageContextSchema("pageContext"),

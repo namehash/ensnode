@@ -11,15 +11,14 @@ import {
 } from "../../shared";
 
 /**
- * Successful result data for "Am I Realtime?" API requests.
+ * Data included with a successful "Am I Realtime?" result.
  */
-export interface AmIRealtimeResultOkData {
+export interface ResultOkAmIRealtimeData {
   /**
-   * Represents the maximum worst-case distance from the current "tip" of
-   * all indexed chains. `maxWorstCaseDistance` is defined by the client
-   * making the request.
+   * The client's requested max worst-case distance from the current "tip" of
+   * all indexed chains.
    */
-  maxWorstCaseDistance: Duration;
+  requestedMaxWorstCaseDistance: Duration;
 
   /**
    * Worst-case distance in seconds.
@@ -27,7 +26,7 @@ export interface AmIRealtimeResultOkData {
    * See {@link RealtimeIndexingStatusProjection.worstCaseDistance} for details.
    *
    * Guarantees:
-   * - `worstCaseDistance` is always less than or equal to `maxWorstCaseDistance`.
+   * - `worstCaseDistance` is always less than or equal to `requestedMaxWorstCaseDistance`.
    */
   worstCaseDistance: Duration;
 
@@ -37,14 +36,23 @@ export interface AmIRealtimeResultOkData {
    * See {@link RealtimeIndexingStatusProjection.slowestChainIndexingCursor} for details.
    */
   slowestChainIndexingCursor: UnixTimestamp;
+
+  /**
+   * The server's current time.
+   *
+   * Guarantees:
+   * - `serverNow` is always greater than or equal to `slowestChainIndexingCursor`.
+   * - `serverNow - slowestChainIndexingCursor` always equals to `worstCaseDistance`.
+   */
+  serverNow: UnixTimestamp;
 }
 
 /**
  * Successful result for "Am I Realtime?" API requests.
  */
-export type AmIRealtimeResultOk = AbstractResultOk<AmIRealtimeResultOkData>;
+export type ResultOkAmIRealtime = AbstractResultOk<ResultOkAmIRealtimeData>;
 
-export function buildAmIRealtimeResultOk(data: AmIRealtimeResultOkData): AmIRealtimeResultOk {
+export function buildResultOkAmIRealtime(data: ResultOkAmIRealtimeData): ResultOkAmIRealtime {
   return {
     resultCode: ResultCodes.Ok,
     data,
@@ -58,8 +66,8 @@ export function buildAmIRealtimeResultOk(data: AmIRealtimeResultOkData): AmIReal
  * at runtime.
  */
 export type AmIRealtimeServerResult =
-  | AmIRealtimeResultOk
+  | ResultOkAmIRealtime
   | ResultInvalidRequest
-  | ResultInternalServerError
-  | ResultServiceUnavailable
-  | ResultInsufficientIndexingProgress;
+  | ResultInternalServerError // used when Indexing Status middleware was not correctly applied
+  | ResultServiceUnavailable // used when Indexing Status couldn't be determined yet
+  | ResultInsufficientIndexingProgress; // used when Indexing Status could be determined but indexing progress was insufficient

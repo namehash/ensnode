@@ -3,10 +3,9 @@ import { describe, expect, it } from "vitest";
 import type { BlockRef } from "../../shared";
 import {
   createIndexingConfig,
-  getChainIndexingConfigTypeId,
+  getOmnichainIndexingConfigTypeId,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
-  getSufficientIndexingProgressChainCursor,
 } from "./helpers";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
@@ -200,7 +199,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
     });
   });
 
-  describe("getChainIndexingConfigTypeId", () => {
+  describe("getOmnichainIndexingConfigTypeId", () => {
     it("returns the correct config type id when all chains have the Definite config", () => {
       // arrange
       const chainStatuses: ChainIndexingStatusSnapshot[] = [
@@ -225,7 +224,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
       ];
 
       // act
-      const configTypeId = getChainIndexingConfigTypeId(chainStatuses);
+      const configTypeId = getOmnichainIndexingConfigTypeId(chainStatuses);
 
       // assert
       expect(configTypeId).toBe(ChainIndexingConfigTypeIds.Definite);
@@ -253,7 +252,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
       ];
 
       // act
-      const configTypeId = getChainIndexingConfigTypeId(chainStatuses);
+      const configTypeId = getOmnichainIndexingConfigTypeId(chainStatuses);
 
       // assert
       expect(configTypeId).toBe(ChainIndexingConfigTypeIds.Indefinite);
@@ -282,7 +281,7 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
       ];
 
       // act & assert
-      expect(() => getChainIndexingConfigTypeId(chainStatuses)).toThrowError(
+      expect(() => getOmnichainIndexingConfigTypeId(chainStatuses)).toThrowError(
         /All ChainIndexingConfigTypeIds must be the same across indexed chains to determine overall ConfigTypeId/i,
       );
     });
@@ -415,24 +414,5 @@ describe("getOmnichainIndexingCursor", () => {
     expect(() => getOmnichainIndexingCursor([])).toThrowError(
       /Unable to determine omnichain indexing cursor/,
     );
-  });
-});
-
-describe("getSufficientIndexingProgressChainCursor", () => {
-  it("calculates sufficient indexing progress chain cursor correctly", () => {
-    // arrange
-    const slowestChainIndexingCursor = 1500; // example timestamp
-    const worstCaseDistance = 300; // 5 minutes in seconds
-    const maxWorstCaseDistance = 120; // 2 minutes in seconds
-
-    // act
-    const sufficientCursor = getSufficientIndexingProgressChainCursor(
-      slowestChainIndexingCursor,
-      worstCaseDistance,
-      maxWorstCaseDistance,
-    );
-
-    // assert
-    expect(sufficientCursor).toBe(1680);
   });
 });
