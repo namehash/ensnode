@@ -38,7 +38,7 @@ export const getDatasourcesWithResolvers = (
       // all of the relevant datasources provide a Resolver ContractConfig with a `startBlock`
       if (!datasource.contracts.Resolver) {
         throw new Error(
-          `Invariant: Datasource does not define a 'Resolver' contract: ${JSON.stringify(datasource)}`,
+          `Invariant: Datasource does not define a 'Resolver' contract. Defined contracts: ${JSON.stringify(Object.keys(datasource.contracts))}`,
         );
       }
 

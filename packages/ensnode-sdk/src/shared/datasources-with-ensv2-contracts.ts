@@ -32,7 +32,7 @@ export const getDatasourcesWithENSv2Contracts = (
       // all of the relevant datasources provide a Registry and EnhancedAccessControl ContractConfig
       if (!datasource.contracts.Registry || !datasource.contracts.EnhancedAccessControl) {
         throw new Error(
-          `Invariant: Datasource does not define a 'Registry' 'EnhancedAccessControl' contracts: ${JSON.stringify(datasource)}`,
+          `Invariant: Datasource does not define 'Registry' and 'EnhancedAccessControl' contracts. Defined contracts: ${JSON.stringify(Object.keys(datasource.contracts))}`,
         );
       }
 

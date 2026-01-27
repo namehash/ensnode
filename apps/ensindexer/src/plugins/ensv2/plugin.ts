@@ -68,13 +68,13 @@ export const pluginName = PluginName.ENSv2;
 
 const REQUIRED_DATASOURCE_NAMES = [
   DatasourceNames.ENSRoot, //
-  DatasourceNames.ENSv2Root,
 ];
 
 const ALL_DATASOURCE_NAMES = [
   ...REQUIRED_DATASOURCE_NAMES,
   DatasourceNames.Basenames,
   DatasourceNames.Lineanames,
+  DatasourceNames.ENSv2Root,
   DatasourceNames.ENSv2ETHRegistry,
 ];
 

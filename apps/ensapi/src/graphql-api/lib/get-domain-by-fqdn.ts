@@ -135,7 +135,7 @@ async function v2_getDomainIdByFqdn(
 
   if (!ENSv2Root) return null;
 
-  const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId({
+  const ENSv2L1ETHRegistryId = makeRegistryId({
     chainId: ENSv2Root.chain.id,
     address: ENSv2Root.contracts.ETHRegistry.address,
   });
@@ -146,7 +146,7 @@ async function v2_getDomainIdByFqdn(
   // set as its resolver, but that is unnecessary at the moment and incurs additional db requests or a join against
   // domain_resolver_relationships
   // TODO: generalize this into other future bridging resolvers depending on how basenames etc do it
-  if (leaf.registry_id === ENS_ROOT_V2_ETH_REGISTRY_ID) {
+  if (leaf.registry_id === ENSv2L1ETHRegistryId) {
     // if ENSv2ETHRegistry datasource doesn't exist, we can't bridge the request to that Registry, so terminate
     if (!ENSv2ETHRegistry) return null;
 
@@ -187,12 +187,12 @@ async function v2_getDomainIdByFqdn(
       `ETHTLDResolver deferring '${nameWithoutTld}' to ENSv2 .eth Registry on Namechain...`,
     );
 
-    const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId({
+    const ENSv2L2ETHRegistryId = makeRegistryId({
       chainId: ENSv2ETHRegistry.chain.id,
       address: ENSv2ETHRegistry.contracts.ETHRegistry.address,
     });
 
-    return v2_getDomainIdByFqdn(NAMECHAIN_V2_ETH_REGISTRY_ID, nameWithoutTld);
+    return v2_getDomainIdByFqdn(ENSv2L2ETHRegistryId, nameWithoutTld);
   }
 
   // finally, not found
