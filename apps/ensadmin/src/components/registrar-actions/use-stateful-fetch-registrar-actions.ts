@@ -1,7 +1,9 @@
 import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
 import {
-  getChainIndexingConfigTypeId,
+  getOmnichainIndexingConfigTypeId,
+  getSupportedIndexingStatusForApiHandler,
   IndexingStatusResponseCodes,
+  isApiHandlerSupportedByIndexingStatus,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
   registrarActionsPrerequisites,
@@ -24,12 +26,7 @@ interface UseStatefulRegistrarActionsProps {
   itemsPerPage: number;
 }
 
-const {
-  hasEnsIndexerConfigSupport,
-  hasIndexingStatusSupport,
-  requiredPlugins,
-  getSupportedIndexingStatus,
-} = registrarActionsPrerequisites;
+const { hasEnsIndexerConfigSupport, requiredPlugins } = registrarActionsPrerequisites;
 
 /**
  * Use Stateful Registrar Actions
@@ -53,11 +50,11 @@ export function useStatefulRegistrarActions({
     const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
     const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
     const chains = Array.from(omnichainSnapshot.chains.values());
-    const configTypeId = getChainIndexingConfigTypeId(chains);
+    const configTypeId = getOmnichainIndexingConfigTypeId(chains);
 
     isRegistrarActionsApiSupported =
       hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
-      hasIndexingStatusSupport(configTypeId, omnichainSnapshot.omnichainStatus);
+      isApiHandlerSupportedByIndexingStatus(configTypeId, omnichainSnapshot.omnichainStatus);
   }
 
   // Note: ENSNode Registrar Actions API is available only in certain cases.
@@ -105,13 +102,13 @@ export function useStatefulRegistrarActions({
 
   const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
   const chains = Array.from(omnichainSnapshot.chains.values());
-  const configTypeId = getChainIndexingConfigTypeId(chains);
+  const configTypeId = getOmnichainIndexingConfigTypeId(chains);
 
   // fetching is temporarily not possible due to indexing status being not advanced enough
-  if (!hasIndexingStatusSupport(configTypeId, omnichainSnapshot.omnichainStatus)) {
+  if (!isApiHandlerSupportedByIndexingStatus(configTypeId, omnichainSnapshot.omnichainStatus)) {
     return {
       fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusId: getSupportedIndexingStatus(configTypeId),
+      supportedIndexingStatusId: getSupportedIndexingStatusForApiHandler(configTypeId),
     } satisfies StatefulFetchRegistrarActionsNotReady;
   }
 

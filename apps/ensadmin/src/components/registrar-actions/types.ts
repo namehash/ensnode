@@ -1,4 +1,4 @@
-import { NamedRegistrarAction, OmnichainIndexingStatusIds } from "@ensnode/ensnode-sdk";
+import { NamedRegistrarAction, OmnichainIndexingStatusIdFinal } from "@ensnode/ensnode-sdk";
 
 export const StatefulFetchStatusIds = {
   /**
@@ -61,9 +61,7 @@ export interface StatefulFetchRegistrarActionsUnsupported {
  */
 export interface StatefulFetchRegistrarActionsNotReady {
   fetchStatus: typeof StatefulFetchStatusIds.NotReady;
-  supportedIndexingStatusId:
-    | typeof OmnichainIndexingStatusIds.Completed
-    | typeof OmnichainIndexingStatusIds.Following;
+  supportedIndexingStatusId: OmnichainIndexingStatusIdFinal;
 }
 
 /**
