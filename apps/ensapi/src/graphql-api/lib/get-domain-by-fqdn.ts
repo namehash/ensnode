@@ -4,7 +4,7 @@ import { getUnixTime } from "date-fns";
 import { Param, sql } from "drizzle-orm";
 import { labelhash, namehash } from "viem";
 
-import { DatasourceNames, getDatasource, maybeGetDatasource } from "@ensnode/datasources";
+import { DatasourceNames, maybeGetDatasource } from "@ensnode/datasources";
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
@@ -28,17 +28,12 @@ import {
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { db } from "@/lib/db";
 
-const ensroot = getDatasource(config.namespace, DatasourceNames.ENSRoot);
-const namechain = maybeGetDatasource(config.namespace, DatasourceNames.Namechain);
+const ENSv2Root = maybeGetDatasource(config.namespace, DatasourceNames.ENSv2Root);
+const ENSv2ETHRegistry = maybeGetDatasource(config.namespace, DatasourceNames.ENSv2ETHRegistry);
 
 const ETH_LABELHASH = labelhashLiteralLabel("eth" as LiteralLabel);
 
 const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
-
-const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId({
-  chainId: ensroot.chain.id,
-  address: ensroot.contracts.ETHRegistry.address,
-});
 
 /**
  * Gets the DomainId of the Domain addressed by `name`.
@@ -138,6 +133,13 @@ async function v2_getDomainIdByFqdn(
   console.log(name);
   console.log(JSON.stringify(rows, null, 2));
 
+  if (!ENSv2Root) return null;
+
+  const ENS_ROOT_V2_ETH_REGISTRY_ID = makeRegistryId({
+    chainId: ENSv2Root.chain.id,
+    address: ENSv2Root.contracts.ETHRegistry.address,
+  });
+
   // we did not find an exact match for the Domain within ENSv2 on the ENS Root Chain
   // if the path terminates at the .eth Registry, we must implement the logic in ETHTLDResolver
   // TODO: we could add an additional invariant that the .eth v2 Registry does indeed have the ETHTLDResolver
@@ -145,9 +147,8 @@ async function v2_getDomainIdByFqdn(
   // domain_resolver_relationships
   // TODO: generalize this into other future bridging resolvers depending on how basenames etc do it
   if (leaf.registry_id === ENS_ROOT_V2_ETH_REGISTRY_ID) {
-    // TODO(ensv2): remove when all namspaces have Namechain datasource defined
-    // if namechain doesn't exist, we can't bridge the request to that Registry, so terminate
-    if (!namechain) return null;
+    // if ENSv2ETHRegistry datasource doesn't exist, we can't bridge the request to that Registry, so terminate
+    if (!ENSv2ETHRegistry) return null;
 
     // Invariant: must be >= 2LD
     if (labelHashPath.length < 2) {
@@ -187,8 +188,8 @@ async function v2_getDomainIdByFqdn(
     );
 
     const NAMECHAIN_V2_ETH_REGISTRY_ID = makeRegistryId({
-      chainId: namechain.chain.id,
-      address: namechain.contracts.ETHRegistry.address,
+      chainId: ENSv2ETHRegistry.chain.id,
+      address: ENSv2ETHRegistry.contracts.ETHRegistry.address,
     });
 
     return v2_getDomainIdByFqdn(NAMECHAIN_V2_ETH_REGISTRY_ID, nameWithoutTld);

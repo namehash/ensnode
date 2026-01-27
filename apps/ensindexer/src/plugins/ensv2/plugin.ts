@@ -54,6 +54,7 @@ import {
   RegistryABI,
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
+import { getDatasourcesWithENSv2Contracts } from "@ensnode/ensnode-sdk/internal";
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
@@ -67,13 +68,14 @@ export const pluginName = PluginName.ENSv2;
 
 const REQUIRED_DATASOURCE_NAMES = [
   DatasourceNames.ENSRoot, //
+  DatasourceNames.ENSv2Root,
 ];
 
 const ALL_DATASOURCE_NAMES = [
   ...REQUIRED_DATASOURCE_NAMES,
-  DatasourceNames.Namechain,
   DatasourceNames.Basenames,
   DatasourceNames.Lineanames,
+  DatasourceNames.ENSv2ETHRegistry,
 ];
 
 export default createPlugin({
@@ -85,10 +87,12 @@ export default createPlugin({
     } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     const {
-      namechain, //
+      ENSv2ETHRegistry, //
       basenames,
       lineanames,
     } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
+
+    const DATASOURCES_WITH_ENSV2_CONTRACTS = getDatasourcesWithENSv2Contracts(config.namespace);
 
     return createConfig({
       chains: chainsConnectionConfigForDatasources(
@@ -103,19 +107,17 @@ export default createPlugin({
         ////////////////////////////
         [namespaceContract(pluginName, "ENSv2Registry")]: {
           abi: RegistryABI,
-          chain: [ensroot, namechain]
-            .filter((ds) => !!ds)
-            .reduce(
-              (memo, datasource) => ({
-                ...memo,
-                ...chainConfigForContract(
-                  config.globalBlockrange,
-                  datasource.chain.id,
-                  datasource.contracts.Registry,
-                ),
-              }),
-              {},
-            ),
+          chain: DATASOURCES_WITH_ENSV2_CONTRACTS.reduce(
+            (memo, datasource) => ({
+              ...memo,
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                datasource.chain.id,
+                datasource.contracts.Registry,
+              ),
+            }),
+            {},
+          ),
         },
 
         ///////////////////////////////////
@@ -123,32 +125,30 @@ export default createPlugin({
         ///////////////////////////////////
         [namespaceContract(pluginName, "EnhancedAccessControl")]: {
           abi: EnhancedAccessControlABI,
-          chain: [ensroot, namechain]
-            .filter((ds) => !!ds)
-            .reduce(
-              (memo, datasource) => ({
-                ...memo,
-                ...chainConfigForContract(
-                  config.globalBlockrange,
-                  datasource.chain.id,
-                  datasource.contracts.EnhancedAccessControl,
-                ),
-              }),
-              {},
-            ),
+          chain: DATASOURCES_WITH_ENSV2_CONTRACTS.reduce(
+            (memo, datasource) => ({
+              ...memo,
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                datasource.chain.id,
+                datasource.contracts.EnhancedAccessControl,
+              ),
+            }),
+            {},
+          ),
         },
 
-        //////////////////////////
-        // Namechain ETHRegistrar
-        //////////////////////////
+        //////////////////////
+        // ENSv2 ETHRegistrar
+        //////////////////////
         [namespaceContract(pluginName, "ETHRegistrar")]: {
           abi: ETHRegistrarABI,
           chain: {
-            ...(namechain &&
+            ...(ENSv2ETHRegistry &&
               chainConfigForContract(
                 config.globalBlockrange,
-                namechain.chain.id,
-                namechain.contracts.ETHRegistrar,
+                ENSv2ETHRegistry.chain.id,
+                ENSv2ETHRegistry.contracts.ETHRegistrar,
               )),
           },
         },
