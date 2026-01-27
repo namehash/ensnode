@@ -9,6 +9,7 @@ import {
 
 import { DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS } from "./datasources-with-ensv2-contracts";
 
+// avoids 'The inferred type of this node exceeds the maximum length the compiler will serialize'
 type DatasourceWithResolverContract = Datasource & { contracts: { Resolver: ContractConfig } };
 
 export const DATASOURCE_NAMES_WITH_RESOLVERS = [
