@@ -45,6 +45,7 @@ export function getLineanamesSubregistryManagedName(namespaceId: ENSNamespaceId)
     case ENSNamespaceIds.Mainnet:
       return "linea.eth";
     case ENSNamespaceIds.Sepolia:
+    case ENSNamespaceIds.SepoliaV2:
       return "linea-sepolia.eth";
     case ENSNamespaceIds.EnsTestEnv:
       throw new Error(

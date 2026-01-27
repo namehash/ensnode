@@ -7,9 +7,6 @@
  * - RequiredAndNotNull opposite type: RequiredToBeNull<T, keys> for constraining polymorphic entities in graphql schema
  * - re-asses NameWrapper expiry logic — compare to subgraph implementation & see if we can simplify
  * - indexes based on graphql queries, ask claude to compile recommendations
- * - modify Registration schema to more closely match ENSv2, map v1 into it
- * - Renewals (v1, v2)
- *  - include similar /latest / superceding logic, need to be able to reference latest renewal to upsert referrers
  * - ThreeDNS
  * - Migration
  *   - need to understand migration pattern better
@@ -21,11 +18,8 @@
  * - Query.permissions(by: { contract: {  } })
  * - custom wrapper for resolveCursorConnection with typesafety that applies defaults and auto-decodes cursors to the indicated type
  * - Pothos envelop plugins (aliases, depth, tokens, whatever)
- * - BEFORE MERGE: revert sepolia.ts namespace back to original, including ensv2 stubs
  *
  * PENDING ENS TEAM
- * - DedicatedResolver moving to EAC
- *  - depends on: namechain --testNames script not crashing in commit >= 803a940
  * - Domain.canonical/Domain.canonicalPath/Domain.fqdn depends on:
  *  - depends on: Registry.canonicalName implementation + indexing
  * - Signal Pattern for Registry contracts
@@ -105,17 +99,18 @@ export default createPlugin({
           abi: RegistryABI,
           chain: [ensroot, namechain]
             .filter((ds) => !!ds)
-            .reduce(
-              (memo, datasource) => ({
+            .reduce((memo, datasource) => {
+              // TODO(ensv2-coverage): remove once ENSv2 exists in all namespaces
+              if (!("Registry" in datasource.contracts)) return memo;
+              return {
                 ...memo,
                 ...chainConfigForContract(
                   config.globalBlockrange,
                   datasource.chain.id,
                   datasource.contracts.Registry,
                 ),
-              }),
-              {},
-            ),
+              };
+            }, {}),
         },
 
         ///////////////////////////////////
@@ -125,17 +120,19 @@ export default createPlugin({
           abi: EnhancedAccessControlABI,
           chain: [ensroot, namechain]
             .filter((ds) => !!ds)
-            .reduce(
-              (memo, datasource) => ({
+            .reduce((memo, datasource) => {
+              // TODO(ensv2-coverage): remove once ENSv2 exists in all namespaces
+              if (!("EnhancedAccessControl" in datasource.contracts)) return memo;
+
+              return {
                 ...memo,
                 ...chainConfigForContract(
                   config.globalBlockrange,
                   datasource.chain.id,
                   datasource.contracts.EnhancedAccessControl,
                 ),
-              }),
-              {},
-            ),
+              };
+            }, {}),
         },
 
         //////////////////////////

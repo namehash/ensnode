@@ -52,6 +52,10 @@ export const DefaultRecordsSelection = {
     addresses: getCommonCoinTypes(ENSNamespaceIds.Sepolia),
     texts: TEXTS,
   },
+  [ENSNamespaceIds.SepoliaV2]: {
+    addresses: getCommonCoinTypes(ENSNamespaceIds.SepoliaV2),
+    texts: TEXTS,
+  },
   [ENSNamespaceIds.EnsTestEnv]: {
     addresses: getCommonCoinTypes(ENSNamespaceIds.EnsTestEnv),
     texts: TEXTS,
