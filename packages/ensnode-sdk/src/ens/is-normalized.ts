@@ -15,7 +15,6 @@ export function isNormalizedName(name: Name): name is NormalizedName {
     return false;
   }
 }
-
 /**
  * Determines whether the Label is normalized.
  *

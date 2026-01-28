@@ -1,7 +1,16 @@
 import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
 
 import { uint256ToHex32 } from "../ens";
-import type { Price, PriceEth, SerializedPrice, SerializedPriceEth } from "./currencies";
+import type {
+  Price,
+  PriceDai,
+  PriceEth,
+  PriceUsdc,
+  SerializedPrice,
+  SerializedPriceDai,
+  SerializedPriceEth,
+  SerializedPriceUsdc,
+} from "./currencies";
 import type {
   AccountIdString,
   AssetIdString,
@@ -47,6 +56,20 @@ export function serializePrice(price: Price): SerializedPrice {
  */
 export function serializePriceEth(price: PriceEth): SerializedPriceEth {
   return serializePrice(price) as SerializedPriceEth;
+}
+
+/**
+ * Serializes a {@link PriceUsdc} object.
+ */
+export function serializePriceUsdc(price: PriceUsdc): SerializedPriceUsdc {
+  return serializePrice(price) as SerializedPriceUsdc;
+}
+
+/**
+ * Serializes a {@link PriceDai} object.
+ */
+export function serializePriceDai(price: PriceDai): SerializedPriceDai {
+  return serializePrice(price) as SerializedPriceDai;
 }
 
 /**

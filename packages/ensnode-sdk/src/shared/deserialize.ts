@@ -1,5 +1,6 @@
 import { prettifyError } from "zod/v4";
 
+import type { PriceDai, PriceEth, PriceUsdc } from "./currencies";
 import type { ChainIdString, UrlString } from "./serialized-types";
 import type {
   AccountId,
@@ -18,6 +19,9 @@ import {
   makeChainIdStringSchema,
   makeDatetimeSchema,
   makeDurationSchema,
+  makePriceDaiSchema,
+  makePriceEthSchema,
+  makePriceUsdcSchema,
   makeUnixTimestampSchema,
   makeUrlSchema,
 } from "./zod-schemas";
@@ -119,6 +123,39 @@ export function parseAccountId(maybeAccountId: unknown, valueLabel?: string): Ac
 
   if (parsed.error) {
     throw new RangeError(`Cannot deserialize AccountId:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializePriceEth(maybePrice: unknown, valueLabel?: string): PriceEth {
+  const schema = makePriceEthSchema(valueLabel);
+  const parsed = schema.safeParse(maybePrice);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize PriceEth:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializePriceUsdc(maybePrice: unknown, valueLabel?: string): PriceUsdc {
+  const schema = makePriceUsdcSchema(valueLabel);
+  const parsed = schema.safeParse(maybePrice);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize PriceUsdc:\n${prettifyError(parsed.error)}\n`);
+  }
+
+  return parsed.data;
+}
+
+export function deserializePriceDai(maybePrice: unknown, valueLabel?: string): PriceDai {
+  const schema = makePriceDaiSchema(valueLabel);
+  const parsed = schema.safeParse(maybePrice);
+
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize PriceDai:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;

@@ -19,7 +19,9 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./internal": "./src/internal.ts"
+    "./v1": "./src/v1/index.ts",
+    "./internal": "./src/internal.ts",
+    "./v1/internal": "./src/v1/internal.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -33,12 +35,22 @@
           "types": "./dist/index.d.cts",
           "default": "./dist/index.cjs"
         }
+      },
+      "./v1": {
+        "import": {
+          "types": "./dist/v1/index.d.ts",
+          "default": "./dist/v1/index.js"
+        },
+        "require": {
+          "types": "./dist/v1/index.d.cts",
+          "default": "./dist/v1/index.cjs"
+        }
       }
-    },
-    "main": "./dist/index.cjs",
-    "module": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "prepublish": "tsup",
     "test": "vitest",

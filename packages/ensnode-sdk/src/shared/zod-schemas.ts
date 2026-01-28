@@ -11,9 +11,15 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
  */
 import { z } from "zod/v4";
 
-import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
+import { ENSNamespaceIds, type InterpretedName, type Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
-import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
+import {
+  type CurrencyId,
+  CurrencyIds,
+  type PriceDai,
+  type PriceEth,
+  type PriceUsdc,
+} from "./currencies";
 import { reinterpretName } from "./interpretation/reinterpretation";
 import type { AccountIdString } from "./serialized-types";
 import type {
@@ -290,6 +296,18 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
  */
 export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
   makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+/**
+ * Schema for {@link PriceUsdc} type.
+ */
+export const makePriceUsdcSchema = (valueLabel: string = "Price USDC") =>
+  makePriceCurrencySchema(CurrencyIds.USDC, valueLabel).transform((v) => v as PriceUsdc);
+
+/**
+ * Schema for {@link PriceDai} type.
+ */
+export const makePriceDaiSchema = (valueLabel: string = "Price DAI") =>
+  makePriceCurrencySchema(CurrencyIds.DAI, valueLabel).transform((v) => v as PriceDai);
 
 /**
  * Schema for {@link AccountId} type.
