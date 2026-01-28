@@ -10,8 +10,8 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
-import { DB_SCHEMA_VERSION } from "@/lib/database";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
+import { DB_SCHEMA_VERSION } from "@/lib/database";
 
 /**
  * Validates and extracts label set configuration from environment variables.

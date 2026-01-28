@@ -1,4 +1,4 @@
-import config, { getDefaultDataDir } from "@/config";
+import config from "@/config";
 
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,17 +16,6 @@ import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
-
-export function validatePortConfiguration(cliPort: number): void {
-  // Only validate if PORT was explicitly set in the environment
-  // If PORT is not set, CLI port can override the default
-  if (process.env.PORT !== undefined && cliPort !== config.port) {
-    throw new Error(
-      `Port conflict: Command line argument (${cliPort}) differs from configured port (${config.port}). ` +
-        `Please use only one method to specify the port.`,
-    );
-  }
-}
 
 // interface IngestArgs {
 //   "input-file": string;
@@ -114,7 +103,7 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory to store LevelDB data",
-              default: getDefaultDataDir(),
+              default: config.dataDir,
             });
         },
         async (argv: ArgumentsCamelCase<IngestProtobufArgs>) => {
@@ -137,11 +126,10 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory containing LevelDB data",
-              default: getDefaultDataDir(),
+              default: config.dataDir,
             });
         },
         async (argv: ArgumentsCamelCase<ServeArgs>) => {
-          validatePortConfiguration(argv.port);
           await serverCommand({
             port: argv.port,
             dataDir: argv["data-dir"],
@@ -156,7 +144,7 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory containing LevelDB data",
-              default: getDefaultDataDir(),
+              default: config.dataDir,
             })
             .option("lite", {
               type: "boolean",
@@ -179,7 +167,7 @@ export function createCLI(options: CLIOptions = {}) {
           return yargs.option("data-dir", {
             type: "string",
             description: "Directory containing LevelDB data",
-            default: getDefaultDataDir(),
+            default: config.dataDir,
           });
         },
         async (argv: ArgumentsCamelCase<PurgeArgs>) => {

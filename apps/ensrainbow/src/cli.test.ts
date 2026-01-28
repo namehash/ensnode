@@ -37,25 +37,28 @@ describe("CLI", () => {
     await rm(tempDir, { recursive: true, force: true });
   });
 
-  describe("validatePortConfiguration", () => {
-    it("should not throw when PORT env var is not set", async () => {
+  describe("port configuration", () => {
+    it("should allow CLI port to override PORT env var", async () => {
+      // Mock serverCommand so we only test argument resolution here
       vi.resetModules();
-      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
-      expect(() => validatePortConfigurationFresh(3000)).not.toThrow();
-    });
+      const serverCommandMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock("@/commands/server-command", () => ({
+        serverCommand: serverCommandMock,
+      }));
 
-    it("should not throw when PORT matches CLI port", async () => {
+      // Simulate PORT being set in the environment
       vi.stubEnv("PORT", "3000");
-      vi.resetModules();
-      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
-      expect(() => validatePortConfigurationFresh(3000)).not.toThrow();
-    });
 
-    it("should throw when PORT conflicts with CLI port", async () => {
-      vi.stubEnv("PORT", "3000");
-      vi.resetModules();
-      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
-      expect(() => validatePortConfigurationFresh(4000)).toThrow("Port conflict");
+      const { createCLI: createCLIFresh } = await import("./cli");
+      const cliWithPort = createCLIFresh({ exitProcess: false });
+
+      // CLI port should override env PORT
+      await cliWithPort.parse(["serve", "--port", "4000", "--data-dir", testDataDir]);
+
+      expect(serverCommandMock).toHaveBeenCalledWith(expect.objectContaining({ port: 4000 }));
+
+      // Restore real implementation for subsequent tests
+      vi.doUnmock("@/commands/server-command");
     });
   });
 
@@ -494,8 +497,8 @@ describe("CLI", () => {
           testDataDir,
         ]);
 
-        // Give server time to start
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Give server time to start (DB open + validation can take a bit)
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Make a request to health endpoint
         const response = await fetch(`http://localhost:${customPort}/health`);
@@ -504,6 +507,30 @@ describe("CLI", () => {
         // Cleanup - send SIGINT to stop server
         process.emit("SIGINT", "SIGINT");
         await serverPromise;
+      });
+
+      it("should use the default port when PORT env var is not set", async () => {
+        // Mock serverCommand so we don't actually start a server or touch the DB here
+        vi.resetModules();
+        const serverCommandMock = vi.fn().mockResolvedValue(undefined);
+        vi.doMock("@/commands/server-command", () => ({
+          serverCommand: serverCommandMock,
+        }));
+
+        // PORT is cleared in beforeEach; no CLI --port is provided
+        const { createCLI: createCLIFresh } = await import("./cli");
+        const cliWithDefaultPort = createCLIFresh({ exitProcess: false });
+
+        // Invoke serve without specifying --port
+        await cliWithDefaultPort.parse(["serve", "--data-dir", testDataDir]);
+
+        // Assert that serverCommand was called with the default port
+        expect(serverCommandMock).toHaveBeenCalledWith(
+          expect.objectContaining({ port: ENSRAINBOW_DEFAULT_PORT }),
+        );
+
+        // Restore real implementation for subsequent tests
+        vi.doUnmock("@/commands/server-command");
       });
 
       it("should respect PORT environment variable", async () => {
@@ -526,8 +553,8 @@ describe("CLI", () => {
         // Start server
         const serverPromise = cliWithCustomPort.parse(["serve", "--data-dir", testDataDir]);
 
-        // Give server time to start
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Give server time to start (DB open + validation can take a bit)
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         // Make a request to health endpoint
         const response = await fetch(`http://localhost:${customPort}/health`);
@@ -571,14 +598,41 @@ describe("CLI", () => {
         await serverPromise;
       });
 
-      it("should throw on port conflict", async () => {
+      it("should allow CLI port to override PORT env var", async () => {
         vi.stubEnv("PORT", "5000");
         vi.resetModules();
         const { createCLI: createCLIFresh } = await import("./cli");
         const cliWithPort = createCLIFresh({ exitProcess: false });
-        await expect(
-          cliWithPort.parse(["serve", "--port", "4000", "--data-dir", testDataDir]),
-        ).rejects.toThrow("Port conflict");
+
+        // First ingest data
+        const ensrainbowOutputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
+        await cliWithPort.parse([
+          "ingest-ensrainbow",
+          "--input-file",
+          ensrainbowOutputFile,
+          "--data-dir",
+          testDataDir,
+        ]);
+
+        // CLI port should override env PORT without error
+        const serverPromise = cliWithPort.parse([
+          "serve",
+          "--port",
+          "4000",
+          "--data-dir",
+          testDataDir,
+        ]);
+
+        // Give server time to start (DB open + validation can take a bit)
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Verify server is running on the CLI port (not env port)
+        const response = await fetch("http://localhost:4000/health");
+        expect(response.status).toBe(200);
+
+        // Cleanup - send SIGINT to stop server
+        process.emit("SIGINT", "SIGINT");
+        await serverPromise;
       });
     });
 
