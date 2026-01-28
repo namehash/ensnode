@@ -57,43 +57,34 @@ const DateStringToUnixTimestampSchema = z.coerce
   .pipe(makeDatetimeSchema())
   .transform((date) => getUnixTime(date));
 
-const BaseEnsApiConfigSchema = z.object({
-  port: PortSchema.default(ENSApi_DEFAULT_PORT),
-  databaseUrl: DatabaseUrlSchema,
-  databaseSchemaName: DatabaseSchemaNameSchema,
-  ensIndexerUrl: EnsIndexerUrlSchema,
-  theGraphApiKey: TheGraphApiKeySchema,
-  namespace: ENSNamespaceSchema,
-  rpcConfigs: RpcConfigsSchema,
-  ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-});
-
-const EnsApiConfigSchema = BaseEnsApiConfigSchema.extend({
-  ensHolidayAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
-  ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
-})
+const EnsApiConfigSchema = z
+  .object({
+    port: PortSchema.default(ENSApi_DEFAULT_PORT),
+    databaseUrl: DatabaseUrlSchema,
+    databaseSchemaName: DatabaseSchemaNameSchema,
+    ensIndexerUrl: EnsIndexerUrlSchema,
+    theGraphApiKey: TheGraphApiKeySchema,
+    namespace: ENSNamespaceSchema,
+    rpcConfigs: RpcConfigsSchema,
+    ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
+    ensHolidayAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
+    ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
+  })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo)
   .check(invariant_ensHolidayAwardsEndAfterStart);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
-/**
- * Schema for OpenAPI generation mode. The holiday awards fields accept pre-computed
- * timestamps since we're using mock data (not date strings from environment variables).
- */
-const EnsApiConfigSchemaForOpenApiGeneration = BaseEnsApiConfigSchema.extend({
-  ensHolidayAwardsStart: z.number(),
-  ensHolidayAwardsEnd: z.number(),
-})
-  .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_ensIndexerPublicConfigVersionInfo)
-  .check(invariant_ensHolidayAwardsEndAfterStart);
+/** Convert unix timestamp to ISO 8601 string for schema parsing */
+function unixTimestampToISOString(timestamp: number): string {
+  return new Date(timestamp * 1000).toISOString();
+}
 
 function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
   logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
 
-  return EnsApiConfigSchemaForOpenApiGeneration.parse({
+  return EnsApiConfigSchema.parse({
     port: env.PORT || ENSApi_DEFAULT_PORT,
     databaseUrl:
       "postgresql://mock_openapi_only:mock_openapi_only@localhost:5432/mock_openapi_only",
@@ -124,9 +115,10 @@ function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
         ensRainbowSchema: 1,
       },
     },
-    ensHolidayAwardsStart: getUnixTime(new Date(ENS_HOLIDAY_AWARDS_START_DATE)),
-    ensHolidayAwardsEnd: getUnixTime(new Date(ENS_HOLIDAY_AWARDS_END_DATE)),
-  }) as EnsApiConfig;
+    // Convert unix timestamps to ISO strings for schema parsing
+    ensHolidayAwardsStart: unixTimestampToISOString(ENS_HOLIDAY_AWARDS_START_DATE),
+    ensHolidayAwardsEnd: unixTimestampToISOString(ENS_HOLIDAY_AWARDS_END_DATE),
+  });
 }
 
 /**
