@@ -38,20 +38,26 @@ export const makeAbstractResultErrorSchema = <TResultCode extends ResultCode>(
 ) =>
   z.object({
     resultCode: z.literal(resultCode),
-    errorMessage: z.string(),
-    suggestRetry: z.boolean(),
+    data: z.object({
+      errorMessage: z.string(),
+      suggestRetry: z.boolean(),
+    }),
   });
 
 /**
  * Schema for {@link AbstractResultError} with data.
  */
-export const makeAbstractResultErrorWithDataSchema = <TResultCode extends ResultCode, TData>(
+export const makeAbstractResultErrorWithDataSchema = <TResultCode extends ResultCode>(
   resultCode: TResultCode,
-  dataSchema: z.ZodType<TData>,
-) =>
-  makeAbstractResultErrorSchema(resultCode).extend({
-    data: dataSchema,
+  dataSchema: z.ZodObject,
+) => {
+  const abstractResultErrorShape = makeAbstractResultErrorSchema(resultCode).shape;
+
+  return z.object({
+    resultCode: abstractResultErrorShape.resultCode,
+    data: abstractResultErrorShape.data.extend(dataSchema.shape),
   });
+};
 
 /**
  * Schema for {@link ResultInvalidRequest}.
