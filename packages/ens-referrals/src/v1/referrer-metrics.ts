@@ -1,6 +1,11 @@
 import type { Address } from "viem";
 
-import type { Duration, PriceEth, PriceUsdc } from "@ensnode/ensnode-sdk";
+import {
+  type Duration,
+  getCurrencyInfo,
+  type PriceEth,
+  type PriceUsdc,
+} from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { normalizeAddress, validateLowercaseAddress } from "./address";
@@ -285,10 +290,10 @@ export const buildAwardedReferrerMetrics = (
   const awardPoolShare = calcReferrerAwardPoolShare(referrer, aggregatedMetrics, rules);
 
   // Calculate the approximate USDC value by multiplying the share by the total award pool value
-  // We need to convert the share (a number between 0 and 1) to a bigint amount
-  const awardPoolApproxAmount = BigInt(
-    Math.floor(awardPoolShare * Number(rules.totalAwardPoolValue.amount)),
-  );
+  const currencyInfo = getCurrencyInfo(rules.totalAwardPoolValue.currency);
+  const precisionScale = 10n ** BigInt(currencyInfo.decimals);
+  const scaledShare = BigInt(Math.floor(awardPoolShare * Number(precisionScale)));
+  const awardPoolApproxAmount = (rules.totalAwardPoolValue.amount * scaledShare) / precisionScale;
 
   const result = {
     ...referrer,

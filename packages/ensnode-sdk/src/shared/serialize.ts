@@ -1,6 +1,6 @@
 import { AccountId as CaipAccountId, AssetId as CaipAssetId } from "caip";
-import { type Hex, toHex } from "viem";
 
+import { uint256ToHex32 } from "../ens";
 import type {
   Price,
   PriceDai,
@@ -19,21 +19,6 @@ import type {
   UrlString,
 } from "./serialized-types";
 import type { AccountId, AssetId, ChainId, Datetime } from "./types";
-
-/**
- * Encodes a uint256 bigint as hex string sized to 32 bytes.
- * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
- * into Node or LabelHash, which is a common behavior in the ENS ecosystem.
- * (see NameWrapper, ETHRegistrarController)
- *
- * @remarks
- * This is an inline copy of the function from `../ens/subname-helpers.ts` to avoid
- * cross-module imports that cause Vite SSR module resolution issues. When Vitest loads
- * TypeScript sources in a pnpm workspace, importing from ../ens creates a complex module
- * graph that Vite SSR cannot properly resolve, resulting in imported functions appearing
- * as undefined at runtime.
- */
-const uint256ToHex32 = (num: bigint): Hex => toHex(num, { size: 32 });
 
 /**
  * Serializes a {@link ChainId} value into its string representation.

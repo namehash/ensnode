@@ -209,7 +209,7 @@ export interface ReferrerLeaderboardPage {
    * described by `pageContext` within the related {@link ReferrerLeaderboard}.
    *
    * @invariant Array will be empty if `pageContext.totalRecords` is 0.
-   * @invariant Array entries are ordered by `rank` (descending).
+   * @invariant Array entries are ordered by `rank` (ascending).
    */
   referrers: AwardedReferrerMetrics[];
 
