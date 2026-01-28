@@ -26,6 +26,7 @@ import {
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
+import { buildOpenApiMockConfig } from "@/config/openapi-mock-config";
 import {
   invariant_ensHolidayAwardsEndAfterStart,
   invariant_ensIndexerPublicConfigVersionInfo,
@@ -75,45 +76,7 @@ const EnsApiConfigSchema = z
   .check(invariant_ensHolidayAwardsEndAfterStart);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
-
-function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
-  logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
-
-  return EnsApiConfigSchema.parse({
-    port: env.PORT || ENSApi_DEFAULT_PORT,
-    databaseUrl:
-      "postgresql://mock_openapi_only:mock_openapi_only@localhost:5432/mock_openapi_only",
-    databaseSchemaName: "public",
-    ensIndexerUrl: "http://localhost:42069",
-    theGraphApiKey: undefined,
-    namespace: "mainnet",
-    rpcConfigs: {
-      "1": "https://rpc.example.com",
-    },
-    ensIndexerPublicConfig: {
-      labelSet: {
-        labelSetId: "ens-default",
-        labelSetVersion: 1,
-      },
-      indexedChainIds: [1],
-      isSubgraphCompatible: false,
-      namespace: "mainnet",
-      plugins: ["subgraph"],
-      databaseSchemaName: "public",
-      versionInfo: {
-        nodejs: process.version,
-        ponder: "0.0.0",
-        ensDb: packageJson.version,
-        ensIndexer: packageJson.version,
-        ensNormalize: "0.0.0",
-        ensRainbow: packageJson.version,
-        ensRainbowSchema: 1,
-      },
-    },
-    ensHolidayAwardsStart: new Date(ENS_HOLIDAY_AWARDS_START_DATE * 1000).toISOString(),
-    ensHolidayAwardsEnd: new Date(ENS_HOLIDAY_AWARDS_END_DATE * 1000).toISOString(),
-  });
-}
+export type EnsApiConfigInput = z.input<typeof EnsApiConfigSchema>;
 
 /**
  * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
@@ -123,7 +86,8 @@ function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   if (env.OPENAPI_GENERATE_MODE === "true") {
-    return buildConfigForOpenApiGeneration(env);
+    logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
+    return EnsApiConfigSchema.parse(buildOpenApiMockConfig(env.PORT));
   }
 
   try {
