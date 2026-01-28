@@ -1,5 +1,11 @@
 # @docs/ensnode
 
+## 1.6.0
+
+### Patch Changes
+
+- [#1558](https://github.com/namehash/ensnode/pull/1558) [`69f5c6b`](https://github.com/namehash/ensnode/commit/69f5c6bd27215a855d2dd4eaeb258bcf7cc6ea82) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Activate Context7 to assist builders using LLMs to build on ENSNode
+
 ## 1.5.1
 
 ### Patch Changes
