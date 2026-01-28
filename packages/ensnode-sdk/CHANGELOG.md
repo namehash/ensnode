@@ -1,5 +1,18 @@
 # @ensnode/ensnode-sdk
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1542](https://github.com/namehash/ensnode/pull/1542) [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0) Thanks [@Goader](https://github.com/Goader)! - Flipped dependency relationship between `ensnode-sdk` and `ens-referrals`. Introduced new `ENSReferralsClient` for referral leaderboard APIs. Consolidated duplicate types (`ChainId`, `AccountId`, `UnixTimestamp`, `Duration`) by importing from `ensnode-sdk`.
+
+### Patch Changes
+
+- [#1553](https://github.com/namehash/ensnode/pull/1553) [`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Added getDefaultEnsNodeUrl utility to get the URL for the default ENSNode deployment for a given ENS namespace
+
+- Updated dependencies [[`a87b437`](https://github.com/namehash/ensnode/commit/a87b4370ff8b4da6a254dda39afac19e3a7f6e94)]:
+  - @ensnode/datasources@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes
