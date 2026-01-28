@@ -1,3 +1,5 @@
+import config, { getDefaultDataDir } from "@/config";
+
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -14,13 +16,13 @@ import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
 import { purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
 import { validateCommand } from "@/commands/validate-command";
-import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
 
 export function validatePortConfiguration(cliPort: number): void {
-  const envPort = process.env.PORT;
-  if (envPort !== undefined && cliPort !== getEnvPort()) {
+  // Only validate if PORT was explicitly set in the environment
+  // If PORT is not set, CLI port can override the default
+  if (process.env.PORT !== undefined && cliPort !== config.port) {
     throw new Error(
-      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
+      `Port conflict: Command line argument (${cliPort}) differs from configured port (${config.port}). ` +
         `Please use only one method to specify the port.`,
     );
   }
@@ -89,7 +91,7 @@ export function createCLI(options: CLIOptions = {}) {
       //       .option("data-dir", {
       //         type: "string",
       //         description: "Directory to store LevelDB data",
-      //         default: getDefaultDataSubDir(),
+      //         default: getDefaultDataDir(),
       //       });
       //   },
       //   async (argv: ArgumentsCamelCase<IngestArgs>) => {
@@ -112,7 +114,7 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory to store LevelDB data",
-              default: getDefaultDataSubDir(),
+              default: getDefaultDataDir(),
             });
         },
         async (argv: ArgumentsCamelCase<IngestProtobufArgs>) => {
@@ -130,12 +132,12 @@ export function createCLI(options: CLIOptions = {}) {
             .option("port", {
               type: "number",
               description: "Port to listen on",
-              default: getEnvPort(),
+              default: config.port,
             })
             .option("data-dir", {
               type: "string",
               description: "Directory containing LevelDB data",
-              default: getDefaultDataSubDir(),
+              default: getDefaultDataDir(),
             });
         },
         async (argv: ArgumentsCamelCase<ServeArgs>) => {
@@ -154,7 +156,7 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory containing LevelDB data",
-              default: getDefaultDataSubDir(),
+              default: getDefaultDataDir(),
             })
             .option("lite", {
               type: "boolean",
@@ -177,7 +179,7 @@ export function createCLI(options: CLIOptions = {}) {
           return yargs.option("data-dir", {
             type: "string",
             description: "Directory containing LevelDB data",
-            default: getDefaultDataSubDir(),
+            default: getDefaultDataDir(),
           });
         },
         async (argv: ArgumentsCamelCase<PurgeArgs>) => {
