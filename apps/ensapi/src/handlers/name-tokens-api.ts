@@ -2,7 +2,7 @@ import config from "@/config";
 
 import { describeRoute, resolver as validationResolver } from "hono-openapi";
 import { namehash } from "viem";
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import {
   ENS_ROOT,
