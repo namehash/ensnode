@@ -24,7 +24,7 @@ const app = factory.createApp();
 /**
  * Get Registrar Actions (all records)
  *
- * Example: `GET /api/registrar-actions`
+ * Example: `GET /api/registrar-actions/v1`
  *
  * @see {@link app.get("/:parentNode")} for response documentation
  */
@@ -74,17 +74,17 @@ app.get(
  *
  * Examples of use:
  * - all records associated with `namehash('eth')` parent node:
- *   `GET /api/registrar-actions/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
+ *   `GET /api/registrar-actions/v1/0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae`
  * - all records associated with `namehash('base.eth')` parent node:
- *   `GET /api/registrar-actions/0xff1e3c0eb00ec714e34b6114125fbde1dea2f24a72fbf672e7b7fd5690328e10`
+ *   `GET /api/registrar-actions/v1/0xff1e3c0eb00ec714e34b6114125fbde1dea2f24a72fbf672e7b7fd5690328e10`
  * - all records associated with `namehash('linea.eth')` parent node:
- *   `GET /api/registrar-actions/0x527aac89ac1d1de5dd84cff89ec92c69b028ce9ce3fa3d654882474ab4402ec3`
+ *   `GET /api/registrar-actions/v1/0x527aac89ac1d1de5dd84cff89ec92c69b028ce9ce3fa3d654882474ab4402ec3`
  *
  * Examples of use with testnets:
  * - all records associated with `namehash('linea-sepolia.eth')` parent node:
- *   `GET /api/registrar-actions/0x1944d8f922dbda424d5bb8181be5344d513cd0210312d2dcccd37d54c11a17de`
+ *   `GET /api/registrar-actions/v1/0x1944d8f922dbda424d5bb8181be5344d513cd0210312d2dcccd37d54c11a17de`
  * - all records associated with `namehash('basetest.eth')` parent node:
- *   `GET /api/registrar-actions/0x646204f07e7fcd394a508306bf1148a1e13d14287fa33839bf9ad63755f547c6`
+ *   `GET /api/registrar-actions/v1/0x646204f07e7fcd394a508306bf1148a1e13d14287fa33839bf9ad63755f547c6`
  *
  * Responds with:
  * - 400 error response for bad input, such as:
@@ -94,12 +94,13 @@ app.get(
  *   - (if provided) `orderBy` search param is not part of {@link RegistrarActionsOrders}.
  *   - (if provided) `beginTimestamp` or `endTimestamp` search params are not valid Unix timestamps.
  *   - (if both provided) `endTimestamp` is less than `beginTimestamp`.
+ * - 500 error response for cases such as:
+ *   - Failed invariants
  * - 503 error response for cases such as:
  *   - Connected ENSNode has not all required plugins set to active.
  *   - Connected ENSNode is not in `omnichainStatus` of either
  *     {@link OmnichainIndexingStatusIds.Completed} or
  *     {@link OmnichainIndexingStatusIds.Following}.
- *   - unknown server error occurs.
  */
 app.get(
   "/:parentNode",

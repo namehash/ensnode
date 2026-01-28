@@ -39,9 +39,9 @@ export function validateApiHandlerPrerequisites(
   // Fail validation if required plugins were not activated in
   // the connected ENSIndexer config
   if (requiredPlugins.length > 0) {
-    const hasEnsIndexerConfigSupport =
-      requiredPlugins.length === 0 ||
-      requiredPlugins.every((plugin) => config.ensIndexerPublicConfig.plugins.includes(plugin));
+    const hasEnsIndexerConfigSupport = requiredPlugins.every((plugin) =>
+      config.ensIndexerPublicConfig.plugins.includes(plugin),
+    );
 
     if (!hasEnsIndexerConfigSupport) {
       const errorMessage = [
