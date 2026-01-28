@@ -76,11 +76,6 @@ const EnsApiConfigSchema = z
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
-/** Convert unix timestamp to ISO 8601 string for schema parsing */
-function unixTimestampToISOString(timestamp: number): string {
-  return new Date(timestamp * 1000).toISOString();
-}
-
 function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
   logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
 
@@ -115,9 +110,8 @@ function buildConfigForOpenApiGeneration(env: EnsApiEnvironment): EnsApiConfig {
         ensRainbowSchema: 1,
       },
     },
-    // Convert unix timestamps to ISO strings for schema parsing
-    ensHolidayAwardsStart: unixTimestampToISOString(ENS_HOLIDAY_AWARDS_START_DATE),
-    ensHolidayAwardsEnd: unixTimestampToISOString(ENS_HOLIDAY_AWARDS_END_DATE),
+    ensHolidayAwardsStart: new Date(ENS_HOLIDAY_AWARDS_START_DATE * 1000).toISOString(),
+    ensHolidayAwardsEnd: new Date(ENS_HOLIDAY_AWARDS_END_DATE * 1000).toISOString(),
   });
 }
 
