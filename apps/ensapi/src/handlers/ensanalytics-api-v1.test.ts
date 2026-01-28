@@ -5,7 +5,7 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
 
-import * as middleware from "../middleware/referrer-leaderboard.middleware";
+import * as middleware from "../middleware/referrer-leaderboard.middleware-v1";
 
 vi.mock("@/config", () => ({
   get default() {
@@ -18,8 +18,8 @@ vi.mock("@/config", () => ({
   },
 }));
 
-vi.mock("../middleware/referrer-leaderboard.middleware", () => ({
-  referrerLeaderboardMiddleware: vi.fn(),
+vi.mock("../middleware/referrer-leaderboard.middleware-v1", () => ({
+  referrerLeaderboardMiddlewareV1: vi.fn(),
 }));
 
 import {
@@ -43,9 +43,9 @@ import app from "./ensanalytics-api-v1";
 describe("/ensanalytics/v1", () => {
   describe("/referrers", () => {
     it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
-      // Arrange: set `referrerLeaderboard` context var
-      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        c.set("referrerLeaderboard", populatedReferrerLeaderboard);
+      // Arrange: set `referrerLeaderboardV1` context var
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referrerLeaderboardV1", populatedReferrerLeaderboard);
         return await next();
       });
 
@@ -138,9 +138,9 @@ describe("/ensanalytics/v1", () => {
     });
 
     it("returns empty cached referrer leaderboard when there are no referrals yet", async () => {
-      // Arrange: set `referrerLeaderboard` context var
-      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        c.set("referrerLeaderboard", emptyReferralLeaderboard);
+      // Arrange: set `referrerLeaderboardV1` context var
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referrerLeaderboardV1", emptyReferralLeaderboard);
         return await next();
       });
 
@@ -178,8 +178,8 @@ describe("/ensanalytics/v1", () => {
   describe("/referrers/:referrer", () => {
     it("returns referrer metrics when referrer exists in leaderboard", async () => {
       // Arrange: set `referrerLeaderboard` context var with populated leaderboard
-      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        c.set("referrerLeaderboard", populatedReferrerLeaderboard);
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referrerLeaderboardV1", populatedReferrerLeaderboard);
         return await next();
       });
 
@@ -210,8 +210,8 @@ describe("/ensanalytics/v1", () => {
 
     it("returns zero-score metrics when referrer does not exist in leaderboard", async () => {
       // Arrange: set `referrerLeaderboard` context var with populated leaderboard
-      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        c.set("referrerLeaderboard", populatedReferrerLeaderboard);
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referrerLeaderboardV1", populatedReferrerLeaderboard);
         return await next();
       });
 
@@ -252,9 +252,9 @@ describe("/ensanalytics/v1", () => {
     });
 
     it("returns zero-score metrics when leaderboard is empty", async () => {
-      // Arrange: set `referrerLeaderboard` context var with empty leaderboard
-      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        c.set("referrerLeaderboard", emptyReferralLeaderboard);
+      // Arrange: set `referrerLeaderboardV1` context var with empty leaderboard
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referrerLeaderboardV1", emptyReferralLeaderboard);
         return await next();
       });
 
@@ -294,8 +294,8 @@ describe("/ensanalytics/v1", () => {
 
     it("returns error response when leaderboard fails to load", async () => {
       // Arrange: set `referrerLeaderboard` context var with rejected promise
-      vi.mocked(middleware.referrerLeaderboardMiddleware).mockImplementation(async (c, next) => {
-        c.set("referrerLeaderboard", new Error("Database connection failed"));
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referrerLeaderboardV1", new Error("Database connection failed"));
         return await next();
       });
 

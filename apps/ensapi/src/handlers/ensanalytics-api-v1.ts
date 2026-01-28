@@ -18,7 +18,7 @@ import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard.middleware";
+import { referrerLeaderboardMiddlewareV1 } from "@/middleware/referrer-leaderboard.middleware-v1";
 
 const logger = makeLogger("ensanalytics-api-v1");
 
@@ -45,7 +45,7 @@ const app = factory
   .createApp()
 
   // Apply referrer leaderboard cache middleware to all routes in this handler
-  .use(referrerLeaderboardMiddleware)
+  .use(referrerLeaderboardMiddlewareV1)
 
   // Get a page from the referrer leaderboard
   .get(
@@ -66,12 +66,12 @@ const app = factory
     validate("query", paginationQuerySchema),
     async (c) => {
       // context must be set by the required middleware
-      if (c.var.referrerLeaderboard === undefined) {
-        throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddleware required`);
+      if (c.var.referrerLeaderboardV1 === undefined) {
+        throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddlewareV1 required`);
       }
 
       try {
-        if (c.var.referrerLeaderboard instanceof Error) {
+        if (c.var.referrerLeaderboardV1 instanceof Error) {
           return c.json(
             serializeReferrerLeaderboardPageResponse({
               responseCode: ReferrerLeaderboardPageResponseCodes.Error,
@@ -85,7 +85,7 @@ const app = factory
         const { page, recordsPerPage } = c.req.valid("query");
         const leaderboardPage = getReferrerLeaderboardPage(
           { page, recordsPerPage },
-          c.var.referrerLeaderboard,
+          c.var.referrerLeaderboardV1,
         );
 
         return c.json(
@@ -139,13 +139,13 @@ app.get(
   validate("param", referrerAddressSchema),
   async (c) => {
     // context must be set by the required middleware
-    if (c.var.referrerLeaderboard === undefined) {
-      throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddleware required`);
+    if (c.var.referrerLeaderboardV1 === undefined) {
+      throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddlewareV1 required`);
     }
 
     try {
       // Check if leaderboard failed to load
-      if (c.var.referrerLeaderboard instanceof Error) {
+      if (c.var.referrerLeaderboardV1 instanceof Error) {
         return c.json(
           serializeReferrerDetailResponse({
             responseCode: ReferrerDetailResponseCodes.Error,
@@ -157,7 +157,7 @@ app.get(
       }
 
       const { referrer } = c.req.valid("param");
-      const detail = getReferrerDetail(referrer, c.var.referrerLeaderboard);
+      const detail = getReferrerDetail(referrer, c.var.referrerLeaderboardV1);
 
       return c.json(
         serializeReferrerDetailResponse({

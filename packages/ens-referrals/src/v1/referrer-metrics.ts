@@ -4,7 +4,7 @@ import type { Duration, PriceEth, PriceUsdc } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { normalizeAddress, validateLowercaseAddress } from "./address";
-import type { AggregatedReferrerMetrics } from "./aggregations-v1";
+import type { AggregatedReferrerMetrics } from "./aggregations";
 import { validateNonNegativeInteger } from "./number";
 import {
   calcReferrerFinalScore,
@@ -13,8 +13,8 @@ import {
   isReferrerQualified,
   type ReferrerRank,
   validateReferrerRank,
-} from "./rank-v1";
-import type { ReferralProgramRules } from "./rules-v1";
+} from "./rank";
+import type { ReferralProgramRules } from "./rules";
 import { calcReferrerScore, type ReferrerScore, validateReferrerScore } from "./score";
 import { validateDuration } from "./time";
 

@@ -3,8 +3,8 @@ import type { Address } from "viem";
 import type {
   ReferrerLeaderboardPage,
   ReferrerLeaderboardPageParams,
-} from "../leaderboard-page-v1";
-import type { ReferrerDetail } from "../referrer-detail-v1";
+} from "../leaderboard-page";
+import type { ReferrerDetail } from "../referrer-detail";
 
 /**
  * Request parameters for a referrer leaderboard page query.

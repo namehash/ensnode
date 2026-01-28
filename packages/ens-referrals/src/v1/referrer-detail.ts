@@ -2,14 +2,14 @@ import type { Address } from "viem";
 
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-import type { AggregatedReferrerMetrics } from "./aggregations-v1";
-import type { ReferrerLeaderboard } from "./leaderboard-v1";
+import type { AggregatedReferrerMetrics } from "./aggregations";
+import type { ReferrerLeaderboard } from "./leaderboard";
 import {
   type AwardedReferrerMetrics,
   buildUnrankedReferrerMetrics,
   type UnrankedReferrerMetrics,
-} from "./referrer-metrics-v1";
-import type { ReferralProgramRules } from "./rules-v1";
+} from "./referrer-metrics";
+import type { ReferralProgramRules } from "./rules";
 
 /**
  * The type of referrer detail data.

@@ -2,8 +2,8 @@ import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNonNegativeInteger } from "./number";
-import type { RankedReferrerMetrics } from "./referrer-metrics-v1";
-import type { ReferralProgramRules } from "./rules-v1";
+import type { RankedReferrerMetrics } from "./referrer-metrics";
+import type { ReferralProgramRules } from "./rules";
 import { type ReferrerScore, validateReferrerScore } from "./score";
 import { validateDuration } from "./time";
 

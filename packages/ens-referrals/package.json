@@ -19,7 +19,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./v1": "./src/v1.ts",
+    "./v1": "./src/v1/index.ts",
     "./internal": "./src/internal.ts"
   },
   "publishConfig": {
@@ -37,12 +37,12 @@
       },
       "./v1": {
         "import": {
-          "types": "./dist/v1.d.ts",
-          "default": "./dist/v1.js"
+          "types": "./dist/v1/index.d.ts",
+          "default": "./dist/v1/index.js"
         },
         "require": {
-          "types": "./dist/v1.d.cts",
-          "default": "./dist/v1.cjs"
+          "types": "./dist/v1/index.d.cts",
+          "default": "./dist/v1/index.cjs"
         }
       }
     }

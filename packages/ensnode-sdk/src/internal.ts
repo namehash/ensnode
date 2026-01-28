@@ -40,6 +40,8 @@ export * from "./shared/protocol-acceleration/is-bridged-resolver";
 export * from "./shared/protocol-acceleration/is-ensip-19-reverse-resolver";
 export * from "./shared/protocol-acceleration/is-static-resolver";
 export * from "./shared/thegraph";
+export * from "./shared/serialize";
+export * from "./shared/deserialize";
 export * from "./shared/zod-schemas";
 export * from "./shared/zod-types";
 export * from "./tokenscope/zod-schemas";

@@ -1,10 +1,10 @@
 import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-sdk";
 
-import type { AggregatedReferrerMetrics } from "../aggregations-v1";
-import type { ReferrerLeaderboardPage } from "../leaderboard-page-v1";
-import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail-v1";
-import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics-v1";
-import type { ReferralProgramRules } from "../rules-v1";
+import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
+import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
+import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
+import type { ReferralProgramRules } from "../rules";
 import type {
   ReferrerDetailResponse,
   ReferrerDetailResponseError,
@@ -12,7 +12,7 @@ import type {
   ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseError,
   ReferrerLeaderboardPageResponseOk,
-} from "./types-v1";
+} from "./types";
 
 /**
  * Serialized representation of {@link ReferralProgramRules}.

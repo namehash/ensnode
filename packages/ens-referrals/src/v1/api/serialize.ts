@@ -1,10 +1,10 @@
-import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
+import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk/internal";
 
-import type { AggregatedReferrerMetrics } from "../aggregations-v1";
-import type { ReferrerLeaderboardPage } from "../leaderboard-page-v1";
-import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail-v1";
-import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics-v1";
-import type { ReferralProgramRules } from "../rules-v1";
+import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
+import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
+import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
+import type { ReferralProgramRules } from "../rules";
 import type {
   SerializedAggregatedReferrerMetrics,
   SerializedAwardedReferrerMetrics,
@@ -15,13 +15,13 @@ import type {
   SerializedReferrerLeaderboardPage,
   SerializedReferrerLeaderboardPageResponse,
   SerializedUnrankedReferrerMetrics,
-} from "./serialized-types-v1";
+} from "./serialized-types";
 import {
   type ReferrerDetailResponse,
   ReferrerDetailResponseCodes,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
-} from "./types-v1";
+} from "./types";
 
 /**
  * Serializes a {@link ReferralProgramRules} object.

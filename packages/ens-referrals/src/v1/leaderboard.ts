@@ -2,7 +2,7 @@ import type { Address } from "viem";
 
 import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
-import { type AggregatedReferrerMetrics, buildAggregatedReferrerMetrics } from "./aggregations-v1";
+import { type AggregatedReferrerMetrics, buildAggregatedReferrerMetrics } from "./aggregations";
 import {
   type AwardedReferrerMetrics,
   buildAwardedReferrerMetrics,
@@ -10,8 +10,8 @@ import {
   buildScoredReferrerMetrics,
   type ReferrerMetrics,
   sortReferrerMetrics,
-} from "./referrer-metrics-v1";
-import type { ReferralProgramRules } from "./rules-v1";
+} from "./referrer-metrics";
+import type { ReferralProgramRules } from "./rules";
 
 /**
  * Represents a leaderboard for any number of referrers.

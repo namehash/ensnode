@@ -21,9 +21,9 @@ import {
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page-v1";
-import { type ReferrerDetailRanked, ReferrerDetailTypeIds } from "../referrer-detail-v1";
-import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types-v1";
+import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
+import { type ReferrerDetailRanked, ReferrerDetailTypeIds } from "../referrer-detail";
+import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
 
 /**
  * Schema for ReferralProgramRules
