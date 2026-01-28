@@ -106,7 +106,7 @@ app.route("/name-tokens", nameTokensApi);
 // not explicitly requesting v1 will continue to use the
 // original (v0) version of the API.
 app.route("/registrar-actions", registrarActionsApiV0); // Registrar Actions API (implicitly v0)
-app.route("/registrar-actions/v1", registrarActionsApiV1); // Registrar Actions API (v1)
+app.route("/v1/registrar-actions", registrarActionsApiV1); // Registrar Actions API (v1)
 
 // Resolution API
 app.route("/resolve", resolutionApi);
