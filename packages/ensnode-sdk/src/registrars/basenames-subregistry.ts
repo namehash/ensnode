@@ -45,6 +45,7 @@ export function getBasenamesSubregistryManagedName(namespaceId: ENSNamespaceId):
     case ENSNamespaceIds.Mainnet:
       return "base.eth";
     case ENSNamespaceIds.Sepolia:
+    case ENSNamespaceIds.SepoliaV2:
       return "basetest.eth";
     case ENSNamespaceIds.EnsTestEnv:
       throw new Error(
