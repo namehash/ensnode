@@ -75,10 +75,6 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
     const targetIndexingStatus = getOmnichainIndexingStatusIdFinal(configTypeId);
 
     if (omnichainSnapshot.omnichainStatus !== targetIndexingStatus) {
-      // indexing status does not meet prerequisite
-      logger.warn(
-        `Registrar Actions API requested but omnichain indexing status is "${omnichainSnapshot.omnichainStatus}", required "${targetIndexingStatus}".`,
-      );
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,

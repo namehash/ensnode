@@ -259,17 +259,15 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
 
 const makeSerializedPriceAmountSchema = (_valueLabel: string = "Serialized Price Amount") =>
   z.string();
+
 const makePriceAmountSchema = (valueLabel: string = "Price Amount") =>
-  z.preprocess(
-    (v) => (typeof v === "string" ? BigInt(v) : v),
-    z
-      .bigint({
-        error: `${valueLabel} must represent a bigint.`,
-      })
-      .nonnegative({
-        error: `${valueLabel} must not be negative.`,
-      }),
-  );
+  z.coerce
+    .bigint({
+      error: `${valueLabel} must represent a bigint.`,
+    })
+    .nonnegative({
+      error: `${valueLabel} must not be negative.`,
+    });
 
 export const makePriceCurrencySchema = (
   currency: CurrencyId,
