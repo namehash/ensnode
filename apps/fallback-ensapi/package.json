@@ -21,7 +21,7 @@
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.955.0",
