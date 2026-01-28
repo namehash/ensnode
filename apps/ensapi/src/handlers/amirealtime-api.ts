@@ -12,7 +12,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { makeDurationSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { getIndexingStatusForSupportedApiHandler } from "@/lib/handlers/api-support";
+import { validateApiHandlerPrerequisites } from "@/lib/handlers/api-handler-prerequisites";
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
@@ -46,15 +46,15 @@ app.get(
     }),
   ),
   async (c) => {
-    const indexingStatusResult = getIndexingStatusForSupportedApiHandler(c.var.indexingStatus);
+    const validationResult = validateApiHandlerPrerequisites(c.var.indexingStatus);
 
-    // Return any error result from indexing status check
-    if (indexingStatusResult.resultCode !== ResultCodes.Ok) {
-      return resultIntoHttpResponse(c, indexingStatusResult);
+    // Prerequisite not met, so return error response
+    if (validationResult.resultCode !== ResultCodes.Ok) {
+      return resultIntoHttpResponse(c, validationResult);
     }
 
     const { requestedMaxWorstCaseDistance } = c.req.valid("query");
-    const { indexingStatus } = indexingStatusResult.data;
+    const { indexingStatus } = validationResult.data;
     const { worstCaseDistance, snapshot, projectedAt } = indexingStatus;
     const { slowestChainIndexingCursor, omnichainSnapshot } = snapshot;
     const chains = Array.from(omnichainSnapshot.chains.values());

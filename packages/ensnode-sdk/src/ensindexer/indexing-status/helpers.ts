@@ -12,6 +12,7 @@ import {
   type ChainIndexingStatusSnapshotQueued,
   type CrossChainIndexingStatusSnapshot,
   type OmnichainIndexingStatusId,
+  type OmnichainIndexingStatusIdFinal,
   OmnichainIndexingStatusIds,
 } from "./types";
 
@@ -194,6 +195,21 @@ export function getOmnichainIndexingConfigTypeId(
   throw new Error(
     `Invariant: all ChainIndexingConfigTypeIds must be the same across indexed chains to determine overall ConfigTypeId.`,
   );
+}
+
+/**
+ * Get the final Omnichain Indexing Status ID for
+ * a given Chain Indexing Config Type.
+ */
+export function getOmnichainIndexingStatusIdFinal(
+  configType: ChainIndexingConfigTypeId,
+): OmnichainIndexingStatusIdFinal {
+  const statuses = {
+    [ChainIndexingConfigTypeIds.Definite]: OmnichainIndexingStatusIds.Completed,
+    [ChainIndexingConfigTypeIds.Indefinite]: OmnichainIndexingStatusIds.Following,
+  } as const;
+
+  return statuses[configType];
 }
 
 /**

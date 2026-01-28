@@ -21,7 +21,7 @@ import {
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-import { getIndexingStatusForSupportedApiHandler } from "@/lib/handlers/api-support";
+import { validateApiHandlerPrerequisites } from "@/lib/handlers/api-handler-prerequisites";
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
@@ -159,19 +159,18 @@ app.get(
   }),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
-    const indexingStatusResult = getIndexingStatusForSupportedApiHandler(
+    const validationResult = validateApiHandlerPrerequisites(
       c.var.indexingStatus,
       registrarActionsPrerequisites.requiredPlugins,
     );
 
-    // Return any error result from indexing status check
-    if (indexingStatusResult.resultCode !== ResultCodes.Ok) {
-      return resultIntoHttpResponse(c, indexingStatusResult);
+    // Prerequisite not met, so return error response
+    if (validationResult.resultCode !== ResultCodes.Ok) {
+      return resultIntoHttpResponse(c, validationResult);
     }
 
-    const { indexingStatus } = indexingStatusResult.data;
     const query = c.req.valid("query");
-
+    const { indexingStatus } = validationResult.data;
     const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
 
     // Get the accurateAsOf timestamp from the slowest chain indexing cursor
@@ -242,20 +241,19 @@ app.get(
   ),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
-    const indexingStatusResult = getIndexingStatusForSupportedApiHandler(
+    const validationResult = validateApiHandlerPrerequisites(
       c.var.indexingStatus,
       registrarActionsPrerequisites.requiredPlugins,
     );
 
-    // Return any error result from indexing status check
-    if (indexingStatusResult.resultCode !== ResultCodes.Ok) {
-      return resultIntoHttpResponse(c, indexingStatusResult);
+    // Prerequisite not met, so return error response
+    if (validationResult.resultCode !== ResultCodes.Ok) {
+      return resultIntoHttpResponse(c, validationResult);
     }
 
-    const { indexingStatus } = indexingStatusResult.data;
     const { parentNode } = c.req.valid("param");
     const query = c.req.valid("query");
-
+    const { indexingStatus } = validationResult.data;
     const { registrarActions, pageContext } = await fetchRegistrarActions(parentNode, query);
 
     // Get the accurateAsOf timestamp from the slowest chain indexing cursor

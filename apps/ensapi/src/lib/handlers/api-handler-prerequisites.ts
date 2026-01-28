@@ -1,56 +1,61 @@
 /**
- * This module provides helper functions to determine and build results related to
- * indexing status for ENSApi handlers that require specific indexing status support.
+ * This module provides a function to validate the prerequisites for API handlers.
  */
 import config from "@/config";
 
 import {
+  type ApiHandlerPrerequisitesValidationResult,
   buildResultInsufficientIndexingProgress,
   buildResultInternalServerError,
-  buildResultOkIndexingStatusForSupportedApi,
+  buildResultOkApiHandlerPrerequisitesValidation,
   buildResultServiceUnavailable,
   getOmnichainIndexingConfigTypeId,
-  getSupportedIndexingStatusForApiHandler,
+  getOmnichainIndexingStatusIdFinal,
   getTimestampForLowestOmnichainStartBlock,
-  type IndexingStatusForSupportedApiResult,
-  isApiHandlerSupportedByIndexingStatus,
   type PluginName,
 } from "@ensnode/ensnode-sdk";
 
 import type { MiddlewareVariables } from "@/lib/hono-factory";
 
 /**
- * Get the indexing status for supported API handlers,
- * ensuring all prerequisites are met. If any prerequisites are not met,
- * an appropriate error result is returned.
+ * Validates that the indexing status meets the prerequisites for the API handler.
+ *
+ * If any of the prerequisites is not met, returns an appropriate error result.
+ * Otherwise, returns a successful result containing the indexing status.
  *
  * @param indexingStatusVar Indexing status variable from middleware context
  * @param requiredPlugins List of required plugins for the API handler
- * @returns The indexing status result for supported API handler.
+ * @returns Prerequisite validation result
  */
-export function getIndexingStatusForSupportedApiHandler(
+export function validateApiHandlerPrerequisites(
   indexingStatusVar: MiddlewareVariables["indexingStatus"] | undefined,
   requiredPlugins: PluginName[] = [],
-): IndexingStatusForSupportedApiResult {
+): ApiHandlerPrerequisitesValidationResult {
+  // Fail validation if indexing status middleware was not applied
   if (indexingStatusVar === undefined) {
     return buildResultInternalServerError(`Invariant: indexingStatusMiddleware required.`);
   }
 
-  const hasEnsIndexerConfigSupport =
-    requiredPlugins.length === 0 ||
-    requiredPlugins.every((plugin) => config.ensIndexerPublicConfig.plugins.includes(plugin));
+  // Fail validation if required plugins were not activated in
+  // the connected ENSIndexer config
+  if (requiredPlugins.length > 0) {
+    const hasEnsIndexerConfigSupport =
+      requiredPlugins.length === 0 ||
+      requiredPlugins.every((plugin) => config.ensIndexerPublicConfig.plugins.includes(plugin));
 
-  if (!hasEnsIndexerConfigSupport) {
-    const errorMessage = [
-      `This API is unavailable for this ENSNode instance.`,
-      `The connected ENSIndexer did not activate all the plugins this API requires.`,
-      `Active plugins: "${config.ensIndexerPublicConfig.plugins.join(", ")}".`,
-      `Required plugins: "${requiredPlugins.join(", ")}".`,
-    ].join(" ");
+    if (!hasEnsIndexerConfigSupport) {
+      const errorMessage = [
+        `This API is unavailable for this ENSNode instance.`,
+        `The connected ENSIndexer did not activate all the plugins this API requires.`,
+        `Active plugins: "${config.ensIndexerPublicConfig.plugins.join(", ")}".`,
+        `Required plugins: "${requiredPlugins.join(", ")}".`,
+      ].join(" ");
 
-    return buildResultServiceUnavailable(errorMessage, false);
+      return buildResultServiceUnavailable(errorMessage, false);
+    }
   }
 
+  // Fail validation if Indexing Status has not been fetched successfully yet
   if (indexingStatusVar instanceof Error) {
     const errorMessage = [
       `This API is temporarily unavailable for this ENSNode instance.`,
@@ -65,12 +70,12 @@ export function getIndexingStatusForSupportedApiHandler(
 
   const chains = Array.from(omnichainSnapshot.chains.values());
   const configTypeId = getOmnichainIndexingConfigTypeId(chains);
+  const targetIndexingStatus = getOmnichainIndexingStatusIdFinal(configTypeId);
 
-  if (!isApiHandlerSupportedByIndexingStatus(configTypeId, omnichainSnapshot.omnichainStatus)) {
+  // Fail validation if Indexing Status has not reached sufficient progress
+  if (omnichainSnapshot.omnichainStatus !== targetIndexingStatus) {
     const earliestChainIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
     const progressSufficientFromChainIndexingCursor = slowestChainIndexingCursor;
-
-    const targetIndexingStatus = getSupportedIndexingStatusForApiHandler(configTypeId);
 
     const errorMessage = [
       `This API is temporarily unavailable for this ENSNode instance.`,
@@ -86,7 +91,7 @@ export function getIndexingStatusForSupportedApiHandler(
     });
   }
 
-  return buildResultOkIndexingStatusForSupportedApi({
+  return buildResultOkApiHandlerPrerequisitesValidation({
     indexingStatus: indexingStatusVar,
   });
 }
