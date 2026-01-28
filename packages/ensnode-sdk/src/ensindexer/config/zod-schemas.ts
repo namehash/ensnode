@@ -8,7 +8,7 @@
  */
 import { z } from "zod/v4";
 
-import { uniq } from "../../shared";
+import { uniq } from "../../shared/collections";
 import {
   makeChainIdSchema,
   makeENSNamespaceIdSchema,

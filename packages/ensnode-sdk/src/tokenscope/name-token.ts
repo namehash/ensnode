@@ -3,9 +3,9 @@ import { isAddressEqual, zeroAddress } from "viem";
 import { DatasourceNames, type ENSNamespaceId } from "@ensnode/datasources";
 
 import { getParentNameFQDN, type InterpretedName } from "../ens";
-import { type AccountId, accountIdEqual } from "../shared";
+import { accountIdEqual } from "../shared/account-id";
 import { getDatasourceContract, maybeGetDatasourceContract } from "../shared/datasource-contract";
-import type { AssetId } from "../shared/types";
+import type { AccountId, AssetId } from "../shared/types";
 import { type NFTMintStatus, type SerializedAssetId, serializeAssetId } from "./assets";
 
 /**

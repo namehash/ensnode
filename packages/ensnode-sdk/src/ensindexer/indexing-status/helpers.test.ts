@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { BlockRef } from "../../shared";
+import type { BlockRef } from "../../shared/types";
 import {
   createIndexingConfig,
   getOmnichainIndexingCursor,

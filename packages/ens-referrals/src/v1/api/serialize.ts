@@ -1,4 +1,4 @@
-import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk/internal";
+import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";

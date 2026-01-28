@@ -1,4 +1,4 @@
-import type { BlockRef, ChainId, UnixTimestamp } from "../../shared";
+import type { BlockRef, ChainId, UnixTimestamp } from "../../shared/types";
 import {
   type ChainIndexingConfig,
   type ChainIndexingConfigDefinite,

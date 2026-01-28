@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import type { Name } from "../ens";
-import type { ChainId } from "../shared";
+import type { ChainId } from "../shared/types";
 import type { ResolverRecordsResponse } from "./resolver-records-response";
 import type { ResolverRecordsSelection } from "./resolver-records-selection";
 

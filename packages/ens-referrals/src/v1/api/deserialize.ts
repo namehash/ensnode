@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import { deserializePriceEth, deserializePriceUsdc } from "@ensnode/ensnode-sdk/internal";
+import { deserializePriceEth, deserializePriceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";

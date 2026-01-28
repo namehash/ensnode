@@ -1,4 +1,6 @@
-import { type ChainId, type ChainIdString, serializeChainId } from "../../shared";
+import { serializeChainId } from "../../shared/serialize";
+import type { ChainIdString } from "../../shared/serialized-types";
+import type { ChainId } from "../../shared/types";
 import type {
   SerializedCrossChainIndexingStatusSnapshot,
   SerializedOmnichainIndexingStatusSnapshot,

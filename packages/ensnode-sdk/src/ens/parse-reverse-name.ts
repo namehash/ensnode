@@ -1,6 +1,6 @@
 import { type Address, hexToBigInt, isAddress } from "viem";
 
-import { asLowerCaseAddress } from "../shared";
+import { asLowerCaseAddress } from "../shared/address";
 import { bigintToCoinType, type CoinType, DEFAULT_EVM_COIN_TYPE, ETH_COIN_TYPE } from "./coin-type";
 import type { Label, Name } from "./types";
 

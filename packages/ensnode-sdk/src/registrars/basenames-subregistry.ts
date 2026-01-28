@@ -6,7 +6,7 @@ import {
 } from "@ensnode/datasources";
 
 import type { Name } from "../ens";
-import type { AccountId } from "../shared";
+import type { AccountId } from "../shared/types";
 
 /**
  * Gets the SubregistryId (an AccountId) of the Basenames Subregistry contract (this is the

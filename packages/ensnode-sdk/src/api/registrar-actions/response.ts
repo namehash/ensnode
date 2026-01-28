@@ -1,6 +1,6 @@
 import type { InterpretedName } from "../../ens";
 import type { RegistrarAction } from "../../registrars";
-import type { UnixTimestamp } from "../../shared";
+import type { UnixTimestamp } from "../../shared/types";
 import type { IndexingStatusResponseCodes } from "../indexing-status";
 import type { ErrorResponse } from "../shared/errors";
 import type { ResponsePageContext } from "../shared/pagination";

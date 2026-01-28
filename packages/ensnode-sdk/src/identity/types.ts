@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import type { Name } from "../ens";
-import type { DefaultableChainId } from "../shared";
+import type { DefaultableChainId } from "../shared/types";
 
 /**
  * The resolution status for an `Identity`.

@@ -2,7 +2,7 @@ import { bytesToHex, stringToHex } from "viem";
 import { packetToBytes } from "viem/ens";
 import { describe, expect, it } from "vitest";
 
-import { labelhashLiteralLabel } from "../shared";
+import { labelhashLiteralLabel } from "../shared/labelhash";
 import { decodeDNSEncodedName } from "./dns-encoded-name";
 import { encodeLabelHash } from "./encode-labelhash";
 import type { DNSEncodedName, LiteralLabel } from "./types";

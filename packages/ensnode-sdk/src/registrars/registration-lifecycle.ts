@@ -1,5 +1,5 @@
 import type { Node } from "../ens";
-import type { UnixTimestamp } from "../shared";
+import type { UnixTimestamp } from "../shared/types";
 import type { Subregistry } from "./subregistry";
 
 /**

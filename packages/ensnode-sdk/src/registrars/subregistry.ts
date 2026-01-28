@@ -1,5 +1,5 @@
 import type { Node } from "../ens";
-import type { AccountId } from "../shared";
+import type { AccountId } from "../shared/types";
 
 /**
  * Subregistry

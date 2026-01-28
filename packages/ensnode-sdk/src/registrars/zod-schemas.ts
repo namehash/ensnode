@@ -2,7 +2,7 @@ import type { Address } from "viem";
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { addPrices, isPriceEqual } from "../shared";
+import { addPrices, isPriceEqual } from "../shared/currencies";
 import {
   makeAccountIdSchema,
   makeBlockRefSchema,
