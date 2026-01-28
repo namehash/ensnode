@@ -20,7 +20,7 @@
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsgo --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
