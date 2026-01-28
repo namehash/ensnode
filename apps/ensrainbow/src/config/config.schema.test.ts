@@ -24,7 +24,7 @@ describe("buildConfigFromEnvironment", () => {
       expect(config).toStrictEqual({
         port: ENSRAINBOW_DEFAULT_PORT,
         dataDir: getDefaultDataDir(),
-        dbSchemaVersion: undefined,
+        dbSchemaVersion: DB_SCHEMA_VERSION,
         labelSet: undefined,
       });
     });
@@ -96,12 +96,12 @@ describe("buildConfigFromEnvironment", () => {
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
 
-    it("allows DB_SCHEMA_VERSION to be undefined", () => {
+    it("defaults DB_SCHEMA_VERSION to code version when not set", () => {
       const env: ENSRainbowEnvironment = {};
 
       const config = buildConfigFromEnvironment(env);
 
-      expect(config.dbSchemaVersion).toBeUndefined();
+      expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
 
     it("applies full label set configuration when both ID and version are set", () => {
@@ -282,12 +282,12 @@ describe("buildConfigFromEnvironment", () => {
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
 
-    it("passes when DB_SCHEMA_VERSION is undefined", () => {
+    it("passes when DB_SCHEMA_VERSION defaults to code version", () => {
       const env: ENSRainbowEnvironment = {};
 
       const config = buildConfigFromEnvironment(env);
 
-      expect(config.dbSchemaVersion).toBeUndefined();
+      expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
   });
 

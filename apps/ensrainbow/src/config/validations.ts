@@ -10,12 +10,12 @@ import type { ENSRainbowConfig } from "./config.schema";
 export function invariant_dbSchemaVersionMatch(ctx: ZodCheckFnInput<ENSRainbowConfig>): void {
   const { value: config } = ctx;
 
-  if (config.dbSchemaVersion !== undefined && config.dbSchemaVersion !== DB_SCHEMA_VERSION) {
+  if (config.dbSchemaVersion !== DB_SCHEMA_VERSION) {
     ctx.issues.push({
       code: "custom",
       path: ["dbSchemaVersion"],
       input: config.dbSchemaVersion,
-      message: `DB_SCHEMA_VERSION mismatch! Expected version ${DB_SCHEMA_VERSION} from code, but found ${config.dbSchemaVersion} in environment variables.`,
+      message: `DB_SCHEMA_VERSION mismatch! Code expects version ${DB_SCHEMA_VERSION}, but found ${config.dbSchemaVersion} in environment variables.`,
     });
   }
 }

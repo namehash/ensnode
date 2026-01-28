@@ -10,6 +10,7 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
+import { DB_SCHEMA_VERSION } from "@/lib/database";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 
 /**
@@ -67,7 +68,7 @@ const DataDirSchema = z
 const DbSchemaVersionSchema = z.coerce
   .number({ error: "DB_SCHEMA_VERSION must be a number." })
   .int({ error: "DB_SCHEMA_VERSION must be an integer." })
-  .optional();
+  .default(DB_SCHEMA_VERSION);
 
 const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 

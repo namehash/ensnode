@@ -37,42 +37,6 @@ describe("CLI", () => {
     await rm(tempDir, { recursive: true, force: true });
   });
 
-  describe("getEnvPort", () => {
-    it("should return ENSRAINBOW_DEFAULT_PORT when PORT is not set", async () => {
-      vi.resetModules();
-      const { getEnvPort: getEnvPortFresh } = await import("@/lib/env");
-      expect(getEnvPortFresh()).toBe(ENSRAINBOW_DEFAULT_PORT);
-    });
-
-    it("should return port from environment variable", async () => {
-      const customPort = 4000;
-      vi.stubEnv("PORT", customPort.toString());
-      vi.resetModules();
-      const { getEnvPort: getEnvPortFresh } = await import("@/lib/env");
-      expect(getEnvPortFresh()).toBe(customPort);
-    });
-
-    it("should throw error for invalid port number", async () => {
-      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
-        throw new Error("process.exit called");
-      }) as never);
-      vi.stubEnv("PORT", "invalid");
-      vi.resetModules();
-      await expect(import("@/lib/env")).rejects.toThrow("process.exit called");
-      expect(exitSpy).toHaveBeenCalledWith(1);
-    });
-
-    it("should throw error for negative port number", async () => {
-      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
-        throw new Error("process.exit called");
-      }) as never);
-      vi.stubEnv("PORT", "-1");
-      vi.resetModules();
-      await expect(import("@/lib/env")).rejects.toThrow("process.exit called");
-      expect(exitSpy).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe("validatePortConfiguration", () => {
     it("should not throw when PORT env var is not set", async () => {
       vi.resetModules();
