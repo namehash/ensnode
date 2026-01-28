@@ -13,7 +13,14 @@ import { z } from "zod/v4";
 
 import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
-import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
+import {
+  type CurrencyId,
+  CurrencyIds,
+  Price,
+  type PriceEth,
+  SerializedPrice,
+  type SerializedPriceEth,
+} from "./currencies";
 import { reinterpretName } from "./interpretation/reinterpretation";
 import type { AccountIdString } from "./serialized-types";
 import type {
@@ -250,7 +257,10 @@ export const makeENSNamespaceIdSchema = (valueLabel: string = "ENSNamespaceId") 
     },
   });
 
-const makePriceAmountSchema = (valueLabel: string = "Amount") =>
+const makeSerializedPriceAmountSchema = (_valueLabel: string = "Serialized Price Amount") =>
+  z.string();
+
+const makePriceAmountSchema = (valueLabel: string = "Price Amount") =>
   z.coerce
     .bigint({
       error: `${valueLabel} must represent a bigint.`,
@@ -265,6 +275,18 @@ export const makePriceCurrencySchema = (
 ) =>
   z.strictObject({
     amount: makePriceAmountSchema(`${valueLabel} amount`),
+
+    currency: z.literal(currency, {
+      error: `${valueLabel} currency must be set to '${currency}'.`,
+    }),
+  });
+
+export const makeSerializedPriceCurrencySchema = (
+  currency: CurrencyId,
+  valueLabel: string = "Price Currency",
+) =>
+  z.strictObject({
+    amount: makeSerializedPriceAmountSchema(`${valueLabel} amount`),
 
     currency: z.literal(currency, {
       error: `${valueLabel} currency must be set to '${currency}'.`,
@@ -286,10 +308,32 @@ export const makePriceSchema = (valueLabel: string = "Price") =>
   );
 
 /**
+ * Schema for {@link SerializedPrice} type.
+ */
+export const makeSerializedPriceSchema = (valueLabel: string = "Serialized Price") =>
+  z.discriminatedUnion(
+    "currency",
+    [
+      makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel),
+      makeSerializedPriceCurrencySchema(CurrencyIds.USDC, valueLabel),
+      makeSerializedPriceCurrencySchema(CurrencyIds.DAI, valueLabel),
+    ],
+    { error: `${valueLabel} currency must be one of ${Object.values(CurrencyIds).join(", ")}` },
+  );
+
+/**
  * Schema for {@link PriceEth} type.
  */
 export const makePriceEthSchema = (valueLabel: string = "Price ETH") =>
   makePriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform((v) => v as PriceEth);
+
+/**
+ * Schema for {@link SerializedPriceEth} type.
+ */
+export const makeSerializedPriceEthSchema = (valueLabel: string = "Serialized Price ETH") =>
+  makeSerializedPriceCurrencySchema(CurrencyIds.ETH, valueLabel).transform(
+    (v) => v as SerializedPriceEth,
+  );
 
 /**
  * Schema for {@link AccountId} type.

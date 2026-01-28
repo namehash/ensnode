@@ -1,6 +1,8 @@
 import config from "@/config";
 
 import {
+  getOmnichainIndexingConfigTypeId,
+  getOmnichainIndexingStatusIdFinal,
   RegistrarActionsResponseCodes,
   registrarActionsPrerequisites,
   serializeRegistrarActionsResponse,
@@ -68,17 +70,22 @@ export const registrarActionsApiMiddleware = factory.createMiddleware(
 
     const { omnichainSnapshot } = c.var.indexingStatus.snapshot;
 
-    if (!registrarActionsPrerequisites.hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus))
+    const chains = Array.from(omnichainSnapshot.chains.values());
+    const configTypeId = getOmnichainIndexingConfigTypeId(chains);
+    const targetIndexingStatus = getOmnichainIndexingStatusIdFinal(configTypeId);
+
+    if (omnichainSnapshot.omnichainStatus !== targetIndexingStatus) {
       return c.json(
         serializeRegistrarActionsResponse({
           responseCode: RegistrarActionsResponseCodes.Error,
           error: {
             message: `Registrar Actions API is not available`,
-            details: `The cached omnichain indexing status of the Connected ENSIndexer must be one of the following ${registrarActionsPrerequisites.supportedIndexingStatusIds.map((statusId) => `"${statusId}"`).join(", ")}.`,
+            details: `The cached omnichain indexing status of the Connected ENSIndexer must be "${targetIndexingStatus}".`,
           },
         }),
         500,
       );
+    }
 
     await next();
   },

@@ -1,9 +1,4 @@
-import {
-  type ENSIndexerPublicConfig,
-  type OmnichainIndexingStatusId,
-  OmnichainIndexingStatusIds,
-  PluginName,
-} from "../../ensindexer";
+import { type ENSIndexerPublicConfig, PluginName } from "../../ensindexer";
 
 export const registrarActionsPrerequisites = Object.freeze({
   /**
@@ -25,7 +20,7 @@ export const registrarActionsPrerequisites = Object.freeze({
     PluginName.Basenames,
     PluginName.Lineanames,
     PluginName.Registrars,
-  ] as const,
+  ],
 
   /**
    * Check if provided ENSApiPublicConfig supports the Registrar Actions API.
@@ -33,25 +28,6 @@ export const registrarActionsPrerequisites = Object.freeze({
   hasEnsIndexerConfigSupport(config: ENSIndexerPublicConfig): boolean {
     return registrarActionsPrerequisites.requiredPlugins.every((plugin) =>
       config.plugins.includes(plugin),
-    );
-  },
-  /**
-   * Required Indexing Status IDs
-   *
-   * Database indexes are created by the time the omnichain indexing status
-   * is either `completed` or `following`.
-   */
-  supportedIndexingStatusIds: [
-    OmnichainIndexingStatusIds.Completed,
-    OmnichainIndexingStatusIds.Following,
-  ],
-
-  /**
-   * Check if provided indexing status supports the Registrar Actions API.
-   */
-  hasIndexingStatusSupport(omnichainIndexingStatusId: OmnichainIndexingStatusId): boolean {
-    return registrarActionsPrerequisites.supportedIndexingStatusIds.some(
-      (supportedIndexingStatusId) => supportedIndexingStatusId === omnichainIndexingStatusId,
     );
   },
 });

@@ -153,19 +153,12 @@ export function DisplayRegistrarActionsPanel({
           <CardContent className="max-sm:p-3 max-sm:pt-0 flex flex-col gap-4">
             <p>The Registrar Actions API on the connected ENSNode instance is not available yet.</p>
             <p>
-              The Registrar Actions API will be available once the omnichain indexing status reaches
-              one of the following:
+              The Registrar Actions API will be available once the omnichain indexing status becomes{" "}
+              <Badge variant="secondary">
+                {formatOmnichainIndexingStatus(registrarActions.supportedIndexingStatusId)}
+              </Badge>
+              .
             </p>
-
-            <ul>
-              {registrarActions.supportedIndexingStatusIds.map((supportedStatusId) => (
-                <li className="inline" key={supportedStatusId}>
-                  <Badge variant="secondary">
-                    {formatOmnichainIndexingStatus(supportedStatusId)}
-                  </Badge>{" "}
-                </li>
-              ))}
-            </ul>
           </CardContent>
           <CardFooter className="gap-6">
             <Button asChild>

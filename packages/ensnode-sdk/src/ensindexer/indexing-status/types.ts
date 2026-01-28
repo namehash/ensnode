@@ -321,6 +321,15 @@ export type OmnichainIndexingStatusId =
   (typeof OmnichainIndexingStatusIds)[keyof typeof OmnichainIndexingStatusIds];
 
 /**
+ * The range of {@link OmnichainIndexingStatusId} values that represent
+ * an final omnichain indexing status. Once indexing reaches one of these
+ * statuses, it will continue in that status forever.
+ */
+export type OmnichainIndexingStatusIdFinal =
+  | typeof OmnichainIndexingStatusIds.Completed
+  | typeof OmnichainIndexingStatusIds.Following;
+
+/**
  * Omnichain indexing status snapshot when the overall `omnichainStatus` is
  * {@link OmnichainIndexingStatusIds.Unstarted}.
  *

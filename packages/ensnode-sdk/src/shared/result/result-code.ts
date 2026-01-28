@@ -13,9 +13,21 @@ export const ResultCodes = {
   Ok: "ok",
 
   /**
-   * Server error: the operation failed due to an unexpected error internally within the server.
+   * Server error: the operation failed due to an unexpected error internally
+   * within the server.
    */
   InternalServerError: "internal-server-error",
+
+  /**
+   * Server error: the operation failed due to the requested service being
+   * unavailable at the time of the request.
+   */
+  ServiceUnavailable: "service-unavailable",
+
+  /**
+   * Server error: the operation failed due to insufficient indexing progress.
+   */
+  InsufficientIndexingProgress: "insufficient-indexing-progress",
 
   /**
    * Server error: the requested resource was not found.
@@ -38,7 +50,8 @@ export const ResultCodes = {
   RequestTimeout: "request-timeout",
 
   /**
-   * Client error: received an unrecognized result from the server for an operation.
+   * Client error: received an unrecognized result from the server for
+   * an operation.
    */
   ClientUnrecognizedOperationResult: "client-unrecognized-operation-result",
 } as const;
@@ -48,6 +61,8 @@ export const ResultCodes = {
  */
 export const RESULT_CODE_SERVER_ERROR_CODES = [
   ResultCodes.InternalServerError,
+  ResultCodes.ServiceUnavailable,
+  ResultCodes.InsufficientIndexingProgress,
   ResultCodes.NotFound,
   ResultCodes.InvalidRequest,
 ] as const;
@@ -62,7 +77,8 @@ export const RESULT_CODE_CLIENT_ERROR_CODES = [
 ] as const;
 
 /**
- * List of all error codes the client can return (client-originated + relayed from server).
+ * List of all error codes the client can return
+ * (client-originated + relayed from server).
  */
 export const RESULT_CODE_ALL_ERROR_CODES = [
   ...RESULT_CODE_CLIENT_ERROR_CODES,
@@ -97,6 +113,11 @@ export type ResultCodeDefinite = Exclude<ResultCode, ResultCodeIndefinite>;
  * ResultCode for an error result that may be determined by the server.
  */
 export type ResultCodeServerError = (typeof RESULT_CODE_SERVER_ERROR_CODES)[number];
+
+/**
+ * ResultCode for a result that may be determined by the server.
+ */
+export type ResultCodeServer = ResultCodeServerError | typeof ResultCodes.Ok;
 
 /**
  * ResultCode for an error result that may be determined by the client.

@@ -12,6 +12,7 @@ import {
   makeLowercaseAddressSchema,
   makeNodeSchema,
   makePriceEthSchema,
+  makeSerializedPriceEthSchema,
   makeTransactionHashSchema,
   makeUnixTimestampSchema,
 } from "../shared/zod-schemas";
@@ -23,6 +24,10 @@ import {
   type RegistrarActionPricingUnknown,
   type RegistrarActionReferralAvailable,
   RegistrarActionTypes,
+  SerializedRegistrarAction,
+  SerializedRegistrarActionPricing,
+  type SerializedRegistrarActionPricingAvailable,
+  type SerializedRegistrarActionPricingUnknown,
 } from "./registrar-action";
 import type { RegistrationLifecycle } from "./registration-lifecycle";
 import { Subregistry } from "./subregistry";
@@ -86,6 +91,43 @@ const makeRegistrarActionPricingSchema = (valueLabel: string = "Registrar Action
       })
       .transform((v) => v as RegistrarActionPricingUnknown),
   ]);
+
+/**
+ * Schema for parsing objects into {@link SerializedRegistrarActionPricing}.
+ */
+const makeSerializedRegistrarActionPricingSchema = (
+  valueLabel: string = "Serialized Registrar Action Pricing",
+) => {
+  const baseCostDescription = `Base cost (before any 'premium') of Ether measured in units of Wei paid to execute the "logical registrar action".`;
+  const premiumDescription = `"premium" cost (in excesses of the 'baseCost') of Ether measured in units of Wei paid to execute the "logical registrar action".`;
+  const totalDescription = `Total cost of Ether measured in units of Wei paid to execute the "logical registrar action".`;
+
+  return z.union([
+    // pricing available
+    z
+      .object({
+        baseCost: makeSerializedPriceEthSchema(`${valueLabel} Base Cost`).meta({
+          description: baseCostDescription,
+        }),
+        premium: makeSerializedPriceEthSchema(`${valueLabel} Premium`).meta({
+          description: premiumDescription,
+        }),
+        total: makeSerializedPriceEthSchema(`${valueLabel} Total`).meta({
+          description: totalDescription,
+        }),
+      })
+      .transform((v) => v as SerializedRegistrarActionPricingAvailable),
+
+    // pricing unknown
+    z
+      .object({
+        baseCost: z.null().meta({ description: baseCostDescription }),
+        premium: z.null().meta({ description: premiumDescription }),
+        total: z.null().meta({ description: totalDescription }),
+      })
+      .transform((v) => v as SerializedRegistrarActionPricingUnknown),
+  ]);
+};
 
 /** Invariant: decodedReferrer is based on encodedReferrer */
 function invariant_registrarActionDecodedReferrerBasedOnRawReferrer(
@@ -159,31 +201,89 @@ const EventIdsSchema = z
   .min(1)
   .transform((v) => v as [RegistrarActionEventId, ...RegistrarActionEventId[]]);
 
+const registrarActionTypeDescription = `The type of "logical registrar action".`;
+
 export const makeBaseRegistrarActionSchema = (valueLabel: string = "Base Registrar Action") =>
   z
     .object({
-      id: EventIdSchema,
-      incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`),
-      registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`),
+      id: EventIdSchema.meta({
+        description: `The 'id' value is a deterministic and globally unique identifier for the "logical registrar action".`,
+      }),
+      incrementalDuration: makeDurationSchema(`${valueLabel} Incremental Duration`).meta({
+        description: `The duration by which the "logical registrar action" extended the associated 'registrationLifecycle'.`,
+      }),
+      registrant: makeLowercaseAddressSchema(`${valueLabel} Registrant`).meta({
+        description: `Identifies the address that initiated the "logical registrar action" and is paying the 'pricing.total' cost (if applicable).`,
+      }),
       registrationLifecycle: makeRegistrationLifecycleSchema(
         `${valueLabel} Registration Lifecycle`,
-      ),
-      pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`),
-      referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`),
-      block: makeBlockRefSchema(`${valueLabel} Block`),
-      transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`),
-      eventIds: EventIdsSchema,
+      ).meta({
+        description: `Registration Lifecycle associated with this "logical registrar action".`,
+      }),
+      type: z.string().meta({
+        description: registrarActionTypeDescription,
+      }),
+      referral: makeRegistrarActionReferralSchema(`${valueLabel} Referral`).meta({
+        description: `Referral information associated with this "logical registrar action".`,
+      }),
+      block: makeBlockRefSchema(`${valueLabel} Block`).meta({
+        description: `References the block where the "logical registrar action" was executed.`,
+      }),
+      transactionHash: makeTransactionHashSchema(`${valueLabel} Transaction Hash`).meta({
+        description: `Transaction hash of the transaction associated with the "logical registrar action".`,
+      }),
+      eventIds: EventIdsSchema.meta({
+        description: `Array of the eventIds that have contributed to the state of the "logical registrar action" record.`,
+      }),
     })
     .check(invariant_eventIdsInitialElementIsTheActionId);
 
+const pricingInfoDescription = `Pricing information associated with this "logical registrar action".`;
+
 export const makeRegistrarActionRegistrationSchema = (valueLabel: string = "Registration ") =>
   makeBaseRegistrarActionSchema(valueLabel).extend({
-    type: z.literal(RegistrarActionTypes.Registration),
+    type: z.literal(RegistrarActionTypes.Registration).meta({
+      description: registrarActionTypeDescription,
+    }),
+
+    pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`).meta({
+      description: pricingInfoDescription,
+    }),
+  });
+
+export const makeSerializedRegistrarActionRegistrationSchema = (
+  valueLabel: string = "SerializedRegistration ",
+) =>
+  makeBaseRegistrarActionSchema(valueLabel).extend({
+    type: z.literal(RegistrarActionTypes.Registration).meta({
+      description: registrarActionTypeDescription,
+    }),
+
+    pricing: makeSerializedRegistrarActionPricingSchema(`${valueLabel} Pricing`).meta({
+      description: pricingInfoDescription,
+    }),
   });
 
 export const makeRegistrarActionRenewalSchema = (valueLabel: string = "Renewal") =>
   makeBaseRegistrarActionSchema(valueLabel).extend({
-    type: z.literal(RegistrarActionTypes.Renewal),
+    type: z.literal(RegistrarActionTypes.Renewal).meta({
+      description: registrarActionTypeDescription,
+    }),
+    pricing: makeRegistrarActionPricingSchema(`${valueLabel} Pricing`).meta({
+      description: pricingInfoDescription,
+    }),
+  });
+
+export const makeSerializedRegistrarActionRenewalSchema = (
+  valueLabel: string = "Serialized Renewal",
+) =>
+  makeBaseRegistrarActionSchema(valueLabel).extend({
+    type: z.literal(RegistrarActionTypes.Renewal).meta({
+      description: registrarActionTypeDescription,
+    }),
+    pricing: makeSerializedRegistrarActionPricingSchema(`${valueLabel} Pricing`).meta({
+      description: pricingInfoDescription,
+    }),
   });
 
 /**
@@ -193,4 +293,15 @@ export const makeRegistrarActionSchema = (valueLabel: string = "Registrar Action
   z.discriminatedUnion("type", [
     makeRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
     makeRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
+  ]);
+
+/**
+ * Schema for {@link SerializedRegistrarAction}.
+ */
+export const makeSerializedRegistrarActionSchema = (
+  valueLabel: string = "Serialized Registrar Action",
+) =>
+  z.discriminatedUnion("type", [
+    makeSerializedRegistrarActionRegistrationSchema(`${valueLabel} Registration`),
+    makeSerializedRegistrarActionRenewalSchema(`${valueLabel} Renewal`),
   ]);

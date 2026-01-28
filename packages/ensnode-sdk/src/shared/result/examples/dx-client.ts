@@ -23,8 +23,8 @@ export const myExampleDXClient = (address: Address): void => {
     console.log(result.data.name);
   } else {
     // NOTE: Here the type system knows that `result` has fields for `errorMessage` and `suggestRetry`
-    console.error(`Error: (${result.resultCode}) - ${result.errorMessage}`);
-    if (result.suggestRetry) {
+    console.error(`Error: (${result.resultCode}) - ${result.data.errorMessage}`);
+    if (result.data.suggestRetry) {
       console.log("Try again?");
     }
   }

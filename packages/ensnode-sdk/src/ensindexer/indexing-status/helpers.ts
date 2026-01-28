@@ -3,6 +3,7 @@ import {
   type ChainIndexingConfig,
   type ChainIndexingConfigDefinite,
   type ChainIndexingConfigIndefinite,
+  type ChainIndexingConfigTypeId,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
@@ -11,6 +12,7 @@ import {
   type ChainIndexingStatusSnapshotQueued,
   type CrossChainIndexingStatusSnapshot,
   type OmnichainIndexingStatusId,
+  type OmnichainIndexingStatusIdFinal,
   OmnichainIndexingStatusIds,
 } from "./types";
 
@@ -169,6 +171,45 @@ export function createIndexingConfig(
     configType: ChainIndexingConfigTypeIds.Indefinite,
     startBlock,
   } satisfies ChainIndexingConfigIndefinite;
+}
+
+/**
+ * Get Omnichain Indexing Config Type ID from Chain Indexing Status Snapshots.
+ * @param chains Chain Indexing Status Snapshots
+ * @returns Omnichain Indexing Config Type ID
+ * @throws Error if Omnichain Indexing Config Type IDs are mixed across chains
+ */
+export function getOmnichainIndexingConfigTypeId(
+  chains: ChainIndexingStatusSnapshot[],
+): ChainIndexingConfigTypeId {
+  const chainConfigTypeIds = chains.map((chain) => chain.config.configType);
+
+  if (chainConfigTypeIds.every((typeId) => typeId === ChainIndexingConfigTypeIds.Definite)) {
+    return ChainIndexingConfigTypeIds.Definite;
+  }
+
+  if (chainConfigTypeIds.every((typeId) => typeId === ChainIndexingConfigTypeIds.Indefinite)) {
+    return ChainIndexingConfigTypeIds.Indefinite;
+  }
+
+  throw new Error(
+    `Invariant: all ChainIndexingConfigTypeIds must be the same across indexed chains to determine overall ConfigTypeId.`,
+  );
+}
+
+/**
+ * Get the final Omnichain Indexing Status ID for
+ * a given Chain Indexing Config Type.
+ */
+export function getOmnichainIndexingStatusIdFinal(
+  configType: ChainIndexingConfigTypeId,
+): OmnichainIndexingStatusIdFinal {
+  const statuses = {
+    [ChainIndexingConfigTypeIds.Definite]: OmnichainIndexingStatusIds.Completed,
+    [ChainIndexingConfigTypeIds.Indefinite]: OmnichainIndexingStatusIds.Following,
+  } as const;
+
+  return statuses[configType];
 }
 
 /**

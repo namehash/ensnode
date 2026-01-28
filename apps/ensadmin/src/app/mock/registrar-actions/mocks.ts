@@ -2,6 +2,7 @@ import {
   Duration,
   InterpretedName,
   NamedRegistrarAction,
+  OmnichainIndexingStatusIds,
   registrarActionsPrerequisites,
 } from "@ensnode/ensnode-sdk";
 
@@ -248,7 +249,7 @@ export const variants: Map<StatefulFetchStatusId, StatefulFetchRegistrarActions>
     StatefulFetchStatusIds.NotReady,
     {
       fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusIds: registrarActionsPrerequisites.supportedIndexingStatusIds,
+      supportedIndexingStatusId: OmnichainIndexingStatusIds.Following,
     } satisfies StatefulFetchRegistrarActionsNotReady,
   ],
   [

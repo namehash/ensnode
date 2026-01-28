@@ -1,9 +1,97 @@
+/**
+ * Common Result Types and Builders
+ *
+ * This module defines specific result data models that might be shared across more than 1 route.
+ */
+
+import type { UnixTimestamp } from "../types";
+import type { AbstractResultError, AbstractResultErrorData } from "./result-base";
+import { type ResultCode, ResultCodes } from "./result-code";
+
+/************************************************************
+ * Service Unavailable
+ ************************************************************/
+
+export interface ResultServiceUnavailable
+  extends AbstractResultError<typeof ResultCodes.ServiceUnavailable> {}
+
+/**
+ * Builds a result object representing a service unavailable error.
+ */
+export const buildResultServiceUnavailable = (
+  errorMessage?: string,
+  suggestRetry: boolean = true,
+): ResultServiceUnavailable => {
+  return {
+    resultCode: ResultCodes.ServiceUnavailable,
+    data: {
+      errorMessage: errorMessage ?? "The service is currently unavailable.",
+      suggestRetry,
+    },
+  };
+};
+
+/************************************************************
+ * Insufficient Indexing Progress
+ ************************************************************/
+
+/**
+ * Data for insufficient indexing progress error result.
+ */
+export interface ResultInsufficientIndexingProgressData {
+  /**
+   * The current omnichain indexing status.
+   */
+  currentIndexingStatus: string;
+
+  /**
+   * The timestamp of the "slowest" latest indexed block timestamp
+   * across all indexed chains.
+   */
+  currentIndexingCursor: UnixTimestamp;
+
+  /**
+   * The timestamp of the earliest indexed block across all indexed chains.
+   */
+  startIndexingCursor: UnixTimestamp;
+
+  /**
+   * The target omnichain indexing status for sufficient progress.
+   */
+  targetIndexingStatus: string;
+
+  /**
+   * The target timestamp from which indexing progress is considered sufficient.
+   */
+  targetIndexingCursor: UnixTimestamp;
+}
+
+export interface ResultInsufficientIndexingProgress
+  extends AbstractResultError<
+    typeof ResultCodes.InsufficientIndexingProgress,
+    ResultInsufficientIndexingProgressData & AbstractResultErrorData
+  > {}
+
+/**
+ * Builds a result object representing a insufficient indexing progress error.
+ */
+export const buildResultInsufficientIndexingProgress = (
+  errorMessage: string,
+  data: ResultInsufficientIndexingProgressData,
+): ResultInsufficientIndexingProgress => {
+  return {
+    resultCode: ResultCodes.InsufficientIndexingProgress,
+    data: {
+      ...data,
+      errorMessage,
+      suggestRetry: true,
+    },
+  };
+};
+
 /************************************************************
  * Internal Server Error
  ************************************************************/
-
-import type { AbstractResultError } from "./result-base";
-import { type ResultCode, ResultCodes } from "./result-code";
 
 export interface ResultInternalServerError
   extends AbstractResultError<typeof ResultCodes.InternalServerError> {}
@@ -17,8 +105,10 @@ export const buildResultInternalServerError = (
 ): ResultInternalServerError => {
   return {
     resultCode: ResultCodes.InternalServerError,
-    errorMessage: errorMessage ?? "An unknown internal server error occurred.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "An unknown internal server error occurred.",
+      suggestRetry,
+    },
   };
 };
 
@@ -37,8 +127,10 @@ export const buildResultNotFound = (
 ): ResultNotFound => {
   return {
     resultCode: ResultCodes.NotFound,
-    errorMessage: errorMessage ?? "Requested resource not found.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Requested resource not found.",
+      suggestRetry,
+    },
   };
 };
 
@@ -58,8 +150,10 @@ export const buildResultInvalidRequest = (
 ): ResultInvalidRequest => {
   return {
     resultCode: ResultCodes.InvalidRequest,
-    errorMessage: errorMessage ?? "Invalid request.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Invalid request.",
+      suggestRetry,
+    },
   };
 };
 
@@ -79,8 +173,10 @@ export const buildResultConnectionError = (
 ): ResultConnectionError => {
   return {
     resultCode: ResultCodes.ConnectionError,
-    errorMessage: errorMessage ?? "Connection error.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Connection error.",
+      suggestRetry,
+    },
   };
 };
 
@@ -100,8 +196,10 @@ export const buildResultRequestTimeout = (
 ): ResultRequestTimeout => {
   return {
     resultCode: ResultCodes.RequestTimeout,
-    errorMessage: errorMessage ?? "Request timed out.",
-    suggestRetry,
+    data: {
+      errorMessage: errorMessage ?? "Request timed out.",
+      suggestRetry,
+    },
   };
 };
 
@@ -150,8 +248,10 @@ export const buildResultClientUnrecognizedOperationResult = (
 
   return {
     resultCode: ResultCodes.ClientUnrecognizedOperationResult,
-    errorMessage,
-    suggestRetry,
+    data: {
+      errorMessage,
+      suggestRetry,
+    },
   };
 };
 

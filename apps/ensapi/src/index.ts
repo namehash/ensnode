@@ -7,13 +7,19 @@ import { cors } from "hono/cors";
 import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
+import {
+  buildResultInternalServerError,
+  buildResultNotFound,
+  buildResultOkHealth,
+} from "@ensnode/ensnode-sdk";
+
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
-import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
+import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
@@ -112,13 +118,24 @@ app.get(
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {
-  return c.json({ message: "fallback ok" });
+  const result = buildResultOkHealth({ message: "fallback ok" });
+
+  return resultIntoHttpResponse(c, result);
+});
+
+app.notFound((c) => {
+  const result = buildResultNotFound(`Resource not found: ${c.req.path}`);
+
+  return resultIntoHttpResponse(c, result);
 });
 
 // log hono errors to console
-app.onError((error, ctx) => {
+app.onError((error, c) => {
   logger.error(error);
-  return errorResponse(ctx, "Internal Server Error");
+
+  const result = buildResultInternalServerError(`Internal Server Error: ${error.message}`);
+
+  return resultIntoHttpResponse(c, result);
 });
 
 // start ENSNode API OpenTelemetry SDK

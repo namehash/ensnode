@@ -12,6 +12,7 @@
  * app/package in the monorepo which requires `@ensnode/ensnode-sdk` dependency.
  */
 
+export * from "./api/amirealtime/zod-schemas";
 export * from "./api/indexing-status/zod-schemas";
 export * from "./api/name-tokens/zod-schemas";
 export * from "./api/registrar-actions/zod-schemas";
@@ -39,6 +40,7 @@ export * from "./shared/log-level";
 export * from "./shared/protocol-acceleration/is-bridged-resolver";
 export * from "./shared/protocol-acceleration/is-ensip-19-reverse-resolver";
 export * from "./shared/protocol-acceleration/is-static-resolver";
+export * from "./shared/result/zod-schemas";
 export * from "./shared/thegraph";
 export * from "./shared/zod-schemas";
 export * from "./shared/zod-types";

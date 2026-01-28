@@ -19,7 +19,8 @@ import { factory } from "@/lib/hono-factory";
 
 import ensnodeGraphQLApi from "./ensnode-graphql-api";
 import nameTokensApi from "./name-tokens-api";
-import registrarActionsApi from "./registrar-actions-api";
+import registrarActionsApiV0 from "./registrar-actions-api/v0";
+import registrarActionsApiV1 from "./registrar-actions-api/v1";
 import resolutionApi from "./resolution-api";
 
 const app = factory.createApp();
@@ -100,8 +101,12 @@ app.get(
 // Name Tokens API
 app.route("/name-tokens", nameTokensApi);
 
-// Registrar Actions API
-app.route("/registrar-actions", registrarActionsApi);
+// Registrar Actions API has to be available in two versions
+// because of breaking changes introduced in v1. All clients
+// not explicitly requesting v1 will continue to use the
+// original (v0) version of the API.
+app.route("/registrar-actions", registrarActionsApiV0); // Registrar Actions API (implicitly v0)
+app.route("/v1/registrar-actions", registrarActionsApiV1); // Registrar Actions API (v1)
 
 // Resolution API
 app.route("/resolve", resolutionApi);

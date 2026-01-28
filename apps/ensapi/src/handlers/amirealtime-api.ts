@@ -2,21 +2,30 @@ import { minutesToSeconds } from "date-fns";
 import { describeRoute } from "hono-openapi";
 import z from "zod/v4";
 
-import type { Duration } from "@ensnode/ensnode-sdk";
+import {
+  buildResultInsufficientIndexingProgress,
+  buildResultOkAmIRealtime,
+  type Duration,
+  getTimestampForLowestOmnichainStartBlock,
+  OmnichainIndexingStatusIds,
+  ResultCodes,
+} from "@ensnode/ensnode-sdk";
 import { makeDurationSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { errorResponse } from "@/lib/handlers/error-response";
+import { validateApiHandlerPrerequisites } from "@/lib/handlers/api-handler-prerequisites";
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
+import { openApiResponsesAmIRealtimeApi } from "@/lib/open-api/amirealtime-api-responses";
+import { resultIntoHttpResponse } from "@/lib/result/result-into-http-response";
 
 const app = factory.createApp();
 
-// Set default `maxWorstCaseDistance` for `GET /amirealtime` endpoint to one minute.
+// Set default `requestedMaxWorstCaseDistance` for `GET /amirealtime` endpoint to one minute.
 export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSeconds(1);
 
 // allow performance monitoring clients to read HTTP Status for the provided
-// `maxWorstCaseDistance` param
+// `requestedMaxWorstCaseDistance` param
 app.get(
   "/",
   describeRoute({
@@ -24,63 +33,63 @@ app.get(
     summary: "Check indexing progress",
     description:
       "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-    responses: {
-      200: {
-        description:
-          "Indexing progress is guaranteed to be within the requested distance of realtime",
-      },
-      503: {
-        description:
-          "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
-      },
-    },
+    responses: openApiResponsesAmIRealtimeApi,
   }),
   validate(
     "query",
     z.object({
-      maxWorstCaseDistance: params.queryParam
+      requestedMaxWorstCaseDistance: params.queryParam
         .optional()
         .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
-        .pipe(makeDurationSchema("maxWorstCaseDistance query param"))
+        .pipe(makeDurationSchema("requestedMaxWorstCaseDistance query param"))
         .describe("Maximum acceptable worst-case indexing distance in seconds"),
     }),
   ),
   async (c) => {
-    // context must be set by the required middleware
-    if (c.var.indexingStatus === undefined) {
-      throw new Error(`Invariant(amirealtime-api): indexingStatusMiddleware required.`);
+    const validationResult = validateApiHandlerPrerequisites(c.var.indexingStatus);
+
+    // Prerequisite not met, so return error response
+    if (validationResult.resultCode !== ResultCodes.Ok) {
+      return resultIntoHttpResponse(c, validationResult);
     }
 
-    // return 503 response error with details on prerequisite being unavailable
-    if (c.var.indexingStatus instanceof Error) {
-      return errorResponse(
-        c,
-        `Invariant(amirealtime-api): Indexing Status has to be resolved successfully before 'maxWorstCaseDistance' can be applied.`,
-        503,
+    const { requestedMaxWorstCaseDistance } = c.req.valid("query");
+    const { indexingStatus } = validationResult.data;
+    const { worstCaseDistance, snapshot, projectedAt } = indexingStatus;
+    const { slowestChainIndexingCursor, omnichainSnapshot } = snapshot;
+    const chains = Array.from(omnichainSnapshot.chains.values());
+
+    // Case: worst-case distance exceeds requested maximum
+    if (worstCaseDistance > requestedMaxWorstCaseDistance) {
+      const earliestChainIndexingCursor = getTimestampForLowestOmnichainStartBlock(chains);
+      // Progress is considered sufficient from the point where
+      // the worst-case distance would be within the requested maximum
+      const progressSufficientFromChainIndexingCursor =
+        slowestChainIndexingCursor + worstCaseDistance - requestedMaxWorstCaseDistance;
+
+      const result = buildResultInsufficientIndexingProgress(
+        `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'requestedMaxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; requestedMaxWorstCaseDistance = ${requestedMaxWorstCaseDistance}`,
+        {
+          currentIndexingStatus: omnichainSnapshot.omnichainStatus,
+          currentIndexingCursor: slowestChainIndexingCursor,
+          startIndexingCursor: earliestChainIndexingCursor,
+          targetIndexingStatus: OmnichainIndexingStatusIds.Following,
+          targetIndexingCursor: progressSufficientFromChainIndexingCursor,
+        },
       );
+
+      return resultIntoHttpResponse(c, result);
     }
 
-    const { maxWorstCaseDistance } = c.req.valid("query");
-    const { worstCaseDistance, snapshot } = c.var.indexingStatus;
-    const { slowestChainIndexingCursor } = snapshot;
-
-    // return 503 response error with details on
-    // requested `maxWorstCaseDistance` vs. actual `worstCaseDistance`
-    if (worstCaseDistance > maxWorstCaseDistance) {
-      return errorResponse(
-        c,
-        `Indexing Status 'worstCaseDistance' must be below or equal to the requested 'maxWorstCaseDistance'; worstCaseDistance = ${worstCaseDistance}; maxWorstCaseDistance = ${maxWorstCaseDistance}`,
-        503,
-      );
-    }
-
-    // return 200 response OK with current details on `maxWorstCaseDistance`,
-    // `slowestChainIndexingCursor`, and `worstCaseDistance`
-    return c.json({
-      maxWorstCaseDistance,
+    // Case: worst-case distance is within requested maximum
+    const result = buildResultOkAmIRealtime({
+      requestedMaxWorstCaseDistance,
       slowestChainIndexingCursor,
       worstCaseDistance,
+      serverNow: projectedAt,
     });
+
+    return resultIntoHttpResponse(c, result);
   },
 );
 

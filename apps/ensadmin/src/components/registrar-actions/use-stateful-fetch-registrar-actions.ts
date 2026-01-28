@@ -1,5 +1,7 @@
 import { useENSNodeConfig, useRegistrarActions } from "@ensnode/ensnode-react";
 import {
+  getOmnichainIndexingConfigTypeId,
+  getOmnichainIndexingStatusIdFinal,
   IndexingStatusResponseCodes,
   RegistrarActionsOrders,
   RegistrarActionsResponseCodes,
@@ -23,12 +25,7 @@ interface UseStatefulRegistrarActionsProps {
   itemsPerPage: number;
 }
 
-const {
-  hasEnsIndexerConfigSupport,
-  hasIndexingStatusSupport,
-  requiredPlugins,
-  supportedIndexingStatusIds,
-} = registrarActionsPrerequisites;
+const { hasEnsIndexerConfigSupport, requiredPlugins } = registrarActionsPrerequisites;
 
 /**
  * Use Stateful Registrar Actions
@@ -51,10 +48,13 @@ export function useStatefulRegistrarActions({
   ) {
     const { ensIndexerPublicConfig } = ensNodeConfigQuery.data;
     const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+    const chains = Array.from(omnichainSnapshot.chains.values());
+    const configTypeId = getOmnichainIndexingConfigTypeId(chains);
+    const targetIndexingStatus = getOmnichainIndexingStatusIdFinal(configTypeId);
 
     isRegistrarActionsApiSupported =
       hasEnsIndexerConfigSupport(ensIndexerPublicConfig) &&
-      hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus);
+      omnichainSnapshot.omnichainStatus === targetIndexingStatus;
   }
 
   // Note: ENSNode Registrar Actions API is available only in certain cases.
@@ -101,12 +101,15 @@ export function useStatefulRegistrarActions({
   }
 
   const { omnichainSnapshot } = indexingStatusQuery.data.realtimeProjection.snapshot;
+  const chains = Array.from(omnichainSnapshot.chains.values());
+  const configTypeId = getOmnichainIndexingConfigTypeId(chains);
+  const targetIndexingStatus = getOmnichainIndexingStatusIdFinal(configTypeId);
 
   // fetching is temporarily not possible due to indexing status being not advanced enough
-  if (!hasIndexingStatusSupport(omnichainSnapshot.omnichainStatus)) {
+  if (omnichainSnapshot.omnichainStatus !== targetIndexingStatus) {
     return {
       fetchStatus: StatefulFetchStatusIds.NotReady,
-      supportedIndexingStatusIds,
+      supportedIndexingStatusId: targetIndexingStatus,
     } satisfies StatefulFetchRegistrarActionsNotReady;
   }
 
