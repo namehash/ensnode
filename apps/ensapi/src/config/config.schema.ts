@@ -26,6 +26,7 @@ import {
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
+import { buildOpenApiMockConfig } from "@/config/openapi-mock-config";
 import {
   invariant_ensHolidayAwardsEndAfterStart,
   invariant_ensIndexerPublicConfigVersionInfo,
@@ -75,6 +76,7 @@ const EnsApiConfigSchema = z
   .check(invariant_ensHolidayAwardsEndAfterStart);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
+export type EnsApiConfigInput = z.input<typeof EnsApiConfigSchema>;
 
 /**
  * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
@@ -83,6 +85,11 @@ export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
  * @throws Error with formatted validation messages if environment parsing fails
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
+  if (env.OPENAPI_GENERATE_MODE === "true") {
+    logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
+    return EnsApiConfigSchema.parse(buildOpenApiMockConfig(env.PORT));
+  }
+
   try {
     const ensIndexerUrl = EnsIndexerUrlSchema.parse(env.ENSINDEXER_URL);
 
