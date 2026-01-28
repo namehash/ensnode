@@ -18,6 +18,7 @@ export default {
   // Extends the existing Sepolia Namespace
   ...SepoliaNamespace,
 
+  // adds ENSv2 Root contracts on Sepolia
   [DatasourceNames.ENSv2Root]: {
     chain: sepolia,
     contracts: {
@@ -37,7 +38,7 @@ export default {
     },
   },
 
-  // add a namechain
+  // adds ENSv2 ETH Registry (also deployed to Sepolia)
   [DatasourceNames.ENSv2ETHRegistry]: {
     chain: sepolia,
     contracts: {
