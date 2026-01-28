@@ -2,7 +2,7 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { isAbsolute, resolve } from "node:path";
 
-import { z } from "zod/v4";
+import { prettifyError, ZodError, z } from "zod/v4";
 
 import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import { makeFullyPinnedLabelSetSchema, PortSchema } from "@ensnode/ensnode-sdk/internal";
@@ -96,32 +96,39 @@ export type ENSRainbowConfig = z.infer<typeof ENSRainbowConfigSchema>;
  * Validates and parses the complete environment configuration using ENSRainbowConfigSchema.
  *
  * @returns A validated ENSRainbowConfig object
- * @throws {ZodError} with detailed validation messages if environment parsing fails
- * @throws {Error} if label set configuration is invalid (e.g., only one of LABEL_SET_ID or LABEL_SET_VERSION is provided)
+ * @throws Error with formatted validation messages if environment parsing fails
  */
 export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowConfig {
-  // Transform environment variables into config shape with validation
-  const envToConfigSchema = z
-    .object({
-      PORT: z.string().optional(),
-      DATA_DIR: z.string().optional(),
-      DB_SCHEMA_VERSION: z.string().optional(),
-      LABEL_SET_ID: z.string().optional(),
-      LABEL_SET_VERSION: z.string().optional(),
-    })
-    .transform((env) => {
-      const labelSet = validateLabelSetConfiguration(env.LABEL_SET_ID, env.LABEL_SET_VERSION);
+  try {
+    // Transform environment variables into config shape with validation
+    const envToConfigSchema = z
+      .object({
+        PORT: z.string().optional(),
+        DATA_DIR: z.string().optional(),
+        DB_SCHEMA_VERSION: z.string().optional(),
+        LABEL_SET_ID: z.string().optional(),
+        LABEL_SET_VERSION: z.string().optional(),
+      })
+      .transform((env) => {
+        const labelSet = validateLabelSetConfiguration(env.LABEL_SET_ID, env.LABEL_SET_VERSION);
 
-      return {
-        port: env.PORT,
-        dataDir: env.DATA_DIR,
-        dbSchemaVersion: env.DB_SCHEMA_VERSION,
-        labelSet,
-      };
-    });
+        return {
+          port: env.PORT,
+          dataDir: env.DATA_DIR,
+          dbSchemaVersion: env.DB_SCHEMA_VERSION,
+          labelSet,
+        };
+      });
 
-  const configInput = envToConfigSchema.parse(env);
-  return ENSRainbowConfigSchema.parse(configInput);
+    const configInput = envToConfigSchema.parse(env);
+    return ENSRainbowConfigSchema.parse(configInput);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(`Failed to parse environment configuration: \n${prettifyError(error)}\n`);
+    }
+
+    throw error;
+  }
 }
 
 /**
