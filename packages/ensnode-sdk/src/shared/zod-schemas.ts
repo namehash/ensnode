@@ -11,7 +11,7 @@ import { type Address, type Hex, isAddress, isHex, size } from "viem";
  */
 import { z } from "zod/v4";
 
-import { ENSNamespaceIds, type InterpretedName, Node } from "../ens";
+import { ENSNamespaceIds, type InterpretedName, type Node } from "../ens";
 import { asLowerCaseAddress } from "./address";
 import { type CurrencyId, CurrencyIds, Price, type PriceEth } from "./currencies";
 import { reinterpretName } from "./interpretation/reinterpretation";
