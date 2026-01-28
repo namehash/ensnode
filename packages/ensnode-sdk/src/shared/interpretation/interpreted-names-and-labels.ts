@@ -126,3 +126,28 @@ export function interpretedNameToLabelHashPath(name: InterpretedName): LabelHash
     })
     .toReversed();
 }
+
+/**
+ * Constructs a new InterpetedName from an InterpretedLabel (child) and InterpretedName (parent).
+ *
+ * If no parent is available the InterpretedLabel is cast to an InterpretedName and returned.
+ *
+ * @dev the following is safe due to InterpretedLabel/InterpretedName semantics, see above.
+ */
+export function constructSubInterpretedName(
+  label: InterpretedLabel,
+  name: InterpretedName | undefined,
+): InterpretedName {
+  if (name === undefined) return label as Name as InterpretedName;
+  return [label, name].join(".") as InterpretedName;
+}
+
+/**
+ * Given a `labelHash` and optionally its healed InterpretedLabel, return an InterpretedLabel.
+ */
+export function ensureInterpretedLabel(
+  labelHash: LabelHash,
+  label: InterpretedLabel | undefined,
+): InterpretedLabel {
+  return label ?? (encodeLabelHash(labelHash) as InterpretedLabel);
+}

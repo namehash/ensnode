@@ -8,6 +8,7 @@ import type {
   ENSv2DomainId,
   EncodedReferrer,
   InterpretedLabel,
+  InterpretedName,
   LabelHash,
   PermissionsId,
   PermissionsResourceId,
@@ -193,6 +194,11 @@ export const relations_v1Domain = relations(v1Domain, ({ one, many }) => ({
     references: [label.labelHash],
   }),
   registrations: many(registration),
+  canonicalName: one(canonicalName, {
+    relationName: "canonicalName",
+    fields: [v1Domain.id],
+    references: [canonicalName.domainId],
+  }),
 }));
 
 export const v2Domain = onchainTable(
@@ -249,6 +255,11 @@ export const relations_v2Domain = relations(v2Domain, ({ one, many }) => ({
     references: [label.labelHash],
   }),
   registrations: many(registration),
+  canonicalName: one(canonicalName, {
+    relationName: "canonicalName",
+    fields: [v2Domain.id],
+    references: [canonicalName.domainId],
+  }),
 }));
 
 /////////////////
@@ -483,4 +494,29 @@ export const label = onchainTable("labels", (t) => ({
 
 export const label_relations = relations(label, ({ many }) => ({
   domains: many(v2Domain),
+}));
+
+///////////////////
+// Canonical Names
+///////////////////
+
+// NOTE(canonical-names): this table will be refactored away once Canonical Names are implemented in
+// ENSv2, and we'll be able to store this information directly on the Registry entity, but until
+// then we need a place to track canonical domain references without requiring that a Registry contract
+// has emitted an event (and therefore is indexed)
+// NOTE(canonical-names): this table can also disappear once the Signal pattern is implemented for
+// Registry contracts, ensuring that they are indexed during construction and are available for storage.
+export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
+  registryId: t.text().primaryKey().$type<RegistryId>(),
+  domainId: t.text().notNull().$type<ENSv2DomainId>(),
+}));
+
+export const canonicalName = onchainTable("canonical_names", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  canonicalName: t.text().notNull().$type<InterpretedName>(),
+}));
+
+export const canonicalName_relations = relations(label, ({ one }) => ({
+  v1Domain: one(v1Domain),
+  v2Domain: one(v2Domain),
 }));

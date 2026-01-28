@@ -15,6 +15,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { materializeENSv2CanonicalName } from "@/lib/ensv2/canonical-name-db-helpers";
 import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
@@ -106,6 +107,9 @@ export default function () {
         // if the v2Domain exists, this is a re-register after expiration and tokenId may have changed
         .onConflictDoUpdate({ tokenId });
 
+      // materialize its canonical name
+      await materializeENSv2CanonicalName(context, domainId);
+
       // supercede the latest Registration if exists
       if (registration) await supercedeLatestRegistration(context, registration);
 
@@ -189,8 +193,6 @@ export default function () {
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      // console.log(`SubregistryUpdated: ${subregistry} \n ↳ ${domainId}`);
-
       // update domain's subregistry
       if (subregistry === null) {
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
@@ -199,6 +201,13 @@ export default function () {
         const subregistryId = makeRegistryId(subregistryAccountId);
 
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
+
+        // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
+        // replace with real logic once ENS Team implements Canonical Names
+        await context.db
+          .insert(schema.registryCanonicalDomain)
+          .values({ registryId: subregistryId, domainId })
+          .onConflictDoUpdate({ domainId });
       }
     },
   );
