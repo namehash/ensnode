@@ -15,4 +15,3 @@ export * from "./rules";
 export * from "./score";
 export * from "./status";
 export * from "./time";
-

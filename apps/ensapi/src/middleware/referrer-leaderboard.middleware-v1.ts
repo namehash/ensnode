@@ -31,4 +31,3 @@ export const referrerLeaderboardMiddlewareV1 = factory.createMiddleware(async (c
   c.set("referrerLeaderboardV1", leaderboard);
   await next();
 });
-

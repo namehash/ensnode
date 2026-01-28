@@ -71,7 +71,9 @@ export const referrerLeaderboardCacheV1 = new SWRCache({
       );
     }
 
-    logger.info(`Building referrer leaderboard (V1) with rules:\n${JSON.stringify(rules, null, 2)}`);
+    logger.info(
+      `Building referrer leaderboard (V1) with rules:\n${JSON.stringify(rules, null, 2)}`,
+    );
 
     try {
       const result = await getReferrerLeaderboard(rules, latestIndexedBlockRef.timestamp);
@@ -88,4 +90,3 @@ export const referrerLeaderboardCacheV1 = new SWRCache({
   proactiveRevalidationInterval: minutesToSeconds(2),
   proactivelyInitialize: true,
 });
-

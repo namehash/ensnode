@@ -1,9 +1,6 @@
 import type { Address } from "viem";
 
-import type {
-  ReferrerLeaderboardPage,
-  ReferrerLeaderboardPageParams,
-} from "../leaderboard-page";
+import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
 import type { ReferrerDetail } from "../referrer-detail";
 
 /**
