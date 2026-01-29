@@ -19,10 +19,6 @@ export async function ensureLabel(context: Context, label: LiteralLabel) {
   const labelHash = labelhash(label);
   const interpretedLabel = literalLabelToInterpretedLabel(label);
 
-  // TODO(canonical-names): perhaps implement retroactive materialization of newly healed labels here?
-  // not sure how best to do that within the constraints of the ponder cache... could defer to some
-  // ENSAPI-managed queue of newly-healed labelhashes?
-
   await context.db
     .insert(schema.label)
     .values({ labelHash, value: interpretedLabel })

@@ -5,13 +5,16 @@ import {
   type ENSv1DomainId,
   type ENSv2DomainId,
   getCanonicalId,
+  interpretedLabelsToInterpretedName,
   type RegistrationId,
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { getV1CanonicalPath, getV2CanonicalPath } from "@/graphql-api/lib/get-canonical-path";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
@@ -98,68 +101,61 @@ DomainInterfaceRef.implement({
       resolve: async ({ label }) => label.value,
     }),
 
-    ////////////////////
-    // Domain.canonical
-    ////////////////////
-    // TODO: pending ENS team canonicalName implementation
-    // canonical: t.field({
-    //   description: "TODO",
-    //   type: "Name",
-    //   nullable: true,
-    //   resolve: async ({ id }, args, context) => {
-    //     // TODO: dataloader the getCanonicalPath(domainId) function
-    //     const canonicalPath = await getCanonicalPath(id);
-    //     if (!canonicalPath) return null;
+    ///////////////
+    // Domain.name
+    ///////////////
+    name: t.field({
+      description: "TODO",
+      type: "Name",
+      nullable: true,
+      resolve: async (domain, args, context) => {
+        // TODO: dataloader/cache the get*CanonicalPath helper
+        const canonicalPath = isENSv1Domain(domain)
+          ? await getV1CanonicalPath(domain.id)
+          : await getV2CanonicalPath(domain.id);
+        if (!canonicalPath) return null;
 
-    //     const domains = await rejectAnyErrors(
-    //       DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-    //     );
+        // TODO: this could be more efficient if the get*CanonicalPath helpers included the label
+        // join for us.
+        const domains = await rejectAnyErrors(
+          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+        );
 
-    //     return interpretedLabelsToInterpretedName(
-    //       canonicalPath.map((domainId) => {
-    //         const found = domains.find((d) => d.id === domainId);
-    //         if (!found) throw new Error(`Invariant`);
-    //         return found.label.value;
-    //       }),
-    //     );
-    //   },
-    // }),
+        const labels = canonicalPath.map((domainId) => {
+          const found = domains.find((d) => d.id === domainId);
+          if (!found) {
+            throw new Error(
+              `Invariant(Domain.canonicalName): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
+            );
+          }
 
-    //////////////////
-    // Domain.parents
-    //////////////////
-    // TODO: pending ENS team canonicalName implementation
-    // parents: t.field({
-    //   description: "TODO",
-    //   type: [DomainInterfaceRef],
-    //   nullable: true,
-    //   resolve: async ({ id }, args, context) => {
-    //     // TODO: dataloader the getCanonicalPath(domainId) function
-    //     const canonicalPath = await getCanonicalPath(id);
-    //     if (!canonicalPath) return null;
+          return found.label.value;
+        });
 
-    //     const domains = await rejectErrors(
-    //       DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-    //     );
+        return interpretedLabelsToInterpretedName(labels);
+      },
+    }),
 
-    //     return domains.slice(1);
-    //   },
-    // }),
+    // TODO: maybe supply partial names as well? perhaps a Domain.name.canonical and Domain.name.partial and so on?
 
-    //////////////////
-    // Domain.aliases
-    //////////////////
-    // TODO: pending ENS team canonicalName implementation, maybe impossible to implement
-    // aliases: t.field({
-    //   description: "TODO",
-    //   type: ["Name"],
-    //   nullable: false,
-    //   resolve: async (parent) => {
-    //     // a domain's aliases are all of the paths from root to this domain for which it can be
-    //     // resolved. naively reverse-traverse the namegaph until the root is reached... yikes.
-    //     return [];
-    //   },
-    // }),
+    ///////////////
+    // Domain.path
+    ///////////////
+    path: t.field({
+      description: "TODO",
+      type: [DomainInterfaceRef],
+      nullable: true,
+      resolve: async (domain, args, context) => {
+        const canonicalPath = isENSv1Domain(domain)
+          ? await getV1CanonicalPath(domain.id)
+          : await getV2CanonicalPath(domain.id);
+        if (!canonicalPath) return null;
+
+        return await rejectAnyErrors(
+          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+        );
+      },
+    }),
 
     //////////////////////
     // Domain.owner

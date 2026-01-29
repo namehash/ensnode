@@ -81,22 +81,6 @@ import type {
  *
  * Many entities may directly reference an Event, which represents the metadata associated with the
  * on-chain event responsible for its existence.
- *
- *
- * # Canonial Name Search
- *
- * - autocomplete (i.e. starts_with)
- *  - is there a fast sql query that, given a partial interpreted name, can return a set of domain ids?
- *  - 'og.shru' as input.
- *  - start with all domains that are addressable by the completed portion
- *    - must support recursion like `sub1.sub2.pare`
- *  - given that set of domains, then find domains addressable by that path for whom the next step
- *    is LIKE the partial label joined against both domains tables
- *  - find all labels like leaf with index
- *  - join into both domains tables to find all domains that use that label
- *  - filter by domains that
- *  - then for each domain, validate
- *
  */
 
 /////////

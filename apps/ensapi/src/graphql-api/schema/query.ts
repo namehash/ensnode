@@ -1,4 +1,5 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
+import { and, asc, desc, gt, lt } from "drizzle-orm";
 
 import {
   type ENSv1DomainId,
@@ -12,7 +13,9 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { findDomains } from "@/graphql-api/lib/find-domains";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
+import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
@@ -35,6 +38,46 @@ const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
 builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
+      /////////////////////////////
+      // Query.domains (Testing)
+      /////////////////////////////
+      domains: t.connection({
+        description: "TODO",
+        type: DomainInterfaceRef,
+        // TODO: args for where filter
+        resolve: (parent, args, context) =>
+          resolveCursorConnection(
+            { ...DEFAULT_CONNECTION_ARGS, args },
+            async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
+              // construct query for relevant domains
+              const domains = findDomains({ name: "et" });
+
+              // execute with pagination constraints
+              const results = await db
+                .with(domains)
+                .select()
+                .from(domains)
+                .where(
+                  and(
+                    ...[
+                      before && lt(domains.id, cursors.decode<any>(before)),
+                      after && gt(domains.id, cursors.decode<any>(after)),
+                    ].filter((c) => !!c),
+                  ),
+                )
+                .orderBy(inverted ? desc(domains.id) : asc(domains.id))
+                .limit(limit);
+
+              // provide full Domain entities via dataloader
+              return rejectAnyErrors(
+                DomainInterfaceRef.getDataloader(context).loadMany(
+                  results.map((result) => result.id),
+                ),
+              );
+            },
+          ),
+      }),
+
       /////////////////////////////
       // Query.v1Domains (Testing)
       /////////////////////////////
