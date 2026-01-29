@@ -33,8 +33,7 @@ export default {
    * ENS Root contracts deployed on Sepolia for the ENSv1 + ENSv2 test deployment.
    *
    * NOTE: `UniversalRegistrarRenewalWithReferrer` is a placeholder entry required by the typesystem
-   * due to the registrar plugin; it does not exist on Sepolia V2 and therefore uses the zero address
-   * and a `startBlock` of 0.
+   * due to the registrar plugin; it does not exist on Sepolia V2 and therefore uses the zero address.
    */
   [DatasourceNames.ENSRoot]: {
     chain: sepolia,
