@@ -71,6 +71,8 @@ jobs:
               echo "SEPOLIA_INDEXER_SVC_ID="${{ secrets.GREEN_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
               #ENSRAINBOW
               echo "ENSRAINBOW_SVC_ID="${{ secrets.GREEN_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
+              #ENSRAINBOW SEARCHLIGHT
+              echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID="${{ secrets.GREEN_ENSRAINBOW_SEARCHLIGHT_SVC_ID }} >> "$GITHUB_ENV"
               #ENSADMIN
               echo "ENSADMIN_SVC_ID="${{ secrets.GREEN_ENSADMIN_SVC_ID }} >> "$GITHUB_ENV"
               echo "SLACK_TITLE=':large_green_circle: GREEN environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
@@ -92,6 +94,8 @@ jobs:
               echo "SEPOLIA_INDEXER_SVC_ID="${{ secrets.BLUE_SEPOLIA_INDEXER_SVC_ID }} >> "$GITHUB_ENV"
               #ENSRAINBOW
               echo "ENSRAINBOW_SVC_ID="${{ secrets.BLUE_ENSRAINBOW_SVC_ID }} >> "$GITHUB_ENV"
+              #ENSRAINBOW SEARCHLIGHT
+              echo "ENSRAINBOW_SEARCHLIGHT_SVC_ID="${{ secrets.BLUE_ENSRAINBOW_SEARCHLIGHT_SVC_ID }} >> "$GITHUB_ENV"
               #ENSADMIN
               echo "ENSADMIN_SVC_ID="${{ secrets.BLUE_ENSADMIN_SVC_ID }} >> "$GITHUB_ENV"
               echo "SLACK_TITLE=':large_blue_circle: BLUE environment is now having new ENSNode version - '"${{ env.TAG }} >> "$GITHUB_ENV"
@@ -127,21 +131,23 @@ jobs:
           }
 
           #ALPHA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}             ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}         ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_API_SVC_ID}               ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_INDEXER_SVC_ID}           ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #MAINNET
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}           ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}       ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_API_SVC_ID}             ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${MAINNET_INDEXER_SVC_ID}         ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #ALPHA-SEPOLIA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}     ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID} ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_API_SVC_ID}       ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ALPHA_SEPOLIA_INDEXER_SVC_ID}   ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #SEPOLIA
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}           ${{ env.ENSAPI_DOCKER_IMAGE }}
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}       ${{ env.ENSINDEXER_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_API_SVC_ID}             ${{ env.ENSAPI_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}         ${{ env.ENSINDEXER_DOCKER_IMAGE }}
           #ENSRAINBOW
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}            ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}              ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
+          #ENSRAINBOW SEARCHLIGHT
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SEARCHLIGHT_SVC_ID}  ${{ env.ENSRAINBOW_DOCKER_IMAGE }}
           #ENSADMIN
-          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}              ${{ env.ENSADMIN_DOCKER_IMAGE }}
+          update_service_image  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}                ${{ env.ENSADMIN_DOCKER_IMAGE }}
 
       # Update DATABASE_SCHEMA for each indexer based on input tag
       - name: Update shared environment variable
@@ -195,6 +201,8 @@ jobs:
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${SEPOLIA_INDEXER_SVC_ID}
           #ENSRAINBOW
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SVC_ID}
+          #ENSRAINBOW SEARCHLIGHT
+          redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSRAINBOW_SEARCHLIGHT_SVC_ID}
           #ENSADMIN
           redeploy_service  ${RAILWAY_ENVIRONMENT_ID} ${ENSADMIN_SVC_ID}
 
