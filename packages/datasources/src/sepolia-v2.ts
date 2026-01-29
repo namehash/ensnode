@@ -1,7 +1,7 @@
 import { zeroAddress } from "viem";
 import { sepolia } from "viem/chains";
 
-// ABIs for ENSv2 Datasources
+// ABIs for ENSv2 Datasource
 import { EnhancedAccessControl } from "./abis/ensv2/EnhancedAccessControl";
 import { ETHRegistrar } from "./abis/ensv2/ETHRegistrar";
 import { Registry } from "./abis/ensv2/Registry";
@@ -24,8 +24,17 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
  * The Sepolia V2 ENSNamespace
  *
  * This represents a testing deployment of ENSv1 w/ ENSv2 on Sepolia.
+ *
+ * NOTE: the ENSv2ETHRegistry Datasource contracts are deployed to Sepolia (rather than an L2).
  */
 export default {
+  /**
+   * ENS Root contracts deployed on Sepolia for the ENSv1 + ENSv2 test deployment.
+   *
+   * NOTE: `UniversalRegistrarRenewalWithReferrer` is a placeholder entry required by the typesystem
+   * due to the registrar plugin; it does not exist on Sepolia V2 and therefore uses the zero address
+   * and a `startBlock` of 0.
+   */
   [DatasourceNames.ENSRoot]: {
     chain: sepolia,
     contracts: {
@@ -73,7 +82,6 @@ export default {
         address: "0x198827b2316e020c48b500fc3cebdbcaf58787ce",
         startBlock: 9374794,
       },
-      // placeholder entry to satisfy TypeScript type requirements, does not exist in sepolia-v2
       UniversalRegistrarRenewalWithReferrer: {
         abi: root_UniversalRegistrarRenewalWithReferrer,
         address: zeroAddress,
@@ -102,7 +110,6 @@ export default {
   },
 
   [DatasourceNames.ENSv2ETHRegistry]: {
-    // NOTE: currently deployed to Sepolia (instead of an L2) for testing purposes
     chain: sepolia,
     contracts: {
       Resolver: { abi: ResolverABI, startBlock: 9770973 },
