@@ -1,0 +1,229 @@
+---
+title: Unknown Labels
+description: Understanding the fundamental problem of unknown labels in ENS and how ENSRainbow mitigates it.
+sidebar:
+  label: Unknown Labels
+  order: 2
+keywords: [ensrainbow, unknown labels, labelhash, healing, rainbow tables, keccak256]
+---
+
+## The Problem: Unknown Labels
+
+When querying indexed ENS names, you may encounter labels represented as [**Encoded LabelHashes**](/docs/reference/terminology#encoded-labelhash) like `[428...b0b]` instead of human-readable strings.
+
+An **Unknown Label** is a [**Label**](/ensrainbow/concepts/glossary#label) for which the human-readable string is not available, and only the [**LabelHash**](/ensrainbow/concepts/glossary#labelhash) is known. These labels are displayed using the format `[{LabelHash}]`.
+
+Unknown labels are an unfortunate user experience issue in the ENS ecosystem. They make names difficult to read, understand, and work with in applications.
+
+### Format: Encoded LabelHash
+
+When an unknown label is encountered, it is represented as an **Encoded LabelHash** in the format `[{labelhash}]`, where `{labelhash}` is the 64-character hexadecimal representation of the labelhash (without the `0x` prefix).
+
+**Examples:**
+- `vitalik.eth` — a normalized name with known labels
+- `[731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22].eth` — a name with an unknown label encoded as a labelhash, followed by the known label `eth`
+- `731f7025b488151de311c24abc1f27f02940bde412246fbdb3dea0d4f0663b22.eth` — a name where the first label is known and happens to contain 64 hex characters (no square brackets)
+
+The square bracket encoding is essential to differentiate between an unknown label (represented by its labelhash) and a known label that literally contains hex characters.
+
+## What Causes Unknown Labels?
+
+Unknown labels arise from the fundamental design of the ENS protocol:
+
+### The ENS Registry Design
+
+In the ENS `Registry` contract, only the **name**'s **node** is registered on-chain. The **node** is a 32-byte hash computed using the `namehash` function, which recursively applies the `labelhash` function to each label in the name.
+
+**The critical point:** The Registry stores only the node (the hash), not the human-readable labels that compose the name. This means:
+
+1. **Direct Registry calls** can create subnames by providing only the labelhash, without revealing the label string on-chain
+2. **Historical data** from before label emission was standardized may not include label information
+3. **Event logs** may only contain labelhashes, not the original label strings
+
+### When Labels Can Be Made Known
+
+In many cases, the labels that make up a name can be made **known**:
+
+- **Contract events**: Some contracts (like `ETHRegistrarController` or `NameWrapper`) emit the human-readable label in their events
+- **[Rainbow table](/ensrainbow/concepts/glossary#rainbow-table) lookups**: The human-readable label for a given labelhash can sometimes be determined via rainbow table lookups and other strategies
+- **ENSRainbow [healing](/ensrainbow/concepts/glossary#heal)**: ENSRainbow attempts to heal unknown labels by looking up labelhashes in its rainbow tables
+
+However, if none of these methods succeed, the label remains unknown and must be represented as an encoded labelhash.
+
+## Why Unknown Labels Are Forever a Consideration
+
+Unknown labels are a **permanent architectural constraint** of the ENS protocol, not a temporary issue that can be fully eliminated. Here's why:
+
+### 1. Protocol Design Immutability
+
+The ENS Registry contract design is immutable—it cannot be changed retroactively. The fundamental design decision to store only nodes (hashes) rather than labels means that:
+
+- Historical subnames created without label emission will always have unknown labels unless they can be healed via rainbow tables
+- Future subnames can still be created via direct Registry calls that only provide labelhashes
+- The protocol cannot require label emission for all subname creation methods without breaking backward compatibility
+
+### 2. Cryptographic One-Way Function
+
+The `labelhash` function uses `keccak256`, a cryptographic hash function that is **one-way**:
+
+- Given a label, you can compute its labelhash: `labelhash("vitalik") → 0xaf2c...`
+- Given a labelhash, you **cannot** reverse it to get the original label: `0xaf2c... → ???`
+
+This means that without external knowledge (rainbow tables, event logs, etc.), a labelhash cannot be converted back to its original label.
+
+### 3. Ongoing Subname Creation
+
+New subnames continue to be created on-chain. While many modern contracts emit label information in events, the protocol itself does not guarantee this. Unknown labels will continue to appear as long as:
+
+- Direct Registry calls are used to create subnames
+- Contracts that don't emit label information are used
+- Historical data without label information is indexed
+
+## How Unknown Labels Influence Indexing
+
+Unknown labels significantly impact how ENS data is indexed and queried:
+
+### Indexing Process
+
+When ENSNode indexes onchain events where a subname is created in the ENS Registry:
+
+1. **The labelhash is always known** from the onchain event data
+2. **The label may be unknown** if it wasn't emitted in the event
+3. **ENSRainbow lookup is attempted**: ENSNode attempts to lookup the label for the labelhash through an attached ENSRainbow server
+4. **Representation decision**:
+   - If the lookup succeeds: ENSNode represents the subname using its true label
+   - If the lookup fails: ENSNode represents the "unknown label" using its labelhash in the format `[labelhash]`
+
+### Label Mutability Over Time
+
+The representation of labels can change over time as ENSRainbow's healing capabilities improve:
+
+- **Time 1**: ENSRainbow cannot heal label X → label is represented as `[labelhash]`
+- **Time 2**: ENSRainbow gains the ability to heal label X → label transitions from unknown to known
+
+This mutability means that:
+- Label representations should not be used as immutable identifiers
+- The node (computed via `namehash`) should always be used as the stable identifier for querying
+- For deterministic results, pin healing to a specific label set ID + version (see [Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning))
+
+### Subgraph-Unindexable Labels
+
+The legacy ENS Subgraph specifies that **Unknown Labels** and labels containing certain UTF-8 characters are "invalid" or "subgraph-unindexable". These include:
+
+1. `\0` (null byte) - PostgreSQL does not allow storing this character in text fields
+2. `.` (period) - Conflicts with ENS label separator logic
+3. `[` (left square bracket) - Conflicts with "unknown label" representations
+4. `]` (right square bracket) - Conflicts with "unknown label" representations
+
+In ENSNode's default *Interpreted Labels* mode (`SUBGRAPH_COMPAT=false`), when a `subgraph-unindexable` label is encountered, it will be represented as an **Encoded LabelHash** even if the actual label data is available. This prevents database and parsing issues while maintaining compatibility with ENS tooling.
+
+## How Unknown Labels Influence Apps and User Interfaces
+
+Unknown labels create significant challenges for applications building on ENS:
+
+### Display Challenges
+
+**Rendering unknown labels** requires careful handling to differentiate between:
+- An unknown label (represented as `[labelhash]`)
+- A known label that happens to contain hex characters
+
+Apps must:
+- Display encoded labelhashes in a way that clearly indicates they're placeholders
+- Handle names that mix known and unknown labels
+- Provide fallback UI when names contain unknown labels
+
+### Querying Challenges
+
+When querying ENSNode for names:
+
+1. **Use nodes, not names**: Always use the node (computed via `namehash`) as the stable identifier, not the name string
+2. **Normalization awareness**: When querying from user input, normalize first; when querying from onchain data, don't normalize
+3. **Encoded LabelHash-aware namehash**: Use implementations like [viem's namehash](https://github.com/wevm/viem/blob/fe558fdef7e2e9cd5f3f57d8bdeae0c7ff67a1b0/src/utils/ens/namehash.ts#L36-L51) that handle encoded labelhashes correctly
+
+### User Experience Impact
+
+Unknown labels create poor user experiences:
+- **Readability**: Names become unreadable (e.g., `[428...b0b].eth` instead of `example.eth`)
+- **Search & Discovery**: Search and filtering become difficult when names contain hashes
+- **Trust & Usability**: Cryptic hash representations reduce user trust and application usability
+- **Accessibility**: Screen readers and other assistive technologies struggle with hash-based representations
+
+## The Solution: How ENSRainbow Works
+
+ENSRainbow mitigates the unknown labels problem by providing a **[healing](/ensrainbow/concepts/glossary#heal) service** that converts labelhashes back to human-readable labels via [rainbow table](/ensrainbow/concepts/glossary#rainbow-table) lookups.
+
+### What is Healing?
+
+[**Healing**](/ensrainbow/concepts/glossary#heal) is the act of converting a labelhash back to its original label via a rainbow table lookup. ENSRainbow maintains pre-computed mappings of `labelhash → label` pairs (called [rainbow records](/ensrainbow/concepts/glossary#rainbow-record)) that enable this reverse lookup.
+
+### How ENSRainbow Works
+
+ENSRainbow operates as a **sidecar service** to ENSNode:
+
+1. **[Rainbow Table](/ensrainbow/concepts/glossary#rainbow-table) Storage**: ENSRainbow maintains LevelDB databases containing millions of labelhash-to-label mappings
+2. **HTTP API**: Provides a lightweight HTTP API (`GET /v1/heal/{labelhash}`) that returns the corresponding label if found (optionally scoped via `label_set_id` and `label_set_version` query parameters)
+3. **Integration with ENSNode**: During indexing, ENSNode automatically queries ENSRainbow when it encounters an unknown labelhash
+4. **Deterministic Healing**: Uses label set IDs and versions to ensure deterministic healing across time
+
+### Healing Process
+
+When ENSNode encounters an unknown label during indexing:
+
+```typescript
+// 1. ENSNode encounters labelhash: 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+// 2. ENSNode queries ENSRainbow: GET /v1/heal/0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+// 3. ENSRainbow looks up in rainbow table
+// 4. If found: Returns { "status": "success", "label": "vitalik" }
+// 5. ENSNode stores the name as "vitalik.eth" instead of "[af2c...].eth"
+```
+
+### Coverage and Limitations
+
+ENSRainbow significantly improves healing coverage compared to relying solely on services like the ENS Subgraph. However:
+
+- **Not all labels can be healed**: Some labelhashes may never be recoverable if the original label was never emitted anywhere
+- **Growing coverage**: ENSRainbow's goal is to heal as many ENS names as possible, minimizing the probability that end-users encounter unknown labels
+- **Multiple label sets**: Different [label sets](/ensrainbow/concepts/glossary#label-set) (identified by [label set ID](/ensrainbow/concepts/glossary#label-set-id)) can provide different coverage, allowing the ecosystem to contribute additional healing data
+
+### Label Sets and Versioning
+
+ENSRainbow uses a [**label set**](/ensrainbow/concepts/glossary#label-set) system to organize rainbow table data:
+
+- **[Label Set ID](/ensrainbow/concepts/glossary#label-set-id)**: Identifies a collection of [rainbow records](/ensrainbow/concepts/glossary#rainbow-record) (e.g., `subgraph`, `discovery-a`)
+- **[Label Set Version](/ensrainbow/concepts/glossary#label-set-version)**: Monotonically increasing version numbers that enable incremental updates
+- **Deterministic Results**: Clients can pin to specific versions for reproducible healing results
+
+This system enables:
+- **Extensibility**: New label sets can be created and published by anyone
+- **Incremental Updates**: New versions add mappings without invalidating previous versions
+- **Deterministic Healing**: Applications can rely on consistent results over time
+
+For more details, see [Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning).
+
+## Background: Why Rainbow Tables Are Necessary
+
+To fully understand why unknown labels are a hard problem, it's helpful to understand the underlying cryptography that makes ENSRainbow necessary.
+
+The [**labelhash**](/ensrainbow/concepts/glossary#labelhash) function computes a 32-byte hash of a label using `keccak256`.
+
+```typescript
+import { labelhash } from 'viem';
+const labelHash = labelhash("vitalik");
+// Returns: 0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
+```
+
+`keccak256` is a cryptographic hash function that is **one-way**:
+
+- Given a label, you can compute its labelhash: `labelhash("vitalik") → 0xaf2c...`
+- Given a labelhash, you **cannot** reverse it to get the original label: `0xaf2c... → ???`
+
+This means that without external knowledge (rainbow tables, event logs, etc.), a labelhash cannot be converted back to its original label. This one-way property is exactly why rainbow tables—and ENSRainbow—are necessary.
+
+## Related Documentation
+
+- **[Glossary](/ensrainbow/concepts/glossary)** - Key terminology including [labelhash](/ensrainbow/concepts/glossary#labelhash), [heal](/ensrainbow/concepts/glossary#heal), and [rainbow table](/ensrainbow/concepts/glossary#rainbow-table)
+- **[Label Sets & Versioning](/ensrainbow/concepts/label-sets-and-versioning)** - Understanding how ENSRainbow organizes healing data
+- **[Architecture](/ensrainbow/concepts/architecture)** - High-level system architecture and data flow
+- **[API Reference](/ensrainbow/usage/api)** - Complete HTTP API documentation for ENSRainbow
+- **[Terminology Reference](/docs/reference/terminology)** - Comprehensive ENSNode terminology including [Unknown Label](/docs/reference/terminology#unknown-label) and [Encoded LabelHash](/docs/reference/terminology#encoded-labelhash)
+- **[Querying Best Practices](/docs/usage/querying-best-practices)** - How to handle unknown labels when querying ENSNode
