@@ -12,7 +12,12 @@
   },
   "homepage": "https://github.com/namehash/ensnode/tree/main/docs/docs.ensnode.io",
   "scripts": {
-    "mint": "pnpm dlx mint@^4.1.0"
+    "mint": "pnpm dlx mint@^4.1.0",
+    "openapi:generate": "tsx scripts/generate-openapi.ts"
   },
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.28.0",
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "^4.7.1"
+  }
 }
