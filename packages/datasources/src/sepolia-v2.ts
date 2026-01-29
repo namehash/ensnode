@@ -136,7 +136,7 @@ export default {
         address: "0xf7fca8d7b8b802d07a1011b69a5e39395197b730",
         startBlock: 9374776,
       },
-      DefaultReverseResolver: {
+      DefaultReverseResolver3: {
         abi: ResolverABI,
         address: "0xa238d3aca667210d272391a119125d38816af4b1",
         startBlock: 9374791,
