@@ -91,6 +91,19 @@ module "ensrainbow" {
   ensrainbow_label_set_version = var.ensrainbow_label_set_version
 }
 
+module "ensrainbow_starlight" {
+  source = "./modules/ensrainbow"
+
+  render_environment_id = render_project.ensnode.environments["default"].id
+  render_region         = local.render_region
+  svc_name_suffix       = "-starlight"
+  ensnode_version       = var.ensnode_version
+
+  # Configuration for the Starlight instance
+  ensrainbow_label_set_id      = "starlight"
+  ensrainbow_label_set_version = var.ensrainbow_label_set_version
+}
+
 module "ensadmin" {
   source                = "./modules/ensadmin"
   render_region         = local.render_region
