@@ -33,7 +33,7 @@
   },
   "scripts": {
     "prepublish": "tsup",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci"
