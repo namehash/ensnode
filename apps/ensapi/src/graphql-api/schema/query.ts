@@ -50,7 +50,9 @@ builder.queryType({
             { ...DEFAULT_CONNECTION_ARGS, args },
             async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
               // construct query for relevant domains
-              const domains = findDomains({ name: "et" });
+              const domains = findDomains({
+                name: "49fd2be640db2910c2fab69bb8531ab6e76127ff.add",
+              });
 
               // execute with pagination constraints
               const results = await db

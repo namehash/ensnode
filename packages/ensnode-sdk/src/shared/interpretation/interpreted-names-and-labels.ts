@@ -106,14 +106,14 @@ export function isInterpretedName(name: Name): name is InterpretedName {
 }
 
 /**
- * Converts an InterpretedName into a LabelHashPath.
+ * Converts InterpretedLabels into a LabelHashPath.
  */
-export function interpretedNameToLabelHashPath(name: InterpretedName): LabelHashPath {
-  return interpretedNameToInterpretedLabels(name)
+export function interpretedLabelsToLabelHashPath(labels: InterpretedLabel[]): LabelHashPath {
+  return labels
     .map((label) => {
       if (!isInterpetedLabel(label)) {
         throw new Error(
-          `Invariant(interpretedNameToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
+          `Invariant(interpretedLabelsToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
         );
       }
 
@@ -150,4 +150,28 @@ export function ensureInterpretedLabel(
   label: InterpretedLabel | undefined,
 ): InterpretedLabel {
   return label ?? (encodeLabelHash(labelHash) as InterpretedLabel);
+}
+
+/**
+ * Parses a Partial InterpretedName into concrete InterpretedLabels and the partial Label.
+ *
+ * @throws if the provided `partialInterpretedName` is not composed of concrete InterpretedLabels.
+ */
+export function parsePartialInterpretedName(partialInterpretedName: Name): {
+  concrete: InterpretedLabel[];
+  partial: string;
+} {
+  if (partialInterpretedName === "") return { concrete: [], partial: "" };
+
+  const concrete = partialInterpretedName.split(".");
+  // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
+  const partial = concrete.pop()!;
+
+  if (!concrete.every(isInterpetedLabel)) {
+    throw new Error(
+      `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.`,
+    );
+  }
+
+  return { concrete, partial };
 }
