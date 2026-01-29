@@ -5,13 +5,9 @@ import type { EncodedReferrer } from "./encoded-referrer";
 export type { EncodedReferrer } from "./encoded-referrer";
 export { decodeEncodedReferrer, ZERO_ENCODED_REFERRER } from "./encoded-referrer";
 
-import {
-  type BlockRef,
-  type Duration,
-  type PriceEth,
-  type SerializedPriceEth,
-  serializePriceEth,
-} from "../shared";
+import type { PriceEth, SerializedPriceEth } from "../shared/currencies";
+import { serializePriceEth } from "../shared/serialize";
+import type { BlockRef, Duration } from "../shared/types";
 import type { RegistrationLifecycle } from "./registration-lifecycle";
 
 /**
