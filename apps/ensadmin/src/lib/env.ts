@@ -8,6 +8,7 @@ const DEFAULT_SERVER_CONNECTION_LIBRARY = [
   "https://api.alpha-sepolia.ensnode.io",
   "https://api.mainnet.ensnode.io",
   "https://api.sepolia.ensnode.io",
+  "https://api.v2-sepolia.ensnode.io",
 ].join(",");
 
 /**
