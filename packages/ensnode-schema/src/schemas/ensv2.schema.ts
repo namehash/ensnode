@@ -8,7 +8,6 @@ import type {
   ENSv2DomainId,
   EncodedReferrer,
   InterpretedLabel,
-  InterpretedName,
   LabelHash,
   PermissionsId,
   PermissionsResourceId,
@@ -82,6 +81,22 @@ import type {
  *
  * Many entities may directly reference an Event, which represents the metadata associated with the
  * on-chain event responsible for its existence.
+ *
+ *
+ * # Canonial Name Search
+ *
+ * - autocomplete (i.e. starts_with)
+ *  - is there a fast sql query that, given a partial interpreted name, can return a set of domain ids?
+ *  - 'og.shru' as input.
+ *  - start with all domains that are addressable by the completed portion
+ *    - must support recursion like `sub1.sub2.pare`
+ *  - given that set of domains, then find domains addressable by that path for whom the next step
+ *    is LIKE the partial label joined against both domains tables
+ *  - find all labels like leaf with index
+ *  - join into both domains tables to find all domains that use that label
+ *  - filter by domains that
+ *  - then for each domain, validate
+ *
  */
 
 /////////
@@ -194,11 +209,6 @@ export const relations_v1Domain = relations(v1Domain, ({ one, many }) => ({
     references: [label.labelHash],
   }),
   registrations: many(registration),
-  canonicalName: one(canonicalName, {
-    relationName: "canonicalName",
-    fields: [v1Domain.id],
-    references: [canonicalName.domainId],
-  }),
 }));
 
 export const v2Domain = onchainTable(
@@ -255,11 +265,6 @@ export const relations_v2Domain = relations(v2Domain, ({ one, many }) => ({
     references: [label.labelHash],
   }),
   registrations: many(registration),
-  canonicalName: one(canonicalName, {
-    relationName: "canonicalName",
-    fields: [v2Domain.id],
-    references: [canonicalName.domainId],
-  }),
 }));
 
 /////////////////
@@ -500,23 +505,13 @@ export const label_relations = relations(label, ({ many }) => ({
 // Canonical Names
 ///////////////////
 
-// NOTE(canonical-names): this table will be refactored away once Canonical Names are implemented in
+// TODO(canonical-names): this table will be refactored away once Canonical Names are implemented in
 // ENSv2, and we'll be able to store this information directly on the Registry entity, but until
 // then we need a place to track canonical domain references without requiring that a Registry contract
 // has emitted an event (and therefore is indexed)
-// NOTE(canonical-names): this table can also disappear once the Signal pattern is implemented for
+// TODO(canonical-names): this table can also disappear once the Signal pattern is implemented for
 // Registry contracts, ensuring that they are indexed during construction and are available for storage.
 export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
   registryId: t.text().primaryKey().$type<RegistryId>(),
   domainId: t.text().notNull().$type<ENSv2DomainId>(),
-}));
-
-export const canonicalName = onchainTable("canonical_names", (t) => ({
-  domainId: t.text().primaryKey().$type<DomainId>(),
-  canonicalName: t.text().notNull().$type<InterpretedName>(),
-}));
-
-export const canonicalName_relations = relations(label, ({ one }) => ({
-  v1Domain: one(v1Domain),
-  v2Domain: one(v2Domain),
 }));
