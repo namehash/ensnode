@@ -25,7 +25,12 @@ jobs:
       # AWS_REGION is required for aws-actions/configure-aws-credentials@v4
       # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
       # AWS_REGION should be the same as Terraform S3 bucket state region.
-      AWS_REGION: us-east-1
+      # AWS_REGION: us-east-1
+
+      # Set R2 credentials as AWS credentials for Terraform to access R2 bucket
+      AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+
       TF_VAR_ensnode_version: ${{ inputs.tag || 'latest' }}
       TF_VAR_ensindexer_label_set_id: ${{ vars.LABEL_SET_ID }}
       TF_VAR_ensindexer_label_set_version: ${{ vars.LABEL_SET_VERSION }}
@@ -52,11 +57,11 @@ jobs:
         with:
           terraform_version: 1.6.0
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE}}
-          aws-region: ${{ env.AWS_REGION }}
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_ROLE}}
+      #     aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: terraform init

@@ -13,7 +13,21 @@ terraform {
   backend "s3" {
     bucket = "ensnode-terraform"
     key    = "render-tfstate"
-    region = "us-east-1"
+
+    # R2 Endpoint URL
+    endpoints = {
+      s3 = "https://568d25449daec794a4cf277e3c286406.r2.cloudflarestorage.com"
+    }
+
+    # R2 requires 'auto' or 'us-east-1' (even if your bucket is elsewhere)
+    region = "auto"
+
+    # Essential for R2 compatibility
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_s3_checksum            = true
   }
 }
 
