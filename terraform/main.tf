@@ -1,6 +1,6 @@
 
 locals {
-  # The `hosted_zone_name` represents the "base" domain name of the zone in Cloudflare
+  # The `hosted_zone_name` represents the "base" domain name of the zone in DNS
   # where "hosted" ENSNode app instances (such as ENSIndexer and ENSRainbow) are nested beneath.
   #
   # For example, if:
