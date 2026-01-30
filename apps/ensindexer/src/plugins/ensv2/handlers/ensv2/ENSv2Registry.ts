@@ -1,13 +1,20 @@
+import config from "@/config";
+
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
+import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
+  accountIdEqual,
   getCanonicalId,
+  getDatasourceContract,
+  getENSv2RootRegistry,
   interpretAddress,
   isRegistrationFullyExpired,
   type LiteralLabel,
+  labelhashLiteralLabel,
   makeENSv2DomainId,
   makeLatestRegistrationId,
   makeRegistryId,
@@ -27,6 +34,13 @@ import { namespaceContract } from "@/lib/plugin-helpers";
 import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
+
+const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
+const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
+  config.namespace,
+  DatasourceNames.ENSv2ETHRegistry,
+  "ETHRegistry",
+);
 
 export default function () {
   ponder.on(
@@ -77,6 +91,19 @@ export default function () {
           ...registry,
         })
         .onConflictDoNothing();
+
+      // if this Registry is Bridged, we know its Canonical Domain and can set it here
+      // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
+      if (accountIdEqual(registry, ENSV2_L2_ETH_REGISTRY)) {
+        const domainId = makeENSv2DomainId(
+          ENSV2_ROOT_REGISTRY,
+          getCanonicalId(labelhashLiteralLabel("eth" as LiteralLabel)),
+        );
+        await context.db
+          .insert(schema.registryCanonicalDomain)
+          .values({ registryId: registryId, domainId })
+          .onConflictDoUpdate({ domainId });
+      }
 
       // ensure discovered Label
       await ensureLabel(context, label);

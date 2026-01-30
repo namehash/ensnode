@@ -23,6 +23,7 @@ import { cursors } from "@/graphql-api/schema/cursors";
 import {
   DomainIdInput,
   DomainInterfaceRef,
+  DomainsWhereInput,
   ENSv1DomainRef,
   ENSv2DomainRef,
 } from "@/graphql-api/schema/domain";
@@ -32,17 +33,8 @@ import { RegistryIdInput, RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverIdInput, ResolverRef } from "@/graphql-api/schema/resolver";
 import { db } from "@/lib/db";
 
-// don't want them to get familiar/accustom to these methods until their necessity is certain
+// don't want them to get familiar/accustomed to these methods until their necessity is certain
 const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
-
-const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
-  description: "Filter for domains query. Requires one of name or owner.",
-  isOneOf: true,
-  fields: (t) => ({
-    name: t.string(),
-    owner: t.field({ type: "Address" }),
-  }),
-});
 
 builder.queryType({
   fields: (t) => ({

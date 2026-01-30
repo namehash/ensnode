@@ -4,6 +4,7 @@ import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
+  type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
   interpretedLabelsToLabelHashPath,
@@ -25,8 +26,8 @@ interface DomainFilter {
 /**
  * Find Domains by Canonical Name.
  *
- * @throws If `name` or `owner` is not provided.
- * @throws If `name` is provided but is not a valid Partial InterpretedName
+ * @throws if neither `name` or `owner` are provided
+ * @throws if `name` is provided but is not a valid Partial InterpretedName
  *
  * ## Terminology:
  *
@@ -83,8 +84,8 @@ export function findDomains({ name, owner }: DomainFilter) {
   const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
 
   // compose subquery by concrete LabelHashPath
-  const v1DomainsByName = v1DomainsByLabelHashPath(labelHashPath);
-  const v2DomainsByName = v2DomainsByLabelHashPath(labelHashPath);
+  const v1DomainsByLabelHashPathQuery = v1DomainsByLabelHashPath(labelHashPath);
+  const v2DomainsByLabelHashPathQuery = v2DomainsByLabelHashPath(labelHashPath);
 
   // alias for the head domains (to get its labelHash for partial matching)
   const v1HeadDomain = alias(schema.v1Domain, "v1HeadDomain");
@@ -92,10 +93,13 @@ export function findDomains({ name, owner }: DomainFilter) {
 
   // join on leafId (the autocomplete result), filter by owner and partial
   const v1Domains = db
-    .select({ id: schema.v1Domain.id })
+    .select({ id: sql<DomainId>`${schema.v1Domain.id}`.as("id") })
     .from(schema.v1Domain)
-    .innerJoin(v1DomainsByName, eq(schema.v1Domain.id, v1DomainsByName.leafId))
-    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByName.headId))
+    .innerJoin(
+      v1DomainsByLabelHashPathQuery,
+      eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
+    )
+    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId))
     .innerJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
     .where(
       and(
@@ -106,10 +110,13 @@ export function findDomains({ name, owner }: DomainFilter) {
 
   // join on leafId (the autocomplete result), filter by owner and partial
   const v2Domains = db
-    .select({ id: schema.v2Domain.id })
+    .select({ id: sql<DomainId>`${schema.v2Domain.id}`.as("id") })
     .from(schema.v2Domain)
-    .innerJoin(v2DomainsByName, eq(schema.v2Domain.id, v2DomainsByName.leafId))
-    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByName.headId))
+    .innerJoin(
+      v2DomainsByLabelHashPathQuery,
+      eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
+    )
+    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId))
     .innerJoin(schema.label, eq(schema.label.labelHash, v2HeadDomain.labelHash))
     .where(
       and(
@@ -118,21 +125,8 @@ export function findDomains({ name, owner }: DomainFilter) {
       ),
     );
 
-  // TODO: remove this, just for debugging
-  Promise.all([db.select().from(v1DomainsByName), db.select().from(v2DomainsByName)]).then(
-    ([v1DomainsResults, v2DomainsResults]) =>
-      logger.debug({
-        v1DomainsSQL: v1Domains.toSQL().sql,
-        v1DomainsResults,
-        v2Domains: v2Domains.toSQL().sql,
-        v2DomainsResults,
-      }),
-  );
-
-  // use any to ignore id column type mismatch (ENSv1DomainId & ENSv2DomainId, and raw SQL vs table column)
-  const domains = db.$with("domains").as(unionAll(v1Domains, v2Domains as any));
-
-  return domains;
+  // union the two subqueries and return
+  return db.$with("domains").as(unionAll(v1Domains, v2Domains));
 }
 
 /**
@@ -160,7 +154,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
         headId: sql<ENSv1DomainId>`${schema.v1Domain.id}`.as("headId"),
       })
       .from(schema.v1Domain)
-      .as("v1DomainsByName");
+      .as("v1_path");
   }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
@@ -207,7 +201,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
         WHERE depth = ${pathLength}
       ) AS v1_path_check`,
     )
-    .as("v1DomainsByName");
+    .as("v1_path");
 }
 
 /**
@@ -235,7 +229,7 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
         headId: sql<ENSv2DomainId>`${schema.v2Domain.id}`.as("headId"),
       })
       .from(schema.v2Domain)
-      .as("v2DomainsByName");
+      .as("v2_path");
   }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
@@ -287,5 +281,5 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
         WHERE depth = ${pathLength}
       ) AS v2_path_check`,
     )
-    .as("v2DomainsByName");
+    .as("v2_path");
 }
