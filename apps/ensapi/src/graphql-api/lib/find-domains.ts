@@ -14,7 +14,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
-import { escapeLikeString } from "@/lib/helpers/escape-like-string";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("find-domains");
@@ -105,7 +104,8 @@ export function findDomains({ name, owner }: DomainFilter) {
     .where(
       and(
         owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
-        partial ? like(schema.label.value, `${escapeLikeString(partial)}%`) : undefined,
+        // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        partial ? like(schema.label.value, `${partial}%`) : undefined,
       ),
     );
 
@@ -122,7 +122,8 @@ export function findDomains({ name, owner }: DomainFilter) {
     .where(
       and(
         owner ? eq(schema.v2Domain.ownerId, owner) : undefined,
-        partial ? like(schema.label.value, `${escapeLikeString(partial)}%`) : undefined,
+        // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        partial ? like(schema.label.value, `${partial}%`) : undefined,
       ),
     );
 
