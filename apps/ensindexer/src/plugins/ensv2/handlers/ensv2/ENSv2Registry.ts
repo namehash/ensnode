@@ -35,13 +35,6 @@ import type { EventWithArgs } from "@/lib/ponder-helpers";
 
 const pluginName = PluginName.ENSv2;
 
-const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
-const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSv2ETHRegistry,
-  "ETHRegistry",
-);
-
 export default function () {
   ponder.on(
     namespaceContract(pluginName, "ENSv2Registry:NameRegistered"),
@@ -91,6 +84,14 @@ export default function () {
           ...registry,
         })
         .onConflictDoNothing();
+
+      // TODO(ensv2): hoist this access once all namespaces declare ENSv2 contracts
+      const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
+      const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSv2ETHRegistry,
+        "ETHRegistry",
+      );
 
       // if this Registry is Bridged, we know its Canonical Domain and can set it here
       // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
