@@ -22,7 +22,7 @@ catalog:
   lucide-react: ^0.548.0
   pg-connection-string: ^2.9.1
   pino: 10.1.0
-  ponder: 0.16.1
+  ponder: 0.16.2
   tailwindcss: ^4.1.18
   tailwindcss-animate: ^1.0.7
   tailwind-merge: ^3.4.0

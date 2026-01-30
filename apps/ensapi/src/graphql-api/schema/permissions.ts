@@ -101,12 +101,10 @@ PermissionsRef.implement({
             db.query.permissionsResource.findMany({
               where: (t, { lt, gt, eq, and }) =>
                 and(
-                  ...[
-                    eq(t.chainId, parent.chainId),
-                    eq(t.address, parent.address),
-                    before !== undefined && lt(t.id, cursors.decode<PermissionsResourceId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<PermissionsResourceId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.chainId, parent.chainId),
+                  eq(t.address, parent.address),
+                  before ? lt(t.id, cursors.decode<PermissionsResourceId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<PermissionsResourceId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,
@@ -165,13 +163,11 @@ PermissionsResourceRef.implement({
             db.query.permissionsUser.findMany({
               where: (t, { lt, gt, eq, and }) =>
                 and(
-                  ...[
-                    eq(t.chainId, parent.chainId),
-                    eq(t.address, parent.address),
-                    eq(t.resource, parent.resource),
-                    before !== undefined && lt(t.id, cursors.decode<PermissionsUserId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<PermissionsUserId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.chainId, parent.chainId),
+                  eq(t.address, parent.address),
+                  eq(t.resource, parent.resource),
+                  before ? lt(t.id, cursors.decode<PermissionsUserId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<PermissionsUserId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,

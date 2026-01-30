@@ -47,11 +47,9 @@ RegistryRef.implement({
             db.query.v2Domain.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    eq(t.subregistryId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.subregistryId, parent.id),
+                  before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,
@@ -73,11 +71,9 @@ RegistryRef.implement({
             db.query.v2Domain.findMany({
               where: (t, { lt, gt, eq, and }) =>
                 and(
-                  ...[
-                    eq(t.registryId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.registryId, parent.id),
+                  before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,

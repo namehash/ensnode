@@ -1,13 +1,20 @@
+import config from "@/config";
+
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
+import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
+  accountIdEqual,
   getCanonicalId,
+  getDatasourceContract,
+  getENSv2RootRegistry,
   interpretAddress,
   isRegistrationFullyExpired,
   type LiteralLabel,
+  labelhashLiteralLabel,
   makeENSv2DomainId,
   makeLatestRegistrationId,
   makeRegistryId,
@@ -77,6 +84,27 @@ export default function () {
           ...registry,
         })
         .onConflictDoNothing();
+
+      // TODO(ensv2): hoist this access once all namespaces declare ENSv2 contracts
+      const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
+      const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSv2ETHRegistry,
+        "ETHRegistry",
+      );
+
+      // if this Registry is Bridged, we know its Canonical Domain and can set it here
+      // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
+      if (accountIdEqual(registry, ENSV2_L2_ETH_REGISTRY)) {
+        const domainId = makeENSv2DomainId(
+          ENSV2_ROOT_REGISTRY,
+          getCanonicalId(labelhashLiteralLabel("eth" as LiteralLabel)),
+        );
+        await context.db
+          .insert(schema.registryCanonicalDomain)
+          .values({ registryId: registryId, domainId })
+          .onConflictDoUpdate({ domainId });
+      }
 
       // ensure discovered Label
       await ensureLabel(context, label);
@@ -189,8 +217,6 @@ export default function () {
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      // console.log(`SubregistryUpdated: ${subregistry} \n ↳ ${domainId}`);
-
       // update domain's subregistry
       if (subregistry === null) {
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
@@ -199,6 +225,13 @@ export default function () {
         const subregistryId = makeRegistryId(subregistryAccountId);
 
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
+
+        // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
+        // replace with real logic once ENS Team implements Canonical Names
+        await context.db
+          .insert(schema.registryCanonicalDomain)
+          .values({ registryId: subregistryId, domainId })
+          .onConflictDoUpdate({ domainId });
       }
     },
   );

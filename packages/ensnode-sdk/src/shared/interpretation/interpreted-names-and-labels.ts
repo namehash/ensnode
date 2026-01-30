@@ -94,7 +94,7 @@ export function isInterpetedLabel(label: Label): label is InterpretedLabel {
   // if it looks like an encoded labelhash, it must be one
   if (label.startsWith("[")) {
     const labelHash = encodedLabelToLabelhash(label);
-    if (labelHash === null) return false;
+    return labelHash != null;
   }
 
   // otherwise label must be normalized
@@ -106,14 +106,14 @@ export function isInterpretedName(name: Name): name is InterpretedName {
 }
 
 /**
- * Converts an InterpretedName into a LabelHashPath.
+ * Converts InterpretedLabels into a LabelHashPath.
  */
-export function interpretedNameToLabelHashPath(name: InterpretedName): LabelHashPath {
-  return interpretedNameToInterpretedLabels(name)
+export function interpretedLabelsToLabelHashPath(labels: InterpretedLabel[]): LabelHashPath {
+  return labels
     .map((label) => {
       if (!isInterpetedLabel(label)) {
         throw new Error(
-          `Invariant(interpretedNameToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
+          `Invariant(interpretedLabelsToLabelHashPath): Expected InterpretedLabel, received '${label}'.`,
         );
       }
 
@@ -125,4 +125,53 @@ export function interpretedNameToLabelHashPath(name: InterpretedName): LabelHash
       return labelhash(label);
     })
     .toReversed();
+}
+
+/**
+ * Constructs a new InterpretedName from an InterpretedLabel (child) and InterpretedName (parent).
+ *
+ * If no parent is available the InterpretedLabel is cast to an InterpretedName and returned.
+ *
+ * @dev the following is safe due to InterpretedLabel/InterpretedName semantics, see above.
+ */
+export function constructSubInterpretedName(
+  label: InterpretedLabel,
+  name: InterpretedName | undefined,
+): InterpretedName {
+  if (name === undefined || name === "") return label as Name as InterpretedName;
+  return [label, name].join(".") as InterpretedName;
+}
+
+/**
+ * Given a `labelHash` and optionally its healed InterpretedLabel, return an InterpretedLabel.
+ */
+export function ensureInterpretedLabel(
+  labelHash: LabelHash,
+  label: InterpretedLabel | undefined,
+): InterpretedLabel {
+  return label ?? (encodeLabelHash(labelHash) as InterpretedLabel);
+}
+
+/**
+ * Parses a Partial InterpretedName into concrete InterpretedLabels and the partial Label.
+ *
+ * @throws if the provided `partialInterpretedName` is not composed of concrete InterpretedLabels.
+ */
+export function parsePartialInterpretedName(partialInterpretedName: Name): {
+  concrete: InterpretedLabel[];
+  partial: string;
+} {
+  if (partialInterpretedName === "") return { concrete: [], partial: "" };
+
+  const concrete = partialInterpretedName.split(".");
+  // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
+  const partial = concrete.pop()!;
+
+  if (!concrete.every(isInterpetedLabel)) {
+    throw new Error(
+      `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.\n${JSON.stringify(concrete)}`,
+    );
+  }
+
+  return { concrete, partial };
 }
