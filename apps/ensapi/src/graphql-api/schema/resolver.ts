@@ -86,12 +86,10 @@ ResolverRef.implement({
             db.query.resolverRecords.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    eq(t.chainId, parent.chainId),
-                    eq(t.address, parent.address),
-                    before !== undefined && lt(t.id, cursors.decode<ResolverRecordsId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ResolverRecordsId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.chainId, parent.chainId),
+                  eq(t.address, parent.address),
+                  before ? lt(t.id, cursors.decode<ResolverRecordsId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<ResolverRecordsId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,

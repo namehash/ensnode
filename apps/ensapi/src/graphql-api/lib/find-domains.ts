@@ -14,6 +14,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { escapeLikeString } from "@/lib/helpers/escape-like-string";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("find-domains");
@@ -100,11 +101,11 @@ export function findDomains({ name, owner }: DomainFilter) {
       eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
     )
     .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId))
-    .innerJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
+    .leftJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
     .where(
       and(
         owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
-        partial ? like(schema.label.value, `${partial}%`) : undefined,
+        partial ? like(schema.label.value, `${escapeLikeString(partial)}%`) : undefined,
       ),
     );
 
@@ -117,11 +118,11 @@ export function findDomains({ name, owner }: DomainFilter) {
       eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
     )
     .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId))
-    .innerJoin(schema.label, eq(schema.label.labelHash, v2HeadDomain.labelHash))
+    .leftJoin(schema.label, eq(schema.label.labelHash, v2HeadDomain.labelHash))
     .where(
       and(
         owner ? eq(schema.v2Domain.ownerId, owner) : undefined,
-        partial ? like(schema.label.value, `${partial}%`) : undefined,
+        partial ? like(schema.label.value, `${escapeLikeString(partial)}%`) : undefined,
       ),
     );
 

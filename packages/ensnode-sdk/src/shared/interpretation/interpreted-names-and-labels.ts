@@ -128,7 +128,7 @@ export function interpretedLabelsToLabelHashPath(labels: InterpretedLabel[]): La
 }
 
 /**
- * Constructs a new InterpetedName from an InterpretedLabel (child) and InterpretedName (parent).
+ * Constructs a new InterpretedName from an InterpretedLabel (child) and InterpretedName (parent).
  *
  * If no parent is available the InterpretedLabel is cast to an InterpretedName and returned.
  *

@@ -170,6 +170,7 @@ export const v1Domain = onchainTable(
   (t) => ({
     byParent: index().on(t.parentId),
     byOwner: index().on(t.ownerId),
+    byLabelHash: index().on(t.labelHash),
   }),
 );
 
@@ -221,6 +222,7 @@ export const v2Domain = onchainTable(
   (t) => ({
     byRegistry: index().on(t.registryId),
     byOwner: index().on(t.ownerId),
+    byLabelHash: index().on(t.labelHash),
   }),
 );
 
@@ -476,10 +478,16 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one }) =>
 // Labels
 //////////
 
-export const label = onchainTable("labels", (t) => ({
-  labelHash: t.hex().primaryKey().$type<LabelHash>(),
-  value: t.text().notNull().$type<InterpretedLabel>(),
-}));
+export const label = onchainTable(
+  "labels",
+  (t) => ({
+    labelHash: t.hex().primaryKey().$type<LabelHash>(),
+    value: t.text().notNull().$type<InterpretedLabel>(),
+  }),
+  (t) => ({
+    byValue: index().on(t.value),
+  }),
+);
 
 export const label_relations = relations(label, ({ many }) => ({
   domains: many(v2Domain),

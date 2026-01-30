@@ -2,6 +2,7 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and, asc, desc, gt, lt } from "drizzle-orm";
 
 import {
+  type DomainId,
   type ENSv1DomainId,
   type ENSv2DomainId,
   getENSv2RootRegistryId,
@@ -46,14 +47,14 @@ builder.queryType({
         description: "TODO",
         type: DomainInterfaceRef,
         args: {
-          where: t.arg({ type: DomainsWhereInput, required: true }),
+          where: t.arg({ type: DomainsWhereInput, required: false }),
         },
         resolve: (parent, args, context) =>
           resolveCursorConnection(
             { ...DEFAULT_CONNECTION_ARGS, args },
             async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
               // construct query for relevant domains
-              const domains = findDomains(args.where);
+              const domains = findDomains(args.where || {});
 
               // execute with pagination constraints
               const results = await db
@@ -62,10 +63,8 @@ builder.queryType({
                 .from(domains)
                 .where(
                   and(
-                    ...[
-                      before && lt(domains.id, cursors.decode<any>(before)),
-                      after && gt(domains.id, cursors.decode<any>(after)),
-                    ].filter((c) => !!c),
+                    before ? lt(domains.id, cursors.decode<DomainId>(before)) : undefined,
+                    after ? gt(domains.id, cursors.decode<DomainId>(after)) : undefined,
                   ),
                 )
                 .orderBy(inverted ? desc(domains.id) : asc(domains.id))
@@ -94,10 +93,8 @@ builder.queryType({
               db.query.v1Domain.findMany({
                 where: (t, { lt, gt, and }) =>
                   and(
-                    ...[
-                      before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
-                      after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
-                    ].filter((c) => !!c),
+                    before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
+                    after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
                   ),
                 orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
                 limit,
@@ -119,10 +116,8 @@ builder.queryType({
               db.query.v2Domain.findMany({
                 where: (t, { lt, gt, and }) =>
                   and(
-                    ...[
-                      before !== undefined && lt(t.id, cursors.decode<ENSv2DomainId>(before)),
-                      after !== undefined && gt(t.id, cursors.decode<ENSv2DomainId>(after)),
-                    ].filter((c) => !!c),
+                    before ? lt(t.id, cursors.decode<ENSv2DomainId>(before)) : undefined,
+                    after ? gt(t.id, cursors.decode<ENSv2DomainId>(after)) : undefined,
                   ),
                 orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
                 limit,
@@ -144,10 +139,8 @@ builder.queryType({
               db.query.resolver.findMany({
                 where: (t, { lt, gt, and }) =>
                   and(
-                    ...[
-                      before !== undefined && lt(t.id, cursors.decode<ResolverId>(before)),
-                      after !== undefined && gt(t.id, cursors.decode<ResolverId>(after)),
-                    ].filter((c) => !!c),
+                    before ? lt(t.id, cursors.decode<ResolverId>(before)) : undefined,
+                    after ? gt(t.id, cursors.decode<ResolverId>(after)) : undefined,
                   ),
                 orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
                 limit,
@@ -168,10 +161,8 @@ builder.queryType({
               db.query.registration.findMany({
                 where: (t, { lt, gt, and }) =>
                   and(
-                    ...[
-                      before !== undefined && lt(t.id, cursors.decode<RegistrationId>(before)),
-                      after !== undefined && gt(t.id, cursors.decode<RegistrationId>(after)),
-                    ].filter((c) => !!c),
+                    before ? lt(t.id, cursors.decode<RegistrationId>(before)) : undefined,
+                    after ? gt(t.id, cursors.decode<RegistrationId>(after)) : undefined,
                   ),
                 orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
                 limit,

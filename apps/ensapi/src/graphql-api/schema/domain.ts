@@ -125,7 +125,7 @@ DomainInterfaceRef.implement({
           const found = domains.find((d) => d.id === domainId);
           if (!found) {
             throw new Error(
-              `Invariant(Domain.canonicalName): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
+              `Invariant(Domain.name): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
             );
           }
 
@@ -200,11 +200,9 @@ DomainInterfaceRef.implement({
             db.query.registration.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    eq(t.domainId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<RegistrationId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<RegistrationId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.domainId, parent.id),
+                  before ? lt(t.id, cursors.decode<RegistrationId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<RegistrationId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? asc(t.index) : desc(t.index)),
               limit,
@@ -245,11 +243,9 @@ ENSv1DomainRef.implement({
             db.query.v1Domain.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    eq(t.parentId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.parentId, parent.id),
+                  before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,
@@ -329,5 +325,12 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
   fields: (t) => ({
     name: t.string(),
     owner: t.field({ type: "Address" }),
+  }),
+});
+
+export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
+  description: "Filter for Account.domains query.",
+  fields: (t) => ({
+    name: t.string({ required: true }),
   }),
 });
