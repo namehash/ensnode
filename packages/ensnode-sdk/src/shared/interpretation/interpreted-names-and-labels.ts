@@ -138,7 +138,7 @@ export function constructSubInterpretedName(
   label: InterpretedLabel,
   name: InterpretedName | undefined,
 ): InterpretedName {
-  if (name === undefined) return label as Name as InterpretedName;
+  if (name === undefined || name === "") return label as Name as InterpretedName;
   return [label, name].join(".") as InterpretedName;
 }
 
@@ -166,8 +166,6 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
   const concrete = partialInterpretedName.split(".");
   // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
   const partial = concrete.pop()!;
-
-  console.log(concrete);
 
   if (!concrete.every(isInterpetedLabel)) {
     throw new Error(

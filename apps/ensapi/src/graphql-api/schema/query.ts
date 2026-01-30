@@ -47,14 +47,14 @@ builder.queryType({
         description: "TODO",
         type: DomainInterfaceRef,
         args: {
-          where: t.arg({ type: DomainsWhereInput, required: false }),
+          where: t.arg({ type: DomainsWhereInput, required: true }),
         },
         resolve: (parent, args, context) =>
           resolveCursorConnection(
             { ...DEFAULT_CONNECTION_ARGS, args },
             async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
               // construct query for relevant domains
-              const domains = findDomains(args.where || {});
+              const domains = findDomains(args.where);
 
               // execute with pagination constraints
               const results = await db

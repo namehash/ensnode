@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { encodeLabelHash, type InterpretedLabel, type LiteralLabel, type Name } from "../../ens";
+import {
+  encodeLabelHash,
+  type InterpretedLabel,
+  type InterpretedName,
+  type LiteralLabel,
+  type Name,
+} from "../../ens";
 import { labelhashLiteralLabel } from "../labelhash";
 import {
+  constructSubInterpretedName,
   interpretedLabelsToInterpretedName,
   literalLabelsToInterpretedName,
   literalLabelToInterpretedLabel,
@@ -177,5 +184,33 @@ describe("interpretation", () => {
     ] as Name[])("throws for invalid concrete label: %j", (input) => {
       expect(() => parsePartialInterpretedName(input)).toThrow();
     });
+  });
+
+  describe("constructSubInterpretedName", () => {
+    it.each([
+      // label only (no parent)
+      ["eth", undefined, "eth"],
+      ["eth", "", "eth"],
+      ["test", undefined, "test"],
+      ["vitalik", undefined, "vitalik"],
+      // label + parent
+      ["test", "eth", "test.eth"],
+      ["vitalik", "eth", "vitalik.eth"],
+      ["sub", "parent.eth", "sub.parent.eth"],
+      ["wallet", "sub.parent.eth", "wallet.sub.parent.eth"],
+      // with encoded labelhash as label
+      [EXAMPLE_ENCODED_LABEL_HASH, "eth", `${EXAMPLE_ENCODED_LABEL_HASH}.eth`],
+      [EXAMPLE_ENCODED_LABEL_HASH, undefined, EXAMPLE_ENCODED_LABEL_HASH],
+      // with encoded labelhash in parent
+      ["sub", `${EXAMPLE_ENCODED_LABEL_HASH}.eth`, `sub.${EXAMPLE_ENCODED_LABEL_HASH}.eth`],
+      // emoji labels
+      ["🔥", "eth", "🔥.eth"],
+      ["wallet", "🔥.eth", "wallet.🔥.eth"],
+    ] as [InterpretedLabel, InterpretedName | undefined, InterpretedName][])(
+      "constructSubInterpretedName(%j, %j) → %j",
+      (label, parent, expected) => {
+        expect(constructSubInterpretedName(label, parent)).toEqual(expected);
+      },
+    );
   });
 });

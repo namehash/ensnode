@@ -1,4 +1,4 @@
-import { and, eq, like, Param, sql } from "drizzle-orm";
+import { and, eq, like, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
@@ -17,6 +17,8 @@ import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("find-domains");
+
+const MAX_DEPTH = 16;
 
 interface DomainFilter {
   name?: Name | undefined | null;
@@ -68,6 +70,11 @@ export function findDomains({ name, owner }: DomainFilter) {
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
   // NOTE: throws if name is not a Partial InterpretedName
   const { concrete, partial } = parsePartialInterpretedName(name || "");
+
+  // validate depth to prevent arbitrary recursion in CTEs
+  if (concrete.length > MAX_DEPTH) {
+    throw new Error(`Invariant(findDomains): Name depth exceeds maximum of ${MAX_DEPTH} labels.`);
+  }
 
   logger.debug({ input: { name, owner, concrete, partial } });
 
@@ -160,7 +167,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
+  const rawLabelHashPathArray = sql`${sql.param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
   // Use a recursive CTE starting from the deepest child and traversing UP
@@ -235,7 +242,7 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
+  const rawLabelHashPathArray = sql`${sql.param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
   // Use a recursive CTE starting from the deepest child and traversing UP
