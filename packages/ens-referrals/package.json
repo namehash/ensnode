@@ -54,7 +54,7 @@
   "scripts": {
     "prepublish": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo --noEmit"
   },
   "peerDependencies": {
     "viem": "catalog:"
