@@ -45,7 +45,7 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo --noEmit"
   },
   "peerDependencies": {
     "viem": "catalog:"
