@@ -22,6 +22,12 @@ variable "db_schema_version" {
   default     = "3"
 }
 
+variable "svc_name_suffix" {
+  type        = string
+  description = "Suffix to append to the service and resource names (e.g. '-searchlight'). Use empty string for default."
+  default     = ""
+}
+
 variable "ensrainbow_label_set_id" {
   type        = string
   description = "The label set ID that ENSRainbow will offer to its clients (e.g., 'subgraph', 'ens-test-env')"
