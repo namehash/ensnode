@@ -2,4 +2,7 @@
 "ensapi": minor
 ---
 
-ENSV2 blah blah
+The experiemental ENSv2 API now supports the following Domain filters, namely matching indexed Domains by name prefix.
+
+- `Query.domains(where: { name?: "example.et", owner?: "0xdead...beef" })`
+- `Account.domains(where?: { name: "example.et })`
