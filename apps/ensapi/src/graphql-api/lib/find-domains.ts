@@ -1,5 +1,5 @@
-import { eq, Param, sql } from "drizzle-orm";
-import { unionAll } from "drizzle-orm/pg-core";
+import { and, eq, like, Param, sql } from "drizzle-orm";
+import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
@@ -7,11 +7,15 @@ import {
   type ENSv1DomainId,
   type ENSv2DomainId,
   interpretedLabelsToLabelHashPath,
+  type LabelHashPath,
   type Name,
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
 import { db } from "@/lib/db";
+import { makeLogger } from "@/lib/logger";
+
+const logger = makeLogger("find-domains");
 
 interface DomainFilter {
   name?: Name;
@@ -48,20 +52,23 @@ interface DomainFilter {
  *
  * ## Algorithm
  *
- * - 'og.shru' as input.
- * - start with all domains that are addressable by the completed portion
- *   - must support recursion like `sub1.sub2.pare`
- * - given that set of domains, then find domains addressable by that path for whom the next step
- *   is LIKE the partial label joined against both domains tables
- * - find all labels like leaf with index
- * - join into both domains tables to find all domains that use that label
- * - filter by domains that
- * - then for each domain, validate
+ * 1. parse Partial InterpretedName into concrete path and partial fragment
+ *   i.e. for a `name` like "sub1.sub2.paren":
+ *    - concrete = ["sub1", "sub2"]
+ *    - partial = 'paren'
+ * 2. validate inputs
+ * 3. for both v1Domains and v2Domains
+ *   a. construct a subquery that filters the set of Domains to those with the specific concrete path
+ *   b. if provided, filter the head domains of that path by `partial`
+ *   c. if provided, filter the leaf domains of that path by `owner`
+ * 4. construct a union of the two result sets and return
  */
 export function findDomains({ name, owner }: DomainFilter) {
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
   // NOTE: throws if name is not a Partial InterpretedName
   const { concrete, partial } = parsePartialInterpretedName(name || "");
+
+  logger.debug({ input: { name, owner, concrete, partial } });
 
   // a name input is valid if it was parsed to something other than just empty string
   const validName = concrete.length > 0 || partial !== "";
@@ -73,27 +80,54 @@ export function findDomains({ name, owner }: DomainFilter) {
     throw new Error(`Invariant(findDomains): One of 'name' or 'owner' must be provided.`);
   }
 
-  // compose a v1Domain subquery by name
-  const v1DomainsByName = findV1DomainsByName(name);
+  const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
 
-  // join on leafId (the autocomplete result), filter by owner
-  // TODO: filter by partial using headId
+  // compose subquery by concrete LabelHashPath
+  const v1DomainsByName = v1DomainsByLabelHashPath(labelHashPath);
+  const v2DomainsByName = v2DomainsByLabelHashPath(labelHashPath);
+
+  // alias for the head domains (to get its labelHash for partial matching)
+  const v1HeadDomain = alias(schema.v1Domain, "v1HeadDomain");
+  const v2HeadDomain = alias(schema.v2Domain, "v2HeadDomain");
+
+  // join on leafId (the autocomplete result), filter by owner and partial
   const v1Domains = db
     .select({ id: schema.v1Domain.id })
     .from(schema.v1Domain)
     .innerJoin(v1DomainsByName, eq(schema.v1Domain.id, v1DomainsByName.leafId))
-    .where(owner ? eq(schema.v1Domain.ownerId, owner) : undefined);
+    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByName.headId))
+    .innerJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
+    .where(
+      and(
+        owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
+        partial ? like(schema.label.value, `${partial}%`) : undefined,
+      ),
+    );
 
-  // compose a v2Domain subquery by name
-  const v2DomainsByName = findV2DomainsByName(name);
-
-  // join on leafId (the autocomplete result), filter by owner
-  // TODO: filter by partial using headId
+  // join on leafId (the autocomplete result), filter by owner and partial
   const v2Domains = db
     .select({ id: schema.v2Domain.id })
     .from(schema.v2Domain)
     .innerJoin(v2DomainsByName, eq(schema.v2Domain.id, v2DomainsByName.leafId))
-    .where(owner ? eq(schema.v2Domain.ownerId, owner) : undefined);
+    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByName.headId))
+    .innerJoin(schema.label, eq(schema.label.labelHash, v2HeadDomain.labelHash))
+    .where(
+      and(
+        owner ? eq(schema.v2Domain.ownerId, owner) : undefined,
+        partial ? like(schema.label.value, `${partial}%`) : undefined,
+      ),
+    );
+
+  // TODO: remove this, just for debugging
+  Promise.all([db.select().from(v1DomainsByName), db.select().from(v2DomainsByName)]).then(
+    ([v1DomainsResults, v2DomainsResults]) =>
+      logger.debug({
+        v1DomainsSQL: v1Domains.toSQL().sql,
+        v1DomainsResults,
+        v2Domains: v2Domains.toSQL().sql,
+        v2DomainsResults,
+      }),
+  );
 
   // use any to ignore id column type mismatch (ENSv1DomainId & ENSv2DomainId, and raw SQL vs table column)
   const domains = db.$with("domains").as(unionAll(v1Domains, v2Domains as any));
@@ -116,11 +150,18 @@ export function findDomains({ name, owner }: DomainFilter) {
  * Algorithm: Start from the deepest child (leaf) and traverse UP to find the head.
  * This is more efficient than starting from all domains and traversing down.
  */
-function findV1DomainsByName(name: DomainFilter["name"]) {
-  const { concrete } = parsePartialInterpretedName(name || "");
-
-  // Get the labelHashPath from concrete labels (reversed: parent-most first)
-  const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
+function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
+  // If no concrete path, return all domains (leaf = head = self)
+  // Postgres will optimize this simple subquery when joined
+  if (labelHashPath.length === 0) {
+    return db
+      .select({
+        leafId: sql<ENSv1DomainId>`${schema.v1Domain.id}`.as("leafId"),
+        headId: sql<ENSv1DomainId>`${schema.v1Domain.id}`.as("headId"),
+      })
+      .from(schema.v1Domain)
+      .as("v1DomainsByName");
+  }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
@@ -184,11 +225,18 @@ function findV1DomainsByName(name: DomainFilter["name"]) {
  * Algorithm: Start from the deepest child (leaf) and traverse UP via registryCanonicalDomain.
  * For v2, parent relationship is: domain.registryId -> registryCanonicalDomain -> parent domainId
  */
-function findV2DomainsByName(name: DomainFilter["name"]) {
-  const { concrete } = parsePartialInterpretedName(name || "");
-
-  // Get the labelHashPath from concrete labels (reversed: parent-most first)
-  const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
+function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
+  // If no concrete path, return all domains (leaf = head = self)
+  // Postgres will optimize this simple subquery when joined
+  if (labelHashPath.length === 0) {
+    return db
+      .select({
+        leafId: sql<ENSv2DomainId>`${schema.v2Domain.id}`.as("leafId"),
+        headId: sql<ENSv2DomainId>`${schema.v2Domain.id}`.as("headId"),
+      })
+      .from(schema.v2Domain)
+      .as("v2DomainsByName");
+  }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
