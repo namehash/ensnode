@@ -4,9 +4,9 @@ import { join } from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DEFAULT_PORT, getEnvPort } from "@/lib/env";
+import { ENSRAINBOW_DEFAULT_PORT } from "@/config/defaults";
 
-import { createCLI, validatePortConfiguration } from "./cli";
+import { createCLI } from "./cli";
 
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
@@ -38,42 +38,60 @@ describe("CLI", () => {
   });
 
   describe("getEnvPort", () => {
-    it("should return DEFAULT_PORT when PORT is not set", () => {
-      expect(getEnvPort()).toBe(DEFAULT_PORT);
+    it("should return ENSRAINBOW_DEFAULT_PORT when PORT is not set", async () => {
+      vi.resetModules();
+      const { getEnvPort: getEnvPortFresh } = await import("@/lib/env");
+      expect(getEnvPortFresh()).toBe(ENSRAINBOW_DEFAULT_PORT);
     });
 
-    it("should return port from environment variable", () => {
+    it("should return port from environment variable", async () => {
       const customPort = 4000;
-      process.env.PORT = customPort.toString();
-      expect(getEnvPort()).toBe(customPort);
+      vi.stubEnv("PORT", customPort.toString());
+      vi.resetModules();
+      const { getEnvPort: getEnvPortFresh } = await import("@/lib/env");
+      expect(getEnvPortFresh()).toBe(customPort);
     });
 
-    it("should throw error for invalid port number", () => {
-      process.env.PORT = "invalid";
-      expect(() => getEnvPort()).toThrow(
-        'Invalid PORT value "invalid": must be a non-negative integer',
-      );
+    it("should throw error for invalid port number", async () => {
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as never);
+      vi.stubEnv("PORT", "invalid");
+      vi.resetModules();
+      await expect(import("@/lib/env")).rejects.toThrow("process.exit called");
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
-    it("should throw error for negative port number", () => {
-      process.env.PORT = "-1";
-      expect(() => getEnvPort()).toThrow('Invalid PORT value "-1": must be a non-negative integer');
+    it("should throw error for negative port number", async () => {
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as never);
+      vi.stubEnv("PORT", "-1");
+      vi.resetModules();
+      await expect(import("@/lib/env")).rejects.toThrow("process.exit called");
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
 
   describe("validatePortConfiguration", () => {
-    it("should not throw when PORT env var is not set", () => {
-      expect(() => validatePortConfiguration(3000)).not.toThrow();
+    it("should not throw when PORT env var is not set", async () => {
+      vi.resetModules();
+      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
+      expect(() => validatePortConfigurationFresh(3000)).not.toThrow();
     });
 
-    it("should not throw when PORT matches CLI port", () => {
-      process.env.PORT = "3000";
-      expect(() => validatePortConfiguration(3000)).not.toThrow();
+    it("should not throw when PORT matches CLI port", async () => {
+      vi.stubEnv("PORT", "3000");
+      vi.resetModules();
+      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
+      expect(() => validatePortConfigurationFresh(3000)).not.toThrow();
     });
 
-    it("should throw when PORT conflicts with CLI port", () => {
-      process.env.PORT = "3000";
-      expect(() => validatePortConfiguration(4000)).toThrow("Port conflict");
+    it("should throw when PORT conflicts with CLI port", async () => {
+      vi.stubEnv("PORT", "3000");
+      vi.resetModules();
+      const { validatePortConfiguration: validatePortConfigurationFresh } = await import("./cli");
+      expect(() => validatePortConfigurationFresh(4000)).toThrow("Port conflict");
     });
   });
 
@@ -526,11 +544,14 @@ describe("CLI", () => {
 
       it("should respect PORT environment variable", async () => {
         const customPort = 5115;
-        process.env.PORT = customPort.toString();
+        vi.stubEnv("PORT", customPort.toString());
+        vi.resetModules();
+        const { createCLI: createCLIFresh } = await import("./cli");
+        const cliWithCustomPort = createCLIFresh({ exitProcess: false });
 
         // First ingest some test data
         const ensrainbowOutputFile = join(TEST_FIXTURES_DIR, "test_ens_names_0.ensrainbow");
-        await cli.parse([
+        await cliWithCustomPort.parse([
           "ingest-ensrainbow",
           "--input-file",
           ensrainbowOutputFile,
@@ -539,7 +560,7 @@ describe("CLI", () => {
         ]);
 
         // Start server
-        const serverPromise = cli.parse(["serve", "--data-dir", testDataDir]);
+        const serverPromise = cliWithCustomPort.parse(["serve", "--data-dir", testDataDir]);
 
         // Give server time to start
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -587,9 +608,12 @@ describe("CLI", () => {
       });
 
       it("should throw on port conflict", async () => {
-        process.env.PORT = "5000";
+        vi.stubEnv("PORT", "5000");
+        vi.resetModules();
+        const { createCLI: createCLIFresh } = await import("./cli");
+        const cliWithPort = createCLIFresh({ exitProcess: false });
         await expect(
-          cli.parse(["serve", "--port", "4000", "--data-dir", testDataDir]),
+          cliWithPort.parse(["serve", "--port", "4000", "--data-dir", testDataDir]),
         ).rejects.toThrow("Port conflict");
       });
     });
