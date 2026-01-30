@@ -4,6 +4,7 @@ import {
   buildReferralProgramRules,
   ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  serializeReferralProgramRules,
 } from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
 
@@ -72,7 +73,11 @@ export const referrerLeaderboardCacheV1 = new SWRCache({
     }
 
     logger.info(
-      `Building referrer leaderboard (V1) with rules:\n${JSON.stringify(rules, null, 2)}`,
+      `Building referrer leaderboard (V1) with rules:\n${JSON.stringify(
+        serializeReferralProgramRules(rules),
+        null,
+        2,
+      )}`,
     );
 
     try {

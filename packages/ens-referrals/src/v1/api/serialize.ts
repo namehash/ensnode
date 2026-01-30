@@ -26,7 +26,7 @@ import {
 /**
  * Serializes a {@link ReferralProgramRules} object.
  */
-function serializeReferralProgramRules(
+export function serializeReferralProgramRules(
   rules: ReferralProgramRules,
 ): SerializedReferralProgramRules {
   return {
