@@ -1,33 +1,25 @@
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
     render = {
       source  = "render-oss/render"
       version = "1.7.0"
     }
   }
 
-  backend "s3" {
-    bucket = "ensnode-terraform"
-    key    = "render-tfstate"
 
-    # R2 Endpoint URL
+  backend "s3" {
+    bucket                      = "ensnode-terraform"
+    key                         = "render-tfstate"
+    region                      = "auto"
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+    skip_requesting_account_id  = true
+    skip_s3_checksum            = true
+    use_path_style              = true
     endpoints = {
       s3 = "https://568d25449daec794a4cf277e3c286406.r2.cloudflarestorage.com"
     }
-
-    # R2 requires 'auto' or 'us-east-1' (even if your bucket is elsewhere)
-    region = "auto"
-
-    # Essential for R2 compatibility
-    skip_credentials_validation = true
-    skip_region_validation      = true
-    skip_requesting_account_id  = true
-    skip_metadata_api_check     = true
-    skip_s3_checksum            = true
   }
 }
 

@@ -28,6 +28,7 @@ jobs:
       # AWS_REGION: us-east-1
 
       # Set R2 credentials as AWS credentials for Terraform to access R2 bucket
+      # AWS_EC2_METADATA_DISABLED: true  # Important: disable EC2 metadata lookup
       AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
 
