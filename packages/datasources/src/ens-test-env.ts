@@ -48,7 +48,7 @@ export default {
       },
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x9a676e781a523b5d0c0e43731313a708cb607508",
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
         startBlock: 0,
       },
       Resolver: {
