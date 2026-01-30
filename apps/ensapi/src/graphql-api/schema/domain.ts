@@ -321,7 +321,6 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
 
 export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
   description: "Filter for domains query. Requires one of name or owner.",
-  isOneOf: true,
   fields: (t) => ({
     name: t.string(),
     owner: t.field({ type: "Address" }),

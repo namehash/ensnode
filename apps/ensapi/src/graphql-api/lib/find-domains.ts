@@ -19,8 +19,8 @@ import { makeLogger } from "@/lib/logger";
 const logger = makeLogger("find-domains");
 
 interface DomainFilter {
-  name?: Name;
-  owner?: Address;
+  name?: Name | undefined | null;
+  owner?: Address | undefined | null;
 }
 
 /**
@@ -73,7 +73,7 @@ export function findDomains({ name, owner }: DomainFilter) {
 
   // a name input is valid if it was parsed to something other than just empty string
   const validName = concrete.length > 0 || partial !== "";
-  const validOwner = owner !== undefined;
+  const validOwner = !!owner;
 
   // Invariant: one of name or owner must be provided
   // TODO: maybe this should be zod...

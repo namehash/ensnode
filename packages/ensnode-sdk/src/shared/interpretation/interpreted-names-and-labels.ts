@@ -94,7 +94,7 @@ export function isInterpetedLabel(label: Label): label is InterpretedLabel {
   // if it looks like an encoded labelhash, it must be one
   if (label.startsWith("[")) {
     const labelHash = encodedLabelToLabelhash(label);
-    if (labelHash === null) return false;
+    return labelHash != null;
   }
 
   // otherwise label must be normalized
@@ -167,9 +167,11 @@ export function parsePartialInterpretedName(partialInterpretedName: Name): {
   // biome-ignore lint/style/noNonNullAssertion: there's always at least one element after a .split
   const partial = concrete.pop()!;
 
+  console.log(concrete);
+
   if (!concrete.every(isInterpetedLabel)) {
     throw new Error(
-      `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.`,
+      `Invariant(parsePartialInterpretedName): Concrete portion of Partial InterpretedName contains segments that are not InterpretedLabels.\n${JSON.stringify(concrete)}`,
     );
   }
 
