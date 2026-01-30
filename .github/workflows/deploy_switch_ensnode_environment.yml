@@ -77,6 +77,8 @@ jobs:
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-v2-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-v2-sepolia-indexer"
 
           # SEPOLIA
+          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
+          redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
