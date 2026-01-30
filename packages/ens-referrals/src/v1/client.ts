@@ -124,7 +124,7 @@ export class ENSReferralsClient {
   async getReferrerLeaderboardPage(
     request?: ReferrerLeaderboardPageRequest,
   ): Promise<ReferrerLeaderboardPageResponse> {
-    const url = new URL(`/ensanalytics/v1/referrers`, this.options.url);
+    const url = new URL(`/v1/ensanalytics/referrers`, this.options.url);
 
     if (request?.page) url.searchParams.set("page", request.page.toString());
     if (request?.recordsPerPage)
@@ -229,7 +229,7 @@ export class ENSReferralsClient {
    */
   async getReferrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse> {
     const url = new URL(
-      `/api/ensanalytics/referrers/${encodeURIComponent(request.referrer)}`,
+      `/v1/ensanalytics/referrers/${encodeURIComponent(request.referrer)}`,
       this.options.url,
     );
 
