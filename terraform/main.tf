@@ -1,6 +1,6 @@
 
 locals {
-  # The `hosted_zone_name` represents the "base" domain name of the zone in AWS Route53
+  # The `hosted_zone_name` represents the "base" domain name of the zone in Cloudflare
   # where "hosted" ENSNode app instances (such as ENSIndexer and ENSRainbow) are nested beneath.
   #
   # For example, if:
