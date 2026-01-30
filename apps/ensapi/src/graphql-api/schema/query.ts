@@ -35,6 +35,15 @@ import { db } from "@/lib/db";
 // don't want them to get familiar/accustom to these methods until their necessity is certain
 const INCLUDE_DEV_METHODS = process.env.NODE_ENV !== "production";
 
+const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
+  description: "Filter for domains query. Requires one of name or owner.",
+  isOneOf: true,
+  fields: (t) => ({
+    name: t.string(),
+    owner: t.field({ type: "Address" }),
+  }),
+});
+
 builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
@@ -44,15 +53,15 @@ builder.queryType({
       domains: t.connection({
         description: "TODO",
         type: DomainInterfaceRef,
-        // TODO: args for where filter
+        args: {
+          where: t.arg({ type: DomainsWhereInput, required: true }),
+        },
         resolve: (parent, args, context) =>
           resolveCursorConnection(
             { ...DEFAULT_CONNECTION_ARGS, args },
             async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
               // construct query for relevant domains
-              const domains = findDomains({
-                name: "49fd2be640db2910c2fab69bb8531ab6e76127ff.add",
-              });
+              const domains = findDomains(args.where);
 
               // execute with pagination constraints
               const results = await db

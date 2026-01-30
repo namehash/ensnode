@@ -5,6 +5,7 @@ import type { Address } from "viem";
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type ENSv1DomainId,
+  type ENSv2DomainId,
   interpretedLabelsToLabelHashPath,
   type Name,
   parsePartialInterpretedName,
@@ -19,6 +20,9 @@ interface DomainFilter {
 
 /**
  * Find Domains by Canonical Name.
+ *
+ * @throws If `name` or `owner` is not provided.
+ * @throws If `name` is provided but is not a valid Partial InterpretedName
  *
  * ## Terminology:
  *
@@ -55,7 +59,7 @@ interface DomainFilter {
  * - then for each domain, validate
  */
 export function findDomains({ name, owner }: DomainFilter) {
-  // NOTE: if name is not provided, parse empty string to simplify control-flow
+  // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
   // NOTE: throws if name is not a Partial InterpretedName
   const { concrete, partial } = parsePartialInterpretedName(name || "");
 
@@ -72,16 +76,24 @@ export function findDomains({ name, owner }: DomainFilter) {
   // compose a v1Domain subquery by name
   const v1DomainsByName = findV1DomainsByName(name);
 
-  // filter by owner
-  // TODO: filter by partial
+  // join on leafId (the autocomplete result), filter by owner
+  // TODO: filter by partial using headId
   const v1Domains = db
     .select({ id: schema.v1Domain.id })
     .from(schema.v1Domain)
-    .innerJoin(v1DomainsByName, eq(schema.v1Domain.id, v1DomainsByName.unambiguousId))
+    .innerJoin(v1DomainsByName, eq(schema.v1Domain.id, v1DomainsByName.leafId))
     .where(owner ? eq(schema.v1Domain.ownerId, owner) : undefined);
 
-  // TODO: implement v2Domains search with canonical path constraint
-  const v2Domains = findV2Domains({ name, owner });
+  // compose a v2Domain subquery by name
+  const v2DomainsByName = findV2DomainsByName(name);
+
+  // join on leafId (the autocomplete result), filter by owner
+  // TODO: filter by partial using headId
+  const v2Domains = db
+    .select({ id: schema.v2Domain.id })
+    .from(schema.v2Domain)
+    .innerJoin(v2DomainsByName, eq(schema.v2Domain.id, v2DomainsByName.leafId))
+    .where(owner ? eq(schema.v2Domain.ownerId, owner) : undefined);
 
   // use any to ignore id column type mismatch (ENSv1DomainId & ENSv2DomainId, and raw SQL vs table column)
   const domains = db.$with("domains").as(unionAll(v1Domains, v2Domains as any));
@@ -92,26 +104,20 @@ export function findDomains({ name, owner }: DomainFilter) {
 /**
  * Compose a query for v1Domains that have the specified children path.
  *
- * For a search like "sub.example.et":
- *  - concrete = ["sub", "example"]
- *  - partial = 'et'
- *  - labelHashPath = [labelhash('example'), labelhash('sub')]
+ * For a search like "sub1.sub2.paren":
+ *  - concrete = ["sub1", "sub2"]
+ *  - partial = 'paren'
+ *  - labelHashPath = [labelhash('sub2'), labelhash('sub1')]
  *
- * We find v1Domains where the Domain's descendants match the labelHashPath:
- *  - Domain D (returned)
- *  - D has child with label_hash = labelHashPath[1] (example)
- *  - That child has child with label_hash = labelHashPath[2] (sub)
+ * We find v1Domains matching the concrete path and return both:
+ *  - leafId: the deepest child (label "sub1") - the autocomplete result, for ownership check
+ *  - headId: the parent of the path (whose label should match partial "paren")
  *
- * Algorithm: Start from the deepest child (leaf) and traverse UP to find candidates.
+ * Algorithm: Start from the deepest child (leaf) and traverse UP to find the head.
  * This is more efficient than starting from all domains and traversing down.
  */
 function findV1DomainsByName(name: DomainFilter["name"]) {
   const { concrete } = parsePartialInterpretedName(name || "");
-
-  // If no concrete labels, return all v1Domains (optionally filtered by owner)
-  // if (concrete.length === 0) {
-  //   return db.select({ id: schema.v1Domain.id }).from(schema.v1Domain);
-  // }
 
   // Get the labelHashPath from concrete labels (reversed: parent-most first)
   const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
@@ -124,17 +130,19 @@ function findV1DomainsByName(name: DomainFilter["name"]) {
   // The query:
   // 1. Starts with domains matching the leaf labelHash (deepest child)
   // 2. Recursively joins parents, verifying each ancestor's labelHash
-  // 3. Returns the parent domain after traversing the full path (the candidate)
+  // 3. Returns both the leaf (for result/ownership) and head (for partial match)
   return db
     .select({
       // https://github.com/drizzle-team/drizzle-orm/issues/1242
-      unambiguousId: sql<ENSv1DomainId>`v1_path_check.candidate_id`.as("unambiguousId"),
+      leafId: sql<ENSv1DomainId>`v1_path_check.leaf_id`.as("leafId"),
+      headId: sql<ENSv1DomainId>`v1_path_check.head_id`.as("headId"),
     })
     .from(
       sql`(
         WITH RECURSIVE upward_check AS (
           -- Base case: find the deepest children (leaves of the concrete path)
           SELECT
+            d.id AS leaf_id,
             d.parent_id AS current_id,
             1 AS depth
           FROM ${schema.v1Domain} d
@@ -144,6 +152,7 @@ function findV1DomainsByName(name: DomainFilter["name"]) {
 
           -- Recursive step: traverse UP, verifying each ancestor's labelHash
           SELECT
+            upward_check.leaf_id,
             pd.parent_id AS current_id,
             upward_check.depth + 1
           FROM upward_check
@@ -152,7 +161,7 @@ function findV1DomainsByName(name: DomainFilter["name"]) {
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
         )
-        SELECT current_id AS candidate_id
+        SELECT leaf_id, current_id AS head_id
         FROM upward_check
         WHERE depth = ${pathLength}
       ) AS v1_path_check`,
@@ -160,10 +169,75 @@ function findV1DomainsByName(name: DomainFilter["name"]) {
     .as("v1DomainsByName");
 }
 
-// TODO: implement v2Domains search with canonical path constraint
-function findV2Domains({ owner }: DomainFilter) {
+/**
+ * Compose a query for v2Domains that have the specified children path.
+ *
+ * For a search like "sub1.sub2.paren":
+ *  - concrete = ["sub1", "sub2"]
+ *  - partial = 'paren'
+ *  - labelHashPath = [labelhash('sub2'), labelhash('sub1')]
+ *
+ * We find v2Domains matching the concrete path and return both:
+ *  - leafId: the deepest child (label "sub1") - the autocomplete result, for ownership check
+ *  - headId: the parent of the path (whose label should match partial "paren")
+ *
+ * Algorithm: Start from the deepest child (leaf) and traverse UP via registryCanonicalDomain.
+ * For v2, parent relationship is: domain.registryId -> registryCanonicalDomain -> parent domainId
+ */
+function findV2DomainsByName(name: DomainFilter["name"]) {
+  const { concrete } = parsePartialInterpretedName(name || "");
+
+  // Get the labelHashPath from concrete labels (reversed: parent-most first)
+  const labelHashPath = interpretedLabelsToLabelHashPath(concrete);
+
+  // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
+  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
+  const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
+
+  // Use a recursive CTE starting from the deepest child and traversing UP
+  // The query:
+  // 1. Starts with domains matching the leaf labelHash (deepest child)
+  // 2. Recursively joins parents via registryCanonicalDomain, verifying each ancestor's labelHash
+  // 3. Returns both the leaf (for result/ownership) and head (for partial match)
   return db
-    .select({ id: schema.v2Domain.id })
-    .from(schema.v2Domain)
-    .where(owner ? eq(schema.v2Domain.ownerId, owner) : undefined);
+    .select({
+      // https://github.com/drizzle-team/drizzle-orm/issues/1242
+      leafId: sql<ENSv2DomainId>`v2_path_check.leaf_id`.as("leafId"),
+      headId: sql<ENSv2DomainId>`v2_path_check.head_id`.as("headId"),
+    })
+    .from(
+      sql`(
+        WITH RECURSIVE upward_check AS (
+          -- Base case: find the deepest children (leaves of the concrete path)
+          -- and get their parent via registryCanonicalDomain
+          SELECT
+            d.id AS leaf_id,
+            rcd.domain_id AS current_id,
+            1 AS depth
+          FROM ${schema.v2Domain} d
+          JOIN ${schema.registryCanonicalDomain} rcd
+            ON rcd.registry_id = d.registry_id
+          WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
+
+          UNION ALL
+
+          -- Recursive step: traverse UP via registryCanonicalDomain
+          SELECT
+            upward_check.leaf_id,
+            rcd.domain_id AS current_id,
+            upward_check.depth + 1
+          FROM upward_check
+          JOIN ${schema.v2Domain} pd
+            ON pd.id = upward_check.current_id
+          JOIN ${schema.registryCanonicalDomain} rcd
+            ON rcd.registry_id = pd.registry_id
+          WHERE upward_check.depth < ${pathLength}
+            AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
+        )
+        SELECT leaf_id, current_id AS head_id
+        FROM upward_check
+        WHERE depth = ${pathLength}
+      ) AS v2_path_check`,
+    )
+    .as("v2DomainsByName");
 }
