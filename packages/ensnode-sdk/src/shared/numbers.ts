@@ -37,7 +37,7 @@ export function bigIntToNumber(n: bigint): number {
  * @returns The scaled bigint value, rounded down via integer division
  *
  * @throws {Error} If value is negative
- * @throws {Error} If scaleFactor is negative, NaN, or infinite
+ * @throws {Error} If scaleFactor is negative, NaN, infinite, or >= 1e21
  *
  * @example
  * // Scale by 0.5
@@ -65,6 +65,11 @@ export function scaleBigintByNumber(value: bigint, scaleFactor: number): bigint 
 
   if (scaleFactor < 0) {
     throw new Error(`scaleBigintByNumber: scaleFactor must be non-negative, got: ${scaleFactor}`);
+  }
+
+  // Reject scaleFactor >= 1e21 to prevent toFixed(20) from producing exponential notation that breaks BigInt parsing
+  if (scaleFactor >= 1e21) {
+    throw new Error(`scaleBigintByNumber: scaleFactor must be less than 1e21, got: ${scaleFactor}`);
   }
 
   // Handle special cases

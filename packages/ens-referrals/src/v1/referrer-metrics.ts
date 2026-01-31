@@ -298,7 +298,7 @@ export const buildAwardedReferrerMetrics = (
     ...referrer,
     awardPoolShare,
     awardPoolApproxValue,
-  } as AwardedReferrerMetrics;
+  } satisfies AwardedReferrerMetrics;
   validateAwardedReferrerMetrics(result, rules);
   return result;
 };

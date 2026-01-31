@@ -139,6 +139,25 @@ describe("Numbers", () => {
           "scaleBigintByNumber: scaleFactor must be a finite number",
         );
       });
+
+      it("should throw on scaleFactor >= 1e21", () => {
+        expect(() => scaleBigintByNumber(1000n, 1e21)).toThrow(
+          "scaleBigintByNumber: scaleFactor must be less than 1e21",
+        );
+        expect(() => scaleBigintByNumber(1000n, 1e22)).toThrow(
+          "scaleBigintByNumber: scaleFactor must be less than 1e21",
+        );
+        expect(() => scaleBigintByNumber(1000n, 1e30)).toThrow(
+          "scaleBigintByNumber: scaleFactor must be less than 1e21",
+        );
+      });
+
+      it("should accept scaleFactor just below 1e21", () => {
+        // Use 1e20 which is definitely below 1e21 (1e21 - 1 doesn't work due to floating point precision)
+        expect(() => scaleBigintByNumber(1000n, 1e20)).not.toThrow();
+        // Also test a value closer to the limit: 9.999999999999999e20
+        expect(() => scaleBigintByNumber(1000n, 9.999999999999999e20)).not.toThrow();
+      });
     });
   });
 });

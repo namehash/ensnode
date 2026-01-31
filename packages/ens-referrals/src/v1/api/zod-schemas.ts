@@ -29,13 +29,18 @@ import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } fro
  * Schema for ReferralProgramRules
  */
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
-  z.object({
-    totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
-    maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
-    startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
-    endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
-    subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
-  });
+  z
+    .object({
+      totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
+      maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
+      startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
+      endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
+      subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
+    })
+    .refine((data) => data.endTime >= data.startTime, {
+      message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
+      path: ["endTime"],
+    });
 
 /**
  * Schema for AwardedReferrerMetrics (with numeric rank)

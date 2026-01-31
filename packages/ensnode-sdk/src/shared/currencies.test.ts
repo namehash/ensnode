@@ -277,6 +277,22 @@ describe("Currencies", () => {
         expect(() => parseEth("abc")).toThrow();
         expect(() => parseEth("1.2.3")).toThrow();
       });
+
+      it("should throw on empty string", () => {
+        expect(() => parseEth("")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on whitespace-only string", () => {
+        expect(() => parseEth("   ")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEth("\t")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEth("\n")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on negative values", () => {
+        expect(() => parseEth("-1")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEth("-0.5")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseEth("-123.456")).toThrow("amount must be a non-negative decimal string");
+      });
     });
   });
 
@@ -353,6 +369,22 @@ describe("Currencies", () => {
         expect(() => parseUsdc("abc")).toThrow();
         expect(() => parseUsdc("1.2.3")).toThrow();
       });
+
+      it("should throw on empty string", () => {
+        expect(() => parseUsdc("")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on whitespace-only string", () => {
+        expect(() => parseUsdc("   ")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseUsdc("\t")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseUsdc("\n")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on negative values", () => {
+        expect(() => parseUsdc("-1")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseUsdc("-0.5")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseUsdc("-123.456")).toThrow("amount must be a non-negative decimal string");
+      });
     });
   });
 
@@ -428,6 +460,22 @@ describe("Currencies", () => {
       it("should throw on invalid format", () => {
         expect(() => parseDai("abc")).toThrow();
         expect(() => parseDai("1.2.3")).toThrow();
+      });
+
+      it("should throw on empty string", () => {
+        expect(() => parseDai("")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on whitespace-only string", () => {
+        expect(() => parseDai("   ")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseDai("\t")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseDai("\n")).toThrow("amount must be a non-negative decimal string");
+      });
+
+      it("should throw on negative values", () => {
+        expect(() => parseDai("-1")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseDai("-0.5")).toThrow("amount must be a non-negative decimal string");
+        expect(() => parseDai("-123.456")).toThrow("amount must be a non-negative decimal string");
       });
     });
   });
