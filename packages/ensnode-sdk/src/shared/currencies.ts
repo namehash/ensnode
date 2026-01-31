@@ -218,13 +218,16 @@ export function scalePrice<T extends Price>(price: T, scaleFactor: number): T {
  * Validates a decimal string for currency parsing.
  *
  * @param value - The decimal string to validate
- * @throws {Error} If value is empty or whitespace-only
+ * @throws {Error} If value is empty, whitespace-only or untrimmed
  * @throws {Error} If value represents a negative number
  */
 function validateAmountToParse(value: string): void {
   const trimmed = value.trim();
   if (trimmed === "") {
     throw new Error("amount must be a non-negative decimal string");
+  }
+  if (value !== trimmed) {
+    throw new Error("amount must not have leading or trailing whitespace");
   }
   if (trimmed.startsWith("-")) {
     throw new Error("amount must be a non-negative decimal string");
@@ -242,7 +245,7 @@ function validateAmountToParse(value: string): void {
  * @param value - The decimal string to parse (e.g., "0.015" for 0.015 ETH)
  * @returns A PriceEth object with the amount in wei (smallest unit)
  *
- * @throws {Error} If value is empty or whitespace-only
+ * @throws {Error} If value is empty, whitespace-only or untrimmed
  * @throws {Error} If value represents a negative number
  * @throws {Error} If value is not a valid decimal string (e.g., "abc", "1.2.3")
  *
@@ -269,7 +272,7 @@ export function parseEth(value: string): PriceEth {
  * @param value - The decimal string to parse (e.g., "123.45678" for $123.45678)
  * @returns A PriceUsdc object with the amount in the smallest unit (6 decimals)
  *
- * @throws {Error} If value is empty or whitespace-only
+ * @throws {Error} If value is empty, whitespace-only or untrimmed
  * @throws {Error} If value represents a negative number
  * @throws {Error} If value is not a valid decimal string (e.g., "abc", "1.2.3")
  *
@@ -296,7 +299,7 @@ export function parseUsdc(value: string): PriceUsdc {
  * @param value - The decimal string to parse (e.g., "123.456789012345678" for 123.456789012345678 DAI)
  * @returns A PriceDai object with the amount in the smallest unit (18 decimals)
  *
- * @throws {Error} If value is empty or whitespace-only
+ * @throws {Error} If value is empty, whitespace-only or untrimmed
  * @throws {Error} If value represents a negative number
  * @throws {Error} If value is not a valid decimal string (e.g., "abc", "1.2.3")
  *
