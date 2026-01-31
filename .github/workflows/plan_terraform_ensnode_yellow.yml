@@ -25,7 +25,7 @@ jobs:
       # AWS_REGION is required for aws-actions/configure-aws-credentials@v4
       # Terraform keeps it's state inside S3 bucket. This bucket needs to be created before running Terraform apply.
       # AWS_REGION should be the same as Terraform S3 bucket state region.
-      # AWS_REGION: us-east-1
+      AWS_REGION: us-east-1
 
       # Set R2 credentials as AWS credentials for Terraform to access R2 bucket
       # AWS_EC2_METADATA_DISABLED: true  # Important: disable EC2 metadata lookup
