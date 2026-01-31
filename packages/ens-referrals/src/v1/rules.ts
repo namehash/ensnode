@@ -4,7 +4,7 @@ import {
   priceUsdc,
   type UnixTimestamp,
 } from "@ensnode/ensnode-sdk";
-import { makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
+import { makeAccountIdSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNonNegativeInteger } from "./number";
 import { validateUnixTimestamp } from "./time";
@@ -71,6 +71,15 @@ export const validateReferralProgramRules = (rules: ReferralProgramRules): void 
   if (!parseResult.success) {
     throw new Error(
       `ReferralProgramRules: totalAwardPoolValue validation failed: ${parseResult.error.message}`,
+    );
+  }
+
+  // Validate subregistryId using Zod schema
+  const accountIdSchema = makeAccountIdSchema("ReferralProgramRules.subregistryId");
+  const accountIdParseResult = accountIdSchema.safeParse(rules.subregistryId);
+  if (!accountIdParseResult.success) {
+    throw new Error(
+      `ReferralProgramRules: subregistryId validation failed: ${accountIdParseResult.error.message}`,
     );
   }
 

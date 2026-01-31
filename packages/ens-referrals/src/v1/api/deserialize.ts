@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import { deserializePriceEth, deserializePriceUsdc } from "@ensnode/ensnode-sdk";
+import { deserializePriceEth, deserializePriceUsdc, type PriceEth } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
@@ -145,7 +145,7 @@ function deserializeReferrerDetailUnranked(
  * Deserialize a {@link ReferrerLeaderboardPageResponse} object.
  *
  * Note: This function explicitly deserializes each subobject to convert string
- * RevenueContribution values back to bigint, then validates using Zod schemas
+ * RevenueContribution values back to {@link PriceEth}, then validates using Zod schemas
  * to enforce invariants on the data.
  */
 export function deserializeReferrerLeaderboardPageResponse(
@@ -184,7 +184,7 @@ export function deserializeReferrerLeaderboardPageResponse(
  * Deserialize a {@link ReferrerDetailResponse} object.
  *
  * Note: This function explicitly deserializes each subobject to convert string
- * RevenueContribution values back to bigint, then validates using Zod schemas
+ * RevenueContribution values back to {@link PriceEth}, then validates using Zod schemas
  * to enforce invariants on the data.
  */
 export function deserializeReferrerDetailResponse(

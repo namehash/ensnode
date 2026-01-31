@@ -43,6 +43,10 @@ export function calcReferrerFinalScoreBoost(
 ): number {
   if (!isReferrerQualified(rank, rules)) return 0;
 
+  // Avoid division by zero when only a single referrer is qualified.
+  // In this case, that single referrer (rank 1) should receive the maximum boost.
+  if (rules.maxQualifiedReferrers === 1) return 1;
+
   return 1 - (rank - 1) / (rules.maxQualifiedReferrers - 1);
 }
 

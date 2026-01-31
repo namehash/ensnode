@@ -2,9 +2,11 @@ import type { Address } from "viem";
 
 import {
   type Duration,
-  getCurrencyInfo,
   type PriceEth,
   type PriceUsdc,
+  priceEth,
+  priceUsdc,
+  scalePrice,
 } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema, makePriceUsdcSchema } from "@ensnode/ensnode-sdk/internal";
 
@@ -290,19 +292,13 @@ export const buildAwardedReferrerMetrics = (
   const awardPoolShare = calcReferrerAwardPoolShare(referrer, aggregatedMetrics, rules);
 
   // Calculate the approximate USDC value by multiplying the share by the total award pool value
-  const currencyInfo = getCurrencyInfo(rules.totalAwardPoolValue.currency);
-  const precisionScale = 10n ** BigInt(currencyInfo.decimals);
-  const scaledShare = BigInt(Math.floor(awardPoolShare * Number(precisionScale)));
-  const awardPoolApproxAmount = (rules.totalAwardPoolValue.amount * scaledShare) / precisionScale;
+  const awardPoolApproxValue = scalePrice(rules.totalAwardPoolValue, awardPoolShare);
 
   const result = {
     ...referrer,
     awardPoolShare,
-    awardPoolApproxValue: {
-      currency: "USDC" as const,
-      amount: awardPoolApproxAmount,
-    },
-  };
+    awardPoolApproxValue,
+  } as AwardedReferrerMetrics;
   validateAwardedReferrerMetrics(result, rules);
   return result;
 };
@@ -359,7 +355,7 @@ export const validateUnrankedReferrerMetrics = (metrics: UnrankedReferrerMetrics
   }
   if (metrics.totalRevenueContribution.amount !== 0n) {
     throw new Error(
-      `Invalid UnrankedReferrerMetrics: totalRevenueContribution must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
+      `Invalid UnrankedReferrerMetrics: totalRevenueContribution.amount must be 0n, got: ${metrics.totalRevenueContribution.amount.toString()}.`,
     );
   }
 
@@ -410,10 +406,7 @@ export const validateUnrankedReferrerMetrics = (metrics: UnrankedReferrerMetrics
  * @returns An {@link UnrankedReferrerMetrics} with zero values for all metrics and null rank
  */
 export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferrerMetrics => {
-  const baseMetrics = buildReferrerMetrics(referrer, 0, 0, {
-    currency: "ETH" as const,
-    amount: 0n,
-  });
+  const baseMetrics = buildReferrerMetrics(referrer, 0, 0, priceEth(0n));
   const scoredMetrics = buildScoredReferrerMetrics(baseMetrics);
 
   const result = {
@@ -423,10 +416,7 @@ export const buildUnrankedReferrerMetrics = (referrer: Address): UnrankedReferre
     finalScoreBoost: 0,
     finalScore: 0,
     awardPoolShare: 0,
-    awardPoolApproxValue: {
-      currency: "USDC" as const,
-      amount: 0n,
-    },
+    awardPoolApproxValue: priceUsdc(0n),
   } satisfies UnrankedReferrerMetrics;
 
   validateUnrankedReferrerMetrics(result);

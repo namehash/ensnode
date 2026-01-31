@@ -53,8 +53,8 @@ export const buildReferrerLeaderboard = (
   rules: ReferralProgramRules,
   accurateAsOf: UnixTimestamp,
 ): ReferrerLeaderboard => {
-  const uniqueReferrers = allReferrers.map((referrer) => referrer.referrer);
-  if (uniqueReferrers.length !== allReferrers.length) {
+  const uniqueReferrers = new Set(allReferrers.map((referrer) => referrer.referrer));
+  if (uniqueReferrers.size !== allReferrers.length) {
     throw new Error(
       "ReferrerLeaderboard: Cannot buildReferrerLeaderboard containing duplicate referrers",
     );

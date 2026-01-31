@@ -1,4 +1,4 @@
-import type { Duration, PriceEth } from "@ensnode/ensnode-sdk";
+import { type Duration, type PriceEth, priceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { validateNonNegativeInteger } from "./number";
@@ -66,6 +66,31 @@ export const validateAggregatedReferrerMetrics = (metrics: AggregatedReferrerMet
   validateReferrerScore(metrics.minFinalScoreToQualify);
 };
 
+/**
+ * Builds aggregated metrics from a complete, globally ranked list of referrers.
+ *
+ * **IMPORTANT: This function expects a complete ranking of all referrers.**
+ *
+ * @param referrers - Must be a complete, globally ranked list of `RankedReferrerMetrics`
+ *                    where ranks start at 1 and are consecutive (e.g., 1, 2, 3, ...).
+ *                    **This must NOT be a paginated or partial slice of the rankings.**
+ *
+ * @param rules - The referral program rules that define qualification criteria,
+ *                including `maxQualifiedReferrers` (the maximum number of referrers
+ *                that can qualify for rewards).
+ *
+ * @returns Aggregated metrics including totals across all referrers and the minimum
+ *          score required to qualify.
+ *
+ * @remarks
+ * - If you need to work with paginated data, aggregate the full ranking first before
+ *   calling this function, or call this function on the complete dataset and then paginate
+ *   the results.
+ * - If `rules.maxQualifiedReferrers === 0`, no referrers can qualify and
+ *   `minFinalScoreToQualify` will be set to `Number.MAX_SAFE_INTEGER`.
+ * - If `referrers` is empty and `rules.maxQualifiedReferrers > 0`,
+ *   `minFinalScoreToQualify` will be set to `0` (anyone can qualify).
+ */
 export const buildAggregatedReferrerMetrics = (
   referrers: RankedReferrerMetrics[],
   rules: ReferralProgramRules,
@@ -108,10 +133,7 @@ export const buildAggregatedReferrerMetrics = (
   const result = {
     grandTotalReferrals,
     grandTotalIncrementalDuration,
-    grandTotalRevenueContribution: {
-      currency: "ETH" as const,
-      amount: grandTotalRevenueContributionAmount,
-    },
+    grandTotalRevenueContribution: priceEth(grandTotalRevenueContributionAmount),
     grandTotalQualifiedReferrersFinalScore,
     minFinalScoreToQualify,
   };

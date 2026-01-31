@@ -124,6 +124,69 @@ export const validateReferrerLeaderboardPageContext = (
       `Invalid ReferrerLeaderboardPageContext: total must be a non-negative integer but is ${context.totalRecords}.`,
     );
   }
+
+  // Validate totalPages
+  if (!isNonNegativeInteger(context.totalPages)) {
+    throw new Error(
+      `Invalid ReferrerLeaderboardPageContext: totalPages must be a non-negative integer but is ${context.totalPages}.`,
+    );
+  }
+
+  const expectedTotalPages =
+    context.totalRecords === 0 ? 1 : Math.ceil(context.totalRecords / context.recordsPerPage);
+
+  if (context.totalPages !== expectedTotalPages) {
+    throw new Error(
+      `Invalid ReferrerLeaderboardPageContext: totalPages is ${context.totalPages} but expected ${expectedTotalPages} based on totalRecords (${context.totalRecords}) and recordsPerPage (${context.recordsPerPage}).`,
+    );
+  }
+
+  if (context.page > context.totalPages) {
+    throw new Error(
+      `Invalid ReferrerLeaderboardPageContext: page ${context.page} exceeds totalPages ${context.totalPages}.`,
+    );
+  }
+
+  // Validate startIndex and endIndex
+  const expectedStartIndex = (context.page - 1) * context.recordsPerPage;
+  const expectedEndIndex = Math.min(
+    expectedStartIndex + context.recordsPerPage - 1,
+    context.totalRecords - 1,
+  );
+
+  if (context.totalRecords === 0) {
+    if (context.startIndex !== undefined) {
+      throw new Error(
+        `Invalid ReferrerLeaderboardPageContext: startIndex must be undefined when totalRecords is 0 but is ${context.startIndex}.`,
+      );
+    }
+    if (context.endIndex !== undefined) {
+      throw new Error(
+        `Invalid ReferrerLeaderboardPageContext: endIndex must be undefined when totalRecords is 0 but is ${context.endIndex}.`,
+      );
+    }
+  } else {
+    if (context.startIndex !== expectedStartIndex) {
+      throw new Error(
+        `Invalid ReferrerLeaderboardPageContext: startIndex is ${context.startIndex} but expected ${expectedStartIndex} based on page (${context.page}) and recordsPerPage (${context.recordsPerPage}).`,
+      );
+    }
+    if (context.endIndex !== expectedEndIndex) {
+      throw new Error(
+        `Invalid ReferrerLeaderboardPageContext: endIndex is ${context.endIndex} but expected ${expectedEndIndex} based on startIndex (${expectedStartIndex}), recordsPerPage (${context.recordsPerPage}), and totalRecords (${context.totalRecords}).`,
+      );
+    }
+    if (
+      typeof context.endIndex !== "undefined" &&
+      typeof context.startIndex !== "undefined" &&
+      context.endIndex < context.startIndex
+    ) {
+      throw new Error(
+        `Invalid ReferrerLeaderboardPageContext: endIndex (${context.endIndex}) must be greater than or equal to startIndex (${context.startIndex}).`,
+      );
+    }
+  }
+
   const startIndex = (context.page - 1) * context.recordsPerPage;
   const endIndex = startIndex + context.recordsPerPage;
 

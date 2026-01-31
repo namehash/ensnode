@@ -165,7 +165,7 @@ export const makeReferrerLeaderboardPageResponseErrorSchema = (
 export const makeReferrerLeaderboardPageResponseSchema = (
   valueLabel: string = "ReferrerLeaderboardPageResponse",
 ) =>
-  z.union([
+  z.discriminatedUnion("responseCode", [
     makeReferrerLeaderboardPageResponseOkSchema(valueLabel),
     makeReferrerLeaderboardPageResponseErrorSchema(valueLabel),
   ]);
@@ -201,7 +201,7 @@ export const makeReferrerDetailUnrankedSchema = (valueLabel: string = "ReferrerD
 export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
   z.object({
     responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
-    data: z.union([
+    data: z.discriminatedUnion("type", [
       makeReferrerDetailRankedSchema(`${valueLabel}.data`),
       makeReferrerDetailUnrankedSchema(`${valueLabel}.data`),
     ]),
@@ -223,7 +223,7 @@ export const makeReferrerDetailResponseErrorSchema = (
  * Schema for {@link ReferrerDetailResponse}
  */
 export const makeReferrerDetailResponseSchema = (valueLabel: string = "ReferrerDetailResponse") =>
-  z.union([
+  z.discriminatedUnion("responseCode", [
     makeReferrerDetailResponseOkSchema(valueLabel),
     makeReferrerDetailResponseErrorSchema(valueLabel),
   ]);

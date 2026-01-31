@@ -24,7 +24,7 @@ export const validateReferrerScore = (score: ReferrerScore): void => {
 /**
  * Calculate the score of a referrer based on the total incremental duration
  * (in seconds) of registrations and renewals for direct subnames of .eth
- * referrered by the referrer within the ENS Holiday Awards period.
+ * referred by the referrer within the ENS Holiday Awards period.
  *
  * @param totalIncrementalDuration - The total incremental duration (in seconds)
  * of referrals made by a referrer within the {@link ReferralProgramRules}.

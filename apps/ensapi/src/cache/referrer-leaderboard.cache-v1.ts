@@ -50,6 +50,10 @@ export const referrerLeaderboardCacheV1 = new SWRCache({
   fn: async () => {
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
+      logger.error(
+        { error: indexingStatus },
+        "Failed to read indexing status cache while generating referrer leaderboard (V1). Cannot proceed without valid indexing status.",
+      );
       throw new Error(
         "Unable to generate referrer leaderboard. indexingStatusCache must have been successfully initialized.",
       );
