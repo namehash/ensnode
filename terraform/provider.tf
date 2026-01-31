@@ -33,3 +33,7 @@ provider "render" {
   wait_for_deploy_completion       = true
   skip_deploy_after_service_update = false
 }
+
+provider "aws" {
+  region = "us-east-1"   # required for legacy Route53 resources in state
+}
