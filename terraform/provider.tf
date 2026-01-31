@@ -8,7 +8,7 @@ terraform {
 
   backend "s3" {
     bucket = "ensnode-terraform"
-    key    = "render-tfstate"
+    key    = "render-tfstate.json"
     region = "auto"
     skip_credentials_validation = true
     skip_metadata_api_check     = true
