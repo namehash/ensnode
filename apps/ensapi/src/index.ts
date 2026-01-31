@@ -9,6 +9,7 @@ import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
+import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
@@ -66,8 +67,8 @@ app.route("/subgraph", subgraphApi);
 // use ENSAnalytics API at /ensanalytics (v0, implicit)
 app.route("/ensanalytics", ensanalyticsApi);
 
-// use ENSAnalytics API v1 at /ensanalytics/v1
-app.route("/ensanalytics/v1", ensanalyticsApiV1);
+// use ENSAnalytics API v1 at /v1/ensanalytics
+app.route("/v1/ensanalytics", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
@@ -159,6 +160,9 @@ const gracefulShutdown = async () => {
 
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
+
+    referrerLeaderboardCacheV1.destroy();
+    logger.info("Destroyed referrerLeaderboardCacheV1");
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");
