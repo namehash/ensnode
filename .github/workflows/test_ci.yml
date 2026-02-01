@@ -62,12 +62,12 @@ jobs:
           echo "$ENSAPI_PID" > ensapi.pid
           echo "ENSAPI_PID=$ENSAPI_PID" >> "$GITHUB_ENV"
 
-          # Cleanup function to ensure background process is stopped
           cleanup() {
             echo "Stopping ENSApi (PID: $ENSAPI_PID)..."
             kill $ENSAPI_PID 2>/dev/null || true
             wait $ENSAPI_PID 2>/dev/null || true
           }
+          trap cleanup EXIT INT TERM
 
           # Wait for server to be ready
           SERVER_READY=false
@@ -88,20 +88,13 @@ jobs:
             sleep 1
           done
 
-          if ! kill -0 $ENSAPI_PID 2>/dev/null; then
-            echo "❌ ENSApi process exited unexpectedly after starting"
-            exit 1
-          fi
-
           if [ "$SERVER_READY" != "true" ]; then
             echo "❌ ENSApi failed to start within 30 seconds"
             echo "The server did not respond to requests at http://localhost:4334/openapi.json"
-            cleanup
             exit 1
           fi
 
       - name: Generate OpenAPI spec from local build
-        working-directory: docs/docs.ensnode.io
         run: pnpm --filter @docs/mintlify openapi:generate http://localhost:4334
 
       - name: Verify OpenAPI spec matches committed version

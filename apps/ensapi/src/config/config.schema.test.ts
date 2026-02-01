@@ -21,6 +21,7 @@ import logger from "@/lib/logger";
 vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
+    info: vi.fn(),
   },
 }));
 
@@ -56,6 +57,17 @@ vi.stubGlobal("fetch", mockFetch);
 describe("buildConfigFromEnvironment", () => {
   afterEach(() => {
     mockFetch.mockReset();
+  });
+
+  it("returns mock config without fetching when OPENAPI_GENERATE_MODE is enabled", async () => {
+    const result = await buildConfigFromEnvironment({
+      OPENAPI_GENERATE_MODE: "true",
+      PORT: "5000",
+    });
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(result.port).toBe(5000);
+    expect(result.namespace).toBe("mainnet");
   });
 
   it("returns a valid config object using environment variables", async () => {

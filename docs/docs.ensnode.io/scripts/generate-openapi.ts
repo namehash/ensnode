@@ -92,7 +92,7 @@ async function main() {
     paths?: Record<string, unknown>;
   };
 
-  writeFileSync(OUTPUT_PATH, JSON.stringify(spec) + "\n", "utf-8");
+  writeFileSync(OUTPUT_PATH, `${JSON.stringify(spec)}\n`, "utf-8");
 
   console.log(`OpenAPI spec written to: ${OUTPUT_PATH}`);
   console.log(`Spec version: ${typedSpec.info?.version}`);
