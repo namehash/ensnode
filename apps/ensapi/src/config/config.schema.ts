@@ -85,12 +85,12 @@ export type EnsApiConfigInput = z.input<typeof EnsApiConfigSchema>;
  * @throws Error with formatted validation messages if environment parsing fails
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
-  if (env.OPENAPI_GENERATE_MODE === "true") {
-    logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
-    return EnsApiConfigSchema.parse(buildOpenApiMockConfig(env.PORT));
-  }
-
   try {
+    if (env.OPENAPI_GENERATE_MODE === "true") {
+      logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
+      return EnsApiConfigSchema.parse(buildOpenApiMockConfig(env.PORT));
+    }
+
     const ensIndexerUrl = EnsIndexerUrlSchema.parse(env.ENSINDEXER_URL);
 
     const ensIndexerPublicConfig = await pRetry(() => fetchENSIndexerConfig(ensIndexerUrl), {

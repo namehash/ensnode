@@ -89,9 +89,24 @@ async function main() {
 
   // Format the output with Biome (required for CI to pass)
   console.log("Formatting with Biome...");
-  execFileSync("pnpm", ["biome", "format", "--write", OUTPUT_PATH], {
-    stdio: "inherit",
-  });
+  try {
+    execFileSync("pnpm", ["biome", "format", "--write", OUTPUT_PATH], {
+      stdio: "inherit",
+    });
+  } catch (error) {
+    console.error("Error: Failed to format openapi.json with Biome.");
+    if (error instanceof Error) {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code === "ENOENT") {
+        console.error(
+          "It looks like 'pnpm' or 'biome' is not installed or not available on your PATH.",
+        );
+      } else if (err.message) {
+        console.error(err.message);
+      }
+    }
+    process.exit(1);
+  }
 }
 
 main().catch((error) => {
