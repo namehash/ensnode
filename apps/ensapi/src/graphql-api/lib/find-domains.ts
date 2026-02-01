@@ -100,6 +100,39 @@ export function findDomains({ name, owner }: DomainFilter) {
   const v1HeadDomain = alias(schema.v1Domain, "v1HeadDomain");
   const v2HeadDomain = alias(schema.v2Domain, "v2HeadDomain");
 
+  // Base subqueries: extract unified structure from v1 and v2 domains
+  // Returns {id, ownerId, leafLabelHash, headLabelHash} for each matching domain
+  const v1DomainsBase = db
+    .select({
+      id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
+      ownerId: schema.v1Domain.ownerId,
+      leafLabelHash: schema.v1Domain.labelHash,
+      headLabelHash: v1HeadDomain.labelHash,
+    })
+    .from(schema.v1Domain)
+    .innerJoin(
+      v1DomainsByLabelHashPathQuery,
+      eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
+    )
+    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId));
+
+  const v2DomainsBase = db
+    .select({
+      id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
+      ownerId: schema.v2Domain.ownerId,
+      leafLabelHash: schema.v2Domain.labelHash,
+      headLabelHash: v2HeadDomain.labelHash,
+    })
+    .from(schema.v2Domain)
+    .innerJoin(
+      v2DomainsByLabelHashPathQuery,
+      eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
+    )
+    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId));
+
+  // Union v1 and v2 base queries into a single CTE
+  const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));
+
   // alias for head label (for partial matching) and leaf label (for NAME ordering)
   const headLabel = alias(schema.label, "headLabel");
   const leafLabel = alias(schema.label, "leafLabel");
@@ -125,10 +158,11 @@ export function findDomains({ name, owner }: DomainFilter) {
     )
     .as("latestRegistration");
 
-  // join on leafId (the autocomplete result), filter by owner and partial
-  const v1Domains = db
+  // Apply shared joins and filters on the unified domain base
+  const domains = db
+    .with(domainsBase)
     .select({
-      id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
+      id: domainsBase.id,
       // for NAME ordering
       leafLabelValue: sql<string | null>`${leafLabel.value}`.as("leafLabelValue"),
       // for REGISTRATION_TIMESTAMP ordering
@@ -136,59 +170,24 @@ export function findDomains({ name, owner }: DomainFilter) {
       // for REGISTRATION_EXPIRY ordering
       registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
     })
-    .from(schema.v1Domain)
-    .innerJoin(
-      v1DomainsByLabelHashPathQuery,
-      eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
-    )
-    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId))
+    .from(domainsBase)
     // join head label for partial matching
-    .leftJoin(headLabel, eq(headLabel.labelHash, v1HeadDomain.labelHash))
+    .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
     // join leaf label for NAME ordering
-    .leftJoin(leafLabel, eq(leafLabel.labelHash, schema.v1Domain.labelHash))
+    .leftJoin(leafLabel, eq(leafLabel.labelHash, domainsBase.leafLabelHash))
     // join latest registration for timestamp/expiry ordering
-    .leftJoin(latestRegistration, eq(latestRegistration.domainId, schema.v1Domain.id))
+    .leftJoin(latestRegistration, eq(latestRegistration.domainId, domainsBase.id))
     .where(
       and(
-        owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
+        owner ? eq(domainsBase.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
+        // This is intentional - we can't match partial text against unknown labels.
         partial ? like(headLabel.value, `${partial}%`) : undefined,
       ),
     );
 
-  // join on leafId (the autocomplete result), filter by owner and partial
-  const v2Domains = db
-    .select({
-      id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
-      // for NAME ordering
-      leafLabelValue: sql<string | null>`${leafLabel.value}`.as("leafLabelValue"),
-      // for REGISTRATION_TIMESTAMP ordering
-      registrationStart: sql<bigint | null>`${latestRegistration.start}`.as("registrationStart"),
-      // for REGISTRATION_EXPIRY ordering
-      registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
-    })
-    .from(schema.v2Domain)
-    .innerJoin(
-      v2DomainsByLabelHashPathQuery,
-      eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
-    )
-    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId))
-    // join head label for partial matching
-    .leftJoin(headLabel, eq(headLabel.labelHash, v2HeadDomain.labelHash))
-    // join leaf label for NAME ordering
-    .leftJoin(leafLabel, eq(leafLabel.labelHash, schema.v2Domain.labelHash))
-    // join latest registration for timestamp/expiry ordering
-    .leftJoin(latestRegistration, eq(latestRegistration.domainId, schema.v2Domain.id))
-    .where(
-      and(
-        owner ? eq(schema.v2Domain.ownerId, owner) : undefined,
-        // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-        partial ? like(headLabel.value, `${partial}%`) : undefined,
-      ),
-    );
-
-  // union the two subqueries and return
-  return db.$with("domains").as(unionAll(v1Domains, v2Domains));
+  return db.$with("domains").as(domains);
 }
 
 /**
