@@ -65,8 +65,11 @@ async function main() {
   let spec: unknown;
   try {
     spec = await response.json();
-  } catch {
+  } catch (error) {
     console.error("Error: Response is not valid JSON.");
+    if (error instanceof Error) {
+      console.error(`Parse error: ${error.message}`);
+    }
     console.error("The server may not be returning an OpenAPI spec.");
     process.exit(1);
   }
