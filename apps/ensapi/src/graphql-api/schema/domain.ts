@@ -10,7 +10,6 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { getV1CanonicalPath, getV2CanonicalPath } from "@/graphql-api/lib/get-canonical-path";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
@@ -109,10 +108,9 @@ DomainInterfaceRef.implement({
       type: "Name",
       nullable: true,
       resolve: async (domain, args, context) => {
-        // TODO: dataloader/cache the get*CanonicalPath helper
         const canonicalPath = isENSv1Domain(domain)
-          ? await getV1CanonicalPath(domain.id)
-          : await getV2CanonicalPath(domain.id);
+          ? await context.loaders.v1CanonicalPath.load(domain.id)
+          : await context.loaders.v2CanonicalPath.load(domain.id);
         if (!canonicalPath) return null;
 
         // TODO: this could be more efficient if the get*CanonicalPath helpers included the label
@@ -147,8 +145,8 @@ DomainInterfaceRef.implement({
       nullable: true,
       resolve: async (domain, args, context) => {
         const canonicalPath = isENSv1Domain(domain)
-          ? await getV1CanonicalPath(domain.id)
-          : await getV2CanonicalPath(domain.id);
+          ? await context.loaders.v1CanonicalPath.load(domain.id)
+          : await context.loaders.v2CanonicalPath.load(domain.id);
         if (!canonicalPath) return null;
 
         return await rejectAnyErrors(

@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { namehash } from "viem";
 
@@ -137,7 +139,7 @@ ResolverRef.implement({
       description: "TODO",
       type: AccountIdRef,
       nullable: true,
-      resolve: (parent, args, context) => isBridgedResolver(context.namespace, parent),
+      resolve: (parent) => isBridgedResolver(config.namespace, parent),
     }),
 
     ////////////////////////

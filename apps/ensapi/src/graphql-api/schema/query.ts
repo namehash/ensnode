@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, asc, desc, gt, lt } from "drizzle-orm";
 
@@ -238,7 +240,7 @@ builder.queryType({
       description: "TODO",
       type: RegistryRef,
       nullable: false,
-      resolve: (parent, args, context) => getENSv2RootRegistryId(context.namespace),
+      resolve: () => getENSv2RootRegistryId(config.namespace),
     }),
   }),
 });
