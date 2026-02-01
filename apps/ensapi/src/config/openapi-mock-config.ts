@@ -25,6 +25,8 @@ export function buildOpenApiMockConfig(port?: string): EnsApiConfigInput {
     theGraphApiKey: undefined,
     namespace: "mainnet",
     rpcConfigs: {
+      // Intentionally non-functional RPC URL used only in OPENAPI_GENERATE_MODE
+      // for OpenAPI spec generation; ENSApi will not attempt to connect to this.
       "1": "https://rpc.example.com",
     },
     ensIndexerPublicConfig: {
