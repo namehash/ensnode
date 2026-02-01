@@ -45,7 +45,7 @@
                   "properties": {
                     "version": { "type": "string", "minLength": 1 },
                     "theGraphFallback": {
-                      "anyOf": [
+                      "oneOf": [
                         {
                           "type": "object",
                           "properties": {
@@ -97,7 +97,7 @@
                         "isSubgraphCompatible": { "type": "boolean" },
                         "namespace": {
                           "type": "string",
-                          "enum": ["mainnet", "sepolia", "ens-test-env"]
+                          "enum": ["mainnet", "sepolia", "sepolia-v2", "ens-test-env"]
                         },
                         "plugins": {
                           "minItems": 1,
@@ -164,7 +164,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "type": "object",
                       "properties": {
@@ -179,7 +179,7 @@
                             },
                             "worstCaseDistance": { "type": "number" },
                             "snapshot": {
-                              "anyOf": [
+                              "oneOf": [
                                 {
                                   "type": "object",
                                   "properties": {
@@ -195,7 +195,7 @@
                                       "maximum": 9007199254740991
                                     },
                                     "omnichainSnapshot": {
-                                      "anyOf": [
+                                      "oneOf": [
                                         {
                                           "type": "object",
                                           "properties": {
@@ -207,7 +207,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -216,7 +216,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -311,7 +311,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -623,7 +623,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -632,7 +632,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -727,7 +727,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -1039,7 +1039,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -1048,7 +1048,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -1143,7 +1143,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -1455,7 +1455,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -1464,7 +1464,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -1559,7 +1559,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -1897,7 +1897,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "type": "object",
                       "properties": {
@@ -1912,7 +1912,7 @@
                             },
                             "worstCaseDistance": { "type": "number" },
                             "snapshot": {
-                              "anyOf": [
+                              "oneOf": [
                                 {
                                   "type": "object",
                                   "properties": {
@@ -1928,7 +1928,7 @@
                                       "maximum": 9007199254740991
                                     },
                                     "omnichainSnapshot": {
-                                      "anyOf": [
+                                      "oneOf": [
                                         {
                                           "type": "object",
                                           "properties": {
@@ -1940,7 +1940,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -1949,7 +1949,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -2044,7 +2044,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -2356,7 +2356,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -2365,7 +2365,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -2460,7 +2460,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -2772,7 +2772,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -2781,7 +2781,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -2876,7 +2876,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -3188,7 +3188,7 @@
                                               "type": "object",
                                               "propertyNames": { "type": "string" },
                                               "additionalProperties": {
-                                                "anyOf": [
+                                                "oneOf": [
                                                   {
                                                     "type": "object",
                                                     "properties": {
@@ -3197,7 +3197,7 @@
                                                         "const": "chain-queued"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -3292,7 +3292,7 @@
                                                         "const": "chain-backfill"
                                                       },
                                                       "config": {
-                                                        "anyOf": [
+                                                        "oneOf": [
                                                           {
                                                             "type": "object",
                                                             "properties": {
@@ -3640,7 +3640,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "type": "object",
                       "properties": {
@@ -3681,7 +3681,7 @@
                                     "required": ["assetNamespace", "contract", "tokenId"]
                                   },
                                   "ownership": {
-                                    "anyOf": [
+                                    "oneOf": [
                                       {
                                         "type": "object",
                                         "properties": {
@@ -3793,7 +3793,7 @@
                       "additionalProperties": false
                     },
                     {
-                      "anyOf": [
+                      "oneOf": [
                         {
                           "type": "object",
                           "properties": {
@@ -3866,7 +3866,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "type": "object",
                       "properties": {
@@ -3907,7 +3907,7 @@
                                     "required": ["assetNamespace", "contract", "tokenId"]
                                   },
                                   "ownership": {
-                                    "anyOf": [
+                                    "oneOf": [
                                       {
                                         "type": "object",
                                         "properties": {
@@ -4019,7 +4019,7 @@
                       "additionalProperties": false
                     },
                     {
-                      "anyOf": [
+                      "oneOf": [
                         {
                           "type": "object",
                           "properties": {
@@ -4092,7 +4092,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "type": "object",
                       "properties": {
@@ -4133,7 +4133,7 @@
                                     "required": ["assetNamespace", "contract", "tokenId"]
                                   },
                                   "ownership": {
-                                    "anyOf": [
+                                    "oneOf": [
                                       {
                                         "type": "object",
                                         "properties": {
@@ -4245,7 +4245,7 @@
                       "additionalProperties": false
                     },
                     {
-                      "anyOf": [
+                      "oneOf": [
                         {
                           "type": "object",
                           "properties": {
