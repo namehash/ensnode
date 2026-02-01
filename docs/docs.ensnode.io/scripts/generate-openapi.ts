@@ -18,6 +18,13 @@ import { resolve } from "node:path";
 const OUTPUT_PATH = resolve(import.meta.dirname, "../openapi.json");
 const TIMEOUT_MS = 30000;
 
+/**
+ * Fetches the OpenAPI spec from a running ENSApi instance, validates it,
+ * writes it to disk, and formats it with Biome.
+ *
+ * Expects the ENSApi URL as the first command-line argument.
+ * Exits with code 1 on any error (connection, validation, or formatting).
+ */
 async function main() {
   const ensapiUrl = process.argv[2];
 
