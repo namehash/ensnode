@@ -482,10 +482,10 @@ export const label = onchainTable(
   "labels",
   (t) => ({
     labelHash: t.hex().primaryKey().$type<LabelHash>(),
-    value: t.text().notNull().$type<InterpretedLabel>(),
+    interpreted: t.text().notNull().$type<InterpretedLabel>(),
   }),
   (t) => ({
-    byValue: index().on(t.value),
+    byInterpreted: index().on(t.interpreted),
   }),
 );
 
