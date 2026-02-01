@@ -102,7 +102,7 @@ jobs:
 
       - name: Generate OpenAPI spec from local build
         working-directory: docs/docs.ensnode.io
-        run: pnpm openapi:generate http://localhost:4334
+        run: pnpm --filter @docs/mintlify openapi:generate http://localhost:4334
 
       - name: Verify OpenAPI spec matches committed version
         run: |
