@@ -166,7 +166,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
       .as("v1_path");
   }
 
-  // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
+  // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
@@ -241,7 +241,7 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
       .as("v2_path");
   }
 
-  // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
+  // NOTE: using new Param as per https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
