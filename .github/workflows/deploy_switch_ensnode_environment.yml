@@ -103,7 +103,7 @@ jobs:
             --request POST \
             --url "https://api.mintlify.com/v1/project/update/${{ vars.MINTLIFY_PROJECT_ID }}" \
             --header "Authorization: Bearer ${{ secrets.MINTLIFY_API_TOKEN }}")
-          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed -e 's/HTTPSTATUS\:.*//g')
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed -e 's/HTTPSTATUS:.*//g')
           HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
           if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
             echo "Mintlify docs rebuild triggered successfully (HTTP $HTTP_STATUS)"
