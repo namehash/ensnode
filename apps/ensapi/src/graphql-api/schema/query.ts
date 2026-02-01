@@ -1,7 +1,7 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and, asc, desc, gt, lt } from "drizzle-orm";
+import { and, gt, lt } from "drizzle-orm";
 
 import {
   type DomainId,
@@ -16,7 +16,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { findDomains } from "@/graphql-api/lib/find-domains";
+import { findDomains, orderFindDomains } from "@/graphql-api/lib/find-domains";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
@@ -26,6 +26,7 @@ import { cursors } from "@/graphql-api/schema/cursors";
 import {
   DomainIdInput,
   DomainInterfaceRef,
+  DomainsOrderInput,
   DomainsWhereInput,
   ENSv1DomainRef,
   ENSv2DomainRef,
@@ -50,6 +51,7 @@ builder.queryType({
         type: DomainInterfaceRef,
         args: {
           where: t.arg({ type: DomainsWhereInput, required: true }),
+          order: t.arg({ type: DomainsOrderInput }),
         },
         resolve: (parent, args, context) =>
           resolveCursorConnection(
@@ -57,6 +59,14 @@ builder.queryType({
             async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
               // construct query for relevant domains
               const domains = findDomains(args.where);
+
+              // build order clauses
+              const orderClauses = orderFindDomains(
+                domains,
+                args.order?.by,
+                args.order?.dir,
+                inverted,
+              );
 
               // execute with pagination constraints
               const results = await db
@@ -69,7 +79,7 @@ builder.queryType({
                     after ? gt(domains.id, cursors.decode<DomainId>(after)) : undefined,
                   ),
                 )
-                .orderBy(inverted ? desc(domains.id) : asc(domains.id))
+                .orderBy(...orderClauses)
                 .limit(limit);
 
               // provide full Domain entities via dataloader

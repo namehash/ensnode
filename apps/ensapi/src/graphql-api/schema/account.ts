@@ -6,7 +6,7 @@ import * as schema from "@ensnode/ensnode-schema";
 import type { DomainId, PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { findDomains } from "@/graphql-api/lib/find-domains";
+import { findDomains, orderFindDomains } from "@/graphql-api/lib/find-domains";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
@@ -14,7 +14,11 @@ import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-regi
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { AccountDomainsWhereInput, DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import {
+  AccountDomainsWhereInput,
+  DomainInterfaceRef,
+  DomainsOrderInput,
+} from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -64,6 +68,7 @@ AccountRef.implement({
       type: DomainInterfaceRef,
       args: {
         where: t.arg({ type: AccountDomainsWhereInput, required: false }),
+        order: t.arg({ type: DomainsOrderInput }),
       },
       resolve: (parent, args, context) =>
         resolveCursorConnection(
@@ -71,6 +76,14 @@ AccountRef.implement({
           async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
             // construct query for relevant domains
             const domains = findDomains({ ...args.where, owner: parent.id });
+
+            // build order clauses
+            const orderClauses = orderFindDomains(
+              domains,
+              args.order?.by,
+              args.order?.dir,
+              inverted,
+            );
 
             // execute with pagination constraints
             const results = await db
@@ -83,7 +96,7 @@ AccountRef.implement({
                   after ? gt(domains.id, cursors.decode<DomainId>(after)) : undefined,
                 ),
               )
-              .orderBy(inverted ? desc(domains.id) : asc(domains.id))
+              .orderBy(...orderClauses)
               .limit(limit);
 
             // provide full Domain entities via dataloader

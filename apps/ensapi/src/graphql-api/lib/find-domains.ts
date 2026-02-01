@@ -1,4 +1,4 @@
-import { and, eq, like, Param, sql } from "drizzle-orm";
+import { and, asc, desc, eq, like, Param, type SQL, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
@@ -13,6 +13,8 @@ import {
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
+import type { DomainsOrderBy } from "@/graphql-api/schema/domain";
+import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
@@ -98,43 +100,90 @@ export function findDomains({ name, owner }: DomainFilter) {
   const v1HeadDomain = alias(schema.v1Domain, "v1HeadDomain");
   const v2HeadDomain = alias(schema.v2Domain, "v2HeadDomain");
 
+  // alias for head label (for partial matching) and leaf label (for NAME ordering)
+  const headLabel = alias(schema.label, "headLabel");
+  const leafLabel = alias(schema.label, "leafLabel");
+
+  // subquery for latest registration per domain (highest index)
+  // TODO: replace this with a JOIN against the latest registration lookup table after
+  // https://github.com/namehash/ensnode/issues/1594
+  const latestRegistration = db
+    .select({
+      domainId: schema.registration.domainId,
+      start: schema.registration.start,
+      expiry: schema.registration.expiry,
+    })
+    .from(schema.registration)
+    .where(
+      eq(
+        schema.registration.index,
+        db
+          .select({ maxIndex: sql<number>`MAX(${schema.registration.index})` })
+          .from(schema.registration)
+          .where(eq(schema.registration.domainId, schema.registration.domainId)),
+      ),
+    )
+    .as("latestRegistration");
+
   // join on leafId (the autocomplete result), filter by owner and partial
   const v1Domains = db
-    .select({ id: sql<DomainId>`${schema.v1Domain.id}`.as("id") })
+    .select({
+      id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
+      // for NAME ordering
+      leafLabelValue: sql<string | null>`${leafLabel.value}`.as("leafLabelValue"),
+      // for REGISTRATION_TIMESTAMP ordering
+      registrationStart: sql<bigint | null>`${latestRegistration.start}`.as("registrationStart"),
+      // for REGISTRATION_EXPIRY ordering
+      registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
+    })
     .from(schema.v1Domain)
     .innerJoin(
       v1DomainsByLabelHashPathQuery,
       eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
     )
     .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId))
-    .leftJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
+    // join head label for partial matching
+    .leftJoin(headLabel, eq(headLabel.labelHash, v1HeadDomain.labelHash))
+    // join leaf label for NAME ordering
+    .leftJoin(leafLabel, eq(leafLabel.labelHash, schema.v1Domain.labelHash))
+    // join latest registration for timestamp/expiry ordering
+    .leftJoin(latestRegistration, eq(latestRegistration.domainId, schema.v1Domain.id))
     .where(
       and(
         owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
-        // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(schema.label.value, `${partial}%`) : undefined,
+        partial ? like(headLabel.value, `${partial}%`) : undefined,
       ),
     );
 
   // join on leafId (the autocomplete result), filter by owner and partial
   const v2Domains = db
-    .select({ id: sql<DomainId>`${schema.v2Domain.id}`.as("id") })
+    .select({
+      id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
+      // for NAME ordering
+      leafLabelValue: sql<string | null>`${leafLabel.value}`.as("leafLabelValue"),
+      // for REGISTRATION_TIMESTAMP ordering
+      registrationStart: sql<bigint | null>`${latestRegistration.start}`.as("registrationStart"),
+      // for REGISTRATION_EXPIRY ordering
+      registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
+    })
     .from(schema.v2Domain)
     .innerJoin(
       v2DomainsByLabelHashPathQuery,
       eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
     )
     .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId))
-    .leftJoin(schema.label, eq(schema.label.labelHash, v2HeadDomain.labelHash))
+    // join head label for partial matching
+    .leftJoin(headLabel, eq(headLabel.labelHash, v2HeadDomain.labelHash))
+    // join leaf label for NAME ordering
+    .leftJoin(leafLabel, eq(leafLabel.labelHash, schema.v2Domain.labelHash))
+    // join latest registration for timestamp/expiry ordering
+    .leftJoin(latestRegistration, eq(latestRegistration.domainId, schema.v2Domain.id))
     .where(
       and(
         owner ? eq(schema.v2Domain.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
-        // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(schema.label.value, `${partial}%`) : undefined,
+        partial ? like(headLabel.value, `${partial}%`) : undefined,
       ),
     );
 
@@ -298,4 +347,41 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
       ) AS v2_path_check`,
     )
     .as("v2_path");
+}
+
+/**
+ * Build ORDER BY clauses for a findDomains result.
+ *
+ * @param domains - The findDomains CTE result
+ * @param orderBy - The field to order by (defaults to NAME)
+ * @param orderDir - The direction to order ("ASC" or "DESC", defaults to "ASC")
+ * @param inverted - Whether the relay pagination is inverted (backward pagination)
+ * @returns Array of SQL order expressions
+ */
+export function orderFindDomains(
+  domains: ReturnType<typeof findDomains>,
+  orderBy: typeof DomainsOrderBy.$inferType | undefined | null,
+  orderDir: typeof OrderDirection.$inferType | undefined | null,
+  inverted: boolean,
+): SQL[] {
+  // Combine user's orderDir with relay's inverted (XOR logic)
+  // inverted flips the sort for backward pagination, so we flip it back
+  const effectiveDesc = (orderDir === "DESC") !== inverted;
+
+  const orderColumn = {
+    NAME: domains.leafLabelValue,
+    REGISTRATION_TIMESTAMP: domains.registrationStart,
+    REGISTRATION_EXPIRY: domains.registrationExpiry,
+  }[orderBy ?? "NAME"];
+
+  // Use NULLS LAST for ascending, NULLS FIRST for descending
+  // This keeps unregistered domains at the end when sorting by registration fields
+  const primaryOrder = effectiveDesc
+    ? sql`${orderColumn} DESC NULLS FIRST`
+    : sql`${orderColumn} ASC NULLS LAST`;
+
+  // Always include id as tiebreaker for stable ordering
+  const tiebreaker = effectiveDesc ? desc(domains.id) : asc(domains.id);
+
+  return [primaryOrder, tiebreaker];
 }
