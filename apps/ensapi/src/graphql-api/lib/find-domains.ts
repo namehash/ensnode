@@ -112,6 +112,8 @@ export function findDomains({ name, owner }: DomainFilter) {
       and(
         owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
+        // This is intentional - we can't match partial text against unknown labels.
         partial ? like(schema.label.value, `${partial}%`) : undefined,
       ),
     );
@@ -130,6 +132,8 @@ export function findDomains({ name, owner }: DomainFilter) {
       and(
         owner ? eq(schema.v2Domain.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
+        // This is intentional - we can't match partial text against unknown labels.
         partial ? like(schema.label.value, `${partial}%`) : undefined,
       ),
     );
@@ -261,6 +265,8 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
         WITH RECURSIVE upward_check AS (
           -- Base case: find the deepest children (leaves of the concrete path)
           -- and get their parent via registryCanonicalDomain
+          -- Note: JOIN (not LEFT JOIN) is intentional - we only match domains
+          -- with a complete canonical path to the searched FQDN
           SELECT
             d.id AS leaf_id,
             rcd.domain_id AS current_id,
@@ -273,6 +279,7 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
           UNION ALL
 
           -- Recursive step: traverse UP via registryCanonicalDomain
+          -- Note: JOIN (not LEFT JOIN) is intentional - see base case comment
           SELECT
             upward_check.leaf_id,
             rcd.domain_id AS current_id,
