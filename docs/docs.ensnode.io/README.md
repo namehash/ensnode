@@ -34,11 +34,18 @@ To avoid documenting unreleased features:
 
 ## API Reference
 
-The API Reference is generated from an OpenAPI spec. In production, Mintlify fetches this from the live API URL. For PR previews, Mintlify uses the committed `openapi.json` file.
+The API Reference is generated from an OpenAPI spec. Two sources are used depending on context:
+
+| Context         | OpenAPI Source                              | Page                                                            |
+| --------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| **Production**  | Fetched from `https://api.alpha.ensnode.io` | API Reference                                                   |
+| **PR Previews** | Committed `openapi.json` file               | [Preview page](https://docs.ensnode.io/ensapi/preview) (hidden) |
+
+This means production docs always reflect the live API, while PR previews can show upcoming API changes before they're deployed.
 
 ### Generating the Spec
 
-To generate the OpenAPI spec, start ENSApi and run the generator:
+When you modify API routes or schemas in ENSApi, regenerate the OpenAPI spec:
 
 ```bash
 # Start ENSApi in OpenAPI generate mode (no external dependencies required)
@@ -48,11 +55,20 @@ OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start
 pnpm --filter @docs/mintlify openapi:generate http://localhost:4334
 ```
 
+**`OPENAPI_GENERATE_MODE`:** ENSApi normally requires a running ENSIndexer and database to start. This mode uses a mock configuration so the server can start without external dependencies, allowing spec generation in local dev and CI environments.
+
 The URL argument is required — there is no default to avoid accidentally generating from the wrong source.
 
 ### CI Validation
 
-CI runs an `openapi-sync-check` job that validates the committed `openapi.json` matches what ENSApi generates. Update the committed spec when you change API routes or schemas.
+CI runs an `openapi-sync-check` job on every PR that:
+
+1. Starts ENSApi with `OPENAPI_GENERATE_MODE=true`
+2. Generates the spec from the running server
+3. Compares it against the committed `openapi.json`
+4. Validates the spec with `mintlify openapi-check`
+
+If the committed spec doesn't match what ENSApi generates, CI fails with a diff showing what changed.
 
 ### Environment Switch
 
