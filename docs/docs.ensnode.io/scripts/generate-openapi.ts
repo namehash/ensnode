@@ -28,7 +28,8 @@ async function main() {
     process.exit(1);
   }
 
-  const openapiUrl = `${ensapiUrl}/openapi.json`;
+  const normalizedEnsapiUrl = ensapiUrl.replace(/\/+$/, "");
+  const openapiUrl = `${normalizedEnsapiUrl}/openapi.json`;
 
   console.log(`Fetching OpenAPI spec from: ${openapiUrl}`);
 

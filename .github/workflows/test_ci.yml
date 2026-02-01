@@ -88,6 +88,11 @@ jobs:
             sleep 1
           done
 
+          if ! kill -0 $ENSAPI_PID 2>/dev/null; then
+            echo "❌ ENSApi process exited unexpectedly after starting"
+            exit 1
+          fi
+
           if [ "$SERVER_READY" != "true" ]; then
             echo "❌ ENSApi failed to start within 30 seconds"
             echo "The server did not respond to requests at http://localhost:4334/openapi.json"
