@@ -219,12 +219,21 @@ export default function () {
 
       // update domain's subregistry
       if (subregistry === null) {
+        // TODO(canonical-names): this last-write-wins heuristic breaks if a domain ever unsets its
+        // subregistry. i.e. the (sub)Registry's Canonical Domain becomes null, making it disjoint because
+        // we don't track other domains who have set it as a Subregistry. This is acceptable for now,
+        // and obviously isn't an issue once ENS Team implements Canonical Names
+        const previous = await context.db.find(schema.v2Domain, { id: domainId });
+        if (previous?.subregistryId) {
+          await context.db.delete(schema.registryCanonicalDomain, {
+            registryId: previous.subregistryId,
+          });
+        }
+
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
         const subregistryId = makeRegistryId(subregistryAccountId);
-
-        await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
 
         // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
         // replace with real logic once ENS Team implements Canonical Names
@@ -232,6 +241,8 @@ export default function () {
           .insert(schema.registryCanonicalDomain)
           .values({ registryId: subregistryId, domainId })
           .onConflictDoUpdate({ domainId });
+
+        await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
       }
     },
   );
