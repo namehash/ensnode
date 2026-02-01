@@ -4621,9 +4621,9 @@
         ]
       }
     },
-    "/ensanalytics/v1/referrers": {
+    "/v1/ensanalytics/referrers": {
       "get": {
-        "operationId": "getEnsanalyticsV1Referrers",
+        "operationId": "getV1EnsanalyticsReferrers",
         "tags": ["ENSAwards"],
         "summary": "Get Referrer Leaderboard (v1)",
         "description": "Returns a paginated page from the referrer leaderboard",
@@ -4647,9 +4647,9 @@
         ]
       }
     },
-    "/ensanalytics/v1/referrers/{referrer}": {
+    "/v1/ensanalytics/referrers/{referrer}": {
       "get": {
-        "operationId": "getEnsanalyticsV1Referrers:referrer",
+        "operationId": "getV1EnsanalyticsReferrers:referrer",
         "tags": ["ENSAwards"],
         "summary": "Get Referrer Detail (v1)",
         "description": "Returns detailed information for a specific referrer by address",
