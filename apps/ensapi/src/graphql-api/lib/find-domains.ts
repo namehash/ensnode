@@ -1,4 +1,4 @@
-import { and, eq, like, sql } from "drizzle-orm";
+import { and, eq, like, Param, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
@@ -167,7 +167,7 @@ function v1DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rawLabelHashPathArray = sql`${sql.param(labelHashPath)}::text[]`;
+  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
   // Use a recursive CTE starting from the deepest child and traversing UP
@@ -242,7 +242,7 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
   }
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
-  const rawLabelHashPathArray = sql`${sql.param(labelHashPath)}::text[]`;
+  const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;
   const pathLength = sql`array_length(${rawLabelHashPathArray}, 1)`;
 
   // Use a recursive CTE starting from the deepest child and traversing UP
