@@ -12,3 +12,4 @@ jobs:
       - uses: mheap/require-checklist-action@v2
         with:
           requireChecklist: false # If this is true and there are no checklists detected, the action will fail
+          skipComments: true # Stop checking comments for checklists. AI Review Agents may add comments that interfere with checklist detection.

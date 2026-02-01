@@ -7,7 +7,6 @@
 This Terraform configuration manages the infrastructure for ENSNode deployments. The infrastructure includes:
 
 ### AWS Resources
-- DNS configuration and management
 - S3 bucket for Terraform state - `ensnode-terraform` (must be pre-existing with a predefined name)
 
 ### Render Resources

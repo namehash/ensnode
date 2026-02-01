@@ -1,6 +1,6 @@
 
 locals {
-  # The `hosted_zone_name` represents the "base" domain name of the zone in AWS Route53
+  # The `hosted_zone_name` represents the "base" domain name of the zone in DNS
   # where "hosted" ENSNode app instances (such as ENSIndexer and ENSRainbow) are nested beneath.
   #
   # For example, if:
@@ -27,6 +27,15 @@ locals {
       namespace                = "sepolia"
       render_instance_plan     = "starter"
       subgraph_compat          = true
+    }
+    v2-sepolia = {
+      ensnode_indexer_type     = "v2-sepolia"
+      ensnode_environment_name = var.render_environment
+      database_schema          = "v2SepoliaSchema-${var.ensnode_version}"
+      plugins                  = "ensv2,protocol-acceleration"
+      namespace                = "sepolia"
+      render_instance_plan     = "starter"
+      subgraph_compat          = false
     }
     mainnet = {
       ensnode_indexer_type     = "mainnet"

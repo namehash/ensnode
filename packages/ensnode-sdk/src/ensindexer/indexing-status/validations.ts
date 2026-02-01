@@ -1,7 +1,7 @@
 import type { ParsePayload } from "zod/v4/core";
 
-import type { ChainId } from "../../shared";
 import * as blockRef from "../../shared/block-ref";
+import type { ChainId } from "../../shared/types";
 import {
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted,

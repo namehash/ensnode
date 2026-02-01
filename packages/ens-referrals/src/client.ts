@@ -229,7 +229,7 @@ export class ENSReferralsClient {
    */
   async getReferrerDetail(request: ReferrerDetailRequest): Promise<ReferrerDetailResponse> {
     const url = new URL(
-      `/api/ensanalytics/referrers/${encodeURIComponent(request.referrer)}`,
+      `/ensanalytics/referrers/${encodeURIComponent(request.referrer)}`,
       this.options.url,
     );
 

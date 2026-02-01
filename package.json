@@ -24,6 +24,7 @@
     "@biomejs/biome": "^2.3.1",
     "@changesets/changelog-github": "^0.5.2",
     "@changesets/cli": "^2.29.8",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "jsdom": "^27.0.1",
     "tsup": "catalog:",
     "typescript": "catalog:",
@@ -40,7 +41,7 @@
       "undici@<6.23.0": ">=6.23.0",
       "devalue@>=5.3.0 <=5.6.1": ">=5.6.2",
       "h3@<=1.15.4": ">=1.15.5",
-      "tar@<=7.5.3": "^7.5.4",
+      "tar@<7.5.7": "^7.5.7",
       "lodash@<=4.17.22": "^4.17.23",
       "lodash-es@<=4.17.22": "^4.17.23"
     },

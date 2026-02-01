@@ -8,7 +8,8 @@
  */
 import { z } from "zod/v4";
 
-import { type ChainId, deserializeChainId } from "../../shared";
+import { deserializeChainId } from "../../shared/deserialize";
+import type { ChainId } from "../../shared/types";
 import {
   makeBlockRefSchema,
   makeChainIdStringSchema,
