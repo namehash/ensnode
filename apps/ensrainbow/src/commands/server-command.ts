@@ -35,7 +35,6 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     try {
       await db.getPrecalculatedRainbowRecordCount();
     } catch (_error) {
-      await db.close();
       logger.error("Cannot start server: database is empty or uninitialized.");
       logger.error("The database must contain ingested data before the server can start.");
       logger.error("Please run the ingestion command first to populate the database.");

@@ -13,6 +13,7 @@ import {
   type LabelSetId,
   type LabelSetVersion,
 } from "@ensnode/ensnode-sdk";
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
 import { buildENSRainbowPublicConfig } from "@/config/config.schema";
@@ -27,6 +28,25 @@ import { logger } from "@/utils/logger";
 export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   const api = new Hono();
   const server = await ENSRainbowServer.init(db);
+
+  // Build and cache the public config once on startup
+  // This avoids calling labelCount() on every /v1/config request
+  const countResult = await server.labelCount();
+  if (countResult.status === StatusCode.Error) {
+    logger.error("Failed to get records count during API initialization");
+    throw new Error(
+      `Cannot initialize API: ${countResult.error} (errorCode: ${countResult.errorCode})`,
+    );
+  }
+
+  const cachedPublicConfig = buildENSRainbowPublicConfig(
+    config,
+    server.getServerLabelSet(),
+    countResult.count,
+  );
+
+  console.log("ENSRainbow public config:");
+  console.log(prettyPrintJson(cachedPublicConfig));
 
   // Enable CORS for all versioned API routes
   api.use(
@@ -94,26 +114,10 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     return c.json(result, result.errorCode);
   });
 
-  api.get("/v1/config", async (c: HonoContext) => {
-    const countResult = await server.labelCount();
-    if (countResult.status === StatusCode.Error) {
-      logger.error("Failed to get records count for config endpoint");
-      return c.json(
-        {
-          status: StatusCode.Error,
-          error: countResult.error,
-          errorCode: countResult.errorCode,
-        },
-        500,
-      );
-    }
-
-    const publicConfig = buildENSRainbowPublicConfig(
-      config,
-      server.getServerLabelSet(),
-      countResult.count,
-    );
-    return c.json(publicConfig);
+  api.get("/v1/config", (c: HonoContext) => {
+    // Return the cached public config built on startup
+    // This avoids database queries on every request
+    return c.json(cachedPublicConfig);
   });
 
   /**

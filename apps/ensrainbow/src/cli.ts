@@ -31,7 +31,6 @@ interface IngestProtobufArgs {
  * Arguments for the 'serve' command.
  *
  * Note: CLI arguments take precedence over environment variables.
- * If both --port and PORT are set, --port will be used and a warning will be logged.
  */
 interface ServeArgs {
   port: number;

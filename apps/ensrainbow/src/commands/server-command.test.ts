@@ -168,24 +168,24 @@ describe("Server Command Tests", () => {
   });
 
   describe("GET /v1/config", () => {
-    it("should return an error when database is empty", async () => {
+    it("should return cached config from startup", async () => {
+      // The config is cached on startup with count = 0 (set in beforeAll)
+      // Even if the database is cleared in beforeEach, the cached config is returned
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/config`);
-      expect(response.status).toBe(500);
-      const data = (await response.json()) as {
-        status: typeof StatusCode.Error;
-        error: string;
-        errorCode: typeof ErrorCode.ServerError;
-      };
-      const expectedData = {
-        status: StatusCode.Error,
-        error: "Label count not initialized. Check the validate command.",
-        errorCode: ErrorCode.ServerError,
-      };
-      expect(data).toEqual(expectedData);
+      expect(response.status).toBe(200);
+      const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
+
+      expect(typeof data.version).toBe("string");
+      expect(data.version.length).toBeGreaterThan(0);
+      expect(data.labelSet.labelSetId).toBe("test-label-set-id");
+      expect(data.labelSet.highestLabelSetVersion).toBe(0);
+      // Config is cached on startup with count = 0, so it returns the cached value
+      expect(data.recordsCount).toBe(0);
     });
 
-    it("should return correct config when label count is initialized", async () => {
-      // Set a specific precalculated rainbow record count in the database
+    it("should return cached config even if database count changes", async () => {
+      // Set a different count in the database
+      // However, the config is cached on startup, so it will still return the cached value
       await db.setPrecalculatedRainbowRecordCount(42);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/config`);
@@ -196,7 +196,8 @@ describe("Server Command Tests", () => {
       expect(data.version.length).toBeGreaterThan(0);
       expect(data.labelSet.labelSetId).toBe("test-label-set-id");
       expect(data.labelSet.highestLabelSetVersion).toBe(0);
-      expect(data.recordsCount).toBe(42);
+      // Config is cached on startup with count = 0, so changing the DB doesn't affect it
+      expect(data.recordsCount).toBe(0);
     });
   });
 
