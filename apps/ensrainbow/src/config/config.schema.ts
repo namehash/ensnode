@@ -14,6 +14,8 @@ import type { ENSRainbowConfig } from "@/config/types";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
+export type { ENSRainbowConfig };
+
 const DataDirSchema = z
   .string()
   .trim()
