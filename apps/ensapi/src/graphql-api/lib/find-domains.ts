@@ -150,20 +150,21 @@ export function findDomains({ name, owner }: DomainFilter) {
   // subquery for latest registration per domain (highest index)
   // TODO: replace this with a JOIN against the latest registration lookup table after
   // https://github.com/namehash/ensnode/issues/1594
+  const registrationOuter = alias(schema.registration, "registrationOuter");
   const latestRegistration = db
     .select({
-      domainId: schema.registration.domainId,
-      start: schema.registration.start,
-      expiry: schema.registration.expiry,
+      domainId: registrationOuter.domainId,
+      start: registrationOuter.start,
+      expiry: registrationOuter.expiry,
     })
-    .from(schema.registration)
+    .from(registrationOuter)
     .where(
       eq(
-        schema.registration.index,
+        registrationOuter.index,
         db
           .select({ maxIndex: sql<number>`MAX(${schema.registration.index})` })
           .from(schema.registration)
-          .where(eq(schema.registration.domainId, schema.registration.domainId)),
+          .where(eq(schema.registration.domainId, registrationOuter.domainId)),
       ),
     )
     .as("latestRegistration");
@@ -193,7 +194,7 @@ export function findDomains({ name, owner }: DomainFilter) {
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
         // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
+        partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
       ),
     );
 
@@ -383,10 +384,10 @@ export function orderFindDomains(
     REGISTRATION_EXPIRY: domains.registrationExpiry,
   }[orderBy ?? "NAME"];
 
-  // Use NULLS LAST for ascending, NULLS FIRST for descending
-  // This keeps unregistered domains at the end when sorting by registration fields
+  // Always use NULLS LAST so unregistered domains (NULL registration fields)
+  // appear at the end regardless of sort direction
   const primaryOrder = effectiveDesc
-    ? sql`${orderColumn} DESC NULLS FIRST`
+    ? sql`${orderColumn} DESC NULLS LAST`
     : sql`${orderColumn} ASC NULLS LAST`;
 
   // Always include id as tiebreaker for stable ordering
