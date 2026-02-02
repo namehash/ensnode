@@ -5,6 +5,7 @@ import {
   type ENSv1DomainId,
   type ENSv2DomainId,
   getCanonicalId,
+  interpretedLabelsToInterpretedName,
   type RegistrationId,
 } from "@ensnode/ensnode-sdk";
 
@@ -12,6 +13,7 @@ import { builder } from "@/graphql-api/builder";
 import { getDomainResolver } from "@/graphql-api/lib/get-domain-resolver";
 import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
+import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
@@ -98,68 +100,60 @@ DomainInterfaceRef.implement({
       resolve: async ({ label }) => label.value,
     }),
 
-    ////////////////////
-    // Domain.canonical
-    ////////////////////
-    // TODO: pending ENS team canonicalName implementation
-    // canonical: t.field({
-    //   description: "TODO",
-    //   type: "Name",
-    //   nullable: true,
-    //   resolve: async ({ id }, args, context) => {
-    //     // TODO: dataloader the getCanonicalPath(domainId) function
-    //     const canonicalPath = await getCanonicalPath(id);
-    //     if (!canonicalPath) return null;
+    ///////////////
+    // Domain.name
+    ///////////////
+    name: t.field({
+      description: "TODO",
+      type: "Name",
+      nullable: true,
+      resolve: async (domain, args, context) => {
+        const canonicalPath = isENSv1Domain(domain)
+          ? await context.loaders.v1CanonicalPath.load(domain.id)
+          : await context.loaders.v2CanonicalPath.load(domain.id);
+        if (!canonicalPath) return null;
 
-    //     const domains = await rejectAnyErrors(
-    //       DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-    //     );
+        // TODO: this could be more efficient if the get*CanonicalPath helpers included the label
+        // join for us.
+        const domains = await rejectAnyErrors(
+          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+        );
 
-    //     return interpretedLabelsToInterpretedName(
-    //       canonicalPath.map((domainId) => {
-    //         const found = domains.find((d) => d.id === domainId);
-    //         if (!found) throw new Error(`Invariant`);
-    //         return found.label.value;
-    //       }),
-    //     );
-    //   },
-    // }),
+        const labels = canonicalPath.map((domainId) => {
+          const found = domains.find((d) => d.id === domainId);
+          if (!found) {
+            throw new Error(
+              `Invariant(Domain.name): Domain in CanonicalPath not found:\nPath: ${JSON.stringify(canonicalPath)}\nDomainId: ${domainId}`,
+            );
+          }
 
-    //////////////////
-    // Domain.parents
-    //////////////////
-    // TODO: pending ENS team canonicalName implementation
-    // parents: t.field({
-    //   description: "TODO",
-    //   type: [DomainInterfaceRef],
-    //   nullable: true,
-    //   resolve: async ({ id }, args, context) => {
-    //     // TODO: dataloader the getCanonicalPath(domainId) function
-    //     const canonicalPath = await getCanonicalPath(id);
-    //     if (!canonicalPath) return null;
+          return found.label.value;
+        });
 
-    //     const domains = await rejectErrors(
-    //       DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
-    //     );
+        return interpretedLabelsToInterpretedName(labels);
+      },
+    }),
 
-    //     return domains.slice(1);
-    //   },
-    // }),
+    // TODO: maybe supply partial names as well? perhaps a Domain.name.canonical and Domain.name.partial and so on?
 
-    //////////////////
-    // Domain.aliases
-    //////////////////
-    // TODO: pending ENS team canonicalName implementation, maybe impossible to implement
-    // aliases: t.field({
-    //   description: "TODO",
-    //   type: ["Name"],
-    //   nullable: false,
-    //   resolve: async (parent) => {
-    //     // a domain's aliases are all of the paths from root to this domain for which it can be
-    //     // resolved. naively reverse-traverse the namegaph until the root is reached... yikes.
-    //     return [];
-    //   },
-    // }),
+    ///////////////
+    // Domain.path
+    ///////////////
+    path: t.field({
+      description: "TODO",
+      type: [DomainInterfaceRef],
+      nullable: true,
+      resolve: async (domain, args, context) => {
+        const canonicalPath = isENSv1Domain(domain)
+          ? await context.loaders.v1CanonicalPath.load(domain.id)
+          : await context.loaders.v2CanonicalPath.load(domain.id);
+        if (!canonicalPath) return null;
+
+        return await rejectAnyErrors(
+          DomainInterfaceRef.getDataloader(context).loadMany(canonicalPath),
+        );
+      },
+    }),
 
     //////////////////////
     // Domain.owner
@@ -204,11 +198,9 @@ DomainInterfaceRef.implement({
             db.query.registration.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    eq(t.domainId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<RegistrationId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<RegistrationId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.domainId, parent.id),
+                  before ? lt(t.id, cursors.decode<RegistrationId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<RegistrationId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? asc(t.index) : desc(t.index)),
               limit,
@@ -249,11 +241,9 @@ ENSv1DomainRef.implement({
             db.query.v1Domain.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    eq(t.parentId, parent.id),
-                    before !== undefined && lt(t.id, cursors.decode<ENSv1DomainId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<ENSv1DomainId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.parentId, parent.id),
+                  before ? lt(t.id, cursors.decode<ENSv1DomainId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<ENSv1DomainId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,
@@ -324,5 +314,20 @@ export const DomainIdInput = builder.inputType("DomainIdInput", {
   fields: (t) => ({
     name: t.field({ type: "Name" }),
     id: t.field({ type: "DomainId" }),
+  }),
+});
+
+export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
+  description: "Filter for domains query. Requires one of name or owner.",
+  fields: (t) => ({
+    name: t.string(),
+    owner: t.field({ type: "Address" }),
+  }),
+});
+
+export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereInput", {
+  description: "Filter for Account.domains query.",
+  fields: (t) => ({
+    name: t.string({ required: true }),
   }),
 });

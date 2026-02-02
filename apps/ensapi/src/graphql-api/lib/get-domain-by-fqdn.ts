@@ -13,8 +13,8 @@ import {
   getENSv2RootRegistryId,
   type InterpretedName,
   interpretedLabelsToInterpretedName,
+  interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
-  interpretedNameToLabelHashPath,
   isRegistrationFullyExpired,
   type LabelHash,
   type LiteralLabel,
@@ -87,7 +87,7 @@ async function v2_getDomainIdByFqdn(
   name: InterpretedName,
   { now } = { now: BigInt(getUnixTime(new Date())) },
 ): Promise<DomainId | null> {
-  const labelHashPath = interpretedNameToLabelHashPath(name);
+  const labelHashPath = interpretedLabelsToLabelHashPath(interpretedNameToInterpretedLabels(name));
 
   // https://github.com/drizzle-team/drizzle-orm/issues/1289#issuecomment-2688581070
   const rawLabelHashPathArray = sql`${new Param(labelHashPath)}::text[]`;

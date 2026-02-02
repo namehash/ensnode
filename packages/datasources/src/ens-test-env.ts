@@ -43,12 +43,12 @@ export default {
     contracts: {
       ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
         startBlock: 0,
       },
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+        address: "0x0165878a594ca255338adfa4d48449f69242eb8f",
         startBlock: 0,
       },
       Resolver: {
