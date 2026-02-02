@@ -67,7 +67,7 @@ jobs:
             kill $ENSAPI_PID 2>/dev/null || true
             wait $ENSAPI_PID 2>/dev/null || true
           }
-          trap cleanup EXIT INT TERM
+          trap cleanup INT TERM
 
           # Wait for server to be ready
           SERVER_READY=false
