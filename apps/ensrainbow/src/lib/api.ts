@@ -79,31 +79,21 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       );
     }
 
-    logger.debug(
-      `Healing request for labelhash: ${labelhash}, with labelSet: ${JSON.stringify(
-        clientLabelSet,
-      )}`,
-    );
     const result = await server.heal(labelhash, clientLabelSet);
-    logger.debug(result, `Heal result:`);
     return c.json(result, result.errorCode);
   });
 
   api.get("/health", (c: HonoContext) => {
-    logger.debug("Health check request");
     const result: EnsRainbow.HealthResponse = { status: "ok" };
     return c.json(result);
   });
 
   api.get("/v1/labels/count", async (c: HonoContext) => {
-    logger.debug("Label count request");
     const result = await server.labelCount();
-    logger.debug(result, `Count result`);
     return c.json(result, result.errorCode);
   });
 
   api.get("/v1/config", async (c: HonoContext) => {
-    logger.debug("Config request");
     const countResult = await server.labelCount();
     if (countResult.status === StatusCode.Error) {
       logger.error("Failed to get records count for config endpoint");
@@ -118,7 +108,6 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
     }
 
     const publicConfig = buildENSRainbowPublicConfig(server.getServerLabelSet(), countResult.count);
-    logger.debug(publicConfig, `Config result`);
     return c.json(publicConfig);
   });
 
@@ -126,7 +115,6 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
    * @deprecated Use GET /v1/config instead. This endpoint will be removed in a future version.
    */
   api.get("/v1/version", (c: HonoContext) => {
-    logger.debug("Version request");
     const result: EnsRainbow.VersionResponse = {
       status: StatusCode.Success,
       versionInfo: {
@@ -135,7 +123,6 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
         labelSet: server.getServerLabelSet(),
       },
     };
-    logger.debug(result, `Version result`);
     return c.json(result);
   });
 
