@@ -24,13 +24,13 @@ export interface ENSRainbowConfig {
    * The absolute path to the data directory where ENSRainbow stores its database and other files.
    *
    * This directory will contain:
-   * - The SQLite database file with label set data
+   * - The LevelDB database file with label set data
    * - Any temporary files created during operation
    *
    * If a relative path is provided in the environment variable, it will be resolved to an
    * absolute path relative to the current working directory.
    *
-   * Default: `{cwd}/ensrainbow-data` or `/data` in Docker
+   * Default: `{cwd}/data`
    *
    * Invariants:
    * - Must be a non-empty string
@@ -42,7 +42,7 @@ export interface ENSRainbowConfig {
   /**
    * The database schema version expected by the code.
    *
-   * This version number corresponds to the structure of the SQLite database that ENSRainbow
+   * This version number corresponds to the structure of the LevelDB database that ENSRainbow
    * uses to store label set data. If the version in the environment doesn't match the version
    * expected by the code, the application will fail to start.
    *

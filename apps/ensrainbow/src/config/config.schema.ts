@@ -45,6 +45,16 @@ const ENSRainbowConfigBaseSchema = z.object({
   labelSet: LabelSetSchema.optional(),
 });
 
+/**
+ * Helper function to check if a string value is present (not undefined and not empty after trimming).
+ *
+ * @param str - The string value to check
+ * @returns true if the string is defined and has non-whitespace content after trimming
+ */
+const hasValue = (str: string | undefined): boolean => {
+  return str !== undefined && str.trim() !== "";
+};
+
 const ENSRainbowConfigSchema = ENSRainbowConfigBaseSchema
   /**
    * Invariant enforcement
@@ -82,9 +92,8 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
        */
       .check((ctx) => {
         const { value: env } = ctx;
-        const hasLabelSetId = env.LABEL_SET_ID !== undefined && env.LABEL_SET_ID.trim() !== "";
-        const hasLabelSetVersion =
-          env.LABEL_SET_VERSION !== undefined && env.LABEL_SET_VERSION.trim() !== "";
+        const hasLabelSetId = hasValue(env.LABEL_SET_ID);
+        const hasLabelSetVersion = hasValue(env.LABEL_SET_VERSION);
 
         if (hasLabelSetId && !hasLabelSetVersion) {
           ctx.issues.push({
@@ -107,9 +116,8 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
         }
       })
       .transform((env) => {
-        const hasLabelSetId = env.LABEL_SET_ID !== undefined && env.LABEL_SET_ID.trim() !== "";
-        const hasLabelSetVersion =
-          env.LABEL_SET_VERSION !== undefined && env.LABEL_SET_VERSION.trim() !== "";
+        const hasLabelSetId = hasValue(env.LABEL_SET_ID);
+        const hasLabelSetVersion = hasValue(env.LABEL_SET_VERSION);
 
         const labelSet =
           hasLabelSetId && hasLabelSetVersion
