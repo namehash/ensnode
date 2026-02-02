@@ -1,5 +1,8 @@
 import { serve } from "@hono/node-server";
 
+import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
+
+import config from "@/config";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { logger } from "@/utils/logger";
@@ -17,6 +20,10 @@ export async function createServer(db: ENSRainbowDB) {
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
+  // Log the config that ENSRainbow is running with
+  console.log("ENSRainbow running with config:");
+  console.log(prettyPrintJson(config));
+
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
 
   const db = await ENSRainbowDB.open(options.dataDir);
