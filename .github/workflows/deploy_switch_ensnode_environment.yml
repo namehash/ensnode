@@ -79,11 +79,15 @@ jobs:
           # SEPOLIA
           redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
+
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-api-router/service "${TARGET_ENVIRONMENT}-sepolia-api"
           redis-cli -u $REDIS_URL SET traefik/http/routers/lb-header-sepolia-indexer-router/service "${TARGET_ENVIRONMENT}-sepolia-indexer"
 
           # ENSRAINBOW
           redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-api"
+
+          # ENSRAINBOW SEARCHLIGHT
+          redis-cli -u $REDIS_URL SET traefik/http/routers/ensrainbow-searchlight-api-router/service "${TARGET_ENVIRONMENT}-ensrainbow-searchlight-api"
 
       - name: Promote ENSAdmin Vercel Deployment
         run: |

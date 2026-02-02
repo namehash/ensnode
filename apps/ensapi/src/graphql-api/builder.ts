@@ -7,18 +7,16 @@ import type {
   ChainId,
   CoinType,
   DomainId,
-  ENSNamespaceId,
   InterpretedName,
   Node,
   RegistryId,
   ResolverId,
 } from "@ensnode/ensnode-sdk";
 
+import type { context } from "@/graphql-api/context";
+
 export const builder = new SchemaBuilder<{
-  Context: {
-    namespace: ENSNamespaceId;
-    now: bigint;
-  };
+  Context: ReturnType<typeof context>;
   Scalars: {
     BigInt: { Input: bigint; Output: bigint };
     Address: { Input: Address; Output: Address };

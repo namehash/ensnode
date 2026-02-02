@@ -140,12 +140,10 @@ RegistrationInterfaceRef.implement({
             db.query.renewal.findMany({
               where: (t, { eq, lt, gt, and }) =>
                 and(
-                  ...[
-                    eq(t.domainId, parent.domainId),
-                    eq(t.registrationIndex, parent.index),
-                    before !== undefined && lt(t.id, cursors.decode<RenewalId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<RenewalId>(after)),
-                  ].filter((c) => !!c),
+                  eq(t.domainId, parent.domainId),
+                  eq(t.registrationIndex, parent.index),
+                  before ? lt(t.id, cursors.decode<RenewalId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<RenewalId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,
