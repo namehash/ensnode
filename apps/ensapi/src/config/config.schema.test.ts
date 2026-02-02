@@ -22,6 +22,7 @@ vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
     info: vi.fn(),
+    warn: vi.fn(),
   },
 }));
 
@@ -68,6 +69,17 @@ describe("buildConfigFromEnvironment", () => {
     expect(mockFetch).not.toHaveBeenCalled();
     expect(result.port).toBe(5000);
     expect(result.namespace).toBe("mainnet");
+  });
+
+  it("logs warning when OPENAPI_GENERATE_MODE has invalid value", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+    });
+
+    await buildConfigFromEnvironment({ ...BASE_ENV, OPENAPI_GENERATE_MODE: "false" });
+
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it("returns a valid config object using environment variables", async () => {
