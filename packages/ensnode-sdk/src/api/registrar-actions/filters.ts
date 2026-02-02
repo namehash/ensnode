@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import type { Node } from "../../ens";
-import type { UnixTimestamp } from "../../shared";
+import type { UnixTimestamp } from "../../shared/types";
 import {
   type RegistrarActionsFilter,
   type RegistrarActionsFilterBeginTimestamp,

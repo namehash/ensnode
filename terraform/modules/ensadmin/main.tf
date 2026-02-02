@@ -1,3 +1,7 @@
+locals {
+  ensadmin_fqdn = "admin.${var.ensnode_environment_name}.${var.hosted_zone_name}"
+}
+
 # For details on "render_web_service", see:
 # https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensadmin" {

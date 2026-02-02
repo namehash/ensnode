@@ -9,7 +9,6 @@ import type { LabelHash, Node } from "./types";
  */
 export const makeSubdomainNode = (labelHash: LabelHash, node: Node): Node =>
   keccak256(concat([node, labelHash]));
-
 /**
  * Encodes a uint256 bigint as hex string sized to 32 bytes.
  * Uses include, in the context of ENS, decoding the uint256-encoded tokenId of NFT-issuing contracts
