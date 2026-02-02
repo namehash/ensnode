@@ -86,6 +86,13 @@ export type EnsApiConfigInput = z.input<typeof EnsApiConfigSchema>;
  */
 export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promise<EnsApiConfig> {
   try {
+    if (env.OPENAPI_GENERATE_MODE !== undefined && env.OPENAPI_GENERATE_MODE !== "true") {
+      logger.warn(
+        `OPENAPI_GENERATE_MODE is set to '${env.OPENAPI_GENERATE_MODE}' but only 'true' is recognized. ` +
+          "The mode will not be enabled. To enable it, set OPENAPI_GENERATE_MODE=true",
+      );
+    }
+
     if (env.OPENAPI_GENERATE_MODE === "true") {
       logger.info("OPENAPI_GENERATE_MODE enabled - using minimal mock config");
       return EnsApiConfigSchema.parse(buildOpenApiMockConfig(env.PORT));

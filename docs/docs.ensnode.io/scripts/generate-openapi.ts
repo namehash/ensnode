@@ -107,11 +107,18 @@ async function main() {
   } catch (error) {
     console.error("Error: Failed to format openapi.json with Biome.");
     if (error instanceof Error) {
-      const err = error as NodeJS.ErrnoException;
+      const err = error as NodeJS.ErrnoException & { status?: number };
       if (err.code === "ENOENT") {
         console.error(
           "It looks like 'pnpm' or 'biome' is not installed or not available on your PATH.",
         );
+      } else if (err.code === "EACCES") {
+        console.error("Permission denied when trying to run 'pnpm'.");
+      } else if (err.status !== undefined) {
+        // execFileSync sets 'status' to the exit code when the command fails
+        console.error(`Biome exited with code ${err.status}.`);
+        console.error("This may indicate invalid JSON or a Biome configuration issue.");
+        console.error("Try running 'pnpm biome format --write openapi.json' manually to debug.");
       } else if (err.message) {
         console.error(err.message);
       }

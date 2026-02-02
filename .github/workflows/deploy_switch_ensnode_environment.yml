@@ -95,14 +95,25 @@ jobs:
         id: mintlify
         continue-on-error: true
         run: |
-          curl --silent --show-error --fail \
+          HTTP_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
             --connect-timeout 10 \
             --max-time 30 \
             --retry 2 \
             --retry-delay 5 \
             --request POST \
             --url "https://api.mintlify.com/v1/project/update/${{ vars.MINTLIFY_PROJECT_ID }}" \
-            --header "Authorization: Bearer ${{ secrets.MINTLIFY_API_TOKEN }}"
+            --header "Authorization: Bearer ${{ secrets.MINTLIFY_API_TOKEN }}")
+
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+          HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "Mintlify rebuild triggered successfully (HTTP $HTTP_CODE)"
+          else
+            echo "Mintlify API returned HTTP $HTTP_CODE"
+            echo "Response body: $HTTP_BODY"
+            exit 1
+          fi
 
       - name: Notify Mintlify Rebuild Failure
         if: steps.mintlify.outcome == 'failure'
