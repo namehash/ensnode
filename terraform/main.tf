@@ -18,52 +18,84 @@ locals {
   hosted_zone_name = "ensnode.io"
   # See https://render.com/docs/blueprint-spec#region
   render_region = "ohio"
+
+
+  # ENSRainbow instances with their specific configurations.
+  ensrainbow_instances = {
+    # The Subgraph instance uses fixed label set ID "subgraph" and
+    # fixed label set version "0".
+    subgraph = {
+      ensrainbow_label_set_id      = "subgraph"
+      ensrainbow_label_set_version = "0"
+    }
+
+    # The Searchlight instance uses fixed label set ID "searchlight" and
+    # configurable label set version.
+    searchlight = {
+      ensrainbow_label_set_id      = "searchlight"
+      ensrainbow_label_set_version = var.ensrainbow_searchlight_label_set_version
+    }
+  }
+
+  # ENSIndexer instances with their specific configurations.
+  # Subgraph instances use the ENSRainbow Subgraph instance.
+  # while Alpha-style and v2 instances use the ENSRainbow Searchlight instance.
   ensindexer_instances = {
     sepolia = {
-      ensnode_indexer_type     = "sepolia"
-      ensnode_environment_name = var.render_environment
-      database_schema          = "sepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph"
-      namespace                = "sepolia"
-      render_instance_plan     = "starter"
-      subgraph_compat          = true
+      ensnode_indexer_type         = "sepolia"
+      ensnode_environment_name     = var.render_environment
+      database_schema              = "sepoliaSchema-${var.ensnode_version}"
+      plugins                      = "subgraph"
+      namespace                    = "sepolia"
+      render_instance_plan         = "starter"
+      subgraph_compat              = true
+      ensindexer_label_set_id      = "subgraph"
+      ensindexer_label_set_version = "0"
     }
     v2-sepolia = {
-      ensnode_indexer_type     = "v2-sepolia"
-      ensnode_environment_name = var.render_environment
-      database_schema          = "v2SepoliaSchema-${var.ensnode_version}"
-      plugins                  = "ensv2,protocol-acceleration"
-      namespace                = "sepolia"
-      render_instance_plan     = "starter"
-      subgraph_compat          = false
+      ensnode_indexer_type         = "v2-sepolia"
+      ensnode_environment_name     = var.render_environment
+      database_schema              = "v2SepoliaSchema-${var.ensnode_version}"
+      plugins                      = "ensv2,protocol-acceleration"
+      namespace                    = "sepolia"
+      render_instance_plan         = "starter"
+      subgraph_compat              = false
+      ensindexer_label_set_id      = "searchlight"
+      ensindexer_label_set_version = var.ensrainbow_searchlight_label_set_version
     }
     mainnet = {
-      ensnode_indexer_type     = "mainnet"
-      ensnode_environment_name = var.render_environment
-      database_schema          = "mainnetSchema-${var.ensnode_version}"
-      plugins                  = "subgraph"
-      namespace                = "mainnet"
-      render_instance_plan     = "standard"
-      subgraph_compat          = true
+      ensnode_indexer_type         = "mainnet"
+      ensnode_environment_name     = var.render_environment
+      database_schema              = "mainnetSchema-${var.ensnode_version}"
+      plugins                      = "subgraph"
+      namespace                    = "mainnet"
+      render_instance_plan         = "standard"
+      subgraph_compat              = true
+      ensindexer_label_set_id      = "subgraph"
+      ensindexer_label_set_version = "0"
     }
     alpha = {
-      ensnode_indexer_type     = "alpha"
-      ensnode_environment_name = var.render_environment
-      database_schema          = "alphaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
-      namespace                = "mainnet"
-      render_instance_plan     = "standard"
-      subgraph_compat          = false
+      ensnode_indexer_type         = "alpha"
+      ensnode_environment_name     = var.render_environment
+      database_schema              = "alphaSchema-${var.ensnode_version}"
+      plugins                      = "subgraph,basenames,lineanames,threedns,protocol-acceleration,registrars,tokenscope"
+      namespace                    = "mainnet"
+      render_instance_plan         = "standard"
+      subgraph_compat              = false
+      ensindexer_label_set_id      = "searchlight"
+      ensindexer_label_set_version = var.ensrainbow_searchlight_label_set_version
     }
 
     alpha-sepolia = {
-      ensnode_indexer_type     = "alpha-sepolia"
-      ensnode_environment_name = var.render_environment
-      database_schema          = "alphaSepoliaSchema-${var.ensnode_version}"
-      plugins                  = "subgraph,basenames,lineanames,registrars"
-      namespace                = "sepolia"
-      render_instance_plan     = "starter"
-      subgraph_compat          = false
+      ensnode_indexer_type         = "alpha-sepolia"
+      ensnode_environment_name     = var.render_environment
+      database_schema              = "alphaSepoliaSchema-${var.ensnode_version}"
+      plugins                      = "subgraph,basenames,lineanames,registrars"
+      namespace                    = "sepolia"
+      render_instance_plan         = "starter"
+      subgraph_compat              = false
+      ensindexer_label_set_id      = "searchlight"
+      ensindexer_label_set_version = var.ensrainbow_searchlight_label_set_version
     }
   }
 }
@@ -91,26 +123,15 @@ module "ensdb" {
 module "ensrainbow" {
   source = "./modules/ensrainbow"
 
+  for_each = local.ensrainbow_instances
+
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
   ensnode_version       = var.ensnode_version
 
   # Label set that ENSRainbow will offer to its clients
-  ensrainbow_label_set_id      = var.ensrainbow_label_set_id
-  ensrainbow_label_set_version = var.ensrainbow_label_set_version
-}
-
-module "ensrainbow_searchlight" {
-  source = "./modules/ensrainbow"
-
-  render_environment_id = render_project.ensnode.environments["default"].id
-  render_region         = local.render_region
-  svc_name_suffix       = "-searchlight"
-  ensnode_version       = var.ensnode_version
-
-  # Configuration for the Searchlight instance
-  ensrainbow_label_set_id      = "searchlight"
-  ensrainbow_label_set_version = var.ensrainbow_label_set_version
+  ensrainbow_label_set_id      = each.value.ensrainbow_label_set_id
+  ensrainbow_label_set_version = each.value.ensrainbow_label_set_version
 }
 
 module "ensadmin" {
@@ -144,7 +165,6 @@ module "ensindexer" {
   # Common configuration (spread operator merges the map)
   hosted_zone_name = local.hosted_zone_name
   ensnode_version  = var.ensnode_version
-  ensrainbow_url   = module.ensrainbow.ensrainbow_url
 
   # Common configuration
   render_region           = local.render_region
@@ -155,6 +175,10 @@ module "ensindexer" {
   quicknode_endpoint_name = var.quicknode_endpoint_name
 
   # The "fully pinned" label set reference that ENSIndexer will request ENSRainbow use for deterministic label healing across time. This label set reference is "fully pinned" as it requires both the labelSetId and labelSetVersion fields to be defined.
-  ensindexer_label_set_id      = var.ensindexer_label_set_id
-  ensindexer_label_set_version = var.ensindexer_label_set_version
+  ensindexer_label_set_id      = each.value.ensindexer_label_set_id
+  ensindexer_label_set_version = each.value.ensindexer_label_set_version
+
+  # The internal URL to the relevant ENSRainbow service instance
+  # that this ENSIndexer instance will use.
+  ensrainbow_url = module.ensrainbow[each.value.ensindexer_label_set_id].ensrainbow_url
 }
