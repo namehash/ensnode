@@ -17,12 +17,12 @@ import { labelByLabelHash } from "@/lib/graphnode-helpers";
  */
 export async function ensureLabel(context: Context, label: LiteralLabel) {
   const labelHash = labelhash(label);
-  const interpretedLabel = literalLabelToInterpretedLabel(label);
+  const interpreted = literalLabelToInterpretedLabel(label);
 
   await context.db
     .insert(schema.label)
-    .values({ labelHash, value: interpretedLabel })
-    .onConflictDoUpdate({ value: interpretedLabel });
+    .values({ labelHash, interpreted })
+    .onConflictDoUpdate({ interpreted });
 }
 
 /**
@@ -41,9 +41,6 @@ export async function ensureUnknownLabel(context: Context, labelHash: LabelHash)
   if (healedLabel) return await ensureLabel(context, healedLabel);
 
   // otherwise upsert label entity
-  const interpretedLabel = encodeLabelHash(labelHash) as InterpretedLabel;
-  await context.db
-    .insert(schema.label)
-    .values({ labelHash, value: interpretedLabel })
-    .onConflictDoNothing();
+  const interpreted = encodeLabelHash(labelHash) as InterpretedLabel;
+  await context.db.insert(schema.label).values({ labelHash, interpreted }).onConflictDoNothing();
 }

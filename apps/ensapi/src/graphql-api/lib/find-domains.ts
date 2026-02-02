@@ -114,7 +114,17 @@ export function findDomains({ name, owner }: DomainFilter) {
       v1DomainsByLabelHashPathQuery,
       eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
     )
-    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId));
+    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId))
+    .leftJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
+    .where(
+      and(
+        owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
+        // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
+        // This is intentional - we can't match partial text against unknown labels.
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
+      ),
+    );
 
   const v2DomainsBase = db
     .select({
@@ -164,7 +174,7 @@ export function findDomains({ name, owner }: DomainFilter) {
     .select({
       id: domainsBase.id,
       // for NAME ordering
-      leafLabelValue: sql<string | null>`${leafLabel.value}`.as("leafLabelValue"),
+      leafLabelValue: sql<string | null>`${leafLabel.interpreted}`.as("leafLabelValue"),
       // for REGISTRATION_TIMESTAMP ordering
       registrationStart: sql<bigint | null>`${latestRegistration.start}`.as("registrationStart"),
       // for REGISTRATION_EXPIRY ordering
@@ -183,7 +193,7 @@ export function findDomains({ name, owner }: DomainFilter) {
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
         // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(headLabel.value, `${partial}%`) : undefined,
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
       ),
     );
 
