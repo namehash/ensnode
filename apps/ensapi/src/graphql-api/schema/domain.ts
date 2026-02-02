@@ -97,7 +97,7 @@ DomainInterfaceRef.implement({
       type: "String",
       description: "TODO",
       nullable: false,
-      resolve: async ({ label }) => label.value,
+      resolve: ({ label }) => label.interpreted,
     }),
 
     ///////////////
@@ -127,7 +127,7 @@ DomainInterfaceRef.implement({
             );
           }
 
-          return found.label.value;
+          return found.label.interpreted;
         });
 
         return interpretedLabelsToInterpretedName(labels);

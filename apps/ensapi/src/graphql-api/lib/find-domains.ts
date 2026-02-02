@@ -114,7 +114,7 @@ export function findDomains({ name, owner }: DomainFilter) {
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
         // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(schema.label.value, `${partial}%`) : undefined,
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
       ),
     );
 
@@ -134,7 +134,7 @@ export function findDomains({ name, owner }: DomainFilter) {
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
         // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(schema.label.value, `${partial}%`) : undefined,
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
       ),
     );
 
