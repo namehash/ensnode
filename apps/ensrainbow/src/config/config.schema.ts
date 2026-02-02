@@ -10,46 +10,9 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
+import type { ENSRainbowConfig } from "@/config/types";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { DB_SCHEMA_VERSION } from "@/lib/database";
-
-/**
- * Validates and extracts label set configuration from environment variables.
- *
- * Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither should be set.
- *
- * @param labelSetId - The raw LABEL_SET_ID environment variable
- * @param labelSetVersion - The raw LABEL_SET_VERSION environment variable
- * @returns The validated label set configuration object, or undefined if neither is set
- * @throws Error if only one of the label set variables is provided
- */
-function validateLabelSetConfiguration(
-  labelSetId: string | undefined,
-  labelSetVersion: string | undefined,
-): { labelSetId: string; labelSetVersion: string } | undefined {
-  // Validate label set configuration: both must be provided together, or neither
-  const hasLabelSetId = labelSetId !== undefined && labelSetId.trim() !== "";
-  const hasLabelSetVersion = labelSetVersion !== undefined && labelSetVersion.trim() !== "";
-
-  if (hasLabelSetId && !hasLabelSetVersion) {
-    throw new Error(
-      `LABEL_SET_ID is set but LABEL_SET_VERSION is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
-    );
-  }
-
-  if (!hasLabelSetId && hasLabelSetVersion) {
-    throw new Error(
-      `LABEL_SET_VERSION is set but LABEL_SET_ID is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.`,
-    );
-  }
-
-  return hasLabelSetId && hasLabelSetVersion
-    ? {
-        labelSetId,
-        labelSetVersion,
-      }
-    : undefined;
-}
 
 const DataDirSchema = z
   .string()
@@ -68,17 +31,19 @@ const DataDirSchema = z
 const DbSchemaVersionSchema = z.coerce
   .number({ error: "DB_SCHEMA_VERSION must be a number." })
   .int({ error: "DB_SCHEMA_VERSION must be an integer." })
+  .positive({ error: "DB_SCHEMA_VERSION must be greater than 0." })
   .default(DB_SCHEMA_VERSION);
 
 const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 
-const ENSRainbowConfigSchema = z
-  .object({
-    port: PortSchema.default(ENSRAINBOW_DEFAULT_PORT),
-    dataDir: DataDirSchema.default(getDefaultDataDir()),
-    dbSchemaVersion: DbSchemaVersionSchema,
-    labelSet: LabelSetSchema.optional(),
-  })
+const ENSRainbowConfigBaseSchema = z.object({
+  port: PortSchema.default(ENSRAINBOW_DEFAULT_PORT),
+  dataDir: DataDirSchema.default(getDefaultDataDir()),
+  dbSchemaVersion: DbSchemaVersionSchema,
+  labelSet: LabelSetSchema.optional(),
+});
+
+const ENSRainbowConfigSchema = ENSRainbowConfigBaseSchema
   /**
    * Invariant enforcement
    *
@@ -87,8 +52,6 @@ const ENSRainbowConfigSchema = z
    * Each such function has access to config values that were already parsed.
    */
   .check(invariant_dbSchemaVersionMatch);
-
-export type ENSRainbowConfig = z.infer<typeof ENSRainbowConfigSchema>;
 
 /**
  * Builds the ENSRainbow configuration object from an ENSRainbowEnvironment object.
@@ -100,7 +63,7 @@ export type ENSRainbowConfig = z.infer<typeof ENSRainbowConfigSchema>;
  */
 export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowConfig {
   try {
-    // Transform environment variables into config shape with validation
+    // Transform environment variables into config shape
     const envToConfigSchema = z
       .object({
         PORT: z.string().optional(),
@@ -109,8 +72,50 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
         LABEL_SET_ID: z.string().optional(),
         LABEL_SET_VERSION: z.string().optional(),
       })
+      /**
+       * Invariant enforcement on environment variables
+       *
+       * We check that LABEL_SET_ID and LABEL_SET_VERSION are provided together, or neither.
+       * This check happens before transformation to ensure we don't create invalid config objects.
+       */
+      .check((ctx) => {
+        const { value: env } = ctx;
+        const hasLabelSetId = env.LABEL_SET_ID !== undefined && env.LABEL_SET_ID.trim() !== "";
+        const hasLabelSetVersion =
+          env.LABEL_SET_VERSION !== undefined && env.LABEL_SET_VERSION.trim() !== "";
+
+        if (hasLabelSetId && !hasLabelSetVersion) {
+          ctx.issues.push({
+            code: "custom",
+            path: ["LABEL_SET_VERSION"],
+            input: env,
+            message:
+              "LABEL_SET_ID is set but LABEL_SET_VERSION is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.",
+          });
+        }
+
+        if (!hasLabelSetId && hasLabelSetVersion) {
+          ctx.issues.push({
+            code: "custom",
+            path: ["LABEL_SET_ID"],
+            input: env,
+            message:
+              "LABEL_SET_VERSION is set but LABEL_SET_ID is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.",
+          });
+        }
+      })
       .transform((env) => {
-        const labelSet = validateLabelSetConfiguration(env.LABEL_SET_ID, env.LABEL_SET_VERSION);
+        const hasLabelSetId = env.LABEL_SET_ID !== undefined && env.LABEL_SET_ID.trim() !== "";
+        const hasLabelSetVersion =
+          env.LABEL_SET_VERSION !== undefined && env.LABEL_SET_VERSION.trim() !== "";
+
+        const labelSet =
+          hasLabelSetId && hasLabelSetVersion
+            ? {
+                labelSetId: env.LABEL_SET_ID,
+                labelSetVersion: env.LABEL_SET_VERSION,
+              }
+            : undefined;
 
         return {
           port: env.PORT,
