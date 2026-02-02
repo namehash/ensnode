@@ -27,6 +27,12 @@ interface IngestProtobufArgs {
   "data-dir": string;
 }
 
+/**
+ * Arguments for the 'serve' command.
+ *
+ * Note: CLI arguments take precedence over environment variables.
+ * If both --port and PORT are set, --port will be used and a warning will be logged.
+ */
 interface ServeArgs {
   port: number;
   "data-dir": string;
@@ -120,7 +126,7 @@ export function createCLI(options: CLIOptions = {}) {
           return yargs
             .option("port", {
               type: "number",
-              description: "Port to listen on",
+              description: "Port to listen on (overrides PORT env var if both are set)",
               default: config.port,
             })
             .option("data-dir", {
