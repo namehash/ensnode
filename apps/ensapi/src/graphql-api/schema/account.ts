@@ -1,12 +1,12 @@
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
 import { and, asc, desc, eq, gt, lt } from "drizzle-orm";
-import { unionAll } from "drizzle-orm/pg-core";
 import type { Address } from "viem";
 
 import * as schema from "@ensnode/ensnode-schema";
-import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
+import type { DomainId, PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { findDomains } from "@/graphql-api/lib/find-domains";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
@@ -14,7 +14,7 @@ import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-regi
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import { DomainInterfaceRef } from "@/graphql-api/schema/domain";
+import { AccountDomainsWhereInput, DomainInterfaceRef } from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -62,41 +62,31 @@ AccountRef.implement({
     domains: t.connection({
       description: "TODO",
       type: DomainInterfaceRef,
+      args: {
+        where: t.arg({ type: AccountDomainsWhereInput, required: false }),
+      },
       resolve: (parent, args, context) =>
         resolveCursorConnection(
           { ...DEFAULT_CONNECTION_ARGS, args },
           async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-            const v1Domains = db
-              .select({ id: schema.v1Domain.id })
-              .from(schema.v1Domain)
-              .where(eq(schema.v1Domain.ownerId, parent.id))
-              .leftJoin(schema.label, eq(schema.v1Domain.labelHash, schema.label.labelHash));
+            // construct query for relevant domains
+            const domains = findDomains({ ...args.where, owner: parent.id });
 
-            const v2Domains = db
-              .select({ id: schema.v2Domain.id })
-              .from(schema.v2Domain)
-              .where(eq(schema.v2Domain.ownerId, parent.id))
-              .leftJoin(schema.label, eq(schema.v2Domain.labelHash, schema.label.labelHash));
-
-            // use any to ignore id column type mismatch (ENSv1DomainId & ENSv2DomainId)
-            const domains = db.$with("domains").as(unionAll(v1Domains, v2Domains as any));
-
+            // execute with pagination constraints
             const results = await db
               .with(domains)
               .select()
               .from(domains)
               .where(
                 and(
-                  ...[
-                    // NOTE: using any because drizzle infers id as ENSv1DomainId
-                    before && lt(domains.id, cursors.decode<any>(before)),
-                    after && gt(domains.id, cursors.decode<any>(after)),
-                  ].filter((c) => !!c),
+                  before ? lt(domains.id, cursors.decode<DomainId>(before)) : undefined,
+                  after ? gt(domains.id, cursors.decode<DomainId>(after)) : undefined,
                 ),
               )
               .orderBy(inverted ? desc(domains.id) : asc(domains.id))
               .limit(limit);
 
+            // provide full Domain entities via dataloader
             return rejectAnyErrors(
               DomainInterfaceRef.getDataloader(context).loadMany(
                 results.map((result) => result.id),
@@ -122,15 +112,15 @@ AccountRef.implement({
             db.query.permissionsUser.findMany({
               where: (t, { lt, gt, and, eq }) =>
                 and(
-                  ...[
-                    // this user's permissions
-                    eq(t.user, parent.id),
-                    // optionally filtered by contract
-                    args.in && and(eq(t.chainId, args.in.chainId), eq(t.address, args.in.address)),
-                    // optionall filtered by cursor
-                    before !== undefined && lt(t.id, cursors.decode<PermissionsUserId>(before)),
-                    after !== undefined && gt(t.id, cursors.decode<PermissionsUserId>(after)),
-                  ].filter((c) => !!c),
+                  // this user's permissions
+                  eq(t.user, parent.id),
+                  // optionally filtered by contract
+                  args.in
+                    ? and(eq(t.chainId, args.in.chainId), eq(t.address, args.in.address))
+                    : undefined,
+                  // optionall filtered by cursor
+                  before ? lt(t.id, cursors.decode<PermissionsUserId>(before)) : undefined,
+                  after ? gt(t.id, cursors.decode<PermissionsUserId>(after)) : undefined,
                 ),
               orderBy: (t, { asc, desc }) => (inverted ? desc(t.id) : asc(t.id)),
               limit,
@@ -164,13 +154,13 @@ AccountRef.implement({
               )
               .where(
                 and(
-                  ...[
-                    eq(schema.permissionsUser.user, parent.id),
-                    before !== undefined &&
-                      lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before)),
-                    after !== undefined &&
-                      gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after)),
-                  ].filter((c) => !!c),
+                  eq(schema.permissionsUser.user, parent.id),
+                  before
+                    ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
+                    : undefined,
+                  after
+                    ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
+                    : undefined,
                 ),
               )
               .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))
@@ -206,13 +196,13 @@ AccountRef.implement({
               )
               .where(
                 and(
-                  ...[
-                    eq(schema.permissionsUser.user, parent.id),
-                    before !== undefined &&
-                      lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before)),
-                    after !== undefined &&
-                      gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after)),
-                  ].filter((c) => !!c),
+                  eq(schema.permissionsUser.user, parent.id),
+                  before
+                    ? lt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(before))
+                    : undefined,
+                  after
+                    ? gt(schema.permissionsUser.id, cursors.decode<PermissionsUserId>(after))
+                    : undefined,
                 ),
               )
               .orderBy(inverted ? desc(schema.permissionsUser.id) : asc(schema.permissionsUser.id))

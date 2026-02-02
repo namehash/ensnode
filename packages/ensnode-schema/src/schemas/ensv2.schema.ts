@@ -170,6 +170,7 @@ export const v1Domain = onchainTable(
   (t) => ({
     byParent: index().on(t.parentId),
     byOwner: index().on(t.ownerId),
+    byLabelHash: index().on(t.labelHash),
   }),
 );
 
@@ -221,6 +222,7 @@ export const v2Domain = onchainTable(
   (t) => ({
     byRegistry: index().on(t.registryId),
     byOwner: index().on(t.ownerId),
+    byLabelHash: index().on(t.labelHash),
   }),
 );
 
@@ -476,11 +478,32 @@ export const relations_permissionsUser = relations(permissionsUser, ({ one }) =>
 // Labels
 //////////
 
-export const label = onchainTable("labels", (t) => ({
-  labelHash: t.hex().primaryKey().$type<LabelHash>(),
-  value: t.text().notNull().$type<InterpretedLabel>(),
-}));
+export const label = onchainTable(
+  "labels",
+  (t) => ({
+    labelHash: t.hex().primaryKey().$type<LabelHash>(),
+    interpreted: t.text().notNull().$type<InterpretedLabel>(),
+  }),
+  (t) => ({
+    byInterpreted: index().on(t.interpreted),
+  }),
+);
 
 export const label_relations = relations(label, ({ many }) => ({
   domains: many(v2Domain),
+}));
+
+///////////////////
+// Canonical Names
+///////////////////
+
+// TODO(canonical-names): this table will be refactored away once Canonical Names are implemented in
+// ENSv2, and we'll be able to store this information directly on the Registry entity, but until
+// then we need a place to track canonical domain references without requiring that a Registry contract
+// has emitted an event (and therefore is indexed)
+// TODO(canonical-names): this table can also disappear once the Signal pattern is implemented for
+// Registry contracts, ensuring that they are indexed during construction and are available for storage.
+export const registryCanonicalDomain = onchainTable("registry_canonical_domains", (t) => ({
+  registryId: t.text().primaryKey().$type<RegistryId>(),
+  domainId: t.text().notNull().$type<ENSv2DomainId>(),
 }));

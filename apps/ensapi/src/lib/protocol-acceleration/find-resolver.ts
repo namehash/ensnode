@@ -216,16 +216,15 @@ async function findResolverWithIndex(
             where: (t, { inArray, and, or, eq }) =>
               and(
                 or(
-                  ...[
-                    // filter for Domain-Resolver Relationship in the current Registry
-                    and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
-                    // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
-                    isENSv1Registry(config.namespace, registry) &&
-                      and(
+                  // filter for Domain-Resolver Relationship in the current Registry
+                  and(eq(t.chainId, registry.chainId), eq(t.address, registry.address)),
+                  // OR, if the registry is the ENS Root Registry, also include records from RegistryOld
+                  isENSv1Registry(config.namespace, registry)
+                    ? and(
                         eq(t.chainId, ENSv1RegistryOld.chainId),
                         eq(t.address, ENSv1RegistryOld.address),
-                      ),
-                  ].filter((c) => !!c),
+                      )
+                    : undefined,
                 ),
                 // filter for Domain-Resolver Relations for the following DomainIds
                 inArray(t.domainId, domainIds),

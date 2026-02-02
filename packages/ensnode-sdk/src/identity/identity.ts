@@ -2,7 +2,7 @@ import type { Address } from "viem";
 
 import { type ENSNamespaceId, getENSRootChainId } from "@ensnode/datasources";
 
-import type { DefaultableChainId } from "../shared";
+import type { DefaultableChainId } from "../shared/types";
 import {
   type Identity,
   ResolutionStatusIds,
