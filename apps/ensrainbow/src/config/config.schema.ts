@@ -155,7 +155,7 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
  * @returns A complete ENSRainbowPublicConfig object
  */
 export function buildENSRainbowPublicConfig(
-  config: ENSRainbowConfig,
+  _config: ENSRainbowConfig, // kept for semantic purposes, not used in the function
   labelSet: EnsRainbowServerLabelSet,
   recordsCount: number,
 ): EnsRainbow.ENSRainbowPublicConfig {
