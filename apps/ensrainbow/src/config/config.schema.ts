@@ -140,6 +140,7 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
  * @returns A complete ENSRainbowPublicConfig object
  */
 export function buildENSRainbowPublicConfig(
+  config: ENSRainbowConfig,
   labelSet: EnsRainbowServerLabelSet,
   recordsCount: number,
 ): EnsRainbow.ENSRainbowPublicConfig {
