@@ -180,5 +180,10 @@ module "ensindexer" {
 
   # The internal URL to the relevant ENSRainbow service instance
   # that this ENSIndexer instance will use.
+  # Note: Each ENSRainbow instance can be referenced by its label set ID,
+  # as defined in local.ensrainbow_instances. Also, each ENSIndexer instance
+  # defines which label set ID it is configured to use.
+  # We use that label set ID config of an ENSIndexer instance to look up
+  # the specific ENSRainbow module instance and extract its URL output.
   ensrainbow_url = module.ensrainbow[each.value.ensindexer_label_set_id].ensrainbow_url
 }
