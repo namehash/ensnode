@@ -1,6 +1,5 @@
 import type { z } from "zod/v4";
 
-import type { EnsRainbowClientLabelSet } from "@ensnode/ensnode-sdk";
 import type { PortNumber } from "@ensnode/ensnode-sdk/internal";
 
 import type { AbsolutePathSchemaBase, DbSchemaVersionSchemaBase } from "./config.schema";
@@ -24,5 +23,4 @@ export interface ENSRainbowEnvConfig {
   port: PortNumber;
   dataDir: AbsolutePath;
   dbSchemaVersion: DbSchemaVersion;
-  labelSet?: Required<EnsRainbowClientLabelSet>;
 }

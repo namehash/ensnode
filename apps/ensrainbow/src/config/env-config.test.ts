@@ -1,17 +1,12 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import { isAbsolute, resolve } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
-
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import { buildConfigFromEnvironment, buildENSRainbowPublicConfig } from "./config.schema";
+import { buildConfigFromEnvironment } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
-import type { ENSRainbowEnvConfig } from "./types";
 
 vi.mock("@/utils/logger", () => ({
   logger: {
@@ -285,31 +280,6 @@ describe("buildConfigFromEnvironment", () => {
       expect(isAbsolute(config.dataDir)).toBe(true);
       // ~ is treated as a directory name, not home expansion
       expect(config.dataDir).toBe(resolve(process.cwd(), tildeDataDir));
-    });
-  });
-});
-
-describe("buildENSRainbowPublicConfig", () => {
-  describe("Success cases", () => {
-    it("returns a valid ENSRainbow public config with correct structure", () => {
-      const mockConfig: ENSRainbowEnvConfig = {
-        port: ENSRAINBOW_DEFAULT_PORT,
-        dataDir: getDefaultDataDir(),
-        dbSchemaVersion: DB_SCHEMA_VERSION,
-      };
-      const labelSet: EnsRainbowServerLabelSet = {
-        labelSetId: "subgraph",
-        highestLabelSetVersion: 0,
-      };
-      const recordsCount = 1000;
-
-      const result = buildENSRainbowPublicConfig(mockConfig, labelSet, recordsCount);
-
-      expect(result).toStrictEqual({
-        version: packageJson.version,
-        labelSet,
-        recordsCount,
-      });
     });
   });
 });

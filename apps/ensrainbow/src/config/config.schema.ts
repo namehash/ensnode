@@ -5,7 +5,7 @@ import { isAbsolute, resolve } from "node:path";
 import { prettifyError, ZodError, z } from "zod/v4";
 
 import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
-import { makeFullyPinnedLabelSetSchema, PortSchema } from "@ensnode/ensnode-sdk/internal";
+import { PortSchema } from "@ensnode/ensnode-sdk/internal";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
@@ -38,18 +38,11 @@ export const DbSchemaVersionSchemaBase = z.coerce
 
 const DbSchemaVersionSchema = DbSchemaVersionSchemaBase.default(DB_SCHEMA_VERSION);
 
-const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
-
 const ENSRainbowConfigBaseSchema = z.object({
   port: PortSchema.default(ENSRAINBOW_DEFAULT_PORT),
   dataDir: DataDirSchema.default(() => getDefaultDataDir()),
   dbSchemaVersion: DbSchemaVersionSchema,
-  labelSet: LabelSetSchema.optional(),
 });
-
-const hasValue = (str: string | undefined): boolean => {
-  return str !== undefined && str.trim() !== "";
-};
 
 const ENSRainbowConfigSchema = ENSRainbowConfigBaseSchema.check(invariant_dbSchemaVersionMatch);
 
@@ -60,51 +53,12 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
         PORT: z.string().optional(),
         DATA_DIR: z.string().optional(),
         DB_SCHEMA_VERSION: z.string().optional(),
-        LABEL_SET_ID: z.string().optional(),
-        LABEL_SET_VERSION: z.string().optional(),
-      })
-      .check((ctx) => {
-        const { value: env } = ctx;
-        const hasLabelSetId = hasValue(env.LABEL_SET_ID);
-        const hasLabelSetVersion = hasValue(env.LABEL_SET_VERSION);
-
-        if (hasLabelSetId && !hasLabelSetVersion) {
-          ctx.issues.push({
-            code: "custom",
-            path: ["LABEL_SET_VERSION"],
-            input: env,
-            message:
-              "LABEL_SET_ID is set but LABEL_SET_VERSION is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.",
-          });
-        }
-
-        if (!hasLabelSetId && hasLabelSetVersion) {
-          ctx.issues.push({
-            code: "custom",
-            path: ["LABEL_SET_ID"],
-            input: env,
-            message:
-              "LABEL_SET_VERSION is set but LABEL_SET_ID is missing. Both LABEL_SET_ID and LABEL_SET_VERSION must be provided together, or neither.",
-          });
-        }
       })
       .transform((env) => {
-        const hasLabelSetId = hasValue(env.LABEL_SET_ID);
-        const hasLabelSetVersion = hasValue(env.LABEL_SET_VERSION);
-
-        const labelSet =
-          hasLabelSetId && hasLabelSetVersion
-            ? {
-                labelSetId: env.LABEL_SET_ID,
-                labelSetVersion: env.LABEL_SET_VERSION,
-              }
-            : undefined;
-
         return {
           port: env.PORT,
           dataDir: env.DATA_DIR,
           dbSchemaVersion: env.DB_SCHEMA_VERSION,
-          labelSet,
         };
       });
 
