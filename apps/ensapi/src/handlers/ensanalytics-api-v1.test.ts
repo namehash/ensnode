@@ -44,7 +44,7 @@ import {
 
 import app from "./ensanalytics-api-v1";
 
-describe("/ensanalytics/v1", () => {
+describe("/v1/ensanalytics", () => {
   describe("/referral-leaderboard", () => {
     it("returns requested records when referrer leaderboard has multiple pages of data", async () => {
       // Arrange: mock cache map with cycle-1
