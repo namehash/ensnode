@@ -13,6 +13,7 @@ const mockFetch = vi.fn<typeof fetch>();
 
 describe("Ponder Client", () => {
   beforeEach(() => {
+    mockFetch.mockReset();
     vi.stubGlobal("fetch", mockFetch);
   });
 
