@@ -273,7 +273,18 @@ export const makeCustomReferralProgramCyclesSchema = (
 ) =>
   z
     .array(makeReferralProgramCycleSchema(`${valueLabel}[cycle]`))
-    .min(1, `${valueLabel} must contain at least one cycle`);
+    .min(1, `${valueLabel} must contain at least one cycle`)
+    .refine(
+      (cycles) => {
+        const ids = new Set<string>();
+        for (const cycle of cycles) {
+          if (ids.has(cycle.id)) return false;
+          ids.add(cycle.id);
+        }
+        return true;
+      },
+      { message: `${valueLabel} must not contain duplicate cycle ids` },
+    );
 
 /**
  * Schema for validating a {@link ReferralProgramCycleSet} (Map structure).
