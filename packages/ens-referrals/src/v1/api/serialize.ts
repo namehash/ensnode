@@ -1,24 +1,32 @@
 import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferralProgramCycle, ReferralProgramCycleId } from "../cycle";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
-import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
+import type {
+  ReferrerDetail,
+  ReferrerDetailRanked,
+  ReferrerDetailUnranked,
+} from "../referrer-detail";
 import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
   SerializedAggregatedReferrerMetrics,
   SerializedAwardedReferrerMetrics,
+  SerializedReferralProgramCycle,
   SerializedReferralProgramRules,
+  SerializedReferrerDetail,
+  SerializedReferrerDetailAllCyclesData,
+  SerializedReferrerDetailAllCyclesResponse,
   SerializedReferrerDetailRanked,
-  SerializedReferrerDetailResponse,
   SerializedReferrerDetailUnranked,
   SerializedReferrerLeaderboardPage,
   SerializedReferrerLeaderboardPageResponse,
   SerializedUnrankedReferrerMetrics,
 } from "./serialized-types";
 import {
-  type ReferrerDetailResponse,
-  ReferrerDetailResponseCodes,
+  type ReferrerDetailAllCyclesResponse,
+  ReferrerDetailAllCyclesResponseCodes,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
 } from "./types";
@@ -141,6 +149,32 @@ function serializeReferrerDetailUnranked(
 }
 
 /**
+ * Serializes a {@link ReferrerDetail} object (ranked or unranked).
+ */
+function serializeReferrerDetail(detail: ReferrerDetail): SerializedReferrerDetail {
+  switch (detail.type) {
+    case "ranked":
+      return serializeReferrerDetailRanked(detail);
+    case "unranked":
+      return serializeReferrerDetailUnranked(detail);
+  }
+}
+
+/**
+ * Serializes a {@link ReferralProgramCycle} object.
+ */
+export function serializeReferralProgramCycle(
+  cycle: ReferralProgramCycle,
+): SerializedReferralProgramCycle {
+  return {
+    id: cycle.id,
+    displayName: cycle.displayName,
+    rules: serializeReferralProgramRules(cycle.rules),
+    rulesUrl: cycle.rulesUrl,
+  };
+}
+
+/**
  * Serialize a {@link ReferrerLeaderboardPageResponse} object.
  */
 export function serializeReferrerLeaderboardPageResponse(
@@ -159,29 +193,27 @@ export function serializeReferrerLeaderboardPageResponse(
 }
 
 /**
- * Serialize a {@link ReferrerDetailResponse} object.
+ * Serialize a {@link ReferrerDetailAllCyclesResponse} object.
  */
-export function serializeReferrerDetailResponse(
-  response: ReferrerDetailResponse,
-): SerializedReferrerDetailResponse {
+export function serializeReferrerDetailAllCyclesResponse(
+  response: ReferrerDetailAllCyclesResponse,
+): SerializedReferrerDetailAllCyclesResponse {
   switch (response.responseCode) {
-    case ReferrerDetailResponseCodes.Ok:
-      switch (response.data.type) {
-        case "ranked":
-          return {
-            responseCode: response.responseCode,
-            data: serializeReferrerDetailRanked(response.data),
-          };
+    case ReferrerDetailAllCyclesResponseCodes.Ok: {
+      const serializedData: SerializedReferrerDetailAllCyclesData =
+        {} as SerializedReferrerDetailAllCyclesData;
 
-        case "unranked":
-          return {
-            responseCode: response.responseCode,
-            data: serializeReferrerDetailUnranked(response.data),
-          };
+      for (const [cycleId, detail] of Object.entries(response.data)) {
+        serializedData[cycleId as ReferralProgramCycleId] = serializeReferrerDetail(detail);
       }
-      break;
 
-    case ReferrerDetailResponseCodes.Error:
+      return {
+        responseCode: response.responseCode,
+        data: serializedData,
+      };
+    }
+
+    case ReferrerDetailAllCyclesResponseCodes.Error:
       return response;
   }
 }

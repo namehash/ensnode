@@ -1,15 +1,24 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
 import {
-  ENS_HOLIDAY_AWARDS_END_DATE,
-  ENS_HOLIDAY_AWARDS_START_DATE,
-} from "@namehash/ens-referrals";
-import { getUnixTime } from "date-fns";
+  getReferralProgramCycleSet,
+  type ReferralProgramCycle,
+  type ReferralProgramCycleSet,
+} from "@namehash/ens-referrals/v1";
+import {
+  makeCustomReferralProgramCyclesSchema,
+  makeReferralProgramCycleSetSchema,
+} from "@namehash/ens-referrals/v1/internal";
 import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { type ENSApiPublicConfig, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import {
+  type ENSApiPublicConfig,
+  type ENSNamespaceId,
+  getEthnamesSubregistryId,
+  serializeENSIndexerPublicConfig,
+} from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -17,7 +26,6 @@ import {
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
-  makeDatetimeSchema,
   makeENSIndexerPublicConfigSchema,
   PortSchema,
   RpcConfigsSchema,
@@ -26,10 +34,7 @@ import {
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
-import {
-  invariant_ensHolidayAwardsEndAfterStart,
-  invariant_ensIndexerPublicConfigVersionInfo,
-} from "@/config/validations";
+import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
 
@@ -51,12 +56,6 @@ export const DatabaseUrlSchema = z.string().refine(
   },
 );
 
-// Use ISO 8601 format for defining datetime values (e.g., '2025-12-01T00:00:00Z')
-const DateStringToUnixTimestampSchema = z.coerce
-  .string()
-  .pipe(makeDatetimeSchema())
-  .transform((date) => getUnixTime(date));
-
 const EnsApiConfigSchema = z
   .object({
     port: PortSchema.default(ENSApi_DEFAULT_PORT),
@@ -67,14 +66,65 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    ensHolidayAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
-    ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
+    referralProgramCycleSet: makeReferralProgramCycleSetSchema("referralProgramCycleSet"),
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_ensIndexerPublicConfigVersionInfo)
-  .check(invariant_ensHolidayAwardsEndAfterStart);
+  .check(invariant_ensIndexerPublicConfigVersionInfo);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
+
+/**
+ * Loads the referral program cycle set from a custom URL or uses defaults.
+ *
+ * @param customCyclesUrl - Optional URL to a JSON file containing custom cycle definitions
+ * @param namespace - The ENS namespace to get the subregistry address for
+ * @returns A map of cycle IDs to their cycle configurations
+ */
+async function loadReferralProgramCycleSet(
+  customCyclesUrl: string | undefined,
+  namespace: ENSNamespaceId,
+): Promise<ReferralProgramCycleSet> {
+  const subregistryId = getEthnamesSubregistryId(namespace);
+
+  if (!customCyclesUrl) {
+    logger.info("Using default referral program cycle set");
+    return getReferralProgramCycleSet(subregistryId.address);
+  }
+
+  // Validate URL format
+  try {
+    new URL(customCyclesUrl);
+  } catch {
+    throw new Error(`CUSTOM_REFERRAL_PROGRAM_CYCLES is not a valid URL: ${customCyclesUrl}`);
+  }
+
+  // Fetch and validate
+  logger.info(`Fetching custom referral program cycles from: ${customCyclesUrl}`);
+  const response = await fetch(customCyclesUrl);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch custom referral program cycles from ${customCyclesUrl}: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const json = await response.json();
+  const schema = makeCustomReferralProgramCyclesSchema("CUSTOM_REFERRAL_PROGRAM_CYCLES");
+  const validated = schema.parse(json);
+
+  // Convert array to Map, check for duplicates
+  const cycleSet: ReferralProgramCycleSet = new Map();
+  for (const cycleObj of validated) {
+    const cycle = cycleObj as ReferralProgramCycle;
+    const cycleId = cycle.id;
+    if (cycleSet.has(cycleId)) {
+      throw new Error(`Duplicate cycle ID in CUSTOM_REFERRAL_PROGRAM_CYCLES: ${cycle.id}`);
+    }
+    cycleSet.set(cycleId, cycle);
+  }
+
+  logger.info(`Loaded ${cycleSet.size} custom referral program cycles`);
+  return cycleSet;
+}
 
 /**
  * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
@@ -97,6 +147,11 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 
     const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
 
+    const referralProgramCycleSet = await loadReferralProgramCycleSet(
+      env.CUSTOM_REFERRAL_PROGRAM_CYCLES,
+      ensIndexerPublicConfig.namespace,
+    );
+
     return EnsApiConfigSchema.parse({
       port: env.PORT,
       databaseUrl: env.DATABASE_URL,
@@ -106,8 +161,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
-      ensHolidayAwardsStart: env.ENS_HOLIDAY_AWARDS_START,
-      ensHolidayAwardsEnd: env.ENS_HOLIDAY_AWARDS_END,
+      referralProgramCycleSet,
     });
   } catch (error) {
     if (error instanceof ZodError) {

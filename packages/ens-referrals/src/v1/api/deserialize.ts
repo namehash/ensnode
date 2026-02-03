@@ -3,31 +3,42 @@ import { prettifyError } from "zod/v4";
 import { deserializePriceEth, deserializePriceUsdc, type PriceEth } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferralProgramCycle, ReferralProgramCycleId } from "../cycle";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
-import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
+import type {
+  ReferrerDetail,
+  ReferrerDetailRanked,
+  ReferrerDetailUnranked,
+} from "../referrer-detail";
 import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
   SerializedAggregatedReferrerMetrics,
   SerializedAwardedReferrerMetrics,
+  SerializedReferralProgramCycle,
   SerializedReferralProgramRules,
+  SerializedReferrerDetail,
+  SerializedReferrerDetailAllCyclesResponse,
   SerializedReferrerDetailRanked,
-  SerializedReferrerDetailResponse,
   SerializedReferrerDetailUnranked,
   SerializedReferrerLeaderboardPage,
   SerializedReferrerLeaderboardPageResponse,
   SerializedUnrankedReferrerMetrics,
 } from "./serialized-types";
-import type { ReferrerDetailResponse, ReferrerLeaderboardPageResponse } from "./types";
+import type {
+  ReferrerDetailAllCyclesData,
+  ReferrerDetailAllCyclesResponse,
+  ReferrerLeaderboardPageResponse,
+} from "./types";
 import {
-  makeReferrerDetailResponseSchema,
+  makeReferrerDetailAllCyclesResponseSchema,
   makeReferrerLeaderboardPageResponseSchema,
 } from "./zod-schemas";
 
 /**
  * Deserializes a {@link SerializedReferralProgramRules} object.
  */
-function deserializeReferralProgramRules(
+export function deserializeReferralProgramRules(
   rules: SerializedReferralProgramRules,
 ): ReferralProgramRules {
   return {
@@ -142,6 +153,32 @@ function deserializeReferrerDetailUnranked(
 }
 
 /**
+ * Deserializes a {@link SerializedReferrerDetail} object (ranked or unranked).
+ */
+function deserializeReferrerDetail(detail: SerializedReferrerDetail): ReferrerDetail {
+  switch (detail.type) {
+    case "ranked":
+      return deserializeReferrerDetailRanked(detail);
+    case "unranked":
+      return deserializeReferrerDetailUnranked(detail);
+  }
+}
+
+/**
+ * Deserializes a {@link SerializedReferralProgramCycle} object.
+ */
+export function deserializeReferralProgramCycle(
+  cycle: SerializedReferralProgramCycle,
+): ReferralProgramCycle {
+  return {
+    id: cycle.id,
+    displayName: cycle.displayName,
+    rules: deserializeReferralProgramRules(cycle.rules),
+    rulesUrl: cycle.rulesUrl,
+  };
+}
+
+/**
  * Deserialize a {@link ReferrerLeaderboardPageResponse} object.
  *
  * Note: This function explicitly deserializes each subobject to convert string
@@ -181,34 +218,30 @@ export function deserializeReferrerLeaderboardPageResponse(
 }
 
 /**
- * Deserialize a {@link ReferrerDetailResponse} object.
+ * Deserialize a {@link ReferrerDetailAllCyclesResponse} object.
  *
  * Note: This function explicitly deserializes each subobject to convert string
  * RevenueContribution values back to {@link PriceEth}, then validates using Zod schemas
  * to enforce invariants on the data.
  */
-export function deserializeReferrerDetailResponse(
-  maybeResponse: SerializedReferrerDetailResponse,
+export function deserializeReferrerDetailAllCyclesResponse(
+  maybeResponse: SerializedReferrerDetailAllCyclesResponse,
   valueLabel?: string,
-): ReferrerDetailResponse {
-  let deserialized: ReferrerDetailResponse;
+): ReferrerDetailAllCyclesResponse {
+  let deserialized: ReferrerDetailAllCyclesResponse;
+
   switch (maybeResponse.responseCode) {
     case "ok": {
-      switch (maybeResponse.data.type) {
-        case "ranked":
-          deserialized = {
-            responseCode: maybeResponse.responseCode,
-            data: deserializeReferrerDetailRanked(maybeResponse.data),
-          } as ReferrerDetailResponse;
-          break;
+      const data: ReferrerDetailAllCyclesData = {} as ReferrerDetailAllCyclesData;
 
-        case "unranked":
-          deserialized = {
-            responseCode: maybeResponse.responseCode,
-            data: deserializeReferrerDetailUnranked(maybeResponse.data),
-          } as ReferrerDetailResponse;
-          break;
+      for (const [cycleId, detail] of Object.entries(maybeResponse.data)) {
+        data[cycleId as ReferralProgramCycleId] = deserializeReferrerDetail(detail);
       }
+
+      deserialized = {
+        responseCode: "ok",
+        data,
+      };
       break;
     }
 
@@ -218,11 +251,13 @@ export function deserializeReferrerDetailResponse(
   }
 
   // Then validate the deserialized structure using zod schemas
-  const schema = makeReferrerDetailResponseSchema(valueLabel);
+  const schema = makeReferrerDetailAllCyclesResponseSchema(valueLabel);
   const parsed = schema.safeParse(deserialized);
 
   if (parsed.error) {
-    throw new Error(`Cannot deserialize ReferrerDetailResponse:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(
+      `Cannot deserialize ReferrerDetailAllCyclesResponse:\n${prettifyError(parsed.error)}\n`,
+    );
   }
 
   return parsed.data;

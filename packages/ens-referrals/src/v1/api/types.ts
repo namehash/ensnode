@@ -1,12 +1,16 @@
 import type { Address } from "viem";
 
+import type { ReferralProgramCycleId } from "../cycle";
 import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
 import type { ReferrerDetail } from "../referrer-detail";
 
 /**
  * Request parameters for a referrer leaderboard page query.
  */
-export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPageParams {}
+export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPageParams {
+  /** The referral program cycle ID */
+  cycle: ReferralProgramCycleId;
+}
 
 /**
  * A status code for a referrer leaderboard page API response.
@@ -67,9 +71,9 @@ export interface ReferrerDetailRequest {
 /**
  * A status code for referrer detail API responses.
  */
-export const ReferrerDetailResponseCodes = {
+export const ReferrerDetailAllCyclesResponseCodes = {
   /**
-   * Represents that the referrer detail data is available.
+   * Represents that the referrer detail data across all cycles is available.
    */
   Ok: "ok",
 
@@ -80,32 +84,41 @@ export const ReferrerDetailResponseCodes = {
 } as const;
 
 /**
- * The derived string union of possible {@link ReferrerDetailResponseCodes}.
+ * The derived string union of possible {@link ReferrerDetailAllCyclesResponseCodes}.
  */
-export type ReferrerDetailResponseCode =
-  (typeof ReferrerDetailResponseCodes)[keyof typeof ReferrerDetailResponseCodes];
+export type ReferrerDetailAllCyclesResponseCode =
+  (typeof ReferrerDetailAllCyclesResponseCodes)[keyof typeof ReferrerDetailAllCyclesResponseCodes];
 
 /**
- * A referrer detail response when the data is available for a referrer on the leaderboard.
+ * Referrer detail data across all cycles.
+ *
+ * Maps each cycle ID to the referrer's detail for that cycle.
  */
-export type ReferrerDetailResponseOk = {
-  responseCode: typeof ReferrerDetailResponseCodes.Ok;
-  data: ReferrerDetail;
+export type ReferrerDetailAllCyclesData = Record<ReferralProgramCycleId, ReferrerDetail>;
+
+/**
+ * A successful response containing referrer detail for all cycles.
+ */
+export type ReferrerDetailAllCyclesResponseOk = {
+  responseCode: typeof ReferrerDetailAllCyclesResponseCodes.Ok;
+  data: ReferrerDetailAllCyclesData;
 };
 
 /**
- * A referrer detail response when an error occurs.
+ * A referrer detail across all cycles response when an error occurs.
  */
-export type ReferrerDetailResponseError = {
-  responseCode: typeof ReferrerDetailResponseCodes.Error;
+export type ReferrerDetailAllCyclesResponseError = {
+  responseCode: typeof ReferrerDetailAllCyclesResponseCodes.Error;
   error: string;
   errorMessage: string;
 };
 
 /**
- * A referrer detail API response.
+ * A referrer detail across all cycles API response.
  *
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type ReferrerDetailResponse = ReferrerDetailResponseOk | ReferrerDetailResponseError;
+export type ReferrerDetailAllCyclesResponse =
+  | ReferrerDetailAllCyclesResponseOk
+  | ReferrerDetailAllCyclesResponseError;

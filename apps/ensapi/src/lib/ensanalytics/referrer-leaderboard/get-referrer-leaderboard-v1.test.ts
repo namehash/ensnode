@@ -1,11 +1,8 @@
-import {
-  buildReferralProgramRules,
-  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-  type ReferrerLeaderboard,
-} from "@namehash/ens-referrals/v1";
+import { buildReferralProgramRules, type ReferrerLeaderboard } from "@namehash/ens-referrals/v1";
 import { getUnixTime } from "date-fns";
 import { describe, expect, it, vi } from "vitest";
+
+import { priceUsdc } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database-v1";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard-v1";
@@ -17,8 +14,8 @@ vi.mock("./database-v1", () => ({
 }));
 
 const rules = buildReferralProgramRules(
-  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+  priceUsdc(10_000_000_000n), // 10,000 USDC in smallest units
+  10, // maxQualifiedReferrers
   getUnixTime("2025-01-01T00:00:00Z"),
   getUnixTime("2025-12-31T23:59:59Z"),
   {

@@ -8,8 +8,8 @@ import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import { referralLeaderboardCyclesCaches } from "@/cache/referral-leaderboard-cycles.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
-import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
@@ -161,8 +161,11 @@ const gracefulShutdown = async () => {
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
 
-    referrerLeaderboardCacheV1.destroy();
-    logger.info("Destroyed referrerLeaderboardCacheV1");
+    // Destroy all cycle caches
+    for (const [cycleId, cache] of referralLeaderboardCyclesCaches) {
+      cache.destroy();
+      logger.info(`Destroyed referralLeaderboardCyclesCache for ${cycleId}`);
+    }
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");

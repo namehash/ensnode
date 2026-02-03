@@ -1,6 +1,7 @@
-import type { ReferrerLeaderboard } from "@namehash/ens-referrals/v1";
-
-import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
+import {
+  type ReferralLeaderboardCyclesCacheMap,
+  referralLeaderboardCyclesCaches,
+} from "@/cache/referral-leaderboard-cycles.cache";
 import { factory } from "@/lib/hono-factory";
 
 /**
@@ -8,17 +9,17 @@ import { factory } from "@/lib/hono-factory";
  */
 export type ReferrerLeaderboardMiddlewareV1Variables = {
   /**
-   * A {@link ReferrerLeaderboard} containing metrics and rankings for all referrers
-   * with at least one referral within the ENS Holiday Awards period, or an {@link Error}
-   * indicating failure to build the leaderboard.
+   * A map from cycle ID to its dedicated {@link SWRCache} containing {@link ReferrerLeaderboard}.
    *
-   * If `referrerLeaderboardV1` is an {@link Error}, no prior attempts to successfully fetch (and cache)
-   * a referrer leaderboard within the lifetime of this middleware have been successful.
+   * Each cycle has its own independent cache to preserve successful data even when other cycles fail.
+   * When reading from a specific cycle's cache, it will return either:
+   * - The {@link ReferrerLeaderboard} if successfully cached
+   * - An {@link Error} if the cache failed to build
    *
-   * If `referrerLeaderboardV1` is a {@link ReferrerLeaderboard}, a referrer leaderboard was successfully
-   * fetched (and cached) at least once within the lifetime of this middleware.
+   * Individual cycle caches maintain their own stale-while-revalidate behavior, so a previously
+   * successfully fetched cycle continues serving its data even if a subsequent refresh fails.
    */
-  referrerLeaderboardV1: ReferrerLeaderboard | Error;
+  referralLeaderboardCyclesCaches: ReferralLeaderboardCyclesCacheMap;
 };
 
 /**
@@ -26,8 +27,6 @@ export type ReferrerLeaderboardMiddlewareV1Variables = {
  * to downstream middleware and handlers (V1 API).
  */
 export const referrerLeaderboardMiddlewareV1 = factory.createMiddleware(async (c, next) => {
-  const leaderboard = await referrerLeaderboardCacheV1.read();
-
-  c.set("referrerLeaderboardV1", leaderboard);
+  c.set("referralLeaderboardCyclesCaches", referralLeaderboardCyclesCaches);
   await next();
 });

@@ -1,14 +1,15 @@
 import type { SerializedPriceEth, SerializedPriceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
+import type { ReferralProgramCycle, ReferralProgramCycleId } from "../cycle";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type { ReferrerDetailRanked, ReferrerDetailUnranked } from "../referrer-detail";
 import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
-  ReferrerDetailResponse,
-  ReferrerDetailResponseError,
-  ReferrerDetailResponseOk,
+  ReferrerDetailAllCyclesResponse,
+  ReferrerDetailAllCyclesResponseError,
+  ReferrerDetailAllCyclesResponseOk,
   ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseError,
   ReferrerLeaderboardPageResponseOk,
@@ -108,22 +109,38 @@ export type SerializedReferrerLeaderboardPageResponse =
   | SerializedReferrerLeaderboardPageResponseError;
 
 /**
- * Serialized representation of {@link ReferrerDetailResponseError}.
- *
- * Note: All fields are already serializable, so this type is identical to the source type.
+ * Serialized representation of {@link ReferralProgramCycle}.
  */
-export type SerializedReferrerDetailResponseError = ReferrerDetailResponseError;
-
-/**
- * Serialized representation of {@link ReferrerDetailResponseOk}.
- */
-export interface SerializedReferrerDetailResponseOk extends Omit<ReferrerDetailResponseOk, "data"> {
-  data: SerializedReferrerDetail;
+export interface SerializedReferralProgramCycle extends Omit<ReferralProgramCycle, "rules"> {
+  rules: SerializedReferralProgramRules;
 }
 
 /**
- * Serialized representation of {@link ReferrerDetailResponse}.
+ * Serialized representation of referrer detail data across all cycles.
  */
-export type SerializedReferrerDetailResponse =
-  | SerializedReferrerDetailResponseOk
-  | SerializedReferrerDetailResponseError;
+export type SerializedReferrerDetailAllCyclesData = Record<
+  ReferralProgramCycleId,
+  SerializedReferrerDetail
+>;
+
+/**
+ * Serialized representation of {@link ReferrerDetailAllCyclesResponseOk}.
+ */
+export interface SerializedReferrerDetailAllCyclesResponseOk
+  extends Omit<ReferrerDetailAllCyclesResponseOk, "data"> {
+  data: SerializedReferrerDetailAllCyclesData;
+}
+
+/**
+ * Serialized representation of {@link ReferrerDetailAllCyclesResponseError}.
+ *
+ * Note: All fields are already serializable, so this type is identical to the source type.
+ */
+export type SerializedReferrerDetailAllCyclesResponseError = ReferrerDetailAllCyclesResponseError;
+
+/**
+ * Serialized representation of {@link ReferrerDetailAllCyclesResponse}.
+ */
+export type SerializedReferrerDetailAllCyclesResponse =
+  | SerializedReferrerDetailAllCyclesResponseOk
+  | SerializedReferrerDetailAllCyclesResponseError;

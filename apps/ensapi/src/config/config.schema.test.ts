@@ -1,13 +1,11 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import {
-  ENS_HOLIDAY_AWARDS_END_DATE,
-  ENS_HOLIDAY_AWARDS_START_DATE,
-} from "@namehash/ens-referrals";
+import { getReferralProgramCycleSet } from "@namehash/ens-referrals/v1";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type ENSIndexerPublicConfig,
+  getEthnamesSubregistryId,
   PluginName,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -21,6 +19,7 @@ import logger from "@/lib/logger";
 vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
+    info: vi.fn(),
   },
 }));
 
@@ -53,6 +52,9 @@ const ENSINDEXER_PUBLIC_CONFIG = {
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
+const subregistryId = getEthnamesSubregistryId("mainnet");
+const defaultCycleSet = getReferralProgramCycleSet(subregistryId.address);
+
 describe("buildConfigFromEnvironment", () => {
   afterEach(() => {
     mockFetch.mockReset();
@@ -82,8 +84,7 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      referralProgramCycleSet: defaultCycleSet,
     });
   });
 
@@ -164,8 +165,7 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      referralProgramCycleSet: defaultCycleSet,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -189,8 +189,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      referralProgramCycleSet: defaultCycleSet,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -224,8 +223,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      referralProgramCycleSet: defaultCycleSet,
       theGraphApiKey: "secret-api-key",
     };
 

@@ -21,9 +21,13 @@ import {
   makeUnixTimestampSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
+import type { ReferralProgramCycleId } from "../cycle";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
 import { type ReferrerDetailRanked, ReferrerDetailTypeIds } from "../referrer-detail";
-import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
+import {
+  ReferrerDetailAllCyclesResponseCodes,
+  ReferrerLeaderboardPageResponseCodes,
+} from "./types";
 
 /**
  * Schema for ReferralProgramRules
@@ -200,35 +204,103 @@ export const makeReferrerDetailUnrankedSchema = (valueLabel: string = "ReferrerD
   });
 
 /**
- * Schema for {@link ReferrerDetailResponseOk}
- * Accepts either ranked or unranked referrer detail data
+ * Schema for {@link ReferrerDetailAllCyclesResponseOk}
+ * Accepts a record of cycle IDs to referrer details
  */
-export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+export const makeReferrerDetailAllCyclesResponseOkSchema = (
+  valueLabel: string = "ReferrerDetailAllCyclesResponse",
+) =>
   z.object({
-    responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
-    data: z.discriminatedUnion("type", [
-      makeReferrerDetailRankedSchema(`${valueLabel}.data`),
-      makeReferrerDetailUnrankedSchema(`${valueLabel}.data`),
-    ]),
+    responseCode: z.literal(ReferrerDetailAllCyclesResponseCodes.Ok),
+    data: z.record(
+      makeReferralProgramCycleIdSchema(`${valueLabel}.data[cycle]`),
+      z.discriminatedUnion("type", [
+        makeReferrerDetailRankedSchema(`${valueLabel}.data[cycle]`),
+        makeReferrerDetailUnrankedSchema(`${valueLabel}.data[cycle]`),
+      ]),
+    ),
   });
 
 /**
- * Schema for {@link ReferrerDetailResponseError}
+ * Schema for {@link ReferrerDetailAllCyclesResponseError}
  */
-export const makeReferrerDetailResponseErrorSchema = (
-  _valueLabel: string = "ReferrerDetailResponse",
+export const makeReferrerDetailAllCyclesResponseErrorSchema = (
+  _valueLabel: string = "ReferrerDetailAllCyclesResponse",
 ) =>
   z.object({
-    responseCode: z.literal(ReferrerDetailResponseCodes.Error),
+    responseCode: z.literal(ReferrerDetailAllCyclesResponseCodes.Error),
     error: z.string(),
     errorMessage: z.string(),
   });
 
 /**
- * Schema for {@link ReferrerDetailResponse}
+ * Schema for {@link ReferrerDetailAllCyclesResponse}
  */
-export const makeReferrerDetailResponseSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+export const makeReferrerDetailAllCyclesResponseSchema = (
+  valueLabel: string = "ReferrerDetailAllCyclesResponse",
+) =>
   z.discriminatedUnion("responseCode", [
-    makeReferrerDetailResponseOkSchema(valueLabel),
-    makeReferrerDetailResponseErrorSchema(valueLabel),
+    makeReferrerDetailAllCyclesResponseOkSchema(valueLabel),
+    makeReferrerDetailAllCyclesResponseErrorSchema(valueLabel),
   ]);
+
+/**
+ * Schema for validating a {@link ReferralProgramCycleId}.
+ *
+ * Note: This accepts any non-empty string to support custom cycle IDs loaded from
+ * CUSTOM_REFERRAL_PROGRAM_CYCLES. Runtime validation against configured cycles
+ * happens at the business logic level.
+ */
+export const makeReferralProgramCycleIdSchema = (valueLabel: string = "ReferralProgramCycleId") =>
+  z.string().min(1, `${valueLabel} must not be empty`);
+
+/**
+ * Schema for validating a {@link ReferralProgramCycle}.
+ */
+export const makeReferralProgramCycleSchema = (valueLabel: string = "ReferralProgramCycle") =>
+  z.object({
+    id: makeReferralProgramCycleIdSchema(`${valueLabel}.id`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
+    rulesUrl: z.url(`${valueLabel}.rulesUrl must be a valid URL`),
+  });
+
+/**
+ * Schema for validating custom referral program cycles (array format from JSON).
+ */
+export const makeCustomReferralProgramCyclesSchema = (
+  valueLabel: string = "CustomReferralProgramCycles",
+) =>
+  z
+    .array(makeReferralProgramCycleSchema(`${valueLabel}[cycle]`))
+    .min(1, `${valueLabel} must contain at least one cycle`);
+
+/**
+ * Schema for validating a {@link ReferralProgramCycleSet} (Map structure).
+ */
+export const makeReferralProgramCycleSetSchema = (valueLabel: string = "ReferralProgramCycleSet") =>
+  z
+    .instanceof(Map, {
+      message: `${valueLabel} must be a Map`,
+    })
+    .refine(
+      (map): map is Map<string, unknown> => {
+        // Validate each entry in the map
+        for (const [key, value] of map.entries()) {
+          // Validate key is a string
+          if (typeof key !== "string") {
+            return false;
+          }
+          // Validate value structure using the cycle schema
+          try {
+            makeReferralProgramCycleSchema(`${valueLabel}[${key}]`).parse(value);
+          } catch {
+            return false;
+          }
+        }
+        return true;
+      },
+      {
+        message: `${valueLabel} must be a Map<ReferralProgramCycleId, ReferralProgramCycle>`,
+      },
+    );
