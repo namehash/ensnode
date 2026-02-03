@@ -96,7 +96,7 @@ jobs:
 
       # Non-blocking: failures are reported to Slack and can be manually retriggered
       - name: Trigger Mintlify Docs Rebuild
-        id: mintlify
+        id: mintlify_rebuild
         continue-on-error: true
         run: |
           HTTP_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
@@ -120,7 +120,7 @@ jobs:
           fi
 
       - name: Notify Mintlify Rebuild Failure
-        if: steps.mintlify.outcome == 'failure'
+        if: steps.mintlify_rebuild.outcome == 'failure'
         uses: ./.github/actions/send_slack_notification
         with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
