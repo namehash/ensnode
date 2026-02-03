@@ -20,7 +20,9 @@ export class PonderClient {
     const response = await fetch(requestUrl);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch Ponder status: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch Ponder Indexing Status: ${response.status} ${response.statusText}`,
+      );
     }
 
     const responseData = await response.json();

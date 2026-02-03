@@ -69,5 +69,24 @@ describe("Ponder Client", () => {
         );
       });
     });
+
+    describe("HTTP error handling", () => {
+      it("should handle non-OK HTTP responses", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response("Internal Server Error", {
+            status: 500,
+            statusText: "Internal Server Error",
+          }),
+        );
+
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        // Act & Assert
+        await expect(ponderClient.status()).rejects.toThrowError(
+          /Failed to fetch Ponder Indexing Status/,
+        );
+      });
+    });
   });
 });
