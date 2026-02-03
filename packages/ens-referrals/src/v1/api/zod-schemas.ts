@@ -283,6 +283,9 @@ export const makeReferralProgramCycleSetSchema = (valueLabel: string = "Referral
     .instanceof(Map, {
       message: `${valueLabel} must be a Map`,
     })
+    .refine((map) => map.size >= 1, {
+      message: `${valueLabel} must contain at least one cycle`,
+    })
     .refine(
       (map): map is Map<string, unknown> => {
         // Validate each entry in the map
