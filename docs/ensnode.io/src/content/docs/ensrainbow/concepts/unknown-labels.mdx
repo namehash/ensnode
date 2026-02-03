@@ -11,9 +11,11 @@ keywords: [ensrainbow, unknown labels, labelhash, healing, rainbow tables, kecca
 
 When querying indexed ENS names, you may encounter labels represented as [**Encoded LabelHashes**](/docs/reference/terminology#encoded-labelhash) like `[428...b0b]` instead of human-readable strings.
 
-An **Unknown Label** is a [**Label**](/ensrainbow/concepts/glossary#label) for which the human-readable string is not available, and only the [**LabelHash**](/ensrainbow/concepts/glossary#labelhash) is known. These labels are displayed using the format `[{LabelHash}]`.
+An **Unknown Label** is a [**Label**](/ensrainbow/concepts/glossary#label) that is known to exist, but where only the [**LabelHash**](/ensrainbow/concepts/glossary#labelhash) of the label is known, not the human-readable string. These unknown labels are represented by ENS indexers as encoded labelhashes using the format `[{LabelHash}]`.
 
-Unknown labels are an unfortunate user experience issue in the ENS ecosystem. They make names difficult to read, understand, and work with in applications.
+Unknown labels are an unfortunate user experience issue in the ENS ecosystem. They can make names difficult to read, understand, and work with in applications.
+
+ENSRainbow serves the goal of minimizing the number of unknown labels that exist, and therefore minimizing the probability that users experience interacting them.
 
 ### Format: Encoded LabelHash
 
@@ -56,7 +58,7 @@ Unknown labels are a **permanent architectural constraint** of the ENS protocol,
 
 ### 1. Protocol Design Immutability
 
-The ENS Registry contract design is immutable—it cannot be changed retroactively. The fundamental design decision to store only nodes (hashes) rather than labels means that:
+The ENS Registry contract design is immutable. It cannot be changed retroactively.
 
 - Historical subnames created without label emission will always have unknown labels unless they can be healed via rainbow tables
 - Future subnames can still be created via direct Registry calls that only provide labelhashes
@@ -73,15 +75,11 @@ This means that without external knowledge (rainbow tables, event logs, etc.), a
 
 ### 3. Ongoing Subname Creation
 
-New subnames continue to be created on-chain. While many modern contracts emit label information in events, the protocol itself does not guarantee this. Unknown labels will continue to appear as long as:
-
-- Direct Registry calls are used to create subnames
-- Contracts that don't emit label information are used
-- Historical data without label information is indexed
+New subnames continue to be created on-chain. While many modern contracts emit label information in events, the protocol itself does not guarantee this.
 
 ## How Unknown Labels Influence Indexing
 
-Unknown labels significantly impact how ENS data is indexed and queried:
+Unknown labels impact how ENS data is indexed and queried:
 
 ### Indexing Process
 
@@ -115,22 +113,15 @@ The legacy ENS Subgraph specifies that **Unknown Labels** and labels containing 
 3. `[` (left square bracket) - Conflicts with "unknown label" representations
 4. `]` (right square bracket) - Conflicts with "unknown label" representations
 
-In ENSNode's default *Interpreted Labels* mode (`SUBGRAPH_COMPAT=false`), when a `subgraph-unindexable` label is encountered, it will be represented as an **Encoded LabelHash** even if the actual label data is available. This prevents database and parsing issues while maintaining compatibility with ENS tooling.
+In ENSNode's default *Interpreted Labels* mode (`SUBGRAPH_COMPAT=false`), when a `subgraph-unindexable` label is encountered, it will be represented as an **Encoded LabelHash** even if the actual label data is available. This simplifies handling for many edge cases.
 
 ## How Unknown Labels Influence Apps and User Interfaces
 
-Unknown labels create significant challenges for applications building on ENS:
+Unknown labels create challenges for applications building on ENS:
 
 ### Display Challenges
 
-**Rendering unknown labels** requires careful handling to differentiate between:
-- An unknown label (represented as `[labelhash]`)
-- A known label that happens to contain hex characters
-
-Apps must:
-- Display encoded labelhashes in a way that clearly indicates they're placeholders
-- Handle names that mix known and unknown labels
-- Provide fallback UI when names contain unknown labels
+Apps must support the possibility of needing to display names containing unknown labels / encoded labelhashes.
 
 ### Querying Challenges
 
