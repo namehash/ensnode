@@ -39,7 +39,7 @@
     "types": "./dist/index.d.ts"
   },
   "scripts": {
-    "prepublishOnly": "tsup",
+    "prepublish": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "lint": "biome check --write .",

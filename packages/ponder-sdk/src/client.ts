@@ -25,7 +25,13 @@ export class PonderClient {
       );
     }
 
-    const responseData = await response.json();
+    let responseData: unknown;
+
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Failed to parse Ponder status response as JSON");
+    }
 
     return deserializePonderIndexingStatus(responseData);
   }
