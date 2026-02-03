@@ -293,7 +293,10 @@ export const makeReferralProgramCycleSetSchema = (valueLabel: string = "Referral
           }
           // Validate value structure using the cycle schema
           try {
-            makeReferralProgramCycleSchema(`${valueLabel}[${key}]`).parse(value);
+            const parsed = makeReferralProgramCycleSchema(`${valueLabel}[${key}]`).parse(value);
+            if (parsed.id !== key) {
+              return false;
+            }
           } catch {
             return false;
           }

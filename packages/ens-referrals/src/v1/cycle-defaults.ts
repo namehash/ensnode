@@ -45,13 +45,13 @@ const CYCLE_2_CONFIG = {
    * Start date for the March 2026 referral program.
    * 2026-03-01T00:00:00Z (March 1, 2026 at 00:00:00 UTC)
    */
-  START_DATE: 1772524800 as UnixTimestamp,
+  START_DATE: 1772323200 as UnixTimestamp,
 
   /**
    * End date for the March 2026 referral program.
    * 2026-03-31T23:59:59Z (March 31, 2026 at 23:59:59 UTC)
    */
-  END_DATE: 1775116799 as UnixTimestamp,
+  END_DATE: 1775001599 as UnixTimestamp,
 
   /**
    * The maximum number of qualified referrers.

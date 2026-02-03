@@ -1,7 +1,7 @@
 import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
-import type { ReferralProgramCycle, ReferralProgramCycleId } from "../cycle";
+import type { ReferralProgramCycle } from "../cycle";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type {
   ReferrerDetail,
@@ -157,6 +157,10 @@ function serializeReferrerDetail(detail: ReferrerDetail): SerializedReferrerDeta
       return serializeReferrerDetailRanked(detail);
     case "unranked":
       return serializeReferrerDetailUnranked(detail);
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(`Unknown detail type: ${(_exhaustiveCheck as ReferrerDetail).type}`);
+    }
   }
 }
 
@@ -200,15 +204,12 @@ export function serializeReferrerDetailAllCyclesResponse(
 ): SerializedReferrerDetailAllCyclesResponse {
   switch (response.responseCode) {
     case ReferrerDetailAllCyclesResponseCodes.Ok: {
-      const serializedData: SerializedReferrerDetailAllCyclesData =
-        {} as SerializedReferrerDetailAllCyclesData;
-
-      for (const [cycleId, detail] of Object.entries(response.data)) {
-        // Object.entries only returns existing entries, so detail is never undefined at runtime
-        serializedData[cycleId as ReferralProgramCycleId] = serializeReferrerDetail(
-          detail as ReferrerDetail,
-        );
-      }
+      const serializedData = Object.fromEntries(
+        Object.entries(response.data).map(([cycleId, detail]) => [
+          cycleId,
+          serializeReferrerDetail(detail as ReferrerDetail),
+        ]),
+      ) as SerializedReferrerDetailAllCyclesData;
 
       return {
         responseCode: response.responseCode,
@@ -218,5 +219,12 @@ export function serializeReferrerDetailAllCyclesResponse(
 
     case ReferrerDetailAllCyclesResponseCodes.Error:
       return response;
+
+    default: {
+      const _exhaustiveCheck: never = response;
+      throw new Error(
+        `Unknown response code: ${(_exhaustiveCheck as ReferrerDetailAllCyclesResponse).responseCode}`,
+      );
+    }
   }
 }

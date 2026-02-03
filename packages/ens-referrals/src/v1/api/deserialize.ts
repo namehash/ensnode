@@ -161,6 +161,10 @@ function deserializeReferrerDetail(detail: SerializedReferrerDetail): ReferrerDe
       return deserializeReferrerDetailRanked(detail);
     case "unranked":
       return deserializeReferrerDetailUnranked(detail);
+    default: {
+      const _exhaustiveCheck: never = detail;
+      throw new Error(`Unknown detail type: ${(_exhaustiveCheck as ReferrerDetail).type}`);
+    }
   }
 }
 

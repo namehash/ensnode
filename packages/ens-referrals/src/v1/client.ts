@@ -32,8 +32,9 @@ export interface ClientOptions {
  * // Create client with default options
  * const client = new ENSReferralsClient();
  *
- * // Get referrer leaderboard
+ * // Get referrer leaderboard for cycle-1
  * const leaderboardPage = await client.getReferrerLeaderboardPage({
+ *   cycle: "cycle-1",
  *   page: 1,
  *   recordsPerPage: 25
  * });
@@ -89,7 +90,8 @@ export class ENSReferralsClient {
    * @example
    * ```typescript
    * // Get first page of cycle-1 leaderboard with default page size (25 records)
-   * const response = await client.getReferrerLeaderboardPage({ cycle: "cycle-1" });
+   * const cycleId = "cycle-1";
+   * const response = await client.getReferrerLeaderboardPage({ cycle: cycleId });
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
    *   const {
    *     aggregatedMetrics,
@@ -98,7 +100,8 @@ export class ENSReferralsClient {
    *     pageContext,
    *     accurateAsOf
    *   } = response.data;
-   *   console.log(`Cycle: ${rules.cycleId}`);
+   *   console.log(`Cycle: ${cycleId}`);
+   *   console.log(`Subregistry: ${rules.subregistryId}`);
    *   console.log(`Total Referrers: ${pageContext.totalRecords}`);
    *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
    * }
@@ -220,10 +223,10 @@ export class ENSReferralsClient {
    * if (response.responseCode === ReferrerDetailAllCyclesResponseCodes.Ok) {
    *   // If "cycle-1" is configured, it will be in response.data
    *   const cycle1Detail = response.data["cycle-1"];
-   *   if (cycle1Detail.type === ReferrerDetailTypeIds.Ranked) {
+   *   if (cycle1Detail && cycle1Detail.type === ReferrerDetailTypeIds.Ranked) {
    *     // TypeScript knows this is ReferrerDetailRanked
    *     console.log(`Cycle 1 Rank: ${cycle1Detail.referrer.rank}`);
-   *   } else {
+   *   } else if (cycle1Detail) {
    *     // TypeScript knows this is ReferrerDetailUnranked
    *     console.log("Referrer is not on the leaderboard for cycle-1");
    *   }
