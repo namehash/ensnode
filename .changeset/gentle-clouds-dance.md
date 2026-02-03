@@ -2,4 +2,4 @@
 "ensapi": patch
 ---
 
-Add `OPENAPI_GENERATE_MODE` to start ENSApi with mock config for OpenAPI spec generation without external dependencies
+Add `OPENAPI_GENERATE_MODE` environment variable to enable starting ENSApi with a mock config exclusively for OpenAPI spec generation without external dependencies
