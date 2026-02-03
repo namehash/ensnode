@@ -13,7 +13,12 @@ import {
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import type { Domain, DomainOrderValue, DomainsOrderBy } from "@/graphql-api/schema/domain";
+import type {
+  Domain,
+  DomainCursor,
+  DomainOrderValue,
+  DomainsOrderBy,
+} from "@/graphql-api/schema/domain";
 import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
@@ -221,8 +226,6 @@ export function findDomains({ name, owner }: DomainFilter) {
       and(
         owner ? eq(domainsBase.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
-        // This is intentional - we can't match partial text against unknown labels.
         partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
       ),
     );
@@ -408,32 +411,28 @@ function getOrderColumn(
  * Uses tuple comparison: (orderColumn, id) > (cursorValue, cursorId)
  *
  * @param domains - The findDomains CTE result
- * @param cursorId - The domain ID from the decoded cursor
- * @param cursorValue - The order column value from the decoded cursor
- * @param cursorOrderBy - The order field from the decoded cursor
- * @param queryOrderBy - The order field for the current query (must match cursorOrderBy)
+ * @param cursor - The decoded DomainCursor
+ * @param queryOrderBy - The order field for the current query (must match cursor.by)
  * @param direction - "after" for forward pagination, "before" for backward
  * @param effectiveDesc - Whether the effective sort direction is descending
- * @throws if cursorOrderBy does not match queryOrderBy
+ * @throws if cursor.by does not match queryOrderBy
  * @returns SQL expression for the cursor filter
  */
 export function cursorFilter(
   domains: ReturnType<typeof findDomains>,
-  cursorId: DomainId,
-  cursorValue: DomainOrderValue | undefined,
-  cursorOrderBy: typeof DomainsOrderBy.$inferType,
+  cursor: DomainCursor,
   queryOrderBy: typeof DomainsOrderBy.$inferType,
   direction: "after" | "before",
   effectiveDesc: boolean,
 ): SQL {
   // Validate cursor was created with the same ordering as the current query
-  if (cursorOrderBy !== queryOrderBy) {
+  if (cursor.by !== queryOrderBy) {
     throw new Error(
-      `Invalid cursor: cursor was created with orderBy=${cursorOrderBy} but query uses orderBy=${queryOrderBy}`,
+      `Invalid cursor: cursor was created with orderBy=${cursor.by} but query uses orderBy=${queryOrderBy}`,
     );
   }
 
-  const orderColumn = getOrderColumn(domains, cursorOrderBy);
+  const orderColumn = getOrderColumn(domains, cursor.by);
 
   // Determine comparison direction:
   // - "after" with ASC = greater than cursor
@@ -444,7 +443,7 @@ export function cursorFilter(
   const op = useGreaterThan ? ">" : "<";
 
   // Direct tuple comparison with cursor values (no subquery needed)
-  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${cursorValue}, ${cursorId})`;
+  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${cursor.value}, ${cursor.id})`;
 }
 
 /**

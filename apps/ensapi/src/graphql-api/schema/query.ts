@@ -98,26 +98,10 @@ builder.queryType({
                 .where(
                   and(
                     beforeCursor
-                      ? cursorFilter(
-                          domains,
-                          beforeCursor.id,
-                          beforeCursor.value,
-                          beforeCursor.by,
-                          orderBy,
-                          "before",
-                          effectiveDesc,
-                        )
+                      ? cursorFilter(domains, beforeCursor, orderBy, "before", effectiveDesc)
                       : undefined,
                     afterCursor
-                      ? cursorFilter(
-                          domains,
-                          afterCursor.id,
-                          afterCursor.value,
-                          afterCursor.by,
-                          orderBy,
-                          "after",
-                          effectiveDesc,
-                        )
+                      ? cursorFilter(domains, afterCursor, orderBy, "after", effectiveDesc)
                       : undefined,
                   ),
                 )
