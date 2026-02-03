@@ -1,21 +1,10 @@
 import type { z } from "zod/v4";
 
-import { nonnegativeIntegerSchema } from "./shared";
-
-//// Block Number
-
-export const blockNumberSchema = nonnegativeIntegerSchema;
-
-/**
- * Block Number
- *
- * Guaranteed to be a non-negative integer.
- */
-export type BlockNumber = z.infer<typeof blockNumberSchema>;
+import { positiveIntegerSchema } from "./numbers";
 
 // Chain ID
 
-export const chainIdSchema = nonnegativeIntegerSchema;
+export const chainIdSchema = positiveIntegerSchema;
 
 /**
  * Chain ID

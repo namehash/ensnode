@@ -2,14 +2,14 @@
   "name": "@ensnode/ponder-sdk",
   "version": "1.5.1",
   "type": "module",
-  "description": "A utility library for interacting with Ponder application and data",
+  "description": "A utility library for interacting with Ponder apps and data.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/namehash/ensnode.git",
-    "directory": "packages/ponder-metadata-api"
+    "directory": "packages/ponder-sdk"
   },
-  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-metadata-api",
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-sdk",
   "keywords": [
     "ENSNode",
     "Ponder"
@@ -39,14 +39,11 @@
     "types": "./dist/index.d.ts"
   },
   "scripts": {
-    "prepublish": "tsup",
+    "prepublishOnly": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci"
-  },
-  "dependencies": {
-    "parse-prometheus-text-format": "^1.1.1"
   },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
@@ -59,7 +56,6 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@ensnode/ensnode-sdk": "workspace:*",
     "ponder": "catalog:",
     "viem": "catalog:",
     "zod": "catalog:"

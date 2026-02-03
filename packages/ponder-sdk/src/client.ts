@@ -1,32 +1,30 @@
-import { buildPonderStatus, type PonderStatus } from "./api/status";
-import type { ChainId } from "./chain";
-import { validatePonderStatusResponse } from "./ponder-status";
+import {
+  deserializePonderIndexingStatus,
+  type PonderIndexingStatus,
+} from "./deserialize/indexing-status";
 
 /**
  * PonderClient for interacting with Ponder app endpoints.
- *
- * Requires the set of indexed chain IDs to validate the status response against the expected chains.
- * This ensures that the client can detect if the Ponder instance is missing status for any of the indexed chains.
  */
 export class PonderClient {
-  constructor(
-    private baseUrl: URL,
-    private indexedChainIds: Set<ChainId>,
-  ) {}
+  constructor(private baseUrl: URL) {}
 
   /**
-   * Get Ponder Status
+   * Get Ponder Indexing Status
    *
-   * @returns Validated Ponder Status response
-   * @throws Error if the response is invalid
+   * @returns Ponder Indexing Status.
+   * @throws Error if the response could not be fetched or was invalid.
    */
-  async status(): Promise<PonderStatus> {
+  async status(): Promise<PonderIndexingStatus> {
     const requestUrl = new URL("/status", this.baseUrl);
     const response = await fetch(requestUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Ponder status: ${response.status} ${response.statusText}`);
+    }
+
     const responseData = await response.json();
 
-    const validatedData = validatePonderStatusResponse(responseData, this.indexedChainIds);
-
-    return buildPonderStatus(validatedData);
+    return deserializePonderIndexingStatus(responseData);
   }
 }

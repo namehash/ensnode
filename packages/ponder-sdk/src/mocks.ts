@@ -1,66 +1,66 @@
-import type { PonderStatusResponse } from "./ponder-status";
+import type { SerializedPonderIndexingStatus } from "./deserialize/indexing-status";
 
-export const validPonderStatusResponse = {
-  "1": {
+export const mockSerializedPonderIndexingStatusValid = {
+  mainnet: {
     id: 1,
     block: {
       number: 24375715,
       timestamp: 1770114251,
     },
   },
-  "10": {
+  optimism: {
     id: 10,
     block: {
       number: 147257736,
       timestamp: 1770114249,
     },
   },
-  "8453": {
+  base: {
     id: 8453,
     block: {
       number: 41662451,
       timestamp: 1770114249,
     },
   },
-  "42161": {
+  arbitrum: {
     id: 42161,
     block: {
       number: 428158835,
       timestamp: 1770114250,
     },
   },
-  "59144": {
+  linea: {
     id: 59144,
     block: {
       number: 28577755,
       timestamp: 1770114244,
     },
   },
-  "534352": {
+  scroll: {
     id: 534352,
     block: {
       number: 29352537,
       timestamp: 1770114250,
     },
   },
-} satisfies PonderStatusResponse;
+} satisfies SerializedPonderIndexingStatus;
 
-export const validPonderStatusResponseMinimal = {
-  "1": {
-    id: 1,
-    block: {
-      number: 4375715,
-      timestamp: 1770114251,
-    },
-  },
-};
-
-export const invalidPonderStatusResponseNegativeBlockNumber = {
-  "1": {
+export const mockSerializedPonderIndexingStatusInvalidBlockNumber = {
+  mainnet: {
     id: 1,
     block: {
       number: -24375715, // Invalid negative block number
       timestamp: 1770114251,
     },
   },
-};
+} satisfies SerializedPonderIndexingStatus;
+
+export const mockSerializedPonderIndexingStatusInvalidChainId = {
+  mainnet: {
+    id: 0, // Invalid non-positive chain ID
+    block: {
+      number: 24375715,
+      timestamp: 1770114251,
+    },
+  },
+} satisfies SerializedPonderIndexingStatus;

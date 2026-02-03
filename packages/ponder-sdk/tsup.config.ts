@@ -10,7 +10,6 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  external: ["@ensnode/ensnode-sdk", "ponder", "viem", "zod"],
-  noExternal: ["parse-prometheus-text-format"],
+  external: ["ponder", "viem", "zod"], // Mark peer dependencies as external
   outDir: "./dist",
 });
