@@ -50,7 +50,8 @@ variable "database_schema" {
 }
 
 variable "ensrainbow_url" {
-  type = string
+  type        = string
+  description = "Internal URL to relevant ENSRainbow service instance (e.g. URL to ENSRainbow Subgraph instance, or ENSRainbow Searchlight)."
 }
 
 variable "ensindexer_label_set_id" {
