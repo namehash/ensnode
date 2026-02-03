@@ -9,17 +9,16 @@ import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
-import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
+import { openApiGenerateModeMiddleware } from "@/middleware/openapi-generate-mode.middleware";
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
-import ensanalyticsApiV1 from "./handlers/ensanalytics-api-v1";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
@@ -33,6 +32,9 @@ app.use(async (ctx, next) => {
 
 // use CORS middleware
 app.use(cors({ origin: "*" }));
+
+// block all routes except /openapi.json when running in OpenAPI generate mode
+app.use(openApiGenerateModeMiddleware);
 
 // include automatic OpenTelemetry instrumentation for incoming requests
 app.use(otel());
@@ -64,11 +66,8 @@ app.route("/api", ensNodeApi);
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
-// use ENSAnalytics API at /ensanalytics (v0, implicit)
+// use ENSAnalytics API at /ensanalytics
 app.route("/ensanalytics", ensanalyticsApi);
-
-// use ENSAnalytics API v1 at /v1/ensanalytics
-app.route("/v1/ensanalytics", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
@@ -160,9 +159,6 @@ const gracefulShutdown = async () => {
 
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
-
-    referrerLeaderboardCacheV1.destroy();
-    logger.info("Destroyed referrerLeaderboardCacheV1");
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");

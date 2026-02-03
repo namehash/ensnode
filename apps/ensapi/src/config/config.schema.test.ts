@@ -108,6 +108,7 @@ describe("buildConfigFromEnvironment", () => {
       ]),
       ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
       ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      inOpenApiGenerateMode: false,
     });
   });
 
@@ -190,6 +191,7 @@ describe("buildEnsApiPublicConfig", () => {
       ]),
       ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
       ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      inOpenApiGenerateMode: false,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -215,6 +217,7 @@ describe("buildEnsApiPublicConfig", () => {
       rpcConfigs: new Map(),
       ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
       ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      inOpenApiGenerateMode: false,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -251,6 +254,7 @@ describe("buildEnsApiPublicConfig", () => {
       ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
       ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
       theGraphApiKey: "secret-api-key",
+      inOpenApiGenerateMode: false,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);

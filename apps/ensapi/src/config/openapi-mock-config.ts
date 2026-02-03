@@ -14,6 +14,9 @@ import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
  * When OPENAPI_GENERATE_MODE is enabled, ENSApi uses this mock config
  * to start without requiring real database or indexer connections.
  * This allows the OpenAPI spec to be generated in CI environments.
+ *
+ * Additionally, when `inOpenApiGenerateMode` is true (set by this config),
+ * all routes return HTTP 503 Service Unavailable except for `/openapi.json`.
  */
 export function buildOpenApiMockConfig(port?: string): EnsApiConfigInput {
   return {
@@ -51,5 +54,6 @@ export function buildOpenApiMockConfig(port?: string): EnsApiConfigInput {
     },
     ensHolidayAwardsStart: new Date(ENS_HOLIDAY_AWARDS_START_DATE * 1000).toISOString(),
     ensHolidayAwardsEnd: new Date(ENS_HOLIDAY_AWARDS_END_DATE * 1000).toISOString(),
+    inOpenApiGenerateMode: true,
   };
 }

@@ -70,6 +70,22 @@ const EnsApiConfigSchema = z
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
     ensHolidayAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
     ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
+    /**
+     * When true, ENSApi is running in OpenAPI generate mode. In this mode:
+     * - All routes return HTTP 503 Service Unavailable except for `/openapi.json`
+     * - The following environment variables are ignored (mock values are used instead):
+     *   - DATABASE_URL
+     *   - ENSINDEXER_URL
+     *   - THEGRAPH_API_KEY
+     *   - All RPC configuration variables (ALCHEMY_API_KEY, QUICKNODE_API_KEY,
+     *     QUICKNODE_ENDPOINT_NAME, DRPC_API_KEY, RPC_URL_*)
+     *   - ENS_HOLIDAY_AWARDS_START
+     *   - ENS_HOLIDAY_AWARDS_END
+     * - The following environment variables are still respected:
+     *   - PORT
+     *   - LOG_LEVEL
+     */
+    inOpenApiGenerateMode: z.boolean().default(false),
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo)
