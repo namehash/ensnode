@@ -1,4 +1,6 @@
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach } from "node:test";
+
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { PonderClient } from "./client";
 import { deserializePonderIndexingStatus } from "./deserialize/indexing-status";
@@ -12,9 +14,12 @@ import {
 const mockFetch = vi.fn<typeof fetch>();
 
 describe("Ponder Client", () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
+  beforeAll(() => {
     vi.stubGlobal("fetch", mockFetch);
+  });
+
+  afterEach(() => {
+    mockFetch.mockReset();
   });
 
   afterAll(() => {
