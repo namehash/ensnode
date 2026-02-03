@@ -1,11 +1,12 @@
 "use client";
 
+import { NameDisplay } from "@namehash/namehash-ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, useState } from "react";
 
 import type { Name } from "@ensnode/ensnode-sdk";
 
-import { getNameDetailsRelativePath, NameDisplay, NameLink } from "@/components/identity/utils";
+import { getNameDetailsRelativePath, NameLink } from "@/components/name-links";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

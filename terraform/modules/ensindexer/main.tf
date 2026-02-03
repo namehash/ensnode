@@ -6,6 +6,10 @@ locals {
     "QUICKNODE_API_KEY"       = { value = var.quicknode_api_key }
     "QUICKNODE_ENDPOINT_NAME" = { value = var.quicknode_endpoint_name }
   }
+
+  ensindexer_fqdn = "indexer.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}"
+
+  ensapi_fqdn = "api.${var.ensnode_indexer_type}.${var.ensnode_environment_name}.${var.hosted_zone_name}"
 }
 
 # For details on "render_web_service", see:

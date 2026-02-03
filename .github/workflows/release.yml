@@ -69,7 +69,8 @@ jobs:
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # https://github.com/changesets/action/issues/98#issuecomment-2519457411
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Filter Published Packages For Apps
         uses: cloudposse/github-action-jq@main

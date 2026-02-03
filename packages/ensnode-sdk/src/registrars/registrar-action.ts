@@ -1,17 +1,13 @@
-import type { EncodedReferrer } from "@namehash/ens-referrals";
-
-export type { EncodedReferrer } from "@namehash/ens-referrals";
-export { decodeEncodedReferrer, ZERO_ENCODED_REFERRER } from "@namehash/ens-referrals";
-
 import type { Address, Hash } from "viem";
 
-import {
-  type BlockRef,
-  type Duration,
-  type PriceEth,
-  type SerializedPriceEth,
-  serializePriceEth,
-} from "../shared";
+import type { EncodedReferrer } from "./encoded-referrer";
+
+export type { EncodedReferrer } from "./encoded-referrer";
+export { decodeEncodedReferrer, ZERO_ENCODED_REFERRER } from "./encoded-referrer";
+
+import type { PriceEth, SerializedPriceEth } from "../shared/currencies";
+import { serializePriceEth } from "../shared/serialize";
+import type { BlockRef, Duration } from "../shared/types";
 import type { RegistrationLifecycle } from "./registration-lifecycle";
 
 /**
@@ -122,8 +118,8 @@ export interface RegistrarActionReferralAvailable {
   /**
    * Decoded Referrer
    *
-   * Decoded referrer according to the subjective interpretation of
-   * `encodedReferrer` defined for ENS Holiday Awards.
+   * The referrer address decoded from {@link encodedReferrer} using strict
+   * left-zero-padding validation.
    *
    * Identifies the interpreted address of the referrer.
    * The "chainId" of this address is the same as is referenced in
@@ -151,9 +147,8 @@ export interface RegistrarActionReferralNotApplicable {
   /**
    * Decoded Referrer
    *
-   * Decoded referrer according to the subjective interpretation of
-   * `encodedReferrer` defined for ENS Holiday Awards.
-   *
+   * The referrer address decoded from {@link encodedReferrer} using strict
+   * left-zero-padding validation. Null when the registrar controller does not implement referrals.
    */
   decodedReferrer: null;
 }

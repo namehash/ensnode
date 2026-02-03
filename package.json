@@ -2,7 +2,7 @@
   "name": "ensnode-monorepo",
   "version": "0.0.1",
   "private": true,
-  "packageManager": "pnpm@10.26.0",
+  "packageManager": "pnpm@10.28.0",
   "scripts": {
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
@@ -24,25 +24,27 @@
     "@biomejs/biome": "^2.3.1",
     "@changesets/changelog-github": "^0.5.2",
     "@changesets/cli": "^2.29.8",
+    "@typescript/native-preview": "7.0.0-dev.20260128.1",
     "jsdom": "^27.0.1",
     "tsup": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=24.13.0"
   },
   "pnpm": {
     "overrides": {
       "@adraffy/ens-normalize": "catalog:",
-      "@graphiql/react>@headlessui/react": "2.2.0",
       "esbuild@<=0.24.2": ">=0.25.0",
-      "tmp@<=0.2.3": ">=0.2.4",
-      "ponder>vite": "6.4.1",
-      "@tailwindcss/vite>vite@<7.1.11": ">=7.1.11",
-      "axios@<1.12.0": ">=1.12.0",
-      "glob@<11.1.0": ">=11.1.0",
-      "mdast-util-to-hast@<13.2.1": ">=13.2.1"
+      "diff@<8.0.3": ">=8.0.3",
+      "undici@<6.23.0": ">=6.23.0",
+      "devalue@>=5.3.0 <=5.6.1": ">=5.6.2",
+      "h3@<=1.15.4": ">=1.15.5",
+      "tar@<7.5.7": "^7.5.7",
+      "lodash@<=4.17.22": "^4.17.23",
+      "lodash-es@<=4.17.22": "^4.17.23",
+      "fast-xml-parser@>=4.3.6 <=5.3.3": "^5.3.4"
     },
     "ignoredBuiltDependencies": [
       "bun"

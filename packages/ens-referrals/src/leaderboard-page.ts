@@ -1,9 +1,10 @@
+import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
+
 import type { AggregatedReferrerMetrics } from "./aggregations";
 import type { ReferrerLeaderboard } from "./leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "./number";
 import type { AwardedReferrerMetrics } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
-import type { UnixTimestamp } from "./time";
 
 /**
  * The default number of referrers per leaderboard page.
@@ -208,7 +209,7 @@ export interface ReferrerLeaderboardPage {
    * described by `pageContext` within the related {@link ReferrerLeaderboard}.
    *
    * @invariant Array will be empty if `pageContext.totalRecords` is 0.
-   * @invariant Array entries are ordered by `rank` (descending).
+   * @invariant Array entries are ordered by `rank` (ascending).
    */
   referrers: AwardedReferrerMetrics[];
 

@@ -1,5 +1,54 @@
 # ensindexer
 
+## 1.5.1
+
+### Patch Changes
+
+- [#1534](https://github.com/namehash/ensnode/pull/1534) [`bc1897d`](https://github.com/namehash/ensnode/commit/bc1897d99fe6f3e3b33db77e76eb1943cbcdbb71) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Updated default plugin activations when `SUBGRAPH_COMPAT=false` (default) to also include protocol-acceleration, registrars, and tokenscope.
+
+- [#1537](https://github.com/namehash/ensnode/pull/1537) [`63617fa`](https://github.com/namehash/ensnode/commit/63617fa827daa4bd7761f482812daf7b507da3d2) Thanks [@tk-o](https://github.com/tk-o)! - Updates Node.js runtime to the current LTS version (v24).
+
+- Updated dependencies []:
+  - @ensnode/datasources@1.5.1
+  - @ensnode/ensrainbow-sdk@1.5.1
+  - @ensnode/ponder-metadata@1.5.1
+  - @ensnode/ensnode-schema@1.5.1
+  - @ensnode/ensnode-sdk@1.5.1
+
+## 1.5.0
+
+### Patch Changes
+
+- [#1515](https://github.com/namehash/ensnode/pull/1515) [`eda900e`](https://github.com/namehash/ensnode/commit/eda900e1073e26111aa2ed6a04ec4310ca46b65f) Thanks [@shrugs](https://github.com/shrugs)! - Adds `timestamp` to Event entities in the ENSv2 schema (Registration.event, Renewal.event).
+
+- [#1527](https://github.com/namehash/ensnode/pull/1527) [`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc) Thanks [@tk-o](https://github.com/tk-o)! - Update `registrars` plugin indexing logic to store at most one metadata record in ENSDb for current "logical registrar action".
+
+- Updated dependencies [[`dc7e07f`](https://github.com/namehash/ensnode/commit/dc7e07f6e69e30d597a871b79bd2c6876de9f8cc)]:
+  - @ensnode/ensnode-schema@1.5.0
+  - @ensnode/datasources@1.5.0
+  - @ensnode/ensrainbow-sdk@1.5.0
+  - @ensnode/ponder-metadata@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
+## 1.4.0
+
+### Minor Changes
+
+- [#1280](https://github.com/namehash/ensnode/pull/1280) [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec) Thanks [@shrugs](https://github.com/shrugs)! - Introduces the ENSv2 Plugin ('ensv2') for indexing both ENSv1 and the future ENSv2 protocol.
+
+- [#1280](https://github.com/namehash/ensnode/pull/1280) [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec) Thanks [@shrugs](https://github.com/shrugs)! - BREAKING: Removed holesky ENSNamespace.
+
+### Patch Changes
+
+- [#1075](https://github.com/namehash/ensnode/pull/1075) [`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990) Thanks [@djstrong](https://github.com/djstrong)! - Refine ENSRainbow Docs
+
+- Updated dependencies [[`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990), [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec), [`c254385`](https://github.com/namehash/ensnode/commit/c254385a7f08952b31eff8cdd46c01cb09bed8ec), [`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d), [`cf1b218`](https://github.com/namehash/ensnode/commit/cf1b218c27cb2253f37ef6b452c908d5c387aa0a), [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda), [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3)]:
+  - @ensnode/ensnode-sdk@1.4.0
+  - @ensnode/ensrainbow-sdk@1.4.0
+  - @ensnode/ensnode-schema@1.4.0
+  - @ensnode/datasources@1.4.0
+  - @ensnode/ponder-metadata@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes

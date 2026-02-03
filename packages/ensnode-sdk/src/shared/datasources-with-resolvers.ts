@@ -7,6 +7,9 @@ import {
   maybeGetDatasource,
 } from "@ensnode/datasources";
 
+import { DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS } from "./datasources-with-ensv2-contracts";
+
+// avoids 'The inferred type of this node exceeds the maximum length the compiler will serialize'
 type DatasourceWithResolverContract = Datasource & { contracts: { Resolver: ContractConfig } };
 
 export const DATASOURCE_NAMES_WITH_RESOLVERS = [
@@ -15,7 +18,9 @@ export const DATASOURCE_NAMES_WITH_RESOLVERS = [
   DatasourceNames.Lineanames,
   DatasourceNames.ThreeDNSOptimism,
   DatasourceNames.ThreeDNSBase,
-  DatasourceNames.Namechain,
+
+  // all datasources that define ENSv2 contracts also define Resolver
+  ...DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS,
 ] as const satisfies DatasourceName[];
 
 /**
@@ -29,14 +34,13 @@ export const getDatasourcesWithResolvers = (
     maybeGetDatasource(namespace, datasourceName),
   )
     .filter((datasource) => !!datasource)
-    .filter((datasource) => {
+    .map((datasource) => {
       // all of the relevant datasources provide a Resolver ContractConfig with a `startBlock`
       if (!datasource.contracts.Resolver) {
-        console.warn(
-          `Warning(resolverContractConfig): Datasource does not define a 'Resolver' contract. ${JSON.stringify(datasource)}`,
+        throw new Error(
+          `Invariant: Datasource does not define a 'Resolver' contract. Defined contracts: ${JSON.stringify(Object.keys(datasource.contracts))}`,
         );
-        return false;
       }
 
-      return true;
+      return datasource;
     });

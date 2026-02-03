@@ -11,7 +11,7 @@
  * into the ENSIndexer application data model (and its constraints).
  */
 
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 import type { ChainIdString, ChainIndexingStatusSnapshot } from "@ensnode/ensnode-sdk";
 import {

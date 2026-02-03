@@ -6,7 +6,7 @@ import type { TheGraphFallback } from "./config/thegraph";
  * Determines whether, given the provided context, a Subgraph GraphQL API request can be handled by
  * a TheGraph-hosted Subgraph.
  *
- * @see https://ensnode.io/docs/reference/subgraph-compatibility/
+ * @see https://ensnode.io/docs/concepts/what-is-the-ens-subgraph/
  */
 export const canFallbackToTheGraph = ({
   namespace,
@@ -44,6 +44,7 @@ const makeTheGraphSubgraphUrl = (namespace: ENSNamespaceId, apiKey: string) => {
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/5XqPmWe6gjyrJtFn9cLy237i4cWw2j9HcUJEXsP5qGtH`;
     case ENSNamespaceIds.Sepolia:
       return `https://gateway.thegraph.com/api/${apiKey}/subgraphs/id/G1SxZs317YUb9nQX3CC98hDyvxfMJNZH5pPRGpNrtvwN`;
+    case ENSNamespaceIds.SepoliaV2:
     case ENSNamespaceIds.EnsTestEnv:
       return null;
     default:

@@ -11,6 +11,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: ["viem"],
-  noExternal: ["@namehash/ens-referrals"],
   outDir: "./dist",
 });

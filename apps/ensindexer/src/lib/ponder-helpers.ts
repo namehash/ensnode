@@ -7,7 +7,7 @@
 import type { Event, EventNames } from "ponder:registry";
 import type { ChainConfig } from "ponder";
 import type { Address, PublicClient } from "viem";
-import * as z from "zod/v4";
+import { z } from "zod/v4";
 
 import {
   type ContractConfig,
@@ -305,16 +305,19 @@ export function chainsConnectionConfig(
     );
   }
 
+  // NOTE: disable cache on local chains (e.g. ens-test-env, devnet)
+  const disableCache =
+    chainId === 31337 ||
+    chainId === 1337 ||
+    chainId === ensTestEnvL1Chain.id ||
+    chainId === ensTestEnvL2Chain.id;
+
   return {
     [chainId.toString()]: {
       id: chainId,
       rpc: rpcConfig.httpRPCs.map((httpRPC) => httpRPC.toString()),
       ws: rpcConfig.websocketRPC?.toString(),
-      // NOTE: disable cache on local chains (e.g. Anvil, Ganache)
-      ...((chainId === 31337 ||
-        chainId === 1337 ||
-        chainId === ensTestEnvL1Chain.id ||
-        chainId === ensTestEnvL2Chain.id) && { disableCache: true }),
+      disableCache,
     } satisfies ChainConfig,
   };
 }

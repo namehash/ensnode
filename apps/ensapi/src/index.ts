@@ -9,6 +9,7 @@ import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
+import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
@@ -18,6 +19,7 @@ import { indexingStatusMiddleware } from "@/middleware/indexing-status.middlewar
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
+import ensanalyticsApiV1 from "./handlers/ensanalytics-api-v1";
 import ensNodeApi from "./handlers/ensnode-api";
 import subgraphApi from "./handlers/subgraph-api";
 
@@ -62,8 +64,11 @@ app.route("/api", ensNodeApi);
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
-// use ENSAnalytics API at /ensanalytics
+// use ENSAnalytics API at /ensanalytics (v0, implicit)
 app.route("/ensanalytics", ensanalyticsApi);
+
+// use ENSAnalytics API v1 at /v1/ensanalytics
+app.route("/v1/ensanalytics", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
@@ -79,7 +84,14 @@ app.get(
         description:
           "APIs for ENS resolution, navigating the ENS nameforest, and metadata about an ENSNode",
       },
-      servers: [{ url: `http://localhost:${config.port}`, description: "Local Development" }],
+      servers: [
+        { url: "https://api.alpha.ensnode.io", description: "ENSNode Alpha (Mainnet)" },
+        {
+          url: "https://api.alpha-sepolia.ensnode.io",
+          description: "ENSNode Alpha (Sepolia Testnet)",
+        },
+        { url: `http://localhost:${config.port}`, description: "Local Development" },
+      ],
       tags: [
         {
           name: "Resolution",
@@ -148,6 +160,9 @@ const gracefulShutdown = async () => {
 
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
+
+    referrerLeaderboardCacheV1.destroy();
+    logger.info("Destroyed referrerLeaderboardCacheV1");
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");

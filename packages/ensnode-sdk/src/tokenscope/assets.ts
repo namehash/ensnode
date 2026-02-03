@@ -2,15 +2,9 @@ import { type Address, type Hex, isAddressEqual, zeroAddress } from "viem";
 import { prettifyError } from "zod/v4";
 
 import { type Node, uint256ToHex32 } from "../ens";
-import {
-  type AccountId,
-  type AssetId,
-  type AssetNamespace,
-  type ChainId,
-  formatAssetId,
-  type TokenId,
-} from "../shared";
+import { formatAssetId } from "../shared/serialize";
 import type { AssetIdString } from "../shared/serialized-types";
+import type { AccountId, AssetId, AssetNamespace, ChainId, TokenId } from "../shared/types";
 import { makeAssetIdSchema, makeAssetIdStringSchema } from "./zod-schemas";
 
 /**

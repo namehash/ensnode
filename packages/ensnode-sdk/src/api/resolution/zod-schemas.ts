@@ -1,4 +1,4 @@
-import z from "zod/v4";
+import { z } from "zod/v4";
 
 /**
  * Schema for resolver records response (addresses, texts, name)

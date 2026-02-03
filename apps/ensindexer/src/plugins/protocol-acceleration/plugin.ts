@@ -9,7 +9,9 @@ import {
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
 import {
+  DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS,
   DATASOURCE_NAMES_WITH_RESOLVERS,
+  getDatasourcesWithENSv2Contracts,
   getDatasourcesWithResolvers,
 } from "@ensnode/ensnode-sdk/internal";
 
@@ -48,6 +50,7 @@ const DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS = [
 const ALL_DATASOURCE_NAMES = [
   ...DATASOURCE_NAMES_WITH_RESOLVERS,
   ...DATASOURCE_NAMES_WITH_REVERSE_RESOLVERS,
+  ...DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS,
 ];
 
 const REQUIRED_DATASOURCE_NAMES = [DatasourceNames.ENSRoot];
@@ -58,7 +61,6 @@ export default createPlugin({
   createPonderConfig(config) {
     const { ensroot } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
     const {
-      namechain,
       basenames,
       lineanames,
       threednsOptimism,
@@ -143,19 +145,17 @@ export default createPlugin({
         ////////////////////////////
         [namespaceContract(pluginName, "ENSv2Registry")]: {
           abi: RegistryABI,
-          chain: {
-            ...chainConfigForContract(
-              config.globalBlockrange,
-              ensroot.chain.id,
-              ensroot.contracts.Registry,
-            ),
-            ...(namechain &&
-              chainConfigForContract(
+          chain: getDatasourcesWithENSv2Contracts(config.namespace).reduce(
+            (memo, datasource) => ({
+              ...memo,
+              ...chainConfigForContract(
                 config.globalBlockrange,
-                namechain.chain.id,
-                namechain.contracts.Registry,
-              )),
-          },
+                datasource.chain.id,
+                datasource.contracts.Registry,
+              ),
+            }),
+            {},
+          ),
         },
 
         /////////////////

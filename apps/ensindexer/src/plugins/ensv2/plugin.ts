@@ -7,9 +7,6 @@
  * - RequiredAndNotNull opposite type: RequiredToBeNull<T, keys> for constraining polymorphic entities in graphql schema
  * - re-asses NameWrapper expiry logic — compare to subgraph implementation & see if we can simplify
  * - indexes based on graphql queries, ask claude to compile recommendations
- * - modify Registration schema to more closely match ENSv2, map v1 into it
- * - Renewals (v1, v2)
- *  - include similar /latest / superceding logic, need to be able to reference latest renewal to upsert referrers
  * - ThreeDNS
  * - Migration
  *   - need to understand migration pattern better
@@ -21,11 +18,8 @@
  * - Query.permissions(by: { contract: {  } })
  * - custom wrapper for resolveCursorConnection with typesafety that applies defaults and auto-decodes cursors to the indicated type
  * - Pothos envelop plugins (aliases, depth, tokens, whatever)
- * - BEFORE MERGE: revert sepolia.ts namespace back to original, including ensv2 stubs
  *
  * PENDING ENS TEAM
- * - DedicatedResolver moving to EAC
- *  - depends on: namechain --testNames script not crashing in commit >= 803a940
  * - Domain.canonical/Domain.canonicalPath/Domain.fqdn depends on:
  *  - depends on: Registry.canonicalName implementation + indexing
  * - Signal Pattern for Registry contracts
@@ -54,6 +48,7 @@ import {
   RegistryABI,
 } from "@ensnode/datasources";
 import { PluginName } from "@ensnode/ensnode-sdk";
+import { getDatasourcesWithENSv2Contracts } from "@ensnode/ensnode-sdk/internal";
 
 import { createPlugin, namespaceContract } from "@/lib/plugin-helpers";
 import {
@@ -71,9 +66,10 @@ const REQUIRED_DATASOURCE_NAMES = [
 
 const ALL_DATASOURCE_NAMES = [
   ...REQUIRED_DATASOURCE_NAMES,
-  DatasourceNames.Namechain,
   DatasourceNames.Basenames,
   DatasourceNames.Lineanames,
+  DatasourceNames.ENSv2Root,
+  DatasourceNames.ENSv2ETHRegistry,
 ];
 
 export default createPlugin({
@@ -85,10 +81,12 @@ export default createPlugin({
     } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     const {
-      namechain, //
+      ENSv2ETHRegistry, //
       basenames,
       lineanames,
     } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
+
+    const DATASOURCES_WITH_ENSV2_CONTRACTS = getDatasourcesWithENSv2Contracts(config.namespace);
 
     return createConfig({
       chains: chainsConnectionConfigForDatasources(
@@ -103,19 +101,17 @@ export default createPlugin({
         ////////////////////////////
         [namespaceContract(pluginName, "ENSv2Registry")]: {
           abi: RegistryABI,
-          chain: [ensroot, namechain]
-            .filter((ds) => !!ds)
-            .reduce(
-              (memo, datasource) => ({
-                ...memo,
-                ...chainConfigForContract(
-                  config.globalBlockrange,
-                  datasource.chain.id,
-                  datasource.contracts.Registry,
-                ),
-              }),
-              {},
-            ),
+          chain: DATASOURCES_WITH_ENSV2_CONTRACTS.reduce(
+            (memo, datasource) => ({
+              ...memo,
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                datasource.chain.id,
+                datasource.contracts.Registry,
+              ),
+            }),
+            {},
+          ),
         },
 
         ///////////////////////////////////
@@ -123,32 +119,30 @@ export default createPlugin({
         ///////////////////////////////////
         [namespaceContract(pluginName, "EnhancedAccessControl")]: {
           abi: EnhancedAccessControlABI,
-          chain: [ensroot, namechain]
-            .filter((ds) => !!ds)
-            .reduce(
-              (memo, datasource) => ({
-                ...memo,
-                ...chainConfigForContract(
-                  config.globalBlockrange,
-                  datasource.chain.id,
-                  datasource.contracts.EnhancedAccessControl,
-                ),
-              }),
-              {},
-            ),
+          chain: DATASOURCES_WITH_ENSV2_CONTRACTS.reduce(
+            (memo, datasource) => ({
+              ...memo,
+              ...chainConfigForContract(
+                config.globalBlockrange,
+                datasource.chain.id,
+                datasource.contracts.EnhancedAccessControl,
+              ),
+            }),
+            {},
+          ),
         },
 
-        //////////////////////////
-        // Namechain ETHRegistrar
-        //////////////////////////
+        //////////////////////
+        // ENSv2 ETHRegistrar
+        //////////////////////
         [namespaceContract(pluginName, "ETHRegistrar")]: {
           abi: ETHRegistrarABI,
           chain: {
-            ...(namechain &&
+            ...(ENSv2ETHRegistry &&
               chainConfigForContract(
                 config.globalBlockrange,
-                namechain.chain.id,
-                namechain.contracts.ETHRegistrar,
+                ENSv2ETHRegistry.chain.id,
+                ENSv2ETHRegistry.contracts.ETHRegistrar,
               )),
           },
         },

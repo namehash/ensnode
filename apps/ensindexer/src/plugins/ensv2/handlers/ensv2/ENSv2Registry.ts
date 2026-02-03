@@ -1,13 +1,20 @@
+import config from "@/config";
+
 import { type Context, ponder } from "ponder:registry";
 import schema from "ponder:schema";
 import { type Address, hexToBigInt, labelhash } from "viem";
 
+import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
+  accountIdEqual,
   getCanonicalId,
+  getDatasourceContract,
+  getENSv2RootRegistry,
   interpretAddress,
   isRegistrationFullyExpired,
   type LiteralLabel,
+  labelhashLiteralLabel,
   makeENSv2DomainId,
   makeLatestRegistrationId,
   makeRegistryId,
@@ -15,6 +22,7 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
+import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
@@ -77,6 +85,27 @@ export default function () {
         })
         .onConflictDoNothing();
 
+      // TODO(ensv2): hoist this access once all namespaces declare ENSv2 contracts
+      const ENSV2_ROOT_REGISTRY = getENSv2RootRegistry(config.namespace);
+      const ENSV2_L2_ETH_REGISTRY = getDatasourceContract(
+        config.namespace,
+        DatasourceNames.ENSv2ETHRegistry,
+        "ETHRegistry",
+      );
+
+      // if this Registry is Bridged, we know its Canonical Domain and can set it here
+      // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
+      if (accountIdEqual(registry, ENSV2_L2_ETH_REGISTRY)) {
+        const domainId = makeENSv2DomainId(
+          ENSV2_ROOT_REGISTRY,
+          getCanonicalId(labelhashLiteralLabel("eth" as LiteralLabel)),
+        );
+        await context.db
+          .insert(schema.registryCanonicalDomain)
+          .values({ registryId: registryId, domainId })
+          .onConflictDoUpdate({ domainId });
+      }
+
       // ensure discovered Label
       await ensureLabel(context, label);
 
@@ -120,6 +149,7 @@ export default function () {
         domainId,
         start: event.block.timestamp,
         expiry,
+        eventId: await ensureEvent(context, event),
       });
     },
   );
@@ -187,14 +217,30 @@ export default function () {
       const canonicalId = getCanonicalId(tokenId);
       const domainId = makeENSv2DomainId(registryAccountId, canonicalId);
 
-      // console.log(`SubregistryUpdated: ${subregistry} \n ↳ ${domainId}`);
-
       // update domain's subregistry
       if (subregistry === null) {
+        // TODO(canonical-names): this last-write-wins heuristic breaks if a domain ever unsets its
+        // subregistry. i.e. the (sub)Registry's Canonical Domain becomes null, making it disjoint because
+        // we don't track other domains who have set it as a Subregistry. This is acceptable for now,
+        // and obviously isn't an issue once ENS Team implements Canonical Names
+        const previous = await context.db.find(schema.v2Domain, { id: domainId });
+        if (previous?.subregistryId) {
+          await context.db.delete(schema.registryCanonicalDomain, {
+            registryId: previous.subregistryId,
+          });
+        }
+
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId: null });
       } else {
         const subregistryAccountId: AccountId = { chainId: context.chain.id, address: subregistry };
         const subregistryId = makeRegistryId(subregistryAccountId);
+
+        // TODO(canonical-names): this implements last-write-wins heuristic for a Registry's canonical name,
+        // replace with real logic once ENS Team implements Canonical Names
+        await context.db
+          .insert(schema.registryCanonicalDomain)
+          .values({ registryId: subregistryId, domainId })
+          .onConflictDoUpdate({ domainId });
 
         await context.db.update(schema.v2Domain, { id: domainId }).set({ subregistryId });
       }

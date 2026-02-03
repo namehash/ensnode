@@ -1,4 +1,4 @@
-import type { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared";
+import type { BlockRef, ChainId, Duration, UnixTimestamp } from "../../shared/types";
 
 /**
  * The type of indexing configuration for a chain.

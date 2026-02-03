@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/v1/index.ts"],
   platform: "neutral",
   format: ["esm", "cjs"],
   target: "es2022",
@@ -11,5 +11,6 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: ["viem"],
+  noExternal: ["@ensnode/ensnode-sdk"],
   outDir: "./dist",
 });

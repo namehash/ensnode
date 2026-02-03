@@ -1,5 +1,35 @@
 # ensrainbow
 
+## 1.5.1
+
+### Patch Changes
+
+- [#1537](https://github.com/namehash/ensnode/pull/1537) [`63617fa`](https://github.com/namehash/ensnode/commit/63617fa827daa4bd7761f482812daf7b507da3d2) Thanks [@tk-o](https://github.com/tk-o)! - Updates Node.js runtime to the current LTS version (v24).
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@1.5.1
+  - @ensnode/ensnode-sdk@1.5.1
+
+## 1.5.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @ensnode/ensrainbow-sdk@1.5.0
+  - @ensnode/ensnode-sdk@1.5.0
+
+## 1.4.0
+
+### Patch Changes
+
+- [#1136](https://github.com/namehash/ensnode/pull/1136) [`79be028`](https://github.com/namehash/ensnode/commit/79be028af13ed4cc079ecb81c021fcc7d28c1d65) Thanks [@djstrong](https://github.com/djstrong)! - feat: add CSV conversion command to ensrainbow CLI to convert rainbow tables from CSV format to ensrainbow format
+
+- [#1075](https://github.com/namehash/ensnode/pull/1075) [`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990) Thanks [@djstrong](https://github.com/djstrong)! - Refine ENSRainbow Docs
+
+- Updated dependencies [[`706f86b`](https://github.com/namehash/ensnode/commit/706f86b47caf5693153cd2fb7e009b331795d990), [`fcd96db`](https://github.com/namehash/ensnode/commit/fcd96db1aae297a445597e3867de811bc42ca31d), [`cf1b218`](https://github.com/namehash/ensnode/commit/cf1b218c27cb2253f37ef6b452c908d5c387aa0a), [`4e0579b`](https://github.com/namehash/ensnode/commit/4e0579b85c3b118450e7907242b60ca46bebebda), [`bb1686a`](https://github.com/namehash/ensnode/commit/bb1686a34ce1bd36a44598f8de0a24c40a439bc3)]:
+  - @ensnode/ensnode-sdk@1.4.0
+  - @ensnode/ensrainbow-sdk@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes

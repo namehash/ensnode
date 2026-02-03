@@ -1,11 +1,33 @@
-# Choose a PR template
+# Lite PR
 
-Use the appropriate template for this PR:
+[Tip: Review docs on the ENSNode PR process](https://ensnode.io/docs/contributing/prs)
 
-- [**Light PR**](https://github.com/namehash/ensnode/compare/main...HEAD?template=lite.md)
-  For small, low-risk changes (mechanical refactors, formatting, dependency bumps).
+## Summary
 
-- [**Substantial PR**](https://github.com/namehash/ensnode/compare/main...HEAD?template=substantial.md)
-  For behavior changes, consumer impact, new concepts, or high-risk work.
+- What changed (1-3 bullets, no essays).
 
-If you're unsure, that suggests this PR is a **Substantial PR**.
+---
+
+## Why
+
+- Why this change exists. Link to related GitHub issues where relevant.
+
+---
+
+## Testing
+
+- How this was tested.
+- If you didn't test it, say why.
+
+---
+
+## Notes for Reviewer (Optional)
+
+- Anything non-obvious or worth a heads-up.
+
+---
+
+## Pre-Review Checklist (Blocking)
+
+- [ ] This PR does not introduce significant changes and is low-risk to review quickly.
+- [ ] Relevant changesets are included (or are not required)
