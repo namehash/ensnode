@@ -60,6 +60,64 @@ describe("CLI", () => {
       // Restore real implementation for subsequent tests
       vi.doUnmock("@/commands/server-command");
     });
+
+    it("should reject port less than 1", async () => {
+      // Validation happens during argument parsing, before command handler is called
+      try {
+        await cli.parse(["serve", "--port", "0", "--data-dir", testDataDir]);
+        expect.fail("Expected error to be thrown");
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(String(error)).toContain("Invalid port");
+      }
+    });
+
+    it("should reject negative port", async () => {
+      // Validation happens during argument parsing, before command handler is called
+      try {
+        await cli.parse(["serve", "--port", "-1", "--data-dir", testDataDir]);
+        expect.fail("Expected error to be thrown");
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(String(error)).toContain("Invalid port");
+      }
+    });
+
+    it("should reject port greater than 65535", async () => {
+      // Validation happens during argument parsing, before command handler is called
+      try {
+        await cli.parse(["serve", "--port", "65536", "--data-dir", testDataDir]);
+        expect.fail("Expected error to be thrown");
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(String(error)).toContain("Invalid port");
+      }
+    });
+
+    it("should accept valid port numbers", async () => {
+      // Mock serverCommand so we only test argument resolution here
+      vi.resetModules();
+      const serverCommandMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock("@/commands/server-command", () => ({
+        serverCommand: serverCommandMock,
+      }));
+
+      const { createCLI: createCLIFresh } = await import("./cli");
+      const cliWithPort = createCLIFresh({ exitProcess: false });
+
+      // Test valid ports
+      await cliWithPort.parse(["serve", "--port", "1", "--data-dir", testDataDir]);
+      expect(serverCommandMock).toHaveBeenCalledWith(expect.objectContaining({ port: 1 }));
+
+      await cliWithPort.parse(["serve", "--port", "65535", "--data-dir", testDataDir]);
+      expect(serverCommandMock).toHaveBeenCalledWith(expect.objectContaining({ port: 65535 }));
+
+      await cliWithPort.parse(["serve", "--port", "3223", "--data-dir", testDataDir]);
+      expect(serverCommandMock).toHaveBeenCalledWith(expect.objectContaining({ port: 3223 }));
+
+      // Restore real implementation for subsequent tests
+      vi.doUnmock("@/commands/server-command");
+    });
   });
 
   describe("purge command", () => {

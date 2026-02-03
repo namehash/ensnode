@@ -40,7 +40,7 @@ const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 
 const ENSRainbowConfigBaseSchema = z.object({
   port: PortSchema.default(ENSRAINBOW_DEFAULT_PORT),
-  dataDir: DataDirSchema.default(getDefaultDataDir()),
+  dataDir: DataDirSchema.default(() => getDefaultDataDir()),
   dbSchemaVersion: DbSchemaVersionSchema,
   labelSet: LabelSetSchema.optional(),
 });
