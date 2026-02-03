@@ -45,7 +45,17 @@ export const validPonderStatusResponse = {
   },
 } satisfies PonderStatusResponse;
 
-export const invalidPonderStatusResponse = {
+export const validPonderStatusResponseMinimal = {
+  "1": {
+    id: 1,
+    block: {
+      number: 4375715,
+      timestamp: 1770114251,
+    },
+  },
+};
+
+export const invalidPonderStatusResponseNegativeBlockNumber = {
   "1": {
     id: 1,
     block: {

@@ -1050,13 +1050,13 @@ importers:
 
   packages/ponder-sdk:
     dependencies:
+      '@ensnode/ensnode-sdk':
+        specifier: workspace:*
+        version: link:../ensnode-sdk
       parse-prometheus-text-format:
         specifier: ^1.1.1
         version: 1.1.1
     devDependencies:
-      '@ensnode/ensnode-sdk':
-        specifier: workspace:*
-        version: link:../ensnode-sdk
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../shared-configs
