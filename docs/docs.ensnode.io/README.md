@@ -27,7 +27,7 @@ Mintlify deploys automatically: preview deploys on each branch, production deplo
 
 Non-API documentation (guides, concepts, etc.) may be published before the corresponding code is released to production. The API Reference always reflects the actual production API since Mintlify fetches it from the production URL at build time.
 
-To avoid documenting unreleased features:
+For the case of a feature that's not ready to publicly announce in our docs as soon as it is merged to main:
 
 1. **Keep documentation PRs separate from code PRs**
 2. **Merge documentation PRs only after the corresponding code is deployed to production**
