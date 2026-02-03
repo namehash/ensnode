@@ -1,33 +1,12 @@
 import type { LogLevelEnvironment, PortEnvironment } from "@ensnode/ensnode-sdk/internal";
 
 /**
- * Represents the raw, unvalidated environment variables for the ENSRainbow application.
- *
- * Keys correspond to the environment variable names, and all values are optional strings, reflecting
- * their state in `process.env`. This interface is intended to be the source type which then gets
- * mapped/parsed into a structured configuration object like `ENSRainbowConfig`.
+ * Raw, unvalidated environment variables for ENSRainbow.
  */
 export type ENSRainbowEnvironment = PortEnvironment &
   LogLevelEnvironment & {
-    /**
-     * Directory path where the LevelDB database is stored.
-     */
     DATA_DIR?: string;
-
-    /**
-     * Expected Database Schema Version.
-     */
     DB_SCHEMA_VERSION?: string;
-
-    /**
-     * Expected Label Set ID.
-     * Must be provided together with LABEL_SET_VERSION, or neither should be set.
-     */
     LABEL_SET_ID?: string;
-
-    /**
-     * Expected Label Set Version.
-     * Must be provided together with LABEL_SET_ID, or neither should be set.
-     */
     LABEL_SET_VERSION?: string;
   };

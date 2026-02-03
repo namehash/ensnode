@@ -1,13 +1,15 @@
-import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
+import type { z } from "zod/v4";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import type { ENSRainbowConfig } from "./types";
-
-/**
- * Invariant: dbSchemaVersion must match the version expected by the code.
- */
-export function invariant_dbSchemaVersionMatch(ctx: ZodCheckFnInput<ENSRainbowConfig>): void {
+export function invariant_dbSchemaVersionMatch(
+  ctx: z.core.ParsePayload<{
+    port: number;
+    dataDir: string;
+    dbSchemaVersion: number;
+    labelSet?: { labelSetId: string; labelSetVersion: number };
+  }>,
+): void {
   const { value: config } = ctx;
 
   if (config.dbSchemaVersion !== DB_SCHEMA_VERSION) {

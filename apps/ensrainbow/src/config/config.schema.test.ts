@@ -11,7 +11,7 @@ import { DB_SCHEMA_VERSION } from "@/lib/database";
 import { buildConfigFromEnvironment, buildENSRainbowPublicConfig } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
-import type { ENSRainbowConfig } from "./types";
+import type { ENSRainbowEnvConfig } from "./types";
 
 vi.mock("@/utils/logger", () => ({
   logger: {
@@ -371,7 +371,7 @@ describe("buildConfigFromEnvironment", () => {
 describe("buildENSRainbowPublicConfig", () => {
   describe("Success cases", () => {
     it("returns a valid ENSRainbow public config with correct structure", () => {
-      const mockConfig: ENSRainbowConfig = {
+      const mockConfig: ENSRainbowEnvConfig = {
         port: ENSRAINBOW_DEFAULT_PORT,
         dataDir: getDefaultDataDir(),
         dbSchemaVersion: DB_SCHEMA_VERSION,

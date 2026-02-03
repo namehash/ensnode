@@ -10,31 +10,33 @@ import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
-import type { ENSRainbowConfig } from "@/config/types";
+import type { ENSRainbowEnvConfig } from "@/config/types";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-export type { ENSRainbowConfig };
+export type { ENSRainbowEnvConfig };
 
-const DataDirSchema = z
+export const AbsolutePathSchemaBase = z
   .string()
   .trim()
   .min(1, {
-    error: "DATA_DIR must be a non-empty string.",
+    error: "Path must be a non-empty string.",
   })
   .transform((path: string) => {
-    // Resolve relative paths to absolute paths (cross-platform)
     if (isAbsolute(path)) {
       return path;
     }
     return resolve(process.cwd(), path);
   });
 
-const DbSchemaVersionSchema = z.coerce
+const DataDirSchema = AbsolutePathSchemaBase;
+
+export const DbSchemaVersionSchemaBase = z.coerce
   .number({ error: "DB_SCHEMA_VERSION must be a number." })
   .int({ error: "DB_SCHEMA_VERSION must be an integer." })
-  .positive({ error: "DB_SCHEMA_VERSION must be greater than 0." })
-  .default(DB_SCHEMA_VERSION);
+  .positive({ error: "DB_SCHEMA_VERSION must be greater than 0." });
+
+const DbSchemaVersionSchema = DbSchemaVersionSchemaBase.default(DB_SCHEMA_VERSION);
 
 const LabelSetSchema = makeFullyPinnedLabelSetSchema("LABEL_SET");
 
@@ -45,37 +47,14 @@ const ENSRainbowConfigBaseSchema = z.object({
   labelSet: LabelSetSchema.optional(),
 });
 
-/**
- * Helper function to check if a string value is present (not undefined and not empty after trimming).
- *
- * @param str - The string value to check
- * @returns true if the string is defined and has non-whitespace content after trimming
- */
 const hasValue = (str: string | undefined): boolean => {
   return str !== undefined && str.trim() !== "";
 };
 
-const ENSRainbowConfigSchema = ENSRainbowConfigBaseSchema
-  /**
-   * Invariant enforcement
-   *
-   * We enforce invariants across multiple values parsed with `ENSRainbowConfigSchema`
-   * by calling `.check()` function with relevant invariant-enforcing logic.
-   * Each such function has access to config values that were already parsed.
-   */
-  .check(invariant_dbSchemaVersionMatch);
+const ENSRainbowConfigSchema = ENSRainbowConfigBaseSchema.check(invariant_dbSchemaVersionMatch);
 
-/**
- * Builds the ENSRainbow configuration object from an ENSRainbowEnvironment object.
- *
- * Validates and parses the complete environment configuration using ENSRainbowConfigSchema.
- *
- * @returns A validated ENSRainbowConfig object
- * @throws Error with formatted validation messages if environment parsing fails
- */
-export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowConfig {
+export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowEnvConfig {
   try {
-    // Transform environment variables into config shape
     const envToConfigSchema = z
       .object({
         PORT: z.string().optional(),
@@ -84,12 +63,6 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
         LABEL_SET_ID: z.string().optional(),
         LABEL_SET_VERSION: z.string().optional(),
       })
-      /**
-       * Invariant enforcement on environment variables
-       *
-       * We check that LABEL_SET_ID and LABEL_SET_VERSION are provided together, or neither.
-       * This check happens before transformation to ensure we don't create invalid config objects.
-       */
       .check((ctx) => {
         const { value: env } = ctx;
         const hasLabelSetId = hasValue(env.LABEL_SET_ID);
@@ -146,16 +119,8 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
   }
 }
 
-/**
- * Builds the ENSRainbow public configuration from an ENSRainbowConfig object and server state.
- *
- * @param config - The validated ENSRainbowConfig object
- * @param labelSet - The label set managed by the ENSRainbow server
- * @param recordsCount - The total count of records managed by the ENSRainbow service
- * @returns A complete ENSRainbowPublicConfig object
- */
 export function buildENSRainbowPublicConfig(
-  _config: ENSRainbowConfig, // kept for semantic purposes, not used in the function
+  _config: ENSRainbowEnvConfig,
   labelSet: EnsRainbowServerLabelSet,
   recordsCount: number,
 ): EnsRainbow.ENSRainbowPublicConfig {
