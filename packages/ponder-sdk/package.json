@@ -48,16 +48,12 @@
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
-    "ponder": "catalog:",
     "tsup": "catalog:",
     "typescript": "catalog:",
-    "viem": "catalog:",
     "vitest": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "ponder": "catalog:",
-    "viem": "catalog:",
     "zod": "catalog:"
   }
 }
