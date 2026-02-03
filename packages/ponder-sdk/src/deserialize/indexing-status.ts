@@ -6,6 +6,7 @@
  */
 
 import { prettifyError, z } from "zod/v4";
+import type { ParsePayload } from "zod/v4/core";
 
 import type { BlockRef } from "../block";
 import { blockRefSchema } from "../block";
@@ -21,13 +22,25 @@ const schemaSerializedChainBlockRef = z.object({
 
 export type SerializedChainBlockRef = z.infer<typeof schemaSerializedChainBlockRef>;
 
+function invariant_includesAtLeastOneIndexedChain(
+  ctx: ParsePayload<SerializedPonderIndexingStatus>,
+) {
+  const records = ctx.value;
+  if (Object.keys(records).length === 0) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: "Ponder Indexing Status must include at least one indexed chain.",
+    });
+  }
+}
+
 /**
  * Schema describing response at `GET /status`.
  */
-export const schemaSerializedPonderIndexingStatus = z.record(
-  schemaSerializedChainName,
-  schemaSerializedChainBlockRef,
-);
+export const schemaSerializedPonderIndexingStatus = z
+  .record(schemaSerializedChainName, schemaSerializedChainBlockRef)
+  .check(invariant_includesAtLeastOneIndexedChain);
 
 /**
  * Serialized Ponder Indexing Status.

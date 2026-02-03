@@ -68,6 +68,21 @@ describe("Ponder Client", () => {
           /Invalid serialized Ponder Indexing Status.*Value must be a positive integer/,
         );
       });
+
+      it("should handle zero indexed chains in the response", async () => {
+        mockFetch.mockResolvedValueOnce(
+          new Response(JSON.stringify({}), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        await expect(ponderClient.status()).rejects.toThrowError(
+          /Invalid serialized Ponder Indexing Status.*Ponder Indexing Status must include at least one indexed chai/,
+        );
+      });
     });
 
     describe("HTTP error handling", () => {
