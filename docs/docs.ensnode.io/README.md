@@ -55,7 +55,7 @@ OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start
 pnpm --filter @docs/mintlify openapi:generate http://localhost:4334
 ```
 
-**`OPENAPI_GENERATE_MODE`:** ENSApi normally requires a running ENSIndexer and database to start. This mode uses a mock configuration so the server can start without external dependencies, allowing spec generation in local dev and CI environments.
+**`OPENAPI_GENERATE_MODE`:** ENSApi normally requires a running ENSIndexer and ENSDb to start. This mode uses a mock configuration that allows ENSApi to start without external dependencies, allowing OpenAPI spec generation in local dev and CI environments.
 
 The URL argument is required — there is no default to avoid accidentally generating from the wrong source.
 
