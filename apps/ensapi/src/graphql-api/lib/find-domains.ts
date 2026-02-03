@@ -13,7 +13,7 @@ import {
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
-import type { DomainsOrderBy } from "@/graphql-api/schema/domain";
+import type { Domain, DomainOrderValue, DomainsOrderBy } from "@/graphql-api/schema/domain";
 import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
@@ -25,6 +25,34 @@ const MAX_DEPTH = 16;
 interface DomainFilter {
   name?: Name | undefined | null;
   owner?: Address | undefined | null;
+}
+
+/** Domain with order value attached for cursor encoding */
+export type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue | undefined };
+
+/** Result row from findDomains CTE */
+type FindDomainsResult = {
+  id: DomainId;
+  leafLabelValue: string | null;
+  registrationStart: bigint | null;
+  registrationExpiry: bigint | null;
+};
+
+/**
+ * Extract the order value from a findDomains result row based on the orderBy field.
+ */
+export function getOrderValueFromResult(
+  result: FindDomainsResult,
+  orderBy: typeof DomainsOrderBy.$inferType,
+): DomainOrderValue {
+  switch (orderBy) {
+    case "NAME":
+      return result.leafLabelValue;
+    case "REGISTRATION_TIMESTAMP":
+      return result.registrationStart;
+    case "REGISTRATION_EXPIRY":
+      return result.registrationExpiry;
+  }
 }
 
 /**
@@ -102,6 +130,7 @@ export function findDomains({ name, owner }: DomainFilter) {
 
   // Base subqueries: extract unified structure from v1 and v2 domains
   // Returns {id, ownerId, leafLabelHash, headLabelHash} for each matching domain
+  // Note: owner/partial filtering happens in the unified query below, not here
   const v1DomainsBase = db
     .select({
       id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
@@ -114,17 +143,7 @@ export function findDomains({ name, owner }: DomainFilter) {
       v1DomainsByLabelHashPathQuery,
       eq(schema.v1Domain.id, v1DomainsByLabelHashPathQuery.leafId),
     )
-    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId))
-    .leftJoin(schema.label, eq(schema.label.labelHash, v1HeadDomain.labelHash))
-    .where(
-      and(
-        owner ? eq(schema.v1Domain.ownerId, owner) : undefined,
-        // TODO: determine if it's necessary to additionally escape user input for LIKE operator
-        // Note: if label is NULL (unlabeled domain), LIKE returns NULL and filters out the row.
-        // This is intentional - we can't match partial text against unknown labels.
-        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
-      ),
-    );
+    .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId));
 
   const v2DomainsBase = db
     .select({
@@ -360,29 +379,83 @@ function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
 }
 
 /**
- * Build ORDER BY clauses for a findDomains result.
- *
- * @param domains - The findDomains CTE result
- * @param orderBy - The field to order by (defaults to NAME)
- * @param orderDir - The direction to order ("ASC" or "DESC", defaults to "ASC")
- * @param inverted - Whether the relay pagination is inverted (backward pagination)
- * @returns Array of SQL order expressions
+ * Get the order column for a given DomainsOrderBy value.
  */
-export function orderFindDomains(
+function getOrderColumn(
   domains: ReturnType<typeof findDomains>,
-  orderBy: typeof DomainsOrderBy.$inferType | undefined | null,
-  orderDir: typeof OrderDirection.$inferType | undefined | null,
-  inverted: boolean,
-): SQL[] {
-  // Combine user's orderDir with relay's inverted (XOR logic)
-  // inverted flips the sort for backward pagination, so we flip it back
-  const effectiveDesc = (orderDir === "DESC") !== inverted;
-
-  const orderColumn = {
+  orderBy: typeof DomainsOrderBy.$inferType,
+) {
+  return {
     NAME: domains.leafLabelValue,
     REGISTRATION_TIMESTAMP: domains.registrationStart,
     REGISTRATION_EXPIRY: domains.registrationExpiry,
-  }[orderBy ?? "NAME"];
+  }[orderBy];
+}
+
+/**
+ * Build a cursor filter for keyset pagination on findDomains results.
+ *
+ * Uses tuple comparison: (orderColumn, id) > (cursorValue, cursorId)
+ *
+ * @param domains - The findDomains CTE result
+ * @param cursorId - The domain ID from the decoded cursor
+ * @param cursorValue - The order column value from the decoded cursor
+ * @param cursorOrderBy - The order field from the decoded cursor
+ * @param queryOrderBy - The order field for the current query (must match cursorOrderBy)
+ * @param direction - "after" for forward pagination, "before" for backward
+ * @param effectiveDesc - Whether the effective sort direction is descending
+ * @throws if cursorOrderBy does not match queryOrderBy
+ * @returns SQL expression for the cursor filter
+ */
+export function cursorFilter(
+  domains: ReturnType<typeof findDomains>,
+  cursorId: DomainId,
+  cursorValue: DomainOrderValue | undefined,
+  cursorOrderBy: typeof DomainsOrderBy.$inferType,
+  queryOrderBy: typeof DomainsOrderBy.$inferType,
+  direction: "after" | "before",
+  effectiveDesc: boolean,
+): SQL {
+  // Validate cursor was created with the same ordering as the current query
+  if (cursorOrderBy !== queryOrderBy) {
+    throw new Error(
+      `Invalid cursor: cursor was created with orderBy=${cursorOrderBy} but query uses orderBy=${queryOrderBy}`,
+    );
+  }
+
+  const orderColumn = getOrderColumn(domains, cursorOrderBy);
+
+  // Determine comparison direction:
+  // - "after" with ASC = greater than cursor
+  // - "after" with DESC = less than cursor
+  // - "before" with ASC = less than cursor
+  // - "before" with DESC = greater than cursor
+  const useGreaterThan = (direction === "after") !== effectiveDesc;
+  const op = useGreaterThan ? ">" : "<";
+
+  // Direct tuple comparison with cursor values (no subquery needed)
+  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${cursorValue}, ${cursorId})`;
+}
+
+/**
+ * Compute the effective sort direction, combining user's orderDir with relay's inverted flag.
+ * XOR logic: inverted flips the sort for backward pagination.
+ */
+export function isEffectiveDesc(
+  orderDir: typeof OrderDirection.$inferType,
+  inverted: boolean,
+): boolean {
+  return (orderDir === "DESC") !== inverted;
+}
+
+export function orderFindDomains(
+  domains: ReturnType<typeof findDomains>,
+  orderBy: typeof DomainsOrderBy.$inferType,
+  orderDir: typeof OrderDirection.$inferType,
+  inverted: boolean,
+): SQL[] {
+  const effectiveDesc = isEffectiveDesc(orderDir, inverted);
+  const orderColumn = getOrderColumn(domains, orderBy);
 
   // Always use NULLS LAST so unregistered domains (NULL registration fields)
   // appear at the end regardless of sort direction
