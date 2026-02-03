@@ -372,6 +372,11 @@ export interface DomainCursor {
   value: DomainOrderValue | undefined;
 }
 
+/**
+ * Encoding/Decoding helper for Composite DomainCursors.
+ *
+ * @dev it's base64'd JSON
+ */
 export const DomainCursor = {
   encode: (cursor: DomainCursor) => Buffer.from(JSON.stringify(cursor), "utf8").toString("base64"),
   decode: (cursor: string) =>

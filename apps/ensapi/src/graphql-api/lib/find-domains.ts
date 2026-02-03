@@ -22,15 +22,22 @@ const logger = makeLogger("find-domains");
 
 const MAX_DEPTH = 16;
 
+/**
+ * Defines the full set of possible filters for a Find Domains operation.
+ */
 interface DomainFilter {
   name?: Name | undefined | null;
   owner?: Address | undefined | null;
 }
 
-/** Domain with order value attached for cursor encoding */
+/**
+ * Domain with order value attached for cursor encoding
+ */
 export type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue | undefined };
 
-/** Result row from findDomains CTE */
+/**
+ * Result row from findDomains CTE. Includes columns for all supported orderings.
+ */
 type FindDomainsResult = {
   id: DomainId;
   leafLabelValue: string | null;
@@ -85,16 +92,19 @@ export function getOrderValueFromResult(
  *
  * ## Algorithm
  *
- * 1. parse Partial InterpretedName into concrete path and partial fragment
- *   i.e. for a `name` like "sub1.sub2.paren":
- *    - concrete = ["sub1", "sub2"]
- *    - partial = 'paren'
- * 2. validate inputs
- * 3. for both v1Domains and v2Domains
- *   a. construct a subquery that filters the set of Domains to those with the specific concrete path
- *   b. if provided, filter the head domains of that path by `partial`
- *   c. if provided, filter the leaf domains of that path by `owner`
- * 4. construct a union of the two result sets and return
+ * 1. Parse Partial InterpretedName into concrete path and partial fragment
+ *    e.g. for `name` = "sub1.sub2.paren": concrete = ["sub1", "sub2"], partial = "paren"
+ * 2. Validate inputs (at least one of name or owner required)
+ * 3. For both v1Domains and v2Domains:
+ *    a. Build recursive CTE to find domains matching the concrete labelHash path
+ *    b. Extract unified structure: {id, ownerId, leafLabelHash, headLabelHash}
+ * 4. Union v1 and v2 results into domainsBase CTE
+ * 5. Join domainsBase with:
+ *    - headLabel: for partial name matching (LIKE prefix)
+ *    - leafLabel: for NAME ordering
+ *    - latestRegistration: correlated subquery for REGISTRATION_* ordering
+ * 6. Apply filters (owner, partial) in the unified query
+ * 7. Return CTE with columns: id, leafLabelValue, registrationStart, registrationExpiry
  */
 export function findDomains({ name, owner }: DomainFilter) {
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
