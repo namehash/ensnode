@@ -98,34 +98,106 @@ jobs:
       - name: Trigger Mintlify Docs Rebuild
         id: mintlify_rebuild
         continue-on-error: true
+        env:
+          MINTLIFY_API_TOKEN: ${{ secrets.MINTLIFY_API_TOKEN }}
+          MINTLIFY_PROJECT_ID: ${{ vars.MINTLIFY_PROJECT_ID }}
         run: |
+          # Trigger the rebuild and capture the statusId
           HTTP_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
             --connect-timeout 10 \
             --max-time 30 \
             --retry 2 \
             --retry-delay 5 \
             --request POST \
-            --url "https://api.mintlify.com/v1/project/update/${{ vars.MINTLIFY_PROJECT_ID }}" \
-            --header "Authorization: Bearer ${{ secrets.MINTLIFY_API_TOKEN }}")
+            --url "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
+            --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}")
 
           HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
           HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -n1)
 
-          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
-            echo "Mintlify rebuild triggered successfully (HTTP $HTTP_CODE)"
-          else
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "Mintlify API returned HTTP $HTTP_CODE"
             echo "Response body: $HTTP_BODY"
             exit 1
           fi
+
+          echo "Mintlify rebuild triggered successfully (HTTP $HTTP_CODE)"
+
+          # Extract statusId from response
+          STATUS_ID=$(echo "$HTTP_BODY" | jq -r '.statusId // empty')
+          if [ -z "$STATUS_ID" ]; then
+            echo "Failed to extract statusId from response"
+            echo "Response body: $HTTP_BODY"
+            exit 1
+          fi
+
+          echo "Status ID: $STATUS_ID"
+
+          # Poll for completion (max 5 minutes, checking every 10 seconds)
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Checking status (attempt $ATTEMPT/$MAX_ATTEMPTS)..."
+
+            STATUS_RESPONSE=$(curl --silent --write-out "\n%{http_code}" \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --request GET \
+              --url "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
+              --header "Authorization: Bearer ${MINTLIFY_API_TOKEN}")
+
+            STATUS_BODY=$(echo "$STATUS_RESPONSE" | sed '$d')
+            STATUS_CODE=$(echo "$STATUS_RESPONSE" | tail -n1)
+
+            if [ "$STATUS_CODE" -lt 200 ] || [ "$STATUS_CODE" -ge 300 ]; then
+              echo "Status check failed with HTTP $STATUS_CODE"
+              echo "Response: $STATUS_BODY"
+              sleep 10
+              continue
+            fi
+
+            STATUS=$(echo "$STATUS_BODY" | jq -r '.status // empty')
+            echo "Current status: $STATUS"
+
+            case "$STATUS" in
+              "success")
+                echo "Mintlify docs rebuild completed successfully"
+                exit 0
+                ;;
+              "failure")
+                echo "Mintlify docs rebuild failed"
+                exit 1
+                ;;
+              "queued"|"in_progress")
+                sleep 10
+                ;;
+              *)
+                echo "Unknown status: $STATUS"
+                sleep 10
+                ;;
+            esac
+          done
+
+          echo "Timeout waiting for Mintlify rebuild to complete"
+          exit 1
 
       - name: Notify Mintlify Rebuild Failure
         if: steps.mintlify_rebuild.outcome == 'failure'
         uses: ./.github/actions/send_slack_notification
         with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          slack_title: "⚠️ Mintlify Docs Rebuild Failed"
-          slack_message: "Failed to trigger Mintlify docs rebuild during environment switch to ${{ inputs.target }}"
+          slack_title: "Mintlify Docs Rebuild Failed"
+          slack_message: "Mintlify docs rebuild failed during environment switch to ${{ inputs.target }}. Check the workflow logs for details."
+
+      - name: Notify Mintlify Rebuild Success
+        if: steps.mintlify_rebuild.outcome == 'success'
+        uses: ./.github/actions/send_slack_notification
+        with:
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          slack_title: "Mintlify Docs Rebuilt"
+          slack_message: "Mintlify docs successfully rebuilt for environment switch to ${{ inputs.target }}"
 
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
