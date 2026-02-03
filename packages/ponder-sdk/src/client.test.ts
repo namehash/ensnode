@@ -81,7 +81,7 @@ describe("Ponder Client", () => {
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
 
         await expect(ponderClient.status()).rejects.toThrowError(
-          /Invalid serialized Ponder Indexing Status.*Ponder Indexing Status must include at least one indexed chai/,
+          /Invalid serialized Ponder Indexing Status.*Ponder Indexing Status must include at least one indexed chain/,
         );
       });
     });
@@ -95,12 +95,23 @@ describe("Ponder Client", () => {
             statusText: "Internal Server Error",
           }),
         );
-
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
-
         // Act & Assert
         await expect(ponderClient.status()).rejects.toThrowError(
-          /Failed to fetch Ponder Indexing Status/,
+          /Failed to fetch Ponder Indexing Status response/,
+        );
+      });
+
+      it("should handle JSON parsing errors", async () => {
+        mockFetch.mockResolvedValueOnce(
+          new Response("not valid json", {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+        await expect(ponderClient.status()).rejects.toThrowError(
+          /Failed to parse Ponder Indexing Status response as JSON/,
         );
       });
     });

@@ -21,7 +21,7 @@ export class PonderClient {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch Ponder Indexing Status: ${response.status} ${response.statusText}`,
+        `Failed to fetch Ponder Indexing Status response: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -30,7 +30,7 @@ export class PonderClient {
     try {
       responseData = await response.json();
     } catch {
-      throw new Error("Failed to parse Ponder status response as JSON");
+      throw new Error("Failed to parse Ponder Indexing Status response as JSON");
     }
 
     return deserializePonderIndexingStatus(responseData);
