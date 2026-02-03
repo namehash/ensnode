@@ -291,31 +291,32 @@ describe("/ensanalytics/v1", () => {
 
       expect(response.responseCode).toBe(ReferrerDetailAllCyclesResponseCodes.Ok);
       if (response.responseCode === ReferrerDetailAllCyclesResponseCodes.Ok) {
+        const cycle1 = response.data["cycle-1"]!;
+        const cycle2 = response.data["cycle-2"]!;
+
         // Check cycle-1
-        expect(response.data["cycle-1"].type).toBe(ReferrerDetailTypeIds.Unranked);
-        expect(response.data["cycle-1"].rules).toEqual(populatedReferrerLeaderboard.rules);
-        expect(response.data["cycle-1"].aggregatedMetrics).toEqual(
-          populatedReferrerLeaderboard.aggregatedMetrics,
-        );
-        expect(response.data["cycle-1"].referrer.referrer).toBe(nonExistingReferrer);
-        expect(response.data["cycle-1"].referrer.rank).toBe(null);
-        expect(response.data["cycle-1"].referrer.totalReferrals).toBe(0);
-        expect(response.data["cycle-1"].referrer.totalIncrementalDuration).toBe(0);
-        expect(response.data["cycle-1"].referrer.score).toBe(0);
-        expect(response.data["cycle-1"].referrer.isQualified).toBe(false);
-        expect(response.data["cycle-1"].referrer.finalScoreBoost).toBe(0);
-        expect(response.data["cycle-1"].referrer.finalScore).toBe(0);
-        expect(response.data["cycle-1"].referrer.awardPoolShare).toBe(0);
-        expect(response.data["cycle-1"].referrer.awardPoolApproxValue).toStrictEqual({
+        expect(cycle1.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(cycle1.rules).toEqual(populatedReferrerLeaderboard.rules);
+        expect(cycle1.aggregatedMetrics).toEqual(populatedReferrerLeaderboard.aggregatedMetrics);
+        expect(cycle1.referrer.referrer).toBe(nonExistingReferrer);
+        expect(cycle1.referrer.rank).toBe(null);
+        expect(cycle1.referrer.totalReferrals).toBe(0);
+        expect(cycle1.referrer.totalIncrementalDuration).toBe(0);
+        expect(cycle1.referrer.score).toBe(0);
+        expect(cycle1.referrer.isQualified).toBe(false);
+        expect(cycle1.referrer.finalScoreBoost).toBe(0);
+        expect(cycle1.referrer.finalScore).toBe(0);
+        expect(cycle1.referrer.awardPoolShare).toBe(0);
+        expect(cycle1.referrer.awardPoolApproxValue).toStrictEqual({
           currency: "USDC",
           amount: 0n,
         });
-        expect(response.data["cycle-1"].accurateAsOf).toBe(expectedAccurateAsOf);
+        expect(cycle1.accurateAsOf).toBe(expectedAccurateAsOf);
 
         // Check cycle-2
-        expect(response.data["cycle-2"].type).toBe(ReferrerDetailTypeIds.Unranked);
-        expect(response.data["cycle-2"].referrer.referrer).toBe(nonExistingReferrer);
-        expect(response.data["cycle-2"].referrer.rank).toBe(null);
+        expect(cycle2.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(cycle2.referrer.referrer).toBe(nonExistingReferrer);
+        expect(cycle2.referrer.rank).toBe(null);
       }
     });
 
@@ -354,31 +355,32 @@ describe("/ensanalytics/v1", () => {
 
       expect(response.responseCode).toBe(ReferrerDetailAllCyclesResponseCodes.Ok);
       if (response.responseCode === ReferrerDetailAllCyclesResponseCodes.Ok) {
+        const cycle1 = response.data["cycle-1"]!;
+        const cycle2 = response.data["cycle-2"]!;
+
         // Check cycle-1
-        expect(response.data["cycle-1"].type).toBe(ReferrerDetailTypeIds.Unranked);
-        expect(response.data["cycle-1"].rules).toEqual(emptyReferralLeaderboard.rules);
-        expect(response.data["cycle-1"].aggregatedMetrics).toEqual(
-          emptyReferralLeaderboard.aggregatedMetrics,
-        );
-        expect(response.data["cycle-1"].referrer.referrer).toBe(referrer);
-        expect(response.data["cycle-1"].referrer.rank).toBe(null);
-        expect(response.data["cycle-1"].referrer.totalReferrals).toBe(0);
-        expect(response.data["cycle-1"].referrer.totalIncrementalDuration).toBe(0);
-        expect(response.data["cycle-1"].referrer.score).toBe(0);
-        expect(response.data["cycle-1"].referrer.isQualified).toBe(false);
-        expect(response.data["cycle-1"].referrer.finalScoreBoost).toBe(0);
-        expect(response.data["cycle-1"].referrer.finalScore).toBe(0);
-        expect(response.data["cycle-1"].referrer.awardPoolShare).toBe(0);
-        expect(response.data["cycle-1"].referrer.awardPoolApproxValue).toStrictEqual({
+        expect(cycle1.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(cycle1.rules).toEqual(emptyReferralLeaderboard.rules);
+        expect(cycle1.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
+        expect(cycle1.referrer.referrer).toBe(referrer);
+        expect(cycle1.referrer.rank).toBe(null);
+        expect(cycle1.referrer.totalReferrals).toBe(0);
+        expect(cycle1.referrer.totalIncrementalDuration).toBe(0);
+        expect(cycle1.referrer.score).toBe(0);
+        expect(cycle1.referrer.isQualified).toBe(false);
+        expect(cycle1.referrer.finalScoreBoost).toBe(0);
+        expect(cycle1.referrer.finalScore).toBe(0);
+        expect(cycle1.referrer.awardPoolShare).toBe(0);
+        expect(cycle1.referrer.awardPoolApproxValue).toStrictEqual({
           currency: "USDC",
           amount: 0n,
         });
-        expect(response.data["cycle-1"].accurateAsOf).toBe(expectedAccurateAsOf);
+        expect(cycle1.accurateAsOf).toBe(expectedAccurateAsOf);
 
         // Check cycle-2
-        expect(response.data["cycle-2"].type).toBe(ReferrerDetailTypeIds.Unranked);
-        expect(response.data["cycle-2"].referrer.referrer).toBe(referrer);
-        expect(response.data["cycle-2"].referrer.rank).toBe(null);
+        expect(cycle2.type).toBe(ReferrerDetailTypeIds.Unranked);
+        expect(cycle2.referrer.referrer).toBe(referrer);
+        expect(cycle2.referrer.rank).toBe(null);
       }
     });
 

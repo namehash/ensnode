@@ -93,8 +93,13 @@ export type ReferrerDetailAllCyclesResponseCode =
  * Referrer detail data across all cycles.
  *
  * Maps each cycle ID to the referrer's detail for that cycle.
+ * Uses Partial because the set of cycles includes both predefined cycles
+ * (e.g., "cycle-1", "cycle-2") and any custom cycles loaded from configuration.
+ * All configured cycles will have entries in the response (even if empty for
+ * referrers who haven't participated), but TypeScript cannot know at compile
+ * time which specific cycles are configured.
  */
-export type ReferrerDetailAllCyclesData = Record<ReferralProgramCycleId, ReferrerDetail>;
+export type ReferrerDetailAllCyclesData = Partial<Record<ReferralProgramCycleId, ReferrerDetail>>;
 
 /**
  * A successful response containing referrer detail for all cycles.

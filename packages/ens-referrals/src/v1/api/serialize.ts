@@ -204,7 +204,10 @@ export function serializeReferrerDetailAllCyclesResponse(
         {} as SerializedReferrerDetailAllCyclesData;
 
       for (const [cycleId, detail] of Object.entries(response.data)) {
-        serializedData[cycleId as ReferralProgramCycleId] = serializeReferrerDetail(detail);
+        // Object.entries only returns existing entries, so detail is never undefined at runtime
+        serializedData[cycleId as ReferralProgramCycleId] = serializeReferrerDetail(
+          detail as ReferrerDetail,
+        );
       }
 
       return {

@@ -117,10 +117,14 @@ export interface SerializedReferralProgramCycle extends Omit<ReferralProgramCycl
 
 /**
  * Serialized representation of referrer detail data across all cycles.
+ * Uses Partial because the set of cycles includes both predefined cycles
+ * (e.g., "cycle-1", "cycle-2") and any custom cycles loaded from configuration.
+ * All configured cycles will have entries in the response (even if empty for
+ * referrers who haven't participated), but TypeScript cannot know at compile
+ * time which specific cycles are configured.
  */
-export type SerializedReferrerDetailAllCyclesData = Record<
-  ReferralProgramCycleId,
-  SerializedReferrerDetail
+export type SerializedReferrerDetailAllCyclesData = Partial<
+  Record<ReferralProgramCycleId, SerializedReferrerDetail>
 >;
 
 /**
