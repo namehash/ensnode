@@ -36,7 +36,7 @@ function invariant_includesAtLeastOneIndexedChain(
 }
 
 /**
- * Schema describing response at `GET /status`.
+ * Schema describing the response of fetching `GET /status` from a Ponder app.
  */
 export const schemaSerializedPonderIndexingStatus = z
   .record(schemaSerializedChainName, schemaSerializedChainBlockRef)
@@ -50,7 +50,7 @@ export type SerializedPonderIndexingStatus = z.infer<typeof schemaSerializedPond
 /**
  * Ponder Indexing Status
  *
- * Represents chains indexing status in Ponder application.
+ * Represents the chain indexing status in a Ponder application.
  */
 export interface PonderIndexingStatus {
   /**
@@ -84,13 +84,13 @@ function buildPonderIndexingStatus(data: SerializedPonderIndexingStatus): Ponder
 }
 
 /**
- * Deserialize Ponder Indexing Status.
+ * Deserialize and validate a Serialized Ponder Indexing Status.
  *
- * @param response Maybe unvalidated Ponder Indexing Status.
- * @returns Ponder Indexing Status.
- * @throws Error if response is invalid.
+ * @param data Maybe a Serialized Ponder Indexing Status.
+ * @returns Deserialized and validated Ponder Indexing Status.
+ * @throws Error if data cannot be deserialized into a valid Ponder Indexing Status.
  */
-export function deserializePonderIndexingStatus(response: unknown): PonderIndexingStatus {
+export function deserializePonderIndexingStatus(response: SerializedPonderIndexingStatus | unknown): PonderIndexingStatus {
   const validation = schemaSerializedPonderIndexingStatus.safeParse(response);
 
   if (!validation.success) {

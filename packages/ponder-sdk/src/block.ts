@@ -22,6 +22,6 @@ export const blockRefSchema = z.object({
 /**
  * BlockRef
  *
- * Describes a single block.
+ * Reference to a block.
  */
 export type BlockRef = z.infer<typeof blockRefSchema>;

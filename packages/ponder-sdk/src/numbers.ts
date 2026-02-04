@@ -2,6 +2,9 @@ import { z } from "zod/v4";
 
 // Numbers
 
+/**
+ * Any finite number. Rejects non-finite numbers such as `NaN` and `Infinity`.
+ */
 export const numberSchema = z.number({ error: `Value must be a number` });
 
 export const integerSchema = numberSchema.int({ error: `Value must be an integer` });

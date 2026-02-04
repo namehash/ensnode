@@ -4,7 +4,7 @@ import {
 } from "./deserialize/indexing-status";
 
 /**
- * PonderClient for interacting with Ponder app endpoints.
+ * PonderClient for fetching data from Ponder apps.
  */
 export class PonderClient {
   constructor(private baseUrl: URL) {}

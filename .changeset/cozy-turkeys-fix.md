@@ -2,4 +2,4 @@
 "@ensnode/ponder-sdk": minor
 ---
 
-Introduce `ponder-sdk` package, including `PonderClient` implementation.
+Introduce the `ponder-sdk` package, including an initial `PonderClient` implementation.
