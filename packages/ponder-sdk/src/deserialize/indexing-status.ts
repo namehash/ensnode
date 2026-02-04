@@ -1,17 +1,19 @@
 /**
  * Ponder Indexing Status
  *
- * Defines the structure and validation for the Ponder Indexing Status response.
+ * Defines the structure and validation for the Ponder Indexing Status response
+ * from `GET /status` endpoint.
  * @see https://ponder.sh/docs/advanced/observability#indexing-status
  */
 
 import { prettifyError, z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import type { BlockRef } from "../block";
-import { blockRefSchema } from "../block";
-import type { ChainId } from "../chain";
-import { chainIdSchema } from "../chain";
+import type { BlockRef } from "../blocks";
+import { blockRefSchema } from "../blocks";
+import type { ChainId } from "../chains";
+import { chainIdSchema } from "../chains";
+import type { PonderIndexingStatus } from "../indexing-status";
 
 const schemaSerializedChainName = z.string();
 
@@ -19,8 +21,6 @@ const schemaSerializedChainBlockRef = z.object({
   id: chainIdSchema,
   block: blockRefSchema,
 });
-
-export type SerializedChainBlockRef = z.infer<typeof schemaSerializedChainBlockRef>;
 
 function invariant_includesAtLeastOneIndexedChain(
   ctx: ParsePayload<SerializedPonderIndexingStatus>,
@@ -38,7 +38,7 @@ function invariant_includesAtLeastOneIndexedChain(
 /**
  * Schema describing the response of fetching `GET /status` from a Ponder app.
  */
-export const schemaSerializedPonderIndexingStatus = z
+const schemaSerializedPonderIndexingStatus = z
   .record(schemaSerializedChainName, schemaSerializedChainBlockRef)
   .check(invariant_includesAtLeastOneIndexedChain);
 
@@ -46,24 +46,6 @@ export const schemaSerializedPonderIndexingStatus = z
  * Serialized Ponder Indexing Status.
  */
 export type SerializedPonderIndexingStatus = z.infer<typeof schemaSerializedPonderIndexingStatus>;
-
-/**
- * Ponder Indexing Status
- *
- * Represents the chain indexing status in a Ponder application.
- */
-export interface PonderIndexingStatus {
-  /**
-   * Map of indexed chain IDs to their block reference.
-   *
-   * Guarantees:
-   * - Includes entry for at least one indexed chain.
-   * - BlockRef corresponds to either:
-   *   - The first block to be indexed (when chain indexing is currently queued).
-   *   - The last indexed block (when chain indexing is currently in progress).
-   */
-  chains: Map<ChainId, BlockRef>;
-}
 
 /**
  * Build Ponder Indexing Status
@@ -90,8 +72,10 @@ function buildPonderIndexingStatus(data: SerializedPonderIndexingStatus): Ponder
  * @returns Deserialized and validated Ponder Indexing Status.
  * @throws Error if data cannot be deserialized into a valid Ponder Indexing Status.
  */
-export function deserializePonderIndexingStatus(response: SerializedPonderIndexingStatus | unknown): PonderIndexingStatus {
-  const validation = schemaSerializedPonderIndexingStatus.safeParse(response);
+export function deserializePonderIndexingStatus(
+  data: SerializedPonderIndexingStatus | unknown,
+): PonderIndexingStatus {
+  const validation = schemaSerializedPonderIndexingStatus.safeParse(data);
 
   if (!validation.success) {
     throw new Error(

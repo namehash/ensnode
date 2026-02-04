@@ -1,7 +1,5 @@
-import {
-  deserializePonderIndexingStatus,
-  type PonderIndexingStatus,
-} from "./deserialize/indexing-status";
+import { deserializePonderIndexingStatus } from "./deserialize/indexing-status";
+import type { PonderIndexingStatus } from "./indexing-status";
 
 /**
  * PonderClient for fetching data from Ponder apps.

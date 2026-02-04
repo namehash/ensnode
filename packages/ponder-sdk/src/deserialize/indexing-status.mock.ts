@@ -1,4 +1,4 @@
-import type { SerializedPonderIndexingStatus } from "./deserialize/indexing-status";
+import type { SerializedPonderIndexingStatus } from "./indexing-status";
 
 export const mockSerializedPonderIndexingStatusValid = {
   mainnet: {

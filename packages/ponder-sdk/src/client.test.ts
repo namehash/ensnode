@@ -6,7 +6,7 @@ import {
   mockSerializedPonderIndexingStatusInvalidBlockNumber,
   mockSerializedPonderIndexingStatusInvalidChainId,
   mockSerializedPonderIndexingStatusValid,
-} from "./mocks";
+} from "./deserialize/indexing-status.mock";
 
 // Mock Fetch API
 const mockFetch = vi.fn<typeof fetch>();
