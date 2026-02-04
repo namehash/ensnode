@@ -1,6 +1,11 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { PonderClient } from "./client";
+import {
+  indexingMetricsMockInvalidApplicationSettingsOrdering,
+  indexingMetricsMockInvalidNoIndexedChains,
+  indexingMetricsMockValid,
+} from "./deserialize/indexing-metrics.mock";
 import { deserializePonderIndexingStatus } from "./deserialize/indexing-status";
 import {
   mockSerializedPonderIndexingStatusInvalidBlockNumber,
@@ -22,6 +27,61 @@ describe("Ponder Client", () => {
 
   afterAll(() => {
     vi.unstubAllGlobals();
+  });
+
+  describe("metrics()", () => {
+    it("should handle valid Ponder metrics response", async () => {
+      // Arrange
+      mockFetch.mockResolvedValueOnce(
+        new Response(indexingMetricsMockValid.text, {
+          status: 200,
+          headers: { "Content-Type": "text/plain" },
+        }),
+      );
+
+      const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+      // Act & Assert
+      await expect(ponderClient.metrics()).resolves.toStrictEqual(
+        indexingMetricsMockValid.deserialized,
+      );
+    });
+
+    describe("Invalid response handling", () => {
+      it("should handle invalid Ponder application settings in the response", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response(indexingMetricsMockInvalidApplicationSettingsOrdering.text, {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          }),
+        );
+
+        // Act & Assert
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        await expect(ponderClient.metrics()).rejects.toThrowError(
+          /Invalid serialized Ponder Indexing Metrics.*Invalid input: expected "omnichain"/,
+        );
+      });
+
+      it("should handle no indexed chains in the response", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response(indexingMetricsMockInvalidNoIndexedChains.text, {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          }),
+        );
+
+        // Act & Assert
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        await expect(ponderClient.metrics()).rejects.toThrowError(
+          /Invalid serialized Ponder Indexing Metrics.*Ponder Indexing Metrics must include at least one indexed chain/,
+        );
+      });
+    });
   });
 
   describe("status()", () => {

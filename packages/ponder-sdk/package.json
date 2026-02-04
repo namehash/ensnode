@@ -45,6 +45,9 @@
     "lint": "biome check --write .",
     "lint:ci": "biome ci"
   },
+  "dependencies": {
+    "parse-prometheus-text-format": "^1.1.1"
+  },
   "devDependencies": {
     "@ensnode/shared-configs": "workspace:*",
     "@types/node": "catalog:",
