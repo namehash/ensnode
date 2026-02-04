@@ -69,10 +69,7 @@ const CYCLE_2_CONFIG = {
  * @param subregistryId - The subregistry account ID for rule validation (e.g., BaseRegistrar on the namespace chain)
  * @returns A map of cycle IDs to their pre-built cycle configurations
  */
-export function getReferralProgramCycleSet(
-  subregistryId: AccountId,
-): ReferralProgramCycleSet {
-
+export function getReferralProgramCycleSet(subregistryId: AccountId): ReferralProgramCycleSet {
   // Pre-built cycle-1 object (ENS Holiday Awards Dec 2025)
   const cycle1: ReferralProgramCycle = {
     id: ReferralProgramCycleIds.Cycle1,

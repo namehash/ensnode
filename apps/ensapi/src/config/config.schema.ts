@@ -108,7 +108,7 @@ async function loadReferralProgramCycleSet(
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Failed to fetch custom referral program cycles from ${customCyclesUrl}: ${errorMessage}. ` +
-      `Please verify the URL is accessible and the server is running.`,
+        `Please verify the URL is accessible and the server is running.`,
     );
   }
 
@@ -121,23 +121,19 @@ async function loadReferralProgramCycleSet(
   let json: unknown;
   try {
     json = await response.json();
-  } catch (error) {
+  } catch (_error) {
     throw new Error(
       `Failed to parse JSON from ${customCyclesUrl}: The response is not valid JSON. ` +
-      `Please verify the file contains valid JSON.`,
+        `Please verify the file contains valid JSON.`,
     );
   }
   const schema = makeCustomReferralProgramCyclesSchema("CUSTOM_REFERRAL_PROGRAM_CYCLES");
   const validated = schema.parse(json);
 
-  // Convert array to Map, check for duplicates
   const cycleSet: ReferralProgramCycleSet = new Map();
   for (const cycleObj of validated) {
     const cycle = cycleObj as ReferralProgramCycle;
     const cycleId = cycle.id;
-    if (cycleSet.has(cycleId)) {
-      throw new Error(`Duplicate cycle ID in CUSTOM_REFERRAL_PROGRAM_CYCLES: ${cycle.id}`);
-    }
     cycleSet.set(cycleId, cycle);
   }
 

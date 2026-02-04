@@ -9,9 +9,30 @@ import * as middleware from "../middleware/referrer-leaderboard.middleware-v1";
 
 vi.mock("@/config", () => ({
   get default() {
-    const mockedConfig: Pick<EnsApiConfig, "ensIndexerUrl" | "namespace"> = {
+    const mockCycleA: ReferralProgramCycle = {
+      id: "test-cycle-a",
+      displayName: "Test Cycle A",
+      rules: {} as any,
+      rulesUrl: "https://example.com/rules",
+    };
+
+    const mockCycleB: ReferralProgramCycle = {
+      id: "test-cycle-b",
+      displayName: "Test Cycle B",
+      rules: {} as any,
+      rulesUrl: "https://example.com/rules",
+    };
+
+    const mockedConfig: Pick<
+      EnsApiConfig,
+      "ensIndexerUrl" | "namespace" | "referralProgramCycleSet"
+    > = {
       ensIndexerUrl: new URL("https://ensnode.example.com"),
       namespace: ENSNamespaceIds.Mainnet,
+      referralProgramCycleSet: new Map([
+        ["test-cycle-a", mockCycleA],
+        ["test-cycle-b", mockCycleB],
+      ]),
     };
 
     return mockedConfig;
@@ -25,6 +46,7 @@ vi.mock("../middleware/referrer-leaderboard.middleware-v1", () => ({
 import {
   deserializeReferrerDetailAllCyclesResponse,
   deserializeReferrerLeaderboardPageResponse,
+  type ReferralProgramCycle,
   type ReferralProgramCycleId,
   ReferrerDetailAllCyclesResponseCodes,
   type ReferrerDetailAllCyclesResponseOk,
@@ -196,6 +218,52 @@ describe("/v1/ensanalytics", () => {
       } satisfies ReferrerLeaderboardPageResponseOk;
 
       expect(response).toMatchObject(expectedResponse);
+    });
+
+    it("returns 404 error when unknown cycle ID is requested", async () => {
+      // Arrange: mock cache map with test-cycle-a and test-cycle-b
+      const mockCyclesCaches = new Map<ReferralProgramCycleId, SWRCache<ReferrerLeaderboard>>([
+        [
+          "test-cycle-a",
+          {
+            read: async () => populatedReferrerLeaderboard,
+          } as SWRCache<ReferrerLeaderboard>,
+        ],
+        [
+          "test-cycle-b",
+          {
+            read: async () => populatedReferrerLeaderboard,
+          } as SWRCache<ReferrerLeaderboard>,
+        ],
+      ]);
+
+      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+        return await next();
+      });
+
+      // Arrange: create the test client from the app instance
+      const client = testClient(app);
+      const recordsPerPage = 10;
+      const invalidCycle = "invalid-cycle" as ReferralProgramCycleId;
+
+      // Act: send test request with invalid cycle ID
+      const httpResponse = await client["referral-leaderboard"].$get(
+        { query: { cycle: invalidCycle, recordsPerPage: `${recordsPerPage}`, page: "1" } },
+        {},
+      );
+      const responseData = await httpResponse.json();
+      const response = deserializeReferrerLeaderboardPageResponse(responseData);
+
+      // Assert: response is 404 error with list of valid cycles from config
+      expect(httpResponse.status).toBe(404);
+      expect(response.responseCode).toBe(ReferrerLeaderboardPageResponseCodes.Error);
+      if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Error) {
+        expect(response.error).toBe("Not Found");
+        expect(response.errorMessage).toBe(
+          "Unknown cycle: invalid-cycle. Valid cycles: test-cycle-a, test-cycle-b",
+        );
+      }
     });
   });
 

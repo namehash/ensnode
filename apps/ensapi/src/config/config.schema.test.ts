@@ -53,7 +53,7 @@ const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
 const subregistryId = getEthnamesSubregistryId("mainnet");
-const defaultCycleSet = getReferralProgramCycleSet(subregistryId.address);
+const defaultCycleSet = getReferralProgramCycleSet(subregistryId);
 
 describe("buildConfigFromEnvironment", () => {
   afterEach(() => {

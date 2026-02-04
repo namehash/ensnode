@@ -1,4 +1,7 @@
-import { serializeReferralProgramCycle } from "@namehash/ens-referrals/v1";
+import {
+  type ReferralProgramCycle,
+  serializeReferralProgramCycle,
+} from "@namehash/ens-referrals/v1";
 
 import { redactRpcConfigs, redactString } from "@ensnode/ensnode-sdk/internal";
 
@@ -16,7 +19,7 @@ export function redactEnsApiConfig(config: EnsApiConfig) {
     referralProgramCycleSet: Object.fromEntries(
       Array.from(config.referralProgramCycleSet.entries()).map(([cycleId, cycle]) => [
         cycleId,
-        serializeReferralProgramCycle(cycle),
+        serializeReferralProgramCycle(cycle as ReferralProgramCycle),
       ]),
     ),
   };
