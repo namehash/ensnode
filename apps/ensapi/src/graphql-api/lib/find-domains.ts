@@ -9,7 +9,6 @@ import {
   type ENSv2DomainId,
   interpretedLabelsToLabelHashPath,
   type LabelHashPath,
-  type Name,
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
@@ -30,9 +29,9 @@ const MAX_DEPTH = 16;
 /**
  * Defines the full set of possible filters for a Find Domains operation.
  */
-interface DomainFilter {
-  name?: Name | undefined | null;
-  owner?: Address | undefined | null;
+export interface FindDomainsWhereArg {
+  name?: string | null;
+  owner?: Address | null;
 }
 
 /**
@@ -111,7 +110,7 @@ export function getOrderValueFromResult(
  * 6. Apply filters (owner, partial) in the unified query
  * 7. Return CTE with columns: id, leafLabelValue, registrationStart, registrationExpiry
  */
-export function findDomains({ name, owner }: DomainFilter) {
+export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
   // NOTE: throws if name is not a Partial InterpretedName
   const { concrete, partial } = parsePartialInterpretedName(name || "");

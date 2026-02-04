@@ -1,7 +1,6 @@
 import config from "@/config";
 
 import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@pothos/plugin-relay";
-import { and } from "drizzle-orm";
 
 import {
   type ENSv1DomainId,
@@ -15,24 +14,13 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import {
-  cursorFilter,
-  type DomainWithOrderValue,
-  findDomains,
-  getOrderValueFromResult,
-  isEffectiveDesc,
-  orderFindDomains,
-} from "@/graphql-api/lib/find-domains";
 import { getDomainIdByInterpretedName } from "@/graphql-api/lib/get-domain-by-fqdn";
-import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
+import { resolveFindDomains } from "@/graphql-api/lib/resolve-find-domains";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
 import {
-  DOMAINS_DEFAULT_ORDER_BY,
-  DOMAINS_DEFAULT_ORDER_DIR,
-  DomainCursor,
   DomainIdInput,
   DomainInterfaceRef,
   DomainsOrderInput,
@@ -62,72 +50,7 @@ builder.queryType({
           where: t.arg({ type: DomainsWhereInput, required: true }),
           order: t.arg({ type: DomainsOrderInput }),
         },
-        resolve: (parent, args, context) => {
-          const orderBy = args.order?.by ?? DOMAINS_DEFAULT_ORDER_BY;
-          const orderDir = args.order?.dir ?? DOMAINS_DEFAULT_ORDER_DIR;
-
-          return resolveCursorConnection(
-            {
-              ...DEFAULT_CONNECTION_ARGS,
-              args,
-              toCursor: (domain: DomainWithOrderValue) =>
-                DomainCursor.encode({
-                  id: domain.id,
-                  by: orderBy,
-                  value: domain.__orderValue,
-                }),
-            },
-            async ({ before, after, limit, inverted }: ResolveCursorConnectionArgs) => {
-              const effectiveDesc = isEffectiveDesc(orderDir, inverted);
-
-              // construct query for relevant domains
-              const domains = findDomains(args.where);
-
-              // build order clauses
-              const orderClauses = orderFindDomains(domains, orderBy, orderDir, inverted);
-
-              // decode cursors for keyset pagination
-              const beforeCursor = before ? DomainCursor.decode(before) : undefined;
-              const afterCursor = after ? DomainCursor.decode(after) : undefined;
-
-              // execute with pagination constraints using tuple comparison
-              const results = await db
-                .with(domains)
-                .select()
-                .from(domains)
-                .where(
-                  and(
-                    beforeCursor
-                      ? cursorFilter(domains, beforeCursor, orderBy, "before", effectiveDesc)
-                      : undefined,
-                    afterCursor
-                      ? cursorFilter(domains, afterCursor, orderBy, "after", effectiveDesc)
-                      : undefined,
-                  ),
-                )
-                .orderBy(...orderClauses)
-                .limit(limit);
-
-              // Map CTE results by id for order value lookup
-              const orderValueById = new Map(
-                results.map((r) => [r.id, getOrderValueFromResult(r, orderBy)]),
-              );
-
-              // Load full Domain entities via dataloader
-              const loadedDomains = await rejectAnyErrors(
-                DomainInterfaceRef.getDataloader(context).loadMany(
-                  results.map((result) => result.id),
-                ),
-              );
-
-              // Attach order values for cursor encoding
-              return loadedDomains.map((domain) => ({
-                ...domain,
-                __orderValue: orderValueById.get(domain.id),
-              }));
-            },
-          );
-        },
+        resolve: (_, args, context) => resolveFindDomains(context, args),
       }),
 
       /////////////////////////////
