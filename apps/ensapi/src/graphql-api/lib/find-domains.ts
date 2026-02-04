@@ -442,7 +442,8 @@ export function cursorFilter(
   const useGreaterThan = (direction === "after") !== effectiveDesc;
   const op = useGreaterThan ? ">" : "<";
 
-  // Direct tuple comparison with cursor values (no subquery needed)
+  // Tuple comparison: (orderColumn, id) > (cursorValue, cursorId)
+  // NOTE: Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL
   return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${cursor.value}, ${cursor.id})`;
 }
 
