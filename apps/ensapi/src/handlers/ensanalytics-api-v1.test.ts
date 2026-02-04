@@ -5,7 +5,7 @@ import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import type { EnsApiConfig } from "@/config/config.schema";
 
-import * as middleware from "../middleware/referrer-leaderboard.middleware-v1";
+import * as middleware from "../middleware/referral-leaderboard-cycles-caches.middleware";
 
 vi.mock("@/config", () => ({
   get default() {
@@ -39,8 +39,8 @@ vi.mock("@/config", () => ({
   },
 }));
 
-vi.mock("../middleware/referrer-leaderboard.middleware-v1", () => ({
-  referrerLeaderboardMiddlewareV1: vi.fn(),
+vi.mock("../middleware/referral-leaderboard-cycles-caches.middleware", () => ({
+  referralLeaderboardCyclesCachesMiddleware: vi.fn(),
 }));
 
 import {
@@ -79,7 +79,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -184,7 +184,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -237,7 +237,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -285,7 +285,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -341,7 +341,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -405,7 +405,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -469,7 +469,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });
@@ -510,7 +510,7 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referrerLeaderboardMiddlewareV1).mockImplementation(async (c, next) => {
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
         c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
         return await next();
       });

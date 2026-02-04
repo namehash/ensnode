@@ -23,7 +23,7 @@ import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { referrerLeaderboardMiddlewareV1 } from "@/middleware/referrer-leaderboard.middleware-v1";
+import { referralLeaderboardCyclesCachesMiddleware } from "@/middleware/referral-leaderboard-cycles-caches.middleware";
 
 const logger = makeLogger("ensanalytics-api-v1");
 
@@ -59,7 +59,7 @@ const app = factory
   .createApp()
 
   // Apply referrer leaderboard cache middleware to all routes in this handler
-  .use(referrerLeaderboardMiddlewareV1)
+  .use(referralLeaderboardCyclesCachesMiddleware)
 
   // Get a page from the referrer leaderboard for a specific cycle
   .get(
@@ -84,7 +84,7 @@ const app = factory
     async (c) => {
       // context must be set by the required middleware
       if (c.var.referralLeaderboardCyclesCaches === undefined) {
-        throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddlewareV1 required`);
+        throw new Error(`Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`);
       }
 
       try {
@@ -174,7 +174,7 @@ app.get(
   async (c) => {
     // context must be set by the required middleware
     if (c.var.referralLeaderboardCyclesCaches === undefined) {
-      throw new Error(`Invariant(ensanalytics-api-v1): referrerLeaderboardMiddlewareV1 required`);
+      throw new Error(`Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`);
     }
 
     try {

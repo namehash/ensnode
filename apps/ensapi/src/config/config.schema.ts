@@ -127,8 +127,18 @@ async function loadReferralProgramCycleSet(
         `Please verify the file contains valid JSON.`,
     );
   }
+
   const schema = makeCustomReferralProgramCyclesSchema("CUSTOM_REFERRAL_PROGRAM_CYCLES");
-  const validated = schema.parse(json);
+  const result = schema.safeParse(json);
+
+  if (result.error) {
+    throw new Error(
+      `Failed to validate custom referral program cycles from ${customCyclesUrl}:\n${prettifyError(result.error)}\n` +
+        `Please verify the JSON structure matches the expected schema.`,
+    );
+  }
+
+  const validated = result.data;
 
   const cycleSet: ReferralProgramCycleSet = new Map();
   for (const cycleObj of validated) {

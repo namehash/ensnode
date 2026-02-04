@@ -5,9 +5,9 @@ import {
 import { factory } from "@/lib/hono-factory";
 
 /**
- * Type definition for the referrer leaderboard middleware context passed to downstream middleware and handlers (V1 API).
+ * Type definition for the referral leaderboard cycles caches middleware context passed to downstream middleware and handlers.
  */
-export type ReferrerLeaderboardMiddlewareV1Variables = {
+export type ReferralLeaderboardCyclesCachesMiddlewareVariables = {
   /**
    * A map from cycle ID to its dedicated {@link SWRCache} containing {@link ReferrerLeaderboard}.
    *
@@ -23,10 +23,12 @@ export type ReferrerLeaderboardMiddlewareV1Variables = {
 };
 
 /**
- * Middleware that provides {@link ReferrerLeaderboardMiddlewareV1Variables}
- * to downstream middleware and handlers (V1 API).
+ * Middleware that provides {@link ReferralLeaderboardCyclesCachesMiddlewareVariables}
+ * to downstream middleware and handlers.
  */
-export const referrerLeaderboardMiddlewareV1 = factory.createMiddleware(async (c, next) => {
-  c.set("referralLeaderboardCyclesCaches", referralLeaderboardCyclesCaches);
-  await next();
-});
+export const referralLeaderboardCyclesCachesMiddleware = factory.createMiddleware(
+  async (c, next) => {
+    c.set("referralLeaderboardCyclesCaches", referralLeaderboardCyclesCaches);
+    await next();
+  },
+);

@@ -33,6 +33,16 @@ const CYCLE_1_CONFIG = {
    * 10,000 USDC = 10,000,000,000 (10_000 * 10^6 smallest units)
    */
   TOTAL_AWARD_POOL_VALUE: priceUsdc(10_000_000_000n),
+
+  /**
+   * Display name for the cycle.
+   */
+  DISPLAY_NAME: "ENS Holiday Awards",
+
+  /**
+   * URL to the rules for this cycle.
+   */
+  RULES_URL: "https://ensawards.org/ens-holiday-awards-rules",
 } as const;
 
 /**
@@ -61,6 +71,16 @@ const CYCLE_2_CONFIG = {
    * 10,000 USDC = 10,000,000,000 (10_000 * 10^6 smallest units)
    */
   TOTAL_AWARD_POOL_VALUE: priceUsdc(10_000_000_000n),
+
+  /**
+   * Display name for the cycle.
+   */
+  DISPLAY_NAME: "March 2026",
+
+  /**
+   * URL to the rules for this cycle.
+   */
+  RULES_URL: "https://ensawards.org/ens-holiday-awards-rules",
 } as const;
 
 /**
@@ -73,7 +93,7 @@ export function getReferralProgramCycleSet(subregistryId: AccountId): ReferralPr
   // Pre-built cycle-1 object (ENS Holiday Awards Dec 2025)
   const cycle1: ReferralProgramCycle = {
     id: ReferralProgramCycleIds.Cycle1,
-    displayName: "ENS Holiday Awards",
+    displayName: CYCLE_1_CONFIG.DISPLAY_NAME,
     rules: buildReferralProgramRules(
       CYCLE_1_CONFIG.TOTAL_AWARD_POOL_VALUE,
       CYCLE_1_CONFIG.MAX_QUALIFIED_REFERRERS,
@@ -81,13 +101,13 @@ export function getReferralProgramCycleSet(subregistryId: AccountId): ReferralPr
       CYCLE_1_CONFIG.END_DATE,
       subregistryId,
     ),
-    rulesUrl: "https://ensawards.org/ens-holiday-awards-rules",
+    rulesUrl: CYCLE_1_CONFIG.RULES_URL,
   };
 
   // Pre-built cycle-2 object (March 2026)
   const cycle2: ReferralProgramCycle = {
     id: ReferralProgramCycleIds.Cycle2,
-    displayName: "March 2026",
+    displayName: CYCLE_2_CONFIG.DISPLAY_NAME,
     rules: buildReferralProgramRules(
       CYCLE_2_CONFIG.TOTAL_AWARD_POOL_VALUE,
       CYCLE_2_CONFIG.MAX_QUALIFIED_REFERRERS,
@@ -95,7 +115,7 @@ export function getReferralProgramCycleSet(subregistryId: AccountId): ReferralPr
       CYCLE_2_CONFIG.END_DATE,
       subregistryId,
     ),
-    rulesUrl: "https://ensawards.org/march-2026-rules",
+    rulesUrl: CYCLE_2_CONFIG.RULES_URL,
   };
 
   return new Map([

@@ -266,7 +266,7 @@ export class ENSReferralsClient {
       throw new Error("Malformed response data: invalid JSON");
     }
 
-    // The API can return errors with various status codes, but they're still in the
+    // The API can return errors with 500 status, but they're still in the
     // ReferrerDetailAllCyclesResponse format with responseCode: 'error'
     // So we don't need to check response.ok here, just deserialize and let
     // the caller handle the responseCode
