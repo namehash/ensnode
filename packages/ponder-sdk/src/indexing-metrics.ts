@@ -46,7 +46,7 @@ interface ChainIndexingMetrics {
   /**
    * Is indexing completed for the chain?
    *
-   * * This will be true when the backfill has been completed,
+   * This will be true when the backfill has been completed,
    * and a specified end block for the chain has been reached.
    */
   indexingCompleted: boolean;

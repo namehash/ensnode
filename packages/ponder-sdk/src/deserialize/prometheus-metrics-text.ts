@@ -2,7 +2,7 @@
  * This module provides functionality to deserialize Prometheus metrics in text format
  * into a structured JSON format compatible with prom2json.
  *
- * Ponder application expose metrics in Prometheus text format, and this module helps
+ * Ponder applications expose metrics in Prometheus text format, and this module helps
  * convert that text into a more usable JSON structure.
  *
  * @see https://github.com/prometheus/prom2json
