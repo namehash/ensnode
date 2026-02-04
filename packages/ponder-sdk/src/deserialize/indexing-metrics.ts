@@ -168,10 +168,6 @@ function buildUnvalidatedPonderIndexingMetrics(metricsText: string): unknown {
  * @throws Error if data cannot be deserialized into a valid Ponder Indexing Metrics.
  */
 export function deserializePonderIndexingMetrics(data: string | unknown): PonderIndexingMetrics {
-  if (typeof data !== "string") {
-    throw new Error(`Ponder Indexing Metrics data must be a string.`);
-  }
-
   const validation = schemaSerializedPonderIndexingMetrics.safeParse(data);
 
   if (!validation.success) {
