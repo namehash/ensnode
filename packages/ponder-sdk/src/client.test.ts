@@ -29,6 +29,39 @@ describe("Ponder Client", () => {
     vi.unstubAllGlobals();
   });
 
+  describe("health()", () => {
+    it("should handle healthy response", async () => {
+      // Arrange
+      mockFetch.mockResolvedValueOnce(
+        new Response(null, {
+          status: 200,
+        }),
+      );
+
+      const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+      // Act & Assert
+      await expect(ponderClient.health()).resolves.toBeUndefined();
+    });
+
+    it("should handle unhealthy response", async () => {
+      // Arrange
+      mockFetch.mockResolvedValueOnce(
+        new Response("Service Unavailable", {
+          status: 503,
+          statusText: "Service Unavailable",
+        }),
+      );
+
+      const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+      // Act & Assert
+      await expect(ponderClient.health()).rejects.toThrowError(
+        /Failed to fetch Ponder health response/,
+      );
+    });
+  });
+
   describe("metrics()", () => {
     it("should handle valid Ponder metrics response", async () => {
       // Arrange
