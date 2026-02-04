@@ -1,0 +1,59 @@
+{
+  "name": "@ensnode/ponder-sdk",
+  "version": "1.5.1",
+  "type": "module",
+  "description": "A utility library for interacting with Ponder apps and data.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namehash/ensnode.git",
+    "directory": "packages/ponder-sdk"
+  },
+  "homepage": "https://github.com/namehash/ensnode/tree/main/packages/ponder-sdk",
+  "keywords": [
+    "ENSNode",
+    "Ponder"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      }
+    },
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "scripts": {
+    "prepublish": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "lint": "biome check --write .",
+    "lint:ci": "biome ci"
+  },
+  "devDependencies": {
+    "@ensnode/shared-configs": "workspace:*",
+    "@types/node": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "zod": "catalog:"
+  }
+}

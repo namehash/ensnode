@@ -1,0 +1,4 @@
+{
+  "extends": "@ensnode/shared-configs/tsconfig.ponder.json",
+  "include": ["src/**/*"]
+}
