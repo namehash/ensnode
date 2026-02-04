@@ -84,7 +84,9 @@ const app = factory
     async (c) => {
       // context must be set by the required middleware
       if (c.var.referralLeaderboardCyclesCaches === undefined) {
-        throw new Error(`Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`);
+        throw new Error(
+          `Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`,
+        );
       }
 
       try {
@@ -174,7 +176,9 @@ app.get(
   async (c) => {
     // context must be set by the required middleware
     if (c.var.referralLeaderboardCyclesCaches === undefined) {
-      throw new Error(`Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`);
+      throw new Error(
+        `Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`,
+      );
     }
 
     try {

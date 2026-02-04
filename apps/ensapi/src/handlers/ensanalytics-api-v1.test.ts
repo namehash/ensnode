@@ -79,10 +79,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: all possible referrers on a single page response
       const allPossibleReferrers = referrerLeaderboardPageResponseOk.data.referrers;
@@ -184,10 +186,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);
@@ -237,10 +241,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: create the test client from the app instance
       const client = testClient(app);
@@ -285,10 +291,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: use a referrer address that exists in the leaderboard (rank 1)
       const existingReferrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
@@ -341,10 +349,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: use a referrer address that does NOT exist in the leaderboard
       const nonExistingReferrer = "0x0000000000000000000000000000000000000099";
@@ -405,10 +415,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: use any referrer address
       const referrer = "0x0000000000000000000000000000000000000001";
@@ -469,10 +481,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: use any referrer address
       const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
@@ -510,10 +524,12 @@ describe("/v1/ensanalytics", () => {
         ],
       ]);
 
-      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
-        return await next();
-      });
+      vi.mocked(middleware.referralLeaderboardCyclesCachesMiddleware).mockImplementation(
+        async (c, next) => {
+          c.set("referralLeaderboardCyclesCaches", mockCyclesCaches);
+          return await next();
+        },
+      );
 
       // Arrange: use any referrer address
       const referrer = "0x538e35b2888ed5bc58cf2825d76cf6265aa4e31e";
