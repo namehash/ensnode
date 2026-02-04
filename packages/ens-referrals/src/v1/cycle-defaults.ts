@@ -1,6 +1,4 @@
-import { mainnet } from "viem/chains";
-
-import { priceUsdc, type UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { type AccountId, priceUsdc, type UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import {
   type ReferralProgramCycle,
@@ -68,13 +66,12 @@ const CYCLE_2_CONFIG = {
 /**
  * Returns the default referral program cycle set with pre-built cycle definitions.
  *
- * @param subregistryAddress - The subregistry address for rule validation (e.g., BaseRegistrar address)
+ * @param subregistryId - The subregistry account ID for rule validation (e.g., BaseRegistrar on the namespace chain)
  * @returns A map of cycle IDs to their pre-built cycle configurations
  */
 export function getReferralProgramCycleSet(
-  subregistryAddress: `0x${string}`,
+  subregistryId: AccountId,
 ): ReferralProgramCycleSet {
-  const subregistryId = { chainId: mainnet.id, address: subregistryAddress };
 
   // Pre-built cycle-1 object (ENS Holiday Awards Dec 2025)
   const cycle1: ReferralProgramCycle = {

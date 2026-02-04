@@ -88,7 +88,7 @@ async function loadReferralProgramCycleSet(
 
   if (!customCyclesUrl) {
     logger.info("Using default referral program cycle set");
-    return getReferralProgramCycleSet(subregistryId.address);
+    return getReferralProgramCycleSet(subregistryId);
   }
 
   // Validate URL format
@@ -100,14 +100,33 @@ async function loadReferralProgramCycleSet(
 
   // Fetch and validate
   logger.info(`Fetching custom referral program cycles from: ${customCyclesUrl}`);
-  const response = await fetch(customCyclesUrl);
+
+  let response: Response;
+  try {
+    response = await fetch(customCyclesUrl);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Failed to fetch custom referral program cycles from ${customCyclesUrl}: ${errorMessage}. ` +
+      `Please verify the URL is accessible and the server is running.`,
+    );
+  }
+
   if (!response.ok) {
     throw new Error(
       `Failed to fetch custom referral program cycles from ${customCyclesUrl}: ${response.status} ${response.statusText}`,
     );
   }
 
-  const json = await response.json();
+  let json: unknown;
+  try {
+    json = await response.json();
+  } catch (error) {
+    throw new Error(
+      `Failed to parse JSON from ${customCyclesUrl}: The response is not valid JSON. ` +
+      `Please verify the file contains valid JSON.`,
+    );
+  }
   const schema = makeCustomReferralProgramCyclesSchema("CUSTOM_REFERRAL_PROGRAM_CYCLES");
   const validated = schema.parse(json);
 
