@@ -1,119 +1,54 @@
-import packageJson from "@/../package.json";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 
-import type { Context as HonoContext } from "hono";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
+import { type EnsRainbow, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import {
-  buildEnsRainbowClientLabelSet,
-  buildLabelSetId,
-  buildLabelSetVersion,
-  type EnsRainbowClientLabelSet,
-  type LabelSetId,
-  type LabelSetVersion,
-} from "@ensnode/ensnode-sdk";
-import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
-
-import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
-import { ENSRainbowServer } from "@/lib/server";
-import { getErrorMessage } from "@/utils/error-utils";
+import apiV1 from "@/lib/api.v1";
+import type { ENSRainbowDB } from "@/lib/database";
+import { factory } from "@/lib/hono-factory";
+import { ensRainbowServerMiddleware } from "@/lib/middleware/ensrainbow-server.middleware";
 import { logger } from "@/utils/logger";
+
+export type Api = ReturnType<typeof factory.createApp>;
 
 /**
  * Creates and configures an ENS Rainbow api
  */
-export async function createApi(db: ENSRainbowDB): Promise<Hono> {
-  const api = new Hono();
-  const server = await ENSRainbowServer.init(db);
+export function createApi(db: ENSRainbowDB): Api {
+  const api = factory.createApp();
 
-  // Enable CORS for all versioned API routes
-  api.use(
-    "/v1/*",
-    cors({
-      // Allow all origins
-      origin: "*",
-      // ENSRainbow API is read-only, so only allow read methods
-      allowMethods: ["HEAD", "GET", "OPTIONS"],
-    }),
-  );
+  // Apply ENSRainbowServer middleware to all routes
+  api.use(ensRainbowServerMiddleware(db));
 
-  api.get("/v1/heal/:labelhash", async (c: HonoContext) => {
-    const labelhash = c.req.param("labelhash") as `0x${string}`;
-
-    const labelSetVersionParam = c.req.query("label_set_version");
-    const labelSetIdParam = c.req.query("label_set_id");
-
-    let labelSetVersion: LabelSetVersion | undefined;
-    try {
-      if (labelSetVersionParam) {
-        labelSetVersion = buildLabelSetVersion(labelSetVersionParam);
-      }
-    } catch (_error) {
-      logger.warn(`Invalid label_set_version parameter: ${labelSetVersionParam}`);
-      return c.json(
-        {
-          status: StatusCode.Error,
-          error: "Invalid label_set_version parameter: must be a non-negative integer",
-          errorCode: ErrorCode.BadRequest,
-        },
-        400,
-      );
-    }
-
-    let clientLabelSet: EnsRainbowClientLabelSet;
-    try {
-      const labelSetId: LabelSetId | undefined = labelSetIdParam
-        ? buildLabelSetId(labelSetIdParam)
-        : undefined;
-      clientLabelSet = buildEnsRainbowClientLabelSet(labelSetId, labelSetVersion);
-    } catch (error) {
-      logger.warn(error);
-      return c.json(
-        {
-          status: StatusCode.Error,
-          error: getErrorMessage(error),
-          errorCode: ErrorCode.BadRequest,
-        },
-        400,
-      );
-    }
-
-    logger.debug(
-      `Healing request for labelhash: ${labelhash}, with labelSet: ${JSON.stringify(
-        clientLabelSet,
-      )}`,
-    );
-    const result = await server.heal(labelhash, clientLabelSet);
-    logger.debug(result, `Heal result:`);
-    return c.json(result, result.errorCode);
-  });
-
-  api.get("/health", (c: HonoContext) => {
+  api.get("/health", (c) => {
     logger.debug("Health check request");
-    const result: EnsRainbow.HealthResponse = { status: "ok" };
+    const result: EnsRainbow.HealthResponse = { status: StatusCode.Success };
     return c.json(result);
   });
 
-  api.get("/v1/labels/count", async (c: HonoContext) => {
-    logger.debug("Label count request");
-    const result = await server.labelCount();
-    logger.debug(result, `Count result`);
-    return c.json(result, result.errorCode);
+  api.get("/ready", (c) => {
+    logger.debug("Readiness check request");
+
+    const isReady =
+      typeof c.var.ensRainbowServer !== "undefined" && !(c.var.ensRainbowServer instanceof Error);
+
+    console.log("Readiness check - isReady:", isReady);
+
+    let result: EnsRainbow.ReadyResponse;
+    let statusCode: ContentfulStatusCode;
+
+    if (isReady) {
+      result = { status: StatusCode.Success } satisfies EnsRainbow.ReadyResponse;
+      statusCode = 200;
+    } else {
+      result = { status: StatusCode.Error } satisfies EnsRainbow.ReadyResponse;
+      statusCode = 503;
+    }
+
+    return c.json(result, statusCode);
   });
 
-  api.get("/v1/version", (c: HonoContext) => {
-    logger.debug("Version request");
-    const result: EnsRainbow.VersionResponse = {
-      status: StatusCode.Success,
-      versionInfo: {
-        version: packageJson.version,
-        dbSchemaVersion: DB_SCHEMA_VERSION,
-        labelSet: server.getServerLabelSet(),
-      },
-    };
-    logger.debug(result, `Version result`);
-    return c.json(result);
-  });
+  // Mount versioned API routes
+  api.route("/v1", apiV1);
 
   return api;
 }

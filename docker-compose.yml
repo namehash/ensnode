@@ -56,7 +56,9 @@ services:
 
   ensrainbow:
     container_name: ensrainbow
-    image: ghcr.io/namehash/ensnode/ensrainbow:latest
+    build:
+      context: .
+      dockerfile: ./apps/ensrainbow/Dockerfile
     ports:
       - "3223:3223"
     env_file:

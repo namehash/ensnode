@@ -174,9 +174,9 @@ describe("EnsRainbowApiClient", () => {
         } satisfies EnsRainbow.CountSuccess),
     });
 
-    const response = await client.count();
+    const response = (await client.count()) as EnsRainbow.CountSuccess;
 
-    expect(response satisfies EnsRainbow.CountResponse).toBeTruthy();
+    expect(response).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.count === "number").toBeTruthy();
     expect(typeof response.timestamp === "string").toBeTruthy();
@@ -186,15 +186,45 @@ describe("EnsRainbowApiClient", () => {
     mockFetch.mockResolvedValueOnce({
       json: () =>
         Promise.resolve({
-          status: "ok",
+          status: StatusCode.Success,
         } satisfies EnsRainbow.HealthResponse),
     });
 
     const response = await client.health();
 
     expect(response).toEqual({
-      status: "ok",
+      status: StatusCode.Success,
     } satisfies EnsRainbow.HealthResponse);
+  });
+
+  it("should return a positive readiness check", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Success,
+        } satisfies EnsRainbow.ReadyResponse),
+    });
+
+    const response = await client.ready();
+
+    expect(response).toEqual({
+      status: StatusCode.Success,
+    } satisfies EnsRainbow.ReadyResponse);
+  });
+
+  it("should return a negative readiness check", async () => {
+    mockFetch.mockResolvedValueOnce({
+      json: () =>
+        Promise.resolve({
+          status: StatusCode.Error,
+        } satisfies EnsRainbow.ReadyResponse),
+    });
+
+    const response = await client.ready();
+
+    expect(response).toEqual({
+      status: StatusCode.Error,
+    } satisfies EnsRainbow.ReadyResponse);
   });
 
   it("should return version information", async () => {
@@ -213,9 +243,9 @@ describe("EnsRainbowApiClient", () => {
         } satisfies EnsRainbow.VersionResponse),
     });
 
-    const response = await client.version();
+    const response = (await client.version()) as EnsRainbow.VersionSuccess;
 
-    expect(response satisfies EnsRainbow.VersionResponse).toBeTruthy();
+    expect(response).toBeTruthy();
     expect(response.status).toEqual(StatusCode.Success);
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
     expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();

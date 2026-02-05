@@ -12,7 +12,7 @@ export interface ServerCommandOptions {
 /**
  * Creates and configures the ENS Rainbow server application
  */
-export async function createServer(db: ENSRainbowDB) {
+export function createServer(db: ENSRainbowDB) {
   return createApi(db);
 }
 
@@ -22,7 +22,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   const db = await ENSRainbowDB.open(options.dataDir);
 
   try {
-    const app = await createServer(db);
+    const app = createServer(db);
 
     const server = serve({
       fetch: app.fetch,

@@ -8,6 +8,7 @@ import { prettifyError } from "zod/v4";
 
 import type { ENSIndexerVersionInfo, SerializedENSIndexerVersionInfo } from "@ensnode/ensnode-sdk";
 import { makeENSIndexerVersionInfoSchema } from "@ensnode/ensnode-sdk/internal";
+import { StatusCode } from "@ensnode/ensrainbow-sdk/consts";
 
 import { getENSRainbowApiClient } from "@/lib/ensraibow-api-client";
 
@@ -110,7 +111,16 @@ function getPackageVersionFromPnpmStore(pnpmDir: string, packageName: string): s
  */
 export async function getENSIndexerVersionInfo(): Promise<ENSIndexerVersionInfo> {
   const ensRainbowApiClient = getENSRainbowApiClient();
-  const { versionInfo: ensRainbowVersionInfo } = await ensRainbowApiClient.version();
+
+  const versionResponse = await ensRainbowApiClient.version();
+
+  if (versionResponse.status !== StatusCode.Success) {
+    throw new Error(
+      `Cannot fetch ENSRainbow version info: ${versionResponse.error} (code: ${versionResponse.errorCode})`,
+    );
+  }
+
+  const ensRainbowVersionInfo = versionResponse.versionInfo;
 
   // ENSRainbow version (fetched dynamically from the connected ENSRainbow service instance)
   const ensRainbowSchema = ensRainbowVersionInfo.dbSchemaVersion;

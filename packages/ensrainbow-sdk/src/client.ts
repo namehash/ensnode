@@ -24,6 +24,8 @@ export namespace EnsRainbow {
 
     health(): Promise<HealthResponse>;
 
+    ready(): Promise<ReadyResponse>;
+
     version(): Promise<VersionResponse>;
 
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
@@ -33,8 +35,18 @@ export namespace EnsRainbow {
 
   type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
+  export interface DatabaseNotReadyError {
+    status: typeof StatusCode.Error;
+    error: string;
+    errorCode: typeof ErrorCode.DatabaseNotReady;
+  }
+
   export interface HealthResponse {
-    status: "ok";
+    status: typeof StatusCode.Success;
+  }
+
+  export interface ReadyResponse {
+    status: StatusCode;
   }
 
   export interface BaseHealResponse<Status extends StatusCode, Error extends ErrorCode> {
@@ -76,6 +88,7 @@ export namespace EnsRainbow {
   }
 
   export type HealResponse =
+    | DatabaseNotReadyError
     | HealSuccess
     | HealNotFoundError
     | HealServerError
@@ -114,7 +127,7 @@ export namespace EnsRainbow {
     errorCode: typeof ErrorCode.ServerError;
   }
 
-  export type CountResponse = CountSuccess | CountServerError;
+  export type CountResponse = DatabaseNotReadyError | CountSuccess | CountServerError;
 
   /**
    * ENSRainbow version information.
@@ -139,10 +152,12 @@ export namespace EnsRainbow {
   /**
    * Interface for the version endpoint response
    */
-  export interface VersionResponse {
+  export interface VersionSuccess {
     status: typeof StatusCode.Success;
     versionInfo: VersionInfo;
   }
+
+  export type VersionResponse = DatabaseNotReadyError | VersionSuccess;
 }
 
 export interface EnsRainbowApiClientOptions {
@@ -334,7 +349,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
    *
    * Simple verification that the service is running, either in your local setup or for the
    * provided hosted instance.
-   * @returns a status of ENS Rainbow service
+   * @returns a status of ENS Rainbow service health
    * @example
    *
    * const response = await client.health();
@@ -349,6 +364,35 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
     const response = await fetch(new URL("/health", this.options.endpointUrl));
 
     return response.json() as Promise<EnsRainbow.HealthResponse>;
+  }
+
+  /**
+   *
+   * Simple verification that the service is operational and ready to handle requests,
+   * either in your local setup or for the provided hosted instance.
+   *
+   * This can be used as a more specific readiness probe for container orchestration than `health()`,
+   * which only verifies that the service is running but not necessarily ready to handle requests.
+   * .
+   * @returns a status of ENS Rainbow service readiness
+   * @example
+   *
+   * const response = await client.ready();
+   *
+   * console.log(response);
+   *
+   * // {
+   * //   "status": "ok",
+   * // }
+   * // OR
+   * // {
+   * //   "status": "error",
+   * // }
+   */
+  async ready(): Promise<EnsRainbow.ReadyResponse> {
+    const response = await fetch(new URL("/ready", this.options.endpointUrl));
+
+    return response.json() as Promise<EnsRainbow.ReadyResponse>;
   }
 
   /**
