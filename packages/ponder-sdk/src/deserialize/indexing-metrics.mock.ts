@@ -176,8 +176,7 @@ ponder_settings_info{ordering="omnichain",database="postgres",command="start"} 1
 };
 
 /**
- * This mock has conflicting metrics where the "ponder_sync_is_complete" metric
- * is defined but missing the TYPE declaration, which should trigger a validation error.
+ * This mock has conflicting metrics that should cause validation to fail.
  *
  * These metrics must not be set to `1` at the same time:
  * - `ponder_sync_is_complete` (when set to `1`, indicates indexing has been completed and no more syncing is needed)

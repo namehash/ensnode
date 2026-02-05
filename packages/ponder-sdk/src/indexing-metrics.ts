@@ -58,7 +58,7 @@ export interface ChainIndexingMetrics {
    * Number of blocks required to be synced to complete
    * the backfill phase of indexing.
    *
-   * This value is calculated determined by Ponder at the time
+   * This value is calculated by Ponder at the time
    * the backfill starts. It corresponds to the number of blocks between:
    * - the first block to be indexed (specified in Ponder config), and
    * - the last block to be indexed during backfill.
