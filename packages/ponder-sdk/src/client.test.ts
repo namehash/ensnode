@@ -4,6 +4,7 @@ import { PonderClient } from "./client";
 import {
   indexingMetricsMockInvalidApplicationSettingsOrdering,
   indexingMetricsMockInvalidNoIndexedChains,
+  indexingMetricsMockInvalidNonIntegerChainNames,
   indexingMetricsMockValid,
 } from "./deserialize/indexing-metrics.mock";
 import { deserializePonderIndexingStatus } from "./deserialize/indexing-status";
@@ -81,6 +82,22 @@ describe("Ponder Client", () => {
     });
 
     describe("Invalid response handling", () => {
+      it("should handle empty response", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response("", {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          }),
+        );
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        // Act & Assert
+        await expect(ponderClient.metrics()).rejects.toThrowError(
+          /Invalid serialized Ponder Indexing Metrics.*Ponder Indexing Metrics must be a non-empty string/,
+        );
+      });
+
       it("should handle invalid Ponder application settings in the response", async () => {
         // Arrange
         mockFetch.mockResolvedValueOnce(
@@ -90,12 +107,55 @@ describe("Ponder Client", () => {
           }),
         );
 
-        // Act & Assert
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
 
-        await expect(ponderClient.metrics()).rejects.toThrowError(
-          /Invalid serialized Ponder Indexing Metrics.*Invalid input: expected "omnichain"/,
+        // Act
+        try {
+          await ponderClient.metrics();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "unknown error";
+          // Assert
+          expect(errorMessage).toContain("Invalid serialized Ponder Indexing Metrics");
+          expect(errorMessage).toContain("Missing required Prometheus metric: ponder_sync_block");
+          expect(errorMessage).toContain(
+            "Missing required Prometheus metric: ponder_sync_block_timestamp",
+          );
+          expect(errorMessage).toContain(
+            "Missing required Prometheus metric: ponder_historical_total_blocks",
+          );
+          expect(errorMessage).toContain(
+            "Missing required Prometheus metric: ponder_sync_is_complete",
+          );
+          expect(errorMessage).toContain(
+            "Missing required Prometheus metric: ponder_sync_is_realtime",
+          );
+        }
+      });
+
+      it("should handle metrics using non-int chain names in the response", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response(indexingMetricsMockInvalidNonIntegerChainNames.text, {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          }),
         );
+
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        // Act
+        try {
+          await ponderClient.metrics();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "unknown error";
+          // Assert
+          expect(errorMessage).toContain("Invalid serialized Ponder Indexing Metrics");
+          expect(errorMessage).toContain("'optimism' must be a string representing a chain ID");
+          expect(errorMessage).toContain("'mainnet' must be a string representing a chain ID");
+          expect(errorMessage).toContain("'base' must be a string representing a chain ID");
+          expect(errorMessage).toContain("'scroll' must be a string representing a chain ID");
+          expect(errorMessage).toContain("'linea' must be a string representing a chain ID");
+        }
       });
 
       it("should handle no indexed chains in the response", async () => {
@@ -107,11 +167,29 @@ describe("Ponder Client", () => {
           }),
         );
 
-        // Act & Assert
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
 
+        // Act & Assert
         await expect(ponderClient.metrics()).rejects.toThrowError(
-          /Invalid serialized Ponder Indexing Metrics.*Ponder Indexing Metrics must include at least one indexed chain/,
+          /Invalid serialized Ponder Indexing Metrics.*Missing required Prometheus metric: ponder_sync_block/,
+        );
+      });
+    });
+
+    describe("HTTP error handling", () => {
+      it("should handle non-OK HTTP responses", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response("Internal Server Error", {
+            status: 500,
+            statusText: "Internal Server Error",
+          }),
+        );
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        // Act & Assert
+        await expect(ponderClient.metrics()).rejects.toThrowError(
+          /Failed to fetch Ponder Indexing Metrics response/,
         );
       });
     });
@@ -137,6 +215,7 @@ describe("Ponder Client", () => {
 
     describe("Invalid response handling", () => {
       it("should handle invalid block numbers in the response", async () => {
+        // Arrange
         mockFetch.mockResolvedValueOnce(
           new Response(JSON.stringify(mockSerializedPonderIndexingStatusInvalidBlockNumber), {
             status: 200,
@@ -146,12 +225,14 @@ describe("Ponder Client", () => {
 
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
 
+        // Act & Assert
         await expect(ponderClient.status()).rejects.toThrowError(
           /Invalid serialized Ponder Indexing Status.*Value must be a non-negative integer/,
         );
       });
 
       it("should handle invalid chain IDs in the response", async () => {
+        // Arrange
         mockFetch.mockResolvedValueOnce(
           new Response(JSON.stringify(mockSerializedPonderIndexingStatusInvalidChainId), {
             status: 200,
@@ -161,12 +242,14 @@ describe("Ponder Client", () => {
 
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
 
+        // Act & Assert
         await expect(ponderClient.status()).rejects.toThrowError(
           /Invalid serialized Ponder Indexing Status.*Value must be a positive integer/,
         );
       });
 
       it("should handle zero indexed chains in the response", async () => {
+        // Arrange
         mockFetch.mockResolvedValueOnce(
           new Response(JSON.stringify({}), {
             status: 200,
@@ -176,6 +259,7 @@ describe("Ponder Client", () => {
 
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
 
+        // Act & Assert
         await expect(ponderClient.status()).rejects.toThrowError(
           /Invalid serialized Ponder Indexing Status.*Ponder Indexing Status must include at least one indexed chain/,
         );
@@ -192,6 +276,7 @@ describe("Ponder Client", () => {
           }),
         );
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
         // Act & Assert
         await expect(ponderClient.status()).rejects.toThrowError(
           /Failed to fetch Ponder Indexing Status response/,
@@ -199,6 +284,7 @@ describe("Ponder Client", () => {
       });
 
       it("should handle JSON parsing errors", async () => {
+        // Arrange
         mockFetch.mockResolvedValueOnce(
           new Response("not valid json", {
             status: 200,
@@ -206,6 +292,8 @@ describe("Ponder Client", () => {
           }),
         );
         const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        // Act & Assert
         await expect(ponderClient.status()).rejects.toThrowError(
           /Failed to parse Ponder Indexing Status response as JSON/,
         );

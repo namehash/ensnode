@@ -2,34 +2,69 @@ import type { BlockRef } from "./blocks";
 import type { ChainId } from "./chains";
 
 /**
+ * Ponder Application Commands
+ *
+ * Represents the commands that can be used to start a Ponder app.
+ */
+export const PonderAppCommands = {
+  Dev: "dev",
+  Start: "start",
+} as const;
+
+export type PonderAppCommand = (typeof PonderAppCommands)[keyof typeof PonderAppCommands];
+
+/**
+ * Ponder Indexing Orderings
+ *
+ * Represents the indexing ordering strategies supported by Ponder.
+ *
+ * Note: Support for other Ponder indexing strategies is planned for the future.
+ */
+export const PonderIndexingOrderings = {
+  Omnichain: "omnichain",
+} as const;
+
+export type PonderIndexingOrdering =
+  (typeof PonderIndexingOrderings)[keyof typeof PonderIndexingOrderings];
+
+/**
  * Ponder Application Settings
  *
- * Represents the application-level settings for Ponder application.
+ * Represents the application-level settings for a Ponder app.
  */
-interface PonderApplicationSettings {
+export interface PonderApplicationSettings {
   /**
    * Command used to start the Ponder application.
    */
-  command: "dev" | "start";
+  command: PonderAppCommand;
 
   /**
    * Ordering strategy for onchain data used during indexing.
    */
-  ordering: "omnichain";
+  ordering: PonderIndexingOrdering;
 }
 
 /**
  * Chain Indexing Metrics
  *
- * Represents the indexing metrics for a specific chain indexed by Ponder application.
+ * Represents the indexing metrics for a specific chain indexed by a Ponder app.
  *
  * Guarantees:
  * - `indexingCompleted` and `indexingRealtime` cannot both be `true`
  *   at the same time. All other combinations are valid.
  */
-interface ChainIndexingMetrics {
+export interface ChainIndexingMetrics {
   /**
-   * Number of blocks required to be synced during backfill.
+   * Number of blocks required to be synced to complete
+   * the backfill phase of indexing.
+   *
+   * This value is calculated determined by Ponder at the time
+   * the backfill starts. It corresponds to the number of blocks between:
+   * - the first block to be indexed (specified in Ponder config), and
+   * - the last block to be indexed during backfill.
+   * The last block to be indexed during backfill is one of:
+   * - The specified end block (if any) in the Ponder config, or
+   * - The latest known block at the time the backfill started.
    *
    * Guarantees:
    * - Is a positive integer.
@@ -71,7 +106,7 @@ export interface PonderIndexingMetrics {
   /**
    * Settings related to how the Ponder application is configured to index onchain data.
    */
-  application: PonderApplicationSettings;
+  appSettings: PonderApplicationSettings;
 
   /**
    * Map of indexed chain IDs to their respective indexing metrics.

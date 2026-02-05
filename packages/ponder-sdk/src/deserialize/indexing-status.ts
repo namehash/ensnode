@@ -10,16 +10,16 @@ import { prettifyError, z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import type { BlockRef } from "../blocks";
-import { blockRefSchema } from "../blocks";
+import { schemaBlockRef } from "../blocks";
 import type { ChainId } from "../chains";
-import { chainIdSchema } from "../chains";
+import { schemaChainId } from "../chains";
 import type { PonderIndexingStatus } from "../indexing-status";
 
 const schemaSerializedChainName = z.string();
 
 const schemaSerializedChainBlockRef = z.object({
-  id: chainIdSchema,
-  block: blockRefSchema,
+  id: schemaChainId,
+  block: schemaBlockRef,
 });
 
 function invariant_includesAtLeastOneIndexedChain(

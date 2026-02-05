@@ -202,3 +202,14 @@ export class PrometheusMetrics {
     return this.metrics.map((m) => m.name);
   }
 }
+
+/**
+ * Deserialize Prometheus metrics text into validated PrometheusMetrics instance.
+ *
+ * @param maybeMetricsText Text that may represent Prometheus metrics in text format.
+ * @returns Validated PrometheusMetrics instance.
+ * @throws Error if the input text is not valid Prometheus metrics format.
+ */
+export function deserializePrometheusMetrics(maybeMetricsText: string): PrometheusMetrics {
+  return PrometheusMetrics.parse(maybeMetricsText);
+}

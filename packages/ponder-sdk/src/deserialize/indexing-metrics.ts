@@ -9,12 +9,15 @@
 import { prettifyError, z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { type BlockRef, blockRefSchema } from "../blocks";
-import { type ChainId, chainIdSchema } from "../chains";
-import type { PonderIndexingMetrics } from "../indexing-metrics";
-import { positiveIntegerSchema } from "../numbers";
-import { deserializeChainIdString } from "./chains";
-import { PrometheusMetrics } from "./prometheus-metrics-text";
+import { type BlockRef, schemaBlockRef } from "../blocks";
+import {
+  PonderAppCommands,
+  type PonderIndexingMetrics,
+  PonderIndexingOrderings,
+} from "../indexing-metrics";
+import { schemaPositiveInteger } from "../numbers";
+import { schemaChainIdString } from "./chains";
+import { deserializePrometheusMetrics, type PrometheusMetrics } from "./prometheus-metrics-text";
 
 function invariant_indexingCompletedAndRealtimeAreNotBothTrue(
   ctx: ParsePayload<SerializedChainIndexingMetrics>,
@@ -36,8 +39,8 @@ function invariant_indexingCompletedAndRealtimeAreNotBothTrue(
  */
 const schemaSerializedChainIndexingMetrics = z
   .object({
-    backfillSyncBlocksTotal: positiveIntegerSchema,
-    latestSyncedBlock: blockRefSchema,
+    backfillSyncBlocksTotal: schemaPositiveInteger,
+    latestSyncedBlock: schemaBlockRef,
     indexingCompleted: z.boolean(),
     indexingRealtime: z.boolean(),
   })
@@ -49,7 +52,7 @@ type SerializedChainIndexingMetrics = z.infer<typeof schemaSerializedChainIndexi
  * Schema describing the chain indexing metrics.
  */
 const schemaSerializedChainsIndexingMetrics = z.map(
-  chainIdSchema,
+  schemaChainIdString,
   schemaSerializedChainIndexingMetrics,
 );
 
@@ -71,8 +74,8 @@ function invariant_includesAtLeastOneIndexedChain(
  * Schema representing settings of a Ponder app.
  */
 const schemaSerializedApplicationSettings = z.object({
-  command: z.enum(["dev", "start"]),
-  ordering: z.enum(["omnichain"]),
+  command: z.enum(PonderAppCommands),
+  ordering: z.enum(PonderIndexingOrderings),
 });
 
 /**
@@ -80,10 +83,34 @@ const schemaSerializedApplicationSettings = z.object({
  */
 const schemaPonderIndexingMetrics = z
   .object({
-    application: schemaSerializedApplicationSettings,
+    appSettings: schemaSerializedApplicationSettings,
     chains: schemaSerializedChainsIndexingMetrics,
   })
   .check(invariant_includesAtLeastOneIndexedChain);
+
+function invariant_includesRequiredMetrics(ctx: ParsePayload<PrometheusMetrics>) {
+  const prometheusMetrics = ctx.value;
+
+  const metricNames = prometheusMetrics.getMetricNames();
+  const requiredMetricNames = [
+    "ponder_settings_info",
+    "ponder_sync_block",
+    "ponder_sync_block_timestamp",
+    "ponder_historical_total_blocks",
+    "ponder_sync_is_complete",
+    "ponder_sync_is_realtime",
+  ];
+
+  for (const requiredMetricName of requiredMetricNames) {
+    if (!metricNames.includes(requiredMetricName)) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value,
+        message: `Missing required Prometheus metric: ${requiredMetricName}`,
+      });
+    }
+  }
+}
 
 /**
  * Schema describing the response of fetching `GET /metrics` from a Ponder app.
@@ -91,7 +118,10 @@ const schemaPonderIndexingMetrics = z
 const schemaSerializedPonderIndexingMetrics = z.coerce
   .string()
   .nonempty({ error: `Ponder Indexing Metrics must be a non-empty string.` })
-  .pipe(z.preprocess(buildUnvalidatedPonderIndexingMetrics, schemaPonderIndexingMetrics));
+  .transform(deserializePrometheusMetrics) // deserialize Prometheus metrics text into PrometheusMetrics instance
+  .check(invariant_includesRequiredMetrics)
+  .transform(buildUnvalidatedPonderIndexingMetrics)
+  .pipe(schemaPonderIndexingMetrics);
 
 /**
  * Serialized Ponder Indexing Metrics.
@@ -100,51 +130,46 @@ type SerializedPonderIndexingMetrics = z.infer<typeof schemaSerializedPonderInde
 
 /**
  * Build unvalidated (and perhaps partial) Ponder Indexing Metrics
- * from Prometheus metrics text.
  *
- * @param metricsText prometheus metrics in text format.
+ * @param prometheusMetrics valid Prometheus Metrics from Ponder app.
  * @returns Unvalidated (possibly incomplete) Ponder Indexing Metrics
  *          to be validated with {@link schemaSerializedPonderIndexingMetrics}.
  */
-function buildUnvalidatedPonderIndexingMetrics(metricsText: string): unknown {
-  const prometheusMetrics = PrometheusMetrics.parse(metricsText);
-
-  const application = {
+function buildUnvalidatedPonderIndexingMetrics(prometheusMetrics: PrometheusMetrics): unknown {
+  const appSettings = {
     command: prometheusMetrics.getLabel("ponder_settings_info", "command"),
     ordering: prometheusMetrics.getLabel("ponder_settings_info", "ordering"),
   };
 
-  const chainIds = prometheusMetrics
-    .getLabels("ponder_sync_block", "chain")
-    .map((chainIdString) => deserializeChainIdString(chainIdString));
+  const chainReferences = prometheusMetrics.getLabels("ponder_sync_block", "chain");
 
-  const chains = new Map<ChainId, unknown>();
+  const chains = new Map<unknown, unknown>();
 
-  for (const chainId of chainIds) {
+  for (const maybeChainId of chainReferences) {
     const latestSyncedBlock = {
       number: prometheusMetrics.getValue("ponder_sync_block", {
-        chain: `${chainId.toString()}`,
+        chain: maybeChainId,
       }),
       timestamp: prometheusMetrics.getValue("ponder_sync_block_timestamp", {
-        chain: `${chainId.toString()}`,
+        chain: maybeChainId,
       }),
     } satisfies Partial<BlockRef>;
 
     const backfillSyncBlocksTotal = prometheusMetrics.getValue("ponder_historical_total_blocks", {
-      chain: `${chainId.toString()}`,
+      chain: maybeChainId,
     });
 
     const indexingCompleted =
       prometheusMetrics.getValue("ponder_sync_is_complete", {
-        chain: `${chainId.toString()}`,
+        chain: maybeChainId,
       }) === 1;
 
     const indexingRealtime =
       prometheusMetrics.getValue("ponder_sync_is_realtime", {
-        chain: `${chainId.toString()}`,
+        chain: maybeChainId,
       }) === 1;
 
-    chains.set(chainId, {
+    chains.set(maybeChainId, {
       latestSyncedBlock,
       backfillSyncBlocksTotal,
       indexingCompleted,
@@ -153,7 +178,7 @@ function buildUnvalidatedPonderIndexingMetrics(metricsText: string): unknown {
   }
 
   const unvalidatedPonderIndexingMetrics = {
-    application,
+    appSettings,
     chains,
   };
 

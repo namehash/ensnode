@@ -5,20 +5,20 @@ import { z } from "zod/v4";
 /**
  * Any finite number. Rejects non-finite numbers such as `NaN` and `Infinity`.
  */
-export const numberSchema = z.number({ error: `Value must be a number` });
+export const schemaNumber = z.number({ error: `Value must be a number` });
 
-export const integerSchema = numberSchema.int({ error: `Value must be an integer` });
+export const schemaInteger = schemaNumber.int({ error: `Value must be an integer` });
 
-export const nonnegativeNumberSchema = numberSchema.nonnegative({
+export const schemaNonnegativeNumber = schemaNumber.nonnegative({
   error: `Value must be non-negative`,
 });
 
-export const positiveNumberSchema = numberSchema.positive({ error: `Value must be positive` });
+export const schemaPositiveNumber = schemaNumber.positive({ error: `Value must be positive` });
 
-export const nonnegativeIntegerSchema = integerSchema.nonnegative({
+export const schemaNonnegativeInteger = schemaInteger.nonnegative({
   error: `Value must be a non-negative integer`,
 });
 
-export const positiveIntegerSchema = integerSchema.positive({
+export const schemaPositiveInteger = schemaInteger.positive({
   error: `Value must be a positive integer`,
 });

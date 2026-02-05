@@ -1,4 +1,8 @@
-import type { PonderIndexingMetrics } from "../indexing-metrics";
+import {
+  PonderAppCommands,
+  type PonderIndexingMetrics,
+  PonderIndexingOrderings,
+} from "../indexing-metrics";
 
 export const indexingMetricsMockValid = {
   text: `
@@ -46,7 +50,7 @@ ponder_historical_total_blocks{chain="42161"} 78607197
 ponder_historical_total_blocks{chain="59144"} 21873991
 `,
   deserialized: {
-    application: { ordering: "omnichain", command: "start" },
+    appSettings: { ordering: PonderIndexingOrderings.Omnichain, command: PonderAppCommands.Start },
     chains: new Map([
       [
         10,
@@ -104,6 +108,52 @@ ponder_historical_total_blocks{chain="59144"} 21873991
       ],
     ]),
   } satisfies PonderIndexingMetrics,
+};
+
+export const indexingMetricsMockInvalidNonIntegerChainNames = {
+  text: `
+# HELP ponder_settings_info Ponder settings information
+# TYPE ponder_settings_info gauge
+ponder_settings_info{ordering="omnichain",database="postgres",command="start"} 1
+
+# HELP ponder_sync_block Closest-to-tip synced block number
+# TYPE ponder_sync_block gauge
+ponder_sync_block{chain="optimism"} 147268938
+ponder_sync_block{chain="mainnet"} 24377568
+ponder_sync_block{chain="base"} 41673653
+ponder_sync_block{chain="scroll"} 29373405
+ponder_sync_block{chain="arbitrum"} 428248999
+ponder_sync_block{chain="linea"} 28584906
+
+# HELP ponder_sync_block_timestamp Closest-to-tip synced block timestamp
+# TYPE ponder_sync_block_timestamp gauge
+ponder_sync_block_timestamp{chain="optimism"} 1770136653
+ponder_sync_block_timestamp{chain="mainnet"} 1770136655
+ponder_sync_block_timestamp{chain="base"} 1770136653
+ponder_sync_block_timestamp{chain="scroll"} 1770136654
+ponder_sync_block_timestamp{chain="arbitrum"} 1770136654
+ponder_sync_block_timestamp{chain="linea"} 1770136654
+
+# HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
+# TYPE ponder_sync_is_realtime gauge
+ponder_sync_is_realtime{chain="arbitrum"} 1
+ponder_sync_is_realtime{chain="scroll"} 1
+ponder_sync_is_realtime{chain="optimism"} 1
+ponder_sync_is_realtime{chain="mainnet"} 1
+ponder_sync_is_realtime{chain="linea"} 1
+ponder_sync_is_realtime{chain="base"} 1
+
+# HELP ponder_sync_is_complete Boolean (0 or 1) indicating if the sync has synced all blocks
+# TYPE ponder_sync_is_complete gauge
+
+# HELP ponder_historical_total_blocks Number of blocks required for the historical sync
+# TYPE ponder_historical_total_blocks gauge
+ponder_historical_total_blocks{chain="optimism"} 36827849
+ponder_historical_total_blocks{chain="mainnet"} 21042285
+ponder_historical_total_blocks{chain="base"} 24103899
+ponder_historical_total_blocks{chain="scroll"} 12693186
+ponder_historical_total_blocks{chain="arbitrum"} 78607197
+ponder_historical_total_blocks{chain="linea"} 21873991`,
 };
 
 export const indexingMetricsMockInvalidApplicationSettingsOrdering = {

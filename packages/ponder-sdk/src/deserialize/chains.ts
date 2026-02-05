@@ -1,28 +1,21 @@
-import { prettifyError, z } from "zod/v4";
+import { z } from "zod/v4";
+import type { ParsePayload } from "zod/v4/core";
 
-import type { ChainId } from "../chains";
-import { positiveIntegerSchema } from "../numbers";
+import { schemaChainId } from "../chains";
 
-export const chainIdSchema = positiveIntegerSchema;
+function invariant_chainIdStringRepresentsValidChainId(ctx: ParsePayload<string>) {
+  const maybeChainId = ctx.value;
 
-type ChainIdString = string;
-
-const chainIdStringSchema = z
-  .string({ error: `Value must be a string representing a chain ID.` })
-  .pipe(z.coerce.number({ error: `Value must represent a positive integer (>0).` }))
-  .pipe(chainIdSchema);
-
-/**
- * Deserialize Chain ID from String
- *
- * Attempts to deserialize a Chain ID from a string representation.
- */
-export function deserializeChainIdString(maybeChainId: ChainIdString | unknown): ChainId {
-  const parsed = chainIdStringSchema.safeParse(maybeChainId);
-
-  if (parsed.error) {
-    throw new Error(`Cannot deserialize ChainId:\n${prettifyError(parsed.error)}\n`);
+  if (`${Number(maybeChainId)}` !== maybeChainId) {
+    ctx.issues.push({
+      code: "custom",
+      input: ctx.value,
+      message: `'${maybeChainId}' must be a string representing a chain ID.`,
+    });
   }
-
-  return parsed.data;
 }
+
+export const schemaChainIdString = z
+  .string({ error: `Value must be a string representing a chain ID.` })
+  .check(invariant_chainIdStringRepresentsValidChainId)
+  .pipe(z.preprocess((v) => Number(v), schemaChainId));
