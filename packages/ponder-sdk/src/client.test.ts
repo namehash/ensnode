@@ -3,6 +3,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 import { PonderClient } from "./client";
 import {
   indexingMetricsMockInvalidApplicationSettingsOrdering,
+  indexingMetricsMockInvalidConflictingMetrics,
   indexingMetricsMockInvalidNoIndexedChains,
   indexingMetricsMockInvalidNonIntegerChainNames,
   indexingMetricsMockValid,
@@ -172,6 +173,23 @@ describe("Ponder Client", () => {
         // Act & Assert
         await expect(ponderClient.metrics()).rejects.toThrowError(
           /Invalid serialized Ponder Indexing Metrics.*Missing required Prometheus metric: ponder_sync_block/,
+        );
+      });
+
+      it("should handle conflicting metrics in the response", async () => {
+        // Arrange
+        mockFetch.mockResolvedValueOnce(
+          new Response(indexingMetricsMockInvalidConflictingMetrics.text, {
+            status: 200,
+            headers: { "Content-Type": "text/plain" },
+          }),
+        );
+
+        const ponderClient = new PonderClient(new URL("http://localhost:3000"));
+
+        // Act & Assert
+        await expect(ponderClient.metrics()).rejects.toThrowError(
+          /Invalid serialized Ponder Indexing Metrics.*Chain Indexing Metrics cannot have both `indexingCompleted` and `indexingRealtime` as `true`/,
         );
       });
     });

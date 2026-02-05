@@ -174,3 +174,65 @@ ponder_settings_info{ordering="omnichain",database="postgres",command="start"} 1
 # TYPE ponder_sync_block gauge
 `,
 };
+
+/**
+ * This mock has conflicting metrics where the "ponder_sync_is_complete" metric
+ * is defined but missing the TYPE declaration, which should trigger a validation error.
+ *
+ * These metrics must not be set to `1` at the same time:
+ * - `ponder_sync_is_complete` (when set to `1`, indicates indexing has been completed and no more syncing is needed)
+ * - `ponder_sync_is_realtime` (when set to `1`, indicates indexing is in realtime mode and actively syncing new blocks)
+ */
+export const indexingMetricsMockInvalidConflictingMetrics = {
+  text: `
+# HELP ponder_settings_info Ponder settings information
+# TYPE ponder_settings_info gauge
+ponder_settings_info{ordering="omnichain",database="postgres",command="start"} 1
+
+# HELP ponder_sync_block Closest-to-tip synced block number
+# TYPE ponder_sync_block gauge
+ponder_sync_block{chain="10"} 147268938
+ponder_sync_block{chain="1"} 24377568
+ponder_sync_block{chain="8453"} 41673653
+ponder_sync_block{chain="534352"} 29373405
+ponder_sync_block{chain="42161"} 428248999
+ponder_sync_block{chain="59144"} 28584906
+
+# HELP ponder_sync_block_timestamp Closest-to-tip synced block timestamp
+# TYPE ponder_sync_block_timestamp gauge
+ponder_sync_block_timestamp{chain="10"} 1770136653
+ponder_sync_block_timestamp{chain="1"} 1770136655
+ponder_sync_block_timestamp{chain="8453"} 1770136653
+ponder_sync_block_timestamp{chain="534352"} 1770136654
+ponder_sync_block_timestamp{chain="42161"} 1770136654
+ponder_sync_block_timestamp{chain="59144"} 1770136654
+
+# HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
+# TYPE ponder_sync_is_realtime gauge
+ponder_sync_is_realtime{chain="42161"} 1
+ponder_sync_is_realtime{chain="534352"} 1
+ponder_sync_is_realtime{chain="10"} 1
+ponder_sync_is_realtime{chain="1"} 1
+ponder_sync_is_realtime{chain="59144"} 1
+ponder_sync_is_realtime{chain="8453"} 1
+
+ponder_sync_is_complete{chain="42161"} 1
+ponder_sync_is_complete{chain="534352"} 1
+ponder_sync_is_complete{chain="10"} 1
+ponder_sync_is_complete{chain="1"} 1
+ponder_sync_is_complete{chain="59144"} 1
+ponder_sync_is_complete{chain="8453"} 1
+
+# HELP ponder_sync_is_complete Boolean (0 or 1) indicating if the sync has synced all blocks
+# TYPE ponder_sync_is_complete gauge
+
+# HELP ponder_historical_total_blocks Number of blocks required for the historical sync
+# TYPE ponder_historical_total_blocks gauge
+ponder_historical_total_blocks{chain="10"} 36827849
+ponder_historical_total_blocks{chain="1"} 21042285
+ponder_historical_total_blocks{chain="8453"} 24103899
+ponder_historical_total_blocks{chain="534352"} 12693186
+ponder_historical_total_blocks{chain="42161"} 78607197
+ponder_historical_total_blocks{chain="59144"} 21873991
+`,
+};
