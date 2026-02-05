@@ -11,5 +11,6 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: ["zod/*"], // Mark peer dependencies as external
+  noExternal: ["parse-prometheus-text-format"],
   outDir: "./dist",
 });

@@ -1,9 +1,9 @@
 import type { z } from "zod/v4";
 
-import { integerSchema } from "./numbers";
+import { schemaInteger } from "./numbers";
 
 //// Unix Timestamp
-export const unixTimestampSchema = integerSchema;
+export const schemaUnixTimestamp = schemaInteger;
 
 /**
  * Unix timestamp value
@@ -14,4 +14,4 @@ export const unixTimestampSchema = integerSchema;
  * Guaranteed to be an integer. May be zero or negative to represent a time at or
  * before Jan 1, 1970.
  */
-export type UnixTimestamp = z.infer<typeof unixTimestampSchema>;
+export type UnixTimestamp = z.infer<typeof schemaUnixTimestamp>;

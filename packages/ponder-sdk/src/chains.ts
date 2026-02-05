@@ -1,11 +1,10 @@
 import type { z } from "zod/v4";
 
-import { positiveIntegerSchema } from "./numbers";
+import { schemaPositiveInteger } from "./numbers";
 
 // Chain ID
 
-export const chainIdSchema = positiveIntegerSchema;
-
+export const schemaChainId = schemaPositiveInteger;
 /**
  * Chain ID
  *
@@ -14,4 +13,4 @@ export const chainIdSchema = positiveIntegerSchema;
  *
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  **/
-export type ChainId = z.infer<typeof chainIdSchema>;
+export type ChainId = z.infer<typeof schemaChainId>;

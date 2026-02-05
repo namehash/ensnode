@@ -1,22 +1,22 @@
 import { z } from "zod/v4";
 
-import { nonnegativeIntegerSchema } from "./numbers";
-import { unixTimestampSchema } from "./time";
+import { schemaNonnegativeInteger } from "./numbers";
+import { schemaUnixTimestamp } from "./time";
 
 //// Block Number
 
-export const blockNumberSchema = nonnegativeIntegerSchema;
+export const schemaBlockNumber = schemaNonnegativeInteger;
 
 /**
  * Block Number
  *
  * Guaranteed to be a non-negative integer.
  */
-export type BlockNumber = z.infer<typeof blockNumberSchema>;
+export type BlockNumber = z.infer<typeof schemaBlockNumber>;
 
-export const blockRefSchema = z.object({
-  number: blockNumberSchema,
-  timestamp: unixTimestampSchema,
+export const schemaBlockRef = z.object({
+  number: schemaBlockNumber,
+  timestamp: schemaUnixTimestamp,
 });
 
 /**
@@ -24,4 +24,4 @@ export const blockRefSchema = z.object({
  *
  * Reference to a block.
  */
-export type BlockRef = z.infer<typeof blockRefSchema>;
+export type BlockRef = z.infer<typeof schemaBlockRef>;
