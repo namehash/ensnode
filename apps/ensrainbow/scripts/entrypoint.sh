@@ -36,6 +36,23 @@ echo "Marker File: $MARKER_FILE"
 echo "Database Directory: $DB_SUBDIR_PATH"
 echo "-------------------------"
 
+# Start netcat listener in background
+echo "Starting netcat listener on port ${PORT}..."
+nc -lk -p "${PORT}" &
+NC_PID=$!
+
+# Function to cleanup netcat on exit
+cleanup_nc() {
+    if [ -n "${NC_PID:-}" ] && kill -0 "${NC_PID}" 2>/dev/null; then
+        echo "Killing netcat listener (PID: ${NC_PID})..."
+        kill "${NC_PID}" 2>/dev/null || true
+        wait "${NC_PID}" 2>/dev/null || true
+    fi
+}
+
+# Register cleanup function to run on script exit
+trap cleanup_nc EXIT
+
 # Change to the application directory for pnpm commands
 cd "${APP_DIR}"
 
@@ -124,7 +141,14 @@ if [ ! -f "${MARKER_FILE}" ]; then
     fi
 fi # End of download and extraction block
 
-# 7. Start the ENSRainbow server
+# 7. Kill netcat before starting the server
+echo "Stopping netcat listener before starting server..."
+cleanup_nc
+# Clear the PID and remove trap since we've manually cleaned up
+NC_PID=""
+trap - EXIT
+
+# 8. Start the ENSRainbow server
 echo "Starting ENSRainbow server on port ${PORT} using data from ${APP_DIR}/${DB_SUBDIR_PATH}..."
 # pnpm commands were run from APP_DIR, ensure serve also sees --data-dir correctly
 exec pnpm run serve --port "${PORT}" --data-dir "${DB_SUBDIR_PATH}"
