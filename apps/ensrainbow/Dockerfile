@@ -2,7 +2,7 @@
 FROM node:24-slim AS runtime
 
 # Install only essential system dependencies for runtime
-RUN apt-get update && apt-get install -y wget tar && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget tar netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 # Set up pnpm
 ENV PNPM_HOME="/pnpm"
