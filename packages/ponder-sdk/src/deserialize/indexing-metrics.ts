@@ -49,7 +49,7 @@ const schemaSerializedChainIndexingMetrics = z
 type SerializedChainIndexingMetrics = z.infer<typeof schemaSerializedChainIndexingMetrics>;
 
 /**
- * Schema describing the chain indexing metrics.
+ * Schema describing the chains indexing metrics.
  */
 const schemaSerializedChainsIndexingMetrics = z.map(
   schemaChainIdString,
