@@ -1,9 +1,24 @@
 locals {
-  ensadmin_fqdn = "admin.${var.ensnode_environment_name}.${var.hosted_zone_name}"
+  environment = var.ensnode_environment_name
+  zone        = var.hosted_zone_name
+  base_domain = "${local.environment}.${local.zone}"
+
+  api_variants = {
+    alpha          = "api.alpha"
+    alpha-sepolia  = "api.alpha-sepolia"
+    v2-sepolia     = "api.v2-sepolia"
+    mainnet        = "api.mainnet"
+    sepolia        = "api.sepolia"
+  }
+
+  api_fqdns = {
+    for name, prefix in local.api_variants :
+    name => "${prefix}.${local.base_domain}"
+  }
+
+  ensadmin_fqdn = "admin.${local.base_domain}"
 }
 
-# For details on "render_web_service", see:
-# https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensadmin" {
   name           = "ensadmin"
   plan           = var.render_instance_plan
@@ -24,11 +39,14 @@ resource "render_web_service" "ensadmin" {
     ANTHROPIC_API_KEY = {
       value = var.anthropic_api_key
     }
+    NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY = {
+      value = join(",", [
+        for fqdn in values(local.api_fqdns) : "https://${fqdn}"
+      ])
+    }
   }
 
-  # See https://render.com/docs/custom-domains
   custom_domains = [
-    { name : local.ensadmin_fqdn },
+    { name = local.ensadmin_fqdn }
   ]
-
 }
