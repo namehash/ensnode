@@ -1,7 +1,13 @@
 import type { PublicClient } from "viem";
 
-import { bigIntToNumber, type ChainIdString, deserializeBlockRef } from "@ensnode/ensnode-sdk";
-import type { BlockNumber, BlockRef, Blockrange, ChainIndexingMetrics } from "@ensnode/ponder-sdk";
+import { bigIntToNumber, deserializeBlockRef } from "@ensnode/ensnode-sdk";
+import type {
+  BlockNumber,
+  BlockRef,
+  Blockrange,
+  ChainId,
+  ChainIndexingMetrics,
+} from "@ensnode/ponder-sdk";
 
 /**
  * Fetch block ref from RPC.
@@ -15,16 +21,17 @@ async function fetchBlockRef(
   publicClient: PublicClient,
   blockNumber: BlockNumber,
 ): Promise<BlockRef> {
-  const block = await publicClient.getBlock({ blockNumber: BigInt(blockNumber) });
+  try {
+    const block = await publicClient.getBlock({ blockNumber: BigInt(blockNumber) });
 
-  if (!block) {
-    throw new Error(`Could not fetch block ${blockNumber}`);
+    return deserializeBlockRef({
+      number: bigIntToNumber(block.number),
+      timestamp: bigIntToNumber(block.timestamp),
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Failed to fetch block ref for block number ${blockNumber}: ${errorMessage}`);
   }
-
-  return deserializeBlockRef({
-    number: bigIntToNumber(block.number),
-    timestamp: bigIntToNumber(block.timestamp),
-  });
 }
 
 /**
@@ -54,12 +61,12 @@ export interface ChainBlockRefs {
  * Guaranteed to include {@link ChainBlockRefs} for each indexed chain.
  */
 export async function getChainsBlockRefs(
-  chainIds: ChainIdString[],
-  chainsConfigBlockrange: Record<ChainIdString, Blockrange>,
-  chainsIndexingMetrics: Map<ChainIdString, ChainIndexingMetrics>,
-  publicClients: Record<ChainIdString, PublicClient>,
-): Promise<Map<ChainIdString, ChainBlockRefs>> {
-  const chainsBlockRefs = new Map<ChainIdString, ChainBlockRefs>();
+  chainIds: ChainId[],
+  chainsConfigBlockrange: Record<ChainId, Blockrange>,
+  chainsIndexingMetrics: Map<ChainId, ChainIndexingMetrics>,
+  publicClients: Record<ChainId, PublicClient>,
+): Promise<Map<ChainId, ChainBlockRefs>> {
+  const chainsBlockRefs = new Map<ChainId, ChainBlockRefs>();
 
   for (const chainId of chainIds) {
     const blockrange = chainsConfigBlockrange[chainId];
