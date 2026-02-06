@@ -189,7 +189,7 @@ describe("Ponder Client", () => {
 
         // Act & Assert
         await expect(ponderClient.metrics()).rejects.toThrowError(
-          /Invalid serialized Ponder Indexing Metrics.*Chain Indexing Metrics cannot have both `indexingCompleted` and `indexingRealtime` as `true`/,
+          /Invalid serialized Ponder Indexing Metrics.*'ponder_sync_is_complete' and 'ponder_sync_is_realtime' metrics cannot both be 1 at the same time for chain 10/,
         );
       });
     });

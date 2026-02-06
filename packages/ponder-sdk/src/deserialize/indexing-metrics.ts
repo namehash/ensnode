@@ -11,42 +11,50 @@ import type { ParsePayload } from "zod/v4/core";
 
 import { type BlockRef, schemaBlockRef } from "../blocks";
 import {
+  type ChainIndexingMetrics,
+  type ChainIndexingMetricsBackfill,
+  type ChainIndexingMetricsCompleted,
+  type ChainIndexingMetricsQueued,
+  type ChainIndexingMetricsRealtime,
+  ChainIndexingMetricTypes,
   PonderAppCommands,
+  type PonderApplicationSettings,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
 } from "../indexing-metrics";
 import { schemaPositiveInteger } from "../numbers";
 import { schemaChainIdString } from "./chains";
 import { deserializePrometheusMetrics, type PrometheusMetrics } from "./prometheus-metrics-text";
+import type { DeepPartial } from "./utils";
 
-function invariant_indexingCompletedAndRealtimeAreNotBothTrue(
-  ctx: ParsePayload<SerializedChainIndexingMetrics>,
-) {
-  const data = ctx.value;
+const schemaSerializedChainIndexingMetricsQueued = z.object({
+  type: z.literal(ChainIndexingMetricTypes.Queued),
+});
 
-  if (data.indexingCompleted && data.indexingRealtime) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message:
-        "Chain Indexing Metrics cannot have both `indexingCompleted` and `indexingRealtime` as `true`.",
-    });
-  }
-}
+const schemaSerializedChainIndexingMetricsBackfill = z.object({
+  type: z.literal(ChainIndexingMetricTypes.Backfill),
+  backfillTotalBlocks: schemaPositiveInteger,
+});
+
+const schemaSerializedChainIndexingMetricsRealtime = z.object({
+  type: z.literal(ChainIndexingMetricTypes.Realtime),
+  latestKnownBlock: schemaBlockRef,
+});
+
+const schemaSerializedChainIndexingMetricsCompleted = z.object({
+  type: z.literal(ChainIndexingMetricTypes.Completed),
+  targetBlock: schemaBlockRef,
+});
 
 /**
  * Schema describing the chain indexing metrics.
  */
-const schemaSerializedChainIndexingMetrics = z
-  .object({
-    backfillSyncBlocksTotal: schemaPositiveInteger,
-    latestSyncedBlock: schemaBlockRef,
-    indexingCompleted: z.boolean(),
-    indexingRealtime: z.boolean(),
-  })
-  .check(invariant_indexingCompletedAndRealtimeAreNotBothTrue);
-
-type SerializedChainIndexingMetrics = z.infer<typeof schemaSerializedChainIndexingMetrics>;
+const schemaSerializedChainIndexingMetrics = z.discriminatedUnion("type", [
+  schemaSerializedChainIndexingMetricsQueued,
+  schemaSerializedChainIndexingMetricsBackfill,
+  schemaSerializedChainIndexingMetricsRealtime,
+  schemaSerializedChainIndexingMetricsCompleted,
+]);
 
 /**
  * Schema describing the chains indexing metrics.
@@ -55,6 +63,82 @@ const schemaSerializedChainsIndexingMetrics = z.map(
   schemaChainIdString,
   schemaSerializedChainIndexingMetrics,
 );
+
+/**
+ * Build unvalidated (and perhaps partial) Chain Indexing Metrics
+ *
+ * @param maybeChainId A string maybe representing a chain ID.
+ * @param prometheusMetrics valid Prometheus Metrics from Ponder app.
+ * @returns Unvalidated (possibly incomplete) Chain Indexing Metrics
+ *          to be validated by {@link schemaSerializedChainIndexingMetrics}.
+ */
+function buildUnvalidatedChainIndexingMetrics(
+  maybeChainId: string,
+  prometheusMetrics: PrometheusMetrics,
+): DeepPartial<ChainIndexingMetrics> {
+  const ponderHistoricalCompletedIndexingSeconds = prometheusMetrics.getValue(
+    "ponder_historical_completed_indexing_seconds",
+    {
+      chain: maybeChainId,
+    },
+  );
+
+  // If no time has been recorded for historical completed indexing,
+  // we can assume the chain is still queued to be indexed.
+  if (ponderHistoricalCompletedIndexingSeconds === 0) {
+    return {
+      type: ChainIndexingMetricTypes.Queued,
+    } satisfies DeepPartial<ChainIndexingMetricsQueued>;
+  }
+
+  const ponderSyncIsComplete = prometheusMetrics.getValue("ponder_sync_is_complete", {
+    chain: maybeChainId,
+  });
+
+  const ponderSyncIsRealtime = prometheusMetrics.getValue("ponder_sync_is_realtime", {
+    chain: maybeChainId,
+  });
+
+  const latestSyncedBlockNumber = prometheusMetrics.getValue("ponder_sync_block", {
+    chain: maybeChainId,
+  });
+
+  const latestSyncedBlockTimestamp = prometheusMetrics.getValue("ponder_sync_block_timestamp", {
+    chain: maybeChainId,
+  });
+
+  const latestSyncedBlock = {
+    number: latestSyncedBlockNumber,
+    timestamp: latestSyncedBlockTimestamp,
+  } satisfies Partial<BlockRef>;
+
+  // The `ponder_sync_is_complete` metric is set to `1` if, and only if,
+  // the indexing has been completed for the chain.
+  if (ponderSyncIsComplete === 1) {
+    return {
+      type: ChainIndexingMetricTypes.Completed,
+      targetBlock: latestSyncedBlock,
+    } satisfies DeepPartial<ChainIndexingMetricsCompleted>;
+  }
+
+  // The `ponder_sync_is_realtime` metric is set to `1` if, and only if,
+  // the indexing is currently in real-time for the chain.
+  if (ponderSyncIsRealtime === 1) {
+    return {
+      type: ChainIndexingMetricTypes.Realtime,
+      latestKnownBlock: latestSyncedBlock,
+    } satisfies DeepPartial<ChainIndexingMetricsRealtime>;
+  }
+
+  const backfillTotalBlocks = prometheusMetrics.getValue("ponder_historical_total_blocks", {
+    chain: maybeChainId,
+  });
+
+  return {
+    type: ChainIndexingMetricTypes.Backfill,
+    backfillTotalBlocks,
+  } satisfies DeepPartial<ChainIndexingMetricsBackfill>;
+}
 
 function invariant_includesAtLeastOneIndexedChain(
   ctx: ParsePayload<SerializedPonderIndexingMetrics>,
@@ -96,17 +180,61 @@ function invariant_includesRequiredMetrics(ctx: ParsePayload<PrometheusMetrics>)
     "ponder_settings_info",
     "ponder_sync_block",
     "ponder_sync_block_timestamp",
+    "ponder_historical_completed_indexing_seconds",
     "ponder_historical_total_blocks",
     "ponder_sync_is_complete",
     "ponder_sync_is_realtime",
   ];
 
+  // Validate metrics presence invariants.
   for (const requiredMetricName of requiredMetricNames) {
+    // Invariant: Required metric must be present in the Prometheus metrics.
     if (!metricNames.includes(requiredMetricName)) {
       ctx.issues.push({
         code: "custom",
         input: ctx.value,
         message: `Missing required Prometheus metric: ${requiredMetricName}`,
+      });
+    }
+  }
+
+  const chainReferences = prometheusMetrics.getLabels("ponder_sync_block", "chain");
+
+  // Validate per-chain invariants.
+  for (const chainReference of chainReferences) {
+    const ponderHistoricalCompletedIndexingSeconds = prometheusMetrics.getValue(
+      "ponder_historical_completed_indexing_seconds",
+      { chain: chainReference },
+    );
+
+    // Invariant: historical completed indexing seconds must be a non-negative integer.
+    if (
+      typeof ponderHistoricalCompletedIndexingSeconds !== "number" ||
+      !Number.isInteger(ponderHistoricalCompletedIndexingSeconds) ||
+      ponderHistoricalCompletedIndexingSeconds < 0
+    ) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value,
+        message: `'ponder_historical_completed_indexing_seconds' metric for '${chainReference}' chain must be a non-negative integer. Received: ${ponderHistoricalCompletedIndexingSeconds}`,
+      });
+    }
+
+    const ponderSyncIsComplete = prometheusMetrics.getValue("ponder_sync_is_complete", {
+      chain: chainReference,
+    });
+
+    const ponderSyncIsRealtime = prometheusMetrics.getValue("ponder_sync_is_realtime", {
+      chain: chainReference,
+    });
+
+    // Invariant: `ponder_sync_is_complete` and `ponder_sync_is_realtime` cannot
+    // both be `1` at the same time.
+    if (ponderSyncIsComplete === 1 && ponderSyncIsRealtime === 1) {
+      ctx.issues.push({
+        code: "custom",
+        input: ctx.value,
+        message: `'ponder_sync_is_complete' and 'ponder_sync_is_realtime' metrics cannot both be 1 at the same time for chain ${chainReference}`,
       });
     }
   }
@@ -135,46 +263,24 @@ type SerializedPonderIndexingMetrics = z.infer<typeof schemaSerializedPonderInde
  * @returns Unvalidated (possibly incomplete) Ponder Indexing Metrics
  *          to be validated with {@link schemaSerializedPonderIndexingMetrics}.
  */
-function buildUnvalidatedPonderIndexingMetrics(prometheusMetrics: PrometheusMetrics): unknown {
+function buildUnvalidatedPonderIndexingMetrics(
+  prometheusMetrics: PrometheusMetrics,
+): DeepPartial<PonderIndexingMetrics> {
   const appSettings = {
     command: prometheusMetrics.getLabel("ponder_settings_info", "command"),
     ordering: prometheusMetrics.getLabel("ponder_settings_info", "ordering"),
-  };
+  } as DeepPartial<PonderApplicationSettings>;
 
   const chainReferences = prometheusMetrics.getLabels("ponder_sync_block", "chain");
-
-  const chains = new Map<unknown, unknown>();
+  const chains = new Map<string, DeepPartial<ChainIndexingMetrics>>();
 
   for (const maybeChainId of chainReferences) {
-    const latestSyncedBlock = {
-      number: prometheusMetrics.getValue("ponder_sync_block", {
-        chain: maybeChainId,
-      }),
-      timestamp: prometheusMetrics.getValue("ponder_sync_block_timestamp", {
-        chain: maybeChainId,
-      }),
-    } satisfies Partial<BlockRef>;
+    const chainIndexingMetrics = buildUnvalidatedChainIndexingMetrics(
+      maybeChainId,
+      prometheusMetrics,
+    );
 
-    const backfillSyncBlocksTotal = prometheusMetrics.getValue("ponder_historical_total_blocks", {
-      chain: maybeChainId,
-    });
-
-    const indexingCompleted =
-      prometheusMetrics.getValue("ponder_sync_is_complete", {
-        chain: maybeChainId,
-      }) === 1;
-
-    const indexingRealtime =
-      prometheusMetrics.getValue("ponder_sync_is_realtime", {
-        chain: maybeChainId,
-      }) === 1;
-
-    chains.set(maybeChainId, {
-      latestSyncedBlock,
-      backfillSyncBlocksTotal,
-      indexingCompleted,
-      indexingRealtime,
-    });
+    chains.set(maybeChainId, chainIndexingMetrics);
   }
 
   const unvalidatedPonderIndexingMetrics = {

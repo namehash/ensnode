@@ -1,4 +1,6 @@
 import {
+  type ChainIndexingMetricsRealtime,
+  ChainIndexingMetricTypes,
   PonderAppCommands,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
@@ -28,6 +30,15 @@ ponder_sync_block_timestamp{chain="534352"} 1770136654
 ponder_sync_block_timestamp{chain="42161"} 1770136654
 ponder_sync_block_timestamp{chain="59144"} 1770136654
 
+# HELP ponder_historical_completed_indexing_seconds Number of seconds that have been completed
+# TYPE ponder_historical_completed_indexing_seconds gauge
+ponder_historical_completed_indexing_seconds{chain="10"} 34242
+ponder_historical_completed_indexing_seconds{chain="1"} 23124
+ponder_historical_completed_indexing_seconds{chain="8453"} 53253
+ponder_historical_completed_indexing_seconds{chain="534352"} 32503
+ponder_historical_completed_indexing_seconds{chain="42161"} 76864
+ponder_historical_completed_indexing_seconds{chain="59144"} 34235
+
 # HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
 # TYPE ponder_sync_is_realtime gauge
 ponder_sync_is_realtime{chain="42161"} 1
@@ -55,56 +66,44 @@ ponder_historical_total_blocks{chain="59144"} 21873991
       [
         10,
         {
-          backfillSyncBlocksTotal: 36827849,
-          indexingCompleted: false,
-          indexingRealtime: true,
-          latestSyncedBlock: { number: 147268938, timestamp: 1770136653 },
-        },
+          type: ChainIndexingMetricTypes.Realtime,
+          latestKnownBlock: { number: 147268938, timestamp: 1770136653 },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         1,
         {
-          backfillSyncBlocksTotal: 21042285,
-          indexingCompleted: false,
-          indexingRealtime: true,
-          latestSyncedBlock: { number: 24377568, timestamp: 1770136655 },
-        },
+          type: ChainIndexingMetricTypes.Realtime,
+          latestKnownBlock: { number: 24377568, timestamp: 1770136655 },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         8453,
         {
-          backfillSyncBlocksTotal: 24103899,
-          indexingCompleted: false,
-          indexingRealtime: true,
-          latestSyncedBlock: { number: 41673653, timestamp: 1770136653 },
-        },
+          type: ChainIndexingMetricTypes.Realtime,
+          latestKnownBlock: { number: 41673653, timestamp: 1770136653 },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         534352,
         {
-          backfillSyncBlocksTotal: 12693186,
-          indexingCompleted: false,
-          indexingRealtime: true,
-          latestSyncedBlock: { number: 29373405, timestamp: 1770136654 },
-        },
+          type: ChainIndexingMetricTypes.Realtime,
+          latestKnownBlock: { number: 29373405, timestamp: 1770136654 },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         42161,
         {
-          backfillSyncBlocksTotal: 78607197,
-          indexingCompleted: false,
-          indexingRealtime: true,
-          latestSyncedBlock: { number: 428248999, timestamp: 1770136654 },
-        },
+          type: ChainIndexingMetricTypes.Realtime,
+          latestKnownBlock: { number: 428248999, timestamp: 1770136654 },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         59144,
         {
-          backfillSyncBlocksTotal: 21873991,
-          indexingCompleted: false,
-          indexingRealtime: true,
-          latestSyncedBlock: { number: 28584906, timestamp: 1770136654 },
-        },
+          type: ChainIndexingMetricTypes.Realtime,
+          latestKnownBlock: { number: 28584906, timestamp: 1770136654 },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
     ]),
   } satisfies PonderIndexingMetrics,
@@ -133,6 +132,15 @@ ponder_sync_block_timestamp{chain="base"} 1770136653
 ponder_sync_block_timestamp{chain="scroll"} 1770136654
 ponder_sync_block_timestamp{chain="arbitrum"} 1770136654
 ponder_sync_block_timestamp{chain="linea"} 1770136654
+
+# HELP ponder_historical_completed_indexing_seconds Number of seconds that have been completed
+# TYPE ponder_historical_completed_indexing_seconds gauge
+ponder_historical_completed_indexing_seconds{chain="optimism"} 34242
+ponder_historical_completed_indexing_seconds{chain="mainnet"} 23124
+ponder_historical_completed_indexing_seconds{chain="base"} 53253
+ponder_historical_completed_indexing_seconds{chain="scroll"} 32503
+ponder_historical_completed_indexing_seconds{chain="arbitrum"} 76864
+ponder_historical_completed_indexing_seconds{chain="linea"} 34235
 
 # HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
 # TYPE ponder_sync_is_realtime gauge
@@ -205,6 +213,15 @@ ponder_sync_block_timestamp{chain="8453"} 1770136653
 ponder_sync_block_timestamp{chain="534352"} 1770136654
 ponder_sync_block_timestamp{chain="42161"} 1770136654
 ponder_sync_block_timestamp{chain="59144"} 1770136654
+
+# HELP ponder_historical_completed_indexing_seconds Number of seconds that have been completed
+# TYPE ponder_historical_completed_indexing_seconds gauge
+ponder_historical_completed_indexing_seconds{chain="10"} 34242
+ponder_historical_completed_indexing_seconds{chain="1"} 23124
+ponder_historical_completed_indexing_seconds{chain="8453"} 53253
+ponder_historical_completed_indexing_seconds{chain="534352"} 32503
+ponder_historical_completed_indexing_seconds{chain="42161"} 76864
+ponder_historical_completed_indexing_seconds{chain="59144"} 34235
 
 # HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
 # TYPE ponder_sync_is_realtime gauge
