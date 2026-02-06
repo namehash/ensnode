@@ -354,31 +354,3 @@ export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
 
 export const DOMAINS_DEFAULT_ORDER_BY: typeof DomainsOrderBy.$inferType = "NAME";
 export const DOMAINS_DEFAULT_ORDER_DIR: typeof OrderDirection.$inferType = "ASC";
-
-//////////////////////
-// Cursors
-//////////////////////
-
-/** Order value type - string for NAME, bigint for timestamps */
-export type DomainOrderValue = string | bigint | null;
-
-/**
- * Composite Domain cursor for keyset pagination.
- * Includes the order column value to enable proper tuple comparison without subqueries.
- */
-export interface DomainCursor {
-  id: DomainId;
-  by: typeof DomainsOrderBy.$inferType;
-  value: DomainOrderValue | undefined;
-}
-
-/**
- * Encoding/Decoding helper for Composite DomainCursors.
- *
- * @dev it's base64'd JSON
- */
-export const DomainCursor = {
-  encode: (cursor: DomainCursor) => Buffer.from(JSON.stringify(cursor), "utf8").toString("base64"),
-  decode: (cursor: string) =>
-    JSON.parse(Buffer.from(cursor, "base64").toString("utf8")) as DomainCursor,
-};

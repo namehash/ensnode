@@ -6,8 +6,8 @@ import * as schema from "@ensnode/ensnode-schema";
 import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
+import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
-import { resolveFindDomains } from "@/graphql-api/lib/resolve-find-domains";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
