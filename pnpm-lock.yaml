@@ -459,6 +459,9 @@ importers:
       '@ensnode/ponder-metadata':
         specifier: workspace:*
         version: link:../../packages/ponder-metadata
+      '@ensnode/ponder-sdk':
+        specifier: workspace:*
+        version: link:../../packages/ponder-sdk
       caip:
         specifier: 'catalog:'
         version: 1.1.1
