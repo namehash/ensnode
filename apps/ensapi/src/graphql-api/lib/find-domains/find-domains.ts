@@ -211,20 +211,24 @@ function getOrderColumn(
 /**
  * Build a cursor filter for keyset pagination on findDomains results.
  *
- * Uses tuple comparison: (orderColumn, id) > (cursorValue, cursorId)
+ * Uses tuple comparison for non-NULL cursor values, and explicit NULL handling
+ * for NULL cursor values (since PostgreSQL tuple comparison with NULL yields NULL/unknown).
  *
  * @param domains - The findDomains CTE result
  * @param cursor - The decoded DomainCursor
  * @param queryOrderBy - The order field for the current query (must match cursor.by)
+ * @param queryOrderDir - The order direction for the current query (must match cursor.dir)
  * @param direction - "after" for forward pagination, "before" for backward
  * @param effectiveDesc - Whether the effective sort direction is descending
  * @throws if cursor.by does not match queryOrderBy
+ * @throws if cursor.dir does not match queryOrderDir
  * @returns SQL expression for the cursor filter
  */
 export function cursorFilter(
   domains: ReturnType<typeof findDomains>,
   cursor: DomainCursor,
   queryOrderBy: typeof DomainsOrderBy.$inferType,
+  queryOrderDir: typeof OrderDirection.$inferType,
   direction: "after" | "before",
   effectiveDesc: boolean,
 ): SQL {
@@ -232,6 +236,12 @@ export function cursorFilter(
   if (cursor.by !== queryOrderBy) {
     throw new Error(
       `Invalid cursor: cursor was created with orderBy=${cursor.by} but query uses orderBy=${queryOrderBy}`,
+    );
+  }
+
+  if (cursor.dir !== queryOrderDir) {
+    throw new Error(
+      `Invalid cursor: cursor was created with orderDir=${cursor.dir} but query uses orderDir=${queryOrderDir}`,
     );
   }
 
@@ -243,10 +253,26 @@ export function cursorFilter(
   // - "before" with ASC = less than cursor
   // - "before" with DESC = greater than cursor
   const useGreaterThan = (direction === "after") !== effectiveDesc;
-  const op = useGreaterThan ? ">" : "<";
 
-  // Tuple comparison: (orderColumn, id) > (cursorValue, cursorId)
+  // Handle NULL cursor values explicitly (PostgreSQL tuple comparison with NULL yields NULL/unknown)
+  // With NULLS LAST ordering: non-NULL values come before NULL values
+  if (cursor.value === null) {
+    if (direction === "after") {
+      // "after" a NULL = other NULLs with appropriate id comparison
+      return useGreaterThan
+        ? sql`(${orderColumn} IS NULL AND ${domains.id} > ${cursor.id})`
+        : sql`(${orderColumn} IS NULL AND ${domains.id} < ${cursor.id})`;
+    } else {
+      // "before" a NULL = all non-NULLs (they come before NULLs) + NULLs with appropriate id
+      return useGreaterThan
+        ? sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${domains.id} > ${cursor.id}))`
+        : sql`(${orderColumn} IS NOT NULL OR (${orderColumn} IS NULL AND ${domains.id} < ${cursor.id}))`;
+    }
+  }
+
+  // Non-null cursor: use tuple comparison
   // NOTE: Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL
+  const op = useGreaterThan ? ">" : "<";
   return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${cursor.value}, ${cursor.id})`;
 }
 

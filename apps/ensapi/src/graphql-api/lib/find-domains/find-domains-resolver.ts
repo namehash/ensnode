@@ -57,14 +57,12 @@ export function resolveFindDomains(
     order,
     ...connectionArgs
   }: {
-    // there are our additional where/order arguments
-
     // `where` MUST be provided, we don't currently allow iterating over the full set of domains
     where: FindDomainsWhereArg;
     // `order` MAY be provided; defaults are used otherwise
     order?: FindDomainsOrderArg | undefined | null;
 
-    // these resolver arguments from from t.connection
+    // these resolver arguments from t.connection
     first?: number | null;
     last?: number | null;
     before?: string | null;
@@ -82,6 +80,7 @@ export function resolveFindDomains(
         DomainCursor.encode({
           id: domain.id,
           by: orderBy,
+          dir: orderDir,
           value: domain.__orderValue,
         }),
     },
@@ -107,10 +106,10 @@ export function resolveFindDomains(
         .where(
           and(
             beforeCursor
-              ? cursorFilter(domains, beforeCursor, orderBy, "before", effectiveDesc)
+              ? cursorFilter(domains, beforeCursor, orderBy, orderDir, "before", effectiveDesc)
               : undefined,
             afterCursor
-              ? cursorFilter(domains, afterCursor, orderBy, "after", effectiveDesc)
+              ? cursorFilter(domains, afterCursor, orderBy, orderDir, "after", effectiveDesc)
               : undefined,
           ),
         )

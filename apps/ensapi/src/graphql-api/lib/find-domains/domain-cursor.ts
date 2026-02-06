@@ -4,6 +4,7 @@ import type { DomainId } from "@ensnode/ensnode-sdk";
 
 import type { DomainOrderValue } from "@/graphql-api/lib/find-domains/types";
 import type { DomainsOrderBy } from "@/graphql-api/schema/domain";
+import type { OrderDirection } from "@/graphql-api/schema/order-direction";
 
 const stringToBigInt = z.codec(z.string(), z.bigint(), {
   decode: (str) => BigInt(str),
@@ -13,6 +14,7 @@ const stringToBigInt = z.codec(z.string(), z.bigint(), {
 const DomainCursorSchema = z.strictObject({
   id: z.string(),
   by: z.string(),
+  dir: z.string(),
   value: z.union([z.string(), z.null(), stringToBigInt]),
 });
 
@@ -28,6 +30,8 @@ export interface DomainCursor {
   id: DomainId;
   // the column by which the set is ordered
   by: typeof DomainsOrderBy.$inferType;
+  // the direction in which the set is ordered
+  dir: typeof OrderDirection.$inferType;
   // the value of said sort column for this domain
   value: DomainOrderValue;
 }
