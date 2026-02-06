@@ -27,6 +27,7 @@ locals {
     subgraph = {
       ensrainbow_label_set_id      = "subgraph"
       ensrainbow_label_set_version = "0"
+      disk_size_gb                 = 50
     }
 
     # The Searchlight instance uses fixed label set ID "searchlight" and
@@ -34,6 +35,7 @@ locals {
     searchlight = {
       ensrainbow_label_set_id      = "searchlight"
       ensrainbow_label_set_version = var.ensrainbow_searchlight_label_set_version
+      disk_size_gb                 = 100
     }
   }
 
@@ -127,6 +129,7 @@ module "ensrainbow" {
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
+  disk_size_gb          = each.value.disk_size_gb
   ensnode_version       = var.ensnode_version
 
   # Label set that ENSRainbow will offer to its clients
