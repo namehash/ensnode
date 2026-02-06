@@ -37,6 +37,7 @@ echo "Database Directory: $DB_SUBDIR_PATH"
 echo "-------------------------"
 
 # Start netcat listener in background
+# See Dockerfile for documentation on why netcat is used during initialization
 echo "Starting netcat listener on port ${PORT}..."
 nc -lk -p "${PORT}" &
 NC_PID=$!
@@ -150,5 +151,7 @@ trap - EXIT
 
 # 8. Start the ENSRainbow server
 echo "Starting ENSRainbow server on port ${PORT} using data from ${APP_DIR}/${DB_SUBDIR_PATH}..."
+echo "Sleeping for 2 seconds to allow netcat to release the port..."
+sleep 2
 # pnpm commands were run from APP_DIR, ensure serve also sees --data-dir correctly
 exec pnpm run serve --port "${PORT}" --data-dir "${DB_SUBDIR_PATH}"
