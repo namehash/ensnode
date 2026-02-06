@@ -144,10 +144,11 @@ fi # End of download and extraction block
 
 # 7. Kill netcat before starting the server
 echo "Stopping netcat listener before starting server..."
-cleanup_nc
-# Clear the PID and remove trap since we've manually cleaned up
-NC_PID=""
+# Remove the EXIT trap before manual cleanup to avoid double cleanup on signals.
 trap - EXIT
+cleanup_nc
+# Clear the PID now that we've manually cleaned up
+NC_PID=""
 
 # 8. Start the ENSRainbow server
 echo "Starting ENSRainbow server on port ${PORT} using data from ${APP_DIR}/${DB_SUBDIR_PATH}..."
