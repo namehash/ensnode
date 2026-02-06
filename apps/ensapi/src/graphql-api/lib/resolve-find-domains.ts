@@ -29,7 +29,11 @@ interface FindDomainsOrderArg {
 }
 
 /**
- * Shared GraphQL API resolver for domains connection queries, used by Query.domains and Account.domains.
+ * Shared GraphQL API resolver for domains connection queries, used by Query.domains and
+ * Account.domains.
+ *
+ * @param context - The GraphQL Context, required for Dataloader access
+ * @param args - The GraphQL Args object (via t.connection) + FindDomains-specific args (where, order)
  */
 export function resolveFindDomains(
   context: ReturnType<typeof createContext>,
