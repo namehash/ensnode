@@ -117,11 +117,11 @@ export interface ChainIndexingMetricsBackfill {
  * Chain Indexing Metrics Realtime
  *
  * Represents the indexing metrics for a chain that is currently in
- * the real-time indexing phase by a Ponder app. It means that
- * the backfill phase transitioned to completed phase, as there was
+ * the realtime indexing phase by a Ponder app. It means that
+ * the backfill phase transitioned to realtime phase, as there was
  * no "config end block" specified for the chain.
  *
- * The indexing continues in real-time, with no "target end block".
+ * The indexing continues in realtime, with no "target end block".
  * The "latest known block" is continuously updated as new blocks are
  * discovered by RPCs and stored in the RPC cache.
  */

@@ -122,7 +122,7 @@ function buildUnvalidatedChainIndexingMetrics(
   }
 
   // The `ponder_sync_is_realtime` metric is set to `1` if, and only if,
-  // the indexing is currently in real-time for the chain.
+  // the indexing is currently in realtime for the chain.
   if (ponderSyncIsRealtime === 1) {
     return {
       type: ChainIndexingMetricTypes.Realtime,
