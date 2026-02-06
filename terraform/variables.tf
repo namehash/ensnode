@@ -49,5 +49,6 @@ variable "ensrainbow_searchlight_label_set_version" {
 # ENSAdmin Variables
 variable "next_public_server_connection_library" {
   type        = string
-  description = "Comma-separated list of ENSNode API endpoints that ENSAdmin will connect to. Example: 'https://api.mainnet.example.com,https://api.sepolia.example.com'"
+  description = "Comma-separated list of server connection library URLs that ENSAdmin will connect to. Example: 'https://api.mainnet.example.com,https://api.sepolia.example.com'"
+  default     = ""
 }

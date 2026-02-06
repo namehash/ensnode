@@ -42,5 +42,6 @@ variable "anthropic_api_key" {
 
 variable "next_public_server_connection_library" {
   type        = string
-  description = "A comma-separated list of server connection library URLs that the ENSAdmin frontend can use to connect to ENSNode APIs."
+  description = "Comma-separated list of server connection library URLs that ENSAdmin will connect to. Example: 'https://api.mainnet.example.com,https://api.sepolia.example.com'"
+  default     = ""
 }
