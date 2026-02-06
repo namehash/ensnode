@@ -45,3 +45,9 @@ variable "ensrainbow_searchlight_label_set_version" {
   type        = string
   description = "Label set version that ENSRainbow Searchlight will offer to its clients. See https://ensnode.io/ensrainbow/concepts/glossary/#label_set_version for definition."
 }
+
+# ENSAdmin Variables
+variable "next_public_server_connection_library" {
+  type        = string
+  description = "Comma-separated list of ENSNode API endpoints that ENSAdmin will connect to. Example: 'https://api.mainnet.example.com,https://api.sepolia.example.com'"
+}

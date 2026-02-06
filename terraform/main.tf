@@ -140,10 +140,11 @@ module "ensadmin" {
   render_environment_id = render_project.ensnode.environments["default"].id
   render_instance_plan  = "starter"
 
-  hosted_zone_name         = local.hosted_zone_name
-  ensnode_version          = var.ensnode_version
-  ensnode_environment_name = var.render_environment
-  anthropic_api_key        = var.anthropic_api_key
+  hosted_zone_name                      = local.hosted_zone_name
+  ensnode_version                       = var.ensnode_version
+  ensnode_environment_name              = var.render_environment
+  anthropic_api_key                     = var.anthropic_api_key
+  next_public_server_connection_library = var.next_public_server_connection_library
 
   # NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY is not currently configurable through
   # Docker due to this known issue: https://github.com/namehash/ensnode/issues/1037
