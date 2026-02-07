@@ -63,7 +63,7 @@ export type ChainIndexingMetricType =
 /**
  * Number of blocks required to be indexed during backfill.
  *
- * References `ponder_historical_total_blocks` Ponder metric..
+ * References `ponder_historical_total_blocks` Ponder metric.
  *
  * This value is calculated at the time the Ponder app starts,
  * even for each indexed chain.
