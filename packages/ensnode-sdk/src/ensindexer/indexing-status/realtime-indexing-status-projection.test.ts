@@ -1,15 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
-import { createRealtimeIndexingStatusProjection } from "./projection";
-import { earlierBlockRef, laterBlockRef } from "./test-helpers";
+import { earlierBlockRef, laterBlockRef } from "./block-refs.mock";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  CrossChainIndexingStrategyIds,
-  OmnichainIndexingStatusIds,
+} from "./chain-indexing-status-snapshot";
+import { CrossChainIndexingStrategyIds } from "./cross-chain-indexing-status-snapshot";
+import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize/cross-chain-indexing-status-snapshot";
+import { OmnichainIndexingStatusIds } from "./omnichain-indexing-status-snapshot";
+import {
+  createRealtimeIndexingStatusProjection,
   type RealtimeIndexingStatusProjection,
-} from "./types";
+} from "./realtime-indexing-status-projection";
 
 describe("Realtime Indexing Status Projection", () => {
   it("can be created from existing omnichain snapshot", () => {
