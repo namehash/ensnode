@@ -1,7 +1,7 @@
 import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { AggregatedReferrerMetrics } from "../aggregations";
-import type { ReferralProgramCycle } from "../cycle";
+import type { ReferralProgramCycleConfig } from "../cycle";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 import type {
   ReferrerDetail,
@@ -13,11 +13,12 @@ import type { ReferralProgramRules } from "../rules";
 import type {
   SerializedAggregatedReferrerMetrics,
   SerializedAwardedReferrerMetrics,
-  SerializedReferralProgramCycle,
+  SerializedReferralProgramCycleConfig,
+  SerializedReferralProgramCycleConfigSetResponse,
   SerializedReferralProgramRules,
   SerializedReferrerDetail,
-  SerializedReferrerDetailAllCyclesData,
-  SerializedReferrerDetailAllCyclesResponse,
+  SerializedReferrerDetailCyclesData,
+  SerializedReferrerDetailCyclesResponse,
   SerializedReferrerDetailRanked,
   SerializedReferrerDetailUnranked,
   SerializedReferrerLeaderboardPage,
@@ -25,8 +26,10 @@ import type {
   SerializedUnrankedReferrerMetrics,
 } from "./serialized-types";
 import {
-  type ReferrerDetailAllCyclesResponse,
-  ReferrerDetailAllCyclesResponseCodes,
+  type ReferralProgramCycleConfigSetResponse,
+  ReferralProgramCycleConfigSetResponseCodes,
+  type ReferrerDetailCyclesResponse,
+  ReferrerDetailCyclesResponseCodes,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
 } from "./types";
@@ -43,6 +46,7 @@ export function serializeReferralProgramRules(
     startTime: rules.startTime,
     endTime: rules.endTime,
     subregistryId: rules.subregistryId,
+    rulesUrl: rules.rulesUrl.toString(),
   };
 }
 
@@ -165,16 +169,15 @@ function serializeReferrerDetail(detail: ReferrerDetail): SerializedReferrerDeta
 }
 
 /**
- * Serializes a {@link ReferralProgramCycle} object.
+ * Serializes a {@link ReferralProgramCycleConfig} object.
  */
-export function serializeReferralProgramCycle(
-  cycle: ReferralProgramCycle,
-): SerializedReferralProgramCycle {
+export function serializeReferralProgramCycleConfig(
+  cycleConfig: ReferralProgramCycleConfig,
+): SerializedReferralProgramCycleConfig {
   return {
-    id: cycle.id,
-    displayName: cycle.displayName,
-    rules: serializeReferralProgramRules(cycle.rules),
-    rulesUrl: cycle.rulesUrl,
+    slug: cycleConfig.slug,
+    displayName: cycleConfig.displayName,
+    rules: serializeReferralProgramRules(cycleConfig.rules),
   };
 }
 
@@ -197,19 +200,19 @@ export function serializeReferrerLeaderboardPageResponse(
 }
 
 /**
- * Serialize a {@link ReferrerDetailAllCyclesResponse} object.
+ * Serialize a {@link ReferrerDetailCyclesResponse} object.
  */
-export function serializeReferrerDetailAllCyclesResponse(
-  response: ReferrerDetailAllCyclesResponse,
-): SerializedReferrerDetailAllCyclesResponse {
+export function serializeReferrerDetailCyclesResponse(
+  response: ReferrerDetailCyclesResponse,
+): SerializedReferrerDetailCyclesResponse {
   switch (response.responseCode) {
-    case ReferrerDetailAllCyclesResponseCodes.Ok: {
+    case ReferrerDetailCyclesResponseCodes.Ok: {
       const serializedData = Object.fromEntries(
-        Object.entries(response.data).map(([cycleId, detail]) => [
-          cycleId,
+        Object.entries(response.data).map(([cycleSlug, detail]) => [
+          cycleSlug,
           serializeReferrerDetail(detail as ReferrerDetail),
         ]),
-      ) as SerializedReferrerDetailAllCyclesData;
+      ) as SerializedReferrerDetailCyclesData;
 
       return {
         responseCode: response.responseCode,
@@ -217,13 +220,40 @@ export function serializeReferrerDetailAllCyclesResponse(
       };
     }
 
-    case ReferrerDetailAllCyclesResponseCodes.Error:
+    case ReferrerDetailCyclesResponseCodes.Error:
       return response;
 
     default: {
       const _exhaustiveCheck: never = response;
       throw new Error(
-        `Unknown response code: ${(_exhaustiveCheck as ReferrerDetailAllCyclesResponse).responseCode}`,
+        `Unknown response code: ${(_exhaustiveCheck as ReferrerDetailCyclesResponse).responseCode}`,
+      );
+    }
+  }
+}
+
+/**
+ * Serialize a {@link ReferralProgramCycleConfigSetResponse} object.
+ */
+export function serializeReferralProgramCycleConfigSetResponse(
+  response: ReferralProgramCycleConfigSetResponse,
+): SerializedReferralProgramCycleConfigSetResponse {
+  switch (response.responseCode) {
+    case ReferralProgramCycleConfigSetResponseCodes.Ok:
+      return {
+        responseCode: response.responseCode,
+        data: {
+          cycles: response.data.cycles.map(serializeReferralProgramCycleConfig),
+        },
+      };
+
+    case ReferralProgramCycleConfigSetResponseCodes.Error:
+      return response;
+
+    default: {
+      const _exhaustiveCheck: never = response;
+      throw new Error(
+        `Unknown response code: ${(_exhaustiveCheck as ReferralProgramCycleConfigSetResponse).responseCode}`,
       );
     }
   }

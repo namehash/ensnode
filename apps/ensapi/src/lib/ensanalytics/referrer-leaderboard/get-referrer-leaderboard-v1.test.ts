@@ -2,7 +2,7 @@ import { buildReferralProgramRules, type ReferrerLeaderboard } from "@namehash/e
 import { getUnixTime } from "date-fns";
 import { describe, expect, it, vi } from "vitest";
 
-import { priceUsdc } from "@ensnode/ensnode-sdk";
+import { parseUsdc } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database-v1";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard-v1";
@@ -14,7 +14,7 @@ vi.mock("./database-v1", () => ({
 }));
 
 const rules = buildReferralProgramRules(
-  priceUsdc(10_000_000_000n), // 10,000 USDC in smallest units
+  parseUsdc("10000"),
   10, // maxQualifiedReferrers
   getUnixTime("2025-01-01T00:00:00Z"),
   getUnixTime("2025-12-31T23:59:59Z"),
@@ -22,6 +22,7 @@ const rules = buildReferralProgramRules(
     chainId: 1,
     address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   },
+  new URL("https://example.com/rules"),
 );
 
 const accurateAsOf = getUnixTime("2025-11-30T23:59:59Z");

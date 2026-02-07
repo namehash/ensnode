@@ -1,13 +1,18 @@
 import {
-  deserializeReferrerDetailAllCyclesResponse,
+  deserializeReferralProgramCycleConfigSetArray,
+  deserializeReferralProgramCycleConfigSetResponse,
+  deserializeReferrerDetailCyclesResponse,
   deserializeReferrerLeaderboardPageResponse,
-  type ReferrerDetailAllCyclesResponse,
-  type ReferrerDetailRequest,
+  type ReferralProgramCycleConfigSetResponse,
+  type ReferrerDetailCyclesRequest,
+  type ReferrerDetailCyclesResponse,
   type ReferrerLeaderboardPageRequest,
   type ReferrerLeaderboardPageResponse,
-  type SerializedReferrerDetailAllCyclesResponse,
+  type SerializedReferralProgramCycleConfigSetResponse,
+  type SerializedReferrerDetailCyclesResponse,
   type SerializedReferrerLeaderboardPageResponse,
 } from "./api";
+import type { ReferralProgramCycleConfigSet } from "./cycle";
 
 /**
  * Default ENSNode API endpoint URL
@@ -32,9 +37,9 @@ export interface ClientOptions {
  * // Create client with default options
  * const client = new ENSReferralsClient();
  *
- * // Get referrer leaderboard for cycle-1
+ * // Get referrer leaderboard for December 2025 cycle
  * const leaderboardPage = await client.getReferrerLeaderboardPage({
- *   cycle: "cycle-1",
+ *   cycle: "2025-12",
  *   page: 1,
  *   recordsPerPage: 25
  * });
@@ -71,14 +76,50 @@ export class ENSReferralsClient {
   }
 
   /**
+   * Get Referral Program Cycle Config Set
+   *
+   * Fetches and deserializes a referral program cycle config set from a remote URL.
+   *
+   * @param url - The URL to fetch the cycle config set from
+   * @returns A ReferralProgramCycleConfigSet (Map of cycle slugs to cycle configurations)
+   *
+   * @throws if the fetch fails
+   * @throws if the response is not valid JSON
+   * @throws if the data doesn't match the expected schema
+   *
+   * @example
+   * ```typescript
+   * const url = new URL("https://example.com/cycles.json");
+   * const cycleConfigSet = await ENSReferralsClient.getReferralProgramCycleConfigSet(url);
+   * console.log(`Loaded ${cycleConfigSet.size} cycles`);
+   * ```
+   */
+  static async getReferralProgramCycleConfigSet(url: URL): Promise<ReferralProgramCycleConfigSet> {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    let json: unknown;
+    try {
+      json = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    const cycleConfigs = deserializeReferralProgramCycleConfigSetArray(json);
+
+    return new Map(cycleConfigs.map((cycleConfig) => [cycleConfig.slug, cycleConfig]));
+  }
+
+  /**
    * Fetch Referrer Leaderboard Page
    *
    * Retrieves a paginated list of referrer leaderboard metrics for a specific referral program cycle.
-   * Each referrer's contribution is calculated as a percentage of the grand totals across all referrers
-   * within that cycle.
    *
    * @param request - Request parameters including cycle and pagination
-   * @param request.cycle - The referral program cycle ID (e.g., "cycle-1", "cycle-2", or custom cycle ID)
+   * @param request.cycle - The referral program cycle slug (e.g., "2025-12", "2026-03", or custom cycle slug)
    * @param request.page - The page number to retrieve (1-indexed, default: 1)
    * @param request.recordsPerPage - Number of records per page (default: 25, max: 100)
    * @returns {ReferrerLeaderboardPageResponse}
@@ -89,9 +130,9 @@ export class ENSReferralsClient {
    *
    * @example
    * ```typescript
-   * // Get first page of cycle-1 leaderboard with default page size (25 records)
-   * const cycleId = "cycle-1";
-   * const response = await client.getReferrerLeaderboardPage({ cycle: cycleId });
+   * // Get first page of 2025-12 leaderboard with default page size (25 records)
+   * const cycleSlug = "2025-12";
+   * const response = await client.getReferrerLeaderboardPage({ cycle: cycleSlug });
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Ok) {
    *   const {
    *     aggregatedMetrics,
@@ -100,7 +141,7 @@ export class ENSReferralsClient {
    *     pageContext,
    *     accurateAsOf
    *   } = response.data;
-   *   console.log(`Cycle: ${cycleId}`);
+   *   console.log(`Cycle: ${cycleSlug}`);
    *   console.log(`Subregistry: ${rules.subregistryId}`);
    *   console.log(`Total Referrers: ${pageContext.totalRecords}`);
    *   console.log(`Page ${pageContext.page} of ${pageContext.totalPages}`);
@@ -109,9 +150,9 @@ export class ENSReferralsClient {
    *
    * @example
    * ```typescript
-   * // Get second page of cycle-2 with 50 records per page
+   * // Get second page of 2026-03 with 50 records per page
    * const response = await client.getReferrerLeaderboardPage({
-   *   cycle: "cycle-2",
+   *   cycle: "2026-03",
    *   page: 2,
    *   recordsPerPage: 50
    * });
@@ -120,7 +161,7 @@ export class ENSReferralsClient {
    * @example
    * ```typescript
    * // Handle error response (e.g., unknown cycle or data not available)
-   * const response = await client.getReferrerLeaderboardPage({ cycle: "cycle-1" });
+   * const response = await client.getReferrerLeaderboardPage({ cycle: "2025-12" });
    *
    * if (response.responseCode === ReferrerLeaderboardPageResponseCodes.Error) {
    *   console.error(response.error);
@@ -160,13 +201,13 @@ export class ENSReferralsClient {
   }
 
   /**
-   * Fetch Referrer Detail Across All Cycles
+   * Fetch Referrer Detail for Specific Cycles
    *
-   * Retrieves detailed information about a specific referrer across all configured
-   * referral program cycles. Returns a record mapping each cycle ID to the referrer's
-   * detail for that cycle.
+   * Retrieves detailed information about a specific referrer for the requested
+   * referral program cycles. Returns a record mapping each requested cycle slug
+   * to the referrer's detail for that cycle.
    *
-   * The response data maps cycle IDs to referrer details. Each cycle's data is a
+   * The response data maps cycle slugs to referrer details. Each cycle's data is a
    * discriminated union type with a `type` field:
    *
    * **For referrers on the leaderboard** (`ReferrerDetailRanked`):
@@ -183,28 +224,29 @@ export class ENSReferralsClient {
    * - `aggregatedMetrics`: Aggregated metrics for all referrers on the leaderboard
    * - `accurateAsOf`: Unix timestamp indicating when the data was last updated
    *
-   * **Note:** The API uses a fail-fast approach. If ANY cycle fails to load, the entire request
-   * returns an error. When `responseCode === Ok`, ALL configured cycles are guaranteed to be
-   * present in the response data.
+   * **Note:** This endpoint does not allow partial success. When `responseCode === Ok`,
+   * all requested cycles are guaranteed to be present in the response data. If any
+   * requested cycle cannot be returned, the entire request fails with an error.
    *
    * @see {@link https://www.npmjs.com/package/@namehash/ens-referrals|@namehash/ens-referrals} for calculation details
    *
-   * @param request The referrer address to query
-   * @returns {ReferrerDetailAllCyclesResponse} Returns the referrer detail for all cycles
+   * @param request The referrer address and cycle slugs to query
+   * @returns {ReferrerDetailCyclesResponse} Returns the referrer detail for requested cycles
    *
    * @throws if the ENSNode request fails
    * @throws if the response data is malformed
    *
    * @example
    * ```typescript
-   * // Get referrer detail across all cycles
-   * const response = await client.getReferrerDetail({
-   *   referrer: "0x1234567890123456789012345678901234567890"
+   * // Get referrer detail for specific cycles
+   * const response = await client.getReferrerDetailForCycles({
+   *   referrer: "0x1234567890123456789012345678901234567890",
+   *   cycles: ["2025-12", "2026-01"]
    * });
-   * if (response.responseCode === ReferrerDetailAllCyclesResponseCodes.Ok) {
-   *   // All configured cycles are present in response.data
-   *   for (const [cycleId, detail] of Object.entries(response.data)) {
-   *     console.log(`Cycle: ${cycleId}`);
+   * if (response.responseCode === ReferrerDetailCyclesResponseCodes.Ok) {
+   *   // All requested cycles are present in response.data
+   *   for (const [cycleSlug, detail] of Object.entries(response.data)) {
+   *     console.log(`Cycle: ${cycleSlug}`);
    *     console.log(`Type: ${detail.type}`);
    *     if (detail.type === ReferrerDetailTypeIds.Ranked) {
    *       console.log(`Rank: ${detail.referrer.rank}`);
@@ -217,43 +259,46 @@ export class ENSReferralsClient {
    * @example
    * ```typescript
    * // Access specific cycle data directly (cycle is guaranteed to exist when OK)
-   * const response = await client.getReferrerDetail({
-   *   referrer: "0x1234567890123456789012345678901234567890"
+   * const response = await client.getReferrerDetailForCycles({
+   *   referrer: "0x1234567890123456789012345678901234567890",
+   *   cycles: ["2025-12"]
    * });
-   * if (response.responseCode === ReferrerDetailAllCyclesResponseCodes.Ok) {
-   *   // If "cycle-1" is configured, it will be in response.data
-   *   const cycle1Detail = response.data["cycle-1"];
-   *   if (cycle1Detail && cycle1Detail.type === ReferrerDetailTypeIds.Ranked) {
+   * if (response.responseCode === ReferrerDetailCyclesResponseCodes.Ok) {
+   *   const cycle202512Detail = response.data["2025-12"];
+   *   if (cycle202512Detail && cycle202512Detail.type === ReferrerDetailTypeIds.Ranked) {
    *     // TypeScript knows this is ReferrerDetailRanked
-   *     console.log(`Cycle 1 Rank: ${cycle1Detail.referrer.rank}`);
-   *   } else if (cycle1Detail) {
+   *     console.log(`Cycle 2025-12 Rank: ${cycle202512Detail.referrer.rank}`);
+   *   } else if (cycle202512Detail) {
    *     // TypeScript knows this is ReferrerDetailUnranked
-   *     console.log("Referrer is not on the leaderboard for cycle-1");
+   *     console.log("Referrer is not on the leaderboard for 2025-12");
    *   }
    * }
    * ```
    *
    * @example
    * ```typescript
-   * // Handle error response (e.g., a cycle failed to load)
-   * const response = await client.getReferrerDetail({
-   *   referrer: "0x1234567890123456789012345678901234567890"
+   * // Handle error response (e.g., unknown cycle or data not available)
+   * const response = await client.getReferrerDetailForCycles({
+   *   referrer: "0x1234567890123456789012345678901234567890",
+   *   cycles: ["2025-12", "invalid-cycle"]
    * });
    *
-   * if (response.responseCode === ReferrerDetailAllCyclesResponseCodes.Error) {
+   * if (response.responseCode === ReferrerDetailCyclesResponseCodes.Error) {
    *   console.error(response.error);
-   *   // Error message includes which cycle failed
    *   console.error(response.errorMessage);
    * }
    * ```
    */
-  async getReferrerDetail(
-    request: ReferrerDetailRequest,
-  ): Promise<ReferrerDetailAllCyclesResponse> {
+  async getReferrerDetailForCycles(
+    request: ReferrerDetailCyclesRequest,
+  ): Promise<ReferrerDetailCyclesResponse> {
     const url = new URL(
-      `/v1/ensanalytics/referral-leaderboard/${encodeURIComponent(request.referrer)}`,
+      `/v1/ensanalytics/referrer/${encodeURIComponent(request.referrer)}`,
       this.options.url,
     );
+
+    // Add cycles as comma-separated query parameter
+    url.searchParams.set("cycles", request.cycles.join(","));
 
     const response = await fetch(url);
 
@@ -266,13 +311,66 @@ export class ENSReferralsClient {
       throw new Error("Malformed response data: invalid JSON");
     }
 
-    // The API can return errors with 500 status, but they're still in the
-    // ReferrerDetailAllCyclesResponse format with responseCode: 'error'
+    // The API can return errors with various status codes, but they're still in the
+    // ReferrerDetailCyclesResponse format with responseCode: 'error'
     // So we don't need to check response.ok here, just deserialize and let
     // the caller handle the responseCode
 
-    return deserializeReferrerDetailAllCyclesResponse(
-      responseData as SerializedReferrerDetailAllCyclesResponse,
+    return deserializeReferrerDetailCyclesResponse(
+      responseData as SerializedReferrerDetailCyclesResponse,
+    );
+  }
+
+  /**
+   * Get the currently configured referral program cycle config set.
+   * Cycles are sorted in descending order by start timestamp (most recent first).
+   *
+   * @returns A response containing the cycle config set, or an error response if unavailable.
+   *
+   * @example
+   * ```typescript
+   * const response = await client.getCycleConfigSet();
+   *
+   * if (response.responseCode === ReferralProgramCycleConfigSetResponseCodes.Ok) {
+   *   console.log(`Found ${response.data.cycles.length} cycles`);
+   *   for (const cycle of response.data.cycles) {
+   *     console.log(`${cycle.slug}: ${cycle.displayName}`);
+   *   }
+   * }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // Handle error response
+   * const response = await client.getCycleConfigSet();
+   *
+   * if (response.responseCode === ReferralProgramCycleConfigSetResponseCodes.Error) {
+   *   console.error(response.error);
+   *   console.error(response.errorMessage);
+   * }
+   * ```
+   */
+  async getCycleConfigSet(): Promise<ReferralProgramCycleConfigSetResponse> {
+    const url = new URL(`/v1/ensanalytics/cycles`, this.options.url);
+
+    const response = await fetch(url);
+
+    // ENSNode API should always allow parsing a response as JSON object.
+    // If for some reason it's not the case, throw an error.
+    let responseData: unknown;
+    try {
+      responseData = await response.json();
+    } catch {
+      throw new Error("Malformed response data: invalid JSON");
+    }
+
+    // The API can return errors with various status codes, but they're still in the
+    // ReferralProgramCycleConfigSetResponse format with responseCode: 'error'
+    // So we don't need to check response.ok here, just deserialize and let
+    // the caller handle the responseCode
+
+    return deserializeReferralProgramCycleConfigSetResponse(
+      responseData as SerializedReferralProgramCycleConfigSetResponse,
     );
   }
 }

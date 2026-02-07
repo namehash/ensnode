@@ -1,8 +1,7 @@
-import config from "@/config";
-
 import {
-  type ReferralProgramCycle,
-  type ReferralProgramCycleId,
+  type ReferralProgramCycleConfig,
+  type ReferralProgramCycleConfigSet,
+  type ReferralProgramCycleSlug,
   type ReferrerLeaderboard,
   serializeReferralProgramRules,
 } from "@namehash/ens-referrals/v1";
@@ -23,12 +22,15 @@ import { indexingStatusCache } from "./indexing-status.cache";
 const logger = makeLogger("referral-leaderboard-cycles-cache");
 
 /**
- * Map from cycle ID to its leaderboard cache.
- * Each cycle has its own independent cache to preserve successful data
- * even when other cycles fail.
+ * Map from cycle slug to its leaderboard cache.
+ *
+ * Each cycle has its own independent cache. Therefore, each
+ * cycle's cache can be asynchronously loaded / refreshed from
+ * others, and a failure to load data for one cycle doesn't break
+ * data successfully loaded for other cycles.
  */
 export type ReferralLeaderboardCyclesCacheMap = Map<
-  ReferralProgramCycleId,
+  ReferralProgramCycleSlug,
   SWRCache<ReferrerLeaderboard>
 >;
 
@@ -46,58 +48,58 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
 /**
  * Creates a cache builder function for a specific cycle.
  *
- * @param cycleId - The ID of the cycle to build a cache for
+ * @param cycleConfig - The cycle configuration
  * @returns A function that builds the leaderboard for the given cycle
  */
 function createCycleLeaderboardBuilder(
-  cycleId: ReferralProgramCycleId,
+  cycleConfig: ReferralProgramCycleConfig,
 ): () => Promise<ReferrerLeaderboard> {
   return async (): Promise<ReferrerLeaderboard> => {
-    const cycle = config.referralProgramCycleSet.get(cycleId) as ReferralProgramCycle | undefined;
-    if (!cycle) {
-      throw new Error(`Cycle ${cycleId} not found in referralProgramCycleSet`);
-    }
+    const cycleSlug = cycleConfig.slug;
 
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       logger.error(
-        { error: indexingStatus, cycleId },
-        `Failed to read indexing status cache while generating referral leaderboard for ${cycleId}. Cannot proceed without valid indexing status.`,
+        { error: indexingStatus, cycleSlug },
+        `Failed to read indexing status cache while generating referral leaderboard for ${cycleSlug}. Cannot proceed without valid indexing status.`,
       );
       throw new Error(
-        `Unable to generate referral leaderboard for ${cycleId}. indexingStatusCache must have been successfully initialized.`,
+        `Unable to generate referral leaderboard for ${cycleSlug}. indexingStatusCache must have been successfully initialized.`,
       );
     }
 
     const omnichainIndexingStatus = indexingStatus.omnichainSnapshot.omnichainStatus;
     if (!supportedOmnichainIndexingStatuses.includes(omnichainIndexingStatus)) {
       throw new Error(
-        `Unable to generate referrer leaderboard for ${cycleId}. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")}.`,
+        `Unable to generate referrer leaderboard for ${cycleSlug}. Omnichain indexing status is currently ${omnichainIndexingStatus} but must be ${supportedOmnichainIndexingStatuses.join(" or ")}.`,
       );
     }
 
     const latestIndexedBlockRef = getLatestIndexedBlockRef(
       indexingStatus,
-      cycle.rules.subregistryId.chainId,
+      cycleConfig.rules.subregistryId.chainId,
     );
     if (latestIndexedBlockRef === null) {
       throw new Error(
-        `Unable to generate referrer leaderboard for ${cycleId}. Latest indexed block ref for chain ${cycle.rules.subregistryId.chainId} is null.`,
+        `Unable to generate referrer leaderboard for ${cycleSlug}. Latest indexed block ref for chain ${cycleConfig.rules.subregistryId.chainId} is null.`,
       );
     }
 
     logger.info(
-      `Building referrer leaderboard for ${cycleId} with rules:\n${JSON.stringify(
-        serializeReferralProgramRules(cycle.rules),
+      `Building referrer leaderboard for ${cycleSlug} with rules:\n${JSON.stringify(
+        serializeReferralProgramRules(cycleConfig.rules),
         null,
         2,
       )}`,
     );
 
-    const leaderboard = await getReferrerLeaderboard(cycle.rules, latestIndexedBlockRef.timestamp);
+    const leaderboard = await getReferrerLeaderboard(
+      cycleConfig.rules,
+      latestIndexedBlockRef.timestamp,
+    );
 
     logger.info(
-      `Successfully built referrer leaderboard for ${cycleId} with ${leaderboard.referrers.size} referrers`,
+      `Successfully built referrer leaderboard for ${cycleSlug} with ${leaderboard.referrers.size} referrers`,
     );
 
     return leaderboard;
@@ -105,38 +107,55 @@ function createCycleLeaderboardBuilder(
 }
 
 /**
- * Initializes caches for all configured referral program cycles.
- *
- * Each cycle gets its own independent SWRCache, ensuring that if one cycle
- * fails to refresh, other cycles' previously successful data remains available.
- *
- * @returns A map from cycle ID to its dedicated SWRCache
+ * Singleton instance of the initialized caches.
+ * Ensures caches are only initialized once per application lifecycle.
  */
-function initializeCyclesCaches(): ReferralLeaderboardCyclesCacheMap {
+let cachedInstance: ReferralLeaderboardCyclesCacheMap | null = null;
+
+/**
+ * Initializes caches for all referral program cycles in the given cycle set.
+ *
+ * This function uses a singleton pattern to ensure caches are only initialized once,
+ * even if called multiple times. Each cycle gets its own independent SWRCache,
+ * ensuring that if one cycle fails to refresh, other cycles' previously successful
+ * data remains available.
+ *
+ * @param cycleConfigSet - The referral program cycle config set to initialize caches for
+ * @returns A map from cycle slug to its dedicated SWRCache
+ */
+export function initializeReferralLeaderboardCyclesCaches(
+  cycleConfigSet: ReferralProgramCycleConfigSet,
+): ReferralLeaderboardCyclesCacheMap {
+  // Return cached instance if already initialized
+  if (cachedInstance !== null) {
+    return cachedInstance;
+  }
+
   const caches: ReferralLeaderboardCyclesCacheMap = new Map();
 
-  for (const [cycleId] of config.referralProgramCycleSet) {
-    const typedCycleId = cycleId as ReferralProgramCycleId;
+  for (const [cycleSlug, cycleConfig] of cycleConfigSet) {
     const cache = new SWRCache({
-      fn: createCycleLeaderboardBuilder(typedCycleId),
+      fn: createCycleLeaderboardBuilder(cycleConfig),
       ttl: minutesToSeconds(1),
       proactiveRevalidationInterval: minutesToSeconds(2),
       proactivelyInitialize: true,
     });
 
-    caches.set(typedCycleId, cache);
-    logger.info(`Initialized leaderboard cache for ${typedCycleId}`);
+    caches.set(cycleSlug, cache);
+    logger.info(`Initialized leaderboard cache for ${cycleSlug}`);
   }
 
+  // Cache the instance for subsequent calls
+  cachedInstance = caches;
   return caches;
 }
 
 /**
- * Map of independent caches for each referral program cycle.
+ * Gets the cached instance of referral leaderboard cycles caches.
+ * Returns null if not yet initialized.
  *
- * Each cycle has its own SWRCache to ensure independent failure handling.
- * If cycle 1's cache fails to refresh but was previously successful, its old
- * data remains available while cycle 2 can independently succeed or fail.
+ * @returns The cached cache map or null
  */
-export const referralLeaderboardCyclesCaches: ReferralLeaderboardCyclesCacheMap =
-  initializeCyclesCaches();
+export function getReferralLeaderboardCyclesCaches(): ReferralLeaderboardCyclesCacheMap | null {
+  return cachedInstance;
+}

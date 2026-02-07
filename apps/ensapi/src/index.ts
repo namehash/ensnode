@@ -8,7 +8,8 @@ import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
-import { referralLeaderboardCyclesCaches } from "@/cache/referral-leaderboard-cycles.cache";
+import { getReferralLeaderboardCyclesCaches } from "@/cache/referral-leaderboard-cycles.cache";
+import { referralProgramCycleConfigSetCache } from "@/cache/referral-program-cycle-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
@@ -161,10 +162,17 @@ const gracefulShutdown = async () => {
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
 
-    // Destroy all cycle caches
-    for (const [cycleId, cache] of referralLeaderboardCyclesCaches) {
-      cache.destroy();
-      logger.info(`Destroyed referralLeaderboardCyclesCache for ${cycleId}`);
+    // Destroy referral program cycle config set cache
+    referralProgramCycleConfigSetCache.destroy();
+    logger.info("Destroyed referralProgramCycleConfigSetCache");
+
+    // Destroy all cycle caches (if initialized)
+    const cyclesCaches = getReferralLeaderboardCyclesCaches();
+    if (cyclesCaches) {
+      for (const [cycleSlug, cache] of cyclesCaches) {
+        cache.destroy();
+        logger.info(`Destroyed referralLeaderboardCyclesCache for ${cycleSlug}`);
+      }
     }
 
     indexingStatusCache.destroy();

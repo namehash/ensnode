@@ -1,55 +1,32 @@
 import type { ReferralProgramRules } from "./rules";
 
 /**
- * Referral program cycle identifiers.
+ * Referral program cycle slug.
  *
- * Each cycle represents a distinct referral program period with its own
- * rules, leaderboard, and award distribution.
+ * A URL-safe identifier for a referral program cycle. Each cycle represents
+ * a distinct referral program period with its own rules, leaderboard, and
+ * award distribution.
+ *
+ * @invariant Must contain only lowercase letters (a-z), digits (0-9), and hyphens (-).
+ *            Must not start or end with a hyphen. Pattern: `^[a-z0-9]+(-[a-z0-9]+)*$`
+ *
+ * @example "2025-12" // December 2025 cycle
+ * @example "2026-03" // March 2026 cycle
+ * @example "holiday-special" // Custom named cycle
  */
-export const ReferralProgramCycleIds = {
-  /** ENS Holiday Awards December 2025 */
-  Cycle1: "cycle-1",
-  /** March 2026 */
-  Cycle2: "cycle-2",
-} as const;
+export type ReferralProgramCycleSlug = string;
 
 /**
- * Referral program cycle identifier.
- *
- * Can be either a predefined cycle ID (e.g., "cycle-1", "cycle-2") or a custom cycle ID.
- * The type provides autocomplete for known cycle IDs while accepting any string for custom cycles.
+ * Represents a referral program cycle configuration.
  */
-export type ReferralProgramCycleId =
-  | (typeof ReferralProgramCycleIds)[keyof typeof ReferralProgramCycleIds]
-  | (string & {});
-
-/**
- * Array of all valid referral program cycle IDs.
- */
-export const ALL_REFERRAL_PROGRAM_CYCLE_IDS: ReferralProgramCycleId[] =
-  Object.values(ReferralProgramCycleIds);
-
-/**
- * Type guard to check if a string is a predefined {@link ReferralProgramCycleId}.
- *
- * Note: This only checks for predefined cycle IDs (e.g., "cycle-1", "cycle-2").
- * Custom cycle IDs loaded from CUSTOM_REFERRAL_PROGRAM_CYCLES are valid
- * ReferralProgramCycleIds but won't pass this check.
- *
- * @param value - The string value to check
- * @returns true if the value is a predefined cycle ID
- */
-export const isPredefinedCycleId = (value: string): value is ReferralProgramCycleId =>
-  ALL_REFERRAL_PROGRAM_CYCLE_IDS.includes(value as ReferralProgramCycleId);
-
-/**
- * Represents a referral program cycle with its configuration and rules.
- */
-export interface ReferralProgramCycle {
+export interface ReferralProgramCycleConfig {
   /**
-   * Unique identifier for the cycle.
+   * Unique slug identifier for the cycle.
+   *
+   * @invariant Must contain only lowercase letters (a-z), digits (0-9), and hyphens (-).
+   *            Must not start or end with a hyphen. Pattern: `^[a-z0-9]+(-[a-z0-9]+)*$`
    */
-  id: ReferralProgramCycleId;
+  slug: ReferralProgramCycleSlug;
 
   /**
    * Human-readable display name for the cycle.
@@ -61,17 +38,14 @@ export interface ReferralProgramCycle {
    * The rules that govern this referral program cycle.
    */
   rules: ReferralProgramRules;
-
-  /**
-   * URL to the full rules document for this cycle.
-   * @example "https://ensawards.org/ens-holiday-awards-rules"
-   */
-  rulesUrl: string;
 }
 
 /**
- * A map from cycle ID to cycle definition.
+ * A map from cycle slug to cycle configuration.
  *
  * Used to store and look up all configured referral program cycles.
  */
-export type ReferralProgramCycleSet = Map<ReferralProgramCycleId, ReferralProgramCycle>;
+export type ReferralProgramCycleConfigSet = Map<
+  ReferralProgramCycleSlug,
+  ReferralProgramCycleConfig
+>;

@@ -4,12 +4,14 @@ import type { CanAccelerateMiddlewareVariables } from "@/middleware/can-accelera
 import type { IndexingStatusMiddlewareVariables } from "@/middleware/indexing-status.middleware";
 import type { IsRealtimeMiddlewareVariables } from "@/middleware/is-realtime.middleware";
 import type { ReferralLeaderboardCyclesCachesMiddlewareVariables } from "@/middleware/referral-leaderboard-cycles-caches.middleware";
+import type { ReferralProgramCycleConfigSetMiddlewareVariables } from "@/middleware/referral-program-cycle-set.middleware";
 import type { ReferrerLeaderboardMiddlewareVariables } from "@/middleware/referrer-leaderboard.middleware";
 
 export type MiddlewareVariables = IndexingStatusMiddlewareVariables &
   IsRealtimeMiddlewareVariables &
   CanAccelerateMiddlewareVariables &
   ReferrerLeaderboardMiddlewareVariables &
+  ReferralProgramCycleConfigSetMiddlewareVariables &
   ReferralLeaderboardCyclesCachesMiddlewareVariables;
 
 export const factory = createFactory<{

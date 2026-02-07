@@ -1,125 +1,56 @@
-import { type AccountId, priceUsdc, type UnixTimestamp } from "@ensnode/ensnode-sdk";
-
 import {
-  type ReferralProgramCycle,
-  ReferralProgramCycleIds,
-  type ReferralProgramCycleSet,
-} from "./cycle";
+  type ENSNamespaceId,
+  getEthnamesSubregistryId,
+  parseTimestamp,
+  parseUsdc,
+} from "@ensnode/ensnode-sdk";
+
+import type { ReferralProgramCycleConfig, ReferralProgramCycleConfigSet } from "./cycle";
 import { buildReferralProgramRules } from "./rules";
 
 /**
- * Configuration for Cycle 1: ENS Holiday Awards (December 2025)
- */
-const CYCLE_1_CONFIG = {
-  /**
-   * Start date for the ENS Holiday Awards referral program.
-   * 2025-12-01T00:00:00Z (December 1, 2025 at 00:00:00 UTC)
-   */
-  START_DATE: 1764547200 as UnixTimestamp,
-
-  /**
-   * End date for the ENS Holiday Awards referral program.
-   * 2025-12-31T23:59:59Z (December 31, 2025 at 23:59:59 UTC)
-   */
-  END_DATE: 1767225599 as UnixTimestamp,
-
-  /**
-   * The maximum number of qualified referrers.
-   */
-  MAX_QUALIFIED_REFERRERS: 10,
-
-  /**
-   * The total value of the award pool in USDC.
-   * 10,000 USDC = 10,000,000,000 (10_000 * 10^6 smallest units)
-   */
-  TOTAL_AWARD_POOL_VALUE: priceUsdc(10_000_000_000n),
-
-  /**
-   * Display name for the cycle.
-   */
-  DISPLAY_NAME: "ENS Holiday Awards",
-
-  /**
-   * URL to the rules for this cycle.
-   */
-  RULES_URL: "https://ensawards.org/ens-holiday-awards-rules",
-} as const;
-
-/**
- * Configuration for Cycle 2: March 2026
- */
-const CYCLE_2_CONFIG = {
-  /**
-   * Start date for the March 2026 referral program.
-   * 2026-03-01T00:00:00Z (March 1, 2026 at 00:00:00 UTC)
-   */
-  START_DATE: 1772323200 as UnixTimestamp,
-
-  /**
-   * End date for the March 2026 referral program.
-   * 2026-03-31T23:59:59Z (March 31, 2026 at 23:59:59 UTC)
-   */
-  END_DATE: 1775001599 as UnixTimestamp,
-
-  /**
-   * The maximum number of qualified referrers.
-   */
-  MAX_QUALIFIED_REFERRERS: 10,
-
-  /**
-   * The total value of the award pool in USDC.
-   * 10,000 USDC = 10,000,000,000 (10_000 * 10^6 smallest units)
-   */
-  TOTAL_AWARD_POOL_VALUE: priceUsdc(10_000_000_000n),
-
-  /**
-   * Display name for the cycle.
-   */
-  DISPLAY_NAME: "March 2026",
-
-  /**
-   * URL to the rules for this cycle.
-   */
-  RULES_URL: "https://ensawards.org/ens-holiday-awards-rules",
-} as const;
-
-/**
- * Returns the default referral program cycle set with pre-built cycle definitions.
+ * Returns the default referral program cycle set with pre-built cycle configurations.
  *
- * @param subregistryId - The subregistry account ID for rule validation (e.g., BaseRegistrar on the namespace chain)
- * @returns A map of cycle IDs to their pre-built cycle configurations
+ * This function maps from an ENS namespace to the appropriate subregistry (BaseRegistrar)
+ * and builds the default referral program cycles for that namespace.
+ *
+ * @param ensNamespaceId - The ENS namespace slug to get the default cycles for
+ * @returns A map of cycle slugs to their pre-built cycle configurations
+ * @throws Error if the subregistry contract is not found for the given namespace
  */
-export function getReferralProgramCycleSet(subregistryId: AccountId): ReferralProgramCycleSet {
-  // Pre-built cycle-1 object (ENS Holiday Awards Dec 2025)
-  const cycle1: ReferralProgramCycle = {
-    id: ReferralProgramCycleIds.Cycle1,
-    displayName: CYCLE_1_CONFIG.DISPLAY_NAME,
+export function getDefaultReferralProgramCycleConfigSet(
+  ensNamespaceId: ENSNamespaceId,
+): ReferralProgramCycleConfigSet {
+  const subregistryId = getEthnamesSubregistryId(ensNamespaceId);
+
+  const cycle1: ReferralProgramCycleConfig = {
+    slug: "2025-12",
+    displayName: "ENS Holiday Awards",
     rules: buildReferralProgramRules(
-      CYCLE_1_CONFIG.TOTAL_AWARD_POOL_VALUE,
-      CYCLE_1_CONFIG.MAX_QUALIFIED_REFERRERS,
-      CYCLE_1_CONFIG.START_DATE,
-      CYCLE_1_CONFIG.END_DATE,
+      parseUsdc("10000"),
+      10,
+      parseTimestamp("2025-12-01T00:00:00Z"),
+      parseTimestamp("2025-12-31T23:59:59Z"),
       subregistryId,
+      new URL("https://ensawards.org/ens-holiday-awards-rules"),
     ),
-    rulesUrl: CYCLE_1_CONFIG.RULES_URL,
   };
 
-  // Pre-built cycle-2 object (March 2026)
-  const cycle2: ReferralProgramCycle = {
-    id: ReferralProgramCycleIds.Cycle2,
-    displayName: CYCLE_2_CONFIG.DISPLAY_NAME,
+  const cycle2: ReferralProgramCycleConfig = {
+    slug: "2026-03",
+    displayName: "March 2026",
     rules: buildReferralProgramRules(
-      CYCLE_2_CONFIG.TOTAL_AWARD_POOL_VALUE,
-      CYCLE_2_CONFIG.MAX_QUALIFIED_REFERRERS,
-      CYCLE_2_CONFIG.START_DATE,
-      CYCLE_2_CONFIG.END_DATE,
+      parseUsdc("10000"),
+      10,
+      parseTimestamp("2026-03-01T00:00:00Z"),
+      parseTimestamp("2026-03-31T23:59:59Z"),
       subregistryId,
+      new URL("https://ensawards.org/ens-holiday-awards-rules"),
     ),
-    rulesUrl: CYCLE_2_CONFIG.RULES_URL,
   };
 
   return new Map([
-    [ReferralProgramCycleIds.Cycle1, cycle1],
-    [ReferralProgramCycleIds.Cycle2, cycle2],
+    ["2025-12", cycle1],
+    ["2026-03", cycle2],
   ]);
 }

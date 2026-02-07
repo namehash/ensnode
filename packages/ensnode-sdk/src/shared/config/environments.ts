@@ -55,12 +55,12 @@ export type TheGraphEnvironment = {
 /**
  * Environment variables for referral program cycles configuration.
  *
- * If CUSTOM_REFERRAL_PROGRAM_CYCLES is set, it should be a URL pointing to
- * a JSON file containing custom cycle definitions.
+ * If CUSTOM_REFERRAL_PROGRAM_CYCLES is set, it should be a URL that returns
+ * the JSON for a valid serialized custom referral program cycles definition.
  */
 export interface ReferralProgramCyclesEnvironment {
   /**
-   * Optional URL to a JSON file containing custom referral program cycle definitions.
+   * Optional URL that returns the JSON for a valid serialized custom referral program cycles definition.
    * If not set, the default cycle set will be used.
    */
   CUSTOM_REFERRAL_PROGRAM_CYCLES?: string;

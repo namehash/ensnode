@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { ReferralProgramCycleId } from "../cycle";
+import type { ReferralProgramCycleConfig, ReferralProgramCycleSlug } from "../cycle";
 import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
 import type { ReferrerDetail } from "../referrer-detail";
 
@@ -8,8 +8,8 @@ import type { ReferrerDetail } from "../referrer-detail";
  * Request parameters for a referrer leaderboard page query.
  */
 export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPageParams {
-  /** The referral program cycle ID */
-  cycle: ReferralProgramCycleId;
+  /** The referral program cycle slug */
+  cycle: ReferralProgramCycleSlug;
 }
 
 /**
@@ -61,19 +61,26 @@ export type ReferrerLeaderboardPageResponse =
   | ReferrerLeaderboardPageResponseError;
 
 /**
+ * Maximum number of cycles that can be requested in a single {@link ReferrerDetailCyclesRequest}.
+ */
+export const MAX_CYCLES_PER_REQUEST = 20;
+
+/**
  * Request parameters for referrer detail query.
  */
-export interface ReferrerDetailRequest {
+export interface ReferrerDetailCyclesRequest {
   /** The Ethereum address of the referrer to query */
   referrer: Address;
+  /** Array of cycle slugs to query (min 1, max {@link MAX_CYCLES_PER_REQUEST}, must be distinct) */
+  cycles: ReferralProgramCycleSlug[];
 }
 
 /**
  * A status code for referrer detail API responses.
  */
-export const ReferrerDetailAllCyclesResponseCodes = {
+export const ReferrerDetailCyclesResponseCodes = {
   /**
-   * Represents that the referrer detail data across all cycles is available.
+   * Represents that the referrer detail data for the requested cycles is available.
    */
   Ok: "ok",
 
@@ -84,46 +91,100 @@ export const ReferrerDetailAllCyclesResponseCodes = {
 } as const;
 
 /**
- * The derived string union of possible {@link ReferrerDetailAllCyclesResponseCodes}.
+ * The derived string union of possible {@link ReferrerDetailCyclesResponseCodes}.
  */
-export type ReferrerDetailAllCyclesResponseCode =
-  (typeof ReferrerDetailAllCyclesResponseCodes)[keyof typeof ReferrerDetailAllCyclesResponseCodes];
+export type ReferrerDetailCyclesResponseCode =
+  (typeof ReferrerDetailCyclesResponseCodes)[keyof typeof ReferrerDetailCyclesResponseCodes];
 
 /**
- * Referrer detail data across all cycles.
+ * Referrer detail data for requested cycles.
  *
- * Maps each cycle ID to the referrer's detail for that cycle.
- * Uses Partial because the set of cycles includes both predefined cycles
- * (e.g., "cycle-1", "cycle-2") and any custom cycles loaded from configuration.
- * All configured cycles will have entries in the response (even if empty for
- * referrers who haven't participated), but TypeScript cannot know at compile
- * time which specific cycles are configured.
+ * Maps each requested cycle slug to the referrer's detail for that cycle.
+ * Uses Partial because TypeScript cannot know at compile time which specific cycle
+ * slugs are requested. At runtime, when responseCode is Ok, all requested cycle slugs
+ * are guaranteed to be present in this record.
  */
-export type ReferrerDetailAllCyclesData = Partial<Record<ReferralProgramCycleId, ReferrerDetail>>;
+export type ReferrerDetailCyclesData = Partial<Record<ReferralProgramCycleSlug, ReferrerDetail>>;
 
 /**
- * A successful response containing referrer detail for all cycles.
+ * A successful response containing referrer detail for the requested cycles.
  */
-export type ReferrerDetailAllCyclesResponseOk = {
-  responseCode: typeof ReferrerDetailAllCyclesResponseCodes.Ok;
-  data: ReferrerDetailAllCyclesData;
+export type ReferrerDetailCyclesResponseOk = {
+  responseCode: typeof ReferrerDetailCyclesResponseCodes.Ok;
+  data: ReferrerDetailCyclesData;
 };
 
 /**
- * A referrer detail across all cycles response when an error occurs.
+ * A referrer detail cycles response when an error occurs.
  */
-export type ReferrerDetailAllCyclesResponseError = {
-  responseCode: typeof ReferrerDetailAllCyclesResponseCodes.Error;
+export type ReferrerDetailCyclesResponseError = {
+  responseCode: typeof ReferrerDetailCyclesResponseCodes.Error;
   error: string;
   errorMessage: string;
 };
 
 /**
- * A referrer detail across all cycles API response.
+ * A referrer detail cycles API response.
  *
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type ReferrerDetailAllCyclesResponse =
-  | ReferrerDetailAllCyclesResponseOk
-  | ReferrerDetailAllCyclesResponseError;
+export type ReferrerDetailCyclesResponse =
+  | ReferrerDetailCyclesResponseOk
+  | ReferrerDetailCyclesResponseError;
+
+/**
+ * A status code for referral program cycle config set API responses.
+ */
+export const ReferralProgramCycleConfigSetResponseCodes = {
+  /**
+   * Represents that the cycle config set is available.
+   */
+  Ok: "ok",
+
+  /**
+   * Represents that the cycle config set is not available.
+   */
+  Error: "error",
+} as const;
+
+/**
+ * The derived string union of possible {@link ReferralProgramCycleConfigSetResponseCodes}.
+ */
+export type ReferralProgramCycleConfigSetResponseCode =
+  (typeof ReferralProgramCycleConfigSetResponseCodes)[keyof typeof ReferralProgramCycleConfigSetResponseCodes];
+
+/**
+ * The data payload containing cycle configs.
+ * Cycles are sorted in descending order by start timestamp.
+ */
+export type ReferralProgramCycleConfigSetData = {
+  cycles: ReferralProgramCycleConfig[];
+};
+
+/**
+ * A successful response containing the configured cycle config set.
+ */
+export type ReferralProgramCycleConfigSetResponseOk = {
+  responseCode: typeof ReferralProgramCycleConfigSetResponseCodes.Ok;
+  data: ReferralProgramCycleConfigSetData;
+};
+
+/**
+ * A cycle config set response when an error occurs.
+ */
+export type ReferralProgramCycleConfigSetResponseError = {
+  responseCode: typeof ReferralProgramCycleConfigSetResponseCodes.Error;
+  error: string;
+  errorMessage: string;
+};
+
+/**
+ * A referral program cycle config set API response.
+ *
+ * Use the `responseCode` field to determine the specific type interpretation
+ * at runtime.
+ */
+export type ReferralProgramCycleConfigSetResponse =
+  | ReferralProgramCycleConfigSetResponseOk
+  | ReferralProgramCycleConfigSetResponseError;

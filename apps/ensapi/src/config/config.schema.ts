@@ -1,24 +1,10 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import {
-  getReferralProgramCycleSet,
-  type ReferralProgramCycle,
-  type ReferralProgramCycleSet,
-} from "@namehash/ens-referrals/v1";
-import {
-  makeCustomReferralProgramCyclesSchema,
-  makeReferralProgramCycleSetSchema,
-} from "@namehash/ens-referrals/v1/internal";
 import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import {
-  type ENSApiPublicConfig,
-  type ENSNamespaceId,
-  getEthnamesSubregistryId,
-  serializeENSIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import { type ENSApiPublicConfig, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -56,6 +42,24 @@ export const DatabaseUrlSchema = z.string().refine(
   },
 );
 
+/**
+ * Schema for validating custom referral program cycle config set URL.
+ */
+const CustomReferralProgramCycleConfigSetUrlSchema = z
+  .string()
+  .transform((val, ctx) => {
+    try {
+      return new URL(val);
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `CUSTOM_REFERRAL_PROGRAM_CYCLES is not a valid URL: ${val}`,
+      });
+      return z.NEVER;
+    }
+  })
+  .optional();
+
 const EnsApiConfigSchema = z
   .object({
     port: PortSchema.default(ENSApi_DEFAULT_PORT),
@@ -66,90 +70,12 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    referralProgramCycleSet: makeReferralProgramCycleSetSchema("referralProgramCycleSet"),
+    customReferralProgramCycleConfigSetUrl: CustomReferralProgramCycleConfigSetUrlSchema,
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
-
-/**
- * Loads the referral program cycle set from a custom URL or uses defaults.
- *
- * @param customCyclesUrl - Optional URL to a JSON file containing custom cycle definitions
- * @param namespace - The ENS namespace to get the subregistry address for
- * @returns A map of cycle IDs to their cycle configurations
- */
-async function loadReferralProgramCycleSet(
-  customCyclesUrl: string | undefined,
-  namespace: ENSNamespaceId,
-): Promise<ReferralProgramCycleSet> {
-  const subregistryId = getEthnamesSubregistryId(namespace);
-
-  if (!customCyclesUrl) {
-    logger.info("Using default referral program cycle set");
-    return getReferralProgramCycleSet(subregistryId);
-  }
-
-  // Validate URL format
-  try {
-    new URL(customCyclesUrl);
-  } catch {
-    throw new Error(`CUSTOM_REFERRAL_PROGRAM_CYCLES is not a valid URL: ${customCyclesUrl}`);
-  }
-
-  // Fetch and validate
-  logger.info(`Fetching custom referral program cycles from: ${customCyclesUrl}`);
-
-  let response: Response;
-  try {
-    response = await fetch(customCyclesUrl);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Failed to fetch custom referral program cycles from ${customCyclesUrl}: ${errorMessage}. ` +
-        `Please verify the URL is accessible and the server is running.`,
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch custom referral program cycles from ${customCyclesUrl}: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  let json: unknown;
-  try {
-    json = await response.json();
-  } catch (_error) {
-    throw new Error(
-      `Failed to parse JSON from ${customCyclesUrl}: The response is not valid JSON. ` +
-        `Please verify the file contains valid JSON.`,
-    );
-  }
-
-  const schema = makeCustomReferralProgramCyclesSchema("CUSTOM_REFERRAL_PROGRAM_CYCLES");
-  const result = schema.safeParse(json);
-
-  if (result.error) {
-    throw new Error(
-      `Failed to validate custom referral program cycles from ${customCyclesUrl}:\n${prettifyError(result.error)}\n` +
-        `Please verify the JSON structure matches the expected schema.`,
-    );
-  }
-
-  const validated = result.data;
-
-  const cycleSet: ReferralProgramCycleSet = new Map();
-  for (const cycleObj of validated) {
-    const cycle = cycleObj as ReferralProgramCycle;
-    const cycleId = cycle.id;
-    cycleSet.set(cycleId, cycle);
-  }
-
-  logger.info(`Loaded ${cycleSet.size} custom referral program cycles`);
-  return cycleSet;
-}
 
 /**
  * Builds the EnsApiConfig from an EnsApiEnvironment object, fetching the EnsIndexerPublicConfig.
@@ -172,11 +98,6 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
 
     const rpcConfigs = buildRpcConfigsFromEnv(env, ensIndexerPublicConfig.namespace);
 
-    const referralProgramCycleSet = await loadReferralProgramCycleSet(
-      env.CUSTOM_REFERRAL_PROGRAM_CYCLES,
-      ensIndexerPublicConfig.namespace,
-    );
-
     return EnsApiConfigSchema.parse({
       port: env.PORT,
       databaseUrl: env.DATABASE_URL,
@@ -186,7 +107,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
-      referralProgramCycleSet,
+      customReferralProgramCycleConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_CYCLES,
     });
   } catch (error) {
     if (error instanceof ZodError) {

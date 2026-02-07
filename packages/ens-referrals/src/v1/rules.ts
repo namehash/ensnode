@@ -34,6 +34,12 @@ export interface ReferralProgramRules {
    * The account ID of the subregistry for the referral program.
    */
   subregistryId: AccountId;
+
+  /**
+   * URL to the full rules document for this cycle.
+   * @example new URL("https://ensawards.org/ens-holiday-awards-rules")
+   */
+  rulesUrl: URL;
 }
 
 export const validateReferralProgramRules = (rules: ReferralProgramRules): void => {
@@ -72,6 +78,7 @@ export const buildReferralProgramRules = (
   startTime: UnixTimestamp,
   endTime: UnixTimestamp,
   subregistryId: AccountId,
+  rulesUrl: URL,
 ): ReferralProgramRules => {
   const result = {
     totalAwardPoolValue,
@@ -79,6 +86,7 @@ export const buildReferralProgramRules = (
     startTime,
     endTime,
     subregistryId,
+    rulesUrl,
   } satisfies ReferralProgramRules;
 
   validateReferralProgramRules(result);

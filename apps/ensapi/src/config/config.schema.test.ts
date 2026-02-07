@@ -1,11 +1,9 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import { getReferralProgramCycleSet } from "@namehash/ens-referrals/v1";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   type ENSIndexerPublicConfig,
-  getEthnamesSubregistryId,
   PluginName,
   serializeENSIndexerPublicConfig,
 } from "@ensnode/ensnode-sdk";
@@ -52,9 +50,6 @@ const ENSINDEXER_PUBLIC_CONFIG = {
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
-const subregistryId = getEthnamesSubregistryId("mainnet");
-const defaultCycleSet = getReferralProgramCycleSet(subregistryId);
-
 describe("buildConfigFromEnvironment", () => {
   afterEach(() => {
     mockFetch.mockReset();
@@ -84,7 +79,7 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      referralProgramCycleSet: defaultCycleSet,
+      customReferralProgramCycleConfigSetUrl: undefined,
     });
   });
 
@@ -165,7 +160,7 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      referralProgramCycleSet: defaultCycleSet,
+      customReferralProgramCycleConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -189,7 +184,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      referralProgramCycleSet: defaultCycleSet,
+      customReferralProgramCycleConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -223,7 +218,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      referralProgramCycleSet: defaultCycleSet,
+      customReferralProgramCycleConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 
