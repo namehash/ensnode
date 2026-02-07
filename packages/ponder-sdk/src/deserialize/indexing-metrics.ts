@@ -29,6 +29,7 @@ import type { DeepPartial } from "./utils";
 
 const schemaSerializedChainIndexingMetricsQueued = z.object({
   type: z.literal(ChainIndexingMetricTypes.Queued),
+  backfillTotalBlocks: schemaPositiveInteger,
 });
 
 const schemaSerializedChainIndexingMetricsBackfill = z.object({
@@ -76,6 +77,10 @@ function buildUnvalidatedChainIndexingMetrics(
   maybeChainId: string,
   prometheusMetrics: PrometheusMetrics,
 ): DeepPartial<ChainIndexingMetrics> {
+  const backfillTotalBlocks = prometheusMetrics.getValue("ponder_historical_total_blocks", {
+    chain: maybeChainId,
+  });
+
   const ponderHistoricalCompletedIndexingSeconds = prometheusMetrics.getValue(
     "ponder_historical_completed_indexing_seconds",
     {
@@ -88,6 +93,7 @@ function buildUnvalidatedChainIndexingMetrics(
   if (ponderHistoricalCompletedIndexingSeconds === 0) {
     return {
       type: ChainIndexingMetricTypes.Queued,
+      backfillTotalBlocks,
     } satisfies DeepPartial<ChainIndexingMetricsQueued>;
   }
 
@@ -129,10 +135,6 @@ function buildUnvalidatedChainIndexingMetrics(
       latestKnownBlock: latestSyncedBlock,
     } satisfies DeepPartial<ChainIndexingMetricsRealtime>;
   }
-
-  const backfillTotalBlocks = prometheusMetrics.getValue("ponder_historical_total_blocks", {
-    chain: maybeChainId,
-  });
 
   return {
     type: ChainIndexingMetricTypes.Backfill,
