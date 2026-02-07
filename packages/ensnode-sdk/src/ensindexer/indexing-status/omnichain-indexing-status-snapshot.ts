@@ -6,12 +6,6 @@ import {
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
-import {
-  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
-  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted,
-  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing,
-  checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted,
-} from "./validate/omnichain-indexing-status-snapshot";
 
 /**
  * The status of omnichain indexing at the time an omnichain indexing status
@@ -202,6 +196,80 @@ export type OmnichainIndexingStatusSnapshot =
   | OmnichainIndexingStatusSnapshotBackfill
   | OmnichainIndexingStatusSnapshotCompleted
   | OmnichainIndexingStatusSnapshotFollowing;
+
+/**
+ * Check if Chain Indexing Status Snapshots fit the 'unstarted' overall status
+ * snapshot requirements:
+ * - All chains are guaranteed to have a status of "queued".
+ *
+ * Note: This function narrows the {@link ChainIndexingStatusSnapshot} type to
+ * {@link ChainIndexingStatusSnapshotQueued}.
+ */
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshotQueued[] {
+  return chains.every((chain) => chain.chainStatus === ChainIndexingStatusIds.Queued);
+}
+
+/**
+ * Check if Chain Indexing Status Snapshots fit the 'backfill' overall status
+ * snapshot requirements:
+ * - At least one chain is guaranteed to be in the "backfill" status.
+ * - Each chain is guaranteed to have a status of either "queued",
+ *   "backfill" or "completed".
+ *
+ * Note: This function narrows the {@link ChainIndexingStatusSnapshot} type to
+ * {@link ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill}.
+ */
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill[] {
+  const atLeastOneChainInTargetStatus = chains.some(
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Backfill,
+  );
+  const otherChainsHaveValidStatuses = chains.every(
+    (chain) =>
+      chain.chainStatus === ChainIndexingStatusIds.Queued ||
+      chain.chainStatus === ChainIndexingStatusIds.Backfill ||
+      chain.chainStatus === ChainIndexingStatusIds.Completed,
+  );
+
+  return atLeastOneChainInTargetStatus && otherChainsHaveValidStatuses;
+}
+
+/**
+ * Checks if Chain Indexing Status Snapshots fit the 'completed' overall status
+ * snapshot requirements:
+ * - All chains are guaranteed to have a status of "completed".
+ *
+ * Note: This function narrows the {@link ChainIndexingStatusSnapshot} type to
+ * {@link ChainIndexingStatusSnapshotCompleted}.
+ */
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted(
+  chains: ChainIndexingStatusSnapshot[],
+): chains is ChainIndexingStatusSnapshotCompleted[] {
+  const allChainsHaveValidStatuses = chains.every(
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Completed,
+  );
+
+  return allChainsHaveValidStatuses;
+}
+
+/**
+ * Checks Chain Indexing Status Snapshots fit the 'following' overall status
+ * snapshot requirements:
+ * - At least one chain is guaranteed to be in the "following" status.
+ * - Any other chain can have any status.
+ */
+export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing(
+  chains: ChainIndexingStatusSnapshot[],
+): boolean {
+  const allChainsHaveValidStatuses = chains.some(
+    (chain) => chain.chainStatus === ChainIndexingStatusIds.Following,
+  );
+
+  return allChainsHaveValidStatuses;
+}
 
 /**
  * Get {@link OmnichainIndexingStatusId} based on indexed chains' statuses.

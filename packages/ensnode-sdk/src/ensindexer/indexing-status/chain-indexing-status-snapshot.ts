@@ -318,6 +318,13 @@ export function getTimestampForLowestOmnichainStartBlock(
     (chain) => chain.config.startBlock.timestamp,
   );
 
+  // Invariant: earliestKnownBlockTimestamps is guaranteed to have at least one element
+  if (earliestKnownBlockTimestamps.length === 0) {
+    throw new Error(
+      "Invariant violation: at least one chain is required to determine the lowest omnichain start block timestamp",
+    );
+  }
+
   return Math.min(...earliestKnownBlockTimestamps);
 }
 
@@ -365,6 +372,13 @@ export function getTimestampForHighestOmnichainKnownBlock(
     }
   }
 
+  // Invariant: latestKnownBlockTimestamps is guaranteed to have at least one element
+  if (latestKnownBlockTimestamps.length === 0) {
+    throw new Error(
+      "Invariant violation: at least one chain is required to determine the highest omnichain known block timestamp",
+    );
+  }
+
   return Math.max(...latestKnownBlockTimestamps);
 }
 
@@ -376,10 +390,8 @@ export function sortChainStatusesByStartBlockAsc<
   ChainStatusType extends ChainIndexingStatusSnapshot,
 >(chains: [ChainId, ChainStatusType][]): [ChainId, ChainStatusType][] {
   // Sort the chain statuses by the omnichain first block to index timestamp
-  chains.sort(
+  return [...chains].sort(
     ([, chainA], [, chainB]) =>
       chainA.config.startBlock.timestamp - chainB.config.startBlock.timestamp,
   );
-
-  return chains;
 }

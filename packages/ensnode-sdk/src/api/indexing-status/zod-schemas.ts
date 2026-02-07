@@ -1,7 +1,9 @@
 import { z } from "zod/v4";
 
-import { makeSerializedRealtimeIndexingStatusProjectionSchema } from "../../ensindexer/indexing-status/deserialize/realtime-indexing-status-projection";
-import { makeRealtimeIndexingStatusProjectionSchema } from "../../ensindexer/indexing-status/validate/realtime-indexing-status-projection";
+import {
+  makeRealtimeIndexingStatusProjectionSchema,
+  makeSerializedRealtimeIndexingStatusProjectionSchema,
+} from "../../ensindexer/indexing-status/schema/realtime-indexing-status-projection";
 import {
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,

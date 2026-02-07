@@ -26,7 +26,7 @@ describe("Chain Indexing Status Snapshot", () => {
       } satisfies ChainIndexingConfigDefinite);
     });
 
-    it("returns 'indefinite' indexer config if the endBlock exists", () => {
+    it("returns 'indefinite' indexer config if the endBlock does not exist", () => {
       // arrange
       const startBlock = earlierBlockRef;
       const endBlock = null;

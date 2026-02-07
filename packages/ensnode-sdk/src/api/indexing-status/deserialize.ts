@@ -1,8 +1,7 @@
-import z, { prettifyError } from "zod/v4";
+import { prettifyError, z } from "zod/v4";
 
 import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../ensindexer/indexing-status/deserialize/realtime-indexing-status-projection";
-import { IndexingStatusResponseCodes } from "../types";
-import type { IndexingStatusResponse } from "./response";
+import { type IndexingStatusResponse, IndexingStatusResponseCodes } from "./response";
 import type { SerializedIndexingStatusResponse } from "./serialized-response";
 import {
   makeIndexingStatusResponseSchema,

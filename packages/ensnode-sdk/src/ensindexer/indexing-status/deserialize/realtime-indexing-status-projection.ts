@@ -1,13 +1,12 @@
 import { prettifyError, z } from "zod/v4";
 
-import { makeDurationSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
-import type { SerializedRealtimeIndexingStatusProjection } from "../serialize/realtime-indexing-status-projection";
-import { makeRealtimeIndexingStatusProjectionSchema } from "../validate/realtime-indexing-status-projection";
+import { buildUnvalidatedCrossChainIndexingStatusSnapshot } from "../schema/cross-chain-indexing-status-snapshot";
 import {
-  buildUnvalidatedCrossChainIndexingStatusSnapshot,
-  makeSerializedCrossChainIndexingStatusSnapshotSchema,
-} from "./cross-chain-indexing-status-snapshot";
+  makeRealtimeIndexingStatusProjectionSchema,
+  makeSerializedRealtimeIndexingStatusProjectionSchema,
+} from "../schema/realtime-indexing-status-projection";
+import type { SerializedRealtimeIndexingStatusProjection } from "../serialize/realtime-indexing-status-projection";
 
 /**
  * Build unvalidated realtime indexing status projection to be validated.
@@ -50,15 +49,3 @@ export function deserializeRealtimeIndexingStatusProjection(
 
   return parsed.data;
 }
-
-/**
- * Makes Zod schema for {@link SerializedRealtimeIndexingStatusProjection}.
- */
-export const makeSerializedRealtimeIndexingStatusProjectionSchema = (
-  valueLabel: string = "Value",
-) =>
-  z.strictObject({
-    snapshot: makeSerializedCrossChainIndexingStatusSnapshotSchema(valueLabel),
-    projectedAt: makeUnixTimestampSchema(valueLabel),
-    worstCaseDistance: makeDurationSchema(valueLabel),
-  });

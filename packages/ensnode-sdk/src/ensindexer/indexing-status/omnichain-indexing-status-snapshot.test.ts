@@ -62,7 +62,7 @@ describe("Omnichain Indexing Status", () => {
       expect(overallIndexingStatus).toStrictEqual(OmnichainIndexingStatusIds.Backfill);
     });
 
-    it("can correctly derive 'following' status if at least one chain is 'following", () => {
+    it("can correctly derive 'following' status if at least one chain is 'following'", () => {
       // arrange
       const chainStatuses = chainStatusesFollowingMixed;
 
@@ -176,7 +176,7 @@ describe("Omnichain Indexing Status", () => {
             startBlock: earliestBlockRef,
           },
           latestIndexedBlock: evenLaterBlockRef,
-          latestKnownBlock: laterBlockRef,
+          latestKnownBlock: evenLaterBlockRef,
         } satisfies ChainIndexingStatusSnapshotFollowing,
         {
           chainStatus: ChainIndexingStatusIds.Completed,

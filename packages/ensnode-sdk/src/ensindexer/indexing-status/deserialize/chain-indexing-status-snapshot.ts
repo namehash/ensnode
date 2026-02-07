@@ -1,8 +1,8 @@
 import { prettifyError } from "zod/v4";
 
 import type { ChainIndexingStatusSnapshot } from "../chain-indexing-status-snapshot";
+import { makeChainIndexingStatusSnapshotSchema } from "../schema/chain-indexing-status-snapshot";
 import type { SerializedChainIndexingStatusSnapshot } from "../serialize/chain-indexing-status-snapshot";
-import { makeChainIndexingStatusSnapshotSchema } from "../validate/chain-indexing-status-snapshot";
 
 /**
  * Deserialize into a {@link ChainIndexingStatusSnapshot} object.
