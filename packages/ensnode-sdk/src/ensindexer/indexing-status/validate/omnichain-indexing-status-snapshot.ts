@@ -1,7 +1,7 @@
 import { prettifyError } from "zod/v4";
 
 import type { OmnichainIndexingStatusSnapshot } from "../omnichain-indexing-status-snapshot";
-import { makeOmnichainIndexingStatusSnapshotSchema } from "../schema/omnichian-indexing-status-snapshot";
+import { makeOmnichainIndexingStatusSnapshotSchema } from "../schema/omnichain-indexing-status-snapshot";
 
 /**
  * Validate an {@link OmnichainIndexingStatusSnapshot} object.

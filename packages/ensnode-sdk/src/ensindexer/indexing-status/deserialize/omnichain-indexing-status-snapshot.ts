@@ -5,7 +5,7 @@ import {
   buildUnvalidatedOmnichainIndexingStatusSnapshot,
   makeOmnichainIndexingStatusSnapshotSchema,
   makeSerializedOmnichainIndexingStatusSnapshotSchema,
-} from "../schema/omnichian-indexing-status-snapshot";
+} from "../schema/omnichain-indexing-status-snapshot";
 import type { SerializedOmnichainIndexingStatusSnapshot } from "../serialize/omnichain-indexing-status-snapshot";
 
 /**

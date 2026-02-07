@@ -15,7 +15,7 @@ import {
   buildUnvalidatedOmnichainIndexingStatusSnapshot,
   makeOmnichainIndexingStatusSnapshotSchema,
   makeSerializedOmnichainIndexingStatusSnapshotSchema,
-} from "./omnichian-indexing-status-snapshot";
+} from "./omnichain-indexing-status-snapshot";
 
 /**
  * Invariant: for cross-chain indexing status snapshot omnichain,

@@ -3,8 +3,10 @@ import type { ParsePayload } from "zod/v4/core";
 
 import { makeDurationSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
-import { makeCrossChainIndexingStatusSnapshotSchema } from "../schema/cross-chain-indexing-status-snapshot";
-import { makeSerializedCrossChainIndexingStatusSnapshotSchema } from "./cross-chain-indexing-status-snapshot";
+import {
+  makeCrossChainIndexingStatusSnapshotSchema,
+  makeSerializedCrossChainIndexingStatusSnapshotSchema,
+} from "./cross-chain-indexing-status-snapshot";
 
 /**
  * Invariant: For realtime indexing status projection,
