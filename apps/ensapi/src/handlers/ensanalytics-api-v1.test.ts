@@ -889,6 +889,14 @@ describe("/v1/ensanalytics", () => {
         },
       );
 
+      // Mock caches middleware (needed by middleware chain even though /editions doesn't use it)
+      vi.mocked(
+        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
+      ).mockImplementation(async (c, next) => {
+        c.set("referralLeaderboardEditionsCaches", new Map());
+        return await next();
+      });
+
       // Act: send test request
       const httpResponse = await app.request("/editions");
       const responseData = await httpResponse.json();

@@ -161,7 +161,7 @@ export class SWRCache<ValueType> {
         ? this.options.errorTtl
         : this.options.ttl;
 
-    // if ttl expired, revalidate in background
+    // if effective TTL expired, revalidate in background
     if (durationBetween(this.cache.updatedAt, getUnixTime(new Date())) > effectiveTtl) {
       this.revalidate();
     }

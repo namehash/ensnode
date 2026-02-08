@@ -278,7 +278,7 @@ export const makeReferrerMetricsEditionsRequestSchema = (
  * Schema for {@link ReferrerMetricsEditionsResponseOk}
  */
 export const makeReferrerMetricsEditionsResponseOkSchema = (
-  valueLabel: string = "ReferrerMetricsEditionsResponse",
+  valueLabel: string = "ReferrerMetricsEditionsResponseOk",
 ) =>
   z.object({
     responseCode: z.literal(ReferrerMetricsEditionsResponseCodes.Ok),
@@ -292,7 +292,7 @@ export const makeReferrerMetricsEditionsResponseOkSchema = (
  * Schema for {@link ReferrerMetricsEditionsResponseError}
  */
 export const makeReferrerMetricsEditionsResponseErrorSchema = (
-  _valueLabel: string = "ReferrerMetricsEditionsResponse",
+  _valueLabel: string = "ReferrerMetricsEditionsResponseError",
 ) =>
   z.object({
     responseCode: z.literal(ReferrerMetricsEditionsResponseCodes.Error),

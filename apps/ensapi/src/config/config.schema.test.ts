@@ -116,6 +116,23 @@ describe("buildConfigFromEnvironment", () => {
       ENSINDEXER_URL: BASE_ENV.ENSINDEXER_URL,
     };
 
+    it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+      });
+
+      await buildConfigFromEnvironment({
+        ...TEST_ENV,
+        CUSTOM_REFERRAL_PROGRAM_EDITIONS: "not-a-url",
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining("CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
+      );
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
     it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
