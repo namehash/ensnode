@@ -43,17 +43,17 @@ export const DatabaseUrlSchema = z.string().refine(
 );
 
 /**
- * Schema for validating custom referral program cycle config set URL.
+ * Schema for validating custom referral program edition config set URL.
  */
-const CustomReferralProgramCycleConfigSetUrlSchema = z
+const CustomReferralProgramEditionConfigSetUrlSchema = z
   .string()
   .transform((val, ctx) => {
     try {
       return new URL(val);
     } catch {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `CUSTOM_REFERRAL_PROGRAM_CYCLES is not a valid URL: ${val}`,
+        code: "custom",
+        message: `CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: ${val}`,
       });
       return z.NEVER;
     }
@@ -70,7 +70,7 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    customReferralProgramCycleConfigSetUrl: CustomReferralProgramCycleConfigSetUrlSchema,
+    customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
   .check(invariant_ensIndexerPublicConfigVersionInfo);
@@ -107,7 +107,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
-      customReferralProgramCycleConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_CYCLES,
+      customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
     });
   } catch (error) {
     if (error instanceof ZodError) {

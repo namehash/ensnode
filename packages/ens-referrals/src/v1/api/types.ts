@@ -1,15 +1,15 @@
 import type { Address } from "viem";
 
-import type { ReferralProgramCycleConfig, ReferralProgramCycleSlug } from "../cycle";
+import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
+import type { ReferrerEditionMetrics } from "../edition-metrics";
 import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
-import type { ReferrerDetail } from "../referrer-detail";
 
 /**
  * Request parameters for a referrer leaderboard page query.
  */
 export interface ReferrerLeaderboardPageRequest extends ReferrerLeaderboardPageParams {
-  /** The referral program cycle slug */
-  cycle: ReferralProgramCycleSlug;
+  /** The referral program edition slug */
+  edition: ReferralProgramEditionSlug;
 }
 
 /**
@@ -61,26 +61,26 @@ export type ReferrerLeaderboardPageResponse =
   | ReferrerLeaderboardPageResponseError;
 
 /**
- * Maximum number of cycles that can be requested in a single {@link ReferrerDetailCyclesRequest}.
+ * Maximum number of editions that can be requested in a single {@link ReferrerMetricsEditionsRequest}.
  */
-export const MAX_CYCLES_PER_REQUEST = 20;
+export const MAX_EDITIONS_PER_REQUEST = 20;
 
 /**
- * Request parameters for referrer detail query.
+ * Request parameters for referrer metrics query.
  */
-export interface ReferrerDetailCyclesRequest {
+export interface ReferrerMetricsEditionsRequest {
   /** The Ethereum address of the referrer to query */
   referrer: Address;
-  /** Array of cycle slugs to query (min 1, max {@link MAX_CYCLES_PER_REQUEST}, must be distinct) */
-  cycles: ReferralProgramCycleSlug[];
+  /** Array of edition slugs to query (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, must be distinct) */
+  editions: ReferralProgramEditionSlug[];
 }
 
 /**
- * A status code for referrer detail API responses.
+ * A status code for referrer metrics API responses.
  */
-export const ReferrerDetailCyclesResponseCodes = {
+export const ReferrerMetricsEditionsResponseCodes = {
   /**
-   * Represents that the referrer detail data for the requested cycles is available.
+   * Represents that the referrer metrics data for the requested editions is available.
    */
   Ok: "ok",
 
@@ -91,100 +91,102 @@ export const ReferrerDetailCyclesResponseCodes = {
 } as const;
 
 /**
- * The derived string union of possible {@link ReferrerDetailCyclesResponseCodes}.
+ * The derived string union of possible {@link ReferrerMetricsEditionsResponseCodes}.
  */
-export type ReferrerDetailCyclesResponseCode =
-  (typeof ReferrerDetailCyclesResponseCodes)[keyof typeof ReferrerDetailCyclesResponseCodes];
+export type ReferrerMetricsEditionsResponseCode =
+  (typeof ReferrerMetricsEditionsResponseCodes)[keyof typeof ReferrerMetricsEditionsResponseCodes];
 
 /**
- * Referrer detail data for requested cycles.
+ * Referrer metrics data for requested editions.
  *
- * Maps each requested cycle slug to the referrer's detail for that cycle.
- * Uses Partial because TypeScript cannot know at compile time which specific cycle
- * slugs are requested. At runtime, when responseCode is Ok, all requested cycle slugs
+ * Maps each requested edition slug to the referrer's metrics for that edition.
+ * Uses Partial because TypeScript cannot know at compile time which specific edition
+ * slugs are requested. At runtime, when responseCode is Ok, all requested edition slugs
  * are guaranteed to be present in this record.
  */
-export type ReferrerDetailCyclesData = Partial<Record<ReferralProgramCycleSlug, ReferrerDetail>>;
+export type ReferrerMetricsEditionsData = Partial<
+  Record<ReferralProgramEditionSlug, ReferrerEditionMetrics>
+>;
 
 /**
- * A successful response containing referrer detail for the requested cycles.
+ * A successful response containing referrer metrics for the requested editions.
  */
-export type ReferrerDetailCyclesResponseOk = {
-  responseCode: typeof ReferrerDetailCyclesResponseCodes.Ok;
-  data: ReferrerDetailCyclesData;
+export type ReferrerMetricsEditionsResponseOk = {
+  responseCode: typeof ReferrerMetricsEditionsResponseCodes.Ok;
+  data: ReferrerMetricsEditionsData;
 };
 
 /**
- * A referrer detail cycles response when an error occurs.
+ * A referrer metrics editions response when an error occurs.
  */
-export type ReferrerDetailCyclesResponseError = {
-  responseCode: typeof ReferrerDetailCyclesResponseCodes.Error;
+export type ReferrerMetricsEditionsResponseError = {
+  responseCode: typeof ReferrerMetricsEditionsResponseCodes.Error;
   error: string;
   errorMessage: string;
 };
 
 /**
- * A referrer detail cycles API response.
+ * A referrer metrics editions API response.
  *
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type ReferrerDetailCyclesResponse =
-  | ReferrerDetailCyclesResponseOk
-  | ReferrerDetailCyclesResponseError;
+export type ReferrerMetricsEditionsResponse =
+  | ReferrerMetricsEditionsResponseOk
+  | ReferrerMetricsEditionsResponseError;
 
 /**
- * A status code for referral program cycle config set API responses.
+ * A status code for referral program edition config set API responses.
  */
-export const ReferralProgramCycleConfigSetResponseCodes = {
+export const ReferralProgramEditionConfigSetResponseCodes = {
   /**
-   * Represents that the cycle config set is available.
+   * Represents that the edition config set is available.
    */
   Ok: "ok",
 
   /**
-   * Represents that the cycle config set is not available.
+   * Represents that the edition config set is not available.
    */
   Error: "error",
 } as const;
 
 /**
- * The derived string union of possible {@link ReferralProgramCycleConfigSetResponseCodes}.
+ * The derived string union of possible {@link ReferralProgramEditionConfigSetResponseCodes}.
  */
-export type ReferralProgramCycleConfigSetResponseCode =
-  (typeof ReferralProgramCycleConfigSetResponseCodes)[keyof typeof ReferralProgramCycleConfigSetResponseCodes];
+export type ReferralProgramEditionConfigSetResponseCode =
+  (typeof ReferralProgramEditionConfigSetResponseCodes)[keyof typeof ReferralProgramEditionConfigSetResponseCodes];
 
 /**
- * The data payload containing cycle configs.
- * Cycles are sorted in descending order by start timestamp.
+ * The data payload containing edition configs.
+ * Editions are sorted in descending order by start timestamp.
  */
-export type ReferralProgramCycleConfigSetData = {
-  cycles: ReferralProgramCycleConfig[];
+export type ReferralProgramEditionConfigSetData = {
+  editions: ReferralProgramEditionConfig[];
 };
 
 /**
- * A successful response containing the configured cycle config set.
+ * A successful response containing the configured edition config set.
  */
-export type ReferralProgramCycleConfigSetResponseOk = {
-  responseCode: typeof ReferralProgramCycleConfigSetResponseCodes.Ok;
-  data: ReferralProgramCycleConfigSetData;
+export type ReferralProgramEditionConfigSetResponseOk = {
+  responseCode: typeof ReferralProgramEditionConfigSetResponseCodes.Ok;
+  data: ReferralProgramEditionConfigSetData;
 };
 
 /**
- * A cycle config set response when an error occurs.
+ * An edition config set response when an error occurs.
  */
-export type ReferralProgramCycleConfigSetResponseError = {
-  responseCode: typeof ReferralProgramCycleConfigSetResponseCodes.Error;
+export type ReferralProgramEditionConfigSetResponseError = {
+  responseCode: typeof ReferralProgramEditionConfigSetResponseCodes.Error;
   error: string;
   errorMessage: string;
 };
 
 /**
- * A referral program cycle config set API response.
+ * A referral program edition config set API response.
  *
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type ReferralProgramCycleConfigSetResponse =
-  | ReferralProgramCycleConfigSetResponseOk
-  | ReferralProgramCycleConfigSetResponseError;
+export type ReferralProgramEditionConfigSetResponse =
+  | ReferralProgramEditionConfigSetResponseOk
+  | ReferralProgramEditionConfigSetResponseError;

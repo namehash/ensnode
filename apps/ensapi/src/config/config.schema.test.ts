@@ -79,7 +79,7 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      customReferralProgramCycleConfigSetUrl: undefined,
+      customReferralProgramEditionConfigSetUrl: undefined,
     });
   });
 
@@ -160,7 +160,7 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      customReferralProgramCycleConfigSetUrl: undefined,
+      customReferralProgramEditionConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -184,7 +184,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      customReferralProgramCycleConfigSetUrl: undefined,
+      customReferralProgramEditionConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -218,7 +218,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      customReferralProgramCycleConfigSetUrl: undefined,
+      customReferralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 

@@ -1,21 +1,21 @@
 import { prettifyError } from "zod/v4";
 
-import type { ReferralProgramCycleConfig } from "../cycle";
+import type { ReferralProgramEditionConfig } from "../edition";
 import type {
-  SerializedReferralProgramCycleConfigSetResponse,
-  SerializedReferrerDetailCyclesResponse,
+  SerializedReferralProgramEditionConfigSetResponse,
   SerializedReferrerLeaderboardPageResponse,
+  SerializedReferrerMetricsEditionsResponse,
 } from "./serialized-types";
 import type {
-  ReferralProgramCycleConfigSetResponse,
-  ReferrerDetailCyclesResponse,
+  ReferralProgramEditionConfigSetResponse,
   ReferrerLeaderboardPageResponse,
+  ReferrerMetricsEditionsResponse,
 } from "./types";
 import {
-  makeReferralProgramCycleConfigSetArraySchema,
-  makeReferralProgramCycleConfigSetResponseSchema,
-  makeReferrerDetailCyclesResponseSchema,
+  makeReferralProgramEditionConfigSetArraySchema,
+  makeReferralProgramEditionConfigSetResponseSchema,
   makeReferrerLeaderboardPageResponseSchema,
+  makeReferrerMetricsEditionsResponseSchema,
 } from "./zod-schemas";
 
 /**
@@ -38,18 +38,18 @@ export function deserializeReferrerLeaderboardPageResponse(
 }
 
 /**
- * Deserialize a {@link ReferrerDetailCyclesResponse} object.
+ * Deserialize a {@link ReferrerMetricsEditionsResponse} object.
  */
-export function deserializeReferrerDetailCyclesResponse(
-  maybeResponse: SerializedReferrerDetailCyclesResponse,
+export function deserializeReferrerMetricsEditionsResponse(
+  maybeResponse: SerializedReferrerMetricsEditionsResponse,
   valueLabel?: string,
-): ReferrerDetailCyclesResponse {
-  const schema = makeReferrerDetailCyclesResponseSchema(valueLabel);
+): ReferrerMetricsEditionsResponse {
+  const schema = makeReferrerMetricsEditionsResponseSchema(valueLabel);
   const parsed = schema.safeParse(maybeResponse);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize ReferrerDetailCyclesResponse:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize ReferrerMetricsEditionsResponse:\n${prettifyError(parsed.error)}\n`,
     );
   }
 
@@ -57,18 +57,18 @@ export function deserializeReferrerDetailCyclesResponse(
 }
 
 /**
- * Deserializes an array of {@link ReferralProgramCycleConfig} objects.
+ * Deserializes an array of {@link ReferralProgramEditionConfig} objects.
  */
-export function deserializeReferralProgramCycleConfigSetArray(
+export function deserializeReferralProgramEditionConfigSetArray(
   maybeArray: unknown,
   valueLabel?: string,
-): ReferralProgramCycleConfig[] {
-  const schema = makeReferralProgramCycleConfigSetArraySchema(valueLabel);
+): ReferralProgramEditionConfig[] {
+  const schema = makeReferralProgramEditionConfigSetArraySchema(valueLabel);
   const parsed = schema.safeParse(maybeArray);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize ReferralProgramCycleConfigSetArray:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize ReferralProgramEditionConfigSetArray:\n${prettifyError(parsed.error)}\n`,
     );
   }
 
@@ -76,18 +76,18 @@ export function deserializeReferralProgramCycleConfigSetArray(
 }
 
 /**
- * Deserialize a {@link ReferralProgramCycleConfigSetResponse} object.
+ * Deserialize a {@link ReferralProgramEditionConfigSetResponse} object.
  */
-export function deserializeReferralProgramCycleConfigSetResponse(
-  maybeResponse: SerializedReferralProgramCycleConfigSetResponse,
+export function deserializeReferralProgramEditionConfigSetResponse(
+  maybeResponse: SerializedReferralProgramEditionConfigSetResponse,
   valueLabel?: string,
-): ReferralProgramCycleConfigSetResponse {
-  const schema = makeReferralProgramCycleConfigSetResponseSchema(valueLabel);
+): ReferralProgramEditionConfigSetResponse {
+  const schema = makeReferralProgramEditionConfigSetResponseSchema(valueLabel);
   const parsed = schema.safeParse(maybeResponse);
 
   if (parsed.error) {
     throw new Error(
-      `Cannot deserialize ReferralProgramCycleConfigSetResponse:\n${prettifyError(parsed.error)}\n`,
+      `Cannot deserialize ReferralProgramEditionConfigSetResponse:\n${prettifyError(parsed.error)}\n`,
     );
   }
 

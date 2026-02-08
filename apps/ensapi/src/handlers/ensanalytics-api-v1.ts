@@ -1,25 +1,25 @@
 import {
-  getReferrerDetail,
+  getReferrerEditionMetrics,
   getReferrerLeaderboardPage,
-  MAX_CYCLES_PER_REQUEST,
+  MAX_EDITIONS_PER_REQUEST,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-  type ReferralProgramCycleConfigSetResponse,
-  ReferralProgramCycleConfigSetResponseCodes,
-  type ReferralProgramCycleSlug,
-  type ReferrerDetailCyclesData,
-  type ReferrerDetailCyclesResponse,
-  ReferrerDetailCyclesResponseCodes,
+  type ReferralProgramEditionConfigSetResponse,
+  ReferralProgramEditionConfigSetResponseCodes,
+  type ReferralProgramEditionSlug,
   type ReferrerLeaderboard,
   type ReferrerLeaderboardPageRequest,
   type ReferrerLeaderboardPageResponse,
   ReferrerLeaderboardPageResponseCodes,
-  serializeReferralProgramCycleConfigSetResponse,
-  serializeReferrerDetailCyclesResponse,
+  type ReferrerMetricsEditionsData,
+  type ReferrerMetricsEditionsResponse,
+  ReferrerMetricsEditionsResponseCodes,
+  serializeReferralProgramEditionConfigSetResponse,
   serializeReferrerLeaderboardPageResponse,
+  serializeReferrerMetricsEditionsResponse,
 } from "@namehash/ens-referrals/v1";
 import {
-  makeReferralProgramCycleSlugSchema,
-  makeReferrerDetailCyclesArraySchema,
+  makeReferralProgramEditionSlugSchema,
+  makeReferrerMetricsEditionsArraySchema,
 } from "@namehash/ens-referrals/v1/internal";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod/v4";
@@ -29,17 +29,17 @@ import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
-import { referralLeaderboardCyclesCachesMiddleware } from "@/middleware/referral-leaderboard-cycles-caches.middleware";
-import { referralProgramCycleConfigSetMiddleware } from "@/middleware/referral-program-cycle-set.middleware";
+import { referralLeaderboardEditionsCachesMiddleware } from "@/middleware/referral-leaderboard-editions-caches.middleware";
+import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 const logger = makeLogger("ensanalytics-api-v1");
 
 /**
  * Query parameters schema for referrer leaderboard page requests.
- * Validates cycle slug, page number, and records per page.
+ * Validates edition slug, page number, and records per page.
  */
 const referrerLeaderboardPageQuerySchema = z.object({
-  cycle: makeReferralProgramCycleSlugSchema("cycle"),
+  edition: makeReferralProgramEditionSlugSchema("edition"),
   page: z
     .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
     .describe("Page number for pagination"),
@@ -60,25 +60,25 @@ const referrerLeaderboardPageQuerySchema = z.object({
 const app = factory
   .createApp()
 
-  // Apply referral program cycle config set middleware
-  .use(referralProgramCycleConfigSetMiddleware)
+  // Apply referral program edition config set middleware
+  .use(referralProgramEditionConfigSetMiddleware)
 
-  // Apply referrer leaderboard cache middleware (depends on cycle config set middleware)
-  .use(referralLeaderboardCyclesCachesMiddleware)
+  // Apply referrer leaderboard cache middleware (depends on edition config set middleware)
+  .use(referralLeaderboardEditionsCachesMiddleware)
 
-  // Get a page from the referrer leaderboard for a specific cycle
+  // Get a page from the referrer leaderboard for a specific edition
   .get(
     "/referral-leaderboard",
     describeRoute({
       tags: ["ENSAwards"],
       summary: "Get Referrer Leaderboard (v1)",
-      description: "Returns a paginated page from the referrer leaderboard for a specific cycle",
+      description: "Returns a paginated page from the referrer leaderboard for a specific edition",
       responses: {
         200: {
           description: "Successfully retrieved referrer leaderboard page",
         },
         404: {
-          description: "Unknown cycle slug",
+          description: "Unknown edition slug",
         },
         500: {
           description: "Internal server error",
@@ -91,20 +91,20 @@ const app = factory
     validate("query", referrerLeaderboardPageQuerySchema),
     async (c) => {
       // context must be set by the required middleware
-      if (c.var.referralLeaderboardCyclesCaches === undefined) {
+      if (c.var.referralLeaderboardEditionsCaches === undefined) {
         throw new Error(
-          `Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`,
+          `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
         );
       }
 
       try {
-        const { cycle, page, recordsPerPage } = c.req.valid("query");
+        const { edition, page, recordsPerPage } = c.req.valid("query");
 
-        // Check if cycle set failed to load
-        if (c.var.referralLeaderboardCyclesCaches instanceof Error) {
+        // Check if edition set failed to load
+        if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
           logger.error(
-            { error: c.var.referralLeaderboardCyclesCaches },
-            "Referral program cycle set failed to load",
+            { error: c.var.referralLeaderboardEditionsCaches },
+            "Referral program edition set failed to load",
           );
           return c.json(
             serializeReferrerLeaderboardPageResponse({
@@ -116,31 +116,31 @@ const app = factory
           );
         }
 
-        // Get the specific cycle's cache
-        const cycleCache = c.var.referralLeaderboardCyclesCaches.get(cycle);
+        // Get the specific edition's cache
+        const editionCache = c.var.referralLeaderboardEditionsCaches.get(edition);
 
-        if (!cycleCache) {
-          const configuredCycles = Array.from(c.var.referralLeaderboardCyclesCaches.keys());
+        if (!editionCache) {
+          const configuredEditions = Array.from(c.var.referralLeaderboardEditionsCaches.keys());
           return c.json(
             serializeReferrerLeaderboardPageResponse({
               responseCode: ReferrerLeaderboardPageResponseCodes.Error,
               error: "Not Found",
-              errorMessage: `Unknown cycle: ${cycle}. Valid cycles: ${configuredCycles.join(", ")}`,
+              errorMessage: `Unknown edition: ${edition}. Valid editions: ${configuredEditions.join(", ")}`,
             } satisfies ReferrerLeaderboardPageResponse),
             404,
           );
         }
 
-        // Read from the cycle's cache
-        const leaderboard = await cycleCache.read();
+        // Read from the edition's cache
+        const leaderboard = await editionCache.read();
 
-        // Check if this specific cycle failed to build
+        // Check if this specific edition failed to build
         if (leaderboard instanceof Error) {
           return c.json(
             serializeReferrerLeaderboardPageResponse({
               responseCode: ReferrerLeaderboardPageResponseCodes.Error,
               error: "Service Unavailable",
-              errorMessage: `Failed to load leaderboard for cycle ${cycle}.`,
+              errorMessage: `Failed to load leaderboard for edition ${edition}.`,
             } satisfies ReferrerLeaderboardPageResponse),
             503,
           );
@@ -177,32 +177,32 @@ const referrerAddressSchema = z.object({
   referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
 });
 
-// Cycles query parameter schema
-const cyclesQuerySchema = z.object({
-  cycles: z
+// Editions query parameter schema
+const editionsQuerySchema = z.object({
+  editions: z
     .string()
-    .describe("Comma-separated list of cycle slugs")
+    .describe("Comma-separated list of edition slugs")
     .transform((value) => value.split(",").map((s) => s.trim()))
-    .pipe(makeReferrerDetailCyclesArraySchema("cycles")),
+    .pipe(makeReferrerMetricsEditionsArraySchema("editions")),
 });
 
-// Get referrer detail for a specific address for requested cycles
+// Get referrer detail for a specific address for requested editions
 app
   .get(
     "/referrer/:referrer",
     describeRoute({
       tags: ["ENSAwards"],
-      summary: "Get Referrer Detail for Cycles (v1)",
-      description: `Returns detailed information for a specific referrer for the requested cycles. Requires 1-${MAX_CYCLES_PER_REQUEST} distinct cycle slugs. All requested cycles must be recognized and have cached data, or the request fails.`,
+      summary: "Get Referrer Detail for Editions (v1)",
+      description: `Returns detailed information for a specific referrer for the requested editions. Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
       responses: {
         200: {
-          description: "Successfully retrieved referrer detail for requested cycles",
+          description: "Successfully retrieved referrer detail for requested editions",
         },
         400: {
           description: "Invalid request",
         },
         404: {
-          description: "Unknown cycle slug",
+          description: "Unknown edition slug",
         },
         500: {
           description: "Internal server error",
@@ -213,102 +213,104 @@ app
       },
     }),
     validate("param", referrerAddressSchema),
-    validate("query", cyclesQuerySchema),
+    validate("query", editionsQuerySchema),
     async (c) => {
       // context must be set by the required middleware
-      if (c.var.referralLeaderboardCyclesCaches === undefined) {
+      if (c.var.referralLeaderboardEditionsCaches === undefined) {
         throw new Error(
-          `Invariant(ensanalytics-api-v1): referralLeaderboardCyclesCachesMiddleware required`,
+          `Invariant(ensanalytics-api-v1): referralLeaderboardEditionsCachesMiddleware required`,
         );
       }
 
       try {
         const { referrer } = c.req.valid("param");
-        const { cycles } = c.req.valid("query");
+        const { editions } = c.req.valid("query");
 
-        // Check if cycle set failed to load
-        if (c.var.referralLeaderboardCyclesCaches instanceof Error) {
+        // Check if edition set failed to load
+        if (c.var.referralLeaderboardEditionsCaches instanceof Error) {
           logger.error(
-            { error: c.var.referralLeaderboardCyclesCaches },
-            "Referral program cycle set failed to load",
+            { error: c.var.referralLeaderboardEditionsCaches },
+            "Referral program edition set failed to load",
           );
           return c.json(
-            serializeReferrerDetailCyclesResponse({
-              responseCode: ReferrerDetailCyclesResponseCodes.Error,
+            serializeReferrerMetricsEditionsResponse({
+              responseCode: ReferrerMetricsEditionsResponseCodes.Error,
               error: "Service Unavailable",
               errorMessage: "Referral program configuration is currently unavailable.",
-            } satisfies ReferrerDetailCyclesResponse),
+            } satisfies ReferrerMetricsEditionsResponse),
             503,
           );
         }
 
         // Type narrowing: at this point we know it's not an Error
-        const cyclesCaches = c.var.referralLeaderboardCyclesCaches;
+        const editionsCaches = c.var.referralLeaderboardEditionsCaches;
 
-        // Validate that all requested cycles are recognized (exist in the cache map)
-        const configuredCycles = Array.from(cyclesCaches.keys());
-        const unrecognizedCycles = cycles.filter((cycle) => !cyclesCaches.has(cycle));
+        // Validate that all requested editions are recognized (exist in the cache map)
+        const configuredEditions = Array.from(editionsCaches.keys());
+        const unrecognizedEditions = editions.filter((edition) => !editionsCaches.has(edition));
 
-        if (unrecognizedCycles.length > 0) {
+        if (unrecognizedEditions.length > 0) {
           return c.json(
-            serializeReferrerDetailCyclesResponse({
-              responseCode: ReferrerDetailCyclesResponseCodes.Error,
+            serializeReferrerMetricsEditionsResponse({
+              responseCode: ReferrerMetricsEditionsResponseCodes.Error,
               error: "Not Found",
-              errorMessage: `Unknown cycle(s): ${unrecognizedCycles.join(", ")}. Valid cycles: ${configuredCycles.join(", ")}`,
-            } satisfies ReferrerDetailCyclesResponse),
+              errorMessage: `Unknown edition(s): ${unrecognizedEditions.join(", ")}. Valid editions: ${configuredEditions.join(", ")}`,
+            } satisfies ReferrerMetricsEditionsResponse),
             404,
           );
         }
 
-        // Read all requested cycle caches
-        const cycleLeaderboards = await Promise.all(
-          cycles.map(async (cycleSlug) => {
-            const cycleCache = cyclesCaches.get(cycleSlug);
-            if (!cycleCache) {
-              throw new Error(`Invariant: cycle cache for ${cycleSlug} should exist`);
+        // Read all requested edition caches
+        const editionLeaderboards = await Promise.all(
+          editions.map(async (editionSlug) => {
+            const editionCache = editionsCaches.get(editionSlug);
+            if (!editionCache) {
+              throw new Error(`Invariant: edition cache for ${editionSlug} should exist`);
             }
-            const leaderboard = await cycleCache.read();
-            return { cycleSlug, leaderboard };
+            const leaderboard = await editionCache.read();
+            return { editionSlug, leaderboard };
           }),
         );
 
-        // Validate that all requested cycles have cached data (no errors)
-        const uncachedCycles = cycleLeaderboards
+        // Validate that all requested editions have cached data (no errors)
+        const uncachedEditions = editionLeaderboards
           .filter(({ leaderboard }) => leaderboard instanceof Error)
-          .map(({ cycleSlug }) => cycleSlug);
+          .map(({ editionSlug }) => editionSlug);
 
-        if (uncachedCycles.length > 0) {
+        if (uncachedEditions.length > 0) {
           return c.json(
-            serializeReferrerDetailCyclesResponse({
-              responseCode: ReferrerDetailCyclesResponseCodes.Error,
+            serializeReferrerMetricsEditionsResponse({
+              responseCode: ReferrerMetricsEditionsResponseCodes.Error,
               error: "Service Unavailable",
-              errorMessage: `Referrer leaderboard data not cached for cycle(s): ${uncachedCycles.join(", ")}`,
-            } satisfies ReferrerDetailCyclesResponse),
+              errorMessage: `Referrer leaderboard data not cached for edition(s): ${uncachedEditions.join(", ")}`,
+            } satisfies ReferrerMetricsEditionsResponse),
             503,
           );
         }
 
         // Type narrowing: at this point all leaderboards are guaranteed to be non-Error
-        const validCycleLeaderboards = cycleLeaderboards.filter(
+        const validEditionLeaderboards = editionLeaderboards.filter(
           (
             item,
-          ): item is { cycleSlug: ReferralProgramCycleSlug; leaderboard: ReferrerLeaderboard } =>
-            !(item.leaderboard instanceof Error),
+          ): item is {
+            editionSlug: ReferralProgramEditionSlug;
+            leaderboard: ReferrerLeaderboard;
+          } => !(item.leaderboard instanceof Error),
         );
 
-        // Build response data for the requested cycles
-        const cyclesData = Object.fromEntries(
-          validCycleLeaderboards.map(({ cycleSlug, leaderboard }) => [
-            cycleSlug,
-            getReferrerDetail(referrer, leaderboard),
+        // Build response data for the requested editions
+        const editionsData = Object.fromEntries(
+          validEditionLeaderboards.map(({ editionSlug, leaderboard }) => [
+            editionSlug,
+            getReferrerEditionMetrics(referrer, leaderboard),
           ]),
-        ) as ReferrerDetailCyclesData;
+        ) as ReferrerMetricsEditionsData;
 
         return c.json(
-          serializeReferrerDetailCyclesResponse({
-            responseCode: ReferrerDetailCyclesResponseCodes.Ok,
-            data: cyclesData,
-          } satisfies ReferrerDetailCyclesResponse),
+          serializeReferrerMetricsEditionsResponse({
+            responseCode: ReferrerMetricsEditionsResponseCodes.Ok,
+            data: editionsData,
+          } satisfies ReferrerMetricsEditionsResponse),
         );
       } catch (error) {
         logger.error(
@@ -320,28 +322,28 @@ app
             ? error.message
             : "An unexpected error occurred while processing your request";
         return c.json(
-          serializeReferrerDetailCyclesResponse({
-            responseCode: ReferrerDetailCyclesResponseCodes.Error,
+          serializeReferrerMetricsEditionsResponse({
+            responseCode: ReferrerMetricsEditionsResponseCodes.Error,
             error: "Internal server error",
             errorMessage,
-          } satisfies ReferrerDetailCyclesResponse),
+          } satisfies ReferrerMetricsEditionsResponse),
           500,
         );
       }
     },
   )
 
-  // Get configured cycle config set
+  // Get configured edition config set
   .get(
-    "/cycles",
+    "/editions",
     describeRoute({
       tags: ["ENSAwards"],
-      summary: "Get Cycle Config Set (v1)",
+      summary: "Get Edition Config Set (v1)",
       description:
-        "Returns the currently configured referral program cycle config set. Cycles are sorted in descending order by start timestamp (most recent first).",
+        "Returns the currently configured referral program edition config set. Editions are sorted in descending order by start timestamp (most recent first).",
       responses: {
         200: {
-          description: "Successfully retrieved cycle config set",
+          description: "Successfully retrieved edition config set",
         },
         500: {
           description: "Internal server error",
@@ -353,54 +355,54 @@ app
     }),
     async (c) => {
       // context must be set by the required middleware
-      if (c.var.referralProgramCycleConfigSet === undefined) {
+      if (c.var.referralProgramEditionConfigSet === undefined) {
         throw new Error(
-          `Invariant(ensanalytics-api-v1): referralProgramCycleConfigSetMiddleware required`,
+          `Invariant(ensanalytics-api-v1): referralProgramEditionConfigSetMiddleware required`,
         );
       }
 
       try {
-        // Check if cycle config set failed to load
-        if (c.var.referralProgramCycleConfigSet instanceof Error) {
+        // Check if edition config set failed to load
+        if (c.var.referralProgramEditionConfigSet instanceof Error) {
           logger.error(
-            { error: c.var.referralProgramCycleConfigSet },
-            "Referral program cycle config set failed to load",
+            { error: c.var.referralProgramEditionConfigSet },
+            "Referral program edition config set failed to load",
           );
           return c.json(
-            serializeReferralProgramCycleConfigSetResponse({
-              responseCode: ReferralProgramCycleConfigSetResponseCodes.Error,
+            serializeReferralProgramEditionConfigSetResponse({
+              responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
               error: "Service Unavailable",
               errorMessage: "Referral program configuration is currently unavailable.",
-            } satisfies ReferralProgramCycleConfigSetResponse),
+            } satisfies ReferralProgramEditionConfigSetResponse),
             503,
           );
         }
 
         // Convert Map to array and sort by start timestamp descending
-        const cycles = Array.from(c.var.referralProgramCycleConfigSet.values()).sort(
+        const editions = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
           (a, b) => b.rules.startTime - a.rules.startTime,
         );
 
         return c.json(
-          serializeReferralProgramCycleConfigSetResponse({
-            responseCode: ReferralProgramCycleConfigSetResponseCodes.Ok,
+          serializeReferralProgramEditionConfigSetResponse({
+            responseCode: ReferralProgramEditionConfigSetResponseCodes.Ok,
             data: {
-              cycles,
+              editions,
             },
-          } satisfies ReferralProgramCycleConfigSetResponse),
+          } satisfies ReferralProgramEditionConfigSetResponse),
         );
       } catch (error) {
-        logger.error({ error }, "Error in /v1/ensanalytics/cycles endpoint");
+        logger.error({ error }, "Error in /v1/ensanalytics/editions endpoint");
         const errorMessage =
           error instanceof Error
             ? error.message
             : "An unexpected error occurred while processing your request";
         return c.json(
-          serializeReferralProgramCycleConfigSetResponse({
-            responseCode: ReferralProgramCycleConfigSetResponseCodes.Error,
+          serializeReferralProgramEditionConfigSetResponse({
+            responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
             error: "Internal server error",
             errorMessage,
-          } satisfies ReferralProgramCycleConfigSetResponse),
+          } satisfies ReferralProgramEditionConfigSetResponse),
           500,
         );
       }

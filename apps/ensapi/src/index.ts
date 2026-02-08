@@ -8,8 +8,8 @@ import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
-import { getReferralLeaderboardCyclesCaches } from "@/cache/referral-leaderboard-cycles.cache";
-import { referralProgramCycleConfigSetCache } from "@/cache/referral-program-cycle-set.cache";
+import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
+import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
@@ -162,16 +162,16 @@ const gracefulShutdown = async () => {
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
 
-    // Destroy referral program cycle config set cache
-    referralProgramCycleConfigSetCache.destroy();
-    logger.info("Destroyed referralProgramCycleConfigSetCache");
+    // Destroy referral program edition config set cache
+    referralProgramEditionConfigSetCache.destroy();
+    logger.info("Destroyed referralProgramEditionConfigSetCache");
 
-    // Destroy all cycle caches (if initialized)
-    const cyclesCaches = getReferralLeaderboardCyclesCaches();
-    if (cyclesCaches) {
-      for (const [cycleSlug, cache] of cyclesCaches) {
+    // Destroy all edition caches (if initialized)
+    const editionsCaches = getReferralLeaderboardEditionsCaches();
+    if (editionsCaches) {
+      for (const [editionSlug, cache] of editionsCaches) {
         cache.destroy();
-        logger.info(`Destroyed referralLeaderboardCyclesCache for ${cycleSlug}`);
+        logger.info(`Destroyed referralLeaderboardEditionsCache for ${editionSlug}`);
       }
     }
 

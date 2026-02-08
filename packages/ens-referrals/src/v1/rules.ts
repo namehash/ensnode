@@ -36,7 +36,7 @@ export interface ReferralProgramRules {
   subregistryId: AccountId;
 
   /**
-   * URL to the full rules document for this cycle.
+   * URL to the full rules document for these rules.
    * @example new URL("https://ensawards.org/ens-holiday-awards-rules")
    */
   rulesUrl: URL;

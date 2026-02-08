@@ -5,25 +5,25 @@ import {
   parseUsdc,
 } from "@ensnode/ensnode-sdk";
 
-import type { ReferralProgramCycleConfig, ReferralProgramCycleConfigSet } from "./cycle";
+import type { ReferralProgramEditionConfig, ReferralProgramEditionConfigSet } from "./edition";
 import { buildReferralProgramRules } from "./rules";
 
 /**
- * Returns the default referral program cycle set with pre-built cycle configurations.
+ * Returns the default referral program edition set with pre-built edition configurations.
  *
  * This function maps from an ENS namespace to the appropriate subregistry (BaseRegistrar)
- * and builds the default referral program cycles for that namespace.
+ * and builds the default referral program editions for that namespace.
  *
- * @param ensNamespaceId - The ENS namespace slug to get the default cycles for
- * @returns A map of cycle slugs to their pre-built cycle configurations
+ * @param ensNamespaceId - The ENS namespace slug to get the default editions for
+ * @returns A map of edition slugs to their pre-built edition configurations
  * @throws Error if the subregistry contract is not found for the given namespace
  */
-export function getDefaultReferralProgramCycleConfigSet(
+export function getDefaultReferralProgramEditionConfigSet(
   ensNamespaceId: ENSNamespaceId,
-): ReferralProgramCycleConfigSet {
+): ReferralProgramEditionConfigSet {
   const subregistryId = getEthnamesSubregistryId(ensNamespaceId);
 
-  const cycle1: ReferralProgramCycleConfig = {
+  const edition1: ReferralProgramEditionConfig = {
     slug: "2025-12",
     displayName: "ENS Holiday Awards",
     rules: buildReferralProgramRules(
@@ -36,7 +36,7 @@ export function getDefaultReferralProgramCycleConfigSet(
     ),
   };
 
-  const cycle2: ReferralProgramCycleConfig = {
+  const edition2: ReferralProgramEditionConfig = {
     slug: "2026-03",
     displayName: "March 2026",
     rules: buildReferralProgramRules(
@@ -50,7 +50,7 @@ export function getDefaultReferralProgramCycleConfigSet(
   };
 
   return new Map([
-    ["2025-12", cycle1],
-    ["2026-03", cycle2],
+    [edition1.slug, edition1],
+    [edition2.slug, edition2],
   ]);
 }

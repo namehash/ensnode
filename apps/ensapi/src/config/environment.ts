@@ -3,7 +3,7 @@ import type {
   EnsIndexerUrlEnvironment,
   LogLevelEnvironment,
   PortEnvironment,
-  ReferralProgramCyclesEnvironment,
+  ReferralProgramEditionsEnvironment,
   RpcEnvironment,
   TheGraphEnvironment,
 } from "@ensnode/ensnode-sdk/internal";
@@ -21,4 +21,4 @@ export type EnsApiEnvironment = Omit<DatabaseEnvironment, "DATABASE_SCHEMA"> &
   PortEnvironment &
   LogLevelEnvironment &
   TheGraphEnvironment &
-  ReferralProgramCyclesEnvironment;
+  ReferralProgramEditionsEnvironment;
