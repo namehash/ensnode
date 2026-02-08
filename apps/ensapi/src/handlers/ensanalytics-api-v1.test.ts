@@ -42,7 +42,7 @@ import {
   type ReferrerMetricsEditionsResponseOk,
 } from "@namehash/ens-referrals/v1";
 
-import { parseUsdc, type SWRCache } from "@ensnode/ensnode-sdk";
+import { parseTimestamp, parseUsdc, type SWRCache } from "@ensnode/ensnode-sdk";
 
 import {
   emptyReferralLeaderboard,
@@ -259,7 +259,8 @@ describe("/v1/ensanalytics", () => {
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
-        ["2025-12", { slug: "2025-12", displayName: "Edition 1", rules: {} as any }],
+        ["test-edition-a", { slug: "test-edition-a", displayName: "Edition A", rules: {} as any }],
+        ["test-edition-b", { slug: "test-edition-b", displayName: "Edition B", rules: {} as any }],
       ]);
       vi.mocked(editionSetMiddleware.referralProgramEditionConfigSetMiddleware).mockImplementation(
         async (c, next) => {
@@ -799,8 +800,8 @@ describe("/v1/ensanalytics", () => {
             rules: buildReferralProgramRules(
               parseUsdc("10000"),
               100,
-              1733011200, // 2024-12-01
-              1735603200, // 2024-12-31
+              parseTimestamp("2025-12-01T00:00:00Z"),
+              parseTimestamp("2025-12-31T23:59:59Z"),
               { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
               new URL("https://example.com/rules"),
             ),
@@ -814,8 +815,8 @@ describe("/v1/ensanalytics", () => {
             rules: buildReferralProgramRules(
               parseUsdc("10000"),
               100,
-              1740787200, // 2025-03-01
-              1743465600, // 2025-03-31
+              parseTimestamp("2026-03-01T00:00:00Z"),
+              parseTimestamp("2026-03-31T23:59:59Z"),
               { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
               new URL("https://example.com/rules"),
             ),
@@ -829,8 +830,8 @@ describe("/v1/ensanalytics", () => {
             rules: buildReferralProgramRules(
               parseUsdc("10000"),
               100,
-              1748736000, // 2025-06-01
-              1751328000, // 2025-06-30
+              parseTimestamp("2026-06-01T00:00:00Z"),
+              parseTimestamp("2026-06-30T23:59:59Z"),
               { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
               new URL("https://example.com/rules"),
             ),
@@ -887,14 +888,6 @@ describe("/v1/ensanalytics", () => {
           return await next();
         },
       );
-
-      // Mock caches middleware (needed by middleware chain)
-      vi.mocked(
-        editionsCachesMiddleware.referralLeaderboardEditionsCachesMiddleware,
-      ).mockImplementation(async (c, next) => {
-        c.set("referralLeaderboardEditionsCaches", new Map());
-        return await next();
-      });
 
       // Act: send test request
       const httpResponse = await app.request("/editions");

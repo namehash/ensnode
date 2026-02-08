@@ -224,6 +224,25 @@ export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerE
   ]);
 
 /**
+ * Schema for validating a {@link ReferralProgramEditionSlug}.
+ *
+ * Enforces the slug format invariant: lowercase letters (a-z), digits (0-9),
+ * and hyphens (-) only. Must not start or end with a hyphen.
+ *
+ * Runtime validation against configured editions happens at the business logic level.
+ */
+export const makeReferralProgramEditionSlugSchema = (
+  valueLabel: string = "ReferralProgramEditionSlug",
+) =>
+  z
+    .string()
+    .min(1, `${valueLabel} must not be empty`)
+    .regex(
+      /^[a-z0-9]+(-[a-z0-9]+)*$/,
+      `${valueLabel} must contain only lowercase letters, digits, and hyphens. Must not start or end with a hyphen.`,
+    );
+
+/**
  * Schema for validating editions array (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, distinct values).
  */
 export const makeReferrerMetricsEditionsArraySchema = (
@@ -293,25 +312,6 @@ export const makeReferrerMetricsEditionsResponseSchema = (
   ]);
 
 /**
- * Schema for validating a {@link ReferralProgramEditionSlug}.
- *
- * Enforces the slug format invariant: lowercase letters (a-z), digits (0-9),
- * and hyphens (-) only. Must not start or end with a hyphen.
- *
- * Runtime validation against configured editions happens at the business logic level.
- */
-export const makeReferralProgramEditionSlugSchema = (
-  valueLabel: string = "ReferralProgramEditionSlug",
-) =>
-  z
-    .string()
-    .min(1, `${valueLabel} must not be empty`)
-    .regex(
-      /^[a-z0-9]+(-[a-z0-9]+)*$/,
-      `${valueLabel} must contain only lowercase letters, digits, and hyphens. Must not start or end with a hyphen.`,
-    );
-
-/**
  * Schema for validating a {@link ReferralProgramEditionConfig}.
  */
 export const makeReferralProgramEditionConfigSchema = (
@@ -351,7 +351,7 @@ export const makeReferralProgramEditionConfigSetDataSchema = (
   valueLabel: string = "ReferralProgramEditionConfigSetData",
 ) =>
   z.object({
-    editions: z.array(makeReferralProgramEditionConfigSchema(`${valueLabel}.editions[edition]`)),
+    editions: makeReferralProgramEditionConfigSetArraySchema(`${valueLabel}.editions`),
   });
 
 /**

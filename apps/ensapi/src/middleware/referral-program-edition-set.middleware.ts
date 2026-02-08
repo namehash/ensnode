@@ -21,8 +21,10 @@ export type ReferralProgramEditionConfigSetMiddlewareVariables = {
  * to downstream middleware and handlers.
  *
  * This middleware reads the referral program edition config set from the SWR cache.
- * The cache is initialized once at startup and never revalidated, ensuring
+ * The cache is initialized once at startup and, if successful, never revalidated, ensuring
  * the edition config set JSON is only fetched once during the application lifecycle.
+ *
+ * If the cache fails to load, the JSON fetching will be retried on subsequent requests.
  */
 export const referralProgramEditionConfigSetMiddleware = factory.createMiddleware(
   async (c, next) => {

@@ -123,7 +123,7 @@ export class SWRCache<ValueType> {
           };
         })
         .catch((error) => {
-          // on error, only update the cache if this is the first revalidation
+          // on error, only update the cache if there has been no successful revalidation yet
           if (!this.cache || this.cache.result instanceof Error) {
             this.cache = {
               // ensure thrown value is always an Error instance

@@ -30,6 +30,7 @@ async function loadReferralProgramEditionConfigSet(): Promise<ReferralProgramEdi
       return editionConfigSet;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(error, "Error occurred while loading referral program edition config set");
       throw new Error(
         `Failed to load custom referral program edition config set from ${config.customReferralProgramEditionConfigSetUrl.href}: ${errorMessage}`,
       );
@@ -57,19 +58,7 @@ async function loadReferralProgramEditionConfigSet(): Promise<ReferralProgramEdi
  * - proactivelyInitialize: true - Load immediately on startup
  */
 export const referralProgramEditionConfigSetCache = new SWRCache<ReferralProgramEditionConfigSet>({
-  fn: async () => {
-    try {
-      const editionConfigSet = await loadReferralProgramEditionConfigSet();
-      logger.info("Referral program edition config set cached successfully");
-      return editionConfigSet;
-    } catch (error) {
-      logger.error(
-        error,
-        "Error occurred while loading referral program edition config set. The cache will remain empty.",
-      );
-      throw error;
-    }
-  },
+  fn: loadReferralProgramEditionConfigSet,
   ttl: Number.POSITIVE_INFINITY,
   errorTtl: minutesToSeconds(1),
   proactiveRevalidationInterval: undefined,

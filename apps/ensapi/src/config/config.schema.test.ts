@@ -83,6 +83,22 @@ describe("buildConfigFromEnvironment", () => {
     });
   });
 
+  it("parses CUSTOM_REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
+    const customUrl = "https://example.com/editions.json";
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+    });
+
+    const config = await buildConfigFromEnvironment({
+      ...BASE_ENV,
+      CUSTOM_REFERRAL_PROGRAM_EDITIONS: customUrl,
+    });
+
+    expect(config.customReferralProgramEditionConfigSetUrl).toEqual(new URL(customUrl));
+  });
+
   describe("Useful error messages", () => {
     // Mock process.exit to prevent actual exit
     const mockExit = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);

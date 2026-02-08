@@ -3,7 +3,7 @@ import {
   type ReferralLeaderboardEditionsCacheMap,
 } from "@/cache/referral-leaderboard-editions.cache";
 import { factory } from "@/lib/hono-factory";
-import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
+import type { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 /**
  * Type definition for the referral leaderboard editions caches middleware context passed to downstream middleware and handlers.

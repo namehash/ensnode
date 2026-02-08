@@ -65,6 +65,12 @@ export const validateReferralProgramRules = (rules: ReferralProgramRules): void 
   validateUnixTimestamp(rules.startTime);
   validateUnixTimestamp(rules.endTime);
 
+  if (!(rules.rulesUrl instanceof URL)) {
+    throw new Error(
+      `ReferralProgramRules: rulesUrl must be a URL instance, got ${typeof rules.rulesUrl}.`,
+    );
+  }
+
   if (rules.endTime < rules.startTime) {
     throw new Error(
       `ReferralProgramRules: startTime: ${rules.startTime} is after endTime: ${rules.endTime}.`,
