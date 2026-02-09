@@ -12,7 +12,10 @@ import {
   type SerializedReferrerLeaderboardPageResponse,
   type SerializedReferrerMetricsEditionsResponse,
 } from "./api";
-import type { ReferralProgramEditionConfigSet } from "./edition";
+import {
+  buildReferralProgramEditionConfigSet,
+  type ReferralProgramEditionConfigSet,
+} from "./edition";
 
 /**
  * Default ENSNode API endpoint URL
@@ -112,7 +115,7 @@ export class ENSReferralsClient {
 
     const editionConfigs = deserializeReferralProgramEditionConfigSetArray(json);
 
-    return new Map(editionConfigs.map((editionConfig) => [editionConfig.slug, editionConfig]));
+    return buildReferralProgramEditionConfigSet(editionConfigs);
   }
 
   /**

@@ -5,7 +5,11 @@ import {
   parseUsdc,
 } from "@ensnode/ensnode-sdk";
 
-import type { ReferralProgramEditionConfig, ReferralProgramEditionConfigSet } from "./edition";
+import {
+  buildReferralProgramEditionConfigSet,
+  type ReferralProgramEditionConfig,
+  type ReferralProgramEditionConfigSet,
+} from "./edition";
 import { buildReferralProgramRules } from "./rules";
 
 /**
@@ -45,13 +49,10 @@ export function getDefaultReferralProgramEditionConfigSet(
       parseTimestamp("2026-03-01T00:00:00Z"),
       parseTimestamp("2026-03-31T23:59:59Z"),
       subregistryId,
-      // note: this will be replaced with dedicated March 2026 rules URL once published
+      // TODO: replace this with the dedicated March 2026 rules URL once published
       new URL("https://ensawards.org/ens-holiday-awards-rules"),
     ),
   };
 
-  return new Map([
-    [edition1.slug, edition1],
-    [edition2.slug, edition2],
-  ]);
+  return buildReferralProgramEditionConfigSet([edition1, edition2]);
 }
