@@ -22,7 +22,7 @@ export async function createServer(db: ENSRainbowDB) {
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
   // Log the config that ENSRainbow is running with
-  console.log("ENSRainbow running with config:");
+  console.log("ENSRainbow running with environment config:");
   console.log(prettyPrintJson(config));
 
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
