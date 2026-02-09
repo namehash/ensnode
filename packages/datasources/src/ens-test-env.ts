@@ -43,12 +43,12 @@ export default {
     contracts: {
       ENSv1RegistryOld: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
+        address: "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
         startBlock: 0,
       },
       ENSv1Registry: {
         abi: root_Registry, // Registry was redeployed, same abi
-        address: "0x9a676e781a523b5d0c0e43731313a708cb607508",
+        address: "0x0165878a594ca255338adfa4d48449f69242eb8f",
         startBlock: 0,
       },
       Resolver: {
@@ -90,45 +90,34 @@ export default {
         address: "0xdc11f7e700a4c898ae5caddb1082cffa76512add",
         startBlock: 0,
       },
+    },
+  },
 
-      //
-
-      ETHRegistry: {
-        abi: Registry,
-        address: "0x0b306bf915c4d645ff596e518faf3f9669b97016",
-        startBlock: 0,
-      },
+  [DatasourceNames.ENSv2Root]: {
+    chain: ensTestEnvL1Chain,
+    contracts: {
+      Resolver: { abi: ResolverABI, startBlock: 0 },
+      Registry: { abi: Registry, startBlock: 0 },
+      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 0 },
       RootRegistry: {
         abi: Registry,
         address: "0x9a676e781a523b5d0c0e43731313a708cb607508",
         startBlock: 0,
       },
-      Registry: {
+      ETHRegistry: {
         abi: Registry,
-        startBlock: 0,
-      },
-      EnhancedAccessControl: {
-        abi: EnhancedAccessControl,
+        address: "0x0b306bf915c4d645ff596e518faf3f9669b97016",
         startBlock: 0,
       },
     },
   },
 
-  [DatasourceNames.Namechain]: {
+  [DatasourceNames.ENSv2ETHRegistry]: {
     chain: ensTestEnvL2Chain,
     contracts: {
-      Resolver: {
-        abi: ResolverABI,
-        startBlock: 0,
-      },
-      Registry: {
-        abi: Registry,
-        startBlock: 0,
-      },
-      EnhancedAccessControl: {
-        abi: EnhancedAccessControl,
-        startBlock: 0,
-      },
+      Resolver: { abi: ResolverABI, startBlock: 0 },
+      Registry: { abi: Registry, startBlock: 0 },
+      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 0 },
       ETHRegistry: {
         abi: Registry,
         address: "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",

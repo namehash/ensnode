@@ -8,6 +8,8 @@ import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
+import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
@@ -66,8 +68,8 @@ app.route("/subgraph", subgraphApi);
 // use ENSAnalytics API at /ensanalytics (v0, implicit)
 app.route("/ensanalytics", ensanalyticsApi);
 
-// use ENSAnalytics API v1 at /ensanalytics/v1
-app.route("/ensanalytics/v1", ensanalyticsApiV1);
+// use ENSAnalytics API v1 at /v1/ensanalytics
+app.route("/v1/ensanalytics", ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
 app.route("/amirealtime", amIRealtimeApi);
@@ -159,6 +161,19 @@ const gracefulShutdown = async () => {
 
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
+
+    // Destroy referral program edition config set cache
+    referralProgramEditionConfigSetCache.destroy();
+    logger.info("Destroyed referralProgramEditionConfigSetCache");
+
+    // Destroy all edition caches (if initialized)
+    const editionsCaches = getReferralLeaderboardEditionsCaches();
+    if (editionsCaches) {
+      for (const [editionSlug, cache] of editionsCaches) {
+        cache.destroy();
+        logger.info(`Destroyed referralLeaderboardEditionsCache for ${editionSlug}`);
+      }
+    }
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");

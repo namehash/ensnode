@@ -6,7 +6,7 @@ import {
 } from "@ensnode/datasources";
 
 import type { Name } from "../ens";
-import type { AccountId } from "../shared";
+import type { AccountId } from "../shared/types";
 
 /**
  * Gets the SubregistryId (an AccountId) of the Lineanames Subregistry contract (this is the
@@ -45,6 +45,7 @@ export function getLineanamesSubregistryManagedName(namespaceId: ENSNamespaceId)
     case ENSNamespaceIds.Mainnet:
       return "linea.eth";
     case ENSNamespaceIds.Sepolia:
+    case ENSNamespaceIds.SepoliaV2:
       return "linea-sepolia.eth";
     case ENSNamespaceIds.EnsTestEnv:
       throw new Error(

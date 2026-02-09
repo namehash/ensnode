@@ -1,4 +1,4 @@
-import type { UnixTimestamp } from "../../shared";
+import type { UnixTimestamp } from "../../shared/types";
 import type { CrossChainIndexingStatusSnapshot, RealtimeIndexingStatusProjection } from "./types";
 
 /**

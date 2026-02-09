@@ -6,7 +6,7 @@ import {
 } from "@ensnode/datasources";
 
 import type { Name } from "../ens";
-import type { AccountId } from "../shared";
+import type { AccountId } from "../shared/types";
 
 /**
  * Gets the SubregistryId (an AccountId) of the Ethnames Subregistry contract (this is the
@@ -43,6 +43,7 @@ export function getEthnamesSubregistryManagedName(namespaceId: ENSNamespaceId): 
   switch (namespaceId) {
     case ENSNamespaceIds.Mainnet:
     case ENSNamespaceIds.Sepolia:
+    case ENSNamespaceIds.SepoliaV2:
     case ENSNamespaceIds.EnsTestEnv:
       return "eth";
   }

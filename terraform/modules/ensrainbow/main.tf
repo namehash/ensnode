@@ -1,11 +1,12 @@
 locals {
-  mount_path = "/app/apps/ensrainbow/data"
+  mount_path           = "/app/apps/ensrainbow/data"
+  resource_name_suffix = var.ensrainbow_label_set_id
 }
 
 # For details on "render_web_service", see:
 # https://registry.terraform.io/providers/render-oss/render/latest/docs/resources/web_service
 resource "render_web_service" "ensrainbow" {
-  name           = "ensrainbow"
+  name           = "ensrainbow-${local.resource_name_suffix}"
   plan           = "starter"
   region         = var.render_region
   environment_id = var.render_environment_id
@@ -18,8 +19,8 @@ resource "render_web_service" "ensrainbow" {
   }
 
   disk = {
-    name       = "ensrainbow-data"
-    size_gb    = 50
+    name       = "ensrainbow-data-${local.resource_name_suffix}"
+    size_gb    = var.disk_size_gb
     mount_path = local.mount_path
   }
 

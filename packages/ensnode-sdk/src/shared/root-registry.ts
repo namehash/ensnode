@@ -30,7 +30,7 @@ export const isENSv1Registry = (namespace: ENSNamespaceId, contract: AccountId) 
  * Gets the AccountId representing the ENSv2 Root Registry in the selected `namespace`.
  */
 export const getENSv2RootRegistry = (namespace: ENSNamespaceId) =>
-  getDatasourceContract(namespace, DatasourceNames.ENSRoot, "RootRegistry");
+  getDatasourceContract(namespace, DatasourceNames.ENSv2Root, "RootRegistry");
 
 /**
  * Gets the RegistryId representing the ENSv2 Root Registry in the selected `namespace`.

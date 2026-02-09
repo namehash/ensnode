@@ -24,7 +24,7 @@
     "test:coverage": "vitest --coverage",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "get-legacy-data": "./download-rainbow-tables.sh",
     "get-v2-data": "DATA_VERSION=v2 ./download-rainbow-tables.sh",
     "get-test-data": "DATA_VERSION=test ./download-rainbow-tables.sh"
