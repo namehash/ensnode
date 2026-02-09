@@ -4621,54 +4621,6 @@
         ]
       }
     },
-    "/v1/ensanalytics/referrers": {
-      "get": {
-        "operationId": "getV1EnsanalyticsReferrers",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Leaderboard (v1)",
-        "description": "Returns a paginated page from the referrer leaderboard",
-        "responses": {
-          "200": { "description": "Successfully retrieved referrer leaderboard page" },
-          "500": { "description": "Internal server error" }
-        },
-        "parameters": [
-          {
-            "in": "query",
-            "name": "page",
-            "schema": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
-            "description": "Page number for pagination"
-          },
-          {
-            "in": "query",
-            "name": "recordsPerPage",
-            "schema": { "type": "integer", "minimum": 1, "maximum": 100 },
-            "description": "Number of referrers per page"
-          }
-        ]
-      }
-    },
-    "/v1/ensanalytics/referrers/{referrer}": {
-      "get": {
-        "operationId": "getV1EnsanalyticsReferrers:referrer",
-        "tags": ["ENSAwards"],
-        "summary": "Get Referrer Detail (v1)",
-        "description": "Returns detailed information for a specific referrer by address",
-        "responses": {
-          "200": { "description": "Successfully retrieved referrer detail" },
-          "500": { "description": "Internal server error" },
-          "503": { "description": "Service unavailable - referrer leaderboard data not yet cached" }
-        },
-        "parameters": [
-          {
-            "in": "path",
-            "name": "referrer",
-            "schema": { "type": "string" },
-            "required": true,
-            "description": "Referrer Ethereum address"
-          }
-        ]
-      }
-    },
     "/amirealtime": {
       "get": {
         "operationId": "getAmirealtime",

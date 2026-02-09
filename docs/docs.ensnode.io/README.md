@@ -48,16 +48,22 @@ This means production docs always reflect the live API, while PR previews can sh
 When you modify API routes or schemas in ENSApi, regenerate the OpenAPI spec:
 
 ```bash
-# Start ENSApi in OpenAPI generate mode (no external dependencies required)
-OPENAPI_GENERATE_MODE=true pnpm --filter ensapi start
-
-# In another terminal, generate the spec
-pnpm --filter @docs/mintlify openapi:generate http://localhost:4334
+./.github/scripts/generate_openapi_spec.sh
 ```
 
-**`OPENAPI_GENERATE_MODE`:** ENSApi normally requires a running ENSIndexer and ENSDb to start. This mode uses a mock configuration that allows ENSApi to start without external dependencies, allowing OpenAPI spec generation in local dev and CI environments.
+This script starts ENSApi in OpenAPI generate mode, fetches the spec, validates it with Mintlify, and cleans up automatically. No separate terminals required.
 
-The ENSApi URL argument to `openapi:generate` is required — there is no default to avoid accidentally generating from the wrong source.
+**Options:**
+
+- `--check` — Also verify that the generated spec matches the committed version (used in CI)
+
+**Environment variables:**
+
+- `ENSAPI_PORT` — Port for ENSApi (default: 4334)
+- `STARTUP_TIMEOUT` — Seconds to wait for server startup (default: 30)
+- `SKIP_VALIDATION` — Set to "true" to skip Mintlify validation
+
+**Note:** ENSApi normally requires a running ENSIndexer and ENSDb. The script uses `OPENAPI_GENERATE_MODE=true` which enables a mock configuration, allowing spec generation without external dependencies.
 
 ### CI Validation
 
