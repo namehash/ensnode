@@ -12,9 +12,8 @@ import type { ParsePayload } from "zod/v4/core";
 import { type BlockRef, schemaBlockRef } from "../blocks";
 import {
   type ChainIndexingMetrics,
-  type ChainIndexingMetricsBackfill,
   type ChainIndexingMetricsCompleted,
-  type ChainIndexingMetricsQueued,
+  type ChainIndexingMetricsHistorical,
   type ChainIndexingMetricsRealtime,
   ChainIndexingStates,
   PonderAppCommands,
@@ -27,16 +26,10 @@ import { schemaChainIdString } from "./chains";
 import { deserializePrometheusMetrics, type PrometheusMetrics } from "./prometheus-metrics-text";
 import type { DeepPartial } from "./utils";
 
-const schemaSerializedChainIndexingMetricsQueued = z.object({
-  state: z.literal(ChainIndexingStates.Queued),
-  backfillTotalBlocks: schemaPositiveInteger,
+const schemaSerializedChainIndexingMetricsHistorical = z.object({
+  state: z.literal(ChainIndexingStates.Historical),
   latestSyncedBlock: schemaBlockRef,
-});
-
-const schemaSerializedChainIndexingMetricsBackfill = z.object({
-  state: z.literal(ChainIndexingStates.Backfill),
-  backfillTotalBlocks: schemaPositiveInteger,
-  latestSyncedBlock: schemaBlockRef,
+  historicalTotalBlocks: schemaPositiveInteger,
 });
 
 const schemaSerializedChainIndexingMetricsRealtime = z.object({
@@ -53,8 +46,7 @@ const schemaSerializedChainIndexingMetricsCompleted = z.object({
  * Schema describing the chain indexing metrics.
  */
 const schemaSerializedChainIndexingMetrics = z.discriminatedUnion("state", [
-  schemaSerializedChainIndexingMetricsQueued,
-  schemaSerializedChainIndexingMetricsBackfill,
+  schemaSerializedChainIndexingMetricsHistorical,
   schemaSerializedChainIndexingMetricsRealtime,
   schemaSerializedChainIndexingMetricsCompleted,
 ]);
@@ -79,26 +71,6 @@ function buildUnvalidatedChainIndexingMetrics(
   maybeChainId: string,
   prometheusMetrics: PrometheusMetrics,
 ): DeepPartial<ChainIndexingMetrics> {
-  const backfillTotalBlocks = prometheusMetrics.getValue("ponder_historical_total_blocks", {
-    chain: maybeChainId,
-  });
-
-  const ponderHistoricalCompletedIndexingSeconds = prometheusMetrics.getValue(
-    "ponder_historical_completed_indexing_seconds",
-    {
-      chain: maybeChainId,
-    },
-  );
-
-  // If no time has been recorded for historical completed indexing,
-  // we can assume the chain is still queued to be indexed.
-  if (ponderHistoricalCompletedIndexingSeconds === 0) {
-    return {
-      state: ChainIndexingStates.Queued,
-      backfillTotalBlocks,
-    } satisfies DeepPartial<ChainIndexingMetricsQueued>;
-  }
-
   const ponderSyncIsComplete = prometheusMetrics.getValue("ponder_sync_is_complete", {
     chain: maybeChainId,
   });
@@ -138,10 +110,14 @@ function buildUnvalidatedChainIndexingMetrics(
     } satisfies DeepPartial<ChainIndexingMetricsRealtime>;
   }
 
+  const historicalTotalBlocks = prometheusMetrics.getValue("ponder_historical_total_blocks", {
+    chain: maybeChainId,
+  });
+
   return {
-    state: ChainIndexingStates.Backfill,
-    backfillTotalBlocks,
-  } satisfies DeepPartial<ChainIndexingMetricsBackfill>;
+    state: ChainIndexingStates.Historical,
+    historicalTotalBlocks,
+  } satisfies DeepPartial<ChainIndexingMetricsHistorical>;
 }
 
 function invariant_includesAtLeastOneIndexedChain(
@@ -184,7 +160,6 @@ function invariant_includesRequiredMetrics(ctx: ParsePayload<PrometheusMetrics>)
     "ponder_settings_info",
     "ponder_sync_block",
     "ponder_sync_block_timestamp",
-    "ponder_historical_completed_indexing_seconds",
     "ponder_historical_total_blocks",
     "ponder_sync_is_complete",
     "ponder_sync_is_realtime",
@@ -206,24 +181,6 @@ function invariant_includesRequiredMetrics(ctx: ParsePayload<PrometheusMetrics>)
 
   // Validate per-chain invariants.
   for (const chainReference of chainReferences) {
-    const ponderHistoricalCompletedIndexingSeconds = prometheusMetrics.getValue(
-      "ponder_historical_completed_indexing_seconds",
-      { chain: chainReference },
-    );
-
-    // Invariant: historical completed indexing seconds must be a non-negative integer.
-    if (
-      typeof ponderHistoricalCompletedIndexingSeconds !== "number" ||
-      !Number.isInteger(ponderHistoricalCompletedIndexingSeconds) ||
-      ponderHistoricalCompletedIndexingSeconds < 0
-    ) {
-      ctx.issues.push({
-        code: "custom",
-        input: ctx.value,
-        message: `'ponder_historical_completed_indexing_seconds' metric for '${chainReference}' chain must be a non-negative integer. Received: ${ponderHistoricalCompletedIndexingSeconds}`,
-      });
-    }
-
     const ponderSyncIsComplete = prometheusMetrics.getValue("ponder_sync_is_complete", {
       chain: chainReference,
     });

@@ -50,8 +50,7 @@ export interface PonderApplicationSettings {
  * Represents the indexing state of a chain indexed by a Ponder app.
  */
 export const ChainIndexingStates = {
-  Queued: "queued",
-  Backfill: "backfill",
+  Historical: "historical",
   Completed: "completed",
   Realtime: "realtime",
 } as const;
@@ -59,15 +58,13 @@ export const ChainIndexingStates = {
 export type ChainIndexingState = (typeof ChainIndexingStates)[keyof typeof ChainIndexingStates];
 
 /**
- * Chain Indexing Metrics Queued
+ * Chain Indexing Metrics Historical
  *
- * Represents the indexing metrics for a chain that has not started
- * indexing yet, and is queued to transition to backfill phase,
- * where it will be indexed by a Ponder app. While indexing is queued,
- * the Ponder app may be discovering blocks for the chain via RPCs.
+ * Represents the indexing metrics for a chain that is currently queued for
+ * indexing or in the backfill phase by a Ponder app.
  */
-export interface ChainIndexingMetricsQueued {
-  state: typeof ChainIndexingStates.Queued;
+export interface ChainIndexingMetricsHistorical {
+  state: typeof ChainIndexingStates.Historical;
 
   /**
    * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
@@ -76,42 +73,17 @@ export interface ChainIndexingMetricsQueued {
   latestSyncedBlock: BlockRef;
 
   /**
+   * Total count of historical blocks.
    *
-   * Total count of blocks required to be indexed during backfill.
-   *
-   * Each time a Ponder app restarts, if it enters queued mode,
-   * a new value will be calculated based on the current state of the chain.
-   *
-   * Guaranteed to be a positive integer.
-   */
-  backfillTotalBlocks: number;
-}
-
-/**
- * Chain Indexing Metrics Backfill
- *
- * Represents the indexing metrics for a chain that is currently in
- * the backfill phase of indexing by a Ponder app.
- */
-export interface ChainIndexingMetricsBackfill {
-  state: typeof ChainIndexingStates.Backfill;
-
-  /**
-   * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
-   * and stored in the RPC cache as of the time the metric value was captured.
-   */
-  latestSyncedBlock: BlockRef;
-
-  /**
-   *
-   * Total count of blocks required to be indexed during backfill.
-   *
-   * Each time a Ponder app restarts, if it enters backfill mode,
-   * a new value will be calculated based on the current state of the chain.
+   * Each time a Ponder app restarts, if the historical blocks have
+   * not been fully indexed yet, for example, the chain is queued for
+   * indexing or in the backfill phase, the count of historical blocks is
+   * reset and starts increasing again as more historical blocks are
+   * discovered by RPCs and stored in the RPC cache.
    *
    * Guaranteed to be a positive integer.
    */
-  backfillTotalBlocks: number;
+  historicalTotalBlocks: number;
 }
 
 /**
@@ -162,8 +134,7 @@ export interface ChainIndexingMetricsCompleted {
  * Represents the indexing metrics for a specific chain indexed by a Ponder app.
  */
 export type ChainIndexingMetrics =
-  | ChainIndexingMetricsQueued
-  | ChainIndexingMetricsBackfill
+  | ChainIndexingMetricsHistorical
   | ChainIndexingMetricsCompleted
   | ChainIndexingMetricsRealtime;
 

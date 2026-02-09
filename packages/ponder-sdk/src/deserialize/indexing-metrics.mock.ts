@@ -30,15 +30,6 @@ ponder_sync_block_timestamp{chain="534352"} 1770136654
 ponder_sync_block_timestamp{chain="42161"} 1770136654
 ponder_sync_block_timestamp{chain="59144"} 1770136654
 
-# HELP ponder_historical_completed_indexing_seconds Number of seconds that have been completed
-# TYPE ponder_historical_completed_indexing_seconds gauge
-ponder_historical_completed_indexing_seconds{chain="10"} 34242
-ponder_historical_completed_indexing_seconds{chain="1"} 23124
-ponder_historical_completed_indexing_seconds{chain="8453"} 53253
-ponder_historical_completed_indexing_seconds{chain="534352"} 32503
-ponder_historical_completed_indexing_seconds{chain="42161"} 76864
-ponder_historical_completed_indexing_seconds{chain="59144"} 34235
-
 # HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
 # TYPE ponder_sync_is_realtime gauge
 ponder_sync_is_realtime{chain="42161"} 1
@@ -133,15 +124,6 @@ ponder_sync_block_timestamp{chain="scroll"} 1770136654
 ponder_sync_block_timestamp{chain="arbitrum"} 1770136654
 ponder_sync_block_timestamp{chain="linea"} 1770136654
 
-# HELP ponder_historical_completed_indexing_seconds Number of seconds that have been completed
-# TYPE ponder_historical_completed_indexing_seconds gauge
-ponder_historical_completed_indexing_seconds{chain="optimism"} 34242
-ponder_historical_completed_indexing_seconds{chain="mainnet"} 23124
-ponder_historical_completed_indexing_seconds{chain="base"} 53253
-ponder_historical_completed_indexing_seconds{chain="scroll"} 32503
-ponder_historical_completed_indexing_seconds{chain="arbitrum"} 76864
-ponder_historical_completed_indexing_seconds{chain="linea"} 34235
-
 # HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
 # TYPE ponder_sync_is_realtime gauge
 ponder_sync_is_realtime{chain="arbitrum"} 1
@@ -213,15 +195,6 @@ ponder_sync_block_timestamp{chain="8453"} 1770136653
 ponder_sync_block_timestamp{chain="534352"} 1770136654
 ponder_sync_block_timestamp{chain="42161"} 1770136654
 ponder_sync_block_timestamp{chain="59144"} 1770136654
-
-# HELP ponder_historical_completed_indexing_seconds Number of seconds that have been completed
-# TYPE ponder_historical_completed_indexing_seconds gauge
-ponder_historical_completed_indexing_seconds{chain="10"} 34242
-ponder_historical_completed_indexing_seconds{chain="1"} 23124
-ponder_historical_completed_indexing_seconds{chain="8453"} 53253
-ponder_historical_completed_indexing_seconds{chain="534352"} 32503
-ponder_historical_completed_indexing_seconds{chain="42161"} 76864
-ponder_historical_completed_indexing_seconds{chain="59144"} 34235
 
 # HELP ponder_sync_is_realtime Boolean (0 or 1) indicating if the sync is realtime mode
 # TYPE ponder_sync_is_realtime gauge
