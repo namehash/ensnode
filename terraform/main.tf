@@ -119,7 +119,7 @@ module "ensdb" {
 
   render_environment_id = render_project.ensnode.environments["default"].id
   render_region         = local.render_region
-  disk_size_gb          = var.ensdb_disk_size_gb
+  disk_size_gb          = 500
 }
 
 module "ensrainbow" {
