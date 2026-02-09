@@ -7,7 +7,7 @@ import { makeChainIndexingStatusSnapshotSchema } from "../zod-schema/chain-index
  * Validates a maybe {@link ChainIndexingStatusSnapshot} object.
  */
 export function validateChainIndexingStatusSnapshot(
-  unvalidatedSnapshot: ChainIndexingStatusSnapshot,
+  unvalidatedSnapshot: ChainIndexingStatusSnapshot | unknown,
   valueLabel?: string,
 ): ChainIndexingStatusSnapshot {
   const schema = makeChainIndexingStatusSnapshotSchema(valueLabel);

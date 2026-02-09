@@ -336,7 +336,7 @@ export function getTimestampForLowestOmnichainStartBlock(
  * to be indexed across all chains.
  *
  * The "highest known block" for a chain depends on its status:
- * - `config.endBlock` for a "queued" chain,
+ * - `config.endBlock` for a "queued" chain (only if the config is `Definite`),
  * - `backfillEndBlock` for a "backfill" chain,
  * - `latestIndexedBlock` for a "completed" chain,
  * - `latestKnownBlock` for a "following" chain.
@@ -349,10 +349,7 @@ export function getTimestampForHighestOmnichainKnownBlock(
   for (const chain of chains) {
     switch (chain.chainStatus) {
       case ChainIndexingStatusIds.Queued:
-        if (
-          chain.config.configType === ChainIndexingConfigTypeIds.Definite &&
-          chain.config.endBlock
-        ) {
+        if (chain.config.configType === ChainIndexingConfigTypeIds.Definite) {
           latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
         }
         break;
@@ -372,10 +369,11 @@ export function getTimestampForHighestOmnichainKnownBlock(
     }
   }
 
-  // Invariant: latestKnownBlockTimestamps is guaranteed to have at least one element
+  // Invariant: at least one chain must contribute a known block timestamp
+  // (e.g., Queued chains with Indefinite config do not contribute)
   if (latestKnownBlockTimestamps.length === 0) {
     throw new Error(
-      "Invariant violation: at least one chain is required to determine the highest omnichain known block timestamp",
+      "Invariant: at least one chain must contribute a known block timestamp to determine the highest omnichain known block timestamp",
     );
   }
 

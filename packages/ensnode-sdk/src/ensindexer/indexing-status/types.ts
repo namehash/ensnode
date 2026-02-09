@@ -1,5 +1,7 @@
 import type { ChainId, Duration, UnixTimestamp } from "../../shared/types";
 import type {
+  ChainIndexingConfigTypeIds,
+  ChainIndexingStatusIds,
   ChainIndexingStatusSnapshot,
   ChainIndexingStatusSnapshotBackfill,
   ChainIndexingStatusSnapshotCompleted,

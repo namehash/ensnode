@@ -23,13 +23,13 @@ export function invariant_chainSnapshotQueuedBlocks(
 ) {
   const { config } = ctx.value;
 
-  // The `config.endBlock` does not exists for `indefinite` config type
+  // The `config.endBlock` does not exist for `indefinite` config type
   if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
     // invariant holds
     return;
   }
 
-  if (config.endBlock && blockRef.isBeforeOrEqualTo(config.startBlock, config.endBlock) === false) {
+  if (blockRef.isBeforeOrEqualTo(config.startBlock, config.endBlock) === false) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
@@ -65,13 +65,13 @@ export function invariant_chainSnapshotBackfillBlocks(
     });
   }
 
-  // The `config.endBlock` does not exists for `indefinite` config type
+  // The `config.endBlock` does not exist for `indefinite` config type
   if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
     // invariant holds
     return;
   }
 
-  if (config.endBlock && blockRef.isEqualTo(backfillEndBlock, config.endBlock) === false) {
+  if (blockRef.isEqualTo(backfillEndBlock, config.endBlock) === false) {
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
