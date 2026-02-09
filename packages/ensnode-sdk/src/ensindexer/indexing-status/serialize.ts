@@ -1,7 +1,4 @@
-import { serializeChainId } from "../../shared/serialize";
-import type { ChainIdString } from "../../shared/serialized-types";
-import type { ChainId } from "../../shared/types";
-import type { ChainIndexingStatusSnapshot } from "./chain-indexing-status-snapshot";
+import { serializeChainIndexingSnapshots } from "./serialize/chain-indexing-status-snapshot";
 import type {
   SerializedCrossChainIndexingStatusSnapshot,
   SerializedOmnichainIndexingStatusSnapshot,
@@ -40,23 +37,6 @@ export function serializeRealtimeIndexingStatusProjection(
     worstCaseDistance: indexingProjection.worstCaseDistance,
     snapshot: serializeCrossChainIndexingStatusSnapshotOmnichain(indexingProjection.snapshot),
   } satisfies SerializedRealtimeIndexingStatusProjection;
-}
-
-/**
- * Serialize chain indexing snapshots.
- */
-export function serializeChainIndexingSnapshots<
-  ChainIndexingStatusSnapshotType extends ChainIndexingStatusSnapshot,
->(
-  chains: Map<ChainId, ChainIndexingStatusSnapshotType>,
-): Record<ChainIdString, ChainIndexingStatusSnapshotType> {
-  const serializedSnapshots: Record<ChainIdString, ChainIndexingStatusSnapshotType> = {};
-
-  for (const [chainId, snapshot] of chains.entries()) {
-    serializedSnapshots[serializeChainId(chainId)] = snapshot;
-  }
-
-  return serializedSnapshots;
 }
 
 /**

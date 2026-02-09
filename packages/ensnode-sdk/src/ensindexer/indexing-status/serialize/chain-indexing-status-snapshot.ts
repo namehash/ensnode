@@ -1,3 +1,6 @@
+import { serializeChainId } from "../../../shared/serialize";
+import type { ChainIdString } from "../../../shared/serialized-types";
+import type { ChainId } from "../../../shared/types";
 import type {
   ChainIndexingStatusSnapshot,
   ChainIndexingStatusSnapshotBackfill,
@@ -30,3 +33,20 @@ export type SerializedChainIndexingStatusSnapshotCompleted = ChainIndexingStatus
  * Serialized representation of {@link ChainIndexingStatusSnapshotFollowing}
  */
 export type SerializedChainIndexingStatusSnapshotFollowing = ChainIndexingStatusSnapshotFollowing;
+
+/**
+ * Serialize chain indexing status snapshots.
+ */
+export function serializeChainIndexingSnapshots<
+  ChainIndexingStatusSnapshotType extends ChainIndexingStatusSnapshot,
+>(
+  chains: Map<ChainId, ChainIndexingStatusSnapshotType>,
+): Record<ChainIdString, ChainIndexingStatusSnapshotType> {
+  const serializedSnapshots: Record<ChainIdString, ChainIndexingStatusSnapshotType> = {};
+
+  for (const [chainId, snapshot] of chains.entries()) {
+    serializedSnapshots[serializeChainId(chainId)] = snapshot;
+  }
+
+  return serializedSnapshots;
+}
