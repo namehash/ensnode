@@ -12,8 +12,8 @@ import type {
   OmnichainIndexingStatusSnapshot,
   RealtimeIndexingStatusProjection,
 } from "./types";
+import { makeChainIndexingStatusSnapshotSchema } from "./zod-schema/chain-indexing-status-snapshot";
 import {
-  makeChainIndexingStatusSnapshotSchema,
   makeCrossChainIndexingStatusSnapshotSchema,
   makeOmnichainIndexingStatusSnapshotSchema,
   makeRealtimeIndexingStatusProjectionSchema,

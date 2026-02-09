@@ -11,7 +11,7 @@ import {
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
-import { makeChainIndexingStatusSnapshotSchema } from "./zod-schemas";
+import { makeChainIndexingStatusSnapshotSchema } from "./zod-schema/chain-indexing-status-snapshot";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Zod Schemas", () => {
