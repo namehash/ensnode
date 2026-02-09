@@ -197,7 +197,7 @@ jobs:
         with:
           slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           slack_title: "Mintlify Docs Rebuilt"
-          slack_message: "Mintlify docs successfully rebuilt for environment switch to ${{ inputs.target }}"
+          slack_message: "Mintlify docs successfully rebuilt for environment switch to ${{ inputs.target }}. API Reference built from: https://api.alpha.ensnode.io/openapi.json"
 
       - name: Send Slack Notification
         uses: ./.github/actions/send_slack_notification
