@@ -2,7 +2,7 @@ import packageJson from "@/../package.json" with { type: "json" };
 
 import { isAbsolute, resolve } from "node:path";
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 
@@ -13,12 +13,6 @@ import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildENSRainbowPublicConfig } from "./public";
 import type { ENSRainbowEnvConfig } from "./types";
-
-vi.mock("@/utils/logger", () => ({
-  logger: {
-    error: vi.fn(),
-  },
-}));
 
 describe("buildConfigFromEnvironment", () => {
   describe("Success cases", () => {

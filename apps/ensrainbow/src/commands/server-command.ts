@@ -34,12 +34,16 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
     // This prevents starting a server that can't serve any data
     try {
       await db.getPrecalculatedRainbowRecordCount();
-    } catch (_error) {
-      logger.error("Cannot start server: database is empty or uninitialized.");
-      logger.error("The database must contain ingested data before the server can start.");
-      logger.error("Please run the ingestion command first to populate the database.");
-      // Throw error to ensure process exits with non-zero status code for CI/CD and scripts
-      throw new Error("Database is empty or uninitialized. Cannot start server.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("No precalculated count found")) {
+        logger.error("Cannot start server: database is empty or uninitialized.");
+        logger.error("The database must contain ingested data before the server can start.");
+        logger.error("Please run the ingestion command first to populate the database.");
+        throw new Error("Database is empty or uninitialized. Cannot start server.");
+      }
+      logger.error(error, "Cannot start server: failed to read precalculated record count.");
+      throw error;
     }
 
     const app = await createServer(db);
