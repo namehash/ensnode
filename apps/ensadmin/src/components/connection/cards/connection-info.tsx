@@ -14,7 +14,7 @@ export function ConnectionInfo() {
         <InfoCardItem
           label="Selected Connection"
           value={
-            <span className="flex flex-row flex-no-wrap justify-start items-center gap-0.5 text-sm/6">
+            <span className="flex flex-row flex-nowrap justify-start items-center gap-0.5 text-sm/6">
               {rawSelectedConnection}{" "}
               <CopyButton
                 value={rawSelectedConnection}
