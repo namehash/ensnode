@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  earlierBlockRef,
+  earliestBlockRef,
+  laterBlockRef,
+  latestBlockRef,
+} from "./block-refs.mock";
+import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
@@ -10,7 +16,6 @@ import {
 import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize";
 import { serializeOmnichainIndexingStatusSnapshot } from "./serialize";
 import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialized-types";
-import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import { OmnichainIndexingStatusIds, type OmnichainIndexingStatusSnapshot } from "./types";
 
 describe("ENSIndexer: Indexing Status", () => {

@@ -2,6 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { BlockRef } from "../../shared/types";
 import {
+  earlierBlockRef,
+  earliestBlockRef,
+  laterBlockRef,
+  latestBlockRef,
+} from "./block-refs.mock";
+import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
@@ -11,7 +17,6 @@ import {
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
 import { getOmnichainIndexingCursor, getOmnichainIndexingStatus } from "./helpers";
-import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import { OmnichainIndexingStatusIds } from "./types";
 
 describe("ENSIndexer: Indexing Snapshot helpers", () => {

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { earlierBlockRef, laterBlockRef } from "./block-refs.mock";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
 } from "./chain-indexing-status-snapshot";
 import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
 import { createRealtimeIndexingStatusProjection } from "./projection";
-import { earlierBlockRef, laterBlockRef } from "./test-helpers";
 import {
   CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
