@@ -6,24 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export interface ConfigInfoItemProps {
+export interface InfoCardItemProps {
   label: string;
   value: ReactNode;
   additionalInfo?: ReactNode;
 }
 
-export interface ConfigInfoFeatureProps {
+export interface InfoCardFeatureProps {
   label: string;
   description: ReactNode;
   icon: ReactElement;
 }
 
-export interface ConfigInfoFeaturesProps {
+export interface InfoCardFeaturesProps {
   activated?: boolean;
   children: ReactNode;
 }
 
-export interface ConfigInfoAppCardProps {
+export interface InfoCardProps {
   name?: string;
   icon?: ReactElement;
   version?: ReactElement;
@@ -39,9 +39,9 @@ const featureActivationsWrapperStyles =
   "flex flex-row flex-nowrap justify-start items-center gap-2";
 
 /**
- * ConfigInfoItem - Renders a single info item with label, value, and optional tooltip
+ * InfoCardItem - Renders a single info item with label, value, and optional tooltip
  */
-export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemProps) {
+export function InfoCardItem({ label, value, additionalInfo }: InfoCardItemProps) {
   return (
     <div className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start">
       <p className="flex flex-row flex-nowrap justify-start items-center gap-1 text-sm leading-6 font-semibold text-gray-500">
@@ -66,9 +66,9 @@ export function ConfigInfoItem({ label, value, additionalInfo }: ConfigInfoItemP
 }
 
 /**
- * ConfigInfoFeature - Renders a single feature badge with tooltip
+ * InfoCardFeature - Renders a single feature badge with tooltip
  */
-export function ConfigInfoFeature({ label, description, icon }: ConfigInfoFeatureProps) {
+export function InfoCardFeature({ label, description, icon }: InfoCardFeatureProps) {
   return (
     <div className="max-sm:w-full flex flex-row flex-nowrap justify-start max-sm:justify-between items-center gap-1">
       <div className={featureActivationsWrapperStyles}>
@@ -92,9 +92,9 @@ export function ConfigInfoFeature({ label, description, icon }: ConfigInfoFeatur
 }
 
 /**
- * ConfigInfoFeatures - Groups multiple features under "Activated" or "Deactivated" section
+ * InfoCardFeatures - Groups multiple features under "Activated" or "Deactivated" section
  */
-export function ConfigInfoFeatures({ activated = true, children }: ConfigInfoFeaturesProps) {
+export function InfoCardFeatures({ activated = true, children }: InfoCardFeaturesProps) {
   return (
     <CardContent className={cardContentStyles}>
       <div className="h-fit sm:min-w-[255px] flex flex-col justify-start items-start">
@@ -110,19 +110,13 @@ export function ConfigInfoFeatures({ activated = true, children }: ConfigInfoFea
 }
 
 /**
- * ConfigInfoItems - Wrapper for grouping ConfigInfoItem components
+ * InfoCardItems - Wrapper for grouping InfoCardItem components
  */
-export function ConfigInfoItems({ children }: { children: ReactNode }) {
+export function InfoCardItems({ children }: { children: ReactNode }) {
   return <CardContent className={cardContentStyles}>{children}</CardContent>;
 }
 
-export function ConfigInfoAppCard({
-  name,
-  icon,
-  version,
-  docsLink,
-  children,
-}: ConfigInfoAppCardProps) {
+export function InfoCard({ name, icon, version, docsLink, children }: InfoCardProps) {
   return (
     <Card className="shadow-xs">
       {(docsLink || name || icon || version) && (
@@ -154,5 +148,13 @@ export function ConfigInfoAppCard({
       )}
       {children}
     </Card>
+  );
+}
+
+export function InfoCardConnector() {
+  return (
+    <div className="relative h-10 pl-[38px]">
+      <div className="w-0.5 h-full border-l-2 border-dashed border-blue-500 animate-pulse" />
+    </div>
   );
 }

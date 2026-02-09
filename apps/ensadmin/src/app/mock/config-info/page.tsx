@@ -7,7 +7,7 @@ import { deserializeENSApiPublicConfig, SerializedENSApiPublicConfig } from "@en
 import {
   ENSNodeConfigInfoView,
   ENSNodeConfigInfoViewProps,
-} from "@/components/connection/config-info/config-info";
+} from "@/components/connection/cards/ensnode-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
