@@ -1,15 +1,10 @@
 import type { ParsePayload } from "zod/v4/core";
 
-import * as blockRef from "../../shared/block-ref";
 import type { ChainId } from "../../shared/types";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
-  type ChainIndexingStatusSnapshotBackfill,
-  type ChainIndexingStatusSnapshotCompleted,
-  type ChainIndexingStatusSnapshotFollowing,
-  type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
 import {
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
@@ -24,130 +19,6 @@ import type {
   OmnichainIndexingStatusSnapshotFollowing,
   RealtimeIndexingStatusProjection,
 } from "./types";
-
-/**
- * Invariants for {@link ChainIndexingSnapshot}.
- */
-
-/**
- * Invariants for chain snapshot in 'queued' status:
- * - `config.endBlock` (if set) is after `config.startBlock`.
- */
-export function invariant_chainSnapshotQueuedBlocks(
-  ctx: ParsePayload<ChainIndexingStatusSnapshotQueued>,
-) {
-  const { config } = ctx.value;
-
-  // The `config.endBlock` does not exists for `indefinite` config type
-  if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
-    // invariant holds
-    return;
-  }
-
-  if (config.endBlock && blockRef.isBeforeOrEqualTo(config.startBlock, config.endBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`config.startBlock` must be before or same as `config.endBlock`.",
-    });
-  }
-}
-
-/**
- * Invariants for chain snapshot in 'backfill' status:
- * - `config.startBlock` is before or same as `latestIndexedBlock`.
- * - `latestIndexedBlock` is before or same as `backfillEndBlock`.
- * - `backfillEndBlock` is the same as `config.endBlock` (if set).
- */
-export function invariant_chainSnapshotBackfillBlocks(
-  ctx: ParsePayload<ChainIndexingStatusSnapshotBackfill>,
-) {
-  const { config, latestIndexedBlock, backfillEndBlock } = ctx.value;
-
-  if (blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`config.startBlock` must be before or same as `latestIndexedBlock`.",
-    });
-  }
-
-  if (blockRef.isBeforeOrEqualTo(latestIndexedBlock, backfillEndBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`latestIndexedBlock` must be before or same as `backfillEndBlock`.",
-    });
-  }
-
-  // The `config.endBlock` does not exists for `indefinite` config type
-  if (config.configType === ChainIndexingConfigTypeIds.Indefinite) {
-    // invariant holds
-    return;
-  }
-
-  if (config.endBlock && blockRef.isEqualTo(backfillEndBlock, config.endBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`backfillEndBlock` must be the same as `config.endBlock`.",
-    });
-  }
-}
-
-/**
- * Invariants for chain snapshot in 'completed' status:
- * - `config.startBlock` is before or same as `latestIndexedBlock`.
- * - `latestIndexedBlock` is before or same as `config.endBlock`.
- */
-export function invariant_chainSnapshotCompletedBlocks(
-  ctx: ParsePayload<ChainIndexingStatusSnapshotCompleted>,
-) {
-  const { config, latestIndexedBlock } = ctx.value;
-
-  if (blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`config.startBlock` must be before or same as `latestIndexedBlock`.",
-    });
-  }
-
-  if (blockRef.isBeforeOrEqualTo(latestIndexedBlock, config.endBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`latestIndexedBlock` must be before or same as `config.endBlock`.",
-    });
-  }
-}
-
-/**
- * Invariants for chain snapshot in 'following' status:
- * - `config.startBlock` is before or same as `latestIndexedBlock`.
- * - `latestIndexedBlock` is before or same as `latestKnownBlock`.
- */
-export function invariant_chainSnapshotFollowingBlocks(
-  ctx: ParsePayload<ChainIndexingStatusSnapshotFollowing>,
-) {
-  const { config, latestIndexedBlock, latestKnownBlock } = ctx.value;
-
-  if (blockRef.isBeforeOrEqualTo(config.startBlock, latestIndexedBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`config.startBlock` must be before or same as `latestIndexedBlock`.",
-    });
-  }
-
-  if (blockRef.isBeforeOrEqualTo(latestIndexedBlock, latestKnownBlock) === false) {
-    ctx.issues.push({
-      code: "custom",
-      input: ctx.value,
-      message: "`latestIndexedBlock` must be before or same as `latestKnownBlock`.",
-    });
-  }
-}
 
 /**
  * Invariants for {@link OmnichainIndexingSnapshot}.
