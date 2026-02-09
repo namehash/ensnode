@@ -30,11 +30,13 @@ import type { DeepPartial } from "./utils";
 const schemaSerializedChainIndexingMetricsQueued = z.object({
   state: z.literal(ChainIndexingStates.Queued),
   backfillTotalBlocks: schemaPositiveInteger,
+  latestSyncedBlock: schemaBlockRef,
 });
 
 const schemaSerializedChainIndexingMetricsBackfill = z.object({
   state: z.literal(ChainIndexingStates.Backfill),
   backfillTotalBlocks: schemaPositiveInteger,
+  latestSyncedBlock: schemaBlockRef,
 });
 
 const schemaSerializedChainIndexingMetricsRealtime = z.object({

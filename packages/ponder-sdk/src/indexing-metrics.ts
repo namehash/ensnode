@@ -63,14 +63,24 @@ export type ChainIndexingState = (typeof ChainIndexingStates)[keyof typeof Chain
  *
  * Represents the indexing metrics for a chain that has not started
  * indexing yet, and is queued to transition to backfill phase,
- * where it will be indexed by a Ponder app
+ * where it will be indexed by a Ponder app. While indexing is queued,
+ * the Ponder app may be discovering blocks for the chain via RPCs.
  */
 export interface ChainIndexingMetricsQueued {
   state: typeof ChainIndexingStates.Queued;
 
   /**
+   * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
+   * and stored in the RPC cache as of the time the metric value was captured.
+   */
+  latestSyncedBlock: BlockRef;
+
+  /**
    *
    * Total count of blocks required to be indexed during backfill.
+   *
+   * Each time a Ponder app restarts, if it enters queued mode,
+   * a new value will be calculated based on the current state of the chain.
    *
    * Guaranteed to be a positive integer.
    */
@@ -87,8 +97,17 @@ export interface ChainIndexingMetricsBackfill {
   state: typeof ChainIndexingStates.Backfill;
 
   /**
+   * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
+   * and stored in the RPC cache as of the time the metric value was captured.
+   */
+  latestSyncedBlock: BlockRef;
+
+  /**
    *
    * Total count of blocks required to be indexed during backfill.
+   *
+   * Each time a Ponder app restarts, if it enters backfill mode,
+   * a new value will be calculated based on the current state of the chain.
    *
    * Guaranteed to be a positive integer.
    */
