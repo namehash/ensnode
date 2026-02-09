@@ -182,6 +182,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboard = {
       chainId: 1,
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     },
+    rulesUrl: new URL("https://example.com/rules"),
   },
   aggregatedMetrics: {
     grandTotalReferrals: 0,
@@ -204,6 +205,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboard = {
       chainId: 1,
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     },
+    rulesUrl: new URL("https://example.com/rules"),
   },
   aggregatedMetrics: {
     grandTotalReferrals: 68,
@@ -693,6 +695,7 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
         chainId: 1,
         address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
       },
+      rulesUrl: new URL("https://example.com/rules"),
     },
     referrers: [
       {

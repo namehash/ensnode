@@ -12,9 +12,9 @@ import {
 import type { ReferralProgramRules } from "./rules";
 
 /**
- * The type of referrer detail data.
+ * The type of referrer edition metrics data.
  */
-export const ReferrerDetailTypeIds = {
+export const ReferrerEditionMetricsTypeIds = {
   /**
    * Represents a referrer who is ranked on the leaderboard.
    */
@@ -27,26 +27,26 @@ export const ReferrerDetailTypeIds = {
 } as const;
 
 /**
- * The derived string union of possible {@link ReferrerDetailTypeIds}.
+ * The derived string union of possible {@link ReferrerEditionMetricsTypeIds}.
  */
-export type ReferrerDetailTypeId =
-  (typeof ReferrerDetailTypeIds)[keyof typeof ReferrerDetailTypeIds];
+export type ReferrerEditionMetricsTypeId =
+  (typeof ReferrerEditionMetricsTypeIds)[keyof typeof ReferrerEditionMetricsTypeIds];
 
 /**
- * Referrer detail data for a specific referrer address on the leaderboard.
+ * Referrer edition metrics data for a specific referrer address on the leaderboard.
  *
  * Includes the referrer's awarded metrics from the leaderboard plus timestamp.
  *
  * Invariants:
- * - `type` is always {@link ReferrerDetailTypeIds.Ranked}.
+ * - `type` is always {@link ReferrerEditionMetricsTypeIds.Ranked}.
  *
  * @see {@link AwardedReferrerMetrics}
  */
-export interface ReferrerDetailRanked {
+export interface ReferrerEditionMetricsRanked {
   /**
-   * The type of referrer detail data.
+   * The type of referrer edition metrics data.
    */
-  type: typeof ReferrerDetailTypeIds.Ranked;
+  type: typeof ReferrerEditionMetricsTypeIds.Ranked;
 
   /**
    * The {@link ReferralProgramRules} used to calculate the {@link AwardedReferrerMetrics}.
@@ -67,26 +67,26 @@ export interface ReferrerDetailRanked {
   aggregatedMetrics: AggregatedReferrerMetrics;
 
   /**
-   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerDetailData} was accurate as of.
+   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsRanked} was accurate as of.
    */
   accurateAsOf: UnixTimestamp;
 }
 
 /**
- * Referrer detail data for a specific referrer address NOT on the leaderboard.
+ * Referrer edition metrics data for a specific referrer address NOT on the leaderboard.
  *
  * Includes the referrer's unranked metrics (with null rank and isQualified: false) plus timestamp.
  *
  * Invariants:
- * - `type` is always {@link ReferrerDetailTypeIds.Unranked}.
+ * - `type` is always {@link ReferrerEditionMetricsTypeIds.Unranked}.
  *
  * @see {@link UnrankedReferrerMetrics}
  */
-export interface ReferrerDetailUnranked {
+export interface ReferrerEditionMetricsUnranked {
   /**
-   * The type of referrer detail data.
+   * The type of referrer edition metrics data.
    */
-  type: typeof ReferrerDetailTypeIds.Unranked;
+  type: typeof ReferrerEditionMetricsTypeIds.Unranked;
 
   /**
    * The {@link ReferralProgramRules} used to calculate the {@link UnrankedReferrerMetrics}.
@@ -106,39 +106,39 @@ export interface ReferrerDetailUnranked {
   aggregatedMetrics: AggregatedReferrerMetrics;
 
   /**
-   * The {@link UnixTimestamp} of when the data used to build the {@link UnrankedReferrerDetailData} was accurate as of.
+   * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsUnranked} was accurate as of.
    */
   accurateAsOf: UnixTimestamp;
 }
 
 /**
- * Referrer detail data for a specific referrer address.
+ * Referrer edition metrics data for a specific referrer address.
  *
  * Use the `type` field to determine the specific type interpretation
  * at runtime.
  */
-export type ReferrerDetail = ReferrerDetailRanked | ReferrerDetailUnranked;
+export type ReferrerEditionMetrics = ReferrerEditionMetricsRanked | ReferrerEditionMetricsUnranked;
 
 /**
- * Get the detail for a specific referrer from the leaderboard.
+ * Get the edition metrics for a specific referrer from the leaderboard.
  *
- * Returns a {@link ReferrerDetailRanked} if the referrer is on the leaderboard,
- * or a {@link ReferrerDetailUnranked} if the referrer has no referrals.
+ * Returns a {@link ReferrerEditionMetricsRanked} if the referrer is on the leaderboard,
+ * or a {@link ReferrerEditionMetricsUnranked} if the referrer has no referrals.
  *
  * @param referrer - The referrer address to look up
  * @param leaderboard - The referrer leaderboard to query
- * @returns The appropriate {@link ReferrerDetail} (ranked or unranked)
+ * @returns The appropriate {@link ReferrerEditionMetrics} (ranked or unranked)
  */
-export const getReferrerDetail = (
+export const getReferrerEditionMetrics = (
   referrer: Address,
   leaderboard: ReferrerLeaderboard,
-): ReferrerDetail => {
+): ReferrerEditionMetrics => {
   const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
 
   // If referrer is on the leaderboard, return their ranked metrics
   if (awardedReferrerMetrics) {
     return {
-      type: ReferrerDetailTypeIds.Ranked,
+      type: ReferrerEditionMetricsTypeIds.Ranked,
       rules: leaderboard.rules,
       referrer: awardedReferrerMetrics,
       aggregatedMetrics: leaderboard.aggregatedMetrics,
@@ -148,7 +148,7 @@ export const getReferrerDetail = (
 
   // If referrer not found, return an unranked referrer record
   return {
-    type: ReferrerDetailTypeIds.Unranked,
+    type: ReferrerEditionMetricsTypeIds.Unranked,
     rules: leaderboard.rules,
     referrer: buildUnrankedReferrerMetrics(referrer),
     aggregatedMetrics: leaderboard.aggregatedMetrics,

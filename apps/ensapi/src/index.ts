@@ -8,8 +8,9 @@ import { html } from "hono/html";
 import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
+import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
+import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-edition-set.cache";
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
-import { referrerLeaderboardCacheV1 } from "@/cache/referrer-leaderboard.cache-v1";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
 import { factory } from "@/lib/hono-factory";
@@ -161,8 +162,18 @@ const gracefulShutdown = async () => {
     referrerLeaderboardCache.destroy();
     logger.info("Destroyed referrerLeaderboardCache");
 
-    referrerLeaderboardCacheV1.destroy();
-    logger.info("Destroyed referrerLeaderboardCacheV1");
+    // Destroy referral program edition config set cache
+    referralProgramEditionConfigSetCache.destroy();
+    logger.info("Destroyed referralProgramEditionConfigSetCache");
+
+    // Destroy all edition caches (if initialized)
+    const editionsCaches = getReferralLeaderboardEditionsCaches();
+    if (editionsCaches) {
+      for (const [editionSlug, cache] of editionsCaches) {
+        cache.destroy();
+        logger.info(`Destroyed referralLeaderboardEditionsCache for ${editionSlug}`);
+      }
+    }
 
     indexingStatusCache.destroy();
     logger.info("Destroyed indexingStatusCache");
