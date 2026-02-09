@@ -4,8 +4,10 @@ import type {
   ChainIndexingStatusSnapshotBackfill,
   ChainIndexingStatusSnapshotCompleted,
   ChainIndexingStatusSnapshotFollowing,
-  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   ChainIndexingStatusSnapshotQueued,
+} from "./chain-indexing-status-snapshot";
+import type {
+  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   CrossChainIndexingStatusSnapshot,
   CrossChainIndexingStatusSnapshotOmnichain,
   OmnichainIndexingStatusSnapshot,

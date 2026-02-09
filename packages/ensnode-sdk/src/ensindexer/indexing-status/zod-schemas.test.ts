@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
@@ -10,7 +9,8 @@ import {
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-} from "./types";
+} from "./chain-indexing-status-snapshot";
+import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import { makeChainIndexingStatusSnapshotSchema } from "./zod-schemas";
 
 describe("ENSIndexer: Indexing Status", () => {

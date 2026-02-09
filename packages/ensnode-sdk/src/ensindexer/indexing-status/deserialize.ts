@@ -1,5 +1,6 @@
 import { prettifyError } from "zod/v4";
 
+import type { ChainIndexingStatusSnapshot } from "./chain-indexing-status-snapshot";
 import type {
   SerializedChainIndexingStatusSnapshot,
   SerializedCrossChainIndexingStatusSnapshot,
@@ -7,7 +8,6 @@ import type {
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import type {
-  ChainIndexingStatusSnapshot,
   CrossChainIndexingStatusSnapshot,
   OmnichainIndexingStatusSnapshot,
   RealtimeIndexingStatusProjection,

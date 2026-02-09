@@ -7,8 +7,10 @@ import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotCompleted,
-  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotQueued,
+} from "./chain-indexing-status-snapshot";
+import {
+  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   type CrossChainIndexingStatusSnapshot,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,

@@ -1,3 +1,4 @@
+export * from "./chain-indexing-status-snapshot";
 export * from "./deserialize";
 export * from "./helpers";
 export * from "./projection";

@@ -1,6 +1,7 @@
 import { serializeChainId } from "../../shared/serialize";
 import type { ChainIdString } from "../../shared/serialized-types";
 import type { ChainId } from "../../shared/types";
+import type { ChainIndexingStatusSnapshot } from "./chain-indexing-status-snapshot";
 import type {
   SerializedCrossChainIndexingStatusSnapshot,
   SerializedOmnichainIndexingStatusSnapshot,
@@ -11,7 +12,6 @@ import type {
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import {
-  type ChainIndexingStatusSnapshot,
   type CrossChainIndexingStatusSnapshot,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,

@@ -2,12 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import type { BlockRef } from "../../shared/types";
 import {
-  createIndexingConfig,
-  getOmnichainIndexingCursor,
-  getOmnichainIndexingStatus,
-} from "./helpers";
-import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
-import {
   type ChainIndexingConfigDefinite,
   type ChainIndexingConfigIndefinite,
   ChainIndexingConfigTypeIds,
@@ -17,8 +11,14 @@ import {
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  OmnichainIndexingStatusIds,
-} from "./types";
+} from "./chain-indexing-status-snapshot";
+import {
+  createIndexingConfig,
+  getOmnichainIndexingCursor,
+  getOmnichainIndexingStatus,
+} from "./helpers";
+import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
+import { OmnichainIndexingStatusIds } from "./types";
 
 describe("ENSIndexer: Indexing Snapshot helpers", () => {
   describe("getOmnichainIndexingStatus", () => {

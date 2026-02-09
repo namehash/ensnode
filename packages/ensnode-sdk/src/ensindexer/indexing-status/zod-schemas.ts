@@ -17,16 +17,17 @@ import {
   makeUnixTimestampSchema,
 } from "../../shared/zod-schemas";
 import {
-  ChainIndexingConfig,
+  type ChainIndexingConfig,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotFollowing,
-  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  CrossChainIndexingStatusSnapshot,
+} from "./chain-indexing-status-snapshot";
+import {
+  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
