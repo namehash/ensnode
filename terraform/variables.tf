@@ -21,11 +21,6 @@ variable "render_owner_id" {
   type = string
 }
 
-variable "ensdb_disk_size_gb" {
-  type    = number
-  default = 255
-}
-
 # ENSNode Variables
 
 variable "alchemy_api_key" {
