@@ -6,11 +6,13 @@ import { makeBlockRefSchema } from "../../../shared/zod-schemas";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
+  type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
 } from "../chain-indexing-status-snapshot";
+import type { SerializedChainIndexingStatusSnapshot } from "../serialize/chain-indexing-status-snapshot";
 
 /**
  * Invariants for chain snapshot in 'queued' status:
@@ -214,3 +216,9 @@ export const makeChainIndexingStatusSnapshotSchema = (valueLabel: string = "Valu
     makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
     makeChainIndexingStatusSnapshotFollowingSchema(valueLabel),
   ]);
+
+/**
+ * Makes Zod schema for {@link SerializedChainIndexingStatusSnapshot}
+ */
+export const makeSerializedChainIndexingStatusSnapshotSchema =
+  makeChainIndexingStatusSnapshotSchema;
