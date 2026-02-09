@@ -75,11 +75,25 @@ export function validateReferralProgramEditionConfigSet(
  *
  * @param configs - Array of edition configurations to add to the set
  * @returns A validated edition config set
- * @throws {Error} If any config would violate the invariant
+ * @throws {Error} If duplicate slugs are detected or if any config would violate the invariant
  */
 export function buildReferralProgramEditionConfigSet(
   configs: ReferralProgramEditionConfig[],
 ): ReferralProgramEditionConfigSet {
+  // Check for duplicate slugs before creating the Map
+  const slugCounts = configs.reduce((counts, config) => {
+    counts.set(config.slug, (counts.get(config.slug) || 0) + 1);
+    return counts;
+  }, new Map<ReferralProgramEditionSlug, number>());
+
+  const duplicates = Array.from(slugCounts.entries())
+    .filter(([_, count]) => count > 1)
+    .map(([slug, count]) => `"${slug}" (${count} occurrences)`);
+
+  if (duplicates.length > 0) {
+    throw new Error(`Duplicate edition config slugs detected: ${duplicates.join(", ")}`);
+  }
+
   const configSet = new Map(configs.map((config) => [config.slug, config]));
   validateReferralProgramEditionConfigSet(configSet);
   return configSet;
