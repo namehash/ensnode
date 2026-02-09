@@ -16,7 +16,7 @@ import {
   type ChainIndexingMetricsCompleted,
   type ChainIndexingMetricsQueued,
   type ChainIndexingMetricsRealtime,
-  ChainIndexingMetricTypes,
+  ChainIndexingStates,
   PonderAppCommands,
   type PonderApplicationSettings,
   type PonderIndexingMetrics,
@@ -28,29 +28,29 @@ import { deserializePrometheusMetrics, type PrometheusMetrics } from "./promethe
 import type { DeepPartial } from "./utils";
 
 const schemaSerializedChainIndexingMetricsQueued = z.object({
-  type: z.literal(ChainIndexingMetricTypes.Queued),
+  state: z.literal(ChainIndexingStates.Queued),
   backfillTotalBlocks: schemaPositiveInteger,
 });
 
 const schemaSerializedChainIndexingMetricsBackfill = z.object({
-  type: z.literal(ChainIndexingMetricTypes.Backfill),
+  state: z.literal(ChainIndexingStates.Backfill),
   backfillTotalBlocks: schemaPositiveInteger,
 });
 
 const schemaSerializedChainIndexingMetricsRealtime = z.object({
-  type: z.literal(ChainIndexingMetricTypes.Realtime),
-  latestKnownBlock: schemaBlockRef,
+  state: z.literal(ChainIndexingStates.Realtime),
+  latestSyncedBlock: schemaBlockRef,
 });
 
 const schemaSerializedChainIndexingMetricsCompleted = z.object({
-  type: z.literal(ChainIndexingMetricTypes.Completed),
-  targetBlock: schemaBlockRef,
+  state: z.literal(ChainIndexingStates.Completed),
+  finalIndexedBlock: schemaBlockRef,
 });
 
 /**
  * Schema describing the chain indexing metrics.
  */
-const schemaSerializedChainIndexingMetrics = z.discriminatedUnion("type", [
+const schemaSerializedChainIndexingMetrics = z.discriminatedUnion("state", [
   schemaSerializedChainIndexingMetricsQueued,
   schemaSerializedChainIndexingMetricsBackfill,
   schemaSerializedChainIndexingMetricsRealtime,
@@ -92,7 +92,7 @@ function buildUnvalidatedChainIndexingMetrics(
   // we can assume the chain is still queued to be indexed.
   if (ponderHistoricalCompletedIndexingSeconds === 0) {
     return {
-      type: ChainIndexingMetricTypes.Queued,
+      state: ChainIndexingStates.Queued,
       backfillTotalBlocks,
     } satisfies DeepPartial<ChainIndexingMetricsQueued>;
   }
@@ -122,8 +122,8 @@ function buildUnvalidatedChainIndexingMetrics(
   // the indexing has been completed for the chain.
   if (ponderSyncIsComplete === 1) {
     return {
-      type: ChainIndexingMetricTypes.Completed,
-      targetBlock: latestSyncedBlock,
+      state: ChainIndexingStates.Completed,
+      finalIndexedBlock: latestSyncedBlock,
     } satisfies DeepPartial<ChainIndexingMetricsCompleted>;
   }
 
@@ -131,13 +131,13 @@ function buildUnvalidatedChainIndexingMetrics(
   // the indexing is currently in realtime for the chain.
   if (ponderSyncIsRealtime === 1) {
     return {
-      type: ChainIndexingMetricTypes.Realtime,
-      latestKnownBlock: latestSyncedBlock,
+      state: ChainIndexingStates.Realtime,
+      latestSyncedBlock,
     } satisfies DeepPartial<ChainIndexingMetricsRealtime>;
   }
 
   return {
-    type: ChainIndexingMetricTypes.Backfill,
+    state: ChainIndexingStates.Backfill,
     backfillTotalBlocks,
   } satisfies DeepPartial<ChainIndexingMetricsBackfill>;
 }

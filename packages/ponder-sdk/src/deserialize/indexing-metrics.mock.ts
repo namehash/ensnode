@@ -1,6 +1,6 @@
 import {
   type ChainIndexingMetricsRealtime,
-  ChainIndexingMetricTypes,
+  ChainIndexingStates,
   PonderAppCommands,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
@@ -66,43 +66,43 @@ ponder_historical_total_blocks{chain="59144"} 21873991
       [
         10,
         {
-          type: ChainIndexingMetricTypes.Realtime,
-          latestKnownBlock: { number: 147268938, timestamp: 1770136653 },
+          state: ChainIndexingStates.Realtime,
+          latestSyncedBlock: { number: 147268938, timestamp: 1770136653 },
         } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         1,
         {
-          type: ChainIndexingMetricTypes.Realtime,
-          latestKnownBlock: { number: 24377568, timestamp: 1770136655 },
+          state: ChainIndexingStates.Realtime,
+          latestSyncedBlock: { number: 24377568, timestamp: 1770136655 },
         } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         8453,
         {
-          type: ChainIndexingMetricTypes.Realtime,
-          latestKnownBlock: { number: 41673653, timestamp: 1770136653 },
+          state: ChainIndexingStates.Realtime,
+          latestSyncedBlock: { number: 41673653, timestamp: 1770136653 },
         } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         534352,
         {
-          type: ChainIndexingMetricTypes.Realtime,
-          latestKnownBlock: { number: 29373405, timestamp: 1770136654 },
+          state: ChainIndexingStates.Realtime,
+          latestSyncedBlock: { number: 29373405, timestamp: 1770136654 },
         } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         42161,
         {
-          type: ChainIndexingMetricTypes.Realtime,
-          latestKnownBlock: { number: 428248999, timestamp: 1770136654 },
+          state: ChainIndexingStates.Realtime,
+          latestSyncedBlock: { number: 428248999, timestamp: 1770136654 },
         } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         59144,
         {
-          type: ChainIndexingMetricTypes.Realtime,
-          latestKnownBlock: { number: 28584906, timestamp: 1770136654 },
+          state: ChainIndexingStates.Realtime,
+          latestSyncedBlock: { number: 28584906, timestamp: 1770136654 },
         } satisfies ChainIndexingMetricsRealtime,
       ],
     ]),

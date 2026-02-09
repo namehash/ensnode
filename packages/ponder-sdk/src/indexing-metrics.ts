@@ -45,55 +45,18 @@ export interface PonderApplicationSettings {
 }
 
 /**
- * Chain Indexing Metric Types
+ * Chain Indexing States
  *
- * Represents the different types of indexing states for a chain indexed by
- * a Ponder app.
+ * Represents the indexing state of a chain indexed by a Ponder app.
  */
-export const ChainIndexingMetricTypes = {
+export const ChainIndexingStates = {
   Queued: "queued",
   Backfill: "backfill",
   Completed: "completed",
   Realtime: "realtime",
 } as const;
 
-export type ChainIndexingMetricType =
-  (typeof ChainIndexingMetricTypes)[keyof typeof ChainIndexingMetricTypes];
-
-/**
- * Number of blocks required to be indexed during backfill.
- *
- * References `ponder_historical_total_blocks` Ponder metric.
- *
- * This value is calculated at the time the Ponder app starts,
- * even for each indexed chain.
- *
- * If Ponder config specifies a "config end block" for the chain,
- * the `ponder_historical_total_blocks` will be the number of blocks
- * between the "config start block" and the specified "config end block".
- * For example:
- * ```
- * ponder_historical_total_blocks = configEndBlock - configStartBlock + 1
- * ```
- *
- * If Ponder config does not specify the "config end block" for the chain,
- * the `ponder_historical_total_blocks` will be the number of blocks
- * between the "config start block" and the "latest known block"
- * for the chain at the time the backfill starts.
- * The "latest known block" is the "highest" block that has been
- * discovered by RPCs and stored in the RPC cache as of the time
- * the metric value was captured.
- *
- * Each restart of the Ponder app will result in a new value based on
- * the current "latest known block" for the chain at that time.
- * For example:
- * ```
- * ponder_historical_total_blocks = latestKnownBlock - configStartBlock + 1
- * ```
- *
- * Guaranteed to be a positive integer.
- */
-export type BackfillTotalBlocks = number;
+export type ChainIndexingState = (typeof ChainIndexingStates)[keyof typeof ChainIndexingStates];
 
 /**
  * Chain Indexing Metrics Queued
@@ -103,12 +66,15 @@ export type BackfillTotalBlocks = number;
  * where it will be indexed by a Ponder app
  */
 export interface ChainIndexingMetricsQueued {
-  type: typeof ChainIndexingMetricTypes.Queued;
+  state: typeof ChainIndexingStates.Queued;
 
   /**
-   * Total number of blocks to be indexed for the chain during backfill phase.
+   *
+   * Total count of blocks required to be indexed during backfill.
+   *
+   * Guaranteed to be a positive integer.
    */
-  backfillTotalBlocks: BackfillTotalBlocks;
+  backfillTotalBlocks: number;
 }
 
 /**
@@ -118,12 +84,15 @@ export interface ChainIndexingMetricsQueued {
  * the backfill phase of indexing by a Ponder app.
  */
 export interface ChainIndexingMetricsBackfill {
-  type: typeof ChainIndexingMetricTypes.Backfill;
+  state: typeof ChainIndexingStates.Backfill;
 
   /**
-   * Total number of blocks to be indexed for the chain during backfill phase.
+   *
+   * Total count of blocks required to be indexed during backfill.
+   *
+   * Guaranteed to be a positive integer.
    */
-  backfillTotalBlocks: BackfillTotalBlocks;
+  backfillTotalBlocks: number;
 }
 
 /**
@@ -135,36 +104,37 @@ export interface ChainIndexingMetricsBackfill {
  * no "config end block" specified for the chain.
  *
  * The indexing continues in realtime, with no "target end block".
- * The "latest known block" is continuously updated as new blocks are
+ * The "latest synced block" is continuously updated as new blocks are
  * discovered by RPCs and stored in the RPC cache.
  */
 export interface ChainIndexingMetricsRealtime {
-  type: typeof ChainIndexingMetricTypes.Realtime;
+  state: typeof ChainIndexingStates.Realtime;
 
   /**
    * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
    * and stored in the RPC cache as of the time the metric value was captured.
    */
-  latestKnownBlock: BlockRef;
+  latestSyncedBlock: BlockRef;
 }
 
 /**
  * Chain Indexing Metrics Completed
  *
- * Represents the indexing metrics for a chain that has completed indexing by
- * a Ponder app. It means that the backfill phase transitioned to completed phase.
- * No more blocks are required to be indexed for the chain at this point.
+ * Represents the indexing metrics for a chain configured to only index
+ * a finite range of blocks where all blocks in that finite range
+ * have been indexed.
  */
 export interface ChainIndexingMetricsCompleted {
-  type: typeof ChainIndexingMetricTypes.Completed;
+  state: typeof ChainIndexingStates.Completed;
 
   /**
-   * Target block
+   * Final indexed block
    *
-   * A {@link BlockRef} to the block that was the target of the indexing for the chain.
-   * There are no more blocks required to be indexed for the chain after this block.
+   * A {@link BlockRef} to the final block that was the finite target
+   * for indexing the chain. No more blocks will be indexed for the chain
+   * after this block.
    */
-  targetBlock: BlockRef;
+  finalIndexedBlock: BlockRef;
 }
 
 /**
