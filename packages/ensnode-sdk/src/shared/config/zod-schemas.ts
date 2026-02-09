@@ -58,10 +58,6 @@ export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
     `Invalid NAMESPACE. Got '${input}', but supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`,
 });
 
-/**
- * Parses a numeric value as a port number.
- * Ensures the value is an integer (not a float) within the valid port range (1-65535).
- */
 export const PortSchemaBase = z.coerce
   .number({ error: "PORT must be a number." })
   .int({ error: "PORT must be an integer." })

@@ -18,8 +18,6 @@ export namespace EnsRainbow {
 
     /**
      * Get the public configuration of the ENSRainbow service
-     *
-     * @returns the public configuration of the ENSRainbow service
      */
     config(): Promise<ENSRainbowPublicConfig>;
 
@@ -35,7 +33,6 @@ export namespace EnsRainbow {
      * Get the version information of the ENSRainbow service
      *
      * @deprecated Use {@link ApiClient.config} instead. This method will be removed in a future version.
-     * @returns the version information of the ENSRainbow service
      */
     version(): Promise<VersionResponse>;
 
@@ -177,14 +174,11 @@ export namespace EnsRainbow {
 
     /**
      * The label set reference managed by the ENSRainbow server.
-     * This includes both the label set ID and the highest label set version available.
      */
     labelSet: EnsRainbowServerLabelSet;
 
     /**
      * The total count of records managed by the ENSRainbow service.
-     * This represents the number of rainbow records that can be healed.
-     * Always a non-negative integer.
      */
     recordsCount: number;
   }
@@ -397,9 +391,7 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   /**
-   * Get the public configuration of the ENSRainbow service
-   *
-   * @returns the public configuration of the ENSRainbow service
+   * Get the public configuration of the ENSRainbow service.
    */
   async config(): Promise<EnsRainbow.ENSRainbowPublicConfig> {
     const response = await fetch(new URL("/v1/config", this.options.endpointUrl));

@@ -50,9 +50,4 @@ export type DatabaseSchemaName = z.infer<typeof DatabaseSchemaNameSchema>;
 export type EnsIndexerUrl = z.infer<typeof EnsIndexerUrlSchema>;
 export type TheGraphApiKey = z.infer<typeof TheGraphApiKeySchema>;
 
-/**
- * Port number for network services.
- *
- * Inferred from {@link PortSchemaBase} - see that schema for invariants.
- */
 export type PortNumber = z.infer<typeof PortSchemaBase>;

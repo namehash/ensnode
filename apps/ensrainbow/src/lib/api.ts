@@ -115,8 +115,6 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   });
 
   api.get("/v1/config", (c: HonoContext) => {
-    // Return the cached public config built on startup
-    // This avoids database queries on every request
     return c.json(cachedPublicConfig);
   });
 
