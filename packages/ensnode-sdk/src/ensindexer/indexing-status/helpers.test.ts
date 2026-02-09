@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import type { BlockRef } from "../../shared/types";
 import {
-  type ChainIndexingConfigDefinite,
-  type ChainIndexingConfigIndefinite,
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
@@ -12,11 +10,7 @@ import {
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
-import {
-  createIndexingConfig,
-  getOmnichainIndexingCursor,
-  getOmnichainIndexingStatus,
-} from "./helpers";
+import { getOmnichainIndexingCursor, getOmnichainIndexingStatus } from "./helpers";
 import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
 import { OmnichainIndexingStatusIds } from "./types";
 
@@ -162,39 +156,6 @@ describe("ENSIndexer: Indexing Snapshot helpers", () => {
 
       // assert
       expect(overallIndexingStatus).toStrictEqual(OmnichainIndexingStatusIds.Following);
-    });
-  });
-
-  describe("createIndexingConfig", () => {
-    it("returns 'definite' indexer config if the endBlock exists", () => {
-      // arrange
-      const startBlock = earlierBlockRef;
-      const endBlock = laterBlockRef;
-
-      // act
-      const indexingConfig = createIndexingConfig(startBlock, endBlock);
-
-      // assert
-      expect(indexingConfig).toStrictEqual({
-        configType: ChainIndexingConfigTypeIds.Definite,
-        startBlock: earlierBlockRef,
-        endBlock: laterBlockRef,
-      } satisfies ChainIndexingConfigDefinite);
-    });
-
-    it("returns 'indefinite' indexer config if the endBlock exists", () => {
-      // arrange
-      const startBlock = earlierBlockRef;
-      const endBlock = null;
-
-      // act
-      const indexingConfig = createIndexingConfig(startBlock, endBlock);
-
-      // assert
-      expect(indexingConfig).toStrictEqual({
-        configType: ChainIndexingConfigTypeIds.Indefinite,
-        startBlock: earlierBlockRef,
-      } satisfies ChainIndexingConfigIndefinite);
     });
   });
 });

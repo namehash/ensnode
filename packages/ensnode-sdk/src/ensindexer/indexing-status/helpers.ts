@@ -1,9 +1,5 @@
 import type { BlockRef, ChainId, UnixTimestamp } from "../../shared/types";
 import {
-  type ChainIndexingConfig,
-  type ChainIndexingConfigDefinite,
-  type ChainIndexingConfigIndefinite,
-  ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotCompleted,
@@ -48,70 +44,6 @@ export function getOmnichainIndexingStatus(
 }
 
 /**
- * Get the timestamp of the lowest `config.startBlock` across all chains
- * in the provided array of {@link ChainIndexingStatusSnapshot}.
- *
- * Such timestamp is useful when presenting the "lowest" block
- * to be indexed across all chains.
- */
-export function getTimestampForLowestOmnichainStartBlock(
-  chains: ChainIndexingStatusSnapshot[],
-): UnixTimestamp {
-  const earliestKnownBlockTimestamps: UnixTimestamp[] = chains.map(
-    (chain) => chain.config.startBlock.timestamp,
-  );
-
-  return Math.min(...earliestKnownBlockTimestamps);
-}
-
-/**
- * Get the timestamp of the "highest known block" across all chains
- * in the provided array of {@link ChainIndexingStatusSnapshot}.
- *
- * Such timestamp is useful when presenting the "highest known block"
- * to be indexed across all chains.
- *
- * The "highest known block" for a chain depends on its status:
- * - `config.endBlock` for a "queued" chain,
- * - `backfillEndBlock` for a "backfill" chain,
- * - `latestIndexedBlock` for a "completed" chain,
- * - `latestKnownBlock` for a "following" chain.
- */
-export function getTimestampForHighestOmnichainKnownBlock(
-  chains: ChainIndexingStatusSnapshot[],
-): UnixTimestamp {
-  const latestKnownBlockTimestamps: UnixTimestamp[] = [];
-
-  for (const chain of chains) {
-    switch (chain.chainStatus) {
-      case ChainIndexingStatusIds.Queued:
-        if (
-          chain.config.configType === ChainIndexingConfigTypeIds.Definite &&
-          chain.config.endBlock
-        ) {
-          latestKnownBlockTimestamps.push(chain.config.endBlock.timestamp);
-        }
-        break;
-
-      case ChainIndexingStatusIds.Backfill:
-        latestKnownBlockTimestamps.push(chain.backfillEndBlock.timestamp);
-
-        break;
-
-      case ChainIndexingStatusIds.Completed:
-        latestKnownBlockTimestamps.push(chain.latestIndexedBlock.timestamp);
-        break;
-
-      case ChainIndexingStatusIds.Following:
-        latestKnownBlockTimestamps.push(chain.latestKnownBlock.timestamp);
-        break;
-    }
-  }
-
-  return Math.max(...latestKnownBlockTimestamps);
-}
-
-/**
  * Get Omnichain Indexing Cursor
  *
  * The cursor tracks the "highest" latest indexed block timestamp across
@@ -147,30 +79,6 @@ export function getOmnichainIndexingCursor(chains: ChainIndexingStatusSnapshot[]
   }
 
   return Math.max(...latestIndexedBlockTimestamps);
-}
-
-/**
- * Create {@link ChainIndexingConfig} for given block refs.
- *
- * @param startBlock required block ref
- * @param endBlock optional block ref
- */
-export function createIndexingConfig(
-  startBlock: BlockRef,
-  endBlock: BlockRef | null,
-): ChainIndexingConfig {
-  if (endBlock) {
-    return {
-      configType: ChainIndexingConfigTypeIds.Definite,
-      startBlock,
-      endBlock,
-    } satisfies ChainIndexingConfigDefinite;
-  }
-
-  return {
-    configType: ChainIndexingConfigTypeIds.Indefinite,
-    startBlock,
-  } satisfies ChainIndexingConfigIndefinite;
 }
 
 /**
@@ -245,22 +153,6 @@ export function checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollo
   );
 
   return allChainsHaveValidStatuses;
-}
-
-/**
- * Sort a list of [{@link ChainId}, {@link ChainIndexingStatusSnapshot}] tuples
- * by the omnichain start block timestamp in ascending order.
- */
-export function sortChainStatusesByStartBlockAsc<
-  ChainStatusType extends ChainIndexingStatusSnapshot,
->(chains: [ChainId, ChainStatusType][]): [ChainId, ChainStatusType][] {
-  // Sort the chain statuses by the omnichain first block to index timestamp
-  chains.sort(
-    ([, chainA], [, chainB]) =>
-      chainA.config.startBlock.timestamp - chainB.config.startBlock.timestamp,
-  );
-
-  return chains;
 }
 
 /**
