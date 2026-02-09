@@ -1,12 +1,8 @@
-import packageJson from "@/../package.json" with { type: "json" };
-
 import { isAbsolute, resolve } from "node:path";
 
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import { PortSchema } from "@ensnode/ensnode-sdk/internal";
-import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
@@ -71,16 +67,4 @@ export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainb
 
     throw error;
   }
-}
-
-export function buildENSRainbowPublicConfig(
-  _config: ENSRainbowEnvConfig,
-  labelSet: EnsRainbowServerLabelSet,
-  recordsCount: number,
-): EnsRainbow.ENSRainbowPublicConfig {
-  return {
-    version: packageJson.version,
-    labelSet,
-    recordsCount,
-  };
 }

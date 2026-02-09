@@ -8,9 +8,10 @@ import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import { buildConfigFromEnvironment, buildENSRainbowPublicConfig } from "./config.schema";
+import { buildConfigFromEnvironment } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
+import { buildENSRainbowPublicConfig } from "./public";
 import type { ENSRainbowEnvConfig } from "./types";
 
 vi.mock("@/utils/logger", () => ({
