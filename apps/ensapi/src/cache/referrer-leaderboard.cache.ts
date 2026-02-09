@@ -2,7 +2,9 @@ import config from "@/config";
 
 import {
   buildReferralProgramRules,
+  ENS_HOLIDAY_AWARDS_END_DATE,
   ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
+  ENS_HOLIDAY_AWARDS_START_DATE,
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
 } from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
@@ -25,8 +27,8 @@ const logger = makeLogger("referrer-leaderboard-cache.cache");
 const rules = buildReferralProgramRules(
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
   ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-  config.ensHolidayAwardsStart,
-  config.ensHolidayAwardsEnd,
+  ENS_HOLIDAY_AWARDS_START_DATE,
+  ENS_HOLIDAY_AWARDS_END_DATE,
   getEthnamesSubregistryId(config.namespace),
 );
 

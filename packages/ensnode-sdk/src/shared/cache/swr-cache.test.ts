@@ -501,9 +501,9 @@ describe("SWRCache", () => {
       await vi.runAllTimersAsync();
       expect(fn).toHaveBeenCalledTimes(2);
 
-      // After failed revalidation, should still return initial error
+      // After failed revalidation, should still return revalidation error
       const result3 = await cache.read();
-      expect(result3).toBe(initialError);
+      expect(result3).toBe(revalidationError);
 
       // Advance time again to make error stale for next revalidation
       vi.advanceTimersByTime(2000);
@@ -552,6 +552,192 @@ describe("SWRCache", () => {
 
       await cache.read();
       expect(fn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("errorTtl", () => {
+    it("uses errorTtl for cached errors instead of ttl", async () => {
+      let shouldError = true;
+      const fn = vi.fn(async () => {
+        if (shouldError) throw new Error("Error");
+        return "success";
+      });
+
+      const cache = new SWRCache({
+        fn,
+        ttl: 10, // 10 seconds for success
+        errorTtl: 2, // 2 seconds for errors
+      });
+
+      // Initial error
+      const result1 = await cache.read();
+      expect(result1).toBeInstanceOf(Error);
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance by 1 second (less than errorTtl) - should not revalidate
+      vi.advanceTimersByTime(1000);
+      const result2 = await cache.read();
+      expect(result2).toBeInstanceOf(Error);
+      expect(fn).toHaveBeenCalledTimes(1); // No new call
+
+      // Advance by 2 more seconds (total 3, exceeds errorTtl of 2) - should revalidate
+      vi.advanceTimersByTime(2000);
+      shouldError = false;
+
+      const result3 = await cache.read();
+      expect(result3).toBeInstanceOf(Error); // Still stale error
+      expect(fn).toHaveBeenCalledTimes(2); // Revalidation triggered
+
+      // Wait for revalidation to complete
+      await vi.runAllTimersAsync();
+
+      // Now should have success
+      const result4 = await cache.read();
+      expect(result4).toBe("success");
+    });
+
+    it("switches to normal ttl after successful revalidation", async () => {
+      let shouldError = true;
+      const fn = vi.fn(async () => {
+        if (shouldError) throw new Error("Error");
+        return "success";
+      });
+
+      const cache = new SWRCache({
+        fn,
+        ttl: 10, // 10 seconds for success
+        errorTtl: 2, // 2 seconds for errors
+      });
+
+      // Initial error
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance past errorTtl
+      vi.advanceTimersByTime(3000);
+      shouldError = false;
+
+      // Trigger revalidation (will succeed)
+      await cache.read();
+      await vi.runAllTimersAsync();
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      // Now have success - advance by 3 seconds (less than ttl of 10)
+      vi.advanceTimersByTime(3000);
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(2); // Should NOT revalidate (ttl not exceeded)
+
+      // Advance by 8 more seconds (total 11, exceeds ttl of 10)
+      vi.advanceTimersByTime(8000);
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(3); // Should revalidate (ttl exceeded)
+    });
+
+    it("retries errors indefinitely when ttl is infinite but errorTtl is finite", async () => {
+      let callCount = 0;
+      const fn = vi.fn(async () => {
+        callCount++;
+        if (callCount <= 2) throw new Error(`Error ${callCount}`);
+        return "finally success";
+      });
+
+      const cache = new SWRCache({
+        fn,
+        ttl: Number.POSITIVE_INFINITY, // Never revalidate success
+        errorTtl: 2, // Retry errors every 2 seconds
+      });
+
+      // First error
+      const result1 = await cache.read();
+      expect(result1).toBeInstanceOf(Error);
+      expect((result1 as Error).message).toBe("Error 1");
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance past errorTtl - should retry
+      vi.advanceTimersByTime(3000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      const result2 = await cache.read();
+      expect(result2).toBeInstanceOf(Error);
+      expect((result2 as Error).message).toBe("Error 2");
+
+      // Advance past errorTtl again - should retry and succeed
+      vi.advanceTimersByTime(3000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+      expect(fn).toHaveBeenCalledTimes(3);
+
+      const result3 = await cache.read();
+      expect(result3).toBe("finally success");
+
+      // Advance by a very long time - should NOT revalidate (infinite ttl)
+      vi.advanceTimersByTime(1000000);
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(3); // Still 3, no new calls
+    });
+
+    it("uses normal ttl when errorTtl is not specified (backward compatibility)", async () => {
+      const shouldError = true;
+      const fn = vi.fn(async () => {
+        if (shouldError) throw new Error("Error");
+        return "success";
+      });
+
+      const cache = new SWRCache({
+        fn,
+        ttl: 5, // 5 seconds for both success and errors
+        // errorTtl not specified
+      });
+
+      // Initial error
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance by 3 seconds (less than ttl) - should not revalidate
+      vi.advanceTimersByTime(3000);
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Advance by 3 more seconds (total 6, exceeds ttl of 5) - should revalidate
+      vi.advanceTimersByTime(3000);
+      await cache.read();
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it("works with proactive initialization and errorTtl", async () => {
+      let shouldError = true;
+      const fn = vi.fn(async () => {
+        if (shouldError) throw new Error("Error");
+        return "success";
+      });
+
+      const cache = new SWRCache({
+        fn,
+        ttl: 10,
+        errorTtl: 2,
+        proactivelyInitialize: true,
+      });
+
+      // Should have called fn immediately
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      // Wait for initialization to complete
+      await vi.runAllTimersAsync();
+
+      const result1 = await cache.read();
+      expect(result1).toBeInstanceOf(Error);
+
+      // Advance past errorTtl
+      vi.advanceTimersByTime(3000);
+      shouldError = false;
+
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result2 = await cache.read();
+      expect(result2).toBe("success");
     });
   });
 });

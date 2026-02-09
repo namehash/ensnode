@@ -1,11 +1,7 @@
-import {
-  buildReferralProgramRules,
-  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-  type ReferrerLeaderboard,
-} from "@namehash/ens-referrals/v1";
-import { getUnixTime } from "date-fns";
+import { buildReferralProgramRules, type ReferrerLeaderboard } from "@namehash/ens-referrals/v1";
 import { describe, expect, it, vi } from "vitest";
+
+import { parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
 
 import * as database from "./database-v1";
 import { getReferrerLeaderboard } from "./get-referrer-leaderboard-v1";
@@ -17,17 +13,18 @@ vi.mock("./database-v1", () => ({
 }));
 
 const rules = buildReferralProgramRules(
-  ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
-  ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
-  getUnixTime("2025-01-01T00:00:00Z"),
-  getUnixTime("2025-12-31T23:59:59Z"),
+  parseUsdc("10000"),
+  10, // maxQualifiedReferrers
+  parseTimestamp("2025-01-01T00:00:00Z"),
+  parseTimestamp("2025-12-31T23:59:59Z"),
   {
     chainId: 1,
     address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
   },
+  new URL("https://example.com/rules"),
 );
 
-const accurateAsOf = getUnixTime("2025-11-30T23:59:59Z");
+const accurateAsOf = parseTimestamp("2025-11-30T23:59:59Z");
 
 describe("ENSAnalytics Referrer Leaderboard", () => {
   describe("getReferrerLeaderboard", () => {

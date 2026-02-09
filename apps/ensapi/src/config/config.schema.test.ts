@@ -1,9 +1,5 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import {
-  ENS_HOLIDAY_AWARDS_END_DATE,
-  ENS_HOLIDAY_AWARDS_START_DATE,
-} from "@namehash/ens-referrals";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -21,6 +17,7 @@ import logger from "@/lib/logger";
 vi.mock("@/lib/logger", () => ({
   default: {
     error: vi.fn(),
+    info: vi.fn(),
   },
 }));
 
@@ -82,9 +79,24 @@ describe("buildConfigFromEnvironment", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      customReferralProgramEditionConfigSetUrl: undefined,
     });
+  });
+
+  it("parses CUSTOM_REFERRAL_PROGRAM_EDITIONS as a URL object", async () => {
+    const customUrl = "https://example.com/editions.json";
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+    });
+
+    const config = await buildConfigFromEnvironment({
+      ...BASE_ENV,
+      CUSTOM_REFERRAL_PROGRAM_EDITIONS: customUrl,
+    });
+
+    expect(config.customReferralProgramEditionConfigSetUrl).toEqual(new URL(customUrl));
   });
 
   describe("Useful error messages", () => {
@@ -103,6 +115,23 @@ describe("buildConfigFromEnvironment", () => {
       DATABASE_URL: BASE_ENV.DATABASE_URL,
       ENSINDEXER_URL: BASE_ENV.ENSINDEXER_URL,
     };
+
+    it("logs error and exits when CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(serializeENSIndexerPublicConfig(ENSINDEXER_PUBLIC_CONFIG)),
+      });
+
+      await buildConfigFromEnvironment({
+        ...TEST_ENV,
+        CUSTOM_REFERRAL_PROGRAM_EDITIONS: "not-a-url",
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining("CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: not-a-url"),
+      );
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
 
     it("logs error message when QuickNode RPC config was partially configured (missing endpoint name)", async () => {
       mockFetch.mockResolvedValueOnce({
@@ -164,8 +193,7 @@ describe("buildEnsApiPublicConfig", () => {
           } satisfies RpcConfig,
         ],
       ]),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      customReferralProgramEditionConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -189,8 +217,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      customReferralProgramEditionConfigSetUrl: undefined,
     };
 
     const result = buildEnsApiPublicConfig(mockConfig);
@@ -224,8 +251,7 @@ describe("buildEnsApiPublicConfig", () => {
       namespace: ENSINDEXER_PUBLIC_CONFIG.namespace,
       databaseSchemaName: ENSINDEXER_PUBLIC_CONFIG.databaseSchemaName,
       rpcConfigs: new Map(),
-      ensHolidayAwardsStart: ENS_HOLIDAY_AWARDS_START_DATE,
-      ensHolidayAwardsEnd: ENS_HOLIDAY_AWARDS_END_DATE,
+      customReferralProgramEditionConfigSetUrl: undefined,
       theGraphApiKey: "secret-api-key",
     };
 

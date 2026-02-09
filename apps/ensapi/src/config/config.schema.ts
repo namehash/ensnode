@@ -1,10 +1,5 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import {
-  ENS_HOLIDAY_AWARDS_END_DATE,
-  ENS_HOLIDAY_AWARDS_START_DATE,
-} from "@namehash/ens-referrals";
-import { getUnixTime } from "date-fns";
 import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
@@ -17,7 +12,6 @@ import {
   ENSNamespaceSchema,
   EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
-  makeDatetimeSchema,
   makeENSIndexerPublicConfigSchema,
   PortSchema,
   RpcConfigsSchema,
@@ -26,10 +20,7 @@ import {
 
 import { ENSApi_DEFAULT_PORT } from "@/config/defaults";
 import type { EnsApiEnvironment } from "@/config/environment";
-import {
-  invariant_ensHolidayAwardsEndAfterStart,
-  invariant_ensIndexerPublicConfigVersionInfo,
-} from "@/config/validations";
+import { invariant_ensIndexerPublicConfigVersionInfo } from "@/config/validations";
 import { fetchENSIndexerConfig } from "@/lib/fetch-ensindexer-config";
 import logger from "@/lib/logger";
 
@@ -51,11 +42,23 @@ export const DatabaseUrlSchema = z.string().refine(
   },
 );
 
-// Use ISO 8601 format for defining datetime values (e.g., '2025-12-01T00:00:00Z')
-const DateStringToUnixTimestampSchema = z.coerce
+/**
+ * Schema for validating custom referral program edition config set URL.
+ */
+const CustomReferralProgramEditionConfigSetUrlSchema = z
   .string()
-  .pipe(makeDatetimeSchema())
-  .transform((date) => getUnixTime(date));
+  .transform((val, ctx) => {
+    try {
+      return new URL(val);
+    } catch {
+      ctx.addIssue({
+        code: "custom",
+        message: `CUSTOM_REFERRAL_PROGRAM_EDITIONS is not a valid URL: ${val}`,
+      });
+      return z.NEVER;
+    }
+  })
+  .optional();
 
 const EnsApiConfigSchema = z
   .object({
@@ -67,12 +70,10 @@ const EnsApiConfigSchema = z
     namespace: ENSNamespaceSchema,
     rpcConfigs: RpcConfigsSchema,
     ensIndexerPublicConfig: makeENSIndexerPublicConfigSchema("ensIndexerPublicConfig"),
-    ensHolidayAwardsStart: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_START_DATE),
-    ensHolidayAwardsEnd: DateStringToUnixTimestampSchema.default(ENS_HOLIDAY_AWARDS_END_DATE),
+    customReferralProgramEditionConfigSetUrl: CustomReferralProgramEditionConfigSetUrlSchema,
   })
   .check(invariant_rpcConfigsSpecifiedForRootChain)
-  .check(invariant_ensIndexerPublicConfigVersionInfo)
-  .check(invariant_ensHolidayAwardsEndAfterStart);
+  .check(invariant_ensIndexerPublicConfigVersionInfo);
 
 export type EnsApiConfig = z.infer<typeof EnsApiConfigSchema>;
 
@@ -106,8 +107,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
-      ensHolidayAwardsStart: env.ENS_HOLIDAY_AWARDS_START,
-      ensHolidayAwardsEnd: env.ENS_HOLIDAY_AWARDS_END,
+      customReferralProgramEditionConfigSetUrl: env.CUSTOM_REFERRAL_PROGRAM_EDITIONS,
     });
   } catch (error) {
     if (error instanceof ZodError) {
