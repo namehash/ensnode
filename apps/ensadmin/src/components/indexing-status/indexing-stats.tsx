@@ -458,9 +458,7 @@ export function IndexingStats(props: IndexingStatsProps) {
     return <IndexingStatusLoading />;
   }
 
-  return (
-    <IndexingStatsForRealtimeStatusProjection
-      realtimeProjection={indexingStatusQuery.data.realtimeProjection}
-    />
-  );
+  const { realtimeProjection } = indexingStatusQuery.data;
+
+  return <IndexingStatsForRealtimeStatusProjection realtimeProjection={realtimeProjection} />;
 }

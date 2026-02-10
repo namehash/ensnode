@@ -2,7 +2,6 @@
 
 import { useNow } from "@namehash/namehash-ui";
 import { useQuery } from "@tanstack/react-query";
-import { getUnixTime } from "date-fns";
 import { useEffect, useState } from "react";
 
 import {
