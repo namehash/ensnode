@@ -89,8 +89,8 @@ export async function upgradeEditionCache(
   // Success! Swap the caches
   logger.info({ editionSlug }, "New cache successfully initialized and verified, swapping caches");
 
-  oldCache.destroy();
   caches.set(editionSlug, newCache);
+  oldCache.destroy();
 
   logger.info({ editionSlug }, "Cache upgrade to immutable storage complete");
 }
@@ -112,7 +112,7 @@ export async function upgradeEditionCache(
  * @param editionConfigSet - The edition config set containing rules for each edition
  * @param indexingStatus - The current indexing status snapshot
  */
-export async function checkAndUpgradeImmutableCaches(
+export function checkAndUpgradeImmutableCaches(
   caches: ReferralLeaderboardEditionsCacheMap,
   editionConfigSet: ReferralProgramEditionConfigSet,
   indexingStatus: CrossChainIndexingStatusSnapshot,
@@ -182,4 +182,6 @@ export async function checkAndUpgradeImmutableCaches(
     // Don't await - let upgrade run in background
     // Errors are logged inside upgradeEditionCache
   }
+
+  return Promise.resolve();
 }

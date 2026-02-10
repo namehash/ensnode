@@ -740,4 +740,39 @@ describe("SWRCache", () => {
       expect(result2).toBe("success");
     });
   });
+
+  describe("isIndefinitelyStored", () => {
+    it("returns true when ttl is infinity and no proactive revalidation interval", () => {
+      const fn = vi.fn(async () => "value");
+      const cache = new SWRCache({
+        fn,
+        ttl: Number.POSITIVE_INFINITY,
+        proactiveRevalidationInterval: undefined,
+      });
+
+      expect(cache.isIndefinitelyStored()).toBe(true);
+    });
+
+    it("returns false when ttl is infinity but has proactive revalidation interval", () => {
+      const fn = vi.fn(async () => "value");
+      const cache = new SWRCache({
+        fn,
+        ttl: Number.POSITIVE_INFINITY,
+        proactiveRevalidationInterval: 60, // 60 seconds
+      });
+
+      expect(cache.isIndefinitelyStored()).toBe(false);
+    });
+
+    it("returns false when ttl is finite", () => {
+      const fn = vi.fn(async () => "value");
+      const cache = new SWRCache({
+        fn,
+        ttl: 300, // 5 minutes
+        proactiveRevalidationInterval: undefined,
+      });
+
+      expect(cache.isIndefinitelyStored()).toBe(false);
+    });
+  });
 });
