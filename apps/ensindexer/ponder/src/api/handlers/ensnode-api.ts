@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { publicClients } from "ponder:api";
 import { getUnixTime } from "date-fns";
 import { Hono } from "hono";
 
@@ -15,10 +14,13 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
+import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
+import { buildOmnichainIndexingStatusSnapshot } from "@/lib/indexing-status-builder/omnichain-indexing-status-snapshot";
 import {
-  buildOmnichainIndexingStatusSnapshot,
-  createCrossChainIndexingStatusSnapshotOmnichain,
-} from "@/lib/indexing-status/build-index-status";
+  cachedChainsBlockRefs,
+  indexedChainIds,
+  ponderClient,
+} from "@/ponder/api/lib/local-ponder-client";
 
 const app = new Hono();
 
@@ -38,14 +40,26 @@ app.get("/indexing-status", async (c) => {
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
-    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
+    const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
+      ponderClient.metrics(),
+      ponderClient.status(),
+    ]);
+
+    omnichainSnapshot = buildOmnichainIndexingStatusSnapshot(
+      indexedChainIds,
+      cachedChainsBlockRefs,
+      ponderIndexingMetrics,
+      ponderIndexingStatus,
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
+    console.error(
+      `Indexing Status is currently not available. Failed to fetch Omnichain Indexing Status snapshot: ${errorMessage}`,
+    );
   }
 
   // return IndexingStatusResponseError
-  if (typeof omnichainSnapshot === "undefined") {
+  if (!omnichainSnapshot) {
     return c.json(
       serializeIndexingStatusResponse({
         responseCode: IndexingStatusResponseCodes.Error,
@@ -53,8 +67,6 @@ app.get("/indexing-status", async (c) => {
       500,
     );
   }
-
-  // otherwise, proceed with creating IndexingStatusResponseOk
   const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
     omnichainSnapshot,
     snapshotTime,
