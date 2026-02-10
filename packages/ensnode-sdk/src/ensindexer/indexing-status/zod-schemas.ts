@@ -11,22 +11,17 @@ import { z } from "zod/v4";
 import { deserializeChainId } from "../../shared/deserialize";
 import type { ChainId } from "../../shared/types";
 import {
-  makeBlockRefSchema,
   makeChainIdStringSchema,
   makeDurationSchema,
   makeUnixTimestampSchema,
 } from "../../shared/zod-schemas";
+import type {
+  ChainIndexingStatusSnapshot,
+  ChainIndexingStatusSnapshotCompleted,
+  ChainIndexingStatusSnapshotQueued,
+} from "./chain-indexing-status-snapshot";
 import {
-  ChainIndexingConfig,
-  ChainIndexingConfigTypeIds,
-  ChainIndexingStatusIds,
-  type ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotBackfill,
-  type ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  type ChainIndexingStatusSnapshotQueued,
-  CrossChainIndexingStatusSnapshot,
   CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
@@ -37,10 +32,6 @@ import {
   RealtimeIndexingStatusProjection,
 } from "./types";
 import {
-  invariant_chainSnapshotBackfillBlocks,
-  invariant_chainSnapshotCompletedBlocks,
-  invariant_chainSnapshotFollowingBlocks,
-  invariant_chainSnapshotQueuedBlocks,
   invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain,
   invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains,
   invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains,
@@ -53,89 +44,7 @@ import {
   invariant_slowestChainEqualsToOmnichainSnapshotTime,
   invariant_snapshotTimeIsTheHighestKnownBlockTimestamp,
 } from "./validations";
-
-/**
- * Makes Zod schema for {@link ChainIndexingConfig} type.
- */
-const makeChainIndexingConfigSchema = (valueLabel: string = "Value") =>
-  z.discriminatedUnion("configType", [
-    z.strictObject({
-      configType: z.literal(ChainIndexingConfigTypeIds.Indefinite),
-      startBlock: makeBlockRefSchema(valueLabel),
-    }),
-    z.strictObject({
-      configType: z.literal(ChainIndexingConfigTypeIds.Definite),
-      startBlock: makeBlockRefSchema(valueLabel),
-      endBlock: makeBlockRefSchema(valueLabel),
-    }),
-  ]);
-
-/**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshotQueued} type.
- */
-export const makeChainIndexingStatusSnapshotQueuedSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject({
-      chainStatus: z.literal(ChainIndexingStatusIds.Queued),
-      config: makeChainIndexingConfigSchema(valueLabel),
-    })
-    .check(invariant_chainSnapshotQueuedBlocks);
-
-/**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshotBackfill} type.
- */
-export const makeChainIndexingStatusSnapshotBackfillSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject({
-      chainStatus: z.literal(ChainIndexingStatusIds.Backfill),
-      config: makeChainIndexingConfigSchema(valueLabel),
-      latestIndexedBlock: makeBlockRefSchema(valueLabel),
-      backfillEndBlock: makeBlockRefSchema(valueLabel),
-    })
-    .check(invariant_chainSnapshotBackfillBlocks);
-
-/**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshotCompleted} type.
- */
-export const makeChainIndexingStatusSnapshotCompletedSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject({
-      chainStatus: z.literal(ChainIndexingStatusIds.Completed),
-      config: z.strictObject({
-        configType: z.literal(ChainIndexingConfigTypeIds.Definite),
-        startBlock: makeBlockRefSchema(valueLabel),
-        endBlock: makeBlockRefSchema(valueLabel),
-      }),
-      latestIndexedBlock: makeBlockRefSchema(valueLabel),
-    })
-    .check(invariant_chainSnapshotCompletedBlocks);
-
-/**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshotFollowing} type.
- */
-export const makeChainIndexingStatusSnapshotFollowingSchema = (valueLabel: string = "Value") =>
-  z
-    .strictObject({
-      chainStatus: z.literal(ChainIndexingStatusIds.Following),
-      config: z.strictObject({
-        configType: z.literal(ChainIndexingConfigTypeIds.Indefinite),
-        startBlock: makeBlockRefSchema(valueLabel),
-      }),
-      latestIndexedBlock: makeBlockRefSchema(valueLabel),
-      latestKnownBlock: makeBlockRefSchema(valueLabel),
-    })
-    .check(invariant_chainSnapshotFollowingBlocks);
-
-/**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshot}
- */
-export const makeChainIndexingStatusSnapshotSchema = (valueLabel: string = "Value") =>
-  z.discriminatedUnion("chainStatus", [
-    makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
-    makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
-    makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
-    makeChainIndexingStatusSnapshotFollowingSchema(valueLabel),
-  ]);
+import { makeChainIndexingStatusSnapshotSchema } from "./zod-schema/chain-indexing-status-snapshot";
 
 /**
  * Makes Zod schema for {@link ChainIndexingStatusSnapshot} per chain.
