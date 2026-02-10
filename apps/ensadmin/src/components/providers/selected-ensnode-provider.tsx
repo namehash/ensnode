@@ -4,6 +4,7 @@ import type { PropsWithChildren } from "react";
 
 import { ENSNodeProvider } from "@ensnode/ensnode-react";
 
+import { ENSNodeConnectionError } from "@/components/connections/connection-error";
 import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
 
 /**
@@ -17,7 +18,10 @@ import { useSelectedConnection } from "@/hooks/active/use-selected-connection";
  *
  * @param children - React children to render within the provider context
  */
-export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
+export function SelectedENSNodeProvider({
+  header,
+  children,
+}: PropsWithChildren<{ header: React.ReactNode }>) {
   const selectedConnection = useSelectedConnection();
 
   if (selectedConnection.validatedSelectedConnection.isValid) {
@@ -25,6 +29,7 @@ export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
       <ENSNodeProvider
         config={{ client: { url: selectedConnection.validatedSelectedConnection.url } }}
       >
+        {header}
         {children}
       </ENSNodeProvider>
     );
@@ -35,10 +40,19 @@ export function SelectedENSNodeProvider({ children }: PropsWithChildren) {
     // is in an invalid format.
 
     return (
-      <div>
-        Invalid connection: "{selectedConnection.rawSelectedConnection}" (
-        {selectedConnection.validatedSelectedConnection.error})
-      </div>
+      <>
+        {header}
+
+        <section className="p-6">
+          <ENSNodeConnectionError
+            error={
+              new Error(
+                `Invalid connection: "${selectedConnection.rawSelectedConnection}" (${selectedConnection.validatedSelectedConnection.error})`,
+              )
+            }
+          />
+        </section>
+      </>
     );
   }
 }
