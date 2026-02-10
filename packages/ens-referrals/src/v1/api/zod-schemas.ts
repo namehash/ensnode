@@ -150,7 +150,11 @@ export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "Referrer
     referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[record]`)),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
     pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-    status: z.enum(ReferralProgramStatuses),
+    status: z.enum([
+      ReferralProgramStatuses.Scheduled,
+      ReferralProgramStatuses.Active,
+      ReferralProgramStatuses.Closed,
+    ]),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
@@ -199,7 +203,11 @@ export const makeReferrerEditionMetricsRankedSchema = (
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    status: z.enum(ReferralProgramStatuses),
+    status: z.enum([
+      ReferralProgramStatuses.Scheduled,
+      ReferralProgramStatuses.Active,
+      ReferralProgramStatuses.Closed,
+    ]),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
@@ -214,7 +222,11 @@ export const makeReferrerEditionMetricsUnrankedSchema = (
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    status: z.enum(ReferralProgramStatuses),
+    status: z.enum([
+      ReferralProgramStatuses.Scheduled,
+      ReferralProgramStatuses.Active,
+      ReferralProgramStatuses.Closed,
+    ]),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 

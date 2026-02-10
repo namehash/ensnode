@@ -1,7 +1,7 @@
 import type { ReferralProgramRules } from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
 
-import { type Duration, durationBetween, type UnixTimestamp } from "@ensnode/ensnode-sdk";
+import { addDuration, type Duration, type UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 /**
  * Duration after which we assume a closed edition is safe from chain reorganizations.
@@ -27,6 +27,6 @@ export function assumeReferralProgramEditionImmutablyClosed(
   rules: ReferralProgramRules,
   referenceTime: UnixTimestamp,
 ): boolean {
-  const timeSinceClose = durationBetween(rules.endTime, referenceTime);
-  return timeSinceClose > ASSUMED_CHAIN_REORG_SAFE_DURATION;
+  const immutabilityThreshold = addDuration(rules.endTime, ASSUMED_CHAIN_REORG_SAFE_DURATION);
+  return referenceTime > immutabilityThreshold;
 }

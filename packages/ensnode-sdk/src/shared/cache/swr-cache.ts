@@ -177,8 +177,7 @@ export class SWRCache<ValueType> {
    */
   public isIndefinitelyStored(): boolean {
     return (
-      this.options.ttl === Number.POSITIVE_INFINITY &&
-      this.options.proactiveRevalidationInterval === undefined
+      this.options.ttl === Number.POSITIVE_INFINITY && !this.options.proactiveRevalidationInterval
     );
   }
 

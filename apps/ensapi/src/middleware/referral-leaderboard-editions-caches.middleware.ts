@@ -1,4 +1,8 @@
-import type { ReferralProgramEditionConfigSet } from "@namehash/ens-referrals/v1";
+import type {
+  ReferralProgramEditionConfig,
+  ReferralProgramEditionConfigSet,
+  ReferrerLeaderboard,
+} from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
 
 import { getLatestIndexedBlockRef, SWRCache } from "@ensnode/ensnode-sdk";
@@ -15,6 +19,12 @@ import { makeLogger } from "@/lib/logger";
 import type { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 const logger = makeLogger("referral-leaderboard-editions-caches-middleware");
+
+/**
+ * Tracks in-progress cache upgrades to prevent concurrent upgrades of the same edition.
+ * Maps edition slug to the upgrade promise.
+ */
+const inProgressUpgrades = new Map<string, Promise<void>>();
 
 /**
  * Type definition for the referral leaderboard editions caches middleware context passed to downstream middleware and handlers.
@@ -41,11 +51,87 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
 };
 
 /**
+ * Upgrades a single edition's cache from regular SWR to immutable storage.
+ *
+ * This function:
+ * 1. Creates a new cache with infinite TTL and proactive initialization
+ * 2. Waits for the new cache to successfully load data
+ * 3. Verifies the loaded data is immutably closed (fresh enough)
+ * 4. Only then destroys the old cache and swaps in the new one
+ *
+ * If initialization fails or data is not fresh enough, keeps the old cache
+ * and the upgrade will be retried on a future request.
+ *
+ * @param editionSlug - The edition slug being upgraded
+ * @param oldCache - The existing cache to be replaced
+ * @param editionConfig - The edition configuration
+ * @param caches - The map of all edition caches (for swapping)
+ */
+async function upgradeEditionCache(
+  editionSlug: string,
+  oldCache: SWRCache<ReferrerLeaderboard>,
+  editionConfig: ReferralProgramEditionConfig,
+  caches: ReferralLeaderboardEditionsCacheMap,
+): Promise<void> {
+  logger.info({ editionSlug }, "Starting cache upgrade to immutable storage");
+
+  // Create new cache with proactive initialization (starts loading immediately)
+  const newCache = new SWRCache<ReferrerLeaderboard>({
+    fn: createEditionLeaderboardBuilder(editionConfig),
+    ttl: Number.POSITIVE_INFINITY,
+    proactiveRevalidationInterval: undefined,
+    errorTtl: minutesToSeconds(1),
+    proactivelyInitialize: true,
+  });
+
+  // Wait for the new cache to successfully initialize
+  const result = await newCache.read();
+
+  if (result instanceof Error) {
+    logger.warn(
+      { editionSlug, error: result },
+      "Failed to initialize new cache, keeping old cache",
+    );
+    newCache.destroy();
+    return;
+  }
+
+  // Verify the data is fresh enough (immutably closed based on its own accurateAsOf)
+  const isImmutable = assumeReferralProgramEditionImmutablyClosed(
+    result.rules,
+    result.accurateAsOf,
+  );
+
+  if (!isImmutable) {
+    logger.warn(
+      { editionSlug, accurateAsOf: result.accurateAsOf },
+      "New cache data is not fresh enough to be considered immutably closed, keeping old cache",
+    );
+    newCache.destroy();
+    return;
+  }
+
+  // Success! Swap the caches
+  logger.info({ editionSlug }, "New cache successfully initialized and verified, swapping caches");
+
+  oldCache.destroy();
+  caches.set(editionSlug, newCache);
+
+  logger.info({ editionSlug }, "Cache upgrade to immutable storage complete");
+}
+
+/**
  * Checks all caches and upgrades any that have become immutable to store them indefinitely.
  *
  * This function is called non-blocking on each request to opportunistically upgrade caches
- * when editions close. Once a cache is upgraded to immutable storage (infinite TTL, no proactive
- * revalidation), the quick check ensures minimal overhead on all future requests.
+ * when editions close. Each edition's upgrade runs independently in the background, ensuring:
+ * - No data loss: old cache continues serving while new cache initializes
+ * - Graceful failure: if new cache fails to initialize, old cache remains
+ * - No race conditions: atomic check-and-set prevents concurrent upgrades of same edition
+ * - Parallel upgrades: multiple editions can upgrade simultaneously
+ *
+ * Once a cache is upgraded to immutable storage (infinite TTL, no proactive revalidation),
+ * the quick check ensures minimal overhead on all future requests.
  *
  * @param caches - The map of edition caches to check and potentially upgrade
  * @param editionConfigSet - The edition config set containing rules for each edition
@@ -54,7 +140,18 @@ async function checkAndUpgradeImmutableCaches(
   caches: ReferralLeaderboardEditionsCacheMap,
   editionConfigSet: ReferralProgramEditionConfigSet,
 ): Promise<void> {
+  // Read indexing status once before the loop and reuse for all editions
+  const indexingStatus = await indexingStatusCache.read();
+  if (indexingStatus instanceof Error) {
+    logger.debug(
+      { error: indexingStatus },
+      "Failed to read indexing status during immutability check",
+    );
+    return;
+  }
+
   for (const [editionSlug, cache] of caches) {
+    // Quick exit: already upgraded to immutable storage
     if (cache.isIndefinitelyStored()) {
       continue;
     }
@@ -62,16 +159,6 @@ async function checkAndUpgradeImmutableCaches(
     const editionConfig = editionConfigSet.get(editionSlug);
     if (!editionConfig) {
       logger.warn({ editionSlug }, "Edition config not found during immutability check");
-      continue;
-    }
-
-    // Get current indexing status to determine accurate timestamp
-    const indexingStatus = await indexingStatusCache.read();
-    if (indexingStatus instanceof Error) {
-      logger.debug(
-        { error: indexingStatus, editionSlug },
-        "Failed to read indexing status during immutability check",
-      );
       continue;
     }
 
@@ -89,7 +176,7 @@ async function checkAndUpgradeImmutableCaches(
       continue;
     }
 
-    // Check if edition is immutably closed based on accurate timestamp
+    // Check if edition is immutably closed based on current indexing timestamp
     const isImmutable = assumeReferralProgramEditionImmutablyClosed(
       editionConfig.rules,
       latestIndexedBlockRef.timestamp,
@@ -99,22 +186,30 @@ async function checkAndUpgradeImmutableCaches(
       continue;
     }
 
-    // Edition is now immutable! Upgrade the cache
-    logger.info({ editionSlug }, "Upgrading cache to immutable storage");
+    // Atomic check-and-set: prevent concurrent upgrades of the same edition
+    const upgradePromise = (() => {
+      // Check if upgrade already in progress
+      if (inProgressUpgrades.has(editionSlug)) {
+        return null;
+      }
 
-    cache.destroy();
+      // Start upgrade and register promise immediately (no await in between)
+      const promise = upgradeEditionCache(editionSlug, cache, editionConfig, caches).finally(() => {
+        // Always clean up the in-progress tracking
+        inProgressUpgrades.delete(editionSlug);
+      });
 
-    const immutableCache = new SWRCache({
-      fn: createEditionLeaderboardBuilder(editionConfig),
-      ttl: Number.POSITIVE_INFINITY,
-      proactiveRevalidationInterval: undefined,
-      errorTtl: minutesToSeconds(1),
-      proactivelyInitialize: true,
-    });
+      inProgressUpgrades.set(editionSlug, promise);
+      return promise;
+    })();
 
-    caches.set(editionSlug, immutableCache);
+    if (!upgradePromise) {
+      // Another request is already upgrading this edition
+      logger.debug({ editionSlug }, "Upgrade already in progress, skipping");
+    }
 
-    logger.info({ editionSlug }, "Successfully upgraded cache to immutable storage");
+    // Don't await - let upgrade run in background
+    // Errors are logged inside upgradeEditionCache
   }
 }
 
