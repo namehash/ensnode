@@ -423,14 +423,12 @@ export function IndexingStatsForRealtimeStatusProjection({
 
             <ProjectionInfo snapshotTime={snapshotTime} worstCaseDistance={worstCaseDistance} />
 
-            {omnichainStatus && (
-              <Badge
-                className={cn("uppercase text-xs leading-none")}
-                title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainStatus)}`}
-              >
-                {formatOmnichainIndexingStatus(omnichainStatus)}
-              </Badge>
-            )}
+            <Badge
+              className={cn("uppercase text-xs leading-none")}
+              title={`Omnichain indexing status: ${formatOmnichainIndexingStatus(omnichainStatus)}`}
+            >
+              {formatOmnichainIndexingStatus(omnichainStatus)}
+            </Badge>
           </>
         }
       >

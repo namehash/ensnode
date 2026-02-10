@@ -82,8 +82,8 @@ export function useIndexingStatusWithSwr(
 
   return useSwrQuery({
     ...queryOptions,
-    refetchInterval: query.refetchInterval ?? DEFAULT_REFETCH_INTERVAL, // Indexing status changes frequently
     ...query,
+    refetchInterval: query.refetchInterval ?? DEFAULT_REFETCH_INTERVAL, // Indexing status changes frequently
     enabled: query.enabled ?? queryOptions.enabled,
     queryKey,
     queryFn,
