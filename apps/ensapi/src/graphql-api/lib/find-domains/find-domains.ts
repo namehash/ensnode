@@ -166,8 +166,8 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     .with(domainsBase)
     .select({
       id: domainsBase.id,
-      // for NAME ordering (uses head label — the varying part when a concrete path is specified)
-      headLabel: sql<string | null>`${headLabel.interpreted}`.as("headLabel"),
+      // for NAME ordering
+      headLabel: sql<string>`${headLabel.interpreted}`.as("headLabel"),
       // for REGISTRATION_TIMESTAMP ordering
       registrationTimestamp: sql<bigint | null>`${latestRegistration.start}`.as(
         "registrationTimestamp",
