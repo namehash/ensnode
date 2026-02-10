@@ -1,13 +1,16 @@
 import { prettifyError } from "zod/v4";
 
+import type { Unvalidated } from "../../../shared/types";
 import type { ChainIndexingStatusSnapshot } from "../chain-indexing-status-snapshot";
 import { makeChainIndexingStatusSnapshotSchema } from "../zod-schema/chain-indexing-status-snapshot";
 
 /**
  * Validates a maybe {@link ChainIndexingStatusSnapshot} object.
+ *
+ * @throws Error if the provided object is not a valid {@link ChainIndexingStatusSnapshot}.
  */
 export function validateChainIndexingStatusSnapshot(
-  unvalidatedSnapshot: ChainIndexingStatusSnapshot | unknown,
+  unvalidatedSnapshot: Unvalidated<ChainIndexingStatusSnapshot>,
   valueLabel?: string,
 ): ChainIndexingStatusSnapshot {
   const schema = makeChainIndexingStatusSnapshotSchema(valueLabel);
