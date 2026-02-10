@@ -3,7 +3,7 @@ import type {
   ReferralProgramEditionConfigSet,
 } from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   addDuration,
@@ -22,7 +22,12 @@ vi.mock("@/cache/referral-leaderboard-editions.cache", () => ({
 
 import { createEditionLeaderboardBuilder } from "@/cache/referral-leaderboard-editions.cache";
 
-import { checkAndUpgradeImmutableCaches, upgradeEditionCache } from "./cache-upgrade";
+import {
+  checkAndUpgradeImmutableCaches,
+  getUpgradePromise,
+  resetInProgressUpgrades,
+  upgradeEditionCache,
+} from "./cache-upgrade";
 
 describe("Cache upgrade to immutable storage", () => {
   const now = Math.floor(Date.now() / 1000);
@@ -85,6 +90,9 @@ describe("Cache upgrade to immutable storage", () => {
         proactivelyInitialize: false,
       });
 
+      // Spy on the destroy method to verify it's called during swap
+      const destroySpy = vi.spyOn(oldCache, "destroy");
+
       const caches = new Map();
       caches.set(editionSlug, oldCache);
 
@@ -99,6 +107,7 @@ describe("Cache upgrade to immutable storage", () => {
       const upgradedCache = caches.get(editionSlug);
       expect(upgradedCache).not.toBe(oldCache);
       expect(upgradedCache?.isIndefinitelyStored()).toBe(true);
+      expect(destroySpy).toHaveBeenCalledOnce();
     });
 
     it("should keep old cache if new cache fails to initialize", async () => {
@@ -177,6 +186,10 @@ describe("Cache upgrade to immutable storage", () => {
   describe("checkAndUpgradeImmutableCaches", () => {
     beforeEach(() => {
       vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+      resetInProgressUpgrades();
     });
 
     it("should prevent concurrent upgrades of the same edition", async () => {
@@ -308,7 +321,7 @@ describe("Cache upgrade to immutable storage", () => {
 
     it("should skip caches that are not yet immutably closed", async () => {
       const editionSlug = "test-edition";
-      const recentEndTime = now - 60; // Only 1 minute ago, not past safety window
+      const recentEndTime = now - Math.floor(ASSUMED_CHAIN_REORG_SAFE_DURATION / 2); // Still within safety window
       const notImmutableTimestamp = now;
 
       // Create a regular cache for an edition that hasn't closed long enough
@@ -389,16 +402,31 @@ describe("Cache upgrade to immutable storage", () => {
 
       await checkAndUpgradeImmutableCaches(caches, editionConfigSet, indexingStatus);
 
-      // Wait for the upgrade attempt to complete and verify it failed gracefully
-      await vi.waitFor(
-        () => {
-          expect(createEditionLeaderboardBuilder).toHaveBeenCalledOnce();
-          // Old cache should still be in place (upgrade failed)
-          expect(caches.get(editionSlug)).toBe(oldCache);
-          expect(oldCache.isIndefinitelyStored()).toBe(false);
-        },
-        { timeout: 1000 },
-      );
+      // Get the upgrade promise so we can wait for it to complete
+      const firstUpgradePromise = getUpgradePromise(editionSlug);
+      expect(firstUpgradePromise).toBeDefined();
+
+      // Wait for the first upgrade to complete (including .finally() cleanup)
+      await firstUpgradePromise;
+
+      // Verify the upgrade failed gracefully
+      expect(createEditionLeaderboardBuilder).toHaveBeenCalledOnce();
+      expect(caches.get(editionSlug)).toBe(oldCache);
+      expect(oldCache.isIndefinitelyStored()).toBe(false);
+
+      // Call checkAndUpgradeImmutableCaches again to verify the inProgressUpgrades entry was cleaned up
+      await checkAndUpgradeImmutableCaches(caches, editionConfigSet, indexingStatus);
+
+      // Get the second upgrade promise and wait for it to complete
+      const secondUpgradePromise = getUpgradePromise(editionSlug);
+      expect(secondUpgradePromise).toBeDefined();
+      await secondUpgradePromise;
+
+      // Builder should have been called a second time (proving cleanup happened)
+      expect(createEditionLeaderboardBuilder).toHaveBeenCalledTimes(2);
+      // Old cache should still be in place (second upgrade also failed)
+      expect(caches.get(editionSlug)).toBe(oldCache);
+      expect(oldCache.isIndefinitelyStored()).toBe(false);
     });
   });
 });

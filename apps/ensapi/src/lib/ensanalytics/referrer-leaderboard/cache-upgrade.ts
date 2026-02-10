@@ -26,6 +26,23 @@ const logger = makeLogger("referral-leaderboard-cache-upgrade");
 const inProgressUpgrades = new Map<string, Promise<void>>();
 
 /**
+ * Test-only function to reset the in-progress upgrades map.
+ * Call this in test afterEach hooks to ensure test isolation.
+ */
+export function resetInProgressUpgrades(): void {
+  inProgressUpgrades.clear();
+}
+
+/**
+ * Test-only function to get the in-progress upgrade promise for an edition.
+ * @param editionSlug - The edition slug to check
+ * @returns The upgrade promise if one is in progress, undefined otherwise
+ */
+export function getUpgradePromise(editionSlug: string): Promise<void> | undefined {
+  return inProgressUpgrades.get(editionSlug);
+}
+
+/**
  * Upgrades a single edition's cache from regular SWR to immutable storage.
  *
  * This function:
@@ -112,7 +129,7 @@ export async function upgradeEditionCache(
  * @param editionConfigSet - The edition config set containing rules for each edition
  * @param indexingStatus - The current indexing status snapshot
  */
-export function checkAndUpgradeImmutableCaches(
+export async function checkAndUpgradeImmutableCaches(
   caches: ReferralLeaderboardEditionsCacheMap,
   editionConfigSet: ReferralProgramEditionConfigSet,
   indexingStatus: CrossChainIndexingStatusSnapshot,
@@ -182,6 +199,4 @@ export function checkAndUpgradeImmutableCaches(
     // Don't await - let upgrade run in background
     // Errors are logged inside upgradeEditionCache
   }
-
-  return Promise.resolve();
 }
