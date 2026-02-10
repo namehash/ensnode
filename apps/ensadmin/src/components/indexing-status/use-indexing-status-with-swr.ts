@@ -1,5 +1,7 @@
 "use client";
 
+import { useNow } from "@namehash/namehash-ui";
+import { secondsToMilliseconds } from "date-fns";
 import { useCallback, useMemo } from "react";
 
 import {
@@ -11,16 +13,21 @@ import {
   WithSDKConfigParameter,
 } from "@ensnode/ensnode-react";
 import {
+  CrossChainIndexingStatusSnapshotOmnichain,
+  createRealtimeIndexingStatusProjection,
+  Duration,
   type IndexingStatusRequest,
   IndexingStatusResponseCodes,
   IndexingStatusResponseOk,
 } from "@ensnode/ensnode-sdk";
 
-const DEFAULT_REFETCH_INTERVAL = 10 * 1000;
+const DEFAULT_REFETCH_INTERVAL = secondsToMilliseconds(10);
+
+const REALTIME_PROJECTION_REFRESH_RATE: Duration = 1;
 
 interface UseIndexingStatusParameters
   extends IndexingStatusRequest,
-    QueryParameter<IndexingStatusResponseOk> {}
+    QueryParameter<CrossChainIndexingStatusSnapshotOmnichain> {}
 
 /**
  * A proxy hook for {@link useIndexingStatus} which applies
@@ -31,6 +38,7 @@ export function useIndexingStatusWithSwr(
 ) {
   const { config, query = {} } = parameters;
   const _config = useENSNodeSDKConfig(config);
+  const now = useNow({ timeToRefresh: REALTIME_PROJECTION_REFRESH_RATE });
 
   const queryOptions = useMemo(() => createIndexingStatusQueryOptions(_config), [_config]);
   const queryKey = useMemo(() => ["swr", ...queryOptions.queryKey], [queryOptions.queryKey]);
@@ -46,18 +54,39 @@ export function useIndexingStatusWithSwr(
           );
         }
 
-        // successful response to be cached
-        return response;
+        // The indexing status snapshot has been fetched and successfully validated for caching.
+        // Therefore, return it so that query cache for `queryOptions.queryKey` will:
+        // - Replace the currently cached value (if any) with this new value.
+        // - Return this non-null value.
+        return response.realtimeProjection.snapshot;
       }),
     [queryOptions.queryFn],
   );
 
+  // Call select function to `createRealtimeIndexingStatusProjection` each time
+  // `now` is updated.
+  const select = useCallback(
+    (cachedSnapshot: CrossChainIndexingStatusSnapshotOmnichain): IndexingStatusResponseOk => {
+      const realtimeProjection = createRealtimeIndexingStatusProjection(cachedSnapshot, now);
+
+      // Maintain the original response shape of `IndexingStatusResponse`
+      // for the consumers. Creating a new projection from the cached snapshot
+      // each time `now` is updated should be implementation detail.
+      return {
+        responseCode: IndexingStatusResponseCodes.Ok,
+        realtimeProjection,
+      } satisfies IndexingStatusResponseOk;
+    },
+    [now],
+  );
+
   return useSwrQuery({
     ...queryOptions,
-    refetchInterval: query.refetchInterval ?? DEFAULT_REFETCH_INTERVAL, // Indexing status changes frequently
     ...query,
+    refetchInterval: query.refetchInterval ?? DEFAULT_REFETCH_INTERVAL, // Indexing status changes frequently
     enabled: query.enabled ?? queryOptions.enabled,
     queryKey,
     queryFn,
+    select,
   });
 }
