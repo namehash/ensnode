@@ -205,6 +205,8 @@ ponder_sync_is_realtime{chain="1"} 1
 ponder_sync_is_realtime{chain="59144"} 1
 ponder_sync_is_realtime{chain="8453"} 1
 
+# HELP ponder_sync_is_complete Boolean (0 or 1) indicating if the sync has synced all blocks
+# TYPE ponder_sync_is_complete gauge
 ponder_sync_is_complete{chain="42161"} 1
 ponder_sync_is_complete{chain="534352"} 1
 ponder_sync_is_complete{chain="10"} 1
@@ -212,8 +214,6 @@ ponder_sync_is_complete{chain="1"} 1
 ponder_sync_is_complete{chain="59144"} 1
 ponder_sync_is_complete{chain="8453"} 1
 
-# HELP ponder_sync_is_complete Boolean (0 or 1) indicating if the sync has synced all blocks
-# TYPE ponder_sync_is_complete gauge
 
 # HELP ponder_historical_total_blocks Number of blocks required for the historical sync
 # TYPE ponder_historical_total_blocks gauge

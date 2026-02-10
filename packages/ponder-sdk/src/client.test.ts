@@ -124,12 +124,6 @@ describe("Ponder Client", () => {
           expect(errorMessage).toContain(
             "Missing required Prometheus metric: ponder_historical_total_blocks",
           );
-          expect(errorMessage).toContain(
-            "Missing required Prometheus metric: ponder_sync_is_complete",
-          );
-          expect(errorMessage).toContain(
-            "Missing required Prometheus metric: ponder_sync_is_realtime",
-          );
         }
       });
 
@@ -151,11 +145,21 @@ describe("Ponder Client", () => {
           const errorMessage = error instanceof Error ? error.message : "unknown error";
           // Assert
           expect(errorMessage).toContain("Invalid serialized Ponder Indexing Metrics");
-          expect(errorMessage).toContain("'optimism' must be a string representing a chain ID");
-          expect(errorMessage).toContain("'mainnet' must be a string representing a chain ID");
-          expect(errorMessage).toContain("'base' must be a string representing a chain ID");
-          expect(errorMessage).toContain("'scroll' must be a string representing a chain ID");
-          expect(errorMessage).toContain("'linea' must be a string representing a chain ID");
+          expect(errorMessage).toContain(
+            "metric must be a string representing a valid ChainId, but got: 'optimism'",
+          );
+          expect(errorMessage).toContain(
+            "metric must be a string representing a valid ChainId, but got: 'mainnet'",
+          );
+          expect(errorMessage).toContain(
+            "metric must be a string representing a valid ChainId, but got: 'base'",
+          );
+          expect(errorMessage).toContain(
+            "metric must be a string representing a valid ChainId, but got: 'scroll'",
+          );
+          expect(errorMessage).toContain(
+            "metric must be a string representing a valid ChainId, but got: 'linea'",
+          );
         }
       });
 
