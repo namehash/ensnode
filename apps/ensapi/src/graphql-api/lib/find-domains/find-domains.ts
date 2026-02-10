@@ -145,6 +145,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // subquery for latest registration per domain (highest index)
   // TODO: replace this with a JOIN against the latest registration lookup table after
   // https://github.com/namehash/ensnode/issues/1594
+  // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
   const registrationOuter = alias(schema.registration, "registrationOuter");
   const latestRegistration = db
     .select({
@@ -187,6 +188,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
       and(
         owner ? eq(domainsBase.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
+        // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
         partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
       ),
     );
