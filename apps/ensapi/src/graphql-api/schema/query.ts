@@ -41,19 +41,6 @@ builder.queryType({
   fields: (t) => ({
     ...(INCLUDE_DEV_METHODS && {
       /////////////////////////////
-      // Query.domains (Testing)
-      /////////////////////////////
-      domains: t.connection({
-        description: "TODO",
-        type: DomainInterfaceRef,
-        args: {
-          where: t.arg({ type: DomainsWhereInput, required: true }),
-          order: t.arg({ type: DomainsOrderInput }),
-        },
-        resolve: (_, args, context) => resolveFindDomains(context, args),
-      }),
-
-      /////////////////////////////
       // Query.v1Domains (Testing)
       /////////////////////////////
       v1Domains: t.connection({
@@ -142,6 +129,19 @@ builder.queryType({
               }),
           ),
       }),
+    }),
+
+    ////////////////
+    // Find Domains
+    ////////////////
+    domains: t.connection({
+      description: "TODO",
+      type: DomainInterfaceRef,
+      args: {
+        where: t.arg({ type: DomainsWhereInput, required: true }),
+        order: t.arg({ type: DomainsOrderInput }),
+      },
+      resolve: (_, args, context) => resolveFindDomains(context, args),
     }),
 
     //////////////////////////////////
