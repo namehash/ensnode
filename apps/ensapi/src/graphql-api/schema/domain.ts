@@ -345,11 +345,10 @@ export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
 export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
 
 export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
-  description:
-    "Ordering options for domains query. When providing a custom order, both `by` and `dir` must be specified. If no order is provided, the default is NAME ASC.",
+  description: "Ordering options for domains query. If no order is provided, the default isASC.",
   fields: (t) => ({
     by: t.field({ type: DomainsOrderBy, required: true }),
-    dir: t.field({ type: OrderDirection, required: true }),
+    dir: t.field({ type: OrderDirection, defaultValue: "ASC" }),
   }),
 });
 
