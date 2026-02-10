@@ -421,7 +421,11 @@ export function IndexingStatsForRealtimeStatusProjection({
           <>
             <span>Indexing Status</span>
 
-            <ProjectionInfo snapshotTime={snapshotTime} worstCaseDistance={worstCaseDistance} />
+            <ProjectionInfo
+              omnichainIndexingCursor={omnichainSnapshot.omnichainIndexingCursor}
+              snapshotTime={snapshotTime}
+              worstCaseDistance={worstCaseDistance}
+            />
 
             <Badge
               className={cn("uppercase text-xs leading-none")}
