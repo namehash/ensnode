@@ -42,7 +42,7 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  * ## Background:
  *
  * Materializing the set of Canonical Names in ENSv2 is non-trivial and more or less impossible
- * within the confines of Ponder's cache semantics. Additionally retroactive label healing (due to
+ * within the confines of Ponder's cache semantics. Additionally, retroactive label healing (due to
  * new labels being discovered on-chain) is likely impossible within those constraints as well. If we
  * were to implement a naive cache-unfriendly version of canonical name materialization, indexing time
  * would increase dramatically.
@@ -61,14 +61,13 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  * 2. Validate inputs (at least one of name or owner required)
  * 3. For both v1Domains and v2Domains:
  *    a. Build recursive CTE to find domains matching the concrete labelHash path
- *    b. Extract unified structure: {id, ownerId, leafLabelHash, headLabelHash}
+ *    b. Extract unified structure: {id, ownerId, headLabelHash}
  * 4. Union v1 and v2 results into domainsBase CTE
  * 5. Join domainsBase with:
- *    - headLabel: for partial name matching (LIKE prefix)
- *    - leafLabel: for NAME ordering
+ *    - headLabel: for partial name matching (LIKE prefix) and NAME ordering
  *    - latestRegistration: correlated subquery for REGISTRATION_* ordering
  * 6. Apply filters (owner, partial) in the unified query
- * 7. Return CTE with columns: id, leafLabelValue, registrationStart, registrationExpiry
+ * 7. Return CTE with columns: id, headLabel, registrationTimestamp, registrationExpiry
  */
 export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
@@ -105,13 +104,12 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   const v2HeadDomain = alias(schema.v2Domain, "v2HeadDomain");
 
   // Base subqueries: extract unified structure from v1 and v2 domains
-  // Returns {id, ownerId, leafLabelHash, headLabelHash} for each matching domain
+  // Returns {id, ownerId, headLabelHash} for each matching domain
   // Note: owner/partial filtering happens in the unified query below, not here
   const v1DomainsBase = db
     .select({
       id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
       ownerId: schema.v1Domain.ownerId,
-      leafLabelHash: sql`${schema.v1Domain.labelHash}`.as("leafLabelHash"),
       headLabelHash: sql`${v1HeadDomain.labelHash}`.as("headLabelHash"),
     })
     .from(schema.v1Domain)
@@ -125,7 +123,6 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     .select({
       id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
       ownerId: schema.v2Domain.ownerId,
-      leafLabelHash: sql`${schema.v2Domain.labelHash}`.as("leafLabelHash"),
       headLabelHash: sql`${v2HeadDomain.labelHash}`.as("headLabelHash"),
     })
     .from(schema.v2Domain)
@@ -138,9 +135,8 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // Union v1 and v2 base queries into a single CTE
   const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));
 
-  // alias for head label (for partial matching) and leaf label (for NAME ordering)
+  // alias for head label (for partial matching and NAME ordering)
   const headLabel = alias(schema.label, "headLabel");
-  const leafLabel = alias(schema.label, "leafLabel");
 
   // subquery for latest registration per domain (highest index)
   // TODO: replace this with a JOIN against the latest registration lookup table after
@@ -170,18 +166,18 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     .with(domainsBase)
     .select({
       id: domainsBase.id,
-      // for NAME ordering
-      leafLabelValue: sql<string | null>`${leafLabel.interpreted}`.as("leafLabelValue"),
+      // for NAME ordering (uses head label — the varying part when a concrete path is specified)
+      headLabel: sql<string | null>`${headLabel.interpreted}`.as("headLabel"),
       // for REGISTRATION_TIMESTAMP ordering
-      registrationStart: sql<bigint | null>`${latestRegistration.start}`.as("registrationStart"),
+      registrationTimestamp: sql<bigint | null>`${latestRegistration.start}`.as(
+        "registrationTimestamp",
+      ),
       // for REGISTRATION_EXPIRY ordering
       registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
     })
     .from(domainsBase)
-    // join head label for partial matching
+    // join head label for partial matching and NAME ordering
     .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
-    // join leaf label for NAME ordering
-    .leftJoin(leafLabel, eq(leafLabel.labelHash, domainsBase.leafLabelHash))
     // join latest registration for timestamp/expiry ordering
     .leftJoin(latestRegistration, eq(latestRegistration.domainId, domainsBase.id))
     .where(
@@ -204,8 +200,8 @@ function getOrderColumn(
   orderBy: typeof DomainsOrderBy.$inferType,
 ) {
   return {
-    NAME: domains.leafLabelValue,
-    REGISTRATION_TIMESTAMP: domains.registrationStart,
+    NAME: domains.headLabel,
+    REGISTRATION_TIMESTAMP: domains.registrationTimestamp,
     REGISTRATION_EXPIRY: domains.registrationExpiry,
   }[orderBy];
 }

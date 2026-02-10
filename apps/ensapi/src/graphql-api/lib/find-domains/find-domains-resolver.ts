@@ -34,9 +34,9 @@ function getOrderValueFromResult(
 ): DomainOrderValue {
   switch (orderBy) {
     case "NAME":
-      return result.leafLabelValue;
+      return result.headLabel;
     case "REGISTRATION_TIMESTAMP":
-      return result.registrationStart;
+      return result.registrationTimestamp;
     case "REGISTRATION_EXPIRY":
       return result.registrationExpiry;
   }
@@ -97,7 +97,7 @@ export function resolveFindDomains(
       const beforeCursor = before ? DomainCursor.decode(before) : undefined;
       const afterCursor = after ? DomainCursor.decode(after) : undefined;
 
-      // build query with pagination constraints using tuple comparison
+      // build query with pagination constraints
       const query = db
         .with(domains)
         .select()

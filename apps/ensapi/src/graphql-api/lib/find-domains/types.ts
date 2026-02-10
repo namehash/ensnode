@@ -50,7 +50,7 @@ export type DomainWithOrderValue = Domain & { __orderValue: DomainOrderValue };
  */
 export type FindDomainsResult = {
   id: DomainId;
-  leafLabelValue: string | null;
-  registrationStart: bigint | null;
+  headLabel: string | null;
+  registrationTimestamp: bigint | null;
   registrationExpiry: bigint | null;
 };

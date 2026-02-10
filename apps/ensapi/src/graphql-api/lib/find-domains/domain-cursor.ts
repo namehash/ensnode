@@ -14,13 +14,24 @@ import type { OrderDirection } from "@/graphql-api/schema/order-direction";
  * column and which direction the set is ordered.
  */
 export interface DomainCursor {
-  // stable identifier for stable tiebreaks
+  /**
+   * Stable identifier for tiebreaks.
+   */
   id: DomainId;
-  // the column by which the set is ordered
+
+  /**
+   * The criteria by which the set is ordered. One of NAME, REGISTRATION_TIMESTAMP, or REGISTRATION_EXPIRY.
+   */
   by: typeof DomainsOrderBy.$inferType;
-  // the direction in which the set is ordered
+
+  /**
+   * The direction in which the set is ordered, either ASC or DESC.
+   */
   dir: typeof OrderDirection.$inferType;
-  // the value of said sort column for this domain
+
+  /**
+   * The value of the sort column for this Domain in the set.
+   */
   value: DomainOrderValue;
 }
 
