@@ -170,6 +170,19 @@ export class SWRCache<ValueType> {
   }
 
   /**
+   * Returns true if this cache stores data indefinitely without revalidation.
+   *
+   * A cache is considered indefinitely stored when it has infinite TTL and no
+   * proactive revalidation interval configured.
+   */
+  public isIndefinitelyStored(): boolean {
+    return (
+      this.options.ttl === Number.POSITIVE_INFINITY &&
+      this.options.proactiveRevalidationInterval === undefined
+    );
+  }
+
+  /**
    * Destroys the background revalidation interval, if exists.
    */
   public destroy(): void {

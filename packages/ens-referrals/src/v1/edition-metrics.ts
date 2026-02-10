@@ -10,6 +10,7 @@ import {
   type UnrankedReferrerMetrics,
 } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
+import { calcReferralProgramStatus, type ReferralProgramStatusId } from "./status";
 
 /**
  * The type of referrer edition metrics data.
@@ -67,6 +68,12 @@ export interface ReferrerEditionMetricsRanked {
   aggregatedMetrics: AggregatedReferrerMetrics;
 
   /**
+   * The status of the referral program ("Scheduled", "Active", or "Closed")
+   * calculated based on the program's timing relative to {@link accurateAsOf}.
+   */
+  status: ReferralProgramStatusId;
+
+  /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsRanked} was accurate as of.
    */
   accurateAsOf: UnixTimestamp;
@@ -106,6 +113,12 @@ export interface ReferrerEditionMetricsUnranked {
   aggregatedMetrics: AggregatedReferrerMetrics;
 
   /**
+   * The status of the referral program ("Scheduled", "Active", or "Closed")
+   * calculated based on the program's timing relative to {@link accurateAsOf}.
+   */
+  status: ReferralProgramStatusId;
+
+  /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerEditionMetricsUnranked} was accurate as of.
    */
   accurateAsOf: UnixTimestamp;
@@ -134,6 +147,7 @@ export const getReferrerEditionMetrics = (
   leaderboard: ReferrerLeaderboard,
 ): ReferrerEditionMetrics => {
   const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
+  const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
 
   // If referrer is on the leaderboard, return their ranked metrics
   if (awardedReferrerMetrics) {
@@ -142,6 +156,7 @@ export const getReferrerEditionMetrics = (
       rules: leaderboard.rules,
       referrer: awardedReferrerMetrics,
       aggregatedMetrics: leaderboard.aggregatedMetrics,
+      status,
       accurateAsOf: leaderboard.accurateAsOf,
     };
   }
@@ -152,6 +167,7 @@ export const getReferrerEditionMetrics = (
     rules: leaderboard.rules,
     referrer: buildUnrankedReferrerMetrics(referrer),
     aggregatedMetrics: leaderboard.aggregatedMetrics,
+    status,
     accurateAsOf: leaderboard.accurateAsOf,
   };
 };
