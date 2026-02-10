@@ -1,6 +1,6 @@
 import packageJson from "@/../package.json" with { type: "json" };
 
-import type { ENSIndexerPublicConfig, UnixTimestamp } from "@ensnode/ensnode-sdk";
+import type { ENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
 import type { ZodCheckFnInput } from "@ensnode/ensnode-sdk/internal";
 
 // Invariant: ENSIndexerPublicConfig VersionInfo must match ENSApi
@@ -40,27 +40,6 @@ export function invariant_ensIndexerPublicConfigVersionInfo(
       path: ["ensIndexerPublicConfig.versionInfo.ensRainbow"],
       input: ensIndexerPublicConfig.versionInfo.ensRainbow,
       message: `Version Mismatch: ENSRainbow@${ensIndexerPublicConfig.versionInfo.ensRainbow} !== ENSApi@${packageJson.version}`,
-    });
-  }
-}
-
-// Invariant: ensHolidayAwardsEnd must be greater than or equal to ensHolidayAwardsStart
-export function invariant_ensHolidayAwardsEndAfterStart(
-  ctx: ZodCheckFnInput<{
-    ensHolidayAwardsStart: UnixTimestamp;
-    ensHolidayAwardsEnd: UnixTimestamp;
-  }>,
-) {
-  const {
-    value: { ensHolidayAwardsStart, ensHolidayAwardsEnd },
-  } = ctx;
-
-  if (ensHolidayAwardsEnd < ensHolidayAwardsStart) {
-    ctx.issues.push({
-      code: "custom",
-      path: ["ensHolidayAwardsEnd"],
-      input: ensHolidayAwardsEnd,
-      message: `ensHolidayAwardsEnd (${ensHolidayAwardsEnd}) must be greater than or equal to ensHolidayAwardsStart (${ensHolidayAwardsStart})`,
     });
   }
 }

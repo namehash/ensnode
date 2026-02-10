@@ -19,14 +19,24 @@ import {
   makePriceEthSchema,
   makePriceUsdcSchema,
   makeUnixTimestampSchema,
+  makeUrlSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
+import type { ReferralProgramEditionSlug } from "../edition";
+import {
+  type ReferrerEditionMetricsRanked,
+  ReferrerEditionMetricsTypeIds,
+} from "../edition-metrics";
 import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
-import { type ReferrerDetailRanked, ReferrerDetailTypeIds } from "../referrer-detail";
-import { ReferrerDetailResponseCodes, ReferrerLeaderboardPageResponseCodes } from "./types";
+import {
+  MAX_EDITIONS_PER_REQUEST,
+  ReferralProgramEditionConfigSetResponseCodes,
+  ReferrerLeaderboardPageResponseCodes,
+  ReferrerMetricsEditionsResponseCodes,
+} from "./types";
 
 /**
- * Schema for ReferralProgramRules
+ * Schema for {@link ReferralProgramRules}
  */
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
   z
@@ -36,6 +46,7 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
       startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
       endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
       subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
+      rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
     })
     .refine((data) => data.endTime >= data.startTime, {
       message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
@@ -176,11 +187,13 @@ export const makeReferrerLeaderboardPageResponseSchema = (
   ]);
 
 /**
- * Schema for {@link ReferrerDetailRanked} (with ranked metrics)
+ * Schema for {@link ReferrerEditionMetricsRanked} (with ranked metrics)
  */
-export const makeReferrerDetailRankedSchema = (valueLabel: string = "ReferrerDetailRanked") =>
+export const makeReferrerEditionMetricsRankedSchema = (
+  valueLabel: string = "ReferrerEditionMetricsRanked",
+) =>
   z.object({
-    type: z.literal(ReferrerDetailTypeIds.Ranked),
+    type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
@@ -188,11 +201,13 @@ export const makeReferrerDetailRankedSchema = (valueLabel: string = "ReferrerDet
   });
 
 /**
- * Schema for {@link ReferrerDetailUnranked} (with unranked metrics)
+ * Schema for {@link ReferrerEditionMetricsUnranked} (with unranked metrics)
  */
-export const makeReferrerDetailUnrankedSchema = (valueLabel: string = "ReferrerDetailUnranked") =>
+export const makeReferrerEditionMetricsUnrankedSchema = (
+  valueLabel: string = "ReferrerEditionMetricsUnranked",
+) =>
   z.object({
-    type: z.literal(ReferrerDetailTypeIds.Unranked),
+    type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
@@ -200,35 +215,175 @@ export const makeReferrerDetailUnrankedSchema = (valueLabel: string = "ReferrerD
   });
 
 /**
- * Schema for {@link ReferrerDetailResponseOk}
- * Accepts either ranked or unranked referrer detail data
+ * Schema for {@link ReferrerEditionMetrics} (discriminated union of ranked and unranked)
  */
-export const makeReferrerDetailResponseOkSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerEditionMetrics") =>
+  z.discriminatedUnion("type", [
+    makeReferrerEditionMetricsRankedSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedSchema(valueLabel),
+  ]);
+
+/**
+ * Schema for validating a {@link ReferralProgramEditionSlug}.
+ *
+ * Enforces the slug format invariant: lowercase letters (a-z), digits (0-9),
+ * and hyphens (-) only. Must not start or end with a hyphen.
+ *
+ * Runtime validation against configured editions happens at the business logic level.
+ */
+export const makeReferralProgramEditionSlugSchema = (
+  valueLabel: string = "ReferralProgramEditionSlug",
+) =>
+  z
+    .string()
+    .min(1, `${valueLabel} must not be empty`)
+    .regex(
+      /^[a-z0-9]+(-[a-z0-9]+)*$/,
+      `${valueLabel} must contain only lowercase letters, digits, and hyphens. Must not start or end with a hyphen.`,
+    );
+
+/**
+ * Schema for validating editions array (min 1, max {@link MAX_EDITIONS_PER_REQUEST}, distinct values).
+ */
+export const makeReferrerMetricsEditionsArraySchema = (
+  valueLabel: string = "ReferrerMetricsEditionsArray",
+) =>
+  z
+    .array(makeReferralProgramEditionSlugSchema(`${valueLabel}[edition]`))
+    .min(1, `${valueLabel} must contain at least 1 edition`)
+    .max(
+      MAX_EDITIONS_PER_REQUEST,
+      `${valueLabel} must not contain more than ${MAX_EDITIONS_PER_REQUEST} editions`,
+    )
+    .refine(
+      (editions) => {
+        const uniqueEditions = new Set(editions);
+        return uniqueEditions.size === editions.length;
+      },
+      { message: `${valueLabel} must not contain duplicate edition slugs` },
+    );
+
+/**
+ * Schema for {@link ReferrerMetricsEditionsRequest}
+ */
+export const makeReferrerMetricsEditionsRequestSchema = (
+  valueLabel: string = "ReferrerMetricsEditionsRequest",
+) =>
   z.object({
-    responseCode: z.literal(ReferrerDetailResponseCodes.Ok),
-    data: z.discriminatedUnion("type", [
-      makeReferrerDetailRankedSchema(`${valueLabel}.data`),
-      makeReferrerDetailUnrankedSchema(`${valueLabel}.data`),
-    ]),
+    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+    editions: makeReferrerMetricsEditionsArraySchema(`${valueLabel}.editions`),
   });
 
 /**
- * Schema for {@link ReferrerDetailResponseError}
+ * Schema for {@link ReferrerMetricsEditionsResponseOk}
  */
-export const makeReferrerDetailResponseErrorSchema = (
-  _valueLabel: string = "ReferrerDetailResponse",
+export const makeReferrerMetricsEditionsResponseOkSchema = (
+  valueLabel: string = "ReferrerMetricsEditionsResponseOk",
 ) =>
   z.object({
-    responseCode: z.literal(ReferrerDetailResponseCodes.Error),
+    responseCode: z.literal(ReferrerMetricsEditionsResponseCodes.Ok),
+    data: z.record(
+      makeReferralProgramEditionSlugSchema(`${valueLabel}.data[edition]`),
+      makeReferrerEditionMetricsSchema(`${valueLabel}.data[edition]`),
+    ),
+  });
+
+/**
+ * Schema for {@link ReferrerMetricsEditionsResponseError}
+ */
+export const makeReferrerMetricsEditionsResponseErrorSchema = (
+  _valueLabel: string = "ReferrerMetricsEditionsResponseError",
+) =>
+  z.object({
+    responseCode: z.literal(ReferrerMetricsEditionsResponseCodes.Error),
     error: z.string(),
     errorMessage: z.string(),
   });
 
 /**
- * Schema for {@link ReferrerDetailResponse}
+ * Schema for {@link ReferrerMetricsEditionsResponse}
  */
-export const makeReferrerDetailResponseSchema = (valueLabel: string = "ReferrerDetailResponse") =>
+export const makeReferrerMetricsEditionsResponseSchema = (
+  valueLabel: string = "ReferrerMetricsEditionsResponse",
+) =>
   z.discriminatedUnion("responseCode", [
-    makeReferrerDetailResponseOkSchema(valueLabel),
-    makeReferrerDetailResponseErrorSchema(valueLabel),
+    makeReferrerMetricsEditionsResponseOkSchema(valueLabel),
+    makeReferrerMetricsEditionsResponseErrorSchema(valueLabel),
+  ]);
+
+/**
+ * Schema for validating a {@link ReferralProgramEditionConfig}.
+ */
+export const makeReferralProgramEditionConfigSchema = (
+  valueLabel: string = "ReferralProgramEditionConfig",
+) =>
+  z.object({
+    slug: makeReferralProgramEditionSlugSchema(`${valueLabel}.slug`),
+    displayName: z.string().min(1, `${valueLabel}.displayName must not be empty`),
+    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
+  });
+
+/**
+ * Schema for validating referral program edition config set array.
+ */
+export const makeReferralProgramEditionConfigSetArraySchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetArray",
+) =>
+  z
+    .array(makeReferralProgramEditionConfigSchema(`${valueLabel}[edition]`))
+    .min(1, `${valueLabel} must contain at least one edition`)
+    .refine(
+      (editions) => {
+        const slugs = new Set<string>();
+        for (const edition of editions) {
+          if (slugs.has(edition.slug)) return false;
+          slugs.add(edition.slug);
+        }
+        return true;
+      },
+      { message: `${valueLabel} must not contain duplicate edition slugs` },
+    );
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetData}.
+ */
+export const makeReferralProgramEditionConfigSetDataSchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetData",
+) =>
+  z.object({
+    editions: makeReferralProgramEditionConfigSetArraySchema(`${valueLabel}.editions`),
+  });
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetResponseOk}.
+ */
+export const makeReferralProgramEditionConfigSetResponseOkSchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetResponseOk",
+) =>
+  z.object({
+    responseCode: z.literal(ReferralProgramEditionConfigSetResponseCodes.Ok),
+    data: makeReferralProgramEditionConfigSetDataSchema(`${valueLabel}.data`),
+  });
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetResponseError}.
+ */
+export const makeReferralProgramEditionConfigSetResponseErrorSchema = (
+  _valueLabel: string = "ReferralProgramEditionConfigSetResponseError",
+) =>
+  z.object({
+    responseCode: z.literal(ReferralProgramEditionConfigSetResponseCodes.Error),
+    error: z.string(),
+    errorMessage: z.string(),
+  });
+
+/**
+ * Schema for {@link ReferralProgramEditionConfigSetResponse}.
+ */
+export const makeReferralProgramEditionConfigSetResponseSchema = (
+  valueLabel: string = "ReferralProgramEditionConfigSetResponse",
+) =>
+  z.discriminatedUnion("responseCode", [
+    makeReferralProgramEditionConfigSetResponseOkSchema(valueLabel),
+    makeReferralProgramEditionConfigSetResponseErrorSchema(valueLabel),
   ]);

@@ -24,6 +24,9 @@ resource "render_web_service" "ensadmin" {
     ANTHROPIC_API_KEY = {
       value = var.anthropic_api_key
     }
+    NEXT_PUBLIC_SERVER_CONNECTION_LIBRARY = {
+      value = var.next_public_server_connection_library
+    }
   }
 
   # See https://render.com/docs/custom-domains
