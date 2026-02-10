@@ -1,22 +1,10 @@
-import { z } from "zod/v4";
+import superjson from "superjson";
 
 import type { DomainId } from "@ensnode/ensnode-sdk";
 
 import type { DomainOrderValue } from "@/graphql-api/lib/find-domains/types";
 import type { DomainsOrderBy } from "@/graphql-api/schema/domain";
 import type { OrderDirection } from "@/graphql-api/schema/order-direction";
-
-const stringToBigInt = z.codec(z.string(), z.bigint(), {
-  decode: (str) => BigInt(str),
-  encode: (bigint) => bigint.toString(),
-});
-
-const DomainCursorSchema = z.strictObject({
-  id: z.string(),
-  by: z.string(),
-  dir: z.string(),
-  value: z.union([z.string(), z.null(), stringToBigInt]),
-});
 
 /**
  * Composite Domain cursor for keyset pagination.
@@ -43,12 +31,8 @@ export interface DomainCursor {
  */
 export const DomainCursor = {
   encode: (cursor: DomainCursor) =>
-    Buffer.from(JSON.stringify(DomainCursorSchema.encode(cursor)), "utf8").toString("base64"),
-  // NOTE: the 'as DomainCursor' encodes the correct amount of type strictness and ensures that the
-  // decoded zod object is castable to DomainCursor, without the complexity of inferring the types
-  // exclusively from zod
+    Buffer.from(superjson.stringify(cursor), "utf8").toString("base64"),
+  // TODO: in the future, validate the cursor format matches DomainCursor
   decode: (cursor: string) =>
-    DomainCursorSchema.parse(
-      JSON.parse(Buffer.from(cursor, "base64").toString("utf8")),
-    ) as DomainCursor,
+    superjson.parse<DomainCursor>(Buffer.from(cursor, "base64").toString("utf8")),
 };

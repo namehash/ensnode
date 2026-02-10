@@ -2,7 +2,6 @@ import { type ResolveCursorConnectionArgs, resolveCursorConnection } from "@poth
 import { and } from "drizzle-orm";
 
 import type { context as createContext } from "@/graphql-api/context";
-import { DomainCursor } from "@/graphql-api/lib/find-domains/domain-cursor";
 import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import {
@@ -14,6 +13,7 @@ import {
 import { db } from "@/lib/db";
 import { makeLogger } from "@/lib/logger";
 
+import { DomainCursor } from "./domain-cursor";
 import { cursorFilter, findDomains, isEffectiveDesc, orderFindDomains } from "./find-domains";
 
 const logger = makeLogger("find-domains-resolver");
@@ -62,7 +62,7 @@ export function resolveFindDomains(
     // `order` MAY be provided; defaults are used otherwise
     order?: FindDomainsOrderArg | undefined | null;
 
-    // these resolver arguments from t.connection
+    // these resolver arguments are from t.connection
     first?: number | null;
     last?: number | null;
     before?: string | null;
