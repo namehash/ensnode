@@ -1,9 +1,20 @@
+import type { ReferralProgramEditionConfigSet } from "@namehash/ens-referrals/v1";
+import { minutesToSeconds } from "date-fns";
+
+import { getLatestIndexedBlockRef, SWRCache } from "@ensnode/ensnode-sdk";
+
+import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import {
+  createEditionLeaderboardBuilder,
   initializeReferralLeaderboardEditionsCaches,
   type ReferralLeaderboardEditionsCacheMap,
 } from "@/cache/referral-leaderboard-editions.cache";
+import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/referrer-leaderboard/closeout";
 import { factory } from "@/lib/hono-factory";
+import { makeLogger } from "@/lib/logger";
 import type { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
+
+const logger = makeLogger("referral-leaderboard-editions-caches-middleware");
 
 /**
  * Type definition for the referral leaderboard editions caches middleware context passed to downstream middleware and handlers.
@@ -30,12 +41,94 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
 };
 
 /**
+ * Checks all caches and upgrades any that have become immutable to store them indefinitely.
+ *
+ * This function is called non-blocking on each request to opportunistically upgrade caches
+ * when editions close. Once a cache is upgraded to immutable storage (infinite TTL, no proactive
+ * revalidation), the quick check ensures minimal overhead on all future requests.
+ *
+ * @param caches - The map of edition caches to check and potentially upgrade
+ * @param editionConfigSet - The edition config set containing rules for each edition
+ */
+async function checkAndUpgradeImmutableCaches(
+  caches: ReferralLeaderboardEditionsCacheMap,
+  editionConfigSet: ReferralProgramEditionConfigSet,
+): Promise<void> {
+  for (const [editionSlug, cache] of caches) {
+    if (cache.isIndefinitelyStored()) {
+      continue;
+    }
+
+    const editionConfig = editionConfigSet.get(editionSlug);
+    if (!editionConfig) {
+      logger.warn({ editionSlug }, "Edition config not found during immutability check");
+      continue;
+    }
+
+    // Get current indexing status to determine accurate timestamp
+    const indexingStatus = await indexingStatusCache.read();
+    if (indexingStatus instanceof Error) {
+      logger.debug(
+        { error: indexingStatus, editionSlug },
+        "Failed to read indexing status during immutability check",
+      );
+      continue;
+    }
+
+    // Get latest indexed block ref for this edition's chain
+    const latestIndexedBlockRef = getLatestIndexedBlockRef(
+      indexingStatus,
+      editionConfig.rules.subregistryId.chainId,
+    );
+
+    if (latestIndexedBlockRef === null) {
+      logger.debug(
+        { editionSlug, chainId: editionConfig.rules.subregistryId.chainId },
+        "No indexed block ref during immutability check",
+      );
+      continue;
+    }
+
+    // Check if edition is immutably closed based on accurate timestamp
+    const isImmutable = assumeReferralProgramEditionImmutablyClosed(
+      editionConfig.rules,
+      latestIndexedBlockRef.timestamp,
+    );
+
+    if (!isImmutable) {
+      continue;
+    }
+
+    // Edition is now immutable! Upgrade the cache
+    logger.info({ editionSlug }, "Upgrading cache to immutable storage");
+
+    cache.destroy();
+
+    const immutableCache = new SWRCache({
+      fn: createEditionLeaderboardBuilder(editionConfig),
+      ttl: Number.POSITIVE_INFINITY,
+      proactiveRevalidationInterval: undefined,
+      errorTtl: minutesToSeconds(1),
+      proactivelyInitialize: true,
+    });
+
+    caches.set(editionSlug, immutableCache);
+
+    logger.info({ editionSlug }, "Successfully upgraded cache to immutable storage");
+  }
+}
+
+/**
  * Middleware that provides {@link ReferralLeaderboardEditionsCachesMiddlewareVariables}
  * to downstream middleware and handlers.
  *
  * This middleware depends on {@link referralProgramEditionConfigSetMiddleware} to provide
  * the edition config set. If the edition config set failed to load, this middleware propagates the error.
  * Otherwise, it initializes caches for each edition in the config set.
+ *
+ * On each request, this middleware non-blocking checks if any caches should be upgraded to immutable
+ * storage based on accurate indexing timestamps. This allows caches to dynamically transition from
+ * refreshing to indefinite storage as editions close.
  */
 export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddleware(
   async (c, next) => {
@@ -58,6 +151,12 @@ export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddlew
     // Initialize caches for the edition config set
     const caches = initializeReferralLeaderboardEditionsCaches(editionConfigSet);
     c.set("referralLeaderboardEditionsCaches", caches);
+
+    // Non-blocking: Check and upgrade any caches that have become immutable
+    checkAndUpgradeImmutableCaches(caches, editionConfigSet).catch((error) => {
+      logger.error({ error }, "Failed to check and upgrade immutable caches");
+    });
+
     await next();
   },
 );

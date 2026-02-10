@@ -51,7 +51,7 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
  * @param editionConfig - The edition configuration
  * @returns A function that builds the leaderboard for the given edition
  */
-function createEditionLeaderboardBuilder(
+export function createEditionLeaderboardBuilder(
   editionConfig: ReferralProgramEditionConfig,
 ): () => Promise<ReferrerLeaderboard> {
   return async (): Promise<ReferrerLeaderboard> => {
@@ -120,6 +120,10 @@ let cachedInstance: ReferralLeaderboardEditionsCacheMap | null = null;
  * ensuring that if one edition fails to refresh, other editions' previously successful
  * data remains available.
  *
+ * All caches are initially created with normal refresh behavior. Caches are dynamically upgraded
+ * to immutable storage (infinite TTL, no proactive revalidation) by the middleware after an edition
+ * has been closed for more than the safety window based on accurate indexing timestamps.
+ *
  * @param editionConfigSet - The referral program edition config set to initialize caches for
  * @returns A map from edition slug to its dedicated SWRCache
  */
@@ -134,6 +138,8 @@ export function initializeReferralLeaderboardEditionsCaches(
   const caches: ReferralLeaderboardEditionsCacheMap = new Map();
 
   for (const [editionSlug, editionConfig] of editionConfigSet) {
+    // All editions start with normal refresh behavior
+    // They will be dynamically upgraded to immutable storage by the middleware
     const cache = new SWRCache({
       fn: createEditionLeaderboardBuilder(editionConfig),
       ttl: minutesToSeconds(1),
