@@ -15,9 +15,6 @@ import { makeLogger } from "@/lib/logger";
 
 import { DomainCursor } from "./domain-cursor";
 import { cursorFilter, findDomains, isEffectiveDesc, orderFindDomains } from "./find-domains";
-
-const logger = makeLogger("find-domains-resolver");
-
 import type {
   DomainOrderValue,
   DomainWithOrderValue,
@@ -25,6 +22,8 @@ import type {
   FindDomainsResult,
   FindDomainsWhereArg,
 } from "./types";
+
+const logger = makeLogger("find-domains-resolver");
 
 /**
  * Extract the order value from a findDomains result row based on the orderBy field.

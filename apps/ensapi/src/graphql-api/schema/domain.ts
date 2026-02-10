@@ -349,7 +349,7 @@ export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
     "Ordering options for domains query. When providing a custom order, both `by` and `dir` must be specified. If no order is provided, the default is NAME ASC.",
   fields: (t) => ({
     by: t.field({ type: DomainsOrderBy, required: true }),
-    dir: t.field({ type: OrderDirection, defaultValue: "ASC" }),
+    dir: t.field({ type: OrderDirection, required: true }),
   }),
 });
 

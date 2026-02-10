@@ -27,7 +27,7 @@ export interface DomainCursor {
 /**
  * Encoding/Decoding helper for Composite DomainCursors.
  *
- * @dev it's base64'd JSON with bigint encoding via zod
+ * @dev it's base64'd (super)json
  */
 export const DomainCursor = {
   encode: (cursor: DomainCursor) =>
