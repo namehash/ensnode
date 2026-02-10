@@ -140,7 +140,6 @@ async function checkAndUpgradeImmutableCaches(
   caches: ReferralLeaderboardEditionsCacheMap,
   editionConfigSet: ReferralProgramEditionConfigSet,
 ): Promise<void> {
-  // Read indexing status once before the loop and reuse for all editions
   const indexingStatus = await indexingStatusCache.read();
   if (indexingStatus instanceof Error) {
     logger.debug(
@@ -151,7 +150,6 @@ async function checkAndUpgradeImmutableCaches(
   }
 
   for (const [editionSlug, cache] of caches) {
-    // Quick exit: already upgraded to immutable storage
     if (cache.isIndefinitelyStored()) {
       continue;
     }
@@ -162,7 +160,6 @@ async function checkAndUpgradeImmutableCaches(
       continue;
     }
 
-    // Get latest indexed block ref for this edition's chain
     const latestIndexedBlockRef = getLatestIndexedBlockRef(
       indexingStatus,
       editionConfig.rules.subregistryId.chainId,
@@ -176,7 +173,6 @@ async function checkAndUpgradeImmutableCaches(
       continue;
     }
 
-    // Check if edition is immutably closed based on current indexing timestamp
     const isImmutable = assumeReferralProgramEditionImmutablyClosed(
       editionConfig.rules,
       latestIndexedBlockRef.timestamp,
@@ -194,10 +190,14 @@ async function checkAndUpgradeImmutableCaches(
       }
 
       // Start upgrade and register promise immediately (no await in between)
-      const promise = upgradeEditionCache(editionSlug, cache, editionConfig, caches).finally(() => {
-        // Always clean up the in-progress tracking
-        inProgressUpgrades.delete(editionSlug);
-      });
+      const promise = upgradeEditionCache(editionSlug, cache, editionConfig, caches)
+        .catch((error) => {
+          logger.error({ editionSlug, error }, "Unexpected error during cache upgrade");
+        })
+        .finally(() => {
+          // Always clean up the in-progress tracking
+          inProgressUpgrades.delete(editionSlug);
+        });
 
       inProgressUpgrades.set(editionSlug, promise);
       return promise;

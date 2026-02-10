@@ -142,6 +142,15 @@ export const makeReferrerLeaderboardPageContextSchema = (
   });
 
 /**
+ * Schema for referral program status field.
+ * Validates that the status is one of: "Scheduled", "Active", or "Closed".
+ */
+export const makeReferralProgramStatusSchema = (valueLabel: string = "status") =>
+  z.enum(ReferralProgramStatuses, {
+    message: `${valueLabel} must be "Scheduled", "Active", or "Closed"`,
+  });
+
+/**
  * Schema for ReferrerLeaderboardPage
  */
 export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
@@ -150,11 +159,7 @@ export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "Referrer
     referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[record]`)),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
     pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-    status: z.enum([
-      ReferralProgramStatuses.Scheduled,
-      ReferralProgramStatuses.Active,
-      ReferralProgramStatuses.Closed,
-    ]),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
@@ -203,11 +208,7 @@ export const makeReferrerEditionMetricsRankedSchema = (
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    status: z.enum([
-      ReferralProgramStatuses.Scheduled,
-      ReferralProgramStatuses.Active,
-      ReferralProgramStatuses.Closed,
-    ]),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
@@ -222,11 +223,7 @@ export const makeReferrerEditionMetricsUnrankedSchema = (
     rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
     referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
     aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    status: z.enum([
-      ReferralProgramStatuses.Scheduled,
-      ReferralProgramStatuses.Active,
-      ReferralProgramStatuses.Closed,
-    ]),
+    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
     accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
   });
 
