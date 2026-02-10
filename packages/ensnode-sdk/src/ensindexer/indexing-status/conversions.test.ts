@@ -1,18 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize";
-import { serializeOmnichainIndexingStatusSnapshot } from "./serialize";
-import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialized-types";
-import { earlierBlockRef, earliestBlockRef, laterBlockRef, latestBlockRef } from "./test-helpers";
+import {
+  earlierBlockRef,
+  earliestBlockRef,
+  laterBlockRef,
+  latestBlockRef,
+} from "./block-refs.mock";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
-} from "./types";
+} from "./chain-indexing-status-snapshot";
+import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize";
+import { serializeOmnichainIndexingStatusSnapshot } from "./serialize";
+import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialized-types";
+import { OmnichainIndexingStatusIds, type OmnichainIndexingStatusSnapshot } from "./types";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Omnichain Indexing Status Snapshot", () => {
