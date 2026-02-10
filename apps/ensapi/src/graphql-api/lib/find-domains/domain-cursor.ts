@@ -44,6 +44,13 @@ export const DomainCursor = {
   encode: (cursor: DomainCursor) =>
     Buffer.from(superjson.stringify(cursor), "utf8").toString("base64"),
   // TODO: in the future, validate the cursor format matches DomainCursor
-  decode: (cursor: string) =>
-    superjson.parse<DomainCursor>(Buffer.from(cursor, "base64").toString("utf8")),
+  decode: (cursor: string): DomainCursor => {
+    try {
+      return superjson.parse<DomainCursor>(Buffer.from(cursor, "base64").toString("utf8"));
+    } catch {
+      throw new Error(
+        "Invalid cursor: failed to decode cursor. The cursor may be malformed or from an incompatible query.",
+      );
+    }
+  },
 };

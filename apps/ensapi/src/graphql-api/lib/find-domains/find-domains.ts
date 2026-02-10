@@ -270,8 +270,11 @@ export function cursorFilter(
 
   // Non-null cursor: use tuple comparison
   // NOTE: Drizzle 0.41 doesn't support gt/lt with tuple arrays, so we use raw SQL
+  // NOTE: explicit cast required — Postgres can't infer parameter types in tuple comparisons
   const op = useGreaterThan ? ">" : "<";
-  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${cursor.value}, ${cursor.id})`;
+  const castValue =
+    cursor.by === "NAME" ? sql`${cursor.value}::text` : sql`${cursor.value}::bigint`;
+  return sql`(${orderColumn}, ${domains.id}) ${sql.raw(op)} (${castValue}, ${cursor.id})`;
 }
 
 /**
