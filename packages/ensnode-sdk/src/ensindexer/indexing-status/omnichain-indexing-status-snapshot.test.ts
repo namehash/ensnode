@@ -16,8 +16,11 @@ import {
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
-import { getOmnichainIndexingCursor, getOmnichainIndexingStatus } from "./helpers";
-import { OmnichainIndexingStatusIds } from "./types";
+import {
+  getOmnichainIndexingCursor,
+  getOmnichainIndexingStatus,
+  OmnichainIndexingStatusIds,
+} from "./omnichain-indexing-status-snapshot";
 
 describe("ENSIndexer: Indexing Snapshot helpers", () => {
   describe("getOmnichainIndexingStatus", () => {
