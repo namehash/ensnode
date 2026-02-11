@@ -4,13 +4,16 @@ import type {
   ChainIndexingStatusSnapshotCompleted,
   ChainIndexingStatusSnapshotQueued,
 } from "../chain-indexing-status-snapshot";
-import type {
-  ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  OmnichainIndexingStatusSnapshotBackfill,
-  OmnichainIndexingStatusSnapshotCompleted,
-  OmnichainIndexingStatusSnapshotFollowing,
-  OmnichainIndexingStatusSnapshotUnstarted,
+import {
+  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
+  OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
+  type OmnichainIndexingStatusSnapshotBackfill,
+  type OmnichainIndexingStatusSnapshotCompleted,
+  type OmnichainIndexingStatusSnapshotFollowing,
+  type OmnichainIndexingStatusSnapshotUnstarted,
 } from "../omnichain-indexing-status-snapshot";
+import { serializeChainIndexingSnapshots } from "./chain-indexing-status-snapshot";
 
 /**
  * Serialized representation of {@link OmnichainIndexingStatusSnapshotUnstarted}
@@ -55,3 +58,41 @@ export type SerializedOmnichainIndexingStatusSnapshot =
   | SerializedOmnichainIndexingStatusSnapshotBackfill
   | SerializedOmnichainIndexingStatusSnapshotCompleted
   | SerializedOmnichainIndexingStatusSnapshotFollowing;
+
+/**
+ * Serialize a {@link OmnichainIndexingStatusSnapshot} object.
+ */
+export function serializeOmnichainIndexingStatusSnapshot(
+  indexingStatus: OmnichainIndexingStatusSnapshot,
+): SerializedOmnichainIndexingStatusSnapshot {
+  switch (indexingStatus.omnichainStatus) {
+    case OmnichainIndexingStatusIds.Unstarted:
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+      } satisfies SerializedOmnichainIndexingStatusSnapshotUnstarted;
+
+    case OmnichainIndexingStatusIds.Backfill:
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Backfill,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+      } satisfies SerializedOmnichainIndexingStatusSnapshotBackfill;
+
+    case OmnichainIndexingStatusIds.Completed: {
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Completed,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+      } satisfies SerializedOmnichainIndexingStatusSnapshotCompleted;
+    }
+
+    case OmnichainIndexingStatusIds.Following:
+      return {
+        omnichainStatus: OmnichainIndexingStatusIds.Following,
+        chains: serializeChainIndexingSnapshots(indexingStatus.chains),
+        omnichainIndexingCursor: indexingStatus.omnichainIndexingCursor,
+      } satisfies SerializedOmnichainIndexingStatusSnapshotFollowing;
+  }
+}
