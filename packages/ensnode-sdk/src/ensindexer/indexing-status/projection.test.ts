@@ -6,7 +6,7 @@ import {
   ChainIndexingStatusIds,
 } from "./chain-indexing-status-snapshot";
 import { CrossChainIndexingStrategyIds } from "./cross-chain-indexing-status-snapshot";
-import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
+import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize/cross-chain-indexing-status-snapshot";
 import { OmnichainIndexingStatusIds } from "./omnichain-indexing-status-snapshot";
 import { createRealtimeIndexingStatusProjection } from "./projection";
 import type { RealtimeIndexingStatusProjection } from "./types";
