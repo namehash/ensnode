@@ -1,42 +1,20 @@
 import { prettifyError } from "zod/v4";
 
 import type {
-  SerializedChainIndexingStatusSnapshot,
   SerializedCrossChainIndexingStatusSnapshot,
   SerializedOmnichainIndexingStatusSnapshot,
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import type {
-  ChainIndexingStatusSnapshot,
   CrossChainIndexingStatusSnapshot,
   OmnichainIndexingStatusSnapshot,
   RealtimeIndexingStatusProjection,
 } from "./types";
 import {
-  makeChainIndexingStatusSnapshotSchema,
   makeCrossChainIndexingStatusSnapshotSchema,
   makeOmnichainIndexingStatusSnapshotSchema,
   makeRealtimeIndexingStatusProjectionSchema,
 } from "./zod-schemas";
-
-/**
- * Deserialize into a {@link ChainIndexingSnapshot} object.
- */
-export function deserializeChainIndexingStatusSnapshot(
-  maybeSnapshot: SerializedChainIndexingStatusSnapshot,
-  valueLabel?: string,
-): ChainIndexingStatusSnapshot {
-  const schema = makeChainIndexingStatusSnapshotSchema(valueLabel);
-  const parsed = schema.safeParse(maybeSnapshot);
-
-  if (parsed.error) {
-    throw new Error(
-      `Cannot deserialize into ChainIndexingStatusSnapshot:\n${prettifyError(parsed.error)}\n`,
-    );
-  }
-
-  return parsed.data;
-}
 
 /**
  * Deserialize an {@link OmnichainIndexingStatusSnapshot} object.
