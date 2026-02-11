@@ -1,6 +1,6 @@
+import type { RealtimeIndexingStatusProjection } from "./realtime-indexing-status-projection";
 import { serializeCrossChainIndexingStatusSnapshotOmnichain } from "./serialize/cross-chain-indexing-status-snapshot";
 import type { SerializedRealtimeIndexingStatusProjection } from "./serialized-types";
-import type { RealtimeIndexingStatusProjection } from "./types";
 
 export function serializeRealtimeIndexingStatusProjection(
   indexingProjection: RealtimeIndexingStatusProjection,

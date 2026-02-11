@@ -9,7 +9,7 @@ import { CrossChainIndexingStrategyIds } from "./cross-chain-indexing-status-sna
 import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize/cross-chain-indexing-status-snapshot";
 import { OmnichainIndexingStatusIds } from "./omnichain-indexing-status-snapshot";
 import { createRealtimeIndexingStatusProjection } from "./projection";
-import type { RealtimeIndexingStatusProjection } from "./types";
+import type { RealtimeIndexingStatusProjection } from "./realtime-indexing-status-projection";
 
 describe("Realtime Indexing Status Projection", () => {
   it("can be created from existing omnichain snapshot", () => {

@@ -1,6 +1,6 @@
 import type { ParsePayload } from "zod/v4/core";
 
-import type { RealtimeIndexingStatusProjection } from "./types";
+import type { RealtimeIndexingStatusProjection } from "./realtime-indexing-status-projection";
 
 /**
  * Invariant: For realtime indexing status projection,

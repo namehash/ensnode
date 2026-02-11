@@ -1,6 +1,6 @@
 import type { UnixTimestamp } from "../../shared/types";
 import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
-import type { RealtimeIndexingStatusProjection } from "./types";
+import type { RealtimeIndexingStatusProjection } from "./realtime-indexing-status-projection";
 
 /**
  * Create realtime indexing status projection from
