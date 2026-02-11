@@ -1,5 +1,5 @@
 ---
-"@ensnode/ensnode-sdk": patch
+"@ensnode/ensnode-sdk": minor
 ---
 
-Added `isIndefinitelyStored()` method to SWRCache for detecting caches configured with infinite TTL and no proactive revalidation.
+SWRCache `fn` now optionally receives the currently cached result as a parameter, allowing implementations to inspect cached data before deciding whether to return it or fetch fresh data. Fully backward compatible.
