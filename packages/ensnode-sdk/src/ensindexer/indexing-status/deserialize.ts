@@ -7,9 +7,9 @@ import type {
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import type { CrossChainIndexingStatusSnapshot, RealtimeIndexingStatusProjection } from "./types";
+import { makeOmnichainIndexingStatusSnapshotSchema } from "./zod-schema/omnichain-indexing-status-snapshot";
 import {
   makeCrossChainIndexingStatusSnapshotSchema,
-  makeOmnichainIndexingStatusSnapshotSchema,
   makeRealtimeIndexingStatusProjectionSchema,
 } from "./zod-schemas";
 
