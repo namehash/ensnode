@@ -1,6 +1,4 @@
 import packageJson from "@/../package.json" with { type: "json" };
-import type { ArgsConfig } from "@/config";
-import { buildENSRainbowPublicConfig } from "@/config";
 
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
@@ -17,6 +15,8 @@ import {
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
+import { buildENSRainbowPublicConfig } from "@/config/public";
+import type { ArgsConfig } from "@/config/types";
 import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
