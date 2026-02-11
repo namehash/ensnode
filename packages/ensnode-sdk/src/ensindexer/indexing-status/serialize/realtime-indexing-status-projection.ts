@@ -1,5 +1,8 @@
 import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
-import type { SerializedCrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
+import {
+  type SerializedCrossChainIndexingStatusSnapshot,
+  serializeCrossChainIndexingStatusSnapshotOmnichain,
+} from "./cross-chain-indexing-status-snapshot";
 import type { SerializedOmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
 
 /**
@@ -16,4 +19,14 @@ export interface SerializedCurrentIndexingProjectionOmnichain
 export interface SerializedRealtimeIndexingStatusProjection
   extends Omit<RealtimeIndexingStatusProjection, "snapshot"> {
   snapshot: SerializedCrossChainIndexingStatusSnapshot;
+}
+
+export function serializeRealtimeIndexingStatusProjection(
+  indexingProjection: RealtimeIndexingStatusProjection,
+): SerializedRealtimeIndexingStatusProjection {
+  return {
+    projectedAt: indexingProjection.projectedAt,
+    worstCaseDistance: indexingProjection.worstCaseDistance,
+    snapshot: serializeCrossChainIndexingStatusSnapshotOmnichain(indexingProjection.snapshot),
+  } satisfies SerializedRealtimeIndexingStatusProjection;
 }
