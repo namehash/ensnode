@@ -13,7 +13,7 @@ import {
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
-import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize";
+import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize/omnichain-indexing-status-snapshot";
 import {
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
