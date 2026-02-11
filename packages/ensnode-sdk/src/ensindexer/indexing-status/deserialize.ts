@@ -2,7 +2,7 @@ import { prettifyError } from "zod/v4";
 
 import type { RealtimeIndexingStatusProjection } from "./realtime-indexing-status-projection";
 import type { SerializedRealtimeIndexingStatusProjection } from "./serialize/realtime-indexing-status-projection";
-import { makeRealtimeIndexingStatusProjectionSchema } from "./zod-schemas";
+import { makeRealtimeIndexingStatusProjectionSchema } from "./zod-schema/realtime-indexing-status-projection";
 
 /**
  * Deserialize into a {@link RealtimeIndexingStatusProjection} object.

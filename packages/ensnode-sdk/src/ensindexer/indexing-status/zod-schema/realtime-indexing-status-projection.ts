@@ -8,12 +8,12 @@
  */
 import { z } from "zod/v4";
 
-import { makeDurationSchema, makeUnixTimestampSchema } from "../../shared/zod-schemas";
+import { makeDurationSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import {
   invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime,
   invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect,
-} from "./validations";
-import { makeCrossChainIndexingStatusSnapshotSchema } from "./zod-schema/cross-chain-indexing-status-snapshot";
+} from "../validations";
+import { makeCrossChainIndexingStatusSnapshotSchema } from "./cross-chain-indexing-status-snapshot";
 
 /**
  * Makes Zod schema for {@link RealtimeIndexingStatusProjection}
