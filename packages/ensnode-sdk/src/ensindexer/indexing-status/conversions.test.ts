@@ -14,9 +14,12 @@ import {
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
 import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize";
+import {
+  OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
+} from "./omnichain-indexing-status-snapshot";
 import { serializeOmnichainIndexingStatusSnapshot } from "./serialize";
 import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialized-types";
-import { OmnichainIndexingStatusIds, type OmnichainIndexingStatusSnapshot } from "./types";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Omnichain Indexing Status Snapshot", () => {

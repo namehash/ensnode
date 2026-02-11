@@ -6,13 +6,15 @@ import type {
 } from "./chain-indexing-status-snapshot";
 import type {
   ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  CrossChainIndexingStatusSnapshot,
-  CrossChainIndexingStatusSnapshotOmnichain,
   OmnichainIndexingStatusSnapshot,
   OmnichainIndexingStatusSnapshotBackfill,
   OmnichainIndexingStatusSnapshotCompleted,
   OmnichainIndexingStatusSnapshotFollowing,
   OmnichainIndexingStatusSnapshotUnstarted,
+} from "./omnichain-indexing-status-snapshot";
+import type {
+  CrossChainIndexingStatusSnapshot,
+  CrossChainIndexingStatusSnapshotOmnichain,
   RealtimeIndexingStatusProjection,
 } from "./types";
 

@@ -2,6 +2,7 @@ export * from "./chain-indexing-status-snapshot";
 export * from "./deserialize";
 export * from "./deserialize/chain-indexing-status-snapshot";
 export * from "./helpers";
+export * from "./omnichain-indexing-status-snapshot";
 export * from "./projection";
 export * from "./serialize";
 export * from "./serialize/chain-indexing-status-snapshot";

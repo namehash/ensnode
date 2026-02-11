@@ -14,9 +14,11 @@ import {
   getOmnichainIndexingStatus,
 } from "./helpers";
 import type {
-  CrossChainIndexingStatusSnapshotOmnichain,
   OmnichainIndexingStatusSnapshot,
   OmnichainIndexingStatusSnapshotFollowing,
+} from "./omnichain-indexing-status-snapshot";
+import type {
+  CrossChainIndexingStatusSnapshotOmnichain,
   RealtimeIndexingStatusProjection,
 } from "./types";
 

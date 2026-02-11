@@ -1,3 +1,7 @@
+import {
+  OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
+} from "./omnichain-indexing-status-snapshot";
 import { serializeChainIndexingSnapshots } from "./serialize/chain-indexing-status-snapshot";
 import type {
   SerializedCrossChainIndexingStatusSnapshot,
@@ -8,12 +12,7 @@ import type {
   SerializedOmnichainIndexingStatusSnapshotUnstarted,
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
-import {
-  type CrossChainIndexingStatusSnapshot,
-  OmnichainIndexingStatusIds,
-  type OmnichainIndexingStatusSnapshot,
-  type RealtimeIndexingStatusProjection,
-} from "./types";
+import type { CrossChainIndexingStatusSnapshot, RealtimeIndexingStatusProjection } from "./types";
 
 export function serializeCrossChainIndexingStatusSnapshotOmnichain({
   strategy,

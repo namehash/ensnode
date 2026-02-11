@@ -22,15 +22,13 @@ import type {
 } from "./chain-indexing-status-snapshot";
 import {
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  CrossChainIndexingStatusSnapshotOmnichain,
-  CrossChainIndexingStrategyIds,
   OmnichainIndexingStatusIds,
   OmnichainIndexingStatusSnapshotBackfill,
   OmnichainIndexingStatusSnapshotCompleted,
   OmnichainIndexingStatusSnapshotFollowing,
   OmnichainIndexingStatusSnapshotUnstarted,
-  RealtimeIndexingStatusProjection,
-} from "./types";
+} from "./omnichain-indexing-status-snapshot";
+import { CrossChainIndexingStatusSnapshotOmnichain, CrossChainIndexingStrategyIds } from "./types";
 import {
   invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain,
   invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains,

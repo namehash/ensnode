@@ -7,10 +7,10 @@ import {
 } from "./chain-indexing-status-snapshot";
 import {
   type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  type CrossChainIndexingStatusSnapshot,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
-} from "./types";
+} from "./omnichain-indexing-status-snapshot";
+import type { CrossChainIndexingStatusSnapshot } from "./types";
 
 /**
  * Get {@link OmnichainIndexingStatusId} based on indexed chains' statuses.
