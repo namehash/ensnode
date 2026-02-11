@@ -29,8 +29,8 @@ export async function createApi(db: ENSRainbowDB, argsConfig: ArgsConfig): Promi
   const api = new Hono();
   const server = await ENSRainbowServer.init(db);
 
-  // Build and cache the public config once on startup
-  // This avoids calling labelCount() on every /v1/config request
+  // Build and cache the public config and count once on startup.
+  // /v1/config and /v1/labels/count both return this static snapshot so they never diverge.
   const countResult = await server.labelCount();
   if (countResult.status === StatusCode.Error) {
     logger.error("Failed to get records count during API initialization");
@@ -38,6 +38,7 @@ export async function createApi(db: ENSRainbowDB, argsConfig: ArgsConfig): Promi
       `Cannot initialize API: ${countResult.error} (errorCode: ${countResult.errorCode})`,
     );
   }
+  const cachedCountResponse = countResult;
 
   const cachedPublicConfig = buildENSRainbowPublicConfig(
     argsConfig,
@@ -109,9 +110,8 @@ export async function createApi(db: ENSRainbowDB, argsConfig: ArgsConfig): Promi
     return c.json(result);
   });
 
-  api.get("/v1/labels/count", async (c: HonoContext) => {
-    const result = await server.labelCount();
-    return c.json(result, result.errorCode);
+  api.get("/v1/labels/count", (c: HonoContext) => {
+    return c.json(cachedCountResponse, cachedCountResponse.errorCode);
   });
 
   api.get("/v1/config", (c: HonoContext) => {

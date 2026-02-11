@@ -131,20 +131,8 @@ describe("Server Command Tests", () => {
   });
 
   describe("GET /v1/labels/count", () => {
-    it("should throw an error when database is empty", async () => {
-      const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
-      expect(response.status).toBe(500);
-      const data = (await response.json()) as EnsRainbow.CountResponse;
-      const expectedData: EnsRainbow.CountServerError = {
-        status: StatusCode.Error,
-        error: "Label count not initialized. Check the validate command.",
-        errorCode: ErrorCode.ServerError,
-      };
-      expect(data).toEqual(expectedData);
-    });
-
-    it("should return correct count from LABEL_COUNT_KEY", async () => {
-      // Set a specific precalculated rainbow record count in the database
+    it("should return cached count from startup (same as /v1/config)", async () => {
+      // Count is fixed at server start; changing the DB does not affect the response
       await db.setPrecalculatedRainbowRecordCount(42);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`);
@@ -152,11 +140,22 @@ describe("Server Command Tests", () => {
       const data = (await response.json()) as EnsRainbow.CountResponse;
       const expectedData: EnsRainbow.CountSuccess = {
         status: StatusCode.Success,
-        count: 42,
+        count: 0,
         timestamp: expect.any(String),
       };
       expect(data).toEqual(expectedData);
-      expect(() => new Date(data.timestamp as string)).not.toThrow(); // valid timestamp
+      expect(() => new Date(data.timestamp as string)).not.toThrow();
+    });
+
+    it("should match recordsCount in /v1/config", async () => {
+      const [countRes, configRes] = await Promise.all([
+        fetch(`http://localhost:${nonDefaultPort}/v1/labels/count`),
+        fetch(`http://localhost:${nonDefaultPort}/v1/config`),
+      ]);
+      const countData = (await countRes.json()) as EnsRainbow.CountSuccess;
+      const configData = (await configRes.json()) as EnsRainbow.ENSRainbowPublicConfig;
+      expect(countData.status).toBe(StatusCode.Success);
+      expect(countData.count).toBe(configData.recordsCount);
     });
   });
 
