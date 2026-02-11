@@ -5,7 +5,7 @@ import { serve } from "@hono/node-server";
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
 import { createApi } from "@/lib/api";
-import { ENSRainbowDB, NoPrecalculatedCountError } from "@/lib/database";
+import { ENSRainbowDB } from "@/lib/database";
 import { logger } from "@/utils/logger";
 
 export type ServerCommandOptions = ArgsConfig;
@@ -26,18 +26,6 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   const db = await ENSRainbowDB.open(options.dataDir);
 
   try {
-    try {
-      await db.getPrecalculatedRainbowRecordCount();
-    } catch (error) {
-      if (error instanceof NoPrecalculatedCountError) {
-        logger.error("Cannot start server: database is empty or uninitialized.");
-        logger.error("The database must contain ingested data before the server can start.");
-        logger.error("Please run the ingestion command first to populate the database.");
-        throw new Error("Database is empty or uninitialized. Cannot start server.");
-      }
-      throw error;
-    }
-
     const app = await createServer(db, options);
 
     const server = serve({
