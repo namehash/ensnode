@@ -13,10 +13,15 @@ import {
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
 } from "./chain-indexing-status-snapshot";
-import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize";
-import { serializeOmnichainIndexingStatusSnapshot } from "./serialize";
-import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialized-types";
-import { OmnichainIndexingStatusIds, type OmnichainIndexingStatusSnapshot } from "./types";
+import { deserializeOmnichainIndexingStatusSnapshot } from "./deserialize/omnichain-indexing-status-snapshot";
+import {
+  OmnichainIndexingStatusIds,
+  type OmnichainIndexingStatusSnapshot,
+} from "./omnichain-indexing-status-snapshot";
+import {
+  type SerializedOmnichainIndexingStatusSnapshot,
+  serializeOmnichainIndexingStatusSnapshot,
+} from "./serialize/omnichain-indexing-status-snapshot";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Omnichain Indexing Status Snapshot", () => {

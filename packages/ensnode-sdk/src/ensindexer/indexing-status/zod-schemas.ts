@@ -8,137 +8,15 @@
  */
 import { z } from "zod/v4";
 
-import { deserializeChainId } from "../../shared/deserialize";
-import type { ChainId } from "../../shared/types";
+import { makeDurationSchema, makeUnixTimestampSchema } from "../../shared/zod-schemas";
+import { CrossChainIndexingStatusSnapshotOmnichain, CrossChainIndexingStrategyIds } from "./types";
 import {
-  makeChainIdStringSchema,
-  makeDurationSchema,
-  makeUnixTimestampSchema,
-} from "../../shared/zod-schemas";
-import type {
-  ChainIndexingStatusSnapshot,
-  ChainIndexingStatusSnapshotCompleted,
-  ChainIndexingStatusSnapshotQueued,
-} from "./chain-indexing-status-snapshot";
-import {
-  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
-  CrossChainIndexingStatusSnapshotOmnichain,
-  CrossChainIndexingStrategyIds,
-  OmnichainIndexingStatusIds,
-  OmnichainIndexingStatusSnapshotBackfill,
-  OmnichainIndexingStatusSnapshotCompleted,
-  OmnichainIndexingStatusSnapshotFollowing,
-  OmnichainIndexingStatusSnapshotUnstarted,
-  RealtimeIndexingStatusProjection,
-} from "./types";
-import {
-  invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain,
-  invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains,
-  invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains,
-  invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot,
-  invariant_omnichainSnapshotUnstartedHasValidChains,
-  invariant_omnichainStatusSnapshotBackfillHasValidChains,
-  invariant_omnichainStatusSnapshotCompletedHasValidChains,
   invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime,
   invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect,
   invariant_slowestChainEqualsToOmnichainSnapshotTime,
   invariant_snapshotTimeIsTheHighestKnownBlockTimestamp,
 } from "./validations";
-import { makeChainIndexingStatusSnapshotSchema } from "./zod-schema/chain-indexing-status-snapshot";
-
-/**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshot} per chain.
- */
-export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
-  z
-    .record(makeChainIdStringSchema(), makeChainIndexingStatusSnapshotSchema(valueLabel), {
-      error:
-        "Chains indexing statuses must be an object mapping valid chain IDs to their indexing status snapshots.",
-    })
-    .transform((serializedChainsIndexingStatus) => {
-      const chainsIndexingStatus = new Map<ChainId, ChainIndexingStatusSnapshot>();
-
-      for (const [chainIdString, chainStatus] of Object.entries(serializedChainsIndexingStatus)) {
-        chainsIndexingStatus.set(deserializeChainId(chainIdString), chainStatus);
-      }
-
-      return chainsIndexingStatus;
-    });
-
-/**
- * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotUnstarted}
- */
-const makeOmnichainIndexingStatusSnapshotUnstartedSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
-    chains: makeChainIndexingStatusesSchema(valueLabel)
-      .check(invariant_omnichainSnapshotUnstartedHasValidChains)
-      .transform((chains) => chains as Map<ChainId, ChainIndexingStatusSnapshotQueued>),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
-
-/**
- * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotBackfill}
- */
-const makeOmnichainIndexingStatusSnapshotBackfillSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
-    chains: makeChainIndexingStatusesSchema(valueLabel)
-      .check(invariant_omnichainStatusSnapshotBackfillHasValidChains)
-      .transform(
-        (chains) =>
-          chains as Map<
-            ChainId,
-            ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill
-          >,
-      ),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
-
-/**
- * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotCompleted}
- */
-const makeOmnichainIndexingStatusSnapshotCompletedSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
-    chains: makeChainIndexingStatusesSchema(valueLabel)
-      .check(invariant_omnichainStatusSnapshotCompletedHasValidChains)
-      .transform((chains) => chains as Map<ChainId, ChainIndexingStatusSnapshotCompleted>),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
-
-/**
- * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotFollowing}
- */
-const makeOmnichainIndexingStatusSnapshotFollowingSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
-    chains: makeChainIndexingStatusesSchema(valueLabel),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
-
-/**
- * Omnichain Indexing Snapshot Schema
- *
- * Makes a Zod schema definition for validating indexing snapshot
- * across all chains indexed by ENSIndexer instance.
- */
-export const makeOmnichainIndexingStatusSnapshotSchema = (
-  valueLabel: string = "Omnichain Indexing Snapshot",
-) =>
-  z
-    .discriminatedUnion("omnichainStatus", [
-      makeOmnichainIndexingStatusSnapshotUnstartedSchema(valueLabel),
-      makeOmnichainIndexingStatusSnapshotBackfillSchema(valueLabel),
-      makeOmnichainIndexingStatusSnapshotCompletedSchema(valueLabel),
-      makeOmnichainIndexingStatusSnapshotFollowingSchema(valueLabel),
-    ])
-    .check(invariant_omnichainSnapshotStatusIsConsistentWithChainSnapshot)
-    .check(invariant_omnichainIndexingCursorLowerThanEarliestStartBlockAcrossQueuedChains)
-    .check(
-      invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains,
-    )
-    .check(invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain);
+import { makeOmnichainIndexingStatusSnapshotSchema } from "./zod-schema/omnichain-indexing-status-snapshot";
 
 /**
  * Makes Zod schema for {@link CrossChainIndexingStatusSnapshotOmnichain}
