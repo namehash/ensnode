@@ -1,10 +1,8 @@
 import { prettifyError } from "zod/v4";
 
 import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
-import type {
-  SerializedCrossChainIndexingStatusSnapshot,
-  SerializedRealtimeIndexingStatusProjection,
-} from "./serialized-types";
+import type { SerializedCrossChainIndexingStatusSnapshot } from "./serialize/cross-chain-indexing-status-snapshot";
+import type { SerializedRealtimeIndexingStatusProjection } from "./serialized-types";
 import type { RealtimeIndexingStatusProjection } from "./types";
 import {
   makeCrossChainIndexingStatusSnapshotSchema,
