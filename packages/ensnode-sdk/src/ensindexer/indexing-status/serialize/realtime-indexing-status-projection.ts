@@ -1,6 +1,6 @@
-import type { RealtimeIndexingStatusProjection } from "./realtime-indexing-status-projection";
-import type { SerializedCrossChainIndexingStatusSnapshot } from "./serialize/cross-chain-indexing-status-snapshot";
-import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialize/omnichain-indexing-status-snapshot";
+import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
+import type { SerializedCrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
+import type { SerializedOmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
 
 /**
  * Serialized representation of {@link RealtimeIndexingStatusProjection}

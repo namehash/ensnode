@@ -8,5 +8,5 @@ export * from "./realtime-indexing-status-projection";
 export * from "./serialize";
 export * from "./serialize/chain-indexing-status-snapshot";
 export * from "./serialize/omnichain-indexing-status-snapshot";
-export * from "./serialized-types";
+export * from "./serialize/realtime-indexing-status-projection";
 export * from "./validate/chain-indexing-status-snapshot";
