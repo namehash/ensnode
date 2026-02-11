@@ -19,7 +19,7 @@ import {
   type OmnichainIndexingStatusSnapshot,
 } from "./omnichain-indexing-status-snapshot";
 import { serializeOmnichainIndexingStatusSnapshot } from "./serialize";
-import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialized-types";
+import type { SerializedOmnichainIndexingStatusSnapshot } from "./serialize/omnichain-indexing-status-snapshot";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Omnichain Indexing Status Snapshot", () => {

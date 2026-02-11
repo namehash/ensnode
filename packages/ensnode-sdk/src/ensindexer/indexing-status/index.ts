@@ -6,6 +6,7 @@ export * from "./omnichain-indexing-status-snapshot";
 export * from "./projection";
 export * from "./serialize";
 export * from "./serialize/chain-indexing-status-snapshot";
+export * from "./serialize/omnichain-indexing-status-snapshot";
 export * from "./serialized-types";
 export * from "./types";
 export * from "./validate/chain-indexing-status-snapshot";

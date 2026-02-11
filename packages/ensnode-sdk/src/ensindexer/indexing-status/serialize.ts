@@ -4,12 +4,14 @@ import {
 } from "./omnichain-indexing-status-snapshot";
 import { serializeChainIndexingSnapshots } from "./serialize/chain-indexing-status-snapshot";
 import type {
-  SerializedCrossChainIndexingStatusSnapshot,
   SerializedOmnichainIndexingStatusSnapshot,
   SerializedOmnichainIndexingStatusSnapshotBackfill,
   SerializedOmnichainIndexingStatusSnapshotCompleted,
   SerializedOmnichainIndexingStatusSnapshotFollowing,
   SerializedOmnichainIndexingStatusSnapshotUnstarted,
+} from "./serialize/omnichain-indexing-status-snapshot";
+import type {
+  SerializedCrossChainIndexingStatusSnapshot,
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
 import type { CrossChainIndexingStatusSnapshot, RealtimeIndexingStatusProjection } from "./types";
