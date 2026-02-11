@@ -1,14 +1,9 @@
-import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import {
   initializeReferralLeaderboardEditionsCaches,
   type ReferralLeaderboardEditionsCacheMap,
 } from "@/cache/referral-leaderboard-editions.cache";
-import { checkAndUpgradeImmutableCaches } from "@/lib/ensanalytics/referrer-leaderboard/cache-upgrade";
 import { factory } from "@/lib/hono-factory";
-import { makeLogger } from "@/lib/logger";
 import type { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
-
-const logger = makeLogger("referral-leaderboard-editions-caches-middleware");
 
 /**
  * Type definition for the referral leaderboard editions caches middleware context passed to downstream middleware and handlers.
@@ -42,9 +37,8 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
  * the edition config set. If the edition config set failed to load, this middleware propagates the error.
  * Otherwise, it initializes caches for each edition in the config set.
  *
- * On each request, this middleware non-blocking checks if any caches should be upgraded to immutable
- * storage based on accurate indexing timestamps. This allows caches to dynamically transition from
- * refreshing to indefinite storage as editions close.
+ * Each cache's builder function handles immutability internally - when an edition becomes immutably
+ * closed (past the safety window), the builder returns cached data without re-fetching.
  */
 export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddleware(
   async (c, next) => {
@@ -67,18 +61,6 @@ export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddlew
     // Initialize caches for the edition config set
     const caches = initializeReferralLeaderboardEditionsCaches(editionConfigSet);
     c.set("referralLeaderboardEditionsCaches", caches);
-
-    // Non-blocking: Check and upgrade any caches that have become immutable
-    indexingStatusCache
-      .read()
-      .then((indexingStatus) => {
-        if (!(indexingStatus instanceof Error)) {
-          return checkAndUpgradeImmutableCaches(caches, editionConfigSet, indexingStatus);
-        }
-      })
-      .catch((error) => {
-        logger.error({ error }, "Failed to check and upgrade immutable caches");
-      });
 
     await next();
   },

@@ -7,7 +7,7 @@ import type { Duration, UnixTimestamp } from "../types";
 /**
  * Data structure for a single cached result.
  */
-interface CachedResult<ValueType> {
+export interface CachedResult<ValueType> {
   /**
    * The cached result of the fn, either its ValueType or Error.
    */
@@ -23,8 +23,12 @@ export interface SWRCacheOptions<ValueType> {
   /**
    * The async function generating a value of `ValueType` to wrap with SWR caching. It may throw an
    * Error type.
+   *
+   * The function optionally receives the currently cached result (or undefined if no value is
+   * cached yet). This allows the function to implement custom caching strategies, such as
+   * returning the same data for immutable values without re-fetching.
    */
-  fn: () => Promise<ValueType>;
+  fn: (cachedResult?: CachedResult<ValueType>) => Promise<ValueType>;
 
   /**
    * Time-to-live duration of a cached result in seconds. After this duration:
@@ -114,7 +118,7 @@ export class SWRCache<ValueType> {
     // ensure that there is exactly one in progress revalidation promise
     if (!this.inProgressRevalidate) {
       this.inProgressRevalidate = this.options
-        .fn()
+        .fn(this.cache ?? undefined)
         .then((result) => {
           // on success, always update the cache with the latest revalidation
           this.cache = {
@@ -167,18 +171,6 @@ export class SWRCache<ValueType> {
     }
 
     return this.cache.result;
-  }
-
-  /**
-   * Returns true if this cache stores data indefinitely without revalidation.
-   *
-   * A cache is considered indefinitely stored when it has infinite TTL and no
-   * proactive revalidation interval configured.
-   */
-  public isIndefinitelyStored(): boolean {
-    return (
-      this.options.ttl === Number.POSITIVE_INFINITY && !this.options.proactiveRevalidationInterval
-    );
   }
 
   /**

@@ -8,12 +8,14 @@ import {
 import { minutesToSeconds } from "date-fns";
 
 import {
+  type CachedResult,
   getLatestIndexedBlockRef,
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
   SWRCache,
 } from "@ensnode/ensnode-sdk";
 
+import { assumeReferralProgramEditionImmutablyClosed } from "@/lib/ensanalytics/referrer-leaderboard/closeout";
 import { getReferrerLeaderboard } from "@/lib/ensanalytics/referrer-leaderboard/get-referrer-leaderboard-v1";
 import { makeLogger } from "@/lib/logger";
 
@@ -48,14 +50,33 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
 /**
  * Creates a cache builder function for a specific edition.
  *
+ * The builder function checks if cached data exists and represents an immutably closed edition.
+ * If so, it returns the cached data without re-fetching. Otherwise, it fetches fresh data.
+ *
  * @param editionConfig - The edition configuration
  * @returns A function that builds the leaderboard for the given edition
  */
-export function createEditionLeaderboardBuilder(
+function createEditionLeaderboardBuilder(
   editionConfig: ReferralProgramEditionConfig,
-): () => Promise<ReferrerLeaderboard> {
-  return async (): Promise<ReferrerLeaderboard> => {
+): (cachedResult?: CachedResult<ReferrerLeaderboard>) => Promise<ReferrerLeaderboard> {
+  return async (cachedResult?: CachedResult<ReferrerLeaderboard>): Promise<ReferrerLeaderboard> => {
     const editionSlug = editionConfig.slug;
+
+    // Check if cached data is immutable and can be returned as-is
+    if (cachedResult && !(cachedResult.result instanceof Error)) {
+      const isImmutable = assumeReferralProgramEditionImmutablyClosed(
+        cachedResult.result.rules,
+        cachedResult.result.accurateAsOf,
+      );
+
+      if (isImmutable) {
+        logger.debug(
+          { editionSlug },
+          `Edition is immutably closed, returning cached data without re-fetching`,
+        );
+        return cachedResult.result;
+      }
+    }
 
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
@@ -120,10 +141,6 @@ let cachedInstance: ReferralLeaderboardEditionsCacheMap | null = null;
  * ensuring that if one edition fails to refresh, other editions' previously successful
  * data remains available.
  *
- * All caches are initially created with normal refresh behavior. Caches are dynamically upgraded
- * to immutable storage (infinite TTL, no proactive revalidation) by the middleware after an edition
- * has been closed for more than the safety window based on accurate indexing timestamps.
- *
  * @param editionConfigSet - The referral program edition config set to initialize caches for
  * @returns A map from edition slug to its dedicated SWRCache
  */
@@ -138,8 +155,6 @@ export function initializeReferralLeaderboardEditionsCaches(
   const caches: ReferralLeaderboardEditionsCacheMap = new Map();
 
   for (const [editionSlug, editionConfig] of editionConfigSet) {
-    // All editions start with normal refresh behavior
-    // They will be dynamically upgraded to immutable storage by the middleware
     const cache = new SWRCache({
       fn: createEditionLeaderboardBuilder(editionConfig),
       ttl: minutesToSeconds(1),
