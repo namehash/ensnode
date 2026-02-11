@@ -75,11 +75,13 @@ export interface ChainIndexingMetricsHistorical {
   /**
    * Total count of historical blocks.
    *
-   * Each time a Ponder app restarts, if the historical blocks have
-   * not been fully indexed yet, for example, the chain is queued for
-   * indexing or in the backfill phase, the count of historical blocks is
-   * reset and starts increasing again as more historical blocks are
-   * discovered by RPCs and stored in the RPC cache.
+   * The count of historical blocks is only reset when a Ponder app
+   * restarts. If historical blocks have not been fully indexed yet
+   * (for example, the chain is queued for indexing or in the backfill
+   * phase), the count will increase as more historical blocks are
+   * discovered by RPCs and stored in the RPC cache, potentially exceeding
+   * the count from before the restart. Between restarts, this count
+   * remains unchanged.
    *
    * Guaranteed to be a positive integer.
    */
