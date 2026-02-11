@@ -61,7 +61,6 @@ export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddlew
     // Initialize caches for the edition config set
     const caches = initializeReferralLeaderboardEditionsCaches(editionConfigSet);
     c.set("referralLeaderboardEditionsCaches", caches);
-
     await next();
   },
 );
