@@ -1,6 +1,6 @@
-import packageJson from "@/../package.json";
-import { buildENSRainbowPublicConfig } from "@/config";
+import packageJson from "@/../package.json" with { type: "json" };
 import type { ArgsConfig } from "@/config";
+import { buildENSRainbowPublicConfig } from "@/config";
 
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
