@@ -9,11 +9,10 @@
 import { prettifyError, z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import type { BlockRef } from "../blocks";
 import { schemaBlockRef } from "../blocks";
 import type { ChainId } from "../chains";
 import { schemaChainId } from "../chains";
-import type { PonderIndexingStatus } from "../indexing-status";
+import type { ChainIndexingStatus, PonderIndexingStatus } from "../indexing-status";
 
 const schemaSerializedChainName = z.string();
 
@@ -54,10 +53,10 @@ export type SerializedPonderIndexingStatus = z.infer<typeof schemaSerializedPond
  * @returns Ponder Indexing Status.
  */
 function buildPonderIndexingStatus(data: SerializedPonderIndexingStatus): PonderIndexingStatus {
-  const chains = new Map<ChainId, BlockRef>();
+  const chains = new Map<ChainId, ChainIndexingStatus>();
 
   for (const [, chainData] of Object.entries(data)) {
-    chains.set(chainData.id, chainData.block);
+    chains.set(chainData.id, { checkpointBlock: chainData.block });
   }
 
   return {

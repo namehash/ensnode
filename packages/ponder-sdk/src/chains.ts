@@ -14,3 +14,8 @@ export const schemaChainId = schemaPositiveInteger;
  * Chain id standards are organized by the Ethereum Community @ https://github.com/ethereum-lists/chains
  **/
 export type ChainId = z.infer<typeof schemaChainId>;
+
+/**
+ * String representation of a valid Chain ID.
+ */
+export type ChainIdString = string;
