@@ -1,6 +1,7 @@
-import type {
-  CrossChainIndexingStatusSnapshot,
-  CrossChainIndexingStatusSnapshotOmnichain,
+import {
+  type CrossChainIndexingStatusSnapshot,
+  type CrossChainIndexingStatusSnapshotOmnichain,
+  CrossChainIndexingStrategyIds,
 } from "../cross-chain-indexing-status-snapshot";
 import {
   type SerializedOmnichainIndexingStatusSnapshot,
@@ -26,11 +27,20 @@ export function serializeCrossChainIndexingStatusSnapshotOmnichain({
   slowestChainIndexingCursor,
   snapshotTime,
   omnichainSnapshot,
-}: CrossChainIndexingStatusSnapshot): SerializedCrossChainIndexingStatusSnapshot {
+}: CrossChainIndexingStatusSnapshotOmnichain): SerializedCrossChainIndexingStatusSnapshotOmnichain {
   return {
     strategy,
     slowestChainIndexingCursor,
     snapshotTime,
     omnichainSnapshot: serializeOmnichainIndexingStatusSnapshot(omnichainSnapshot),
   };
+}
+
+export function serializeCrossChainIndexingStatusSnapshot(
+  snapshot: CrossChainIndexingStatusSnapshot,
+): SerializedCrossChainIndexingStatusSnapshot {
+  switch (snapshot.strategy) {
+    case CrossChainIndexingStrategyIds.Omnichain:
+      return serializeCrossChainIndexingStatusSnapshotOmnichain(snapshot);
+  }
 }
