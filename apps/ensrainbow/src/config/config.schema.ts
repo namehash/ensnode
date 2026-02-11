@@ -73,5 +73,13 @@ export function buildServeArgsConfig(
   envConfig: ENSRainbowEnvConfig,
   args: { port: number; "data-dir": string },
 ): ArgsConfig {
-  return { ...envConfig, port: args.port, dataDir: args["data-dir"] };
+  try {
+    const dataDir = AbsolutePathSchemaBase.parse(args["data-dir"]);
+    return { ...envConfig, port: args.port, dataDir };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(`Invalid data-dir: \n${prettifyError(error)}\n`);
+    }
+    throw error;
+  }
 }

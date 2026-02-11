@@ -8,7 +8,7 @@ import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import { buildConfigFromEnvironment } from "./config.schema";
+import { buildConfigFromEnvironment, buildServeArgsConfig } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildENSRainbowPublicConfig } from "./public";
@@ -281,6 +281,57 @@ describe("buildConfigFromEnvironment", () => {
       // ~ is treated as a directory name, not home expansion
       expect(config.dataDir).toBe(resolve(process.cwd(), tildeDataDir));
     });
+  });
+});
+
+describe("buildServeArgsConfig", () => {
+  const baseEnvConfig: ENSRainbowEnvConfig = {
+    port: ENSRAINBOW_DEFAULT_PORT,
+    dataDir: "/env/data/dir",
+    dbSchemaVersion: DB_SCHEMA_VERSION,
+  };
+
+  it("normalizes relative data-dir to absolute path", () => {
+    const result = buildServeArgsConfig(baseEnvConfig, {
+      port: 4000,
+      "data-dir": "my-data",
+    });
+
+    expect(result.port).toBe(4000);
+    expect(isAbsolute(result.dataDir)).toBe(true);
+    expect(result.dataDir).toBe(resolve(process.cwd(), "my-data"));
+    expect(result.dataDir).not.toBe("my-data");
+  });
+
+  it("preserves absolute data-dir and merges port", () => {
+    const result = buildServeArgsConfig(baseEnvConfig, {
+      port: 3000,
+      "data-dir": "/absolute/cli/path",
+    });
+
+    expect(result.port).toBe(3000);
+    expect(result.dataDir).toBe("/absolute/cli/path");
+  });
+
+  it("trims whitespace from data-dir", () => {
+    const result = buildServeArgsConfig(baseEnvConfig, {
+      port: baseEnvConfig.port,
+      "data-dir": "  /trimmed/path  ",
+    });
+
+    expect(result.dataDir).toBe("/trimmed/path");
+  });
+
+  it("throws on empty data-dir", () => {
+    expect(() => buildServeArgsConfig(baseEnvConfig, { port: 4000, "data-dir": "" })).toThrow(
+      /Invalid data-dir/,
+    );
+  });
+
+  it("throws on whitespace-only data-dir", () => {
+    expect(() => buildServeArgsConfig(baseEnvConfig, { port: 4000, "data-dir": "   " })).toThrow(
+      /Invalid data-dir/,
+    );
   });
 });
 
