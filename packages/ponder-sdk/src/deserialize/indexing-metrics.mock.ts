@@ -1,4 +1,6 @@
 import {
+  type ChainIndexingMetricsRealtime,
+  ChainIndexingStates,
   PonderAppCommands,
   type PonderIndexingMetrics,
   PonderIndexingOrderings,
@@ -55,56 +57,44 @@ ponder_historical_total_blocks{chain="59144"} 21873991
       [
         10,
         {
-          backfillSyncBlocksTotal: 36827849,
-          indexingCompleted: false,
-          indexingRealtime: true,
+          state: ChainIndexingStates.Realtime,
           latestSyncedBlock: { number: 147268938, timestamp: 1770136653 },
-        },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         1,
         {
-          backfillSyncBlocksTotal: 21042285,
-          indexingCompleted: false,
-          indexingRealtime: true,
+          state: ChainIndexingStates.Realtime,
           latestSyncedBlock: { number: 24377568, timestamp: 1770136655 },
-        },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         8453,
         {
-          backfillSyncBlocksTotal: 24103899,
-          indexingCompleted: false,
-          indexingRealtime: true,
+          state: ChainIndexingStates.Realtime,
           latestSyncedBlock: { number: 41673653, timestamp: 1770136653 },
-        },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         534352,
         {
-          backfillSyncBlocksTotal: 12693186,
-          indexingCompleted: false,
-          indexingRealtime: true,
+          state: ChainIndexingStates.Realtime,
           latestSyncedBlock: { number: 29373405, timestamp: 1770136654 },
-        },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         42161,
         {
-          backfillSyncBlocksTotal: 78607197,
-          indexingCompleted: false,
-          indexingRealtime: true,
+          state: ChainIndexingStates.Realtime,
           latestSyncedBlock: { number: 428248999, timestamp: 1770136654 },
-        },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
       [
         59144,
         {
-          backfillSyncBlocksTotal: 21873991,
-          indexingCompleted: false,
-          indexingRealtime: true,
+          state: ChainIndexingStates.Realtime,
           latestSyncedBlock: { number: 28584906, timestamp: 1770136654 },
-        },
+        } satisfies ChainIndexingMetricsRealtime,
       ],
     ]),
   } satisfies PonderIndexingMetrics,
@@ -215,6 +205,8 @@ ponder_sync_is_realtime{chain="1"} 1
 ponder_sync_is_realtime{chain="59144"} 1
 ponder_sync_is_realtime{chain="8453"} 1
 
+# HELP ponder_sync_is_complete Boolean (0 or 1) indicating if the sync has synced all blocks
+# TYPE ponder_sync_is_complete gauge
 ponder_sync_is_complete{chain="42161"} 1
 ponder_sync_is_complete{chain="534352"} 1
 ponder_sync_is_complete{chain="10"} 1
@@ -222,8 +214,6 @@ ponder_sync_is_complete{chain="1"} 1
 ponder_sync_is_complete{chain="59144"} 1
 ponder_sync_is_complete{chain="8453"} 1
 
-# HELP ponder_sync_is_complete Boolean (0 or 1) indicating if the sync has synced all blocks
-# TYPE ponder_sync_is_complete gauge
 
 # HELP ponder_historical_total_blocks Number of blocks required for the historical sync
 # TYPE ponder_historical_total_blocks gauge
