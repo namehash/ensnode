@@ -5,10 +5,11 @@ import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
 } from "./chain-indexing-status-snapshot";
+import { CrossChainIndexingStrategyIds } from "./cross-chain-indexing-status-snapshot";
 import { deserializeCrossChainIndexingStatusSnapshot } from "./deserialize";
 import { OmnichainIndexingStatusIds } from "./omnichain-indexing-status-snapshot";
 import { createRealtimeIndexingStatusProjection } from "./projection";
-import { CrossChainIndexingStrategyIds, type RealtimeIndexingStatusProjection } from "./types";
+import type { RealtimeIndexingStatusProjection } from "./types";
 
 describe("Realtime Indexing Status Projection", () => {
   it("can be created from existing omnichain snapshot", () => {

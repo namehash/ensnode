@@ -9,7 +9,10 @@
 import { z } from "zod/v4";
 
 import { makeDurationSchema, makeUnixTimestampSchema } from "../../shared/zod-schemas";
-import { CrossChainIndexingStatusSnapshotOmnichain, CrossChainIndexingStrategyIds } from "./types";
+import {
+  CrossChainIndexingStatusSnapshotOmnichain,
+  CrossChainIndexingStrategyIds,
+} from "./cross-chain-indexing-status-snapshot";
 import {
   invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime,
   invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect,

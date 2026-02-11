@@ -1,9 +1,10 @@
+import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
 import { serializeOmnichainIndexingStatusSnapshot } from "./serialize/omnichain-indexing-status-snapshot";
 import type {
   SerializedCrossChainIndexingStatusSnapshot,
   SerializedRealtimeIndexingStatusProjection,
 } from "./serialized-types";
-import type { CrossChainIndexingStatusSnapshot, RealtimeIndexingStatusProjection } from "./types";
+import type { RealtimeIndexingStatusProjection } from "./types";
 
 export function serializeCrossChainIndexingStatusSnapshotOmnichain({
   strategy,

@@ -4,10 +4,8 @@ import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
 } from "./chain-indexing-status-snapshot";
-import type {
-  CrossChainIndexingStatusSnapshotOmnichain,
-  RealtimeIndexingStatusProjection,
-} from "./types";
+import type { CrossChainIndexingStatusSnapshotOmnichain } from "./cross-chain-indexing-status-snapshot";
+import type { RealtimeIndexingStatusProjection } from "./types";
 
 /**
  * Invariants for {@link OmnichainIndexingSnapshot}.

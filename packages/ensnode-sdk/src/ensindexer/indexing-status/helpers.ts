@@ -1,6 +1,6 @@
 import type { BlockRef, ChainId } from "../../shared/types";
 import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
-import type { CrossChainIndexingStatusSnapshot } from "./types";
+import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
 
 /**
  * Gets the latest indexed {@link BlockRef} for the given {@link ChainId}.
