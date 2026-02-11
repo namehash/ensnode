@@ -1,4 +1,5 @@
 import {
+  type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotQueued,
@@ -10,12 +11,40 @@ import {
   type OmnichainIndexingStatusSnapshotCompleted,
   type OmnichainIndexingStatusSnapshotFollowing,
   type OmnichainIndexingStatusSnapshotUnstarted,
+  type Unvalidated,
 } from "@ensnode/ensnode-sdk";
-import type { ChainId, PonderIndexingMetrics, PonderIndexingStatus } from "@ensnode/ponder-sdk";
+import type {
+  ChainId,
+  ChainIndexingMetrics,
+  ChainIndexingStatus,
+  PonderIndexingMetrics,
+  PonderIndexingStatus,
+} from "@ensnode/ponder-sdk";
 
 import type { ChainBlockRefs } from "./chain-block-refs";
-import { buildChainIndexingStatusSnapshots } from "./chain-indexing-status-snapshot";
-import { validateOmnichainIndexingStatusSnapshot } from "./validate/omnichain-indexing-status-snapshot";
+import { buildUnvalidatedChainIndexingStatusSnapshots } from "./chain-indexing-status-snapshot";
+
+function validateOmnichainIndexingStatusSnapshot(
+  snapshot: Unvalidated<OmnichainIndexingStatusSnapshot>,
+): OmnichainIndexingStatusSnapshot {
+  return snapshot as OmnichainIndexingStatusSnapshot; // TODO: implement actual validation logic in ENSNode SDK
+}
+
+function buildChainStatusSnapshots(
+  indexedChainIds: ChainId[],
+  chainsBlockRefs: Map<ChainId, ChainBlockRefs>,
+  chainsIndexingMetrics: Map<ChainId, ChainIndexingMetrics>,
+  chainsIndexingStatus: Map<ChainId, ChainIndexingStatus>,
+): Map<ChainId, Unvalidated<ChainIndexingStatusSnapshot>> {
+  const chainStatusSnapshots = buildUnvalidatedChainIndexingStatusSnapshots(
+    indexedChainIds,
+    chainsBlockRefs,
+    chainsIndexingMetrics,
+    chainsIndexingStatus,
+  );
+
+  return chainStatusSnapshots;
+}
 
 export function buildOmnichainIndexingStatusSnapshot(
   indexedChainIds: ChainId[],
@@ -23,39 +52,49 @@ export function buildOmnichainIndexingStatusSnapshot(
   ponderIndexingMetrics: PonderIndexingMetrics,
   ponderIndexingStatus: PonderIndexingStatus,
 ): OmnichainIndexingStatusSnapshot {
-  const chainStatusSnapshots = buildChainIndexingStatusSnapshots(
+  const chainStatusSnapshots = buildChainStatusSnapshots(
     indexedChainIds,
     chainsBlockRefs,
     ponderIndexingMetrics.chains,
     ponderIndexingStatus.chains,
   );
+
   const chains = Array.from(chainStatusSnapshots.values());
   const omnichainStatus = getOmnichainIndexingStatus(chains);
   const omnichainIndexingCursor = getOmnichainIndexingCursor(chains);
 
   switch (omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted: {
-      return validateOmnichainIndexingStatusSnapshot({
-        omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
-        chains: chainStatusSnapshots as Map<ChainId, ChainIndexingStatusSnapshotQueued>, // narrowing the type here, will be validated in the following 'check' step
+      return {
+        omnichainStatus,
+        chains: chainStatusSnapshots as Map<
+          ChainId,
+          Unvalidated<ChainIndexingStatusSnapshotQueued>
+        >, // narrowing the type here, will be validated in the following 'check' step
         omnichainIndexingCursor,
-      } satisfies OmnichainIndexingStatusSnapshotUnstarted);
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotUnstarted>;
     }
 
     case OmnichainIndexingStatusIds.Backfill: {
       return validateOmnichainIndexingStatusSnapshot({
         omnichainStatus: OmnichainIndexingStatusIds.Backfill,
-        chains: chainStatusSnapshots as Map<ChainId, ChainIndexingStatusSnapshotBackfill>, // narrowing the type here, will be validated in the following 'check' step
+        chains: chainStatusSnapshots as Map<
+          ChainId,
+          Unvalidated<ChainIndexingStatusSnapshotBackfill>
+        >, // narrowing the type here, will be validated in the following 'check' step
         omnichainIndexingCursor,
-      } satisfies OmnichainIndexingStatusSnapshotBackfill);
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotBackfill>);
     }
 
     case OmnichainIndexingStatusIds.Completed: {
       return validateOmnichainIndexingStatusSnapshot({
         omnichainStatus: OmnichainIndexingStatusIds.Completed,
-        chains: chainStatusSnapshots as Map<ChainId, ChainIndexingStatusSnapshotCompleted>, // narrowing the type here, will be validated in the following 'check' step
+        chains: chainStatusSnapshots as Map<
+          ChainId,
+          Unvalidated<ChainIndexingStatusSnapshotCompleted>
+        >, // narrowing the type here, will be validated in the following 'check' step
         omnichainIndexingCursor,
-      } satisfies OmnichainIndexingStatusSnapshotCompleted);
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotCompleted>);
     }
 
     case OmnichainIndexingStatusIds.Following:
@@ -63,6 +102,6 @@ export function buildOmnichainIndexingStatusSnapshot(
         omnichainStatus: OmnichainIndexingStatusIds.Following,
         chains: chainStatusSnapshots,
         omnichainIndexingCursor,
-      } satisfies OmnichainIndexingStatusSnapshotFollowing);
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotFollowing>);
   }
 }
