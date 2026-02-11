@@ -12,10 +12,8 @@ import {
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing,
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted,
   getOmnichainIndexingStatus,
-} from "./helpers";
-import type {
-  OmnichainIndexingStatusSnapshot,
-  OmnichainIndexingStatusSnapshotFollowing,
+  type OmnichainIndexingStatusSnapshot,
+  type OmnichainIndexingStatusSnapshotFollowing,
 } from "./omnichain-indexing-status-snapshot";
 import type {
   CrossChainIndexingStatusSnapshotOmnichain,
