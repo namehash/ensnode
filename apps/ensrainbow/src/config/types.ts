@@ -24,3 +24,8 @@ export interface ENSRainbowEnvConfig {
   dataDir: AbsolutePath;
   dbSchemaVersion: DbSchemaVersion;
 }
+
+/**
+ * Effective config for the serve command: merge(CLI args, EnvConfig).
+ */
+export type ArgsConfig = ENSRainbowEnvConfig;

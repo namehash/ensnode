@@ -1,5 +1,6 @@
 import packageJson from "@/../package.json";
-import config, { buildENSRainbowPublicConfig } from "@/config";
+import { buildENSRainbowPublicConfig } from "@/config";
+import type { ArgsConfig } from "@/config";
 
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
@@ -22,9 +23,9 @@ import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
 /**
- * Creates and configures an ENS Rainbow api
+ * Creates and configures an ENS Rainbow API
  */
-export async function createApi(db: ENSRainbowDB): Promise<Hono> {
+export async function createApi(db: ENSRainbowDB, argsConfig: ArgsConfig): Promise<Hono> {
   const api = new Hono();
   const server = await ENSRainbowServer.init(db);
 
@@ -39,7 +40,7 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   }
 
   const cachedPublicConfig = buildENSRainbowPublicConfig(
-    config,
+    argsConfig,
     server.getServerLabelSet(),
     countResult.count,
   );

@@ -12,7 +12,7 @@ import { buildConfigFromEnvironment } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildENSRainbowPublicConfig } from "./public";
-import type { ENSRainbowEnvConfig } from "./types";
+import type { ArgsConfig, ENSRainbowEnvConfig } from "./types";
 
 describe("buildConfigFromEnvironment", () => {
   describe("Success cases", () => {
@@ -285,6 +285,12 @@ describe("buildConfigFromEnvironment", () => {
 });
 
 describe("buildENSRainbowPublicConfig", () => {
+  const labelSet: EnsRainbowServerLabelSet = {
+    labelSetId: "subgraph",
+    highestLabelSetVersion: 0,
+  };
+  const recordsCount = 1000;
+
   describe("Success cases", () => {
     it("returns a valid ENSRainbow public config with correct structure", () => {
       const mockConfig: ENSRainbowEnvConfig = {
@@ -292,11 +298,6 @@ describe("buildENSRainbowPublicConfig", () => {
         dataDir: getDefaultDataDir(),
         dbSchemaVersion: DB_SCHEMA_VERSION,
       };
-      const labelSet: EnsRainbowServerLabelSet = {
-        labelSetId: "subgraph",
-        highestLabelSetVersion: 0,
-      };
-      const recordsCount = 1000;
 
       const result = buildENSRainbowPublicConfig(mockConfig, labelSet, recordsCount);
 
@@ -305,6 +306,20 @@ describe("buildENSRainbowPublicConfig", () => {
         labelSet,
         recordsCount,
       });
+    });
+
+    it("accepts ArgsConfig (effective config: merge of CLI args and EnvConfig)", () => {
+      const argsConfig: ArgsConfig = {
+        port: 4000,
+        dataDir: getDefaultDataDir(),
+        dbSchemaVersion: DB_SCHEMA_VERSION,
+      };
+
+      const result = buildENSRainbowPublicConfig(argsConfig, labelSet, recordsCount);
+
+      expect(result.version).toBe(packageJson.version);
+      expect(result.labelSet).toStrictEqual(labelSet);
+      expect(result.recordsCount).toBe(recordsCount);
     });
   });
 });

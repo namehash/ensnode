@@ -1,3 +1,5 @@
+import type { ArgsConfig } from "@/config";
+
 import { promises as fs } from "node:fs";
 
 import { serve } from "@hono/node-server";
@@ -7,7 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { ENSRainbowDB } from "@/lib/database";
+import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
 
 import { createServer } from "./server-command";
 
@@ -30,7 +32,12 @@ describe("Server Command Tests", () => {
       await db.markIngestionFinished();
       await db.setLabelSetId("test-label-set-id");
       await db.setHighestLabelSetVersion(0);
-      app = await createServer(db);
+      const argsConfig: ArgsConfig = {
+        port: nonDefaultPort,
+        dataDir: TEST_DB_DIR,
+        dbSchemaVersion: DB_SCHEMA_VERSION,
+      };
+      app = await createServer(db, argsConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({

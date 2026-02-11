@@ -1,4 +1,4 @@
-import config from "@/config";
+import type { ArgsConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
 
@@ -8,22 +8,18 @@ import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { logger } from "@/utils/logger";
 
-export interface ServerCommandOptions {
-  dataDir: string;
-  port: number;
-}
+export type ServerCommandOptions = ArgsConfig;
 
 /**
- * Creates and configures the ENS Rainbow server application
+ * Creates and configures the ENS Rainbow server application.
  */
-export async function createServer(db: ENSRainbowDB) {
-  return createApi(db);
+export async function createServer(db: ENSRainbowDB, argsConfig: ServerCommandOptions) {
+  return createApi(db, argsConfig);
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
-  // Log the config that ENSRainbow is running with
-  console.log("ENSRainbow running with environment config:");
-  console.log(prettyPrintJson(config));
+  console.log("ENSRainbow running with config:");
+  console.log(prettyPrintJson(options));
 
   logger.info(`ENS Rainbow server starting on port ${options.port}...`);
 
@@ -46,7 +42,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
       throw error;
     }
 
-    const app = await createServer(db);
+    const app = await createServer(db, options);
 
     const server = serve({
       fetch: app.fetch,
