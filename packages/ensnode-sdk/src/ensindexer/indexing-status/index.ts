@@ -4,7 +4,6 @@ export * from "./deserialize";
 export * from "./deserialize/chain-indexing-status-snapshot";
 export * from "./deserialize/omnichain-indexing-status-snapshot";
 export * from "./omnichain-indexing-status-snapshot";
-export * from "./projection";
 export * from "./realtime-indexing-status-projection";
 export * from "./serialize";
 export * from "./serialize/chain-indexing-status-snapshot";
