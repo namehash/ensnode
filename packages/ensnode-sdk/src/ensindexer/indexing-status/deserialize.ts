@@ -1,32 +1,8 @@
 import { prettifyError } from "zod/v4";
 
-import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
-import type { SerializedCrossChainIndexingStatusSnapshot } from "./serialize/cross-chain-indexing-status-snapshot";
 import type { SerializedRealtimeIndexingStatusProjection } from "./serialized-types";
 import type { RealtimeIndexingStatusProjection } from "./types";
-import {
-  makeCrossChainIndexingStatusSnapshotSchema,
-  makeRealtimeIndexingStatusProjectionSchema,
-} from "./zod-schemas";
-
-/**
- * Deserialize an {@link CrossChainIndexingStatusSnapshot} object.
- */
-export function deserializeCrossChainIndexingStatusSnapshot(
-  maybeSnapshot: SerializedCrossChainIndexingStatusSnapshot,
-  valueLabel?: string,
-): CrossChainIndexingStatusSnapshot {
-  const schema = makeCrossChainIndexingStatusSnapshotSchema(valueLabel);
-  const parsed = schema.safeParse(maybeSnapshot);
-
-  if (parsed.error) {
-    throw new Error(
-      `Cannot deserialize into CrossChainIndexingStatusSnapshot:\n${prettifyError(parsed.error)}\n`,
-    );
-  }
-
-  return parsed.data;
-}
+import { makeRealtimeIndexingStatusProjectionSchema } from "./zod-schemas";
 
 /**
  * Deserialize into a {@link RealtimeIndexingStatusProjection} object.
