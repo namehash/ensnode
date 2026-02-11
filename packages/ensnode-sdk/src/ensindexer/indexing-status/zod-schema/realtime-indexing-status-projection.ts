@@ -36,22 +36,21 @@ export function invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEq
 /**
  * Invariant: For realtime indexing status projection,
  * `worstCaseDistance` is the difference between `projectedAt`
- * and `omnichainIndexingCursor`.
+ * and `snapshot.slowestChainIndexingCursor`.
  */
 export function invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect(
   ctx: ParsePayload<RealtimeIndexingStatusProjection>,
 ) {
   const projection = ctx.value;
   const { projectedAt, snapshot, worstCaseDistance } = projection;
-  const { omnichainSnapshot } = snapshot;
-  const expectedWorstCaseDistance = projectedAt - omnichainSnapshot.omnichainIndexingCursor;
+  const expectedWorstCaseDistance = projectedAt - snapshot.slowestChainIndexingCursor;
 
   if (worstCaseDistance !== expectedWorstCaseDistance) {
     ctx.issues.push({
       code: "custom",
       input: projection,
       message:
-        "`worstCaseDistance` must be the exact difference between `projectedAt` and `snapshot.omnichainIndexingCursor`.",
+        "`worstCaseDistance` must be the exact difference between `projectedAt` and `snapshot.slowestChainIndexingCursor`.",
     });
   }
 }
