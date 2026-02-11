@@ -10,10 +10,15 @@ export interface ChainIndexingStatus {
   /**
    * Checkpoint Block
    *
-   * During omnichain indexing, a Ponder app indexes the chain and keeps track of the latest indexed block for each chain.
-   * This is represented by the `checkpointBlock` property, which is a reference to either:
+   * During indexing, a Ponder app indexes the chain and
+   * keeps track of a checkpoint block for each indexed chain.
+   *
+   * @see https://ponder.sh/docs/api-reference/ponder/database#checkpoint-table
+   *
+   * The `checkpointBlock` is a reference to either:
    * - the first block to be indexed for the chain (if indexing is queued), or
-   * - the last indexed block for the chain (if indexing is in progress).
+   * - the last indexed block for the chain (if one or more blocks
+   *   have been indexed for the chain).
    */
   checkpointBlock: BlockRef;
 }
@@ -21,11 +26,11 @@ export interface ChainIndexingStatus {
 /**
  * Ponder Indexing Status
  *
- * Represents the chain indexing status in a Ponder application.
+ * Represents the indexing status of each chain in a Ponder app.
  */
 export interface PonderIndexingStatus {
   /**
-   * Map of indexed chain IDs to their block reference.
+   * Map of indexed chain IDs to their chain indexing status.
    *
    * Guarantees:
    * - Includes entry for at least one indexed chain.

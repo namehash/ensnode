@@ -12,14 +12,6 @@ import { Fragment, ReactNode } from "react";
 import { useENSNodeConfig } from "@ensnode/ensnode-react";
 import { type ENSApiPublicConfig, getENSRootChainId } from "@ensnode/ensnode-sdk";
 
-import {
-  ConfigInfoAppCard,
-  ConfigInfoFeature,
-  ConfigInfoFeatures,
-  ConfigInfoItem,
-  ConfigInfoItems,
-} from "@/components/connection/config-info/app-card";
-import { ConnectionLine } from "@/components/connection-line";
 import { ErrorInfo, type ErrorInfoProps } from "@/components/error-info";
 import { ENSApiIcon } from "@/components/icons/ensnode-apps/ensapi-icon";
 import { ENSDbIcon } from "@/components/icons/ensnode-apps/ensdb-icon";
@@ -34,6 +26,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+
+import {
+  InfoCard,
+  InfoCardConnector,
+  InfoCardFeature,
+  InfoCardFeatures,
+  InfoCardItem,
+  InfoCardItems,
+} from "../shared/info-card";
 
 /**
  * Reusable ENSNode card wrapper that provides consistent header and accepts children content
@@ -68,7 +69,7 @@ function ENSNodeCardLoadingSkeleton() {
     <div className={cn(cardContentStyles, "max-sm:gap-3 max-sm:p-0 gap-0")}>
       {["ENSApi", "ENSDb", "ENSIndexer", "ENSRainbow"].map((app, index) => (
         <Fragment key={`${app}-loading`}>
-          {index !== 0 && <ConnectionLine />}
+          {index !== 0 && <InfoCardConnector />}
 
           <Card className="animate-pulse">
             <CardHeader className="max-sm:p-3">
@@ -226,7 +227,7 @@ function ENSNodeConfigCardContent({
   );
 
   const healReverseAddressesFeature = (
-    <ConfigInfoFeature
+    <InfoCardFeature
       label="Heal Reverse Addresses"
       key="ENSIndexer Heal Reverse Addresses feature"
       description={healReverseAddressesDescription}
@@ -235,7 +236,7 @@ function ENSNodeConfigCardContent({
   );
 
   const indexAdditionalRecordsFeature = (
-    <ConfigInfoFeature
+    <InfoCardFeature
       label="Index Additional Resolver Records"
       key="ENSIndexer Index Additional Resolver Records feature"
       description={indexAdditionalRecordsDescription}
@@ -244,7 +245,7 @@ function ENSNodeConfigCardContent({
   );
 
   const replaceUnnormalizedLabelsFeature = (
-    <ConfigInfoFeature
+    <InfoCardFeature
       label="Replace Unnormalized Labels"
       key="ENSIndexer Replace Unnormalized Labels feature"
       description={replaceUnnormalizedLabelsDescription}
@@ -253,7 +254,7 @@ function ENSNodeConfigCardContent({
   );
 
   const subgraphCompatabilityFeature = (
-    <ConfigInfoFeature
+    <InfoCardFeature
       label="Subgraph Compatibility"
       key="ENSIndexer Subgraph Compatibility feature"
       description={subgraphCompatibilityDescription}
@@ -285,7 +286,7 @@ function ENSNodeConfigCardContent({
   return (
     <div className="relative">
       {/*ENSApi*/}
-      <ConfigInfoAppCard
+      <InfoCard
         name="ENSApi"
         icon={<ENSApiIcon width={24} height={24} />}
         version={
@@ -295,12 +296,9 @@ function ENSNodeConfigCardContent({
         }
         docsLink={new URL("https://ensnode.io/ensapi/")}
       >
-        <ConfigInfoItems>
-          <ConfigInfoItem
-            label="Database"
-            value={<p className={cardItemValueStyles}>Postgres</p>}
-          />
-          <ConfigInfoItem
+        <InfoCardItems>
+          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
+          <InfoCardItem
             label="Database Schema"
             value={
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
@@ -309,12 +307,12 @@ function ENSNodeConfigCardContent({
               <p>ENSApi reads indexed data from tables within this Postgres database schema.</p>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="ENS Namespace"
             value={<p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>}
             additionalInfo={<p>The ENS namespace that ENSApi is operating in the context of.</p>}
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="RPC Config"
             value={
               <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
@@ -338,9 +336,9 @@ function ENSNodeConfigCardContent({
               </p>
             }
           />
-        </ConfigInfoItems>
-        <ConfigInfoFeatures activated={ensApiPublicConfig.theGraphFallback.canFallback}>
-          <ConfigInfoFeature
+        </InfoCardItems>
+        <InfoCardFeatures activated={ensApiPublicConfig.theGraphFallback.canFallback}>
+          <InfoCardFeature
             label="Subgraph API Fallback"
             description={
               ensApiPublicConfig.theGraphFallback.canFallback ? (
@@ -368,13 +366,13 @@ function ENSNodeConfigCardContent({
             }
             icon={<History width={15} height={15} className="shrink-0" />}
           />
-        </ConfigInfoFeatures>
-      </ConfigInfoAppCard>
+        </InfoCardFeatures>
+      </InfoCard>
 
-      <ConnectionLine />
+      <InfoCardConnector />
 
       {/*ENSDb*/}
-      <ConfigInfoAppCard
+      <InfoCard
         name="ENSDb"
         icon={<ENSDbIcon width={24} height={24} />}
         version={
@@ -384,12 +382,9 @@ function ENSNodeConfigCardContent({
         }
         docsLink={new URL("https://ensnode.io/ensdb/")}
       >
-        <ConfigInfoItems>
-          <ConfigInfoItem
-            label="Database"
-            value={<p className={cardItemValueStyles}>Postgres</p>}
-          />
-          <ConfigInfoItem
+        <InfoCardItems>
+          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
+          <InfoCardItem
             label="Database Schema"
             value={
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
@@ -398,13 +393,13 @@ function ENSNodeConfigCardContent({
               <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
             }
           />
-        </ConfigInfoItems>
-      </ConfigInfoAppCard>
+        </InfoCardItems>
+      </InfoCard>
 
-      <ConnectionLine />
+      <InfoCardConnector />
 
       {/*ENSIndexer*/}
-      <ConfigInfoAppCard
+      <InfoCard
         name="ENSIndexer"
         icon={<ENSIndexerIcon width={24} height={24} />}
         version={
@@ -414,12 +409,9 @@ function ENSNodeConfigCardContent({
         }
         docsLink={new URL("https://ensnode.io/ensindexer/")}
       >
-        <ConfigInfoItems>
-          <ConfigInfoItem
-            label="Database"
-            value={<p className={cardItemValueStyles}>Postgres</p>}
-          />
-          <ConfigInfoItem
+        <InfoCardItems>
+          <InfoCardItem label="Database" value={<p className={cardItemValueStyles}>Postgres</p>} />
+          <InfoCardItem
             label="Database Schema"
             value={
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.databaseSchemaName}</p>
@@ -428,14 +420,14 @@ function ENSNodeConfigCardContent({
               <p>ENSIndexer writes indexed data to tables within this Postgres database schema.</p>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="ENS Namespace"
             value={<p className={cardItemValueStyles}>{ensIndexerPublicConfig.namespace}</p>}
             additionalInfo={
               <p>The ENS namespace that ENSIndexer is operating in the context of.</p>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="Indexed Chains"
             value={
               <div className="flex flex-row flex-nowrap max-sm:flex-wrap justify-start items-start gap-3 pt-1">
@@ -455,7 +447,7 @@ function ENSNodeConfigCardContent({
               </div>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="Node.js"
             value={
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.nodejs}</p>
@@ -472,7 +464,7 @@ function ENSNodeConfigCardContent({
               </p>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="Ponder"
             value={
               <p className={cardItemValueStyles}>{ensIndexerPublicConfig.versionInfo.ponder}</p>
@@ -489,7 +481,7 @@ function ENSNodeConfigCardContent({
               </p>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="ens-normalize.js"
             value={
               <p className={cardItemValueStyles}>
@@ -508,7 +500,7 @@ function ENSNodeConfigCardContent({
               </p>
             }
           />
-          <ConfigInfoItem
+          <InfoCardItem
             label="Plugins"
             value={
               <div className="w-full flex flex-row flex-nowrap max-[1100px]:flex-wrap justify-start items-start gap-1 pt-1">
@@ -523,19 +515,19 @@ function ENSNodeConfigCardContent({
               </div>
             }
           />
-        </ConfigInfoItems>
-        <ConfigInfoFeatures activated={true}>
+        </InfoCardItems>
+        <InfoCardFeatures activated={true}>
           {ensIndexerFeatures
             .filter((feature) => feature.isActivated)
             .map((feature) => feature.feature)}
-        </ConfigInfoFeatures>
-        <ConfigInfoFeatures activated={false}>
+        </InfoCardFeatures>
+        <InfoCardFeatures activated={false}>
           {ensIndexerFeatures
             .filter((feature) => !feature.isActivated)
             .map((feature) => feature.feature)}
-        </ConfigInfoFeatures>
-        <ConfigInfoItems>
-          <ConfigInfoItem
+        </InfoCardFeatures>
+        <InfoCardItems>
+          <InfoCardItem
             label="Client LabelSet"
             value={
               <ul className={cardItemValueStyles}>
@@ -558,13 +550,13 @@ function ENSNodeConfigCardContent({
               </p>
             }
           />
-        </ConfigInfoItems>
-      </ConfigInfoAppCard>
+        </InfoCardItems>
+      </InfoCard>
 
-      <ConnectionLine />
+      <InfoCardConnector />
 
       {/*ENSRainbow*/}
-      <ConfigInfoAppCard
+      <InfoCard
         name="ENSRainbow"
         icon={<ENSRainbowIcon width={24} height={24} />}
         version={
@@ -574,8 +566,8 @@ function ENSNodeConfigCardContent({
         }
         docsLink={new URL("https://ensnode.io/ensrainbow/")}
       >
-        <ConfigInfoItems>
-          <ConfigInfoItem
+        <InfoCardItems>
+          <InfoCardItem
             label="Server LabelSet"
             value={
               <p className={cardItemValueStyles}>
@@ -594,8 +586,8 @@ function ENSNodeConfigCardContent({
               </p>
             }
           />
-        </ConfigInfoItems>
-      </ConfigInfoAppCard>
+        </InfoCardItems>
+      </InfoCard>
     </div>
   );
 }

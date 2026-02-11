@@ -45,56 +45,100 @@ export interface PonderApplicationSettings {
 }
 
 /**
- * Chain Indexing Metrics
+ * Chain Indexing States
  *
- * Represents the indexing metrics for a specific chain indexed by a Ponder app.
- *
- * Guarantees:
- * - `indexingCompleted` and `indexingRealtime` cannot both be `true`
- *   at the same time. All other combinations are valid.
+ * Represents the indexing state of a chain indexed by a Ponder app.
  */
-export interface ChainIndexingMetrics {
-  /**
-   * Number of blocks required to be synced to complete
-   * the backfill phase of indexing.
-   *
-   * This value is calculated by Ponder at the time
-   * the backfill starts. It corresponds to the number of blocks between:
-   * - the first block to be indexed (specified in Ponder config), and
-   * - the last block to be indexed during backfill.
-   * The last block to be indexed during backfill is one of:
-   * - The specified end block (if any) in the Ponder config, or
-   * - The latest known block at the time the backfill started.
-   *
-   * Guarantees:
-   * - Is a positive integer.
-   */
-  backfillSyncBlocksTotal: number;
+export const ChainIndexingStates = {
+  Historical: "historical",
+  Completed: "completed",
+  Realtime: "realtime",
+} as const;
+
+export type ChainIndexingState = (typeof ChainIndexingStates)[keyof typeof ChainIndexingStates];
+
+/**
+ * Chain Indexing Metrics Historical
+ *
+ * Represents the indexing metrics for a chain that is currently queued for
+ * indexing or in the backfill phase by a Ponder app.
+ */
+export interface ChainIndexingMetricsHistorical {
+  state: typeof ChainIndexingStates.Historical;
 
   /**
-   * Latest synced block
-   *
-   * Corresponds to the latest block stored in the RPC cache for the chain.
+   * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
+   * and stored in the RPC cache as of the time the metric value was captured.
    */
   latestSyncedBlock: BlockRef;
 
   /**
-   * Is indexing completed for the chain?
+   * Total count of historical blocks.
    *
-   * This will be true when the backfill has been completed,
-   * and a specified end block for the chain has been reached.
+   * The count of historical blocks is only reset when a Ponder app
+   * restarts. If historical blocks have not been fully indexed yet
+   * (for example, the chain is queued for indexing or in the backfill
+   * phase), the count will increase as more historical blocks are
+   * discovered by RPCs and stored in the RPC cache, potentially exceeding
+   * the count from before the restart. Between restarts, this count
+   * remains unchanged.
+   *
+   * Guaranteed to be a positive integer.
    */
-  indexingCompleted: boolean;
+  historicalTotalBlocks: number;
+}
+
+/**
+ * Chain Indexing Metrics Realtime
+ *
+ * Represents the indexing metrics for a chain that is currently in
+ * the realtime indexing phase by a Ponder app. It means that
+ * the backfill phase transitioned to realtime phase, as there was
+ * no "config end block" specified for the chain.
+ *
+ * The indexing continues in realtime, with no "target end block".
+ * The "latest synced block" is continuously updated as new blocks are
+ * discovered by RPCs and stored in the RPC cache.
+ */
+export interface ChainIndexingMetricsRealtime {
+  state: typeof ChainIndexingStates.Realtime;
 
   /**
-   * Is indexing following in real-time for the chain?
-   *
-   * This will be true when the backfill has been completed,
-   * and there was no specified end block for the chain,
-   * so indexing continues in real-time.
+   * A {@link BlockRef} to the "highest" block that has been discovered by RPCs
+   * and stored in the RPC cache as of the time the metric value was captured.
    */
-  indexingRealtime: boolean;
+  latestSyncedBlock: BlockRef;
 }
+
+/**
+ * Chain Indexing Metrics Completed
+ *
+ * Represents the indexing metrics for a chain configured to only index
+ * a finite range of blocks where all blocks in that finite range
+ * have been indexed.
+ */
+export interface ChainIndexingMetricsCompleted {
+  state: typeof ChainIndexingStates.Completed;
+
+  /**
+   * Final indexed block
+   *
+   * A {@link BlockRef} to the final block that was the finite target
+   * for indexing the chain. No more blocks will be indexed for the chain
+   * after this block.
+   */
+  finalIndexedBlock: BlockRef;
+}
+
+/**
+ * Chain Indexing Metrics
+ *
+ * Represents the indexing metrics for a specific chain indexed by a Ponder app.
+ */
+export type ChainIndexingMetrics =
+  | ChainIndexingMetricsHistorical
+  | ChainIndexingMetricsCompleted
+  | ChainIndexingMetricsRealtime;
 
 /**
  * Ponder Indexing Metrics
