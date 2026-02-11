@@ -1,22 +1,6 @@
-import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
-import type { SerializedCrossChainIndexingStatusSnapshot } from "./serialize/cross-chain-indexing-status-snapshot";
-import { serializeOmnichainIndexingStatusSnapshot } from "./serialize/omnichain-indexing-status-snapshot";
+import { serializeCrossChainIndexingStatusSnapshotOmnichain } from "./serialize/cross-chain-indexing-status-snapshot";
 import type { SerializedRealtimeIndexingStatusProjection } from "./serialized-types";
 import type { RealtimeIndexingStatusProjection } from "./types";
-
-export function serializeCrossChainIndexingStatusSnapshotOmnichain({
-  strategy,
-  slowestChainIndexingCursor,
-  snapshotTime,
-  omnichainSnapshot,
-}: CrossChainIndexingStatusSnapshot): SerializedCrossChainIndexingStatusSnapshot {
-  return {
-    strategy,
-    slowestChainIndexingCursor,
-    snapshotTime,
-    omnichainSnapshot: serializeOmnichainIndexingStatusSnapshot(omnichainSnapshot),
-  };
-}
 
 export function serializeRealtimeIndexingStatusProjection(
   indexingProjection: RealtimeIndexingStatusProjection,
