@@ -3,7 +3,6 @@ export * from "./cross-chain-indexing-status-snapshot";
 export * from "./deserialize";
 export * from "./deserialize/chain-indexing-status-snapshot";
 export * from "./deserialize/omnichain-indexing-status-snapshot";
-export * from "./helpers";
 export * from "./omnichain-indexing-status-snapshot";
 export * from "./projection";
 export * from "./serialize";
