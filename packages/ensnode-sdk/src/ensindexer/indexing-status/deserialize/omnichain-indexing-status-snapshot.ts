@@ -16,7 +16,7 @@ import {
  * @param serializedSnapshot - The serialized snapshot to build from.
  * @return An unvalidated {@link OmnichainIndexingStatusSnapshot} object.
  */
-function buildUnvalidatedOmnichainIndexingStatusSnapshot(
+export function buildUnvalidatedOmnichainIndexingStatusSnapshot(
   serializedSnapshot: SerializedOmnichainIndexingStatusSnapshot,
 ): Unvalidated<OmnichainIndexingStatusSnapshot> {
   const chains = new Map<Unvalidated<ChainId>, Unvalidated<ChainIndexingStatusSnapshot>>();
