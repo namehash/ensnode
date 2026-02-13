@@ -1,0 +1,24 @@
+import { prettifyError } from "zod/v4";
+
+import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
+import type { SerializedRealtimeIndexingStatusProjection } from "../serialize/realtime-indexing-status-projection";
+import { makeRealtimeIndexingStatusProjectionSchema } from "../zod-schema/realtime-indexing-status-projection";
+
+/**
+ * Deserialize into a {@link RealtimeIndexingStatusProjection} object.
+ */
+export function deserializeRealtimeIndexingStatusProjection(
+  maybeProjection: SerializedRealtimeIndexingStatusProjection,
+  valueLabel?: string,
+): RealtimeIndexingStatusProjection {
+  const schema = makeRealtimeIndexingStatusProjectionSchema(valueLabel);
+  const parsed = schema.safeParse(maybeProjection);
+
+  if (parsed.error) {
+    throw new Error(
+      `Cannot deserialize into RealtimeIndexingStatusProjection:\n${prettifyError(parsed.error)}\n`,
+    );
+  }
+
+  return parsed.data;
+}

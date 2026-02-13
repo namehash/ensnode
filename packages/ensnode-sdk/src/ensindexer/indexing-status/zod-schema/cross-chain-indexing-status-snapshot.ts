@@ -1,21 +1,16 @@
+import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
+import { makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-} from "./chain-indexing-status-snapshot";
-import type {
-  CrossChainIndexingStatusSnapshotOmnichain,
-  RealtimeIndexingStatusProjection,
-} from "./types";
-
-/**
- * Invariants for {@link OmnichainIndexingSnapshot}.
- */
-
-/**
- * Invariants for {@link CrossChainIndexingStatusSnapshotOmnichain}.
- */
+} from "../chain-indexing-status-snapshot";
+import {
+  type CrossChainIndexingStatusSnapshotOmnichain,
+  CrossChainIndexingStrategyIds,
+} from "../cross-chain-indexing-status-snapshot";
+import { makeOmnichainIndexingStatusSnapshotSchema } from "./omnichain-indexing-status-snapshot";
 
 /**
  * Invariant: for cross-chain indexing status snapshot omnichain,
@@ -82,48 +77,27 @@ export function invariant_snapshotTimeIsTheHighestKnownBlockTimestamp(
 }
 
 /**
- * Invariants for {@link RealtimeIndexingStatusProjection}.
+ * Makes Zod schema for {@link CrossChainIndexingStatusSnapshotOmnichain}
  */
+const makeCrossChainIndexingStatusSnapshotOmnichainSchema = (
+  valueLabel: string = "Cross-chain Indexing Status Snapshot Omnichain",
+) =>
+  z
+    .strictObject({
+      strategy: z.literal(CrossChainIndexingStrategyIds.Omnichain),
+      slowestChainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+      snapshotTime: makeUnixTimestampSchema(valueLabel),
+      omnichainSnapshot: makeOmnichainIndexingStatusSnapshotSchema(valueLabel),
+    })
+    .check(invariant_slowestChainEqualsToOmnichainSnapshotTime)
+    .check(invariant_snapshotTimeIsTheHighestKnownBlockTimestamp);
 
 /**
- * Invariant: For realtime indexing status projection,
- * `projectedAt` is after or same as `snapshot.snapshotTime`.
+ * Makes Zod schema for {@link CrossChainIndexingStatusSnapshot}
  */
-export function invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime(
-  ctx: ParsePayload<RealtimeIndexingStatusProjection>,
-) {
-  const projection = ctx.value;
-
-  const { snapshot, projectedAt } = projection;
-
-  if (snapshot.snapshotTime > projectedAt) {
-    ctx.issues.push({
-      code: "custom",
-      input: projection,
-      message: "`projectedAt` must be after or same as `snapshot.snapshotTime`.",
-    });
-  }
-}
-
-/**
- * Invariant: For realtime indexing status projection,
- * `worstCaseDistance` is the difference between `projectedAt`
- * and `omnichainIndexingCursor`.
- */
-export function invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect(
-  ctx: ParsePayload<RealtimeIndexingStatusProjection>,
-) {
-  const projection = ctx.value;
-  const { projectedAt, snapshot, worstCaseDistance } = projection;
-  const { omnichainSnapshot } = snapshot;
-  const expectedWorstCaseDistance = projectedAt - omnichainSnapshot.omnichainIndexingCursor;
-
-  if (worstCaseDistance !== expectedWorstCaseDistance) {
-    ctx.issues.push({
-      code: "custom",
-      input: projection,
-      message:
-        "`worstCaseDistance` must be the exact difference between `projectedAt` and `snapshot.omnichainIndexingCursor`.",
-    });
-  }
-}
+export const makeCrossChainIndexingStatusSnapshotSchema = (
+  valueLabel: string = "Cross-chain Indexing Status Snapshot",
+) =>
+  z.discriminatedUnion("strategy", [
+    makeCrossChainIndexingStatusSnapshotOmnichainSchema(valueLabel),
+  ]);

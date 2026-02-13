@@ -1,8 +1,5 @@
-import type { Duration, UnixTimestamp } from "../../shared/types";
-import type {
-  ChainIndexingConfigTypeIds,
-  ChainIndexingStatusIds,
-} from "./chain-indexing-status-snapshot";
+import type { BlockRef, ChainId, UnixTimestamp } from "../../shared/types";
+import { ChainIndexingStatusIds } from "./chain-indexing-status-snapshot";
 import type { OmnichainIndexingStatusSnapshot } from "./omnichain-indexing-status-snapshot";
 
 /**
@@ -95,32 +92,26 @@ export interface CrossChainIndexingStatusSnapshotOmnichain {
 export type CrossChainIndexingStatusSnapshot = CrossChainIndexingStatusSnapshotOmnichain;
 
 /**
- * A "realtime" indexing status projection based on worst-case assumptions
- * from the `snapshot`.
+ * Gets the latest indexed {@link BlockRef} for the given {@link ChainId}.
  *
- * Invariants:
- * - `projectedAt` is always >= `snapshot.snapshotTime`.
- * - `worstCaseDistance` is always equal to
- *   `projectedAt - snapshot.slowestChainIndexingCursor`.
+ * @returns the latest indexed {@link BlockRef} for the given {@link ChainId}, or null if the chain
+ *          isn't being indexed at all or is queued and therefore hasn't started indexing yet.
  */
-export type RealtimeIndexingStatusProjection = {
-  /**
-   * The timestamp representing "now" as of the time this projection was generated.
-   */
-  projectedAt: UnixTimestamp;
+export function getLatestIndexedBlockRef(
+  indexingStatus: CrossChainIndexingStatusSnapshot,
+  chainId: ChainId,
+): BlockRef | null {
+  const chainIndexingStatus = indexingStatus.omnichainSnapshot.chains.get(chainId);
 
-  /**
-   * The distance between `projectedAt` and `snapshot.slowestChainIndexingCursor`.
-   *
-   * This is "worst-case" because it assumes all of the following:
-   * - the `snapshot` (which may have `snapshot.snapshotTime < projectedAt`) is still the
-   *   latest snapshot and no indexing progress has been made since `snapshotTime`.
-   * - each indexed chain has added a new block as of `projectedAt`.
-   */
-  worstCaseDistance: Duration;
+  if (chainIndexingStatus === undefined) {
+    // chain isn't being indexed at all
+    return null;
+  }
 
-  /**
-   * The {@link CrossChainIndexingStatusSnapshot} that this projection is based on.
-   */
-  snapshot: CrossChainIndexingStatusSnapshot;
-};
+  if (chainIndexingStatus.chainStatus === ChainIndexingStatusIds.Queued) {
+    // chain is queued, so no data for the chain has been indexed yet
+    return null;
+  }
+
+  return chainIndexingStatus.latestIndexedBlock;
+}

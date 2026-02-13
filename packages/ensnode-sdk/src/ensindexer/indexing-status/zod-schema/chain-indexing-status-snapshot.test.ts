@@ -6,7 +6,7 @@ import {
   earliestBlockRef,
   laterBlockRef,
   latestBlockRef,
-} from "./block-refs.mock";
+} from "../block-refs.mock";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
@@ -15,8 +15,8 @@ import {
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-} from "./chain-indexing-status-snapshot";
-import { makeChainIndexingStatusSnapshotSchema } from "./zod-schema/chain-indexing-status-snapshot";
+} from "../chain-indexing-status-snapshot";
+import { makeChainIndexingStatusSnapshotSchema } from "./chain-indexing-status-snapshot";
 
 describe("ENSIndexer: Indexing Status", () => {
   describe("Zod Schemas", () => {
