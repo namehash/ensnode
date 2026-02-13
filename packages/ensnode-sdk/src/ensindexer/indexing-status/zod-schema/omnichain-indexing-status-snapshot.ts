@@ -1,17 +1,13 @@
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import { deserializeChainId } from "../../../shared/deserialize";
-import type { ChainId } from "../../../shared/types";
-import { makeChainIdStringSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import {
-  ChainIndexingStatusIds,
-  type ChainIndexingStatusSnapshot,
-  type ChainIndexingStatusSnapshotCompleted,
-  type ChainIndexingStatusSnapshotQueued,
-} from "../chain-indexing-status-snapshot";
+  makeChainIdSchema,
+  makeChainIdStringSchema,
+  makeUnixTimestampSchema,
+} from "../../../shared/zod-schemas";
+import { ChainIndexingStatusIds } from "../chain-indexing-status-snapshot";
 import {
-  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted,
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotFollowing,
@@ -19,9 +15,24 @@ import {
   getOmnichainIndexingStatus,
   OmnichainIndexingStatusIds,
   type OmnichainIndexingStatusSnapshot,
+  type OmnichainIndexingStatusSnapshotBackfill,
+  type OmnichainIndexingStatusSnapshotCompleted,
   type OmnichainIndexingStatusSnapshotFollowing,
+  type OmnichainIndexingStatusSnapshotUnstarted,
 } from "../omnichain-indexing-status-snapshot";
-import { makeChainIndexingStatusSnapshotSchema } from "./chain-indexing-status-snapshot";
+import {
+  SerializedOmnichainIndexingStatusSnapshot,
+  SerializedOmnichainIndexingStatusSnapshotBackfill,
+  SerializedOmnichainIndexingStatusSnapshotCompleted,
+  SerializedOmnichainIndexingStatusSnapshotFollowing,
+  SerializedOmnichainIndexingStatusSnapshotUnstarted,
+} from "../serialize/omnichain-indexing-status-snapshot";
+import {
+  makeChainIndexingStatusSnapshotBackfillSchema,
+  makeChainIndexingStatusSnapshotCompletedSchema,
+  makeChainIndexingStatusSnapshotFollowingSchema,
+  makeChainIndexingStatusSnapshotQueuedSchema,
+} from "./chain-indexing-status-snapshot";
 
 /**
  * Invariant: For omnichain snapshot,
@@ -165,17 +176,17 @@ export function invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBl
  * all chains must have "queued" status.
  */
 export function invariant_omnichainSnapshotUnstartedHasValidChains(
-  ctx: ParsePayload<Map<ChainId, ChainIndexingStatusSnapshot>>,
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshotUnstarted>,
 ) {
-  const chains = ctx.value;
+  const snapshot = ctx.value;
   const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotUnstarted(
-    Array.from(chains.values()),
+    Array.from(snapshot.chains.values()),
   );
 
   if (hasValidChains === false) {
     ctx.issues.push({
       code: "custom",
-      input: chains,
+      input: snapshot,
       message: `For omnichain status snapshot 'unstarted', all chains must have "queued" status.`,
     });
   }
@@ -188,17 +199,17 @@ export function invariant_omnichainSnapshotUnstartedHasValidChains(
  * or "completed".
  */
 export function invariant_omnichainStatusSnapshotBackfillHasValidChains(
-  ctx: ParsePayload<Map<ChainId, ChainIndexingStatusSnapshot>>,
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshotBackfill>,
 ) {
-  const chains = ctx.value;
+  const snapshot = ctx.value;
   const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill(
-    Array.from(chains.values()),
+    Array.from(snapshot.chains.values()),
   );
 
   if (hasValidChains === false) {
     ctx.issues.push({
       code: "custom",
-      input: chains,
+      input: snapshot,
       message: `For omnichain status snapshot 'backfill', at least one chain must be in "backfill" status and each chain has to have a status of either "queued", "backfill" or "completed".`,
     });
   }
@@ -209,17 +220,17 @@ export function invariant_omnichainStatusSnapshotBackfillHasValidChains(
  * all chains must have "completed" status.
  */
 export function invariant_omnichainStatusSnapshotCompletedHasValidChains(
-  ctx: ParsePayload<Map<ChainId, ChainIndexingStatusSnapshot>>,
+  ctx: ParsePayload<OmnichainIndexingStatusSnapshotCompleted>,
 ) {
-  const chains = ctx.value;
+  const snapshot = ctx.value;
   const hasValidChains = checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotCompleted(
-    Array.from(chains.values()),
+    Array.from(snapshot.chains.values()),
   );
 
   if (hasValidChains === false) {
     ctx.issues.push({
       code: "custom",
-      input: chains,
+      input: snapshot,
       message: `For omnichain status snapshot 'completed', all chains must have "completed" status.`,
     });
   }
@@ -247,75 +258,93 @@ export function invariant_omnichainStatusSnapshotFollowingHasValidChains(
 }
 
 /**
- * Makes Zod schema for {@link ChainIndexingStatusSnapshot} per chain.
- */
-export const makeChainIndexingStatusesSchema = (valueLabel: string = "Value") =>
-  z
-    .record(makeChainIdStringSchema(), makeChainIndexingStatusSnapshotSchema(valueLabel), {
-      error:
-        "Chains indexing statuses must be an object mapping valid chain IDs to their indexing status snapshots.",
-    })
-    .transform((serializedChainsIndexingStatus) => {
-      const chainsIndexingStatus = new Map<ChainId, ChainIndexingStatusSnapshot>();
-
-      for (const [chainIdString, chainStatus] of Object.entries(serializedChainsIndexingStatus)) {
-        chainsIndexingStatus.set(deserializeChainId(chainIdString), chainStatus);
-      }
-
-      return chainsIndexingStatus;
-    });
-
-/**
  * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotUnstarted}
  */
 const makeOmnichainIndexingStatusSnapshotUnstartedSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
-    chains: makeChainIndexingStatusesSchema(valueLabel)
-      .check(invariant_omnichainSnapshotUnstartedHasValidChains)
-      .transform((chains) => chains as Map<ChainId, ChainIndexingStatusSnapshotQueued>),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
+  z
+    .object({
+      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
+      chains: z.map(
+        makeChainIdSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+        ]),
+        {
+          error:
+            "Chains indexing statuses must be a Map with ChainId as keys and ChainIndexingStatusSnapshot as values.",
+        },
+      ),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    })
+    .check(invariant_omnichainSnapshotUnstartedHasValidChains);
 
 /**
  * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotBackfill}
  */
 const makeOmnichainIndexingStatusSnapshotBackfillSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
-    chains: makeChainIndexingStatusesSchema(valueLabel)
-      .check(invariant_omnichainStatusSnapshotBackfillHasValidChains)
-      .transform(
-        (chains) =>
-          chains as Map<
-            ChainId,
-            ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill
-          >,
+  z
+    .object({
+      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
+      chains: z.map(
+        makeChainIdSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+          makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
+          makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+        ]),
+        {
+          error:
+            "Chains indexing statuses must be a Map with ChainId as keys and ChainIndexingStatusSnapshot as values.",
+        },
       ),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    })
+    .check(invariant_omnichainStatusSnapshotBackfillHasValidChains);
 
 /**
  * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotCompleted}
  */
 const makeOmnichainIndexingStatusSnapshotCompletedSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
-    chains: makeChainIndexingStatusesSchema(valueLabel)
-      .check(invariant_omnichainStatusSnapshotCompletedHasValidChains)
-      .transform((chains) => chains as Map<ChainId, ChainIndexingStatusSnapshotCompleted>),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
+  z
+    .object({
+      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
+      chains: z.map(
+        makeChainIdSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+        ]),
+        {
+          error:
+            "Chains indexing statuses must be a Map with ChainId as keys and ChainIndexingStatusSnapshot as values.",
+        },
+      ),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    })
+    .check(invariant_omnichainStatusSnapshotCompletedHasValidChains);
 
 /**
  * Makes Zod schema for {@link OmnichainIndexingStatusSnapshotFollowing}
  */
 const makeOmnichainIndexingStatusSnapshotFollowingSchema = (valueLabel?: string) =>
-  z.strictObject({
-    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
-    chains: makeChainIndexingStatusesSchema(valueLabel),
-    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
-  });
+  z
+    .object({
+      omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
+      chains: z.map(
+        makeChainIdSchema(),
+        z.discriminatedUnion("chainStatus", [
+          makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+          makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
+          makeChainIndexingStatusSnapshotFollowingSchema(valueLabel),
+          makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+        ]),
+        {
+          error:
+            "Chains indexing statuses must be a Map with ChainId as keys and ChainIndexingStatusSnapshot as values.",
+        },
+      ),
+      omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    })
+    .check(invariant_omnichainStatusSnapshotFollowingHasValidChains);
 
 /**
  * Omnichain Indexing Snapshot Schema
@@ -339,3 +368,79 @@ export const makeOmnichainIndexingStatusSnapshotSchema = (
       invariant_omnichainIndexingCursorLowerThanOrEqualToLatestBackfillEndBlockAcrossBackfillChains,
     )
     .check(invariant_omnichainIndexingCursorIsEqualToHighestLatestIndexedBlockAcrossIndexedChain);
+
+/**
+ * Makes Zod schema for {@link SerializedOmnichainIndexingStatusSnapshotUnstarted}
+ */
+const makeSerializedOmnichainIndexingStatusSnapshotUnstartedSchema = (valueLabel?: string) =>
+  z.object({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Unstarted),
+    chains: z.record(
+      makeChainIdStringSchema(),
+      z.discriminatedUnion("chainStatus", [
+        makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+      ]),
+    ),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+  });
+
+/**
+ * Makes Zod schema for {@link SerializedOmnichainIndexingStatusSnapshotBackfill}
+ */
+const makeSerializedOmnichainIndexingStatusSnapshotBackfillSchema = (valueLabel?: string) =>
+  z.object({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Backfill),
+    chains: z.record(
+      makeChainIdStringSchema(),
+      z.discriminatedUnion("chainStatus", [
+        makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+        makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
+        makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+      ]),
+    ),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+  });
+
+/**
+ * Makes Zod schema for {@link SerializedOmnichainIndexingStatusSnapshotCompleted}
+ */
+const makeSerializedOmnichainIndexingStatusSnapshotCompletedSchema = (valueLabel?: string) =>
+  z.object({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Completed),
+    chains: z.record(
+      makeChainIdStringSchema(),
+      z.discriminatedUnion("chainStatus", [
+        makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+      ]),
+    ),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+  });
+
+/**
+ * Makes Zod schema for {@link SerializedOmnichainIndexingStatusSnapshotFollowing}
+ */
+const makeSerializedOmnichainIndexingStatusSnapshotFollowingSchema = (valueLabel?: string) =>
+  z.object({
+    omnichainStatus: z.literal(OmnichainIndexingStatusIds.Following),
+    chains: z.record(
+      makeChainIdStringSchema(),
+      z.discriminatedUnion("chainStatus", [
+        makeChainIndexingStatusSnapshotQueuedSchema(valueLabel),
+        makeChainIndexingStatusSnapshotBackfillSchema(valueLabel),
+        makeChainIndexingStatusSnapshotFollowingSchema(valueLabel),
+        makeChainIndexingStatusSnapshotCompletedSchema(valueLabel),
+      ]),
+    ),
+    omnichainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+  });
+
+/**
+ * Makes Zod schema for {@link SerializedOmnichainIndexingStatusSnapshot}.
+ */
+export const makeSerializedOmnichainIndexingStatusSnapshotSchema = (valueLabel: string = "Value") =>
+  z.discriminatedUnion("omnichainStatus", [
+    makeSerializedOmnichainIndexingStatusSnapshotUnstartedSchema(valueLabel),
+    makeSerializedOmnichainIndexingStatusSnapshotBackfillSchema(valueLabel),
+    makeSerializedOmnichainIndexingStatusSnapshotCompletedSchema(valueLabel),
+    makeSerializedOmnichainIndexingStatusSnapshotFollowingSchema(valueLabel),
+  ]);
