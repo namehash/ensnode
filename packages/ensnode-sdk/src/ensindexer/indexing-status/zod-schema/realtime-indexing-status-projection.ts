@@ -1,17 +1,12 @@
-/**
- * All zod schemas we define must remain internal implementation details.
- * We want the freedom to move away from zod in the future without impacting
- * any users of the ensnode-sdk package.
- *
- * The only way to share Zod schemas is to re-export them from
- * `./src/internal.ts` file.
- */
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
 import { makeDurationSchema, makeUnixTimestampSchema } from "../../../shared/zod-schemas";
 import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
-import { makeCrossChainIndexingStatusSnapshotSchema } from "./cross-chain-indexing-status-snapshot";
+import {
+  makeCrossChainIndexingStatusSnapshotSchema,
+  makeSerializedCrossChainIndexingStatusSnapshotSchema,
+} from "./cross-chain-indexing-status-snapshot";
 
 /**
  * Invariant: For realtime indexing status projection,
@@ -62,10 +57,22 @@ export const makeRealtimeIndexingStatusProjectionSchema = (
   valueLabel: string = "Realtime Indexing Status Projection",
 ) =>
   z
-    .strictObject({
+    .object({
       projectedAt: makeUnixTimestampSchema(valueLabel),
       worstCaseDistance: makeDurationSchema(valueLabel),
       snapshot: makeCrossChainIndexingStatusSnapshotSchema(valueLabel),
     })
     .check(invariant_realtimeIndexingStatusProjectionProjectedAtIsAfterOrEqualToSnapshotTime)
     .check(invariant_realtimeIndexingStatusProjectionWorstCaseDistanceIsCorrect);
+
+/**
+ * Makes Zod schema for {@link SerializedRealtimeIndexingStatusProjection}.
+ */
+export const makeSerializedRealtimeIndexingStatusProjectionSchema = (
+  valueLabel: string = "Value",
+) =>
+  z.object({
+    snapshot: makeSerializedCrossChainIndexingStatusSnapshotSchema(valueLabel),
+    projectedAt: makeUnixTimestampSchema(valueLabel),
+    worstCaseDistance: makeDurationSchema(valueLabel),
+  });
