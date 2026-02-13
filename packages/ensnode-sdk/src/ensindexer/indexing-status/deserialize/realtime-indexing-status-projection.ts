@@ -29,7 +29,7 @@ export function buildUnvalidatedRealtimeIndexingStatusProjection(
  * Deserialize into a {@link RealtimeIndexingStatusProjection} object.
  */
 export function deserializeRealtimeIndexingStatusProjection(
-  maybeProjection: SerializedRealtimeIndexingStatusProjection,
+  maybeProjection: Unvalidated<SerializedRealtimeIndexingStatusProjection>,
   valueLabel?: string,
 ): RealtimeIndexingStatusProjection {
   const schema = makeSerializedRealtimeIndexingStatusProjectionSchema(valueLabel)

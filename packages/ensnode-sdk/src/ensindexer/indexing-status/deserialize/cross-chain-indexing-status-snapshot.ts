@@ -31,7 +31,7 @@ export function buildUnvalidatedCrossChainIndexingStatusSnapshot(
  * Deserialize an {@link CrossChainIndexingStatusSnapshot} object.
  */
 export function deserializeCrossChainIndexingStatusSnapshot(
-  maybeSnapshot: SerializedCrossChainIndexingStatusSnapshot,
+  maybeSnapshot: Unvalidated<SerializedCrossChainIndexingStatusSnapshot>,
   valueLabel?: string,
 ): CrossChainIndexingStatusSnapshot {
   const schema = makeSerializedCrossChainIndexingStatusSnapshotSchema(valueLabel)
