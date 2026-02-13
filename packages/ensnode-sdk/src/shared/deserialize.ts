@@ -1,4 +1,4 @@
-import { prettifyError } from "zod/v4";
+import z, { prettifyError } from "zod/v4";
 
 import type { PriceDai, PriceEth, PriceUsdc } from "./currencies";
 import type { ChainIdString, UrlString } from "./serialized-types";
@@ -107,7 +107,7 @@ export function deserializeBlockRef(
 }
 
 export function deserializeDuration(maybeDuration: unknown, valueLabel?: string): Duration {
-  const schema = makeDurationSchema(valueLabel);
+  const schema = z.coerce.number().pipe(makeDurationSchema(valueLabel));
   const parsed = schema.safeParse(maybeDuration);
 
   if (parsed.error) {
