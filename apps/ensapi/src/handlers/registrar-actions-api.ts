@@ -28,6 +28,11 @@ import { makeLogger } from "@/lib/logger";
 import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-actions";
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
+import {
+  getRegistrarActionsByParentNodeRoute,
+  getRegistrarActionsRoute,
+} from "./registrar-actions-api.routes";
+
 const app = factory.createApp();
 
 const logger = makeLogger("registrar-actions-api");
@@ -156,22 +161,7 @@ async function fetchRegistrarActions(
  */
 app.get(
   "/",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Registrar Actions",
-    description: "Returns all registrar actions with optional filtering and pagination",
-    responses: {
-      200: {
-        description: "Successfully retrieved registrar actions",
-      },
-      400: {
-        description: "Invalid query",
-      },
-      500: {
-        description: "Internal server error",
-      },
-    },
-  }),
+  describeRoute(getRegistrarActionsRoute),
   validate("query", registrarActionsQuerySchema),
   async (c) => {
     try {
@@ -238,23 +228,7 @@ app.get(
  */
 app.get(
   "/:parentNode",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Registrar Actions by Parent Node",
-    description:
-      "Returns registrar actions filtered by parent node hash with optional additional filtering and pagination",
-    responses: {
-      200: {
-        description: "Successfully retrieved registrar actions",
-      },
-      400: {
-        description: "Invalid input",
-      },
-      500: {
-        description: "Internal server error",
-      },
-    },
-  }),
+  describeRoute(getRegistrarActionsByParentNodeRoute),
   validate(
     "param",
     z.object({
