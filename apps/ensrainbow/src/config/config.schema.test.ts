@@ -292,7 +292,7 @@ describe("buildServeCommandConfig", () => {
   };
 
   it("normalizes relative data-dir to absolute path", () => {
-    const result = buildServeCommandConfig(baseEnvConfig, {
+    const result = buildServeCommandConfig({
       port: 4000,
       "data-dir": "my-data",
     });
@@ -304,7 +304,7 @@ describe("buildServeCommandConfig", () => {
   });
 
   it("preserves absolute data-dir and merges port", () => {
-    const result = buildServeCommandConfig(baseEnvConfig, {
+    const result = buildServeCommandConfig({
       port: 3000,
       "data-dir": "/absolute/cli/path",
     });
@@ -314,7 +314,7 @@ describe("buildServeCommandConfig", () => {
   });
 
   it("trims whitespace from data-dir", () => {
-    const result = buildServeCommandConfig(baseEnvConfig, {
+    const result = buildServeCommandConfig({
       port: baseEnvConfig.port,
       "data-dir": "  /trimmed/path  ",
     });
@@ -323,13 +323,13 @@ describe("buildServeCommandConfig", () => {
   });
 
   it("throws on empty data-dir", () => {
-    expect(() => buildServeCommandConfig(baseEnvConfig, { port: 4000, "data-dir": "" })).toThrow(
+    expect(() => buildServeCommandConfig({ port: 4000, "data-dir": "" })).toThrow(
       /Invalid data-dir/,
     );
   });
 
   it("throws on whitespace-only data-dir", () => {
-    expect(() => buildServeCommandConfig(baseEnvConfig, { port: 4000, "data-dir": "   " })).toThrow(
+    expect(() => buildServeCommandConfig({ port: 4000, "data-dir": "   " })).toThrow(
       /Invalid data-dir/,
     );
   });
@@ -363,7 +363,6 @@ describe("buildENSRainbowPublicConfig", () => {
       const serveCommandConfig: ServeCommandConfig = {
         port: 4000,
         dataDir: getDefaultDataDir(),
-        dbSchemaVersion: DB_SCHEMA_VERSION,
       };
 
       const result = buildENSRainbowPublicConfig(serveCommandConfig, labelSet, recordsCount);

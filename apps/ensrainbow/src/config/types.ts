@@ -26,6 +26,9 @@ export interface ENSRainbowEnvConfig {
 }
 
 /**
- * Effective config for the serve command: merge(CLI args, EnvConfig).
+ * Validated configuration for the serve command.
  */
-export type ServeCommandConfig = ENSRainbowEnvConfig;
+export interface ServeCommandConfig {
+  port: PortNumber;
+  dataDir: AbsolutePath;
+}

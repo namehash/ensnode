@@ -3,6 +3,10 @@ import { rm } from "node:fs/promises";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
+export interface PurgeCommandCliArgs {
+  "data-dir": string;
+}
+
 export interface PurgeCommandOptions {
   dataDir: string;
 }

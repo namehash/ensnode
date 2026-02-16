@@ -67,13 +67,15 @@ export function buildEnvConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRa
   }
 }
 
-export function buildServeCommandConfig(
-  envConfig: ENSRainbowEnvConfig,
-  args: { port: number; "data-dir": string },
-): ServeCommandConfig {
+export interface ServeCommandCliArgs {
+  port: number;
+  "data-dir": string;
+}
+
+export function buildServeCommandConfig(args: ServeCommandCliArgs): ServeCommandConfig {
   try {
     const dataDir = AbsolutePathSchemaBase.parse(args["data-dir"]);
-    return { ...envConfig, port: args.port, dataDir };
+    return { port: args.port, dataDir };
   } catch (error) {
     if (error instanceof ZodError) {
       throw new Error(`Invalid data-dir: \n${prettifyError(error)}\n`);

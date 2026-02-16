@@ -9,7 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { DB_SCHEMA_VERSION, ENSRainbowDB } from "@/lib/database";
+import { ENSRainbowDB } from "@/lib/database";
 
 import { createServer } from "./server-command";
 
@@ -35,7 +35,6 @@ describe("Server Command Tests", () => {
       const serveCommandConfig: ServeCommandConfig = {
         port: nonDefaultPort,
         dataDir: TEST_DB_DIR,
-        dbSchemaVersion: DB_SCHEMA_VERSION,
       };
       app = await createServer(db, serveCommandConfig);
 

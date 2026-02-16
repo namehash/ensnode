@@ -1,6 +1,6 @@
 import { buildEnvConfigFromEnvironment } from "./config.schema";
 
-export type { ENSRainbowEnvConfig, ServeCommandConfig } from "./config.schema";
+export type { ENSRainbowEnvConfig, ServeCommandCliArgs, ServeCommandConfig } from "./config.schema";
 export {
   buildEnvConfigFromEnvironment,
   buildServeCommandConfig,
