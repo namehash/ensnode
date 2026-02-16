@@ -16,14 +16,14 @@ import {
   type SerializedIndexingStatusResponseOk,
   serializeIndexingStatusResponse,
 } from "./ensapi/api";
+import { PluginName } from "./ensindexer/config/types";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,
-  CrossChainIndexingStrategyIds,
-  OmnichainIndexingStatusIds,
-  PluginName,
-  type SerializedOmnichainIndexingStatusSnapshotFollowing,
-} from "./ensindexer";
+} from "./indexing-status/chain-indexing-status-snapshot";
+import { CrossChainIndexingStrategyIds } from "./indexing-status/cross-chain-indexing-status-snapshot";
+import { OmnichainIndexingStatusIds } from "./indexing-status/omnichain-indexing-status-snapshot";
+import type { SerializedOmnichainIndexingStatusSnapshotFollowing } from "./indexing-status/serialize/omnichain-indexing-status-snapshot";
 import type { ResolverRecordsSelection } from "./resolution";
 
 const EXAMPLE_NAME: Name = "example.eth";

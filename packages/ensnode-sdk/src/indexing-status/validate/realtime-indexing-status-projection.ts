@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import type { Unvalidated } from "../../../shared/types";
+import type { Unvalidated } from "../../shared/types";
 import type { RealtimeIndexingStatusProjection } from "../realtime-indexing-status-projection";
 import { makeRealtimeIndexingStatusProjectionSchema } from "../zod-schema/realtime-indexing-status-projection";
 

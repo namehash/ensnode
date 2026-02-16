@@ -2,7 +2,7 @@ import type { z } from "zod/v4";
 
 import type { InterpretedName, Node } from "../../ens/types";
 import type { ENSApiPublicConfig } from "../../ensapi/config";
-import type { RealtimeIndexingStatusProjection } from "../../ensindexer/indexing-status/realtime-indexing-status-projection";
+import type { RealtimeIndexingStatusProjection } from "../../indexing-status/realtime-indexing-status-projection";
 import type { RegistrarAction } from "../../registrars/registrar-action";
 import type {
   ForwardResolutionArgs,

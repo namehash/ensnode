@@ -5,7 +5,7 @@ import {
   makeChainIdSchema,
   makeChainIdStringSchema,
   makeUnixTimestampSchema,
-} from "../../../shared/zod-schemas";
+} from "../../shared/zod-schemas";
 import { ChainIndexingStatusIds } from "../chain-indexing-status-snapshot";
 import {
   checkChainIndexingStatusSnapshotsForOmnichainStatusSnapshotBackfill,

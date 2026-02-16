@@ -7,6 +7,7 @@ export * from "./ensindexer";
 export * from "./ensrainbow";
 export * from "./ensv2";
 export * from "./identity";
+export * from "./indexing-status";
 export * from "./registrars";
 export * from "./resolution";
 export * from "./shared/account-id";

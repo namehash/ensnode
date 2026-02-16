@@ -1,4 +1,4 @@
-import { serializeRealtimeIndexingStatusProjection } from "../../../ensindexer/indexing-status/serialize/realtime-indexing-status-projection";
+import { serializeRealtimeIndexingStatusProjection } from "../../../indexing-status/serialize/realtime-indexing-status-projection";
 import { type IndexingStatusResponse, IndexingStatusResponseCodes } from "./response";
 import type {
   SerializedIndexingStatusResponse,

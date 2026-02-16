@@ -1,4 +1,4 @@
-import type { ChainId, UnixTimestamp } from "../../shared/types";
+import type { ChainId, UnixTimestamp } from "../shared/types";
 import {
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,

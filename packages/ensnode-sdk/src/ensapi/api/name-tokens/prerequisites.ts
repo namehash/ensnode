@@ -2,7 +2,7 @@ import { type ENSIndexerPublicConfig, PluginName } from "../../../ensindexer/con
 import {
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
-} from "../../../ensindexer/indexing-status/omnichain-indexing-status-snapshot";
+} from "../../../indexing-status/omnichain-indexing-status-snapshot";
 
 export const nameTokensPrerequisites = Object.freeze({
   /**

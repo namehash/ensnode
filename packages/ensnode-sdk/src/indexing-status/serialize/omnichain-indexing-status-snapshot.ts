@@ -1,4 +1,4 @@
-import type { ChainIdString } from "../../../shared/serialized-types";
+import type { ChainIdString } from "../../shared/serialized-types";
 import type {
   ChainIndexingStatusSnapshot,
   ChainIndexingStatusSnapshotCompleted,

@@ -1,4 +1,4 @@
-import type { Duration, UnixTimestamp } from "../../shared/types";
+import type { Duration, UnixTimestamp } from "../shared/types";
 import type { CrossChainIndexingStatusSnapshot } from "./cross-chain-indexing-status-snapshot";
 
 /**

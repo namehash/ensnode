@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../../ensindexer/indexing-status/deserialize/realtime-indexing-status-projection";
+import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../../indexing-status/deserialize/realtime-indexing-status-projection";
 import type { Unvalidated } from "../../../shared/types";
 import { type IndexingStatusResponse, IndexingStatusResponseCodes } from "./response";
 import type { SerializedIndexingStatusResponse } from "./serialized-response";
