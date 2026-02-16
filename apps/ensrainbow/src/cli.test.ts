@@ -11,6 +11,24 @@ import { createCLI } from "./cli";
 // Path to test fixtures
 const TEST_FIXTURES_DIR = join(__dirname, "..", "test", "fixtures");
 
+/** Polls url until GET returns 200 or timeout. Rejects on timeout. */
+async function waitForHealth(
+  url: string,
+  { intervalMs = 50, timeoutMs = 5000 }: { intervalMs?: number; timeoutMs?: number } = {},
+): Promise<Response> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(url);
+      if (response.status === 200) return response;
+    } catch {
+      // Connection refused or other error; retry
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  throw new Error(`Health check did not return 200 within ${timeoutMs}ms: ${url}`);
+}
+
 describe("CLI", () => {
   let tempDir: string;
   let testDataDir: string;
@@ -555,11 +573,7 @@ describe("CLI", () => {
           testDataDir,
         ]);
 
-        // Give server time to start (DB open + validation can take a bit)
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Make a request to health endpoint
-        const response = await fetch(`http://localhost:${customPort}/health`);
+        const response = await waitForHealth(`http://localhost:${customPort}/health`);
         expect(response.status).toBe(200);
 
         // Cleanup - send SIGINT to stop server
@@ -611,11 +625,7 @@ describe("CLI", () => {
         // Start server
         const serverPromise = cliWithCustomPort.parse(["serve", "--data-dir", testDataDir]);
 
-        // Give server time to start (DB open + validation can take a bit)
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Make a request to health endpoint
-        const response = await fetch(`http://localhost:${customPort}/health`);
+        const response = await waitForHealth(`http://localhost:${customPort}/health`);
         expect(response.status).toBe(200);
 
         // Make a request to count endpoint
@@ -681,11 +691,7 @@ describe("CLI", () => {
           testDataDir,
         ]);
 
-        // Give server time to start (DB open + validation can take a bit)
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Verify server is running on the CLI port (not env port)
-        const response = await fetch("http://localhost:4000/health");
+        const response = await waitForHealth("http://localhost:4000/health");
         expect(response.status).toBe(200);
 
         // Cleanup - send SIGINT to stop server
