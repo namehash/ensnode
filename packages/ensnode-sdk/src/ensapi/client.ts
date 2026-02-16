@@ -39,19 +39,21 @@ export interface ClientOptions {
 }
 
 /**
- * ENSNode API Client
+ * EnsApi Client
  *
  * Provides access to the following ENSNode APIs:
  * - Resolution API
- * - 🚧 Configuration API
- * - 🚧 Indexing Status API
+ * - Configuration API
+ * - Indexing Status API
+ * - Registrar Actions API
+ * - Name Tokens API
  *
  * @example
  * ```typescript
- * import { ENSApiClient } from "@ensnode/ensnode-sdk";
+ * import { EnsApiClient } from "@ensnode/ensnode-sdk";
  *
  * // Create client with default options
- * const client = new ENSApiClient();
+ * const client = new EnsApiClient();
  *
  * // Use resolution methods
  * const { records } = await client.resolveRecords("jesse.base.eth", {
@@ -62,35 +64,35 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, ENSApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, EnsApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Mainnet
- * const client = new ENSApiClient({
+ * const client = new EnsApiClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, ENSApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, EnsApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Sepolia
- * const client = new ENSApiClient({
+ * const client = new EnsApiClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSApiClient } from "@ensnode/ensnode-sdk";
+ * import { EnsApiClient } from "@ensnode/ensnode-sdk";
  *
  * // Custom configuration
- * const client = new ENSApiClient({
+ * const client = new EnsApiClient({
  *   url: new URL("https://my-ensnode-instance.com"),
  * });
  * ```
  */
-export class ENSApiClient {
+export class EnsApiClient {
   private readonly options: ClientOptions;
 
   static defaultOptions(): ClientOptions {
@@ -101,7 +103,7 @@ export class ENSApiClient {
 
   constructor(options: Partial<ClientOptions> = {}) {
     this.options = {
-      ...ENSApiClient.defaultOptions(),
+      ...EnsApiClient.defaultOptions(),
       ...options,
     };
   }
@@ -399,11 +401,11 @@ export class ENSApiClient {
    * ```ts
    * import {
    *   registrarActionsFilter,
-   *   ENSApiClient,
+   *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
-   * const client: ENSApiClient;
+   * const client: EnsApiClient;
    *
    * // Get first page with default page size (10 records)
    * const response = await client.registrarActions();
@@ -611,11 +613,11 @@ export class ENSApiClient {
    * @example
    * ```ts
    * import {
-   *   ENSApiClient,
+   *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
-   * const client: ENSApiClient;
+   * const client: EnsApiClient;
    *
    * // get latest name token records from the indexed subregistry based on the requested name
    * const response = await client.nameTokens({
@@ -673,6 +675,6 @@ export class ENSApiClient {
 /**
  * ENSNode Client
  *
- * @deprecated use {@link ENSApiClient} instead
+ * @deprecated use {@link EnsApiClient} instead
  */
-export class ENSNodeClient extends ENSApiClient {}
+export class ENSNodeClient extends EnsApiClient {}
