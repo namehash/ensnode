@@ -23,6 +23,7 @@ import {
 } from "./api";
 import { ENSNodeClient } from "./client";
 import { ClientError } from "./client-error";
+import { deserializeENSApiPublicConfig } from "./config/deserialize";
 import type { SerializedENSApiPublicConfig } from "./config/serialized-types";
 import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
 
