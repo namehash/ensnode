@@ -160,7 +160,7 @@ export function invariant_isSubgraphCompatibleRequirements(
  * Makes a Zod schema definition for validating all important settings used
  * during runtime of the ENSIndexer instance.
  */
-export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
+export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
@@ -177,3 +177,10 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
      * All required data validations must be performed below.
      */
     .check(invariant_isSubgraphCompatibleRequirements);
+
+/**
+ * ENSIndexer Public Config Schema
+ *
+ * @deprecated Use {@link makeEnsIndexerPublicConfigSchema} instead.
+ */
+export const makeENSIndexerPublicConfigSchema = makeEnsIndexerPublicConfigSchema;

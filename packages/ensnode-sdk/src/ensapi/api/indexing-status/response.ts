@@ -31,7 +31,7 @@ export type EnsApiIndexingStatusResponseCode =
 /**
  * The derived string union of possible {@link EnsApiIndexingStatusResponseCodes}.
  *
- * @deprecated Use {@link EnsApiIndexingStatusResponseCodes} instead.
+ * @deprecated Use {@link EnsApiIndexingStatusResponseCode} instead.
  */
 export type IndexingStatusResponseCode = EnsApiIndexingStatusResponseCode;
 

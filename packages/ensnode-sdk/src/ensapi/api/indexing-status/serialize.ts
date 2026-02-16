@@ -5,6 +5,9 @@ import type {
   SerializedEnsApiIndexingStatusResponseOk,
 } from "./serialized-response";
 
+/**
+ * Serialize a {@link EnsApiIndexingStatusResponse} object.
+ */
 export function serializeEnsApiIndexingStatusResponse(
   response: EnsApiIndexingStatusResponse,
 ): SerializedEnsApiIndexingStatusResponse {
@@ -20,4 +23,9 @@ export function serializeEnsApiIndexingStatusResponse(
   }
 }
 
+/**
+ * Serialize a {@link EnsApiIndexingStatusResponse} object.
+ *
+ * @deprecated Use {@link serializeEnsApiIndexingStatusResponse} instead.
+ */
 export const serializeIndexingStatusResponse = serializeEnsApiIndexingStatusResponse;

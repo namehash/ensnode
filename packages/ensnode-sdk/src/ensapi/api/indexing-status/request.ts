@@ -1,11 +1,11 @@
 /**
  * Represents a request to Indexing Status API.
  */
-export type IndexingStatusRequest = {};
+export type EnsApiIndexingStatusRequest = {};
 
 /**
  * Represents a request to Indexing Status API.
  *
- * @deprecated Use {@link IndexingStatusRequest} instead.
+ * @deprecated Use {@link EnsApiIndexingStatusRequest} instead.
  */
-export type EnsApiIndexingStatusRequest = IndexingStatusRequest;
+export type IndexingStatusRequest = EnsApiIndexingStatusRequest;

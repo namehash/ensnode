@@ -2,7 +2,7 @@ import { prettifyError } from "zod/v4";
 
 import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../../indexing-status/deserialize/realtime-indexing-status-projection";
 import type { Unvalidated } from "../../../shared/types";
-import { type EnsApiIndexingStatusResponse, IndexingStatusResponseCodes } from "./response";
+import { type EnsApiIndexingStatusResponse, EnsApiIndexingStatusResponseCodes } from "./response";
 import type { SerializedEnsApiIndexingStatusResponse } from "./serialized-response";
 import {
   makeEnsApiIndexingStatusResponseSchema,
@@ -19,7 +19,7 @@ import {
 function buildUnvalidatedEnsApiIndexingStatusResponse(
   serializedResponse: SerializedEnsApiIndexingStatusResponse,
 ): Unvalidated<EnsApiIndexingStatusResponse> {
-  if (serializedResponse.responseCode !== IndexingStatusResponseCodes.Ok) {
+  if (serializedResponse.responseCode !== EnsApiIndexingStatusResponseCodes.Ok) {
     return serializedResponse;
   }
 

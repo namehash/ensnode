@@ -2,7 +2,7 @@ import { prettifyError, ZodError } from "zod/v4";
 
 import type { SerializedEnsApiPublicConfig } from "./serialized-types";
 import type { EnsApiPublicConfig } from "./types";
-import { makeENSApiPublicConfigSchema } from "./zod-schemas";
+import { makeEnsApiPublicConfigSchema } from "./zod-schemas";
 
 /**
  * Deserialize a {@link EnsApiPublicConfig} object.
@@ -11,7 +11,7 @@ export function deserializeEnsApiPublicConfig(
   maybeConfig: SerializedEnsApiPublicConfig,
   valueLabel?: string,
 ): EnsApiPublicConfig {
-  const schema = makeENSApiPublicConfigSchema(valueLabel);
+  const schema = makeEnsApiPublicConfigSchema(valueLabel);
   try {
     return schema.parse(maybeConfig);
   } catch (error) {
