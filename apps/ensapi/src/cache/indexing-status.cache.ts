@@ -8,7 +8,7 @@ const logger = makeLogger("indexing-status.cache");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
 export const indexingStatusCache = new SWRCache({
-  fn: async () =>
+  fn: async (_cachedResult) =>
     client
       .indexingStatus() // fetch a new indexing status snapshot
       .then((response) => {

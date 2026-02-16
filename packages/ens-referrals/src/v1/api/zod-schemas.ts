@@ -145,10 +145,8 @@ export const makeReferrerLeaderboardPageContextSchema = (
  * Schema for referral program status field.
  * Validates that the status is one of: "Scheduled", "Active", or "Closed".
  */
-export const makeReferralProgramStatusSchema = (valueLabel: string = "status") =>
-  z.enum(ReferralProgramStatuses, {
-    message: `${valueLabel} must be "Scheduled", "Active", or "Closed"`,
-  });
+export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
+  z.enum(ReferralProgramStatuses);
 
 /**
  * Schema for ReferrerLeaderboardPage

@@ -7,7 +7,8 @@ import { addDuration, type Duration, type UnixTimestamp } from "@ensnode/ensnode
  * Duration after which we assume a closed edition is safe from chain reorganizations.
  *
  * This is a heuristic value (10 minutes) chosen to provide a reasonable safety margin
- * beyond typical Ethereum finality. It is not a guarantee of immutability.
+ * beyond typical chain finality assumptions on supported networks. It is not a guarantee
+ * of immutability.
  */
 export const ASSUMED_CHAIN_REORG_SAFE_DURATION: Duration = minutesToSeconds(10);
 

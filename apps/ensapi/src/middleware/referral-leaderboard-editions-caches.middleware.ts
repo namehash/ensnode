@@ -38,7 +38,7 @@ export type ReferralLeaderboardEditionsCachesMiddlewareVariables = {
  * Otherwise, it initializes caches for each edition in the config set.
  *
  * Each cache's builder function handles immutability internally - when an edition becomes immutably
- * closed (past the safety window), the builder returns cached data without re-fetching.
+ * closed (past the safety window), the builder returns previously cached data without re-fetching.
  */
 export const referralLeaderboardEditionsCachesMiddleware = factory.createMiddleware(
   async (c, next) => {

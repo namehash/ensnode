@@ -45,7 +45,7 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
 ];
 
 export const referrerLeaderboardCache = new SWRCache({
-  fn: async () => {
+  fn: async (_cachedResult) => {
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
       throw new Error(
