@@ -27,7 +27,7 @@ export const registrarActionsPrerequisites = Object.freeze({
   ] as const,
 
   /**
-   * Check if provided ENSApiPublicConfig supports the Registrar Actions API.
+   * Check if provided EnsIndexerPublicConfig supports the Registrar Actions API.
    */
   hasEnsIndexerConfigSupport(config: EnsIndexerPublicConfig): boolean {
     return registrarActionsPrerequisites.requiredPlugins.every((plugin) =>
