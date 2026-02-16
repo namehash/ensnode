@@ -1,4 +1,4 @@
-import type { RealtimeIndexingStatusProjection } from "../../../ensindexer/indexing-status/realtime-indexing-status-projection";
+import type { RealtimeIndexingStatusProjection } from "../../../indexing-status/realtime-indexing-status-projection";
 
 /**
  * A status code for indexing status responses.

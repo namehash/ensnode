@@ -1,8 +1,8 @@
 import { z } from "zod/v4";
 import type { ParsePayload } from "zod/v4/core";
 
-import * as blockRef from "../../../shared/block-ref";
-import { makeBlockRefSchema } from "../../../shared/zod-schemas";
+import * as blockRef from "../../shared/block-ref";
+import { makeBlockRefSchema } from "../../shared/zod-schemas";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,

@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import type { ChainId, Unvalidated } from "../../../shared/types";
+import type { ChainId, Unvalidated } from "../../shared/types";
 import type { ChainIndexingStatusSnapshot } from "../chain-indexing-status-snapshot";
 import type { OmnichainIndexingStatusSnapshot } from "../omnichain-indexing-status-snapshot";
 import type { SerializedOmnichainIndexingStatusSnapshot } from "../serialize/omnichain-indexing-status-snapshot";

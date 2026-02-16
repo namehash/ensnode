@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 import {
   makeRealtimeIndexingStatusProjectionSchema,
   makeSerializedRealtimeIndexingStatusProjectionSchema,
-} from "../../../ensindexer/indexing-status/zod-schema/realtime-indexing-status-projection";
+} from "../../../indexing-status/zod-schema/realtime-indexing-status-projection";
 import {
   type IndexingStatusResponse,
   IndexingStatusResponseCodes,

@@ -1,6 +1,6 @@
 import { prettifyError } from "zod/v4";
 
-import type { Unvalidated } from "../../../shared/types";
+import type { Unvalidated } from "../../shared/types";
 import type { OmnichainIndexingStatusSnapshot } from "../omnichain-indexing-status-snapshot";
 import { makeOmnichainIndexingStatusSnapshotSchema } from "../zod-schema/omnichain-indexing-status-snapshot";
 

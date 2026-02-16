@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { BlockRef } from "../../shared/types";
+import type { BlockRef } from "../shared/types";
 import {
   earlierBlockRef,
   earliestBlockRef,
