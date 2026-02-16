@@ -1,18 +1,25 @@
-import { serializeENSIndexerPublicConfig } from "../../ensindexer";
-import type { SerializedENSApiPublicConfig } from "./serialized-types";
-import type { ENSApiPublicConfig } from "./types";
+import { serializeENSIndexerPublicConfig } from "../../ensindexer/config/serialize";
+import type { SerializedEnsApiPublicConfig } from "./serialized-types";
+import type { EnsApiPublicConfig } from "./types";
 
 /**
- * Serialize a {@link ENSApiPublicConfig} object.
+ * Serialize a {@link EnsApiPublicConfig} object.
  */
-export function serializeENSApiPublicConfig(
-  config: ENSApiPublicConfig,
-): SerializedENSApiPublicConfig {
+export function serializeEnsApiPublicConfig(
+  config: EnsApiPublicConfig,
+): SerializedEnsApiPublicConfig {
   const { version, theGraphFallback, ensIndexerPublicConfig } = config;
 
   return {
     version,
     theGraphFallback,
     ensIndexerPublicConfig: serializeENSIndexerPublicConfig(ensIndexerPublicConfig),
-  } satisfies SerializedENSApiPublicConfig;
+  } satisfies SerializedEnsApiPublicConfig;
 }
+
+/**
+ * Serialize a {@link EnsApiPublicConfig} object.
+ *
+ * @deprecated Use {@link serializeEnsApiPublicConfig} instead.
+ */
+export const serializeENSApiPublicConfig = serializeEnsApiPublicConfig;

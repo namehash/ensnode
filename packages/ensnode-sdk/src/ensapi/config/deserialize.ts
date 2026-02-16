@@ -1,24 +1,31 @@
 import { prettifyError, ZodError } from "zod/v4";
 
-import type { SerializedENSApiPublicConfig } from "./serialized-types";
-import type { ENSApiPublicConfig } from "./types";
+import type { SerializedEnsApiPublicConfig } from "./serialized-types";
+import type { EnsApiPublicConfig } from "./types";
 import { makeENSApiPublicConfigSchema } from "./zod-schemas";
 
 /**
- * Deserialize a {@link ENSApiPublicConfig} object.
+ * Deserialize a {@link EnsApiPublicConfig} object.
  */
-export function deserializeENSApiPublicConfig(
-  maybeConfig: SerializedENSApiPublicConfig,
+export function deserializeEnsApiPublicConfig(
+  maybeConfig: SerializedEnsApiPublicConfig,
   valueLabel?: string,
-): ENSApiPublicConfig {
+): EnsApiPublicConfig {
   const schema = makeENSApiPublicConfigSchema(valueLabel);
   try {
     return schema.parse(maybeConfig);
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(`Cannot deserialize ENSApiPublicConfig:\n${prettifyError(error)}\n`);
+      throw new Error(`Cannot deserialize EnsApiPublicConfig:\n${prettifyError(error)}\n`);
     }
 
     throw error;
   }
 }
+
+/**
+ * Deserialize a {@link EnsApiPublicConfig} object.
+ *
+ * @deprecated Use {@link deserializeEnsApiPublicConfig} instead.
+ */
+export const deserializeENSApiPublicConfig = deserializeEnsApiPublicConfig;
