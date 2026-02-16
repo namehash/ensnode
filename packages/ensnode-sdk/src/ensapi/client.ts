@@ -1,5 +1,4 @@
-import { ClientError } from "./client-error";
-import { getDefaultEnsNodeUrl } from "./deployments";
+import type { ResolverRecordsSelection } from "../resolution";
 import {
   type ConfigResponse,
   deserializeConfigResponse,
@@ -27,8 +26,9 @@ import {
   type SerializedIndexingStatusResponse,
   type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
-} from "./ensapi/api";
-import type { ResolverRecordsSelection } from "./resolution";
+} from "./api";
+import { ClientError } from "./client-error";
+import { getDefaultEnsNodeUrl } from "./deployments";
 
 /**
  * Configuration options for ENSNode API client

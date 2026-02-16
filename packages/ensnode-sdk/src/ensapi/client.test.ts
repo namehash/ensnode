@@ -1,11 +1,16 @@
 import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ENSNodeClient } from "./client";
-import { ClientError } from "./client-error";
-import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
-import { ENSNamespaceIds, type Name } from "./ens";
-import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
+import { ENSNamespaceIds, type Name } from "../ens";
+import { PluginName } from "../ensindexer/config/types";
+import {
+  ChainIndexingConfigTypeIds,
+  ChainIndexingStatusIds,
+} from "../indexing-status/chain-indexing-status-snapshot";
+import { CrossChainIndexingStrategyIds } from "../indexing-status/cross-chain-indexing-status-snapshot";
+import { OmnichainIndexingStatusIds } from "../indexing-status/omnichain-indexing-status-snapshot";
+import type { SerializedOmnichainIndexingStatusSnapshotFollowing } from "../indexing-status/serialize/omnichain-indexing-status-snapshot";
+import type { ResolverRecordsSelection } from "../resolution";
 import {
   deserializeIndexingStatusResponse,
   type ErrorResponse,
@@ -15,16 +20,11 @@ import {
   type ResolvePrimaryNamesResponse,
   type SerializedIndexingStatusResponseOk,
   serializeIndexingStatusResponse,
-} from "./ensapi/api";
-import { PluginName } from "./ensindexer/config/types";
-import {
-  ChainIndexingConfigTypeIds,
-  ChainIndexingStatusIds,
-} from "./indexing-status/chain-indexing-status-snapshot";
-import { CrossChainIndexingStrategyIds } from "./indexing-status/cross-chain-indexing-status-snapshot";
-import { OmnichainIndexingStatusIds } from "./indexing-status/omnichain-indexing-status-snapshot";
-import type { SerializedOmnichainIndexingStatusSnapshotFollowing } from "./indexing-status/serialize/omnichain-indexing-status-snapshot";
-import type { ResolverRecordsSelection } from "./resolution";
+} from "./api";
+import { ENSNodeClient } from "./client";
+import { ClientError } from "./client-error";
+import type { SerializedENSApiPublicConfig } from "./config/serialized-types";
+import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
 
 const EXAMPLE_NAME: Name = "example.eth";
 const EXAMPLE_ADDRESS: Address = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
