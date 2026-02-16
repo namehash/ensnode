@@ -49,6 +49,7 @@ export async function createApi(
     countResult.count,
   );
 
+  // console.log is used so it can't be skipped by the logger
   console.log("ENSRainbow public config:");
   console.log(prettyPrintJson(cachedPublicConfig));
 

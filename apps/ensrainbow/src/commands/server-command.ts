@@ -18,6 +18,7 @@ export async function createServer(db: ENSRainbowDB, serveCommandConfig: ServerC
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
+  // console.log is used so it can't be skipped by the logger
   console.log("ENSRainbow running with config:");
   console.log(prettyPrintJson(options));
 
