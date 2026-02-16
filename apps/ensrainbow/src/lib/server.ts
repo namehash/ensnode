@@ -13,7 +13,7 @@ import {
   StatusCode,
 } from "@ensnode/ensrainbow-sdk";
 
-import type { ENSRainbowDB } from "@/lib/database";
+import { type ENSRainbowDB, NoPrecalculatedCountError } from "@/lib/database";
 import type { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
@@ -132,7 +132,13 @@ export class ENSRainbowServer {
   async labelCount(): Promise<EnsRainbow.CountResponse> {
     try {
       const precalculatedCount = await this.db.getPrecalculatedRainbowRecordCount();
-      if (precalculatedCount === null) {
+      return {
+        status: StatusCode.Success,
+        count: precalculatedCount,
+        timestamp: new Date().toISOString(),
+      } satisfies EnsRainbow.CountSuccess;
+    } catch (error) {
+      if (error instanceof NoPrecalculatedCountError) {
         return {
           status: StatusCode.Error,
           error:
@@ -140,13 +146,6 @@ export class ENSRainbowServer {
           errorCode: ErrorCode.ServerError,
         } satisfies EnsRainbow.CountServerError;
       }
-
-      return {
-        status: StatusCode.Success,
-        count: precalculatedCount,
-        timestamp: new Date().toISOString(),
-      } satisfies EnsRainbow.CountSuccess;
-    } catch (error) {
       logger.error(error, "Failed to retrieve precalculated rainbow record count");
       return {
         status: StatusCode.Error,
