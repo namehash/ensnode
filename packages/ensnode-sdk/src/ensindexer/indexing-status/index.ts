@@ -10,3 +10,6 @@ export * from "./serialize/chain-indexing-status-snapshot";
 export * from "./serialize/omnichain-indexing-status-snapshot";
 export * from "./serialize/realtime-indexing-status-projection";
 export * from "./validate/chain-indexing-status-snapshot";
+export * from "./validate/cross-chain-indexing-status-snapshot";
+export * from "./validate/omnichain-indexing-status-snapshot";
+export * from "./validate/realtime-indexing-status-projection";

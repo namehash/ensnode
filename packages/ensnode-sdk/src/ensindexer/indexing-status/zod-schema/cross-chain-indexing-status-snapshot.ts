@@ -10,7 +10,11 @@ import {
   type CrossChainIndexingStatusSnapshotOmnichain,
   CrossChainIndexingStrategyIds,
 } from "../cross-chain-indexing-status-snapshot";
-import { makeOmnichainIndexingStatusSnapshotSchema } from "./omnichain-indexing-status-snapshot";
+import type { SerializedCrossChainIndexingStatusSnapshot } from "../serialize/cross-chain-indexing-status-snapshot";
+import {
+  makeOmnichainIndexingStatusSnapshotSchema,
+  makeSerializedOmnichainIndexingStatusSnapshotSchema,
+} from "./omnichain-indexing-status-snapshot";
 
 /**
  * Invariant: for cross-chain indexing status snapshot omnichain,
@@ -23,10 +27,6 @@ export function invariant_slowestChainEqualsToOmnichainSnapshotTime(
   const { omnichainIndexingCursor } = omnichainSnapshot;
 
   if (slowestChainIndexingCursor !== omnichainIndexingCursor) {
-    console.log("invariant_slowestChainEqualsToOmnichainSnapshotTime", {
-      slowestChainIndexingCursor,
-      omnichainIndexingCursor,
-    });
     ctx.issues.push({
       code: "custom",
       input: ctx.value,
@@ -83,7 +83,7 @@ const makeCrossChainIndexingStatusSnapshotOmnichainSchema = (
   valueLabel: string = "Cross-chain Indexing Status Snapshot Omnichain",
 ) =>
   z
-    .strictObject({
+    .object({
       strategy: z.literal(CrossChainIndexingStrategyIds.Omnichain),
       slowestChainIndexingCursor: makeUnixTimestampSchema(valueLabel),
       snapshotTime: makeUnixTimestampSchema(valueLabel),
@@ -101,3 +101,16 @@ export const makeCrossChainIndexingStatusSnapshotSchema = (
   z.discriminatedUnion("strategy", [
     makeCrossChainIndexingStatusSnapshotOmnichainSchema(valueLabel),
   ]);
+
+/**
+ * Makes Zod schema for {@link SerializedCrossChainIndexingStatusSnapshot}
+ */
+export const makeSerializedCrossChainIndexingStatusSnapshotSchema = (
+  valueLabel: string = "Serialized Cross-chain Indexing Status Snapshot",
+) =>
+  z.object({
+    strategy: z.enum(CrossChainIndexingStrategyIds),
+    slowestChainIndexingCursor: makeUnixTimestampSchema(valueLabel),
+    snapshotTime: makeUnixTimestampSchema(valueLabel),
+    omnichainSnapshot: makeSerializedOmnichainIndexingStatusSnapshotSchema(valueLabel),
+  });

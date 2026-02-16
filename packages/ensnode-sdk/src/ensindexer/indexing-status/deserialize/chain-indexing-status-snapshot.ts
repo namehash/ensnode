@@ -1,17 +1,18 @@
 import { prettifyError } from "zod/v4";
 
+import type { Unvalidated } from "../../../shared/types";
 import type { ChainIndexingStatusSnapshot } from "../chain-indexing-status-snapshot";
 import type { SerializedChainIndexingStatusSnapshot } from "../serialize/chain-indexing-status-snapshot";
-import { makeSerializedChainIndexingStatusSnapshotSchema } from "../zod-schema/chain-indexing-status-snapshot";
+import { makeChainIndexingStatusSnapshotSchema } from "../zod-schema/chain-indexing-status-snapshot";
 
 /**
  * Deserialize into a {@link ChainIndexingStatusSnapshot} object.
  */
 export function deserializeChainIndexingStatusSnapshot(
-  maybeSnapshot: SerializedChainIndexingStatusSnapshot,
+  maybeSnapshot: Unvalidated<SerializedChainIndexingStatusSnapshot>,
   valueLabel?: string,
 ): ChainIndexingStatusSnapshot {
-  const schema = makeSerializedChainIndexingStatusSnapshotSchema(valueLabel);
+  const schema = makeChainIndexingStatusSnapshotSchema(valueLabel);
   const parsed = schema.safeParse(maybeSnapshot);
 
   if (parsed.error) {
