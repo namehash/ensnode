@@ -1,5 +1,4 @@
-import { ClientError } from "./client-error";
-import { getDefaultEnsNodeUrl } from "./deployments";
+import type { ResolverRecordsSelection } from "../resolution";
 import {
   type ConfigResponse,
   deserializeConfigResponse,
@@ -27,8 +26,9 @@ import {
   type SerializedIndexingStatusResponse,
   type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
-} from "./ensapi/api";
-import type { ResolverRecordsSelection } from "./resolution";
+} from "./api";
+import { ClientError } from "./client-error";
+import { getDefaultEnsNodeUrl } from "./deployments";
 
 /**
  * Configuration options for ENSNode API client
@@ -48,10 +48,10 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
- * import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+ * import { ENSApiClient } from "@ensnode/ensnode-sdk";
  *
  * // Create client with default options
- * const client = new ENSNodeClient();
+ * const client = new ENSApiClient();
  *
  * // Use resolution methods
  * const { records } = await client.resolveRecords("jesse.base.eth", {
@@ -62,35 +62,35 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, ENSNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, ENSApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Mainnet
- * const client = new ENSNodeClient({
+ * const client = new ENSApiClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, ENSNodeClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, ENSApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Sepolia
- * const client = new ENSNodeClient({
+ * const client = new ENSApiClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSNodeClient } from "@ensnode/ensnode-sdk";
+ * import { ENSApiClient } from "@ensnode/ensnode-sdk";
  *
  * // Custom configuration
- * const client = new ENSNodeClient({
+ * const client = new ENSApiClient({
  *   url: new URL("https://my-ensnode-instance.com"),
  * });
  * ```
  */
-export class ENSNodeClient {
+export class ENSApiClient {
   private readonly options: ClientOptions;
 
   static defaultOptions(): ClientOptions {
@@ -101,7 +101,7 @@ export class ENSNodeClient {
 
   constructor(options: Partial<ClientOptions> = {}) {
     this.options = {
-      ...ENSNodeClient.defaultOptions(),
+      ...ENSApiClient.defaultOptions(),
       ...options,
     };
   }
@@ -399,11 +399,11 @@ export class ENSNodeClient {
    * ```ts
    * import {
    *   registrarActionsFilter,
-   *   ENSNodeClient,
+   *   ENSApiClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
-   * const client: ENSNodeClient;
+   * const client: ENSApiClient;
    *
    * // Get first page with default page size (10 records)
    * const response = await client.registrarActions();
@@ -611,11 +611,11 @@ export class ENSNodeClient {
    * @example
    * ```ts
    * import {
-   *   ENSNodeClient,
+   *   ENSApiClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
-   * const client: ENSNodeClient;
+   * const client: ENSApiClient;
    *
    * // get latest name token records from the indexed subregistry based on the requested name
    * const response = await client.nameTokens({
@@ -669,3 +669,10 @@ export class ENSNodeClient {
     return deserializedNameTokensResponse(responseData as SerializedNameTokensResponse);
   }
 }
+
+/**
+ * ENSNode Client
+ *
+ * @deprecated use {@link ENSApiClient} instead
+ */
+export class ENSNodeClient extends ENSApiClient {}

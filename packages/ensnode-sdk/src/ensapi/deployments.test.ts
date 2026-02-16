@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { ENSNamespaceIds } from "../ens";
 import {
   DEFAULT_ENSNODE_API_URL_MAINNET,
   DEFAULT_ENSNODE_API_URL_SEPOLIA,
   getDefaultEnsNodeUrl,
 } from "./deployments";
-import { ENSNamespaceIds } from "./ens";
 
 describe("getDefaultEnsNodeUrl", () => {
   it("returns the mainnet default URL when no namespace is provided", () => {

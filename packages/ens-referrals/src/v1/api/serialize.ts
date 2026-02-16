@@ -118,6 +118,7 @@ function serializeReferrerLeaderboardPage(
     referrers: page.referrers.map(serializeAwardedReferrerMetrics),
     aggregatedMetrics: serializeAggregatedReferrerMetrics(page.aggregatedMetrics),
     pageContext: page.pageContext,
+    status: page.status,
     accurateAsOf: page.accurateAsOf,
   };
 }
@@ -133,6 +134,7 @@ function serializeReferrerEditionMetricsRanked(
     rules: serializeReferralProgramRules(detail.rules),
     referrer: serializeAwardedReferrerMetrics(detail.referrer),
     aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
+    status: detail.status,
     accurateAsOf: detail.accurateAsOf,
   };
 }
@@ -148,6 +150,7 @@ function serializeReferrerEditionMetricsUnranked(
     rules: serializeReferralProgramRules(detail.rules),
     referrer: serializeUnrankedReferrerMetrics(detail.referrer),
     aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
+    status: detail.status,
     accurateAsOf: detail.accurateAsOf,
   };
 }
