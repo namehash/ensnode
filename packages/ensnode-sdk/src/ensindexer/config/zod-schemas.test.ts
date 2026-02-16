@@ -4,8 +4,8 @@ import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
-  makeENSIndexerPublicConfigSchema,
-  makeENSIndexerVersionInfoSchema,
+  makeEnsIndexerPublicConfigSchema,
+  makeEnsIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
   makePluginsListSchema,
@@ -101,7 +101,7 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse version info values", () => {
         expect(
-          makeENSIndexerVersionInfoSchema().parse({
+          makeEnsIndexerVersionInfoSchema().parse({
             nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
@@ -122,7 +122,7 @@ describe("ENSIndexer: Config", () => {
 
         expect(
           formatParseError(
-            makeENSIndexerVersionInfoSchema().safeParse({
+            makeEnsIndexerVersionInfoSchema().safeParse({
               nodejs: "",
               ponder: "",
               ensDb: "",
@@ -170,7 +170,7 @@ describe("ENSIndexer: Config", () => {
           } satisfies EnsIndexerVersionInfo,
         };
 
-        const parsedConfig = makeENSIndexerPublicConfigSchema().parse(validConfig);
+        const parsedConfig = makeEnsIndexerPublicConfigSchema().parse(validConfig);
 
         // The schema transforms URLs and arrays, so we need to check the transformed values
         expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
@@ -185,7 +185,7 @@ describe("ENSIndexer: Config", () => {
         // Test invalid labelSetId
         expect(
           formatParseError(
-            makeENSIndexerPublicConfigSchema().safeParse({
+            makeEnsIndexerPublicConfigSchema().safeParse({
               ...validConfig,
               labelSet: { ...validConfig.labelSet, labelSetId: "" },
             }),
@@ -195,7 +195,7 @@ describe("ENSIndexer: Config", () => {
         // Test invalid labelSetVersion
         expect(
           formatParseError(
-            makeENSIndexerPublicConfigSchema().safeParse({
+            makeEnsIndexerPublicConfigSchema().safeParse({
               ...validConfig,
               labelSet: { ...validConfig.labelSet, labelSetVersion: "not-a-number" },
             }),

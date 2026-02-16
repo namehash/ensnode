@@ -119,7 +119,7 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
+export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
   z
     .strictObject(
       {
@@ -136,6 +136,11 @@ export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
       },
     )
     .check(invariant_ensDbVersionIsSameAsEnsIndexerVersion);
+
+/**
+ * @deprecated Use {@link makeEnsIndexerVersionInfoSchema} instead.
+ */
+export const makeENSIndexerVersionInfoSchema = makeEnsIndexerVersionInfoSchema;
 
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(

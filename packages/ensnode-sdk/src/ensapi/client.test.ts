@@ -449,7 +449,7 @@ describe("EnsApiClient", () => {
 
       const client = new EnsApiClient();
 
-      await expect(client.config()).rejects.toThrow(/Fetching ENSNode Config Failed/i);
+      await expect(client.config()).rejects.toThrow(/Fetching ENSApi Config Failed/i);
     });
   });
 
@@ -479,7 +479,7 @@ describe("EnsApiClient", () => {
 
       // act & assert
       await expect(client.indexingStatus()).rejects.toThrow(
-        /Fetching ENSNode Indexing Status Failed/i,
+        /Fetching ENSApi Indexing Status Failed/i,
       );
     });
   });

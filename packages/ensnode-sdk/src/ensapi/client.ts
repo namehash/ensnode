@@ -1,13 +1,13 @@
 import type { ResolverRecordsSelection } from "../resolution";
 import {
-  type ConfigResponse,
-  deserializeConfigResponse,
   deserializedNameTokensResponse,
+  deserializeEnsApiConfigResponse,
+  deserializeEnsApiIndexingStatusResponse,
   deserializeErrorResponse,
-  deserializeIndexingStatusResponse,
   deserializeRegistrarActionsResponse,
+  type EnsApiConfigResponse,
+  type EnsApiIndexingStatusResponse,
   type ErrorResponse,
-  type IndexingStatusResponse,
   type NameTokensRequest,
   type NameTokensResponse,
   type RegistrarActionsFilter,
@@ -22,8 +22,8 @@ import {
   type ResolvePrimaryNamesResponse,
   type ResolveRecordsRequest,
   type ResolveRecordsResponse,
-  type SerializedConfigResponse,
-  type SerializedIndexingStatusResponse,
+  type SerializedEnsApiConfigResponse,
+  type SerializedEnsApiIndexingStatusResponse,
   type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
 } from "./api";
@@ -304,22 +304,22 @@ export class EnsApiClient {
   }
 
   /**
-   * Fetch ENSNode Config
+   * Fetch ENSApi Config
    *
-   * Fetch the ENSNode's configuration.
+   * Fetch the ENSApi's configuration.
    *
-   * @returns {ConfigResponse}
+   * @returns {EnsApiConfigResponse}
    *
-   * @throws if the ENSNode request fails
-   * @throws if the ENSNode API returns an error response
-   * @throws if the ENSNode response breaks required invariants
+   * @throws if the ENSApi request fails
+   * @throws if the ENSApi returns an error response
+   * @throws if the ENSApi response breaks required invariants
    */
-  async config(): Promise<ConfigResponse> {
+  async config(): Promise<EnsApiConfigResponse> {
     const url = new URL(`/api/config`, this.options.url);
 
     const response = await fetch(url);
 
-    // ENSNode API should always allow parsing a response as JSON object.
+    // ENSApi should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
     let responseData: unknown;
     try {
@@ -330,27 +330,27 @@ export class EnsApiClient {
 
     if (!response.ok) {
       const errorResponse = deserializeErrorResponse(responseData);
-      throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
+      throw new Error(`Fetching ENSApi Config Failed: ${errorResponse.message}`);
     }
 
-    return deserializeConfigResponse(responseData as SerializedConfigResponse);
+    return deserializeEnsApiConfigResponse(responseData as SerializedEnsApiConfigResponse);
   }
 
   /**
-   * Fetch ENSNode Indexing Status
+   * Fetch ENSApi Indexing Status
    *
-   * @returns {IndexingStatusResponse}
+   * @returns {EnsApiIndexingStatusResponse}
    *
-   * @throws if the ENSNode request fails
-   * @throws if the ENSNode API returns an error response
-   * @throws if the ENSNode response breaks required invariants
+   * @throws if the ENSApi request fails
+   * @throws if the ENSApi returns an error response
+   * @throws if the ENSApi response breaks required invariants
    */
-  async indexingStatus(): Promise<IndexingStatusResponse> {
+  async indexingStatus(): Promise<EnsApiIndexingStatusResponse> {
     const url = new URL(`/api/indexing-status`, this.options.url);
 
     const response = await fetch(url);
 
-    // ENSNode API should always allow parsing a response as JSON object.
+    // ENSApi should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
     let responseData: unknown;
     try {
@@ -374,11 +374,13 @@ export class EnsApiClient {
       // however, if errorResponse was defined,
       // throw an error with the generic server error message
       if (typeof errorResponse !== "undefined") {
-        throw new Error(`Fetching ENSNode Indexing Status Failed: ${errorResponse.message}`);
+        throw new Error(`Fetching ENSApi Indexing Status Failed: ${errorResponse.message}`);
       }
     }
 
-    return deserializeIndexingStatusResponse(responseData as SerializedIndexingStatusResponse);
+    return deserializeEnsApiIndexingStatusResponse(
+      responseData as SerializedEnsApiIndexingStatusResponse,
+    );
   }
 
   /**

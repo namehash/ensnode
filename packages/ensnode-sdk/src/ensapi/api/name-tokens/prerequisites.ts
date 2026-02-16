@@ -16,7 +16,7 @@ export const nameTokensPrerequisites = Object.freeze({
   requiredPlugins: [PluginName.Registrars, PluginName.TokenScope] as const,
 
   /**
-   * Check if provided ENSApiPublicConfig supports the Name Tokens API.
+   * Check if provided EnsIndexerPublicConfig supports the Name Tokens API.
    */
   hasEnsIndexerConfigSupport(config: EnsIndexerPublicConfig): boolean {
     return nameTokensPrerequisites.requiredPlugins.every((plugin) =>
