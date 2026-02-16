@@ -25,8 +25,6 @@ export const AbsolutePathSchemaBase = z
     return resolve(process.cwd(), path);
   });
 
-const DataDirSchema = AbsolutePathSchemaBase;
-
 export const DbSchemaVersionSchemaBase = z.coerce
   .number({ error: "DB_SCHEMA_VERSION must be a number." })
   .int({ error: "DB_SCHEMA_VERSION must be an integer." })
@@ -36,7 +34,7 @@ const DbSchemaVersionSchema = DbSchemaVersionSchemaBase.default(DB_SCHEMA_VERSIO
 
 const ENSRainbowConfigBaseSchema = z.object({
   port: OptionalPortNumberSchema.default(ENSRAINBOW_DEFAULT_PORT),
-  dataDir: DataDirSchema.default(() => getDefaultDataDir()),
+  dataDir: AbsolutePathSchemaBase.default(() => getDefaultDataDir()),
   dbSchemaVersion: DbSchemaVersionSchema,
 });
 

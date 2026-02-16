@@ -7,6 +7,4 @@ export type ENSRainbowEnvironment = PortEnvironment &
   LogLevelEnvironment & {
     DATA_DIR?: string;
     DB_SCHEMA_VERSION?: string;
-    LABEL_SET_ID?: string;
-    LABEL_SET_VERSION?: string;
   };
