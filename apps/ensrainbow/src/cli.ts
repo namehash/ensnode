@@ -8,7 +8,7 @@ import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
 import { buildLabelSetId, type LabelSetId } from "@ensnode/ensnode-sdk";
-import { PortSchemaBase } from "@ensnode/ensnode-sdk/internal";
+import { PortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { convertCommand } from "@/commands/convert-command-sql";
 import { convertCsvCommand } from "@/commands/convert-csv-command";
@@ -129,7 +129,7 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Port to listen on (overrides PORT env var if both are set)",
               default: config.port,
               coerce: (port: number) => {
-                const result = PortSchemaBase.safeParse(port);
+                const result = PortNumberSchema.safeParse(port);
                 if (!result.success) {
                   const firstError = result.error.issues[0];
                   throw new Error(`Invalid port: ${firstError?.message ?? "invalid port number"}`);

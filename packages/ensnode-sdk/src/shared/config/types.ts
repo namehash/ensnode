@@ -5,7 +5,7 @@ import type { ChainId } from "../types";
 import type {
   DatabaseSchemaNameSchema,
   EnsIndexerUrlSchema,
-  PortSchemaBase,
+  PortNumberSchema,
   TheGraphApiKeySchema,
 } from "./zod-schemas";
 
@@ -50,4 +50,4 @@ export type DatabaseSchemaName = z.infer<typeof DatabaseSchemaNameSchema>;
 export type EnsIndexerUrl = z.infer<typeof EnsIndexerUrlSchema>;
 export type TheGraphApiKey = z.infer<typeof TheGraphApiKeySchema>;
 
-export type PortNumber = z.infer<typeof PortSchemaBase>;
+export type PortNumber = z.infer<typeof PortNumberSchema>;

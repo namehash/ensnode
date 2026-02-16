@@ -2,7 +2,7 @@ import { isAbsolute, resolve } from "node:path";
 
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { PortSchema } from "@ensnode/ensnode-sdk/internal";
+import { OptionalPortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
@@ -35,7 +35,7 @@ export const DbSchemaVersionSchemaBase = z.coerce
 const DbSchemaVersionSchema = DbSchemaVersionSchemaBase.default(DB_SCHEMA_VERSION);
 
 const ENSRainbowConfigBaseSchema = z.object({
-  port: PortSchema.default(ENSRAINBOW_DEFAULT_PORT),
+  port: OptionalPortNumberSchema.default(ENSRAINBOW_DEFAULT_PORT),
   dataDir: DataDirSchema.default(() => getDefaultDataDir()),
   dbSchemaVersion: DbSchemaVersionSchema,
 });

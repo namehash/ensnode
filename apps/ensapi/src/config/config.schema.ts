@@ -13,7 +13,7 @@ import {
   EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeENSIndexerPublicConfigSchema,
-  PortSchema,
+  OptionalPortNumberSchema,
   RpcConfigsSchema,
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -62,7 +62,7 @@ const CustomReferralProgramEditionConfigSetUrlSchema = z
 
 const EnsApiConfigSchema = z
   .object({
-    port: PortSchema.default(ENSApi_DEFAULT_PORT),
+    port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
     databaseUrl: DatabaseUrlSchema,
     databaseSchemaName: DatabaseSchemaNameSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
