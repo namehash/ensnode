@@ -1,4 +1,4 @@
-import type { ErrorResponse } from "./api";
+import type { ErrorResponse } from "./ensapi/api/shared/errors/response";
 
 export class ClientError extends Error {
   details?: unknown;
