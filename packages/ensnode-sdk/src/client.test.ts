@@ -1,6 +1,11 @@
 import type { Address } from "viem";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ENSNodeClient } from "./client";
+import { ClientError } from "./client-error";
+import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
+import { ENSNamespaceIds, type Name } from "./ens";
+import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
 import {
   deserializeIndexingStatusResponse,
   type ErrorResponse,
@@ -10,12 +15,7 @@ import {
   type ResolvePrimaryNamesResponse,
   type SerializedIndexingStatusResponseOk,
   serializeIndexingStatusResponse,
-} from "./api";
-import { ENSNodeClient } from "./client";
-import { ClientError } from "./client-error";
-import { DEFAULT_ENSNODE_API_URL_MAINNET, getDefaultEnsNodeUrl } from "./deployments";
-import { ENSNamespaceIds, type Name } from "./ens";
-import { deserializeENSApiPublicConfig, type SerializedENSApiPublicConfig } from "./ensapi";
+} from "./ensapi/api";
 import {
   ChainIndexingConfigTypeIds,
   ChainIndexingStatusIds,

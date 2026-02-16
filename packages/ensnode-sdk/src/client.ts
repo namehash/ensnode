@@ -1,3 +1,5 @@
+import { ClientError } from "./client-error";
+import { getDefaultEnsNodeUrl } from "./deployments";
 import {
   type ConfigResponse,
   deserializeConfigResponse,
@@ -25,9 +27,7 @@ import {
   type SerializedIndexingStatusResponse,
   type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
-} from "./api";
-import { ClientError } from "./client-error";
-import { getDefaultEnsNodeUrl } from "./deployments";
+} from "./ensapi/api";
 import type { ResolverRecordsSelection } from "./resolution";
 
 /**
