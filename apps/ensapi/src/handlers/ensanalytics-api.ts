@@ -20,6 +20,8 @@ import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard.middleware";
 
+import { getReferrerDetailRoute, getReferrerLeaderboardRoute } from "./ensanalytics-api.routes";
+
 const logger = makeLogger("ensanalytics-api");
 
 // Pagination query parameters schema (mirrors ReferrerLeaderboardPageRequest)
@@ -50,19 +52,7 @@ const app = factory
   // Get a page from the referrer leaderboard
   .get(
     "/referrers",
-    describeRoute({
-      tags: ["ENSAwards"],
-      summary: "Get Referrer Leaderboard",
-      description: "Returns a paginated page from the referrer leaderboard",
-      responses: {
-        200: {
-          description: "Successfully retrieved referrer leaderboard page",
-        },
-        500: {
-          description: "Internal server error",
-        },
-      },
-    }),
+    describeRoute(getReferrerLeaderboardRoute),
     validate("query", paginationQuerySchema),
     async (c) => {
       // context must be set by the required middleware
@@ -120,22 +110,7 @@ const referrerAddressSchema = z.object({
 // Get referrer detail for a specific address
 app.get(
   "/referrers/:referrer",
-  describeRoute({
-    tags: ["ENSAwards"],
-    summary: "Get Referrer Detail",
-    description: "Returns detailed information for a specific referrer by address",
-    responses: {
-      200: {
-        description: "Successfully retrieved referrer detail",
-      },
-      500: {
-        description: "Internal server error",
-      },
-      503: {
-        description: "Service unavailable - referrer leaderboard data not yet cached",
-      },
-    },
-  }),
+  describeRoute(getReferrerDetailRoute),
   validate("param", referrerAddressSchema),
   async (c) => {
     // context must be set by the required middleware

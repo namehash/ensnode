@@ -1,4 +1,4 @@
-import { describeRoute, resolver as validationResolver } from "hono-openapi";
+import { describeRoute } from "hono-openapi";
 import { z } from "zod/v4";
 
 import type {
@@ -7,11 +7,6 @@ import type {
   ResolvePrimaryNamesResponse,
   ResolveRecordsResponse,
 } from "@ensnode/ensnode-sdk";
-import {
-  makeResolvePrimaryNameResponseSchema,
-  makeResolvePrimaryNamesResponseSchema,
-  makeResolveRecordsResponseSchema,
-} from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -22,6 +17,12 @@ import { resolveReverse } from "@/lib/resolution/reverse-resolution";
 import { runWithTrace } from "@/lib/tracing/tracing-api";
 import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware";
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
+
+import {
+  getResolvePrimaryNameRoute,
+  getResolvePrimaryNamesRoute,
+  getResolveRecordsRoute,
+} from "./resolution-api.routes";
 
 /**
  * The effective distance for acceleration is indexing status cache time plus
@@ -50,21 +51,7 @@ app.use(canAccelerateMiddleware);
  */
 app.get(
   "/records/:name",
-  describeRoute({
-    tags: ["Resolution"],
-    summary: "Resolve ENS Records",
-    description: "Resolves ENS records for a given name",
-    responses: {
-      200: {
-        description: "Successfully resolved records",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeResolveRecordsResponseSchema()),
-          },
-        },
-      },
-    },
-  }),
+  describeRoute(getResolveRecordsRoute),
   validate("param", z.object({ name: params.name })),
   validate(
     "query",
@@ -120,21 +107,7 @@ app.get(
  */
 app.get(
   "/primary-name/:address/:chainId",
-  describeRoute({
-    tags: ["Resolution"],
-    summary: "Resolve Primary Name",
-    description: "Resolves a primary name for a given `address` and `chainId`",
-    responses: {
-      200: {
-        description: "Successfully resolved name",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeResolvePrimaryNameResponseSchema()),
-          },
-        },
-      },
-    },
-  }),
+  describeRoute(getResolvePrimaryNameRoute),
   validate("param", z.object({ address: params.address, chainId: params.defaultableChainId })),
   validate(
     "query",
@@ -180,21 +153,7 @@ app.get(
  */
 app.get(
   "/primary-names/:address",
-  describeRoute({
-    tags: ["Resolution"],
-    summary: "Resolve Primary Names",
-    description: "Resolves all primary names for a given address across multiple chains",
-    responses: {
-      200: {
-        description: "Successfully resolved records",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeResolvePrimaryNamesResponseSchema()),
-          },
-        },
-      },
-    },
-  }),
+  describeRoute(getResolvePrimaryNamesRoute),
   validate("param", z.object({ address: params.address })),
   validate(
     "query",

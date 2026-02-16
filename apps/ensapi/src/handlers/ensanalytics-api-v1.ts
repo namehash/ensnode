@@ -1,7 +1,6 @@
 import {
   getReferrerEditionMetrics,
   getReferrerLeaderboardPage,
-  MAX_EDITIONS_PER_REQUEST,
   REFERRERS_PER_LEADERBOARD_PAGE_MAX,
   type ReferralProgramEditionConfigSetResponse,
   ReferralProgramEditionConfigSetResponseCodes,
@@ -31,6 +30,12 @@ import { factory } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referralLeaderboardEditionsCachesMiddleware } from "@/middleware/referral-leaderboard-editions-caches.middleware";
 import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
+
+import {
+  getEditionConfigSetRoute,
+  getReferralLeaderboardV1Route,
+  getReferrerDetailV1Route,
+} from "./ensanalytics-api-v1.routes";
 
 const logger = makeLogger("ensanalytics-api-v1");
 
@@ -69,25 +74,7 @@ const app = factory
   // Get a page from the referrer leaderboard for a specific edition
   .get(
     "/referral-leaderboard",
-    describeRoute({
-      tags: ["ENSAwards"],
-      summary: "Get Referrer Leaderboard (v1)",
-      description: "Returns a paginated page from the referrer leaderboard for a specific edition",
-      responses: {
-        200: {
-          description: "Successfully retrieved referrer leaderboard page",
-        },
-        404: {
-          description: "Unknown edition slug",
-        },
-        500: {
-          description: "Internal server error",
-        },
-        503: {
-          description: "Service unavailable",
-        },
-      },
-    }),
+    describeRoute(getReferralLeaderboardV1Route),
     validate("query", referrerLeaderboardPageQuerySchema),
     async (c) => {
       // context must be set by the required middleware
@@ -125,7 +112,9 @@ const app = factory
             serializeReferrerLeaderboardPageResponse({
               responseCode: ReferrerLeaderboardPageResponseCodes.Error,
               error: "Not Found",
-              errorMessage: `Unknown edition: ${edition}. Valid editions: ${configuredEditions.join(", ")}`,
+              errorMessage: `Unknown edition: ${edition}. Valid editions: ${configuredEditions.join(
+                ", ",
+              )}`,
             } satisfies ReferrerLeaderboardPageResponse),
             404,
           );
@@ -190,28 +179,7 @@ const editionsQuerySchema = z.object({
 app
   .get(
     "/referrer/:referrer",
-    describeRoute({
-      tags: ["ENSAwards"],
-      summary: "Get Referrer Detail for Editions (v1)",
-      description: `Returns detailed information for a specific referrer for the requested editions. Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
-      responses: {
-        200: {
-          description: "Successfully retrieved referrer detail for requested editions",
-        },
-        400: {
-          description: "Invalid request",
-        },
-        404: {
-          description: "Unknown edition slug",
-        },
-        500: {
-          description: "Internal server error",
-        },
-        503: {
-          description: "Service unavailable",
-        },
-      },
-    }),
+    describeRoute(getReferrerDetailV1Route),
     validate("param", referrerAddressSchema),
     validate("query", editionsQuerySchema),
     async (c) => {
@@ -254,7 +222,9 @@ app
             serializeReferrerMetricsEditionsResponse({
               responseCode: ReferrerMetricsEditionsResponseCodes.Error,
               error: "Not Found",
-              errorMessage: `Unknown edition(s): ${unrecognizedEditions.join(", ")}. Valid editions: ${configuredEditions.join(", ")}`,
+              errorMessage: `Unknown edition(s): ${unrecognizedEditions.join(
+                ", ",
+              )}. Valid editions: ${configuredEditions.join(", ")}`,
             } satisfies ReferrerMetricsEditionsResponse),
             404,
           );
@@ -282,7 +252,9 @@ app
             serializeReferrerMetricsEditionsResponse({
               responseCode: ReferrerMetricsEditionsResponseCodes.Error,
               error: "Service Unavailable",
-              errorMessage: `Referrer leaderboard data not cached for edition(s): ${uncachedEditions.join(", ")}`,
+              errorMessage: `Referrer leaderboard data not cached for edition(s): ${uncachedEditions.join(
+                ", ",
+              )}`,
             } satisfies ReferrerMetricsEditionsResponse),
             503,
           );
@@ -334,79 +306,59 @@ app
   )
 
   // Get configured edition config set
-  .get(
-    "/editions",
-    describeRoute({
-      tags: ["ENSAwards"],
-      summary: "Get Edition Config Set (v1)",
-      description:
-        "Returns the currently configured referral program edition config set. Editions are sorted in descending order by start timestamp (most recent first).",
-      responses: {
-        200: {
-          description: "Successfully retrieved edition config set",
-        },
-        500: {
-          description: "Internal server error",
-        },
-        503: {
-          description: "Service unavailable",
-        },
-      },
-    }),
-    async (c) => {
-      // context must be set by the required middleware
-      if (c.var.referralProgramEditionConfigSet === undefined) {
-        throw new Error(
-          `Invariant(ensanalytics-api-v1): referralProgramEditionConfigSetMiddleware required`,
-        );
-      }
+  .get("/editions", describeRoute(getEditionConfigSetRoute), async (c) => {
+    // context must be set by the required middleware
+    if (c.var.referralProgramEditionConfigSet === undefined) {
+      throw new Error(
+        `Invariant(ensanalytics-api-v1): referralProgramEditionConfigSetMiddleware required`,
+      );
+    }
 
-      try {
-        // Check if edition config set failed to load
-        if (c.var.referralProgramEditionConfigSet instanceof Error) {
-          logger.error(
-            { error: c.var.referralProgramEditionConfigSet },
-            "Referral program edition config set failed to load",
-          );
-          return c.json(
-            serializeReferralProgramEditionConfigSetResponse({
-              responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
-              error: "Service Unavailable",
-              errorMessage: "Referral program configuration is currently unavailable.",
-            } satisfies ReferralProgramEditionConfigSetResponse),
-            503,
-          );
-        }
-
-        // Convert Map to array and sort by start timestamp descending
-        const editions = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
-          (a, b) => b.rules.startTime - a.rules.startTime,
+    try {
+      // Check if edition config set failed to load
+      if (c.var.referralProgramEditionConfigSet instanceof Error) {
+        logger.error(
+          { error: c.var.referralProgramEditionConfigSet },
+          "Referral program edition config set failed to load",
         );
-
-        return c.json(
-          serializeReferralProgramEditionConfigSetResponse({
-            responseCode: ReferralProgramEditionConfigSetResponseCodes.Ok,
-            data: {
-              editions,
-            },
-          } satisfies ReferralProgramEditionConfigSetResponse),
-        );
-      } catch (error) {
-        logger.error({ error }, "Error in /v1/ensanalytics/editions endpoint");
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred while processing your request";
         return c.json(
           serializeReferralProgramEditionConfigSetResponse({
             responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
-            error: "Internal server error",
-            errorMessage,
+            error: "Service Unavailable",
+            errorMessage: "Referral program configuration is currently unavailable.",
           } satisfies ReferralProgramEditionConfigSetResponse),
-          500,
+          503,
         );
       }
-    },
-  );
+
+      // Convert Map to array and sort by start timestamp descending
+      const editions = Array.from(c.var.referralProgramEditionConfigSet.values()).sort(
+        (a, b) => b.rules.startTime - a.rules.startTime,
+      );
+
+      return c.json(
+        serializeReferralProgramEditionConfigSetResponse({
+          responseCode: ReferralProgramEditionConfigSetResponseCodes.Ok,
+          data: {
+            editions,
+          },
+        } satisfies ReferralProgramEditionConfigSetResponse),
+      );
+    } catch (error) {
+      logger.error({ error }, "Error in /v1/ensanalytics/editions endpoint");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred while processing your request";
+      return c.json(
+        serializeReferralProgramEditionConfigSetResponse({
+          responseCode: ReferralProgramEditionConfigSetResponseCodes.Error,
+          error: "Internal server error",
+          errorMessage,
+        } satisfies ReferralProgramEditionConfigSetResponse),
+        500,
+      );
+    }
+  });
 
 export default app;

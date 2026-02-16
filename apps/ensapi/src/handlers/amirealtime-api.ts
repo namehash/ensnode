@@ -10,6 +10,8 @@ import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
 import { factory } from "@/lib/hono-factory";
 
+import { getAmIRealtimeRoute } from "./amirealtime-api.routes";
+
 const app = factory.createApp();
 
 // Set default `maxWorstCaseDistance` for `GET /amirealtime` endpoint to one minute.
@@ -19,22 +21,7 @@ export const AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE: Duration = minutesToSe
 // `maxWorstCaseDistance` param
 app.get(
   "/",
-  describeRoute({
-    tags: ["Meta"],
-    summary: "Check indexing progress",
-    description:
-      "Checks if the indexing progress is guaranteed to be within a requested worst-case distance of realtime",
-    responses: {
-      200: {
-        description:
-          "Indexing progress is guaranteed to be within the requested distance of realtime",
-      },
-      503: {
-        description:
-          "Indexing progress is not guaranteed to be within the requested distance of realtime or indexing status unavailable",
-      },
-    },
-  }),
+  describeRoute(getAmIRealtimeRoute),
   validate(
     "query",
     z.object({

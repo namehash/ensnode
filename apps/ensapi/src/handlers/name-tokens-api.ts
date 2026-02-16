@@ -1,6 +1,6 @@
 import config from "@/config";
 
-import { describeRoute, resolver as validationResolver } from "hono-openapi";
+import { describeRoute } from "hono-openapi";
 import { namehash } from "viem";
 import { z } from "zod/v4";
 
@@ -15,11 +15,7 @@ import {
   type PluginName,
   serializeNameTokensResponse,
 } from "@ensnode/ensnode-sdk";
-import {
-  ErrorResponseSchema,
-  makeNameTokensResponseSchema,
-  makeNodeSchema,
-} from "@ensnode/ensnode-sdk/internal";
+import { makeNodeSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { params } from "@/lib/handlers/params.schema";
 import { validate } from "@/lib/handlers/validate";
@@ -27,6 +23,8 @@ import { factory } from "@/lib/hono-factory";
 import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-tokens-for-domain";
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
+
+import { getNameTokensRoute } from "./name-tokens-api.routes";
 
 const app = factory.createApp();
 
@@ -71,54 +69,7 @@ const makeNameTokensNotIndexedResponse = (
 
 app.get(
   "/",
-  describeRoute({
-    tags: ["Explore"],
-    summary: "Get Name Tokens",
-    description: "Returns name tokens for the requested identifier (domainId or name)",
-    responses: {
-      200: {
-        description: "Name tokens known",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true)),
-          },
-        },
-      },
-      400: {
-        description: "Invalid input",
-        content: {
-          "application/json": {
-            schema: validationResolver(ErrorResponseSchema),
-          },
-        },
-      },
-      404: {
-        description: "Name tokens not indexed",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true)),
-          },
-        },
-      },
-      500: {
-        description: "Internal server error",
-        content: {
-          "application/json": {
-            schema: validationResolver(ErrorResponseSchema),
-          },
-        },
-      },
-      503: {
-        description:
-          "Service unavailable - Name Tokens API prerequisites not met (indexing status not ready or required plugins not activated)",
-        content: {
-          "application/json": {
-            schema: validationResolver(makeNameTokensResponseSchema("Name Tokens Response", true)),
-          },
-        },
-      },
-    },
-  }),
+  describeRoute(getNameTokensRoute),
   validate("query", nameTokensQuerySchema),
   async (c) => {
     // Invariant: context must be set by the required middleware
