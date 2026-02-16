@@ -8,18 +8,18 @@ import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import { buildConfigFromEnvironment, buildServeArgsConfig } from "./config.schema";
+import { buildEnvConfigFromEnvironment, buildServeArgsConfig } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildENSRainbowPublicConfig } from "./public";
 import type { ArgsConfig, ENSRainbowEnvConfig } from "./types";
 
-describe("buildConfigFromEnvironment", () => {
+describe("buildEnvConfigFromEnvironment", () => {
   describe("Success cases", () => {
     it("returns a valid config with all defaults when environment is empty", () => {
       const env: ENSRainbowEnvironment = {};
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config).toStrictEqual({
         port: ENSRAINBOW_DEFAULT_PORT,
@@ -33,7 +33,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "5000",
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.port).toBe(5000);
       expect(config.dataDir).toBe(getDefaultDataDir());
@@ -45,7 +45,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: customDataDir,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dataDir).toBe(customDataDir);
     });
@@ -56,7 +56,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: relativeDataDir,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(isAbsolute(config.dataDir)).toBe(true);
       expect(config.dataDir).toBe(resolve(process.cwd(), relativeDataDir));
@@ -68,7 +68,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: relativeDataDir,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(isAbsolute(config.dataDir)).toBe(true);
       expect(config.dataDir).toBe(resolve(process.cwd(), relativeDataDir));
@@ -80,7 +80,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: absoluteDataDir,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dataDir).toBe(absoluteDataDir);
     });
@@ -90,7 +90,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: DB_SCHEMA_VERSION.toString(),
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
@@ -98,7 +98,7 @@ describe("buildConfigFromEnvironment", () => {
     it("defaults DB_SCHEMA_VERSION to code version when not set", () => {
       const env: ENSRainbowEnvironment = {};
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
@@ -110,7 +110,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: DB_SCHEMA_VERSION.toString(),
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config).toStrictEqual({
         port: 4444,
@@ -126,7 +126,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "not-a-number",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is a float", () => {
@@ -134,7 +134,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "3000.5",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is less than 1", () => {
@@ -142,7 +142,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "0",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is negative", () => {
@@ -150,7 +150,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "-100",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when PORT is greater than 65535", () => {
@@ -158,7 +158,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "65536",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DATA_DIR is empty string", () => {
@@ -166,7 +166,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: "",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DATA_DIR is only whitespace", () => {
@@ -174,7 +174,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: "   ",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DB_SCHEMA_VERSION is not a number", () => {
@@ -182,7 +182,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: "not-a-number",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
 
     it("fails when DB_SCHEMA_VERSION is a float", () => {
@@ -190,7 +190,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: "3.5",
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow();
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow();
     });
   });
 
@@ -201,7 +201,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: wrongVersion.toString(),
       };
 
-      expect(() => buildConfigFromEnvironment(env)).toThrow(/DB_SCHEMA_VERSION mismatch/);
+      expect(() => buildEnvConfigFromEnvironment(env)).toThrow(/DB_SCHEMA_VERSION mismatch/);
     });
 
     it("passes when DB_SCHEMA_VERSION matches code version", () => {
@@ -209,7 +209,7 @@ describe("buildConfigFromEnvironment", () => {
         DB_SCHEMA_VERSION: DB_SCHEMA_VERSION.toString(),
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
@@ -217,7 +217,7 @@ describe("buildConfigFromEnvironment", () => {
     it("passes when DB_SCHEMA_VERSION defaults to code version", () => {
       const env: ENSRainbowEnvironment = {};
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dbSchemaVersion).toBe(DB_SCHEMA_VERSION);
     });
@@ -229,7 +229,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "1",
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.port).toBe(1);
     });
@@ -239,7 +239,7 @@ describe("buildConfigFromEnvironment", () => {
         PORT: "65535",
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.port).toBe(65535);
     });
@@ -250,7 +250,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: `  ${dataDir}  `,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(config.dataDir).toBe(dataDir);
     });
@@ -261,7 +261,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: relativeDataDir,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(isAbsolute(config.dataDir)).toBe(true);
       expect(config.dataDir).toBe(resolve(process.cwd(), relativeDataDir));
@@ -275,7 +275,7 @@ describe("buildConfigFromEnvironment", () => {
         DATA_DIR: tildeDataDir,
       };
 
-      const config = buildConfigFromEnvironment(env);
+      const config = buildEnvConfigFromEnvironment(env);
 
       expect(isAbsolute(config.dataDir)).toBe(true);
       // ~ is treated as a directory name, not home expansion

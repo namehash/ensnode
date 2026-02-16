@@ -42,7 +42,7 @@ const ENSRainbowConfigBaseSchema = z.object({
 
 const ENSRainbowConfigSchema = ENSRainbowConfigBaseSchema.check(invariant_dbSchemaVersionMatch);
 
-export function buildConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowEnvConfig {
+export function buildEnvConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRainbowEnvConfig {
   try {
     const envToConfigSchema = z
       .object({
