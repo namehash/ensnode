@@ -28,4 +28,4 @@ export interface ENSRainbowEnvConfig {
 /**
  * Effective config for the serve command: merge(CLI args, EnvConfig).
  */
-export type ArgsConfig = ENSRainbowEnvConfig;
+export type ServeCommandConfig = ENSRainbowEnvConfig;

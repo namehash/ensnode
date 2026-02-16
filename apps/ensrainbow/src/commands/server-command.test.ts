@@ -1,4 +1,4 @@
-import type { ArgsConfig } from "@/config";
+import type { ServeCommandConfig } from "@/config";
 
 import { promises as fs } from "node:fs";
 
@@ -32,12 +32,12 @@ describe("Server Command Tests", () => {
       await db.markIngestionFinished();
       await db.setLabelSetId("test-label-set-id");
       await db.setHighestLabelSetVersion(0);
-      const argsConfig: ArgsConfig = {
+      const serveCommandConfig: ServeCommandConfig = {
         port: nonDefaultPort,
         dataDir: TEST_DB_DIR,
         dbSchemaVersion: DB_SCHEMA_VERSION,
       };
-      app = await createServer(db, argsConfig);
+      app = await createServer(db, serveCommandConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({

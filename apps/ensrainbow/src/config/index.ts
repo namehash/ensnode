@@ -1,9 +1,9 @@
 import { buildEnvConfigFromEnvironment } from "./config.schema";
 
-export type { ArgsConfig, ENSRainbowEnvConfig } from "./config.schema";
+export type { ENSRainbowEnvConfig, ServeCommandConfig } from "./config.schema";
 export {
   buildEnvConfigFromEnvironment,
-  buildServeArgsConfig,
+  buildServeCommandConfig,
 } from "./config.schema";
 export { ENSRAINBOW_DEFAULT_PORT } from "./defaults";
 export type { ENSRainbowEnvironment } from "./environment";

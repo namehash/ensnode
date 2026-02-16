@@ -11,9 +11,7 @@ For detailed documentation and guides, see the [ENSRainbow Documentation](https:
 ### Configuration
 
 - **EnvConfig**: from environment variables (PORT, DATA_DIR, DB_SCHEMA_VERSION), validated at startup.
-- **ArgsConfig**: effective config for the `serve` command: merge of CLI args and EnvConfig; CLI args take precedence. The API builds the public config (GET /v1/config) from ArgsConfig.
-
-The initial release of ENSRainbow focuses on backwards compatibility with the ENS Subgraph, providing the same label healing capabilities that ENS ecosystem tools rely on today. However, we're actively working on significant enhancements that will expand ENSRainbow's healing capabilities far beyond what's currently possible with the ENS Subgraph. These upcoming features will allow ENSRainbow to heal many previously unknown labels, making it an even more powerful tool for ENS data analysis and integration.
+- **ServeCommandConfig**: effective config for the `serve` command: merge of CLI args and EnvConfig; CLI args take precedence. The API builds the public config (GET /v1/config) from ServeCommandConfig.
 
 ## Special Thanks
 

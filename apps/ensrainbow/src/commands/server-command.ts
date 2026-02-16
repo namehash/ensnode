@@ -1,4 +1,4 @@
-import type { ArgsConfig } from "@/config";
+import type { ServeCommandConfig } from "@/config";
 
 import { serve } from "@hono/node-server";
 
@@ -8,13 +8,13 @@ import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { logger } from "@/utils/logger";
 
-export type ServerCommandOptions = ArgsConfig;
+export type ServerCommandOptions = ServeCommandConfig;
 
 /**
  * Creates and configures the ENS Rainbow server application.
  */
-export async function createServer(db: ENSRainbowDB, argsConfig: ServerCommandOptions) {
-  return createApi(db, argsConfig);
+export async function createServer(db: ENSRainbowDB, serveCommandConfig: ServerCommandOptions) {
+  return createApi(db, serveCommandConfig);
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {

@@ -6,11 +6,11 @@ import { OptionalPortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
-import type { ArgsConfig, ENSRainbowEnvConfig } from "@/config/types";
+import type { ENSRainbowEnvConfig, ServeCommandConfig } from "@/config/types";
 import { invariant_dbSchemaVersionMatch } from "@/config/validations";
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-export type { ArgsConfig, ENSRainbowEnvConfig };
+export type { ServeCommandConfig, ENSRainbowEnvConfig };
 
 export const AbsolutePathSchemaBase = z
   .string()
@@ -67,10 +67,10 @@ export function buildEnvConfigFromEnvironment(env: ENSRainbowEnvironment): ENSRa
   }
 }
 
-export function buildServeArgsConfig(
+export function buildServeCommandConfig(
   envConfig: ENSRainbowEnvConfig,
   args: { port: number; "data-dir": string },
-): ArgsConfig {
+): ServeCommandConfig {
   try {
     const dataDir = AbsolutePathSchemaBase.parse(args["data-dir"]);
     return { ...envConfig, port: args.port, dataDir };

@@ -1,4 +1,4 @@
-import envConfig, { buildServeArgsConfig } from "@/config";
+import envConfig, { buildServeCommandConfig } from "@/config";
 
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -144,8 +144,8 @@ export function createCLI(options: CLIOptions = {}) {
             });
         },
         async (argv: ArgumentsCamelCase<ServeCommandConfig>) => {
-          const argsConfig = buildServeArgsConfig(envConfig, argv);
-          await serverCommand(argsConfig);
+          const serveCommandConfig = buildServeCommandConfig(envConfig, argv);
+          await serverCommand(serveCommandConfig);
         },
       )
       .command(

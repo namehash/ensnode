@@ -8,11 +8,11 @@ import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
-import { buildEnvConfigFromEnvironment, buildServeArgsConfig } from "./config.schema";
+import { buildEnvConfigFromEnvironment, buildServeCommandConfig } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildENSRainbowPublicConfig } from "./public";
-import type { ArgsConfig, ENSRainbowEnvConfig } from "./types";
+import type { ENSRainbowEnvConfig, ServeCommandConfig } from "./types";
 
 describe("buildEnvConfigFromEnvironment", () => {
   describe("Success cases", () => {
@@ -284,7 +284,7 @@ describe("buildEnvConfigFromEnvironment", () => {
   });
 });
 
-describe("buildServeArgsConfig", () => {
+describe("buildServeCommandConfig", () => {
   const baseEnvConfig: ENSRainbowEnvConfig = {
     port: ENSRAINBOW_DEFAULT_PORT,
     dataDir: "/env/data/dir",
@@ -292,7 +292,7 @@ describe("buildServeArgsConfig", () => {
   };
 
   it("normalizes relative data-dir to absolute path", () => {
-    const result = buildServeArgsConfig(baseEnvConfig, {
+    const result = buildServeCommandConfig(baseEnvConfig, {
       port: 4000,
       "data-dir": "my-data",
     });
@@ -304,7 +304,7 @@ describe("buildServeArgsConfig", () => {
   });
 
   it("preserves absolute data-dir and merges port", () => {
-    const result = buildServeArgsConfig(baseEnvConfig, {
+    const result = buildServeCommandConfig(baseEnvConfig, {
       port: 3000,
       "data-dir": "/absolute/cli/path",
     });
@@ -314,7 +314,7 @@ describe("buildServeArgsConfig", () => {
   });
 
   it("trims whitespace from data-dir", () => {
-    const result = buildServeArgsConfig(baseEnvConfig, {
+    const result = buildServeCommandConfig(baseEnvConfig, {
       port: baseEnvConfig.port,
       "data-dir": "  /trimmed/path  ",
     });
@@ -323,13 +323,13 @@ describe("buildServeArgsConfig", () => {
   });
 
   it("throws on empty data-dir", () => {
-    expect(() => buildServeArgsConfig(baseEnvConfig, { port: 4000, "data-dir": "" })).toThrow(
+    expect(() => buildServeCommandConfig(baseEnvConfig, { port: 4000, "data-dir": "" })).toThrow(
       /Invalid data-dir/,
     );
   });
 
   it("throws on whitespace-only data-dir", () => {
-    expect(() => buildServeArgsConfig(baseEnvConfig, { port: 4000, "data-dir": "   " })).toThrow(
+    expect(() => buildServeCommandConfig(baseEnvConfig, { port: 4000, "data-dir": "   " })).toThrow(
       /Invalid data-dir/,
     );
   });
@@ -359,14 +359,14 @@ describe("buildENSRainbowPublicConfig", () => {
       });
     });
 
-    it("accepts ArgsConfig (effective config: merge of CLI args and EnvConfig)", () => {
-      const argsConfig: ArgsConfig = {
+    it("accepts ServeCommandConfig (effective config: merge of CLI args and EnvConfig)", () => {
+      const serveCommandConfig: ServeCommandConfig = {
         port: 4000,
         dataDir: getDefaultDataDir(),
         dbSchemaVersion: DB_SCHEMA_VERSION,
       };
 
-      const result = buildENSRainbowPublicConfig(argsConfig, labelSet, recordsCount);
+      const result = buildENSRainbowPublicConfig(serveCommandConfig, labelSet, recordsCount);
 
       expect(result.version).toBe(packageJson.version);
       expect(result.labelSet).toStrictEqual(labelSet);

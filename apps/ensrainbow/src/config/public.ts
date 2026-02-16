@@ -3,10 +3,10 @@ import packageJson from "@/../package.json" with { type: "json" };
 import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import type { EnsRainbow } from "@ensnode/ensrainbow-sdk";
 
-import type { ArgsConfig } from "./types";
+import type { ServeCommandConfig } from "./types";
 
 export function buildENSRainbowPublicConfig(
-  _argsConfig: ArgsConfig, // kept for semantic purposes
+  _serveCommandConfig: ServeCommandConfig, // kept for semantic purposes
   labelSet: EnsRainbowServerLabelSet,
   recordsCount: number,
 ): EnsRainbow.ENSRainbowPublicConfig {
