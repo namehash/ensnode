@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { type ENSIndexerVersionInfo, PluginName } from "./types";
+import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
   makeENSIndexerPublicConfigSchema,
@@ -109,7 +109,7 @@ describe("ENSIndexer: Config", () => {
             ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies ENSIndexerVersionInfo),
+          } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
           ponder: "0.11.25",
@@ -118,7 +118,7 @@ describe("ENSIndexer: Config", () => {
           ensNormalize: "1.11.1",
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
-        } satisfies ENSIndexerVersionInfo);
+        } satisfies EnsIndexerVersionInfo);
 
         expect(
           formatParseError(
@@ -130,7 +130,7 @@ describe("ENSIndexer: Config", () => {
               ensNormalize: "",
               ensRainbow: "",
               ensRainbowSchema: -1,
-            } satisfies ENSIndexerVersionInfo),
+            } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
   → at nodejs
@@ -167,7 +167,7 @@ describe("ENSIndexer: Config", () => {
             ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies ENSIndexerVersionInfo,
+          } satisfies EnsIndexerVersionInfo,
         };
 
         const parsedConfig = makeENSIndexerPublicConfigSchema().parse(validConfig);

@@ -1,22 +1,29 @@
 import { prettifyError } from "zod/v4";
 
-import type { SerializedENSIndexerPublicConfig } from "./serialized-types";
-import type { ENSIndexerPublicConfig } from "./types";
+import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
+import type { EnsIndexerPublicConfig } from "./types";
 import { makeENSIndexerPublicConfigSchema } from "./zod-schemas";
 
 /**
- * Serialize a {@link ENSIndexerPublicConfig} object.
+ * Deserialize object into a {@link EnsIndexerPublicConfig} object.
  */
-export function deserializeENSIndexerPublicConfig(
-  maybeConfig: SerializedENSIndexerPublicConfig,
+export function deserializeEnsIndexerPublicConfig(
+  maybeConfig: SerializedEnsIndexerPublicConfig,
   valueLabel?: string,
-): ENSIndexerPublicConfig {
+): EnsIndexerPublicConfig {
   const schema = makeENSIndexerPublicConfigSchema(valueLabel);
   const parsed = schema.safeParse(maybeConfig);
 
   if (parsed.error) {
-    throw new Error(`Cannot deserialize ENSIndexerPublicConfig:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(`Cannot deserialize EnsIndexerPublicConfig:\n${prettifyError(parsed.error)}\n`);
   }
 
   return parsed.data;
 }
+
+/**
+ * Deserialize object into a {@link EnsIndexerPublicConfig} object.
+ *
+ * @deprecated Use {@link deserializeEnsIndexerPublicConfig} instead.
+ */
+export const deserializeENSIndexerPublicConfig = deserializeEnsIndexerPublicConfig;

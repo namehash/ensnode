@@ -17,7 +17,7 @@ import {
 } from "../../shared/zod-schemas";
 import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
-import type { ENSIndexerPublicConfig } from "./types";
+import type { EnsIndexerPublicConfig } from "./types";
 import { PluginName } from "./types";
 import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
@@ -140,7 +140,7 @@ export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
