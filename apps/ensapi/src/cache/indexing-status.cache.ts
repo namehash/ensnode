@@ -1,13 +1,18 @@
 import config from "@/config";
 
-import { ENSNodeClient, IndexingStatusResponseCodes, SWRCache } from "@ensnode/ensnode-sdk";
+import {
+  type CrossChainIndexingStatusSnapshot,
+  ENSNodeClient,
+  IndexingStatusResponseCodes,
+  SWRCache,
+} from "@ensnode/ensnode-sdk";
 
 import { makeLogger } from "@/lib/logger";
 
 const logger = makeLogger("indexing-status.cache");
 const client = new ENSNodeClient({ url: config.ensIndexerUrl });
 
-export const indexingStatusCache = new SWRCache({
+export const indexingStatusCache = new SWRCache<CrossChainIndexingStatusSnapshot>({
   fn: async (_cachedResult) =>
     client
       .indexingStatus() // fetch a new indexing status snapshot

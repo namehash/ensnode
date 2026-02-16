@@ -6,6 +6,7 @@ import {
   ENS_HOLIDAY_AWARDS_MAX_QUALIFIED_REFERRERS,
   ENS_HOLIDAY_AWARDS_START_DATE,
   ENS_HOLIDAY_AWARDS_TOTAL_AWARD_POOL_VALUE,
+  type ReferrerLeaderboard,
 } from "@namehash/ens-referrals";
 import { minutesToSeconds } from "date-fns";
 
@@ -44,7 +45,7 @@ const supportedOmnichainIndexingStatuses: OmnichainIndexingStatusId[] = [
   OmnichainIndexingStatusIds.Completed,
 ];
 
-export const referrerLeaderboardCache = new SWRCache({
+export const referrerLeaderboardCache = new SWRCache<ReferrerLeaderboard>({
   fn: async (_cachedResult) => {
     const indexingStatus = await indexingStatusCache.read();
     if (indexingStatus instanceof Error) {
