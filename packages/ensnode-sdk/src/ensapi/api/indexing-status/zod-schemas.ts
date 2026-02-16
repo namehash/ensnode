@@ -5,64 +5,72 @@ import {
   makeSerializedRealtimeIndexingStatusProjectionSchema,
 } from "../../../indexing-status/zod-schema/realtime-indexing-status-projection";
 import {
-  type IndexingStatusResponse,
-  IndexingStatusResponseCodes,
-  type IndexingStatusResponseError,
-  type IndexingStatusResponseOk,
+  type EnsApiIndexingStatusResponse,
+  EnsApiIndexingStatusResponseCodes,
+  type EnsApiIndexingStatusResponseError,
+  type EnsApiIndexingStatusResponseOk,
 } from "./response";
 import {
-  SerializedIndexingStatusResponse,
-  SerializedIndexingStatusResponseOk,
+  SerializedEnsApiIndexingStatusResponse,
+  SerializedEnsApiIndexingStatusResponseOk,
 } from "./serialized-response";
 
 /**
- * Schema for {@link IndexingStatusResponseOk}
+ * Schema for {@link EnsApiIndexingStatusResponseOk}
  **/
-export const makeIndexingStatusResponseOkSchema = (
+export const makeEnsApiIndexingStatusResponseOkSchema = (
   valueLabel: string = "Indexing Status Response OK",
 ) =>
   z.strictObject({
-    responseCode: z.literal(IndexingStatusResponseCodes.Ok),
+    responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeRealtimeIndexingStatusProjectionSchema(valueLabel),
   });
 
 /**
- * Schema for {@link IndexingStatusResponseError}
+ * Schema for {@link EnsApiIndexingStatusResponseError}
  **/
-export const makeIndexingStatusResponseErrorSchema = (
+export const makeEnsApiIndexingStatusResponseErrorSchema = (
   _valueLabel: string = "Indexing Status Response Error",
 ) =>
   z.strictObject({
-    responseCode: z.literal(IndexingStatusResponseCodes.Error),
+    responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Error),
   });
 
 /**
- * Schema for {@link IndexingStatusResponse}
+ * Schema for {@link EnsApiIndexingStatusResponse}
  **/
-export const makeIndexingStatusResponseSchema = (valueLabel: string = "Indexing Status Response") =>
+export const makeEnsApiIndexingStatusResponseSchema = (
+  valueLabel: string = "Indexing Status Response",
+) =>
   z.discriminatedUnion("responseCode", [
-    makeIndexingStatusResponseOkSchema(valueLabel),
-    makeIndexingStatusResponseErrorSchema(valueLabel),
+    makeEnsApiIndexingStatusResponseOkSchema(valueLabel),
+    makeEnsApiIndexingStatusResponseErrorSchema(valueLabel),
   ]);
 
 /**
- * Schema for {@link SerializedIndexingStatusResponseOk}
+ * Schema for {@link EnsApiIndexingStatusResponse}
+ * @deprecated Use {@link makeEnsApiIndexingStatusResponseSchema} instead.
+ */
+export const makeIndexingStatusResponseSchema = makeEnsApiIndexingStatusResponseSchema;
+
+/**
+ * Schema for {@link SerializedEnsApiIndexingStatusResponseOk}
  **/
-export const makeSerializedIndexingStatusResponseOkSchema = (
+export const makeSerializedEnsApiIndexingStatusResponseOkSchema = (
   valueLabel: string = "Serialized Indexing Status Response OK",
 ) =>
   z.strictObject({
-    responseCode: z.literal(IndexingStatusResponseCodes.Ok),
+    responseCode: z.literal(EnsApiIndexingStatusResponseCodes.Ok),
     realtimeProjection: makeSerializedRealtimeIndexingStatusProjectionSchema(valueLabel),
   });
 
 /**
- * Schema for {@link SerializedIndexingStatusResponse}
+ * Schema for {@link SerializedEnsApiIndexingStatusResponse}
  **/
-export const makeSerializedIndexingStatusResponseSchema = (
+export const makeSerializedEnsApiIndexingStatusResponseSchema = (
   valueLabel: string = "Serialized Indexing Status Response",
 ) =>
   z.discriminatedUnion("responseCode", [
-    makeSerializedIndexingStatusResponseOkSchema(valueLabel),
-    makeIndexingStatusResponseErrorSchema(valueLabel),
+    makeSerializedEnsApiIndexingStatusResponseOkSchema(valueLabel),
+    makeEnsApiIndexingStatusResponseErrorSchema(valueLabel),
   ]);

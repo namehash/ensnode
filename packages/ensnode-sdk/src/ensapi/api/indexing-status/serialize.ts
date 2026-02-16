@@ -1,21 +1,23 @@
 import { serializeRealtimeIndexingStatusProjection } from "../../../indexing-status/serialize/realtime-indexing-status-projection";
-import { type IndexingStatusResponse, IndexingStatusResponseCodes } from "./response";
+import { type EnsApiIndexingStatusResponse, EnsApiIndexingStatusResponseCodes } from "./response";
 import type {
-  SerializedIndexingStatusResponse,
-  SerializedIndexingStatusResponseOk,
+  SerializedEnsApiIndexingStatusResponse,
+  SerializedEnsApiIndexingStatusResponseOk,
 } from "./serialized-response";
 
-export function serializeIndexingStatusResponse(
-  response: IndexingStatusResponse,
-): SerializedIndexingStatusResponse {
+export function serializeEnsApiIndexingStatusResponse(
+  response: EnsApiIndexingStatusResponse,
+): SerializedEnsApiIndexingStatusResponse {
   switch (response.responseCode) {
-    case IndexingStatusResponseCodes.Ok:
+    case EnsApiIndexingStatusResponseCodes.Ok:
       return {
         responseCode: response.responseCode,
         realtimeProjection: serializeRealtimeIndexingStatusProjection(response.realtimeProjection),
-      } satisfies SerializedIndexingStatusResponseOk;
+      } satisfies SerializedEnsApiIndexingStatusResponseOk;
 
-    case IndexingStatusResponseCodes.Error:
+    case EnsApiIndexingStatusResponseCodes.Error:
       return response;
   }
 }
+
+export const serializeIndexingStatusResponse = serializeEnsApiIndexingStatusResponse;

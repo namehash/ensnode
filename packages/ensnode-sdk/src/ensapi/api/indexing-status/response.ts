@@ -3,7 +3,7 @@ import type { RealtimeIndexingStatusProjection } from "../../../indexing-status/
 /**
  * A status code for indexing status responses.
  */
-export const IndexingStatusResponseCodes = {
+export const EnsApiIndexingStatusResponseCodes = {
   /**
    * Represents that the indexing status is available.
    */
@@ -16,25 +16,53 @@ export const IndexingStatusResponseCodes = {
 } as const;
 
 /**
- * The derived string union of possible {@link IndexingStatusResponseCodes}.
+ * A status code for indexing status responses.
+ *
+ * @deprecated Use {@link EnsApiIndexingStatusResponseCodes} instead.
  */
-export type IndexingStatusResponseCode =
-  (typeof IndexingStatusResponseCodes)[keyof typeof IndexingStatusResponseCodes];
+export const IndexingStatusResponseCodes = EnsApiIndexingStatusResponseCodes;
+
+/**
+ * The derived string union of possible {@link EnsApiIndexingStatusResponseCodes}.
+ */
+export type EnsApiIndexingStatusResponseCode =
+  (typeof EnsApiIndexingStatusResponseCodes)[keyof typeof EnsApiIndexingStatusResponseCodes];
+
+/**
+ * The derived string union of possible {@link EnsApiIndexingStatusResponseCodes}.
+ *
+ * @deprecated Use {@link EnsApiIndexingStatusResponseCodes} instead.
+ */
+export type IndexingStatusResponseCode = EnsApiIndexingStatusResponseCode;
 
 /**
  * An indexing status response when the indexing status is available.
  */
-export type IndexingStatusResponseOk = {
-  responseCode: typeof IndexingStatusResponseCodes.Ok;
+export type EnsApiIndexingStatusResponseOk = {
+  responseCode: typeof EnsApiIndexingStatusResponseCodes.Ok;
   realtimeProjection: RealtimeIndexingStatusProjection;
 };
 
 /**
+ * An indexing status response when the indexing status is available.
+ *
+ * @deprecated Use {@link EnsApiIndexingStatusResponseOk} instead.
+ */
+export type IndexingStatusResponseOk = EnsApiIndexingStatusResponseOk;
+
+/**
  * An indexing status response when the indexing status is unavailable.
  */
-export type IndexingStatusResponseError = {
-  responseCode: typeof IndexingStatusResponseCodes.Error;
+export type EnsApiIndexingStatusResponseError = {
+  responseCode: typeof EnsApiIndexingStatusResponseCodes.Error;
 };
+
+/**
+ * An indexing status response when the indexing status is unavailable.
+ *
+ * @deprecated Use {@link EnsApiIndexingStatusResponseError} instead.
+ */
+export type IndexingStatusResponseError = EnsApiIndexingStatusResponseError;
 
 /**
  * Indexing status response.
@@ -42,4 +70,13 @@ export type IndexingStatusResponseError = {
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusResponseError;
+export type EnsApiIndexingStatusResponse =
+  | EnsApiIndexingStatusResponseOk
+  | EnsApiIndexingStatusResponseError;
+
+/**
+ * Indexing status response.
+ *
+ * @deprecated Use {@link EnsApiIndexingStatusResponse} instead.
+ */
+export type IndexingStatusResponse = EnsApiIndexingStatusResponse;

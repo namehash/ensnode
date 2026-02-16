@@ -1,3 +1,12 @@
-import type { SerializedENSApiPublicConfig } from "../../config/serialized-types";
+import type { SerializedEnsApiPublicConfig } from "../../config/serialized-types";
+import type { EnsApiConfigResponse } from "./response";
 
-export type SerializedConfigResponse = SerializedENSApiPublicConfig;
+/**
+ * Serialized representation of {@link EnsApiConfigResponse}
+ */
+export type SerializedEnsApiConfigResponse = SerializedEnsApiPublicConfig;
+
+/**
+ * @deprecated Use {@link SerializedEnsApiConfigResponse} instead.
+ */
+export type SerializedConfigResponse = SerializedEnsApiConfigResponse;

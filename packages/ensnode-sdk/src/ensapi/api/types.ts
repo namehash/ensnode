@@ -1,7 +1,7 @@
 import type { z } from "zod/v4";
 
 import type { InterpretedName, Node } from "../../ens/types";
-import type { ENSApiPublicConfig } from "../../ensapi/config";
+import type { EnsApiPublicConfig } from "../../ensapi/config";
 import type { RealtimeIndexingStatusProjection } from "../../indexing-status/realtime-indexing-status-projection";
 import type { RegistrarAction } from "../../registrars/registrar-action";
 import type {
@@ -80,9 +80,16 @@ export interface ResolvePrimaryNamesResponse extends AcceleratableResponse, Trac
 }
 
 /**
- * ENSIndexer Public Config Response
+ * ENSApi Config Response
  */
-export type ConfigResponse = ENSApiPublicConfig;
+export type EnsApiConfigResponse = EnsApiPublicConfig;
+
+/**
+ * ENSApi Config Response
+ *
+ * @deprecated Use {@link EnsApiConfigResponse} instead.
+ */
+export type ConfigResponse = EnsApiConfigResponse;
 
 /**
  * Represents a request to Indexing Status API.
@@ -131,7 +138,6 @@ export type IndexingStatusResponseError = {
  * Use the `responseCode` field to determine the specific type interpretation
  * at runtime.
  */
-export type IndexingStatusResponse = IndexingStatusResponseOk | IndexingStatusResponseError;
 
 /**
  * Registrar Actions response
