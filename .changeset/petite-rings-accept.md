@@ -2,4 +2,4 @@
 "@ensnode/ensnode-sdk": minor
 ---
 
-Introduces `EnsIndexerClient` class, which allows interacting with ENSIndexer APIs.
+Introduces `EnsIndexerClient` class, supporting easy interactions with ENSIndexer APIs.

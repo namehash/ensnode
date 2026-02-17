@@ -3,13 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   deserializeEnsIndexerConfigResponse,
   deserializeEnsIndexerIndexingStatusResponse,
+  EnsIndexerIndexingStatusResponseCodes,
 } from "./api";
 import { EnsIndexerClient } from "./client";
 import { configResponseMock, indexingStatusResponseMock } from "./client.mock";
 
-// Mock fetch globally
+// Mock fetch globally (auto-restored by vitest)
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+vi.stubGlobal("fetch", mockFetch);
 
 const ENSINDEXER_URL = new URL("http://localhost:42069/");
 
@@ -68,6 +69,35 @@ describe("EnsIndexerClient", () => {
         json: async () => serializedMockedResponse,
       });
 
+      // act & assert
+      await expect(client.indexingStatus()).resolves.toStrictEqual(mockedResponse);
+      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
+    });
+
+    it("throws on non-OK response with a generic ErrorResponse payload", async () => {
+      // arrange
+      const requestUrl = new URL(`/api/indexing-status`, ENSINDEXER_URL);
+      const errorResponse = { error: "Something went wrong" };
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => errorResponse,
+      });
+      // act & assert
+      await expect(client.indexingStatus()).rejects.toThrow();
+      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
+    });
+
+    it("returns deserialized payload on non-OK response if body is valid indexing-status payload", async () => {
+      // arrange
+      const requestUrl = new URL(`/api/indexing-status`, ENSINDEXER_URL);
+      const errorStatusPayload = {
+        responseCode: EnsIndexerIndexingStatusResponseCodes.Error,
+      };
+      const mockedResponse = deserializeEnsIndexerIndexingStatusResponse(errorStatusPayload);
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        json: async () => errorStatusPayload,
+      });
       // act & assert
       await expect(client.indexingStatus()).resolves.toStrictEqual(mockedResponse);
       expect(mockFetch).toHaveBeenCalledWith(requestUrl);

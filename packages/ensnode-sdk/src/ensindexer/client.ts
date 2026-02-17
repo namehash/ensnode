@@ -13,7 +13,7 @@ import { deserializeErrorResponse } from "./api/shared/errors/deserialize";
 /**
  * Configuration options for ENSIndexer API client
  */
-export interface ClientOptions {
+export interface EnsIndexerClientOptions {
   /** The ENSIndexer API URL */
   url: URL;
 }
@@ -36,9 +36,9 @@ export interface ClientOptions {
  * ```
  */
 export class EnsIndexerClient {
-  constructor(private readonly options: ClientOptions) {}
+  constructor(private readonly options: EnsIndexerClientOptions) {}
 
-  getOptions(): Readonly<ClientOptions> {
+  getOptions(): Readonly<EnsIndexerClientOptions> {
     return Object.freeze({
       url: new URL(this.options.url.href),
     });
@@ -52,7 +52,7 @@ export class EnsIndexerClient {
    * @returns {EnsIndexerConfigResponse}
    *
    * @throws if the ENSIndexer request fails
-   * @throws if the ENSIndexer API returns an error response
+   * @throws if the ENSIndexer returns a generic error response
    * @throws if the ENSIndexer response breaks required invariants
    */
   async config(): Promise<EnsIndexerConfigResponse> {
@@ -69,9 +69,21 @@ export class EnsIndexerClient {
       throw new Error("Malformed response data: invalid JSON");
     }
 
+    // handle response errors accordingly
     if (!response.ok) {
-      const errorResponse = deserializeErrorResponse(responseData);
-      throw new Error(`Fetching ENSIndexer Config Failed: ${errorResponse.message}`);
+      // check for a generic errorResponse
+      let errorResponse: ErrorResponse | undefined;
+      try {
+        errorResponse = deserializeErrorResponse(responseData);
+      } catch {
+        // No-op: allow subsequent deserialization of config response.
+      }
+
+      // however, if errorResponse was defined,
+      // throw an error with the generic server error message
+      if (typeof errorResponse !== "undefined") {
+        throw new Error(`Fetching ENSIndexer Config Failed: ${errorResponse.message}`);
+      }
     }
 
     return deserializeEnsIndexerConfigResponse(
@@ -85,7 +97,7 @@ export class EnsIndexerClient {
    * @returns {EnsIndexerIndexingStatusResponse}
    *
    * @throws if the ENSIndexer request fails
-   * @throws if the ENSIndexer API returns an error response
+   * @throws if the ENSIndexer returns a generic error response
    * @throws if the ENSIndexer response breaks required invariants
    */
   async indexingStatus(): Promise<EnsIndexerIndexingStatusResponse> {
@@ -109,9 +121,7 @@ export class EnsIndexerClient {
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {
-        // if errorResponse could not be determined,
-        // it means the response includes indexing status data
-        console.log("Indexing Status API: handling a known indexing status server error.");
+        // No-op: allow subsequent deserialization of indexing status response.
       }
 
       // however, if errorResponse was defined,

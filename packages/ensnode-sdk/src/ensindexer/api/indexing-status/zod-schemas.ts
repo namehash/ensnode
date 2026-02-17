@@ -10,7 +10,7 @@ import {
   type EnsIndexerIndexingStatusResponseError,
   type EnsIndexerIndexingStatusResponseOk,
 } from "./response";
-import {
+import type {
   SerializedEnsIndexerIndexingStatusResponse,
   SerializedEnsIndexerIndexingStatusResponseOk,
 } from "./serialized-response";
