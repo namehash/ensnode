@@ -104,6 +104,15 @@ export function isRainbowRecordKey(key: ByteArray): boolean {
  */
 type ENSRainbowLevelDB = ClassicLevel<ByteArray, string>;
 
+/** Thrown when the database has no precalculated rainbow record count (empty or uninitialized). */
+export class NoPrecalculatedCountError extends Error {
+  constructor(dataDir: string) {
+    super(`No precalculated count found in database at ${dataDir}`);
+    this.name = "NoPrecalculatedCountError";
+    Object.setPrototypeOf(this, NoPrecalculatedCountError.prototype);
+  }
+}
+
 /**
  * Generates a consistent error message for database issues that require purging and re-ingesting.
  * @param errorDescription The specific error description
@@ -435,12 +444,13 @@ export class ENSRainbowDB {
 
   /**
    * Gets the precalculated count of rainbow records in the database. The accuracy of the returned value is dependent on setting the precalculated count correctly.
-   * @throws Error if the precalculated count is not found or is improperly formatted
+   * @throws NoPrecalculatedCountError if the precalculated count is not found (empty/uninitialized DB)
+   * @throws Error if the precalculated count is improperly formatted
    */
   public async getPrecalculatedRainbowRecordCount(): Promise<number> {
     const countStr = await this.get(SYSTEM_KEY_PRECALCULATED_RAINBOW_RECORD_COUNT);
     if (countStr === null) {
-      throw new Error(`No precalculated count found in database at ${this.dataDir}`);
+      throw new NoPrecalculatedCountError(this.dataDir);
     }
 
     try {

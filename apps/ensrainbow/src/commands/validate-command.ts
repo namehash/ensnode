@@ -1,5 +1,10 @@
 import { ENSRainbowDB } from "@/lib/database";
 
+export interface ValidateCommandCliArgs {
+  "data-dir": string;
+  lite: boolean;
+}
+
 export interface ValidateCommandOptions {
   dataDir: string;
   lite?: boolean; // defaults to false

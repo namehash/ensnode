@@ -19,6 +19,11 @@ import {
   createRainbowProtobufRoot,
 } from "@/utils/protobuf-schema";
 
+export interface IngestProtobufCommandCliArgs {
+  "input-file": string;
+  "data-dir": string;
+}
+
 export interface IngestProtobufCommandOptions {
   inputFile: string;
   dataDir: string;

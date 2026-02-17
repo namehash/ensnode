@@ -17,6 +17,11 @@ export namespace EnsRainbow {
     count(): Promise<CountResponse>;
 
     /**
+     * Get the public configuration of the ENSRainbow service
+     */
+    config(): Promise<ENSRainbowPublicConfig>;
+
+    /**
      * Heal a labelhash to its original label
      * @param labelHash The labelhash to heal
      */
@@ -24,6 +29,11 @@ export namespace EnsRainbow {
 
     health(): Promise<HealthResponse>;
 
+    /**
+     * Get the version information of the ENSRainbow service
+     *
+     * @deprecated Use {@link ApiClient.config} instead. This method will be removed in a future version.
+     */
     version(): Promise<VersionResponse>;
 
     getOptions(): Readonly<EnsRainbowApiClientOptions>;
@@ -118,6 +128,8 @@ export namespace EnsRainbow {
 
   /**
    * ENSRainbow version information.
+   *
+   * @deprecated Use {@link ENSRainbowPublicConfig} instead. This type will be removed in a future version.
    */
   export interface VersionInfo {
     /**
@@ -138,10 +150,37 @@ export namespace EnsRainbow {
 
   /**
    * Interface for the version endpoint response
+   *
+   * @deprecated Use {@link ENSRainbowPublicConfig} instead. This type will be removed in a future version.
    */
   export interface VersionResponse {
     status: typeof StatusCode.Success;
     versionInfo: VersionInfo;
+  }
+
+  /**
+   * Complete public configuration object for ENSRainbow.
+   *
+   * Contains all public configuration information about the ENSRainbow service instance,
+   * including version, label set information, and record counts.
+   */
+  export interface ENSRainbowPublicConfig {
+    /**
+     * ENSRainbow service version
+     *
+     * @see https://ghcr.io/namehash/ensnode/ensrainbow
+     */
+    version: string;
+
+    /**
+     * The label set reference managed by the ENSRainbow server.
+     */
+    labelSet: EnsRainbowServerLabelSet;
+
+    /**
+     * The total count of records managed by the ENSRainbow service.
+     */
+    recordsCount: number;
   }
 }
 
@@ -352,8 +391,25 @@ export class EnsRainbowApiClient implements EnsRainbow.ApiClient {
   }
 
   /**
+   * Get the public configuration of the ENSRainbow service.
+   */
+  async config(): Promise<EnsRainbow.ENSRainbowPublicConfig> {
+    const response = await fetch(new URL("/v1/config", this.options.endpointUrl));
+
+    if (!response.ok) {
+      const errorData = (await response.json()) as { error?: string; errorCode?: number };
+      throw new Error(
+        errorData.error ?? `Failed to fetch ENSRainbow config: ${response.statusText}`,
+      );
+    }
+
+    return response.json() as Promise<EnsRainbow.ENSRainbowPublicConfig>;
+  }
+
+  /**
    * Get the version information of the ENSRainbow service
    *
+   * @deprecated Use {@link EnsRainbowApiClient.config} instead. This method will be removed in a future version.
    * @returns the version information of the ENSRainbow service
    * @throws if the request fails due to network failures, DNS lookup failures, request
    * timeouts, CORS violations, or invalid URLs
