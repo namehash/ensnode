@@ -4,7 +4,7 @@
  * Converts single-column CSV files (one label per line) to .ensrainbow format with fast-csv
  */
 
-import { createReadStream, createWriteStream, rmSync, statSync } from "node:fs";
+import { createReadStream, createWriteStream, rmSync, statSync, type WriteStream } from "node:fs";
 import { dirname, join } from "node:path";
 
 import { parse } from "@fast-csv/parse";
@@ -54,8 +54,18 @@ class DeduplicationDB {
     try {
       await this.db.get(key);
       return true;
-    } catch (_error) {
-      return false;
+    } catch (error: unknown) {
+      // Only treat a missing-key error as "not found";
+      // rethrow I/O, corruption, LEVEL_LOCKED, or other unexpected errors
+      if (
+        error != null &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "LEVEL_NOT_FOUND"
+      ) {
+        return false;
+      }
+      throw error;
     }
   }
 
@@ -534,13 +544,15 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
   let dedupDb: DeduplicationDB | undefined;
   let tempDb: ClassicLevel<string, string> | undefined;
   let temporaryDedupDir: string | null = null;
+  let outputStream: WriteStream | null = null;
 
   try {
     const {
       RainbowRecordType,
-      outputStream,
+      outputStream: stream,
       existingDb: db,
     } = await initializeConversion(options, labelSetVersion, outputFile, existingDb);
+    outputStream = stream;
     existingDb = db;
 
     // Create temporary deduplication database in the same directory as the output file
@@ -599,6 +611,21 @@ export async function convertCsvCommand(options: ConvertCsvCommandOptions): Prom
     logger.error(`❌ CSV conversion failed: ${errorMessage}`);
     throw error;
   } finally {
+    // Clean up output stream if it wasn't gracefully ended (error path).
+    // After end(), writable is false, so this only triggers on error paths.
+    if (outputStream?.writable) {
+      try {
+        // Suppress errors from in-flight writes whose async I/O completes
+        // after destroy (e.g. "Cannot call write after a stream was destroyed").
+        // On error paths the output file is incomplete anyway.
+        outputStream.on("error", () => {});
+        outputStream.destroy();
+        logger.info("Destroyed output stream on error path");
+      } catch (error) {
+        logger.warn(`Failed to destroy output stream: ${error}`);
+      }
+    }
+
     // Clean up deduplication database - close the wrapper first
     if (dedupDb !== undefined) {
       try {

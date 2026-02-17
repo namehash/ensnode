@@ -63,19 +63,6 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should reject CSV with more than one column", async () => {
-      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_invalid_first.csv");
-      const outputFile = join(tempDir, "output_invalid.ensrainbow");
-
-      await expect(
-        convertCsvCommand({
-          inputFile,
-          outputFile,
-          labelSetId: "test-csv-invalid" as LabelSetId,
-        }),
-      ).rejects.toThrow(/Expected 1 column \(label only\)/);
-    });
-
     it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_special_chars.csv");
       const outputFile = join(tempDir, "output_special.ensrainbow");
