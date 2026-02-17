@@ -1,26 +1,49 @@
-import { prettifyError, ZodError } from "zod/v4";
+import { prettifyError } from "zod/v4";
 
+import { buildUnvalidatedEnsIndexerPublicConfig } from "../../ensindexer/config/deserialize";
+import type { Unvalidated } from "../../shared/types";
 import type { SerializedEnsApiPublicConfig } from "./serialized-types";
 import type { EnsApiPublicConfig } from "./types";
-import { makeEnsApiPublicConfigSchema } from "./zod-schemas";
+import {
+  makeEnsApiPublicConfigSchema,
+  makeSerializedEnsApiPublicConfigSchema,
+} from "./zod-schemas";
 
 /**
- * Deserialize a {@link EnsApiPublicConfig} object.
+ * Builds an unvalidated {@link EnsApiPublicConfig} object to be
+ * validated with {@link makeEnsApiPublicConfigSchema}.
+ *
+ * @param serializedPublicConfig - The serialized public config to build from.
+ * @return An unvalidated {@link EnsApiPublicConfig} object.
+ */
+function buildUnvalidatedEnsApiPublicConfig(
+  serializedPublicConfig: SerializedEnsApiPublicConfig,
+): Unvalidated<EnsApiPublicConfig> {
+  return {
+    ...serializedPublicConfig,
+    ensIndexerPublicConfig: buildUnvalidatedEnsIndexerPublicConfig(
+      serializedPublicConfig.ensIndexerPublicConfig,
+    ),
+  };
+}
+
+/**
+ * Deserialize value into {@link EnsApiPublicConfig} object.
  */
 export function deserializeEnsApiPublicConfig(
-  maybeConfig: SerializedEnsApiPublicConfig,
+  maybePublicConfig: Unvalidated<SerializedEnsApiPublicConfig>,
   valueLabel?: string,
 ): EnsApiPublicConfig {
-  const schema = makeEnsApiPublicConfigSchema(valueLabel);
-  try {
-    return schema.parse(maybeConfig);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      throw new Error(`Cannot deserialize EnsApiPublicConfig:\n${prettifyError(error)}\n`);
-    }
+  const parsed = makeSerializedEnsApiPublicConfigSchema(valueLabel)
+    .transform(buildUnvalidatedEnsApiPublicConfig)
+    .pipe(makeEnsApiPublicConfigSchema(valueLabel))
+    .safeParse(maybePublicConfig);
 
-    throw error;
+  if (parsed.error) {
+    throw new Error(`Cannot deserialize EnsApiPublicConfig:\n${prettifyError(parsed.error)}\n`);
   }
+
+  return parsed.data;
 }
 
 /**
