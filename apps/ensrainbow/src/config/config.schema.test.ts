@@ -322,14 +322,43 @@ describe("buildServeCommandConfig", () => {
 
   it("throws on empty data-dir", () => {
     expect(() => buildServeCommandConfig({ port: 4000, "data-dir": "" })).toThrow(
-      /Invalid data-dir/,
+      /Invalid serve command arguments/,
     );
   });
 
   it("throws on whitespace-only data-dir", () => {
     expect(() => buildServeCommandConfig({ port: 4000, "data-dir": "   " })).toThrow(
-      /Invalid data-dir/,
+      /Invalid serve command arguments/,
     );
+  });
+
+  it("throws when port is less than 1", () => {
+    expect(() => buildServeCommandConfig({ port: 0, "data-dir": "/valid/path" })).toThrow(
+      /Invalid serve command arguments/,
+    );
+  });
+
+  it("throws when port is greater than 65535", () => {
+    expect(() => buildServeCommandConfig({ port: 65536, "data-dir": "/valid/path" })).toThrow(
+      /Invalid serve command arguments/,
+    );
+  });
+
+  it("throws when port is negative", () => {
+    expect(() => buildServeCommandConfig({ port: -1, "data-dir": "/valid/path" })).toThrow(
+      /Invalid serve command arguments/,
+    );
+  });
+
+  it("throws when port is a float", () => {
+    expect(() => buildServeCommandConfig({ port: 3000.5, "data-dir": "/valid/path" })).toThrow(
+      /Invalid serve command arguments/,
+    );
+  });
+
+  it("accepts port at boundary values", () => {
+    expect(buildServeCommandConfig({ port: 1, "data-dir": "/valid/path" }).port).toBe(1);
+    expect(buildServeCommandConfig({ port: 65535, "data-dir": "/valid/path" }).port).toBe(65535);
   });
 });
 

@@ -2,7 +2,7 @@ import { isAbsolute, resolve } from "node:path";
 
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { OptionalPortNumberSchema } from "@ensnode/ensnode-sdk/internal";
+import { OptionalPortNumberSchema, PortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "@/config/defaults";
 import type { ENSRainbowEnvironment } from "@/config/environment";
@@ -74,11 +74,12 @@ export interface ServeCommandCliArgs {
 
 export function buildServeCommandConfig(args: ServeCommandCliArgs): ServeCommandConfig {
   try {
+    const port = PortNumberSchema.parse(args.port);
     const dataDir = AbsolutePathSchemaBase.parse(args["data-dir"]);
-    return { port: args.port, dataDir };
+    return { port, dataDir };
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(`Invalid data-dir: \n${prettifyError(error)}\n`);
+      throw new Error(`Invalid serve command arguments: \n${prettifyError(error)}\n`);
     }
     throw error;
   }
