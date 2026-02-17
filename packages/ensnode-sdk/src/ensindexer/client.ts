@@ -39,7 +39,9 @@ export class EnsIndexerClient {
   constructor(private readonly options: ClientOptions) {}
 
   getOptions(): Readonly<ClientOptions> {
-    return Object.freeze(this.options);
+    return Object.freeze({
+      url: new URL(this.options.url.href),
+    });
   }
 
   /**
