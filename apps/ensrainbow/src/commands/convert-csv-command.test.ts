@@ -63,22 +63,6 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should reject two-column CSV (multi-column formats are not supported)", async () => {
-      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
-      const outputFile = join(tempDir, "output_2col.ensrainbow");
-
-      await expect(
-        convertCsvCommand({
-          inputFile,
-          outputFile,
-          labelSetId: "test-csv-two-col" as LabelSetId,
-          silent: true,
-        }),
-      ).rejects.toThrow(
-        /Expected 1 column \(label only\).*Multi-column CSV formats are not supported/,
-      );
-    });
-
     it("should reject CSV with more than one column", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_invalid_first.csv");
       const outputFile = join(tempDir, "output_invalid.ensrainbow");

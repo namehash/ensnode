@@ -322,7 +322,7 @@ function createRainbowRecord(row: string[]): RainbowRecord {
     );
   }
 
-  const label = String(row[0]);
+  const label = row[0];
   const labelHashBytes = labelHashToBytes(labelhash(label));
   return {
     labelHash: labelHashBytes,
