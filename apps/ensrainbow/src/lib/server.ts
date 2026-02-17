@@ -32,14 +32,14 @@ export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig>
   }
 
   return {
-    labelSet: server.getServerLabelSet(),
+    labelSet: server.serverLabelSet,
     recordsCount: countResult.count,
   };
 }
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private readonly serverLabelSet: EnsRainbowServerLabelSet;
+  public readonly serverLabelSet: EnsRainbowServerLabelSet;
 
   private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
     this.db = db;
@@ -63,14 +63,6 @@ export class ENSRainbowServer {
     const serverLabelSet = await db.getLabelSet();
 
     return new ENSRainbowServer(db, serverLabelSet);
-  }
-
-  /**
-   * Returns the server's EnsRainbowServerLabelSet.
-   * @returns The server's label set configuration
-   */
-  public getServerLabelSet(): EnsRainbowServerLabelSet {
-    return this.serverLabelSet;
   }
 
   /**

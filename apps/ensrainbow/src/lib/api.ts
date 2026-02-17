@@ -28,12 +28,6 @@ export function createApi(
 ): Hono {
   const api = new Hono();
 
-  const countResponse: EnsRainbow.CountSuccess = {
-    status: StatusCode.Success,
-    count: publicConfig.recordsCount,
-    timestamp: new Date().toISOString(),
-  };
-
   // Enable CORS for all versioned API routes
   api.use(
     "/v1/*",
@@ -96,6 +90,11 @@ export function createApi(
   });
 
   api.get("/v1/labels/count", (c: HonoContext) => {
+    const countResponse: EnsRainbow.CountSuccess = {
+      status: StatusCode.Success,
+      count: publicConfig.recordsCount,
+      timestamp: new Date().toISOString(),
+    };
     return c.json(countResponse);
   });
 
@@ -112,7 +111,7 @@ export function createApi(
       versionInfo: {
         version: packageJson.version,
         dbSchemaVersion: DB_SCHEMA_VERSION,
-        labelSet: server.getServerLabelSet(),
+        labelSet: server.serverLabelSet,
       },
     };
     return c.json(result);
