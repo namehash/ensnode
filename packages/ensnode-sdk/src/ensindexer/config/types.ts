@@ -21,7 +21,7 @@ export enum PluginName {
 /**
  * Version info about ENSIndexer and its dependencies.
  */
-export interface ENSIndexerVersionInfo {
+export interface EnsIndexerVersionInfo {
   /**
    * Node.js runtime version
    *
@@ -73,12 +73,19 @@ export interface ENSIndexerVersionInfo {
 }
 
 /**
+ * Version info about ENSIndexer and its dependencies.
+ *
+ * @deprecated Use {@link EnsIndexerVersionInfo} instead.
+ */
+export type ENSIndexerVersionInfo = EnsIndexerVersionInfo;
+
+/**
  * Complete public configuration object for ENSIndexer.
  *
  * We use parameter types to maintain fields layout and documentation across
  * the domain model and its serialized counterpart.
  */
-export interface ENSIndexerPublicConfig {
+export interface EnsIndexerPublicConfig {
   /**
    * The ENS namespace that ENSNode operates in the context of.
    *
@@ -161,5 +168,12 @@ export interface ENSIndexerPublicConfig {
   /**
    * Version info about ENSIndexer.
    */
-  versionInfo: ENSIndexerVersionInfo;
+  versionInfo: EnsIndexerVersionInfo;
 }
+
+/**
+ * Complete public configuration object for ENSIndexer.
+ *
+ * @deprecated Use {@link EnsIndexerPublicConfig} instead.
+ */
+export type ENSIndexerPublicConfig = EnsIndexerPublicConfig;

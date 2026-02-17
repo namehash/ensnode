@@ -1,12 +1,19 @@
-import { deserializeENSApiPublicConfig } from "../../config/deserialize";
-import type { ConfigResponse } from "./response";
-import type { SerializedConfigResponse } from "./serialized-response";
+import { deserializeEnsApiPublicConfig } from "../../config/deserialize";
+import type { EnsApiConfigResponse } from "./response";
+import type { SerializedEnsApiConfigResponse } from "./serialized-response";
 
 /**
- * Deserialize a {@link ConfigResponse} object.
+ * Deserialize a {@link EnsApiConfigResponse} object.
  */
-export function deserializeConfigResponse(
-  serializedResponse: SerializedConfigResponse,
-): ConfigResponse {
-  return deserializeENSApiPublicConfig(serializedResponse);
+export function deserializeEnsApiConfigResponse(
+  serializedResponse: SerializedEnsApiConfigResponse,
+): EnsApiConfigResponse {
+  return deserializeEnsApiPublicConfig(serializedResponse);
 }
+
+/**
+ * Deserialize a {@link EnsApiConfigResponse} object.
+ *
+ * @deprecated Use {@link deserializeEnsApiConfigResponse} instead.
+ */
+export const deserializeConfigResponse = deserializeEnsApiConfigResponse;

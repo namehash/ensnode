@@ -17,7 +17,7 @@ import {
 } from "../../shared/zod-schemas";
 import type { ZodCheckFnInput } from "../../shared/zod-types";
 import { isSubgraphCompatible } from "./is-subgraph-compatible";
-import type { ENSIndexerPublicConfig } from "./types";
+import type { EnsIndexerPublicConfig } from "./types";
 import { PluginName } from "./types";
 import { invariant_ensDbVersionIsSameAsEnsIndexerVersion } from "./validations";
 
@@ -119,7 +119,7 @@ export const makeFullyPinnedLabelSetSchema = (valueLabel: string = "Label set") 
 const makeNonEmptyStringSchema = (valueLabel: string = "Value") =>
   z.string().nonempty({ error: `${valueLabel} must be a non-empty string.` });
 
-export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
+export const makeEnsIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
   z
     .strictObject(
       {
@@ -137,10 +137,15 @@ export const makeENSIndexerVersionInfoSchema = (valueLabel: string = "Value") =>
     )
     .check(invariant_ensDbVersionIsSameAsEnsIndexerVersion);
 
+/**
+ * @deprecated Use {@link makeEnsIndexerVersionInfoSchema} instead.
+ */
+export const makeENSIndexerVersionInfoSchema = makeEnsIndexerVersionInfoSchema;
+
 // Invariant: If config.isSubgraphCompatible, the config must pass isSubgraphCompatible(config)
 export function invariant_isSubgraphCompatibleRequirements(
   ctx: ZodCheckFnInput<
-    Pick<ENSIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
+    Pick<EnsIndexerPublicConfig, "namespace" | "plugins" | "isSubgraphCompatible" | "labelSet">
   >,
 ) {
   const { value: config } = ctx;
@@ -160,7 +165,7 @@ export function invariant_isSubgraphCompatibleRequirements(
  * Makes a Zod schema definition for validating all important settings used
  * during runtime of the ENSIndexer instance.
  */
-export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
+export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexerPublicConfig") =>
   z
     .object({
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
@@ -177,3 +182,10 @@ export const makeENSIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
      * All required data validations must be performed below.
      */
     .check(invariant_isSubgraphCompatibleRequirements);
+
+/**
+ * ENSIndexer Public Config Schema
+ *
+ * @deprecated Use {@link makeEnsIndexerPublicConfigSchema} instead.
+ */
+export const makeENSIndexerPublicConfigSchema = makeEnsIndexerPublicConfigSchema;

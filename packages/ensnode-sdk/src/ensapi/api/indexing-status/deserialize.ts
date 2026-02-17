@@ -2,24 +2,24 @@ import { prettifyError } from "zod/v4";
 
 import { buildUnvalidatedRealtimeIndexingStatusProjection } from "../../../indexing-status/deserialize/realtime-indexing-status-projection";
 import type { Unvalidated } from "../../../shared/types";
-import { type IndexingStatusResponse, IndexingStatusResponseCodes } from "./response";
-import type { SerializedIndexingStatusResponse } from "./serialized-response";
+import { type EnsApiIndexingStatusResponse, EnsApiIndexingStatusResponseCodes } from "./response";
+import type { SerializedEnsApiIndexingStatusResponse } from "./serialized-response";
 import {
-  makeIndexingStatusResponseSchema,
-  makeSerializedIndexingStatusResponseSchema,
+  makeEnsApiIndexingStatusResponseSchema,
+  makeSerializedEnsApiIndexingStatusResponseSchema,
 } from "./zod-schemas";
 
 /**
- * Builds an unvalidated {@link IndexingStatusResponse} object to be
- * validated with {@link makeIndexingStatusResponseSchema}.
+ * Builds an unvalidated {@link EnsApiIndexingStatusResponse} object to be
+ * validated with {@link makeEnsApiIndexingStatusResponseSchema}.
  *
  * @param serializedResponse - The serialized response to build from.
- * @return An unvalidated {@link IndexingStatusResponse} object.
+ * @return An unvalidated {@link EnsApiIndexingStatusResponse} object.
  */
-function buildUnvalidatedIndexingStatusResponse(
-  serializedResponse: SerializedIndexingStatusResponse,
-): Unvalidated<IndexingStatusResponse> {
-  if (serializedResponse.responseCode !== IndexingStatusResponseCodes.Ok) {
+function buildUnvalidatedEnsApiIndexingStatusResponse(
+  serializedResponse: SerializedEnsApiIndexingStatusResponse,
+): Unvalidated<EnsApiIndexingStatusResponse> {
+  if (serializedResponse.responseCode !== EnsApiIndexingStatusResponseCodes.Ok) {
     return serializedResponse;
   }
 
@@ -32,19 +32,28 @@ function buildUnvalidatedIndexingStatusResponse(
 }
 
 /**
- * Deserialize a {@link IndexingStatusResponse} object.
+ * Deserialize a {@link EnsApiIndexingStatusResponse} object.
  */
-export function deserializeIndexingStatusResponse(
-  maybeResponse: Unvalidated<SerializedIndexingStatusResponse>,
-): IndexingStatusResponse {
-  const parsed = makeSerializedIndexingStatusResponseSchema()
-    .transform(buildUnvalidatedIndexingStatusResponse)
-    .pipe(makeIndexingStatusResponseSchema())
+export function deserializeEnsApiIndexingStatusResponse(
+  maybeResponse: Unvalidated<SerializedEnsApiIndexingStatusResponse>,
+): EnsApiIndexingStatusResponse {
+  const parsed = makeSerializedEnsApiIndexingStatusResponseSchema()
+    .transform(buildUnvalidatedEnsApiIndexingStatusResponse)
+    .pipe(makeEnsApiIndexingStatusResponseSchema())
     .safeParse(maybeResponse);
 
   if (parsed.error) {
-    throw new Error(`Cannot deserialize IndexingStatusResponse:\n${prettifyError(parsed.error)}\n`);
+    throw new Error(
+      `Cannot deserialize EnsApiIndexingStatusResponse:\n${prettifyError(parsed.error)}\n`,
+    );
   }
 
   return parsed.data;
 }
+
+/**
+ * Deserialize a {@link EnsApiIndexingStatusResponse} object.
+ *
+ * @deprecated Use {@link deserializeEnsApiIndexingStatusResponse} instead.
+ */
+export const deserializeIndexingStatusResponse = deserializeEnsApiIndexingStatusResponse;

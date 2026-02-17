@@ -1,6 +1,13 @@
-import type { ENSApiPublicConfig } from "../../config/types";
+import type { EnsApiPublicConfig } from "../../config/types";
 
 /**
  * ENSApi Public Config Response
  */
-export type ConfigResponse = ENSApiPublicConfig;
+export type EnsApiConfigResponse = EnsApiPublicConfig;
+
+/**
+ * ENSApi Config API Response
+ *
+ * @deprecated Use {@link EnsApiConfigResponse} instead.
+ */
+export type ConfigResponse = EnsApiConfigResponse;

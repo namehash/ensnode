@@ -1,13 +1,13 @@
 import type { ResolverRecordsSelection } from "../resolution";
 import {
-  type ConfigResponse,
-  deserializeConfigResponse,
   deserializedNameTokensResponse,
+  deserializeEnsApiConfigResponse,
+  deserializeEnsApiIndexingStatusResponse,
   deserializeErrorResponse,
-  deserializeIndexingStatusResponse,
   deserializeRegistrarActionsResponse,
+  type EnsApiConfigResponse,
+  type EnsApiIndexingStatusResponse,
   type ErrorResponse,
-  type IndexingStatusResponse,
   type NameTokensRequest,
   type NameTokensResponse,
   type RegistrarActionsFilter,
@@ -22,8 +22,8 @@ import {
   type ResolvePrimaryNamesResponse,
   type ResolveRecordsRequest,
   type ResolveRecordsResponse,
-  type SerializedConfigResponse,
-  type SerializedIndexingStatusResponse,
+  type SerializedEnsApiConfigResponse,
+  type SerializedEnsApiIndexingStatusResponse,
   type SerializedNameTokensResponse,
   type SerializedRegistrarActionsResponse,
 } from "./api";
@@ -39,19 +39,21 @@ export interface ClientOptions {
 }
 
 /**
- * ENSNode API Client
+ * EnsApi Client
  *
  * Provides access to the following ENSNode APIs:
  * - Resolution API
- * - 🚧 Configuration API
- * - 🚧 Indexing Status API
+ * - Configuration API
+ * - Indexing Status API
+ * - Registrar Actions API
+ * - Name Tokens API
  *
  * @example
  * ```typescript
- * import { ENSApiClient } from "@ensnode/ensnode-sdk";
+ * import { EnsApiClient } from "@ensnode/ensnode-sdk";
  *
  * // Create client with default options
- * const client = new ENSApiClient();
+ * const client = new EnsApiClient();
  *
  * // Use resolution methods
  * const { records } = await client.resolveRecords("jesse.base.eth", {
@@ -62,35 +64,35 @@ export interface ClientOptions {
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, ENSApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, EnsApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Mainnet
- * const client = new ENSApiClient({
+ * const client = new EnsApiClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Mainnet),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSNamespaceIds, ENSApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
+ * import { ENSNamespaceIds, EnsApiClient, getDefaultEnsNodeUrl } from "@ensnode/ensnode-sdk";
  *
  * // Use default ENSNode API URL for Sepolia
- * const client = new ENSApiClient({
+ * const client = new EnsApiClient({
  *   url: getDefaultEnsNodeUrl(ENSNamespaceIds.Sepolia),
  * });
  * ```
  *
  * @example
  * ```typescript
- * import { ENSApiClient } from "@ensnode/ensnode-sdk";
+ * import { EnsApiClient } from "@ensnode/ensnode-sdk";
  *
  * // Custom configuration
- * const client = new ENSApiClient({
+ * const client = new EnsApiClient({
  *   url: new URL("https://my-ensnode-instance.com"),
  * });
  * ```
  */
-export class ENSApiClient {
+export class EnsApiClient {
   private readonly options: ClientOptions;
 
   static defaultOptions(): ClientOptions {
@@ -101,7 +103,7 @@ export class ENSApiClient {
 
   constructor(options: Partial<ClientOptions> = {}) {
     this.options = {
-      ...ENSApiClient.defaultOptions(),
+      ...EnsApiClient.defaultOptions(),
       ...options,
     };
   }
@@ -302,22 +304,22 @@ export class ENSApiClient {
   }
 
   /**
-   * Fetch ENSNode Config
+   * Fetch ENSApi Config
    *
-   * Fetch the ENSNode's configuration.
+   * Fetch the ENSApi's configuration.
    *
-   * @returns {ConfigResponse}
+   * @returns {EnsApiConfigResponse}
    *
-   * @throws if the ENSNode request fails
-   * @throws if the ENSNode API returns an error response
-   * @throws if the ENSNode response breaks required invariants
+   * @throws if the ENSApi request fails
+   * @throws if the ENSApi returns an error response
+   * @throws if the ENSApi response breaks required invariants
    */
-  async config(): Promise<ConfigResponse> {
+  async config(): Promise<EnsApiConfigResponse> {
     const url = new URL(`/api/config`, this.options.url);
 
     const response = await fetch(url);
 
-    // ENSNode API should always allow parsing a response as JSON object.
+    // ENSApi should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
     let responseData: unknown;
     try {
@@ -328,27 +330,27 @@ export class ENSApiClient {
 
     if (!response.ok) {
       const errorResponse = deserializeErrorResponse(responseData);
-      throw new Error(`Fetching ENSNode Config Failed: ${errorResponse.message}`);
+      throw new Error(`Fetching ENSApi Config Failed: ${errorResponse.message}`);
     }
 
-    return deserializeConfigResponse(responseData as SerializedConfigResponse);
+    return deserializeEnsApiConfigResponse(responseData as SerializedEnsApiConfigResponse);
   }
 
   /**
-   * Fetch ENSNode Indexing Status
+   * Fetch ENSApi Indexing Status
    *
-   * @returns {IndexingStatusResponse}
+   * @returns {EnsApiIndexingStatusResponse}
    *
-   * @throws if the ENSNode request fails
-   * @throws if the ENSNode API returns an error response
-   * @throws if the ENSNode response breaks required invariants
+   * @throws if the ENSApi request fails
+   * @throws if the ENSApi returns an error response
+   * @throws if the ENSApi response breaks required invariants
    */
-  async indexingStatus(): Promise<IndexingStatusResponse> {
+  async indexingStatus(): Promise<EnsApiIndexingStatusResponse> {
     const url = new URL(`/api/indexing-status`, this.options.url);
 
     const response = await fetch(url);
 
-    // ENSNode API should always allow parsing a response as JSON object.
+    // ENSApi should always allow parsing a response as JSON object.
     // If for some reason it's not the case, throw an error.
     let responseData: unknown;
     try {
@@ -372,11 +374,13 @@ export class ENSApiClient {
       // however, if errorResponse was defined,
       // throw an error with the generic server error message
       if (typeof errorResponse !== "undefined") {
-        throw new Error(`Fetching ENSNode Indexing Status Failed: ${errorResponse.message}`);
+        throw new Error(`Fetching ENSApi Indexing Status Failed: ${errorResponse.message}`);
       }
     }
 
-    return deserializeIndexingStatusResponse(responseData as SerializedIndexingStatusResponse);
+    return deserializeEnsApiIndexingStatusResponse(
+      responseData as SerializedEnsApiIndexingStatusResponse,
+    );
   }
 
   /**
@@ -399,11 +403,11 @@ export class ENSApiClient {
    * ```ts
    * import {
    *   registrarActionsFilter,
-   *   ENSApiClient,
+   *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
-   * const client: ENSApiClient;
+   * const client: EnsApiClient;
    *
    * // Get first page with default page size (10 records)
    * const response = await client.registrarActions();
@@ -611,11 +615,11 @@ export class ENSApiClient {
    * @example
    * ```ts
    * import {
-   *   ENSApiClient,
+   *   EnsApiClient,
    * } from "@ensnode/ensnode-sdk";
    * import { namehash } from "viem/ens";
    *
-   * const client: ENSApiClient;
+   * const client: EnsApiClient;
    *
    * // get latest name token records from the indexed subregistry based on the requested name
    * const response = await client.nameTokens({
@@ -673,6 +677,6 @@ export class ENSApiClient {
 /**
  * ENSNode Client
  *
- * @deprecated use {@link ENSApiClient} instead
+ * @deprecated use {@link EnsApiClient} instead
  */
-export class ENSNodeClient extends ENSApiClient {}
+export class ENSNodeClient extends EnsApiClient {}

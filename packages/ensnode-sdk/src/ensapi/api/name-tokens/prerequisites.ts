@@ -1,4 +1,4 @@
-import { type ENSIndexerPublicConfig, PluginName } from "../../../ensindexer/config/types";
+import { type EnsIndexerPublicConfig, PluginName } from "../../../ensindexer/config/types";
 import {
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
@@ -16,9 +16,9 @@ export const nameTokensPrerequisites = Object.freeze({
   requiredPlugins: [PluginName.Registrars, PluginName.TokenScope] as const,
 
   /**
-   * Check if provided ENSApiPublicConfig supports the Name Tokens API.
+   * Check if provided EnsIndexerPublicConfig supports the Name Tokens API.
    */
-  hasEnsIndexerConfigSupport(config: ENSIndexerPublicConfig): boolean {
+  hasEnsIndexerConfigSupport(config: EnsIndexerPublicConfig): boolean {
     return nameTokensPrerequisites.requiredPlugins.every((plugin) =>
       config.plugins.includes(plugin),
     );

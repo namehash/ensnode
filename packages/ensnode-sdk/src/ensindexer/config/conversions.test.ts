@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { deserializeENSIndexerPublicConfig } from "./deserialize";
-import { serializeENSIndexerPublicConfig } from "./serialize";
-import type { SerializedENSIndexerPublicConfig } from "./serialized-types";
-import { type ENSIndexerPublicConfig, PluginName } from "./types";
+import { deserializeEnsIndexerPublicConfig } from "./deserialize";
+import { serializeEnsIndexerPublicConfig } from "./serialize";
+import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
+import { type EnsIndexerPublicConfig, PluginName } from "./types";
 
 describe("ENSIndexer: Config", () => {
   describe("serialization", () => {
-    it("can serialize ENSIndexerPublicConfig", () => {
+    it("can serialize EnsIndexerPublicConfig", () => {
       // arrange
       const config = {
         databaseSchemaName: "public",
@@ -28,20 +28,20 @@ describe("ENSIndexer: Config", () => {
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
         },
-      } satisfies ENSIndexerPublicConfig;
+      } satisfies EnsIndexerPublicConfig;
 
       // act
-      const result = serializeENSIndexerPublicConfig(config);
+      const result = serializeEnsIndexerPublicConfig(config);
 
       // assert
       expect(result).toStrictEqual({
         ...config,
         indexedChainIds: [1],
-      } satisfies SerializedENSIndexerPublicConfig);
+      } satisfies SerializedEnsIndexerPublicConfig);
 
       // bonus step: deserialize the serialized
       // act
-      const deserializedResult = deserializeENSIndexerPublicConfig(result);
+      const deserializedResult = deserializeEnsIndexerPublicConfig(result);
 
       // assert
       expect(deserializedResult).toStrictEqual(config);
@@ -68,43 +68,43 @@ describe("ENSIndexer: Config", () => {
         ensRainbow: "0.32.0",
         ensRainbowSchema: 2,
       },
-    } satisfies SerializedENSIndexerPublicConfig;
+    } satisfies SerializedEnsIndexerPublicConfig;
 
-    it("can deserialize SerializedENSIndexerPublicConfig", () => {
+    it("can deserialize SerializedEnsIndexerPublicConfig", () => {
       // arrange
       const serializedConfig = structuredClone(correctSerializedConfig);
 
       // act
-      const result = deserializeENSIndexerPublicConfig(serializedConfig);
+      const result = deserializeEnsIndexerPublicConfig(serializedConfig);
 
       // assert
       expect(result).toStrictEqual({
         ...serializedConfig,
         indexedChainIds: new Set([1, 10, 8453]),
-      } satisfies ENSIndexerPublicConfig);
+      } satisfies EnsIndexerPublicConfig);
     });
 
     it("can enforce invariants: expected subgraph-compatibility", () => {
       // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
+      const serializedConfig: SerializedEnsIndexerPublicConfig =
         structuredClone(correctSerializedConfig);
 
       serializedConfig.isSubgraphCompatible = true;
 
       // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).not.toThrowError();
+      expect(() => deserializeEnsIndexerPublicConfig(serializedConfig)).not.toThrowError();
     });
 
     it("can enforce invariants: broken subgraph-compatibility (wrong plugins active)", () => {
       // arrange
-      const serializedConfig: SerializedENSIndexerPublicConfig =
+      const serializedConfig: SerializedEnsIndexerPublicConfig =
         structuredClone(correctSerializedConfig);
 
       serializedConfig.isSubgraphCompatible = true;
       serializedConfig.plugins.push(PluginName.Lineanames);
 
       // act & assert
-      expect(() => deserializeENSIndexerPublicConfig(serializedConfig)).toThrowError(
+      expect(() => deserializeEnsIndexerPublicConfig(serializedConfig)).toThrowError(
         /isSubgraphCompatible/,
       );
     });

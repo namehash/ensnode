@@ -1,11 +1,11 @@
 import type { ZodCheckFnInput } from "../../shared/zod-types";
-import type { ENSIndexerVersionInfo } from "./types";
+import type { EnsIndexerVersionInfo } from "./types";
 
 /**
  * Invariant: ensDb version is same as ensIndexer version
  */
 export function invariant_ensDbVersionIsSameAsEnsIndexerVersion(
-  ctx: ZodCheckFnInput<ENSIndexerVersionInfo>,
+  ctx: ZodCheckFnInput<EnsIndexerVersionInfo>,
 ) {
   const versionInfo = ctx.value;
 
