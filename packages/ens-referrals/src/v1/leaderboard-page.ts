@@ -5,6 +5,7 @@ import type { ReferrerLeaderboard } from "./leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "./number";
 import type { AwardedReferrerMetrics } from "./referrer-metrics";
 import type { ReferralProgramRules } from "./rules";
+import { calcReferralProgramStatus, type ReferralProgramStatusId } from "./status";
 
 /**
  * The default number of referrers per leaderboard page.
@@ -288,6 +289,12 @@ export interface ReferrerLeaderboardPage {
   pageContext: ReferrerLeaderboardPageContext;
 
   /**
+   * The status of the referral program ("Scheduled", "Active", or "Closed")
+   * calculated based on the program's timing relative to {@link accurateAsOf}.
+   */
+  status: ReferralProgramStatusId;
+
+  /**
    * The {@link UnixTimestamp} of when the data used to build the {@link ReferrerLeaderboardPage} was accurate as of.
    */
   accurateAsOf: UnixTimestamp;
@@ -315,11 +322,14 @@ export const getReferrerLeaderboardPage = (
     referrers = [];
   }
 
+  const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
+
   return {
     rules: leaderboard.rules,
     referrers,
     aggregatedMetrics: leaderboard.aggregatedMetrics,
     pageContext,
     accurateAsOf: leaderboard.accurateAsOf,
+    status,
   };
 };

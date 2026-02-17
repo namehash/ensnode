@@ -1,4 +1,5 @@
 import {
+  ReferralProgramStatuses,
   type ReferrerLeaderboard,
   ReferrerLeaderboardPageResponseCodes,
   type ReferrerLeaderboardPageResponseOk,
@@ -1093,6 +1094,7 @@ export const referrerLeaderboardPageResponseOk: ReferrerLeaderboardPageResponseO
       startIndex: 0,
       endIndex: 28,
     },
+    status: ReferralProgramStatuses.Active,
     accurateAsOf: 1735689600,
   },
 };

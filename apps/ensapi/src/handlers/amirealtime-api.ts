@@ -41,7 +41,11 @@ app.get(
       maxWorstCaseDistance: params.queryParam
         .optional()
         .default(AMIREALTIME_DEFAULT_MAX_WORST_CASE_DISTANCE)
-        .pipe(makeDurationSchema("maxWorstCaseDistance query param"))
+        .pipe(
+          z.coerce
+            .number({ error: `maxWorstCaseDistance query param must be a number` })
+            .pipe(makeDurationSchema("maxWorstCaseDistance query param")),
+        )
         .describe("Maximum acceptable worst-case indexing distance in seconds"),
     }),
   ),

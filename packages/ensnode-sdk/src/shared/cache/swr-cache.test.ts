@@ -740,4 +740,167 @@ describe("SWRCache", () => {
       expect(result2).toBe("success");
     });
   });
+
+  describe("immutability support via cached result parameter", () => {
+    it("should pass undefined on first call when no cache exists", async () => {
+      const fn = vi.fn(async (cachedResult) => {
+        return cachedResult ? "has-cache" : "no-cache";
+      });
+
+      const cache = new SWRCache({ fn, ttl: 60 });
+
+      const result = await cache.read();
+      expect(result).toBe("no-cache");
+      expect(fn).toHaveBeenCalledWith(undefined);
+      cache.destroy();
+    });
+
+    it("should pass cached result on subsequent revalidations", async () => {
+      let callCount = 0;
+      const fn = vi.fn(async (cachedResult) => {
+        callCount++;
+        if (cachedResult && !(cachedResult.result instanceof Error)) {
+          return `call-${callCount}-saw-${cachedResult.result}`;
+        }
+        return `call-${callCount}-fresh`;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1, proactivelyInitialize: true });
+
+      // Wait for initial load
+      await vi.runAllTimersAsync();
+      const result1 = await cache.read();
+      expect(result1).toBe("call-1-fresh");
+
+      // Advance past TTL to trigger revalidation
+      vi.advanceTimersByTime(2000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result2 = await cache.read();
+      expect(result2).toBe("call-2-saw-call-1-fresh");
+      expect(fn).toHaveBeenCalledTimes(2);
+
+      cache.destroy();
+    });
+
+    it("should allow fn to return cached data when immutable", async () => {
+      let callCount = 0;
+
+      // Simulates an edition leaderboard that becomes immutable
+      const fn = vi.fn(async (cachedResult) => {
+        callCount++;
+
+        // If cached data is marked immutable, return it without re-fetching
+        if (
+          cachedResult &&
+          !(cachedResult.result instanceof Error) &&
+          cachedResult.result.isImmutable
+        ) {
+          return cachedResult.result;
+        }
+
+        // Otherwise fetch fresh data
+        // Becomes immutable on second call
+        return {
+          value: `data-${callCount}`,
+          isImmutable: callCount >= 2,
+        };
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1, proactivelyInitialize: true });
+
+      // Initial load
+      await vi.runAllTimersAsync();
+      const result1 = await cache.read();
+      expect(result1).toEqual({ value: "data-1", isImmutable: false });
+      expect(callCount).toBe(1);
+
+      // Trigger revalidation by advancing past TTL
+      vi.advanceTimersByTime(2000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result2 = await cache.read();
+      expect(result2).toEqual({ value: "data-2", isImmutable: true });
+      expect(callCount).toBe(2);
+
+      // Trigger another revalidation
+      vi.advanceTimersByTime(2000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result3 = await cache.read();
+      // Should still be data-2 because fn returned cached immutable data
+      expect(result3).toEqual({ value: "data-2", isImmutable: true });
+      expect(callCount).toBe(3); // fn was called, but returned cached data
+
+      cache.destroy();
+    });
+
+    it("should support backward compatibility with fn that ignores cached result", async () => {
+      let callCount = 0;
+
+      // Old-style function that doesn't use the cachedResult parameter
+      const fn = vi.fn(async () => {
+        callCount++;
+        return `result-${callCount}`;
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1, proactivelyInitialize: true });
+
+      // Initial load
+      await vi.runAllTimersAsync();
+      const result1 = await cache.read();
+      expect(result1).toBe("result-1");
+
+      // Trigger revalidation
+      vi.advanceTimersByTime(2000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result2 = await cache.read();
+      expect(result2).toBe("result-2");
+      expect(callCount).toBe(2);
+
+      cache.destroy();
+    });
+
+    it("should pass cached error result to fn and eventually return success", async () => {
+      let shouldError = true;
+      const fn = vi.fn(async (cachedResult) => {
+        if (cachedResult && cachedResult.result instanceof Error) {
+          return "recovered-from-error";
+        }
+        if (shouldError) throw new Error("test error");
+        return "success";
+      });
+
+      const cache = new SWRCache({ fn, ttl: 1, errorTtl: 1, proactivelyInitialize: true });
+
+      // Initial load (error)
+      await vi.runAllTimersAsync();
+      const result1 = await cache.read();
+      expect(result1).toBeInstanceOf(Error);
+
+      // Trigger revalidation after errorTtl
+      shouldError = false;
+      vi.advanceTimersByTime(2000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result2 = await cache.read();
+      expect(result2).toBe("recovered-from-error");
+
+      // Trigger another revalidation - now cached result is not an error
+      vi.advanceTimersByTime(2000);
+      await cache.read();
+      await vi.runAllTimersAsync();
+
+      const result3 = await cache.read();
+      expect(result3).toBe("success");
+
+      cache.destroy();
+    });
+  });
 });
