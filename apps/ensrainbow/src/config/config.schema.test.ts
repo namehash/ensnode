@@ -9,7 +9,7 @@ import { DB_SCHEMA_VERSION } from "@/lib/database";
 import { buildEnvConfigFromEnvironment, buildServeCommandConfig } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
-import { buildENSRainbowPublicConfig } from "./public";
+import { buildEnsRainbowPublicConfig } from "./public";
 import type { DbConfig, ENSRainbowEnvConfig } from "./types";
 
 describe("buildEnvConfigFromEnvironment", () => {
@@ -333,7 +333,7 @@ describe("buildServeCommandConfig", () => {
   });
 });
 
-describe("buildENSRainbowPublicConfig", () => {
+describe("buildEnsRainbowPublicConfig", () => {
   const dbConfig: DbConfig = {
     labelSet: {
       labelSetId: "subgraph",
@@ -343,7 +343,7 @@ describe("buildENSRainbowPublicConfig", () => {
   };
 
   it("returns a valid ENSRainbow public config with correct structure", () => {
-    const result = buildENSRainbowPublicConfig(dbConfig);
+    const result = buildEnsRainbowPublicConfig(dbConfig);
 
     expect(result).toStrictEqual({
       version: packageJson.version,

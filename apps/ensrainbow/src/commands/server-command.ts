@@ -4,7 +4,7 @@ import { serve } from "@hono/node-server";
 
 import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 
-import { buildENSRainbowPublicConfig } from "@/config/public";
+import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
@@ -24,7 +24,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   try {
     const ensRainbowServer = await ENSRainbowServer.init(db);
     const dbConfig = await buildDbConfig(ensRainbowServer);
-    const publicConfig = buildENSRainbowPublicConfig(dbConfig);
+    const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
 
     // console.log is used so it can't be skipped by the logger
     console.log("ENSRainbow public config:");

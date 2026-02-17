@@ -220,6 +220,57 @@ describe("EnsRainbowApiClient", () => {
     expect(typeof response.versionInfo.version === "string").toBeTruthy();
     expect(typeof response.versionInfo.dbSchemaVersion === "number").toBeTruthy();
   });
+
+  describe("config", () => {
+    it("should request /v1/config and return public config on success", async () => {
+      const configData: EnsRainbow.ENSRainbowPublicConfig = {
+        version: "2.0.0",
+        labelSet: {
+          labelSetId: "subgraph",
+          highestLabelSetVersion: 5,
+        },
+        recordsCount: 133856894,
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(configData),
+      });
+
+      const response = await client.config();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        new URL("/v1/config", DEFAULT_ENSRAINBOW_URL),
+      );
+      expect(response).toEqual(configData);
+    });
+
+    it("should throw with server error message when response is not ok", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        statusText: "Internal Server Error",
+        json: () =>
+          Promise.resolve({
+            error: "Database not ready",
+            errorCode: 500,
+          }),
+      });
+
+      await expect(client.config()).rejects.toThrow("Database not ready");
+    });
+
+    it("should throw with fallback message when error body has no error field", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        statusText: "Service Unavailable",
+        json: () => Promise.resolve({}),
+      });
+
+      await expect(client.config()).rejects.toThrow(
+        "Failed to fetch ENSRainbow config: Service Unavailable",
+      );
+    });
+  });
 });
 
 describe("HealResponse error detection", () => {

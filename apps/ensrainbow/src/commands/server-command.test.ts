@@ -7,7 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { buildENSRainbowPublicConfig } from "@/config/public";
+import { buildEnsRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
 import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
@@ -34,7 +34,7 @@ describe("Server Command Tests", () => {
 
       const ensRainbowServer = await ENSRainbowServer.init(db);
       const dbConfig = await buildDbConfig(ensRainbowServer);
-      const publicConfig = buildENSRainbowPublicConfig(dbConfig);
+      const publicConfig = buildEnsRainbowPublicConfig(dbConfig);
       app = createApi(ensRainbowServer, publicConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
