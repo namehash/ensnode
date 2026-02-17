@@ -318,7 +318,7 @@ export class EnsApiClient {
    * @returns {EnsApiConfigResponse}
    *
    * @throws if the ENSApi request fails
-   * @throws if the ENSIndexer returns a non-ok response
+   * @throws if the ENSApi returns a non-ok response
    * @throws if the ENSApi response breaks required invariants
    */
   async config(): Promise<EnsApiConfigResponse> {
@@ -349,7 +349,7 @@ export class EnsApiClient {
    * @returns {EnsApiIndexingStatusResponse}
    *
    * @throws if the ENSApi request fails
-   * @throws if the ENSIndexer returns a non-ok response
+   * @throws if the ENSApi returns a non-ok response
    * @throws if the ENSApi response breaks required invariants
    */
   async indexingStatus(): Promise<EnsApiIndexingStatusResponse> {

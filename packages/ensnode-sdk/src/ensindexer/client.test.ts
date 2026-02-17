@@ -108,13 +108,15 @@ describe("EnsIndexerClient", () => {
     it("throws on non-OK response with a generic ErrorResponse payload", async () => {
       // arrange
       const requestUrl = new URL(`/api/indexing-status`, ENSINDEXER_URL);
-      const errorResponse = { error: "Something went wrong" };
+      const errorResponse = { message: "Something went wrong" };
       mockFetch.mockResolvedValueOnce({
         ok: false,
         json: async () => errorResponse,
       });
       // act & assert
-      await expect(client.indexingStatus()).rejects.toThrow();
+      await expect(client.indexingStatus()).rejects.toThrow(
+        "Fetching ENSIndexer Indexing Status Failed",
+      );
       expect(mockFetch).toHaveBeenCalledWith(requestUrl);
     });
 
