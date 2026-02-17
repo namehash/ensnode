@@ -60,9 +60,7 @@ describe("EnsIndexerClient", () => {
       // arrange
       const requestUrl = new URL(`/api/config`, ENSINDEXER_URL);
       const errorBody = {
-        error: {
-          message: "Something went wrong",
-        },
+        message: "Something went wrong",
       };
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -71,7 +69,7 @@ describe("EnsIndexerClient", () => {
         json: async () => errorBody,
       });
       // act & assert
-      await expect(client.config()).rejects.toThrow();
+      await expect(client.config()).rejects.toThrow("Fetching ENSIndexer Config Failed");
       expect(mockFetch).toHaveBeenCalledWith(requestUrl);
     });
 
