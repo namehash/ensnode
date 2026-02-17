@@ -1,5 +1,6 @@
 import type { z } from "zod/v4";
 
+import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
 import type { PortNumber } from "@ensnode/ensnode-sdk/internal";
 
 import type { AbsolutePathSchemaBase, DbSchemaVersionSchemaBase } from "./config.schema";
@@ -31,4 +32,12 @@ export interface ENSRainbowEnvConfig {
 export interface ServeCommandConfig {
   port: PortNumber;
   dataDir: AbsolutePath;
+}
+
+/**
+ * Metadata read from an opened ENSRainbow database.
+ */
+export interface DbConfig {
+  labelSet: EnsRainbowServerLabelSet;
+  recordsCount: number;
 }

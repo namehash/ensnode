@@ -16,7 +16,7 @@ import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
 import { buildENSRainbowPublicConfig } from "@/config/public";
-import type { ServeCommandConfig } from "@/config/types";
+import type { DbConfig } from "@/config/types";
 import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
 import { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
@@ -25,10 +25,7 @@ import { logger } from "@/utils/logger";
 /**
  * Creates and configures an ENS Rainbow API
  */
-export async function createApi(
-  db: ENSRainbowDB,
-  serveCommandConfig: ServeCommandConfig,
-): Promise<Hono> {
+export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   const api = new Hono();
   const server = await ENSRainbowServer.init(db);
 
@@ -43,11 +40,12 @@ export async function createApi(
   }
   const cachedCountResponse = countResult;
 
-  const cachedPublicConfig = buildENSRainbowPublicConfig(
-    serveCommandConfig,
-    server.getServerLabelSet(),
-    countResult.count,
-  );
+  const dbConfig: DbConfig = {
+    labelSet: server.getServerLabelSet(),
+    recordsCount: countResult.count,
+  };
+
+  const cachedPublicConfig = buildENSRainbowPublicConfig(dbConfig);
 
   // console.log is used so it can't be skipped by the logger
   console.log("ENSRainbow public config:");

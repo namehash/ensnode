@@ -4,15 +4,13 @@ import { isAbsolute, resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import type { EnsRainbowServerLabelSet } from "@ensnode/ensnode-sdk";
-
 import { DB_SCHEMA_VERSION } from "@/lib/database";
 
 import { buildEnvConfigFromEnvironment, buildServeCommandConfig } from "./config.schema";
 import { ENSRAINBOW_DEFAULT_PORT, getDefaultDataDir } from "./defaults";
 import type { ENSRainbowEnvironment } from "./environment";
 import { buildENSRainbowPublicConfig } from "./public";
-import type { ENSRainbowEnvConfig, ServeCommandConfig } from "./types";
+import type { DbConfig, ENSRainbowEnvConfig } from "./types";
 
 describe("buildEnvConfigFromEnvironment", () => {
   describe("Success cases", () => {
@@ -336,40 +334,21 @@ describe("buildServeCommandConfig", () => {
 });
 
 describe("buildENSRainbowPublicConfig", () => {
-  const labelSet: EnsRainbowServerLabelSet = {
-    labelSetId: "subgraph",
-    highestLabelSetVersion: 0,
+  const dbConfig: DbConfig = {
+    labelSet: {
+      labelSetId: "subgraph",
+      highestLabelSetVersion: 0,
+    },
+    recordsCount: 1000,
   };
-  const recordsCount = 1000;
 
-  describe("Success cases", () => {
-    it("returns a valid ENSRainbow public config with correct structure", () => {
-      const mockConfig: ENSRainbowEnvConfig = {
-        port: ENSRAINBOW_DEFAULT_PORT,
-        dataDir: getDefaultDataDir(),
-        dbSchemaVersion: DB_SCHEMA_VERSION,
-      };
+  it("returns a valid ENSRainbow public config with correct structure", () => {
+    const result = buildENSRainbowPublicConfig(dbConfig);
 
-      const result = buildENSRainbowPublicConfig(mockConfig, labelSet, recordsCount);
-
-      expect(result).toStrictEqual({
-        version: packageJson.version,
-        labelSet,
-        recordsCount,
-      });
-    });
-
-    it("accepts ServeCommandConfig (effective config: merge of CLI args and EnvConfig)", () => {
-      const serveCommandConfig: ServeCommandConfig = {
-        port: 4000,
-        dataDir: getDefaultDataDir(),
-      };
-
-      const result = buildENSRainbowPublicConfig(serveCommandConfig, labelSet, recordsCount);
-
-      expect(result.version).toBe(packageJson.version);
-      expect(result.labelSet).toStrictEqual(labelSet);
-      expect(result.recordsCount).toBe(recordsCount);
+    expect(result).toStrictEqual({
+      version: packageJson.version,
+      labelSet: dbConfig.labelSet,
+      recordsCount: dbConfig.recordsCount,
     });
   });
 });

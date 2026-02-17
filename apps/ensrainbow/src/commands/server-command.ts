@@ -13,8 +13,8 @@ export type ServerCommandOptions = ServeCommandConfig;
 /**
  * Creates and configures the ENS Rainbow server application.
  */
-export async function createServer(db: ENSRainbowDB, serveCommandConfig: ServerCommandOptions) {
-  return createApi(db, serveCommandConfig);
+export async function createServer(db: ENSRainbowDB) {
+  return createApi(db);
 }
 
 export async function serverCommand(options: ServerCommandOptions): Promise<void> {
@@ -27,7 +27,7 @@ export async function serverCommand(options: ServerCommandOptions): Promise<void
   const db = await ENSRainbowDB.open(options.dataDir);
 
   try {
-    const app = await createServer(db, options);
+    const app = await createServer(db);
 
     const server = serve({
       fetch: app.fetch,
