@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
+import { buildUnvalidatedEnsIndexerPublicConfig } from "./deserialize";
 import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
@@ -175,32 +176,32 @@ describe("ENSIndexer: Config", () => {
         const parsedConfig = makeSerializedEnsIndexerPublicConfigSchema().parse(validConfig);
 
         // Verify that the parsed config has the expected values and types
-        expect(parsedConfig.indexedChainIds).toBeInstanceOf(Array);
-        expect(parsedConfig.indexedChainIds).toEqual([1]);
-        expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);
-        expect(parsedConfig.isSubgraphCompatible).toBe(validConfig.isSubgraphCompatible);
-        expect(parsedConfig.namespace).toBe(validConfig.namespace);
-        expect(parsedConfig.plugins).toEqual(validConfig.plugins);
-        expect(parsedConfig.databaseSchemaName).toBe(validConfig.databaseSchemaName);
-        expect(parsedConfig.versionInfo).toEqual(validConfig.versionInfo);
+        expect(parsedConfig).toStrictEqual(validConfig);
 
         // Test invalid labelSetId
         expect(
           formatParseError(
-            makeEnsIndexerPublicConfigSchema().safeParse({
-              ...validConfig,
-              labelSet: { ...validConfig.labelSet, labelSetId: "" },
-            }),
+            makeEnsIndexerPublicConfigSchema().safeParse(
+              buildUnvalidatedEnsIndexerPublicConfig({
+                ...validConfig,
+                labelSet: { ...validConfig.labelSet, labelSetId: "" },
+              }),
+            ),
           ),
         ).toContain("labelSet.labelSetId must be 1-50 characters long");
 
         // Test invalid labelSetVersion
         expect(
           formatParseError(
-            makeEnsIndexerPublicConfigSchema().safeParse({
-              ...validConfig,
-              labelSet: { ...validConfig.labelSet, labelSetVersion: "not-a-number" },
-            }),
+            makeEnsIndexerPublicConfigSchema().safeParse(
+              buildUnvalidatedEnsIndexerPublicConfig({
+                ...validConfig,
+                labelSet: {
+                  ...validConfig.labelSet,
+                  labelSetVersion: "not-a-number" as unknown as number,
+                },
+              }),
+            ),
           ),
         ).toContain("labelSet.labelSetVersion must be an integer");
       });
