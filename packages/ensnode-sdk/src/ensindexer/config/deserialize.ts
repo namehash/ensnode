@@ -1,18 +1,40 @@
 import { prettifyError } from "zod/v4";
 
+import type { Unvalidated } from "../../shared/types";
 import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import type { EnsIndexerPublicConfig } from "./types";
-import { makeEnsIndexerPublicConfigSchema } from "./zod-schemas";
+import {
+  makeEnsIndexerPublicConfigSchema,
+  makeSerializedEnsIndexerPublicConfigSchema,
+} from "./zod-schemas";
 
 /**
- * Deserialize object into a {@link EnsIndexerPublicConfig} object.
+ * Builds an unvalidated {@link EnsIndexerPublicConfig} object to be
+ * validated with {@link makeEnsIndexerPublicConfigSchema}.
+ *
+ * @param serializedPublicConfig - The serialized public config to build from.
+ * @return An unvalidated {@link EnsIndexerPublicConfig} object.
+ */
+export function buildUnvalidatedEnsIndexerPublicConfig(
+  serializedPublicConfig: SerializedEnsIndexerPublicConfig,
+): Unvalidated<EnsIndexerPublicConfig> {
+  return {
+    ...serializedPublicConfig,
+    indexedChainIds: new Set(serializedPublicConfig.indexedChainIds),
+  };
+}
+
+/**
+ * Deserialize value into {@link EnsIndexerPublicConfig} object.
  */
 export function deserializeEnsIndexerPublicConfig(
-  maybeConfig: SerializedEnsIndexerPublicConfig,
+  maybePublicConfig: Unvalidated<SerializedEnsIndexerPublicConfig>,
   valueLabel?: string,
 ): EnsIndexerPublicConfig {
-  const schema = makeEnsIndexerPublicConfigSchema(valueLabel);
-  const parsed = schema.safeParse(maybeConfig);
+  const parsed = makeSerializedEnsIndexerPublicConfigSchema(valueLabel)
+    .transform(buildUnvalidatedEnsIndexerPublicConfig)
+    .pipe(makeEnsIndexerPublicConfigSchema(valueLabel))
+    .safeParse(maybePublicConfig);
 
   if (parsed.error) {
     throw new Error(`Cannot deserialize EnsIndexerPublicConfig:\n${prettifyError(parsed.error)}\n`);

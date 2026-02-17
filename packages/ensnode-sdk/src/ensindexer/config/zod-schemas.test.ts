@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
+import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
 import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
@@ -9,6 +10,7 @@ import {
   makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
   makePluginsListSchema,
+  makeSerializedEnsIndexerPublicConfigSchema,
 } from "./zod-schemas";
 
 describe("ENSIndexer: Config", () => {
@@ -56,16 +58,16 @@ describe("ENSIndexer: Config", () => {
       });
 
       it("can parse indexed chain ID values", () => {
-        expect(makeIndexedChainIdsSchema().parse([1, 10, 8543])).toStrictEqual(
+        expect(makeIndexedChainIdsSchema().parse(new Set([1, 10, 8543]))).toStrictEqual(
           new Set([1, 10, 8543]),
         );
 
         expect(formatParseError(makeIndexedChainIdsSchema().safeParse("1,10"))).toContain(
-          "Indexed Chain IDs must be an array",
+          "Indexed Chain IDs must be a set",
         );
 
-        expect(formatParseError(makeIndexedChainIdsSchema().safeParse([]))).toContain(
-          "Indexed Chain IDs list must include at least one element",
+        expect(formatParseError(makeIndexedChainIdsSchema().safeParse(new Set([])))).toContain(
+          "Indexed Chain IDs must be a set with at least one chain ID.",
         );
       });
 
@@ -167,14 +169,14 @@ describe("ENSIndexer: Config", () => {
             ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies EnsIndexerVersionInfo,
-        };
+          },
+        } satisfies SerializedEnsIndexerPublicConfig;
 
-        const parsedConfig = makeEnsIndexerPublicConfigSchema().parse(validConfig);
+        const parsedConfig = makeSerializedEnsIndexerPublicConfigSchema().parse(validConfig);
 
         // The schema transforms URLs and arrays, so we need to check the transformed values
-        expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
-        expect(Array.from(parsedConfig.indexedChainIds)).toEqual([1]);
+        expect(parsedConfig.indexedChainIds).toBeInstanceOf(Array);
+        expect(parsedConfig.indexedChainIds).toEqual([1]);
         expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);
         expect(parsedConfig.isSubgraphCompatible).toBe(validConfig.isSubgraphCompatible);
         expect(parsedConfig.namespace).toBe(validConfig.namespace);
