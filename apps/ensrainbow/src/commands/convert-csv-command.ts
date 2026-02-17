@@ -13,7 +13,7 @@ import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
 import { labelhash } from "viem";
 
-import { type LabelHash, labelHashToBytes } from "@ensnode/ensnode-sdk";
+import { type LabelHash, type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { ENSRainbowDB } from "../lib/database.js";
 import { logger } from "../utils/logger.js";
@@ -120,6 +120,15 @@ function setupProgressBar(): ProgressBar {
 /**
  * Options for CSV conversion command
  */
+export interface ConvertCsvCommandCliArgs {
+  "input-file": string;
+  "output-file"?: string;
+  "label-set-id": LabelSetId;
+  "progress-interval"?: number;
+  "existing-db-path"?: string;
+  silent?: boolean;
+}
+
 export interface ConvertCsvCommandOptions {
   inputFile: string;
   outputFile?: string; // Optional - will be generated if not provided

@@ -58,13 +58,12 @@ export const ENSNamespaceSchema = z.enum(ENSNamespaceIds, {
     `Invalid NAMESPACE. Got '${input}', but supported ENS namespaces are: ${Object.keys(ENSNamespaceIds).join(", ")}`,
 });
 
-/**
- * Parses a numeric value as a port number.
- */
-export const PortSchema = z.coerce
+export const PortNumberSchema = z.coerce
   .number({ error: "PORT must be a number." })
-  .min(1, { error: "PORT must be greater than 1." })
-  .max(65535, { error: "PORT must be less than 65535" })
-  .optional();
+  .int({ error: "PORT must be an integer." })
+  .min(1, { error: "PORT must be greater than or equal to 1." })
+  .max(65535, { error: "PORT must be less than or equal to 65535." });
+
+export const OptionalPortNumberSchema = PortNumberSchema.optional();
 
 export const TheGraphApiKeySchema = z.string().optional();
