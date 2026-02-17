@@ -81,27 +81,17 @@ pnpm run convert \
 - `--existing-db-path`: Path to existing ENSRainbow database to filter out existing labels from the generated ensrainbow file and determine the next label set version
 - `--silent`: Disable progress bar (useful for scripts and automated workflows)
 
-### CSV Format Support
+### CSV Format
 
-The CSV converter supports two formats and expects CSV files **without a header row**.
+The CSV converter expects a single-column CSV file with one label per line, **without a header row**.
 
-#### Single Column Format (Label Only)
 ```csv
 ethereum
 vitalik
 ens
 ```
 
-The converter automatically computes labelhashes using the `labelhash()` function.
-
-#### Two Column Format (Label + Labelhash)
-```csv
-ethereum,0x541111248b45b7a8dc3f5579f630e74cb01456ea6ac067d3f4d793245a255155
-vitalik,0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a67c7103cc
-ens,0x5cee339e13375638553bdf5a6e36ba80fb9f6a4f0783680884d92b558aa471da
-```
-
-The converter validates the format of provided labelhashes (does not verify they match the label).
+The converter automatically computes labelhashes from labels using the `labelhash()` function. This ensures all label-to-labelhash mappings are deterministically correct.
 
 ### Label Filtering
 

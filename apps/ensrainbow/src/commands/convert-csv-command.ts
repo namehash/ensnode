@@ -1,8 +1,7 @@
 /**
  * ENSRAINBOW CSV FILE CREATION COMMAND
  *
- * Converts CSV files to .ensrainbow format with fast-csv
- * Supports 1-column (label only) and 2-column (label,labelhash) formats
+ * Converts single-column CSV files (one label per line) to .ensrainbow format with fast-csv
  */
 
 import { createReadStream, createWriteStream, rmSync, statSync } from "node:fs";
@@ -13,7 +12,7 @@ import { ClassicLevel } from "classic-level";
 import ProgressBar from "progress";
 import { labelhash } from "viem";
 
-import { type LabelHash, type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
+import { type LabelSetId, labelHashToBytes } from "@ensnode/ensnode-sdk";
 
 import { ENSRainbowDB } from "../lib/database.js";
 import { logger } from "../utils/logger.js";
@@ -313,39 +312,22 @@ async function initializeConversion(
 }
 
 /**
- * Create rainbow record from parsed CSV row
+ * Create rainbow record from a single-column CSV row (label only).
+ * Labelhashes are always computed deterministically from labels.
  */
 function createRainbowRecord(row: string[]): RainbowRecord {
-  const label = String(row[0]);
-
-  if (row.length === 1) {
-    // Single column: compute labelhash using labelhash function
-    const labelHashBytes = labelHashToBytes(labelhash(label));
-    return {
-      labelHash: labelHashBytes,
-      label: label,
-    };
-  } else if (row.length === 2) {
-    // Two columns: validate labelhash format and use provided hash
-    // Trim whitespace from hash (metadata), but preserve label as-is
-    const providedHash = String(row[1]).trim();
-    if (providedHash === "") {
-      throw new Error("LabelHash cannot be empty");
-    }
-    const maybeLabelHash = providedHash.startsWith("0x") ? providedHash : `0x${providedHash}`;
-    try {
-      const labelHash = labelHashToBytes(maybeLabelHash as LabelHash); // performs labelhash format validation
-      return {
-        labelHash,
-        label,
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Invalid labelHash: ${errorMessage}`);
-    }
-  } else {
-    throw new Error(`Expected 1 or 2 columns, but found ${row.length} columns`);
+  if (row.length !== 1) {
+    throw new Error(
+      `Expected 1 column (label only), but found ${row.length} columns. Multi-column CSV formats are not supported.`,
+    );
   }
+
+  const label = String(row[0]);
+  const labelHashBytes = labelHashToBytes(labelhash(label));
+  return {
+    labelHash: labelHashBytes,
+    label,
+  };
 }
 
 /**
@@ -353,21 +335,12 @@ function createRainbowRecord(row: string[]): RainbowRecord {
  */
 async function processRecord(
   row: string[],
-  expectedColumns: number,
   RainbowRecordType: any,
   outputStream: NodeJS.WritableStream,
-  lineNumber: number,
   existingDb: ENSRainbowDB | null,
   dedupDb: DeduplicationDB,
   stats: ConversionStats,
 ): Promise<boolean> {
-  // Validate column count
-  if (row.length !== expectedColumns) {
-    throw new Error(
-      `Expected ${expectedColumns} columns, but found ${row.length} in line ${lineNumber}`,
-    );
-  }
-
   const rainbowRecord = createRainbowRecord(row);
   const label = rainbowRecord.label;
   const labelHashBytes = Buffer.from(rainbowRecord.labelHash);
@@ -427,7 +400,6 @@ async function processCSVFile(
   stats: ConversionStats,
   progressBar: ProgressBar | null,
 ): Promise<{ totalLines: number; processedRecords: number }> {
-  let expectedColumns: number | null = null;
   let lineNumber = 0;
   let processedRecords = 0;
   let lastLoggedLine = 0;
@@ -465,12 +437,6 @@ async function processCSVFile(
             return;
           }
 
-          // Detect column count on first non-empty row
-          if (expectedColumns === null) {
-            expectedColumns = row.length;
-            logger.info(`Detected ${expectedColumns} columns - SEQUENTIAL processing mode`);
-          }
-
           // Log progress (less frequently to avoid logger crashes)
           if (lineNumber % progressInterval === 0 && lineNumber !== lastLoggedLine) {
             const currentTime = Date.now();
@@ -496,10 +462,8 @@ async function processCSVFile(
           // Process this one record
           const wasProcessed = await processRecord(
             row,
-            expectedColumns,
             RainbowRecordType,
             outputStream,
-            lineNumber,
             existingDb,
             dedupDb,
             stats,

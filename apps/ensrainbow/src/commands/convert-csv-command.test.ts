@@ -63,51 +63,33 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should convert two column CSV with provided hashes and ingest successfully", async () => {
+    it("should reject two-column CSV (multi-column formats are not supported)", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_2col.csv");
       const outputFile = join(tempDir, "output_2col.ensrainbow");
-      const dataDir = join(tempDir, "db_2col");
 
-      // Convert CSV to ensrainbow format
-      await convertCsvCommand({
-        inputFile,
-        outputFile,
-        labelSetId: "test-csv-two-col" as LabelSetId,
-        silent: true,
-      });
-
-      // Verify the output file was created
-      const stats = await stat(outputFile);
-      expect(stats.isFile()).toBe(true);
-      expect(stats.size).toBeGreaterThan(0);
-
-      // Ingest the converted file into database
-      const cli = createCLI({ exitProcess: false });
-      await cli.parse(["ingest-ensrainbow", "--input-file", outputFile, "--data-dir", dataDir]);
-
-      const db = await ENSRainbowDB.open(dataDir);
-      expect(await db.validate()).toBe(true);
-      const recordsCount = await db.getPrecalculatedRainbowRecordCount();
-      expect(recordsCount).toBe(10);
-      expect(
-        (await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("test123"))))?.label,
-      ).toBe("test123");
-      expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
-      await db.close();
+      await expect(
+        convertCsvCommand({
+          inputFile,
+          outputFile,
+          labelSetId: "test-csv-two-col" as LabelSetId,
+          silent: true,
+        }),
+      ).rejects.toThrow(
+        /Expected 1 column \(label only\).*Multi-column CSV formats are not supported/,
+      );
     });
 
-    it("should fail when CSV has inconsistent column count", async () => {
+    it("should reject CSV with more than one column", async () => {
       const inputFile = join(TEST_FIXTURES_DIR, "test_labels_invalid_first.csv");
       const outputFile = join(tempDir, "output_invalid.ensrainbow");
 
-      // Convert CSV to ensrainbow format (should fail on inconsistent columns)
       await expect(
         convertCsvCommand({
           inputFile,
           outputFile,
           labelSetId: "test-csv-invalid" as LabelSetId,
         }),
-      ).rejects.toThrow(/Failed on line 1: Expected 1 or 2 col/);
+      ).rejects.toThrow(/Expected 1 column \(label only\)/);
     });
 
     it("should handle CSV with special characters, emojis, unicode, and quoted fields", async () => {
@@ -149,20 +131,6 @@ describe("convert-csv-command", () => {
       }
       expect(await db.getVersionedRainbowRecord(labelHashToBytes(labelhash("1234")))).toBe(null);
       await db.close();
-    });
-
-    it("should fail when CSV contains invalid labelhash format", async () => {
-      const inputFile = join(TEST_FIXTURES_DIR, "test_labels_invalid_hash.csv");
-      const outputFile = join(tempDir, "output_invalid_hash.ensrainbow");
-
-      // Convert CSV to ensrainbow format (should fail on invalid hash format)
-      await expect(
-        convertCsvCommand({
-          inputFile,
-          outputFile,
-          labelSetId: "test-csv-invalid-hash" as LabelSetId,
-        }),
-      ).rejects.toThrow(/Failed on line 2: Invalid labelHash/);
     });
   });
 
@@ -562,22 +530,8 @@ describe("convert-csv-command", () => {
     it("should process all CSV rows including potential headers", async () => {
       const inputFile = join(tempDir, "with_header.csv");
       const outputFile = join(tempDir, "output_header.ensrainbow");
-      const csvContent =
-        "label,labelhash\nalice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob,0x38e47a7b719dce63662aeaf43440326f551b8a7ee198cee35cb5d517f2d296a2";
-      await writeFile(inputFile, csvContent);
 
-      // Should process the file (header will be treated as a regular row and fail validation)
-      // Actually, the header row will be processed and fail because "label" is not a valid hex hash
-      await expect(
-        convertCsvCommand({
-          inputFile,
-          outputFile,
-          labelSetId: "test-header" as LabelSetId,
-          silent: true,
-        }),
-      ).rejects.toThrow(/Invalid labelHash/);
-
-      // For a proper test, let's create a CSV where the header is valid data
+      // Single-column CSV where the header is valid data
       const csvContentValid = "label\nlabel1\nlabel2";
       await writeFile(inputFile, csvContentValid);
 
@@ -603,14 +557,14 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should handle CSV with malformed rows (extra columns)", async () => {
+    it("should reject CSV rows with extra columns", async () => {
       const inputFile = join(tempDir, "malformed_extra_cols.csv");
       const outputFile = join(tempDir, "output_malformed.ensrainbow");
       const csvContent =
         "alice\nbob,0x38e47a7b719dce63662aeaf43440326f551b8a7ee198cee35cb5d517f2d296a2,extra\ncharlie";
       await writeFile(inputFile, csvContent);
 
-      // Should fail when column count is inconsistent
+      // Should fail because second row has more than 1 column
       await expect(
         convertCsvCommand({
           inputFile,
@@ -618,25 +572,7 @@ describe("convert-csv-command", () => {
           labelSetId: "test-malformed" as LabelSetId,
           silent: true,
         }),
-      ).rejects.toThrow(/Expected \d+ columns/);
-    });
-
-    it("should handle CSV with malformed rows (missing columns)", async () => {
-      const inputFile = join(tempDir, "malformed_missing_cols.csv");
-      const outputFile = join(tempDir, "output_malformed2.ensrainbow");
-      const csvContent =
-        "alice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob\ncharlie,0x87a213ce1ee769e28decedefb98f6fe48890a74ba84957ebf877fb591e37e0de";
-      await writeFile(inputFile, csvContent);
-
-      // Should fail when column count is inconsistent
-      await expect(
-        convertCsvCommand({
-          inputFile,
-          outputFile,
-          labelSetId: "test-malformed2" as LabelSetId,
-          silent: true,
-        }),
-      ).rejects.toThrow(/Expected \d+ columns/);
+      ).rejects.toThrow(/Expected 1 column \(label only\)/);
     });
 
     it("should handle CSV with quoted fields containing commas", async () => {
@@ -683,22 +619,23 @@ describe("convert-csv-command", () => {
       await db.close();
     });
 
-    it("should handle CSV with empty labelhash column (should fail validation)", async () => {
-      const inputFile = join(tempDir, "empty_hash.csv");
-      const outputFile = join(tempDir, "output_empty_hash.ensrainbow");
+    it("should reject CSV with two columns (label + labelhash not supported)", async () => {
+      const inputFile = join(tempDir, "two_columns.csv");
+      const outputFile = join(tempDir, "output_two_columns.ensrainbow");
       const csvContent =
-        "alice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob,\ncharlie,0x87a213ce1ee769e28decedefb98f6fe48890a74ba84957ebf877fb591e37e0de";
+        "alice,0x9c0257114eb9399a2985f8e75dad7600c5d89fe3824ffa99ec1c3eb8bf3b0501\nbob,0x38e47a7b719dce63662aeaf43440326f551b8a7ee198cee35cb5d517f2d296a2";
       await writeFile(inputFile, csvContent);
 
-      // Should fail when labelhash is empty
       await expect(
         convertCsvCommand({
           inputFile,
           outputFile,
-          labelSetId: "test-empty-hash" as LabelSetId,
+          labelSetId: "test-two-columns" as LabelSetId,
           silent: true,
         }),
-      ).rejects.toThrow(/LabelHash cannot be empty/);
+      ).rejects.toThrow(
+        /Expected 1 column \(label only\).*Multi-column CSV formats are not supported/,
+      );
     });
   });
 });
