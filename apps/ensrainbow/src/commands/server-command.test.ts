@@ -7,9 +7,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
+import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
-
-import { createServer } from "./server-command";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
@@ -31,7 +30,7 @@ describe("Server Command Tests", () => {
       await db.setLabelSetId("test-label-set-id");
       await db.setHighestLabelSetVersion(0);
 
-      app = await createServer(db);
+      app = await createApi(db);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
