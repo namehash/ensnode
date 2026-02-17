@@ -12,44 +12,27 @@ import {
   type LabelSetId,
   type LabelSetVersion,
 } from "@ensnode/ensnode-sdk";
-import { prettyPrintJson } from "@ensnode/ensnode-sdk/internal";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { buildENSRainbowPublicConfig } from "@/config/public";
-import type { DbConfig } from "@/config/types";
-import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
-import { ENSRainbowServer } from "@/lib/server";
+import { DB_SCHEMA_VERSION } from "@/lib/database";
+import type { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
 /**
- * Creates and configures an ENS Rainbow API
+ * Creates and configures the ENS Rainbow API routes.
  */
-export async function createApi(db: ENSRainbowDB): Promise<Hono> {
+export function createApi(
+  server: ENSRainbowServer,
+  publicConfig: EnsRainbow.ENSRainbowPublicConfig,
+): Hono {
   const api = new Hono();
-  const server = await ENSRainbowServer.init(db);
 
-  // Build and cache the public config and count once on startup.
-  // /v1/config and /v1/labels/count both return this static snapshot so they never diverge.
-  const countResult = await server.labelCount();
-  if (countResult.status === StatusCode.Error) {
-    logger.error("Failed to get records count during API initialization");
-    throw new Error(
-      `Cannot initialize API: ${countResult.error} (errorCode: ${countResult.errorCode})`,
-    );
-  }
-  const cachedCountResponse = countResult;
-
-  const dbConfig: DbConfig = {
-    labelSet: server.getServerLabelSet(),
-    recordsCount: countResult.count,
+  const countResponse: EnsRainbow.CountSuccess = {
+    status: StatusCode.Success,
+    count: publicConfig.recordsCount,
+    timestamp: new Date().toISOString(),
   };
-
-  const cachedPublicConfig = buildENSRainbowPublicConfig(dbConfig);
-
-  // console.log is used so it can't be skipped by the logger
-  console.log("ENSRainbow public config:");
-  console.log(prettyPrintJson(cachedPublicConfig));
 
   // Enable CORS for all versioned API routes
   api.use(
@@ -113,11 +96,11 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
   });
 
   api.get("/v1/labels/count", (c: HonoContext) => {
-    return c.json(cachedCountResponse, cachedCountResponse.errorCode);
+    return c.json(countResponse);
   });
 
   api.get("/v1/config", (c: HonoContext) => {
-    return c.json(cachedPublicConfig);
+    return c.json(publicConfig);
   });
 
   /**

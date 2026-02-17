@@ -10,8 +10,8 @@ For detailed documentation and guides, see the [ENSRainbow Documentation](https:
 
 ### Configuration
 
-- **EnvConfig**: from environment variables (PORT, DATA_DIR, DB_SCHEMA_VERSION), validated at startup.
-- **ServeCommandConfig**: effective config for the `serve` command: merge of CLI args and EnvConfig; CLI args take precedence. The API builds the public config (GET /v1/config) from ServeCommandConfig.
+- **Environment Config**: Built from environment variables (PORT, DATA_DIR, DB_SCHEMA_VERSION) and validated at module load time.
+- **Serve Command Config**: Built from CLI arguments and environment config for the `serve` command. CLI arguments override environment variables. The server builds the public config (GET /v1/config) from the database and command config at startup.
 
 ## Special Thanks
 

@@ -7,8 +7,10 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
+import { buildENSRainbowPublicConfig } from "@/config/public";
 import { createApi } from "@/lib/api";
 import { ENSRainbowDB } from "@/lib/database";
+import { buildDbConfig, ENSRainbowServer } from "@/lib/server";
 
 describe("Server Command Tests", () => {
   let db: ENSRainbowDB;
@@ -30,7 +32,10 @@ describe("Server Command Tests", () => {
       await db.setLabelSetId("test-label-set-id");
       await db.setHighestLabelSetVersion(0);
 
-      app = await createApi(db);
+      const ensRainbowServer = await ENSRainbowServer.init(db);
+      const dbConfig = await buildDbConfig(ensRainbowServer);
+      const publicConfig = buildENSRainbowPublicConfig(dbConfig);
+      app = createApi(ensRainbowServer, publicConfig);
 
       // Start the server on a different port than what ENSRainbow defaults to
       server = serve({
@@ -124,7 +129,7 @@ describe("Server Command Tests", () => {
   });
 
   describe("GET /v1/labels/count", () => {
-    it("should return cached count from startup (same as /v1/config)", async () => {
+    it("should return count snapshot from startup (same as /v1/config)", async () => {
       // Count is fixed at server start; changing the DB does not affect the response
       await db.setPrecalculatedRainbowRecordCount(42);
 
@@ -167,9 +172,9 @@ describe("Server Command Tests", () => {
   });
 
   describe("GET /v1/config", () => {
-    it("should return cached config from startup", async () => {
-      // The config is cached on startup with count = 0 (set in beforeAll)
-      // Even if the database is cleared in beforeEach, the cached config is returned
+    it("should return config snapshot from startup", async () => {
+      // The config is built once on startup with count = 0 (set in beforeAll)
+      // Even if the database is cleared in beforeEach, the same config is returned
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/config`);
       expect(response.status).toBe(200);
       const data = (await response.json()) as EnsRainbow.ENSRainbowPublicConfig;
@@ -178,13 +183,13 @@ describe("Server Command Tests", () => {
       expect(data.version.length).toBeGreaterThan(0);
       expect(data.labelSet.labelSetId).toBe("test-label-set-id");
       expect(data.labelSet.highestLabelSetVersion).toBe(0);
-      // Config is cached on startup with count = 0, so it returns the cached value
+      // Config is built on startup with count = 0, so it returns the startup value
       expect(data.recordsCount).toBe(0);
     });
 
-    it("should return cached config even if database count changes", async () => {
+    it("should return same config even if database count changes", async () => {
       // Set a different count in the database
-      // However, the config is cached on startup, so it will still return the cached value
+      // However, the config is built once on startup, so it will still return the startup value
       await db.setPrecalculatedRainbowRecordCount(42);
 
       const response = await fetch(`http://localhost:${nonDefaultPort}/v1/config`);
@@ -195,7 +200,7 @@ describe("Server Command Tests", () => {
       expect(data.version.length).toBeGreaterThan(0);
       expect(data.labelSet.labelSetId).toBe("test-label-set-id");
       expect(data.labelSet.highestLabelSetVersion).toBe(0);
-      // Config is cached on startup with count = 0, so changing the DB doesn't affect it
+      // Config is built on startup with count = 0, so changing the DB doesn't affect it
       expect(data.recordsCount).toBe(0);
     });
   });

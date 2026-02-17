@@ -13,10 +13,29 @@ import {
   StatusCode,
 } from "@ensnode/ensrainbow-sdk";
 
+import type { DbConfig } from "@/config/types";
 import { type ENSRainbowDB, NoPrecalculatedCountError } from "@/lib/database";
 import type { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
+
+/**
+ * Reads label set and record count from an initialized ENSRainbowServer.
+ * @throws Error if the record count cannot be read from the database.
+ */
+export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig> {
+  const countResult = await server.labelCount();
+  if (countResult.status === StatusCode.Error) {
+    throw new Error(
+      `Failed to read record count from database: ${countResult.error} (errorCode: ${countResult.errorCode})`,
+    );
+  }
+
+  return {
+    labelSet: server.getServerLabelSet(),
+    recordsCount: countResult.count,
+  };
+}
 
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
