@@ -55,6 +55,39 @@ describe("EnsIndexerClient", () => {
       await expect(client.config()).resolves.toStrictEqual(mockedResponse);
       expect(mockFetch).toHaveBeenCalledWith(requestUrl);
     });
+
+    it("throws an error when the config endpoint returns a non-OK response with a valid error body", async () => {
+      // arrange
+      const requestUrl = new URL(`/api/config`, ENSINDEXER_URL);
+      const errorBody = {
+        error: {
+          message: "Something went wrong",
+        },
+      };
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        json: async () => errorBody,
+      });
+      // act & assert
+      await expect(client.config()).rejects.toThrow();
+      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
+    });
+
+    it("throws an 'invalid JSON' error when the config endpoint returns malformed JSON", async () => {
+      // arrange
+      const requestUrl = new URL(`/api/config`, ENSINDEXER_URL);
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => {
+          throw new SyntaxError("Unexpected token in JSON");
+        },
+      });
+      // act & assert
+      await expect(client.config()).rejects.toThrow(/invalid JSON/i);
+      expect(mockFetch).toHaveBeenCalledWith(requestUrl);
+    });
   });
 
   describe("Indexing Status API", () => {
