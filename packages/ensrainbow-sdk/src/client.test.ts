@@ -239,9 +239,7 @@ describe("EnsRainbowApiClient", () => {
 
       const response = await client.config();
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        new URL("/v1/config", DEFAULT_ENSRAINBOW_URL),
-      );
+      expect(mockFetch).toHaveBeenCalledWith(new URL("/v1/config", DEFAULT_ENSRAINBOW_URL));
       expect(response).toEqual(configData);
     });
 
