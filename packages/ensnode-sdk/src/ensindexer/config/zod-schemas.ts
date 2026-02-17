@@ -30,9 +30,13 @@ export const makeIndexedChainIdsSchema = (valueLabel: string = "Indexed Chain ID
   });
 
 export const makeSerializedIndexedChainIdsSchema = (valueLabel: string = "Indexed Chain IDs") =>
-  z.array(makeChainIdSchema(valueLabel), {
-    error: `${valueLabel} must be an array.`,
-  });
+  z
+    .array(makeChainIdSchema(valueLabel), {
+      error: `${valueLabel} must be an array.`,
+    })
+    .min(1, {
+      error: `${valueLabel} must be an array with at least one chain ID.`,
+    });
 
 /**
  * Makes a schema for parsing a list of strings that (for future-proofing)
@@ -172,7 +176,9 @@ export const makeEnsIndexerPublicConfigSchema = (valueLabel: string = "ENSIndexe
     .object({
       labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
       indexedChainIds: makeIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
-      isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
+      isSubgraphCompatible: z.boolean({
+        error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
+      }),
       namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
       plugins: makePluginsListSchema(`${valueLabel}.plugins`),
       databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),
@@ -198,7 +204,9 @@ export const makeSerializedEnsIndexerPublicConfigSchema = (
   z.object({
     labelSet: makeFullyPinnedLabelSetSchema(`${valueLabel}.labelSet`),
     indexedChainIds: makeSerializedIndexedChainIdsSchema(`${valueLabel}.indexedChainIds`),
-    isSubgraphCompatible: z.boolean({ error: `${valueLabel}.isSubgraphCompatible` }),
+    isSubgraphCompatible: z.boolean({
+      error: `${valueLabel}.isSubgraphCompatible must be a boolean value.`,
+    }),
     namespace: makeENSNamespaceIdSchema(`${valueLabel}.namespace`),
     plugins: makePluginsListSchema(`${valueLabel}.plugins`),
     databaseSchemaName: makeDatabaseSchemaNameSchema(`${valueLabel}.databaseSchemaName`),

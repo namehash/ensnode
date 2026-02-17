@@ -174,7 +174,7 @@ describe("ENSIndexer: Config", () => {
 
         const parsedConfig = makeSerializedEnsIndexerPublicConfigSchema().parse(validConfig);
 
-        // The schema transforms URLs and arrays, so we need to check the transformed values
+        // Verify that the parsed config has the expected values and types
         expect(parsedConfig.indexedChainIds).toBeInstanceOf(Array);
         expect(parsedConfig.indexedChainIds).toEqual([1]);
         expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);

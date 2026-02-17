@@ -12,7 +12,7 @@ import {
 export { TheGraphCannotFallbackReasonSchema, TheGraphFallbackSchema };
 
 /**
- * Create a Zod schema for validating a serialized ENSApiPublicConfig.
+ * Create a Zod schema for validating ENSApiPublicConfig.
  *
  * @param valueLabel - Optional label for the value being validated (used in error messages)
  */
