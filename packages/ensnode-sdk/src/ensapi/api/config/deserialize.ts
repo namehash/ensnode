@@ -1,3 +1,4 @@
+import type { Unvalidated } from "../../../shared/types";
 import { deserializeEnsApiPublicConfig } from "../../config/deserialize";
 import type { EnsApiConfigResponse } from "./response";
 import type { SerializedEnsApiConfigResponse } from "./serialized-response";
@@ -6,9 +7,9 @@ import type { SerializedEnsApiConfigResponse } from "./serialized-response";
  * Deserialize a {@link EnsApiConfigResponse} object.
  */
 export function deserializeEnsApiConfigResponse(
-  serializedResponse: SerializedEnsApiConfigResponse,
+  maybeResponse: Unvalidated<SerializedEnsApiConfigResponse>,
 ): EnsApiConfigResponse {
-  return deserializeEnsApiPublicConfig(serializedResponse);
+  return deserializeEnsApiPublicConfig(maybeResponse);
 }
 
 /**
