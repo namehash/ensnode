@@ -200,9 +200,9 @@ const _EXAMPLE_INDEXING_STATUS_FOLLOWING_RESPONSE: EnsApiIndexingStatusResponse 
     responseCode: EnsApiIndexingStatusResponseCodes.Ok,
   });
 
-// Mock fetch globally
+// Mock fetch globally (auto-restored by vitest)
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+vi.stubGlobal("fetch", mockFetch);
 
 describe("EnsApiClient", () => {
   beforeEach(() => {

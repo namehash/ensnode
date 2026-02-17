@@ -33,10 +33,17 @@ import { getDefaultEnsNodeUrl } from "./deployments";
 /**
  * Configuration options for ENSNode API client
  */
-export interface ClientOptions {
+export interface EnsApiClientOptions {
   /** The ENSNode API URL */
   url: URL;
 }
+
+/**
+ * Configuration options for ENSNode API client
+ *
+ * @deprecated Use {@link EnsApiClientOptions} instead.
+ */
+export type ClientOptions = EnsApiClientOptions;
 
 /**
  * EnsApi Client
@@ -93,22 +100,22 @@ export interface ClientOptions {
  * ```
  */
 export class EnsApiClient {
-  private readonly options: ClientOptions;
+  private readonly options: EnsApiClientOptions;
 
-  static defaultOptions(): ClientOptions {
+  static defaultOptions(): EnsApiClientOptions {
     return {
       url: getDefaultEnsNodeUrl(),
     };
   }
 
-  constructor(options: Partial<ClientOptions> = {}) {
+  constructor(options: Partial<EnsApiClientOptions> = {}) {
     this.options = {
       ...EnsApiClient.defaultOptions(),
       ...options,
     };
   }
 
-  getOptions(): Readonly<ClientOptions> {
+  getOptions(): Readonly<EnsApiClientOptions> {
     return Object.freeze({
       url: new URL(this.options.url.href),
     });
@@ -311,7 +318,7 @@ export class EnsApiClient {
    * @returns {EnsApiConfigResponse}
    *
    * @throws if the ENSApi request fails
-   * @throws if the ENSApi returns an error response
+   * @throws if the ENSApi returns a non-ok response
    * @throws if the ENSApi response breaks required invariants
    */
   async config(): Promise<EnsApiConfigResponse> {
@@ -342,7 +349,7 @@ export class EnsApiClient {
    * @returns {EnsApiIndexingStatusResponse}
    *
    * @throws if the ENSApi request fails
-   * @throws if the ENSApi returns an error response
+   * @throws if the ENSApi returns a non-ok response
    * @throws if the ENSApi response breaks required invariants
    */
   async indexingStatus(): Promise<EnsApiIndexingStatusResponse> {
@@ -366,9 +373,7 @@ export class EnsApiClient {
       try {
         errorResponse = deserializeErrorResponse(responseData);
       } catch {
-        // if errorResponse could not be determined,
-        // it means the response includes indexing status data
-        console.log("Indexing Status API: handling a known indexing status server error.");
+        // No-op: allow subsequent deserialization of indexing status response.
       }
 
       // however, if errorResponse was defined,
