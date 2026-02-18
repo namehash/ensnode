@@ -81,7 +81,7 @@ export const parentNodeParamSchema = z.object({
   ),
 });
 
-export const getRegistrarActionsRoute = createRoute({
+export const registrarActionsGetMeta = createRoute({
   method: "get",
   path: "/",
   tags: ["Explore"],
@@ -103,7 +103,7 @@ export const getRegistrarActionsRoute = createRoute({
   },
 });
 
-export const getRegistrarActionsByParentNodeRoute = createRoute({
+export const registrarActionsByParentNodeGetMeta = createRoute({
   method: "get",
   path: "/:parentNode",
   tags: ["Explore"],
@@ -127,4 +127,4 @@ export const getRegistrarActionsByParentNodeRoute = createRoute({
   },
 });
 
-export const routes = [getRegistrarActionsRoute, getRegistrarActionsByParentNodeRoute];
+export const routes = [registrarActionsGetMeta, registrarActionsByParentNodeGetMeta];

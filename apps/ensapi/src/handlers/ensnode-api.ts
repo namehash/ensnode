@@ -9,7 +9,7 @@ import {
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
 import { createApp } from "@/lib/hono-factory";
 
-import { basePath, getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
+import { basePath, configGetMeta, indexingStatusGetMeta } from "./ensnode-api.routes";
 import ensnodeGraphQLApi from "./ensnode-graphql-api";
 import nameTokensApi from "./name-tokens-api";
 import { basePath as nameTokensBasePath } from "./name-tokens-api.routes";
@@ -20,13 +20,13 @@ import { basePath as resolutionBasePath } from "./resolution-api.routes";
 
 const app = createApp();
 
-app.openapi(getConfigRoute, async (c) => {
+app.openapi(configGetMeta, async (c) => {
   const config = (await import("@/config")).default;
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);
   return c.json(serializeENSApiPublicConfig(ensApiPublicConfig));
 });
 
-app.openapi(getIndexingStatusRoute, async (c) => {
+app.openapi(indexingStatusGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.indexingStatus === undefined) {
     throw new Error(`Invariant(indexing-status): indexingStatusMiddleware required`);

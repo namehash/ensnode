@@ -14,9 +14,9 @@ import { canAccelerateMiddleware } from "@/middleware/can-accelerate.middleware"
 import { makeIsRealtimeMiddleware } from "@/middleware/is-realtime.middleware";
 
 import {
-  getResolvePrimaryNameRoute,
-  getResolvePrimaryNamesRoute,
-  getResolveRecordsRoute,
+  resolvePrimaryNameGetMeta,
+  resolvePrimaryNamesGetMeta,
+  resolveRecordsGetMeta,
 } from "./resolution-api.routes";
 
 /**
@@ -44,7 +44,7 @@ app.use(canAccelerateMiddleware);
  * 3. Combined resolution:
  * GET /records/example.eth&name=true&addresses=60,0&texts=avatar,com.twitter
  */
-app.openapi(getResolveRecordsRoute, async (c) => {
+app.openapi(resolveRecordsGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.canAccelerate === undefined) {
     throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
@@ -81,7 +81,7 @@ app.openapi(getResolveRecordsRoute, async (c) => {
  * 3. ENSIP-19 Primary Name (for 'default' EVM Chain)
  * GET /primary-name/0x1234...abcd/0
  */
-app.openapi(getResolvePrimaryNameRoute, async (c) => {
+app.openapi(resolvePrimaryNameGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.canAccelerate === undefined) {
     throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);
@@ -115,7 +115,7 @@ app.openapi(getResolvePrimaryNameRoute, async (c) => {
  * 2. Multichain ENSIP-19 Primary Names Lookup (specific chain ids)
  * GET /primary-names/0x1234...abcd?chainIds=1,10,8453
  */
-app.openapi(getResolvePrimaryNamesRoute, async (c) => {
+app.openapi(resolvePrimaryNamesGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.canAccelerate === undefined) {
     throw new Error(`Invariant(resolution-api): canAccelerateMiddleware required`);

@@ -11,7 +11,7 @@ import { params } from "@/lib/handlers/params.schema";
 
 export const basePath = "/api/resolve";
 
-export const getResolveRecordsRoute = createRoute({
+export const resolveRecordsGetMeta = createRoute({
   method: "get",
   path: "/records/:name",
   tags: ["Resolution"],
@@ -43,7 +43,7 @@ export const getResolveRecordsRoute = createRoute({
   },
 });
 
-export const getResolvePrimaryNameRoute = createRoute({
+export const resolvePrimaryNameGetMeta = createRoute({
   method: "get",
   path: "/primary-name/:address/:chainId",
   tags: ["Resolution"],
@@ -71,7 +71,7 @@ export const getResolvePrimaryNameRoute = createRoute({
   },
 });
 
-export const getResolvePrimaryNamesRoute = createRoute({
+export const resolvePrimaryNamesGetMeta = createRoute({
   method: "get",
   path: "/primary-names/:address",
   tags: ["Resolution"],
@@ -98,7 +98,7 @@ export const getResolvePrimaryNamesRoute = createRoute({
 });
 
 export const routes = [
-  getResolveRecordsRoute,
-  getResolvePrimaryNameRoute,
-  getResolvePrimaryNamesRoute,
+  resolveRecordsGetMeta,
+  resolvePrimaryNameGetMeta,
+  resolvePrimaryNamesGetMeta,
 ];

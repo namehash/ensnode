@@ -30,7 +30,7 @@ export const referrerAddressSchema = z.object({
   referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
 });
 
-export const getReferrerLeaderboardRoute = createRoute({
+export const referrerLeaderboardGetMeta = createRoute({
   method: "get",
   path: "/referrers",
   tags: ["ENSAwards"],
@@ -49,7 +49,7 @@ export const getReferrerLeaderboardRoute = createRoute({
   },
 });
 
-export const getReferrerDetailRoute = createRoute({
+export const referrerDetailGetMeta = createRoute({
   method: "get",
   path: "/referrers/:referrer",
   tags: ["ENSAwards"],
@@ -71,4 +71,4 @@ export const getReferrerDetailRoute = createRoute({
   },
 });
 
-export const routes = [getReferrerLeaderboardRoute, getReferrerDetailRoute];
+export const routes = [referrerLeaderboardGetMeta, referrerDetailGetMeta];

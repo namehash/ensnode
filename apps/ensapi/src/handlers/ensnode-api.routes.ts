@@ -7,7 +7,7 @@ import {
 
 export const basePath = "/api";
 
-export const getConfigRoute = createRoute({
+export const configGetMeta = createRoute({
   method: "get",
   path: "/config",
   tags: ["Meta"],
@@ -25,7 +25,7 @@ export const getConfigRoute = createRoute({
   },
 });
 
-export const getIndexingStatusRoute = createRoute({
+export const indexingStatusGetMeta = createRoute({
   method: "get",
   path: "/indexing-status",
   tags: ["Meta"],
@@ -51,4 +51,4 @@ export const getIndexingStatusRoute = createRoute({
   },
 });
 
-export const routes = [getConfigRoute, getIndexingStatusRoute];
+export const routes = [configGetMeta, indexingStatusGetMeta];

@@ -17,8 +17,8 @@ import { findRegistrarActions } from "@/lib/registrar-actions/find-registrar-act
 import { registrarActionsApiMiddleware } from "@/middleware/registrar-actions.middleware";
 
 import {
-  getRegistrarActionsByParentNodeRoute,
-  getRegistrarActionsRoute,
+  registrarActionsByParentNodeGetMeta,
+  registrarActionsGetMeta,
   type registrarActionsQuerySchema,
 } from "./registrar-actions-api.routes";
 
@@ -89,7 +89,7 @@ async function fetchRegistrarActions(
  *
  * Example: `GET /api/registrar-actions`
  */
-app.openapi(getRegistrarActionsRoute, async (c) => {
+app.openapi(registrarActionsGetMeta, async (c) => {
   try {
     const query = c.req.valid("query");
     const { registrarActions, pageContext } = await fetchRegistrarActions(undefined, query);
@@ -122,7 +122,7 @@ app.openapi(getRegistrarActionsRoute, async (c) => {
 /**
  * Get Registrar Actions (filtered by parent node)
  */
-app.openapi(getRegistrarActionsByParentNodeRoute, async (c) => {
+app.openapi(registrarActionsByParentNodeGetMeta, async (c) => {
   try {
     // Middleware ensures indexingStatus is available and not an Error
     // This check is for TypeScript type safety

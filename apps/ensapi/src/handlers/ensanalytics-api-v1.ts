@@ -21,9 +21,9 @@ import { referralLeaderboardEditionsCachesMiddleware } from "@/middleware/referr
 import { referralProgramEditionConfigSetMiddleware } from "@/middleware/referral-program-edition-set.middleware";
 
 import {
-  getEditionConfigSetRoute,
-  getReferralLeaderboardV1Route,
-  getReferrerDetailV1Route,
+  editionConfigSetGetMeta,
+  referralLeaderboardV1GetMeta,
+  referrerDetailV1GetMeta,
 } from "./ensanalytics-api-v1.routes";
 
 const logger = makeLogger("ensanalytics-api-v1");
@@ -37,7 +37,7 @@ app.use(referralProgramEditionConfigSetMiddleware);
 app.use(referralLeaderboardEditionsCachesMiddleware);
 
 // Get a page from the referrer leaderboard for a specific edition
-app.openapi(getReferralLeaderboardV1Route, async (c) => {
+app.openapi(referralLeaderboardV1GetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.referralLeaderboardEditionsCaches === undefined) {
     throw new Error(
@@ -122,7 +122,7 @@ app.openapi(getReferralLeaderboardV1Route, async (c) => {
 });
 
 // Get referrer detail for a specific address for requested editions
-app.openapi(getReferrerDetailV1Route, async (c) => {
+app.openapi(referrerDetailV1GetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.referralLeaderboardEditionsCaches === undefined) {
     throw new Error(
@@ -242,7 +242,7 @@ app.openapi(getReferrerDetailV1Route, async (c) => {
 });
 
 // Get configured edition config set
-app.openapi(getEditionConfigSetRoute, async (c) => {
+app.openapi(editionConfigSetGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.referralProgramEditionConfigSet === undefined) {
     throw new Error(

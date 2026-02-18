@@ -17,7 +17,7 @@ import { findRegisteredNameTokensForDomain } from "@/lib/name-tokens/find-name-t
 import { getIndexedSubregistries } from "@/lib/name-tokens/get-indexed-subregistries";
 import { nameTokensApiMiddleware } from "@/middleware/name-tokens.middleware";
 
-import { getNameTokensRoute } from "./name-tokens-api.routes";
+import { nameTokensGetMeta } from "./name-tokens-api.routes";
 
 const app = createApp();
 
@@ -40,7 +40,7 @@ const makeNameTokensNotIndexedResponse = (
   },
 });
 
-app.openapi(getNameTokensRoute, async (c): Promise<any> => {
+app.openapi(nameTokensGetMeta, async (c): Promise<any> => {
   // Invariant: context must be set by the required middleware
   if (c.var.indexingStatus === undefined) {
     return c.json(

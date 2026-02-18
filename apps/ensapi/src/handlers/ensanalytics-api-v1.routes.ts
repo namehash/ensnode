@@ -50,7 +50,7 @@ export const editionsQuerySchema = z.object({
     .pipe(makeReferrerMetricsEditionsArraySchema("editions")),
 });
 
-export const getReferralLeaderboardV1Route = createRoute({
+export const referralLeaderboardV1GetMeta = createRoute({
   method: "get",
   path: "/referral-leaderboard",
   tags: ["ENSAwards"],
@@ -75,7 +75,7 @@ export const getReferralLeaderboardV1Route = createRoute({
   },
 });
 
-export const getReferrerDetailV1Route = createRoute({
+export const referrerDetailV1GetMeta = createRoute({
   method: "get",
   path: "/referrer/:referrer",
   tags: ["ENSAwards"],
@@ -104,7 +104,7 @@ export const getReferrerDetailV1Route = createRoute({
   },
 });
 
-export const getEditionConfigSetRoute = createRoute({
+export const editionConfigSetGetMeta = createRoute({
   method: "get",
   path: "/editions",
   tags: ["ENSAwards"],
@@ -125,7 +125,7 @@ export const getEditionConfigSetRoute = createRoute({
 });
 
 export const routes = [
-  getReferralLeaderboardV1Route,
-  getReferrerDetailV1Route,
-  getEditionConfigSetRoute,
+  referralLeaderboardV1GetMeta,
+  referrerDetailV1GetMeta,
+  editionConfigSetGetMeta,
 ];

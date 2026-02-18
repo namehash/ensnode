@@ -26,7 +26,7 @@ export const nameTokensQuerySchema = z
     message: "Exactly one of 'domainId' or 'name' must be provided",
   });
 
-export const getNameTokensRoute = createRoute({
+export const nameTokensGetMeta = createRoute({
   method: "get",
   path: "/",
   tags: ["Explore"],
@@ -80,4 +80,4 @@ export const getNameTokensRoute = createRoute({
   },
 });
 
-export const routes = [getNameTokensRoute];
+export const routes = [nameTokensGetMeta];

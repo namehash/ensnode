@@ -13,7 +13,7 @@ import { createApp } from "@/lib/hono-factory";
 import { makeLogger } from "@/lib/logger";
 import { referrerLeaderboardMiddleware } from "@/middleware/referrer-leaderboard.middleware";
 
-import { getReferrerDetailRoute, getReferrerLeaderboardRoute } from "./ensanalytics-api.routes";
+import { referrerDetailGetMeta, referrerLeaderboardGetMeta } from "./ensanalytics-api.routes";
 
 const logger = makeLogger("ensanalytics-api");
 
@@ -23,7 +23,7 @@ const app = createApp();
 app.use(referrerLeaderboardMiddleware);
 
 // Get a page from the referrer leaderboard
-app.openapi(getReferrerLeaderboardRoute, async (c) => {
+app.openapi(referrerLeaderboardGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.referrerLeaderboard === undefined) {
     throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
@@ -71,7 +71,7 @@ app.openapi(getReferrerLeaderboardRoute, async (c) => {
 });
 
 // Get referrer detail for a specific address
-app.openapi(getReferrerDetailRoute, async (c) => {
+app.openapi(referrerDetailGetMeta, async (c) => {
   // context must be set by the required middleware
   if (c.var.referrerLeaderboard === undefined) {
     throw new Error(`Invariant(ensanalytics-api): referrerLeaderboardMiddleware required`);
