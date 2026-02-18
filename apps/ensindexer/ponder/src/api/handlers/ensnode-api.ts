@@ -16,13 +16,15 @@ import {
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
 import { buildOmnichainIndexingStatusSnapshot } from "@/lib/indexing-status-builder/omnichain-indexing-status-snapshot";
-import {
-  cachedChainsBlockRefs,
-  indexedChainIds,
-  ponderClient,
-} from "@/ponder/api/lib/local-ponder-client";
+import { getLocalPonderClient } from "@/lib/ponder-api-client";
 
 const app = new Hono();
+
+// Calling `getLocalPonderClient` at the top level to initialize
+// the singleton client instance on app startup.
+// This ensures that the client is ready to use when handling requests,
+// and allows us to catch initialization errors early.
+getLocalPonderClient();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
@@ -40,17 +42,10 @@ app.get("/indexing-status", async (c) => {
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
-    const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
-      ponderClient.metrics(),
-      ponderClient.status(),
-    ]);
+    const localPonderClient = await getLocalPonderClient();
+    const chainsIndexingMetadata = await localPonderClient.chainsIndexingMetadata();
 
-    omnichainSnapshot = buildOmnichainIndexingStatusSnapshot(
-      indexedChainIds,
-      cachedChainsBlockRefs,
-      ponderIndexingMetrics,
-      ponderIndexingStatus,
-    );
+    omnichainSnapshot = buildOmnichainIndexingStatusSnapshot(chainsIndexingMetadata);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(

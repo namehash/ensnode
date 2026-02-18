@@ -54,6 +54,7 @@ async function buildChainsIndexingMetadataFixed(
   publicClients: Map<ChainId, PublicClient>,
   ponderClient: PonderClient,
 ): Promise<Map<ChainId, ChainIndexingMetadataFixed>> {
+  console.log("Building ChainIndexingMetadataFixed...");
   const chainsIndexingMetadataFixed = new Map<ChainId, ChainIndexingMetadataFixed>();
 
   const chainsConfigBlockrange = buildChainsConfigBlockrange();
@@ -117,6 +118,8 @@ async function buildChainsIndexingMetadataFixed(
     // Cache the fixed metadata for this chain ID
     chainsIndexingMetadataFixed.set(chainId, metadataFixed);
   }
+
+  console.log("ChainIndexingMetadataFixed built successfully");
 
   return chainsIndexingMetadataFixed;
 }
