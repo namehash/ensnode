@@ -54,25 +54,25 @@ describe("/ensanalytics", () => {
       const allPossibleReferrersIterator = allPossibleReferrers[Symbol.iterator]();
 
       // Arrange: create the test client from the app instance
-      const client = testClient(app);
+      const client: any = testClient(app);
       const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
       const responsePage1 = await client.referrers
         .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 2nd page
       const responsePage2 = await client.referrers
         .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "2" } }, {})
-        .then((r) => r.json())
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 3rd page
       const responsePage3 = await client.referrers
         .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "3" } }, {})
-        .then((r) => r.json())
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Assert: 1st page results
@@ -145,13 +145,13 @@ describe("/ensanalytics", () => {
       });
 
       // Arrange: create the test client from the app instance
-      const client = testClient(app);
+      const client: any = testClient(app);
       const recordsPerPage = 10;
 
       // Act: send test request to fetch 1st page
       const response = await client.referrers
         .$get({ query: { recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Assert: empty page results

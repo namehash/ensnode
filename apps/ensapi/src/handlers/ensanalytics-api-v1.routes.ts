@@ -1,10 +1,64 @@
-import { MAX_EDITIONS_PER_REQUEST } from "@namehash/ens-referrals/v1";
-import type { DescribeRouteOptions } from "hono-openapi";
+import { createRoute } from "@hono/zod-openapi";
+import {
+  MAX_EDITIONS_PER_REQUEST,
+  REFERRERS_PER_LEADERBOARD_PAGE_MAX,
+} from "@namehash/ens-referrals/v1";
+import {
+  makeReferralProgramEditionSlugSchema,
+  makeReferrerMetricsEditionsArraySchema,
+} from "@namehash/ens-referrals/v1/internal";
+import { z } from "zod/v4";
 
-export const getReferralLeaderboardV1Route = {
+import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
+
+export const basePath = "/v1/ensanalytics";
+
+/**
+ * Query parameters schema for referrer leaderboard page requests.
+ * Validates edition slug, page number, and records per page.
+ */
+export const referrerLeaderboardPageQuerySchema = z.object({
+  edition: makeReferralProgramEditionSlugSchema("edition"),
+  page: z
+    .optional(z.coerce.number().int().min(1, "Page must be a positive integer"))
+    .describe("Page number for pagination"),
+  recordsPerPage: z
+    .optional(
+      z.coerce
+        .number()
+        .int()
+        .min(1, "Records per page must be at least 1")
+        .max(
+          REFERRERS_PER_LEADERBOARD_PAGE_MAX,
+          `Records per page must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
+        ),
+    )
+    .describe("Number of referrers per page"),
+});
+
+// Referrer address parameter schema
+export const referrerAddressSchema = z.object({
+  referrer: makeLowercaseAddressSchema("Referrer address").describe("Referrer Ethereum address"),
+});
+
+// Editions query parameter schema
+export const editionsQuerySchema = z.object({
+  editions: z
+    .string()
+    .describe("Comma-separated list of edition slugs")
+    .transform((value) => value.split(",").map((s) => s.trim()))
+    .pipe(makeReferrerMetricsEditionsArraySchema("editions")),
+});
+
+export const getReferralLeaderboardV1Route = createRoute({
+  method: "get",
+  path: "/referral-leaderboard",
   tags: ["ENSAwards"],
   summary: "Get Referrer Leaderboard (v1)",
   description: "Returns a paginated page from the referrer leaderboard for a specific edition",
+  request: {
+    query: referrerLeaderboardPageQuerySchema,
+  },
   responses: {
     200: {
       description: "Successfully retrieved referrer leaderboard page",
@@ -19,12 +73,18 @@ export const getReferralLeaderboardV1Route = {
       description: "Service unavailable",
     },
   },
-} satisfies DescribeRouteOptions;
+});
 
-export const getReferrerDetailV1Route = {
+export const getReferrerDetailV1Route = createRoute({
+  method: "get",
+  path: "/referrer/:referrer",
   tags: ["ENSAwards"],
   summary: "Get Referrer Detail for Editions (v1)",
   description: `Returns detailed information for a specific referrer for the requested editions. Requires 1-${MAX_EDITIONS_PER_REQUEST} distinct edition slugs. All requested editions must be recognized and have cached data, or the request fails.`,
+  request: {
+    params: referrerAddressSchema,
+    query: editionsQuerySchema,
+  },
   responses: {
     200: {
       description: "Successfully retrieved referrer detail for requested editions",
@@ -42,9 +102,11 @@ export const getReferrerDetailV1Route = {
       description: "Service unavailable",
     },
   },
-} satisfies DescribeRouteOptions;
+});
 
-export const getEditionConfigSetRoute = {
+export const getEditionConfigSetRoute = createRoute({
+  method: "get",
+  path: "/editions",
   tags: ["ENSAwards"],
   summary: "Get Edition Config Set (v1)",
   description:
@@ -60,4 +122,10 @@ export const getEditionConfigSetRoute = {
       description: "Service unavailable",
     },
   },
-} satisfies DescribeRouteOptions;
+});
+
+export const routes = [
+  getReferralLeaderboardV1Route,
+  getReferrerDetailV1Route,
+  getEditionConfigSetRoute,
+];

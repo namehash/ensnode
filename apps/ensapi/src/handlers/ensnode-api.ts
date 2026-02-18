@@ -1,7 +1,3 @@
-import config from "@/config";
-
-import { describeRoute } from "hono-openapi";
-
 import {
   IndexingStatusResponseCodes,
   type IndexingStatusResponseError,
@@ -11,22 +7,26 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildEnsApiPublicConfig } from "@/config/config.schema";
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 
-import { getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
+import { basePath, getConfigRoute, getIndexingStatusRoute } from "./ensnode-api.routes";
 import ensnodeGraphQLApi from "./ensnode-graphql-api";
 import nameTokensApi from "./name-tokens-api";
+import { basePath as nameTokensBasePath } from "./name-tokens-api.routes";
 import registrarActionsApi from "./registrar-actions-api";
+import { basePath as registrarActionsBasePath } from "./registrar-actions-api.routes";
 import resolutionApi from "./resolution-api";
+import { basePath as resolutionBasePath } from "./resolution-api.routes";
 
-const app = factory.createApp();
+const app = createApp();
 
-app.get("/config", describeRoute(getConfigRoute), async (c) => {
+app.openapi(getConfigRoute, async (c) => {
+  const config = (await import("@/config")).default;
   const ensApiPublicConfig = buildEnsApiPublicConfig(config);
   return c.json(serializeENSApiPublicConfig(ensApiPublicConfig));
 });
 
-app.get("/indexing-status", describeRoute(getIndexingStatusRoute), async (c) => {
+app.openapi(getIndexingStatusRoute, async (c) => {
   // context must be set by the required middleware
   if (c.var.indexingStatus === undefined) {
     throw new Error(`Invariant(indexing-status): indexingStatusMiddleware required`);
@@ -51,13 +51,13 @@ app.get("/indexing-status", describeRoute(getIndexingStatusRoute), async (c) => 
 });
 
 // Name Tokens API
-app.route("/name-tokens", nameTokensApi);
+app.route(nameTokensBasePath.replace(basePath, ""), nameTokensApi);
 
 // Registrar Actions API
-app.route("/registrar-actions", registrarActionsApi);
+app.route(registrarActionsBasePath.replace(basePath, ""), registrarActionsApi);
 
 // Resolution API
-app.route("/resolve", resolutionApi);
+app.route(resolutionBasePath.replace(basePath, ""), resolutionApi);
 
 // ENSNode GraphQL API
 app.route("/graphql", ensnodeGraphQLApi);

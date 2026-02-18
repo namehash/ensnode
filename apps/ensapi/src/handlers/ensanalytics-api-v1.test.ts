@@ -91,26 +91,41 @@ describe("/v1/ensanalytics", () => {
       const allPossibleReferrersIterator = allPossibleReferrers[Symbol.iterator]();
 
       // Arrange: create the test client from the app instance
-      const client = testClient(app);
+      const client: any = testClient(app);
       const recordsPerPage = 10;
       const edition = "2025-12";
 
       // Act: send test request to fetch 1st page
       const responsePage1 = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
+        .$get(
+          {
+            query: { edition, recordsPerPage: `${recordsPerPage}`, page: "1" },
+          },
+          {},
+        )
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 2nd page
       const responsePage2 = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "2" } }, {})
-        .then((r) => r.json())
+        .$get(
+          {
+            query: { edition, recordsPerPage: `${recordsPerPage}`, page: "2" },
+          },
+          {},
+        )
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Act: send test request to fetch 3rd page
       const responsePage3 = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "3" } }, {})
-        .then((r) => r.json())
+        .$get(
+          {
+            query: { edition, recordsPerPage: `${recordsPerPage}`, page: "3" },
+          },
+          {},
+        )
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Assert: 1st page results
@@ -208,14 +223,19 @@ describe("/v1/ensanalytics", () => {
       });
 
       // Arrange: create the test client from the app instance
-      const client = testClient(app);
+      const client: any = testClient(app);
       const recordsPerPage = 10;
       const edition = "2025-12";
 
       // Act: send test request to fetch 1st page
       const response = await client["referral-leaderboard"]
-        .$get({ query: { edition, recordsPerPage: `${recordsPerPage}`, page: "1" } }, {})
-        .then((r) => r.json())
+        .$get(
+          {
+            query: { edition, recordsPerPage: `${recordsPerPage}`, page: "1" },
+          },
+          {},
+        )
+        .then((r: Response) => r.json())
         .then(deserializeReferrerLeaderboardPageResponse);
 
       // Assert: empty page results
@@ -259,8 +279,22 @@ describe("/v1/ensanalytics", () => {
 
       // Mock edition set middleware to provide a mock edition set
       const mockEditionConfigSet = new Map([
-        ["test-edition-a", { slug: "test-edition-a", displayName: "Edition A", rules: {} as any }],
-        ["test-edition-b", { slug: "test-edition-b", displayName: "Edition B", rules: {} as any }],
+        [
+          "test-edition-a",
+          {
+            slug: "test-edition-a",
+            displayName: "Edition A",
+            rules: {} as any,
+          },
+        ],
+        [
+          "test-edition-b",
+          {
+            slug: "test-edition-b",
+            displayName: "Edition B",
+            rules: {} as any,
+          },
+        ],
       ]);
       vi.mocked(editionSetMiddleware.referralProgramEditionConfigSetMiddleware).mockImplementation(
         async (c, next) => {
@@ -278,13 +312,19 @@ describe("/v1/ensanalytics", () => {
       });
 
       // Arrange: create the test client from the app instance
-      const client = testClient(app);
+      const client: any = testClient(app);
       const recordsPerPage = 10;
       const invalidEdition = "invalid-edition";
 
       // Act: send test request with invalid edition slug
       const httpResponse = await client["referral-leaderboard"].$get(
-        { query: { edition: invalidEdition, recordsPerPage: `${recordsPerPage}`, page: "1" } },
+        {
+          query: {
+            edition: invalidEdition,
+            recordsPerPage: `${recordsPerPage}`,
+            page: "1",
+          },
+        },
         {},
       );
       const responseData = await httpResponse.json();
@@ -802,7 +842,10 @@ describe("/v1/ensanalytics", () => {
               100,
               parseTimestamp("2025-12-01T00:00:00Z"),
               parseTimestamp("2025-12-31T23:59:59Z"),
-              { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
+              {
+                chainId: 1,
+                address: "0x0000000000000000000000000000000000000000",
+              },
               new URL("https://example.com/rules"),
             ),
           },
@@ -817,7 +860,10 @@ describe("/v1/ensanalytics", () => {
               100,
               parseTimestamp("2026-03-01T00:00:00Z"),
               parseTimestamp("2026-03-31T23:59:59Z"),
-              { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
+              {
+                chainId: 1,
+                address: "0x0000000000000000000000000000000000000000",
+              },
               new URL("https://example.com/rules"),
             ),
           },
@@ -832,7 +878,10 @@ describe("/v1/ensanalytics", () => {
               100,
               parseTimestamp("2026-06-01T00:00:00Z"),
               parseTimestamp("2026-06-30T23:59:59Z"),
-              { chainId: 1, address: "0x0000000000000000000000000000000000000000" },
+              {
+                chainId: 1,
+                address: "0x0000000000000000000000000000000000000000",
+              },
               new URL("https://example.com/rules"),
             ),
           },

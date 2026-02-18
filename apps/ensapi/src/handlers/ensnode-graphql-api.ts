@@ -1,7 +1,7 @@
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { requireCorePluginMiddleware } from "@/middleware/require-core-plugin.middleware";
 
-const app = factory.createApp();
+const app = createApp();
 
 app.use(requireCorePluginMiddleware("ensv2"));
 app.use(async (c) => {

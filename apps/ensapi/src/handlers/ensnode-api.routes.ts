@@ -1,12 +1,15 @@
-import type { DescribeRouteOptions } from "hono-openapi";
-import { resolver as validationResolver } from "hono-openapi";
+import { createRoute } from "@hono/zod-openapi";
 
 import {
   makeENSApiPublicConfigSchema,
   makeIndexingStatusResponseSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-export const getConfigRoute: DescribeRouteOptions = {
+export const basePath = "/api";
+
+export const getConfigRoute = createRoute({
+  method: "get",
+  path: "/config",
   tags: ["Meta"],
   summary: "Get ENSApi Public Config",
   description: "Gets the public config of the ENSApi instance",
@@ -15,14 +18,16 @@ export const getConfigRoute: DescribeRouteOptions = {
       description: "Successfully retrieved ENSApi public config",
       content: {
         "application/json": {
-          schema: validationResolver(makeENSApiPublicConfigSchema()),
+          schema: makeENSApiPublicConfigSchema(),
         },
       },
     },
   },
-};
+});
 
-export const getIndexingStatusRoute: DescribeRouteOptions = {
+export const getIndexingStatusRoute = createRoute({
+  method: "get",
+  path: "/indexing-status",
   tags: ["Meta"],
   summary: "Get ENSIndexer Indexing Status",
   description: "Returns the indexing status snapshot most recently captured from ENSIndexer",
@@ -31,7 +36,7 @@ export const getIndexingStatusRoute: DescribeRouteOptions = {
       description: "Successfully retrieved indexing status",
       content: {
         "application/json": {
-          schema: validationResolver(makeIndexingStatusResponseSchema()),
+          schema: makeIndexingStatusResponseSchema(),
         },
       },
     },
@@ -39,9 +44,11 @@ export const getIndexingStatusRoute: DescribeRouteOptions = {
       description: "Indexing status snapshot unavailable",
       content: {
         "application/json": {
-          schema: validationResolver(makeIndexingStatusResponseSchema()),
+          schema: makeIndexingStatusResponseSchema(),
         },
       },
     },
   },
-};
+});
+
+export const routes = [getConfigRoute, getIndexingStatusRoute];

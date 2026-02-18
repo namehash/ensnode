@@ -1,5 +1,5 @@
-import type { DescribeRouteOptions } from "hono-openapi";
-import { resolver as validationResolver } from "hono-openapi";
+import { createRoute } from "@hono/zod-openapi";
+import { z } from "zod/v4";
 
 import {
   makeResolvePrimaryNameResponseSchema,
@@ -7,50 +7,98 @@ import {
   makeResolveRecordsResponseSchema,
 } from "@ensnode/ensnode-sdk/internal";
 
-export const getResolveRecordsRoute: DescribeRouteOptions = {
+import { params } from "@/lib/handlers/params.schema";
+
+export const basePath = "/api/resolve";
+
+export const getResolveRecordsRoute = createRoute({
+  method: "get",
+  path: "/records/:name",
   tags: ["Resolution"],
   summary: "Resolve ENS Records",
   description: "Resolves ENS records for a given name",
+  request: {
+    params: z.object({ name: params.name }),
+    query: z
+      .object({
+        ...params.selectionParams.shape,
+        trace: params.trace,
+        accelerate: params.accelerate,
+      })
+      .transform((value) => {
+        const { trace, accelerate, ...selectionParams } = value;
+        const selection = params.selection.parse(selectionParams);
+        return { selection, trace, accelerate };
+      }),
+  },
   responses: {
     200: {
       description: "Successfully resolved records",
       content: {
         "application/json": {
-          schema: validationResolver(makeResolveRecordsResponseSchema()),
+          schema: makeResolveRecordsResponseSchema(),
         },
       },
     },
   },
-};
+});
 
-export const getResolvePrimaryNameRoute: DescribeRouteOptions = {
+export const getResolvePrimaryNameRoute = createRoute({
+  method: "get",
+  path: "/primary-name/:address/:chainId",
   tags: ["Resolution"],
   summary: "Resolve Primary Name",
   description: "Resolves a primary name for a given `address` and `chainId`",
+  request: {
+    params: z.object({
+      address: params.address,
+      chainId: params.defaultableChainId,
+    }),
+    query: z.object({
+      trace: params.trace,
+      accelerate: params.accelerate,
+    }),
+  },
   responses: {
     200: {
       description: "Successfully resolved name",
       content: {
         "application/json": {
-          schema: validationResolver(makeResolvePrimaryNameResponseSchema()),
+          schema: makeResolvePrimaryNameResponseSchema(),
         },
       },
     },
   },
-};
+});
 
-export const getResolvePrimaryNamesRoute: DescribeRouteOptions = {
+export const getResolvePrimaryNamesRoute = createRoute({
+  method: "get",
+  path: "/primary-names/:address",
   tags: ["Resolution"],
   summary: "Resolve Primary Names",
   description: "Resolves all primary names for a given address across multiple chains",
+  request: {
+    params: z.object({ address: params.address }),
+    query: z.object({
+      chainIds: params.chainIdsWithoutDefaultChainId,
+      trace: params.trace,
+      accelerate: params.accelerate,
+    }),
+  },
   responses: {
     200: {
       description: "Successfully resolved records",
       content: {
         "application/json": {
-          schema: validationResolver(makeResolvePrimaryNamesResponseSchema()),
+          schema: makeResolvePrimaryNamesResponseSchema(),
         },
       },
     },
   },
-};
+});
+
+export const routes = [
+  getResolveRecordsRoute,
+  getResolvePrimaryNameRoute,
+  getResolvePrimaryNamesRoute,
+];

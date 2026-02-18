@@ -5,7 +5,6 @@ import { serve } from "@hono/node-server";
 import { otel } from "@hono/otel";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
-import { openAPIRouteHandler } from "hono-openapi";
 
 import { indexingStatusCache } from "@/cache/indexing-status.cache";
 import { getReferralLeaderboardEditionsCaches } from "@/cache/referral-leaderboard-editions.cache";
@@ -13,19 +12,23 @@ import { referralProgramEditionConfigSetCache } from "@/cache/referral-program-e
 import { referrerLeaderboardCache } from "@/cache/referrer-leaderboard.cache";
 import { redactEnsApiConfig } from "@/config/redact";
 import { errorResponse } from "@/lib/handlers/error-response";
-import { factory } from "@/lib/hono-factory";
+import { createApp } from "@/lib/hono-factory";
 import { sdk } from "@/lib/instrumentation";
 import logger from "@/lib/logger";
 import { indexingStatusMiddleware } from "@/middleware/indexing-status.middleware";
 import { openapiDocumentation } from "@/openapi";
 
 import amIRealtimeApi from "./handlers/amirealtime-api";
+import { basePath as amIRealtimeBasePath } from "./handlers/amirealtime-api.routes";
 import ensanalyticsApi from "./handlers/ensanalytics-api";
+import { basePath as ensanalyticsBasePath } from "./handlers/ensanalytics-api.routes";
 import ensanalyticsApiV1 from "./handlers/ensanalytics-api-v1";
+import { basePath as ensanalyticsV1BasePath } from "./handlers/ensanalytics-api-v1.routes";
 import ensNodeApi from "./handlers/ensnode-api";
+import { basePath as ensnodeBasePath } from "./handlers/ensnode-api.routes";
 import subgraphApi from "./handlers/subgraph-api";
 
-const app = factory.createApp();
+const app = createApp();
 
 // set the X-ENSNode-Version header to the current version
 app.use(async (ctx, next) => {
@@ -61,37 +64,32 @@ app.get("/", (c) =>
 );
 
 // use ENSNode HTTP API at /api
-app.route("/api", ensNodeApi);
+app.route(ensnodeBasePath, ensNodeApi);
 
 // use Subgraph GraphQL API at /subgraph
 app.route("/subgraph", subgraphApi);
 
 // use ENSAnalytics API at /ensanalytics (v0, implicit)
-app.route("/ensanalytics", ensanalyticsApi);
+app.route(ensanalyticsBasePath, ensanalyticsApi);
 
 // use ENSAnalytics API v1 at /v1/ensanalytics
-app.route("/v1/ensanalytics", ensanalyticsApiV1);
+app.route(ensanalyticsV1BasePath, ensanalyticsApiV1);
 
 // use Am I Realtime API at /amirealtime
-app.route("/amirealtime", amIRealtimeApi);
+app.route(amIRealtimeBasePath, amIRealtimeApi);
 
 // use OpenAPI Schema
-app.get(
-  "/openapi.json",
-  openAPIRouteHandler(app, {
-    documentation: {
-      ...openapiDocumentation,
-      info: {
-        ...openapiDocumentation.info,
-        version: packageJson.version,
-      },
-      servers: [
-        ...(openapiDocumentation.servers ?? []),
-        { url: `http://localhost:${config.port}`, description: "Local Development" },
-      ],
-    },
-  }),
-);
+app.doc31("/openapi.json", {
+  ...openapiDocumentation,
+  info: {
+    ...openapiDocumentation.info,
+    version: packageJson.version,
+  },
+  servers: [
+    ...openapiDocumentation.servers,
+    { url: `http://localhost:${config.port}`, description: "Local Development" },
+  ],
+});
 
 // will automatically 503 if config is not available due to ensIndexerPublicConfigMiddleware
 app.get("/health", async (c) => {

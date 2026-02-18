@@ -1,7 +1,5 @@
-import type { GenerateSpecOptions } from "hono-openapi";
-
-export const openapiDocumentation: NonNullable<GenerateSpecOptions["documentation"]> &
-  Required<Pick<NonNullable<GenerateSpecOptions["documentation"]>, "info">> = {
+export const openapiDocumentation = {
+  openapi: "3.1.0" as const,
   info: {
     title: "ENSApi APIs",
     version: "0.0.0", // replaced at runtime with package.json version
