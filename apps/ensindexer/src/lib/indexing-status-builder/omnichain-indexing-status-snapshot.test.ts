@@ -286,5 +286,15 @@ describe("OmnichainIndexingStatusSnapshot", () => {
         omnichainIndexingCursor: laterBlockRef.timestamp,
       });
     });
+
+    it("throws an error when no chains metadata is provided", () => {
+      // arrange
+      const chainsMetadata = new Map();
+
+      // act & assert
+      expect(() => buildOmnichainIndexingStatusSnapshot(chainsMetadata)).toThrowError(
+        /At least one chain's indexing metadata is required to build an OmnichainIndexingStatusSnapshot/,
+      );
+    });
   });
 });

@@ -26,10 +26,18 @@ import { buildChainStatusSnapshots } from "./chain-indexing-status-snapshot";
  *   needed to determine that chain's indexing state.
  *
  * @returns The validated omnichain indexing status snapshot.
+ * @throws Error if the provided metadata is insufficient to determine the status
+ *   snapshot for any chain, or if the resulting snapshot is invalid.
  */
 export function buildOmnichainIndexingStatusSnapshot(
   chainsIndexingMetadata: Map<ChainId, ChainIndexingMetadata>,
 ): OmnichainIndexingStatusSnapshot {
+  if (chainsIndexingMetadata.size === 0) {
+    throw new Error(
+      "At least one chain's indexing metadata is required to build an OmnichainIndexingStatusSnapshot",
+    );
+  }
+
   const chainStatusSnapshots = buildChainStatusSnapshots(chainsIndexingMetadata);
 
   const chains = Array.from(chainStatusSnapshots.values());
