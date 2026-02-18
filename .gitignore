@@ -39,3 +39,6 @@ apps/ensrainbow/data
 
 # fallback-ensapi dist
 apps/fallback-ensapi/dist
+apps/ensrainbow/data*
+apps/ensrainbow/temp*
+apps/ensrainbow/v2*
