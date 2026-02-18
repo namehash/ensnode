@@ -95,6 +95,8 @@ function isPonderDatasourceNested(
  * - every chain include a startBlock,
  * - some chains may include an endBlock,
  * - all present startBlock and endBlock values are valid {@link BlockNumber} values.
+ *
+ * @throws Error if any of the above invariants are violated.
  */
 export function buildChainsBlockrange(ponderConfig: PonderConfigType): Map<ChainId, Blockrange> {
   const chainsBlockrange = new Map<ChainId, Blockrange>();
