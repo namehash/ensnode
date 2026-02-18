@@ -14,6 +14,14 @@ export async function fetchBlockRef(
   publicClient: PublicClient,
   blockNumber: BlockNumber,
 ): Promise<BlockRef> {
+  const chainId = publicClient.chain?.id;
+
+  if (!chainId) {
+    throw new Error(
+      `Public client is missing chain ID, cannot fetch block ref for block number ${blockNumber}`,
+    );
+  }
+
   try {
     const block = await publicClient.getBlock({ blockNumber: BigInt(blockNumber) });
 
@@ -21,9 +29,11 @@ export async function fetchBlockRef(
       timestamp: bigIntToNumber(block.timestamp),
       number: bigIntToNumber(block.number),
     });
-  } catch {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
     throw new Error(
-      `Error fetching block for chain ID ${publicClient.getChainId()} at block number ${blockNumber}: }`,
+      `Error fetching block for chain ID ${chainId} at block number ${blockNumber}: ${errorMessage}`,
     );
   }
 }
