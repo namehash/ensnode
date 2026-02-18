@@ -1,9 +1,9 @@
 import type { ChainId } from "../../shared/types";
 import type {
-  SerializedENSIndexerPublicConfig,
+  SerializedEnsIndexerPublicConfig,
   SerializedIndexedChainIds,
 } from "./serialized-types";
-import type { ENSIndexerPublicConfig } from "./types";
+import type { EnsIndexerPublicConfig } from "./types";
 
 /**
  * Serializes a {@link ChainConfig} object.
@@ -11,12 +11,13 @@ import type { ENSIndexerPublicConfig } from "./types";
 export function serializeIndexedChainIds(indexedChainIds: Set<ChainId>): SerializedIndexedChainIds {
   return Array.from(indexedChainIds);
 }
+
 /**
- * Serialize a {@link ENSIndexerPublicConfig} object.
+ * Serialize a {@link EnsIndexerPublicConfig} object.
  */
-export function serializeENSIndexerPublicConfig(
-  config: ENSIndexerPublicConfig,
-): SerializedENSIndexerPublicConfig {
+export function serializeEnsIndexerPublicConfig(
+  config: EnsIndexerPublicConfig,
+): SerializedEnsIndexerPublicConfig {
   const {
     labelSet,
     indexedChainIds,
@@ -35,5 +36,12 @@ export function serializeENSIndexerPublicConfig(
     namespace,
     plugins,
     versionInfo,
-  } satisfies SerializedENSIndexerPublicConfig;
+  } satisfies SerializedEnsIndexerPublicConfig;
 }
+
+/**
+ * Serialize a {@link EnsIndexerPublicConfig} object.
+ *
+ * @deprecated Use {@link serializeEnsIndexerPublicConfig} instead.
+ */
+export const serializeENSIndexerPublicConfig = serializeEnsIndexerPublicConfig;

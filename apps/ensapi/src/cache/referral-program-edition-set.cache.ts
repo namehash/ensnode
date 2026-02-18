@@ -7,7 +7,7 @@ import {
 } from "@namehash/ens-referrals/v1";
 import { minutesToSeconds } from "date-fns";
 
-import { SWRCache } from "@ensnode/ensnode-sdk";
+import { type CachedResult, SWRCache } from "@ensnode/ensnode-sdk";
 
 import { makeLogger } from "@/lib/logger";
 
@@ -16,7 +16,9 @@ const logger = makeLogger("referral-program-edition-set-cache");
 /**
  * Loads the referral program edition config set from custom URL or defaults.
  */
-async function loadReferralProgramEditionConfigSet(): Promise<ReferralProgramEditionConfigSet> {
+async function loadReferralProgramEditionConfigSet(
+  _cachedResult?: CachedResult<ReferralProgramEditionConfigSet>,
+): Promise<ReferralProgramEditionConfigSet> {
   // Check if custom URL is configured
   if (config.customReferralProgramEditionConfigSetUrl) {
     logger.info(

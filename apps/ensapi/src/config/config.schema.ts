@@ -4,7 +4,7 @@ import pRetry from "p-retry";
 import { parse as parseConnectionString } from "pg-connection-string";
 import { prettifyError, ZodError, z } from "zod/v4";
 
-import { type ENSApiPublicConfig, serializeENSIndexerPublicConfig } from "@ensnode/ensnode-sdk";
+import type { EnsApiPublicConfig } from "@ensnode/ensnode-sdk";
 import {
   buildRpcConfigsFromEnv,
   canFallbackToTheGraph,
@@ -13,7 +13,7 @@ import {
   EnsIndexerUrlSchema,
   invariant_rpcConfigsSpecifiedForRootChain,
   makeENSIndexerPublicConfigSchema,
-  PortSchema,
+  OptionalPortNumberSchema,
   RpcConfigsSchema,
   TheGraphApiKeySchema,
 } from "@ensnode/ensnode-sdk/internal";
@@ -62,7 +62,7 @@ const CustomReferralProgramEditionConfigSetUrlSchema = z
 
 const EnsApiConfigSchema = z
   .object({
-    port: PortSchema.default(ENSApi_DEFAULT_PORT),
+    port: OptionalPortNumberSchema.default(ENSApi_DEFAULT_PORT),
     databaseUrl: DatabaseUrlSchema,
     databaseSchemaName: DatabaseSchemaNameSchema,
     ensIndexerUrl: EnsIndexerUrlSchema,
@@ -103,7 +103,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
       databaseUrl: env.DATABASE_URL,
       ensIndexerUrl: env.ENSINDEXER_URL,
       theGraphApiKey: env.THEGRAPH_API_KEY,
-      ensIndexerPublicConfig: serializeENSIndexerPublicConfig(ensIndexerPublicConfig),
+      ensIndexerPublicConfig,
       namespace: ensIndexerPublicConfig.namespace,
       databaseSchemaName: ensIndexerPublicConfig.databaseSchemaName,
       rpcConfigs,
@@ -128,7 +128,7 @@ export async function buildConfigFromEnvironment(env: EnsApiEnvironment): Promis
  * @param config - The validated EnsApiConfig object
  * @returns A complete ENSApiPublicConfig object
  */
-export function buildEnsApiPublicConfig(config: EnsApiConfig): ENSApiPublicConfig {
+export function buildEnsApiPublicConfig(config: EnsApiConfig): EnsApiPublicConfig {
   return {
     version: packageJson.version,
     theGraphFallback: canFallbackToTheGraph({

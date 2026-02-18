@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { prettifyError, type ZodSafeParseResult } from "zod/v4";
 
-import { type ENSIndexerVersionInfo, PluginName } from "./types";
+import { buildUnvalidatedEnsIndexerPublicConfig } from "./deserialize";
+import type { SerializedEnsIndexerPublicConfig } from "./serialized-types";
+import { type EnsIndexerVersionInfo, PluginName } from "./types";
 import {
   makeDatabaseSchemaNameSchema,
-  makeENSIndexerPublicConfigSchema,
-  makeENSIndexerVersionInfoSchema,
+  makeEnsIndexerPublicConfigSchema,
+  makeEnsIndexerVersionInfoSchema,
   makeFullyPinnedLabelSetSchema,
   makeIndexedChainIdsSchema,
   makePluginsListSchema,
+  makeSerializedEnsIndexerPublicConfigSchema,
 } from "./zod-schemas";
 
 describe("ENSIndexer: Config", () => {
@@ -56,16 +59,16 @@ describe("ENSIndexer: Config", () => {
       });
 
       it("can parse indexed chain ID values", () => {
-        expect(makeIndexedChainIdsSchema().parse([1, 10, 8543])).toStrictEqual(
+        expect(makeIndexedChainIdsSchema().parse(new Set([1, 10, 8543]))).toStrictEqual(
           new Set([1, 10, 8543]),
         );
 
         expect(formatParseError(makeIndexedChainIdsSchema().safeParse("1,10"))).toContain(
-          "Indexed Chain IDs must be an array",
+          "Indexed Chain IDs must be a set",
         );
 
-        expect(formatParseError(makeIndexedChainIdsSchema().safeParse([]))).toContain(
-          "Indexed Chain IDs list must include at least one element",
+        expect(formatParseError(makeIndexedChainIdsSchema().safeParse(new Set([])))).toContain(
+          "Indexed Chain IDs must be a set with at least one chain ID.",
         );
       });
 
@@ -101,7 +104,7 @@ describe("ENSIndexer: Config", () => {
 
       it("can parse version info values", () => {
         expect(
-          makeENSIndexerVersionInfoSchema().parse({
+          makeEnsIndexerVersionInfoSchema().parse({
             nodejs: "v22.22.22",
             ponder: "0.11.25",
             ensDb: "0.32.0",
@@ -109,7 +112,7 @@ describe("ENSIndexer: Config", () => {
             ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies ENSIndexerVersionInfo),
+          } satisfies EnsIndexerVersionInfo),
         ).toStrictEqual({
           nodejs: "v22.22.22",
           ponder: "0.11.25",
@@ -118,11 +121,11 @@ describe("ENSIndexer: Config", () => {
           ensNormalize: "1.11.1",
           ensRainbow: "0.32.0",
           ensRainbowSchema: 2,
-        } satisfies ENSIndexerVersionInfo);
+        } satisfies EnsIndexerVersionInfo);
 
         expect(
           formatParseError(
-            makeENSIndexerVersionInfoSchema().safeParse({
+            makeEnsIndexerVersionInfoSchema().safeParse({
               nodejs: "",
               ponder: "",
               ensDb: "",
@@ -130,7 +133,7 @@ describe("ENSIndexer: Config", () => {
               ensNormalize: "",
               ensRainbow: "",
               ensRainbowSchema: -1,
-            } satisfies ENSIndexerVersionInfo),
+            } satisfies EnsIndexerVersionInfo),
           ),
         ).toStrictEqual(`✖ Value must be a non-empty string.
   → at nodejs
@@ -167,38 +170,38 @@ describe("ENSIndexer: Config", () => {
             ensNormalize: "1.11.1",
             ensRainbow: "0.32.0",
             ensRainbowSchema: 2,
-          } satisfies ENSIndexerVersionInfo,
-        };
+          },
+        } satisfies SerializedEnsIndexerPublicConfig;
 
-        const parsedConfig = makeENSIndexerPublicConfigSchema().parse(validConfig);
+        const parsedConfig = makeSerializedEnsIndexerPublicConfigSchema().parse(validConfig);
 
-        // The schema transforms URLs and arrays, so we need to check the transformed values
-        expect(parsedConfig.indexedChainIds).toBeInstanceOf(Set);
-        expect(Array.from(parsedConfig.indexedChainIds)).toEqual([1]);
-        expect(parsedConfig.labelSet).toEqual(validConfig.labelSet);
-        expect(parsedConfig.isSubgraphCompatible).toBe(validConfig.isSubgraphCompatible);
-        expect(parsedConfig.namespace).toBe(validConfig.namespace);
-        expect(parsedConfig.plugins).toEqual(validConfig.plugins);
-        expect(parsedConfig.databaseSchemaName).toBe(validConfig.databaseSchemaName);
-        expect(parsedConfig.versionInfo).toEqual(validConfig.versionInfo);
+        // Verify that the parsed config has the expected values and types
+        expect(parsedConfig).toStrictEqual(validConfig);
 
         // Test invalid labelSetId
         expect(
           formatParseError(
-            makeENSIndexerPublicConfigSchema().safeParse({
-              ...validConfig,
-              labelSet: { ...validConfig.labelSet, labelSetId: "" },
-            }),
+            makeEnsIndexerPublicConfigSchema().safeParse(
+              buildUnvalidatedEnsIndexerPublicConfig({
+                ...validConfig,
+                labelSet: { ...validConfig.labelSet, labelSetId: "" },
+              }),
+            ),
           ),
         ).toContain("labelSet.labelSetId must be 1-50 characters long");
 
         // Test invalid labelSetVersion
         expect(
           formatParseError(
-            makeENSIndexerPublicConfigSchema().safeParse({
-              ...validConfig,
-              labelSet: { ...validConfig.labelSet, labelSetVersion: "not-a-number" },
-            }),
+            makeEnsIndexerPublicConfigSchema().safeParse(
+              buildUnvalidatedEnsIndexerPublicConfig({
+                ...validConfig,
+                labelSet: {
+                  ...validConfig.labelSet,
+                  labelSetVersion: "not-a-number" as unknown as number,
+                },
+              }),
+            ),
           ),
         ).toContain("labelSet.labelSetVersion must be an integer");
       });

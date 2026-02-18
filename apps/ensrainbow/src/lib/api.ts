@@ -1,4 +1,4 @@
-import packageJson from "@/../package.json";
+import packageJson from "@/../package.json" with { type: "json" };
 
 import type { Context as HonoContext } from "hono";
 import { Hono } from "hono";
@@ -14,17 +14,19 @@ import {
 } from "@ensnode/ensnode-sdk";
 import { type EnsRainbow, ErrorCode, StatusCode } from "@ensnode/ensrainbow-sdk";
 
-import { DB_SCHEMA_VERSION, type ENSRainbowDB } from "@/lib/database";
-import { ENSRainbowServer } from "@/lib/server";
+import { DB_SCHEMA_VERSION } from "@/lib/database";
+import type { ENSRainbowServer } from "@/lib/server";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
 /**
- * Creates and configures an ENS Rainbow api
+ * Creates and configures the ENS Rainbow API routes.
  */
-export async function createApi(db: ENSRainbowDB): Promise<Hono> {
+export function createApi(
+  server: ENSRainbowServer,
+  publicConfig: EnsRainbow.ENSRainbowPublicConfig,
+): Hono {
   const api = new Hono();
-  const server = await ENSRainbowServer.init(db);
 
   // Enable CORS for all versioned API routes
   api.use(
@@ -78,40 +80,40 @@ export async function createApi(db: ENSRainbowDB): Promise<Hono> {
       );
     }
 
-    logger.debug(
-      `Healing request for labelhash: ${labelhash}, with labelSet: ${JSON.stringify(
-        clientLabelSet,
-      )}`,
-    );
     const result = await server.heal(labelhash, clientLabelSet);
-    logger.debug(result, `Heal result:`);
     return c.json(result, result.errorCode);
   });
 
   api.get("/health", (c: HonoContext) => {
-    logger.debug("Health check request");
     const result: EnsRainbow.HealthResponse = { status: "ok" };
     return c.json(result);
   });
 
-  api.get("/v1/labels/count", async (c: HonoContext) => {
-    logger.debug("Label count request");
-    const result = await server.labelCount();
-    logger.debug(result, `Count result`);
-    return c.json(result, result.errorCode);
+  api.get("/v1/labels/count", (c: HonoContext) => {
+    const countResponse: EnsRainbow.CountSuccess = {
+      status: StatusCode.Success,
+      count: publicConfig.recordsCount,
+      timestamp: new Date().toISOString(),
+    };
+    return c.json(countResponse);
   });
 
+  api.get("/v1/config", (c: HonoContext) => {
+    return c.json(publicConfig);
+  });
+
+  /**
+   * @deprecated Use GET /v1/config instead. This endpoint will be removed in a future version.
+   */
   api.get("/v1/version", (c: HonoContext) => {
-    logger.debug("Version request");
     const result: EnsRainbow.VersionResponse = {
       status: StatusCode.Success,
       versionInfo: {
         version: packageJson.version,
         dbSchemaVersion: DB_SCHEMA_VERSION,
-        labelSet: server.getServerLabelSet(),
+        labelSet: server.serverLabelSet,
       },
     };
-    logger.debug(result, `Version result`);
     return c.json(result);
   });
 

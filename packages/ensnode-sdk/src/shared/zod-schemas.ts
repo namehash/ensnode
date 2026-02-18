@@ -87,7 +87,7 @@ export const makeNonNegativeIntegerSchema = (valueLabel: string = "Value") =>
  * Parses a numeric value as {@link Duration}
  */
 export const makeDurationSchema = (valueLabel: string = "Value") =>
-  z.coerce
+  z
     .number({
       error: `${valueLabel} must be a number.`,
     })
