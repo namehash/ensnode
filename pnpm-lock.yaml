@@ -51,6 +51,9 @@ catalogs:
     lucide-react:
       specifier: ^0.548.0
       version: 0.548.0
+    p-retry:
+      specifier: ^7.1.0
+      version: 7.1.0
     pg-connection-string:
       specifier: ^2.9.1
       version: 2.9.1
@@ -400,7 +403,7 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0
       p-retry:
-        specifier: ^7.1.0
+        specifier: 'catalog:'
         version: 7.1.0
       pg-connection-string:
         specifier: 'catalog:'
@@ -475,6 +478,9 @@ importers:
       hono:
         specifier: 'catalog:'
         version: 4.11.7
+      p-retry:
+        specifier: 'catalog:'
+        version: 7.1.0
       pg-connection-string:
         specifier: 'catalog:'
         version: 2.9.1
