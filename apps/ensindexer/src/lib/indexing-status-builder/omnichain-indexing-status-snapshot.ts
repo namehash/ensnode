@@ -1,5 +1,4 @@
 import {
-  type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotQueued,
@@ -12,67 +11,41 @@ import {
   type OmnichainIndexingStatusSnapshotFollowing,
   type OmnichainIndexingStatusSnapshotUnstarted,
   type Unvalidated,
+  validateOmnichainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
-import type {
-  ChainId,
-  ChainIndexingMetrics,
-  ChainIndexingStatus,
-  PonderIndexingMetrics,
-  PonderIndexingStatus,
-} from "@ensnode/ponder-sdk";
+import type { ChainId } from "@ensnode/ponder-sdk";
 
-import type { ChainBlockRefs } from "./chain-block-refs";
-import { buildUnvalidatedChainIndexingStatusSnapshots } from "./chain-indexing-status-snapshot";
+import type { ChainIndexingMetadata } from "./chain-indexing-metadata";
+import { buildChainStatusSnapshots } from "./chain-indexing-status-snapshot";
 
-function validateOmnichainIndexingStatusSnapshot(
-  snapshot: Unvalidated<OmnichainIndexingStatusSnapshot>,
-): OmnichainIndexingStatusSnapshot {
-  return snapshot as OmnichainIndexingStatusSnapshot; // TODO: implement actual validation logic in ENSNode SDK
-}
-
-function buildChainStatusSnapshots(
-  indexedChainIds: ChainId[],
-  chainsBlockRefs: Map<ChainId, ChainBlockRefs>,
-  chainsIndexingMetrics: Map<ChainId, ChainIndexingMetrics>,
-  chainsIndexingStatus: Map<ChainId, ChainIndexingStatus>,
-): Map<ChainId, Unvalidated<ChainIndexingStatusSnapshot>> {
-  const chainStatusSnapshots = buildUnvalidatedChainIndexingStatusSnapshots(
-    indexedChainIds,
-    chainsBlockRefs,
-    chainsIndexingMetrics,
-    chainsIndexingStatus,
-  );
-
-  return chainStatusSnapshots;
-}
-
+/**
+ * Build an omnichain indexing status snapshot from per-chain metadata.
+ *
+ * @param chainsIndexingMetadata - A map of chain IDs to their complete indexing
+ *   metadata. Each entry contains the backfill scope, Ponder metrics, and status
+ *   needed to determine that chain's indexing state.
+ *
+ * @returns The validated omnichain indexing status snapshot.
+ */
 export function buildOmnichainIndexingStatusSnapshot(
-  indexedChainIds: ChainId[],
-  chainsBlockRefs: Map<ChainId, ChainBlockRefs>,
-  ponderIndexingMetrics: PonderIndexingMetrics,
-  ponderIndexingStatus: PonderIndexingStatus,
+  chainsIndexingMetadata: Map<ChainId, ChainIndexingMetadata>,
 ): OmnichainIndexingStatusSnapshot {
-  const chainStatusSnapshots = buildChainStatusSnapshots(
-    indexedChainIds,
-    chainsBlockRefs,
-    ponderIndexingMetrics.chains,
-    ponderIndexingStatus.chains,
-  );
+  const chainStatusSnapshots = buildChainStatusSnapshots(chainsIndexingMetadata);
 
-  const chains = Array.from(chainStatusSnapshots.values());
+  const chains = Array.from(chainStatusSnapshots.values()).filter(Boolean);
   const omnichainStatus = getOmnichainIndexingStatus(chains);
   const omnichainIndexingCursor = getOmnichainIndexingCursor(chains);
 
   switch (omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted: {
-      return {
+      return validateOmnichainIndexingStatusSnapshot({
         omnichainStatus,
         chains: chainStatusSnapshots as Map<
           ChainId,
           Unvalidated<ChainIndexingStatusSnapshotQueued>
         >, // narrowing the type here, will be validated in the following 'check' step
         omnichainIndexingCursor,
-      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotUnstarted>;
+      } satisfies Unvalidated<OmnichainIndexingStatusSnapshotUnstarted>);
     }
 
     case OmnichainIndexingStatusIds.Backfill: {

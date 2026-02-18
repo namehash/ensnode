@@ -1,136 +1,83 @@
 import {
-  ChainIndexingConfigTypeIds,
+  type ChainIndexingConfigDefinite,
+  type ChainIndexingConfigIndefinite,
   ChainIndexingStatusIds,
   type ChainIndexingStatusSnapshot,
   type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
   type ChainIndexingStatusSnapshotFollowing,
   type ChainIndexingStatusSnapshotQueued,
-  createIndexingConfig,
   type Unvalidated,
   validateChainIndexingStatusSnapshot,
 } from "@ensnode/ensnode-sdk";
-import {
-  type ChainId,
-  type ChainIndexingMetrics,
-  ChainIndexingStates,
-  type ChainIndexingStatus,
-  isBlockRefEqualTo,
-} from "@ensnode/ponder-sdk";
+import { type ChainId, ChainIndexingStates, isBlockRefEqualTo } from "@ensnode/ponder-sdk";
 
-import type { ChainBlockRefs } from "./chain-block-refs";
+import type { ChainIndexingMetadata } from "./chain-indexing-metadata";
 
 /**
- * Build Unvalidated Chain Indexing Status Snapshot
+ * Build Chain Indexing Status Snapshot from metadata.
+ *
+ * @param metadata - Complete indexing metadata including backfill scope,
+ *   Ponder config, metrics, and status needed to determine the chain's state.
+ *
+ * @returns The chain indexing status snapshot.
  */
-export function buildUnvalidatedChainIndexingStatusSnapshot(
-  chainId: ChainId,
-  chainBlockRefs: ChainBlockRefs,
-  chainIndexingMetrics: ChainIndexingMetrics,
-  chainIndexingStatus: ChainIndexingStatus,
-): Unvalidated<ChainIndexingStatusSnapshot> {
-  const { checkpointBlock } = chainIndexingStatus;
-
-  const config = createIndexingConfig(
-    chainBlockRefs.config.startBlock,
-    chainBlockRefs.config.endBlock,
-  );
+function buildChainIndexingStatusSnapshot(
+  metadata: ChainIndexingMetadata,
+): ChainIndexingStatusSnapshot {
+  const { backfillScope, indexingConfig, indexingMetrics, indexingStatus } = metadata;
+  const { checkpointBlock } = indexingStatus;
 
   // In omnichain ordering, if the startBlock is the same as the
   // status block, the chain has not started yet.
-  if (isBlockRefEqualTo(chainBlockRefs.config.startBlock, checkpointBlock)) {
-    return {
+  if (isBlockRefEqualTo(backfillScope.startBlock, checkpointBlock)) {
+    return validateChainIndexingStatusSnapshot({
       chainStatus: ChainIndexingStatusIds.Queued,
-      config,
-    } satisfies Unvalidated<ChainIndexingStatusSnapshotQueued>;
+      config: indexingConfig,
+    } satisfies Unvalidated<ChainIndexingStatusSnapshotQueued>);
   }
 
-  if (chainIndexingMetrics.state === ChainIndexingStates.Completed) {
-    // TODO: move that invariant to validation schema
-    if (config.configType !== ChainIndexingConfigTypeIds.Definite) {
-      throw new Error(
-        `The '${ChainIndexingStatusIds.Completed}' indexing status for chain ID '${chainId}' can be only created with the '${ChainIndexingConfigTypeIds.Definite}' indexing config type.`,
-      );
-    }
-
-    return {
+  if (indexingMetrics.state === ChainIndexingStates.Completed) {
+    return validateChainIndexingStatusSnapshot({
       chainStatus: ChainIndexingStatusIds.Completed,
       latestIndexedBlock: checkpointBlock,
-      config,
-    } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>;
+      config: indexingConfig as Unvalidated<ChainIndexingConfigDefinite>,
+    } satisfies Unvalidated<ChainIndexingStatusSnapshotCompleted>);
   }
 
-  if (chainIndexingMetrics.state === ChainIndexingStates.Realtime) {
-    // TODO: move that invariant to validation schema
-    if (config.configType !== ChainIndexingConfigTypeIds.Indefinite) {
-      throw new Error(
-        `The '${ChainIndexingStatusIds.Following}' indexing status for chain ID '${chainId}' can be only created with the '${ChainIndexingConfigTypeIds.Indefinite}' indexing config type.`,
-      );
-    }
-
-    return {
+  if (indexingMetrics.state === ChainIndexingStates.Realtime) {
+    return validateChainIndexingStatusSnapshot({
       chainStatus: ChainIndexingStatusIds.Following,
       latestIndexedBlock: checkpointBlock,
-      latestKnownBlock: chainIndexingMetrics.latestSyncedBlock,
-      config,
-    } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>;
+      latestKnownBlock: indexingMetrics.latestSyncedBlock,
+      config: indexingConfig as Unvalidated<ChainIndexingConfigIndefinite>,
+    } satisfies Unvalidated<ChainIndexingStatusSnapshotFollowing>);
   }
 
-  return {
+  return validateChainIndexingStatusSnapshot({
     chainStatus: ChainIndexingStatusIds.Backfill,
     latestIndexedBlock: checkpointBlock,
-    backfillEndBlock: chainBlockRefs.backfillEndBlock,
-    config,
-  } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>;
+    backfillEndBlock: backfillScope.endBlock,
+    config: indexingConfig,
+  } satisfies Unvalidated<ChainIndexingStatusSnapshotBackfill>);
 }
 
 /**
- * Build Unvalidated Chain Indexing Status Snapshots
+ * Build Chain Indexing Status Snapshot from metadata.
  *
- * @param indexedChainIds list of indexed chain IDs to build snapshots for.
- * @param chainsBlockRefs block refs for indexed chains.
- * @param chainsIndexingMetrics indexing metrics for indexed chains.
- * @param chainsIndexingStatus indexing status for indexed chains.
+ * @param metadata - Complete indexing metadata including backfill scope,
+ *   Ponder config, metrics, and status needed to determine the chain's state.
  *
- * @returns record of {@link Unvalidated<ChainIndexingStatusSnapshot>} keyed by chain ID.
- *
- * @throws error if any of the required data is missing or if data validation fails.
+ * @returns The chain indexing status snapshot.
  */
-export function buildUnvalidatedChainIndexingStatusSnapshots(
-  indexedChainIds: ChainId[],
-  chainsBlockRefs: Map<ChainId, ChainBlockRefs>,
-  chainsIndexingMetrics: Map<ChainId, ChainIndexingMetrics>,
-  chainsIndexingStatus: Map<ChainId, ChainIndexingStatus>,
-): Map<ChainId, Unvalidated<ChainIndexingStatusSnapshot>> {
-  const chainStatusSnapshots = new Map<ChainId, Unvalidated<ChainIndexingStatusSnapshot>>();
+export function buildChainStatusSnapshots(
+  chainsIndexingMetadata: Map<ChainId, ChainIndexingMetadata>,
+): Map<ChainId, ChainIndexingStatusSnapshot> {
+  const chainStatusSnapshots = new Map<ChainId, ChainIndexingStatusSnapshot>();
 
   // Build chain indexing status snapshot for each indexed chain.
-  for (const chainId of indexedChainIds) {
-    const chainBlockRefs = chainsBlockRefs.get(chainId);
-    const chainIndexingStatus = chainsIndexingStatus.get(chainId);
-    const chainIndexingMetrics = chainsIndexingMetrics.get(chainId);
-
-    // Invariant: block refs must be defined for the chain
-    if (!chainBlockRefs) {
-      throw new Error(`Block refs must be defined for chain ID ${chainId}`);
-    }
-
-    // Invariant: chainIndexingStatus must be defined for the chain
-    if (!chainIndexingStatus) {
-      throw new Error(`Indexing status must be defined for chain ID ${chainId}`);
-    }
-
-    // Invariant: chainIndexingMetrics must be defined for the chain
-    if (!chainIndexingMetrics) {
-      throw new Error(`Indexing metrics must be defined for chain ID ${chainId}`);
-    }
-
-    const chainStatusSnapshot = buildUnvalidatedChainIndexingStatusSnapshot(
-      chainId,
-      chainBlockRefs,
-      chainIndexingMetrics,
-      chainIndexingStatus,
-    );
+  for (const [chainId, metadata] of chainsIndexingMetadata) {
+    const chainStatusSnapshot = buildChainIndexingStatusSnapshot(metadata);
 
     chainStatusSnapshots.set(chainId, chainStatusSnapshot);
   }
