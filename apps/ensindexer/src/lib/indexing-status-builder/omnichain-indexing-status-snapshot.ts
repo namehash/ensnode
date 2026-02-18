@@ -32,7 +32,7 @@ export function buildOmnichainIndexingStatusSnapshot(
 ): OmnichainIndexingStatusSnapshot {
   const chainStatusSnapshots = buildChainStatusSnapshots(chainsIndexingMetadata);
 
-  const chains = Array.from(chainStatusSnapshots.values()).filter(Boolean);
+  const chains = Array.from(chainStatusSnapshots.values());
   const omnichainStatus = getOmnichainIndexingStatus(chains);
   const omnichainIndexingCursor = getOmnichainIndexingCursor(chains);
 

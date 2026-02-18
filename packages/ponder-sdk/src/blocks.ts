@@ -27,7 +27,7 @@ export const schemaBlockRef = z.object({
 export type BlockRef = z.infer<typeof schemaBlockRef>;
 
 /**
- * Compare two {@link BlockRef} object to check
+ * Compare two {@link BlockRef} objects to check
  * if blockA is before blockB.
  */
 export function isBlockRefBefore(blockA: BlockRef, blockB: BlockRef) {
@@ -35,7 +35,7 @@ export function isBlockRefBefore(blockA: BlockRef, blockB: BlockRef) {
 }
 
 /**
- * Compare two {@link BlockRef} object to check
+ * Compare two {@link BlockRef} objects to check
  * if blockA is equal to blockB.
  */
 export function isBlockRefEqualTo(blockA: BlockRef, blockB: BlockRef) {
@@ -43,7 +43,7 @@ export function isBlockRefEqualTo(blockA: BlockRef, blockB: BlockRef) {
 }
 
 /**
- * Compare two {@link BlockRef} object to check
+ * Compare two {@link BlockRef} objects to check
  * if blockA is before or equal to blockB.
  */
 export function isBlockRefBeforeOrEqualTo(blockA: BlockRef, blockB: BlockRef) {

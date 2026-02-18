@@ -63,12 +63,12 @@ function buildChainIndexingStatusSnapshot(
 }
 
 /**
- * Build Chain Indexing Status Snapshot from metadata.
+ * Build Chain Indexing Status Snapshots for all indexed chains.
  *
- * @param metadata - Complete indexing metadata including backfill scope,
- *   Ponder config, metrics, and status needed to determine the chain's state.
+ * @param chainsIndexingMetadata - A map of chain IDs to their complete
+ *                                 indexing metadata.
  *
- * @returns The chain indexing status snapshot.
+ * @returns A map of chain IDs to their chain indexing status snapshots.
  */
 export function buildChainStatusSnapshots(
   chainsIndexingMetadata: Map<ChainId, ChainIndexingMetadata>,
