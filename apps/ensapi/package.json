@@ -53,7 +53,7 @@
     "hono": "catalog:",
     "hono-openapi": "^1.1.2",
     "p-memoize": "^8.0.0",
-    "p-retry": "^7.1.0",
+    "p-retry": "catalog:",
     "pg-connection-string": "catalog:",
     "pino": "catalog:",
     "ponder-enrich-gql-docs-middleware": "^0.1.3",
