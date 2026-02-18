@@ -95,7 +95,7 @@ async function buildChainsIndexingMetadataFixed(
     }
 
     const backfillEndBlockNumber =
-      chainConfigBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks + 1;
+      chainConfigBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks - 1;
 
     const [startBlock, endBlock, backfillEndBlock] = await Promise.all([
       fetchBlockRef(publicClient, chainConfigBlockrange.startBlock),
