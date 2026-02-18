@@ -1,6 +1,6 @@
 import {
-  type ChainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotCompleted,
+  type ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill,
   type ChainIndexingStatusSnapshotQueued,
   getOmnichainIndexingCursor,
   getOmnichainIndexingStatus,
@@ -39,7 +39,7 @@ export function buildOmnichainIndexingStatusSnapshot(
   switch (omnichainStatus) {
     case OmnichainIndexingStatusIds.Unstarted: {
       return validateOmnichainIndexingStatusSnapshot({
-        omnichainStatus,
+        omnichainStatus: OmnichainIndexingStatusIds.Unstarted,
         chains: chainStatusSnapshots as Map<
           ChainId,
           Unvalidated<ChainIndexingStatusSnapshotQueued>
@@ -53,7 +53,7 @@ export function buildOmnichainIndexingStatusSnapshot(
         omnichainStatus: OmnichainIndexingStatusIds.Backfill,
         chains: chainStatusSnapshots as Map<
           ChainId,
-          Unvalidated<ChainIndexingStatusSnapshotBackfill>
+          Unvalidated<ChainIndexingStatusSnapshotForOmnichainIndexingStatusSnapshotBackfill>
         >, // narrowing the type here, will be validated in the following 'check' step
         omnichainIndexingCursor,
       } satisfies Unvalidated<OmnichainIndexingStatusSnapshotBackfill>);
