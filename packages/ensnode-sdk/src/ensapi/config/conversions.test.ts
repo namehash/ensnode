@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import { ENSNamespaceIds } from "@ensnode/datasources";
 
 import { PluginName } from "../../ensindexer/config/types";
-import { deserializeENSApiPublicConfig, serializeENSApiPublicConfig } from ".";
-import type { ENSApiPublicConfig } from "./types";
+import { deserializeEnsApiPublicConfig } from "./deserialize";
+import { serializeEnsApiPublicConfig } from "./serialize";
+import type { EnsApiPublicConfig } from "./types";
 
 const MOCK_ENSAPI_PUBLIC_CONFIG = {
   version: "0.36.0",
@@ -29,14 +30,14 @@ const MOCK_ENSAPI_PUBLIC_CONFIG = {
       ponder: "0.5.0",
     },
   },
-} satisfies ENSApiPublicConfig;
+} satisfies EnsApiPublicConfig;
 
-const MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+const MOCK_SERIALIZED_ENSAPI_PUBLIC_CONFIG = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
 
 describe("ENSApi Config Serialization/Deserialization", () => {
-  describe("serializeENSApiPublicConfig", () => {
+  describe("serializeEnsApiPublicConfig", () => {
     it("serializes ENSAPI public config correctly", () => {
-      const result = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+      const result = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
 
       expect(result).toEqual({
         version: "0.36.0",
@@ -65,10 +66,10 @@ describe("ENSApi Config Serialization/Deserialization", () => {
     });
   });
 
-  describe("deserializeENSApiPublicConfig", () => {
+  describe("deserializeEnsApiPublicConfig", () => {
     it("deserializes ENSAPI public config correctly", () => {
-      const serialized = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
-      const result = deserializeENSApiPublicConfig(serialized);
+      const serialized = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+      const result = deserializeEnsApiPublicConfig(serialized);
 
       expect(result).toEqual(MOCK_ENSAPI_PUBLIC_CONFIG);
     });
@@ -79,7 +80,7 @@ describe("ENSApi Config Serialization/Deserialization", () => {
         version: "", // Invalid: empty string
       };
 
-      expect(() => deserializeENSApiPublicConfig(invalidConfig, "testConfig")).toThrow(
+      expect(() => deserializeEnsApiPublicConfig(invalidConfig, "testConfig")).toThrow(
         /testConfig.version/,
       );
     });
@@ -87,8 +88,8 @@ describe("ENSApi Config Serialization/Deserialization", () => {
 
   describe("round-trip conversion", () => {
     it("maintains data integrity through serialize -> deserialize cycle", () => {
-      const serialized = serializeENSApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
-      const deserialized = deserializeENSApiPublicConfig(serialized);
+      const serialized = serializeEnsApiPublicConfig(MOCK_ENSAPI_PUBLIC_CONFIG);
+      const deserialized = deserializeEnsApiPublicConfig(serialized);
 
       expect(deserialized).toStrictEqual(MOCK_ENSAPI_PUBLIC_CONFIG);
     });

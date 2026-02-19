@@ -1,4 +1,4 @@
-import type { ENSIndexerPublicConfig } from "../../ensindexer";
+import type { EnsIndexerPublicConfig } from "../../ensindexer/config/types";
 import type { TheGraphCannotFallbackReason, TheGraphFallback } from "../../shared/config/thegraph";
 
 export type { TheGraphCannotFallbackReason, TheGraphFallback };
@@ -9,7 +9,7 @@ export type { TheGraphCannotFallbackReason, TheGraphFallback };
  * Contains ENSApi-specific configuration at the top level and
  * embeds the complete ENSIndexer public configuration.
  */
-export interface ENSApiPublicConfig {
+export interface EnsApiPublicConfig {
   /**
    * ENSApi service version
    *
@@ -28,5 +28,12 @@ export interface ENSApiPublicConfig {
    * Contains all ENSIndexer public configuration including
    * namespace, plugins, version info, etc.
    */
-  ensIndexerPublicConfig: ENSIndexerPublicConfig;
+  ensIndexerPublicConfig: EnsIndexerPublicConfig;
 }
+
+/**
+ * ENSApi Public Config
+ *
+ * @deprecated Use {@link EnsApiPublicConfig} instead.
+ */
+export type ENSApiPublicConfig = EnsApiPublicConfig;

@@ -1,4 +1,4 @@
-import { type ENSIndexerPublicConfig, PluginName } from "../../../ensindexer/config/types";
+import { type EnsIndexerPublicConfig, PluginName } from "../../../ensindexer/config/types";
 import {
   type OmnichainIndexingStatusId,
   OmnichainIndexingStatusIds,
@@ -27,9 +27,9 @@ export const registrarActionsPrerequisites = Object.freeze({
   ] as const,
 
   /**
-   * Check if provided ENSApiPublicConfig supports the Registrar Actions API.
+   * Check if provided EnsIndexerPublicConfig supports the Registrar Actions API.
    */
-  hasEnsIndexerConfigSupport(config: ENSIndexerPublicConfig): boolean {
+  hasEnsIndexerConfigSupport(config: EnsIndexerPublicConfig): boolean {
     return registrarActionsPrerequisites.requiredPlugins.every((plugin) =>
       config.plugins.includes(plugin),
     );

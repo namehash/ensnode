@@ -13,14 +13,33 @@ import {
   StatusCode,
 } from "@ensnode/ensrainbow-sdk";
 
-import type { ENSRainbowDB } from "@/lib/database";
+import type { DbConfig } from "@/config/types";
+import { type ENSRainbowDB, NoPrecalculatedCountError } from "@/lib/database";
 import type { VersionedRainbowRecord } from "@/lib/rainbow-record";
 import { getErrorMessage } from "@/utils/error-utils";
 import { logger } from "@/utils/logger";
 
+/**
+ * Reads label set and record count from an initialized ENSRainbowServer.
+ * @throws Error if the record count cannot be read from the database.
+ */
+export async function buildDbConfig(server: ENSRainbowServer): Promise<DbConfig> {
+  const countResult = await server.labelCount();
+  if (countResult.status === StatusCode.Error) {
+    throw new Error(
+      `Failed to read record count from database: ${countResult.error} (errorCode: ${countResult.errorCode})`,
+    );
+  }
+
+  return {
+    labelSet: server.serverLabelSet,
+    recordsCount: countResult.count,
+  };
+}
+
 export class ENSRainbowServer {
   private readonly db: ENSRainbowDB;
-  private readonly serverLabelSet: EnsRainbowServerLabelSet;
+  public readonly serverLabelSet: EnsRainbowServerLabelSet;
 
   private constructor(db: ENSRainbowDB, serverLabelSet: EnsRainbowServerLabelSet) {
     this.db = db;
@@ -44,14 +63,6 @@ export class ENSRainbowServer {
     const serverLabelSet = await db.getLabelSet();
 
     return new ENSRainbowServer(db, serverLabelSet);
-  }
-
-  /**
-   * Returns the server's EnsRainbowServerLabelSet.
-   * @returns The server's label set configuration
-   */
-  public getServerLabelSet(): EnsRainbowServerLabelSet {
-    return this.serverLabelSet;
   }
 
   /**
@@ -132,7 +143,13 @@ export class ENSRainbowServer {
   async labelCount(): Promise<EnsRainbow.CountResponse> {
     try {
       const precalculatedCount = await this.db.getPrecalculatedRainbowRecordCount();
-      if (precalculatedCount === null) {
+      return {
+        status: StatusCode.Success,
+        count: precalculatedCount,
+        timestamp: new Date().toISOString(),
+      } satisfies EnsRainbow.CountSuccess;
+    } catch (error) {
+      if (error instanceof NoPrecalculatedCountError) {
         return {
           status: StatusCode.Error,
           error:
@@ -140,13 +157,6 @@ export class ENSRainbowServer {
           errorCode: ErrorCode.ServerError,
         } satisfies EnsRainbow.CountServerError;
       }
-
-      return {
-        status: StatusCode.Success,
-        count: precalculatedCount,
-        timestamp: new Date().toISOString(),
-      } satisfies EnsRainbow.CountSuccess;
-    } catch (error) {
       logger.error(error, "Failed to retrieve precalculated rainbow record count");
       return {
         status: StatusCode.Error,

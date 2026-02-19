@@ -29,6 +29,7 @@
     "@ensnode/ensnode-sdk": "workspace:*",
     "@ensnode/ensrainbow-sdk": "workspace:*",
     "@ensnode/ponder-metadata": "workspace:*",
+    "@ensnode/ponder-sdk": "workspace:*",
     "caip": "catalog:",
     "date-fns": "catalog:",
     "deepmerge-ts": "^7.1.5",

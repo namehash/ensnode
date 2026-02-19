@@ -19,6 +19,12 @@ import {
 } from "@/utils/protobuf-schema";
 import { buildRainbowRecord } from "@/utils/rainbow-record";
 
+export interface ConvertSqlCommandCliArgs {
+  "input-file": string;
+  "output-file"?: string;
+  "label-set-id": LabelSetId;
+}
+
 export interface ConvertCommandOptions {
   inputFile: string;
   outputFile: string;

@@ -1,3 +1,5 @@
+import envConfig, { buildServeCommandConfig, type ServeCommandCliArgs } from "@/config";
+
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -5,65 +7,18 @@ import type { ArgumentsCamelCase, Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 
-import { buildLabelSetId, type LabelSetId } from "@ensnode/ensnode-sdk";
+import { buildLabelSetId } from "@ensnode/ensnode-sdk";
+import { PortNumberSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { convertCommand } from "@/commands/convert-command-sql";
-import { convertCsvCommand } from "@/commands/convert-csv-command";
-// import { ingestCommand } from "@/commands/ingest-command";
-import { ingestProtobufCommand } from "@/commands/ingest-protobuf-command";
-import { purgeCommand } from "@/commands/purge-command";
+import { type ConvertSqlCommandCliArgs, convertCommand } from "@/commands/convert-command-sql";
+import { type ConvertCsvCommandCliArgs, convertCsvCommand } from "@/commands/convert-csv-command";
+import {
+  type IngestProtobufCommandCliArgs,
+  ingestProtobufCommand,
+} from "@/commands/ingest-protobuf-command";
+import { type PurgeCommandCliArgs, purgeCommand } from "@/commands/purge-command";
 import { serverCommand } from "@/commands/server-command";
-import { validateCommand } from "@/commands/validate-command";
-import { getDefaultDataSubDir, getEnvPort } from "@/lib/env";
-
-export function validatePortConfiguration(cliPort: number): void {
-  const envPort = process.env.PORT;
-  if (envPort !== undefined && cliPort !== getEnvPort()) {
-    throw new Error(
-      `Port conflict: Command line argument (${cliPort}) differs from PORT environment variable (${envPort}). ` +
-        `Please use only one method to specify the port.`,
-    );
-  }
-}
-
-// interface IngestArgs {
-//   "input-file": string;
-//   "data-dir": string;
-// }
-
-interface IngestProtobufArgs {
-  "input-file": string;
-  "data-dir": string;
-}
-
-interface ServeArgs {
-  port: number;
-  "data-dir": string;
-}
-
-interface ValidateArgs {
-  "data-dir": string;
-  lite: boolean;
-}
-
-interface PurgeArgs {
-  "data-dir": string;
-}
-
-interface ConvertArgs {
-  "input-file": string;
-  "output-file"?: string;
-  "label-set-id": LabelSetId;
-}
-
-interface ConvertCsvArgs {
-  "input-file": string;
-  "output-file"?: string;
-  "label-set-id": LabelSetId;
-  "progress-interval"?: number;
-  "existing-db-path"?: string;
-  silent?: boolean;
-}
+import { type ValidateCommandCliArgs, validateCommand } from "@/commands/validate-command";
 
 export interface CLIOptions {
   exitProcess?: boolean;
@@ -89,7 +44,7 @@ export function createCLI(options: CLIOptions = {}) {
       //       .option("data-dir", {
       //         type: "string",
       //         description: "Directory to store LevelDB data",
-      //         default: getDefaultDataSubDir(),
+      //         default: getDefaultDataDir(),
       //       });
       //   },
       //   async (argv: ArgumentsCamelCase<IngestArgs>) => {
@@ -112,10 +67,10 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory to store LevelDB data",
-              default: getDefaultDataSubDir(),
+              default: envConfig.dataDir,
             });
         },
-        async (argv: ArgumentsCamelCase<IngestProtobufArgs>) => {
+        async (argv: ArgumentsCamelCase<IngestProtobufCommandCliArgs>) => {
           await ingestProtobufCommand({
             inputFile: argv["input-file"],
             dataDir: argv["data-dir"],
@@ -129,21 +84,26 @@ export function createCLI(options: CLIOptions = {}) {
           return yargs
             .option("port", {
               type: "number",
-              description: "Port to listen on",
-              default: getEnvPort(),
+              description: "Port to listen on (overrides PORT env var if both are set)",
+              default: envConfig.port,
+              coerce: (port: number) => {
+                const result = PortNumberSchema.safeParse(port);
+                if (!result.success) {
+                  const firstError = result.error.issues[0];
+                  throw new Error(`Invalid port: ${firstError?.message ?? "invalid port number"}`);
+                }
+                return result.data;
+              },
             })
             .option("data-dir", {
               type: "string",
               description: "Directory containing LevelDB data",
-              default: getDefaultDataSubDir(),
+              default: envConfig.dataDir,
             });
         },
-        async (argv: ArgumentsCamelCase<ServeArgs>) => {
-          validatePortConfiguration(argv.port);
-          await serverCommand({
-            port: argv.port,
-            dataDir: argv["data-dir"],
-          });
+        async (argv: ArgumentsCamelCase<ServeCommandCliArgs>) => {
+          const serveCommandConfig = buildServeCommandConfig(argv);
+          await serverCommand(serveCommandConfig);
         },
       )
       .command(
@@ -154,7 +114,7 @@ export function createCLI(options: CLIOptions = {}) {
             .option("data-dir", {
               type: "string",
               description: "Directory containing LevelDB data",
-              default: getDefaultDataSubDir(),
+              default: envConfig.dataDir,
             })
             .option("lite", {
               type: "boolean",
@@ -163,7 +123,7 @@ export function createCLI(options: CLIOptions = {}) {
               default: false,
             });
         },
-        async (argv: ArgumentsCamelCase<ValidateArgs>) => {
+        async (argv: ArgumentsCamelCase<ValidateCommandCliArgs>) => {
           await validateCommand({
             dataDir: argv["data-dir"],
             lite: argv.lite,
@@ -177,10 +137,10 @@ export function createCLI(options: CLIOptions = {}) {
           return yargs.option("data-dir", {
             type: "string",
             description: "Directory containing LevelDB data",
-            default: getDefaultDataSubDir(),
+            default: envConfig.dataDir,
           });
         },
-        async (argv: ArgumentsCamelCase<PurgeArgs>) => {
+        async (argv: ArgumentsCamelCase<PurgeCommandCliArgs>) => {
           await purgeCommand({
             dataDir: argv["data-dir"],
           });
@@ -223,7 +183,7 @@ export function createCLI(options: CLIOptions = {}) {
               default: false,
             });
         },
-        async (argv: ArgumentsCamelCase<ConvertCsvArgs>) => {
+        async (argv: ArgumentsCamelCase<ConvertCsvCommandCliArgs>) => {
           await convertCsvCommand({
             inputFile: argv["input-file"],
             outputFile: argv["output-file"],
@@ -255,7 +215,7 @@ export function createCLI(options: CLIOptions = {}) {
               description: "Path to where the resulting ensrainbow file will be output",
             });
         },
-        async (argv: ArgumentsCamelCase<ConvertArgs>) => {
+        async (argv: ArgumentsCamelCase<ConvertSqlCommandCliArgs>) => {
           const outputFile =
             argv["output-file"] ?? join(process.cwd(), `${argv["label-set-id"]}_0.ensrainbow`);
           await convertCommand({
