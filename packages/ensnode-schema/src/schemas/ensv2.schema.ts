@@ -314,7 +314,7 @@ export const registration = onchainTable(
   }),
 );
 
-export const latestRegistration = onchainTable("latest_registrations", (t) => ({
+export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
   domainId: t.text().primaryKey().$type<DomainId>(),
   index: t.integer().notNull(),
 }));
@@ -359,7 +359,7 @@ export const renewal = onchainTable(
 
     domainId: t.text().notNull().$type<DomainId>(),
     registrationIndex: t.integer().notNull(),
-    renewalIndex: t.integer().notNull(),
+    index: t.integer().notNull(),
 
     // all renewals have a duration
     duration: t.bigint().notNull(),
@@ -379,7 +379,7 @@ export const renewal = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.renewalIndex),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.index),
   }),
 );
 
@@ -397,12 +397,12 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
   }),
 }));
 
-export const latestRenewal = onchainTable(
-  "latest_renewals",
+export const latestRenewalIndex = onchainTable(
+  "latest_renewal_indexes",
   (t) => ({
     domainId: t.text().notNull().$type<DomainId>(),
     registrationIndex: t.integer().notNull(),
-    renewalIndex: t.integer().notNull(),
+    index: t.integer().notNull(),
   }),
   (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
 );

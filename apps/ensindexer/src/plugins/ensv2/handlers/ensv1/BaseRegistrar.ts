@@ -209,11 +209,11 @@ export default function () {
         );
       }
 
-      // update the registration
-      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
-
       // derive duration from previous registration's expiry
       const duration = expiry - registration.expiry;
+
+      // update the registration
+      await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
       // insert Renewal
       await insertLatestRenewal(context, {

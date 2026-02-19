@@ -15,19 +15,18 @@ import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensno
  * we could theoretically miss Registrations or Renewals created by a RegistrarController that we don't
  * index for whatever reason.
  *
- * We use pointer tables (latestRegistration, latestRenewal) to track the latest entity for each.
+ * We use pointer tables (latestRegistrationIndex, latestRenewalIndex) to track the latest index for
+ * each type of entity.
  */
 
 /**
  * Gets the latest Registration for the provided `domainId`.
  */
 export async function getLatestRegistration(context: Context, domainId: DomainId) {
-  const pointer = await context.db.find(schema.latestRegistration, { domainId });
+  const pointer = await context.db.find(schema.latestRegistrationIndex, { domainId });
   if (!pointer) return null;
 
-  return context.db.find(schema.registration, {
-    id: makeRegistrationId(domainId, pointer.index),
-  });
+  return context.db.find(schema.registration, { id: makeRegistrationId(domainId, pointer.index) });
 }
 
 /**
@@ -37,21 +36,24 @@ export async function insertLatestRegistration(
   context: Context,
   values: Omit<typeof schema.registration.$inferInsert, "id" | "index">,
 ) {
-  const latest = await context.db.find(schema.latestRegistration, { domainId: values.domainId });
-  const index = latest ? latest.index + 1 : 0;
+  const { domainId } = values;
+
+  // derive new Registration's index from previous, if exists
+  const previous = await getLatestRegistration(context, domainId);
+  const index = previous ? previous.index + 1 : 0;
 
   // insert new Registration
   await context.db.insert(schema.registration).values({
-    id: makeRegistrationId(values.domainId, index),
+    id: makeRegistrationId(domainId, index),
     index,
     ...values,
   });
 
   // ensure this Registration is the latest
   await context.db
-    .insert(schema.latestRegistration)
-    .values({ domainId: values.domainId, index: index })
-    .onConflictDoUpdate({ index: index });
+    .insert(schema.latestRegistrationIndex)
+    .values({ domainId, index })
+    .onConflictDoUpdate({ index });
 }
 
 /**
@@ -62,11 +64,14 @@ export async function getLatestRenewal(
   domainId: DomainId,
   registrationIndex: number,
 ) {
-  const pointer = await context.db.find(schema.latestRenewal, { domainId, registrationIndex });
+  const pointer = await context.db.find(schema.latestRenewalIndex, {
+    domainId,
+    registrationIndex,
+  });
   if (!pointer) return null;
 
   return context.db.find(schema.renewal, {
-    id: makeRenewalId(domainId, registrationIndex, pointer.renewalIndex),
+    id: makeRenewalId(domainId, registrationIndex, pointer.index),
   });
 }
 
@@ -75,37 +80,33 @@ export async function getLatestRenewal(
  */
 export async function insertLatestRenewal(
   context: Context,
-  values: Omit<typeof schema.renewal.$inferInsert, "id" | "registrationIndex" | "renewalIndex">,
+  values: Omit<typeof schema.renewal.$inferInsert, "id" | "registrationIndex" | "index">,
 ) {
-  const latestRegistration = await context.db.find(schema.latestRegistration, {
-    domainId: values.domainId,
-  });
-  if (!latestRegistration) {
+  const { domainId } = values;
+
+  // get the latest Registration
+  const registration = await getLatestRegistration(context, domainId);
+  if (!registration) {
     throw new Error(`Invariant(insertLatestRenewal): Expected latest Registration.`);
   }
 
-  const latestRenewal = await context.db.find(schema.latestRenewal, {
-    domainId: values.domainId,
-    registrationIndex: latestRegistration.index,
-  });
+  const registrationIndex = registration.index;
 
-  const renewalIndex = latestRenewal ? latestRenewal.renewalIndex + 1 : 0;
+  // derive new Renewal's index from previous, if exists
+  const previous = await getLatestRenewal(context, domainId, registrationIndex);
+  const index = previous ? previous.index + 1 : 0;
 
   // insert new Renewal
   await context.db.insert(schema.renewal).values({
-    id: makeRenewalId(values.domainId, latestRegistration.index, renewalIndex),
-    registrationIndex: latestRegistration.index,
-    renewalIndex,
+    id: makeRenewalId(domainId, registration.index, index),
+    registrationIndex,
+    index,
     ...values,
   });
 
   // ensure this Renewal is the latest
   await context.db
-    .insert(schema.latestRenewal)
-    .values({
-      domainId: values.domainId,
-      registrationIndex: latestRegistration.index,
-      renewalIndex,
-    })
-    .onConflictDoUpdate({ renewalIndex });
+    .insert(schema.latestRenewalIndex)
+    .values({ domainId, registrationIndex, index })
+    .onConflictDoUpdate({ index });
 }

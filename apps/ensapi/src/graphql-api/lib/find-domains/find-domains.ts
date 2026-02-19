@@ -165,17 +165,17 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     .from(domainsBase)
     // join head label for partial matching and NAME ordering
     .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
-    // join latest_registrations pointer table
+    // join latest_registration_indexes pointer table
     .leftJoin(
-      schema.latestRegistration,
-      eq(schema.latestRegistration.domainId, domainsBase.domainId),
+      schema.latestRegistrationIndex,
+      eq(schema.latestRegistrationIndex.domainId, domainsBase.domainId),
     )
     // join (latest) Registration for expiry
     .leftJoin(
       latestRegistration,
       and(
         eq(latestRegistration.domainId, domainsBase.domainId),
-        eq(latestRegistration.index, schema.latestRegistration.index),
+        eq(latestRegistration.index, schema.latestRegistrationIndex.index),
       ),
     )
     // join Latest Registration's Event to get start timestamp
