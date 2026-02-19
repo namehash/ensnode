@@ -345,7 +345,7 @@ export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
 export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
 
 export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
-  description: "Ordering options for domains query. If no order is provided, the default isASC.",
+  description: "Ordering options for domains query. If no order is provided, the default is ASC.",
   fields: (t) => ({
     by: t.field({ type: DomainsOrderBy, required: true }),
     dir: t.field({ type: OrderDirection, defaultValue: "ASC" }),

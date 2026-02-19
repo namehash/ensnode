@@ -67,7 +67,14 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  *    - headLabel: for partial name matching (LIKE prefix) and NAME ordering
  *    - latestRegistration: correlated subquery for REGISTRATION_* ordering
  * 6. Apply filters (owner, partial) in the unified query
- * 7. Return CTE with columns: id, headLabel, registrationTimestamp, registrationExpiry
+ * 7. Return CTE with columns: id, headLabel, registrationTimestamp, r egistrationExpiry
+ *
+ * ## Possible Future Improvements
+ *
+ * To support iterating over the full set of Canonical Domains, if desired, we could remove the
+ * input validation constraint, making both optional, and ensure that the downstream generated sql
+ * condenses into something manageable. This is left as a todo, though, as it's not yet clear
+ * whether the ability to iterate all Canonical Domains is a requirement.
  */
 export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
@@ -88,7 +95,6 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   const validOwner = !!owner;
 
   // Invariant: one of name or owner must be provided
-  // TODO: maybe this should be zod...
   if (!validName && !validOwner) {
     throw new Error(`Invariant(findDomains): One of 'name' or 'owner' must be provided.`);
   }
