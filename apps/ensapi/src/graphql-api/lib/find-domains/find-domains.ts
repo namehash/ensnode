@@ -141,51 +141,44 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // Union v1 and v2 base queries into a single subquery
   const domainsBase = unionAll(v1DomainsBase, v2DomainsBase).as("domainsBase");
 
-  // alias tables to avoid "column reference ___ is ambiguous"
-  const headLabel = alias(schema.label, "headLabel");
-  const latestRegistration = alias(schema.registration, "latestRegistration");
-  const latestRegistrationEvent = alias(schema.event, "latestRegistrationEvent");
-
   // Apply shared joins and filters on the unified domain base
   const domains = db
     .select({
       id: domainsBase.domainId,
 
       // for NAME ordering
-      headLabel: sql<string>`${headLabel.interpreted}`.as("headLabel"),
+      headLabel: schema.label.interpreted,
 
       // for REGISTRATION_TIMESTAMP ordering
-      registrationTimestamp: sql<bigint | null>`${latestRegistrationEvent.timestamp}`.as(
-        "registrationTimestamp",
-      ),
+      registrationTimestamp: schema.event.timestamp,
 
       // for REGISTRATION_EXPIRY ordering
-      registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
+      registrationExpiry: schema.registration.expiry,
     })
     .from(domainsBase)
-    // join head label for partial matching and NAME ordering
-    .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
-    // join latest_registration_indexes pointer table
+    // join head label
+    .leftJoin(schema.label, eq(schema.label.labelHash, domainsBase.headLabelHash))
+    // join latestRegistrationIndex
     .leftJoin(
       schema.latestRegistrationIndex,
       eq(schema.latestRegistrationIndex.domainId, domainsBase.domainId),
     )
-    // join (latest) Registration for expiry
+    // join (latest) Registration
     .leftJoin(
-      latestRegistration,
+      schema.registration,
       and(
-        eq(latestRegistration.domainId, domainsBase.domainId),
-        eq(latestRegistration.index, schema.latestRegistrationIndex.index),
+        eq(schema.registration.domainId, domainsBase.domainId),
+        eq(schema.registration.index, schema.latestRegistrationIndex.index),
       ),
     )
-    // join Latest Registration's Event to get start timestamp
-    .leftJoin(latestRegistrationEvent, eq(latestRegistrationEvent.id, latestRegistration.eventId))
+    // join (latest) Registration's Event
+    .leftJoin(schema.event, eq(schema.event.id, schema.registration.eventId))
     .where(
       and(
         owner ? eq(domainsBase.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
-        partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
       ),
     );
 
