@@ -13,14 +13,17 @@
 import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
 import {
-  type BlockNumber,
-  type Blockrange,
-  type ChainId,
-  type ChainIdString,
   deserializeBlockNumber,
   deserializeBlockrange,
   deserializeChainId,
 } from "@ensnode/ensnode-sdk";
+import type {
+  BlockNumber,
+  Blockrange,
+  BlockrangeWithStartBlock,
+  ChainId,
+  ChainIdString,
+} from "@ensnode/ponder-sdk";
 
 /**
  * Ponder config datasource with a flat `chain` value.
@@ -98,8 +101,10 @@ function isPonderDatasourceNested(
  *
  * @throws Error if any of the above invariants are violated.
  */
-export function buildChainsBlockrange(ponderConfig: PonderConfigType): Map<ChainId, Blockrange> {
-  const chainsBlockrange = new Map<ChainId, Blockrange>();
+export function buildChainsBlockrange(
+  ponderConfig: PonderConfigType,
+): Map<ChainId, BlockrangeWithStartBlock> {
+  const chainsBlockrange = new Map<ChainId, BlockrangeWithStartBlock>();
 
   // 0. Get all ponder sources (includes chain + startBlock & endBlock)
   const ponderSources = [
@@ -160,13 +165,20 @@ export function buildChainsBlockrange(ponderConfig: PonderConfigType): Map<Chain
     }
 
     // 5. Assign a valid blockrange to the chain
-    chainsBlockrange.set(
-      deserializeChainId(serializedChainId),
-      deserializeBlockrange({
-        startBlock: chainLowestStartBlock,
-        endBlock: chainHighestEndBlock,
-      }),
-    );
+    const chainId = deserializeChainId(serializedChainId);
+    const blockrange = deserializeBlockrange({
+      startBlock: chainLowestStartBlock,
+      endBlock: chainHighestEndBlock,
+    });
+
+    // Invariant: the blockrange must include a valid startBlock number.
+    if (typeof blockrange.startBlock === "undefined") {
+      throw new Error(
+        `Invalid blockrange for chain '${serializedChainId}'. The blockrange must include a valid startBlock number.`,
+      );
+    }
+
+    chainsBlockrange.set(chainId, blockrange as BlockrangeWithStartBlock);
   }
 
   return chainsBlockrange;
