@@ -1,4 +1,4 @@
-import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
+import { index, onchainEnum, onchainTable, primaryKey, relations, uniqueIndex } from "ponder";
 import type { Address, Hash } from "viem";
 
 import type {
@@ -272,7 +272,7 @@ export const registration = onchainTable(
     id: t.text().primaryKey().$type<RegistrationId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    index: t.integer().notNull().default(0),
+    index: t.integer().notNull(),
 
     // has a type
     type: registrationType().notNull(),
@@ -316,6 +316,11 @@ export const registration = onchainTable(
   }),
 );
 
+export const latestRegistration = onchainTable("latest_registrations", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  index: t.integer().notNull(),
+}));
+
 export const registration_relations = relations(registration, ({ one, many }) => ({
   // belongs to either v1Domain or v2Domain
   v1Domain: one(v1Domain, {
@@ -355,8 +360,8 @@ export const renewal = onchainTable(
     id: t.text().primaryKey().$type<RenewalId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    registrationIndex: t.integer().notNull().default(0),
-    index: t.integer().notNull().default(0),
+    registrationIndex: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
 
     // all renewals have a duration
     duration: t.bigint().notNull(),
@@ -376,7 +381,7 @@ export const renewal = onchainTable(
     eventId: t.text().notNull(),
   }),
   (t) => ({
-    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.index),
+    byId: uniqueIndex().on(t.domainId, t.registrationIndex, t.renewalIndex),
   }),
 );
 
@@ -393,6 +398,16 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
     references: [event.id],
   }),
 }));
+
+export const latestRenewal = onchainTable(
+  "latest_renewals",
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull(),
+    renewalIndex: t.integer().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
+);
 
 ///////////////
 // Permissions

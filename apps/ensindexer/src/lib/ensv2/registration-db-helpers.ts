@@ -1,15 +1,7 @@
 import type { Context } from "ponder:registry";
 import schema from "ponder:schema";
 
-import {
-  type DomainId,
-  makeLatestRegistrationId,
-  makeLatestRenewalId,
-  makeRegistrationId,
-  makeRenewalId,
-} from "@ensnode/ensnode-sdk";
-
-import { toJson } from "@/lib/json-stringify-with-bigints";
+import { type DomainId, makeRegistrationId, makeRenewalId } from "@ensnode/ensnode-sdk";
 
 /**
  * Latest Registration & Renewals
@@ -23,90 +15,97 @@ import { toJson } from "@/lib/json-stringify-with-bigints";
  * we could theoretically miss Registrations or Renewals created by a RegistrarController that we don't
  * index for whatever reason.
  *
- * If we were to access these entities via a custom sql query like "SELECT * from registrations
- * WHERE domainId= $domainId ORDER BY index DESC", ponder's in-memory cache would have to be flushed
- * to postgres every time we access the latest Registration/Renewal, which is pretty frequent.
- * To avoid this, we use the special key path /latest (instead of /:index) to access the
- * latest Registration/Renewal, turning the operation into an O(1) lookup compatible with Ponder's
- * in-memory cacheable db api.
- *
- * Then, when a new Registration/Renewal is to be created, the current latest is 'superceded': its id
- * that is currently /latest is replaced by /:index and the new /latest is inserted. To make this
- * compatible with Ponder's cacheable api, instead of updating the id, we delete the /latest entity
- * and insert a new entity (with all of the same columns) under the new id. See `supercedeLatestRegistration`
- * for implementation.
- *
- * This same logic applies to Renewals. Note that the foreign key for a Renewal's Registration is NOT
- * the RegistrationId (which changes from /latest to /:index as discussed) but is
- * (domainId, registrationIndex, index). The renewals_relationships shows how the composite key
- * (domainId, registrationIndex) is used to join Registrations and Renewals.
- *
- * Finally, RenewalIds must use the 'pinned' RegistrationId (i.e. /:index) at all times, to avoid
- * uniqueness collisions when Registrations are superceded.
+ * We use pointer tables (latestRegistration, latestRenewal) to track the latest entity for each.
  */
 
 /**
- * Gets the latest Regsitration for the provided `domainId`.
+ * Gets the latest Registration for the provided `domainId`.
  */
 export async function getLatestRegistration(context: Context, domainId: DomainId) {
-  return context.db.find(schema.registration, { id: makeLatestRegistrationId(domainId) });
-}
+  const pointer = await context.db.find(schema.latestRegistration, { domainId });
+  if (!pointer) return null;
 
-/**
- * Supercedes the latest Registration, pinning its, making room in the set for a new latest Registration.
- */
-export async function supercedeLatestRegistration(
-  context: Context,
-  registration: typeof schema.registration.$inferSelect,
-) {
-  // Invariant: Must be the latest Registration
-  if (registration.id !== makeLatestRegistrationId(registration.domainId)) {
-    throw new Error(
-      `Invariant(supercedeLatestRegistration): Attempted to supercede non-latest Registration:\n${toJson(registration)}`,
-    );
-  }
-
-  // delete latest
-  await context.db.delete(schema.registration, { id: registration.id });
-
-  // insert existing data into new Registration w/ pinned RegistrationId
-  await context.db.insert(schema.registration).values({
-    ...registration,
-    id: makeRegistrationId(registration.domainId, registration.index),
+  return context.db.find(schema.registration, {
+    id: makeRegistrationId(domainId, pointer.index),
   });
 }
 
 /**
- * Gets the latest Renewal.
+ * Inserts a Registration and updates the latestRegistration pointer for its `domainId`.
+ */
+export async function insertLatestRegistration(
+  context: Context,
+  values: Omit<typeof schema.registration.$inferInsert, "id" | "index">,
+) {
+  const latest = await context.db.find(schema.latestRegistration, { domainId: values.domainId });
+  const index = latest ? latest.index + 1 : 0;
+
+  // insert new Registration
+  await context.db.insert(schema.registration).values({
+    id: makeRegistrationId(values.domainId, index),
+    index,
+    ...values,
+  });
+
+  // ensure this Registration is the latest
+  await context.db
+    .insert(schema.latestRegistration)
+    .values({ domainId: values.domainId, index: index })
+    .onConflictDoUpdate({ index: index });
+}
+
+/**
+ * Gets the latest Renewal for the provided `domainId` and `registrationIndex`.
  */
 export async function getLatestRenewal(
   context: Context,
   domainId: DomainId,
   registrationIndex: number,
 ) {
-  return context.db.find(schema.renewal, { id: makeLatestRenewalId(domainId, registrationIndex) });
+  const pointer = await context.db.find(schema.latestRenewal, { domainId, registrationIndex });
+  if (!pointer) return null;
+
+  return context.db.find(schema.renewal, {
+    id: makeRenewalId(domainId, registrationIndex, pointer.renewalIndex),
+  });
 }
 
 /**
- * Supercedes the latest Renewal, pinning its id, making room in the set for a new latest Renewal.
+ * Inserts a Renewal and updates the latestRenewal pointer for its `domainId` and `registrationIndex`.
  */
-export async function supercedeLatestRenewal(
+export async function insertLatestRenewal(
   context: Context,
-  renewal: typeof schema.renewal.$inferSelect,
+  values: Omit<typeof schema.renewal.$inferInsert, "id" | "registrationIndex" | "renewalIndex">,
 ) {
-  // Invariant: Must be the latest Renewal
-  if (renewal.id !== makeLatestRenewalId(renewal.domainId, renewal.registrationIndex)) {
-    throw new Error(
-      `Invariant(supercedeLatestRenewal): Attempted to supercede non-latest Renewal:\n${toJson(renewal)}`,
-    );
+  const latestRegistration = await context.db.find(schema.latestRegistration, {
+    domainId: values.domainId,
+  });
+  if (!latestRegistration) {
+    throw new Error(`Invariant(insertLatestRenewal): Expected latest Registration.`);
   }
 
-  // delete latest
-  await context.db.delete(schema.renewal, { id: renewal.id });
-
-  // insert existing data into new Renewal w/ 'pinned' RenewalId
-  await context.db.insert(schema.renewal).values({
-    ...renewal,
-    id: makeRenewalId(renewal.domainId, renewal.registrationIndex, renewal.index),
+  const latestRenewal = await context.db.find(schema.latestRenewal, {
+    domainId: values.domainId,
+    registrationIndex: latestRegistration.index,
   });
+
+  const renewalIndex = latestRenewal ? latestRenewal.renewalIndex + 1 : 0;
+
+  // insert new Renewal
+  await context.db.insert(schema.renewal).values({
+    id: makeRenewalId(values.domainId, latestRegistration.index, renewalIndex),
+    registrationIndex: latestRegistration.index,
+    renewalIndex,
+    ...values,
+  });
+
+  // ensure this Renewal is the latest
+  await context.db
+    .insert(schema.latestRenewal)
+    .values({
+      domainId: values.domainId,
+      registrationIndex: latestRegistration.index,
+      renewalIndex,
+    })
+    .onConflictDoUpdate({ renewalIndex });
 }
