@@ -13,7 +13,6 @@ import ponderConfig from "@/ponder/config";
 
 import { buildChainsBlockrange } from "./chains-config-blockrange";
 import { fetchBlockRef } from "./fetch-block-ref";
-import { buildIndexedChainIds } from "./indexed-chains";
 
 /**
  * Build a map of chain ID to its configured blockrange (start and end blocks)
@@ -125,7 +124,7 @@ async function buildChainsIndexingMetadataImmutable(
 }
 
 async function buildChainsIndexingMetadataDynamic(
-  indexedChainIds: ChainId[],
+  indexedChainIds: Set<ChainId>,
   ponderClient: PonderClient,
 ): Promise<Map<ChainId, ChainIndexingMetadataDynamic>> {
   const chainsIndexingMetadataDynamic = new Map<ChainId, ChainIndexingMetadataDynamic>();
@@ -166,13 +165,13 @@ async function buildChainsIndexingMetadataDynamic(
 export class LocalPonderClient {
   #ponderClient: PonderClient;
   #publicClients: Map<ChainId, PublicClient>;
-  #indexedChainIds: ChainId[];
+  #indexedChainIds: Set<ChainId>;
   #chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>;
 
   private constructor(
     ponderClient: PonderClient,
     publicClients: Map<ChainId, PublicClient>,
-    indexedChainIds: ChainId[],
+    indexedChainIds: Set<ChainId>,
     chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>,
   ) {
     this.#ponderClient = ponderClient;
@@ -193,10 +192,9 @@ export class LocalPonderClient {
    * @throws Error if the client fails to connect to the local Ponder app or
    *               if any of the required data cannot be fetched or is invalid.
    */
-  static async init(ponderAppUrl: URL): Promise<LocalPonderClient> {
+  static async init(ponderAppUrl: URL, indexedChainIds: Set<ChainId>): Promise<LocalPonderClient> {
     const ponderClient = new PonderClient(ponderAppUrl);
     const publicClients = buildPublicClientsMap();
-    const indexedChainIds = buildIndexedChainIds(publicClients);
     const chainIndexingMetadataImmutable = await buildChainsIndexingMetadataImmutable(
       publicClients,
       ponderClient,

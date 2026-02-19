@@ -36,15 +36,18 @@ export async function getLocalPonderClient(): Promise<LocalPonderClient> {
    * @returns The initialized LocalPonderClient instance.
    * @throws Error if the client fails to initialize after the specified number of retries.
    */
-  localPonderClientPromise = pRetry(() => LocalPonderClient.init(config.ensIndexerUrl), {
-    retries: 3,
+  localPonderClientPromise = pRetry(
+    () => LocalPonderClient.init(config.ensIndexerUrl, config.indexedChainIds),
+    {
+      retries: 3,
 
-    onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
-      console.warn(
-        `Initializing local Ponder client attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
-      );
+      onFailedAttempt: ({ error, attemptNumber, retriesLeft }) => {
+        console.warn(
+          `Initializing local Ponder client attempt ${attemptNumber} failed (${error.message}). ${retriesLeft} retries left.`,
+        );
+      },
     },
-  }).catch((error) => {
+  ).catch((error) => {
     console.error(
       `Failed to initialize LocalPonderClient after multiple attempts: ${error.message}`,
     );
