@@ -141,7 +141,6 @@ export default function () {
         registrarChainId: registry.chainId,
         registrarAddress: registry.address,
         registrantId: interpretAddress(registrant),
-        start: event.block.timestamp,
         expiry,
         eventId: await ensureEvent(context, event),
       });

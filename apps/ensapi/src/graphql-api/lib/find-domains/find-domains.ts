@@ -114,7 +114,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // Note: owner/partial filtering happens in the unified query below, not here
   const v1DomainsBase = db
     .select({
-      id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
+      domainId: sql<DomainId>`${schema.v1Domain.id}`.as("domainId"),
       ownerId: schema.v1Domain.ownerId,
       headLabelHash: sql`${v1HeadDomain.labelHash}`.as("headLabelHash"),
     })
@@ -127,7 +127,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
 
   const v2DomainsBase = db
     .select({
-      id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
+      domainId: sql<DomainId>`${schema.v2Domain.id}`.as("domainId"),
       ownerId: schema.v2Domain.ownerId,
       headLabelHash: sql`${v2HeadDomain.labelHash}`.as("headLabelHash"),
     })
@@ -138,54 +138,48 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     )
     .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId));
 
-  // Union v1 and v2 base queries into a single CTE
-  const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));
+  // Union v1 and v2 base queries into a single subquery
+  const domainsBase = unionAll(v1DomainsBase, v2DomainsBase).as("domainsBase");
 
-  // alias for head label (for partial matching and NAME ordering)
+  // alias tables to avoid "column reference ___ is ambiguous"
   const headLabel = alias(schema.label, "headLabel");
-
-  // subquery for latest registration per domain (highest index)
-  // TODO: replace this with a JOIN against the latest registration lookup table after
-  // https://github.com/namehash/ensnode/issues/1594
-  // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
-  const registrationOuter = alias(schema.registration, "registrationOuter");
-  const latestRegistration = db
-    .select({
-      domainId: registrationOuter.domainId,
-      start: registrationOuter.start,
-      expiry: registrationOuter.expiry,
-    })
-    .from(registrationOuter)
-    .where(
-      eq(
-        registrationOuter.index,
-        db
-          .select({ maxIndex: sql<number>`MAX(${schema.registration.index})` })
-          .from(schema.registration)
-          .where(eq(schema.registration.domainId, registrationOuter.domainId)),
-      ),
-    )
-    .as("latestRegistration");
+  const latestRegistration = alias(schema.registration, "latestRegistration");
+  const latestRegistrationEvent = alias(schema.event, "latestRegistrationEvent");
 
   // Apply shared joins and filters on the unified domain base
   const domains = db
-    .with(domainsBase)
     .select({
-      id: domainsBase.id,
+      id: domainsBase.domainId,
+
       // for NAME ordering
       headLabel: sql<string>`${headLabel.interpreted}`.as("headLabel"),
+
       // for REGISTRATION_TIMESTAMP ordering
-      registrationTimestamp: sql<bigint | null>`${latestRegistration.start}`.as(
+      registrationTimestamp: sql<bigint | null>`${latestRegistrationEvent.timestamp}`.as(
         "registrationTimestamp",
       ),
+
       // for REGISTRATION_EXPIRY ordering
       registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
     })
     .from(domainsBase)
     // join head label for partial matching and NAME ordering
     .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
-    // join latest registration for timestamp/expiry ordering
-    .leftJoin(latestRegistration, eq(latestRegistration.domainId, domainsBase.id))
+    // join latest_registrations pointer table
+    .leftJoin(
+      schema.latestRegistration,
+      eq(schema.latestRegistration.domainId, domainsBase.domainId),
+    )
+    // join (latest) Registration for expiry
+    .leftJoin(
+      latestRegistration,
+      and(
+        eq(latestRegistration.domainId, domainsBase.domainId),
+        eq(latestRegistration.index, schema.latestRegistration.index),
+      ),
+    )
+    // join Latest Registration's Event to get start timestamp
+    .leftJoin(latestRegistrationEvent, eq(latestRegistrationEvent.id, latestRegistration.eventId))
     .where(
       and(
         owner ? eq(domainsBase.ownerId, owner) : undefined,

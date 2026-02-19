@@ -15,7 +15,6 @@ import {
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
-  makeRenewalId,
   makeSubdomainNode,
   type Node,
   PluginName,
@@ -27,7 +26,6 @@ import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  getLatestRenewal,
   insertLatestRegistration,
   insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
@@ -245,7 +243,6 @@ export default function () {
           registrarChainId: registrar.chainId,
           registrarAddress: registrar.address,
           registrantId: interpretAddress(registrant),
-          start: event.block.timestamp,
           fuses,
           expiry,
           eventId: await ensureEvent(context, event),
