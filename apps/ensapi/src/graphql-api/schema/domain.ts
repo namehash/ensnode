@@ -323,6 +323,7 @@ export const DomainsWhereInput = builder.inputType("DomainsWhereInput", {
   fields: (t) => ({
     name: t.string(),
     owner: t.field({ type: "Address" }),
+    canonical: t.boolean(),
   }),
 });
 
@@ -330,6 +331,7 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
   description: "Filter for Account.domains query.",
   fields: (t) => ({
     name: t.string({ required: true }),
+    canonical: t.boolean(),
   }),
 });
 

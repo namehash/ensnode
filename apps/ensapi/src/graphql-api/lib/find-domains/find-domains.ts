@@ -1,9 +1,12 @@
+import config from "@/config";
+
 import { and, asc, desc, eq, like, type SQL, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/pg-core";
 
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
+  getENSv2RootRegistryId,
   interpretedLabelsToLabelHashPath,
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
@@ -34,6 +37,8 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  *
  * ## Terminology:
  *
+ * - a 'Canonical Registry' is an ENSv2 Registry that is the Root Registry or the (sub)Registry of a
+ *  Domain in a Canonical Registry.
  * - a 'Canonical Domain' is a Domain connected to either the ENSv1 Root or the ENSv2 Root. All ENSv1
  *  Domains are Canonical Domains, but an ENSv2 Domain may not be Canonical, for example if it exists
  *  in a disjoint nametree or its Registry does not declare a Canonical Domain.
@@ -76,7 +81,10 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  * condenses into something manageable. This is left as a todo, though, as it's not yet clear
  * whether the ability to iterate all Canonical Domains is a requirement.
  */
-export function findDomains({ name, owner }: FindDomainsWhereArg) {
+export function findDomains({ name, owner, canonical }: FindDomainsWhereArg) {
+  // coerce `canonical` input to boolean
+  const onlyCanonical = canonical === true;
+
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
   // NOTE: throws if name is not a Partial InterpretedName
   const { concrete, partial } = parsePartialInterpretedName(name || "");
@@ -88,7 +96,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     );
   }
 
-  logger.debug({ input: { name, owner, concrete, partial } });
+  logger.debug({ input: { name, owner, onlyCanonical, concrete, partial } });
 
   // a name input is valid if it was parsed to something other than just empty string
   const validName = concrete.length > 0 || partial !== "";
@@ -125,6 +133,22 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     )
     .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId));
 
+  // If filtering for Canonical Domains, build a recursive CTE that walks from the ENSv2 Root
+  // Registry through registry_canonical_domains to find all Canonical Registries.
+  const canonicalRegistryFilter = onlyCanonical
+    ? sql`${schema.v2Domain.registryId} IN (
+        WITH RECURSIVE canonical_registries AS (
+          SELECT ${getENSv2RootRegistryId(config.namespace)}::text AS registry_id
+          UNION
+          SELECT rcd.registry_id
+          FROM ${schema.registryCanonicalDomain} rcd
+          JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id
+          JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
+        )
+        SELECT registry_id FROM canonical_registries
+      )`
+    : undefined;
+
   const v2DomainsBase = db
     .select({
       id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
@@ -136,7 +160,8 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
       v2DomainsByLabelHashPathQuery,
       eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
     )
-    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId));
+    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId))
+    .where(canonicalRegistryFilter);
 
   // Union v1 and v2 base queries into a single CTE
   const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));
