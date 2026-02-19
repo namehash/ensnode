@@ -7,7 +7,7 @@ import { type ChainId, ChainIndexingStates, PonderClient } from "@ensnode/ponder
 import type {
   ChainIndexingMetadata,
   ChainIndexingMetadataDynamic,
-  ChainIndexingMetadataFixed,
+  ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
 import ponderConfig from "@/ponder/config";
 
@@ -50,12 +50,12 @@ function buildPublicClientsMap(): Map<ChainId, PublicClient> {
  * @throws Error if any of the required data cannot be fetched or is invalid,
  *         or if invariants are violated.
  */
-async function buildChainsIndexingMetadataFixed(
+async function buildChainsIndexingMetadataImmutable(
   publicClients: Map<ChainId, PublicClient>,
   ponderClient: PonderClient,
-): Promise<Map<ChainId, ChainIndexingMetadataFixed>> {
-  console.log("Building ChainIndexingMetadataFixed...");
-  const chainsIndexingMetadataFixed = new Map<ChainId, ChainIndexingMetadataFixed>();
+): Promise<Map<ChainId, ChainIndexingMetadataImmutable>> {
+  console.log("Building ChainIndexingMetadataImmutable...");
+  const chainsIndexingMetadataImmutable = new Map<ChainId, ChainIndexingMetadataImmutable>();
 
   const chainsConfigBlockrange = buildChainsConfigBlockrange();
   const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
@@ -107,21 +107,21 @@ async function buildChainsIndexingMetadataFixed(
 
     const chainIndexingConfig = createIndexingConfig(startBlock, endBlock);
 
-    const metadataFixed: ChainIndexingMetadataFixed = {
+    const metadataImmutable = {
       backfillScope: {
         startBlock,
         endBlock: backfillEndBlock,
       },
       indexingConfig: chainIndexingConfig,
-    };
+    } satisfies ChainIndexingMetadataImmutable;
 
-    // Cache the fixed metadata for this chain ID
-    chainsIndexingMetadataFixed.set(chainId, metadataFixed);
+    // Cache the immutable metadata for this chain ID
+    chainsIndexingMetadataImmutable.set(chainId, metadataImmutable);
   }
 
-  console.log("ChainIndexingMetadataFixed built successfully");
+  console.log("ChainIndexingMetadataImmutable built successfully");
 
-  return chainsIndexingMetadataFixed;
+  return chainsIndexingMetadataImmutable;
 }
 
 async function buildChainsIndexingMetadataDynamic(
@@ -167,18 +167,18 @@ export class LocalPonderClient {
   #ponderClient: PonderClient;
   #publicClients: Map<ChainId, PublicClient>;
   #indexedChainIds: ChainId[];
-  #chainIndexingMetadataFixed: Map<ChainId, ChainIndexingMetadataFixed>;
+  #chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>;
 
   private constructor(
     ponderClient: PonderClient,
     publicClients: Map<ChainId, PublicClient>,
     indexedChainIds: ChainId[],
-    chainIndexingMetadataFixed: Map<ChainId, ChainIndexingMetadataFixed>,
+    chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>,
   ) {
     this.#ponderClient = ponderClient;
     this.#publicClients = publicClients;
     this.#indexedChainIds = indexedChainIds;
-    this.#chainIndexingMetadataFixed = chainIndexingMetadataFixed;
+    this.#chainIndexingMetadataImmutable = chainIndexingMetadataImmutable;
   }
 
   /**
@@ -197,7 +197,7 @@ export class LocalPonderClient {
     const ponderClient = new PonderClient(ponderAppUrl);
     const publicClients = buildPublicClientsMap();
     const indexedChainIds = buildIndexedChainIds(publicClients);
-    const chainIndexingMetadataFixed = await buildChainsIndexingMetadataFixed(
+    const chainIndexingMetadataImmutable = await buildChainsIndexingMetadataImmutable(
       publicClients,
       ponderClient,
     );
@@ -206,7 +206,7 @@ export class LocalPonderClient {
       ponderClient,
       publicClients,
       indexedChainIds,
-      chainIndexingMetadataFixed,
+      chainIndexingMetadataImmutable,
     );
 
     return client;
@@ -267,12 +267,12 @@ export class LocalPonderClient {
     );
 
     for (const chainId of this.indexedChainIds) {
-      const chainIndexingMetadataFixed = this.#chainIndexingMetadataFixed.get(chainId);
+      const chainIndexingMetadataImmutable = this.#chainIndexingMetadataImmutable.get(chainId);
       const chainIndexingMetadataDynamic = chainsIndexingMetadataDynamic.get(chainId);
 
-      // Invariant: fixed and dynamic metadata must exist for indexed chain
-      if (!chainIndexingMetadataFixed) {
-        throw new Error(`No fixed indexing metadata found for chain ID ${chainId}`);
+      // Invariant: immutable and dynamic metadata must exist for indexed chain
+      if (!chainIndexingMetadataImmutable) {
+        throw new Error(`No immutable indexing metadata found for chain ID ${chainId}`);
       }
 
       if (!chainIndexingMetadataDynamic) {
@@ -280,7 +280,7 @@ export class LocalPonderClient {
       }
 
       const metadata = {
-        ...chainIndexingMetadataFixed,
+        ...chainIndexingMetadataImmutable,
         ...chainIndexingMetadataDynamic,
       } satisfies ChainIndexingMetadata;
 

@@ -4,13 +4,14 @@ import type { ChainIndexingMetrics, ChainIndexingStatus } from "@ensnode/ponder-
 import type { BackfillScope } from "./backfill-scope";
 
 /**
- * Chain Indexing Metadata Fixed
+ * Chain Indexing Metadata Immutable
  *
- * Represents the fixed metadata for a chain that is being indexed by a Ponder app. It includes the
- * backfill scope and indexing config for the chain, which are determined at the start of indexing
- * and do not change during the indexing process.
+ * Represents the immutable metadata for a chain that is being indexed by
+ * a Ponder app. It includes the backfill scope and indexing config for
+ * the chain, which are determined at the start of indexing and do not
+ * change during the indexing process.
  */
-export interface ChainIndexingMetadataFixed {
+export interface ChainIndexingMetadataImmutable {
   /**
    * Backfill scope for the chain
    *
@@ -27,7 +28,7 @@ export interface ChainIndexingMetadataFixed {
 }
 
 /**
- * Chain Indexing Metrics Dynamic
+ * Chain Indexing Metadata Dynamic
  *
  * Represents the dynamic metadata for a chain that is currently being indexed by a Ponder app. It
  * includes the current indexing metrics and indexing status for the chain, which are continuously
@@ -56,4 +57,4 @@ export interface ChainIndexingMetadataDynamic {
  * the dynamic metadata (indexing metrics and indexing status) for
  * a chain that is being indexed by a Ponder app.
  */
-export type ChainIndexingMetadata = ChainIndexingMetadataFixed & ChainIndexingMetadataDynamic;
+export type ChainIndexingMetadata = ChainIndexingMetadataImmutable & ChainIndexingMetadataDynamic;
