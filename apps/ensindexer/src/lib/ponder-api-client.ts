@@ -2,7 +2,7 @@ import config from "@/config";
 
 import { LocalPonderClient } from "@/ponder/api/lib/local-ponder-client";
 
-let localPonderClient: LocalPonderClient | undefined = undefined;
+let localPonderClient: LocalPonderClient | undefined;
 
 /**
  * Get the singleton LocalPonderClient instance for the ENSIndexer app.

@@ -112,7 +112,7 @@ export class LocalPonderClient extends PonderClient {
     }
 
     let chainsIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>;
-    
+
     try {
       chainsIndexingMetadataImmutable = await this.#chainsIndexingMetadataImmutable;
     } catch (error) {
@@ -120,8 +120,10 @@ export class LocalPonderClient extends PonderClient {
       // the next request, since the error may be transient.
       this.#chainsIndexingMetadataImmutable = undefined;
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      throw new Error(`Chains Indexing Metadata Immutable must be available to build omnichain indexing status snapshot: ${errorMessage}`);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw new Error(
+        `Chains Indexing Metadata Immutable must be available to build omnichain indexing status snapshot: ${errorMessage}`,
+      );
     }
 
     // Build dynamic metadata for indexed chains on each request since
