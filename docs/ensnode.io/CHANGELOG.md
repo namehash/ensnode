@@ -1,5 +1,13 @@
 # @docs/ensnode
 
+## 1.6.0
+
+### Patch Changes
+
+- [#1558](https://github.com/namehash/ensnode/pull/1558) [`69f5c6b`](https://github.com/namehash/ensnode/commit/69f5c6bd27215a855d2dd4eaeb258bcf7cc6ea82) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Activate Context7 to assist builders using LLMs to build on ENSNode
+
+- [#1579](https://github.com/namehash/ensnode/pull/1579) [`a14120d`](https://github.com/namehash/ensnode/commit/a14120df5b6ff85f922ddc57b2e241706a445337) Thanks [@tk-o](https://github.com/tk-o)! - Included ENSRainbow Searchlight instance on _Hosted ENSRainbow Instances_ page.
+
 ## 1.5.1
 
 ### Patch Changes

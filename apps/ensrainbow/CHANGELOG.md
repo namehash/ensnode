@@ -1,5 +1,17 @@
 # ensrainbow
 
+## 1.6.0
+
+### Patch Changes
+
+- [#1425](https://github.com/namehash/ensnode/pull/1425) [`b06e60f`](https://github.com/namehash/ensnode/commit/b06e60ff7d1a8de096c5d99c4ecef5cfdff84750) Thanks [@djstrong](https://github.com/djstrong)! - Adds `/v1/config` endpoint to ENSRainbow API returning public configuration (version, label set, records count) and deprecates `/v1/version` endpoint. The new endpoint provides comprehensive service discovery capabilities for clients.
+
+  Server startup now requires an initialized database (with a precalculated record count). Run ingestion before starting the server so `/v1/config` is accurate and the service is ready to serve. If the database is empty or uninitialized, startup fails with a clear error directing you to run ingestion first.
+
+- Updated dependencies [[`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7), [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c), [`4cf6f41`](https://github.com/namehash/ensnode/commit/4cf6f412a9fa9aa6c438b83acf090adb8365f497), [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91), [`1bc599f`](https://github.com/namehash/ensnode/commit/1bc599f99804d1cf08dd0d23d5518b1b8e7928c5), [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0), [`43d3e9c`](https://github.com/namehash/ensnode/commit/43d3e9cdc6456c8b32940a8860b92c523157ffea), [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8), [`b06e60f`](https://github.com/namehash/ensnode/commit/b06e60ff7d1a8de096c5d99c4ecef5cfdff84750)]:
+  - @ensnode/ensnode-sdk@1.6.0
+  - @ensnode/ensrainbow-sdk@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes
