@@ -133,19 +133,19 @@ export default {
 
       DefaultReverseResolver3: {
         abi: ResolverABI,
-        address: "0x70e0bA845a1A0F2DA3359C97E0285013525FFC49",
+        address: "0x70e0ba845a1a0f2da3359c97e0285013525ffc49",
         startBlock: 0,
       },
 
       DefaultPublicResolver4: {
         abi: ResolverABI,
-        address: "0x172076E0166D1F9Cc711C77Adf8488051744980C",
+        address: "0x172076e0166d1f9cc711c77adf8488051744980c",
         startBlock: 0,
       },
 
       DefaultPublicResolver5: {
         abi: ResolverABI,
-        address: "0x4EE6eCAD1c2Dae9f525404De8555724e3c35d07B",
+        address: "0x4ee6ecad1c2dae9f525404de8555724e3c35d07b",
         startBlock: 0,
       },
     },

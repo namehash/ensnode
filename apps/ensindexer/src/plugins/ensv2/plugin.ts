@@ -69,7 +69,6 @@ const ALL_DATASOURCE_NAMES = [
   DatasourceNames.Basenames,
   DatasourceNames.Lineanames,
   DatasourceNames.ENSv2Root,
-  DatasourceNames.ENSv2ETHRegistry,
 ];
 
 export default createPlugin({
@@ -81,8 +80,8 @@ export default createPlugin({
     } = getRequiredDatasources(config.namespace, REQUIRED_DATASOURCE_NAMES);
 
     const {
-      ENSv2ETHRegistry, //
-      basenames,
+      ENSv2Root, //
+      basenames, //
       lineanames,
     } = maybeGetDatasources(config.namespace, ALL_DATASOURCE_NAMES);
 
@@ -138,11 +137,11 @@ export default createPlugin({
         [namespaceContract(pluginName, "ETHRegistrar")]: {
           abi: ETHRegistrarABI,
           chain: {
-            ...(ENSv2ETHRegistry &&
+            ...(ENSv2Root &&
               chainConfigForContract(
                 config.globalBlockrange,
-                ENSv2ETHRegistry.chain.id,
-                ENSv2ETHRegistry.contracts.ETHRegistrar,
+                ENSv2Root.chain.id,
+                ENSv2Root.contracts.ETHRegistrar,
               )),
           },
         },
