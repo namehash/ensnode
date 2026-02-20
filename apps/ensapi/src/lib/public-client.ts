@@ -1,8 +1,7 @@
 import config from "@/config";
 
-import { ccipRequest, createPublicClient, fallback, http, type PublicClient } from "viem";
+import { createPublicClient, fallback, http, type PublicClient } from "viem";
 
-import { ensTestEnvChain } from "@ensnode/datasources";
 import type { ChainId } from "@ensnode/ensnode-sdk";
 
 const _cache = new Map<ChainId, PublicClient>();

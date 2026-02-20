@@ -743,7 +743,7 @@ describe("config (minimal base env)", () => {
         NAMESPACE: "ens-test-env",
         LABEL_SET_ID: "ens-test-env",
         LABEL_SET_VERSION: "0",
-        RPC_URL_15658733: VALID_RPC_URL,
+        [`RPC_URL_${ensTestEnvChain.id}`]: VALID_RPC_URL,
       });
       await expect(getConfig()).resolves.toMatchObject({
         namespace: ENSNamespaceIds.EnsTestEnv,
