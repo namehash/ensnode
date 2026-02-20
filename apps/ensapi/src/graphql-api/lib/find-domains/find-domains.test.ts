@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { ENSNamespaceIds } from "@ensnode/datasources";
+
+vi.mock("@/config", () => ({ namespace: ENSNamespaceIds.Mainnet }));
 vi.mock("@/lib/db", () => ({ db: {} }));
 vi.mock("@/graphql-api/lib/find-domains/find-domains-by-labelhash-path", () => ({}));
 
