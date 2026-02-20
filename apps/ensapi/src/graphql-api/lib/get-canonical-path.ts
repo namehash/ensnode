@@ -97,7 +97,7 @@ export async function getV2CanonicalPath(domainId: ENSv2DomainId): Promise<Canon
       JOIN ${schema.registryCanonicalDomain} rcd
         ON rcd.registry_id = upward.registry_id
       JOIN ${schema.v2Domain} pd
-        ON pd.id = rcd.domain_id
+        ON pd.id = rcd.domain_id AND pd.subregistry_id = upward.registry_id
       WHERE upward.registry_id != ${ENSv2_ROOT_REGISTRY_ID}
         AND upward.depth < ${MAX_DEPTH}
     )

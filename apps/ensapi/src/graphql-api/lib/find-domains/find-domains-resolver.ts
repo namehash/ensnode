@@ -43,8 +43,7 @@ function getOrderValueFromResult(
 }
 
 /**
- * Shared GraphQL API resolver for domains connection queries, used by Query.domains and
- * Account.domains.
+ * GraphQL API resolver for domains connection queries, used by Query.domains.
  *
  * @param context - The GraphQL Context, required for Dataloader access
  * @param args - The GraphQL Args object (via t.connection) + FindDomains-specific args (where, order)

@@ -137,6 +137,8 @@ export function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
           FROM ${schema.v2Domain} d
           JOIN ${schema.registryCanonicalDomain} rcd
             ON rcd.registry_id = d.registry_id
+          JOIN ${schema.v2Domain} rcd_parent
+            ON rcd_parent.id = rcd.domain_id AND rcd_parent.subregistry_id = d.registry_id
           WHERE d.label_hash = (${rawLabelHashPathArray})[${pathLength}]
 
           UNION ALL
@@ -152,6 +154,8 @@ export function v2DomainsByLabelHashPath(labelHashPath: LabelHashPath) {
             ON pd.id = upward_check.current_id
           JOIN ${schema.registryCanonicalDomain} rcd
             ON rcd.registry_id = pd.registry_id
+          JOIN ${schema.v2Domain} rcd_parent
+            ON rcd_parent.id = rcd.domain_id AND rcd_parent.subregistry_id = pd.registry_id
           WHERE upward_check.depth < ${pathLength}
             AND pd.label_hash = (${rawLabelHashPathArray})[${pathLength} - upward_check.depth]
         )

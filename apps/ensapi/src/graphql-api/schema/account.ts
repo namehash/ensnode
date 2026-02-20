@@ -6,18 +6,12 @@ import * as schema from "@ensnode/ensnode-schema";
 import type { PermissionsUserId } from "@ensnode/ensnode-sdk";
 
 import { builder } from "@/graphql-api/builder";
-import { resolveFindDomains } from "@/graphql-api/lib/find-domains/find-domains-resolver";
 import { getModelId } from "@/graphql-api/lib/get-model-id";
 import { AccountIdInput } from "@/graphql-api/schema/account-id";
 import { AccountRegistryPermissionsRef } from "@/graphql-api/schema/account-registries-permissions";
 import { AccountResolverPermissionsRef } from "@/graphql-api/schema/account-resolver-permissions";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
-import {
-  AccountDomainsWhereInput,
-  DomainInterfaceRef,
-  DomainsOrderInput,
-} from "@/graphql-api/schema/domain";
 import { PermissionsUserRef } from "@/graphql-api/schema/permissions";
 import { db } from "@/lib/db";
 
@@ -57,26 +51,6 @@ AccountRef.implement({
       type: "Address",
       nullable: false,
       resolve: (parent) => parent.id,
-    }),
-
-    ///////////////////
-    // Account.domains
-    ///////////////////
-    domains: t.connection({
-      description: "TODO",
-      type: DomainInterfaceRef,
-      args: {
-        where: t.arg({ type: AccountDomainsWhereInput, required: false }),
-        order: t.arg({ type: DomainsOrderInput }),
-      },
-      resolve: (parent, args, context) =>
-        resolveFindDomains(context, {
-          ...args,
-          where: {
-            ...args.where,
-            owner: parent.id,
-          },
-        }),
     }),
 
     ///////////////////////

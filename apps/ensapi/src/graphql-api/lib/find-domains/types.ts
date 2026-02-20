@@ -24,6 +24,14 @@ export interface FindDomainsWhereArg {
    * owned by the specified Address.
    */
   owner?: Address | null;
+
+  /**
+   * When `true`, only Canonical Domains are returned. All v1Domains are Canonical, and v2Domains
+   * are filtered to those whose registry is reachable from the ENSv2 Root Registry.
+   *
+   * When `false` or omitted, all Domains are returned, regardless of whether they are Canonical or not.
+   */
+  canonical?: boolean | null;
 }
 
 /**
