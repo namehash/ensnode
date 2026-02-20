@@ -149,7 +149,7 @@ export function buildChainsBlockrange(
     //      ponderSource for that chain has its respective `endBlock` defined.
     const isEndBlockForChainAllowed = chainEndBlocks.length === chainStartBlocks.length;
 
-    // 3.b) Get the highest endBLock for the chain.
+    // 3.b) Get the highest endBlock for the chain.
     const chainHighestEndBlock =
       isEndBlockForChainAllowed && chainEndBlocks.length > 0
         ? Math.max(...chainEndBlocks)
