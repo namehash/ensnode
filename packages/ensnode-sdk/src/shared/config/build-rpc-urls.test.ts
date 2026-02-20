@@ -4,16 +4,16 @@ import { describe, expect, it } from "vitest";
 import {
   type ENSNamespace,
   ENSNamespaceIds,
-  ensTestEnvL1Chain,
-  ensTestEnvL2Chain,
+  ensTestEnvChain,
   getENSNamespace,
 } from "@ensnode/datasources";
 
+import type { ChainId } from "../types";
 import { buildAlchemyBaseUrl, buildDRPCUrl, buildQuickNodeURL } from "./build-rpc-urls";
 
 const KEY = "whatever";
 
-const LOCAL_CHAIN_IDS = [ensTestEnvL1Chain.id, ensTestEnvL2Chain.id];
+const LOCAL_CHAIN_IDS: ChainId[] = [ensTestEnvChain.id];
 const ALL_KNOWN_PUBLIC_CHAIN_IDS = Object.values(ENSNamespaceIds)
   .map((namespace) => getENSNamespace(namespace))
   .flatMap((namespace: ENSNamespace) => Object.values(namespace))

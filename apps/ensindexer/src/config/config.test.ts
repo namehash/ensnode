@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ensTestEnvL1Chain, ensTestEnvL2Chain } from "@ensnode/datasources";
+import { ensTestEnvChain } from "@ensnode/datasources";
 import { ENSNamespaceIds, PluginName } from "@ensnode/ensnode-sdk";
 import type { RpcConfig } from "@ensnode/ensnode-sdk/internal";
 
@@ -661,8 +661,7 @@ describe("config (minimal base env)", () => {
         stubEnv({ NAMESPACE: "ens-test-env", PLUGINS: "subgraph" });
 
         const config = await getConfig();
-        expect(config.rpcConfigs.has(ensTestEnvL1Chain.id)).toBe(true);
-        expect(config.rpcConfigs.has(ensTestEnvL2Chain.id)).toBe(true);
+        expect(config.rpcConfigs.has(ensTestEnvChain.id)).toBe(true);
       });
     });
 
