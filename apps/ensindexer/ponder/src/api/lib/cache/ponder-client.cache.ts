@@ -1,9 +1,10 @@
 import config from "@/config";
+
 import { type Duration, SWRCache } from "@ensnode/ensnode-sdk";
 import {
   PonderClient,
-  PonderIndexingMetrics,
-  PonderIndexingStatus,
+  type PonderIndexingMetrics,
+  type PonderIndexingStatus,
 } from "@ensnode/ponder-sdk";
 
 /**
@@ -47,12 +48,10 @@ const ponderClient = new PonderClient(config.ensIndexerUrl);
 export const ponderClientCache = new SWRCache({
   fn: async function loadPonderClientCache() {
     try {
-      console.info(`[PonderClientCache]: loading data...`);
       const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
         ponderClient.metrics(),
         ponderClient.status(),
       ]);
-      console.info(`[PonderClientCache]: Successfully loaded data`);
 
       return { ponderIndexingMetrics, ponderIndexingStatus };
     } catch (error) {
@@ -64,5 +63,4 @@ export const ponderClientCache = new SWRCache({
   },
   ttl: Number.POSITIVE_INFINITY,
   proactiveRevalidationInterval: 10 satisfies Duration,
-  proactivelyInitialize: true,
 }) satisfies PonderClientCache;

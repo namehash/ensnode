@@ -1,7 +1,5 @@
 import config from "@/config";
 
-import { chainsIndexingMetadataImmutableCache } from "@/ponder/api/lib/cache/chains-indexing-metadata-immutable.cache";
-import { ponderClientCache } from "@/ponder/api/lib/cache/ponder-client.cache";
 import { LocalPonderClient } from "@/ponder/api/lib/local-ponder-client";
 
 let localPonderClient: LocalPonderClient | undefined = undefined;
@@ -11,7 +9,7 @@ let localPonderClient: LocalPonderClient | undefined = undefined;
  *
  * This function relies on SWR caches with proactive revalidation to load
  * necessary data for the client state, allowing the client to be initialized
- * in a non-blocking way. The function will return the cached client instance.
+ * in a non-blocking way.
  *
  * @returns The singleton LocalPonderClient instance.
  */
@@ -19,12 +17,7 @@ export function getLocalPonderClient(): LocalPonderClient {
   // Initialize the singleton LocalPonderClient instance if it hasn't been
   // initialized yet.
   if (localPonderClient === undefined) {
-    localPonderClient = new LocalPonderClient(
-      config.ensIndexerUrl,
-      config.indexedChainIds,
-      chainsIndexingMetadataImmutableCache,
-      ponderClientCache,
-    );
+    localPonderClient = new LocalPonderClient(config.ensIndexerUrl, config.indexedChainIds);
   }
 
   return localPonderClient;

@@ -15,7 +15,6 @@ import {
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
-import { buildOmnichainIndexingStatusSnapshot } from "@/lib/indexing-status-builder/omnichain-indexing-status-snapshot";
 import { getLocalPonderClient } from "@/lib/ponder-api-client";
 
 const app = new Hono();
@@ -41,9 +40,7 @@ app.get("/indexing-status", async (c) => {
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
-    const chainsIndexingMetadata = await localPonderClient.chainsIndexingMetadata();
-
-    omnichainSnapshot = buildOmnichainIndexingStatusSnapshot(chainsIndexingMetadata);
+    omnichainSnapshot = await localPonderClient.getOmnichainIndexingStatusSnapshot();
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error(
