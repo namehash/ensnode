@@ -46,8 +46,8 @@ catalogs:
       specifier: 0.41.0
       version: 0.41.0
     hono:
-      specifier: ^4.11.7
-      version: 4.11.7
+      specifier: ^4.11.10
+      version: 4.12.0
     lucide-react:
       specifier: ^0.548.0
       version: 0.548.0
@@ -95,7 +95,6 @@ overrides:
   tar@<7.5.7: '>=7.5.7'
   ajv@<8.18.0: '>=8.18.0'
   minimatch@<10.2.1: '>=10.2.1'
-  hono@<4.11.10: '>=4.11.10'
   devalue@<=5.6.2: '>=5.6.3'
 
 patchedDependencies:
@@ -320,13 +319,13 @@ importers:
         version: link:../../packages/ponder-subgraph
       '@hono/node-server':
         specifier: ^1.19.5
-        version: 1.19.5(hono@4.11.7)
+        version: 1.19.5(hono@4.12.0)
       '@hono/otel':
         specifier: ^0.2.2
-        version: 0.2.2(hono@4.11.7)
+        version: 0.2.2(hono@4.12.0)
       '@hono/standard-validator':
         specifier: ^0.2.2
-        version: 0.2.2(@standard-schema/spec@1.0.0)(hono@4.11.7)
+        version: 0.2.2(@standard-schema/spec@1.0.0)(hono@4.12.0)
       '@namehash/ens-referrals':
         specifier: workspace:*
         version: link:../../packages/ens-referrals
@@ -395,10 +394,10 @@ importers:
         version: 5.16.0(graphql@16.11.0)
       hono:
         specifier: 'catalog:'
-        version: 4.11.7
+        version: 4.12.0
       hono-openapi:
         specifier: ^1.1.2
-        version: 1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.11.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-schema/spec@1.0.0)(arktype@2.1.29)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.7)(openapi-types@12.1.3)
+        version: 1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.12.0))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-schema/spec@1.0.0)(arktype@2.1.29)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.0)(openapi-types@12.1.3)
       p-memoize:
         specifier: ^8.0.0
         version: 8.0.0
@@ -413,7 +412,7 @@ importers:
         version: 10.1.0
       ponder-enrich-gql-docs-middleware:
         specifier: ^0.1.3
-        version: 0.1.3(graphql@16.11.0)(hono@4.11.7)
+        version: 0.1.3(graphql@16.11.0)(hono@4.12.0)
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
@@ -480,13 +479,13 @@ importers:
         version: 5.6.1
       hono:
         specifier: 'catalog:'
-        version: 4.11.7
+        version: 4.12.0
       pg-connection-string:
         specifier: 'catalog:'
         version: 2.9.1
       ponder:
         specifier: 'catalog:'
-        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.11.7)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
+        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.12.0)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@4.3.6)
@@ -523,13 +522,13 @@ importers:
         version: 5.0.5
       '@hono/node-server':
         specifier: ^1.4.1
-        version: 1.19.5(hono@4.11.7)
+        version: 1.19.5(hono@4.12.0)
       classic-level:
         specifier: ^1.4.1
         version: 1.4.1
       hono:
         specifier: 'catalog:'
-        version: 4.11.7
+        version: 4.12.0
       pino:
         specifier: 'catalog:'
         version: 10.1.0
@@ -587,14 +586,14 @@ importers:
         version: link:../../packages/ensnode-sdk
       hono:
         specifier: 'catalog:'
-        version: 4.11.7
+        version: 4.12.0
     devDependencies:
       '@ensnode/shared-configs':
         specifier: workspace:*
         version: link:../../packages/shared-configs
       '@hono/node-server':
         specifier: ^1.19.7
-        version: 1.19.7(hono@4.11.7)
+        version: 1.19.7(hono@4.12.0)
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.9
@@ -847,7 +846,7 @@ importers:
     dependencies:
       ponder:
         specifier: 'catalog:'
-        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.11.7)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76)
+        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.12.0)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76)
       viem:
         specifier: 'catalog:'
         version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
@@ -1044,10 +1043,10 @@ importers:
         version: 24.10.9
       hono:
         specifier: 'catalog:'
-        version: 4.11.7
+        version: 4.12.0
       ponder:
         specifier: 'catalog:'
-        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.11.7)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76)
+        version: 0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.12.0)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76)
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -1121,7 +1120,7 @@ importers:
         version: 24.10.9
       hono:
         specifier: 'catalog:'
-        version: 4.11.7
+        version: 4.12.0
       tsup:
         specifier: 'catalog:'
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -2220,24 +2219,24 @@ packages:
     resolution: {integrity: sha512-iBuhh+uaaggeAuf+TftcjZyWh2GEgZcVGXkNtskLVoWaXhnJtC5HLHrU8W1KHDoucqO1MswwglmkWLFyiDn4WQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
-      hono: '>=4.11.10'
+      hono: ^4
 
   '@hono/node-server@1.19.7':
     resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
-      hono: '>=4.11.10'
+      hono: ^4
 
   '@hono/otel@0.2.2':
     resolution: {integrity: sha512-4U6fo2o4Tx9m8MmN/hqT5gmTqHSv9/Bl7crPH3/ktAI6lM2BUi5DDbqGvUulNPIjrQbURol+dD6fuydobAS6fw==}
     peerDependencies:
-      hono: '>=4.11.10'
+      hono: '*'
 
   '@hono/standard-validator@0.2.2':
     resolution: {integrity: sha512-mJ7W84Bt/rSvoIl63Ynew+UZOHAzzRAoAXb3JaWuxAkM/Lzg+ZHTCUiz77KOtn2e623WNN8LkD57Dk0szqUrIw==}
     peerDependencies:
       '@standard-schema/spec': ^1.0.0
-      hono: '>=4.11.10'
+      hono: '>=3.9.0'
 
   '@iconify-json/lucide@1.2.71':
     resolution: {integrity: sha512-KL+3JHW+wN8QqT3CN+7e1SzTe+gIunFBuUICtVmdCmdVRx+MdGNkX4xJhXoYHfhYO2azrEhoGPG+It9k30aZkw==}
@@ -6055,7 +6054,7 @@ packages:
       '@standard-community/standard-json': ^0.3.5
       '@standard-community/standard-openapi': ^0.2.9
       '@types/json-schema': ^7.0.15
-      hono: '>=4.11.10'
+      hono: ^4.8.3
       openapi-types: ^12.1.3
     peerDependenciesMeta:
       '@hono/standard-validator':
@@ -6063,8 +6062,8 @@ packages:
       hono:
         optional: true
 
-  hono@4.11.7:
-    resolution: {integrity: sha512-l7qMiNee7t82bH3SeyUCt9UF15EVmaBvsppY2zQtrbIhl/yzBTny+YUxsVjSjQ6gaqaeVtZmGocom8TzBlA4Yw==}
+  hono@4.12.0:
+    resolution: {integrity: sha512-NekXntS5M94pUfiVZ8oXXK/kkri+5WpX2/Ik+LVsl+uvw+soj4roXIsPqO+XsWrAw20mOzaXOZf3Q7PfB9A/IA==}
     engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@4.0.0:
@@ -7246,14 +7245,14 @@ packages:
     engines: {node: '>=12.0'}
     peerDependencies:
       graphql: ^16.10.0
-      hono: '>=4.11.10'
+      hono: ^4.6.19
 
   ponder@0.16.2:
     resolution: {integrity: sha512-cUTtcrGxSt5ReJc0z7UuJWirHtQZ33KAepaIrp2W+Smzi8FJ2Odm5TedrtdlmHnaagUpl8eagpRUBsoXrPYXYw==}
     engines: {node: '>=18.14'}
     hasBin: true
     peerDependencies:
-      hono: '>=4.11.10'
+      hono: '>=4.5'
       typescript: '>=5.0.4'
       viem: '>=2'
     peerDependenciesMeta:
@@ -10530,24 +10529,24 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@hono/node-server@1.19.5(hono@4.11.7)':
+  '@hono/node-server@1.19.5(hono@4.12.0)':
     dependencies:
-      hono: 4.11.7
+      hono: 4.12.0
 
-  '@hono/node-server@1.19.7(hono@4.11.7)':
+  '@hono/node-server@1.19.7(hono@4.12.0)':
     dependencies:
-      hono: 4.11.7
+      hono: 4.12.0
 
-  '@hono/otel@0.2.2(hono@4.11.7)':
+  '@hono/otel@0.2.2(hono@4.12.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a)
       '@opentelemetry/semantic-conventions': 1.37.0
-      hono: 4.11.7
+      hono: 4.12.0
 
-  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.11.7)':
+  '@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.12.0)':
     dependencies:
       '@standard-schema/spec': 1.0.0
-      hono: 4.11.7
+      hono: 4.12.0
 
   '@iconify-json/lucide@1.2.71':
     dependencies:
@@ -14829,17 +14828,17 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  hono-openapi@1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.11.7))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-schema/spec@1.0.0)(arktype@2.1.29)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.11.7)(openapi-types@12.1.3):
+  hono-openapi@1.1.2(@hono/standard-validator@0.2.2(@standard-schema/spec@1.0.0)(hono@4.12.0))(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-community/standard-openapi@0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-schema/spec@1.0.0)(arktype@2.1.29)(openapi-types@12.1.3)(zod@4.3.6))(@types/json-schema@7.0.15)(hono@4.12.0)(openapi-types@12.1.3):
     dependencies:
       '@standard-community/standard-json': 0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6)
       '@standard-community/standard-openapi': 0.2.9(@standard-community/standard-json@0.3.5(@standard-schema/spec@1.0.0)(@types/json-schema@7.0.15)(arktype@2.1.29)(quansync@0.2.11)(zod-to-json-schema@3.24.6(zod@4.3.6))(zod@4.3.6))(@standard-schema/spec@1.0.0)(arktype@2.1.29)(openapi-types@12.1.3)(zod@4.3.6)
       '@types/json-schema': 7.0.15
       openapi-types: 12.1.3
     optionalDependencies:
-      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.0.0)(hono@4.11.7)
-      hono: 4.11.7
+      '@hono/standard-validator': 0.2.2(@standard-schema/spec@1.0.0)(hono@4.12.0)
+      hono: 4.12.0
 
-  hono@4.11.7: {}
+  hono@4.12.0: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:
@@ -16251,12 +16250,12 @@ snapshots:
       path-data-parser: 0.1.0
       points-on-curve: 0.2.0
 
-  ponder-enrich-gql-docs-middleware@0.1.3(graphql@16.11.0)(hono@4.11.7):
+  ponder-enrich-gql-docs-middleware@0.1.3(graphql@16.11.0)(hono@4.12.0):
     dependencies:
       graphql: 16.11.0
-      hono: 4.11.7
+      hono: 4.12.0
 
-  ponder@0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.11.7)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76):
+  ponder@0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.12.0)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))(zod@3.25.76):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -16264,7 +16263,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.2
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
-      '@hono/node-server': 1.19.5(hono@4.11.7)
+      '@hono/node-server': 1.19.5(hono@4.12.0)
       '@ponder/utils': 0.2.17(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@3.25.76))
       abitype: 0.10.3(typescript@5.9.3)(zod@3.25.76)
       ansi-escapes: 7.1.1
@@ -16277,7 +16276,7 @@ snapshots:
       glob: 10.5.0
       graphql: 16.8.2
       graphql-yoga: 5.17.1(graphql@16.8.2)
-      hono: 4.11.7
+      hono: 4.12.0
       http-terminator: 3.2.0
       kysely: 0.26.3
       pg: 8.16.3
@@ -16338,7 +16337,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  ponder@0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.11.7)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6):
+  ponder@0.16.2(@opentelemetry/api@1.9.0(patch_hash=4b2adeefaf7c22f9987d0a125d69cab900719bec7ed7636648bea6947107033a))(@types/node@24.10.9)(hono@4.12.0)(lightningcss@1.30.2)(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))(zod@4.3.6):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -16346,7 +16345,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-aliases': 2.6.2
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
-      '@hono/node-server': 1.19.5(hono@4.11.7)
+      '@hono/node-server': 1.19.5(hono@4.12.0)
       '@ponder/utils': 0.2.17(typescript@5.9.3)(viem@2.38.5(typescript@5.9.3)(zod@4.3.6))
       abitype: 0.10.3(typescript@5.9.3)(zod@4.3.6)
       ansi-escapes: 7.1.1
@@ -16359,7 +16358,7 @@ snapshots:
       glob: 10.5.0
       graphql: 16.8.2
       graphql-yoga: 5.17.1(graphql@16.8.2)
-      hono: 4.11.7
+      hono: 4.12.0
       http-terminator: 3.2.0
       kysely: 0.26.3
       pg: 8.16.3
