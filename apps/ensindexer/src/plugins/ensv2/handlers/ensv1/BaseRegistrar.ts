@@ -216,7 +216,7 @@ export default function () {
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
 
       // insert Renewal
-      await insertLatestRenewal(context, {
+      await insertLatestRenewal(context, registration, {
         domainId,
         duration,
         eventId: await ensureEvent(context, event),

@@ -157,7 +157,7 @@ export default function () {
       }
 
       // insert Renewal
-      await insertLatestRenewal(context, {
+      await insertLatestRenewal(context, registration, {
         domainId,
         duration,
         referrer,

@@ -80,17 +80,11 @@ export async function getLatestRenewal(
  */
 export async function insertLatestRenewal(
   context: Context,
+  registration: Pick<typeof schema.registration.$inferInsert, "index">,
   values: Omit<typeof schema.renewal.$inferInsert, "id" | "registrationIndex" | "index">,
 ) {
+  const { index: registrationIndex } = registration;
   const { domainId } = values;
-
-  // get the latest Registration
-  const registration = await getLatestRegistration(context, domainId);
-  if (!registration) {
-    throw new Error(`Invariant(insertLatestRenewal): Expected latest Registration.`);
-  }
-
-  const registrationIndex = registration.index;
 
   // derive new Renewal's index from previous, if exists
   const previous = await getLatestRenewal(context, domainId, registrationIndex);
@@ -98,7 +92,7 @@ export async function insertLatestRenewal(
 
   // insert new Renewal
   await context.db.insert(schema.renewal).values({
-    id: makeRenewalId(domainId, registration.index, index),
+    id: makeRenewalId(domainId, registrationIndex, index),
     registrationIndex,
     index,
     ...values,

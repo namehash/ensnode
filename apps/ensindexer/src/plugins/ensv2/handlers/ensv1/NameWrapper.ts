@@ -367,7 +367,7 @@ export default function () {
       const duration = expiry - (registration.expiry ?? event.block.timestamp);
 
       // insert Renewal
-      await insertLatestRenewal(context, {
+      await insertLatestRenewal(context, registration, {
         domainId,
         duration,
         eventId: await ensureEvent(context, event),
