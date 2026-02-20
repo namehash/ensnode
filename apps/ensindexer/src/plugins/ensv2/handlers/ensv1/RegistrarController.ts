@@ -97,6 +97,14 @@ export default function () {
       );
     }
 
+    // ensure label
+    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
+    if (label !== undefined) {
+      await ensureLabel(context, label);
+    } else {
+      await ensureUnknownLabel(context, labelHash);
+    }
+
     const controller = getThisAccountId(context, event);
     const { node: managedNode } = getManagedName(controller);
     const node = makeSubdomainNode(labelHash, managedNode);
@@ -129,14 +137,6 @@ export default function () {
           },
         )}`,
       );
-    }
-
-    // ensure label
-    // NOTE: technically not necessary, as should be ensured by NameRegistered, but we include here anyway
-    if (label !== undefined) {
-      await ensureLabel(context, label);
-    } else {
-      await ensureUnknownLabel(context, labelHash);
     }
 
     // update renewal info
