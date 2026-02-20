@@ -64,7 +64,7 @@ export async function buildChainsIndexingMetadataImmutable(
 ): Promise<Map<ChainId, ChainIndexingMetadataImmutable>> {
   const chainsIndexingMetadataImmutable = new Map<ChainId, ChainIndexingMetadataImmutable>();
 
-  for (const chainId of indexedChainIds.values()) {
+  for (const chainId of indexedChainIds) {
     const chainConfigBlockrange = chainsConfigBlockrange.get(chainId);
     const chainIndexingMetrics = ponderIndexingMetrics.chains.get(chainId);
     const publicClient = publicClients.get(chainId);

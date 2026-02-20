@@ -25,7 +25,7 @@ export class LocalPonderClient extends PonderClient {
 
   // Values based on Ponder config and inter-process APIs
   #chainsConfigBlockrange?: Map<ChainId, BlockrangeWithStartBlock>;
-  #chainsIndexingMetadataImmutable?: Map<ChainId, ChainIndexingMetadataImmutable>;
+  #chainsIndexingMetadataImmutable?: Promise<Map<ChainId, ChainIndexingMetadataImmutable>>;
   #publicClients?: Map<ChainId, PublicClient>;
 
   constructor(ponderAppUrl: URL, indexedChainIds: Set<ChainId>) {
@@ -101,15 +101,27 @@ export class LocalPonderClient extends PonderClient {
 
     const { ponderIndexingMetrics, ponderIndexingStatus } = ponderClientCacheResult;
 
-    // Build and cache immutable metadata for indexed chains if not already
-    // cached.
+    // Build and cache immutable metadata for indexed chains if not already cached.
     if (this.#chainsIndexingMetadataImmutable === undefined) {
-      this.#chainsIndexingMetadataImmutable = await buildChainsIndexingMetadataImmutable(
+      this.#chainsIndexingMetadataImmutable = buildChainsIndexingMetadataImmutable(
         this.#indexedChainIds,
         this.chainsConfigBlockrange,
         this.publicClients,
         ponderIndexingMetrics,
       );
+    }
+
+    let chainsIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>;
+    
+    try {
+      chainsIndexingMetadataImmutable = await this.#chainsIndexingMetadataImmutable;
+    } catch (error) {
+      // Reset the cached promise if it is rejected to allow retrying on
+      // the next request, since the error may be transient.
+      this.#chainsIndexingMetadataImmutable = undefined;
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Chains Indexing Metadata Immutable must be available to build omnichain indexing status snapshot: ${errorMessage}`);
     }
 
     // Build dynamic metadata for indexed chains on each request since
@@ -121,7 +133,7 @@ export class LocalPonderClient extends PonderClient {
     );
 
     for (const chainId of this.#indexedChainIds) {
-      const chainIndexingMetadataImmutable = this.#chainsIndexingMetadataImmutable.get(chainId);
+      const chainIndexingMetadataImmutable = chainsIndexingMetadataImmutable.get(chainId);
       const chainIndexingMetadataDynamic = chainsIndexingMetadataDynamic.get(chainId);
 
       // Invariant: both, immutable and dynamic metadata must exist for indexed chain

@@ -23,7 +23,7 @@ export function buildChainsIndexingMetadataDynamic(
 ): Map<ChainId, ChainIndexingMetadataDynamic> {
   const chainsIndexingMetadataDynamic = new Map<ChainId, ChainIndexingMetadataDynamic>();
 
-  for (const chainId of indexedChainIds.values()) {
+  for (const chainId of indexedChainIds) {
     const chainIndexingMetrics = ponderIndexingMetrics.chains.get(chainId);
     const chainIndexingStatus = ponderIndexingStatus.chains.get(chainId);
 
