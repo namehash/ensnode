@@ -133,23 +133,29 @@ export function findDomains({ name, owner, canonical }: FindDomainsWhereArg) {
     )
     .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId));
 
-  // If filtering for Canonical Domains, build a recursive CTE that walks from the ENSv2 Root
-  // Registry through registry_canonical_domains to find all Canonical Registries.
-  const canonicalRegistryFilter = onlyCanonical
-    ? sql`${schema.v2Domain.registryId} IN (
-        WITH RECURSIVE canonical_registries AS (
-          SELECT ${getENSv2RootRegistryId(config.namespace)}::text AS registry_id
-          UNION
-          SELECT rcd.registry_id
-          FROM ${schema.registryCanonicalDomain} rcd
-          JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id
-          JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
-        )
-        SELECT registry_id FROM canonical_registries
-      )`
-    : undefined;
+  // Build a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
+  // Canonical Registries.
+  // TODO: could this be optimized further, perhaps as a materialized view?
+  // TODO: this automatically handles fully bridged registries, but would need to be modified to
+  // handle conditionally bridged registries.
+  const canonicalRegistries = db
+    .select({ registryId: sql<string>`registry_id`.as("registryId") })
+    .from(
+      sql`(
+            WITH RECURSIVE canonical_registries AS (
+              SELECT ${getENSv2RootRegistryId(config.namespace)}::text AS registry_id
+              UNION
+              SELECT rcd.registry_id
+              FROM ${schema.registryCanonicalDomain} rcd
+              JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
+              JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
+            )
+            SELECT DISTINCT registry_id FROM canonical_registries
+          ) AS canonical_registries_cte`,
+    )
+    .as("canonical_registries");
 
-  const v2DomainsBase = db
+  const v2DomainsBaseQuery = db
     .select({
       id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
       ownerId: schema.v2Domain.ownerId,
@@ -160,8 +166,15 @@ export function findDomains({ name, owner, canonical }: FindDomainsWhereArg) {
       v2DomainsByLabelHashPathQuery,
       eq(schema.v2Domain.id, v2DomainsByLabelHashPathQuery.leafId),
     )
-    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId))
-    .where(canonicalRegistryFilter);
+    .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId));
+
+  // conditionally join against the set of Canonical Registries if filtering by `canonical`
+  const v2DomainsBase = onlyCanonical
+    ? v2DomainsBaseQuery.innerJoin(
+        canonicalRegistries,
+        eq(schema.v2Domain.registryId, canonicalRegistries.registryId),
+      )
+    : v2DomainsBaseQuery;
 
   // Union v1 and v2 base queries into a single CTE
   const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));

@@ -8,13 +8,13 @@ import { DatasourceNames } from "@ensnode/datasources";
 import {
   type AccountId,
   accountIdEqual,
+  ETH_NODE,
   getCanonicalId,
   getDatasourceContract,
   getENSv2RootRegistry,
   interpretAddress,
   isRegistrationFullyExpired,
   type LiteralLabel,
-  labelhashLiteralLabel,
   makeENSv2DomainId,
   makeLatestRegistrationId,
   makeRegistryId,
@@ -96,10 +96,7 @@ export default function () {
       // if this Registry is Bridged, we know its Canonical Domain and can set it here
       // TODO(bridged-registries): generalize this to future ENSv2 Bridged Resolvers
       if (accountIdEqual(registry, ENSV2_L2_ETH_REGISTRY)) {
-        const domainId = makeENSv2DomainId(
-          ENSV2_ROOT_REGISTRY,
-          getCanonicalId(labelhashLiteralLabel("eth" as LiteralLabel)),
-        );
+        const domainId = makeENSv2DomainId(ENSV2_ROOT_REGISTRY, getCanonicalId(ETH_NODE));
         await context.db
           .insert(schema.registryCanonicalDomain)
           .values({ registryId: registryId, domainId })
