@@ -6,7 +6,6 @@ import { type BlockrangeWithStartBlock, type ChainId, PonderClient } from "@ensn
 
 import type {
   ChainIndexingMetadata,
-  ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
 import ponderConfig from "@/ponder/config";
 
@@ -14,6 +13,7 @@ import { ponderClientCache, type PonderClientCache } from "./cache/ponder-client
 import { buildChainsBlockrange } from "./chains-config-blockrange";
 import { buildChainsIndexingMetadataDynamic } from "./chains-indexing-metadata-dynamic";
 import { buildChainsIndexingMetadataImmutable } from "./chains-indexing-metadata-immutable";
+import { chainsIndexingMetadataImmutableCache, ChainsIndexingMetadataImmutableCache } from "./cache/chains-indexing-metadata-immutable.cache";
 
 /**
  * Build a map of chain ID to its configured blockrange (start and end blocks)
@@ -45,18 +45,18 @@ function buildPublicClientsMap(): Map<ChainId, PublicClient> {
  */
 export class LocalPonderClient {
   #indexedChainIds: Set<ChainId>;
-  #chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>;
+  #chainsIndexingMetadataImmutableCache: ChainsIndexingMetadataImmutableCache;
   #ponderClientCache: PonderClientCache;
   #publicClients: Map<ChainId, PublicClient>;
 
   private constructor(
     indexedChainIds: Set<ChainId>,
-    chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>,
+    chainsIndexingMetadataImmutableCache: ChainsIndexingMetadataImmutableCache,
     ponderClientCache: PonderClientCache,
     publicClients: Map<ChainId, PublicClient>,
   ) {
     this.#indexedChainIds = indexedChainIds;
-    this.#chainIndexingMetadataImmutable = chainIndexingMetadataImmutable;
+    this.#chainsIndexingMetadataImmutableCache = chainsIndexingMetadataImmutableCache;
     this.#ponderClientCache = ponderClientCache;
     this.#publicClients = publicClients;
   }
@@ -77,19 +77,19 @@ export class LocalPonderClient {
     const ponderClient = new PonderClient(ponderAppUrl);
     ponderClientCache.setContext({ ponderClient });
 
-    const ponderIndexingMetrics = await ponderClient.metrics();
     const publicClients = buildPublicClientsMap();
     const chainsConfigBlockrange = buildChainsConfigBlockrange();
-    const chainIndexingMetadataImmutable = await buildChainsIndexingMetadataImmutable(
+
+    chainsIndexingMetadataImmutableCache.setContext({
       indexedChainIds,
       chainsConfigBlockrange,
       publicClients,
-      ponderIndexingMetrics,
-    );
+      ponderClientCache,
+    });
 
     const client = new LocalPonderClient(
       indexedChainIds,
-      chainIndexingMetadataImmutable,
+      chainsIndexingMetadataImmutableCache,
       ponderClientCache,
       publicClients,
     );
@@ -150,6 +150,15 @@ export class LocalPonderClient {
       );
     }
 
+    const chainsIndexingMetadataImmutable = await this.#chainsIndexingMetadataImmutableCache.read();
+
+    // Invariant: indexing metrics must be available in cache
+    if (chainsIndexingMetadataImmutable instanceof Error) {
+      throw new Error(
+        `Chains Indexing Metadata Immutable must be available in cache to build chains indexing metadata immutable: ${chainsIndexingMetadataImmutable.message}`,
+      );
+    }
+
     const { ponderIndexingMetrics, ponderIndexingStatus } = ponderClientCacheResult;
 
     const chainsIndexingMetadataDynamic = buildChainsIndexingMetadataDynamic(
@@ -159,7 +168,7 @@ export class LocalPonderClient {
     );
 
     for (const chainId of this.indexedChainIds) {
-      const chainIndexingMetadataImmutable = this.#chainIndexingMetadataImmutable.get(chainId);
+      const chainIndexingMetadataImmutable = chainsIndexingMetadataImmutable.get(chainId);
       const chainIndexingMetadataDynamic = chainsIndexingMetadataDynamic.get(chainId);
 
       // Invariant: immutable and dynamic metadata must exist for indexed chain
