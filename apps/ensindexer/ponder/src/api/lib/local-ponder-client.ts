@@ -1,18 +1,18 @@
 import { publicClients as ponderPublicClients } from "ponder:api";
 import type { PublicClient } from "viem";
 
-import { type Blockrange, deserializeChainId } from "@ensnode/ensnode-sdk";
+import { deserializeChainId } from "@ensnode/ensnode-sdk";
 import { type BlockrangeWithStartBlock, type ChainId, PonderClient } from "@ensnode/ponder-sdk";
 
 import type {
   ChainIndexingMetadata,
-  ChainIndexingMetadataDynamic,
   ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
 import { buildChainsIndexingMetadataImmutable } from "@/ponder/api/lib/chains-indexing-metadata-immutable";
 import ponderConfig from "@/ponder/config";
 
 import { buildChainsBlockrange } from "./chains-config-blockrange";
+import { buildChainsIndexingMetadataDynamic } from "./chains-indexing-metadata-dynamic";
 
 /**
  * Build a map of chain ID to its configured blockrange (start and end blocks)
@@ -37,42 +37,6 @@ function buildPublicClientsMap(): Map<ChainId, PublicClient> {
       publicClient,
     ]),
   );
-}
-
-async function buildChainsIndexingMetadataDynamic(
-  indexedChainIds: Set<ChainId>,
-  ponderClient: PonderClient,
-): Promise<Map<ChainId, ChainIndexingMetadataDynamic>> {
-  const chainsIndexingMetadataDynamic = new Map<ChainId, ChainIndexingMetadataDynamic>();
-
-  const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
-    ponderClient.metrics(),
-    ponderClient.status(),
-  ]);
-
-  for (const chainId of indexedChainIds) {
-    const chainIndexingMetrics = ponderIndexingMetrics.chains.get(chainId);
-    const chainIndexingStatus = ponderIndexingStatus.chains.get(chainId);
-
-    // Invariants: indexing metrics and indexing status must exist in proper state for the indexed chain.
-    if (!chainIndexingMetrics) {
-      throw new Error(`No indexing metrics found for indexed chain ID ${chainId}`);
-    }
-
-    if (!chainIndexingStatus) {
-      throw new Error(`No indexing status found for indexed chain ID ${chainId}`);
-    }
-
-    const metadataDynamic = {
-      indexingMetrics: chainIndexingMetrics,
-      indexingStatus: chainIndexingStatus,
-    } satisfies ChainIndexingMetadataDynamic;
-
-    // Cache the dynamic metadata for this chain ID
-    chainsIndexingMetadataDynamic.set(chainId, metadataDynamic);
-  }
-
-  return chainsIndexingMetadataDynamic;
 }
 
 /**
@@ -179,9 +143,16 @@ export class LocalPonderClient {
    */
   async chainsIndexingMetadata(): Promise<Map<ChainId, ChainIndexingMetadata>> {
     const chainsIndexingMetadata = new Map<ChainId, ChainIndexingMetadata>();
-    const chainsIndexingMetadataDynamic = await buildChainsIndexingMetadataDynamic(
+
+    const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
+      this.#ponderClient.metrics(),
+      this.#ponderClient.status(),
+    ]);
+
+    const chainsIndexingMetadataDynamic = buildChainsIndexingMetadataDynamic(
       this.indexedChainIds,
-      this.#ponderClient,
+      ponderIndexingMetrics,
+      ponderIndexingStatus,
     );
 
     for (const chainId of this.indexedChainIds) {
