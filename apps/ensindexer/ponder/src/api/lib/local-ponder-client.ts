@@ -8,11 +8,12 @@ import type {
   ChainIndexingMetadata,
   ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
-import { buildChainsIndexingMetadataImmutable } from "@/ponder/api/lib/chains-indexing-metadata-immutable";
 import ponderConfig from "@/ponder/config";
 
+import { ponderClientCache, type PonderClientCache } from "./cache/ponder-client.cache";
 import { buildChainsBlockrange } from "./chains-config-blockrange";
 import { buildChainsIndexingMetadataDynamic } from "./chains-indexing-metadata-dynamic";
+import { buildChainsIndexingMetadataImmutable } from "./chains-indexing-metadata-immutable";
 
 /**
  * Build a map of chain ID to its configured blockrange (start and end blocks)
@@ -43,21 +44,21 @@ function buildPublicClientsMap(): Map<ChainId, PublicClient> {
  * LocalPonderClient for interacting with the local Ponder app and its data.
  */
 export class LocalPonderClient {
-  #ponderClient: PonderClient;
-  #publicClients: Map<ChainId, PublicClient>;
   #indexedChainIds: Set<ChainId>;
   #chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>;
+  #ponderClientCache: PonderClientCache;
+  #publicClients: Map<ChainId, PublicClient>;
 
   private constructor(
-    ponderClient: PonderClient,
-    publicClients: Map<ChainId, PublicClient>,
     indexedChainIds: Set<ChainId>,
     chainIndexingMetadataImmutable: Map<ChainId, ChainIndexingMetadataImmutable>,
+    ponderClientCache: PonderClientCache,
+    publicClients: Map<ChainId, PublicClient>,
   ) {
-    this.#ponderClient = ponderClient;
-    this.#publicClients = publicClients;
     this.#indexedChainIds = indexedChainIds;
     this.#chainIndexingMetadataImmutable = chainIndexingMetadataImmutable;
+    this.#ponderClientCache = ponderClientCache;
+    this.#publicClients = publicClients;
   }
 
   /**
@@ -74,9 +75,11 @@ export class LocalPonderClient {
    */
   static async init(ponderAppUrl: URL, indexedChainIds: Set<ChainId>): Promise<LocalPonderClient> {
     const ponderClient = new PonderClient(ponderAppUrl);
+    ponderClientCache.setContext({ ponderClient });
+
+    const ponderIndexingMetrics = await ponderClient.metrics();
     const publicClients = buildPublicClientsMap();
     const chainsConfigBlockrange = buildChainsConfigBlockrange();
-    const ponderIndexingMetrics = await ponderClient.metrics();
     const chainIndexingMetadataImmutable = await buildChainsIndexingMetadataImmutable(
       indexedChainIds,
       chainsConfigBlockrange,
@@ -85,10 +88,10 @@ export class LocalPonderClient {
     );
 
     const client = new LocalPonderClient(
-      ponderClient,
-      publicClients,
       indexedChainIds,
       chainIndexingMetadataImmutable,
+      ponderClientCache,
+      publicClients,
     );
 
     return client;
@@ -106,13 +109,6 @@ export class LocalPonderClient {
    */
   get indexedChainIds() {
     return this.#indexedChainIds;
-  }
-
-  /**
-   * Ponder client instance connected to the local Ponder app.
-   */
-  get ponderClient(): PonderClient {
-    return this.#ponderClient;
   }
 
   /**
@@ -144,10 +140,17 @@ export class LocalPonderClient {
   async chainsIndexingMetadata(): Promise<Map<ChainId, ChainIndexingMetadata>> {
     const chainsIndexingMetadata = new Map<ChainId, ChainIndexingMetadata>();
 
-    const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
-      this.#ponderClient.metrics(),
-      this.#ponderClient.status(),
-    ]);
+    const ponderClientCacheResult = await this.#ponderClientCache.read();
+
+    // Invariants: both indexing metrics and indexing status must be available
+    // in cache
+    if (ponderClientCacheResult instanceof Error) {
+      throw new Error(
+        `Ponder Client cache must be available to build chains indexing metadata dynamic: ${ponderClientCacheResult.message}`,
+      );
+    }
+
+    const { ponderIndexingMetrics, ponderIndexingStatus } = ponderClientCacheResult;
 
     const chainsIndexingMetadataDynamic = buildChainsIndexingMetadataDynamic(
       this.indexedChainIds,
