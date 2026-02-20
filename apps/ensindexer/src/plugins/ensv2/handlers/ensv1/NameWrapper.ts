@@ -15,8 +15,6 @@ import {
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv1DomainId,
-  makeLatestRegistrationId,
-  makeLatestRenewalId,
   makeSubdomainNode,
   type Node,
   PluginName,
@@ -28,9 +26,8 @@ import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  getLatestRenewal,
-  supercedeLatestRegistration,
-  supercedeLatestRenewal,
+  insertLatestRegistration,
+  insertLatestRenewal,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -238,20 +235,14 @@ export default function () {
         // incoming `expiry` that is _already_ expired, so we explicitly do not create an invariant
         // to validate the incoming `expiry` value
 
-        // supercede the latest Registration if exists
-        if (registration) await supercedeLatestRegistration(context, registration);
-
         // insert NameWrapper Registration
         await ensureAccount(context, registrant);
-        await context.db.insert(schema.registration).values({
-          id: makeLatestRegistrationId(domainId),
-          index: registration ? registration.index + 1 : 0,
+        await insertLatestRegistration(context, {
+          domainId,
           type: "NameWrapper",
           registrarChainId: registrar.chainId,
           registrarAddress: registrar.address,
           registrantId: interpretAddress(registrant),
-          domainId,
-          start: event.block.timestamp,
           fuses,
           expiry,
           eventId: await ensureEvent(context, event),
@@ -375,16 +366,9 @@ export default function () {
       // as 'time added since now' (which could be 0 seconds)
       const duration = expiry - (registration.expiry ?? event.block.timestamp);
 
-      // get latest Renewal and supercede if exists
-      const renewal = await getLatestRenewal(context, domainId, registration.index);
-      if (renewal) await supercedeLatestRenewal(context, renewal);
-
-      // insert latest Renewal
-      await context.db.insert(schema.renewal).values({
-        id: makeLatestRenewalId(domainId, registration.index),
+      // insert Renewal
+      await insertLatestRenewal(context, registration, {
         domainId,
-        registrationIndex: registration.index,
-        index: renewal ? renewal.index + 1 : 0,
         duration,
         eventId: await ensureEvent(context, event),
         // NOTE: NameWrapper does not include pricing information

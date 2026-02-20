@@ -114,7 +114,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // Note: owner/partial filtering happens in the unified query below, not here
   const v1DomainsBase = db
     .select({
-      id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
+      domainId: sql<DomainId>`${schema.v1Domain.id}`.as("domainId"),
       ownerId: schema.v1Domain.ownerId,
       headLabelHash: sql`${v1HeadDomain.labelHash}`.as("headLabelHash"),
     })
@@ -127,7 +127,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
 
   const v2DomainsBase = db
     .select({
-      id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
+      domainId: sql<DomainId>`${schema.v2Domain.id}`.as("domainId"),
       ownerId: schema.v2Domain.ownerId,
       headLabelHash: sql`${v2HeadDomain.labelHash}`.as("headLabelHash"),
     })
@@ -138,60 +138,47 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     )
     .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId));
 
-  // Union v1 and v2 base queries into a single CTE
-  const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));
-
-  // alias for head label (for partial matching and NAME ordering)
-  const headLabel = alias(schema.label, "headLabel");
-
-  // subquery for latest registration per domain (highest index)
-  // TODO: replace this with a JOIN against the latest registration lookup table after
-  // https://github.com/namehash/ensnode/issues/1594
-  // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
-  const registrationOuter = alias(schema.registration, "registrationOuter");
-  const latestRegistration = db
-    .select({
-      domainId: registrationOuter.domainId,
-      start: registrationOuter.start,
-      expiry: registrationOuter.expiry,
-    })
-    .from(registrationOuter)
-    .where(
-      eq(
-        registrationOuter.index,
-        db
-          .select({ maxIndex: sql<number>`MAX(${schema.registration.index})` })
-          .from(schema.registration)
-          .where(eq(schema.registration.domainId, registrationOuter.domainId)),
-      ),
-    )
-    .as("latestRegistration");
+  // Union v1 and v2 base queries into a single subquery
+  const domainsBase = unionAll(v1DomainsBase, v2DomainsBase).as("domainsBase");
 
   // Apply shared joins and filters on the unified domain base
   const domains = db
-    .with(domainsBase)
     .select({
-      id: domainsBase.id,
+      id: domainsBase.domainId,
+
       // for NAME ordering
-      headLabel: sql<string>`${headLabel.interpreted}`.as("headLabel"),
+      headLabel: schema.label.interpreted,
+
       // for REGISTRATION_TIMESTAMP ordering
-      registrationTimestamp: sql<bigint | null>`${latestRegistration.start}`.as(
-        "registrationTimestamp",
-      ),
+      registrationTimestamp: schema.event.timestamp,
+
       // for REGISTRATION_EXPIRY ordering
-      registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
+      registrationExpiry: schema.registration.expiry,
     })
     .from(domainsBase)
-    // join head label for partial matching and NAME ordering
-    .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
-    // join latest registration for timestamp/expiry ordering
-    .leftJoin(latestRegistration, eq(latestRegistration.domainId, domainsBase.id))
+    // join head label
+    .leftJoin(schema.label, eq(schema.label.labelHash, domainsBase.headLabelHash))
+    // join latestRegistrationIndex
+    .leftJoin(
+      schema.latestRegistrationIndex,
+      eq(schema.latestRegistrationIndex.domainId, domainsBase.domainId),
+    )
+    // join (latest) Registration
+    .leftJoin(
+      schema.registration,
+      and(
+        eq(schema.registration.domainId, domainsBase.domainId),
+        eq(schema.registration.index, schema.latestRegistrationIndex.index),
+      ),
+    )
+    // join (latest) Registration's Event
+    .leftJoin(schema.event, eq(schema.event.id, schema.registration.eventId))
     .where(
       and(
         owner ? eq(domainsBase.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
-        partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
       ),
     );
 

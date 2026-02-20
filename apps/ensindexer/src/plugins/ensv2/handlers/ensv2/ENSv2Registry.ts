@@ -16,7 +16,6 @@ import {
   type LiteralLabel,
   labelhashLiteralLabel,
   makeENSv2DomainId,
-  makeLatestRegistrationId,
   makeRegistryId,
   PluginName,
 } from "@ensnode/ensnode-sdk";
@@ -26,7 +25,7 @@ import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
 import { ensureLabel } from "@/lib/ensv2/label-db-helpers";
 import {
   getLatestRegistration,
-  supercedeLatestRegistration,
+  insertLatestRegistration,
 } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
@@ -134,20 +133,14 @@ export default function () {
         // if the v2Domain exists, this is a re-register after expiration and tokenId may have changed
         .onConflictDoUpdate({ tokenId });
 
-      // supercede the latest Registration if exists
-      if (registration) await supercedeLatestRegistration(context, registration);
-
       // insert ENSv2Registry Registration
       await ensureAccount(context, registrant);
-      await context.db.insert(schema.registration).values({
-        id: makeLatestRegistrationId(domainId),
-        index: registration ? registration.index + 1 : 0,
+      await insertLatestRegistration(context, {
+        domainId,
         type: "ENSv2Registry",
         registrarChainId: registry.chainId,
         registrarAddress: registry.address,
         registrantId: interpretAddress(registrant),
-        domainId,
-        start: event.block.timestamp,
         expiry,
         eventId: await ensureEvent(context, event),
       });
