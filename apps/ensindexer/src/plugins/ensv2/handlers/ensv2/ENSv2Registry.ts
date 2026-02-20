@@ -157,11 +157,6 @@ export default function () {
 
       // update Registration
       await context.db.update(schema.registration, { id: registration.id }).set({ expiry });
-
-      // if newExpiry is 0, this is an `unregister` call, related to ejecting
-      // https://github.com/ensdomains/namechain/blob/9e31679f4ee6d8abb4d4e840cdf06f2d653a706b/contracts/src/L1/bridge/L1BridgeController.sol#L141
-      // TODO(migration): maybe do something special with this state?
-      // if (expiry === 0n) return;
     },
   );
 

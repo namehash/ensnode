@@ -1,29 +1,19 @@
 /**
  * TODO
  * - root can be inserted on setup or could be discovered naturally — see how that affects traversal/graphql api
- *   - probably easier to just insert it ahead of time like previously
- * - move registration expiration shared logic to sdk/ens
- *   - update isRegistrationFullyExpired todo in ensapi somewhere
+ *   - probably easier to just insert it ahead of time like previously?
  * - RequiredAndNotNull opposite type: RequiredToBeNull<T, keys> for constraining polymorphic entities in graphql schema
  * - re-asses NameWrapper expiry logic — compare to subgraph implementation & see if we can simplify
  * - indexes based on graphql queries, ask claude to compile recommendations
  * - ThreeDNS
- * - Migration
- *   - need to understand migration pattern better
- *   - individual names are migrated to v2 and can choose to move to an ENSv2 Registry on L1 or L2
- *   - locked names (wrapped and not unwrappable) are 'frozen' by having their fuses burned
- *     - will need to observe the correct event and then override the existing domain/registratioon info
- *   - for MigratedWrappedNameRegistries, need to check name expiry during resolution and avoid resolving expired names
- * - autocomplete api
- * - Query.permissions(by: { contract: {  } })
+ * - Migration status/state
  * - custom wrapper for resolveCursorConnection with typesafety that applies defaults and auto-decodes cursors to the indicated type
  * - Pothos envelop plugins (aliases, depth, tokens, whatever)
  *
  * PENDING ENS TEAM
- * - Domain.canonical/Domain.canonicalPath/Domain.fqdn depends on:
- *  - depends on: Registry.canonicalName implementation + indexing
+ * - Canonical Domain tracking
  * - Signal Pattern for Registry contracts
- *  - depends on: ens team implementing in namechain contracts
+ *  - depends on: ens team implementing in v2 contracts
  *
  * MAYBE DO LATER?
  * - ? better typechecking for polymorphic entities in drizzle schema

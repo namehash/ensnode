@@ -26,7 +26,7 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
  * for development and testing.
  *
  * @see https://github.com/ensdomains/ens-test-env
- * @see https://github.com/ensdomains/namechain
+ * @see https://github.com/ensdomains/contracts-v2
  *
  * NOTE: The ens-test-env ENS namespace does not support Basenames, Lineanames, or 3DNS.
  * NOTE: The ens-test-env ENS namespace does not (yet) support ENSIP-19 Reverse Resolvers.
@@ -35,8 +35,8 @@ export default {
   /**
    * ENSRoot Datasource
    *
-   * Addresses and Start Blocks from Namechain devnet
-   * https://github.com/ensdomains/namechain
+   * Addresses and Start Blocks from ENSv2 devnet
+   * https://github.com/ensdomains/contracts-v2
    */
   [DatasourceNames.ENSRoot]: {
     chain: ensTestEnvChain,
