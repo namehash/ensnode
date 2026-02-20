@@ -1,5 +1,39 @@
 # ensapi
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1621](https://github.com/namehash/ensnode/pull/1621) [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c) Thanks [@Goader](https://github.com/Goader)! - Added `status` field to referral program API responses (`ReferrerLeaderboardPage`, `ReferrerEditionMetricsRanked`, `ReferrerEditionMetricsUnranked`) indicating whether a program is "Scheduled", "Active", or "Closed" based on the program's timing relative to `accurateAsOf`.
+
+- [#1603](https://github.com/namehash/ensnode/pull/1603) [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91) Thanks [@Goader](https://github.com/Goader)! - Introduces referral program editions support with pre-configured edition definitions (ENS Holiday Awards December 2025, March 2026 edition). Updated ENSAnalytics API v1 to support edition-based leaderboard queries and added edition configuration to environment schema.
+
+- [#1576](https://github.com/namehash/ensnode/pull/1576) [`6e98fb6`](https://github.com/namehash/ensnode/commit/6e98fb677d5021c4bc9d17b01289290d1c286003) Thanks [@shrugs](https://github.com/shrugs)! - The experimental ENSv2 API now supports the following Domain filters, namely matching indexed Domains by name prefix.
+
+  - `Query.domains(where: { name?: "example.et", owner?: "0xdead...beef" })`
+  - `Account.domains(where?: { name: "example.et" })`
+
+- [#1621](https://github.com/namehash/ensnode/pull/1621) [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c) Thanks [@Goader](https://github.com/Goader)! - Referral program edition leaderboard caches now check for immutability within the cache builder function. Closed editions past the safety window return cached data without re-fetching.
+
+- [#1655](https://github.com/namehash/ensnode/pull/1655) [`41077b3`](https://github.com/namehash/ensnode/commit/41077b3fc105b349fa42aaef5312d5195ac43472) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 API: Breaking change, Registration.start is replaced by Registration.event.timestamp.
+
+- [#1554](https://github.com/namehash/ensnode/pull/1554) [`365c996`](https://github.com/namehash/ensnode/commit/365c9967e07680659746af352b8ba623839c7d6e) Thanks [@Goader](https://github.com/Goader)! - Implemented API versioning for ENSAnalytics referral endpoints. Introduced explicit `/ensanalytics/v1/*` routes while preserving existing `/ensanalytics/*` routes as implicit v0.
+
+- [#1595](https://github.com/namehash/ensnode/pull/1595) [`229eaeb`](https://github.com/namehash/ensnode/commit/229eaeb37bd446bef05c28c1603503c3fd318c47) Thanks [@shrugs](https://github.com/shrugs)! - ENSv2 GraphQL API: Introduces order criteria for Domain methods, i.e. `Account.domains(order: { by: NAME, dir: ASC })`. The supported Order criteria are `NAME`, `REGISTRATION_TIMESTAMP`, and `REGISTRATION_EXPIRY` in either `ASC` or `DESC` orders, defaulting to `NAME` and `ASC`.
+
+### Patch Changes
+
+- [#1542](https://github.com/namehash/ensnode/pull/1542) [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0) Thanks [@Goader](https://github.com/Goader)! - Flipped dependency relationship between `ensnode-sdk` and `ens-referrals`. Introduced new `ENSReferralsClient` for referral leaderboard APIs. Consolidated duplicate types (`ChainId`, `AccountId`, `UnixTimestamp`, `Duration`) by importing from `ensnode-sdk`.
+
+- [#1562](https://github.com/namehash/ensnode/pull/1562) [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8) Thanks [@Goader](https://github.com/Goader)! - Migrated v1 referrer leaderboard API to use mature `PriceEth` and `PriceUsdc` types from `ensnode-sdk`, replacing temporary `RevenueContribution` and `USDQuantity` types. Added `/v1` subpath export to `ens-referrals`.
+
+- Updated dependencies [[`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c), [`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7), [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c), [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91), [`4cf6f41`](https://github.com/namehash/ensnode/commit/4cf6f412a9fa9aa6c438b83acf090adb8365f497), [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91), [`1bc599f`](https://github.com/namehash/ensnode/commit/1bc599f99804d1cf08dd0d23d5518b1b8e7928c5), [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0), [`a87b437`](https://github.com/namehash/ensnode/commit/a87b4370ff8b4da6a254dda39afac19e3a7f6e94), [`43d3e9c`](https://github.com/namehash/ensnode/commit/43d3e9cdc6456c8b32940a8860b92c523157ffea), [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8)]:
+  - @namehash/ens-referrals@1.6.0
+  - @ensnode/ensnode-sdk@1.6.0
+  - @ensnode/datasources@1.6.0
+  - @ensnode/ensnode-schema@1.6.0
+  - @ensnode/ponder-subgraph@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes

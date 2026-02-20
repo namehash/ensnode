@@ -1,5 +1,30 @@
 # @ensnode/ensnode-sdk
 
+## 1.6.0
+
+### Minor Changes
+
+- [#1621](https://github.com/namehash/ensnode/pull/1621) [`75c8b01`](https://github.com/namehash/ensnode/commit/75c8b01644cae2c5ac96dcc253441c64e755a45c) Thanks [@Goader](https://github.com/Goader)! - SWRCache `fn` now optionally receives the currently cached result as a parameter, allowing implementations to inspect cached data before deciding whether to return it or fetch fresh data. Fully backward compatible.
+
+- [#1643](https://github.com/namehash/ensnode/pull/1643) [`4cf6f41`](https://github.com/namehash/ensnode/commit/4cf6f412a9fa9aa6c438b83acf090adb8365f497) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `EnsIndexerClient` class, supporting easy interactions with ENSIndexer APIs.
+
+- [#1617](https://github.com/namehash/ensnode/pull/1617) [`1bc599f`](https://github.com/namehash/ensnode/commit/1bc599f99804d1cf08dd0d23d5518b1b8e7928c5) Thanks [@tk-o](https://github.com/tk-o)! - Introduces `validateChainIndexingStatusSnapshot` which enables validating values against business-layer requirements.
+
+- [#1542](https://github.com/namehash/ensnode/pull/1542) [`500388b`](https://github.com/namehash/ensnode/commit/500388b217ea420b79b85670891b99ade07f07f0) Thanks [@Goader](https://github.com/Goader)! - Flipped dependency relationship between `ensnode-sdk` and `ens-referrals`. Introduced new `ENSReferralsClient` for referral leaderboard APIs. Consolidated duplicate types (`ChainId`, `AccountId`, `UnixTimestamp`, `Duration`) by importing from `ensnode-sdk`.
+
+- [#1629](https://github.com/namehash/ensnode/pull/1629) [`43d3e9c`](https://github.com/namehash/ensnode/commit/43d3e9cdc6456c8b32940a8860b92c523157ffea) Thanks [@tk-o](https://github.com/tk-o)! - Introduced `validate*` functions for Indexing Status data model. These functions enable new use cases on consumer side.
+
+- [#1562](https://github.com/namehash/ensnode/pull/1562) [`84a4c5e`](https://github.com/namehash/ensnode/commit/84a4c5e70df1e33ceed495888fc9b4436c577fc8) Thanks [@Goader](https://github.com/Goader)! - Migrated v1 referrer leaderboard API to use mature `PriceEth` and `PriceUsdc` types from `ensnode-sdk`, replacing temporary `RevenueContribution` and `USDQuantity` types. Added `/v1` subpath export to `ens-referrals`.
+
+### Patch Changes
+
+- [#1553](https://github.com/namehash/ensnode/pull/1553) [`220b71f`](https://github.com/namehash/ensnode/commit/220b71f1dfcf7d7d7ef6e5a2841dced2501ad3d7) Thanks [@lightwalker-eth](https://github.com/lightwalker-eth)! - Added getDefaultEnsNodeUrl utility to get the URL for the default ENSNode deployment for a given ENS namespace
+
+- [#1603](https://github.com/namehash/ensnode/pull/1603) [`8be113b`](https://github.com/namehash/ensnode/commit/8be113b445a5c475a6e69f6c6c99689d4b974d91) Thanks [@Goader](https://github.com/Goader)! - Adds `parseTimestamp` utility to parse ISO 8601 date strings into Unix timestamps. Adds `errorTtl` option to `SWRCache` for configuring separate revalidation intervals for cached errors vs. successful results.
+
+- Updated dependencies [[`a87b437`](https://github.com/namehash/ensnode/commit/a87b4370ff8b4da6a254dda39afac19e3a7f6e94)]:
+  - @ensnode/datasources@1.6.0
+
 ## 1.5.1
 
 ### Patch Changes
