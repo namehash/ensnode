@@ -1,18 +1,18 @@
 import { publicClients as ponderPublicClients } from "ponder:api";
 import type { PublicClient } from "viem";
 
-import { type Blockrange, createIndexingConfig, deserializeChainId } from "@ensnode/ensnode-sdk";
-import { type ChainId, ChainIndexingStates, PonderClient } from "@ensnode/ponder-sdk";
+import { type Blockrange, deserializeChainId } from "@ensnode/ensnode-sdk";
+import { type BlockrangeWithStartBlock, type ChainId, PonderClient } from "@ensnode/ponder-sdk";
 
 import type {
   ChainIndexingMetadata,
   ChainIndexingMetadataDynamic,
   ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
+import { buildChainsIndexingMetadataImmutable } from "@/ponder/api/lib/chains-indexing-metadata-immutable";
 import ponderConfig from "@/ponder/config";
 
 import { buildChainsBlockrange } from "./chains-config-blockrange";
-import { fetchBlockRef } from "./fetch-block-ref";
 
 /**
  * Build a map of chain ID to its configured blockrange (start and end blocks)
@@ -20,7 +20,7 @@ import { fetchBlockRef } from "./fetch-block-ref";
  *
  * @throws Error if invariants are violated.
  */
-function buildChainsConfigBlockrange(): Map<ChainId, Blockrange> {
+function buildChainsConfigBlockrange(): Map<ChainId, BlockrangeWithStartBlock> {
   return buildChainsBlockrange(ponderConfig);
 }
 
@@ -37,90 +37,6 @@ function buildPublicClientsMap(): Map<ChainId, PublicClient> {
       publicClient,
     ]),
   );
-}
-
-/**
- * Build a map of chain ID to its fixed indexing metadata.
- *
- * @param publicClients A map of chain ID to its corresponding public client,
- *                      used to fetch block references for chain's blockrange.
- * @param ponderClient The Ponder client used to fetch indexing metrics and status.
- * @returns A map of chain ID to its fixed indexing metadata.
- * @throws Error if any of the required data cannot be fetched or is invalid,
- *         or if invariants are violated.
- */
-async function buildChainsIndexingMetadataImmutable(
-  publicClients: Map<ChainId, PublicClient>,
-  ponderClient: PonderClient,
-): Promise<Map<ChainId, ChainIndexingMetadataImmutable>> {
-  console.log("Building ChainIndexingMetadataImmutable...");
-  const chainsIndexingMetadataImmutable = new Map<ChainId, ChainIndexingMetadataImmutable>();
-
-  const chainsConfigBlockrange = buildChainsConfigBlockrange();
-  const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
-    ponderClient.metrics(),
-    ponderClient.status(),
-  ]);
-
-  for (const [chainId, publicClient] of publicClients.entries()) {
-    const chainConfigBlockrange = chainsConfigBlockrange.get(chainId);
-    const chainIndexingMetrics = ponderIndexingMetrics.chains.get(chainId);
-    const chainIndexingStatus = ponderIndexingStatus.chains.get(chainId);
-
-    // Invariants: chain config blockrange, indexing metrics, and indexing status
-    // must exist in proper state for the indexed chain.
-    if (!chainConfigBlockrange) {
-      throw new Error(`No chain config blockrange found for indexed chain ID ${chainId}`);
-    }
-
-    if (!chainConfigBlockrange.startBlock) {
-      throw new Error(
-        `No start block found in chain config blockrange for indexed chain ID ${chainId}`,
-      );
-    }
-
-    if (!chainIndexingMetrics) {
-      throw new Error(`No indexing metrics found for indexed chain ID ${chainId}`);
-    }
-
-    if (chainIndexingMetrics.state !== ChainIndexingStates.Historical) {
-      throw new Error(
-        `In order to build 'ChainsIndexingMetadataFixed', chain indexing state must be "historical" for indexed chain ID ${chainId}, but got "${chainIndexingMetrics.state}"`,
-      );
-    }
-
-    if (!chainIndexingStatus) {
-      throw new Error(`No indexing status found for indexed chain ID ${chainId}`);
-    }
-
-    const backfillEndBlockNumber =
-      chainConfigBlockrange.startBlock + chainIndexingMetrics.historicalTotalBlocks - 1;
-
-    const [startBlock, endBlock, backfillEndBlock] = await Promise.all([
-      fetchBlockRef(publicClient, chainConfigBlockrange.startBlock),
-      chainConfigBlockrange.endBlock
-        ? fetchBlockRef(publicClient, chainConfigBlockrange.endBlock)
-        : null,
-      fetchBlockRef(publicClient, backfillEndBlockNumber),
-    ]);
-
-    const chainIndexingConfig = createIndexingConfig(startBlock, endBlock);
-
-    const metadataImmutable = {
-      backfillScope: {
-        startBlock,
-        endBlock: backfillEndBlock,
-      },
-      indexingConfig: chainIndexingConfig,
-    } satisfies ChainIndexingMetadataImmutable;
-
-    // Cache the immutable metadata for this chain ID
-    chainsIndexingMetadataImmutable.set(chainId, metadataImmutable);
-  }
-
-  console.log("ChainIndexingMetadataImmutable built successfully");
-
-  return chainsIndexingMetadataImmutable;
 }
 
 async function buildChainsIndexingMetadataDynamic(
@@ -195,9 +111,13 @@ export class LocalPonderClient {
   static async init(ponderAppUrl: URL, indexedChainIds: Set<ChainId>): Promise<LocalPonderClient> {
     const ponderClient = new PonderClient(ponderAppUrl);
     const publicClients = buildPublicClientsMap();
+    const chainsConfigBlockrange = buildChainsConfigBlockrange();
+    const ponderIndexingMetrics = await ponderClient.metrics();
     const chainIndexingMetadataImmutable = await buildChainsIndexingMetadataImmutable(
+      indexedChainIds,
+      chainsConfigBlockrange,
       publicClients,
-      ponderClient,
+      ponderIndexingMetrics,
     );
 
     const client = new LocalPonderClient(
