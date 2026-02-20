@@ -1,6 +1,5 @@
 import config from "@/config";
 
-import { publicClients } from "ponder:api";
 import { getUnixTime } from "date-fns";
 import { Hono } from "hono";
 
@@ -15,12 +14,17 @@ import {
 } from "@ensnode/ensnode-sdk";
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
-import {
-  buildOmnichainIndexingStatusSnapshot,
-  createCrossChainIndexingStatusSnapshotOmnichain,
-} from "@/lib/indexing-status/build-index-status";
+import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
+import { buildOmnichainIndexingStatusSnapshot } from "@/lib/indexing-status-builder/omnichain-indexing-status-snapshot";
+import { getLocalPonderClient } from "@/lib/ponder-api-client";
 
 const app = new Hono();
+
+// Calling `getLocalPonderClient` at the top level to initialize
+// the singleton client instance on app startup.
+// This ensures that the client is ready to use when handling requests,
+// and allows us to catch initialization errors early.
+getLocalPonderClient();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
@@ -38,14 +42,19 @@ app.get("/indexing-status", async (c) => {
   let omnichainSnapshot: OmnichainIndexingStatusSnapshot | undefined;
 
   try {
-    omnichainSnapshot = await buildOmnichainIndexingStatusSnapshot(publicClients);
+    const localPonderClient = await getLocalPonderClient();
+    const chainsIndexingMetadata = await localPonderClient.chainsIndexingMetadata();
+
+    omnichainSnapshot = buildOmnichainIndexingStatusSnapshot(chainsIndexingMetadata);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`Omnichain snapshot is currently not available: ${errorMessage}`);
+    console.error(
+      `Indexing Status is currently not available. Failed to fetch Omnichain Indexing Status snapshot: ${errorMessage}`,
+    );
   }
 
   // return IndexingStatusResponseError
-  if (typeof omnichainSnapshot === "undefined") {
+  if (!omnichainSnapshot) {
     return c.json(
       serializeIndexingStatusResponse({
         responseCode: IndexingStatusResponseCodes.Error,
@@ -53,8 +62,6 @@ app.get("/indexing-status", async (c) => {
       500,
     );
   }
-
-  // otherwise, proceed with creating IndexingStatusResponseOk
   const crossChainSnapshot = createCrossChainIndexingStatusSnapshotOmnichain(
     omnichainSnapshot,
     snapshotTime,

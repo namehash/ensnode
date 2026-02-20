@@ -37,6 +37,7 @@
     "pg-connection-string": "catalog:",
     "hono": "catalog:",
     "ponder": "catalog:",
+    "p-retry": "catalog:",
     "viem": "catalog:",
     "zod": "catalog:"
   },

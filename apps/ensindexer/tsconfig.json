@@ -2,6 +2,7 @@
   "extends": "@ensnode/shared-configs/tsconfig.ponder.json",
   "compilerOptions": {
     "paths": {
+      "@/ponder/*": ["./ponder/src/*"],
       "@/*": ["./src/*"]
     },
     "typeRoots": ["./types"]
