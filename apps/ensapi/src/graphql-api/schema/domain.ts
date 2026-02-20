@@ -17,6 +17,7 @@ import { rejectAnyErrors } from "@/graphql-api/lib/reject-any-errors";
 import { AccountRef } from "@/graphql-api/schema/account";
 import { DEFAULT_CONNECTION_ARGS } from "@/graphql-api/schema/constants";
 import { cursors } from "@/graphql-api/schema/cursors";
+import { OrderDirection } from "@/graphql-api/schema/order-direction";
 import { RegistrationInterfaceRef } from "@/graphql-api/schema/registration";
 import { RegistryRef } from "@/graphql-api/schema/registry";
 import { ResolverRef } from "@/graphql-api/schema/resolver";
@@ -331,3 +332,25 @@ export const AccountDomainsWhereInput = builder.inputType("AccountDomainsWhereIn
     name: t.string({ required: true }),
   }),
 });
+
+//////////////////////
+// Ordering
+//////////////////////
+
+export const DomainsOrderBy = builder.enumType("DomainsOrderBy", {
+  description: "Fields by which domains can be ordered",
+  values: ["NAME", "REGISTRATION_TIMESTAMP", "REGISTRATION_EXPIRY"] as const,
+});
+
+export type DomainsOrderByValue = typeof DomainsOrderBy.$inferType;
+
+export const DomainsOrderInput = builder.inputType("DomainsOrderInput", {
+  description: "Ordering options for domains query. If no order is provided, the default is ASC.",
+  fields: (t) => ({
+    by: t.field({ type: DomainsOrderBy, required: true }),
+    dir: t.field({ type: OrderDirection, defaultValue: "ASC" }),
+  }),
+});
+
+export const DOMAINS_DEFAULT_ORDER_BY: typeof DomainsOrderBy.$inferType = "NAME";
+export const DOMAINS_DEFAULT_ORDER_DIR: typeof OrderDirection.$inferType = "ASC";
