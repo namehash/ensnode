@@ -9,18 +9,13 @@ import {
   interpretAddress,
   isRegistrationFullyExpired,
   makeENSv2DomainId,
-  makeLatestRenewalId,
   PluginName,
   type TokenId,
 } from "@ensnode/ensnode-sdk";
 
 import { ensureAccount } from "@/lib/ensv2/account-db-helpers";
 import { ensureEvent } from "@/lib/ensv2/event-db-helpers";
-import {
-  getLatestRegistration,
-  getLatestRenewal,
-  supercedeLatestRenewal,
-} from "@/lib/ensv2/registration-db-helpers";
+import { getLatestRegistration, insertLatestRenewal } from "@/lib/ensv2/registration-db-helpers";
 import { getThisAccountId } from "@/lib/get-this-account-id";
 import { toJson } from "@/lib/json-stringify-with-bigints";
 import { namespaceContract } from "@/lib/plugin-helpers";
@@ -161,16 +156,9 @@ export default function () {
         );
       }
 
-      // get latest Renewal and supercede if exists
-      const renewal = await getLatestRenewal(context, domainId, registration.index);
-      if (renewal) await supercedeLatestRenewal(context, renewal);
-
-      // insert latest Renewal
-      await context.db.insert(schema.renewal).values({
-        id: makeLatestRenewalId(domainId, registration.index),
+      // insert Renewal
+      await insertLatestRenewal(context, registration, {
         domainId,
-        registrationIndex: registration.index,
-        index: renewal ? renewal.index + 1 : 0,
         duration,
         referrer,
         eventId: await ensureEvent(context, event),

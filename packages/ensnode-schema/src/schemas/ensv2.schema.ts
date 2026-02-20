@@ -1,4 +1,4 @@
-import { index, onchainEnum, onchainTable, relations, sql, uniqueIndex } from "ponder";
+import { index, onchainEnum, onchainTable, primaryKey, relations, sql, uniqueIndex } from "ponder";
 import type { Address, Hash } from "viem";
 
 import type {
@@ -273,13 +273,11 @@ export const registration = onchainTable(
     id: t.text().primaryKey().$type<RegistrationId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    index: t.integer().notNull().default(0),
+    index: t.integer().notNull(),
 
     // has a type
     type: registrationType().notNull(),
 
-    // must have a start timestamp
-    start: t.bigint().notNull(),
     // may have an expiry
     expiry: t.bigint(),
     // maybe have a grace period (BaseRegistrar)
@@ -316,6 +314,11 @@ export const registration = onchainTable(
     byId: uniqueIndex().on(t.domainId, t.index),
   }),
 );
+
+export const latestRegistrationIndex = onchainTable("latest_registration_indexes", (t) => ({
+  domainId: t.text().primaryKey().$type<DomainId>(),
+  index: t.integer().notNull(),
+}));
 
 export const registration_relations = relations(registration, ({ one, many }) => ({
   // belongs to either v1Domain or v2Domain
@@ -356,8 +359,8 @@ export const renewal = onchainTable(
     id: t.text().primaryKey().$type<RenewalId>(),
 
     domainId: t.text().notNull().$type<DomainId>(),
-    registrationIndex: t.integer().notNull().default(0),
-    index: t.integer().notNull().default(0),
+    registrationIndex: t.integer().notNull(),
+    index: t.integer().notNull(),
 
     // all renewals have a duration
     duration: t.bigint().notNull(),
@@ -394,6 +397,16 @@ export const renewal_relations = relations(renewal, ({ one }) => ({
     references: [event.id],
   }),
 }));
+
+export const latestRenewalIndex = onchainTable(
+  "latest_renewal_indexes",
+  (t) => ({
+    domainId: t.text().notNull().$type<DomainId>(),
+    registrationIndex: t.integer().notNull(),
+    index: t.integer().notNull(),
+  }),
+  (t) => ({ pk: primaryKey({ columns: [t.domainId, t.registrationIndex] }) }),
+);
 
 ///////////////
 // Permissions
