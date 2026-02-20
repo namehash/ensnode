@@ -9,9 +9,16 @@ import { db } from "@/lib/db";
 
 /**
  * The maximum depth to traverse the ENSv2 namegraph in order to construct the set of Canonical
- * Registries. While technically not necessary (as a doubly-linked directed graph cannot include
- * cycles) this avoids the possibility of an infinite runaway query in the event that the indexed
- * namegraph is somehow corrupted or otherwise introduces a canonical cycle.
+ * Registries.
+ *
+ * Note that the set of Canonical Registries in the ENSv2 Namegraph is a _tree_, enforced by the
+ * requirement that each Registry maintain a reverse-pointer to its Canonical Domain, a form of
+ * 'edge authentication': if the reverse-pointer doesn't agree with the forward-pointer, the edge
+ * is not traversed, making cycles within the direced graph impossible.
+ *
+ * So while technically not necessary, including the depth constraint avoids the possibility of an
+ * infinite runaway query in the event that the indexed namegraph is somehow corrupted or otherwise
+ * introduces a canonical cycle.
  */
 const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
@@ -29,7 +36,7 @@ export const getCanonicalRegistriesCTE = () =>
       sql`(
             WITH RECURSIVE canonical_registries AS (
               SELECT ${getENSv2RootRegistryId(config.namespace)}::text AS registry_id, 0 AS depth
-              UNION
+              UNION ALL
               SELECT rcd.registry_id, cr.depth + 1
               FROM ${schema.registryCanonicalDomain} rcd
               JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
