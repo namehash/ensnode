@@ -221,6 +221,7 @@ export const v2Domain = onchainTable(
   }),
   (t) => ({
     byRegistry: index().on(t.registryId),
+    bySubregistry: index().on(t.subregistryId),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
   }),

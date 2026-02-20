@@ -150,7 +150,7 @@ export function findDomains({ name, owner, canonical }: FindDomainsWhereArg) {
               JOIN ${schema.v2Domain} parent ON parent.id = rcd.domain_id AND parent.subregistry_id = rcd.registry_id
               JOIN canonical_registries cr ON cr.registry_id = parent.registry_id
             )
-            SELECT DISTINCT registry_id FROM canonical_registries
+            SELECT registry_id FROM canonical_registries
           ) AS canonical_registries_cte`,
     )
     .as("canonical_registries");
