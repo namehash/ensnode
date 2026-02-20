@@ -17,13 +17,10 @@ const CANONICAL_REGISTRIES_MAX_DEPTH = 16;
 
 /**
  * Builds a recursive CTE that traverses from the ENSv2 Root Registry to construct a set of all
- * Canonical Registries.
+ * Canonical Registries. A Canonical Registry is an ENSv2 Registry that is the Root Registry or the
+ * (sub)Registry of a Domain in a Canonical Registry.
  *
  * TODO: could this be optimized further, perhaps as a materialized view?
- * TODO: this automatically handles fully bridged registries, but would need to be modified to
- * handle _conditionally_ bridged registries.
- *
- * @returns
  */
 export const getCanonicalRegistriesCTE = () =>
   db
