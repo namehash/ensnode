@@ -32,7 +32,7 @@ export async function getDomainIdByInterpretedName(
     v2_getDomainIdByFqdn(ROOT_REGISTRY_ID, name),
   ]);
 
-  // prefer v2DomainId if exists
+  // prefer v2Domain over v1Domain
   return v2DomainId || v1DomainId || null;
 }
 

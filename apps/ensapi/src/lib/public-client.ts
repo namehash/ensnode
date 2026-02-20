@@ -24,21 +24,6 @@ export function getPublicClient(chainId: ChainId): PublicClient {
       // Create an viem#PublicClient that uses a fallback() transport with all specified HTTP RPCs
       createPublicClient({
         transport: fallback(rpcConfig.httpRPCs.map((url) => http(url.toString()))),
-        ccipRead: {
-          async request({ data, sender, urls }) {
-            // When running in Docker, ENSApi's viem should fetch the UniversalResolverGateway at
-            // http://devnet:8547 rather than the default of http://localhost:8547, which is unreachable
-            // from within the Docker container. So here, if we're handling a CCIP-Read request on
-            // the ens-test-env L1 Chain, we add the ens-test-env's docker-compose-specific url as
-            // a fallback if the default (http://localhost:8547) fails.
-            if (chainId === ensTestEnvChain.id) {
-              return ccipRequest({ data, sender, urls: [...urls, "http://devnet:8547"] });
-            }
-
-            // otherwise, handle as normal
-            return ccipRequest({ data, sender, urls });
-          },
-        },
       }),
     );
   }
