@@ -1,4 +1,4 @@
-import { index, onchainEnum, onchainTable, relations, uniqueIndex } from "ponder";
+import { index, onchainEnum, onchainTable, relations, sql, uniqueIndex } from "ponder";
 import type { Address, Hash } from "viem";
 
 import type {
@@ -221,7 +221,7 @@ export const v2Domain = onchainTable(
   }),
   (t) => ({
     byRegistry: index().on(t.registryId),
-    bySubregistry: index().on(t.subregistryId),
+    bySubregistry: index().on(t.subregistryId).where(sql`${t.subregistryId} IS NOT NULL`),
     byOwner: index().on(t.ownerId),
     byLabelHash: index().on(t.labelHash),
   }),
