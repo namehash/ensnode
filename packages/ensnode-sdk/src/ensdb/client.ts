@@ -1,7 +1,5 @@
-import type {
-  CrossChainIndexingStatusSnapshot,
-  EnsIndexerPublicConfig,
-} from "@ensnode/ensnode-sdk";
+import { EnsIndexerPublicConfig } from "../ensindexer/config";
+import { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-chain-indexing-status-snapshot";
 
 /**
  * ENSDb Client Query

@@ -10,7 +10,7 @@ import { onchainTable } from "ponder";
  * Possible key value pairs are defined by 'EnsNodeMetadata' type:
  * - `EnsNodeMetadataEnsDbVersion`
  * - `EnsNodeMetadataEnsIndexerPublicConfig`
- * - `EnsNodeMetadataIndexingStatus`
+ * - `EnsNodeMetadataEnsIndexerIndexingStatus`
  */
 export const ensNodeMetadata = onchainTable("ensnode_metadata", (t) => ({
   /**
@@ -19,7 +19,7 @@ export const ensNodeMetadata = onchainTable("ensnode_metadata", (t) => ({
    * Allowed keys:
    * - `EnsNodeMetadataEnsDbVersion['key']`
    * - `EnsNodeMetadataEnsIndexerPublicConfig['key']`
-   * - `EnsNodeMetadataIndexingStatus['key']`
+   * - `EnsNodeMetadataEnsIndexerIndexingStatus['key']`
    */
   key: t.text().primaryKey(),
 
@@ -29,7 +29,7 @@ export const ensNodeMetadata = onchainTable("ensnode_metadata", (t) => ({
    * Allowed values:
    * - `EnsNodeMetadataEnsDbVersion['value']`
    * - `EnsNodeMetadataEnsIndexerPublicConfig['value']`
-   * - `EnsNodeMetadataIndexingStatus['value']`
+   * - `EnsNodeMetadataEnsIndexerIndexingStatus['value']`
    *
    * Guaranteed to be a JSON object.
    */

@@ -25,7 +25,7 @@ export interface SerializedEnsNodeMetadataEnsIndexerPublicConfig {
  * Serialized representation of {@link EnsNodeMetadataEnsIndexerIndexingStatus}.
  */
 export interface SerializedEnsNodeMetadataEnsIndexerIndexingStatus {
-  key: typeof EnsNodeMetadataKeys.IndexingStatus;
+  key: typeof EnsNodeMetadataKeys.EnsIndexerIndexingStatus;
   value: SerializedCrossChainIndexingStatusSnapshot;
 }
 

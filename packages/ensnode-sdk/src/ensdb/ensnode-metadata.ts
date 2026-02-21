@@ -7,7 +7,7 @@ import type { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-
 export const EnsNodeMetadataKeys = {
   EnsDbVersion: "ensdb_version",
   EnsIndexerPublicConfig: "ensindexer_public_config",
-  IndexingStatus: "ensindexer_indexing_status",
+  EnsIndexerIndexingStatus: "ensindexer_indexing_status",
 } as const;
 
 export type EnsNodeMetadataKey = (typeof EnsNodeMetadataKeys)[keyof typeof EnsNodeMetadataKeys];
@@ -23,7 +23,7 @@ export interface EnsNodeMetadataEnsIndexerPublicConfig {
 }
 
 export interface EnsNodeMetadataEnsIndexerIndexingStatus {
-  key: typeof EnsNodeMetadataKeys.IndexingStatus;
+  key: typeof EnsNodeMetadataKeys.EnsIndexerIndexingStatus;
   value: CrossChainIndexingStatusSnapshot;
 }
 
