@@ -4,7 +4,7 @@ import { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-chain
 /**
  * ENSDb Client Query
  * 
-  Includes methods for reading from ENSDb.
+ * Includes methods for reading from ENSDb.
  */
 export interface EnsDbClientQuery {
   /**
