@@ -73,7 +73,7 @@ export function buildRpcConfigsFromEnv(
       continue;
     }
 
-    // ens-test-env L1 Chain
+    // ens-test-env Chain
     if (chain.id === ensTestEnvChain.id) {
       rpcConfigs[serializeChainId(ensTestEnvChain.id)] = ensTestEnvChain.rpcUrls.default.http[0];
       continue;
