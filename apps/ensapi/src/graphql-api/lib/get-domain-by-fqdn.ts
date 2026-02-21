@@ -1,52 +1,23 @@
 import config from "@/config";
 
-import { getUnixTime } from "date-fns";
 import { Param, sql } from "drizzle-orm";
 import { namehash } from "viem";
 
-import { DatasourceNames } from "@ensnode/datasources";
 import * as schema from "@ensnode/ensnode-schema";
 import {
   type DomainId,
   type ENSv2DomainId,
-  ETH_NODE,
   getENSv2RootRegistryId,
   type InterpretedName,
-  interpretedLabelsToInterpretedName,
   interpretedLabelsToLabelHashPath,
   interpretedNameToInterpretedLabels,
-  isRegistrationFullyExpired,
   type LabelHash,
-  type LiteralLabel,
-  labelhashLiteralLabel,
   makeENSv1DomainId,
-  makeRegistryId,
-  makeSubdomainNode,
-  maybeGetDatasourceContract,
   type RegistryId,
 } from "@ensnode/ensnode-sdk";
 
-import { getLatestRegistration } from "@/graphql-api/lib/get-latest-registration";
 import { db } from "@/lib/db";
-import { makeLogger } from "@/lib/logger";
 
-const logger = makeLogger("get-domain-by-fqdn");
-
-// TODO(ensv2): can make this getDatasourceContract once ENSv2 Datasources are available in all namespaces
-const V2_ROOT_ETH_REGISTRY = maybeGetDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSv2Root,
-  "ETHRegistry",
-);
-
-// TODO(ensv2): can make this getDatasourceContract once ENSv2 Datasources are available in all namespaces
-const V2_NAMECHAIN_ETH_REGISTRY = maybeGetDatasourceContract(
-  config.namespace,
-  DatasourceNames.ENSv2ETHRegistry,
-  "ETHRegistry",
-);
-
-const ETH_LABELHASH = labelhashLiteralLabel("eth" as LiteralLabel);
 const ROOT_REGISTRY_ID = getENSv2RootRegistryId(config.namespace);
 
 /**
@@ -61,7 +32,7 @@ export async function getDomainIdByInterpretedName(
     v2_getDomainIdByFqdn(ROOT_REGISTRY_ID, name),
   ]);
 
-  // prefer v2DomainId
+  // prefer v2Domain over v1Domain
   return v2DomainId || v1DomainId || null;
 }
 
@@ -77,15 +48,12 @@ async function v1_getDomainIdByFqdn(name: InterpretedName): Promise<DomainId | n
 }
 
 /**
- * Forward-traverses the ENSv2 namegraph in order to identify the Domain addressed by `name`.
- *
- * If the exact Domain was not found, and the path terminates at a bridging resolver, bridge to the
- * indicated Registry and continue traversing.
+ * Forward-traverses the ENSv2 namegraph from the specified root in order to identify the Domain
+ * addressed by `name`.
  */
 async function v2_getDomainIdByFqdn(
-  registryId: RegistryId,
+  rootRegistryId: RegistryId,
   name: InterpretedName,
-  { now } = { now: BigInt(getUnixTime(new Date())) },
 ): Promise<DomainId | null> {
   const labelHashPath = interpretedLabelsToLabelHashPath(interpretedNameToInterpretedLabels(name));
 
@@ -102,7 +70,7 @@ async function v2_getDomainIdByFqdn(
         NULL::text AS label_hash,
         0 AS depth
       FROM ${schema.registry} r
-      WHERE r.id = ${registryId}
+      WHERE r.id = ${rootRegistryId}
 
       UNION ALL
 
@@ -131,80 +99,16 @@ async function v2_getDomainIdByFqdn(
     depth: number;
   }[];
 
-  // this was a query for a TLD and it does not exist in ENS Root Chain ENSv2
+  // this was a query for a TLD and it does not exist within the ENSv2 namegraph
   if (rows.length === 0) return null;
 
   // biome-ignore lint/style/noNonNullAssertion: length check above
   const leaf = rows[rows.length - 1]!;
 
-  /////////////////////////////////////////////////////////////////////////////////
-  // 1. An exact match was found for the Domain within ENSv2 on the ENS Root Chain.
-  /////////////////////////////////////////////////////////////////////////////////
+  // the v2Domain was found iff there is an exact match within the ENSv2 namegraph
   const exact = rows.length === labelHashPath.length;
-  if (exact) {
-    logger.debug(`Found '${name}' in ENSv2 from Registry ${registryId}`);
-    return leaf.domain_id;
-  }
+  if (exact) return leaf.domain_id;
 
-  /////////////////////////////////////////////////////////////////////////////////
-  // 2. ETHTLDResolver
-  // if the path terminates at the .eth Registry, we must implement the logic in ETHTLDResolver
-  // TODO: we could add an additional invariant that the .eth v2 Registry does indeed have the ETHTLDResolver
-  // set as its resolver, but that is unnecessary at the moment and incurs additional db requests or a join against
-  // domain_resolver_relationships
-  // TODO: generalize this into other future bridging resolvers depending on how basenames etc do it
-  /////////////////////////////////////////////////////////////////////////////////
-
-  if (!V2_ROOT_ETH_REGISTRY) return null;
-
-  // 2.1: if the path did not terminate at the .eth Registry, then the domain was not found
-  if (leaf.registry_id !== makeRegistryId(V2_ROOT_ETH_REGISTRY)) return null;
-
-  logger.debug({ name, rows });
-
-  // Invariant: must be >= 2LD
-  if (labelHashPath.length < 2) {
-    throw new Error(`Invariant: '${name}' is not >= 2LD (has depth ${labelHashPath.length})!`);
-  }
-
-  // Invariant: LabelHashPath must originate at 'eth'
-  if (labelHashPath[0] !== ETH_LABELHASH) {
-    throw new Error(
-      `Invariant: '${name}' terminated at .eth Registry but the queried labelHashPath (${JSON.stringify(labelHashPath)}) does not originate with 'eth' (${ETH_LABELHASH}).`,
-    );
-  }
-
-  // Invariant: The path must terminate at 'eth' as well.
-  if (leaf.label_hash !== ETH_LABELHASH) {
-    throw new Error(
-      `Invariant: the leaf identified (${leaf.label_hash}) does not match 'eth' (${ETH_LABELHASH}).`,
-    );
-  }
-
-  // construct the node of the 2ld
-  const dotEth2LDNode = makeSubdomainNode(labelHashPath[1], ETH_NODE);
-
-  // 2.2: if there's an active registration in ENSv1 for the .eth 2LD, then resolve from ENSv1
-  const ensv1DomainId = makeENSv1DomainId(dotEth2LDNode);
-  const registration = await getLatestRegistration(ensv1DomainId);
-
-  if (registration && !isRegistrationFullyExpired(registration, now)) {
-    logger.debug(
-      `ETHTLDResolver deferring to actively registered name ${dotEth2LDNode} in ENSv1...`,
-    );
-    return await v1_getDomainIdByFqdn(name);
-  }
-
-  // 2.3: otherwise, direct to Namechain ENSv2 .eth Registry
-  // if there's no ETHRegistry on Namechain, the domain was not found
-  if (!V2_NAMECHAIN_ETH_REGISTRY) return null;
-
-  const nameWithoutTld = interpretedLabelsToInterpretedName(
-    interpretedNameToInterpretedLabels(name).slice(0, -1),
-  );
-  logger.debug(
-    `ETHTLDResolver deferring '${nameWithoutTld}' to ENSv2 .eth Registry on Namechain...`,
-  );
-
-  return v2_getDomainIdByFqdn(makeRegistryId(V2_NAMECHAIN_ETH_REGISTRY), nameWithoutTld, { now });
+  // otherwise, the v2 domain was not found
+  return null;
 }

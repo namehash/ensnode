@@ -12,8 +12,7 @@ import { z } from "zod/v4";
 import {
   type ContractConfig,
   type DatasourceName,
-  ensTestEnvL1Chain,
-  ensTestEnvL2Chain,
+  ensTestEnvChain,
   maybeGetDatasource,
 } from "@ensnode/datasources";
 import type { Blockrange, ChainId, ENSNamespaceId } from "@ensnode/ensnode-sdk";
@@ -305,12 +304,8 @@ export function chainsConnectionConfig(
     );
   }
 
-  // NOTE: disable cache on local chains (e.g. ens-test-env, devnet)
-  const disableCache =
-    chainId === 31337 ||
-    chainId === 1337 ||
-    chainId === ensTestEnvL1Chain.id ||
-    chainId === ensTestEnvL2Chain.id;
+  // NOTE: disable cache on local chains (e.g. ganache, anvil, ens-test-env)
+  const disableCache = chainId === 31337 || chainId === 1337 || chainId === ensTestEnvChain.id;
 
   return {
     [chainId.toString()]: {
