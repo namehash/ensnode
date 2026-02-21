@@ -31,7 +31,7 @@ export const ensNodeMetadata = onchainTable("ensnode_metadata", (t) => ({
    * - `EnsNodeMetadataEnsIndexerPublicConfig['value']`
    * - `EnsNodeMetadataEnsIndexerIndexingStatus['value']`
    *
-   * Guaranteed to be a JSON object.
+   * Guaranteed to be a serialized representation of JSON object.
    */
   value: t.jsonb().notNull(),
 }));

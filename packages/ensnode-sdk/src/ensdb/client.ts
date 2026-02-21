@@ -11,7 +11,6 @@ export interface EnsDbClientQuery {
    * Get ENSDb Version
    *
    * @returns the existing record, or `undefined`.
-   * @throws if not exactly one record was found.
    */
   getEnsDbVersion(): Promise<string | undefined>;
 
@@ -19,7 +18,6 @@ export interface EnsDbClientQuery {
    * Get ENSIndexer Public Config
    *
    * @returns the existing record, or `undefined`.
-   * @throws if not exactly one record was found.
    */
   getEnsIndexerPublicConfig(): Promise<EnsIndexerPublicConfig | undefined>;
 
@@ -27,7 +25,6 @@ export interface EnsDbClientQuery {
    * Get Indexing Status Snapshot
    *
    * @returns the existing record, or `undefined`.
-   * @throws if not exactly one record was found.
    */
   getIndexingStatusSnapshot(): Promise<CrossChainIndexingStatusSnapshot | undefined>;
 }
