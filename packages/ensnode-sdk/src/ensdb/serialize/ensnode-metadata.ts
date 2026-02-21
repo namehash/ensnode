@@ -1,11 +1,11 @@
 import type { SerializedEnsIndexerPublicConfig } from "../../ensindexer/config";
 import type { SerializedCrossChainIndexingStatusSnapshot } from "../../indexing-status/serialize/cross-chain-indexing-status-snapshot";
-import {
+import type {
   EnsNodeMetadata,
-  type EnsNodeMetadataEnsDbVersion,
-  type EnsNodeMetadataEnsIndexerIndexingStatus,
-  type EnsNodeMetadataEnsIndexerPublicConfig,
-  type EnsNodeMetadataKeys,
+  EnsNodeMetadataEnsDbVersion,
+  EnsNodeMetadataEnsIndexerIndexingStatus,
+  EnsNodeMetadataEnsIndexerPublicConfig,
+  EnsNodeMetadataKeys,
 } from "../ensnode-metadata";
 
 /**

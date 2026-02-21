@@ -1,9 +1,9 @@
-import { EnsIndexerPublicConfig } from "../ensindexer/config";
-import { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-chain-indexing-status-snapshot";
+import type { EnsIndexerPublicConfig } from "../ensindexer/config";
+import type { CrossChainIndexingStatusSnapshot } from "../indexing-status/cross-chain-indexing-status-snapshot";
 
 /**
  * ENSDb Client Query
- * 
+ *
  * Includes methods for reading from ENSDb.
  */
 export interface EnsDbClientQuery {
