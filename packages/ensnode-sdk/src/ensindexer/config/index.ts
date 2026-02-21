@@ -1,3 +1,4 @@
+export * from "./compatibility";
 export * from "./deserialize";
 export * from "./is-subgraph-compatible";
 export * from "./label-utils";
