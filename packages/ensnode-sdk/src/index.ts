@@ -1,5 +1,6 @@
 export * from "./ens";
 export * from "./ensapi";
+export * from "./ensdb";
 export * from "./ensindexer";
 export * from "./ensrainbow";
 export * from "./ensv2";
