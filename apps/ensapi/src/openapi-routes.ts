@@ -13,14 +13,18 @@ import {
 export function createRoutesForSpec() {
   const app = new OpenAPIHono();
 
-  const routeGroups = [{ basePath: amirealtimeBasePath, routes: amirealtimeRoutes }];
+  const routeGroups = [
+    { basePath: amirealtimeBasePath, routes: amirealtimeRoutes },
+  ];
 
   for (const group of routeGroups) {
     for (const route of group.routes) {
+      const path =
+        route.path === "/" ? group.basePath : `${group.basePath}${route.path}`;
       app.openapi(
-        { ...route, path: `${group.basePath}${route.path}` },
+        { ...route, path },
         // stub handler — never called, only needed for route registration
-        (c) => c.json({}),
+        (c) => c.json({})
       );
     }
   }
