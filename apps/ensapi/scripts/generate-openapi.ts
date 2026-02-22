@@ -3,7 +3,7 @@ import packageJson from "../package.json" with { type: "json" };
 import { openapiDocumentation } from "../src/openapi-documentation";
 import { createRoutesForSpec } from "../src/openapi-routes";
 
-const version = process.env.ENSAPI_VERSION ?? packageJson.version ?? "0.0.0";
+const version = process.env.ENSAPI_VERSION ?? packageJson.version;
 
 const app = createRoutesForSpec();
 
