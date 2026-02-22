@@ -17,7 +17,8 @@
     "test": "vitest",
     "lint": "biome check --write .",
     "lint:ci": "biome ci",
-    "typecheck": "tsgo --noEmit"
+    "typecheck": "tsgo --noEmit",
+    "generate:openapi": "tsx scripts/generate-openapi.ts"
   },
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
@@ -28,6 +29,7 @@
     "@hono/node-server": "^1.19.5",
     "@hono/otel": "^0.2.2",
     "@hono/standard-validator": "^0.2.2",
+    "@hono/zod-openapi": "^1.2.2",
     "@namehash/ens-referrals": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/core": "^2.0.1",

@@ -1,0 +1,29 @@
+import { OpenAPIHono } from "@hono/zod-openapi";
+
+import {
+  basePath as amirealtimeBasePath,
+  routes as amirealtimeRoutes,
+} from "./handlers/amirealtime-api.routes";
+
+/**
+ * Creates an OpenAPIHono app with all route definitions registered using stub handlers.
+ * This allows generating the OpenAPI spec without importing any handler code that
+ * depends on config/env vars.
+ */
+export function createRoutesForSpec() {
+  const app = new OpenAPIHono();
+
+  const routeGroups = [{ basePath: amirealtimeBasePath, routes: amirealtimeRoutes }];
+
+  for (const group of routeGroups) {
+    for (const route of group.routes) {
+      app.openapi(
+        { ...route, path: `${group.basePath}${route.path}` },
+        // stub handler — never called, only needed for route registration
+        (c) => c.json({}),
+      );
+    }
+  }
+
+  return app;
+}
