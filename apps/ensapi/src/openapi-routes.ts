@@ -14,12 +14,11 @@ export function createRoutesForSpec() {
 
   for (const group of routeGroups) {
     for (const route of group.routes) {
-      const path =
-        route.path === "/" ? group.basePath : `${group.basePath}${route.path}`;
+      const path = route.path === "/" ? group.basePath : `${group.basePath}${route.path}`;
       app.openapi(
         { ...route, path },
         // stub handler — never called, only needed for route registration
-        (c) => c.json({})
+        (c) => c.json({}),
       );
     }
   }
