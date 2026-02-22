@@ -43,6 +43,7 @@ Runnable commands for validating changes; lint and format with Biome.
 - Run tests for a single package/app: `pnpm --filter <package-name> test` (e.g. `pnpm --filter ensapi test`)
 - Lint and format: `pnpm lint` (fixes where applicable); CI lint: `pnpm lint:ci`
 - Type checking: `pnpm typecheck` (runs typecheck in all workspaces)
+- Build (validate tsup/tsx bundling for the package you changed): `pnpm --filter <package-name> build`
 
 ## Testing
 
