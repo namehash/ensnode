@@ -1,9 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 
-import {
-  basePath as amirealtimeBasePath,
-  routes as amirealtimeRoutes,
-} from "./handlers/amirealtime-api.routes";
+import * as amIRealtimeRoutes from "./handlers/amirealtime-api.routes";
 
 /**
  * Creates an OpenAPIHono app with all route definitions registered using stub handlers.
@@ -13,9 +10,7 @@ import {
 export function createRoutesForSpec() {
   const app = new OpenAPIHono();
 
-  const routeGroups = [
-    { basePath: amirealtimeBasePath, routes: amirealtimeRoutes },
-  ];
+  const routeGroups = [amIRealtimeRoutes];
 
   for (const group of routeGroups) {
     for (const route of group.routes) {
