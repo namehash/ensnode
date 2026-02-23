@@ -1,13 +1,12 @@
 import type { EnsIndexerPublicConfig } from "./types";
 
-export type EnsIndexerPublicConfigCompatibilityCheck = Pick<
+export type EnsIndexerPublicConfigCompatibilityCheck = Omit<
   EnsIndexerPublicConfig,
-  "indexedChainIds" | "isSubgraphCompatible" | "namespace" | "plugins"
+  "databaseSchemaName" | "versionInfo"
 >;
 
 /**
- * Validate if `configB` is compatible with `configA`, such that `configA` is
- * a subset of `configB`.
+ * Validate if `configB` is compatible with `configA`, such that `configA` equals to `configB`.
  *
  * @throws error if configs are incompatible.
  */
@@ -15,18 +14,12 @@ export function validateEnsIndexerPublicConfigCompatibility(
   configA: EnsIndexerPublicConfigCompatibilityCheck,
   configB: EnsIndexerPublicConfigCompatibilityCheck,
 ): void {
-  const configAIndexedChainIds = Array.from(configA.indexedChainIds);
-  const configBIndexedChainIds = Array.from(configB.indexedChainIds);
-  if (
-    !configAIndexedChainIds.every((configAChainId) =>
-      configBIndexedChainIds.includes(configAChainId),
-    )
-  ) {
+  if (configA.indexedChainIds.symmetricDifference(configB.indexedChainIds).size > 0) {
     throw new Error(
       [
         `'indexedChainIds' must be compatible.`,
-        `Stored Config 'indexedChainIds': '${configAIndexedChainIds.join(", ")}'.`,
-        `Current Config 'indexedChainIds': '${configBIndexedChainIds.join(", ")}'.`,
+        `Stored Config 'indexedChainIds': '${Array.from(configA.indexedChainIds).join(", ")}'.`,
+        `Current Config 'indexedChainIds': '${Array.from(configB.indexedChainIds).join(", ")}'.`,
       ].join(" "),
     );
   }
@@ -51,7 +44,30 @@ export function validateEnsIndexerPublicConfigCompatibility(
     );
   }
 
-  if (!configA.plugins.every((configAPlugin) => configB.plugins.includes(configAPlugin))) {
+  if (configA.labelSet.labelSetId !== configB.labelSet.labelSetId) {
+    throw new Error(
+      [
+        `'labelSet.labelSetId' must be compatible.`,
+        `Stored Config 'labelSet.labelSetId': '${configA.labelSet.labelSetId}'.`,
+        `Current Config 'labelSet.labelSetId': '${configB.labelSet.labelSetId}'.`,
+      ].join(" "),
+    );
+  }
+
+  if (configA.labelSet.labelSetVersion !== configB.labelSet.labelSetVersion) {
+    throw new Error(
+      [
+        `'labelSet.labelSetVersion' must be compatible.`,
+        `Stored Config 'labelSet.labelSetVersion': '${configA.labelSet.labelSetVersion}'.`,
+        `Current Config 'labelSet.labelSetVersion': '${configB.labelSet.labelSetVersion}'.`,
+      ].join(" "),
+    );
+  }
+
+  const configAPluginsSet = new Set(configA.plugins);
+  const configBPluginsSet = new Set(configB.plugins);
+
+  if (configAPluginsSet.symmetricDifference(configBPluginsSet).size > 0) {
     throw new Error(
       [
         `'plugins' must be compatible.`,

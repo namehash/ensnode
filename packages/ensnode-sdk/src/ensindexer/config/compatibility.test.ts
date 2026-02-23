@@ -12,24 +12,25 @@ describe("EnsIndexerConfig compatibility", () => {
   describe("validateEnsIndexerPublicConfigCompatibility()", () => {
     const config = {
       indexedChainIds: new Set([1, 10, 8453]),
+      labelSet: {
+        labelSetId: "test-label-set",
+        labelSetVersion: 1,
+      },
       isSubgraphCompatible: false,
       namespace: ENSNamespaceIds.Mainnet,
       plugins: [PluginName.Subgraph, PluginName.Basenames, PluginName.ThreeDNS],
     } satisfies EnsIndexerPublicConfigCompatibilityCheck;
 
-    it("does not throw error when 'configB' is compatible with 'configA' ('configA' is subset of 'configB')", () => {
+    it("does not throw error when 'configA' and 'configB' are equal", () => {
       const configA = structuredClone(config);
-
       const configB = structuredClone(config);
-      configB.indexedChainIds.add(59144);
-      configB.plugins.push(PluginName.Lineanames);
 
       expect(() =>
         validateEnsIndexerPublicConfigCompatibility(configA, configB),
       ).not.toThrowError();
     });
 
-    it("throws error when 'configA.indexedChainIds' are not subset of 'configB.indexedChainIds'", () => {
+    it("throws error when 'configA.indexedChainIds' differ from 'configB.indexedChainIds'", () => {
       const configA = structuredClone(config);
 
       const configB = structuredClone(config);
@@ -66,7 +67,39 @@ describe("EnsIndexerConfig compatibility", () => {
       );
     });
 
-    it("throws error when 'configA.plugins' are not subset of 'configB.plugins'", () => {
+    it("throws error when 'configA.labelSet.labelSetId' is not same as 'configB.labelSet.labelSetId'", () => {
+      const configA = structuredClone(config);
+
+      const configB = {
+        ...structuredClone(config),
+        labelSet: {
+          ...structuredClone(config.labelSet),
+          labelSetId: "different-label-set",
+        },
+      } satisfies EnsIndexerPublicConfigCompatibilityCheck;
+
+      expect(() => validateEnsIndexerPublicConfigCompatibility(configA, configB)).toThrowError(
+        /'labelSet.labelSetId' must be compatible. Stored Config 'labelSet.labelSetId': 'test-label-set'. Current Config 'labelSet.labelSetId': 'different-label-set'/i,
+      );
+    });
+
+    it("throws error when 'configA.labelSet.labelSetVersion' is not same as 'configB.labelSet.labelSetVersion'", () => {
+      const configA = structuredClone(config);
+
+      const configB = {
+        ...structuredClone(config),
+        labelSet: {
+          ...structuredClone(config.labelSet),
+          labelSetVersion: config.labelSet.labelSetVersion + 1,
+        },
+      } satisfies EnsIndexerPublicConfigCompatibilityCheck;
+
+      expect(() => validateEnsIndexerPublicConfigCompatibility(configA, configB)).toThrowError(
+        /'labelSet.labelSetVersion' must be compatible. Stored Config 'labelSet.labelSetVersion': '1'. Current Config 'labelSet.labelSetVersion': '2'/i,
+      );
+    });
+
+    it("throws error when 'configA.plugins' differ from 'configB.plugins'", () => {
       const configA = structuredClone(config);
 
       const configB = structuredClone(config);
