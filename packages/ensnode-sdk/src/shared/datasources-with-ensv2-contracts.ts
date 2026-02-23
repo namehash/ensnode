@@ -9,7 +9,6 @@ import {
 
 export const DATASOURCE_NAMES_WITH_ENSv2_CONTRACTS = [
   DatasourceNames.ENSv2Root,
-  DatasourceNames.ENSv2ETHRegistry,
 ] as const satisfies DatasourceName[];
 
 // avoids 'The inferred type of this node exceeds the maximum length the compiler will serialize'
