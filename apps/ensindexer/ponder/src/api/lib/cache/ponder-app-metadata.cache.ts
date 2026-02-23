@@ -8,16 +8,19 @@ import type {
   ChainIndexingMetadataDynamic,
   ChainIndexingMetadataImmutable,
 } from "@/lib/indexing-status-builder/chain-indexing-metadata";
-import { fetchBlockRef } from "@/ponder/api/lib/fetch-block-ref";
 
 import { buildChainsBlockrange } from "../chains-config-blockrange";
 import { buildChainIndexingMetadataImmutable } from "../chains-indexing-metadata-immutable";
+import { fetchBlockRef } from "../fetch-block-ref";
 import { buildPonderCachedPublicClients } from "../ponder-cached-public-clients";
 
 /**
  * Metadata from a Ponder app.
  */
 export interface PonderAppMetadata {
+  /**
+   * Complete indexing metadata for all indexed chains.
+   */
   chainsIndexingMetadata: Map<ChainId, ChainIndexingMetadata>;
 }
 
@@ -112,17 +115,26 @@ export const ponderAppMetadataCache = new SWRCache({
           );
         }
 
+        const metadataDynamic = {
+          indexingMetrics: chainIndexingMetrics,
+          indexingStatus: chainIndexingStatus,
+        } satisfies ChainIndexingMetadataDynamic;
+
         let metadataImmutable: ChainIndexingMetadataImmutable;
 
-        // If there is no cached result, or if the cached result is an error,
-        // we build the immutable metadata from scratch.
+        // Fetch relevant block refs from RPCs and build the immutable metadata
+        // for the chain if, and only if, a successfully cached result is
+        // not available yet.
         if (cachedResult === undefined || cachedResult.result instanceof Error) {
+          // Invariant: Ponder cached public client must be available
           if (!ponderCachedPublicClient) {
             throw new Error(
               `Ponder cached public client must be available for indexed chain ID ${chainId}`,
             );
           }
 
+          // Invariant: chain indexing state must be "historical" in order to
+          // build immutable metadata for the chain.
           if (chainIndexingMetrics.state !== ChainIndexingStates.Historical) {
             throw new Error(
               `Chain indexing state must be "historical" for indexed chain ID ${chainId}, but got "${chainIndexingMetrics.state}"`,
@@ -147,7 +159,7 @@ export const ponderAppMetadataCache = new SWRCache({
             backfillEndBlock,
           );
         } else {
-          // Reuse the immutable metadata from cache, as it should not change over time.
+          // Reuse the chain indexing metadata from cache
           const chainIndexingMetadata = cachedResult.result.chainsIndexingMetadata.get(chainId);
 
           // Invariant: chain indexing metadata must be available in cache.
@@ -162,11 +174,6 @@ export const ponderAppMetadataCache = new SWRCache({
             indexingConfig: chainIndexingMetadata.indexingConfig,
           };
         }
-
-        const metadataDynamic = {
-          indexingMetrics: chainIndexingMetrics,
-          indexingStatus: chainIndexingStatus,
-        } satisfies ChainIndexingMetadataDynamic;
 
         currentResult.chainsIndexingMetadata.set(chainId, {
           ...metadataImmutable,

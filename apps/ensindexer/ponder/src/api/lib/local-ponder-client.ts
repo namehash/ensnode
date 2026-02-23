@@ -14,8 +14,8 @@ export class LocalPonderClient extends PonderClient {
   /**
    * Get {@link OmnichainIndexingStatusSnapshot} for the indexed chains.
    *
-   * This method fetches the necessary data from the Ponder Client cache and
-   * builds the indexing status snapshot for all indexed chains.
+   * This method fetches the necessary data from the Ponder App Metadata cache
+   * and builds the indexing status snapshot for all indexed chains.
    *
    * @returns A {@link OmnichainIndexingStatusSnapshot} for the indexed chains.
    * @throws Error if required data is not available in cache or if any of
