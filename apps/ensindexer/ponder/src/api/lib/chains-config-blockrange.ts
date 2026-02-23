@@ -25,6 +25,8 @@ import type {
   ChainIdString,
 } from "@ensnode/ponder-sdk";
 
+import ponderConfig from "@/ponder/config";
+
 /**
  * Ponder config datasource with a flat `chain` value.
  */
@@ -101,9 +103,7 @@ function isPonderDatasourceNested(
  *
  * @throws Error if any of the above invariants are violated.
  */
-export function buildChainsBlockrange(
-  ponderConfig: PonderConfigType,
-): Map<ChainId, BlockrangeWithStartBlock> {
+export function buildChainsBlockrange(): Map<ChainId, BlockrangeWithStartBlock> {
   const chainsBlockrange = new Map<ChainId, BlockrangeWithStartBlock>();
 
   // 0. Get all ponder sources (includes chain + startBlock & endBlock)
@@ -149,7 +149,7 @@ export function buildChainsBlockrange(
     //      ponderSource for that chain has its respective `endBlock` defined.
     const isEndBlockForChainAllowed = chainEndBlocks.length === chainStartBlocks.length;
 
-    // 3.b) Get the highest endBLock for the chain.
+    // 3.b) Get the highest endBlock for the chain.
     const chainHighestEndBlock =
       isEndBlockForChainAllowed && chainEndBlocks.length > 0
         ? Math.max(...chainEndBlocks)
