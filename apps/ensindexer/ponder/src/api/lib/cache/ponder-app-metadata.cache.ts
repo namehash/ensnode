@@ -54,6 +54,11 @@ const ponderClient = new PonderClient(config.ensIndexerUrl);
  * Note, that Ponder app needs a while at startup to populate indexing metrics,
  * and indexing status, so a few of the initial attempts to load this cache may
  * fail until required data is made available by the Ponder app.
+ *
+ * Loading cache data includes making RPC calls to fetch relevant
+ * block references for all indexed chains. RPC calls may sometimes fail due to
+ * transient network issues, so the cache is designed to be resilient to such
+ * failures as well.
  */
 export const ponderAppMetadataCache = new SWRCache({
   fn: async function loadPonderAppMetadataCache(cachedResult) {
