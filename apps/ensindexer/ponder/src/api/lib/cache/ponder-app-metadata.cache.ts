@@ -115,7 +115,7 @@ export const ponderAppMetadataCache = new SWRCache({
       );
 
       // Invariant: indexed chain IDs from Ponder Indexing Metrics and
-      // Ponder Indexing Status must be consistent the configured
+      // Ponder Indexing Status must be consistent with the configured
       // indexed chain IDs.
       if (areChainIdsConsistent === false) {
         throw new Error(
