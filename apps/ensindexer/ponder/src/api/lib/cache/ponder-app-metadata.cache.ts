@@ -112,10 +112,6 @@ export const ponderAppMetadataCache = new SWRCache({
           );
         }
 
-        if (!chainIndexingMetrics) {
-          throw new Error(`Indexing metrics must be available for indexed chain ID ${chainId}`);
-        }
-
         let metadataImmutable: ChainIndexingMetadataImmutable;
 
         // If there is no cached result, or if the cached result is an error,
