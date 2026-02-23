@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import { publicClients as ponderPublicClients } from "ponder:api";
 import type { PublicClient } from "viem";
 
@@ -158,3 +160,11 @@ export class LocalPonderClient extends PonderClient {
     return buildOmnichainIndexingStatusSnapshot(chainsIndexingMetadata);
   }
 }
+
+/**
+ * The singleton instance of LocalPonderClient.
+ */
+export const localPonderClient = new LocalPonderClient(
+  config.ensIndexerUrl,
+  config.indexedChainIds,
+);
