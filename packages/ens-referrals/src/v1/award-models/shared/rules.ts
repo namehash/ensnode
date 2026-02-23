@@ -1,0 +1,53 @@
+import type { AccountId, UnixTimestamp } from "@ensnode/ensnode-sdk";
+
+/**
+ * Discriminant values for the award model used in a referral program edition.
+ *
+ * @remarks Clients MUST check `awardModel` before accessing model-specific fields.
+ * Unrecognized `awardModel` values MUST be handled gracefully - when parsed via Zod schemas,
+ * unknown award model objects are returned as `{ awardModel: string } & Record<string, unknown>`.
+ * Servers may introduce new award model types at any time without breaking existing clients.
+ */
+export const ReferralProgramAwardModels = {
+  PieSplit: "pie-split",
+  RevShareLimit: "rev-share-limit",
+} as const;
+
+export type ReferralProgramAwardModel =
+  (typeof ReferralProgramAwardModels)[keyof typeof ReferralProgramAwardModels];
+
+/**
+ * Base fields shared across all referral program rule types.
+ *
+ * Both `ReferralProgramRulesPieSplit` and `ReferralProgramRulesRevShareLimit` are structurally
+ * compatible with this interface, so it can be used wherever only the common fields are needed
+ * (e.g., `assertLeaderboardInputs`).
+ */
+export interface BaseReferralProgramRules {
+  /**
+   * Discriminant: identifies the award model for this edition.
+   */
+  awardModel: ReferralProgramAwardModel;
+
+  /**
+   * The start time of the referral program.
+   */
+  startTime: UnixTimestamp;
+
+  /**
+   * The end time of the referral program.
+   * @invariant Guaranteed to be greater than or equal to `startTime`
+   */
+  endTime: UnixTimestamp;
+
+  /**
+   * The account ID of the subregistry for the referral program.
+   */
+  subregistryId: AccountId;
+
+  /**
+   * URL to the full rules document for these rules.
+   * @example new URL("https://ensawards.org/ens-holiday-awards-rules")
+   */
+  rulesUrl: URL;
+}

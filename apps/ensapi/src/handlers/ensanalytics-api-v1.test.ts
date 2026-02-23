@@ -28,7 +28,7 @@ vi.mock("../middleware/referral-leaderboard-editions-caches.middleware", () => (
 }));
 
 import {
-  buildReferralProgramRules,
+  buildReferralProgramRulesPieSplit,
   deserializeReferralProgramEditionConfigSetResponse,
   deserializeReferrerLeaderboardPageResponse,
   deserializeReferrerMetricsEditionsResponse,
@@ -41,6 +41,7 @@ import {
   type ReferrerLeaderboardPageResponseOk,
   ReferrerMetricsEditionsResponseCodes,
   type ReferrerMetricsEditionsResponseOk,
+  type UnrankedReferrerMetricsPieSplit,
 } from "@namehash/ens-referrals/v1";
 
 import { parseTimestamp, parseUsdc, type SWRCache } from "@ensnode/ensnode-sdk";
@@ -446,16 +447,17 @@ describe("/v1/ensanalytics", () => {
         expect(edition1.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
         expect(edition1.rules).toEqual(populatedReferrerLeaderboard.rules);
         expect(edition1.aggregatedMetrics).toEqual(populatedReferrerLeaderboard.aggregatedMetrics);
-        expect(edition1.referrer.referrer).toBe(nonExistingReferrer);
-        expect(edition1.referrer.rank).toBe(null);
-        expect(edition1.referrer.totalReferrals).toBe(0);
-        expect(edition1.referrer.totalIncrementalDuration).toBe(0);
-        expect(edition1.referrer.score).toBe(0);
-        expect(edition1.referrer.isQualified).toBe(false);
-        expect(edition1.referrer.finalScoreBoost).toBe(0);
-        expect(edition1.referrer.finalScore).toBe(0);
-        expect(edition1.referrer.awardPoolShare).toBe(0);
-        expect(edition1.referrer.awardPoolApproxValue).toStrictEqual({
+        const edition1Referrer = edition1.referrer as UnrankedReferrerMetricsPieSplit;
+        expect(edition1Referrer.referrer).toBe(nonExistingReferrer);
+        expect(edition1Referrer.rank).toBe(null);
+        expect(edition1Referrer.totalReferrals).toBe(0);
+        expect(edition1Referrer.totalIncrementalDuration).toBe(0);
+        expect(edition1Referrer.score).toBe(0);
+        expect(edition1Referrer.isQualified).toBe(false);
+        expect(edition1Referrer.finalScoreBoost).toBe(0);
+        expect(edition1Referrer.finalScore).toBe(0);
+        expect(edition1Referrer.awardPoolShare).toBe(0);
+        expect(edition1Referrer.awardPoolApproxValue).toStrictEqual({
           currency: "USDC",
           amount: 0n,
         });
@@ -527,16 +529,17 @@ describe("/v1/ensanalytics", () => {
         expect(edition1.type).toBe(ReferrerEditionMetricsTypeIds.Unranked);
         expect(edition1.rules).toEqual(emptyReferralLeaderboard.rules);
         expect(edition1.aggregatedMetrics).toEqual(emptyReferralLeaderboard.aggregatedMetrics);
-        expect(edition1.referrer.referrer).toBe(referrer);
-        expect(edition1.referrer.rank).toBe(null);
-        expect(edition1.referrer.totalReferrals).toBe(0);
-        expect(edition1.referrer.totalIncrementalDuration).toBe(0);
-        expect(edition1.referrer.score).toBe(0);
-        expect(edition1.referrer.isQualified).toBe(false);
-        expect(edition1.referrer.finalScoreBoost).toBe(0);
-        expect(edition1.referrer.finalScore).toBe(0);
-        expect(edition1.referrer.awardPoolShare).toBe(0);
-        expect(edition1.referrer.awardPoolApproxValue).toStrictEqual({
+        const edition1Referrer2 = edition1.referrer as UnrankedReferrerMetricsPieSplit;
+        expect(edition1Referrer2.referrer).toBe(referrer);
+        expect(edition1Referrer2.rank).toBe(null);
+        expect(edition1Referrer2.totalReferrals).toBe(0);
+        expect(edition1Referrer2.totalIncrementalDuration).toBe(0);
+        expect(edition1Referrer2.score).toBe(0);
+        expect(edition1Referrer2.isQualified).toBe(false);
+        expect(edition1Referrer2.finalScoreBoost).toBe(0);
+        expect(edition1Referrer2.finalScore).toBe(0);
+        expect(edition1Referrer2.awardPoolShare).toBe(0);
+        expect(edition1Referrer2.awardPoolApproxValue).toStrictEqual({
           currency: "USDC",
           amount: 0n,
         });
@@ -804,7 +807,7 @@ describe("/v1/ensanalytics", () => {
           {
             slug: "2025-12",
             displayName: "December 2025",
-            rules: buildReferralProgramRules(
+            rules: buildReferralProgramRulesPieSplit(
               parseUsdc("10000"),
               100,
               parseTimestamp("2025-12-01T00:00:00Z"),
@@ -819,7 +822,7 @@ describe("/v1/ensanalytics", () => {
           {
             slug: "2026-03",
             displayName: "March 2026",
-            rules: buildReferralProgramRules(
+            rules: buildReferralProgramRulesPieSplit(
               parseUsdc("10000"),
               100,
               parseTimestamp("2026-03-01T00:00:00Z"),
@@ -834,7 +837,7 @@ describe("/v1/ensanalytics", () => {
           {
             slug: "2026-06",
             displayName: "June 2026",
-            rules: buildReferralProgramRules(
+            rules: buildReferralProgramRulesPieSplit(
               parseUsdc("10000"),
               100,
               parseTimestamp("2026-06-01T00:00:00Z"),

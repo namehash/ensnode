@@ -1,6 +1,26 @@
-import { serializePriceEth, serializePriceUsdc } from "@ensnode/ensnode-sdk";
-
-import type { AggregatedReferrerMetrics } from "../aggregations";
+import {
+  serializeReferralProgramRulesPieSplit,
+  serializeReferrerEditionMetricsRankedPieSplit,
+  serializeReferrerEditionMetricsUnrankedPieSplit,
+  serializeReferrerLeaderboardPagePieSplit,
+} from "../award-models/pie-split/api/serialize";
+import type {
+  ReferrerEditionMetricsRankedPieSplit,
+  ReferrerEditionMetricsUnrankedPieSplit,
+} from "../award-models/pie-split/edition-metrics";
+import type { ReferrerLeaderboardPagePieSplit } from "../award-models/pie-split/leaderboard-page";
+import {
+  serializeReferralProgramRulesRevShareLimit,
+  serializeReferrerEditionMetricsRankedRevShareLimit,
+  serializeReferrerEditionMetricsUnrankedRevShareLimit,
+  serializeReferrerLeaderboardPageRevShareLimit,
+} from "../award-models/rev-share-limit/api/serialize";
+import type {
+  ReferrerEditionMetricsRankedRevShareLimit,
+  ReferrerEditionMetricsUnrankedRevShareLimit,
+} from "../award-models/rev-share-limit/edition-metrics";
+import type { ReferrerLeaderboardPageRevShareLimit } from "../award-models/rev-share-limit/leaderboard-page";
+import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
 import type {
   ReferrerEditionMetrics,
@@ -8,11 +28,8 @@ import type {
   ReferrerEditionMetricsUnranked,
 } from "../edition-metrics";
 import type { ReferrerLeaderboardPage } from "../leaderboard-page";
-import type { AwardedReferrerMetrics, UnrankedReferrerMetrics } from "../referrer-metrics";
 import type { ReferralProgramRules } from "../rules";
 import type {
-  SerializedAggregatedReferrerMetrics,
-  SerializedAwardedReferrerMetrics,
   SerializedReferralProgramEditionConfig,
   SerializedReferralProgramEditionConfigSetResponse,
   SerializedReferralProgramRules,
@@ -23,7 +40,6 @@ import type {
   SerializedReferrerLeaderboardPageResponse,
   SerializedReferrerMetricsEditionsData,
   SerializedReferrerMetricsEditionsResponse,
-  SerializedUnrankedReferrerMetrics,
 } from "./serialized-types";
 import {
   type ReferralProgramEditionConfigSetResponse,
@@ -40,71 +56,13 @@ import {
 export function serializeReferralProgramRules(
   rules: ReferralProgramRules,
 ): SerializedReferralProgramRules {
-  return {
-    totalAwardPoolValue: serializePriceUsdc(rules.totalAwardPoolValue),
-    maxQualifiedReferrers: rules.maxQualifiedReferrers,
-    startTime: rules.startTime,
-    endTime: rules.endTime,
-    subregistryId: rules.subregistryId,
-    rulesUrl: rules.rulesUrl.toString(),
-  };
-}
+  switch (rules.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferralProgramRulesPieSplit(rules);
 
-/**
- * Serializes an {@link AwardedReferrerMetrics} object.
- */
-function serializeAwardedReferrerMetrics(
-  metrics: AwardedReferrerMetrics,
-): SerializedAwardedReferrerMetrics {
-  return {
-    referrer: metrics.referrer,
-    totalReferrals: metrics.totalReferrals,
-    totalIncrementalDuration: metrics.totalIncrementalDuration,
-    totalRevenueContribution: serializePriceEth(metrics.totalRevenueContribution),
-    score: metrics.score,
-    rank: metrics.rank,
-    isQualified: metrics.isQualified,
-    finalScoreBoost: metrics.finalScoreBoost,
-    finalScore: metrics.finalScore,
-    awardPoolShare: metrics.awardPoolShare,
-    awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
-  };
-}
-
-/**
- * Serializes an {@link UnrankedReferrerMetrics} object.
- */
-function serializeUnrankedReferrerMetrics(
-  metrics: UnrankedReferrerMetrics,
-): SerializedUnrankedReferrerMetrics {
-  return {
-    referrer: metrics.referrer,
-    totalReferrals: metrics.totalReferrals,
-    totalIncrementalDuration: metrics.totalIncrementalDuration,
-    totalRevenueContribution: serializePriceEth(metrics.totalRevenueContribution),
-    score: metrics.score,
-    rank: metrics.rank,
-    isQualified: metrics.isQualified,
-    finalScoreBoost: metrics.finalScoreBoost,
-    finalScore: metrics.finalScore,
-    awardPoolShare: metrics.awardPoolShare,
-    awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
-  };
-}
-
-/**
- * Serializes an {@link AggregatedReferrerMetrics} object.
- */
-function serializeAggregatedReferrerMetrics(
-  metrics: AggregatedReferrerMetrics,
-): SerializedAggregatedReferrerMetrics {
-  return {
-    grandTotalReferrals: metrics.grandTotalReferrals,
-    grandTotalIncrementalDuration: metrics.grandTotalIncrementalDuration,
-    grandTotalRevenueContribution: serializePriceEth(metrics.grandTotalRevenueContribution),
-    grandTotalQualifiedReferrersFinalScore: metrics.grandTotalQualifiedReferrersFinalScore,
-    minFinalScoreToQualify: metrics.minFinalScoreToQualify,
-  };
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferralProgramRulesRevShareLimit(rules);
+  }
 }
 
 /**
@@ -113,14 +71,16 @@ function serializeAggregatedReferrerMetrics(
 function serializeReferrerLeaderboardPage(
   page: ReferrerLeaderboardPage,
 ): SerializedReferrerLeaderboardPage {
-  return {
-    rules: serializeReferralProgramRules(page.rules),
-    referrers: page.referrers.map(serializeAwardedReferrerMetrics),
-    aggregatedMetrics: serializeAggregatedReferrerMetrics(page.aggregatedMetrics),
-    pageContext: page.pageContext,
-    status: page.status,
-    accurateAsOf: page.accurateAsOf,
-  };
+  switch (page.rules.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      // Single type assertion per branch: rules.awardModel === "pie-split" guarantees all correlated
+      // fields are the pie-split variant, but TypeScript cannot narrow a union on a nested property.
+      return serializeReferrerLeaderboardPagePieSplit(page as ReferrerLeaderboardPagePieSplit);
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferrerLeaderboardPageRevShareLimit(
+        page as ReferrerLeaderboardPageRevShareLimit,
+      );
+  }
 }
 
 /**
@@ -129,14 +89,16 @@ function serializeReferrerLeaderboardPage(
 function serializeReferrerEditionMetricsRanked(
   detail: ReferrerEditionMetricsRanked,
 ): SerializedReferrerEditionMetricsRanked {
-  return {
-    type: detail.type,
-    rules: serializeReferralProgramRules(detail.rules),
-    referrer: serializeAwardedReferrerMetrics(detail.referrer),
-    aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
-    status: detail.status,
-    accurateAsOf: detail.accurateAsOf,
-  };
+  switch (detail.rules.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferrerEditionMetricsRankedPieSplit(
+        detail as ReferrerEditionMetricsRankedPieSplit,
+      );
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferrerEditionMetricsRankedRevShareLimit(
+        detail as ReferrerEditionMetricsRankedRevShareLimit,
+      );
+  }
 }
 
 /**
@@ -145,14 +107,16 @@ function serializeReferrerEditionMetricsRanked(
 function serializeReferrerEditionMetricsUnranked(
   detail: ReferrerEditionMetricsUnranked,
 ): SerializedReferrerEditionMetricsUnranked {
-  return {
-    type: detail.type,
-    rules: serializeReferralProgramRules(detail.rules),
-    referrer: serializeUnrankedReferrerMetrics(detail.referrer),
-    aggregatedMetrics: serializeAggregatedReferrerMetrics(detail.aggregatedMetrics),
-    status: detail.status,
-    accurateAsOf: detail.accurateAsOf,
-  };
+  switch (detail.rules.awardModel) {
+    case ReferralProgramAwardModels.PieSplit:
+      return serializeReferrerEditionMetricsUnrankedPieSplit(
+        detail as ReferrerEditionMetricsUnrankedPieSplit,
+      );
+    case ReferralProgramAwardModels.RevShareLimit:
+      return serializeReferrerEditionMetricsUnrankedRevShareLimit(
+        detail as ReferrerEditionMetricsUnrankedRevShareLimit,
+      );
+  }
 }
 
 /**

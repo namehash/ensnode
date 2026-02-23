@@ -1,24 +1,24 @@
 import { type Duration, type PriceEth, priceEth } from "@ensnode/ensnode-sdk";
 import { makePriceEthSchema } from "@ensnode/ensnode-sdk/internal";
 
-import { validateNonNegativeInteger } from "./number";
-import type { RankedReferrerMetrics } from "./referrer-metrics";
-import type { ReferralProgramRules } from "./rules";
-import { type ReferrerScore, validateReferrerScore } from "./score";
-import { validateDuration } from "./time";
+import { validateNonNegativeInteger } from "../../number";
+import { validateDuration } from "../../time";
+import { type ReferrerScore, validateReferrerScore } from "../shared/score";
+import type { RankedReferrerMetricsPieSplit } from "./metrics";
+import type { ReferralProgramRulesPieSplit } from "./rules";
 
 /**
- * Represents aggregated metrics for a list of `RankedReferrerMetrics`.
+ * Represents aggregated metrics for a list of {@link RankedReferrerMetricsPieSplit}.
  */
-export interface AggregatedReferrerMetrics {
+export interface AggregatedReferrerMetricsPieSplit {
   /**
-   * @invariant The sum of `totalReferrals` across all `RankedReferrerMetrics` in the list.
+   * @invariant The sum of `totalReferrals` across all {@link RankedReferrerMetricsPieSplit} in the list.
    * @invariant Guaranteed to be a non-negative integer (>= 0)
    */
   grandTotalReferrals: number;
 
   /**
-   * @invariant The sum of `totalIncrementalDuration` across all `RankedReferrerMetrics` in the list.
+   * @invariant The sum of `totalIncrementalDuration` across all {@link RankedReferrerMetricsPieSplit} in the list.
    */
   grandTotalIncrementalDuration: Duration;
 
@@ -26,14 +26,14 @@ export interface AggregatedReferrerMetrics {
    * The total revenue contribution in ETH to the ENS DAO from all referrals
    * across all referrers on the leaderboard.
    *
-   * This is the sum of `totalRevenueContribution` across all `RankedReferrerMetrics` in the list.
+   * This is the sum of `totalRevenueContribution` across all {@link RankedReferrerMetricsPieSplit} in the list.
    *
    * @invariant Guaranteed to be a valid PriceEth with non-negative amount (>= 0n)
    */
   grandTotalRevenueContribution: PriceEth;
 
   /**
-   * @invariant The sum of `finalScore` across all `RankedReferrerMetrics` where `isQualified` is `true`.
+   * @invariant The sum of `finalScore` across all {@link RankedReferrerMetricsPieSplit} where `isQualified` is `true`.
    */
   grandTotalQualifiedReferrersFinalScore: ReferrerScore;
 
@@ -47,18 +47,19 @@ export interface AggregatedReferrerMetrics {
   minFinalScoreToQualify: ReferrerScore;
 }
 
-export const validateAggregatedReferrerMetrics = (metrics: AggregatedReferrerMetrics): void => {
+export const validateAggregatedReferrerMetricsPieSplit = (
+  metrics: AggregatedReferrerMetricsPieSplit,
+): void => {
   validateNonNegativeInteger(metrics.grandTotalReferrals);
   validateDuration(metrics.grandTotalIncrementalDuration);
 
-  // Validate grandTotalRevenueContribution using Zod schema
   const priceEthSchema = makePriceEthSchema(
-    "AggregatedReferrerMetrics.grandTotalRevenueContribution",
+    "AggregatedReferrerMetricsPieSplit.grandTotalRevenueContribution",
   );
   const parseResult = priceEthSchema.safeParse(metrics.grandTotalRevenueContribution);
   if (!parseResult.success) {
     throw new Error(
-      `AggregatedReferrerMetrics: grandTotalRevenueContribution validation failed: ${parseResult.error.message}`,
+      `AggregatedReferrerMetricsPieSplit: grandTotalRevenueContribution validation failed: ${parseResult.error.message}`,
     );
   }
 
@@ -67,15 +68,15 @@ export const validateAggregatedReferrerMetrics = (metrics: AggregatedReferrerMet
 };
 
 /**
- * Builds aggregated metrics from a complete, globally ranked list of referrers.
+ * Builds aggregated pie-split metrics from a complete, globally ranked list of referrers.
  *
  * **IMPORTANT: This function expects a complete ranking of all referrers.**
  *
- * @param referrers - Must be a complete, globally ranked list of `RankedReferrerMetrics`
- *                    where ranks start at 1 and are consecutive (e.g., 1, 2, 3, ...).
+ * @param referrers - Must be a complete, globally ranked list of {@link RankedReferrerMetricsPieSplit}
+ *                    where ranks start at 1 and are consecutive.
  *                    **This must NOT be a paginated or partial slice of the rankings.**
  *
- * @param rules - The referral program rules that define qualification criteria,
+ * @param rules - The {@link ReferralProgramRulesPieSplit} object that define qualification criteria,
  *                including `maxQualifiedReferrers` (the maximum number of referrers
  *                that can qualify for rewards).
  *
@@ -91,10 +92,10 @@ export const validateAggregatedReferrerMetrics = (metrics: AggregatedReferrerMet
  * - If `referrers` is empty and `rules.maxQualifiedReferrers > 0`,
  *   `minFinalScoreToQualify` will be set to `0` (anyone can qualify).
  */
-export const buildAggregatedReferrerMetrics = (
-  referrers: RankedReferrerMetrics[],
-  rules: ReferralProgramRules,
-): AggregatedReferrerMetrics => {
+export const buildAggregatedReferrerMetricsPieSplit = (
+  referrers: RankedReferrerMetricsPieSplit[],
+  rules: ReferralProgramRulesPieSplit,
+): AggregatedReferrerMetricsPieSplit => {
   let grandTotalReferrals = 0;
   let grandTotalIncrementalDuration = 0;
   let grandTotalRevenueContributionAmount = 0n;
@@ -122,7 +123,7 @@ export const buildAggregatedReferrerMetrics = (
       if (referrers.length !== 0) {
         // invariant sanity check
         throw new Error(
-          "AggregatedReferrerMetrics: There are referrers on the leaderboard, and the rules allow for qualified referrers, but no qualified referrers.",
+          "AggregatedReferrerMetricsPieSplit: There are referrers on the leaderboard, and the rules allow for qualified referrers, but no qualified referrers.",
         );
       }
 
@@ -136,9 +137,9 @@ export const buildAggregatedReferrerMetrics = (
     grandTotalRevenueContribution: priceEth(grandTotalRevenueContributionAmount),
     grandTotalQualifiedReferrersFinalScore,
     minFinalScoreToQualify,
-  };
+  } satisfies AggregatedReferrerMetricsPieSplit;
 
-  validateAggregatedReferrerMetrics(result);
+  validateAggregatedReferrerMetricsPieSplit(result);
 
   return result;
 };

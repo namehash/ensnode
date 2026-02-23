@@ -1,4 +1,8 @@
-import { buildReferralProgramRules, type ReferrerLeaderboard } from "@namehash/ens-referrals/v1";
+import {
+  type AwardedReferrerMetricsPieSplit,
+  buildReferralProgramRulesPieSplit,
+  type ReferrerLeaderboard,
+} from "@namehash/ens-referrals/v1";
 import { describe, expect, it, vi } from "vitest";
 
 import { parseTimestamp, parseUsdc } from "@ensnode/ensnode-sdk";
@@ -12,7 +16,7 @@ vi.mock("./database-v1", () => ({
   getReferrerMetrics: vi.fn(),
 }));
 
-const rules = buildReferralProgramRules(
+const rules = buildReferralProgramRulesPieSplit(
   parseUsdc("10000"),
   10, // maxQualifiedReferrers
   parseTimestamp("2025-01-01T00:00:00Z"),
@@ -57,31 +61,47 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       expect(qualifiedReferrers.every(([_, referrer]) => referrer.isQualified)).toBe(true);
       expect(unqualifiedReferrers.every(([_, referrer]) => !referrer.isQualified)).toBe(true);
 
-      // Assert `finalScoreBoost`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost > 0)).toBe(true);
-      expect(unqualifiedReferrers.every(([_, referrer]) => referrer.finalScoreBoost === 0)).toBe(
-        true,
-      );
-
-      // Assert `finalScore`
+      // Assert `finalScoreBoost` (pie-split specific)
       expect(
         qualifiedReferrers.every(
-          ([_, referrer]) => referrer.finalScore === referrer.score * referrer.finalScoreBoost,
+          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).finalScoreBoost > 0,
         ),
       ).toBe(true);
       expect(
-        unqualifiedReferrers.every(([_, referrer]) => referrer.finalScore === referrer.score),
+        unqualifiedReferrers.every(
+          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).finalScoreBoost === 0,
+        ),
+      ).toBe(true);
+
+      // Assert `finalScore` (pie-split specific)
+      expect(
+        qualifiedReferrers.every(([_, r]) => {
+          const referrer = r as AwardedReferrerMetricsPieSplit;
+          return referrer.finalScore === referrer.score * referrer.finalScoreBoost;
+        }),
+      ).toBe(true);
+      expect(
+        unqualifiedReferrers.every(([_, r]) => {
+          const referrer = r as AwardedReferrerMetricsPieSplit;
+          return referrer.finalScore === referrer.score;
+        }),
       ).toBe(true);
 
       /**
        * Assert {@link AwardedReferrerMetrics}.
        */
 
-      // Assert `awardPoolShare`
-      expect(qualifiedReferrers.every(([_, referrer]) => referrer.awardPoolShare > 0)).toBe(true);
-      expect(unqualifiedReferrers.every(([_, referrer]) => referrer.awardPoolShare === 0)).toBe(
-        true,
-      );
+      // Assert `awardPoolShare` (pie-split specific)
+      expect(
+        qualifiedReferrers.every(
+          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).awardPoolShare > 0,
+        ),
+      ).toBe(true);
+      expect(
+        unqualifiedReferrers.every(
+          ([_, r]) => (r as AwardedReferrerMetricsPieSplit).awardPoolShare === 0,
+        ),
+      ).toBe(true);
 
       // Assert `awardPoolApproxValue`
       expect(

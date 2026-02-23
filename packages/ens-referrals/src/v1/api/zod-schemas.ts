@@ -9,26 +9,20 @@
 
 import z from "zod/v4";
 
-import {
-  makeAccountIdSchema,
-  makeDurationSchema,
-  makeFiniteNonNegativeNumberSchema,
-  makeLowercaseAddressSchema,
-  makeNonNegativeIntegerSchema,
-  makePositiveIntegerSchema,
-  makePriceEthSchema,
-  makePriceUsdcSchema,
-  makeUnixTimestampSchema,
-  makeUrlSchema,
-} from "@ensnode/ensnode-sdk/internal";
+import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
-import type { ReferralProgramEditionSlug } from "../edition";
 import {
-  type ReferrerEditionMetricsRanked,
-  ReferrerEditionMetricsTypeIds,
-} from "../edition-metrics";
-import { REFERRERS_PER_LEADERBOARD_PAGE_MAX } from "../leaderboard-page";
-import { ReferralProgramStatuses } from "../status";
+  makeReferralProgramRulesPieSplitSchema,
+  makeReferrerEditionMetricsRankedPieSplitSchema,
+  makeReferrerEditionMetricsUnrankedPieSplitSchema,
+  makeReferrerLeaderboardPagePieSplitSchema,
+} from "../award-models/pie-split/api/zod-schemas";
+import {
+  makeReferralProgramRulesRevShareLimitSchema,
+  makeReferrerEditionMetricsRankedRevShareLimitSchema,
+  makeReferrerEditionMetricsUnrankedRevShareLimitSchema,
+  makeReferrerLeaderboardPageRevShareLimitSchema,
+} from "../award-models/rev-share-limit/api/zod-schemas";
 import {
   MAX_EDITIONS_PER_REQUEST,
   ReferralProgramEditionConfigSetResponseCodes,
@@ -37,129 +31,37 @@ import {
 } from "./types";
 
 /**
- * Schema for {@link ReferralProgramRules}
+ * Schema for {@link ReferralProgramRules}.
+ *
+ * Accepts known award model variants (pie-split, rev-share-limit) with full validation,
+ * plus a passthrough catch-all for unknown future types.
+ *
+ * If `awardModel` is not recognized, the object parses as `{ awardModel: string } & Record<string, unknown>`.
+ * Clients must check `awardModel` before accessing model-specific fields.
+ * This design allows servers to introduce new award model types without breaking existing clients.
  */
 export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralProgramRules") =>
-  z
-    .object({
-      totalAwardPoolValue: makePriceUsdcSchema(`${valueLabel}.totalAwardPoolValue`),
-      maxQualifiedReferrers: makeNonNegativeIntegerSchema(`${valueLabel}.maxQualifiedReferrers`),
-      startTime: makeUnixTimestampSchema(`${valueLabel}.startTime`),
-      endTime: makeUnixTimestampSchema(`${valueLabel}.endTime`),
-      subregistryId: makeAccountIdSchema(`${valueLabel}.subregistryId`),
-      rulesUrl: makeUrlSchema(`${valueLabel}.rulesUrl`),
-    })
-    .refine((data) => data.endTime >= data.startTime, {
-      message: `${valueLabel}.endTime must be >= ${valueLabel}.startTime`,
-      path: ["endTime"],
-    });
+  z.union([
+    makeReferralProgramRulesPieSplitSchema(valueLabel),
+    makeReferralProgramRulesRevShareLimitSchema(valueLabel),
+    // Passthrough catch-all for unknown future award model types
+    z
+      .object({ awardModel: z.string() })
+      .passthrough(),
+  ]);
 
 /**
- * Schema for AwardedReferrerMetrics (with numeric rank)
- */
-export const makeAwardedReferrerMetricsSchema = (valueLabel: string = "AwardedReferrerMetrics") =>
-  z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-    totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
-    score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
-    rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
-    isQualified: z.boolean(),
-    finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
-      1,
-      `${valueLabel}.finalScoreBoost must be <= 1`,
-    ),
-    finalScore: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScore`),
-    awardPoolShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolShare`).max(
-      1,
-      `${valueLabel}.awardPoolShare must be <= 1`,
-    ),
-    awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
-  });
-
-/**
- * Schema for UnrankedReferrerMetrics (with null rank)
- */
-export const makeUnrankedReferrerMetricsSchema = (valueLabel: string = "UnrankedReferrerMetrics") =>
-  z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-    totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
-    score: makeFiniteNonNegativeNumberSchema(`${valueLabel}.score`),
-    rank: z.null(),
-    isQualified: z.literal(false),
-    finalScoreBoost: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScoreBoost`).max(
-      1,
-      `${valueLabel}.finalScoreBoost must be <= 1`,
-    ),
-    finalScore: makeFiniteNonNegativeNumberSchema(`${valueLabel}.finalScore`),
-    awardPoolShare: makeFiniteNonNegativeNumberSchema(`${valueLabel}.awardPoolShare`).max(
-      1,
-      `${valueLabel}.awardPoolShare must be <= 1`,
-    ),
-    awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
-  });
-
-/**
- * Schema for AggregatedReferrerMetrics
- */
-export const makeAggregatedReferrerMetricsSchema = (
-  valueLabel: string = "AggregatedReferrerMetrics",
-) =>
-  z.object({
-    grandTotalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.grandTotalReferrals`),
-    grandTotalIncrementalDuration: makeDurationSchema(
-      `${valueLabel}.grandTotalIncrementalDuration`,
-    ),
-    grandTotalRevenueContribution: makePriceEthSchema(
-      `${valueLabel}.grandTotalRevenueContribution`,
-    ),
-    grandTotalQualifiedReferrersFinalScore: makeFiniteNonNegativeNumberSchema(
-      `${valueLabel}.grandTotalQualifiedReferrersFinalScore`,
-    ),
-    minFinalScoreToQualify: makeFiniteNonNegativeNumberSchema(
-      `${valueLabel}.minFinalScoreToQualify`,
-    ),
-  });
-
-export const makeReferrerLeaderboardPageContextSchema = (
-  valueLabel: string = "ReferrerLeaderboardPageContext",
-) =>
-  z.object({
-    page: makePositiveIntegerSchema(`${valueLabel}.page`),
-    recordsPerPage: makePositiveIntegerSchema(`${valueLabel}.recordsPerPage`).max(
-      REFERRERS_PER_LEADERBOARD_PAGE_MAX,
-      `${valueLabel}.recordsPerPage must not exceed ${REFERRERS_PER_LEADERBOARD_PAGE_MAX}`,
-    ),
-    totalRecords: makeNonNegativeIntegerSchema(`${valueLabel}.totalRecords`),
-    totalPages: makePositiveIntegerSchema(`${valueLabel}.totalPages`),
-    hasNext: z.boolean(),
-    hasPrev: z.boolean(),
-    startIndex: z.optional(makeNonNegativeIntegerSchema(`${valueLabel}.startIndex`)),
-    endIndex: z.optional(makeNonNegativeIntegerSchema(`${valueLabel}.endIndex`)),
-  });
-
-/**
- * Schema for referral program status field.
- * Validates that the status is one of: "Scheduled", "Active", or "Closed".
- */
-export const makeReferralProgramStatusSchema = (_valueLabel: string = "status") =>
-  z.enum(ReferralProgramStatuses);
-
-/**
- * Schema for ReferrerLeaderboardPage
+ * Schema for {@link ReferrerLeaderboardPage}
  */
 export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
-  z.object({
-    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrers: z.array(makeAwardedReferrerMetricsSchema(`${valueLabel}.referrers[record]`)),
-    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z.union([
+    makeReferrerLeaderboardPagePieSplitSchema(valueLabel),
+    makeReferrerLeaderboardPageRevShareLimitSchema(valueLabel),
+    // Passthrough for unknown future award model types
+    z
+      .object({ rules: z.object({ awardModel: z.string() }).passthrough() })
+      .passthrough(),
+  ]);
 
 /**
  * Schema for {@link ReferrerLeaderboardPageResponseOk}
@@ -201,14 +103,10 @@ export const makeReferrerLeaderboardPageResponseSchema = (
 export const makeReferrerEditionMetricsRankedSchema = (
   valueLabel: string = "ReferrerEditionMetricsRanked",
 ) =>
-  z.object({
-    type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
-    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrer: makeAwardedReferrerMetricsSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z.union([
+    makeReferrerEditionMetricsRankedPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
+  ]);
 
 /**
  * Schema for {@link ReferrerEditionMetricsUnranked} (with unranked metrics)
@@ -216,22 +114,20 @@ export const makeReferrerEditionMetricsRankedSchema = (
 export const makeReferrerEditionMetricsUnrankedSchema = (
   valueLabel: string = "ReferrerEditionMetricsUnranked",
 ) =>
-  z.object({
-    type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
-    rules: makeReferralProgramRulesSchema(`${valueLabel}.rules`),
-    referrer: makeUnrankedReferrerMetricsSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsSchema(`${valueLabel}.aggregatedMetrics`),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z.union([
+    makeReferrerEditionMetricsUnrankedPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
+  ]);
 
 /**
- * Schema for {@link ReferrerEditionMetrics} (discriminated union of ranked and unranked)
+ * Schema for {@link ReferrerEditionMetrics} (union of all ranked and unranked model variants)
  */
 export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerEditionMetrics") =>
-  z.discriminatedUnion("type", [
-    makeReferrerEditionMetricsRankedSchema(valueLabel),
-    makeReferrerEditionMetricsUnrankedSchema(valueLabel),
+  z.union([
+    makeReferrerEditionMetricsRankedPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
   ]);
 
 /**

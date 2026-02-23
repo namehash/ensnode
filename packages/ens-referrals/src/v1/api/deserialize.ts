@@ -34,7 +34,10 @@ export function deserializeReferrerLeaderboardPageResponse(
     );
   }
 
-  return parsed.data;
+  // The Zod schema includes passthrough catch-alls for unknown award model types,
+  // making its inferred output type wider than ReferrerLeaderboardPageResponse.
+  // This assertion is safe: the schema validates all known fields correctly.
+  return parsed.data as unknown as ReferrerLeaderboardPageResponse;
 }
 
 /**
@@ -53,7 +56,8 @@ export function deserializeReferrerMetricsEditionsResponse(
     );
   }
 
-  return parsed.data;
+  // Same passthrough-widened type assertion as above.
+  return parsed.data as unknown as ReferrerMetricsEditionsResponse;
 }
 
 /**
@@ -72,7 +76,8 @@ export function deserializeReferralProgramEditionConfigSetArray(
     );
   }
 
-  return parsed.data;
+  // Same passthrough-widened type assertion as above.
+  return parsed.data as unknown as ReferralProgramEditionConfig[];
 }
 
 /**
@@ -91,5 +96,6 @@ export function deserializeReferralProgramEditionConfigSetResponse(
     );
   }
 
-  return parsed.data;
+  // Same passthrough-widened type assertion as above.
+  return parsed.data as unknown as ReferralProgramEditionConfigSetResponse;
 }

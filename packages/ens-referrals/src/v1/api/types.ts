@@ -1,8 +1,9 @@
 import type { Address } from "viem";
 
+import type { ReferrerLeaderboardPageParams } from "../award-models/shared/leaderboard-page";
 import type { ReferralProgramEditionConfig, ReferralProgramEditionSlug } from "../edition";
 import type { ReferrerEditionMetrics } from "../edition-metrics";
-import type { ReferrerLeaderboardPage, ReferrerLeaderboardPageParams } from "../leaderboard-page";
+import type { ReferrerLeaderboardPage } from "../leaderboard-page";
 
 /**
  * Request parameters for a referrer leaderboard page query.

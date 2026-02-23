@@ -9,10 +9,10 @@ import { ReferralProgramRules } from "./rules";
 import { validateDuration } from "./time";
 
 /**
- * Metrics for a single referrer, as aggregated from the DB layer.
- * Independent of other referrers and award model; does not carry an `awardModel` discriminant.
+ * Base metrics for a single referrer independent of other referrers and award model.
+ * Used as input from the DB layer; does not carry an `awardModel` discriminant.
  */
-export interface ReferrerMetrics {
+export interface BaseReferrerMetrics {
   /**
    * The fully lowercase Ethereum address of the referrer.
    *
@@ -50,28 +50,28 @@ export const buildReferrerMetrics = (
   totalReferrals: number,
   totalIncrementalDuration: Duration,
   totalRevenueContribution: PriceEth,
-): ReferrerMetrics => {
+): BaseReferrerMetrics => {
   const result = {
     referrer: normalizeAddress(referrer),
     totalReferrals,
     totalIncrementalDuration,
     totalRevenueContribution,
-  } satisfies ReferrerMetrics;
+  } satisfies BaseReferrerMetrics;
 
   validateReferrerMetrics(result);
   return result;
 };
 
-export const validateReferrerMetrics = (metrics: ReferrerMetrics): void => {
+export const validateReferrerMetrics = (metrics: BaseReferrerMetrics): void => {
   validateLowercaseAddress(metrics.referrer);
   validateNonNegativeInteger(metrics.totalReferrals);
   validateDuration(metrics.totalIncrementalDuration);
 
-  const priceEthSchema = makePriceEthSchema("ReferrerMetrics.totalRevenueContribution");
+  const priceEthSchema = makePriceEthSchema("BaseReferrerMetrics.totalRevenueContribution");
   const parseResult = priceEthSchema.safeParse(metrics.totalRevenueContribution);
   if (!parseResult.success) {
     throw new Error(
-      `ReferrerMetrics: totalRevenueContribution validation failed: ${parseResult.error.message}`,
+      `BaseReferrerMetrics: totalRevenueContribution validation failed: ${parseResult.error.message}`,
     );
   }
 };
