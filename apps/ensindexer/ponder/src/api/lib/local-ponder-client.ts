@@ -95,7 +95,7 @@ export class LocalPonderClient extends PonderClient {
     // Invariant: indexing metrics must be available in cache
     if (ponderClientCacheResult instanceof Error) {
       throw new Error(
-        `Ponder Indexing Metrics must be available in cache to build chains indexing metadata immutable: ${ponderClientCacheResult.message}`,
+        `Ponder Client data must be available in cache to build chains indexing metadata immutable: ${ponderClientCacheResult.message}`,
       );
     }
 
