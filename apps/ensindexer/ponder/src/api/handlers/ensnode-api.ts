@@ -15,14 +15,9 @@ import {
 
 import { buildENSIndexerPublicConfig } from "@/config/public";
 import { createCrossChainIndexingStatusSnapshotOmnichain } from "@/lib/indexing-status/build-index-status";
-import { getLocalPonderClient } from "@/lib/ponder-api-client";
+import { localPonderClient } from "@/ponder/api/lib/local-ponder-client";
 
 const app = new Hono();
-// Get the local Ponder Client instance
-// Note that the client initialization is designed to be non-blocking,
-// by implementing internal SWR caches with proactive revalidation to
-// load necessary data for the client state.
-const localPonderClient = getLocalPonderClient();
 
 // include ENSIndexer Public Config endpoint
 app.get("/config", async (c) => {
