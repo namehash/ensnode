@@ -176,6 +176,7 @@ export const dbResultsReferrerLeaderboard: ReferrerMetrics[] = [
 ];
 
 export const emptyReferralLeaderboard: ReferrerLeaderboardPieSplit = {
+  awardModel: ReferralProgramAwardModels.PieSplit,
   rules: {
     awardModel: ReferralProgramAwardModels.PieSplit,
     totalAwardPoolValue: parseUsdc("10000"),
@@ -200,6 +201,7 @@ export const emptyReferralLeaderboard: ReferrerLeaderboardPieSplit = {
 };
 
 export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
+  awardModel: ReferralProgramAwardModels.PieSplit,
   rules: {
     awardModel: ReferralProgramAwardModels.PieSplit,
     totalAwardPoolValue: parseUsdc("10000"),
@@ -691,6 +693,7 @@ export const populatedReferrerLeaderboard: ReferrerLeaderboardPieSplit = {
 export const referrerLeaderboardPageResponseOk = {
   responseCode: ReferrerLeaderboardPageResponseCodes.Ok,
   data: {
+    awardModel: ReferralProgramAwardModels.PieSplit,
     rules: {
       awardModel: ReferralProgramAwardModels.PieSplit,
       totalAwardPoolValue: parseUsdc("10000"),

@@ -99,6 +99,7 @@ export function serializeReferrerEditionMetricsRankedPieSplit(
   detail: ReferrerEditionMetricsRankedPieSplit,
 ): SerializedReferrerEditionMetricsRankedPieSplit {
   return {
+    awardModel: detail.awardModel,
     type: detail.type,
     rules: serializeReferralProgramRulesPieSplit(detail.rules),
     referrer: serializeAwardedReferrerMetricsPieSplit(detail.referrer),
@@ -115,6 +116,7 @@ export function serializeReferrerEditionMetricsUnrankedPieSplit(
   detail: ReferrerEditionMetricsUnrankedPieSplit,
 ): SerializedReferrerEditionMetricsUnrankedPieSplit {
   return {
+    awardModel: detail.awardModel,
     type: detail.type,
     rules: serializeReferralProgramRulesPieSplit(detail.rules),
     referrer: serializeUnrankedReferrerMetricsPieSplit(detail.referrer),
@@ -131,6 +133,7 @@ export function serializeReferrerLeaderboardPagePieSplit(
   page: ReferrerLeaderboardPagePieSplit,
 ): SerializedReferrerLeaderboardPagePieSplit {
   return {
+    awardModel: page.awardModel,
     rules: serializeReferralProgramRulesPieSplit(page.rules),
     referrers: page.referrers.map(serializeAwardedReferrerMetricsPieSplit),
     aggregatedMetrics: serializeAggregatedReferrerMetricsPieSplit(page.aggregatedMetrics),

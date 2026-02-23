@@ -13,14 +13,12 @@ import { makeLowercaseAddressSchema } from "@ensnode/ensnode-sdk/internal";
 
 import {
   makeReferralProgramRulesPieSplitSchema,
-  makeReferrerEditionMetricsRankedPieSplitSchema,
-  makeReferrerEditionMetricsUnrankedPieSplitSchema,
+  makeReferrerEditionMetricsPieSplitSchema,
   makeReferrerLeaderboardPagePieSplitSchema,
 } from "../award-models/pie-split/api/zod-schemas";
 import {
   makeReferralProgramRulesRevShareLimitSchema,
-  makeReferrerEditionMetricsRankedRevShareLimitSchema,
-  makeReferrerEditionMetricsUnrankedRevShareLimitSchema,
+  makeReferrerEditionMetricsRevShareLimitSchema,
   makeReferrerLeaderboardPageRevShareLimitSchema,
 } from "../award-models/rev-share-limit/api/zod-schemas";
 import {
@@ -51,15 +49,16 @@ export const makeReferralProgramRulesSchema = (valueLabel: string = "ReferralPro
   ]);
 
 /**
- * Schema for {@link ReferrerLeaderboardPage}
+ * Schema for {@link ReferrerLeaderboardPage}.
  */
 export const makeReferrerLeaderboardPageSchema = (valueLabel: string = "ReferrerLeaderboardPage") =>
   z.union([
     makeReferrerLeaderboardPagePieSplitSchema(valueLabel),
     makeReferrerLeaderboardPageRevShareLimitSchema(valueLabel),
-    // Passthrough for unknown future award model types
+    // Passthrough catch-all for unknown future award model types.
+    // Servers may introduce new award model types at any time without breaking existing clients.
     z
-      .object({ rules: z.object({ awardModel: z.string() }).passthrough() })
+      .object({ awardModel: z.string() })
       .passthrough(),
   ]);
 
@@ -98,36 +97,12 @@ export const makeReferrerLeaderboardPageResponseSchema = (
   ]);
 
 /**
- * Schema for {@link ReferrerEditionMetricsRanked} (with ranked metrics)
- */
-export const makeReferrerEditionMetricsRankedSchema = (
-  valueLabel: string = "ReferrerEditionMetricsRanked",
-) =>
-  z.union([
-    makeReferrerEditionMetricsRankedPieSplitSchema(valueLabel),
-    makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
-  ]);
-
-/**
- * Schema for {@link ReferrerEditionMetricsUnranked} (with unranked metrics)
- */
-export const makeReferrerEditionMetricsUnrankedSchema = (
-  valueLabel: string = "ReferrerEditionMetricsUnranked",
-) =>
-  z.union([
-    makeReferrerEditionMetricsUnrankedPieSplitSchema(valueLabel),
-    makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
-  ]);
-
-/**
- * Schema for {@link ReferrerEditionMetrics} (union of all ranked and unranked model variants)
+ * Schema for {@link ReferrerEditionMetrics} (discriminated union of all ranked and unranked model variants).
  */
 export const makeReferrerEditionMetricsSchema = (valueLabel: string = "ReferrerEditionMetrics") =>
-  z.union([
-    makeReferrerEditionMetricsRankedPieSplitSchema(valueLabel),
-    makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
-    makeReferrerEditionMetricsUnrankedPieSplitSchema(valueLabel),
-    makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
+  z.discriminatedUnion("awardModel", [
+    makeReferrerEditionMetricsPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsRevShareLimitSchema(valueLabel),
   ]);
 
 /**

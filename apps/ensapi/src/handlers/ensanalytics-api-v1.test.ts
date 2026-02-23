@@ -365,6 +365,7 @@ describe("/v1/ensanalytics", () => {
         responseCode: ReferrerMetricsEditionsResponseCodes.Ok,
         data: {
           "2025-12": {
+            awardModel: populatedReferrerLeaderboard.awardModel,
             type: ReferrerEditionMetricsTypeIds.Ranked,
             rules: populatedReferrerLeaderboard.rules,
             referrer: expectedMetrics,
@@ -373,6 +374,7 @@ describe("/v1/ensanalytics", () => {
             status: ReferralProgramStatuses.Active,
           },
           "2026-03": {
+            awardModel: populatedReferrerLeaderboard.awardModel,
             type: ReferrerEditionMetricsTypeIds.Ranked,
             rules: populatedReferrerLeaderboard.rules,
             referrer: expectedMetrics,

@@ -2,6 +2,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import type { ReferralProgramStatusId } from "../../status";
 import type { ReferrerEditionMetricsTypeIds } from "../shared/edition-metrics";
+import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsPieSplit } from "./aggregations";
 import type { AwardedReferrerMetricsPieSplit, UnrankedReferrerMetricsPieSplit } from "./metrics";
 import type { ReferralProgramRulesPieSplit } from "./rules";
@@ -13,10 +14,18 @@ import type { ReferralProgramRulesPieSplit } from "./rules";
  *
  * Invariants:
  * - `type` is always {@link ReferrerEditionMetricsTypeIds.Ranked}.
+ * - `awardModel` is always {@link ReferralProgramAwardModels.PieSplit} and equals `rules.awardModel`.
  *
  * @see {@link AwardedReferrerMetricsPieSplit}
  */
 export interface ReferrerEditionMetricsRankedPieSplit {
+  /**
+   * Discriminant identifying this as data from a pie-split leaderboard edition.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.PieSplit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.PieSplit;
+
   /**
    * The type of referrer edition metrics data.
    */
@@ -59,10 +68,18 @@ export interface ReferrerEditionMetricsRankedPieSplit {
  *
  * Invariants:
  * - `type` is always {@link ReferrerEditionMetricsTypeIds.Unranked}.
+ * - `awardModel` is always {@link ReferralProgramAwardModels.PieSplit} and equals `rules.awardModel`.
  *
  * @see {@link UnrankedReferrerMetricsPieSplit}
  */
 export interface ReferrerEditionMetricsUnrankedPieSplit {
+  /**
+   * Discriminant identifying this as data from a pie-split leaderboard edition.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.PieSplit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.PieSplit;
+
   /**
    * The type of referrer edition metrics data.
    */

@@ -5,6 +5,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import { assertLeaderboardInputs } from "../shared/leaderboard-guards";
 import { sortReferrerMetrics } from "../shared/rank";
+import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsPieSplit } from "./aggregations";
 import { buildAggregatedReferrerMetricsPieSplit } from "./aggregations";
 import type { AwardedReferrerMetricsPieSplit } from "./metrics";
@@ -19,6 +20,13 @@ import type { ReferralProgramRulesPieSplit } from "./rules";
  * Represents a leaderboard with the pie-split award model for any number of referrers.
  */
 export interface ReferrerLeaderboardPieSplit {
+  /**
+   * Discriminant identifying this as a pie-split leaderboard.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.PieSplit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.PieSplit;
+
   /**
    * The rules of the referral program that generated the {@link ReferrerLeaderboardPieSplit}.
    */
@@ -73,5 +81,5 @@ export const buildReferrerLeaderboardPieSplit = (
 
   const referrers = new Map(awardedReferrers.map((r) => [r.referrer, r]));
 
-  return { rules, aggregatedMetrics, referrers, accurateAsOf };
+  return { awardModel: rules.awardModel, rules, aggregatedMetrics, referrers, accurateAsOf };
 };

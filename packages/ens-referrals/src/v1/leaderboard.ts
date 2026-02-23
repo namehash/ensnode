@@ -15,7 +15,7 @@ import type { ReferralProgramRules } from "./rules";
 /**
  * Represents a leaderboard for any number of referrers.
  *
- * Use `rules.awardModel` to determine the specific variant at runtime.
+ * Use `awardModel` to narrow the specific variant at runtime.
  */
 export type ReferrerLeaderboard = ReferrerLeaderboardPieSplit | ReferrerLeaderboardRevShareLimit;
 

@@ -120,6 +120,7 @@ describe("ENSAnalytics Referrer Leaderboard", () => {
       const result = await getReferrerLeaderboard(rules, accurateAsOf);
 
       expect(result).toMatchObject({
+        awardModel: rules.awardModel,
         aggregatedMetrics: {
           grandTotalIncrementalDuration: 0,
           grandTotalRevenueContribution: {

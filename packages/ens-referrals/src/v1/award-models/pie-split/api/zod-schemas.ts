@@ -18,6 +18,7 @@ import {
   makeReferrerLeaderboardPageContextSchema,
 } from "../../shared/api/zod-schemas";
 import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
+import { ReferralProgramAwardModels } from "../../shared/rules";
 
 /**
  * Schema for {@link ReferralProgramRulesPieSplit}.
@@ -120,16 +121,22 @@ export const makeAggregatedReferrerMetricsPieSplitSchema = (
 export const makeReferrerEditionMetricsRankedPieSplitSchema = (
   valueLabel: string = "ReferrerEditionMetricsRankedPieSplit",
 ) =>
-  z.object({
-    type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
-    rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
-    referrer: makeAwardedReferrerMetricsPieSplitSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
-      `${valueLabel}.aggregatedMetrics`,
-    ),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z
+    .object({
+      awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
+      type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
+      rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
+      referrer: makeAwardedReferrerMetricsPieSplitSchema(`${valueLabel}.referrer`),
+      aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
+        `${valueLabel}.aggregatedMetrics`,
+      ),
+      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
 
 /**
  * Schema for {@link ReferrerEditionMetricsUnrankedPieSplit}.
@@ -137,16 +144,34 @@ export const makeReferrerEditionMetricsRankedPieSplitSchema = (
 export const makeReferrerEditionMetricsUnrankedPieSplitSchema = (
   valueLabel: string = "ReferrerEditionMetricsUnrankedPieSplit",
 ) =>
-  z.object({
-    type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
-    rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
-    referrer: makeUnrankedReferrerMetricsPieSplitSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
-      `${valueLabel}.aggregatedMetrics`,
-    ),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z
+    .object({
+      awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
+      type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
+      rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
+      referrer: makeUnrankedReferrerMetricsPieSplitSchema(`${valueLabel}.referrer`),
+      aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
+        `${valueLabel}.aggregatedMetrics`,
+      ),
+      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
+
+/**
+ * Schema for all {@link ReferrerEditionMetrics} variants of the pie-split award model
+ * (both ranked and unranked).
+ */
+export const makeReferrerEditionMetricsPieSplitSchema = (
+  valueLabel: string = "ReferrerEditionMetricsPieSplit",
+) =>
+  z.discriminatedUnion("type", [
+    makeReferrerEditionMetricsRankedPieSplitSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedPieSplitSchema(valueLabel),
+  ]);
 
 /**
  * Schema for {@link ReferrerLeaderboardPagePieSplit}.
@@ -154,13 +179,21 @@ export const makeReferrerEditionMetricsUnrankedPieSplitSchema = (
 export const makeReferrerLeaderboardPagePieSplitSchema = (
   valueLabel: string = "ReferrerLeaderboardPagePieSplit",
 ) =>
-  z.object({
-    rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
-    referrers: z.array(makeAwardedReferrerMetricsPieSplitSchema(`${valueLabel}.referrers[record]`)),
-    aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
-      `${valueLabel}.aggregatedMetrics`,
-    ),
-    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z
+    .object({
+      awardModel: z.literal(ReferralProgramAwardModels.PieSplit),
+      rules: makeReferralProgramRulesPieSplitSchema(`${valueLabel}.rules`),
+      referrers: z.array(
+        makeAwardedReferrerMetricsPieSplitSchema(`${valueLabel}.referrers[record]`),
+      ),
+      aggregatedMetrics: makeAggregatedReferrerMetricsPieSplitSchema(
+        `${valueLabel}.aggregatedMetrics`,
+      ),
+      pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
+      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });

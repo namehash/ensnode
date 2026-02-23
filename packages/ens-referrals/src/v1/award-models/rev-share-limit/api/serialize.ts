@@ -96,6 +96,7 @@ export function serializeReferrerEditionMetricsRankedRevShareLimit(
   detail: ReferrerEditionMetricsRankedRevShareLimit,
 ): SerializedReferrerEditionMetricsRankedRevShareLimit {
   return {
+    awardModel: detail.awardModel,
     type: detail.type,
     rules: serializeReferralProgramRulesRevShareLimit(detail.rules),
     referrer: serializeAwardedReferrerMetricsRevShareLimit(detail.referrer),
@@ -112,6 +113,7 @@ export function serializeReferrerEditionMetricsUnrankedRevShareLimit(
   detail: ReferrerEditionMetricsUnrankedRevShareLimit,
 ): SerializedReferrerEditionMetricsUnrankedRevShareLimit {
   return {
+    awardModel: detail.awardModel,
     type: detail.type,
     rules: serializeReferralProgramRulesRevShareLimit(detail.rules),
     referrer: serializeUnrankedReferrerMetricsRevShareLimit(detail.referrer),
@@ -128,6 +130,7 @@ export function serializeReferrerLeaderboardPageRevShareLimit(
   page: ReferrerLeaderboardPageRevShareLimit,
 ): SerializedReferrerLeaderboardPageRevShareLimit {
   return {
+    awardModel: page.awardModel,
     rules: serializeReferralProgramRulesRevShareLimit(page.rules),
     referrers: page.referrers.map(serializeAwardedReferrerMetricsRevShareLimit),
     aggregatedMetrics: serializeAggregatedReferrerMetricsRevShareLimit(page.aggregatedMetrics),

@@ -5,6 +5,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import { assertLeaderboardInputs } from "../shared/leaderboard-guards";
 import { sortReferrerMetrics } from "../shared/rank";
+import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import { buildAggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import type { AwardedReferrerMetricsRevShareLimit } from "./metrics";
@@ -19,6 +20,13 @@ import type { ReferralProgramRulesRevShareLimit } from "./rules";
  * Represents a leaderboard with the rev-share-limit award model for any number of referrers.
  */
 export interface ReferrerLeaderboardRevShareLimit {
+  /**
+   * Discriminant identifying this as a rev-share-limit leaderboard.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareLimit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+
   /**
    * The rules of the referral program that generated the {@link ReferrerLeaderboardRevShareLimit}.
    */
@@ -76,5 +84,5 @@ export const buildReferrerLeaderboardRevShareLimit = (
 
   const referrers = new Map(awardedReferrers.map((r) => [r.referrer, r]));
 
-  return { rules, aggregatedMetrics, referrers, accurateAsOf };
+  return { awardModel: rules.awardModel, rules, aggregatedMetrics, referrers, accurateAsOf };
 };

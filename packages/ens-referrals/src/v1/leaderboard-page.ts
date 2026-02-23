@@ -1,9 +1,7 @@
-import type { ReferrerLeaderboardPieSplit } from "./award-models/pie-split/leaderboard";
 import {
   buildLeaderboardPagePieSplit,
   type ReferrerLeaderboardPagePieSplit,
 } from "./award-models/pie-split/leaderboard-page";
-import type { ReferrerLeaderboardRevShareLimit } from "./award-models/rev-share-limit/leaderboard";
 import {
   buildLeaderboardPageRevShareLimit,
   type ReferrerLeaderboardPageRevShareLimit,
@@ -18,7 +16,7 @@ import type { ReferrerLeaderboard } from "./leaderboard";
 /**
  * A page of referrers from the referrer leaderboard.
  *
- * Use `rules.awardModel` to determine the specific variant at runtime. Within each variant,
+ * Use `awardModel` to narrow the specific variant at runtime. Within each variant,
  * `rules`, `referrers`, and `aggregatedMetrics` are all guaranteed to be from the same model.
  */
 export type ReferrerLeaderboardPage =
@@ -31,15 +29,10 @@ export const getReferrerLeaderboardPage = (
 ): ReferrerLeaderboardPage => {
   const pageContext = buildReferrerLeaderboardPageContext(pageParams, leaderboard);
 
-  switch (leaderboard.rules.awardModel) {
+  switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
-      // Single type assertion per branch: rules.awardModel === "pie-split" guarantees the leaderboard
-      // is ReferrerLeaderboardPieSplit, but TypeScript cannot narrow a union on a nested property.
-      return buildLeaderboardPagePieSplit(pageContext, leaderboard as ReferrerLeaderboardPieSplit);
+      return buildLeaderboardPagePieSplit(pageContext, leaderboard);
     case ReferralProgramAwardModels.RevShareLimit:
-      return buildLeaderboardPageRevShareLimit(
-        pageContext,
-        leaderboard as ReferrerLeaderboardRevShareLimit,
-      );
+      return buildLeaderboardPageRevShareLimit(pageContext, leaderboard);
   }
 };

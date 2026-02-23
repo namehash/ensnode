@@ -4,13 +4,11 @@ import type {
   ReferrerEditionMetricsRankedPieSplit,
   ReferrerEditionMetricsUnrankedPieSplit,
 } from "./award-models/pie-split/edition-metrics";
-import type { ReferrerLeaderboardPieSplit } from "./award-models/pie-split/leaderboard";
 import { buildUnrankedReferrerMetricsPieSplit } from "./award-models/pie-split/metrics";
 import type {
   ReferrerEditionMetricsRankedRevShareLimit,
   ReferrerEditionMetricsUnrankedRevShareLimit,
 } from "./award-models/rev-share-limit/edition-metrics";
-import type { ReferrerLeaderboardRevShareLimit } from "./award-models/rev-share-limit/leaderboard";
 import { buildUnrankedReferrerMetricsRevShareLimit } from "./award-models/rev-share-limit/metrics";
 import { ReferrerEditionMetricsTypeIds } from "./award-models/shared/edition-metrics";
 import { ReferralProgramAwardModels } from "./award-models/shared/rules";
@@ -20,7 +18,7 @@ import { calcReferralProgramStatus } from "./status";
 /**
  * Referrer edition metrics data for a specific referrer address on the leaderboard.
  *
- * Use `rules.awardModel` to determine the specific model variant at runtime.
+ * Use `awardModel` to narrow the specific model variant at runtime.
  */
 export type ReferrerEditionMetricsRanked =
   | ReferrerEditionMetricsRankedPieSplit
@@ -29,7 +27,7 @@ export type ReferrerEditionMetricsRanked =
 /**
  * Referrer edition metrics data for a specific referrer address NOT on the leaderboard.
  *
- * Use `rules.awardModel` to determine the specific model variant at runtime.
+ * Use `awardModel` to narrow the specific model variant at runtime.
  */
 export type ReferrerEditionMetricsUnranked =
   | ReferrerEditionMetricsUnrankedPieSplit
@@ -38,8 +36,8 @@ export type ReferrerEditionMetricsUnranked =
 /**
  * Referrer edition metrics data for a specific referrer address.
  *
- * Use the `type` field to determine if the referrer is ranked or unranked.
- * Use `rules.awardModel` to determine the award model variant.
+ * Use `type` to determine if the referrer is ranked or unranked.
+ * Use `awardModel` to narrow the award model variant.
  */
 export type ReferrerEditionMetrics = ReferrerEditionMetricsRanked | ReferrerEditionMetricsUnranked;
 
@@ -59,50 +57,50 @@ export const getReferrerEditionMetrics = (
 ): ReferrerEditionMetrics => {
   const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
 
-  switch (leaderboard.rules.awardModel) {
+  switch (leaderboard.awardModel) {
     case ReferralProgramAwardModels.PieSplit: {
-      // Single type assertion per branch: rules.awardModel === "pie-split" guarantees the leaderboard
-      // is ReferrerLeaderboardPieSplit, but TypeScript cannot narrow a union on a nested property.
-      const typedLeaderboard = leaderboard as ReferrerLeaderboardPieSplit;
-      const awardedReferrerMetrics = typedLeaderboard.referrers.get(referrer);
+      const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {
+          awardModel: leaderboard.awardModel,
           type: ReferrerEditionMetricsTypeIds.Ranked,
-          rules: typedLeaderboard.rules,
+          rules: leaderboard.rules,
           referrer: awardedReferrerMetrics,
-          aggregatedMetrics: typedLeaderboard.aggregatedMetrics,
+          aggregatedMetrics: leaderboard.aggregatedMetrics,
           status,
           accurateAsOf: leaderboard.accurateAsOf,
         } satisfies ReferrerEditionMetricsRankedPieSplit;
       }
       return {
+        awardModel: leaderboard.awardModel,
         type: ReferrerEditionMetricsTypeIds.Unranked,
-        rules: typedLeaderboard.rules,
+        rules: leaderboard.rules,
         referrer: buildUnrankedReferrerMetricsPieSplit(referrer),
-        aggregatedMetrics: typedLeaderboard.aggregatedMetrics,
+        aggregatedMetrics: leaderboard.aggregatedMetrics,
         status,
         accurateAsOf: leaderboard.accurateAsOf,
       } satisfies ReferrerEditionMetricsUnrankedPieSplit;
     }
 
     case ReferralProgramAwardModels.RevShareLimit: {
-      const typedLeaderboard = leaderboard as ReferrerLeaderboardRevShareLimit;
-      const awardedReferrerMetrics = typedLeaderboard.referrers.get(referrer);
+      const awardedReferrerMetrics = leaderboard.referrers.get(referrer);
       if (awardedReferrerMetrics) {
         return {
+          awardModel: leaderboard.awardModel,
           type: ReferrerEditionMetricsTypeIds.Ranked,
-          rules: typedLeaderboard.rules,
+          rules: leaderboard.rules,
           referrer: awardedReferrerMetrics,
-          aggregatedMetrics: typedLeaderboard.aggregatedMetrics,
+          aggregatedMetrics: leaderboard.aggregatedMetrics,
           status,
           accurateAsOf: leaderboard.accurateAsOf,
         } satisfies ReferrerEditionMetricsRankedRevShareLimit;
       }
       return {
+        awardModel: leaderboard.awardModel,
         type: ReferrerEditionMetricsTypeIds.Unranked,
-        rules: typedLeaderboard.rules,
+        rules: leaderboard.rules,
         referrer: buildUnrankedReferrerMetricsRevShareLimit(referrer),
-        aggregatedMetrics: typedLeaderboard.aggregatedMetrics,
+        aggregatedMetrics: leaderboard.aggregatedMetrics,
         status,
         accurateAsOf: leaderboard.accurateAsOf,
       } satisfies ReferrerEditionMetricsUnrankedRevShareLimit;

@@ -2,6 +2,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 
 import type { ReferralProgramStatusId } from "../../status";
 import type { ReferrerEditionMetricsTypeIds } from "../shared/edition-metrics";
+import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsRevShareLimit } from "./aggregations";
 import type {
   AwardedReferrerMetricsRevShareLimit,
@@ -16,10 +17,18 @@ import type { ReferralProgramRulesRevShareLimit } from "./rules";
  *
  * Invariants:
  * - `type` is always {@link ReferrerEditionMetricsTypeIds.Ranked}.
+ * - `awardModel` is always {@link ReferralProgramAwardModels.RevShareLimit} and equals `rules.awardModel`.
  *
  * @see {@link AwardedReferrerMetricsRevShareLimit}
  */
 export interface ReferrerEditionMetricsRankedRevShareLimit {
+  /**
+   * Discriminant identifying this as data from a rev-share-limit leaderboard edition.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareLimit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+
   /**
    * The type of referrer edition metrics data.
    */
@@ -62,10 +71,18 @@ export interface ReferrerEditionMetricsRankedRevShareLimit {
  *
  * Invariants:
  * - `type` is always {@link ReferrerEditionMetricsTypeIds.Unranked}.
+ * - `awardModel` is always {@link ReferralProgramAwardModels.RevShareLimit} and equals `rules.awardModel`.
  *
  * @see {@link UnrankedReferrerMetricsRevShareLimit}
  */
 export interface ReferrerEditionMetricsUnrankedRevShareLimit {
+  /**
+   * Discriminant identifying this as data from a rev-share-limit leaderboard edition.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.RevShareLimit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.RevShareLimit;
+
   /**
    * The type of referrer edition metrics data.
    */

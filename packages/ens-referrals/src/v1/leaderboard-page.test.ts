@@ -19,6 +19,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
 
   it("correctly evaluates `hasNext` when `leaderboard.referrers.size` and `recordsPerPage` are equal", () => {
     const leaderboard: ReferrerLeaderboardPieSplit = {
+      awardModel: "pie-split",
       rules: {
         awardModel: "pie-split",
         totalAwardPoolValue: priceUsdc(10000n),
@@ -106,6 +107,7 @@ describe("buildReferrerLeaderboardPageContext", () => {
 
   it("Correctly builds the pagination context when `leaderboard.referrers.size` is 0", () => {
     const leaderboard: ReferrerLeaderboardPieSplit = {
+      awardModel: "pie-split",
       rules: {
         awardModel: "pie-split",
         totalAwardPoolValue: priceUsdc(10000n),

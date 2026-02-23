@@ -4,22 +4,12 @@ import {
   serializeReferrerEditionMetricsUnrankedPieSplit,
   serializeReferrerLeaderboardPagePieSplit,
 } from "../award-models/pie-split/api/serialize";
-import type {
-  ReferrerEditionMetricsRankedPieSplit,
-  ReferrerEditionMetricsUnrankedPieSplit,
-} from "../award-models/pie-split/edition-metrics";
-import type { ReferrerLeaderboardPagePieSplit } from "../award-models/pie-split/leaderboard-page";
 import {
   serializeReferralProgramRulesRevShareLimit,
   serializeReferrerEditionMetricsRankedRevShareLimit,
   serializeReferrerEditionMetricsUnrankedRevShareLimit,
   serializeReferrerLeaderboardPageRevShareLimit,
 } from "../award-models/rev-share-limit/api/serialize";
-import type {
-  ReferrerEditionMetricsRankedRevShareLimit,
-  ReferrerEditionMetricsUnrankedRevShareLimit,
-} from "../award-models/rev-share-limit/edition-metrics";
-import type { ReferrerLeaderboardPageRevShareLimit } from "../award-models/rev-share-limit/leaderboard-page";
 import { ReferralProgramAwardModels } from "../award-models/shared/rules";
 import type { ReferralProgramEditionConfig } from "../edition";
 import type {
@@ -71,15 +61,11 @@ export function serializeReferralProgramRules(
 function serializeReferrerLeaderboardPage(
   page: ReferrerLeaderboardPage,
 ): SerializedReferrerLeaderboardPage {
-  switch (page.rules.awardModel) {
+  switch (page.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
-      // Single type assertion per branch: rules.awardModel === "pie-split" guarantees all correlated
-      // fields are the pie-split variant, but TypeScript cannot narrow a union on a nested property.
-      return serializeReferrerLeaderboardPagePieSplit(page as ReferrerLeaderboardPagePieSplit);
+      return serializeReferrerLeaderboardPagePieSplit(page);
     case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerLeaderboardPageRevShareLimit(
-        page as ReferrerLeaderboardPageRevShareLimit,
-      );
+      return serializeReferrerLeaderboardPageRevShareLimit(page);
   }
 }
 
@@ -89,15 +75,11 @@ function serializeReferrerLeaderboardPage(
 function serializeReferrerEditionMetricsRanked(
   detail: ReferrerEditionMetricsRanked,
 ): SerializedReferrerEditionMetricsRanked {
-  switch (detail.rules.awardModel) {
+  switch (detail.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
-      return serializeReferrerEditionMetricsRankedPieSplit(
-        detail as ReferrerEditionMetricsRankedPieSplit,
-      );
+      return serializeReferrerEditionMetricsRankedPieSplit(detail);
     case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerEditionMetricsRankedRevShareLimit(
-        detail as ReferrerEditionMetricsRankedRevShareLimit,
-      );
+      return serializeReferrerEditionMetricsRankedRevShareLimit(detail);
   }
 }
 
@@ -107,15 +89,11 @@ function serializeReferrerEditionMetricsRanked(
 function serializeReferrerEditionMetricsUnranked(
   detail: ReferrerEditionMetricsUnranked,
 ): SerializedReferrerEditionMetricsUnranked {
-  switch (detail.rules.awardModel) {
+  switch (detail.awardModel) {
     case ReferralProgramAwardModels.PieSplit:
-      return serializeReferrerEditionMetricsUnrankedPieSplit(
-        detail as ReferrerEditionMetricsUnrankedPieSplit,
-      );
+      return serializeReferrerEditionMetricsUnrankedPieSplit(detail);
     case ReferralProgramAwardModels.RevShareLimit:
-      return serializeReferrerEditionMetricsUnrankedRevShareLimit(
-        detail as ReferrerEditionMetricsUnrankedRevShareLimit,
-      );
+      return serializeReferrerEditionMetricsUnrankedRevShareLimit(detail);
   }
 }
 

@@ -4,6 +4,7 @@ import {
   type ReferrerLeaderboardPageContext,
   sliceReferrers,
 } from "../shared/leaderboard-page";
+import type { ReferralProgramAwardModels } from "../shared/rules";
 import type { AggregatedReferrerMetricsPieSplit } from "./aggregations";
 import type { ReferrerLeaderboardPieSplit } from "./leaderboard";
 import type { AwardedReferrerMetricsPieSplit } from "./metrics";
@@ -13,6 +14,13 @@ import type { ReferralProgramRulesPieSplit } from "./rules";
  * A page of referrers from the pie-split referrer leaderboard.
  */
 export interface ReferrerLeaderboardPagePieSplit extends BaseReferrerLeaderboardPage {
+  /**
+   * Discriminant identifying this as a page from a pie-split leaderboard.
+   *
+   * @invariant Always equals `rules.awardModel` ({@link ReferralProgramAwardModels.PieSplit}).
+   */
+  awardModel: typeof ReferralProgramAwardModels.PieSplit;
+
   /**
    * The {@link ReferralProgramRulesPieSplit} used to generate the {@link ReferrerLeaderboardPieSplit}
    * that this {@link ReferrerLeaderboardPagePieSplit} comes from.
@@ -40,6 +48,7 @@ export function buildLeaderboardPagePieSplit(
 ): ReferrerLeaderboardPagePieSplit {
   const status = calcReferralProgramStatus(leaderboard.rules, leaderboard.accurateAsOf);
   return {
+    awardModel: leaderboard.awardModel,
     rules: leaderboard.rules,
     referrers: sliceReferrers(leaderboard.referrers, pageContext),
     aggregatedMetrics: leaderboard.aggregatedMetrics,

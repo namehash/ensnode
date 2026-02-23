@@ -5,6 +5,7 @@ import type { UnixTimestamp } from "@ensnode/ensnode-sdk";
 import type { ReferrerLeaderboard } from "../../leaderboard";
 import { isNonNegativeInteger, isPositiveInteger } from "../../number";
 import type { ReferralProgramStatusId } from "../../status";
+import type { ReferralProgramAwardModel } from "./rules";
 
 /**
  * The default number of referrers per leaderboard page.
@@ -261,6 +262,11 @@ export const buildReferrerLeaderboardPageContext = (
  * Base fields shared by all leaderboard page variants.
  */
 export interface BaseReferrerLeaderboardPage {
+  /**
+   * Discriminant identifying the award model for this leaderboard page.
+   */
+  awardModel: ReferralProgramAwardModel;
+
   /**
    * The {@link ReferrerLeaderboardPageContext} of this page relative to the overall leaderboard.
    */

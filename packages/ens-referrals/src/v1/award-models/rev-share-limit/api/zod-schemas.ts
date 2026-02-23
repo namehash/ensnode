@@ -18,6 +18,7 @@ import {
   makeReferrerLeaderboardPageContextSchema,
 } from "../../shared/api/zod-schemas";
 import { ReferrerEditionMetricsTypeIds } from "../../shared/edition-metrics";
+import { ReferralProgramAwardModels } from "../../shared/rules";
 
 /**
  * Schema for {@link ReferralProgramRulesRevShareLimit}.
@@ -102,16 +103,22 @@ export const makeAggregatedReferrerMetricsRevShareLimitSchema = (
 export const makeReferrerEditionMetricsRankedRevShareLimitSchema = (
   valueLabel: string = "ReferrerEditionMetricsRankedRevShareLimit",
 ) =>
-  z.object({
-    type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
-    rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
-    referrer: makeAwardedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
-      `${valueLabel}.aggregatedMetrics`,
-    ),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z
+    .object({
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+      type: z.literal(ReferrerEditionMetricsTypeIds.Ranked),
+      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
+      referrer: makeAwardedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrer`),
+      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
+        `${valueLabel}.aggregatedMetrics`,
+      ),
+      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
 
 /**
  * Schema for {@link ReferrerEditionMetricsUnrankedRevShareLimit}.
@@ -119,16 +126,34 @@ export const makeReferrerEditionMetricsRankedRevShareLimitSchema = (
 export const makeReferrerEditionMetricsUnrankedRevShareLimitSchema = (
   valueLabel: string = "ReferrerEditionMetricsUnrankedRevShareLimit",
 ) =>
-  z.object({
-    type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
-    rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
-    referrer: makeUnrankedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrer`),
-    aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
-      `${valueLabel}.aggregatedMetrics`,
-    ),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z
+    .object({
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+      type: z.literal(ReferrerEditionMetricsTypeIds.Unranked),
+      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
+      referrer: makeUnrankedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrer`),
+      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
+        `${valueLabel}.aggregatedMetrics`,
+      ),
+      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
+
+/**
+ * Schema for all {@link ReferrerEditionMetrics} variants of the rev-share-limit award model
+ * (both ranked and unranked).
+ */
+export const makeReferrerEditionMetricsRevShareLimitSchema = (
+  valueLabel: string = "ReferrerEditionMetricsRevShareLimit",
+) =>
+  z.discriminatedUnion("type", [
+    makeReferrerEditionMetricsRankedRevShareLimitSchema(valueLabel),
+    makeReferrerEditionMetricsUnrankedRevShareLimitSchema(valueLabel),
+  ]);
 
 /**
  * Schema for {@link ReferrerLeaderboardPageRevShareLimit}.
@@ -136,15 +161,21 @@ export const makeReferrerEditionMetricsUnrankedRevShareLimitSchema = (
 export const makeReferrerLeaderboardPageRevShareLimitSchema = (
   valueLabel: string = "ReferrerLeaderboardPageRevShareLimit",
 ) =>
-  z.object({
-    rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
-    referrers: z.array(
-      makeAwardedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrers[record]`),
-    ),
-    aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
-      `${valueLabel}.aggregatedMetrics`,
-    ),
-    pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
-    status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
-    accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
-  });
+  z
+    .object({
+      awardModel: z.literal(ReferralProgramAwardModels.RevShareLimit),
+      rules: makeReferralProgramRulesRevShareLimitSchema(`${valueLabel}.rules`),
+      referrers: z.array(
+        makeAwardedReferrerMetricsRevShareLimitSchema(`${valueLabel}.referrers[record]`),
+      ),
+      aggregatedMetrics: makeAggregatedReferrerMetricsRevShareLimitSchema(
+        `${valueLabel}.aggregatedMetrics`,
+      ),
+      pageContext: makeReferrerLeaderboardPageContextSchema(`${valueLabel}.pageContext`),
+      status: makeReferralProgramStatusSchema(`${valueLabel}.status`),
+      accurateAsOf: makeUnixTimestampSchema(`${valueLabel}.accurateAsOf`),
+    })
+    .refine((data) => data.awardModel === data.rules.awardModel, {
+      message: `${valueLabel}.awardModel must equal ${valueLabel}.rules.awardModel`,
+      path: ["awardModel"],
+    });
