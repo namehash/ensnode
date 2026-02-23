@@ -25,7 +25,6 @@ import { DatasourceNames, type ENSNamespace } from "./lib/types";
  *
  * This represents a testing deployment of ENSv1 w/ ENSv2 on Sepolia.
  *
- * @dev the ENSv2ETHRegistry Datasource contracts are deployed to Sepolia (rather than an L2).
  * @dev we use the earliest start block for simplicity (it's just for efficiency re: log fetches).
  */
 export default {
@@ -104,20 +103,6 @@ export default {
       ETHRegistry: {
         abi: Registry,
         address: "0x3f0920aa92c5f9bce54643c09955c5f241f1f763",
-        startBlock: 9374708,
-      },
-    },
-  },
-
-  [DatasourceNames.ENSv2ETHRegistry]: {
-    chain: sepolia,
-    contracts: {
-      Resolver: { abi: ResolverABI, startBlock: 9374708 },
-      Registry: { abi: Registry, startBlock: 9374708 },
-      EnhancedAccessControl: { abi: EnhancedAccessControl, startBlock: 9374708 },
-      ETHRegistry: {
-        abi: Registry,
-        address: "0xf332544e6234f1ca149907d0d4658afd5feb6831",
         startBlock: 9374708,
       },
       ETHRegistrar: {

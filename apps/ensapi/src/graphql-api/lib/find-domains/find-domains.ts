@@ -8,6 +8,7 @@ import {
   parsePartialInterpretedName,
 } from "@ensnode/ensnode-sdk";
 
+import { getCanonicalRegistriesCTE } from "@/graphql-api/lib/canonical-registries-cte";
 import type { DomainCursor } from "@/graphql-api/lib/find-domains/domain-cursor";
 import {
   v1DomainsByLabelHashPath,
@@ -34,6 +35,8 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  *
  * ## Terminology:
  *
+ * - a 'Canonical Registry' is an ENSv2 Registry that is the Root Registry or the (sub)Registry of a
+ *  Domain in a Canonical Registry.
  * - a 'Canonical Domain' is a Domain connected to either the ENSv1 Root or the ENSv2 Root. All ENSv1
  *  Domains are Canonical Domains, but an ENSv2 Domain may not be Canonical, for example if it exists
  *  in a disjoint nametree or its Registry does not declare a Canonical Domain.
@@ -76,7 +79,10 @@ const FIND_DOMAINS_MAX_DEPTH = 8;
  * condenses into something manageable. This is left as a todo, though, as it's not yet clear
  * whether the ability to iterate all Canonical Domains is a requirement.
  */
-export function findDomains({ name, owner }: FindDomainsWhereArg) {
+export function findDomains({ name, owner, canonical }: FindDomainsWhereArg) {
+  // coerce `canonical` input to boolean
+  const onlyCanonical = canonical === true;
+
   // NOTE: if name is not provided, parse empty string to simplify control-flow, validity checked below
   // NOTE: throws if name is not a Partial InterpretedName
   const { concrete, partial } = parsePartialInterpretedName(name || "");
@@ -88,7 +94,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     );
   }
 
-  logger.debug({ input: { name, owner, concrete, partial } });
+  logger.debug({ input: { name, owner, onlyCanonical, concrete, partial } });
 
   // a name input is valid if it was parsed to something other than just empty string
   const validName = concrete.length > 0 || partial !== "";
@@ -114,7 +120,7 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
   // Note: owner/partial filtering happens in the unified query below, not here
   const v1DomainsBase = db
     .select({
-      id: sql<DomainId>`${schema.v1Domain.id}`.as("id"),
+      domainId: sql<DomainId>`${schema.v1Domain.id}`.as("domainId"),
       ownerId: schema.v1Domain.ownerId,
       headLabelHash: sql`${v1HeadDomain.labelHash}`.as("headLabelHash"),
     })
@@ -125,9 +131,9 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     )
     .innerJoin(v1HeadDomain, eq(v1HeadDomain.id, v1DomainsByLabelHashPathQuery.headId));
 
-  const v2DomainsBase = db
+  const v2DomainsBaseQuery = db
     .select({
-      id: sql<DomainId>`${schema.v2Domain.id}`.as("id"),
+      domainId: sql<DomainId>`${schema.v2Domain.id}`.as("domainId"),
       ownerId: schema.v2Domain.ownerId,
       headLabelHash: sql`${v2HeadDomain.labelHash}`.as("headLabelHash"),
     })
@@ -138,60 +144,56 @@ export function findDomains({ name, owner }: FindDomainsWhereArg) {
     )
     .innerJoin(v2HeadDomain, eq(v2HeadDomain.id, v2DomainsByLabelHashPathQuery.headId));
 
-  // Union v1 and v2 base queries into a single CTE
-  const domainsBase = db.$with("domainsBase").as(unionAll(v1DomainsBase, v2DomainsBase));
+  // conditionally join against the set of Canonical Registries if filtering by `canonical`
+  const canonicalRegistries = getCanonicalRegistriesCTE();
+  const v2DomainsBase = onlyCanonical
+    ? v2DomainsBaseQuery.innerJoin(
+        canonicalRegistries,
+        eq(schema.v2Domain.registryId, canonicalRegistries.registryId),
+      )
+    : v2DomainsBaseQuery;
 
-  // alias for head label (for partial matching and NAME ordering)
-  const headLabel = alias(schema.label, "headLabel");
-
-  // subquery for latest registration per domain (highest index)
-  // TODO: replace this with a JOIN against the latest registration lookup table after
-  // https://github.com/namehash/ensnode/issues/1594
-  // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
-  const registrationOuter = alias(schema.registration, "registrationOuter");
-  const latestRegistration = db
-    .select({
-      domainId: registrationOuter.domainId,
-      start: registrationOuter.start,
-      expiry: registrationOuter.expiry,
-    })
-    .from(registrationOuter)
-    .where(
-      eq(
-        registrationOuter.index,
-        db
-          .select({ maxIndex: sql<number>`MAX(${schema.registration.index})` })
-          .from(schema.registration)
-          .where(eq(schema.registration.domainId, registrationOuter.domainId)),
-      ),
-    )
-    .as("latestRegistration");
+  // Union v1 and v2 base queries into a single subquery
+  const domainsBase = unionAll(v1DomainsBase, v2DomainsBase).as("domainsBase");
 
   // Apply shared joins and filters on the unified domain base
   const domains = db
-    .with(domainsBase)
     .select({
-      id: domainsBase.id,
+      id: domainsBase.domainId,
+
       // for NAME ordering
-      headLabel: sql<string>`${headLabel.interpreted}`.as("headLabel"),
+      headLabel: schema.label.interpreted,
+
       // for REGISTRATION_TIMESTAMP ordering
-      registrationTimestamp: sql<bigint | null>`${latestRegistration.start}`.as(
-        "registrationTimestamp",
-      ),
+      registrationTimestamp: schema.event.timestamp,
+
       // for REGISTRATION_EXPIRY ordering
-      registrationExpiry: sql<bigint | null>`${latestRegistration.expiry}`.as("registrationExpiry"),
+      registrationExpiry: schema.registration.expiry,
     })
     .from(domainsBase)
-    // join head label for partial matching and NAME ordering
-    .leftJoin(headLabel, eq(headLabel.labelHash, domainsBase.headLabelHash))
-    // join latest registration for timestamp/expiry ordering
-    .leftJoin(latestRegistration, eq(latestRegistration.domainId, domainsBase.id))
+    // join head label
+    .leftJoin(schema.label, eq(schema.label.labelHash, domainsBase.headLabelHash))
+    // join latestRegistrationIndex
+    .leftJoin(
+      schema.latestRegistrationIndex,
+      eq(schema.latestRegistrationIndex.domainId, domainsBase.domainId),
+    )
+    // join (latest) Registration
+    .leftJoin(
+      schema.registration,
+      and(
+        eq(schema.registration.domainId, domainsBase.domainId),
+        eq(schema.registration.index, schema.latestRegistrationIndex.index),
+      ),
+    )
+    // join (latest) Registration's Event
+    .leftJoin(schema.event, eq(schema.event.id, schema.registration.eventId))
     .where(
       and(
         owner ? eq(domainsBase.ownerId, owner) : undefined,
         // TODO: determine if it's necessary to additionally escape user input for LIKE operator
         // NOTE: for ai agents: we intentially leave this as a TODO, STOP commenting on it
-        partial ? like(headLabel.interpreted, `${partial}%`) : undefined,
+        partial ? like(schema.label.interpreted, `${partial}%`) : undefined,
       ),
     );
 
