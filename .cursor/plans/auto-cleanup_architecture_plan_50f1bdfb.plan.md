@@ -88,7 +88,7 @@ type NormalizationResult =
   | { ok: false; reason: string };    // human-readable reason normalization failed
 ```
 
-**Null value handling**: if `rawValue` is `null` (the resolver has no value for that key), `normalizeRecord` produces `op: "Unnormalizable"` with `reason: "no value set"`. The key is still recognized; the record participates in the set-level priority contest but always loses to any record with a non-null rawValue.
+**Null value handling**: if `rawValue` is `null` (the resolver has no value for that key), `normalizeRecord` returns an `IndividualRecordNormalizationResult` whose `valueResult` has `op: "Unnormalizable"` with `reason: "no value set"`. At the set level, a null-value record is treated identically to any other `Unnormalizable` record: it only participates in Pass 2 (which runs only when no candidate successfully normalizes), and loses to any record whose value op is `AlreadyNormalized` or `Normalized`.
 
 ### 1.2 Key normalization types (per key)
 
@@ -205,25 +205,34 @@ type NormalizedRecordSet = {
    * Two distinct kinds of entries are keyed here:
    * - op "Normalized": keyed by normalizedKey (the canonical key for the winner).
    * - op "UnrecognizedKeyAndValue": keyed by rawKey (passed through as-is).
+   * No other op values appear in this map.
    */
-  normalizedRecords: Record<string, RecordNormalizationResult>;
+  normalizedRecords: Record<
+    string,
+    Extract<RecordNormalizationResult, { op: "Normalized" | "UnrecognizedKeyAndValue" }>
+  >;
   /**
    * Records that did not make it into normalizedRecords:
    * UnnormalizableValue and DuplicateNormalizedKey.
    */
-  unnormalizedRecords: RecordNormalizationResult[];
+  unnormalizedRecords: Extract<
+    RecordNormalizationResult,
+    { op: "UnnormalizableValue" | "DuplicateNormalizedKey" }
+  >[];
 };
 ```
 
 **Priority rule** when multiple records share the same normalized key — two-pass algorithm:
 
 **Pass 1 — normalizable candidates** (value op is `AlreadyNormalized` or `Normalized`):
+
 1. Among these, the record whose `rawKey === normalizedKey` wins first.
 2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
 3. The winner gets `op: "Normalized"` and is placed in `normalizedRecords`.
 4. Pass-1 losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
 
 **Pass 2 — only if Pass 1 found no winner** (all candidates are `Unnormalizable`):
+
 1. Among Unnormalizable candidates, the record whose `rawKey === normalizedKey` wins first.
 2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
 3. The winner gets `op: "UnnormalizableValue"` and goes into `unnormalizedRecords` (no valid value exists, so `normalizedRecords` has no entry for this normalized key).
@@ -263,7 +272,9 @@ function expandNormalizedKeys(
 ): string[]
 ```
 
-Returns: `[normalizedKey, ...unnormalizedKeys]` for each known key, deduplicated. Unknown keys are kept as-is.
+**Precondition**: no element of `normalizedKeys` may be an unnormalized key variant (i.e. present in `defs.byUnnormalizedKey` but not in `defs.byNormalizedKey`). Passing `vnd.twitter` where `com.twitter` is expected is a caller error and must throw synchronously with a clear message listing the offending keys. Completely unknown keys (absent from both maps) are not an error — they are passed through as-is, supporting arbitrary user-defined keys.
+
+Returns: `[normalizedKey, ...unnormalizedKeys]` for each key found in `defs.byNormalizedKey`, followed by any unrecognized keys as-is. The result is deduplicated by first-occurrence: if the same key appears more than once, its first position is kept and subsequent occurrences are dropped. Ordering is otherwise stable and deterministic, ensuring consistent multicall construction and reproducible traces.
 
 ---
 
@@ -398,7 +409,7 @@ Unnormalized variants: `telegram`, `com.telegram`, `Telegram`
 - Plain username: `alice`
 - Prefixed: `@alice`
 - t.me URL: `https://t.me/alice`, `http://t.me/alice`, `t.me/alice`
-- telegram.me URL: `https://telegram.me/alice`
+- telegram.me URL: `https://telegram.me/alice`, `http://telegram.me/alice`, `telegram.me/alice`
 
 **Validation**: extracted username must match `^[a-zA-Z0-9_]{5,32}$`.
 
@@ -436,7 +447,7 @@ Unnormalized variants: `URL`, `Website`, `website`
 
 **Accepted input formats**: any string that parses as a valid URL with `http` or `https` scheme.
 
-**Validation**: `new URL(value)` must not throw and `scheme` must be `http:` or `https:`.
+**Validation**: `new URL(value)` must not throw and `url.protocol` must be `"http:"` or `"https:"`.
 
 **Canonical form**: `new URL(value).href` (the browser-canonical URL string, e.g. trailing slash normalized).
 
@@ -542,4 +553,5 @@ The `records.texts` field always contains the stripped, clean output when `norma
 2. **Parameter name for metadata field**: `normalizationMetadata`, `includeNormalizationMetadata`, or another name?
 3. **Unnormalizable behavior**: When a key is recognized but no candidate produces a valid value, should `records.texts` contain `null` for that key, or should the key be omitted from the response entirely?
 4. **`displayValue` and `url` placement**: Should these enrichment fields be part of `records.texts` (when `normalize=true`) or only inside `normalizationMetadata`? Including them in the main response is more convenient for UI clients but changes the primary response shape significantly for all callers.
+5. **Client requesting an unnormalized key directly**: If a client passes `texts=vnd.twitter` (an unnormalized variant) instead of `texts=com.twitter`, should `expandNormalizedKeys` throw immediately (current spec — fail fast, caller error), or silently map it to the canonical key and expand from there (more forgiving for legacy integrations)? The issue does not address this case.
 
