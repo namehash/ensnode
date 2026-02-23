@@ -7,6 +7,7 @@ export * from "./deserialize/realtime-indexing-status-projection";
 export * from "./omnichain-indexing-status-snapshot";
 export * from "./realtime-indexing-status-projection";
 export * from "./serialize/chain-indexing-status-snapshot";
+export * from "./serialize/cross-chain-indexing-status-snapshot";
 export * from "./serialize/omnichain-indexing-status-snapshot";
 export * from "./serialize/realtime-indexing-status-projection";
 export * from "./validate/chain-indexing-status-snapshot";
