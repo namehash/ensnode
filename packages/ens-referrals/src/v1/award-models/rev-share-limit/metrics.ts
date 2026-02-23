@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import { type PriceUsdc, priceEth, priceUsdc, scalePrice } from "@ensnode/ensnode-sdk";
+import { type PriceUsdc, priceEth, priceUsdc } from "@ensnode/ensnode-sdk";
 
 import type { ReferrerMetrics } from "../../referrer-metrics";
 import { buildReferrerMetrics } from "../../referrer-metrics";
@@ -73,27 +73,36 @@ export const buildRankedReferrerMetricsRevShareLimit = (
  */
 export interface AwardedReferrerMetricsRevShareLimit extends RankedReferrerMetricsRevShareLimit {
   /**
+   * The standard (uncapped) USDC award value for this referrer, computed as
+   * `qualifiedRevenueShare × totalBaseRevenueContribution`.
+   *
+   * Represents what the referrer would receive if the pool were unlimited.
+   * Independent of the pool state.
+   *
+   * @invariant Guaranteed to be a valid PriceUsdc with non-negative amount (>= 0n)
+   */
+  standardAwardValue: PriceUsdc;
+
+  /**
    * The approximate USDC value of the referrer's award.
    *
+   * This is the amount actually claimed from the pool by this referrer, capped by
+   * the remaining pool at the time of their qualifying events.
+   *
    * @invariant Guaranteed to be a valid PriceUsdc with amount between 0 and {@link ReferralProgramRulesRevShareLimit.totalAwardPoolValue.amount} (inclusive)
+   * @invariant Always <= standardAwardValue.amount
    */
   awardPoolApproxValue: PriceUsdc;
 }
 
 export const buildAwardedReferrerMetricsRevShareLimit = (
   referrer: RankedReferrerMetricsRevShareLimit,
-  rules: ReferralProgramRulesRevShareLimit,
-  scalingFactor: number,
+  standardAwardValue: PriceUsdc,
+  awardPoolApproxValue: PriceUsdc,
 ): AwardedReferrerMetricsRevShareLimit => {
-  const awardPoolApproxValue = referrer.isQualified
-    ? scalePrice(
-        scalePrice(referrer.totalBaseRevenueContribution, rules.qualifiedRevenueShare),
-        scalingFactor,
-      )
-    : priceUsdc(0n);
-
   return {
     ...referrer,
+    standardAwardValue,
     awardPoolApproxValue,
   } satisfies AwardedReferrerMetricsRevShareLimit;
 };
@@ -128,6 +137,7 @@ export const buildUnrankedReferrerMetricsRevShareLimit = (
     totalBaseRevenueContribution: priceUsdc(0n),
     rank: null,
     isQualified: false,
+    standardAwardValue: priceUsdc(0n),
     awardPoolApproxValue: priceUsdc(0n),
   } satisfies UnrankedReferrerMetricsRevShareLimit;
 };

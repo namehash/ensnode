@@ -67,6 +67,7 @@ export function serializeAwardedReferrerMetricsRevShareLimit(
     totalBaseRevenueContribution: serializePriceUsdc(metrics.totalBaseRevenueContribution),
     rank: metrics.rank,
     isQualified: metrics.isQualified,
+    standardAwardValue: serializePriceUsdc(metrics.standardAwardValue),
     awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
   };
 }
@@ -85,6 +86,7 @@ export function serializeUnrankedReferrerMetricsRevShareLimit(
     totalBaseRevenueContribution: serializePriceUsdc(metrics.totalBaseRevenueContribution),
     rank: metrics.rank,
     isQualified: metrics.isQualified,
+    standardAwardValue: serializePriceUsdc(metrics.standardAwardValue),
     awardPoolApproxValue: serializePriceUsdc(metrics.awardPoolApproxValue),
   };
 }

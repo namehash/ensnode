@@ -43,10 +43,14 @@ export interface SerializedAggregatedReferrerMetricsRevShareLimit
 export interface SerializedAwardedReferrerMetricsRevShareLimit
   extends Omit<
     AwardedReferrerMetricsRevShareLimit,
-    "totalRevenueContribution" | "totalBaseRevenueContribution" | "awardPoolApproxValue"
+    | "totalRevenueContribution"
+    | "totalBaseRevenueContribution"
+    | "standardAwardValue"
+    | "awardPoolApproxValue"
   > {
   totalRevenueContribution: SerializedPriceEth;
   totalBaseRevenueContribution: SerializedPriceUsdc;
+  standardAwardValue: SerializedPriceUsdc;
   awardPoolApproxValue: SerializedPriceUsdc;
 }
 
@@ -56,10 +60,14 @@ export interface SerializedAwardedReferrerMetricsRevShareLimit
 export interface SerializedUnrankedReferrerMetricsRevShareLimit
   extends Omit<
     UnrankedReferrerMetricsRevShareLimit,
-    "totalRevenueContribution" | "totalBaseRevenueContribution" | "awardPoolApproxValue"
+    | "totalRevenueContribution"
+    | "totalBaseRevenueContribution"
+    | "standardAwardValue"
+    | "awardPoolApproxValue"
   > {
   totalRevenueContribution: SerializedPriceEth;
   totalBaseRevenueContribution: SerializedPriceUsdc;
+  standardAwardValue: SerializedPriceUsdc;
   awardPoolApproxValue: SerializedPriceUsdc;
 }
 

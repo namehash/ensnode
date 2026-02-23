@@ -52,16 +52,24 @@ export const makeReferralProgramRulesRevShareLimitSchema = (
 export const makeAwardedReferrerMetricsRevShareLimitSchema = (
   valueLabel: string = "AwardedReferrerMetricsRevShareLimit",
 ) =>
-  z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-    totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
-    totalBaseRevenueContribution: makePriceUsdcSchema(`${valueLabel}.totalBaseRevenueContribution`),
-    rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
-    isQualified: z.boolean(),
-    awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
-  });
+  z
+    .object({
+      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
+      totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+      totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
+      totalBaseRevenueContribution: makePriceUsdcSchema(
+        `${valueLabel}.totalBaseRevenueContribution`,
+      ),
+      rank: makePositiveIntegerSchema(`${valueLabel}.rank`),
+      isQualified: z.boolean(),
+      standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
+      awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
+    })
+    .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
+      message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
+      path: ["awardPoolApproxValue"],
+    });
 
 /**
  * Schema for {@link UnrankedReferrerMetricsRevShareLimit} (with null rank).
@@ -69,16 +77,24 @@ export const makeAwardedReferrerMetricsRevShareLimitSchema = (
 export const makeUnrankedReferrerMetricsRevShareLimitSchema = (
   valueLabel: string = "UnrankedReferrerMetricsRevShareLimit",
 ) =>
-  z.object({
-    referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
-    totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
-    totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
-    totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
-    totalBaseRevenueContribution: makePriceUsdcSchema(`${valueLabel}.totalBaseRevenueContribution`),
-    rank: z.null(),
-    isQualified: z.literal(false),
-    awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
-  });
+  z
+    .object({
+      referrer: makeLowercaseAddressSchema(`${valueLabel}.referrer`),
+      totalReferrals: makeNonNegativeIntegerSchema(`${valueLabel}.totalReferrals`),
+      totalIncrementalDuration: makeDurationSchema(`${valueLabel}.totalIncrementalDuration`),
+      totalRevenueContribution: makePriceEthSchema(`${valueLabel}.totalRevenueContribution`),
+      totalBaseRevenueContribution: makePriceUsdcSchema(
+        `${valueLabel}.totalBaseRevenueContribution`,
+      ),
+      rank: z.null(),
+      isQualified: z.literal(false),
+      standardAwardValue: makePriceUsdcSchema(`${valueLabel}.standardAwardValue`),
+      awardPoolApproxValue: makePriceUsdcSchema(`${valueLabel}.awardPoolApproxValue`),
+    })
+    .refine((data) => data.awardPoolApproxValue.amount <= data.standardAwardValue.amount, {
+      message: `${valueLabel}.awardPoolApproxValue must be <= ${valueLabel}.standardAwardValue`,
+      path: ["awardPoolApproxValue"],
+    });
 
 /**
  * Schema for {@link AggregatedReferrerMetricsRevShareLimit}.

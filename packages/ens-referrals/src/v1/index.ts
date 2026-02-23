@@ -14,6 +14,7 @@ export * from "./award-models/rev-share-limit/edition-metrics";
 export * from "./award-models/rev-share-limit/leaderboard";
 export * from "./award-models/rev-share-limit/leaderboard-page";
 export * from "./award-models/rev-share-limit/metrics";
+export * from "./award-models/rev-share-limit/referral-event";
 export * from "./award-models/rev-share-limit/rules";
 export * from "./award-models/shared/edition-metrics";
 export * from "./award-models/shared/leaderboard-page";
