@@ -108,21 +108,23 @@ export const ponderAppMetadataCache = new SWRCache({
         ponderClient.status(),
       ]);
 
-      const chainIdsFromMetrics = Array.from(ponderIndexingMetrics.chains.keys());
-      const chainIdsFromStatus = Array.from(ponderIndexingStatus.chains.keys());
-      const areChainIdsConsistent = Array.from(indexedChainIds.values()).every(
-        (chainId) => chainIdsFromStatus.includes(chainId) && chainIdsFromMetrics.includes(chainId),
-      );
+      const chainIdsFromMetrics = new Set(ponderIndexingMetrics.chains.keys());
 
-      // Invariant: indexed chain IDs from Ponder Indexing Metrics and
-      // Ponder Indexing Status must be consistent the configured
-      // indexed chain IDs.
-      if (areChainIdsConsistent === false) {
+      // Invariant: ponderIndexingMetrics must cover all chains indexed by ENSIndexer
+      // config and must not include any chain that is not indexed.
+      if (chainIdsFromMetrics.symmetricDifference(indexedChainIds).size > 0) {
         throw new Error(
-          `Indexed chain IDs from Ponder Indexing Metrics and Status must be consistent with each other and with config. ` +
-            `Chain IDs from Metrics: ${chainIdsFromMetrics.join(", ")}, ` +
-            `Chain IDs from Status: ${chainIdsFromStatus.join(", ")}, ` +
-            `Indexed Chain IDs from ENSIndexer config: ${Array.from(indexedChainIds).join(", ")}`,
+          `Ponder indexing metrics must be available for all indexed chains. Indexed chain IDs from ENSIndexer config: ${Array.from(config.indexedChainIds).join(", ")}, Chain IDs with metrics: ${Array.from(chainIdsFromMetrics).join(", ")}`,
+        );
+      }
+
+      const chainIdsFromStatus = new Set(ponderIndexingStatus.chains.keys());
+
+      // Invariant: ponderIndexingStatus must cover all chains indexed by ENSIndexer
+      // config and must not include any chain that is not indexed.
+      if (chainIdsFromStatus.symmetricDifference(indexedChainIds).size > 0) {
+        throw new Error(
+          `Ponder indexing status must be available for all indexed chains. Indexed chain IDs from ENSIndexer config: ${Array.from(config.indexedChainIds).join(", ")}, Chain IDs with status: ${Array.from(chainIdsFromStatus).join(", ")}`,
         );
       }
 

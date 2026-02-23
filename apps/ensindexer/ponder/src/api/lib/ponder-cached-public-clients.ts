@@ -1,3 +1,5 @@
+import config from "@/config";
+
 import { publicClients as ponderPublicClients } from "ponder:api";
 import type { PublicClient } from "viem";
 
@@ -12,11 +14,22 @@ import type { ChainId } from "@ensnode/ponder-sdk";
  *         deserialized.
  */
 export function buildPonderCachedPublicClients(): Map<ChainId, PublicClient> {
-  const result = new Map<ChainId, PublicClient>();
+  const ponderCachedPublicClients = new Map<ChainId, PublicClient>();
 
   for (const [chainId, publicClient] of Object.entries(ponderPublicClients)) {
-    result.set(deserializeChainId(chainId), publicClient);
+    ponderCachedPublicClients.set(deserializeChainId(chainId), publicClient);
   }
 
-  return result;
+  const foundChainIds = new Set(ponderCachedPublicClients.keys());
+  const indexedChainIds = config.indexedChainIds;
+
+  // Invariant: ponderCachedPublicClients must cover all chains indexed by ENSIndexer
+  // config and must not include any chain that is not indexed.
+  if (foundChainIds.symmetricDifference(indexedChainIds).size > 0) {
+    throw new Error(
+      `Ponder cached public clients must be available for all indexed chains. Indexed chain IDs from ENSIndexer config: ${Array.from(config.indexedChainIds).join(", ")}, Chain IDs with cached public clients: ${Array.from(ponderCachedPublicClients.keys()).join(", ")}`,
+    );
+  }
+
+  return ponderCachedPublicClients;
 }

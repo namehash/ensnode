@@ -10,6 +10,8 @@
  * the "highest" endBlock defined for each of the indexed chains.
  */
 
+import config from "@/config";
+
 import type { AddressConfig, ChainConfig, CreateConfigReturnType } from "ponder";
 
 import {
@@ -179,6 +181,17 @@ export function buildChainsBlockrange(): Map<ChainId, BlockrangeWithStartBlock> 
     }
 
     chainsBlockrange.set(chainId, blockrange as BlockrangeWithStartBlock);
+  }
+
+  const foundChainIds = new Set(chainsBlockrange.keys());
+  const indexedChainIds = config.indexedChainIds;
+
+  // Invariant: chainsBlockrange must cover all chains indexed by ENSIndexer
+  // config and must not include any chain that is not indexed.
+  if (foundChainIds.symmetricDifference(indexedChainIds).size > 0) {
+    throw new Error(
+      `Chain config blockrange must be available for all indexed chains. Indexed chain IDs from ENSIndexer config: ${Array.from(config.indexedChainIds).join(", ")}, Chain IDs with config blockrange: ${Array.from(chainsBlockrange.keys()).join(", ")}`,
+    );
   }
 
   return chainsBlockrange;
