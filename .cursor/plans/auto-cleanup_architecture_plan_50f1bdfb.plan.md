@@ -56,12 +56,14 @@ type TextRecordKeyDef = {
   normalize: (validatedValue: string) => NormalizationResult;
   /** Human-friendly value for UIs. e.g. "@alice" from "alice" */
   displayValue: (normalizedValue: string) => string;
-  /** Full URL to the related resource. e.g. "https://x.com/alice" */
-  url: (normalizedValue: string) => string;
+  /** Full URL to the related resource, or null if no URL can be derived (e.g. Discord, NFT avatar). */
+  url: (normalizedValue: string) => string | null;
 };
 ```
 
-Invariants (enforced at registry construction):
+**Key lookup is case-sensitive and exact-match only.** A `rawKey` of `TWITTER` does not match `twitter` or `Twitter`. Every cased variant that a production ENS resolver may use must be listed explicitly in `unnormalizedKeys`. There is no implicit case folding at lookup time.
+
+Invariants (enforced at `TextRecordNormalizationDefs` construction):
 
 - No two `normalizedKey` values are the same.
 - No two `unnormalizedKey` values are the same across all definitions.
@@ -111,10 +113,17 @@ type ValueNormalizationResult =
   | { op: "AlreadyNormalized"; rawValue: string; normalizedValue: string }
   /** Value was successfully transformed; rawValue !== normalizedValue */
   | { op: "Normalized"; rawValue: string; normalizedValue: string }
-  /** Key was recognized but no candidate produced a valid normalized value */
-  | { op: "Unnormalizable"; rawValue: string; normalizedValue: null }
-  /** Key is unrecognized; value passed through without validation/normalization */
-  | { op: "Unrecognized"; rawValue: string; normalizedValue: null };
+  /**
+   * Key was recognized but value could not be normalized.
+   * rawValue is null when the resolver had no value for this key.
+   * reason carries the validation/normalization failure message.
+   */
+  | { op: "Unnormalizable"; rawValue: string | null; normalizedValue: null; reason: string }
+  /**
+   * Key is unrecognized; value passed through without validation/normalization.
+   * rawValue is null when the resolver had no value for this unrecognized key.
+   */
+  | { op: "Unrecognized"; rawValue: string | null; normalizedValue: null };
 ```
 
 ### 1.4 Layer 1: Individual record normalization
@@ -142,9 +151,10 @@ Logic:
 
 - Look up `rawKey` in registry (by normalizedKey or unnormalizedKey).
 - If found: determine `keyResult` (AlreadyNormalized if rawKey === normalizedKey, else Normalized).
-  - Run validate + normalize on rawValue.
-  - If succeeded: `valueResult` is AlreadyNormalized or Normalized.
-  - If failed: `valueResult` is Unnormalizable.
+  - If `rawValue` is null: `valueResult` is Unnormalizable with reason `"no value set"`.
+  - If `rawValue` is a string: run validate + normalize on rawValue.
+    - If succeeded: `valueResult` is AlreadyNormalized (when validate + normalize produced the same string) or Normalized (when the string changed).
+    - If failed: `valueResult` is Unnormalizable with the reason from the failing step.
 - If not found: `keyResult` is Unrecognized; `valueResult` is Unrecognized.
 
 ### 1.5 Layer 2: Set-level normalization
@@ -158,13 +168,12 @@ type RecordNormalizationOp =
   /** Key unrecognized — both key and value are passed through unchanged */
   | "UnrecognizedKeyAndValue"
   /**
-   * Key recognized (AlreadyNormalized or Normalized) but value op is Unrecognized.
-   * Distinct from UnnormalizableValue: the value could not even be attempted
-   * (e.g., schema mismatch), whereas UnnormalizableValue means validation was
-   * attempted and failed.
+   * Key recognized, value could not be normalized — excluded from clean output.
+   * Covers all failure cases for a recognized key: null value, format mismatch,
+   * validation failure, etc. Note: a separate "UnrecognizedValue" op is not needed
+   * because ValueNormalizationOp "Unrecognized" is by definition only reachable
+   * when the key itself is unrecognized (captured by "UnrecognizedKeyAndValue" above).
    */
-  | "UnrecognizedValue"
-  /** Key recognized, value attempted but could not be normalized — excluded from clean output */
   | "UnnormalizableValue"
   /** Another record already claimed this normalized key (lower priority variant) */
   | "DuplicateNormalizedKey";
@@ -177,7 +186,7 @@ type RecordNormalizationResult = {
   normalizedValue?: string;
   displayKey?: string;
   displayValue?: string;
-  url?: string;
+  url?: string | null;
 };
 
 type NormalizedRecordSet = {
