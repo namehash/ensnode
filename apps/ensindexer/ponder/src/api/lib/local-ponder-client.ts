@@ -14,7 +14,7 @@ import { buildOmnichainIndexingStatusSnapshot } from "@/lib/indexing-status-buil
 import { buildChainsIndexingMetadataImmutable } from "@/ponder/api/lib/chains-indexing-metadata-immutable";
 import ponderConfig from "@/ponder/config";
 
-import { ponderClientCache } from "./cache/ponder-client.cache";
+import { ponderAppMetadataCache } from "./cache/ponder-app-metadata.cache";
 import { buildChainsBlockrange } from "./chains-config-blockrange";
 import { buildChainsIndexingMetadataDynamic } from "./chains-indexing-metadata-dynamic";
 
@@ -92,16 +92,16 @@ export class LocalPonderClient extends PonderClient {
   public async getOmnichainIndexingStatusSnapshot(): Promise<OmnichainIndexingStatusSnapshot> {
     const chainsIndexingMetadata = new Map<ChainId, ChainIndexingMetadata>();
 
-    const ponderClientCacheResult = await ponderClientCache.read();
+    const ponderAppMetadata = await ponderAppMetadataCache.read();
 
-    // Invariant: indexing metrics must be available in cache
-    if (ponderClientCacheResult instanceof Error) {
+    // Invariant: Ponder App Metadata must be available in cache
+    if (ponderAppMetadata instanceof Error) {
       throw new Error(
-        `Ponder Client data must be available in cache to build chains indexing metadata immutable: ${ponderClientCacheResult.message}`,
+        `Ponder App Metadata must be available in cache: ${ponderAppMetadata.message}`,
       );
     }
 
-    const { ponderIndexingMetrics, ponderIndexingStatus } = ponderClientCacheResult;
+    const { ponderIndexingMetrics, ponderIndexingStatus } = ponderAppMetadata;
 
     // Build and cache immutable metadata for indexed chains if not already cached.
     if (this.#chainsIndexingMetadataImmutable === undefined) {

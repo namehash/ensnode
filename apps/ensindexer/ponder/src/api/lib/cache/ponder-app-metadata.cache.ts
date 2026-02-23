@@ -8,29 +8,29 @@ import {
 } from "@ensnode/ponder-sdk";
 
 /**
- * Result of the Ponder Client cache.
+ * Metadata from a Ponder app.
  */
-export interface PonderClientCacheResult {
+export interface PonderAppMetadata {
   ponderIndexingMetrics: PonderIndexingMetrics;
   ponderIndexingStatus: PonderIndexingStatus;
 }
 
 /**
- * SWR Cache for Ponder Client data
+ * SWR Cache for Ponder App Metadata
  */
-export type PonderClientCache = SWRCache<PonderClientCacheResult>;
+export type PonderAppMetadataCache = SWRCache<PonderAppMetadata>;
 
 const ponderClient = new PonderClient(config.ensIndexerUrl);
 
 /**
- * Cache for Ponder Client data
- *
+ * Cache for Ponder App Metadata
  * In case of using multiple Ponder API endpoints, it is optimal for data
  * consistency to call all endpoints at once. This cache loads both
  * Ponder Indexing Metrics and Ponder Indexing Status together, and provides
  * them as a single cached result. This way, we ensure that the metrics and
- * status data are always from the same point in time, and avoid potential
- * inconsistencies that could arise if they were loaded separately.
+ * status data are always from (approximately) the same point in time, and
+ * minimize potential inconsistencies that could arise if they were loaded
+ * separately.
  *
  * Ponder Client may sometimes fail to load data, i.e. due to network issues.
  * The cache is designed to be resilient to loading failures, and will keep data
@@ -45,7 +45,7 @@ const ponderClient = new PonderClient(config.ensIndexerUrl);
  * and indexing status, so a few of the initial attempts to load this cache may
  * fail until required data is made available by the Ponder app.
  */
-export const ponderClientCache = new SWRCache({
+export const ponderAppMetadataCache = new SWRCache({
   fn: async function loadPonderClientCache() {
     try {
       const [ponderIndexingMetrics, ponderIndexingStatus] = await Promise.all([
@@ -56,11 +56,13 @@ export const ponderClientCache = new SWRCache({
       return { ponderIndexingMetrics, ponderIndexingStatus };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`[PonderClientCache]: an error occurred while loading data: ${errorMessage}`);
+      console.error(
+        `[PonderAppMetadataCache]: an error occurred while loading data: ${errorMessage}`,
+      );
 
-      throw new Error(`Failed to load Ponder Client cache: ${errorMessage}`);
+      throw new Error(`Failed to load Ponder App Metadata cache: ${errorMessage}`);
     }
   },
   ttl: Number.POSITIVE_INFINITY,
-  proactiveRevalidationInterval: 10 satisfies Duration,
-}) satisfies PonderClientCache;
+  proactiveRevalidationInterval: 1 satisfies Duration,
+}) satisfies PonderAppMetadataCache;
