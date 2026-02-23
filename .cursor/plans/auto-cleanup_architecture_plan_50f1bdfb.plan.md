@@ -39,6 +39,11 @@ Every function is a pure in-memory data operation with no I/O dependencies.
 Each logical record type has a **normalized key** (the canonical primary key) and an ordered list of **unnormalized key variants** (legacy/alternative names tried as fallbacks):
 
 ```typescript
+type TextRecordNormalizationDefs = {
+  byNormalizedKey: Map<string, TextRecordKeyDef>;
+  byUnnormalizedKey: Map<string, TextRecordKeyDef>;
+};
+
 type TextRecordKeyDef = {
   /** Canonical key used in API responses and UI labels. e.g. "com.twitter" */
   normalizedKey: string;
@@ -135,6 +140,8 @@ type IndividualRecordNormalizationResult = {
   keyResult: KeyNormalizationResult;
   valueResult: ValueNormalizationResult;
 };
+// Invariant: if keyResult.op === "Unrecognized" then valueResult.op === "Unrecognized".
+// A recognized key can never produce a valueResult with op "Unrecognized".
 ```
 
 **Key function — normalize one record:**
@@ -143,18 +150,18 @@ type IndividualRecordNormalizationResult = {
 function normalizeRecord(
   rawKey: string,
   rawValue: string | null,
-  registry: TextRecordNormalizationRegistry,
+  defs: TextRecordNormalizationDefs,
 ): IndividualRecordNormalizationResult
 ```
 
 Logic:
 
-- Look up `rawKey` in registry (by normalizedKey or unnormalizedKey).
+- Look up `rawKey` in `defs` (via `byNormalizedKey` or `byUnnormalizedKey`).
 - If found: determine `keyResult` (AlreadyNormalized if rawKey === normalizedKey, else Normalized).
   - If `rawValue` is null: `valueResult` is Unnormalizable with reason `"no value set"`.
   - If `rawValue` is a string: run validate + normalize on rawValue.
-    - If succeeded: `valueResult` is AlreadyNormalized (when validate + normalize produced the same string) or Normalized (when the string changed).
-    - If failed: `valueResult` is Unnormalizable with the reason from the failing step.
+    - If succeeded: `valueResult` is `AlreadyNormalized` iff `normalizedValue === rawValue` (validate + normalize produced a value identical to the original rawValue); otherwise `valueResult` is `Normalized` (normalizedValue differs from rawValue).
+    - If failed: `valueResult` is `Unnormalizable` with the reason from the failing step.
 - If not found: `keyResult` is Unrecognized; `valueResult` is Unrecognized.
 
 ### 1.5 Layer 2: Set-level normalization
@@ -178,21 +185,26 @@ type RecordNormalizationOp =
   /** Another record already claimed this normalized key (lower priority variant) */
   | "DuplicateNormalizedKey";
 
-type RecordNormalizationResult = {
-  op: RecordNormalizationOp;
-  individual: IndividualRecordNormalizationResult;
-  /** Present when op is "Normalized" */
-  normalizedKey?: string;
-  normalizedValue?: string;
-  displayKey?: string;
-  displayValue?: string;
-  url?: string | null;
-};
+type RecordNormalizationResult =
+  | {
+      op: "Normalized";
+      individual: IndividualRecordNormalizationResult;
+      normalizedKey: string;
+      normalizedValue: string;
+      displayKey: string;
+      displayValue: string;
+      url: string | null;
+    }
+  | {
+      op: "UnrecognizedKeyAndValue" | "UnnormalizableValue" | "DuplicateNormalizedKey";
+      individual: IndividualRecordNormalizationResult;
+    };
 
 type NormalizedRecordSet = {
   /**
-   * Maps each normalized key to its winning RecordNormalizationResult.
-   * Also contains UnrecognizedKeyAndValue records (keyed by their rawKey).
+   * Two distinct kinds of entries are keyed here:
+   * - op "Normalized": keyed by normalizedKey (the canonical key for the winner).
+   * - op "UnrecognizedKeyAndValue": keyed by rawKey (passed through as-is).
    */
   normalizedRecords: Record<string, RecordNormalizationResult>;
   /**
@@ -203,18 +215,28 @@ type NormalizedRecordSet = {
 };
 ```
 
-**Priority rule** when multiple records share the same normalized key:
+**Priority rule** when multiple records share the same normalized key — two-pass algorithm:
 
-1. The record whose `rawKey === normalizedKey` wins unconditionally.
-2. Among remaining candidates, priority follows the ordering in `unnormalizedKeys`.
-3. Losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
+**Pass 1 — normalizable candidates** (value op is `AlreadyNormalized` or `Normalized`):
+1. Among these, the record whose `rawKey === normalizedKey` wins first.
+2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
+3. The winner gets `op: "Normalized"` and is placed in `normalizedRecords`.
+4. Pass-1 losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
+
+**Pass 2 — only if Pass 1 found no winner** (all candidates are `Unnormalizable`):
+1. Among Unnormalizable candidates, the record whose `rawKey === normalizedKey` wins first.
+2. If none match the normalized key, the first in `unnormalizedKeys` order wins.
+3. The winner gets `op: "UnnormalizableValue"` and goes into `unnormalizedRecords` (no valid value exists, so `normalizedRecords` has no entry for this normalized key).
+4. Pass-2 losers get `op: "DuplicateNormalizedKey"` and go into `unnormalizedRecords`.
+
+This ensures a valid value from any fallback key always beats an invalid or null value on the canonical key.
 
 **Key function — build the set:**
 
 ```typescript
 function normalizeRecordSet(
   records: Array<{ rawKey: string; rawValue: string | null }>,
-  registry: TextRecordNormalizationRegistry,
+  defs: TextRecordNormalizationDefs,
 ): NormalizedRecordSet
 ```
 
@@ -228,7 +250,7 @@ function stripNormalizationMetadata(
 ): Record<string, string | null>
 ```
 
-Returns only the `normalizedKey → normalizedValue` pairs from the "Normalized" records, plus `rawKey → rawValue` passthrough for "UnrecognizedKeyAndValue" records.
+Returns only the `normalizedKey → normalizedValue` pairs from the "Normalized" records, plus `rawKey → rawValue` passthrough for "UnrecognizedKeyAndValue" records. Unrecognized keys are always included even when `rawValue` is null — producing `{ [rawKey]: null }` — so the caller receives a complete picture of every key that was present in the input.
 
 ### 1.7 Pre-resolution: key expansion
 
@@ -237,7 +259,7 @@ Before resolution, normalized keys are expanded into the full set of candidate k
 ```typescript
 function expandNormalizedKeys(
   normalizedKeys: readonly string[],
-  registry: TextRecordNormalizationRegistry,
+  defs: TextRecordNormalizationDefs,
 ): string[]
 ```
 
@@ -245,9 +267,9 @@ Returns: `[normalizedKey, ...unnormalizedKeys]` for each known key, deduplicated
 
 ---
 
-## Phase 1: Transform registry
+## Phase 1: Initial `TextRecordNormalizationDefs`
 
-The registry maps normalized keys to `TextRecordKeyDef`. All lookups support both normalized keys and unnormalized variants.
+The initial definitions cover the 9 most common ENS text record key types. All lookups support both normalized keys and unnormalized variants via the two maps on `TextRecordNormalizationDefs`.
 
 **Initial set of recognized keys:**
 
@@ -267,14 +289,14 @@ The registry maps normalized keys to `TextRecordKeyDef`. All lookups support bot
 
 **Open question:** Should the normalized key for Twitter be `com.twitter` or `com.x` (reflecting the platform rebrand)? If `com.x`, what are the unnormalized variants to include?
 
-### Registry construction
+### `TextRecordNormalizationDefs` construction
 
-The registry is constructed once at module initialization as a plain object with two internal lookup maps built from the definitions:
+A `TextRecordNormalizationDefs` is built once from the array of `TextRecordKeyDef` objects. Its two maps provide O(1) lookup by either key form:
 
-- `byNormalizedKey: Map<string, TextRecordKeyDef>` — keyed by `normalizedKey`.
-- `byUnnormalizedKey: Map<string, TextRecordKeyDef>` — keyed by each entry in `unnormalizedKeys`, pointing to the owning def.
+- `byNormalizedKey` — keyed by each `normalizedKey`.
+- `byUnnormalizedKey` — keyed by each entry in `unnormalizedKeys`, pointing to the owning def.
 
-At construction time the registry validates its own invariants and throws synchronously if any are violated (fail fast). No lazy initialization.
+At construction time the invariants are validated and any violation throws synchronously (fail fast). No lazy initialization.
 
 ### Per-key transform specifications
 
@@ -313,7 +335,7 @@ Unnormalized variants: `vnd.github`, `github`
 - Prefixed: `@alice`
 - github.com URL: `https://github.com/alice`, `http://github.com/alice`, `github.com/alice`
 
-**Validation**: extracted username must match `^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$` (1–39 chars, alphanumeric and hyphens, no leading/trailing hyphen).
+**Validation**: extracted username must match `^(?!.*--)[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$` (1–39 chars, alphanumeric and hyphens, no leading/trailing hyphen, no consecutive hyphens).
 
 **Canonical form**: lowercase username (e.g. `alice`).
 
@@ -331,7 +353,7 @@ Unnormalized variants: `com.warpcast`, `Farcaster`, `farcaster`
 
 - Plain username: `alice`
 - Prefixed: `@alice`
-- Warpcast URL: `https://warpcast.com/alice`, `http://warpcast.com/alice`
+- Warpcast URL: `https://warpcast.com/alice`, `http://warpcast.com/alice`, `warpcast.com/alice`
 
 **Validation**: extracted username must match `^[a-z0-9][a-z0-9-]{0,15}$` (Farcaster usernames are lowercase-only, 1–16 chars).
 
@@ -356,8 +378,8 @@ Discord supports two username formats: the new format (post-2023, no discriminat
 
 **Validation**:
 
-- New format: must match `^[a-z0-9_.]{2,32}$`.
-- Legacy format: must match `^.{2,32}#[0-9]{4}$`.
+- New format: must match `^(?!.*\.\.)[a-z0-9_.]{2,32}$` (no consecutive periods).
+- Legacy format: must match `^[^\x00-\x1F\x7F]{2,32}#[0-9]{4}$` (printable characters only before the `#` discriminator).
 
 **Canonical form**: the username as provided (lowercased for new format, `username#NNNN` preserved for legacy).
 
@@ -519,5 +541,5 @@ The `records.texts` field always contains the stripped, clean output when `norma
 1. **Normalized key for Twitter**: `com.twitter` or `com.x` (reflecting the platform rebrand)? What unnormalized variants should be included?
 2. **Parameter name for metadata field**: `normalizationMetadata`, `includeNormalizationMetadata`, or another name?
 3. **Unnormalizable behavior**: When a key is recognized but no candidate produces a valid value, should `records.texts` contain `null` for that key, or should the key be omitted from the response entirely?
-4. `**displayValue` and `url` placement**: Should these enrichment fields be part of `records.texts` (when `normalize=true`) or only inside `normalizationMetadata`? Including them in the main response is more convenient for UI clients but changes the primary response shape significantly for all callers.
+4. **`displayValue` and `url` placement**: Should these enrichment fields be part of `records.texts` (when `normalize=true`) or only inside `normalizationMetadata`? Including them in the main response is more convenient for UI clients but changes the primary response shape significantly for all callers.
 
